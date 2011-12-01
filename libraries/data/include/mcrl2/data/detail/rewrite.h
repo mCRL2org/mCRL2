@@ -17,7 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 // #include "mcrl2/data/detail/rewrite_conversion_helper.h"
-#include "mcrl2/data/fresh_variable_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 #ifndef NO_DYNLOAD
 #define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
@@ -32,7 +32,7 @@ namespace detail
 {
 
 /** \brief Rewrite strategies. */
-typedef enum { 
+typedef enum {
                GS_REWR_JITTY,     /** \brief JITty */
 #ifdef MCRL2_JITTYC_AVAILABLE
                GS_REWR_JITTYC,    /** \brief Compiling JITty */
@@ -65,8 +65,8 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
 class Rewriter
 {
   protected:
-    // detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
-    data::fresh_variable_generator<> generator;  //name for variables.
+    // detail::rewrite_conversion_helper< Rewriter> m_conversion_helper;
+    data::set_identifier_generator generator;  //name for variables.
 
   public:
 
@@ -86,10 +86,9 @@ class Rewriter
      *        function instead.
      * \sa createRewriter()
      **/
-    Rewriter():
+    Rewriter()
        // m_conversion_helper(*this),
-       generator("x_")
-    { 
+    {
       internal_true.protect();
       internal_true=toInner(sort_bool::true_(),true);
       internal_false.protect();
@@ -123,7 +122,7 @@ class Rewriter
      * \param Term The term to be rewritten. This term should be a data_term
      * \return The normal form of Term.
      **/
-    
+
     virtual data_expression rewrite(const data_expression term, substitution_type &sigma) = 0;
 
     /**
@@ -156,7 +155,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
     virtual atermpp::aterm_appl rewrite_internal(
-                     const atermpp::aterm_appl Term, 
+                     const atermpp::aterm_appl Term,
                      internal_substitution_type &sigma);
     /**
      * \brief Rewrite a list of terms in the internal rewriter
@@ -167,7 +166,7 @@ class Rewriter
      *         normal form.
      **/
     virtual atermpp::term_list < atermpp::aterm_appl > rewrite_internal_list(
-                     const atermpp::term_list < atermpp::aterm_appl > Terms, 
+                     const atermpp::term_list < atermpp::aterm_appl > Terms,
                      internal_substitution_type &sigma);
 
     /**
@@ -266,7 +265,7 @@ class Rewriter
  *         and strategy Strategy to rewrite.
  **/
 Rewriter* createRewriter(
-             const data_specification& DataSpec, 
+             const data_specification& DataSpec,
              const used_data_equation_selector &equations_selector,
              const RewriteStrategy Strategy = GS_REWR_JITTY);
 
@@ -344,7 +343,7 @@ inline atermpp::aterm_appl Apply0(const atermpp::aterm head)
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply1(
-         const atermpp::aterm head, 
+         const atermpp::aterm head,
          const atermpp::aterm_appl arg1)
 {
  return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATerm)(ATermAppl)arg1);
@@ -353,8 +352,8 @@ inline atermpp::aterm_appl Apply1(
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply2(
-         const atermpp::aterm head, 
-         const atermpp::aterm_appl arg1, 
+         const atermpp::aterm head,
+         const atermpp::aterm_appl arg1,
          const atermpp::aterm_appl arg2)
 {
  return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2);
@@ -362,9 +361,9 @@ inline atermpp::aterm_appl Apply2(
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply3(
-         const atermpp::aterm head, 
-         const atermpp::aterm_appl arg1, 
-         const atermpp::aterm_appl arg2, 
+         const atermpp::aterm head,
+         const atermpp::aterm_appl arg1,
+         const atermpp::aterm_appl arg2,
          const atermpp::aterm_appl arg3)
 {
  return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2,(ATerm)(ATermAppl)arg3);
@@ -382,7 +381,7 @@ atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2i
 
 inline size_t getArity(const data::function_symbol op)
 {
-  // This function calculates the cumulated length of all 
+  // This function calculates the cumulated length of all
   // potential function arguments.
   sort_expression sort = op.sort();
   size_t arity = 0;

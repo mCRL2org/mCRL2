@@ -16,7 +16,7 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/fresh_variable_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sort_expression.h"
 
 #include "mcrl2/data/rewriter.h"
@@ -389,8 +389,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format,sigma,sigma_internal);
 
 
-      data::fresh_variable_generator<> variable_generator("internally_generated_variable_for_forall");
-      variable_generator.add_identifiers(pbes_system::find_identifiers(expr));
+      data::set_identifier_generator variable_name_generator;
+      variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > conjunction_set;
@@ -446,7 +446,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                        s!=dsorts.end() ; ++s)
                   {
                     constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
-                    data::variable new_variable=variable_generator(*s);
+                    data::variable new_variable(variable_name_generator("internally_generated_variable_for_forall"), *s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
@@ -569,8 +569,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r, use_internal_rewrite_format,sigma,sigma_internal);
 
-      data::fresh_variable_generator<> variable_generator("internally_generated_variable_for_exists");
-      variable_generator.add_identifiers(pbes_system::find_identifiers(expr));
+      data::set_identifier_generator variable_name_generator;
+      variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > disjunction_set;
@@ -624,7 +624,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                        s!=dsorts.end() ; ++s)
                   {
                     constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
-                    data::variable new_variable=variable_generator(*s);
+                    data::variable new_variable(variable_name_generator("internally_generated_variable_for_forall"), *s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {

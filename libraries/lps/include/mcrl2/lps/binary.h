@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-#include "mcrl2/data/fresh_variable_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -111,7 +111,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "Original process parameters: " << data::pp(process_parameters) << std::endl;
 
-      data::fresh_variable_generator<> generator;
+      data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
       enumerator_type enumerator(m_spec.data(),m_rewriter);
 
@@ -140,14 +140,14 @@ class binary_algorithm: public lps::detail::lps_algorithm
           int n = static_cast< int >(ceil(::log(static_cast< double >(enumerated_elements.size())) / ::log(static_cast< double >(2))));
 
           //Set hint for fresh variable names
-          generator.set_hint(par.name());
+          std::string par_name = par.name();
 
           // Temp list for storage
           data::variable_vector new_pars;
           //Create new parameters and add them to the parameter list.
           for (int i = 0; i<n; ++i)
           {
-            data::variable v(generator(data::sort_bool::bool_()));
+            data::variable v(generator(par_name), data::sort_bool::bool_());
             new_parameters.push_back(v);
             new_pars.push_back(v);
           }

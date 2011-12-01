@@ -159,7 +159,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   for(atermpp::term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
   {
     const variable v=variable((*i)(0));
-    const variable v_fresh(generator(v.sort()));
+    const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
     sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
@@ -200,7 +200,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
       if (identifiers_in_sigma.find(v.name()) != identifiers_in_sigma.end())
       {
         number_of_renamed_variables++;
-        new_variables[count]=generator(v.sort());
+        new_variables[count]=data::variable(generator("x_"), v.sort());
       }
       else new_variables[count]=v;
     }
@@ -277,13 +277,13 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
   {
     const variable v= (*i);
-    const variable v_fresh(generator(v.sort()));
+    const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
     sigma[v_fresh]=rewrite_internal(t(count),sigma);
   }
-  
+
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
-  
+
   // Reset variables in sigma
   for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
@@ -325,7 +325,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
 }
 
-// Generate a term equivalent to forall vl.t1. 
+// Generate a term equivalent to forall vl.t1.
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
@@ -386,7 +386,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
 }
 
-// Generate a term equivalent to forall vl.t1. 
+// Generate a term equivalent to forall vl.t1.
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(

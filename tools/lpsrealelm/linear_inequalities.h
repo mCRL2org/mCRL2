@@ -22,7 +22,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/fresh_variable_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
 {
@@ -1296,7 +1296,7 @@ inline bool is_inconsistent(
   atermpp::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
-  fresh_variable_generator<> fresh_variable("slack_var");
+  set_identifier_generator fresh_variable_name;
 
   for (std::vector < linear_inequality >::const_iterator i=inequalities_in.begin();
        i!=inequalities_in.end(); ++i)
@@ -1310,7 +1310,7 @@ inline bool is_inconsistent(
     for (linear_inequality::lhs_t::const_iterator j=i->lhs_begin();
          j!=i->lhs_end(); ++j)
     {
-      fresh_variable.add_identifiers(j->first.name());
+      fresh_variable_name.add_identifier(j->first.name());
     }
   }
 
@@ -1402,7 +1402,7 @@ inline bool is_inconsistent(
       {
         // The inequality has more than one variable at the left hand side.
         // We transform it into an equation with a new slack variable.
-        variable new_basic_variable=fresh_variable(sort_real::real_());
+        variable new_basic_variable(fresh_variable_name("slack_var"), sort_real::real_());
         basic_variables.insert(new_basic_variable);
         upperbounds[new_basic_variable]=i->rhs();
         upperbounds_delta_correction[new_basic_variable]=
