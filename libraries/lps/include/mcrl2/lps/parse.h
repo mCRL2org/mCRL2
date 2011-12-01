@@ -197,34 +197,6 @@ specification parse_linear_process_specification(const std::string& text)
   return parse_linear_process_specification(stream);
 }
 
-/// \brief Parses a multi_action from an input stream
-/// \param ma_stream An input stream containing a multi_action
-/// \param[in] action_decls A list of allowed action labels that is used for type checking.
-/// \param[in] data_spec The data specification that is used for type checking.
-/// \return The parsed multi_action
-/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
-inline
-multi_action parse_multi_action(std::stringstream& in, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  std::string text = utilities::read_text(in);
-  multi_action result = parse_multi_action_new(text);
-  complete_multi_action(result, action_decls, data_spec);
-  return result;
-}
-/// \brief Parses a linear process specification from a string
-/// \brief Parses a multi_action from a string
-/// \param text An input stream containing a multi_action
-/// \param[in] action_decls A list of allowed action labels that is used for type checking.
-/// \param[in] data_spec The data specification that is used for type checking.
-/// \return The parsed multi_action
-/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
-inline
-multi_action parse_multi_action(const std::string& text, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  std::stringstream ma_stream(text);
-  return parse_multi_action(ma_stream, action_decls, data_spec);
-}
-
 } // namespace lps
 
 } // namespace mcrl2
