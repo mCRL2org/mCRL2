@@ -29,7 +29,7 @@ SortExpr
   | 'struct' ConstrDeclList                                         // structured sort
   ;
 
-SortExprList: SortExpr ( '#' SortExpr )*       $binary_left 2 ;
+SortExprList: (SortExpr '#')* SortExpr         $unary_right 2 ;
 
 SortSpec: 'sort' SortDecl+ ;
 
