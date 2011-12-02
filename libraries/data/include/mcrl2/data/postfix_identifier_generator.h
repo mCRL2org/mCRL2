@@ -24,8 +24,7 @@ namespace data
 class postfix_identifier_generator: public set_identifier_generator
 {
   protected:
-
-    number_postfix_generator m_generator;
+    utilities::simple_number_postfix_generator m_generator;
 
   public:
     /// \brief Constructor.
@@ -37,15 +36,10 @@ class postfix_identifier_generator: public set_identifier_generator
     core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string id(hint + std::string(m_generator()));
-
-      if (has_identifier(id))
+      while (has_identifier(id))
       {
-        while (has_identifier(id))
-        {
-          id = core::identifier_string(hint + std::string(m_generator()));
-        }
+        id = core::identifier_string(hint + std::string(m_generator()));
       }
-
       add_identifier(id);
       return id;
     }

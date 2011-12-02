@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/identifier_generator.h
+/// \file mcrl2/utilities/number_postfix_generator.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H
-#define MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
+#define MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 
 #include <cassert>
 #include <cctype>
@@ -19,13 +19,46 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
-namespace mcrl2
-{
+namespace mcrl2 {
 
-namespace utilities
-{
+namespace utilities {
 
-/// \brief Identifier generator that generates names with a postfix consisting of a number.
+/// \brief Identifier generator that generates names consisting of a prefix followed by a number.
+/// After each call to operator() the number is incremented.
+class simple_number_postfix_generator
+{
+  protected:
+    /// \brief A prefix.
+    std::string m_prefix;
+
+    /// \brief An index.
+    unsigned int m_index;
+
+  public:
+    /// \brief Constructor.
+    simple_number_postfix_generator()
+      : m_prefix("x"), m_index(0)
+    {}
+
+    /// \brief Constructor.
+    /// \param prefix A string
+    /// \param index A positive integer
+    simple_number_postfix_generator(const std::string& prefix, unsigned int index = 0)
+      : m_prefix(prefix), m_index(index)
+    {}
+
+    /// \brief Generates a fresh identifier that doesn't appear in the context.
+    /// \return A fresh identifier.
+    std::string operator()()
+    {
+      std::ostringstream out;
+      out << m_prefix << m_index++;
+      return out.str();
+    }
+};
+
+/// \brief Identifier generator that generates names consisting of a prefix followed by a number.
+/// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
 class number_postfix_generator
 {
   protected:
@@ -34,7 +67,6 @@ class number_postfix_generator
 
     /// \brief The default hint.
     std::string m_hint;
-
 
   public:
 
@@ -128,4 +160,4 @@ class number_postfix_generator
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H

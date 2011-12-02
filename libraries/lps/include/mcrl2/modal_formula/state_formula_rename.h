@@ -17,7 +17,7 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {

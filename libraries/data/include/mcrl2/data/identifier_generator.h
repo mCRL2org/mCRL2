@@ -17,46 +17,13 @@
 #include <sstream>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
 
 namespace data
 {
-
-/// \brief Identifier generator that generates names with a postfix consisting of a number.
-class number_postfix_generator
-{
-  protected:
-    /// \brief A prefix.
-    std::string m_prefix;
-
-    /// \brief An index.
-    unsigned int m_index;
-
-  public:
-    /// \brief Constructor.
-    number_postfix_generator()
-      : m_prefix("x"), m_index(0)
-    {}
-
-    /// \brief Constructor.
-    /// \param prefix A string
-    /// \param index A positive integer
-    number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-      : m_prefix(prefix), m_index(index)
-    {}
-
-    /// \brief Generates a fresh identifier that doesn't appear in the context.
-    /// \return A fresh identifier.
-    core::identifier_string operator()()
-    {
-      std::ostringstream out;
-      out << m_prefix << m_index++;
-      return core::identifier_string(out.str());
-    }
-};
 
 /// \brief Abstract base class for identifier generators.
 /// Identifier generators generate fresh names that do not appear in a

@@ -15,7 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"

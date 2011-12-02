@@ -15,7 +15,7 @@
 #include <iterator>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/map.h"
 

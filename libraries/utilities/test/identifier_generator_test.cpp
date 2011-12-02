@@ -14,7 +14,7 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

@@ -28,7 +28,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/atermpp/container_utility.h"
 
@@ -188,7 +188,7 @@ class structured_sort: public detail::structured_sort_base
             data_expression operand_left;
             data_expression operand_right;
 
-            number_postfix_generator generator("v");
+            utilities::simple_number_postfix_generator generator("v");
 
             // Create variables for equation
             atermpp::vector< variable > variables;
@@ -283,7 +283,7 @@ class structured_sort: public detail::structured_sort_base
         {
           structured_sort_constructor_argument_list arguments(i->arguments());
 
-          number_postfix_generator generator("v");
+          utilities::simple_number_postfix_generator generator("v");
 
           atermpp::vector< variable > variables;
 
@@ -332,7 +332,7 @@ class structured_sort: public detail::structured_sort_base
             else
             {
 
-              number_postfix_generator generator("v");
+              utilities::simple_number_postfix_generator generator("v");
 
               structured_sort_constructor_argument_list arguments(i->arguments());
 
