@@ -465,6 +465,19 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(test_sort_expressions)
+{
+  data::sort_expression x = parse_sort_expression("Bool # Nat -> (Pos -> Real)");
+  std::string xtext = data::pp(x);
+  data::sort_expression y = parse_sort_expression(xtext);
+  std::string ytext = data::pp(y);
+  std::cout << "original = " << "Bool # Nat -> (Pos -> Real)" << std::endl;
+  std::cout << "xtext    = " << xtext << std::endl;
+  std::cout << "ytext    = " << ytext << std::endl;
+  BOOST_CHECK(x == y);
+  BOOST_CHECK(xtext == ytext);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
