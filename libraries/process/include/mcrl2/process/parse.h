@@ -258,7 +258,9 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
   type_check(x);
   if (alpha_reduce)
   {
-    apply_alphabet_reduction(x);
+    // apply_alphabet_reduction(x);
+    alphabet_reduction reduce;
+    reduce(x);
   }
   process::translate_user_notation(x);
   process::normalize_sorts(x, x.data());
