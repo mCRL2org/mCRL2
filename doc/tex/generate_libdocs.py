@@ -25,6 +25,7 @@ output_dir = "build/tex"
 # 2. path to the library in the mCRL2 source tree (relative to trunk).
 library_list = [
     [ 'atermpp', 'libraries/atermpp' ],
+    [ 'bes', 'libraries/bes' ],
     [ 'core', 'libraries/core' ],
     [ 'data', 'libraries/data' ],
     [ 'lps', 'libraries/lps' ],
