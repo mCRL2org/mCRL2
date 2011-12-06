@@ -45,7 +45,7 @@ namespace mcrl2
       template < class T >
       static inline atermpp::term_list <T> gsaATsortList(atermpp::term_list <T> l)
       {
-        atermpp::set <T> s;
+        atermpp::multiset <T> s;
         for (typename atermpp::term_list <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
           s.insert(*i);
@@ -1002,7 +1002,6 @@ namespace mcrl2
           a = block(Ha,a);
           alphas[a]=filter_block_list(l,Ha);
         }
-
         return a;
       }
       else if (is_allow(a))
@@ -1568,7 +1567,6 @@ namespace mcrl2
           {
             l = alphas.count(a)>0?alphas[a]:gsaGetAlpha(a);
           }
-
           if (!Ca.empty())
           {
             a = comm(Ca,a);
