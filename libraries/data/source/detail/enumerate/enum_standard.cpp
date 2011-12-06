@@ -557,12 +557,16 @@ bool EnumeratorSolutionsStandard::next(
           }
           const atermpp::aterm_appl term_rf = ApplyArray(domain_sorts.size()+1,var_array);
 
-          push_on_fs_stack_and_split_or(
+          const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
+          enum_sigma[var]=term_rf;
+          const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+          enum_sigma[var]=old_substituted_value;
+          push_on_fs_stack_and_split_or_without_rewriting(
                                   fs_stack,
                                   uvars+var_list,
                                   push_front(e.substituted_vars(),var),
                                   push_front(e.vals(),term_rf),
-                                  atermpp::replace(e.expr(),var,term_rf),
+                                  rewritten_expr,
                                   atermpp::term_list < atermpp::aterm_appl > (),
                                   false);
         }
