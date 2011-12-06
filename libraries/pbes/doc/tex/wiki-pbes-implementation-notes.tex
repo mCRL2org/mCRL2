@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, October 18, 2011 10:29:44}
+%TCIDATA{LastRevised=Tuesday, December 06, 2011 16:46:54}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1125,7 +1125,7 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=\emptyset  \\ 
+c_{X}:=\emptyset \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
@@ -1157,7 +1157,7 @@ e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an
@@ -1247,8 +1247,8 @@ variables.
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{ReachableVariables(}}\mathcal{E},X_{init}\text{\textsc{)}} \\ 
-\text{visited }:=\{X_{init}\};\text{ explored }:=\emptyset  \\ 
-\text{\textbf{while} visited}\neq \emptyset  \\ 
+\text{visited }:=\{X_{init}\};\text{ explored }:=\emptyset \\ 
+\text{\textbf{while} visited}\neq \emptyset \\ 
 \qquad \text{\textbf{choose} }X_{i}\in \text{visited} \\ 
 \qquad \text{visited}:=\text{visited}\setminus \{X_{i}\} \\ 
 \qquad \text{explored }:=\text{ explored}\cup \{X_{i}\} \\ 
@@ -1259,7 +1259,7 @@ _{X_{i}}{)} \\
 \text{\textbf{return} explored}%
 \end{array}%
 \end{equation*}%
-\pagebreak 
+\pagebreak
 
 \section{PBES abstraction}
 
@@ -1304,7 +1304,63 @@ The motivation for this algorithm is that if the solution of $\mathsf{%
 abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],false)$ is $true$, this implies
 that the solution of $\mathcal{E}$ is $true$ as well, and if the solution of 
 $\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],true)$ is $false$, this
-implies that the solution of $\mathcal{E}$ is $false$.\newpage
+implies that the solution of $\mathcal{E}$ is $false$.
+
+\newpage
+
+\section{Absinthe}
+
+The Absinthe algorithm takes as input a substitution on function symbols $%
+\sigma _{F}:\mathcal{F}\rightarrow \mathcal{F}$, and a substitution on sorts 
+$\sigma _{S}:\mathcal{S}\rightarrow \mathcal{S}$, where $\mathcal{F}$ is the
+set of function symbols and $\mathcal{S}$ is the set of sorts. For each $%
+s\in domain(\sigma _{S}\mathcal{)}$ there is a corresponding abstraction
+function $h_{s}$.
+
+\subsection{Extending $\protect\sigma _{F}$}
+
+The algorithm extends the substitution $\sigma _{F}$ for all function
+symbols $f$ that are used in the PBES, but are not present yet in $\sigma
+_{F}$. A function symbol $f\in \mathcal{F}$ is "generalized" as follows:%
+\begin{equation*}
+\begin{array}{lcl}
+f:s_{b} & \mapsto  & \overline{f}:s_{b}^{\sigma _{S}} \\ 
+f:C(s) & \mapsto  & \overline{f}:C(s)^{\sigma _{S}} \\ 
+f:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto  & \overline{f}%
+:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
+Set(s^{\sigma _{S}}),%
+\end{array}%
+\end{equation*}%
+where $s_{b}$ is a basic sort, $s_{1}\times \cdots \times s_{n}\rightarrow s$
+is a function sort, and $C(s)$ is a container sort. The sort of $f$ may not
+contain any element of $domain(\sigma _{S}\mathcal{)}$ as a subsort (N.B.
+this is probably too strict!).
+
+For each of the function symbols a corresponding equation is introduced:%
+\begin{equation*}
+\begin{array}{lcl}
+\overline{f} & = & \left\{ 
+\begin{array}{ll}
+h_{s_{b}}(f)\text{ } & \text{if }s_{b}\in domain(\sigma _{S}\mathcal{)} \\ 
+f^{\sigma _{S}} & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+&  &  \\ 
+\overline{f} & = & f^{\sigma _{S}} \\ 
+&  &  \\ 
+\overline{f}(x) & = & \left\{ 
+\begin{array}{ll}
+\{h_{s}(f(x))\}\text{ } & \text{if }s\in domain(\sigma _{S}\mathcal{)} \\ 
+\{f(x)\} & \text{otherwise,}%
+\end{array}%
+\right. 
+\end{array}%
+\end{equation*}%
+where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$. Besides this, the
+substitution $\sigma _{F}$ is extended with constructor functions for
+container sorts of the sorts in $domain(\sigma _{S}\mathcal{)}$. 
+
+\newpage 
 
 \section{ Gau\ss\ Elimination}
 
