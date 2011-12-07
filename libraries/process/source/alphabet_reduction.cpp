@@ -51,7 +51,7 @@ namespace mcrl2
           s.insert(*i);
         }
         atermpp::term_list <T> r;
-        for (typename atermpp::set <T> :: const_iterator i=s.begin(); i!=s.end(); ++i)
+        for (typename atermpp::multiset <T> :: const_iterator i=s.begin(); i!=s.end(); ++i)
         {
           r=push_front(r,*i);
         }
