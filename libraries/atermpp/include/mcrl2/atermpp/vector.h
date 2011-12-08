@@ -106,7 +106,7 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     /// Destructor.
     ~vector()
     {
-      ATunprotectProtectedATerm();
+      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.

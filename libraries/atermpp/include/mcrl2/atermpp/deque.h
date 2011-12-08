@@ -106,7 +106,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// Destructor.
     ~deque()
     {
-      ATunprotectProtectedATerm();
+      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.

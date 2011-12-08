@@ -106,7 +106,7 @@ class list: public std::list<T,Allocator>, IProtectedATerm
     /// Destructor.
     ~list()
     {
-      ATunprotectProtectedATerm();
+      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.

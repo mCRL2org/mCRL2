@@ -100,7 +100,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// Destructor.
     ~set()
     {
-      ATunprotectProtectedATerm();
+      ATunprotectProtectedATerm(this);
     }
 
     /// Assignment operator.
@@ -203,7 +203,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// Destructor.
     ~multiset()
     {
-      ATunprotectProtectedATerm();
+      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.
