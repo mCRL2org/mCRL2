@@ -981,6 +981,7 @@ std::cout << "<out>" << data::pp(result) << " " << result << std::endl;
         function_symbol f1 = *j;
         function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         sigmaF[f1] = f2;
+        dataspec.add_mapping(f2);
 mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) << " to sigmaF" << std::endl;
       }
     }
