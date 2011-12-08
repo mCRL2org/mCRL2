@@ -2,6 +2,9 @@
 ## Set Boost configuration
 ##---------------------------------------------------
 
+# Set minimum version of Boost
+set(MCRL2_BOOST_MINIMUM_VERSION 103500)
+
 # Use static libraries when compiled static
 if( NOT BUILD_SHARED_LIBS )
   set(Boost_USE_STATIC_LIBS ON)
@@ -26,12 +29,22 @@ if(NOT Boost_FOUND)
   message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
 endif(NOT Boost_FOUND)
 
-if( Boost_VERSION LESS 103500 )
+if( Boost_VERSION LESS MCRL2_BOOST_MINIMUM_VERSION )
+  #Unset Cached libraries
+  unset(Boost_INCLUDE_DIR CACHE)
+  unset(Boost_LIBRARY_DIRS CACHE)
+  unset(Boost_LIBRARY_DIRS CACHE)
+  unset(Boost_LIB_VERSION CACHE)
+  unset(Boost_VERSION CACHE)
+  unset(BOOST_ROOT CACHE)
+  unset(BOOST_INCLUDEDIR CACHE)
+
   message( STATUS "Boost version v1.35 or higher required." )
   message( STATUS "Current Boost version: ${Boost_VERSION}.")
   message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
-  message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
-endif( Boost_VERSION LESS 103500 )
+  message( STATUS "instructions on building mCRL2 with an external version of boost.")
+  message( FATAL_ERROR "")
+endif( Boost_VERSION LESS MCRL2_BOOST_MINIMUM_VERSION )
 
 message( STATUS "Boost version: ${Boost_VERSION}" )
 
