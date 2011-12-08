@@ -739,6 +739,7 @@ std::cout << "<out>" << data::pp(result) << " " << result << std::endl;
         }
 
         atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        variables = atermpp::convert<data::variable_list>(x);
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         application f_x(f1, data::data_expression_list(x.begin(), x.end()));
 
