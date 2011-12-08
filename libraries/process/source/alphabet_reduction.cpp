@@ -1650,9 +1650,15 @@ namespace mcrl2
         }
       }
 
-      if (is_delta(a) || is_tau(a))
+      if (is_delta(a))
       {
+        // return the empty multi action list
         l = action_label_list_list();
+      }
+      else if (is_tau(a))
+      {
+        // return a list containing the empty multi action.
+        l = push_front(action_label_list_list(),lps::action_label_list());
       }
       else if (lps::is_action(a))
       {
@@ -1837,8 +1843,15 @@ l_ok:
         // calculate the alphabet only if it is a single multiaction.
         action_label_list_list l;   // Result
 
-        if (is_delta(a) || is_tau(a))
+        if (is_delta(a))
         {
+          // return an empty set of multi-actions.
+          success=true;
+        }
+        else if (is_tau(a))
+        {
+          // return the set with the empty multi-action.
+          l = push_front(action_label_list_list(),lps::action_label_list());
           success=true;
         }
         else if (lps::is_action(a))
@@ -1876,7 +1889,6 @@ l_ok:
           {
             return action_label_list_list();
           }
-
           l=sync_list(l,l2,length,allowed);
         }
         else
