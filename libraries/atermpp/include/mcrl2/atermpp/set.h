@@ -100,7 +100,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// Destructor.
     ~set()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// Assignment operator.
@@ -112,10 +112,10 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::set.ATmarkTerms() : protecting " << set<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::set<T, Compare, Allocator>::iterator i = std::set<T, Compare, Allocator>::begin(); i != std::set<T, Compare, Allocator>::end(); ++i)
       {
@@ -203,14 +203,14 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// Destructor.
     ~multiset()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::multiset.ATprotectTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multiset.ATmarkTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multiset<T, Compare, Allocator>::iterator i = std::multiset<T, Compare, Allocator>::begin(); i != std::multiset<T, Compare, Allocator>::end(); ++i)
       {

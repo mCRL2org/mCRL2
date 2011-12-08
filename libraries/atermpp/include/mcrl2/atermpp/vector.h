@@ -106,14 +106,14 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     /// Destructor.
     ~vector()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::vector.ATmarkTerms() : protecting " << vector<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::vector<T,Allocator>::iterator i = std::vector<T,Allocator>::begin(); i != std::vector<T,Allocator>::end(); ++i)
       {

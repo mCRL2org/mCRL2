@@ -101,14 +101,14 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// Destructor.
     virtual ~map()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::map.ATmarkTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::map<Key, T, Compare, Allocator>::iterator i = std::map<Key, T, Compare, Allocator>::begin(); i != std::map<Key, T, Compare, Allocator>::end(); ++i)
       {
@@ -197,14 +197,14 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// Destructor.
     virtual ~multimap()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multimap.ATmarkTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multimap<Key, T, Compare, Allocator>::iterator i = std::multimap<Key, T, Compare, Allocator>::begin(); i != std::multimap<Key, T, Compare, Allocator>::end(); ++i)
       {

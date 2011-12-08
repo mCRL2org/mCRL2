@@ -106,14 +106,14 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// Destructor.
     ~deque()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::deque.ATmarkTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::deque<T, Allocator>::iterator i = std::deque<T, Allocator>::begin(); i != std::deque<T, Allocator>::end(); ++i)
       {

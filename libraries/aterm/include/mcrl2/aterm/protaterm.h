@@ -1,7 +1,7 @@
 #ifndef ATERM_IPROTECTEDATERM
 #define ATERM_IPROTECTEDATERM
 
-#include <set>
+#include <list>
 #include "mcrl2/aterm/aterm1.h"
 
 namespace aterm
@@ -9,7 +9,8 @@ namespace aterm
 
 class IProtectedATerm
 {
-    typedef std::multiset< IProtectedATerm* > pa_container;
+    typedef std::list< IProtectedATerm* > pa_container;
+    pa_container::iterator node;
 
   protected:
 
@@ -17,7 +18,7 @@ class IProtectedATerm
     {
       for (pa_container::iterator i=p_aterms().begin(); i!=p_aterms().end(); i++)
       {
-        (*i)->ATprotectTerms();
+        (*i)->ATmarkTerms();
       }
     }
 
@@ -35,17 +36,27 @@ class IProtectedATerm
 
     void ATprotectProtectedATerm(IProtectedATerm* i)
     {
-      p_aterms().insert(i);
+      p_aterms().push_front(i);
+      node = p_aterms().begin();
     }
 
-    void ATunprotectProtectedATerm(IProtectedATerm* i)
+    void ATunprotectProtectedATerm()
     {
-      p_aterms().erase(i);
+      p_aterms().erase(node);
     }
 
   public:
 
-    virtual void ATprotectTerms() = 0; // This method has a wrong name. It marks terms.
+    IProtectedATerm()
+    {}
+
+    IProtectedATerm &operator=(const IProtectedATerm &old)
+    { 
+      // Prevent node from being assigned.
+      return *this;
+    }
+
+    virtual void ATmarkTerms() = 0; 
 
     virtual ~IProtectedATerm() = 0;
 };

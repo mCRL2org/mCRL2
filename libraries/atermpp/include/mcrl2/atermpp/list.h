@@ -106,14 +106,14 @@ class list: public std::list<T,Allocator>, IProtectedATerm
     /// Destructor.
     ~list()
     {
-      ATunprotectProtectedATerm(this);
+      ATunprotectProtectedATerm();
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::list.ATprotectTerms() : protecting " << list<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::list.ATmarkTerms() : protecting " << list<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::list<T,Allocator>::iterator i = std::list<T,Allocator>::begin(); i != std::list<T,Allocator>::end(); ++i)
       {
