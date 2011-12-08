@@ -1,6 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/gc.h"
 
@@ -49,7 +50,9 @@ size_t FOLD(const MachineWord w)
 //#define FOLD(w)         ((HN(w)) ^ (HN(w) >> 32))
 static const size_t PTR_ALIGN_SHIFT = 4;
 //#define PTR_ALIGN_SHIFT 4
-#else
+#endif // AT_64BIT
+
+#ifdef AT_32BIT
 inline
 size_t FOLD(const MachineWord w)
 {
@@ -58,7 +61,7 @@ size_t FOLD(const MachineWord w)
 //#define FOLD(w)         (HN(w))
 static const size_t PTR_ALIGN_SHIFT = 2;
 //#define PTR_ALIGN_SHIFT 2
-#endif
+#endif // AT_32BIT
 
 inline size_t ADDR_TO_BLOCK_IDX(const void* a)
 {

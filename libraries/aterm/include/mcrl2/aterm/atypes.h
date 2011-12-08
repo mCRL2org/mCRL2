@@ -2,6 +2,7 @@
 #define ATYPES_H
 
 #include <cstddef>
+#include "mcrl2/aterm/architecture.h"
 
 namespace aterm
 {
@@ -42,21 +43,20 @@ typedef int ssize_t;
 #endif
 
 #ifdef AT_64BIT
-
 inline
 ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 {
   return (ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^(((MachineWord)(a)) >> 34));
 }
+#endif// AT_64BIT
 
-#else
-
+#ifdef AT_32BIT
 inline
 ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 {
   return ((ShortHashNumber)(a)) >> 2;
 }
-#endif // AT_64BIT
+#endif // AT_32BIT
 
 inline
 HashNumber ADDR_TO_HNR(const void* a)

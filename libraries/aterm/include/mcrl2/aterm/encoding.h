@@ -4,6 +4,7 @@
 
 #ifndef ENCODING_H
 #define ENCODING_H
+#include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/atypes.h"
 
 namespace aterm
@@ -73,10 +74,11 @@ static const size_t HEADER_BITS = sizeof(size_t)*8;
 #ifdef AT_64BIT
 static const header_type SHIFT_LENGTH = MCRL2_HT(34);
 static const header_type ARITY_BITS = MCRL2_HT(8);
-#else
+#endif /* AT_64BIT */
+#ifdef AT_32BIT
 static const header_type SHIFT_LENGTH = MCRL2_HT(10);
 static const header_type ARITY_BITS = MCRL2_HT(3);
-#endif /* AT_64BIT */
+#endif /* AT_32BIT */
 
 static const header_type TYPE_BITS = MCRL2_HT(3);
 static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
