@@ -1803,7 +1803,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         // A result in normal form is requested.
         pair<bool,string> r=calc_inner_term(ATgetArgument((ATermAppl)t,2),startarg,nnfvars,false,total_arity);
         ss << "this_rewriter->internal_existential_quantifier_enumeration(" <<
-               "this_rewriter->binding_variable_lists_gget(" << binding_variable_list_index(variable_list(ATgetArgument((ATermAppl)t,1))) << ")," <<
+               "this_rewriter->binding_variable_lists_get(" << binding_variable_list_index(variable_list(ATgetArgument((ATermAppl)t,1))) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
       }
