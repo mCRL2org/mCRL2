@@ -294,7 +294,6 @@ struct absinthe_algorithm
 
     data::data_expression operator()(const data::data_expression& x)
     {
-std::cout << "<in>" << data::pp(x) << " " << x << std::endl;
       data::data_expression result;
 
       if (data::is_variable(x))
@@ -320,7 +319,6 @@ std::cout << "<in>" << data::pp(x) << " " << x << std::endl;
           pbes_system::detail::absinthe_check_expression(result);
         }
       }
-std::cout << "<out>" << data::pp(result) << " " << result << std::endl;
       return result;
     }
   };
@@ -775,9 +773,6 @@ std::cout << "<out>" << data::pp(result) << " " << result << std::endl;
       {
         throw mcrl2::runtime_error("absinthe algorithm (lift_equation_1_2): unsupported sort " + print_term(s1) + " detected!");
       }
-
-      std::cout << "<lhs>" << data::pp(lhs) << std::endl;
-      std::cout << "<rhs>" << data::pp(rhs) << std::endl;
 
       if (lhs.sort() != rhs.sort())
       {
