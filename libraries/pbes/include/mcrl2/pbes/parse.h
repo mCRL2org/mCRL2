@@ -364,7 +364,7 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   }
 
   pbes<> q = p;
-  q.initial_state() == tr::true_();
+  q.initial_state() = tr::true_();
   std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration
