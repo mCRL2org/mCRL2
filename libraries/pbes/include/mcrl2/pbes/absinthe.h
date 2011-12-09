@@ -739,7 +739,7 @@ struct absinthe_algorithm
         atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
         variables = atermpp::convert<data::variable_list>(x);
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
-        application f_x(f1, data::data_expression_list(x.begin(), x.end()));
+        data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
 
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
 
@@ -929,21 +929,6 @@ struct absinthe_algorithm
 
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
-//    std::set<data::function_symbol> to_be_removed;
-//    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
-//    {
-//mCRL2log(log::debug, "absinthe") << "Inspecting used function symbol " << data::pp(*i) << " " << *i << std::endl;
-//      if (sigmaH.find(detail::target_sort(i->sort())) != sigmaH.end())
-//      {
-//mCRL2log(log::debug, "absinthe") << "Removing used function symbol   " << data::pp(*i) << " " << *i << std::endl;
-//        to_be_removed.insert(*i);
-//      }
-//    }
-//    for (std::set<data::function_symbol>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
-//    {
-//mCRL2log(log::debug, "absinthe") << "Removing function symbol   " << data::pp(*i) << " " << *i << std::endl;
-//      used_function_symbols.erase(*i);
-//    }
 
     // add List containers for user defined sorts, since they are used in the translation
     const data::sort_expression_vector& sorts = dataspec.user_defined_sorts();
@@ -953,18 +938,6 @@ struct absinthe_algorithm
       dataspec.add_context_sort(s);
     }
 
-//    for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
-//    {
-//      data::sort_expression s = data::container_sort(data::list_container(), i->first);
-//      dataspec.add_context_sort(s);
-//      data::function_symbol_vector list_constructors = dataspec.constructors(s);
-//      for (data::function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
-//      {
-//mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(*j) << " " << *j << std::endl;
-//        used_function_symbols.insert(*j);
-//      }
-//    }
-
     // add constructor functions of List containers of abstracted sorts to sigmaF
     for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
     {
@@ -973,8 +946,8 @@ struct absinthe_algorithm
       data::function_symbol_vector list_constructors = dataspec.constructors(s);
       for (data::function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
       {
-        function_symbol f1 = *j;
-        function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
+        data::function_symbol f1 = *j;
+        data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) << " to sigmaF" << std::endl;

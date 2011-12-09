@@ -50,36 +50,6 @@ void test_absinthe(const std::string& pbes_text, const std::string& abstraction_
   core::garbage_collect();
 }
 
-void test1()
-{
-  std::string PBES_TEXT =
-    "pbes                                                                                        \n"
-    "                                                                                            \n"
-    "nu X(l:List(Nat)) = (val(l == []) || X(tail(l)) ) && (val(l != []) || X([0,1,2,3,4,5,6]) ); \n"
-    "                                                                                            \n"
-    "init X([0,1,2,3,4,5,6]);                                                                    \n"
-    ;
-
-  std::string ABSTRACTION_TEXT =
-    "sort                               \n"
-    "  AbsNat  = struct even_n | odd_n; \n"
-    "                                   \n"
-    "var n: Nat;                        \n"
-    "                                   \n"
-    "eqn                                \n"
-    "(n mod 2 == 0) -> h(n) = even_n;   \n"
-    "(n mod 2 == 1) -> h(n) = odd_n;    \n"
-    "                                   \n"
-    "absmap                             \n"
-    "h:  Nat -> AbsNat;                 \n"
-    "                                   \n"
-    "absfunc                            \n"
-    "%empty section for this example    \n"
-  ;
-
-  test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
-}
-
 // test with structured sorts
 void test2()
 {
@@ -126,7 +96,6 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_separate_keyword_section();
-  test1();
   test2();
 
   return 0;
