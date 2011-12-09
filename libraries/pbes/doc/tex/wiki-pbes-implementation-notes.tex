@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, December 06, 2011 16:46:54}
+%TCIDATA{LastRevised=Friday, December 09, 2011 17:08:00}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1310,33 +1310,49 @@ implies that the solution of $\mathcal{E}$ is $false$.
 
 \section{Absinthe}
 
-The Absinthe algorithm takes as input a substitution on function symbols $%
-\sigma _{F}:\mathcal{F}\rightarrow \mathcal{F}$, and a substitution on sorts 
-$\sigma _{S}:\mathcal{S}\rightarrow \mathcal{S}$, where $\mathcal{F}$ is the
-set of function symbols and $\mathcal{S}$ is the set of sorts. For each $%
-s\in domain(\sigma _{S}\mathcal{)}$ there is a corresponding abstraction
-function $h_{s}$.
+The Absinthe algorithm takes as input a PBES $p$, a substitution on function
+symbols $\sigma _{F}:\mathcal{F}\rightarrow \mathcal{F}$, and a substitution
+on sorts $\sigma _{S}:\mathcal{S}\rightarrow \mathcal{S}$, where $\mathcal{F}
+$ is the set of function symbols and $\mathcal{S}$ is the set of sorts. For
+each $s\in domain(\sigma _{S}\mathcal{)}$ there is a corresponding \emph{%
+abstraction function} $h_{s}$.
 
-\subsection{Extending $\protect\sigma _{F}$}
+\subsection{Definitions}
 
-The algorithm extends the substitution $\sigma _{F}$ for all function
-symbols $f$ that are used in the PBES, but are not present yet in $\sigma
-_{F}$. A function symbol $f\in \mathcal{F}$ is "generalized" as follows:%
+We define $FunctionSymbols(p)$ as the set of function symbols that occur in
+the PBES $p$. For a sort $s$ we define $ContainerConstructors(s)$ as the set
+of constructor functions of the sorts $List(s)$, $Set(s)$ and $Bag(s)$. This
+includes for example the functions $[]:List(s)$ and $\rhd :s\times
+List(s)\rightarrow List(s)$.
+
+\subsection{Algorithm}
+
+The algorithm first extends and modifies the substitution $\sigma _{F}$.
+Then a transformation to $p$ is applied.
+
+\subsubsection{Step 1}
+
+The algorithm first extends the substitution $\sigma _{F}$. Let $A=\left(
+FunctionSymbols(p)\cup \dbigcup\limits_{s\in domain(\sigma
+_{S})}ContainerConstructors(s)\right) \setminus domain(\sigma _{F}\mathcal{)}
+$. For each function symbol $f\in A$ the substitution $\sigma _{F}$ is
+extended based on the sort of $f$:%
 \begin{equation*}
 \begin{array}{lcl}
-f:s_{b} & \mapsto  & \overline{f}:s_{b}^{\sigma _{S}} \\ 
-f:C(s) & \mapsto  & \overline{f}:C(s)^{\sigma _{S}} \\ 
-f:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto  & \overline{f}%
-:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
+\sigma _{F}(f:s_{b}) & = & \overline{f}:s_{b}^{\sigma _{S}} \\ 
+\sigma _{F}(f:C(s)) & = & \overline{f}:C(s)^{\sigma _{S}} \\ 
+\sigma _{F}(f:s_{1}\times \cdots \times s_{n}\rightarrow s) & = & \overline{f%
+}:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
 Set(s^{\sigma _{S}}),%
 \end{array}%
 \end{equation*}%
 where $s_{b}$ is a basic sort, $s_{1}\times \cdots \times s_{n}\rightarrow s$
-is a function sort, and $C(s)$ is a container sort. The sort of $f$ may not
-contain any element of $domain(\sigma _{S}\mathcal{)}$ as a subsort (N.B.
-this is probably too strict!).
+is a function sort, and $C(s)$ is a container sort, and where $\overline{f}$
+is a fresh identifier. The sort of $f$ may not contain any element of $%
+domain(\sigma _{S}\mathcal{)}$ as a subsort.
 
-For each of the function symbols a corresponding equation is introduced:%
+For each of the function symbols $f\in FunctionSymbols(p)$ $\setminus
+domain(\sigma _{F}\mathcal{)}$ a corresponding equation is introduced:%
 \begin{equation*}
 \begin{array}{lcl}
 \overline{f} & = & \left\{ 
@@ -1356,11 +1372,76 @@ f^{\sigma _{S}} & \text{otherwise}%
 \right. 
 \end{array}%
 \end{equation*}%
-where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$. Besides this, the
-substitution $\sigma _{F}$ is extended with constructor functions for
-container sorts of the sorts in $domain(\sigma _{S}\mathcal{)}$. 
+where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$. 
 
-\newpage 
+\subsubsection{Step 2}
+
+After this the substitution $\sigma _{F}$ is transformed. Each $%
+(f_{1},f_{2})\in \sigma _{F}$ is replaced by $(f_{1},f_{3})$, where $f_{3}$
+is obtained from $f_{2}$ as follows:%
+\begin{equation*}
+\begin{array}{lcl}
+f_{2}:s_{b} & \mapsto  & f_{3}:Set(s_{b}) \\ 
+f_{2}:C(s) & \mapsto  & f_{3}:Set(C(s)) \\ 
+f_{2}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto  & 
+f_{3}:Set(s_{1})\times \cdots \times Set(s_{n})\rightarrow s,%
+\end{array}%
+\end{equation*}%
+where $f3$ is a fresh name.
+
+For each pair $(f_{2},f_{3})$ a corresponding equation is generated:%
+\begin{equation*}
+\begin{array}{lcl}
+f_{3} & = & \{f_{2}\} \\ 
+&  &  \\ 
+f_{3} & = & \{f_{2}\} \\ 
+&  &  \\ 
+f_{3}(X) & = & \left\{ y:s\ |\ \exists _{x:s_{1}\times \cdots \times
+s_{n}\rightarrow s}\ .\ x\in X\wedge y\in f_{2}(x)\right\} ,%
+\end{array}%
+\end{equation*}%
+where $X:Set(s_{1})\times \cdots \times Set(s_{n})\rightarrow s$.
+
+\subsubsection{Step 3}
+
+The PBES $p$ is transformed using the transformations $T$ and $U$, that is
+defined recursively as:%
+\begin{eqnarray*}
+T(\mathcal{(\sigma }_{1}X_{1}(d_{1} &:&D_{1})=\varphi _{1})\ldots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n}))=\mathcal{(\sigma }_{1}%
+\widehat{X_{1}}(d_{1}:D_{1}^{\sigma _{S}})=T(\varphi _{1}))\ldots \mathcal{%
+(\sigma }_{n}\widehat{X_{n}}(d_{n}:D_{n}^{\sigma _{S}})=T(\varphi _{n})) \\
+T(\lnot \varphi ) &=&\lnot T(\varphi ) \\
+T(\varphi \oplus \psi ) &=&T(\varphi )\oplus T(\psi ) \\
+T(X_{i}(e)) &=&\left\{ 
+\begin{array}{cc}
+\dbigvee\limits_{d\in T(e)}\widehat{X_{i}}(d) & \text{if it is an
+under-approximation} \\ 
+\dbigwedge\limits_{d\in T(e)}\widehat{X_{i}}(d) & \text{if it is an
+over-approximation}%
+\end{array}%
+\right.  \\
+T(\forall _{d:D}.\varphi ) &=&\forall _{d:D^{\sigma _{S}}}.T(\varphi ) \\
+T(\exists _{d:D}.\varphi ) &=&\exists _{d:D^{\sigma _{S}}}.T(\varphi ) \\
+T(b) &=&\left\{ 
+\begin{array}{cc}
+false\in U(b) & \text{if it is an under-approximation} \\ 
+true\in U(b) & \text{if it is an over-approximation,}%
+\end{array}%
+\right.  \\
+U(v) &=&\{v^{\sigma _{S}}\} \\
+U(f) &=&\mathcal{\sigma }_{F}(f) \\
+U(c) &=&\{h_{s}(c)\}\text{ if }c:s\text{ is a ground term and }s\in
+domain(\sigma _{S}) \\
+U(f(x)) &=&U(f)(U(x))\text{ N.B. The general case }U(y(x))\text{ is not
+supported!} \\
+U(\lambda _{d:D}.x) &=&\{v:s^{\sigma _{S}}\ |\ v=U(x)\}\text{, where }x:s \\
+U(\forall _{d:D}.x) &=&? \\
+U(\exists _{d:D}.x) &=&? \\
+U(x\text{ whr }y &:&=z)=?
+\end{eqnarray*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$. Note that $T$ operates on
+PBES expressions, and $U$ operates on data expressions. \newpage 
 
 \section{ Gau\ss\ Elimination}
 
