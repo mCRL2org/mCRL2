@@ -25,19 +25,25 @@ else(MSVC)
     add_definitions("-DAT_32BIT")
     set(ATERM_FLAGS "-m32")
     add_definitions("-m32")
+    #Required for wxWidgets for OSX
+    set(MCRL2_ARCHITECTURE "i386")
   else(CMAKE_OSX_ARCHITECTURES MATCHES "i386" OR  CMAKE_OSX_DEPLOYMENT_TARGET MATCHES "10.5")
 
   if (CMAKE_SIZEOF_VOID_P MATCHES "8")
     message (STATUS "Architecture: 64bit Unix" )
     set(ATERM_FLAGS "-m64 -DAT_64BIT")
     add_definitions("-DAT_64BIT")
-    # set(ARCHITECTURE "x86_64")
+
+    #Required for wxWidgets for OSX
+    set(MCRL2_ARCHITECTURE "x86_64")
   endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
   if (CMAKE_SIZEOF_VOID_P MATCHES "4")
     message (STATUS "Architecture: 32bit Unix" )
     add_definitions("-DAT_32BIT")
     set(ATERM_FLAGS "-m32")
-    # set(ARCHITECTURE "i386")
+    
+    #Required for wxWidgets for OSX
+    set(MCRL2_ARCHITECTURE "i386")
   endif (CMAKE_SIZEOF_VOID_P MATCHES "4")
   endif(CMAKE_OSX_ARCHITECTURES MATCHES "i386" OR  CMAKE_OSX_DEPLOYMENT_TARGET MATCHES "10.5")
 endif(MSVC)

@@ -32,7 +32,23 @@
         message( FATAL_ERROR "Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
   
       endif( wxWidgets_VERSION LESS 2.8.0 )
-  
+
+      if( wxWidgets_VERSION LESS 2.9.0 AND APPLE AND MCRL2_ARCHITECTURE MATCHES "x86_64" )
+        message( STATUS "---------------------------------------------------------------------------------")
+        message( STATUS "Warning: GUI tools are not built." )
+        message( STATUS "The mCRL2 toolset requires for a x86_64 build wxWidgets version v2.9.0 or higher." )
+        message( STATUS "Current wxWidgets version: ${wxWidgets_VERSION}")
+        message( STATUS "OPTIONS:")
+        message( STATUS "---------------------------------------------------------------------------------")
+        message( STATUS "1. Set MCRL2_ENABLE_GUI_TOOLS to \"FALSE\" to build without GUI-tools.")
+        message( STATUS "2. Set CMAKE_OSX_ARCHITECTURES to \"i386\" and CMAKE_OSX_DEPLOYMENT_TARGET to \"10.5\".")
+        message( STATUS "3. Install wxWidget 2.9.0+ with Cocoa support and:" )
+        message( STATUS "   * set wxWidgets_CONFIG_EXECUTABLE to the location of wx-config.")
+        message( STATUS "   * set wxWidgets_wxrc_EXECUTABLE to the location of wxrc.")
+        message( STATUS "---------------------------------------------------------------------------------")
+        message( FATAL_ERROR "")
+      endif(  wxWidgets_VERSION LESS 2.9.0 AND APPLE AND MCRL2_ARCHITECTURE MATCHES "x86_64" )
+
       message(STATUS "wxWidgets version: ${wxWidgets_VERSION}")
   
     else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
