@@ -539,7 +539,7 @@ static void checkPattern(ATermAppl p)
 void CheckRewriteRule(const data_equation DataEqn)
 {
   const variable_list rule_var_list = DataEqn.variables();
-  const std::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
+  const atermpp::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars
   std::set <variable> lhs_vars;
