@@ -4956,7 +4956,7 @@ bool check_term_MultActName(Term t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_String<atermpp::aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_String<atermpp::aterm>, 1))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
