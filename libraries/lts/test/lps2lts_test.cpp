@@ -455,6 +455,16 @@ BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
+// Example from bug #832
+BOOST_AUTO_TEST_CASE(test_plus)
+{
+  std::string spec(
+    "act a;\n"
+    "proc P = a.P + a.P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
