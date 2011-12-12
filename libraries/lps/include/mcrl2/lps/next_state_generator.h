@@ -40,6 +40,8 @@ class next_state_generator
     data::rewriter::strategy m_rewriter_strategy;
     mcrl2::data::detail::legacy_rewriter m_rewriter;
     NextState* m_NextState;
+    NextStateGenerator* m_NextStateGenerator;
+    NextStateGenerator* m_NextStateGeneratorPerSummand;
 
   public:
     /// \brief A type that represents a transition to a 'next' state.
@@ -84,8 +86,7 @@ class next_state_generator
     };
 
     /// \brief Iterator that generates all successor states of a given state.
-    // TODO: Note that the NextState and NextStateGenerator classes have a clumsy interface.
-    // This has a negative effect on the performance.
+    /// N.B. Concurrent traversals with this iterator are not allowed!
     class iterator: public boost::iterator_facade<
       iterator,                               // Derived
       const state_type,                       // Value
@@ -94,7 +95,7 @@ class next_state_generator
     {
       protected:
         NextState* m_next_state;
-        boost::shared_ptr<NextStateGenerator> m_generator;
+        NextStateGenerator* m_generator;
         state_type m_state;
 
       public:
@@ -103,34 +104,16 @@ class next_state_generator
         {}
 
         /// \brief Constructor.
-        iterator(NextState* next)
+        iterator(NextState* next, NextStateGenerator* generator)
           : m_next_state(next),
-            m_generator(m_next_state->getNextStates(m_next_state->getInitialState())),
+            m_generator(generator),
             m_state(0, m_next_state->getInitialState())
         { }
 
         /// \brief Constructor.
-        iterator(NextState* next, const atermpp::aterm& state)
+        iterator(NextState* next, NextStateGenerator* generator, const atermpp::aterm& state)
           : m_next_state(next),
-            m_generator(m_next_state->getNextStates(state))
-        {
-          m_state.state = state;
-        }
-
-        /// \brief Constructor.
-        iterator(NextState* next, size_t summand_index)
-          : m_next_state(next),
-            m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
-            m_state(0, m_next_state->getInitialState())
-        { }
-
-        /// \brief Constructor.
-        iterator(NextState* next,
-                 const atermpp::aterm& state,
-                 size_t summand_index
-                )
-          : m_next_state(next),
-            m_generator(m_next_state->getNextStates(state, summand_index))
+            m_generator(generator)
         {
           m_state.state = state;
         }
@@ -182,6 +165,8 @@ class next_state_generator
       lps::detail::instantiate_global_variables(m_specification);
       m_rewriter = mcrl2::data::detail::legacy_rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), m_rewriter_strategy);
       m_NextState = createNextState(m_specification, m_rewriter, false);
+      m_NextStateGenerator = 0;
+      m_NextStateGeneratorPerSummand = 0;
     }
 
     /// \brief Constructor
@@ -190,7 +175,9 @@ class next_state_generator
     next_state_generator(const std::string& filename, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
       : m_rewriter_strategy(rewriter_strategy),
         m_rewriter(data::data_specification()),
-        m_NextState(0)
+        m_NextState(0),
+        m_NextStateGenerator(0),
+        m_NextStateGeneratorPerSummand(0)
     {
       load(filename);
     }
@@ -199,8 +186,9 @@ class next_state_generator
     next_state_generator(const specification& lps_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
       : m_specification(lps_spec),
         m_rewriter_strategy(rewriter_strategy),
-        m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables()), rewriter_strategy)
-        // m_enumerator(lps_spec.data(), m_rewriter)
+        m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables()), rewriter_strategy),
+        m_NextStateGenerator(0),
+        m_NextStateGeneratorPerSummand(0)
     {
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
@@ -225,13 +213,15 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
     /// \brief Returns an iterator for generating the successors of the initial state.
     iterator begin()
     {
-      return iterator(m_NextState);
+      m_NextStateGenerator = m_NextState->getNextStates(m_NextState->getInitialState(), m_NextStateGenerator);
+      return iterator(m_NextState, m_NextStateGenerator);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     iterator begin(const atermpp::aterm& state)
     {
-      return iterator(m_NextState, state);
+      m_NextStateGenerator = m_NextState->getNextStates(state, m_NextStateGenerator);
+      return iterator(m_NextState, m_NextStateGenerator, state);
     }
 
     /// \brief Returns an iterator for generating the successors of the initial state.
@@ -239,7 +229,8 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
     /// generated.
     iterator begin(size_t summand_index)
     {
-      return iterator(m_NextState, summand_index);
+      m_NextStateGeneratorPerSummand = m_NextState->getNextStates(m_NextState->getInitialState(), summand_index, m_NextStateGeneratorPerSummand);
+      return iterator(m_NextState, m_NextStateGeneratorPerSummand);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
@@ -247,7 +238,8 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
     /// generated.
     iterator begin(const atermpp::aterm& state, size_t summand_index)
     {
-      return iterator(m_NextState, state, summand_index);
+      m_NextStateGeneratorPerSummand = m_NextState->getNextStates(state, summand_index, m_NextStateGeneratorPerSummand);
+      return iterator(m_NextState, m_NextStateGeneratorPerSummand, state);
     }
 
     /// \brief Returns the initial state of the specification.
