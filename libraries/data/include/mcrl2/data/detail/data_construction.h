@@ -17,48 +17,11 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/standard.h"
 
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-#include "mcrl2/data/detail/print_parse_check.h"
-#endif
-
 namespace mcrl2 {
 
 namespace data {
 
 namespace detail {
-
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-template <class T> // note, T is only a dummy
-struct data_specification_container
-{
-  static const data_specification* dataspec;
-};
-
-template <class T>
-const data_specification* data_specification_container<T>::dataspec = 0;
-
-inline
-void set_data_specification(const data_specification& dataspec)
-{
-  data_specification_container<int>::dataspec = &dataspec;
-}
-
-inline
-const data_specification& get_data_specification()
-{
-  return *data_specification_container<int>::dataspec;
-}
-
-template <typename T>
-inline void data_construction_check_expression(const T& x)
-{
-  data::detail::print_parse_check(x, get_data_specification());
-}
-#else
-template <typename T>
-inline void data_construction_check_expression(const T&)
-{}
-#endif
 
 /// \brief Create the finite set { x }, with x a data expression.
 inline
@@ -67,7 +30,6 @@ data_expression create_finite_set(const data_expression& x)
   data_expression result = data::sort_fset::fset_empty(x.sort());
   result = data::sort_fset::fsetinsert(x.sort(), x, result);
   result = data::sort_set::setfset(x.sort(), result);
-  data_construction_check_expression(result);
   return result;
 }
 
@@ -77,7 +39,6 @@ data_expression create_set_comprehension(const variable& x, const data_expressio
 {
   assert(sort_bool::is_bool(phi.sort()));
   data_expression result = sort_set::setconstructor(x.sort(), lambda(x, phi), sort_fset::fset_empty(x.sort()));
-  data_construction_check_expression(result);
   return result;
 }
 
@@ -86,7 +47,6 @@ inline
 data_expression create_set_in(const data_expression& x, const data_expression& X)
 {
   data_expression result = sort_set::setin(x.sort(), x, X);
-  data_construction_check_expression(result);
   return result;
 }
 

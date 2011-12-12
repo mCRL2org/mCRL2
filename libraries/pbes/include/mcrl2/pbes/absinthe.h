@@ -229,12 +229,12 @@ struct absinthe_algorithm
       if (i == sigmaS.end())
       {
         result = super::operator()(x);
-        pbes_system::detail::absinthe_check_expression(result);
+        //pbes_system::detail::absinthe_check_expression(result);
       }
       else
       {
         result = i->second;
-        pbes_system::detail::absinthe_check_expression(result);
+        //pbes_system::detail::absinthe_check_expression(result);
       }
       return result;
     }
@@ -244,7 +244,7 @@ struct absinthe_algorithm
       function_symbol_substitution_map::const_iterator i = sigmaF.find(x);
       if (i != sigmaF.end())
       {
-        pbes_system::detail::absinthe_check_expression(i->second);
+        //pbes_system::detail::absinthe_check_expression(i->second);
         return i->second;
       }
       throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
@@ -281,14 +281,14 @@ struct absinthe_algorithm
     data::data_expression operator()(const data::lambda& x)
     {
       data::data_expression body = super::operator()(x);
-      pbes_system::detail::absinthe_check_expression(body);
+      //pbes_system::detail::absinthe_check_expression(body);
       data::sort_expression s = body.sort();
       data::set_identifier_generator generator;
       std::set<core::identifier_string> ids = data::find_identifiers(x);
       generator.add_identifiers(ids);
       data::variable v(generator("v"), s);
       data::data_expression result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
-      pbes_system::detail::absinthe_check_expression(result);
+      //pbes_system::detail::absinthe_check_expression(result);
       return result;
     }
 
@@ -300,7 +300,7 @@ struct absinthe_algorithm
       {
         result = super::operator()(x);
         result = data::detail::create_finite_set(result);
-        pbes_system::detail::absinthe_check_expression(result);
+        //pbes_system::detail::absinthe_check_expression(result);
       }
       else
       {
@@ -310,13 +310,13 @@ struct absinthe_algorithm
         {
           data::data_expression_list args = atermpp::make_list(x);
           result = data::detail::create_finite_set(data::application(i->second, args));
-          pbes_system::detail::absinthe_check_expression(result);
+          //pbes_system::detail::absinthe_check_expression(result);
         }
         else
         {
           // first apply the sort and function symbol transformations
           result = super::operator()(x);
-          pbes_system::detail::absinthe_check_expression(result);
+          //pbes_system::detail::absinthe_check_expression(result);
         }
       }
       return result;
@@ -722,7 +722,7 @@ struct absinthe_algorithm
         {
           data::function_symbol h = i->second;
           rhs = data::application(h, atermpp::make_list(f1));
-          pbes_system::detail::absinthe_check_expression(rhs);
+          //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
       else if (data::is_function_sort(s1))
@@ -748,13 +748,13 @@ struct absinthe_algorithm
         {
           data::application f1_sigma_x(f1_sigma, data::data_expression_list(x.begin(), x.end()));
           rhs = data::detail::create_finite_set(f_x);
-          pbes_system::detail::absinthe_check_expression(rhs);
+          //pbes_system::detail::absinthe_check_expression(rhs);
         }
         else
         {
           data::function_symbol h = i->second;
           rhs = create_finite_set(data::application(h, atermpp::make_list(f_x)));
-          pbes_system::detail::absinthe_check_expression(rhs);
+          //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
       else if (data::is_container_sort(s1))
@@ -767,7 +767,7 @@ struct absinthe_algorithm
         lhs = f2;
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
         rhs = f1_sigma;
-        pbes_system::detail::absinthe_check_expression(rhs);
+        //pbes_system::detail::absinthe_check_expression(rhs);
       }
       else
       {
@@ -1095,8 +1095,6 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, dataspec);
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping ---\n" << print_mapping(sigmaF) << std::endl;
 
-    pbes_system::detail::absinthe_data_specification() = dataspec;
-
     // 4) add lifted sorts, mappings and equations to dataspec
     // before: the mapping sigmaF is f1 -> f2
     // after: the mapping sigmaF is f1 -> f3
@@ -1111,12 +1109,9 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
 
     p.data() = dataspec;
-    pbes_system::detail::absinthe_data_specification() = dataspec;
 
     // then transform the data expressions and the propositional variable instantiations
     absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, is_over_approximation)(p);
-
-    mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << pbes_system::pbes_to_aterm(p) << std::endl;
 
     mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << pbes_system::pp(p) << std::endl;
   }
