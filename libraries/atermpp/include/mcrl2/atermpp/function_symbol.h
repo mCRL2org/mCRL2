@@ -18,6 +18,9 @@
 
 namespace atermpp
 {
+
+using namespace aterm;
+
 /// \brief Function symbol.
 class function_symbol
 {

@@ -19,6 +19,8 @@ namespace atermpp
 namespace detail
 {
 
+using namespace aterm;
+
 // --- term ---
 /// \brief Conversion function
 /// \param t A pointer
