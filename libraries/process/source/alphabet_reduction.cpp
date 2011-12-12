@@ -72,7 +72,7 @@ namespace mcrl2
         return reverse(r);
       }
 
-      template < class T >
+/*      template < class T >
       static inline atermpp::term_list <T> remove_one_element(atermpp::term_list <T> l, T e)
       {
         atermpp::term_list <T> r;
@@ -90,6 +90,7 @@ namespace mcrl2
         }
         return r;
       }
+*/
       template < class T >
       static inline bool gsaATisDisjoint(atermpp::term_list <T>  l, atermpp::term_list <T> m)
       {
@@ -746,13 +747,13 @@ namespace mcrl2
             sort_expression_list s = a.sorts();
             lps::action_label_list tr = r;
             bool b=true;
-            c = detail::remove_one_element(c,a.name());
+            c = remove_one_element(c,a.name());
             for (core::identifier_string_list::const_iterator j=c.begin(); j!=c.end(); ++j)
             {
               lps::action_label act(*j,s);
               if (std::find(tr.begin(),tr.end(),act) != tr.end())
               {
-                tr = detail::remove_one_element(tr,act);
+                tr = remove_one_element(tr,act);
               }
               else
               {
@@ -911,7 +912,7 @@ namespace mcrl2
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
         action_label_list_list mas=apply_comms(*i,C,lhs);
-        mas=detail::remove_one_element(mas,lps::action_label_list());
+        mas=remove_one_element(mas,lps::action_label_list());
         detail::gsaATindexedSetPutList(m,mas);
       }
 

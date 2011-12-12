@@ -2033,12 +2033,12 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::data::pp(Mucks_rewriter.convert_from((ATermAppl)p)));
+                                   mcrl2::data::pp(Mucks_rewriter.convert_from(p)));
       }
       else
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::data::pp(p));
+                                   mcrl2::data::pp(mcrl2::data::data_expression(p)));
       }
       return false_();
     }

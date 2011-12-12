@@ -65,7 +65,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       {
         return m_enclosing_enumerator->rewr_obj->internal_true;
       }
-      else if (!ATisInt((ATerm)(ATermAppl)condition) && condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
+      else if (condition.type()==AT_APPL && condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
       {
         return condition(1);
       }
@@ -211,6 +211,11 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
     return false;
   }
 
+  if (gsIsBinder(t) || gsIsWhr(t))
+  {
+    return false;
+  }
+
   if (t(0) == m_enclosing_enumerator->rewr_obj->internal_and)
   {
     assert(t.size()==3);
@@ -254,7 +259,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 
   while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
   {
-    vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
+    vars = remove_one_element(vars, var);
     substituted_vars=push_front(substituted_vars,var);
     vals = push_front(vals,val);
 
@@ -330,7 +335,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     size_t arity = t.size();
     size_t extra_arity = 0;
 
-    if (!ATisInt(head))
+    if (head.type()!=AT_INT)
     {
       head = build_solution_single(head,substituted_vars,exprs);
       if (!is_variable(head))
@@ -342,7 +347,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,arity+extra_arity);
     size_t k = 1;
 
-    if (!ATisInt(head) && !is_variable(head))
+    if (head.type()!=AT_INT && !is_variable(head))
     {
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)

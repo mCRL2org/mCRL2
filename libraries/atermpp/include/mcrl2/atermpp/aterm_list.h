@@ -325,7 +325,7 @@ template <typename Term>
 inline
 term_list<Term> remove_one_element(const term_list<Term>& l, const Term& x)
 {
-  return term_list<Term>(ATremoveElement(l, x));
+  return term_list<Term>(ATremoveElement(l, aterm_traits<Term>::term(x)));
 }
 
 /// \brief Applies a function to all elements of the list and returns the result.
