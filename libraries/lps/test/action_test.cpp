@@ -52,11 +52,26 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(equal_signatures(a1, a2));
   BOOST_CHECK(!equal_signatures(a1, a3));
 
-  action empty = action();
+  /* action empty = action();
   std::cerr << lps::pp(empty) << std::endl;
-  std::cerr << lps::pp(action()) << std::endl;
+  std::cerr << lps::pp(action()) << std::endl; */
 
+
+  // Test whether the front of an action_label_list is working properly.
+  
+  action_label_list l;
+  l=push_front(l,aX);
+  BOOST_CHECK(l.front()==aX);
+  l=push_front(l,aY);
+  l=push_front(l,aY);
+  BOOST_CHECK(l.front()==aY);
+  action_label_list l1=l;
   core::garbage_collect();
+  BOOST_CHECK(l1.front()==aY);
+  BOOST_CHECK(l.front()==aY);
+  action_label a=l.front();
+  BOOST_CHECK(a==aY);
+
 
   return 0;
 }

@@ -73,14 +73,19 @@ namespace mcrl2
       }
 
       template < class T >
-      static inline atermpp::term_list <T> remove_element(atermpp::term_list <T> l, T e)
+      static inline atermpp::term_list <T> remove_one_element(atermpp::term_list <T> l, T e)
       {
         atermpp::term_list <T> r;
+        bool found=false;
         for(typename atermpp::term_list <T>::const_iterator i=l.begin(); i!=l.end(); ++i)
         {
-          if (*i!=e)
+          if (found || *i!=e) 
           {
             r=push_front(r,*i);
+          }
+          else
+          {
+            found=true; // Take care that the element is only removed once.
           }
         }
         return r;
@@ -667,11 +672,15 @@ namespace mcrl2
 
     action_name_multiset_list alphabet_reduction::gsaMakeMultActNameL(atermpp::term_list< identifier_string_list > l)
     {
-      // turns list of lists l to a list of multiactions
+      // turns list of lists l to a list of multiactions, but leave the empty multi-action out, as
+      // it is not an allowed action_name_multiset.
       action_name_multiset_list r;
       for (atermpp::term_list< atermpp::term_list < identifier_string > >::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        r=push_front(r,action_name_multiset(*i));
+        if (!i->empty())
+        {
+          r=push_front(r,action_name_multiset(*i));
+        }
       }
 
       return reverse(r);  
@@ -720,13 +729,13 @@ namespace mcrl2
       //explanation: applying {a:Nat|b:Nat-c:Nat} to a|b can either give c, or a|b,
       //depending on the parameters of a and b. (in case a,b have no parameters,
       //the result is definitely c)
-      //so the result is an alphabeth, not a single multiaction
+      //so the result is an alphabet, not a single multiaction
 
       action_label_list_list m=push_front(action_label_list_list(),lps::action_label_list());
       lps::action_label_list r=l;
       while (r.size() > 0)
       {
-        lps::action_label a = r.front();
+        lps::action_label a = r.front();  // Deze front werkt niet met huidige library.
         r = pop_front(r);
         bool applied=false;
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
@@ -737,13 +746,13 @@ namespace mcrl2
             sort_expression_list s = a.sorts();
             lps::action_label_list tr = r;
             bool b=true;
-            c = detail::remove_element(c,a.name());
+            c = detail::remove_one_element(c,a.name());
             for (core::identifier_string_list::const_iterator j=c.begin(); j!=c.end(); ++j)
             {
               lps::action_label act(*j,s);
               if (std::find(tr.begin(),tr.end(),act) != tr.end())
               {
-                tr = detail::remove_element(tr,act);
+                tr = detail::remove_one_element(tr,act);
               }
               else
               {
@@ -780,7 +789,6 @@ namespace mcrl2
           m=sync_list(m,push_front(action_label_list_list(),push_front(lps::action_label_list(),a)));
         }
       }
-
       if (!r.empty())
       {
         m=sync_list(m,push_front(action_label_list_list(),r));
@@ -903,7 +911,7 @@ namespace mcrl2
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
         action_label_list_list mas=apply_comms(*i,C,lhs);
-        mas=detail::remove_element(mas,lps::action_label_list());
+        mas=detail::remove_one_element(mas,lps::action_label_list());
         detail::gsaATindexedSetPutList(m,mas);
       }
 
@@ -1308,7 +1316,6 @@ namespace mcrl2
 
         assert(alphas.count(p)>0);
         l = alphas[p];
-
         l = filter_comm_list(l,C);
         a = comm(comm(a).comm_set(),p);
         a = gsApplyAlpha(a);
@@ -1669,14 +1676,14 @@ namespace mcrl2
       {
         process_identifier pn=process_instance(a).identifier();
         //this should be an mCRL process (pCRL processes always have an entry).
-        //we apply the alphabeth reductions to its body and then we know the alphabet
+        //we apply the alphabet reductions to its body and then we know the alphabet
         l=alphas_process_identifiers.count(pn)>0?alphas_process_identifiers[pn]:gsaGetAlpha(procs[pn],length,allowed);
       }
       else if (is_process_instance_assignment(a))
       {
         process_identifier pn=process_instance_assignment(a).identifier();
         //this should be an mCRL process (pCRL processes always have an entry).
-        //we apply the alphabeth reductions to its body and then we know the alphabet
+        //we apply the alphabet reductions to its body and then we know the alphabet
         l=alphas_process_identifiers.count(pn)>0?alphas_process_identifiers[pn]:gsaGetAlpha(procs[pn],length,allowed);
       }
       else if (is_block(a))
@@ -1932,7 +1939,7 @@ l_ok:
         if (non_recursive_set.count(pn)>0)
         {
           //if this is a mCRL process.
-          //we apply the alphabeth reductions to its body and then we know the alphabet
+          //we apply the alphabet reductions to its body and then we know the alphabet
           process_expression new_p=gsApplyAlpha(procs[pn]);
           procs[pn]=new_p;
           assert(alphas.count(new_p)>0);
