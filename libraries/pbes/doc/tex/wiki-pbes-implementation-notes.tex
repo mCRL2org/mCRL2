@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, December 09, 2011 17:08:00}
+%TCIDATA{LastRevised=Monday, December 12, 2011 13:16:02}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1332,47 +1332,55 @@ Then a transformation to $p$ is applied.
 
 \subsubsection{Step 1}
 
-The algorithm first extends the substitution $\sigma _{F}$. Let $A=\left(
-FunctionSymbols(p)\cup \dbigcup\limits_{s\in domain(\sigma
-_{S})}ContainerConstructors(s)\right) \setminus domain(\sigma _{F}\mathcal{)}
-$. For each function symbol $f\in A$ the substitution $\sigma _{F}$ is
-extended based on the sort of $f$:%
+The algorithm first extends the substitution $\sigma _{F}$. Let
+
+\begin{equation*}
+A=\left( FunctionSymbols(p)\cup \dbigcup\limits_{s\in domain(\sigma
+_{S})}ContainerConstructors(s)\right) \setminus domain(\sigma _{F}\mathcal{)}%
+.
+\end{equation*}
+
+For each function symbol $f_{1}\in A$ the substitution $\sigma _{F}$ is
+extended with $\sigma _{F}(f_{1}):=f_{2}$, where $f_{2}$ is obtained from $%
+f_{1}$ using%
 \begin{equation*}
 \begin{array}{lcl}
-\sigma _{F}(f:s_{b}) & = & \overline{f}:s_{b}^{\sigma _{S}} \\ 
-\sigma _{F}(f:C(s)) & = & \overline{f}:C(s)^{\sigma _{S}} \\ 
-\sigma _{F}(f:s_{1}\times \cdots \times s_{n}\rightarrow s) & = & \overline{f%
-}:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
+f_{1}:s_{b} & \mapsto  & f_{2}:s_{b}^{\sigma _{S}} \\ 
+f_{1}:C(s) & \mapsto  & f_{2}:C(s)^{\sigma _{S}} \\ 
+f_{1}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto  & 
+f_{2}:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
 Set(s^{\sigma _{S}}),%
 \end{array}%
 \end{equation*}%
 where $s_{b}$ is a basic sort, $s_{1}\times \cdots \times s_{n}\rightarrow s$
-is a function sort, and $C(s)$ is a container sort, and where $\overline{f}$
-is a fresh identifier. The sort of $f$ may not contain any element of $%
+is a function sort, and $C(s)$ is a container sort, and where $f_{2}$ is a
+fresh identifier. The sort of $f_{1}$ may not contain any element of $%
 domain(\sigma _{S}\mathcal{)}$ as a subsort.
 
 For each of the function symbols $f\in FunctionSymbols(p)$ $\setminus
 domain(\sigma _{F}\mathcal{)}$ a corresponding equation is introduced:%
 \begin{equation*}
 \begin{array}{lcl}
-\overline{f} & = & \left\{ 
+f_{2} & = & \left\{ 
 \begin{array}{ll}
-h_{s_{b}}(f)\text{ } & \text{if }s_{b}\in domain(\sigma _{S}\mathcal{)} \\ 
+h_{s_{b}}(f_{1})\text{ } & \text{if }s_{b}\in domain(\sigma _{S}\mathcal{)}
+\\ 
 f^{\sigma _{S}} & \text{otherwise}%
 \end{array}%
 \right.  \\ 
 &  &  \\ 
-\overline{f} & = & f^{\sigma _{S}} \\ 
+f_{2} & = & f_{1}^{\sigma _{S}} \\ 
 &  &  \\ 
-\overline{f}(x) & = & \left\{ 
+f_{2}(x) & = & \left\{ 
 \begin{array}{ll}
-\{h_{s}(f(x))\}\text{ } & \text{if }s\in domain(\sigma _{S}\mathcal{)} \\ 
-\{f(x)\} & \text{otherwise,}%
+\{h_{s}(f_{1}(x))\}\text{ } & \text{if }s\in domain(\sigma _{S}\mathcal{)}
+\\ 
+\{f_{1}(x)\} & \text{otherwise,}%
 \end{array}%
 \right. 
 \end{array}%
 \end{equation*}%
-where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$. 
+where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$.
 
 \subsubsection{Step 2}
 
@@ -1381,9 +1389,9 @@ After this the substitution $\sigma _{F}$ is transformed. Each $%
 is obtained from $f_{2}$ as follows:%
 \begin{equation*}
 \begin{array}{lcl}
-f_{2}:s_{b} & \mapsto  & f_{3}:Set(s_{b}) \\ 
-f_{2}:C(s) & \mapsto  & f_{3}:Set(C(s)) \\ 
-f_{2}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto  & 
+f_{2}:s_{b} & \mapsto & f_{3}:Set(s_{b}) \\ 
+f_{2}:C(s) & \mapsto & f_{3}:Set(C(s)) \\ 
+f_{2}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto & 
 f_{3}:Set(s_{1})\times \cdots \times Set(s_{n})\rightarrow s,%
 \end{array}%
 \end{equation*}%
@@ -1420,7 +1428,7 @@ under-approximation} \\
 \dbigwedge\limits_{d\in T(e)}\widehat{X_{i}}(d) & \text{if it is an
 over-approximation}%
 \end{array}%
-\right.  \\
+\right. \\
 T(\forall _{d:D}.\varphi ) &=&\forall _{d:D^{\sigma _{S}}}.T(\varphi ) \\
 T(\exists _{d:D}.\varphi ) &=&\exists _{d:D^{\sigma _{S}}}.T(\varphi ) \\
 T(b) &=&\left\{ 
@@ -1428,7 +1436,7 @@ T(b) &=&\left\{
 false\in U(b) & \text{if it is an under-approximation} \\ 
 true\in U(b) & \text{if it is an over-approximation,}%
 \end{array}%
-\right.  \\
+\right. \\
 U(v) &=&\{v^{\sigma _{S}}\} \\
 U(f) &=&\mathcal{\sigma }_{F}(f) \\
 U(c) &=&\{h_{s}(c)\}\text{ if }c:s\text{ is a ground term and }s\in
@@ -1441,7 +1449,7 @@ U(\exists _{d:D}.x) &=&? \\
 U(x\text{ whr }y &:&=z)=?
 \end{eqnarray*}%
 where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$. Note that $T$ operates on
-PBES expressions, and $U$ operates on data expressions. \newpage 
+PBES expressions, and $U$ operates on data expressions. \newpage
 
 \section{ Gau\ss\ Elimination}
 
