@@ -208,6 +208,14 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
       {
         delete m_NextState;
       }
+      if (m_NextStateGenerator)
+      {
+        delete m_NextStateGenerator;
+      }
+      if (m_NextStateGeneratorPerSummand)
+      {
+        delete m_NextStateGeneratorPerSummand;
+      }
     }
 
     /// \brief Returns an iterator for generating the successors of the initial state.
