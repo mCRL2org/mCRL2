@@ -159,7 +159,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   for(atermpp::term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
   {
     const variable v=variable((*i)(0));
-    const variable v_fresh(generator("x_"), v.sort());
+    const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
     sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
@@ -313,8 +313,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      internal_substitution_type &sigma)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
-  // in data types, i.e. without applying the implement function anymore. This function is
-  // to replace internal_existential_quantifier_enumeration and should then not be called new anymore.
+  // in data types, i.e. without applying the implement function anymore. 
 
   assert(gsIsBinder(t) && t(0)==gsMakeExists());
   /* Get Body of Exists */
@@ -325,7 +324,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
 }
 
-// Generate a term equivalent to forall vl.t1.
+// Generate a term equivalent to exists vl.t1.
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
@@ -334,11 +333,27 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
+  // First rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  
+  variable_list vl_new;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= (*i);
+    const variable v_fresh(generator("ex_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    vl_new=push_front(vl_new,v_fresh);
+  }
+
+  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl, t1, sigma,true,&ES,100);
+  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,true,&ES,100);
 
   /* Create a list to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -395,11 +410,27 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
+  // First rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  
+  variable_list vl_new;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= (*i);
+    const variable v_fresh(generator("all_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    vl_new=push_front(vl_new,v_fresh);
+  }
+
+  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl, t1, sigma,false,&ES,100);
+  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,false,&ES,100);
 
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -424,7 +455,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     {
       evaluated_condition=internal_true;
     }
-    else if (!ATisInt((ATerm)(ATermAppl)evaluated_condition) && evaluated_condition(0) == internal_not)
+    else if (evaluated_condition(0) == internal_not)
     {
       evaluated_condition=evaluated_condition(1);
     }

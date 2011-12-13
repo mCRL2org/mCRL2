@@ -1003,6 +1003,86 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 
 }
 
+BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
+{
+  /* Taken from a pbes provided by Tim Willemse, showing a conflict of variable name x0
+  that are bound by different existential quantifiers of different type.
+  =====================================================================================
+  sort AbsNum = struct e0 | e1 | e2 | e3 | e4 ;
+
+  map
+       absplus: AbsNum # AbsNum -> Set(AbsNum);
+       absle: AbsNum # AbsNum -> Set(Bool);
+       Lifted_and: Set(Bool) # Set(Bool) -> Set(Bool);
+       Lifted_absle: Set(AbsNum) # Set(AbsNum) -> Set(Bool);
+       Lifted_absplus: Set(AbsNum) # Set(AbsNum) -> Set(AbsNum);
+  
+  var
+       n,m: AbsNum;
+  eqn
+       absplus(e0, n)  =  {n};
+       absplus(e2, e2)  =  {e3};
+       absle(n,m) = {false};
+  
+  var  X0,X1: Set(Bool);
+  eqn
+       Lifted_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. (x0 in X0) && (x1 in X1) && (y in {x0 && x1}) } ;
+  
+  var  X0,X1: Set(AbsNum);
+  eqn  Lifted_absle(X0, X1)  =  { y: Bool | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absle(x0, x1)) };
+       Lifted_absplus(X0, X1)  =  { y: AbsNum | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absplus(x0, x1)) };
+  
+  
+  pbes
+       mu X(t_P: AbsNum) = val(false in (Lifted_and( Lifted_absle({e2}, Lifted_absplus({t_P}, {e2})) , {true}))) ;
+  
+  init X(e0);
+  */
+
+  std::string s(
+  "sort AbsNum = struct e0 | e1 | e2 | e3 | e4 ;\n"
+
+  "map\n"
+  "     absplus: AbsNum # AbsNum -> Set(AbsNum);\n"
+  "     absle: AbsNum # AbsNum -> Set(Bool);\n"
+  "     Lifted_and: Set(Bool) # Set(Bool) -> Set(Bool);\n"
+  "     Lifted_absle: Set(AbsNum) # Set(AbsNum) -> Set(Bool);\n"
+  "     Lifted_absplus: Set(AbsNum) # Set(AbsNum) -> Set(AbsNum);\n"
+  "\n"
+  "var\n"
+  "     n,m: AbsNum;\n"
+  "eqn\n"
+  "     absplus(e0, n)  =  {n};\n"
+  "     absplus(e2, e2)  =  {e3};\n"
+  "     absle(n,m) = {false};\n"
+  "\n"
+  "var  X0,X1: Set(Bool);\n"
+  "eqn\n"
+  "     Lifted_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. (x0 in X0) && (x1 in X1) && (y in {x0 && x1}) } ;\n"
+  "\n"
+  "var  X0,X1: Set(AbsNum);\n"
+  "eqn  Lifted_absle(X0, X1)  =  { y: Bool | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absle(x0, x1)) };\n"
+  "     Lifted_absplus(X0, X1)  =  { y: AbsNum | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absplus(x0, x1)) };\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "existentially bound variable x0 of different types\n";
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy22: " << data::pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("false in (Lifted_and( Lifted_absle({e2}, Lifted_absplus({e0}, {e2})) , {true}))", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+  }
+
+
+  
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
