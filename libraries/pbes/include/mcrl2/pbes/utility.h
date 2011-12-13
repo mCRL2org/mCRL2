@@ -467,11 +467,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // r.set_internally_associated_value(*i,d);
                   if (use_internal_rewrite_format)
                   {
-                    sigma_internal[*i]= r.convert_to(d);
+                    sigma_internal[*i]= r.rewrite_internal(r.convert_to(d),sigma_internal);
                   }
                   else
                   {
-                    sigma[*i]= d;
+                    sigma[*i]= r(d);
                   }
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma,sigma_internal));
                   // sigma[*i] = *i; // erase *i
@@ -644,11 +644,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // sigma[*i]=d;
                   if (use_internal_rewrite_format)
                   {
-                    sigma_internal[*i]=r.convert_to(d);
+                    sigma_internal[*i]=r.rewrite_internal(r.convert_to(d),sigma_internal);
                   }
                   else
                   {
-                    sigma[*i]=d;
+                    sigma[*i]=r(d);
                   }
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma,sigma_internal));
                   // sigma[*i] = *i; // erase *i

@@ -560,10 +560,13 @@ bool EnumeratorSolutionsStandard::next(
               max_vars *= MAX_VARS_FACTOR;
             }
           }
-          const atermpp::aterm_appl term_rf = ApplyArray(domain_sorts.size()+1,var_array);
+          // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is 
+          // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
+          // using it is much cheaper than using a default substitution.
+          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array),enum_sigma);
 
           const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
-          enum_sigma[var]=term_rf;
+          enum_sigma[var]=term_rf;  
           const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
           enum_sigma[var]=old_substituted_value;
           push_on_fs_stack_and_split_or_without_rewriting(

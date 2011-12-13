@@ -1078,9 +1078,41 @@ BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
     data::data_expression f(parse_data_expression("true", specification));
     data_rewrite_test(R, e, f);
   }
+}
 
+BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
+{
+  // The example below was made by Rolf van Leusden. It shows that if
+  // constructors are not normalforms, then the generated normalform must
+  // be rewritten. This was not the case with revision 10008 (December 2012)
+  std::string s(
+  "sort FloorID     = struct F1 | F2;\n"
+  " \n"
+  "map  fSucc      : FloorID           -> FloorID;\n"
+  "     equal      : FloorID # FloorID      -> Bool;\n"
+  "\n"
+  "var  f,g       : FloorID;\n"
+  "eqn  F2               = fSucc(F1); \n"
+  "     equal(fSucc(f),fSucc(g))  = equal(f,g);\n"
+  "     equal(fSucc(f),F1)      = false;\n"
+  "     equal(F1,fSucc(g))      = false;\n"
+  "     equal(F1,F1)        = true;\n"
+  "     f==g            = equal(f,g);\n"
+  );
 
-  
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "constructors_that_are_not_a_normal_form\n";
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy23: " << data::pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("exists f:FloorID.equal(f,F2)", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+  }
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
