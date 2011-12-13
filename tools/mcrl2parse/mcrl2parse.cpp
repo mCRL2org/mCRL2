@@ -29,6 +29,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/detail/dparser_ambiguity.h"
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/linearise.h"
@@ -270,6 +271,7 @@ class mcrl2parse_tool : public input_tool
     bool check_parser;
     bool check_printer;
     bool aterm_format;
+    bool warn;
 
     void set_file_type(const std::string& type)
     {
@@ -324,6 +326,7 @@ class mcrl2parse_tool : public input_tool
       desc.add_option("check-parser", "compare the results of the old and new parser", 'p');
       desc.add_option("check-printer", "compare the results of the old and new pretty printer", 'P');
       desc.add_option("aterm-format", "compare the results in aterm format", 'a');
+      desc.add_option("warn", "generate warnings", 'w');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -342,6 +345,7 @@ class mcrl2parse_tool : public input_tool
       check_parser   = 0 < parser.options.count("check-parser");
       check_printer  = 0 < parser.options.count("check-printer");
       aterm_format   = 0 < parser.options.count("aterm-format");
+      warn           = 0 < parser.options.count("warn");
       text = parser.option_argument("expression");
     }
 
@@ -411,6 +415,13 @@ class mcrl2parse_tool : public input_tool
         {
           core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
           p.print_tree(node);
+        }
+
+        if (warn)
+        {
+          core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+          core::foreach_parse_node(node, core::warn_and_or(parser_tables_mcrl2));
+          core::foreach_parse_node(node, core::warn_left_merge_merge(parser_tables_mcrl2));
         }
 
         if (check_parser)

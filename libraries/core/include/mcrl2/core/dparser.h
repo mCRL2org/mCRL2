@@ -73,6 +73,21 @@ struct parse_node
     return result.str();
   }
 
+  int column() const
+  {
+    return node->start_loc.col;
+  }
+
+  int line() const
+  {
+    return node->start_loc.line;
+  }
+
+  std::string pathname() const
+  {
+    return std::string(node->start_loc.pathname);
+  }
+
   operator bool() const
   {
     return node != 0;
@@ -88,7 +103,7 @@ struct parser_table
     : m_table(table)
   { }
 
-  // Prints a tree of 
+  // Prints a tree of
   std::string tree(const core::parse_node& node) const
   {
     std::stringstream result;
