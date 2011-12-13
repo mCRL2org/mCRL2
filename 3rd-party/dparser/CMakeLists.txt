@@ -23,6 +23,11 @@ add_definitions(
   -Dstrncasecmp=_strnicmp
   -Dsnprintf=_snprintf
 )
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+else(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+   # The following is more accurate, but currently does not do the job
+  #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-sign-compare -Wno-unused-parameter -Wno-long-long -Wno-format")
 endif(MSVC)
 
 # ######### General setup ##########
