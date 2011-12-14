@@ -1279,7 +1279,7 @@ readFromTextFile(int* c, FILE* file)
   {
     int i;
     mCRL2log(mcrl2::log::error) << "readFromTextFile: parse error at line " << line
-                                << ", col " << col << (line||col)?":\n":"";
+                                << ", col " << col << ((line||col)?":\n":"");
     for (i = 0; i < ERROR_SIZE; ++i)
     {
       char c = error_buf[(i + error_idx) % ERROR_SIZE];
