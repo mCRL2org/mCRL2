@@ -12,6 +12,14 @@ cmake_minimum_required(VERSION 2.6)
 
 # ##### Generate parser tables ######
 
+# Silence warnings while compiling generated C code (mcrl2_syntax.c is the only
+# C code in this library)
+if(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+else(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
+endif(MSVC)
+
 add_custom_command(
   OUTPUT ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.c
   COMMAND make_dparser -A -H1 -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
