@@ -13,6 +13,7 @@
 #define SMT_LIB_SOLVER_H
 
 #include <string>
+#include <sstream>
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -82,11 +83,9 @@ class SMT_LIB_Solver: public SMT_Solver
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl) v_sort);
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-          sprintf(v_sort_string, "sort%lu", v_sort_number);
-          f_extrasorts = f_extrasorts + v_sort_string;
-          free(v_sort_string);
-          v_sort_string = 0;
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << v_sort_number;
+          f_extrasorts = f_extrasorts + v_sort_string.str();
         }
         f_extrasorts = f_extrasorts + ")\n";
       }
@@ -105,11 +104,9 @@ class SMT_LIB_Solver: public SMT_Solver
           v_operators = pop_front(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm)(ATermAppl) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-          sprintf(v_operator_string, "op%lu", v_operator_number);
-          f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
-          free(v_operator_string);
-          v_operator_string = 0;
+          std::stringstream v_operator_string;
+          v_operator_string << "op" << v_operator_number;
+          f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string.str();
           sort_expression v_sort = data_expression(v_operator).sort();
           do
           {
@@ -152,11 +149,9 @@ class SMT_LIB_Solver: public SMT_Solver
               else
               {
                 size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort_domain_elt, 0);
-                char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-                sprintf(v_sort_string, "sort%lu", v_sort_number);
-                f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
-                free(v_sort_string);
-                v_sort_string = 0;
+                std::stringstream v_sort_string;
+                v_sort_string << "sort" << v_sort_number;
+                f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string.str();
               }
             }
           }
@@ -200,11 +195,9 @@ class SMT_LIB_Solver: public SMT_Solver
         else
         {
           size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort, 0);
-          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-          sprintf(v_sort_string, "sort%lu", v_sort_number);
-          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
-          free(v_sort_string);
-          v_sort_string = 0;
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << v_sort_number;
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string.str() +")";
         }
       }
       if (!f_variables.empty())
@@ -218,16 +211,12 @@ class SMT_LIB_Solver: public SMT_Solver
       f_extrapreds = "";
       if (f_bool2pred)
       {
-        char* v_sort_string;
-
         size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl)sort_bool::bool_());
         assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-        v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-        sprintf(v_sort_string, "sort%lu", v_sort_number);
+        std::stringstream v_sort_string;
+        v_sort_string << "sort" << v_sort_number;
         f_extrapreds = "  :extrapreds ((bool2pred ";
-        f_extrapreds = f_extrapreds + v_sort_string + ")";
-        free(v_sort_string);
-        v_sort_string = 0;
+        f_extrapreds = f_extrapreds + v_sort_string.str() + ")";
         f_extrapreds = f_extrapreds + ")\n";
       }
     }
@@ -245,12 +234,10 @@ class SMT_LIB_Solver: public SMT_Solver
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl)v_sort);
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-          sprintf(v_sort_string, "sort%lu", v_sort_number);
-          const char* v_sort_original_id = basic_sort(v_sort).name().to_string().c_str();
-          f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
-          free(v_sort_string);
-          v_sort_string = 0;
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << v_sort_number;
+          std::string v_sort_original_id = basic_sort(v_sort).name();
+          f_sorts_notes = f_sorts_notes + "(" + v_sort_string.str() + " = " + v_sort_original_id + ")";
         }
         f_sorts_notes = f_sorts_notes + "\"\n";
       }
@@ -269,12 +256,10 @@ class SMT_LIB_Solver: public SMT_Solver
           v_operators = pop_front(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm)(ATermAppl) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-          sprintf(v_operator_string, "op%lu", v_operator_number);
-          char* v_operator_original_id = core::detail::gsATermAppl2String(ATAgetArgument(v_operator, 0));
-          f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
-          free(v_operator_string);
-          v_operator_string = 0;
+          std::stringstream v_operator_string;
+          v_operator_string << "op" << v_operator_number;
+          std::string v_operator_original_id = v_operator.name();
+          f_operators_notes = f_operators_notes + "(" + v_operator_string.str() + " = " + v_operator_original_id + ")";
         }
         f_operators_notes = f_operators_notes + "\"\n";
       }
@@ -645,17 +630,13 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_unknown_operator(const data_expression a_clause)
     {
-      size_t v_operator_number;
-      char* v_operator_string;
-
       const data_expression v_operator = application(a_clause).head();
-      v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
+      size_t v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
 
-      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%lu", v_operator_number);
-      f_formula = f_formula + "(" + v_operator_string;
-      free(v_operator_string);
-      v_operator_string = 0;
+      std::stringstream v_operator_string;
+      v_operator_string << "op" << v_operator_number;
+      f_formula = f_formula + "(" + v_operator_string.str();
+
       if (data::is_application(a_clause))
       {
         data::application a = data::application(data::data_expression(a_clause));
@@ -738,17 +719,12 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_constant(const data_expression a_clause)
     {
-      size_t v_operator_number;
-      char* v_operator_string;
-
       const data_expression v_operator = application(a_clause).head();
-      v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
+      size_t v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
 
-      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%lu", v_operator_number);
-      f_formula = f_formula + v_operator_string;
-      free(v_operator_string);
-      v_operator_string = 0;
+      std::stringstream v_operator_string;
+      v_operator_string << "op" << v_operator_number;
+      f_formula = f_formula + v_operator_string.str();
     }
 
     void add_nat_clauses()

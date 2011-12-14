@@ -128,12 +128,9 @@ class Induction
       variable v_result;
       do
       {
-        char* v_dummy_string = (char*) malloc((utilities::NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
-        sprintf(v_dummy_string, "dummy%ld", f_fresh_dummy_number);
-        core::identifier_string v_dummy_name = core::detail::gsString2ATermAppl(v_dummy_string);
-        v_result = variable(v_dummy_name, a_sort);
-        free(v_dummy_string);
-        v_dummy_string = 0;
+        std::stringstream v_dummy_string;
+        v_dummy_string << "dummy" << f_fresh_dummy_number;
+        v_result = variable(v_dummy_string.str(), a_sort);
         f_fresh_dummy_number++;
       }
       while (gsOccurs((ATerm)(ATermAppl) v_result, (ATerm)(ATermAppl) f_formula));

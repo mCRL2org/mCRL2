@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <stdexcept>
+
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/memory.h"
@@ -84,7 +86,7 @@ size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
-// static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS); 
+// static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
 /*
  * For GC tuning
@@ -188,8 +190,7 @@ void resize_hashtable()
   }
   else
   {
-    fprintf(stderr, "warning: could not resize hashtable to class %lu.\n",
-    table_class);
+    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << table_class << std::endl;
     table_class--;
     table_size = ((HashNumber)1)<<table_class;
     table_mask = table_size-1;
@@ -448,7 +449,7 @@ void AT_growMaxTermSize(size_t neededsize)
   newsize = (neededsize> 2*maxTermSize?neededsize:2*maxTermSize);
 
 #ifndef NDEBUG
-  fprintf(stderr, "Growing administrative structures to accomodate terms of size %lu\n", newsize);
+  mCRL2log(mcrl2::log::info) << "Growing administrative structures to accomodate terms of size " << newsize << std::endl;
 #endif
 
   newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));

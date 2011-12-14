@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cstdlib>
+#include <sstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
@@ -511,10 +512,10 @@ bool EnumeratorSolutionsStandard::next(
           var_array[0]=OpId2Int(*it);
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
-            char Name[40];
+            std::stringstream Name;
             static size_t fresh_variable_index=0;
-            sprintf(Name, "@enum@%ld", fresh_variable_index++);
-            const variable fv = variable(gsMakeDataVarId(gsFreshString2ATermAppl(Name,(ATerm)ATempty,true),*i));
+            Name << "@enum@" << fresh_variable_index++;
+            const variable fv = variable(gsMakeDataVarId(gsFreshString2ATermAppl(Name.str().c_str(),(ATerm)ATempty,true),*i));
             var_list = push_front(var_list,fv);
             var_array[j]=fv;
 
@@ -560,13 +561,13 @@ bool EnumeratorSolutionsStandard::next(
               max_vars *= MAX_VARS_FACTOR;
             }
           }
-          // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is 
+          // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
           // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
           // using it is much cheaper than using a default substitution.
           const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array),enum_sigma);
 
           const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
-          enum_sigma[var]=term_rf;  
+          enum_sigma[var]=term_rf;
           const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
           enum_sigma[var]=old_substituted_value;
           push_on_fs_stack_and_split_or_without_rewriting(

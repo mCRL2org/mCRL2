@@ -10,6 +10,7 @@
 #include <io.h>
 #endif
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/aterm2.h"
@@ -108,7 +109,7 @@ typedef struct
 /*}}}  */
 /*{{{  variables */
 
-char bafio_id[] = "$Id: bafio.c 23464 2007-08-27 09:22:35Z eriks $";
+char bafio_id[] = "$Id$";
 
 static size_t nr_unique_symbols = 0;
 static sym_read_entry* read_symbols;
@@ -187,7 +188,7 @@ writeIntToBuf(const size_t val, unsigned char* buf)
 
   if (sizeof(size_t)>4 && val>((size_t)1<<4*sizeof(size_t)))
   {
-    fprintf(stderr,"Warning losing precision of integers when writing to .baf file\n");
+    mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
   }
 
   buf[0] = 0xf0;
@@ -1411,6 +1412,7 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
     default:
       /* Must be a function application */
       result = (ATerm)ATmakeApplArray(sym->sym, args);
+      break;
 
   }
 
@@ -1500,7 +1502,7 @@ ATerm read_baf(byte_reader* reader)
 
   if (val != BAF_MAGIC)
   {
-    ATfprintf(stderr, "read_baf: input is not in BAF!\n");
+    mCRL2log(mcrl2::log::error) << "read_baf: input is not in BAF!" << std::endl;
     return NULL;
   }
 
@@ -1511,7 +1513,7 @@ ATerm read_baf(byte_reader* reader)
 
   if (val != BAF_VERSION)
   {
-    ATfprintf(stderr, "read_baf: wrong BAF version, giving up!\n");
+    mCRL2log(mcrl2::log::error) << "read_baf: wrong BAF version, giving up!" << std::endl;
     return NULL;
   }
 

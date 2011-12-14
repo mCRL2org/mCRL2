@@ -40,14 +40,13 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
   if (!found)
   {
     //find "sk" that does not occur in Term
-    char* Name = (char*) malloc((strlen(s)+utilities::NrOfChars(INT_MAX)+1)*sizeof(char));
     for (int i = 0; i < INT_MAX && !found; i++)
     {
-      sprintf(Name, "%s%d", s, i);
-      NewTerm = gsString2ATermAppl(Name);
+      std::stringstream Name;
+      Name << s << i;
+      NewTerm = gsString2ATermAppl(Name.str().c_str());
       found = !gsOccurs((ATerm) NewTerm, Term);
     }
-    free(Name);
   }
   if (found)
   {
@@ -56,7 +55,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
   else
   {
     //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
-    fprintf(stderr, "error: cannot generate fresh ATermAppl with prefix %s\n", s);
+    mCRL2log(log::error) << "cannot generate fresh ATermAppl with prefix " << s << std::endl;
     return NULL;
   }
 }

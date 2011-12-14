@@ -306,7 +306,7 @@ bool lps2lts_algorithm::savetrace(
         }
       }
     }
-    catch (mcrl2::runtime_error e)
+    catch (mcrl2::runtime_error& e)
     {
       delete nsgen;
       throw e;

@@ -48,7 +48,7 @@
 #define FIXPOINT_MASK 2
 #define RANK_SHIFT 2
 
-// TODO: 
+// TODO:
 namespace bes
 {
 
@@ -1475,7 +1475,6 @@ class boolean_equation_system
     {
       if (v>nr_of_variables())
       {
-        // fprintf(stderr,"ACCESSING A VARIABLE THAT DOES NOT EXIST\n");
         return dummy();
       }
       else
@@ -2091,7 +2090,7 @@ class boolean_equation_system
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
 
       // Declare two variable substitutions for use in the rewriters. Only one is necessary if precompilation
-      // can be switched off. 
+      // can be switched off.
       substitution_type sigma;
       internal_substitution_type sigma_internal;
 
@@ -2102,7 +2101,7 @@ class boolean_equation_system
       }
       for(std::set < sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
       {
-        const function_symbol_vector constructors(pbes_spec.data().constructors(*i)); 
+        const function_symbol_vector constructors(pbes_spec.data().constructors(*i));
         for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
         {
           Mucks_rewriter.convert_to(*j);
@@ -2307,7 +2306,7 @@ class boolean_equation_system
                sigma,
                sigma_internal
               );
-  
+
             new_bes_expression=
               add_propositional_variable_instantiations_to_indexed_set_and_translate(
                 new_pbes_expression,
@@ -2317,7 +2316,7 @@ class boolean_equation_system
                 opt_strategy,
                 opt_construct_counter_example,
                 variable_to_be_processed);
-          }  
+          }
           catch (mcrl2::runtime_error &e)
           {
             propositional_variable_instantiation prop_var=propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
@@ -2332,7 +2331,7 @@ class boolean_equation_system
               }
               prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
             }
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " + 
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " +
                   mcrl2::pbes_system::pp(prop_var));
           }
 

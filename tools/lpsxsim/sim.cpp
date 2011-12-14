@@ -135,7 +135,7 @@ class sim_tool : public rewriter_tool< input_tool >
             std::cout << "deadlock" << std::endl << std::endl;
           }
         }
-        catch (mcrl2::runtime_error e)
+        catch (mcrl2::runtime_error& e)
         {
           mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
         }
@@ -180,7 +180,7 @@ class sim_tool : public rewriter_tool< input_tool >
           else if (isdigit(s[0]))
           {
             size_t idx;
-            sscanf(s.c_str(),"%lu",&idx);
+            sscanf(s.c_str(),"%zu",&idx);
             if (idx < ATgetLength(next_states))
             {
               std::cout << std::endl << "transition: " << core::pp_deprecated(ATAgetFirst(ATLelementAt(next_states,idx))) << std::endl << std::endl;

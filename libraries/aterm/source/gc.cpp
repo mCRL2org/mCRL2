@@ -14,6 +14,7 @@
 #endif
 #endif
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/afun.h"
 #include "mcrl2/aterm/memory.h"
@@ -1114,7 +1115,7 @@ void minor_sweep_phase_young()
       {
         if (!EQUAL_HEADER(data->header,FREE_HEADER))
         {
-          fprintf(stderr,"data = %p header = %lu\n",(void*)data,(size_t) data->header);
+          mCRL2log(mcrl2::log::error) << "data = " << (void*)data << " header = " << (size_t) data->header << std::endl;
         }
         assert(EQUAL_HEADER(data->header,FREE_HEADER));
         assert(ATgetType(data) == AT_FREE);

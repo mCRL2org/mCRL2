@@ -243,7 +243,7 @@ static ATermList get_substs(ATermList ids)
     while (!is_user_identifier(s) ||
            (used.count((ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >0))
     {
-      sprintf(t,"%lu",i);
+      sprintf(t,"%zu",i);
       i++;
     }
 
@@ -353,7 +353,7 @@ static ATermList convert_datas(ATermAppl spec, ATermList* ids)
     }
     ATermAppl lhs_before_translation=ATAgetArgument(ATAgetFirst(eqns),1);
     if (strcmp(ATgetName(ATgetAFun(lhs_before_translation)),"eq#Bool#Bool"))
-    { 
+    {
       // No match.
       lhs = dataterm2ATermAppl(lhs_before_translation,args);
       rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);

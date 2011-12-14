@@ -235,6 +235,7 @@ size_t AT_printAFun(const AFun fun, FILE* f)
         default:
           fputc(*id, f);
           size++;
+          break;
       }
       id++;
     }
@@ -281,6 +282,7 @@ std::string ATwriteAFunToString(const AFun fun)
           break;
         default:
           oss << *id;
+          break;
       }
       ++id;
     }
@@ -354,7 +356,6 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
         throw std::runtime_error("AT_initAFun: out of symbol slots!");
       }
     }
-    /* fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free); */
     first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
 
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
