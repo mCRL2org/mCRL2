@@ -64,11 +64,8 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
  **/
 class Rewriter
 {
-  protected:
-    // detail::rewrite_conversion_helper< Rewriter> m_conversion_helper;
-    data::set_identifier_generator generator;  //name for variables.
-
   public:
+    data::set_identifier_generator generator;  //name for variables.
 
     typedef mutable_indexed_substitution<data::variable, atermpp::vector< atermpp::aterm_appl > > internal_substitution_type;
     typedef mutable_indexed_substitution<data::variable, atermpp::vector< data::data_expression > > substitution_type;
@@ -87,7 +84,6 @@ class Rewriter
      * \sa createRewriter()
      **/
     Rewriter()
-       // m_conversion_helper(*this),
     {
       internal_true.protect();
       internal_true=toInner(sort_bool::true_(),true);

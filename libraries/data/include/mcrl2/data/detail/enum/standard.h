@@ -267,14 +267,12 @@ class EnumeratorSolutionsStandard
   private:
     void reset(const bool not_equal_to_false); 
 
-    bool FindInnerCEquality(const atermpp::aterm_appl T, 
+    bool find_equality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
                             mcrl2::data::variable &v, 
                             atermpp::aterm_appl &e);
 
     void EliminateVars(fs_expr &e);
-
-    bool FindInnerCEquality_aux(const atermpp::aterm_appl t);
 
     atermpp::aterm_appl build_solution_single(
                  const atermpp::aterm_appl t,

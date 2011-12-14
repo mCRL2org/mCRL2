@@ -200,7 +200,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 negated);
 }
 
-bool EnumeratorSolutionsStandard::FindInnerCEquality(
+bool EnumeratorSolutionsStandard::find_equality(
                         const atermpp::aterm_appl t,
                         const mcrl2::data::variable_list vars,
                         mcrl2::data::variable &v,
@@ -220,7 +220,7 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
   if (t(0) == m_enclosing_enumerator->rewr_obj->internal_and)
   {
     assert(t.size()==3);
-    return FindInnerCEquality(t(1),vars,v,e) || FindInnerCEquality(t(2),vars,v,e);
+    return find_equality(t(1),vars,v,e) || find_equality(t(2),vars,v,e);
   }
   else if (m_enclosing_enumerator->eqs.find(t(0)) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
   {
@@ -258,7 +258,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   variable var;
   atermpp::aterm_appl val;
 
-  while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
+  while (!vars.empty() && find_equality(expr,vars,var,val))
   {
     vars = remove_one_element(vars, var);
     substituted_vars=push_front(substituted_vars,var);
@@ -512,10 +512,7 @@ bool EnumeratorSolutionsStandard::next(
           var_array[0]=OpId2Int(*it);
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
-            std::stringstream Name;
-            static size_t fresh_variable_index=0;
-            Name << "@enum@" << fresh_variable_index++;
-            const variable fv = variable(gsMakeDataVarId(gsFreshString2ATermAppl(Name.str().c_str(),(ATerm)ATempty,true),*i));
+            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@enum@"),*i);
             var_list = push_front(var_list,fv);
             var_array[j]=fv;
 
