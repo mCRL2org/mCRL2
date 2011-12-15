@@ -731,7 +731,11 @@ struct absinthe_algorithm
         data::function_sort fs2(f2.sort());
 
         // check validity
-        if (fs1.domain() != fs2.domain())
+        if (data::is_function_update_application(f1))
+        {
+          // TODO: add check that the domain of the updated function does not contain abstraction sorts
+        }
+        else if (fs1.domain() != fs2.domain())
         {
           throw std::runtime_error("can not generalize functions with abstraction sorts in the domain: " + data::pp(f1) + ": " + data::pp(s1));
         }

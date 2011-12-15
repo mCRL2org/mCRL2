@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, December 12, 2011 13:16:02}
+%TCIDATA{LastRevised=Thursday, December 15, 2011 16:55:54}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1354,8 +1354,17 @@ Set(s^{\sigma _{S}}),%
 \end{equation*}%
 where $s_{b}$ is a basic sort, $s_{1}\times \cdots \times s_{n}\rightarrow s$
 is a function sort, and $C(s)$ is a container sort, and where $f_{2}$ is a
-fresh identifier. The sort of $f_{1}$ may not contain any element of $%
-domain(\sigma _{S}\mathcal{)}$ as a subsort.
+fresh identifier.
+
+\begin{remark}
+The sort of $f_{1}$ may not contain any element of $domain(\sigma _{S}%
+\mathcal{)}$ as a subsort.
+\end{remark}
+
+\begin{remark}
+If $f_{1}$ is a function update, then the domain of the updated function may
+not contain any element of $domain(\sigma _{S}\mathcal{)}$ as a subsort.
+\end{remark}
 
 For each of the function symbols $f\in FunctionSymbols(p)$ $\setminus
 domain(\sigma _{F}\mathcal{)}$ a corresponding equation is introduced:%
@@ -1373,14 +1382,23 @@ f_{2} & = & f_{1}^{\sigma _{S}} \\
 &  &  \\ 
 f_{2}(x) & = & \left\{ 
 \begin{array}{ll}
-\{h_{s}(f_{1}(x))\}\text{ } & \text{if }s\in domain(\sigma _{S}\mathcal{)}
-\\ 
+\{h_{s}(f_{1}(x))\}\text{ } & \text{if }TargetSort(s)\in domain(\sigma _{S}%
+\mathcal{)} \\ 
 \{f_{1}(x)\} & \text{otherwise,}%
 \end{array}%
 \right. 
 \end{array}%
 \end{equation*}%
-where $x:s_{1}\times \cdots \times s_{n}\rightarrow s$.
+where $x:s_{1}^{\sigma _{S}}\times \cdots \times s_{n}^{\sigma
+_{S}}\rightarrow s^{\sigma _{S}}$, and where $TargetSort$ is recursively
+defined as%
+\begin{equation*}
+\begin{array}{lcl}
+TargetSort(s_{b}) & = & s_{b} \\ 
+TargetSort(C(s)) & = & C(s) \\ 
+TargetSort(s_{1}\times \cdots \times s_{n}\rightarrow s) & = & TargetSort(s).%
+\end{array}%
+\end{equation*}
 
 \subsubsection{Step 2}
 
