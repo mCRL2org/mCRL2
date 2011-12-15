@@ -50,7 +50,7 @@ class pbes_absinthe_tool: public input_output_tool
       super::add_options(desc);
 
       desc.add_option("abstraction-file",
-                       make_optional_argument("FILE", ""),
+                       make_mandatory_argument("FILE"),
                        "use the abstraction specification in FILE. ",
                        'a');
 
