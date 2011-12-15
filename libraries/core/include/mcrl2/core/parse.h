@@ -23,7 +23,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/core/dparser.h"
-#include "mcrl2/core/detail/dparser_ambiguity.h"
+#include "mcrl2/core/detail/dparser_functions.h"
 
 extern "C"
 {
@@ -165,7 +165,7 @@ void print_aterm(const atermpp::aterm_appl& x)
 inline
 identifier_string parse_identifier(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("Id");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);

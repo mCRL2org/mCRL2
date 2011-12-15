@@ -114,7 +114,7 @@ struct action_rename_actions: public lps::action_actions
 inline
 action_rename_specification parse_action_rename_specification_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("ActionRenameSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);

@@ -184,7 +184,7 @@ struct parser
   parser_table m_table;
   D_Parser* m_parser;
 
-  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0)
+  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0)
     : m_table(tables)
   {
     m_parser = new_D_Parser(&tables, 0);
@@ -195,6 +195,10 @@ struct parser
     if (ambiguity_fn)
     {
       m_parser->ambiguity_fn = ambiguity_fn;
+    }
+    if (syntax_error_fn)
+    {
+      m_parser->syntax_error_fn = syntax_error_fn;
     }
   }
 

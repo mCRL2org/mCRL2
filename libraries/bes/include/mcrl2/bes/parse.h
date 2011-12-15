@@ -85,7 +85,7 @@ struct bes_actions: public core::default_parser_actions
 inline
 boolean_expression parse_boolean_expression_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("BesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -97,7 +97,7 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
 inline
 boolean_equation_system<> parse_boolean_equation_system_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);

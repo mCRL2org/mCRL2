@@ -52,7 +52,7 @@ struct action_formula_actions: public lps::action_actions
 inline
 action_formula parse_action_formula_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -89,7 +89,7 @@ struct regular_formula_actions: public action_formulas::action_formula_actions
 inline
 regular_formula parse_regular_formula_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -170,7 +170,7 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
 inline
 state_formula parse_state_formula_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
