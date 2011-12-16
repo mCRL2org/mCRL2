@@ -658,6 +658,25 @@ class action_summand: public summand_base
     }
 };
 
+/// \brief Comparison operator for action summands.
+inline
+bool operator<(const action_summand& x, const action_summand& y)
+{
+  if (x.summation_variables() != y.summation_variables())
+  {
+    return x.summation_variables() < y.summation_variables();
+  }
+  if (x.condition() != y.condition())
+  {
+    return x.condition() < y.condition();
+  }
+  if (x.assignments() != y.assignments())
+  {
+    return x.assignments() < y.assignments();
+  }
+  return x.multi_action() < y.multi_action();
+}
+
 /// \brief Vector of action summands
 typedef atermpp::vector<action_summand> action_summand_vector;
 
