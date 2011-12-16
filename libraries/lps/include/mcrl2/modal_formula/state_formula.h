@@ -770,17 +770,21 @@ int precedence(const state_formula& x)
   {
     return 3;
   }
-  else if (is_and(x) || is_or(x))
+  else if (is_or(x))
   {
     return 4;
   }
-  else if (is_must(x) || is_may(x))
+  else if (is_and(x))
   {
     return 5;
   }
-  else if (is_not(x))
+  else if (is_must(x) || is_may(x))
   {
     return 6;
+  }
+  else if (is_not(x))
+  {
+    return 7;
   }
   return core::detail::precedences::max_precedence;
 }

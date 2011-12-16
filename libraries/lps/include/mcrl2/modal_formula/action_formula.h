@@ -453,17 +453,21 @@ int precedence(const action_formula& x)
   {
     return 2;
   }
-  else if (is_and(x) || is_or(x))
+  else if (is_or(x))
   {
     return 3;
   }
-  else if (is_at(x))
+  else if (is_and(x))
   {
     return 4;
   }
-  else if (is_not(x))
+  else if (is_at(x))
   {
     return 5;
+  }
+  else if (is_not(x))
+  {
+    return 6;
   }
   return core::detail::precedences::max_precedence;
 }
