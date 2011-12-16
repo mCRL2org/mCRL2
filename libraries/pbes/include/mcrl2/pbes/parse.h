@@ -21,6 +21,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
@@ -108,6 +109,7 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
   p.destroy_parse_node(node);
   return result;
@@ -120,6 +122,7 @@ pbes<> parse_pbes_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   pbes<> result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
   p.destroy_parse_node(node);
   return result;

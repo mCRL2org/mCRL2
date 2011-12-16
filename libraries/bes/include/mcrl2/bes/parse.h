@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_PARSE_H
 #define MCRL2_BES_PARSE_H
 
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -89,6 +90,7 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("BesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   boolean_expression result = bes_actions(parser_tables_mcrl2).parse_BesExpr(node);
   p.destroy_parse_node(node);
   return result;
@@ -101,6 +103,7 @@ boolean_equation_system<> parse_boolean_equation_system_new(const std::string& t
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   boolean_equation_system<> result = bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
   p.destroy_parse_node(node);
   return result;

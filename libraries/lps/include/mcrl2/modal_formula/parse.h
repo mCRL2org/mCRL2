@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_PARSE_H
 
 #include <iostream>
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -56,6 +57,7 @@ action_formula parse_action_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   action_formula result = action_formula_actions(parser_tables_mcrl2).parse_ActFrm(node);
   p.destroy_parse_node(node);
   return result;
@@ -174,6 +176,7 @@ state_formula parse_state_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   state_formula result = state_formula_actions(parser_tables_mcrl2).parse_StateFrm(node);
   p.destroy_parse_node(node);
   return result;

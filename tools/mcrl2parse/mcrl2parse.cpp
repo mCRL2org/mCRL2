@@ -420,8 +420,8 @@ class mcrl2parse_tool : public input_tool
         if (warn)
         {
           core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-          core::foreach_parse_node(node, core::warn_and_or(parser_tables_mcrl2));
-          core::foreach_parse_node(node, core::warn_left_merge_merge(parser_tables_mcrl2));
+          core::warn_and_or(node);
+          core::warn_left_merge_merge(node);
         }
 
         if (check_parser)

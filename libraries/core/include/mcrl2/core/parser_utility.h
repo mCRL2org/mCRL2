@@ -13,10 +13,13 @@
 #define MCRL2_CORE_PARSER_UTILITY_H
 
 #include "mcrl2/core/dparser.h"
+#include "mcrl2/core/parse.h"
 
 namespace mcrl2 {
 
 namespace core {
+
+namespace detail {
 
 /// \brief Calls the function f on each node in the parse tree with x as root
 template <typename Function>
@@ -33,12 +36,12 @@ void foreach_parse_node(const parse_node& x, Function f)
 }
 
 /// \brief Checks if a node is the binary operation op
-struct is_binary_operator
+struct is_binary_operator_node
 {
   const parser_table& table;
   std::string op;
 
-  is_binary_operator(const parser_table& table_, const std::string& op_)
+  is_binary_operator_node(const parser_table& table_, const std::string& op_)
     : table(table_),
       op(op_)
   {}
@@ -66,50 +69,50 @@ struct is_binary_operator
 };
 
 /// \brief Checks if a node is the binary operation '&&'
-struct is_and: public is_binary_operator
+struct is_and_node: public is_binary_operator_node
 {
-  is_and(const parser_table& table_)
-    : is_binary_operator(table_, "&&")
+  is_and_node(const parser_table& table_)
+    : is_binary_operator_node(table_, "&&")
   {}
 };
 
 /// \brief Checks if a node is the binary operation '||'
-struct is_or: public is_binary_operator
+struct is_or_node: public is_binary_operator_node
 {
-  is_or(const parser_table& table_)
-    : is_binary_operator(table_, "||")
+  is_or_node(const parser_table& table_)
+    : is_binary_operator_node(table_, "||")
   {}
 };
 
 /// \brief Checks if a node is the merge operation '||'
-struct is_merge: public is_binary_operator
+struct is_merge_node: public is_binary_operator_node
 {
-  is_merge(const parser_table& table_)
-    : is_binary_operator(table_, "||")
+  is_merge_node(const parser_table& table_)
+    : is_binary_operator_node(table_, "||")
   {}
 };
 
 /// \brief Checks if a node is the left merge operation '||_'
-struct is_left_merge: public is_binary_operator
+struct is_left_merge_node: public is_binary_operator_node
 {
-  is_left_merge(const parser_table& table_)
-    : is_binary_operator(table_, "||_")
+  is_left_merge_node(const parser_table& table_)
+    : is_binary_operator_node(table_, "||_")
   {}
 };
 
 /// \brief Checks if a node is of type 'x && (y || z)'
-struct is_and_or
+struct is_and_or_node
 {
   const parser_table& table;
 
-  is_and_or(const parser_table& table_)
+  is_and_or_node(const parser_table& table_)
     : table(table_)
   {}
 
   bool operator()(const parse_node& x)
   {
     bool result = true;
-    if (!is_and(table)(x))
+    if (!is_and_node(table)(x))
     {
       result = false;
     }
@@ -126,7 +129,7 @@ struct is_and_or
       {
         result = false;
       }
-      if (!is_or(table)(right))
+      if (!is_or_node(table)(right))
       {
         result = false;
       }
@@ -147,7 +150,7 @@ struct is_left_merge_merge
   bool operator()(const parse_node& x)
   {
     bool result = true;
-    if (!is_left_merge(table)(x))
+    if (!is_left_merge_node(table)(x))
     {
       result = false;
     }
@@ -164,7 +167,7 @@ struct is_left_merge_merge
       {
         result = false;
       }
-      if (!is_merge(table)(right))
+      if (!is_merge_node(table)(right))
       {
         result = false;
       }
@@ -173,28 +176,28 @@ struct is_left_merge_merge
   }
 };
 
-struct warn_and_or
+struct find_and_or
 {
   const parser_table& table;
 
-  warn_and_or(const parser_table& table_)
+  find_and_or(const parser_table& table_)
     : table(table_)
   {}
 
   void operator()(const parse_node& x)
   {
-    if (is_and_or(table)(x))
+    if (is_and_or_node(table)(x))
     {
       std::cout << "Warning: the expression of the form 'x && y || z' on location " << x.line() << ":" << x.column() << " may be parsed differently than before" << std::endl;
     }
   }
 };
 
-struct warn_left_merge_merge
+struct find_left_merge_merge
 {
   const parser_table& table;
 
-  warn_left_merge_merge(const parser_table& table_)
+  find_left_merge_merge(const parser_table& table_)
     : table(table_)
   {}
 
@@ -206,6 +209,22 @@ struct warn_left_merge_merge
     }
   }
 };
+
+} // namespace detail
+
+/// \brief Prints a warning for each occurrence of 'x && y || z' in the parse tree.
+inline
+void warn_and_or(const parse_node& node)
+{
+  core::detail::foreach_parse_node(node, core::detail::find_and_or(parser_tables_mcrl2));
+}
+
+/// \brief Prints a warning for each occurrence of 'x ||_ y || z' in the parse tree.
+inline
+void warn_left_merge_merge(const parse_node& node)
+{
+  core::detail::foreach_parse_node(node, core::detail::find_left_merge_merge(parser_tables_mcrl2));
+}
 
 } // namespace core
 

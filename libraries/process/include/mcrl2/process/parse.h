@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
@@ -235,6 +236,8 @@ process_expression parse_process_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("ProcExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
   process_expression result = process_actions(parser_tables_mcrl2).parse_ProcExpr(node);
   p.destroy_parse_node(node);
   return result;
@@ -247,6 +250,8 @@ process_specification parse_process_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("mCRL2Spec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
   process_specification result = process_actions(parser_tables_mcrl2).parse_mCRL2Spec(node);
   p.destroy_parse_node(node);
   return result;

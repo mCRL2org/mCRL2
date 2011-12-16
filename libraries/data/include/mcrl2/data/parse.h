@@ -24,6 +24,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/standard_utility.h"
@@ -473,6 +474,7 @@ data_expression parse_data_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
   data_expression result = data_expression_actions(parser_tables_mcrl2).parse_DataExpr(node);
   p.destroy_parse_node(node);
   return result;
