@@ -755,10 +755,10 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
   return toInner(term,true);
 }
 
-data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
+/* data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
 {
   return fromInner(term);
-}
+} */
 
 data_expression RewriterJitty::rewrite(const data_expression term, substitution_type &sigma)
 {

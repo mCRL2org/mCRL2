@@ -282,10 +282,10 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
   return r;
 }
 
-data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
+/* data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
 {
   return fromInner(t);
-}
+} */
 
 static char* whitespace_str = NULL;
 static int whitespace_len;

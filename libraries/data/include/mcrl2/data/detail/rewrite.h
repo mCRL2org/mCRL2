@@ -143,7 +143,7 @@ class Rewriter
      * \param Term A term in the internal rewriter format.
      * \return The term Term as an mCRL2 data term.
      **/
-    virtual data_expression fromRewriteFormat(const atermpp::aterm_appl Term);
+    data_expression fromRewriteFormat(const atermpp::aterm_appl Term);
     /**
      * \brief Rewrite a term in the internal rewriter format.
      * \param Term The term to be rewritten. This term should be

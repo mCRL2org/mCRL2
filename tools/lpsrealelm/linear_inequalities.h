@@ -162,8 +162,6 @@ class linear_inequality
     };
 
 
-    // void set_factor_for_a_variable(const variable x,const data_expression e);
-
   private:
     // The right hand sides should only contain expressions representing constant reals.
 
@@ -180,16 +178,13 @@ class linear_inequality
       bool negate=false,
       const data_expression factor=real_one())
     {
-      // mCRL2log(debug) << "EXPRESSION " << pp(e) <<  " factor: " << pp(factor) << "\n";
       if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
       {
-        // mCRL2log(debug) << "is_minus_application\n";
         parse_and_store_expression(application(e).left(),r,negate,factor);
         parse_and_store_expression(application(e).right(),r,!negate,factor);
       }
       else if (sort_real::is_negate_application(e) && application(e).arguments().size()==1)
       {
-        // mCRL2log(debug) << "is_negate_application\n";
         parse_and_store_expression(*(application(e).arguments().begin()),r,!negate,factor);
       }
       else if (sort_real::is_plus_application(e))
@@ -236,7 +231,6 @@ class linear_inequality
       }
       else if (is_closed_real_number(rewrite_with_memory(e,r)))
       {
-        // mCRL2log(debug) << "CONST EXPRESSION " << pp(e) << " FACTOR " << pp(factor) << " NEG " << negate << "\n";
         if (factor==real_one())
         {
           set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
@@ -338,13 +332,11 @@ class linear_inequality
                       const comparison_t cmp,
                       const rewriter& r):m_lhs(),m_comparison(cmp)
     {
-      // mCRL2log(debug) << "lhs " << pp(lhs) << "  rhs " << pp(rhs) << "\n";
       m_rhs.protect();
       m_rhs=real_zero();
 
       parse_and_store_expression(lhs,r);
       parse_and_store_expression(rhs,r,true);
-      // mCRL2log(debug) << "Result-: " << string(*this) << "\n";
     }
 
     lhs_t::const_iterator lhs_begin() const
@@ -521,7 +513,6 @@ class linear_inequality
       for (lhs_t::const_iterator i=m_lhs.begin();
            i!=m_lhs.end(); ++i)
       {
-        // m_lhs.find(i->first) == i
         m_lhs[i->first]=rewrite_with_memory(sort_real::divides(m_lhs[i->first],e),r);
       }
       set_rhs(rewrite_with_memory(sort_real::divides(rhs(),e),r));
@@ -556,28 +547,10 @@ class linear_inequality
 };
 
 
-//static set < size_t > linear_inequality::m_empty_spots_in_rhss;
-//static atermpp::vector < mcrl2::data::data_expression > linear_inequality::m_rhss;
-
 inline
 std::string string(const linear_inequality& l)
 {
   std::string s=l.lhs_string();
-  /* if (l.lhs_begin()==l.lhs_end())
-  { s="0";
-  }
-  for( linear_inequality::lhs_t::const_iterator i=l.lhs_begin(); i!=l.lhs_end(); ++i)
-  { s=s + (i==l.lhs_begin()?"":" + ") ;
-    if (i->second==real_one())
-    { s=s + pp(i->first);
-    }
-    else if (i->second==real_minus_one())
-    { s=s + "-" + pp(i->first);
-    }
-    else
-    { s=s + pp(i->second) + "*" + pp(i->first);
-    }
-  } */
 
   if (l.comparison()==linear_inequality::less)
   {
@@ -607,7 +580,6 @@ static data_expression init_real_zero(data_expression& real_zero)
 {
   real_zero=sort_real::real_("0");
   real_zero.protect();
-  // ATprotect(reinterpret_cast<ATerm*>(&real_zero));
   return real_zero;
 }
 
@@ -615,7 +587,6 @@ static data_expression init_real_one(data_expression& real_one)
 {
   real_one=sort_real::real_("1");
   real_one.protect();
-  // ATprotect(reinterpret_cast<ATerm*>(&real_one));
   return real_one;
 }
 
@@ -623,7 +594,6 @@ static data_expression init_real_minus_one(data_expression& real_minus_one)
 {
   real_minus_one=sort_real::real_("-1");
   real_minus_one.protect();
-  // ATprotect(reinterpret_cast<ATerm*>(&real_minus_one));
   return real_minus_one;
 }
 
@@ -644,14 +614,6 @@ inline data_expression real_minus_one()
   static data_expression real_minus_one=init_real_minus_one(real_minus_one);
   return real_minus_one;
 }
-
-/* inline data_expression divide(const data_expression e1,const data_expression e2)
-{ return mcrl2::data::sort_real::divides(e1,e2);
-}
-
-inline data_expression multiply(const data_expression e1,const data_expression e2)
-{ return mcrl2::data::sort_real::times(e1,e2);
-} */
 
 inline data_expression min(const data_expression e1,const data_expression e2,const rewriter& r)
 {
@@ -730,33 +692,6 @@ inline bool is_zero(const data_expression e)
   assert(is_closed_real_number(e));
   return (e==real_zero());
 }
-
-
-/// \brief Retrieve the left hand side of a data expression
-/// \param e A data expression
-/// \pre e is a data application d(x,y) with two arguments
-/// \ret x
-
-/* inline data_expression e.left()nst data_expression e)
-{
-  assert(is_data_application(e));
-  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
-  assert(arguments.size() <= 2); // Allow application to be applied on unary functions!
-  return *(arguments.begin());
-} */
-
-/// \brief Retrieve the right hand side of a data expression
-/// \param e A data expression
-/// \pre e is a data application d(x,y) with two arguments
-/// \ret y
-
-/* inline data_expression rhs_(const data_expression e)
-{
-  assert(is_data_application(e));
-  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
-  assert(arguments.size() == 2);
-  return *(++arguments.begin());
-} */
 
 /// \brief Print the vector of inequalities to stderr in readable form.
 inline std::string pp_vector(const std::vector < linear_inequality > &inequalities)
@@ -1811,13 +1746,9 @@ inline data_expression rewrite_with_memory(
   atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
   if (i==rewrite_hash_table.end())
   {
-    // mCRL2log(debug) << "Size of hash table: " << rewrite_hash_table.size() << "\n";
     data_expression t1=r(t);
-    // rewrite_hash_table[t]=t1;
-    // mCRL2log(debug) << "Term " << pp(t) << "Result " << pp(t1) << "\n";
     return t1;
   }
-  // mCRL2log(debug) << "Term " << pp(t) << "FROM HASH " << pp(i->second) << "\n";
   return i->second;
 }
 

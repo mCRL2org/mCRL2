@@ -47,7 +47,7 @@ class RewriterCompilingJitty: public Rewriter
          internal_substitution_type &sigma);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression term);
-    data_expression fromRewriteFormat(const atermpp::aterm_appl term);
+    // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
     bool addRewriteRule(const data_equation rule);
     bool removeRewriteRule(const data_equation rule);
     internal_substitution_type *global_sigma;

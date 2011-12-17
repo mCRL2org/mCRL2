@@ -93,10 +93,10 @@ atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
   return rewr_obj->toRewriteFormat(Term);
 }
 
-data_expression RewriterProver::fromRewriteFormat(const atermpp::aterm_appl Term)
+/* data_expression RewriterProver::fromRewriteFormat(const atermpp::aterm_appl Term)
 {
   return rewr_obj->fromRewriteFormat(Term);
-}
+} */
 
 RewriteStrategy RewriterProver::getStrategy()
 {

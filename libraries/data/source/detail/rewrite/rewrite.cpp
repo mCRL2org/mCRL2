@@ -103,10 +103,9 @@ atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression /*Term*/)
   return atermpp::aterm_appl();
 }
 
-data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl /*Term*/)
+data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl t)
 {
-  assert(0);
-  return data_expression();
+  return fromInner(t);
 }
 
 atermpp::aterm_appl Rewriter::rewrite_internal(

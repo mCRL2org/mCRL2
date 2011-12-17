@@ -53,11 +53,10 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     {
     }
 
-
     atermpp::aterm_appl convert_to(const data_expression &t) const
     {
       return convert_expression_to(t);
-    }
+    } 
 
     internal_substitution_type convert_to(const substitution_type& sigma) const
     {
@@ -67,7 +66,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     data_expression convert_from(const atermpp::aterm_appl t) const
     {
       return m_rewriter->fromRewriteFormat(t);
-    }
+    } 
   
     atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, internal_substitution_type &sigma) const
     {
