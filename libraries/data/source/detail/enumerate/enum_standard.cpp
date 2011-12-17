@@ -264,11 +264,12 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
     substituted_vars=push_front(substituted_vars,var);
     vals = push_front(vals,val);
 
-    internal_substitution_type sigma;
-    sigma[var]=val;
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
-    expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,sigma);
+    const atermpp::aterm_appl old_val=enum_sigma(var);
+    enum_sigma[var]=val;
+    expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
+    enum_sigma[var]=old_val;
   }
 
 #ifndef NDEBUG
