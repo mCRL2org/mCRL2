@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(case_5)
       "         r(b1_S) .\n"
       "         P(s3_S = e0_3, b_S = b1_S)\n"
       "     + sum b2_S: Byte.\n"
-      "         (s3_S == e2_3 && b2_S == ESC || b2_S == END) ->\n"
+      "         (s3_S == e2_3 && (b2_S == ESC || b2_S == END)) ->\n"
       "         r(b2_S) .\n"
       "         P(s3_S = e1_3, b_S = b2_S)\n"
       "     + ((s30_C && s31_R == e3_4) && ESC == b_C) ->\n"

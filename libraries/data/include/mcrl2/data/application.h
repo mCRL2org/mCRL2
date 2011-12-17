@@ -140,8 +140,8 @@ class application: public detail::application_base
     /// \pre The number of arguments must be at least n.
     data_expression argument(const size_t n)
     {
-      assert(arguments().size() > n+1);
-      return data_expression((ATermAppl)ATelementAt(arguments(),n+1));
+      assert(arguments().size() > n);
+      return data_expression((ATermAppl)ATelementAt(arguments(),n));
     }
 }; // class application
 
