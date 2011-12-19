@@ -291,7 +291,6 @@ void pbesrewr(const std::string& input_filename,
     }
     case quantifier_one_point:
     {
-std::cout << "<ONE POINT>" << std::endl;
       one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;

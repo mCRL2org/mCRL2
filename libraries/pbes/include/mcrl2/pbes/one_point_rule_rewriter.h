@@ -34,7 +34,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const exists& x)
   {
-    atermpp::set<pbes_expression> terms = pbes_expr::split_and(x.body());
+    pbes_expression body = static_cast<Derived&>(*this)(x.body());
+    atermpp::set<pbes_expression> terms = pbes_expr::split_and(body);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< atermpp::set<pbes_expression>::iterator > to_be_removed;
@@ -85,12 +86,13 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    return x;
+    return exists(x.variables(), body);
   }
 
   pbes_expression operator()(const forall& x)
   {
-    atermpp::set<pbes_expression> terms = pbes_expr::split_or(x.body());
+    pbes_expression body = static_cast<Derived&>(*this)(x.body());
+    atermpp::set<pbes_expression> terms = pbes_expr::split_or(body);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< atermpp::set<pbes_expression>::iterator > to_be_removed;
@@ -141,7 +143,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    return x;
+    return forall(x.variables(), body);
   }
 
 };
