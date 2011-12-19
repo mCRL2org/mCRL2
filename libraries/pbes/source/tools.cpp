@@ -23,6 +23,7 @@
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
@@ -285,6 +286,13 @@ void pbesrewr(const std::string& input_filename,
       data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = false;
       enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case quantifier_one_point:
+    {
+std::cout << "<ONE POINT>" << std::endl;
+      one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;
     }

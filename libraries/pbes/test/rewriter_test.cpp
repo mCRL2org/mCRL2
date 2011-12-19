@@ -20,9 +20,8 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/detail/test_operation.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
@@ -34,8 +33,9 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/detail/test_operation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -593,6 +593,23 @@ void test_substitutions3()
   core::garbage_collect();
 }
 
+void test_one_point_rule_rewriter()
+{
+  one_point_rule_rewriter R;
+  pbes_system::pbes_expression x;
+  pbes_system::pbes_expression y;
+
+  x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
+  y = R(x);
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
+
+  x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
+  y = R(x);
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -604,6 +621,7 @@ int test_main(int argc, char* argv[])
   test_substitutions1();
   test_substitutions2();
   test_substitutions3();
+  test_one_point_rule_rewriter();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
   BOOST_CHECK(false);

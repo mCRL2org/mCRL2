@@ -46,6 +46,14 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       desc.add_option("skip-data", "do not rewrite data expressions", 's');
     }
 
+    /// \brief Returns the types of rewriters that are available for this tool.
+    std::set<pbes_system::pbes_rewriter_type> available_rewriters() const
+    {
+      std::set<pbes_system::pbes_rewriter_type> result = super::available_rewriters();
+      result.insert(pbes_system::quantifier_one_point);
+      return result;
+    }
+
   public:
     pbes_rewriter()
       : super(
@@ -91,6 +99,7 @@ class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter>
       values.push_back("simplify");
       values.push_back("quantifier-all");
       values.push_back("quantifier-finite");
+      values.push_back("quantifier-one-point");
       values.push_back("pfnf");
       m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
 

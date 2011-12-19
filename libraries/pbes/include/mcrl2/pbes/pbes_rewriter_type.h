@@ -26,6 +26,7 @@ enum pbes_rewriter_type
   simplify,
   quantifier_all,
   quantifier_finite,
+  quantifier_one_point,
   prover,
   pfnf
 };
@@ -45,6 +46,10 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   if (type == "quantifier-finite")
   {
     return quantifier_finite;
+  }
+  if (type == "quantifier-one-point")
+  {
+    return quantifier_one_point;
   }
   if (type == "prover")
   {
@@ -69,6 +74,8 @@ std::string pbes_rewriter_description(pbes_rewriter_type type)
       return "  'quantifier-all' for eliminating all quantifiers";
     case quantifier_finite :
       return "  'quantifier-finite' for eliminating finite quantifier variables";
+    case quantifier_one_point :
+      return "  'quantifier-one-point' for one point rule quantifier elimination";
     case prover            :
       return "  'prover' for rewriting using a prover";
     case pfnf              :
