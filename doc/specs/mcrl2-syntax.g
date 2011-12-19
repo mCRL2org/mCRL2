@@ -364,7 +364,7 @@ StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;
 
 StateVarAssignment: Id ':' SortExpr '=' DataExpr ;
 
-StateVarAssignmentList: StateVarAssignment ( ',' Assignment )* ;
+StateVarAssignmentList: StateVarAssignment ( ',' StateVarAssignment )* ;
 
 //--- Action Rename Specifications
 
