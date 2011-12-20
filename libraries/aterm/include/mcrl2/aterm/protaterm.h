@@ -1,7 +1,7 @@
 #ifndef ATERM_IPROTECTEDATERM
 #define ATERM_IPROTECTEDATERM
 
-#include <set>
+#include <list>
 #include "mcrl2/aterm/aterm1.h"
 
 namespace aterm
@@ -9,13 +9,15 @@ namespace aterm
 
 class IProtectedATerm
 {
-    // typedef std::list< IProtectedATerm* > pa_container;
-    typedef std::multiset< IProtectedATerm* > pa_container;
-    // pa_container::iterator node;
+    typedef std::list< IProtectedATerm* > pa_container;
+    pa_container::iterator node;
 
   protected:
 
-    static void AT_protectProtectedATerms()  // This method has a wrong name. It is used for marking terms.
+    // Intentionally declare a static global list of derived objects from pa_container
+    // that all have a virtual function ATmarkTerms() which is called when marking
+    // ATerms which are then not thrown away.
+    static void AT_markProtectedATerms()  
     {
       for (pa_container::iterator i=p_aterms().begin(); i!=p_aterms().end(); i++)
       {
@@ -25,7 +27,7 @@ class IProtectedATerm
 
     static pa_container initialise_p_aterms()
     {
-      ATaddProtectFunction(AT_protectProtectedATerms);
+      ATaddProtectFunction(AT_markProtectedATerms);
       return pa_container();
     }
 
@@ -35,38 +37,32 @@ class IProtectedATerm
       return _p_aterms;
     }
 
-    void ATprotectProtectedATerm(IProtectedATerm* i)
-    {
-      p_aterms().insert(i);
-      // p_aterms().push_front(i);
-      // node = p_aterms().begin();
-    }
-
-    void ATunprotectProtectedATerm(IProtectedATerm* i)
-    {
-      p_aterms().erase(i);
-      // p_aterms().erase(node);
-    }
-
   public:
 
     IProtectedATerm()
     {}
 
-    /* IProtectedATerm &operator=(const IProtectedATerm &old)
+    /// Constructor
+    IProtectedATerm(IProtectedATerm* i)
+    {
+      p_aterms().push_front(i);
+      node = p_aterms().begin();
+    }
+
+    /// Assignment operator.
+    IProtectedATerm &operator=(const IProtectedATerm &old)
     { 
       // Prevent node from being assigned.
       return *this;
-    } */
+    } 
 
     virtual void ATmarkTerms() = 0; 
 
-    virtual ~IProtectedATerm() = 0;
+    ~IProtectedATerm()
+    {
+      p_aterms().erase(node);
+    }
 };
-
-inline IProtectedATerm::~IProtectedATerm()
-{
-}
 
 } // namespace aterm
 
