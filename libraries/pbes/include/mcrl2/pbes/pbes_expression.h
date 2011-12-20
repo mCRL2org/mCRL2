@@ -460,12 +460,29 @@ inline bool is_and(const pbes_expression& t)
   return is_pbes_and(t);
 }
 
+
+/// \brief Test for a conjunction
+/// \param t A PBES expression or a data expression
+/// \return True if it is a conjunction
+inline bool data_is_and(const pbes_expression& t)
+{
+  return is_pbes_and(t) || data::sort_bool::is_and_application(t);
+}
+
 /// \brief Test for a disjunction
 /// \param t A PBES expression
 /// \return True if it is a disjunction
 inline bool is_or(const pbes_expression& t)
 {
   return is_pbes_or(t);
+}
+
+/// \brief Test for a disjunction
+/// \param t A PBES expression or a data expression
+/// \return True if it is a disjunction
+inline bool data_is_or(const pbes_expression& t)
+{
+  return is_pbes_or(t) || data::sort_bool::is_or_application(t);
 }
 
 /// \brief Test for an implication
@@ -601,6 +618,22 @@ pbes_expression arg(const pbes_expression& t)
   }
 }
 
+/// \brief Returns the pbes expression argument of expressions of type not, exists and forall.
+/// \param t A PBES expression or a data expression
+/// \return The pbes expression argument of expressions of type not, exists and forall.
+inline
+pbes_expression data_arg(const pbes_expression& t)
+{
+  if (data::is_data_expression(t))
+  {
+    return data::application(t).arguments().front();
+  }
+  else
+  {
+    return arg(t);
+  }
+}
+
 /// \brief Returns the left hand side of an expression of type and, or or imp.
 /// \param t A PBES expression
 /// \return The left hand side of an expression of type and, or or imp.
@@ -611,6 +644,22 @@ pbes_expression left(const pbes_expression& t)
   return atermpp::arg1(t);
 }
 
+/// \brief Returns the left hand side of an expression of type and, or or imp.
+/// \param t A PBES expression or a data expression
+/// \return The left hand side of an expression of type and, or or imp.
+inline
+pbes_expression data_left(const pbes_expression& t)
+{
+  if (data::is_data_expression(t))
+  {
+    return data::application(t).left();
+  }
+  else
+  {
+    return left(t);
+  }
+}
+
 /// \brief Returns the right hand side of an expression of type and, or or imp.
 /// \param t A PBES expression
 /// \return The right hand side of an expression of type and, or or imp.
@@ -618,6 +667,22 @@ inline
 pbes_expression right(const pbes_expression& t)
 {
   return atermpp::arg2(t);
+}
+
+/// \brief Returns the left hand side of an expression of type and, or or imp.
+/// \param t A PBES expression or a data expression
+/// \return The left hand side of an expression of type and, or or imp.
+inline
+pbes_expression data_right(const pbes_expression& t)
+{
+  if (data::is_data_expression(t))
+  {
+    return data::application(t).right();
+  }
+  else
+  {
+    return right(t);
+  }
 }
 
 /// \brief Returns the variables of a quantification expression
@@ -767,11 +832,20 @@ pbes_expression join_and(FwdIt first, FwdIt last)
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
+atermpp::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_expressions = false)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+
+  if (split_data_expressions)
+  {
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), data_is_or, data_left, data_right);
+  }
+  else
+  {
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+  }
+
   return result;
 }
 
@@ -782,11 +856,20 @@ atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
+atermpp::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data_expressions = false)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+
+  if (split_data_expressions)
+  {
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), data_is_and, data_left, data_right);
+  }
+  else
+  {
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+  }
+
   return result;
 }
 } // namespace pbes_expr
