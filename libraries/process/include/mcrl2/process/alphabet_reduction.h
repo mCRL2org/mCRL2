@@ -69,9 +69,9 @@ class alphabet_reduction
     atermpp::term_list < T > sync_mact(atermpp::term_list < T > a, atermpp::term_list < T > b);
     action_label_list_list filter_block_list(action_label_list_list l, core::identifier_string_list H);
     action_label_list_list filter_hide_list(action_label_list_list l, core::identifier_string_list I);
-    action_label_list_list filter_allow_list(action_label_list_list l, action_name_multiset_list V);
-    action_name_multiset_list split_allow(
-            action_name_multiset_list V, 
+    action_label_list_list filter_allow_list(action_label_list_list l, atermpp::term_list < core::identifier_string_list > V);
+    atermpp::term_list < core::identifier_string_list > split_allow(
+            atermpp::term_list < core::identifier_string_list > V, 
             atermpp::term_list < core::identifier_string_list > ulp, 
             atermpp::term_list < core::identifier_string_list > ulq);
     template < class T >
@@ -82,18 +82,18 @@ class alphabet_reduction
             atermpp::term_list < core::identifier_string_list > allowed=atermpp::term_list < core::identifier_string_list >());
     action_label_list_list sync_list_ht(action_label_list_list l1, action_label_list_list l2, bool including_products_of_actions=true);
     atermpp::term_list< core::identifier_string_list > apply_unrename(core::identifier_string_list l, rename_expression_list R);
-    action_name_multiset_list gsaMakeMultActNameL(atermpp::term_list< atermpp::term_list < core::identifier_string > > l);
-    action_name_multiset_list apply_unrename_allow_list(action_name_multiset_list V, rename_expression_list R);
+    atermpp::term_list < core::identifier_string_list > gsaMakeMultActNameL(atermpp::term_list< atermpp::term_list < core::identifier_string > > l);
+    atermpp::term_list < core::identifier_string_list > apply_unrename_allow_list(atermpp::term_list < core::identifier_string_list > V, rename_expression_list R);
     alphabet_reduction::action_label_list_list  apply_comms(lps::action_label_list l, communication_expression_list C, core::identifier_string_list lhs);
-    action_name_multiset_list extend_allow_comm_with_alpha(
-            action_name_multiset_list V,
+    atermpp::term_list < core::identifier_string_list > extend_allow_comm_with_alpha(
+            atermpp::term_list < core::identifier_string_list > V,
             communication_expression_list  C, 
             action_label_list_list l);
-    action_name_multiset_list extend_allow_comm(action_name_multiset_list V, communication_expression_list C);
+    atermpp::term_list < core::identifier_string_list > extend_allow_comm(atermpp::term_list < core::identifier_string_list > V, communication_expression_list C);
     action_label_list_list filter_comm_list(action_label_list_list l, communication_expression_list C);
     process_expression PushBlock(core::identifier_string_list H, process_expression a);
     process_expression PushHide(core::identifier_string_list I, process_expression a);
-    process_expression PushAllow(action_name_multiset_list V, process_expression a);
+    process_expression PushAllow(atermpp::term_list < core::identifier_string_list > V, process_expression a);
     process_expression PushComm(communication_expression_list C, process_expression a);
     action_label_list_list gsaGetAlpha(
             process_expression a, 
