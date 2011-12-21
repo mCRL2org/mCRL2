@@ -153,7 +153,6 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     /// \param[in] recogniser The name of the recogniser.
     /// \pre name is not empty.
     /// \pre recogniser is not empty.
-#ifndef _MSC_VER
     template < typename Container >
     structured_sort_constructor(const core::identifier_string& name,
                                 const Container& arguments,
@@ -161,7 +160,6 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
                                 typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
       : detail::structured_sort_constructor_base(make_constructor(name, atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), recogniser))
     { }
-#endif // _MSC_VER
 
     /// \brief Constructor
     ///
