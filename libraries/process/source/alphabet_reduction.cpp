@@ -37,13 +37,13 @@ namespace mcrl2
 
       static AFun afunPair;
 
-      static inline ATermAppl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
+      static ATermAppl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
       {
         return ATmakeAppl2(afunPair,(ATerm)(ATermList)ma1,(ATerm)(ATermAppl)ma2);
       }
 
       template < class T >
-      static inline atermpp::term_list <T> gsaATsortList(atermpp::term_list <T> l)
+      static atermpp::term_list <T> gsaATsortList(atermpp::term_list <T> l)
       {
         atermpp::multiset <T> s;
         for (typename atermpp::term_list <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -59,7 +59,7 @@ namespace mcrl2
       }
 
       template < class T >
-      static inline atermpp::term_list <T> gsaATintersectList(atermpp::term_list <T> l, atermpp::term_list <T> m)
+      static atermpp::term_list <T> gsaATintersectList(atermpp::term_list <T> l, atermpp::term_list <T> m)
       {
         atermpp::term_list <T> r;
         for (typename atermpp::term_list <T>::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -73,13 +73,13 @@ namespace mcrl2
       }
 
       template < class T >
-      static inline bool gsaATisDisjoint(atermpp::term_list <T>  l, atermpp::term_list <T> m)
+      static bool gsaATisDisjoint(atermpp::term_list <T>  l, atermpp::term_list <T> m)
       {
         return (gsaATintersectList(l,m)).empty();
       }
 
       template <class T>
-      static inline void gsaATindexedSetPutList(atermpp::set < T > &m, atermpp::term_list <T> l)
+      static void gsaATindexedSetPutList(atermpp::set < T > &m, atermpp::term_list <T> l)
       {
         //add l into m
         for (typename atermpp::term_list <T>::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -88,7 +88,7 @@ namespace mcrl2
         }
       }
 
-      static inline lps::action_label_list add_typeMA(identifier_string_list ma, sort_expression_list s)
+      static lps::action_label_list add_typeMA(identifier_string_list ma, sort_expression_list s)
       {
         //adds type s to all actions in ma
         lps::action_label_list r;
@@ -99,7 +99,7 @@ namespace mcrl2
         return gsaATsortList(r);
       }
  
-      atermpp::term_list < core::identifier_string_list > transform_list(const action_name_multiset_list l)
+      static atermpp::term_list < core::identifier_string_list > transform_list(const action_name_multiset_list l)
       {
         // Always insert empty list also.
         atermpp::term_list < core::identifier_string_list > result;
@@ -112,7 +112,7 @@ namespace mcrl2
         return reverse(result);
       }
 
-      action_name_multiset_list transform_list_back(const atermpp::term_list < core::identifier_string_list > l)
+      static action_name_multiset_list transform_list_back(const atermpp::term_list < core::identifier_string_list > l)
       {
         action_name_multiset_list result;
         for(atermpp::term_list < core::identifier_string_list >::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -2302,13 +2302,10 @@ l_ok:
     }
 
     /** \brief     Apply alphabet reduction to an mCRL2 process specification.
-     *  \param[in] data_spec A data specification representation of an mCRL2 process
-     *             specification in the internal format after type checking.
      *  \param[in] equations process equations to which alpha conversion needs to be applied.
      *  \param[in] init The initial process.
      **/
     void alphabet_reduction::gsAlpha(
-        const mcrl2::data::data_specification& data_spec,
         process_equation_list& equations,
         process_expression& init)
     {
@@ -2595,7 +2592,7 @@ l_ok:
       data::variable_list global_variables(p.global_variables().begin(),p.global_variables().end());
       process_equation_list equations(p.equations().begin(),p.equations().end());
       process_expression init=p.init();
-      gsAlpha(p.data(),equations,init);
+      gsAlpha(equations,init);
       p=process_specification(p.data(),action_labels,global_variables,equations,init);
     }
 

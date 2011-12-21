@@ -104,10 +104,7 @@ class alphabet_reduction
     process_identifier_list gsaGetDeps(process_expression a);
     action_label_list_list filter_rename_list(action_label_list_list l, rename_expression_list R);
     bool gsaGetProp(const process_expression a, process_identifier context);
-    void gsAlpha(
-            const mcrl2::data::data_specification& data_spec,
-            process_equation_list& equations,
-            process_expression& init);
+    void gsAlpha(process_equation_list& equations, process_expression& init);
 
  
   public:
