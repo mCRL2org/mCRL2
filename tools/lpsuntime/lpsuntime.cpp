@@ -10,16 +10,14 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/lps/untime.h"
+#include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace mcrl2::core;
 
 class untime_tool: public input_output_tool
 {
@@ -41,14 +39,7 @@ class untime_tool: public input_output_tool
 
     bool run()
     {
-      lps::specification spec;
-      spec.load(m_input_filename);
-
-      lps::untime_algorithm untime(spec);
-      untime.run();
-
-      spec.save(m_output_filename);
-
+      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename);
       return true;
     }
 

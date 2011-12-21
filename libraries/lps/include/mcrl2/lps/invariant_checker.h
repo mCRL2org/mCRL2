@@ -17,6 +17,7 @@
 #include <string>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/data/substitutions.h"
@@ -97,7 +98,7 @@ class Invariant_Checker
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,

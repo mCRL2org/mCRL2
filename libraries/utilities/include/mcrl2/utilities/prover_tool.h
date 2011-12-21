@@ -12,7 +12,7 @@
 #ifndef MCRL2_UTILITIES_PROVER_TOOL_H
 #define MCRL2_UTILITIES_PROVER_TOOL_H
 
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2
@@ -29,7 +29,7 @@ template <typename Tool>
 class prover_tool: public Tool
 {
   protected:
-    typedef mcrl2::data::detail::SMT_Solver_Type smt_solver_type;
+    typedef mcrl2::data::detail::smt_solver_type smt_solver_type;
 
     /// The data rewriter strategy
     smt_solver_type m_solver_type;

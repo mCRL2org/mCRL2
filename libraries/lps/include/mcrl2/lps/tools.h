@@ -15,10 +15,14 @@
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 
 namespace mcrl2 {
 
 namespace lps {
+
+void lpsbinary(const std::string& input_filename,
+               const std::string& output_filename);
 
 void lpsconstelm(const std::string& input_filename,
                  const std::string& output_filename,
@@ -32,6 +36,23 @@ void lpsconstelm(const std::string& input_filename,
 void lpsinfo(const std::string& input_filename,
              const std::string& input_file_message
             );
+
+void lpsinvelm(const std::string& input_filename,
+               const std::string& output_filename,
+               const std::string& invariant_filename,
+               const std::string& dot_file_name,
+               data::rewriter::strategy rewrite_strategy,
+               data::detail::smt_solver_type solver_type,
+               const size_t summand_number,
+               const bool no_check,
+               const bool no_elimination,
+               const bool simplify_all,
+               const bool all_violations,
+               const bool counter_example,
+               const bool path_eliminator,
+               const bool apply_induction,
+               const int time_limit
+              );
 
 void lpsparelm(const std::string& input_filename,
                const std::string& output_filename
@@ -49,6 +70,19 @@ void lpsrewr(const std::string& input_filename,
              bool benchmark,
              unsigned long bench_times
             );
+
+void lpssumelm(const std::string& input_filename,
+               const std::string& output_filename,
+               const bool decluster);
+
+void lpssuminst(const std::string& input_filename,
+                const std::string& output_filename,
+                const std::string& sorts_string,
+                const bool finite_sorts_only,
+                const bool tau_summands_only);
+
+void lpsuntime(const std::string& input_filename,
+               const std::string& output_filename);
 
 void txtlps(const std::string& input_filename,
             const std::string& output_filename

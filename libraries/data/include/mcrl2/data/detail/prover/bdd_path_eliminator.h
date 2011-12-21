@@ -21,6 +21,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/data/detail/prover/bdd_manipulator.h"
@@ -32,52 +33,6 @@ namespace data
 {
 namespace detail
 {
-
-/// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
-enum SMT_Solver_Type
-{
-  solver_type_cvc,
-};
-
-/// \brief standard conversion from stream to solver type
-inline
-std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type& s)
-{
-  char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  using namespace mcrl2::data::detail;
-
-  /// no standard conversion available function, so implement on-the-spot
-  is.readsome(solver_type, 10);
-
-  s = solver_type_cvc;
-  if (strncmp(solver_type, "cvc", 3) == 0)
-  {
-    if (solver_type[3] != '\0')
-    {
-      is.setstate(std::ios_base::failbit);
-    }
-  }
-  else
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-
-  return is;
-}
-
-/// \brief standard conversion from solvert type to stream
-inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s)
-{
-  static char const* solvers[] =
-  {
-    "cvc",
-  };
-
-  os << solvers[s];
-
-  return os;
-}
 
 /** \brief Base class for eliminating inconsistent paths from BDDs.
  *
@@ -120,8 +75,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \param a_guard A guard or a negated guard.
     /// \param a_minimal A boolean value indicating whether or not minimal sets of possibly inconsistent guards are constructed.
     data_expression_list create_condition(
-               data_expression_list a_path, 
-               const data_expression a_guard, 
+               data_expression_list a_path,
+               const data_expression a_guard,
                bool a_minimal)
     {
       if (!a_minimal)
@@ -228,7 +183,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
 
     /// \brief Constructor that initializes the field BDD_Path_Eliminator::f_smt_solver.
     /// \param a_solver_type A value of an enumerated type, representing an SMT solver.
-    BDD_Path_Eliminator(SMT_Solver_Type a_solver_type)
+    BDD_Path_Eliminator(smt_solver_type a_solver_type)
     {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
       if (a_solver_type == solver_type_cvc)

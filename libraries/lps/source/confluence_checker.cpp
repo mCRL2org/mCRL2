@@ -148,7 +148,7 @@ data_expression get_equation_from_assignments(
       }
       a_assignments_1=pop_front(a_assignments_1);
     }
-    else 
+    else
     {
       if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
       {
@@ -451,7 +451,7 @@ Confluence_Checker::Confluence_Checker(
   mcrl2::data::rewriter::strategy a_rewrite_strategy,
   int a_time_limit,
   bool a_path_eliminator,
-  SMT_Solver_Type a_solver_type,
+  smt_solver_type a_solver_type,
   bool a_apply_induction,
   bool a_no_marking,
   bool a_check_all,
@@ -460,7 +460,7 @@ Confluence_Checker::Confluence_Checker(
   std::string const& a_dot_file_name):
   f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
   f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-  f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy, 
+  f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
                      a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
   f_lps(a_lps),
   f_no_marking(a_no_marking),
