@@ -27,24 +27,27 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     deque()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param a An allocator.
     explicit deque(const Allocator& a)
       : std::deque<T, Allocator>(a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param count A positive number.
     explicit deque(typename std::deque<T,Allocator>::size_type count)
       : std::deque<T, Allocator>(count),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -52,8 +55,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \param val A value.
     deque(typename std::deque<T,Allocator>::size_type count, const T& val)
       : std::deque<T, Allocator>(count, val),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -62,16 +66,18 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \param a An allocator.
     deque(typename std::deque<T,Allocator>::size_type count, const T& val, const Allocator& a)
       : std::deque<T, Allocator>(count, val, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A deque.
     deque(const deque& right)
       : std::deque<T, Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -80,8 +86,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     template<class InIt>
     deque(InIt first, InIt last)
       : std::deque<T, Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -91,8 +98,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     template<class InIt>
     deque(InIt first, InIt last, const Allocator& a)
       : std::deque<T, Allocator>(first, last, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.

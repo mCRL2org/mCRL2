@@ -37,20 +37,19 @@ class IProtectedATerm
       return _p_aterms;
     }
 
-  public:
-
-    IProtectedATerm()
-    {}
-
-    /// Constructor
-    IProtectedATerm(IProtectedATerm* i)
+    void protect_aterms(IProtectedATerm* i)
     {
       p_aterms().push_front(i);
       node = p_aterms().begin();
     }
 
+  public:
+
+    IProtectedATerm()
+    {}
+
     /// Assignment operator.
-    IProtectedATerm &operator=(const IProtectedATerm &old)
+    IProtectedATerm &operator=(const IProtectedATerm &)
     { 
       // Prevent node from being assigned.
       return *this;

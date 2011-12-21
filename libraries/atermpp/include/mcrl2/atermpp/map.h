@@ -29,16 +29,18 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     map()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit map(const Compare& comp)
       : std::map<Key, T, Compare, Allocator>(comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -46,16 +48,18 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     map(const Compare& comp, const Allocator& a)
       : std::map<Key, T, Compare, Allocator>(comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A map.
     map(const map& right)
       : std::map<Key, T, Compare, Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -64,8 +68,9 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     map(InIt first, InIt last)
       : std::map<Key, T, Compare, Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -75,8 +80,9 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp)
       : std::map<Key, T, Compare, Allocator>(first, last, comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -87,8 +93,9 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::map<Key, T, Compare, Allocator>(first, last, comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.
@@ -117,16 +124,18 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
   public:
     /// \brief Constructor.
     multimap()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit multimap(const Compare& comp)
       : std::multimap<Key, T, Compare, Allocator>(comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -134,16 +143,18 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \param a An allocator.
     multimap(const Compare& comp, const Allocator& a)
       : std::multimap<Key, T, Compare, Allocator>(comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A map.
     multimap(const multimap& right)
       : std::multimap<Key, T, Compare, Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -152,8 +163,9 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     template<class InIt>
     multimap(InIt first, InIt last)
       : std::multimap<Key, T, Compare, Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -163,8 +175,9 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp)
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -175,8 +188,9 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.

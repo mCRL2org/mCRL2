@@ -28,16 +28,18 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     set()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit set(const Compare& comp)
       : std::set<T, Compare, Allocator>(comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -45,16 +47,18 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     set(const Compare& comp, const Allocator& a)
       : std::set<T, Compare, Allocator>(comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A set.
     set(const set& right)
       : std::set<T, Compare, Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -63,8 +67,9 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     set(InIt first, InIt last)
       : std::set<T, Compare, Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -74,8 +79,9 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp)
       : std::set<T, Compare, Allocator>(first, last, comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -86,8 +92,9 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::set<T, Compare, Allocator>(first, last, comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.
@@ -123,16 +130,18 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     multiset()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit multiset(const Compare& comp)
       : std::multiset<T, Compare, Allocator>(comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -140,16 +149,18 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     multiset(const Compare& comp, const Allocator& a)
       : std::multiset<T, Compare, Allocator>(comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A multiset.
     multiset(const multiset& right)
       : std::multiset<T, Compare, Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -158,8 +169,9 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     multiset(InIt first, InIt last)
       : std::multiset<T, Compare, Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -169,8 +181,9 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp)
       : std::multiset<T, Compare, Allocator>(first, last, comp),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -181,8 +194,9 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::multiset<T, Compare, Allocator>(first, last, comp, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.

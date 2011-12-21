@@ -27,24 +27,27 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     vector()
-      : IProtectedATerm(this)
+      : IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param a An allocator.
     explicit vector(const Allocator& a)
       : std::vector<T,Allocator>(a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param count A positive number.
     explicit vector(typename std::vector<T,Allocator>::size_type count)
       : std::vector<T,Allocator>(count),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -52,8 +55,9 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     /// \param val A value.
     vector(typename std::vector<T,Allocator>::size_type count, const T& val)
       : std::vector<T,Allocator>(count, val),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -62,16 +66,18 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     /// \param a An allocator.
     vector(typename std::vector<T,Allocator>::size_type count, const T& val, const Allocator& a)
       : std::vector<T,Allocator>(count, val, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A vector.
     vector(const vector& right)
       : std::vector<T,Allocator>(right),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -80,8 +86,9 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     template<class InIt>
     vector(InIt first, InIt last)
       : std::vector<T,Allocator>(first, last),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -91,8 +98,9 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     template<class InIt>
     vector(InIt first, InIt last, const Allocator& a)
       : std::vector<T,Allocator>(first, last, a),
-        IProtectedATerm(this)
+        IProtectedATerm()
     {
+      protect_aterms(this);
     }
 
     /// Destructor.
