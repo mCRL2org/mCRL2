@@ -210,7 +210,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow
     /// these restrictions
     /// \param a_bdd A binary decision diagram.
-    virtual data_expression simplify(const data_expression a_bdd)
+    virtual data_expression simplify(const data_expression& a_bdd)
     {
       return aux_simplify(a_bdd, data_expression_list());
     }

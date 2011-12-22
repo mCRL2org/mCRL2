@@ -43,7 +43,7 @@ inline void string_to_strategy_test(std::string const& strategy)
 template < bool b >
 inline void string_to_prover_type_test(std::string const& prover_type)
 {
-  string_to_type_test< mcrl2::data::detail::SMT_Solver_Type, b >(prover_type);
+  string_to_type_test< mcrl2::data::detail::smt_solver_type, b >(prover_type);
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid)

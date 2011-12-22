@@ -66,7 +66,7 @@ class BDD_Simplifier
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    virtual data_expression simplify(data_expression a_bdd)
+    virtual data_expression simplify(const data_expression& a_bdd)
     {
       return a_bdd;
     }
