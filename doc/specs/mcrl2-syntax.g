@@ -93,8 +93,8 @@ DataExpr
   | 'exists' VarsDeclList '.' DataExpr       $unary_right  0
   | 'lambda' VarsDeclList '.' DataExpr       $unary_right  0
   | DataExpr '=>'  DataExpr                  $binary_right 1
-  | DataExpr '||'  DataExpr                  $binary_left  2
-  | DataExpr '&&'  DataExpr                  $binary_left  3
+  | DataExpr '||'  DataExpr                  $binary_right 2
+  | DataExpr '&&'  DataExpr                  $binary_right 3
   | DataExpr '=='  DataExpr                  $binary_left  4
   | DataExpr '!='  DataExpr                  $binary_left  4
   | DataExpr '<'   DataExpr                  $binary_left  5
@@ -176,7 +176,7 @@ ProcExpr
   | '(' ProcExpr ')'
   | ProcExpr '+'   ProcExpr                     $binary_left  1
   | 'sum' VarsDeclList '.' ProcExpr             $unary_right  2
-  | ProcExpr '||'  ProcExpr                     $binary_left  3
+  | ProcExpr '||'  ProcExpr                     $binary_right 3
   | ProcExpr '||_' ProcExpr                     $binary_right 4
   | DataExprUnit '->' ProcExpr                  $unary_right  5
   | DataExprUnit IfThen ProcExpr                $unary_right  5
@@ -199,7 +199,7 @@ ProcExprNoIf
   | '(' ProcExpr ')'
   | ProcExprNoIf '+'   ProcExprNoIf             $binary_left  1
   | 'sum' VarsDeclList '.' ProcExprNoIf         $unary_right  2
-  | ProcExprNoIf '||'  ProcExprNoIf             $binary_left  3
+  | ProcExprNoIf '||'  ProcExprNoIf             $binary_right 3
   | ProcExprNoIf '||_' ProcExprNoIf             $binary_right 3
   | DataExprUnit IfThen ProcExprNoIf            $unary_right  4
   | ProcExprNoIf '<<'  ProcExprNoIf             $binary_left  5
@@ -265,8 +265,8 @@ BesExpr
   : 'true'
   | 'false'
   | BesExpr '=>' BesExpr     $binary_right 2
-  | BesExpr '||' BesExpr     $binary_left  3
-  | BesExpr '&&' BesExpr     $binary_left  4
+  | BesExpr '||' BesExpr     $binary_right 3
+  | BesExpr '&&' BesExpr     $binary_right 4
   | '!' BesExpr              $unary_right  5
   | '(' BesExpr ')'
   | BesVar
@@ -302,8 +302,8 @@ PbesExpr
   | 'forall' VarsDeclList '.' PbesExpr                           $unary_right  0
   | 'exists' VarsDeclList '.' PbesExpr                           $unary_right  0
   | PbesExpr '=>' PbesExpr                                       $binary_right 2
-  | PbesExpr '&&' PbesExpr                                       $binary_left  3
-  | PbesExpr '||' PbesExpr                                       $binary_left  4
+  | PbesExpr '&&' PbesExpr                                       $binary_right 3
+  | PbesExpr '||' PbesExpr                                       $binary_right 4
   | '!' PbesExpr                                                 $unary_right  5
   | '(' PbesExpr ')'
   | PropVarInst
@@ -319,8 +319,8 @@ ActFrm
   | 'forall' VarsDeclList '.' ActFrm                             $unary_right  0
   | 'exists' VarsDeclList '.' ActFrm                             $unary_right  0
   | ActFrm '=>' ActFrm                                           $binary_right 2
-  | ActFrm '||' ActFrm                                           $binary_left  3
-  | ActFrm '&&' ActFrm                                           $binary_left  4
+  | ActFrm '||' ActFrm                                           $binary_right 3
+  | ActFrm '&&' ActFrm                                           $binary_right 4
   | ActFrm '@' DataExpr                                          $binary_left  5
   | '!' ActFrm                                                   $unary_right  6
   | '(' ActFrm ')'
@@ -349,8 +349,8 @@ StateFrm
   | 'forall' VarsDeclList '.' StateFrm                           $unary_right  2
   | 'exists' VarsDeclList '.' StateFrm                           $unary_right  2
   | StateFrm '=>' StateFrm                                       $binary_right 3
-  | StateFrm '||' StateFrm                                       $binary_left  4
-  | StateFrm '&&' StateFrm                                       $binary_left  5
+  | StateFrm '||' StateFrm                                       $binary_right 4
+  | StateFrm '&&' StateFrm                                       $binary_right 5
   | '[' RegFrm ']' StateFrm                                      $unary_right  6
   | '<' RegFrm '>' StateFrm                                      $unary_right  6
   | '!' StateFrm                                                 $unary_right  7
