@@ -172,7 +172,9 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_ltsmin("jitty");
+#ifdef MCRL2_JITTYC_AVAILABLE
   test_ltsmin("jittyc");
+#endif // MCRL2_JITTYC_AVAILABLE
 
   return 0;
 }
