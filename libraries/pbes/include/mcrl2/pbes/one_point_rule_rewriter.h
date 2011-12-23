@@ -12,8 +12,10 @@
 #ifndef MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
 #define MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
 
+#include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions.h"
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/replace.h"
 
@@ -34,6 +36,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const exists& x)
   {
+    namespace a = data::detail::data_accessors;
+
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
     atermpp::set<pbes_expression> terms = pbes_expr::split_and(body, true);
     data::mutable_map_substitution<> sigma;
@@ -42,16 +46,13 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
     for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
-      // check if the term *i corresponds to (v != e), with v a quantifier variable.
+      // check if the term *i corresponds to (v == e), with v a quantifier variable.
       if (data::is_data_expression(*i))
       {
         if (data::is_equal_to_application(data::data_expression(*i)))
         {
-          data::application d = *i;
-          data::data_expression_list arguments = d.arguments();
-          data::data_expression_list::const_iterator j = arguments.begin();
-          data::data_expression left = *j++;
-          data::data_expression right = *j;
+          data::data_expression left = a::left(*i);
+          data::data_expression right = a::right(*i);
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;
@@ -91,6 +92,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const forall& x)
   {
+    namespace a = data::detail::data_accessors;
+
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
     atermpp::set<pbes_expression> terms = pbes_expr::split_or(body, true);
     data::mutable_map_substitution<> sigma;
@@ -104,11 +107,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       {
         if (data::is_not_equal_to_application(data::data_expression(*i)))
         {
-          data::application d = *i;
-          data::data_expression_list arguments = d.arguments();
-          data::data_expression_list::const_iterator j = arguments.begin();
-          data::data_expression left = *j++;
-          data::data_expression right = *j;
+          data::data_expression left = a::left(*i);
+          data::data_expression right = a::right(*i);
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;

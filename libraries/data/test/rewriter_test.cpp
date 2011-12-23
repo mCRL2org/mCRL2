@@ -205,13 +205,16 @@ void one_point_rule_preprocessor_test()
 {
   using namespace data::detail;
 
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!(true && false)", "!(true) || !(false)");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!!b", "b");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!!!!b", "b");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!(b1 && b2 && b3)", "!b1 || !b2 || !b3");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!(b1 || b2 || b3)", "!b1 && !b2 && !b3");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!(b1 == b2)", "b1 != b2");
-  test_rewriters(N(one_point_rule_preprocessor), N(I), "!(b1 == b2 && b1 == b3)", "b1 != b2 || b1 != b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(true && false)", "!(true) || !(false)");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!!b", "b");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!!!!b", "b");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 && b2 && b3)", "!b1 || !b2 || !b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 || b2 || b3)", "!b1 && !b2 && !b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 == b2)", "b1 != b2");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 != b2)", "b1 == b2");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 == b2 && b1 == b3)", "b1 != b2 || b1 != b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 != b2 || b1 != b3)", "b1 == b2 && b1 == b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(n1 != n2 || n1 != n2 + 1)", "n1 == n2 && n1 == n2 + 1");
 }
 
 int test_main(int argc, char** argv)

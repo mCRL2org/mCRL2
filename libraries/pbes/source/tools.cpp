@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -291,8 +292,14 @@ void pbesrewr(const std::string& input_filename,
     }
     case quantifier_one_point:
     {
+      // first preprocess data expressions
+      data::detail::one_point_rule_preprocessor one_point_processor;
+      data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar(one_point_processor);
+      pbes_rewrite(p, datar);
+
       one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);
+
       break;
     }
     case pfnf:
