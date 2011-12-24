@@ -118,8 +118,13 @@ class lps2lts_tool : public lps2lts_base
                    "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') determines "
                    "where temporary files are stored.\n"
                    "\n"
+                   "Note that lps2lts can deliver multiple transitions with the same label between"
+                   "any pair of states. If this is not desired, such transitions can be removed by"
+                   "applying a strong bisimulation reducton using for instance the tool ltsconvert.\n"
+                   "\n"
                    "The format of OUTFILE is determined by its extension (unless it is specified "
                    "by an option). The supported formats are:\n"
+                   "\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()
                   )
     {
