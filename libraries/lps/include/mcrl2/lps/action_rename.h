@@ -491,7 +491,6 @@ inline
 action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification& ars)
 {
   data::data_specification data_spec=ars.data();
-  data_spec.declare_data_specification_to_be_type_checked();
   const action_label_list al=lps::normalize_sorts(ars.action_labels(),data_spec);
 
   atermpp::vector<action_rename_rule> l(ars.rules());
@@ -886,7 +885,7 @@ lps::specification action_rename(
     }
   }
   specification lps_new_spec = specification(
-                                 lps_old_spec.data(),
+                                 action_rename_spec.data(), // This contains the data of the lps and the rename file.
                                  all,
                                  lps_old_spec.global_variables(),
                                  new_process,

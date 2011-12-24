@@ -1115,6 +1115,49 @@ class data_specification
 }; // class data_specification
 
 
+/// \brief Merges two data specifications into one.
+/// \details It is assumed that the two specs can be merged. I.e.
+///          that the second is a safe extension of the first.
+/// \param spec1[in] One of the input specifications.
+/// \param spec2[in] The second input specification.
+/// \return A specification that is merged.
+
+inline data_specification operator +(data_specification spec1, const data_specification &spec2)
+{
+  const sort_expression_vector sv=spec2.user_defined_sorts();
+  for(sort_expression_vector::const_iterator i=sv.begin(); i!=sv.end(); ++i)
+  {
+    spec1.add_sort(*i);
+  }
+// void declare_data_specification_to_be_type_checked()
+
+  const alias_vector av=spec2.user_defined_aliases();
+  for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
+  {
+    spec1.add_alias(*i);
+  }
+
+  const function_symbol_vector cv=spec2.user_defined_constructors();
+  for(function_symbol_vector::const_iterator i=cv.begin(); i!=cv.end(); ++i)
+  {
+    spec1.add_constructor(*i);
+  }
+
+  const function_symbol_vector mv=spec2.user_defined_mappings();
+  for(function_symbol_vector::const_iterator i=mv.begin(); i!=mv.end(); ++i)
+  {
+    spec1.add_constructor(*i);
+  }
+
+  const data_equation_vector ev=spec2.user_defined_equations();
+  for(data_equation_vector::const_iterator i=ev.begin(); i!=ev.end(); ++i)
+  {
+    spec1.add_equation(*i);
+  }
+
+  return spec1;
+}
+
 /// \brief Finds a mapping in a data specification.
 /// \param data A data specification
 /// \param s A string
