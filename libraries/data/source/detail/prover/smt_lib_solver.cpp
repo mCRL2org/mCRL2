@@ -120,8 +120,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
         message.append(output, 0, i);
       }
 
-      mCRL2log(error) << "Fatal: SMT prover " << T::name() << " returned :" << std::endl << std::endl
-                      << message << std::endl;
+      throw mcrl2::runtime_error(std::string("The SMT prover ") + T::name() + " does not work properly. " + message );
     }
 
     ::close(pipe_stdout[0]);
@@ -141,8 +140,8 @@ bool binary_smt_solver< T >::usable()
 {
   if (!binary_smt_solver::execute("(benchmark nameless :formula true)"))
   {
-    mCRL2log(error) << "The SMT solver " << T::name() << " is not available." << std::endl
-                    << "Consult the manual of the tool you are using for instructions on how to obtain " << T::name() << "." << std::endl;
+    throw mcrl2::runtime_error(std::string("The SMT solver ") + T::name() + " is not available. \n" + 
+                     "Consult the manual of the tool you are using for instructions on how to obtain " + T::name() + ".");
 
     return false;
   }

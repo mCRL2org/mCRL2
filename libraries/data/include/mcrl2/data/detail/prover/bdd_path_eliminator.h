@@ -91,7 +91,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         data_expression v_guard_from_set;
         data_expression v_guard_from_path;
 
-        data_expression_list v_set(a_guard);
+        data_expression_list v_set=push_front(data_expression_list(),a_guard);
         while (v_set != v_auxiliary_set)
         {
           v_auxiliary_set = v_set;
