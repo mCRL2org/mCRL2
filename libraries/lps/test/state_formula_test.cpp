@@ -342,7 +342,7 @@ void test_rename()
 
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(spec));
-  formula = parse_state_formula("mu X. mu X. X", spec);
+  formula = parse_state_formula("mu X. mu X. X", spec, false);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;

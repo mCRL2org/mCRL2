@@ -18,6 +18,8 @@
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/regfrmtrans.h"
+#include "mcrl2/modal_formula/detail/state_formula_name_clash_checker.h"
+#include "mcrl2/modal_formula/detail/state_formula_name_clash_resolver.h"
 
 namespace mcrl2
 {
@@ -198,6 +200,10 @@ void translate_regular_formula(state_formula& f)
 inline
 void complete_state_formula(state_formula& x, lps::specification& spec, bool check_monotonicity = true)
 {
+  if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
+  {
+    x = state_formulas::detail::resolve_name_clashes(x);
+  }
   type_check(x, spec, check_monotonicity);
   translate_regular_formula(x);
   spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
@@ -210,7 +216,7 @@ void complete_state_formula(state_formula& x, lps::specification& spec, bool che
 // may cause internal names to change.
 /// \param formula_stream A stream from which can be read
 /// \param spec A linear process specification
-/// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous
+/// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous. Furthermore, name clashes are resolved.
 /// \return The converted modal formula
 inline
 state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true)
