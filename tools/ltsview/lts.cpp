@@ -305,12 +305,12 @@ bool LTS::readFromFile(const std::string& filename)
   initialState = states[mcrl2_lts.initial_state()];
   simulation->setInitialState(initialState);
 
-  for (transition_const_range r=mcrl2_lts.get_transitions() ; !r.empty(); r.advance_begin(1))
+  const std::vector<transition> &trans=mcrl2_lts.get_transitions();
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition ti=r.front();
-    State* s1 = states[ti.from()];
-    State* s2 = states[ti.to()];
-    Transition* t = new Transition(s1,s2,static_cast<int>(ti.label()));
+    State* s1 = states[r->from()];
+    State* s2 = states[r->to()];
+    Transition* t = new Transition(s1,s2,static_cast<int>(r->label()));
     if (s1 != s2)
     {
       s1->addOutTransition(t);

@@ -632,12 +632,12 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
+    const std::vector<transition> &trans=l.get_transitions();
+    for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r) 
     {
-      const transition t=r.front();
-      if (visited[t.from()])
+      if (visited[r->from()])
       {
-        label_map[t.label()] = 1;
+        label_map[r->label()] = 1;
       }
     }
 
@@ -652,12 +652,12 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
+    const std::vector<transition> &trans1=l.get_transitions();
+    for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r) 
     {
-      const transition t=r.front();
-      if (visited[t.from()])
+      if (visited[r->from()])
       {
-        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
+        new_lts.add_transition(transition(state_map[r->from()],label_map[r->label()],state_map[r->to()]));
       }
     }
 

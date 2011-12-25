@@ -88,13 +88,13 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
-        for (lts::transition_const_range r = lts0.get_transitions(); !r.empty(); r.advance_begin(1))
+        const std::vector<lts::transition> &trans=lts0.get_transitions();
+        for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
-          lts::transition tr = r.front();
-          if (s == tr.from())
+          if (s == r->from())
           {
-            lts::detail::action_label_lts a = lts0.action_label(tr.label());
-            state_type t = tr.to();
+            lts::detail::action_label_lts a = lts0.action_label(r->label());
+            state_type t = r->to();
             v.push_back(imp(sat_top(a, alpha), RHS(phi, t)));
           }
         }
@@ -107,13 +107,13 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
-        for (lts::transition_const_range r = lts0.get_transitions(); !r.empty(); r.advance_begin(1))
+        const std::vector<lts::transition> &trans=lts0.get_transitions();
+        for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
-          lts::transition tr = r.front();
-          if (s == tr.from())
+          if (s == r->from())
           {
-            lts::detail::action_label_lts a = lts0.action_label(tr.label());
-            state_type t = tr.to();
+            lts::detail::action_label_lts a = lts0.action_label(r->label());
+            state_type t = r->to();
             v.push_back(and_(sat_top(a, alpha), RHS(phi, t)));
           }
         }

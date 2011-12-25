@@ -123,9 +123,10 @@ class bisim_partitioner
       // used. A set is used to remove double occurrences of transitions.
       std::set < transition > resulting_transitions;
 
-      for (transition_const_range t=aut.get_transitions(); !t.empty(); t.advance_begin(1))
+      const std::vector<transition> & trans=aut.get_transitions();
+      for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
       {
-        const transition i=t.front();
+        const transition i=*t;
         if (!branching ||
             !aut.is_tau(i.label()) ||
             get_eq_class(i.from())!=get_eq_class(i.to()) ||
@@ -291,9 +292,10 @@ class bisim_partitioner
         // when calculating ia strong bisimulation reduction.
         size_t initial_partition_non_inert_counter=0;
         size_t current_inert_transition_counter=0;
-        for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+        const std::vector<transition> & trans=aut.get_transitions();
+        for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         { 
-          const transition t=r.front();
+          const transition t= *r;
           if (branching && aut.is_tau(t.label()))
           {
             if (preserve_divergences && t.from()==t.to())
@@ -310,9 +312,10 @@ class bisim_partitioner
         initial_partition.non_inert_transitions.reserve(current_inert_transition_counter);
       }
 
-      for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+      const std::vector<transition> & trans=aut.get_transitions();
+      for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
       {
-        const transition t=r.front();
+        const transition t= *r;
 
         if (branching && aut.is_tau(t.label()))
         {
@@ -326,9 +329,9 @@ class bisim_partitioner
             bottom_state=false;
           }
         }
-        transition_const_range next_i=r;
-        next_i.advance_begin(1);
-        if (next_i.empty() || t.from()!=next_i.front().from())
+        std::vector<transition>::const_iterator next_i=r;
+        ++next_i;
+        if (next_i==trans.end() || t.from()!=next_i->from())
         {
           // store the current from state
           for (; last_non_stored_state_number<t.from(); ++last_non_stored_state_number)
@@ -363,9 +366,10 @@ class bisim_partitioner
 
       // Store the non-inert transitions (i.e. the non tau transitions)
       aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
-      for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+      const std::vector<transition> & trans1=aut.get_transitions();
+      for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
       {
-        const transition t=r.front();
+        const transition t= *r;
         if (!branching || !aut.is_tau(t.label()))
         {
           // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.

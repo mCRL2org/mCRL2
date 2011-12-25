@@ -122,14 +122,6 @@ class transition
     }
 };
 
-/// \brief An iterator const range to visit transitions.
-typedef boost::iterator_range<std::vector<transition>::const_iterator>
-transition_const_range;
-
-/// \brief An iterator range to visit and change transitions.
-typedef boost::iterator_range<std::vector<transition>::iterator>
-transition_range;
-
 }
 }
 

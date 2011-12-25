@@ -52,12 +52,12 @@ inline size_t to(const outgoing_transitions_per_state_t::const_iterator& i)
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state(transition_const_range r)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition> &trans)
 {
   outgoing_transitions_per_state_t result;
-  for (; !r.empty(); r.advance_begin(1))
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t = r.front();
+    const transition t = *r;
     result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
                     t.from(), std::pair<transition::size_type, transition::size_type>(t.label(), t.to())));
   }
@@ -66,12 +66,12 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(transitio
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(transition_const_range r)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition> &trans)
 {
   outgoing_transitions_per_state_t result;
-  for (; !r.empty(); r.advance_begin(1))
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t = r.front();
+    const transition t =*r;
     result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
                     t.to(), std::pair<transition::size_type, transition::size_type>(t.label(), t.from())));
   }
@@ -101,12 +101,12 @@ inline size_t to(const outgoing_transitions_per_state_action_t::const_iterator& 
 }
 
 /// \brief Provide the transitions as a multimap accessible per from state and label.
-inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(transition_const_range r)
+inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(const std::vector<transition> &trans)
 {
   outgoing_transitions_per_state_action_t result;
-  for (; !r.empty(); r.advance_begin(1))
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t = r.front();
+    const transition t = *r;
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
                     std::pair<transition::size_type, transition::size_type>(t.from(), t.label()), t.to()));
   }
@@ -115,12 +115,12 @@ inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_ac
 
 /// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
 inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair_reversed(
-  transition_const_range r)
+  const std::vector<transition> &trans)
 {
   outgoing_transitions_per_state_action_t result;
-  for (; !r.empty(); r.advance_begin(1))
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t = r.front();
+    const transition t = *r;
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
                     std::pair<transition::size_type, transition::size_type>(t.to(), t.label()), t.from()));
   }

@@ -106,29 +106,29 @@ class lts
 
   protected:
 
-    states_size_type nstates;
-    states_size_type init_state;
-    std::vector<transition> transitions;
-    atermpp::vector<STATE_LABEL_T> state_labels;
-    atermpp::vector<ACTION_LABEL_T> action_labels;
-    std::vector<bool> taus; // A vector indicating which labels are to be viewed as tau's.
+    states_size_type m_nstates;
+    states_size_type m_init_state;
+    std::vector<transition> m_transitions;
+    atermpp::vector<STATE_LABEL_T> m_state_labels;
+    atermpp::vector<ACTION_LABEL_T> m_action_labels;
+    std::vector<bool> m_taus; // A vector indicating which labels are to be viewed as tau's.
 
   public:
 
     /** \brief Creates an empty LTS.
      */
-    lts():nstates(0)
+    lts():m_nstates(0)
     {};
 
     /** \brief Creates a copy of the supplied LTS.
      * \param[in] l The LTS to copy. */
     lts(const lts& l):
-      nstates(l.nstates),
-      init_state(l.init_state),
-      transitions(l.transitions),
-      state_labels(l.state_labels),
-      action_labels(l.action_labels),
-      taus(l.taus)
+      m_nstates(l.m_nstates),
+      m_init_state(l.m_init_state),
+      m_transitions(l.m_transitions),
+      m_state_labels(l.m_state_labels),
+      m_action_labels(l.m_action_labels),
+      m_taus(l.m_taus)
     {};
 
     /** \brief Standard destructor for the class lts.
@@ -142,19 +142,19 @@ class lts
     void swap(lts& l)
     {
       {
-        const states_size_type aux=init_state;
-        init_state=l.init_state;
-        l.init_state=aux;
+        const states_size_type aux=m_init_state;
+        m_init_state=l.m_init_state;
+        l.m_init_state=aux;
       }
       {
-        const states_size_type aux=nstates;
-        nstates=l.nstates;
-        l.nstates=aux;
+        const states_size_type aux=m_nstates;
+        m_nstates=l.m_nstates;
+        l.m_nstates=aux;
       }
-      transitions.swap(l.transitions);
-      state_labels.swap(l.state_labels);
-      taus.swap(l.taus);
-      action_labels.swap(l.action_labels);
+      m_transitions.swap(l.m_transitions);
+      m_state_labels.swap(l.m_state_labels);
+      m_taus.swap(l.m_taus);
+      m_action_labels.swap(l.m_action_labels);
     };
 
     /** \brief Gets the lts_type of the lts.
@@ -168,7 +168,7 @@ class lts
      * \return The number of states of this LTS. */
     states_size_type num_states() const
     {
-      return nstates;
+      return m_nstates;
     }
 
     /** \brief Gets the number of state labels of this LTS.
@@ -178,28 +178,28 @@ class lts
      *  \return The number of state labels of this LTS. */
     states_size_type num_state_labels() const
     {
-      return state_labels.size();
+      return m_state_labels.size();
     }
 
     /** \brief Sets the number of states of this LTS.
      * \param[in] n The number of states of this LTS. */
     void set_num_states(const states_size_type n, const bool has_state_labels = true)
     {
-      nstates = n;
+      m_nstates = n;
       if (has_state_labels)
       {
-        if (state_labels.size() > 0)
+        if (m_state_labels.size() > 0)
         {
-          state_labels.resize(n);
+          m_state_labels.resize(n);
         }
         else
         {
-          state_labels = atermpp::vector<STATE_LABEL_T>();
+          m_state_labels = atermpp::vector<STATE_LABEL_T>();
         }
       }
       else
       {
-        state_labels = atermpp::vector<STATE_LABEL_T>();
+        m_state_labels = atermpp::vector<STATE_LABEL_T>();
       }
     }
 
@@ -207,7 +207,7 @@ class lts
      * \return The number of transitions of this LTS. */
     transitions_size_type num_transitions() const
     {
-      return transitions.size();
+      return m_transitions.size();
     }
 
     /** \brief Sets the number of action labels of this LTS.
@@ -215,21 +215,21 @@ class lts
      *          these are set to the default action label. */
     void set_num_action_labels(const labels_size_type n)
     {
-      action_labels.resize(n);
+      m_action_labels.resize(n);
     }
 
     /** \brief Gets the number of action labels of this LTS.
      * \return The number of action labels of this LTS. */
     labels_size_type num_action_labels() const
     {
-      return action_labels.size();
+      return m_action_labels.size();
     }
 
     /** \brief Gets the initial state number of this LTS.
      * \return The number of the initial state of this LTS. */
     states_size_type initial_state() const
     {
-      return init_state;
+      return m_init_state;
     }
 
     /** \brief Sets the initial state number of this LTS.
@@ -237,8 +237,8 @@ class lts
      * state. */
     void set_initial_state(states_size_type state)
     {
-      assert(state<nstates);
-      init_state = state;
+      assert(state<m_nstates);
+      m_init_state = state;
     }
 
     /** \brief Adds a state to this LTS.
@@ -252,14 +252,14 @@ class lts
     {
       if (label==STATE_LABEL_T())
       {
-        assert(state_labels.size()==0);
+        assert(m_state_labels.size()==0);
       }
       else
       {
-        assert(nstates==state_labels.size());
-        state_labels.push_back(label);
+        assert(m_nstates==m_state_labels.size());
+        m_state_labels.push_back(label);
       }
-      return nstates++;
+      return m_nstates++;
     }
 
     /** \brief Adds an action with a label to this LTS.
@@ -269,10 +269,10 @@ class lts
      * \return The number of the added label. */
     labels_size_type add_action(const ACTION_LABEL_T label, bool is_tau = false)
     {
-      assert(action_labels.size()==taus.size());
-      const labels_size_type label_index=action_labels.size();
-      taus.push_back(is_tau);
-      action_labels.push_back(label);
+      assert(m_action_labels.size()==m_taus.size());
+      const labels_size_type label_index=m_action_labels.size();
+      m_taus.push_back(is_tau);
+      m_action_labels.push_back(label);
       return label_index;
     }
 
@@ -281,9 +281,9 @@ class lts
      * \param[in] label The label that will be assigned to the state. */
     void set_state_label(states_size_type state, STATE_LABEL_T label)
     {
-      assert(state<nstates);
-      assert(nstates==state_labels.size());
-      state_labels[state] = label;
+      assert(state<m_nstates);
+      assert(m_nstates==m_state_labels.size());
+      m_state_labels[state] = label;
     }
 
     /** \brief Sets the label of an action.
@@ -292,10 +292,10 @@ class lts
      * \param[in] is_tau Indicates whether the label is a tau action. */
     void set_action_label(labels_size_type action, ACTION_LABEL_T label, bool is_tau = false)
     {
-      assert(action<action_labels.size());
-      action_labels[action] = label;
-      assert(action<taus.size());
-      taus[action] = is_tau;
+      assert(action<m_action_labels.size());
+      m_action_labels[action] = label;
+      assert(action<m_taus.size());
+      m_taus[action] = is_tau;
     }
     ;
 
@@ -304,9 +304,9 @@ class lts
      * \return The label of the state. */
     STATE_LABEL_T state_label(const states_size_type state) const
     {
-      assert(state<nstates);
-      assert(nstates==state_labels.size());
-      return state_labels[state];
+      assert(state<m_nstates);
+      assert(m_nstates==m_state_labels.size());
+      return m_state_labels[state];
     }
 
     /** \brief Gets the label of an action.
@@ -315,8 +315,8 @@ class lts
 
     ACTION_LABEL_T action_label(const labels_size_type action) const
     {
-      assert(action < action_labels.size());
-      return action_labels[action];
+      assert(action < m_action_labels.size());
+      return m_action_labels[action];
     }
 
     /** \brief Clear the transitions of an lts.
@@ -325,7 +325,7 @@ class lts
      *          action labels untouched. */
     void clear_transitions()
     {
-      transitions = std::vector<transition>();
+      m_transitions = std::vector<transition>();
     }
 
     /** \brief Clear the action labels of an lts.
@@ -335,8 +335,8 @@ class lts
      *           It will not change the number of action labels. */
     void clear_actions()
     {
-      action_labels = atermpp::vector<ACTION_LABEL_T>();
-      taus = std::vector<bool>();
+      m_action_labels = atermpp::vector<ACTION_LABEL_T>();
+      m_taus = std::vector<bool>();
     }
 
     /** \brief Clear the labels of an lts.
@@ -345,7 +345,7 @@ class lts
      *           state labels */
     void clear_state_labels()
     {
-      state_labels = atermpp::vector<STATE_LABEL_T>();
+      m_state_labels = atermpp::vector<STATE_LABEL_T>();
     }
 
     /** \brief Clear the transitions system.
@@ -357,23 +357,26 @@ class lts
       clear_state_labels();
       clear_actions();
       clear_transitions();;
-      nstates = 0;
+      m_nstates = 0;
     }
 
-    /** \brief Gets an iterator range to the transitions of this LTS.
-     * \return A const iterator range to the transitions of this LTS. */
-    transition_const_range get_transitions() const
+    /** \brief Gets a const reference to the vector of transitions of the current lts.
+     *  \details As this vector can be huge, it is adviced to avoid
+     *           to copy this vector.
+     * \return   A const reference to the vector. */
+    const std::vector<transition> &get_transitions() const
     {
-      return transition_const_range(transitions);
-    }
+      return m_transitions;
+    } 
 
-    /** \brief Gets an iterator range to the transitions of this LTS.
-     * \return An iterator range to the transitions of this LTS.
-     *         The transitions can be altered. */
-    transition_range get_transitions()
+    /** \brief Gets a reference to the vector of transitions of the current lts.
+     *  \details As this vector can be huge, it is adviced to avoid
+     *           to copy this vector.
+     * \return   A reference to the vector. */
+    std::vector<transition> &get_transitions() 
     {
-      return transition_range(transitions);
-    }
+      return m_transitions;
+    } 
 
     /** \brief Add a transition to the lts.
         \details The transition can be added, even if there are not (yet) valid state and
@@ -381,7 +384,7 @@ class lts
      */
     void add_transition(const transition& t)
     {
-      transitions.push_back(t);
+      m_transitions.push_back(t);
     }
 
     /** \brief Checks whether an action is a tau action.
@@ -390,8 +393,8 @@ class lts
      * \retval false otherwise.  */
     bool is_tau(labels_size_type action) const
     {
-      assert(action<taus.size());
-      return taus[action];
+      assert(action<m_taus.size());
+      return m_taus[action];
     }
 
     /** \brief Sets whether an action is internal, i.e., a tau action.
@@ -399,8 +402,8 @@ class lts
      * \param[in] is_tau Indicates whether the action should become a tau action. */
     void set_tau(labels_size_type action, bool is_tau = true)
     {
-      assert(action<taus.size());
-      taus[action] = is_tau;
+      assert(action<m_taus.size());
+      m_taus[action] = is_tau;
     }
 
     /** \brief Sets all actions with a string that occurs in tau_actions to tau.
@@ -445,12 +448,11 @@ class lts
       // system, because all behavioural reduction algorithms only compare the actions.
       if (!map_multiaction_indices.empty())
       {
-        for (transition_range r=get_transitions(); !r.empty(); r.advance_begin(1))
+        for (std::vector<transition>::iterator i=m_transitions.begin(); i!=m_transitions.end(); i++)
         {
-          transition& t=r.front();
-          if (map_multiaction_indices.count(t.label())>0)
+          if (map_multiaction_indices.count(i->label())>0)
           {
-            t.set_label(map_multiaction_indices[t.label()]);
+            i->set_label(map_multiaction_indices[i->label()]);
           }
         }
       }
@@ -462,7 +464,7 @@ class lts
     */
     bool has_state_info() const
     {
-      return state_labels.size() > 0;
+      return m_state_labels.size() > 0;
     }
 
     /** \brief Sorts the transitions using a sort style.
@@ -473,11 +475,11 @@ class lts
       switch (ts)
       {
         case lbl_tgt_src:
-          sort(transitions.begin(),transitions.end(),detail::compare_transitions_lts);
+          sort(m_transitions.begin(),m_transitions.end(),detail::compare_transitions_lts);
           break;
         case src_lbl_tgt:
         default:
-          sort(transitions.begin(),transitions.end(),detail::compare_transitions_slt);
+          sort(m_transitions.begin(),m_transitions.end(),detail::compare_transitions_slt);
           break;
       }
     }
@@ -494,16 +496,16 @@ class lts
     size_t*
     get_transition_indices()
     {
-      size_t* A = (size_t*)malloc((nstates+1)*sizeof(size_t));
+      size_t* A = (size_t*)malloc((m_nstates+1)*sizeof(size_t));
       if (A == NULL)
       {
         throw mcrl2::runtime_error("Out of memory.");
       }
       size_t t = 0;
       A[0] = 0;
-      for (size_t s = 1; s <= nstates; ++s)
+      for (size_t s = 1; s <= m_nstates; ++s)
       {
-        while (t < num_transitions() && transitions[t].from() == s-1)
+        while (t < num_transitions() && m_transitions[t].from() == s-1)
         {
           ++t;
         }

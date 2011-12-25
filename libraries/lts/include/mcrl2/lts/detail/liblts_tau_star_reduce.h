@@ -38,8 +38,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   // Copy the transitions into a local set of transitions, to which we
   // have access.
 
-  const transition_const_range r=l.get_transitions();
-  atermpp::vector < transition > local_transitions(r.begin(),r.end());
+  std::vector < transition > local_transitions=l.get_transitions();
 
   size_t* trans_lut = l.get_transition_indices();
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,size_t,l.num_states() + 1);

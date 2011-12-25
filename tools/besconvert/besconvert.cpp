@@ -376,9 +376,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       }
 
       m_lts.sort_transitions(lts::src_lbl_tgt);
-      lts::transition_const_range transitions(m_lts.get_transitions());
+      const std::vector<lts::transition> &transitions=m_lts.get_transitions();
 
-      for (lts::transition_const_range::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
       {
         has_outgoing_transition[i->from()] = true;
       }
@@ -403,7 +403,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
       // Build formulas
       size_t cur_state = 0;
-      lts::transition_const_range::const_iterator i = transitions.begin();
+      std::vector<lts::transition>::const_iterator i = transitions.begin();
       atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())

@@ -1503,9 +1503,10 @@ inline void convert_core_lts(CONVERTOR& c,
     }
   }
 
-  for (transition_const_range r=lts_in.get_transitions(); !r.empty(); r.advance_begin(1))
+  const std::vector<transition> &trans=lts_in.get_transitions();
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    lts_out.add_transition(r.front());
+    lts_out.add_transition(*r);
   }
   lts_out.set_initial_state(lts_in.initial_state());
 }

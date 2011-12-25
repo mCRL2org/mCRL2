@@ -86,17 +86,18 @@ void lts_dot_t::save(const string& filename) const
       }
     }
   }
-  for (transition_const_range t=get_transitions();  !t.empty(); t.advance_begin(1))
+  const std::vector<transition> &trans=get_transitions();
+  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t) 
   {
     if (has_state_info())
     {
-      os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" <<
-         mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+      os << state_label(t->from()).name() << "->" << state_label(t->to()).name() << "[label=\"" <<
+         mcrl2::lts::detail::pp(action_label(t->label())) << "\"];" << endl;
     }
     else
     {
-      os << "S" << t.front().from() << " -> " << "S" << t.front().to() << "[label=\"" <<
-         mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+      os << "S" << t->from() << " -> " << "S" << t->to() << "[label=\"" <<
+         mcrl2::lts::detail::pp(action_label(t->label())) << "\"];" << endl;
     }
   }
 
