@@ -127,8 +127,6 @@ MarkStateRuleDialog::~MarkStateRuleDialog()
 
 void MarkStateRuleDialog::loadValues(wxString paramName)
 {
-  // atermpp::set<ATermAppl> domain = lts->getParameterDomain(parameterIndices[paramName]);
-  // atermpp::set<ATermAppl>::iterator dom_it;
   std::vector<std::string> domain = lts->getParameterDomain(parameterIndices[paramName]);
   std::vector<std::string>::iterator dom_it;
   wxArrayString wxvalues;
