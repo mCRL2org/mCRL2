@@ -73,6 +73,18 @@ static function_symbol get_function_symbol_of_head(const data_expression t)
 
 static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm_appl internal_true, RewriterJitty *rewriter)
 {
+
+  size_t max_arity = 0;
+  for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l) 
+  {
+    const size_t current_arity=rewriter->toRewriteFormat(l->lhs()).size();
+    if (current_arity > max_arity + 1)
+    {
+      max_arity = current_arity-1;
+    }
+  }
+
+
   ATermList rules=ATempty;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   { 
@@ -86,14 +98,6 @@ static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm
   ATermList strat = ATmakeList0();
   size_t arity;
 
-  size_t max_arity = 0;
-  for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    if (ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2))) > max_arity + 1)
-    {
-      max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
-    }
-  }
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
   for (size_t i=0; i<max_arity; ++i)
   {
@@ -117,10 +121,10 @@ static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm
       if (ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1)
       {
         atermpp::aterm_appl cond = ATAelementAt(ATLgetFirst(rules),1);
-        ATermList vars = (cond==internal_true)?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm)(ATermList) get_vars(cond));
+        atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));
         atermpp::aterm_appl pars = ATAelementAt(ATLgetFirst(rules),2);
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
         for (size_t i = 0; i < arity; i++)
         {
           bs[i]=false;
@@ -131,28 +135,29 @@ static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm
           if (!is_variable(pars(i+1)))
           {
             bs[i] = true;
-            ATermList evars = get_vars(pars(i+1));
-            for (; !ATisEmpty(evars); evars=ATgetNext(evars))
+            const variable_list evars = get_vars(pars(i+1));
+            for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
-              for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
+              const atermpp::term_list <variable_list> next_vars=pop_front(vars);
+              for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
               {
-                if (ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != ATERM_NON_EXISTING_POSITION)
+                if (std::find(o->begin(),o->end(),*v) != o->end())
                 {
                   bs[j] = true;
                 }
                 j++;
               }
             }
-            vars = ATappend(vars,(ATerm)(ATermList) get_vars(pars(i+1)));
+            vars = push_back(vars,get_vars(pars(i+1)));
           }
           else
           {
             int j = -1;
             bool b = false;
-            for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
+            for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
             {
-              if (ATindexOf(ATLgetFirst(o),pars(i+1),0) != ATERM_NON_EXISTING_POSITION)
+              if (std::find(o->begin(),o->end(),pars(i+1)) != o->end())
               {
                 if (j >= 0)
                 {
@@ -166,7 +171,7 @@ static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm
             {
               bs[i] = true;
             }
-            vars = ATappend(vars,(ATerm)(ATermList) get_vars(pars(i+1)));
+            vars = push_back(vars,get_vars(pars(i+1)));
           }
         }
 
@@ -388,9 +393,9 @@ bool RewriterJitty::removeRewriteRule(const data_equation rule)
   return true;
 }
 
-static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, const atermpp::aterm t)
+static atermpp::aterm subst_values(variable* vars, atermpp::aterm* vals, size_t len, const atermpp::aterm t)
 {
-  if (ATisInt((ATerm)t))
+  if (t.type()==AT_INT)
   {
     return t;
   }
@@ -398,7 +403,7 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
   {
     for (size_t i=0; i<len; i++)
     {
-      if (ATisEqual((ATerm)t,vars[i]))
+      if (t==vars[i])
       {
         return vals[i];
       }
@@ -469,26 +474,27 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
   }
 }
 
+// Match term t with the lhs p of an equation in internal format.
 static bool match_jitty(
-                    ATerm t,
-                    ATerm p,
-                    ATermAppl* vars,
-                    ATerm* vals,
+                    const atermpp::aterm t,
+                    const atermpp::aterm p,
+                    variable* vars,
+                    atermpp::aterm* vals,
                     size_t* len,
                     const size_t maxlen)
 {
-  if (ATisInt(p))
+  if (p.type()==AT_INT)
   {
-    return ATisEqual(p,t);
+    return p==t;
   }
   else if (is_variable(p))
   {
     for (size_t i=0; i<*len; i++)
     {
       assert(i<maxlen);
-      if (ATisEqual(p,vars[i]))
+      if (p==vars[i])
       {
-        if (ATisEqual(t,vals[i]))
+        if (t==vals[i])
         {
           return true;
         }
@@ -499,27 +505,31 @@ static bool match_jitty(
       }
     }
     assert(*len<maxlen);
-    vars[*len] = (ATermAppl) p;
+    vars[*len] = variable(p);
     vals[*len] = t;
     (*len)++;
     return true;
   }
   else
   {
-    if (ATisInt(t) || is_variable(t))
+    if (t.type()==AT_INT || is_variable(t) || is_abstraction(t) || is_where_clause(t))
     {
       return false;
     }
-    if (!ATisEqualAFun(ATgetAFun((ATermAppl) p),ATgetAFun((ATermAppl) t)))
+    // p and t must be aterm_appl's.
+    atermpp::aterm_appl pa=p;
+    atermpp::aterm_appl ta=t;
+
+    if (pa.function()!=ta.function())
     {
       return false;
     }
 
-    size_t arity = ATgetArity(ATgetAFun((ATermAppl) p));
+    size_t arity = pa.size();
 
     for (size_t i=0; i<arity; i++)
     {
-      if (!match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,i),vars,vals,len,maxlen))
+      if (!match_jitty(ta(i),pa(i),vars,vals,len,maxlen))
       {
         return false;
       }
@@ -696,15 +706,16 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 
         size_t max_len = ATgetLength(ATLgetFirst(rule));
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl, max_len);
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,ATerm, max_len);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,variable, max_len);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,atermpp::aterm, max_len);
+
         size_t len = 0;
         bool matches = true;
 
         for (size_t i=1; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty((rewritten[i]==atermpp::aterm())?((ATerm) args[i]):(ATerm)rewritten[i],ATgetArgument(lhs,i),vars,vals,&len,max_len))
+          if (!match_jitty((rewritten[i]==atermpp::aterm())?(args[i]):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len,max_len))
           {
             matches = false;
             break;
