@@ -3454,7 +3454,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
   mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(*DataTerm) <<
               " with PosType " << core::pp_deprecated(PosType) << "" << std::endl;
 
-  if (gsIsBinder(*DataTerm))
+  if (is_abstraction(*DataTerm))
   {
     //The variable declaration of a binder should have at least 1 declaration
     if (ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
@@ -3644,7 +3644,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     }
   }
 
-  if (gsIsWhr(*DataTerm))
+  if (is_where_clause(*DataTerm))
   {
     ATermList WhereVarList=ATmakeList0();
     ATermList NewWhereList=ATmakeList0();

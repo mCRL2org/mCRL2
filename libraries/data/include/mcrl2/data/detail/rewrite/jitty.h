@@ -47,9 +47,7 @@ class RewriterJitty: public Rewriter
     size_t max_vars;
     bool need_rebuild;
 
-    // ATermAppl jitty_true;
-
-    atermpp::map< ATermInt, ATermList > jitty_eqns;
+    atermpp::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
     atermpp::vector < ATermList >  jitty_strat;
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, internal_substitution_type &sigma);
     void build_strategies();

@@ -1391,7 +1391,7 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     assert(ATisAppl(t) && gsIsDataVarId((ATermAppl) t));
     return (nnfvars == NULL) || (ATindexOf(nnfvars,t,0) == ATERM_NON_EXISTING_POSITION);
   }
-  else if (gsIsBinder((ATermAppl) t))
+  else if (is_abstraction(t))
   {
     assert(ATisAppl(t));
     return false; // I assume that lambda, forall and exists are not in normal form by default.
@@ -1399,7 +1399,7 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
   }
   else
   {
-    assert(ATisAppl(t) && gsIsWhr((ATermAppl) t));
+    assert(ATisAppl(t) && is_where_clause(t));
     return false; // I assume that a where clause is not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
@@ -1596,7 +1596,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         assert(false);
         // return calc_inner_term(ATgetFirst((ATermList) t), startarg, nnfvars,true,total_arity);
       }
-      if (gsIsBinder(ATgetFirst((ATermList) t)))
+      if (is_abstraction(ATgetFirst((ATermList) t)))
       {
         atermpp::aterm_appl lambda_term=ATgetFirst((ATermList) t);
         assert(lambda_term(0)=gsMakeLambda());
@@ -1752,7 +1752,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     return pair<bool,string>(rewr || !b, ss.str());
   }
-  else if (gsIsBinder((ATermAppl)t))
+  else if (is_abstraction(t))
   {
     stringstream ss;
     if (ATAgetArgument((ATermAppl)t,0)==gsMakeLambda())
@@ -1818,7 +1818,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
     }
   }
-  else if (gsIsWhr((ATermAppl)t))
+  else if (is_where_clause(t))
   {
 
     stringstream ss;
@@ -2796,7 +2796,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f,
             ");\n"
             "  }\n"
-            "  else if (mcrl2::core::detail::gsIsBinder(a))\n"
+            "  else if (mcrl2::data::is_abstraction(a))\n"
             "  {\n"
             "    return ATmakeAppl(%li,(ATerm)(ATermAppl)a", (long int) get_appl_afun_value(i+1)); // YYYY
 
@@ -2960,14 +2960,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    head=(*(this_rewriter->global_sigma))(mcrl2::data::variable(head));\n"
       "  }\n"
-      "  else if (gsIsWhr(head))\n"
+      "  else if (mcrl2::data::is_where_clause(head))\n"
       "  {\n"
       "    head = this_rewriter->rewrite_where(head,*(this_rewriter->global_sigma));\n"
       "  }\n"
       "  \n"
       "  // Here head has the shape\n"
       "  // variable, u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,\n"
-      "  if (gsIsBinder(head))\n"
+      "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
       "    const atermpp::aterm_appl binder=head(0);\n"
       "    if (binder==gsMakeLambda())\n"
@@ -3054,7 +3054,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
-      "  if (gsIsBinder(t))\n"
+      "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"
       "    atermpp::aterm_appl binder=t(0);\n"
       "    if (binder==gsMakeExists())\n"
@@ -3074,7 +3074,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    assert(0);\n"
       "    return t;\n"
       "  }\n"
-      "  assert(gsIsWhr(t));\n"
+      "  assert(mcrl2::data::is_where_clause(t));\n"
       "  return this_rewriter->rewrite_where(t,*(this_rewriter->global_sigma));\n"
       "}\n");
 

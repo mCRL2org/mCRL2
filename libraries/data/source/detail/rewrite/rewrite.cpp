@@ -53,7 +53,7 @@ struct is_a_variable
 {
   bool operator()(atermpp::aterm t) const
   {
-    return core::detail::gsIsDataVarId(t);
+    return is_variable(t);
   }
 };
 
@@ -314,7 +314,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore. 
 
-  assert(gsIsBinder(t) && t(0)==gsMakeExists());
+  assert(is_abstraction(t) && t(0)==gsMakeExists());
   /* Get Body of Exists */
   const atermpp::aterm_appl t1 = t(2);
 
@@ -393,7 +393,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
-  assert(gsIsBinder(t) && t(0)==gsMakeForall());
+  assert(is_abstraction(t) && t(0)==gsMakeForall());
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = t(2);
   const variable_list vl=t(1);
@@ -431,7 +431,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   /* Find A solution*/
   EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,false,&ES,100);
 
-  /* Create ATermList to store solutions */
+  /* Create lists to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
   atermpp::aterm_appl evaluated_condition=internal_true;
   atermpp::aterm_appl partial_result=internal_true;
@@ -542,85 +542,85 @@ static void check_vars(const data_expression expr, const std::set <variable> &va
 }
 
 //Prototype
-static void checkPattern(ATermAppl p);
+static void checkPattern(const data_expression p);
 
-static void checkPattern(ATermList l)
+static void checkPattern(const data_expression_list l)
 {
-  for (; !ATisEmpty(l); l = ATgetNext(l))
+  for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    checkPattern(ATAgetFirst(l));
+    checkPattern(*i);
   }
 }
 
-static void checkPattern(ATermAppl p)
+static void checkPattern(const data_expression p)
 {
-  if (gsIsDataAppl(p))
+  if (is_application(p))
   {
-    if (gsIsDataVarId(ATAgetArgument(p,0)))
+    if (is_variable(application(p).head()))
     {
-      throw string("variable "+data::pp(variable(ATgetArgument(p,0))) +
+      throw mcrl2::runtime_error(string("variable ") + data::pp(application(p).head()) +
                " is used as head symbol in an application, which is not supported");
     }
-    checkPattern(ATAgetArgument(p,0));
-    checkPattern(ATLgetArgument(p,1));
+    checkPattern(application(p).head());
+    checkPattern(application(p).arguments());
   }
 }
 
-void CheckRewriteRule(const data_equation DataEqn)
+void CheckRewriteRule(const data_equation data_eqn)
 {
-  const variable_list rule_var_list = DataEqn.variables();
+  const variable_list rule_var_list = data_eqn.variables();
   const atermpp::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars
   std::set <variable> lhs_vars;
   try
   {
-    check_vars(DataEqn.lhs(),rule_vars,lhs_vars);
+    check_vars(data_eqn.lhs(),rule_vars,lhs_vars);
   }
   catch (variable& var)
   {
-    // This should never occur if DataEqn is a valid data equation
-    mCRL2log(log::error) << "Data Equation: " << atermpp::aterm_appl(DataEqn) << std::endl;
+    // This should never occur if data_eqn is a valid data equation
+    mCRL2log(log::error) << "Data Equation: " << atermpp::aterm_appl(data_eqn) << std::endl;
     assert(0);
-    throw runtime_error("variable " + pp(var) + " occurs in left-hand side of equation but is not defined (in equation: " + pp(DataEqn) + ")");
+    throw runtime_error("variable " + pp(var) + " occurs in left-hand side of equation but is not defined (in equation: " + pp(data_eqn) + ")");
   }
 
   // check that variables from the condition occur in the lhs
   try
   {
     std::set <variable> dummy;
-    check_vars(DataEqn.condition(),lhs_vars,dummy);
+    check_vars(data_eqn.condition(),lhs_vars,dummy);
   }
   catch (variable& var)
   {
     throw runtime_error("variable " + pp(var) + " occurs in condition of equation but not in left-hand side (in equation: " +
-                    pp(DataEqn) + "); equation cannot be used as rewrite rule");
+                    pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 
   // check that variables from the rhs are occur in the lhs
   try
   {
     std::set <variable> dummy;
-    check_vars(DataEqn.rhs(),lhs_vars,dummy);
+    check_vars(data_eqn.rhs(),lhs_vars,dummy);
   }
   catch (variable& var)
   {
     throw runtime_error("variable " + pp(var) + " occurs in right-hand side of equation but not in left-hand side (in equation: " +
-                pp(DataEqn) + "); equation cannot be used as rewrite rule");
+                pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 
   // check that the lhs is a supported pattern
-  if (is_variable(DataEqn.lhs()))
+  if (is_variable(data_eqn.lhs()))
   {
     throw runtime_error("left-hand side of equation is a variable; this is not allowed for rewriting");
   }
   try
   {
-    checkPattern(DataEqn.lhs());
+    checkPattern(data_eqn.lhs());
   }
-  catch (string& s)
+  catch (mcrl2::runtime_error &s)
   {
-    throw runtime_error(s+" (in equation: " + pp(DataEqn) + "); equation cannot be used as rewrite rule");
+    throw runtime_error(string(s.what()) + " (in equation: " + pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 }
 
@@ -764,9 +764,6 @@ atermpp::aterm_int OpId2Int(const function_symbol term)
 
 atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
 {
-
-  assert(!gsIsNil((ATermAppl)term)); // Originally Nil was returned unchanged, but is hopefully not used anymore. JFG
-
   if (is_variable(term))
   {
     return term;
@@ -776,8 +773,7 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
     atermpp::term_list <atermpp::aterm_appl> l;
     atermpp::aterm_appl arg0 = toInner(application(term).head(), add_opids);
     // Reflect the way of encoding the other arguments!
-    // if (gsIsNil(arg0) || gsIsDataVarId(arg0))
-    if (is_variable(arg0) || gsIsBinder(arg0) || gsIsWhr(arg0))
+    if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
     {
       l = push_front(l, arg0);
     }
@@ -819,17 +815,17 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
     return gsMakeBinder(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
   }
   assert(0); // term has unexpected format.
-  return Apply0((ATerm)(ATermAppl)term);
+  return atermpp::aterm_appl();
 }
 
 data_expression fromInner(atermpp::aterm_appl term)
 {
-  if (gsIsDataVarId((ATermAppl)term))
+  if (is_variable(term))
   {
     return variable(term);
   }
 
-  if (gsIsWhr((ATermAppl)term))
+  if (is_where_clause(term))
   {
     const data_expression body=fromInner(term(0));
     const atermpp::term_list<atermpp::aterm_appl> l=term(1);
@@ -843,7 +839,7 @@ data_expression fromInner(atermpp::aterm_appl term)
     return where_clause(body,lv);
   }
 
-  if (gsIsBinder((ATermAppl)term))
+  if (is_abstraction(term))
   {
     return abstraction(binder_type(term(0)),variable_list(term(1)),fromInner(term(2)));
   }
@@ -852,9 +848,9 @@ data_expression fromInner(atermpp::aterm_appl term)
   atermpp::aterm_appl t = term(0);
   data_expression a;
 
-  if (ATisInt((ATerm)(ATermAppl)t))
+  if (t.type()==AT_INT)
   {
-    a = get_int2term(ATgetInt((ATermInt)(ATerm)(ATermAppl) t));
+    a = get_int2term((atermpp::aterm_int(t)).value());
   }
   else
   {

@@ -212,7 +212,7 @@ bool EnumeratorSolutionsStandard::find_equality(
     return false;
   }
 
-  if (gsIsBinder(t) || gsIsWhr(t))
+  if (is_abstraction(t) || is_where_clause(t))
   {
     return false;
   }
@@ -316,12 +316,12 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   {
     return build_solution_single(t,substituted_vars,exprs);
   }
-  else if (gsIsWhr(t))
+  else if (is_where_clause(t))
   {
     assert(0); // This is a non expected case as t is a normalform.
     return t; // compiler warning
   }
-  else if (gsIsBinder(t))
+  else if (is_abstraction(t))
   {
     const atermpp::aterm_appl t1=t;
     const atermpp::aterm_appl binder=t1(0);
