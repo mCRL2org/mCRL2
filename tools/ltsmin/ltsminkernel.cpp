@@ -333,7 +333,9 @@ blocks */
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
+    {
       mCRL2log(mcrl2::log::verbose) << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    }
     cnt++;
     last_nBlocks = nBlocks;
   }
@@ -610,7 +612,9 @@ int Compare(SVCstateIndex init1, SVCstateIndex init2)
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
+    {
       mCRL2log(mcrl2::log::verbose) << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    }
     cnt++;
     last_nBlocks = nBlocks;
   }

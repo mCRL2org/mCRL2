@@ -234,6 +234,10 @@ std::string pp(const T& x)
   return out.str();
 }
 
+/// \brief Prototypes for aterm overloads
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
+
 } // namespace core
 
 } // namespace mcrl2

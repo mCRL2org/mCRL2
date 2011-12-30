@@ -670,7 +670,6 @@ namespace mcrl2
         core::identifier_string_list temp;
         for (rename_expression_list::const_iterator j=R.begin(); j!=R.end(); ++j)
         {
-          rename_expression r=R.front();
           if (*i == j->target())
           {
             temp=push_front(temp,j->source());
@@ -1922,7 +1921,6 @@ l_ok:
 
     process_expression alphabet_reduction::gsApplyAlpha(process_expression a)
     {
-      process_expression old_a=a;
       // apply the alpha reductions to a.
       // makes sure that the alphabet of a is in the table alphas after the function returns its value
       assert(all_stable);
@@ -2568,7 +2566,6 @@ l_ok:
           if (subs_alpha_rev.count(pn)>0)
           {
             old_pn=subs_alpha_rev[pn];
-            variable_list fpars1=form_pars[old_pn];
             if (form_pars.count(old_pn)>0)
             {
               fpars = form_pars[old_pn];

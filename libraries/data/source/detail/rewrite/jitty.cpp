@@ -71,7 +71,7 @@ static function_symbol get_function_symbol_of_head(const data_expression t)
 
 
 
-static ATermList create_strategy(data_equation_list rules1, const atermpp::aterm_appl internal_true, RewriterJitty *rewriter)
+static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewriter)
 {
 
   size_t max_arity = 0;
@@ -322,7 +322,7 @@ RewriterJitty::RewriterJitty(
     }
     else
     {
-      jitty_strat[i.value()] = create_strategy(reverse(it->second), internal_true,this);
+      jitty_strat[i.value()] = create_strategy(reverse(it->second), this);
     }
   }
 }
@@ -788,7 +788,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
       make_jitty_strat_sufficiently_larger(j);
       if (jitty_strat[j] == NULL)
       {
-        jitty_strat[j] = create_strategy(opids->second, internal_true,this);
+        jitty_strat[j] = create_strategy(opids->second, this);
       }
     }
     need_rebuild = false;

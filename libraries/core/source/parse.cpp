@@ -28,7 +28,7 @@ namespace core {
 namespace detail {
 
 /// \brief Function for resolving parser ambiguities.
-struct D_ParseNode* ambiguity_fn(struct D_Parser *p, int n, struct D_ParseNode **v)
+struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
   core::parser_table table(parser_tables_mcrl2);
   if (n == 2)
