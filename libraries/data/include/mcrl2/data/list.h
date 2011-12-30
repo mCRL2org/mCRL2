@@ -30,9 +30,6 @@
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
 
-// Workaround for OS X with Apples patched gcc 4.0.1
-#undef nil
-
 namespace mcrl2 {
 
   namespace data {
@@ -703,18 +700,6 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument
-      ///        head from an application
-      /// \param e A data expression
-      /// \pre head is defined for e
-      /// \return The argument of e that corresponds to head
-      inline
-      data_expression head(const data_expression& e)
-      {
-        assert(is_cons_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
@@ -722,91 +707,19 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_concat_application(e));
+        assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
+      ///        arg from an application
       /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      /// \pre arg is defined for e
+      /// \return The argument of e that corresponds to arg
       inline
-      data_expression arg1(const data_expression& e)
+      data_expression arg(const data_expression& e)
       {
-        assert(is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
-      inline
-      data_expression arg2(const data_expression& e)
-      {
-        assert(is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        list from an application
-      /// \param e A data expression
-      /// \pre list is defined for e
-      /// \return The argument of e that corresponds to list
-      inline
-      data_expression list(const data_expression& e)
-      {
-        assert(is_count_application(e) || is_element_at_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        tail from an application
-      /// \param e A data expression
-      /// \pre tail is defined for e
-      /// \return The argument of e that corresponds to tail
-      inline
-      data_expression tail(const data_expression& e)
-      {
-        assert(is_cons_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        rhead from an application
-      /// \param e A data expression
-      /// \pre rhead is defined for e
-      /// \return The argument of e that corresponds to rhead
-      inline
-      data_expression rhead(const data_expression& e)
-      {
-        assert(is_snoc_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        position from an application
-      /// \param e A data expression
-      /// \pre position is defined for e
-      /// \return The argument of e that corresponds to position
-      inline
-      data_expression position(const data_expression& e)
-      {
-        assert(is_element_at_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        rtail from an application
-      /// \param e A data expression
-      /// \pre rtail is defined for e
-      /// \return The argument of e that corresponds to rtail
-      inline
-      data_expression rtail(const data_expression& e)
-      {
-        assert(is_snoc_application(e));
+        assert(is_count_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -818,7 +731,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_concat_application(e));
+        assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 

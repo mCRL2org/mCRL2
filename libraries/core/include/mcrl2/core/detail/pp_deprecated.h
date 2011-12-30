@@ -1599,7 +1599,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
       }
     }
   }
-  else if (data::sort_real::is_redfracwhr_application(data::data_expression(Part)))
+  else if (data::sort_real::is_reduce_fraction_where_application(data::data_expression(Part)))
   {
     data::data_expression e(Part);
     Part = data::sort_real::plus(data::sort_real::int2real(data::sort_real::arg2(e)),
@@ -1613,10 +1613,6 @@ static ATermAppl
 reconstruct_container_expression(ATermAppl Part)
 {
   using namespace mcrl2::data;
-  using namespace mcrl2::data::sort_list;
-  using namespace mcrl2::data::sort_set;
-  using namespace mcrl2::data::sort_fset;
-  using namespace mcrl2::data::sort_bag;
 
   if (!gsIsDataAppl(Part) && !gsIsOpId(Part))
   {
@@ -1624,47 +1620,47 @@ reconstruct_container_expression(ATermAppl Part)
   }
 
   data_expression expr(Part);
-  if (is_cons_application(expr))
+  if (sort_list::is_cons_application(expr))
   {
     data_expression_vector elements;
-    while (is_cons_application(expr))
+    while (sort_list::is_cons_application(expr))
     {
-      elements.push_back(sort_list::head(expr));
-      expr = sort_list::tail(expr);
+      elements.push_back(sort_list::left(expr));
+      expr = sort_list::right(expr);
     }
 
-    if (is_nil_function_symbol(expr))
+    if (sort_list::is_nil_function_symbol(expr))
     {
-      Part = list_enumeration(expr.sort(), elements);
+      Part = sort_list::list_enumeration(expr.sort(), elements);
     }
   }
-  else if (is_snoc_application(expr))
+  else if (sort_list::is_snoc_application(expr))
   {
     data_expression_vector elements;
-    while (is_snoc_application(expr))
+    while (sort_list::is_snoc_application(expr))
     {
-      elements.insert(elements.begin(), sort_list::rhead(expr));
-      expr = sort_list::rtail(expr);
+      elements.insert(elements.begin(), sort_list::right(expr));
+      expr = sort_list::left(expr);
     }
 
-    if (is_nil_function_symbol(expr))
+    if (sort_list::is_nil_function_symbol(expr))
     {
-      Part = list_enumeration(expr.sort(), elements);
+      Part = sort_list::list_enumeration(expr.sort(), elements);
     }
   }
-  else if (is_setconstructor_application(expr))
+  else if (sort_set::is_constructor_application(expr))
   {
     //mCRL2log(log::debug) << "Reconstructing implementation of set comprehension" << std::endl;
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
     sort_expression element_sort(*function_sort(sort_set::left(expr).sort()).domain().begin());
-    if (is_false_function_function_symbol(sort_set::left(expr)))
+    if (sort_set::is_false_function_function_symbol(sort_set::left(expr)))
     {
-      Part = reconstruct_container_expression(static_cast<ATermAppl>(setfset(element_sort, sort_set::right(expr))));
+      Part = reconstruct_container_expression(static_cast<ATermAppl>(sort_set::set_fset(element_sort, sort_set::right(expr))));
     }
-    else if (is_true_function_function_symbol(sort_set::left(expr)))
+    else if (sort_set::is_true_function_function_symbol(sort_set::left(expr)))
     {
-      Part = static_cast<ATermAppl>(setcomplement(element_sort, setfset(element_sort, sort_set::right(expr))));
+      Part = static_cast<ATermAppl>(sort_set::complement(element_sort, sort_set::set_fset(element_sort, sort_set::right(expr))));
     }
     else
     {
@@ -1673,7 +1669,7 @@ reconstruct_container_expression(ATermAppl Part)
       ATermAppl var = gsMakeDataVarId(gsFreshString2ATermAppl("x",
                                       (ATerm) static_cast<ATermAppl>(expr), true), se_func_dom);
       ATermAppl body;
-      if (data::sort_fset::is_fset_empty_function_symbol(sort_set::right(expr)))
+      if (data::sort_fset::is_empty_function_symbol(sort_set::right(expr)))
       {
         body = sort_set::left(expr)(data::variable(var));
 
@@ -1691,13 +1687,13 @@ reconstruct_container_expression(ATermAppl Part)
       else
       {
         data_expression lhs(sort_set::left(expr)(data::variable(var)));
-        data_expression rhs(setin(element_sort, data_expression(var), setfset(element_sort, sort_set::right(expr))));
+        data_expression rhs(sort_set::in(element_sort, data_expression(var), sort_set::set_fset(element_sort, sort_set::right(expr))));
         body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
       }
       Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1((ATerm) var), body);
     }
   }
-  else if (sort_set::is_setfset_application(expr))
+  else if (sort_set::is_set_fset_application(expr))
   {
     //mCRL2log(log::debug) << "Reconstructing SetFSet" << std::endl;
     //try to reconstruct Part as the empty set or as a set enumeration
@@ -1708,23 +1704,23 @@ reconstruct_container_expression(ATermAppl Part)
       Part = static_cast<ATermAppl>(result);
     }
   }
-  else if (sort_fset::is_fset_empty_function_symbol(expr))
+  else if (sort_fset::is_empty_function_symbol(expr))
   {
     Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
   }
-  else if (sort_fset::is_fset_cons_application(expr) || sort_fset::is_fsetinsert_application(expr))
+  else if (sort_fset::is_cons_application(expr) || sort_fset::is_insert_application(expr))
   {
     data_expression de_fset(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
-    while (!sort_fset::is_fset_empty_function_symbol(de_fset) && elts_is_consistent)
+    while (!sort_fset::is_empty_function_symbol(de_fset) && elts_is_consistent)
     {
-      if (sort_fset::is_fset_cons_application(de_fset))
+      if (sort_fset::is_cons_application(de_fset))
       {
-        elements.push_back(sort_fset::head(de_fset));
-        de_fset = sort_fset::tail(de_fset);
+        elements.push_back(sort_fset::left(de_fset));
+        de_fset = sort_fset::right(de_fset);
       }
-      else if (sort_fset::is_fsetinsert_application(de_fset))
+      else if (sort_fset::is_insert_application(de_fset))
       {
         elements.push_back(sort_fset::left(de_fset));
         de_fset = sort_fset::right(de_fset);
@@ -1739,7 +1735,7 @@ reconstruct_container_expression(ATermAppl Part)
       Part = static_cast<ATermAppl>(sort_set::set_enumeration(expr.sort(), elements));
     }
   }
-  else if (sort_set::is_setcomprehension_application(expr))
+  else if (sort_set::is_set_comprehension_application(expr))
   {
     data_expression body(sort_set::arg(expr));
     data_expression_vector variables;
@@ -1759,14 +1755,14 @@ reconstruct_container_expression(ATermAppl Part)
     Part = gsMakeBinder(gsMakeSetComp(), atermpp::convert<data_expression_list>(variables), body);
   }
 
-  else if (sort_bag::is_bagconstructor_application(expr))
+  else if (sort_bag::is_constructor_application(expr))
   {
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
     sort_expression element_sort = *function_sort(sort_bag::left(expr).sort()).domain().begin();
-    if (is_zero_function_function_symbol(sort_bag::left(expr)))
+    if (sort_bag::is_zero_function_function_symbol(sort_bag::left(expr)))
     {
-      Part = reconstruct_container_expression(static_cast<ATermAppl>(bagfbag(element_sort, sort_bag::right(expr))));
+      Part = reconstruct_container_expression(static_cast<ATermAppl>(sort_bag::bag_fbag(element_sort, sort_bag::right(expr))));
     }
     else
     {
@@ -1795,14 +1791,14 @@ reconstruct_container_expression(ATermAppl Part)
           }
         }
       }
-      if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(expr)))
+      if (!sort_fbag::is_empty_function_symbol(sort_bag::right(expr)))
       {
-        body = sort_nat::swap_zero(body, sort_bag::bagcount(element_sort, var, sort_bag::bagfbag(element_sort, sort_bag::right(expr))));
+        body = sort_nat::swap_zero(body, sort_bag::count(element_sort, var, sort_bag::bag_fbag(element_sort, sort_bag::right(expr))));
       }
       Part = gsMakeBinder(gsMakeBagComp(), make_list(var), body);
     }
   }
-  else if (sort_bag::is_bagfbag_application(expr))
+  else if (sort_bag::is_bag_fbag_application(expr))
   {
     //mCRL2log(log::debug) << "Reconstructing BagFBag" << std::endl;
     //try to reconstruct Part as the empty bag or as a bag enumeration
@@ -1813,30 +1809,30 @@ reconstruct_container_expression(ATermAppl Part)
       Part = static_cast<ATermAppl>(result);
     }
   }
-  else if (sort_fbag::is_fbag_empty_function_symbol(expr))
+  else if (sort_fbag::is_empty_function_symbol(expr))
   {
     Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
   }
-  else if (sort_fbag::is_fbag_cons_application(expr) || sort_fbag::is_fbaginsert_application(expr) || sort_fbag::is_fbagcinsert_application(expr))
+  else if (sort_fbag::is_cons_application(expr) || sort_fbag::is_insert_application(expr) || sort_fbag::is_cinsert_application(expr))
   {
     data_expression de_fbag(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
-    while (!sort_fbag::is_fbag_empty_function_symbol(de_fbag) && elts_is_consistent)
+    while (!sort_fbag::is_empty_function_symbol(de_fbag) && elts_is_consistent)
     {
-      if (sort_fbag::is_fbag_cons_application(de_fbag))
+      if (sort_fbag::is_cons_application(de_fbag))
       {
-        elements.push_back(sort_fbag::head(de_fbag));
-        elements.push_back(sort_fbag::headcount(de_fbag));
-        de_fbag = sort_fbag::tail(de_fbag);
+        elements.push_back(sort_fbag::arg1(de_fbag));
+        elements.push_back(sort_fbag::arg2(de_fbag));
+        de_fbag = sort_fbag::arg3(de_fbag);
       }
-      else if (sort_fbag::is_fbaginsert_application(de_fbag))
+      else if (sort_fbag::is_insert_application(de_fbag))
       {
         elements.push_back(sort_fbag::arg1(de_fbag));
         elements.push_back(sort_nat::cnat(sort_fbag::arg2(de_fbag)));
         de_fbag = sort_fbag::arg3(de_fbag);
       }
-      else if (sort_fbag::is_fbagcinsert_application(de_fbag))
+      else if (sort_fbag::is_cinsert_application(de_fbag))
       {
         elements.push_back(sort_fbag::arg1(de_fbag));
         elements.push_back(sort_fbag::arg2(de_fbag));
@@ -1852,7 +1848,7 @@ reconstruct_container_expression(ATermAppl Part)
       Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), elements));
     }
   }
-  else if (sort_bag::is_bagcomprehension_application(expr))
+  else if (sort_bag::is_bag_comprehension_application(expr))
   {
     data_expression body(sort_bag::arg(expr));
     data_expression_vector variables;
@@ -3139,7 +3135,7 @@ bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength)
     (IdName == data::sort_bool::not_name())      ||
     (IdName == data::sort_int::negate_name())      ||
     (IdName == data::sort_list::count_name()) ||
-    (IdName == data::sort_set::setcomplement_name());
+    (IdName == data::sort_set::complement_name());
 }
 
 bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength)
@@ -3169,17 +3165,17 @@ bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength)
     (IdName == data::sort_list::concat_name())       ||
     (IdName == data::sort_real::plus_name())          ||
     (IdName == data::sort_real::minus_name())         ||
-    (IdName == data::sort_set::setunion_name())     ||
-    (IdName == data::sort_set::setdifference_name())      ||
-    (IdName == data::sort_bag::bagjoin_name())      ||
-    (IdName == data::sort_bag::bagdifference_name())      ||
+    (IdName == data::sort_set::union_name())     ||
+    (IdName == data::sort_set::difference_name())      ||
+    (IdName == data::sort_bag::join_name())      ||
+    (IdName == data::sort_bag::difference_name())      ||
     (IdName == data::sort_int::div_name())          ||
     (IdName == data::sort_int::mod_name())          ||
     (IdName == data::sort_real::divides_name())       ||
     (IdName == data::sort_int::times_name())         ||
     (IdName == data::sort_list::element_at_name())        ||
-    (IdName == data::sort_set::setintersection_name()) ||
-    (IdName == data::sort_bag::bagintersect_name());
+    (IdName == data::sort_set::intersection_name()) ||
+    (IdName == data::sort_bag::intersection_name());
 }
 
 int gsPrecIdPrefix()
@@ -3223,8 +3219,8 @@ int gsPrecIdInfix(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
-    (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
-    (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
+    (IdName == data::sort_set::union_name()) || (IdName == data::sort_set::difference_name()) ||
+    (IdName == data::sort_bag::join_name()) || (IdName == data::sort_bag::difference_name())
   )
   {
     return 9;
@@ -3236,8 +3232,8 @@ int gsPrecIdInfix(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
-    (IdName == data::sort_set::setintersection_name()) ||
-    (IdName == data::sort_bag::bagintersect_name())
+    (IdName == data::sort_set::intersection_name()) ||
+    (IdName == data::sort_bag::intersection_name())
   )
   {
     return 11;
@@ -3285,8 +3281,8 @@ int gsPrecIdInfixLeft(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
-    (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
-    (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
+    (IdName == data::sort_set::union_name()) || (IdName == data::sort_set::difference_name()) ||
+    (IdName == data::sort_bag::join_name()) || (IdName == data::sort_bag::difference_name())
   )
   {
     return 9;
@@ -3298,8 +3294,8 @@ int gsPrecIdInfixLeft(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
-    (IdName == data::sort_set::setintersection_name()) ||
-    (IdName == data::sort_bag::bagintersect_name())
+    (IdName == data::sort_set::intersection_name()) ||
+    (IdName == data::sort_bag::intersection_name())
   )
   {
     return 11;
@@ -3347,8 +3343,8 @@ int gsPrecIdInfixRight(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
-    (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
-    (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
+    (IdName == data::sort_set::union_name()) || (IdName == data::sort_set::difference_name()) ||
+    (IdName == data::sort_bag::join_name()) || (IdName == data::sort_bag::difference_name())
   )
   {
     return 10;
@@ -3360,8 +3356,8 @@ int gsPrecIdInfixRight(ATermAppl IdName)
   }
   else if (
     (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
-    (IdName == data::sort_set::setintersection_name()) ||
-    (IdName == data::sort_bag::bagintersect_name())
+    (IdName == data::sort_set::intersection_name()) ||
+    (IdName == data::sort_bag::intersection_name())
   )
   {
     return 12;

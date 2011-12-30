@@ -762,19 +762,19 @@ namespace mcrl2 {
       /// \brief Generate identifier \@gtesubtb
       /// \return Identifier \@gtesubtb
       inline
-      core::identifier_string const& gtesubtb_name()
+      core::identifier_string const& gte_subtract_with_borrow_name()
       {
-        static core::identifier_string gtesubtb_name = core::detail::initialise_static_expression(gtesubtb_name, core::identifier_string("@gtesubtb"));
-        return gtesubtb_name;
+        static core::identifier_string gte_subtract_with_borrow_name = core::detail::initialise_static_expression(gte_subtract_with_borrow_name, core::identifier_string("@gtesubtb"));
+        return gte_subtract_with_borrow_name;
       }
 
       /// \brief Constructor for function symbol \@gtesubtb
-      /// \return Function symbol gtesubtb
+      /// \return Function symbol gte_subtract_with_borrow
       inline
-      function_symbol const& gtesubtb()
+      function_symbol const& gte_subtract_with_borrow()
       {
-        static function_symbol gtesubtb = core::detail::initialise_static_expression(gtesubtb, function_symbol(gtesubtb_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat())));
-        return gtesubtb;
+        static function_symbol gte_subtract_with_borrow = core::detail::initialise_static_expression(gte_subtract_with_borrow, function_symbol(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat())));
+        return gte_subtract_with_borrow;
       }
 
 
@@ -782,11 +782,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@gtesubtb
       inline
-      bool is_gtesubtb_function_symbol(const atermpp::aterm_appl& e)
+      bool is_gte_subtract_with_borrow_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == gtesubtb();
+          return function_symbol(e) == gte_subtract_with_borrow();
         }
         return false;
       }
@@ -797,21 +797,21 @@ namespace mcrl2 {
       /// \param arg2 A data expression
       /// \return Application of \@gtesubtb to a number of arguments
       inline
-      application gtesubtb(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return gtesubtb()(arg0, arg1, arg2);
+        return gte_subtract_with_borrow()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@gtesubtb
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol gtesubtb to a
+      /// \return true iff e is an application of function symbol gte_subtract_with_borrow to a
       ///     number of arguments
       inline
-      bool is_gtesubtb_application(const atermpp::aterm_appl& e)
+      bool is_gte_subtract_with_borrow_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_gtesubtb_function_symbol(application(e).head());
+          return is_gte_subtract_with_borrow_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1582,19 +1582,19 @@ namespace mcrl2 {
       /// \brief Generate identifier \@gdivmod
       /// \return Identifier \@gdivmod
       inline
-      core::identifier_string const& gdivmod_name()
+      core::identifier_string const& generalised_divmod_name()
       {
-        static core::identifier_string gdivmod_name = core::detail::initialise_static_expression(gdivmod_name, core::identifier_string("@gdivmod"));
-        return gdivmod_name;
+        static core::identifier_string generalised_divmod_name = core::detail::initialise_static_expression(generalised_divmod_name, core::identifier_string("@gdivmod"));
+        return generalised_divmod_name;
       }
 
       /// \brief Constructor for function symbol \@gdivmod
-      /// \return Function symbol gdivmod
+      /// \return Function symbol generalised_divmod
       inline
-      function_symbol const& gdivmod()
+      function_symbol const& generalised_divmod()
       {
-        static function_symbol gdivmod = core::detail::initialise_static_expression(gdivmod, function_symbol(gdivmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair())));
-        return gdivmod;
+        static function_symbol generalised_divmod = core::detail::initialise_static_expression(generalised_divmod, function_symbol(generalised_divmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair())));
+        return generalised_divmod;
       }
 
 
@@ -1602,11 +1602,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@gdivmod
       inline
-      bool is_gdivmod_function_symbol(const atermpp::aterm_appl& e)
+      bool is_generalised_divmod_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == gdivmod();
+          return function_symbol(e) == generalised_divmod();
         }
         return false;
       }
@@ -1617,21 +1617,21 @@ namespace mcrl2 {
       /// \param arg2 A data expression
       /// \return Application of \@gdivmod to a number of arguments
       inline
-      application gdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return gdivmod()(arg0, arg1, arg2);
+        return generalised_divmod()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@gdivmod
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol gdivmod to a
+      /// \return true iff e is an application of function symbol generalised_divmod to a
       ///     number of arguments
       inline
-      bool is_gdivmod_application(const atermpp::aterm_appl& e)
+      bool is_generalised_divmod_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_gdivmod_function_symbol(application(e).head());
+          return is_generalised_divmod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1639,19 +1639,19 @@ namespace mcrl2 {
       /// \brief Generate identifier \@ggdivmod
       /// \return Identifier \@ggdivmod
       inline
-      core::identifier_string const& ggdivmod_name()
+      core::identifier_string const& doubly_generalised_divmod_name()
       {
-        static core::identifier_string ggdivmod_name = core::detail::initialise_static_expression(ggdivmod_name, core::identifier_string("@ggdivmod"));
-        return ggdivmod_name;
+        static core::identifier_string doubly_generalised_divmod_name = core::detail::initialise_static_expression(doubly_generalised_divmod_name, core::identifier_string("@ggdivmod"));
+        return doubly_generalised_divmod_name;
       }
 
       /// \brief Constructor for function symbol \@ggdivmod
-      /// \return Function symbol ggdivmod
+      /// \return Function symbol doubly_generalised_divmod
       inline
-      function_symbol const& ggdivmod()
+      function_symbol const& doubly_generalised_divmod()
       {
-        static function_symbol ggdivmod = core::detail::initialise_static_expression(ggdivmod, function_symbol(ggdivmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair())));
-        return ggdivmod;
+        static function_symbol doubly_generalised_divmod = core::detail::initialise_static_expression(doubly_generalised_divmod, function_symbol(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair())));
+        return doubly_generalised_divmod;
       }
 
 
@@ -1659,11 +1659,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@ggdivmod
       inline
-      bool is_ggdivmod_function_symbol(const atermpp::aterm_appl& e)
+      bool is_doubly_generalised_divmod_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == ggdivmod();
+          return function_symbol(e) == doubly_generalised_divmod();
         }
         return false;
       }
@@ -1674,21 +1674,21 @@ namespace mcrl2 {
       /// \param arg2 A data expression
       /// \return Application of \@ggdivmod to a number of arguments
       inline
-      application ggdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application doubly_generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return ggdivmod()(arg0, arg1, arg2);
+        return doubly_generalised_divmod()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@ggdivmod
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol ggdivmod to a
+      /// \return true iff e is an application of function symbol doubly_generalised_divmod to a
       ///     number of arguments
       inline
-      bool is_ggdivmod_application(const atermpp::aterm_appl& e)
+      bool is_doubly_generalised_divmod_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_ggdivmod_function_symbol(application(e).head());
+          return is_doubly_generalised_divmod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1711,7 +1711,7 @@ namespace mcrl2 {
         result.push_back(plus(sort_pos::pos(), nat()));
         result.push_back(plus(nat(), sort_pos::pos()));
         result.push_back(plus(nat(), nat()));
-        result.push_back(gtesubtb());
+        result.push_back(gte_subtract_with_borrow());
         result.push_back(times(nat(), nat()));
         result.push_back(div());
         result.push_back(mod());
@@ -1726,8 +1726,8 @@ namespace mcrl2 {
         result.push_back(first());
         result.push_back(last());
         result.push_back(divmod());
-        result.push_back(gdivmod());
-        result.push_back(ggdivmod());
+        result.push_back(generalised_divmod());
+        result.push_back(doubly_generalised_divmod());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1738,32 +1738,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        proj2 from an application
-      /// \param e A data expression
-      /// \pre proj2 is defined for e
-      /// \return The argument of e that corresponds to proj2
-      inline
-      data_expression proj2(const data_expression& e)
-      {
-        assert(is_cpair_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        proj1 from an application
-      /// \param e A data expression
-      /// \pre proj1 is defined for e
-      /// \return The argument of e that corresponds to proj1
-      inline
-      data_expression proj1(const data_expression& e)
-      {
-        assert(is_cpair_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1774,16 +1750,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
-        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-        }
-        if (is_gtesubtb_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-        }
-        throw mcrl2::runtime_error("Unexpected expression occurred");
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1794,16 +1762,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
-        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_ggdivmod_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-        }
-        if (is_gtesubtb_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 2);
-        }
-        throw mcrl2::runtime_error("Unexpected expression occurred");
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1814,7 +1774,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
+        assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
@@ -1831,18 +1791,6 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        number from an application
-      /// \param e A data expression
-      /// \pre number is defined for e
-      /// \return The argument of e that corresponds to number
-      inline
-      data_expression number(const data_expression& e)
-      {
-        assert(is_succ_application(e) || is_pred_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
       ///        arg from an application
       /// \param e A data expression
       /// \pre arg is defined for e
@@ -1850,48 +1798,8 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_dub_application(e) || is_even_application(e));
-        if (is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_even_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-        }
-        if (is_dub_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-        }
-        throw mcrl2::runtime_error("Unexpected expression occurred");
-      }
-
-      ///\brief Function for projecting out argument
-      ///        pair from an application
-      /// \param e A data expression
-      /// \pre pair is defined for e
-      /// \return The argument of e that corresponds to pair
-      inline
-      data_expression pair(const data_expression& e)
-      {
-        assert(is_first_application(e) || is_last_application(e));
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_first_application(e) || is_last_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        bit from an application
-      /// \param e A data expression
-      /// \pre bit is defined for e
-      /// \return The argument of e that corresponds to bit
-      inline
-      data_expression bit(const data_expression& e)
-      {
-        assert(is_dub_application(e) || is_gtesubtb_application(e) || is_gdivmod_application(e));
-        if (is_dub_application(e) || is_gtesubtb_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-        }
-        if (is_gdivmod_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-        }
-        throw mcrl2::runtime_error("Unexpected expression occurred");
       }
 
       ///\brief Function for projecting out argument
@@ -1902,7 +1810,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -1953,11 +1861,11 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vn), plus(c0(), vn), vn));
         result.push_back(data_equation(atermpp::make_vector(vn), plus(vn, c0()), vn));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp), gtesubtb(sort_bool::false_(), vp, sort_pos::c1()), pred(vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp), gtesubtb(sort_bool::true_(), vp, sort_pos::c1()), pred(nat2pos(pred(vp)))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), gtesubtb(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gtesubtb(vb, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), gtesubtb(vb, sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), dub(sort_bool::not_(vb), gtesubtb(sort_bool::true_(), vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), gtesubtb(vb, sort_pos::cdub(sort_bool::true_(), vp), sort_pos::cdub(sort_bool::false_(), vq)), dub(sort_bool::not_(vb), gtesubtb(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp), gte_subtract_with_borrow(sort_bool::false_(), vp, sort_pos::c1()), pred(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp), gte_subtract_with_borrow(sort_bool::true_(), vp, sort_pos::c1()), pred(nat2pos(pred(vp)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), gte_subtract_with_borrow(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gte_subtract_with_borrow(vb, vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::true_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::true_(), vp), sort_pos::cdub(sort_bool::false_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vn), times(c0(), vn), c0()));
         result.push_back(data_equation(atermpp::make_vector(vn), times(vn, c0()), c0()));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cnat(vp), cnat(vq)), cnat(times(vp, vq))));
@@ -1977,7 +1885,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq), mod(cnat(vp), vq), last(divmod(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vn), monus(c0(), vn), c0()));
         result.push_back(data_equation(atermpp::make_vector(vn), monus(vn, c0()), vn));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), monus(cnat(vp), cnat(vq)), gtesubtb(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), monus(cnat(vp), cnat(vq)), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vm), swap_zero(vm, c0()), vm));
         result.push_back(data_equation(atermpp::make_vector(vn), swap_zero(c0(), vn), vn));
         result.push_back(data_equation(atermpp::make_vector(vp), swap_zero(cnat(vp), cnat(vp)), c0()));
@@ -2007,11 +1915,11 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vm, vn), last(cpair(vm, vn)), vn));
         result.push_back(data_equation(variable_list(), divmod(sort_pos::c1(), sort_pos::c1()), cpair(cnat(sort_pos::c1()), c0())));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), cnat(sort_pos::c1()))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), divmod(sort_pos::cdub(vb, vp), vq), gdivmod(divmod(vp, vq), vb, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vm, vn, vp), gdivmod(cpair(vm, vn), vb, vp), ggdivmod(dub(vb, vn), vm, vp)));
-        result.push_back(data_equation(atermpp::make_vector(vn, vp), ggdivmod(c0(), vn, vp), cpair(dub(sort_bool::false_(), vn), c0())));
-        result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), less(vp, vq), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), cnat(vp))));
-        result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), less_equal(vq, vp), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gtesubtb(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), divmod(sort_pos::cdub(vb, vp), vq), generalised_divmod(divmod(vp, vq), vb, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vm, vn, vp), generalised_divmod(cpair(vm, vn), vb, vp), doubly_generalised_divmod(dub(vb, vn), vm, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), doubly_generalised_divmod(c0(), vn, vp), cpair(dub(sort_bool::false_(), vn), c0())));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), less(vp, vq), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), cnat(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), less_equal(vq, vp), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         return result;
       }
 

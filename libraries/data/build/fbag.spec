@@ -14,16 +14,15 @@
 #include nat.spec
 #include fset.spec
 
-sort FBag(S) <"fbag"> = struct @fbag_empty <"fbag_empty"> | @fbag_cons <"fbag_cons"> : S <"head"> # Pos <"headcount"> # FBag(S) <"tail">;
+sort FBag(S) <"fbag"> = struct @fbag_empty <"empty"> | @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3">;
 
-map @fbag_insert <"fbaginsert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
-    @fbag_cinsert <"fbagcinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
-    @fbag_count <"fbagcount"> : S <"left"> # FBag(S) <"right"> -> Nat;
-    @fbag_in <"fbagin"> : S <"left"> # FBag(S) <"right"> -> Bool;
-%    @fbag_lte <"fbaglte"> : (S -> Nat) <"arg1"> # FBag(S) <"arg2"> # FBag(S) <"arg3"> -> Bool;
-    @fbag_join <"fbagjoin"> : (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
-    @fbag_inter <"fbagintersect">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
-    @fbag_diff <"fbagdifference">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
+map @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
+    @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
+    @fbag_count <"count"> : S <"left"> # FBag(S) <"right"> -> Nat;
+    @fbag_in <"in"> : S <"left"> # FBag(S) <"right"> -> Bool;
+    @fbag_join <"join"> : (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
+    @fbag_inter <"intersect">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
+    @fbag_diff <"difference">: (S -> Nat) <"arg1"> # (S -> Nat) <"arg2"> # FBag(S) <"arg3"> # FBag(S) <"arg4"> -> FBag(S);
     @fbag2fset <"fbag2fset">: (S -> Nat) <"left"> # FBag(S) <"right"> -> FSet(S);
     @fset2fbag <"fset2fbag">: FSet(S) <"arg"> -> FBag(S);
 

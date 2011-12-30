@@ -10,6 +10,7 @@
 
 #include bool.spec
 #include pos.spec
+#supertypeof Pos
 
 sort Nat <"nat">;
 % Auxiliary sort natpair, pair of natural numbers
@@ -18,7 +19,7 @@ sort Nat <"nat">;
 cons @c0 <"c0"> : Nat;
      @cNat <"cnat"> : Pos <"arg"> -> Nat;
 % Constructor for natpair
-     @cPair <"cpair"> : Nat <"proj1"> # Nat <"proj2"> -> @NatPair;
+     @cPair <"cpair"> : Nat <"arg1"> # Nat <"arg2"> -> @NatPair;
 
 map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos;
@@ -26,36 +27,31 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     max <"maximum">:Nat <"left"> #Pos <"right">->Pos;
     max <"maximum">:Nat <"left"> #Nat <"right">->Nat;
     min <"minimum">:Nat <"left"> #Nat <"right">->Nat;
-    succ <"succ">:Nat <"number">->Pos;
-    pred <"pred">:Pos <"number">->Nat;
-    @dub <"dub">:Bool <"bit"> # Nat <"arg"> -> Nat;
+    succ <"succ">:Nat <"arg">->Pos;
+    pred <"pred">:Pos <"arg">->Nat;
+    @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat;
     + <"plus">:Pos <"left"> #Nat <"right">->Pos;
     + <"plus">:Nat <"left"> #Pos <"right">->Pos;
     + <"plus">:Nat <"left"> #Nat <"right">->Nat;
-%    @gtesubt <"gtesubt">:Pos <"arg1"> # Pos <"arg2"> -> Nat;
-%    @gtesubt <"gtesubt">:Nat <"arg1"> # Nat <"arg2"> -> Nat;
-    @gtesubtb <"gtesubtb">: Bool <"bit"> # Pos <"arg1"> # Pos <"arg2"> -> Nat;
+    @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos <"arg2"> # Pos <"arg3"> -> Nat;
     * <"times">:Nat <"left"> #Nat <"right">->Nat;
-%    div <"div">: Pos <"arg1"> # Pos <"arg2"> -> Nat;
-    div <"div">: Nat <"arg1"> # Pos <"arg2"> -> Nat;
-%    mod <"mod">:Pos <"arg1"> # Pos <"arg2"> -> Nat;
-    mod <"mod">:Nat <"arg1"> # Pos <"arg2"> -> Nat;
-    exp <"exp">:Pos <"arg1"> # Nat <"arg2"> -> Pos;
-    exp <"exp">:Nat <"arg1"> # Nat <"arg2"> -> Nat;
+    div <"div">: Nat <"left"> # Pos <"right"> -> Nat;
+    mod <"mod">:Nat <"left"> # Pos <"right"> -> Nat;
+    exp <"exp">:Pos <"left"> # Nat <"right"> -> Pos;
+    exp <"exp">:Nat <"left"> # Nat <"right"> -> Nat;
     @even <"even">:Nat <"arg"> -> Bool;
     @monus <"monus">:Nat <"left"> # Nat <"right"> -> Nat;
     @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat;
     @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
-%    @swap_zero_lte <"swap_zero_lte">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> -> Bool;
 
 % functions for natpair
-    @first <"first"> : @NatPair <"pair"> -> Nat;
-    @last <"last"> : @NatPair <"pair"> -> Nat;
-    @divmod <"divmod"> : Pos <"arg1"> # Pos <"arg2"> -> @NatPair;
-    @gdivmod <"gdivmod"> : @NatPair <"arg1"> # Bool <"bit"> # Pos <"arg3"> -> @NatPair;
-    @ggdivmod <"ggdivmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair;
+    @first <"first"> : @NatPair <"arg"> -> Nat;
+    @last <"last"> : @NatPair <"arg"> -> Nat;
+    @divmod <"divmod"> : Pos <"left"> # Pos <"right"> -> @NatPair;
+    @gdivmod <"generalised_divmod"> : @NatPair <"arg1"> # Bool <"arg2"> # Pos <"arg3"> -> @NatPair;
+    @ggdivmod <"doubly_generalised_divmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair;
 
 
 var b:Bool;
@@ -100,9 +96,6 @@ eqn ==(@c0, @cNat(p)) = false;
     +(@c0,n) = n;
     +(n,@c0) = n;
     +(@cNat(p),@cNat(q)) = @cNat(@addc(false,p,q));
-%    @gtesubt(p,q) = @gtesubtb(false,p,q);
-%    @gtesubt(n,@c0) = n;
-%    @gtesubt(@cNat(p),@cNat(q)) = @gtesubtb(false, p,q);
     @gtesubtb(false,p,@c1) = pred(p);
     @gtesubtb(true,p,@c1) = pred(Nat2Pos(pred(p)));
     @gtesubtb(b,@cDub(c,p),@cDub(c,q)) = @dub(b, @gtesubtb(b,p,q));
@@ -121,22 +114,8 @@ eqn ==(@c0, @cNat(p)) = false;
     @even(@c0) = true;
     @even(@cNat(@c1)) = false;
     @even(@cNat(@cDub(b,p))) = !(b);
-%    div(p,@c1) = @cNat(p);
-%    div(@c1, @cDub(b,p)) = @c0;
-%    div(@cDub(b,p),@cDub(false,q)) = div(p,q);
-%    <=(p,q) -> div(@cDub(false,p), @cDub(true,q)) = @c0;
-%    <(q,p) -> div(@cDub(false,p), @cDub(true,q)) = @first(@gdivmod(@divmod(p, @cDub(true, q)), false, @cDub(true, q)));
-%    <=(p,q) -> div(@cDub(true,p), @cDub(true,q)) = if(==(p,q),@cNat(@c1),@c0);
-%    <(q,p) -> div(@cDub(true,p), @cDub(true,q)) = @first(@gdivmod(@divmod(p, @cDub(true,q)), true, @cDub(true,q)));
     div(@c0,p) = @c0;
     div(@cNat(p),q) = @first(@divmod(p,q));
-%    mod(p,@c1) = @c0;
-%    mod(@c1,@cDub(b,p)) = @cNat(@c1);
-%    mod(@cDub(b,p),@cDub(false,q)) = @dub(b,mod(p,q));
-%    <=(p,q) -> mod(@cDub(false,p),@cDub(true,q)) = @cNat(@cDub(false,p));
-%    <(q,p) -> mod(@cDub(false,p),@cDub(true,q)) = @last(@gdivmod(@divmod(p,@cDub(true,q)), false, @cDub(true, q)));
-%    <=(p,q) -> mod(@cDub(true,p),@cDub(true,q)) = if(==(p,q), @c0, @cNat(@cDub(true,p)));
-%    <(q,p) -> mod(@cDub(true,p),@cDub(true,q)) = @last(@gdivmod(@divmod(p,@cDub(true,q)), true, @cDub(true, q)));
     mod(@c0,p) = @c0;
     mod(@cNat(p),q) = @last(@divmod(p,q));
     @monus(@c0,n) = @c0;
@@ -164,8 +143,6 @@ eqn ==(@c0, @cNat(p)) = false;
     @swap_zero_monus(@c0, @cNat(p), @c0, n) = @c0;
     @swap_zero_monus(@c0, @cNat(p), @cNat(q), n) = @monus(@cNat(q), @swap_zero(@cNat(p), n));
     @swap_zero_monus(@cNat(p), @cNat(q), m, n) = @swap_zero(@monus(@cNat(p),@cNat(q)),@monus(@swap_zero(@cNat(p),m), @swap_zero(@cNat(q),n)));
-%    @swap_zero_lte(@c0,m,n) = <=(m,n);
-%    @swap_zero_lte(@cNat(p),m,n) = <=(@swap_zero(@cNat(p),m), @swap_zero(@cNat(p),n));
 
 % equations for natpair
     ==(@cPair(m,n), @cPair(u,v)) = &&(==(m,u),==(n,v));

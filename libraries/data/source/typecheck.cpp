@@ -1294,21 +1294,21 @@ void gstcDataInit(void)
   gstcAddSystemFunction(sort_list::in(data::unknown_sort()));
   //Sets
   gstcAddSystemFunction(sort_bag::set2bag(data::unknown_sort()));
-  gstcAddSystemConstant(sort_set::emptyset(data::unknown_sort()));
-  gstcAddSystemFunction(sort_set::setin(data::unknown_sort()));
-  gstcAddSystemFunction(sort_set::setunion_(data::unknown_sort()));
-  gstcAddSystemFunction(sort_set::setdifference(data::unknown_sort()));
-  gstcAddSystemFunction(sort_set::setintersection(data::unknown_sort()));
-  gstcAddSystemFunction(sort_set::setcomplement(data::unknown_sort()));
+  gstcAddSystemConstant(sort_set::empty(data::unknown_sort()));
+  gstcAddSystemFunction(sort_set::in(data::unknown_sort()));
+  gstcAddSystemFunction(sort_set::union_(data::unknown_sort()));
+  gstcAddSystemFunction(sort_set::difference(data::unknown_sort()));
+  gstcAddSystemFunction(sort_set::intersection(data::unknown_sort()));
+  gstcAddSystemFunction(sort_set::complement(data::unknown_sort()));
 
   //Bags
   gstcAddSystemFunction(sort_bag::bag2set(data::unknown_sort()));
-  gstcAddSystemConstant(sort_bag::emptybag(data::unknown_sort()));
-  gstcAddSystemFunction(sort_bag::bagin(data::unknown_sort()));
-  gstcAddSystemFunction(sort_bag::bagcount(data::unknown_sort()));
-  gstcAddSystemFunction(sort_bag::bagjoin(data::unknown_sort()));
-  gstcAddSystemFunction(sort_bag::bagdifference(data::unknown_sort()));
-  gstcAddSystemFunction(sort_bag::bagintersect(data::unknown_sort()));
+  gstcAddSystemConstant(sort_bag::empty(data::unknown_sort()));
+  gstcAddSystemFunction(sort_bag::in(data::unknown_sort()));
+  gstcAddSystemFunction(sort_bag::count(data::unknown_sort()));
+  gstcAddSystemFunction(sort_bag::join(data::unknown_sort()));
+  gstcAddSystemFunction(sort_bag::difference(data::unknown_sort()));
+  gstcAddSystemFunction(sort_bag::intersection(data::unknown_sort()));
 
   // function update
   gstcAddSystemFunction(data::function_update(data::unknown_sort(),data::unknown_sort()));
@@ -4681,9 +4681,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (ATisEqual(static_cast<ATermAppl>(sort_set::setunion_name()),ATAgetArgument(*DataTerm,0))||
-          ATisEqual(static_cast<ATermAppl>(sort_set::setdifference_name()),ATAgetArgument(*DataTerm,0))||
-          ATisEqual(static_cast<ATermAppl>(sort_set::setintersection_name()),ATAgetArgument(*DataTerm,0)))
+      if (ATisEqual(static_cast<ATermAppl>(sort_set::union_name()),ATAgetArgument(*DataTerm,0))||
+          ATisEqual(static_cast<ATermAppl>(sort_set::difference_name()),ATAgetArgument(*DataTerm,0))||
+          ATisEqual(static_cast<ATermAppl>(sort_set::intersection_name()),ATAgetArgument(*DataTerm,0)))
       {
         mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
@@ -4695,7 +4695,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (ATisEqual(static_cast<ATermAppl>(sort_set::setcomplement_name()),ATAgetArgument(*DataTerm,0)))
+      if (ATisEqual(static_cast<ATermAppl>(sort_set::complement_name()),ATAgetArgument(*DataTerm,0)))
       {
         mCRL2log(debug) << "Doing SetCompl matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
@@ -4719,7 +4719,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (ATisEqual(static_cast<ATermAppl>(sort_bag::bagcount_name()),ATAgetArgument(*DataTerm,0)))
+      if (ATisEqual(static_cast<ATermAppl>(sort_bag::count_name()),ATAgetArgument(*DataTerm,0)))
       {
         mCRL2log(debug) << "Doing BagCount matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchBagOpBagCount(Type);

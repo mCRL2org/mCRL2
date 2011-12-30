@@ -105,25 +105,25 @@ namespace detail {
   inline
   bool is_set_union(const application& x)
   {
-    return sort_set::is_setunion_application(x);
+    return sort_set::is_union_application(x);
   }
 
   inline
   bool is_set_difference(const application& x)
   {
-    return sort_set::is_setdifference_application(x);
+    return sort_set::is_difference_application(x);
   }
 
   inline
   bool is_bag_join(const application& x)
   {
-    return sort_bag::is_bagjoin_application(x);
+    return sort_bag::is_join_application(x);
   }
 
   inline
   bool is_bag_difference(const application& x)
   {
-    return sort_bag::is_bagdifference_application(x);
+    return sort_bag::is_difference_application(x);
   }
 
   inline
@@ -195,13 +195,13 @@ namespace detail {
   inline
   bool is_set_intersection(const application& x)
   {
-    return sort_set::is_setintersection_application(x);
+    return sort_set::is_intersection_application(x);
   }
 
   inline
   bool is_bag_intersection(const application& x)
   {
-    return sort_bag::is_bagintersect_application(x);
+    return sort_bag::is_intersection_application(x);
   }
 
   inline
@@ -215,7 +215,7 @@ namespace detail {
   {
     while (sort_list::is_cons_application(x))
     {
-      x = sort_list::tail(x);
+      x = sort_list::right(x);
     }
     return sort_list::is_nil_function_symbol(x);
   }
@@ -225,7 +225,7 @@ namespace detail {
   {
     while (sort_list::is_snoc_application(x))
     {
-      x = sort_list::rtail(x);
+      x = sort_list::left(x);
     }
     return sort_list::is_nil_function_symbol(x);
   }
@@ -250,7 +250,7 @@ int precedence(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return precedence(sort_real::numerator(x));
+    return precedence(sort_real::left(x));
   }
 
   else if (detail::is_implies(x))
@@ -327,7 +327,7 @@ int infix_precedence_left(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_left(sort_real::numerator(x));
+    return infix_precedence_left(sort_real::arg(x));
   }
 
   else if (detail::is_implies(x))
@@ -403,7 +403,7 @@ int infix_precedence_right(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_right(sort_real::numerator(x));
+    return infix_precedence_right(sort_real::arg(x));
   }
 
   else if (detail::is_implies(x))

@@ -16,17 +16,17 @@
 sort List(S) <"list">;
 
 cons [] <"nil"> : List(S);
-     |> <"cons_"> : S <"head"> # List(S) <"tail"> -> List(S);
+     |> <"cons_"> : S <"left"> # List(S) <"right"> -> List(S);
 
-map in <"in"> : S <"arg1"> # List(S) <"arg2"> -> Bool;
-    # <"count"> : List(S) <"list"> -> Nat;
-    <| <"snoc"> : List(S) <"rtail"> # S <"rhead"> -> List(S);
+map in <"in"> : S <"left"> # List(S) <"right"> -> Bool;
+    # <"count"> : List(S) <"arg"> -> Nat;
+    <| <"snoc"> : List(S) <"left"> # S <"right"> -> List(S);
     ++ <"concat"> : List(S) <"left"> # List(S) <"right"> -> List(S);
-    . <"element_at"> : List(S) <"list"> # Nat <"position"> -> S;
-    head <"head"> : List(S) <"list"> -> S;
-    tail <"tail"> : List(S) <"list"> -> List(S);
-    rhead <"rhead"> : List(S) <"list"> -> S;
-    rtail <"rtail"> : List(S) <"list"> -> List(S);
+    . <"element_at"> : List(S) <"left"> # Nat <"right"> -> S;
+    head <"head"> : List(S) <"arg"> -> S;
+    tail <"tail"> : List(S) <"arg"> -> List(S);
+    rhead <"rhead"> : List(S) <"arg"> -> S;
+    rtail <"rtail"> : List(S) <"arg"> -> List(S);
 
 var d:S;
     e:S;

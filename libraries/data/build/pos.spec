@@ -13,14 +13,14 @@
 sort Pos <"pos">;
 
 cons @c1 <"c1">:Pos;
-     @cDub <"cdub">:Bool <"bit"> #Pos <"number"> ->Pos;
+     @cDub <"cdub">:Bool <"left"> #Pos <"right"> ->Pos;
 
 map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
     min <"minimum">:Pos <"left"> #Pos <"right">->Pos;
-    succ <"succ">:Pos <"number">->Pos;
-    @pospred <"pospred">:Pos <"number">->Pos;
+    succ <"succ">:Pos <"arg">->Pos;
+    @pospred <"pos_predecessor">:Pos <"arg">->Pos;
     + <"plus">:Pos <"left"> #Pos <"right">->Pos;
-    @addc <"add_with_carry">:Bool <"bit"> #Pos <"left"> #Pos <"right">->Pos;
+    @addc <"add_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos;
     * <"times">:Pos <"left"> #Pos <"right">->Pos;
 
 var b:Bool;
@@ -30,9 +30,6 @@ var b:Bool;
     r:Pos;
 eqn ==(@c1, @cDub(b,p)) = false;
     ==(@cDub(b,p), @c1) = false;
-%    ==(@cDub(false,p), @cDub(true,q)) = false;
-%    ==(@cDub(true,p), @cDub(false,q)) = false;
-%    ==(@cDub(b,p), @cDub(b, q)) = ==(p,q);
     ==(@cDub(b,p), @cDub(c, q)) = &&(==(b,c), ==(p,q));
     ==(succ(p),@c1) = false;
     ==(@c1,succ(q)) = false;
@@ -40,9 +37,6 @@ eqn ==(@c1, @cDub(b,p)) = false;
     ==(@cDub(b,p),succ(q)) = ==(@pospred(@cDub(b,p)),q);
     <(p, @c1) = false;
     <(@c1, @cDub(b,p)) = true;
-%    <(@cDub(b,p), @cDub(b,q)) = <(p,q);
-%    <(@cDub(false,p), @cDub(true, q)) = <=(p,q);
-%    <(@cDub(b,p), @cDub(false, q)) = <(p,q);
 % The equation below is required for the enumeration of lists
     <(@cDub(b,p), @cDub(c,q)) = if(=>(c,b), <(p,q), <=(p,q));
     <(succ(p),@cDub(c,q)) = <(p,@pospred(@cDub(c,q)));
@@ -50,9 +44,6 @@ eqn ==(@c1, @cDub(b,p)) = false;
     <(@c1,succ(q)) = true;
     <=(@c1, p) = true;
     <=(@cDub(b,p), @c1) = false;
-%    <=(@cDub(b,p), @cDub(b, q)) = <=(p,q);
-%    <=(@cDub(false,p), @cDub(b,q)) = <=(p,q);
-%    <=(@cDub(true,p), @cDub(false, q)) = <(p,q);
 % The equation below is required for the enumeration of lists
     <=(@cDub(b,p), @cDub(c,q)) = if(=>(b,c), <=(p,q), <(p,q));
     <=(succ(p),@cDub(c,q)) = <(p,@cDub(c,q));

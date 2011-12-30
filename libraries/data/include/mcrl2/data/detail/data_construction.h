@@ -27,9 +27,9 @@ namespace detail {
 inline
 data_expression create_finite_set(const data_expression& x)
 {
-  data_expression result = data::sort_fset::fset_empty(x.sort());
-  result = data::sort_fset::fsetinsert(x.sort(), x, result);
-  result = data::sort_set::setfset(x.sort(), result);
+  data_expression result = data::sort_fset::empty(x.sort());
+  result = data::sort_fset::insert(x.sort(), x, result);
+  result = data::sort_set::set_fset(x.sort(), result);
   return result;
 }
 
@@ -38,7 +38,7 @@ inline
 data_expression create_set_comprehension(const variable& x, const data_expression& phi)
 {
   assert(sort_bool::is_bool(phi.sort()));
-  data_expression result = sort_set::setconstructor(x.sort(), lambda(x, phi), sort_fset::fset_empty(x.sort()));
+  data_expression result = sort_set::constructor(x.sort(), lambda(x, phi), sort_fset::empty(x.sort()));
   return result;
 }
 
@@ -46,7 +46,7 @@ data_expression create_set_comprehension(const variable& x, const data_expressio
 inline
 data_expression create_set_in(const data_expression& x, const data_expression& X)
 {
-  data_expression result = sort_set::setin(x.sort(), x, X);
+  data_expression result = sort_set::in(x.sort(), x, X);
   return result;
 }
 

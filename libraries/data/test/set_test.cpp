@@ -57,16 +57,16 @@ void set_expression_test()
   variable_vector v;
   v.push_back(parse_variable("s:Set(Nat)"));
 
-  test_data_expression("{x : Nat | x < 10}", v, is_setconstructor_application);
-  test_data_expression("!s", v, is_setcomplement_application);
-  test_data_expression("s * {1,2,3}", v, is_setintersection_application);
-  test_data_expression("s - {3,1,2}", v, is_setdifference_application);
-  test_data_expression("1 in s", v, is_setin_application);
-  test_data_expression("{} + s", v, is_setunion_application);
-  test_data_expression("(({} + s) - {20}) * {40}", v, is_setintersection_application);
+  test_data_expression("{x : Nat | x < 10}", v, sort_set::is_constructor_application);
+  test_data_expression("!s", v, sort_set::is_complement_application);
+  test_data_expression("s * {1,2,3}", v, sort_set::is_intersection_application);
+  test_data_expression("s - {3,1,2}", v, sort_set::is_difference_application);
+  test_data_expression("1 in s", v, sort_set::is_in_application);
+  test_data_expression("{} + s", v, sort_set::is_union_application);
+  test_data_expression("(({} + s) - {20}) * {40}", v, sort_set::is_intersection_application);
   test_data_expression("{10} < s", v, is_less_application<data_expression>);
   test_data_expression("s <= {10}", v, is_less_equal_application<data_expression>);
-  test_data_expression("{20} + {30}", v, is_setunion_application);
+  test_data_expression("{20} + {30}", v, sort_set::is_union_application);
 
   data_expression t1d1 = parse_data_expression("{1,2}");
   data_expression t1d2 = parse_data_expression("{2,1}");
@@ -78,13 +78,13 @@ void set_expression_test()
 
   data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d1));
+  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2));
 
   data_expression e = parse_data_expression("{20}", v.begin(), v.end());
-  BOOST_CHECK(is_setconstructor_application(normaliser(e)));
+  BOOST_CHECK(sort_set::is_constructor_application(normaliser(e)));
 
   e = parse_data_expression("{20, 30, 40}", v.begin(), v.end());
-  BOOST_CHECK(is_setconstructor_application(normaliser(e)));
+  BOOST_CHECK(sort_set::is_constructor_application(normaliser(e)));
 }
 
 int test_main(int argc, char** argv)

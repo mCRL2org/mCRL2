@@ -395,18 +395,14 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
 
 BOOST_AUTO_TEST_CASE(set_rewrite_test)
 {
-  using namespace mcrl2::data::sort_set;
-  using namespace mcrl2::data::sort_fset;
-  using namespace mcrl2::data::sort_nat;
-  using namespace mcrl2::data::sort_bool;
   std::cerr << "set_rewrite_test" << std::endl;
 //  data_specification specification = parse_data_specification(
 //    "sort A = Set(Nat);"
 //  );
 
   data_specification specification;
-  specification.add_context_sort(set_(nat()));
-  specification.add_context_sort(set_(bool_()));
+  specification.add_context_sort(sort_set::set_(sort_nat::nat()));
+  specification.add_context_sort(sort_set::set_(sort_bool::bool_()));
 
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
@@ -414,68 +410,66 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     std::cerr << "  Strategy8: " << data::pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    sort_expression set_nat(set_(nat()));
+    sort_expression set_nat(sort_set::set_(sort_nat::nat()));
 
-    data_expression empty(R(normalize_sorts(emptyset(nat()),specification)));
+    data_expression empty(R(normalize_sorts(sort_set::empty(sort_nat::nat()),specification)));
 
-    data_expression p0(nat(0));
-    data_expression p1(nat(1));
-    data_expression p2(nat(2));
+    data_expression p0(sort_nat::nat(0));
+    data_expression p1(sort_nat::nat(1));
+    data_expression p2(sort_nat::nat(2));
 
-    data_rewrite_test(R, normalize_sorts(equal_to(true_function(nat()), true_function(nat())),specification), true_());
-    data_rewrite_test(R, normalize_sorts(equal_to(false_function(nat()), false_function(nat())),specification), true_());
-    data_rewrite_test(R, normalize_sorts(equal_to(true_function(nat()), false_function(nat())),specification), false_());
-    data_rewrite_test(R, normalize_sorts(equal_to(false_function(nat()), true_function(nat())),specification), false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(sort_set::true_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::false_function(sort_nat::nat())),specification), sort_bool::true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(sort_set::true_function(sort_nat::nat()), sort_set::false_function(sort_nat::nat())),specification), sort_bool::false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::false_());
 
-    data_expression s1(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat()))),specification)));
-    data_expression s2(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat()))),specification)));
-    data_expression s(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat())))),specification)));
+    data_expression s1(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::empty(sort_nat::nat()))),specification)));
+    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification)));
+    data_expression s(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat())))),specification)));
 
-    data_expression empty_complement(normalize_sorts(setcomplement(nat(),emptyset(nat())),specification));
-    data_expression intersection(normalize_sorts(setintersection(nat(),setcomplement(nat(),emptyset(nat())),emptyset(nat())),specification));
+    data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),sort_set::empty(sort_nat::nat())),specification));
+    data_expression intersection(normalize_sorts(sort_set::intersection(sort_nat::nat(),sort_set::complement(sort_nat::nat(),sort_set::empty(sort_nat::nat())),sort_set::empty(sort_nat::nat())),specification));
     //data_rewrite_test(R, normalize_sorts(less_equal(empty_complement,empty),specification), false_());
-    data_rewrite_test(R, normalize_sorts(less_equal(empty,empty_complement),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(empty,empty_complement),specification), sort_bool::true_());
     //data_rewrite_test(R, normalize_sorts(equal_to(intersection, empty_complement),specification), true_());
     //data_rewrite_test(R, normalize_sorts(equal_to(empty_complement, intersection),specification), true_());
 
-    data_rewrite_test(R, normalize_sorts(setin(nat(), p0, s),specification), false_());
-    data_rewrite_test(R, normalize_sorts(setin(nat(), p1, s),specification), true_());
-    data_rewrite_test(R, normalize_sorts(setin(nat(), p2, s),specification), true_());
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, s),specification), sort_bool::false_());
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_());
 
-    data_rewrite_test(R, normalize_sorts(setunion_(nat(), s, empty),specification), s);
-    data_rewrite_test(R, normalize_sorts(setunion_(nat(), s1, s2),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, empty),specification), empty);
-    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, s1),specification), s1);
-    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, s2),specification), s2);
+    data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, s1),specification), s1);
+    data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, empty),specification), s);
-    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, s1),specification), s2);
-    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, s2),specification), s1);
+    data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, s1),specification), s2);
+    data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, s2),specification), s1);
 
-    data_rewrite_test(R, normalize_sorts(setin(nat(), p0, setcomplement(nat(), s)),specification), true_());
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, sort_set::complement(sort_nat::nat(), s)),specification), sort_bool::true_());
     // extra tests by Jan Friso
     data::data_expression x = data::parse_data_expression("1 in {n:Nat|n<5}",specification);
-    data_rewrite_test(R, x, true_());
+    data_rewrite_test(R, x, sort_bool::true_());
     x = data::parse_data_expression("7 in {n:Nat|n<5}",specification);
-    data_rewrite_test(R, x, false_());
+    data_rewrite_test(R, x, sort_bool::false_());
     x = data::parse_data_expression("true in {n:Bool|n || !n}",specification);
-    data_rewrite_test(R, x, true_());
+    data_rewrite_test(R, x, sort_bool::true_());
     x = data::parse_data_expression("false in {n:Bool|n && !n}",specification);
-    data_rewrite_test(R, x, false_());
+    data_rewrite_test(R, x, sort_bool::false_());
 
     // test for a variation on bug #721,
     // see also set_bool_rewrite_test()
-    x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+    x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::cnat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, false_());
+    data_rewrite_test(R, x, sort_bool::false_());
   }
 }
 
 BOOST_AUTO_TEST_CASE(bag_rewrite_test)
 {
-  using namespace mcrl2::data::sort_bag;
-  using namespace mcrl2::data::sort_fbag;
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_pos;
   using namespace mcrl2::data::sort_bool;
@@ -484,8 +478,8 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
                                        "sort A = Bag(Nat);"
                                      );
 
-  specification.add_context_sort(bag(nat()));
-  specification.add_context_sort(bag(pos()));
+  specification.add_context_sort(sort_bag::bag(nat()));
+  specification.add_context_sort(sort_bag::bag(pos()));
 
   std::cerr << "bag rewrite test\n";
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
@@ -496,34 +490,34 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
 
     sort_expression bag_nat(sort_bag::bag(nat()));
 
-    data_expression empty(R(normalize_sorts(emptybag(nat()),specification)));
+    data_expression empty(R(normalize_sorts(sort_bag::empty(nat()),specification)));
 
     data_expression p0(nat(0));
     data_expression p1(nat(1));
     data_expression p2(nat(2));
 
-    data_expression s1(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat()))),specification)));
-    data_expression s2(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))),specification)));
-    data_expression s(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))),specification)));
+    data_expression s1(R(normalize_sorts(sort_bag::bag_fbag(nat(), sort_fbag::insert(nat(), p1, pos(1), sort_fbag::empty(nat()))),specification)));
+    data_expression s2(R(normalize_sorts(sort_bag::bag_fbag(nat(), sort_fbag::insert(nat(), p2, pos(2), sort_fbag::empty(nat()))),specification)));
+    data_expression s(R(normalize_sorts(sort_bag::bag_fbag(nat(), sort_fbag::insert(nat(), p1, pos(1), sort_fbag::insert(nat(), p2, pos(2), sort_fbag::empty(nat())))),specification)));
 
-    data_rewrite_test(R, normalize_sorts(bagin(nat(), p0, s),specification), false_());
-    data_rewrite_test(R, normalize_sorts(bagin(nat(), p1, s),specification), true_());
-    data_rewrite_test(R, normalize_sorts(bagin(nat(), p2, s),specification), true_());
+    data_rewrite_test(R, normalize_sorts(sort_bag::in(nat(), p0, s),specification), false_());
+    data_rewrite_test(R, normalize_sorts(sort_bag::in(nat(), p1, s),specification), true_());
+    data_rewrite_test(R, normalize_sorts(sort_bag::in(nat(), p2, s),specification), true_());
 
-    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p0, s),specification), p0);
-    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p1, s),specification), p1);
-    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p2, s),specification), p2);
+    data_rewrite_test(R, normalize_sorts(sort_bag::count(nat(), p0, s),specification), p0);
+    data_rewrite_test(R, normalize_sorts(sort_bag::count(nat(), p1, s),specification), p1);
+    data_rewrite_test(R, normalize_sorts(sort_bag::count(nat(), p2, s),specification), p2);
 
-    data_rewrite_test(R, normalize_sorts(bagjoin(nat(), s, empty),specification), s);
-    data_rewrite_test(R, normalize_sorts(bagjoin(nat(), s1, s2),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::join(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::join(nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, empty),specification), empty);
-    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, s1),specification), s1);
-    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, s2),specification), s2);
+    data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, s1),specification), s1);
+    data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, empty),specification), s);
-    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, s1),specification), s2);
-    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, s2),specification), s1);
+    data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, s1),specification), s2);
+    data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, s2),specification), s1);
 
     // extra tests by Jan Friso
     data::data_expression x = data::parse_data_expression("count(1,{ 1:1,2:2})==1",specification);
@@ -616,17 +610,15 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
 {
   using namespace sort_bool;
   using namespace sort_nat;
-  using namespace sort_set;
-  using namespace sort_fset;
 
   data_specification specification;
 
   // Rewrite without sort alias
-  specification.add_context_sort(set_(bool_()));
-  specification.add_context_sort(fset(bool_()));
+  specification.add_context_sort(sort_set::set_(bool_()));
+  specification.add_context_sort(sort_fset::fset(bool_()));
 
   std::cerr << "set bool rewrite test\n";
-  data_expression e(not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_()))))));
+  data_expression e(not_(sort_fset::in(bool_(), true_(), sort_fset::insert(bool_(), false_(), sort_fset::cons_(bool_(), true_(), sort_fset::empty(bool_()))))));
   e = normalize_sorts(e,specification);
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
@@ -638,15 +630,15 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
 
   // Rewrite with sort alias
   specification = parse_data_specification("sort S = Set(Bool);\n");
-  specification.add_context_sort(set_(bool_()));
-  specification.add_context_sort(fset(bool_()));
+  specification.add_context_sort(sort_set::set_(bool_()));
+  specification.add_context_sort(sort_fset::fset(bool_()));
 
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy12: " << data::pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    e = not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_())))));
+    e = not_(sort_fset::in(bool_(), true_(), sort_fset::insert(bool_(), false_(), sort_fset::cons_(bool_(), true_(), sort_fset::empty(bool_())))));
     e = normalize_sorts(e,specification);
     data_rewrite_test(R, e, false_());
 
@@ -657,7 +649,7 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
 
 
   specification = data_specification();
-  specification.add_context_sort(set_(nat()));
+  specification.add_context_sort(sort_set::set_(nat()));
 
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
@@ -665,7 +657,7 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
     data::rewriter R(specification, *strat);
 
     // test for a variation on bug #721
-    e = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+    e = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     e = normalize_sorts(e,specification);
     data_rewrite_test(R, e, false_());
   }
@@ -691,7 +683,7 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
     std::cerr << "  Strategy14: " << data::pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+    data::data_expression x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
@@ -699,14 +691,12 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
 
 BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
 {
-  using namespace mcrl2::data::sort_set;
-  using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_bool;
   std::cerr << "finite_set_nat_rewrite_test_without_alias\n";
   data_specification specification;
 
-  specification.add_context_sort(set_(nat()));
+  specification.add_context_sort(sort_set::set_(nat()));
 
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
@@ -724,19 +714,19 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
-    x = fsetin(nat(), c0(), fset_cons(nat(), c0(), fset_empty(nat())));
+    x = sort_fset::in(nat(), c0(), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
-    x = fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())));
+    x = sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, fset_cons(nat(), c0(), fset_cons(nat(), cnat(sort_pos::c1()), fset_empty(nat()))));
+    data_rewrite_test(R, x, sort_fset::cons_(nat(), c0(), sort_fset::cons_(nat(), cnat(sort_pos::c1()), sort_fset::empty(nat()))));
 
-    x = fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat()))));
+    x = sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat()))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
-    x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+    x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }

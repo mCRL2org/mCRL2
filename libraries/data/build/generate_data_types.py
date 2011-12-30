@@ -35,6 +35,8 @@ def main():
     print "Generating code for %s" % (spec)
     cmd = "python ./codegen.py %s %s.spec ../include/mcrl2/data/%s.h" % (arguments, spec, spec)
     retcode = call(cmd, shell=True)
+    if retcode <> 0:
+      raise Exception("Failed to generate code for %s. Aborting... (while executing command %s)" % (spec, cmd))
 
 if __name__ == "__main__":
   main()

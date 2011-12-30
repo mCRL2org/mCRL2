@@ -1378,6 +1378,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument
+      ///        left from an application
+      /// \param e A data expression
+      /// \pre left is defined for e
+      /// \return The argument of e that corresponds to left
+      inline
+      data_expression left(const data_expression& e)
+      {
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+      }
+
+      ///\brief Function for projecting out argument
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
@@ -1385,44 +1397,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
-      inline
-      data_expression arg1(const data_expression& e)
-      {
-        assert(is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
-      inline
-      data_expression arg2(const data_expression& e)
-      {
-        assert(is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        number from an application
-      /// \param e A data expression
-      /// \pre number is defined for e
-      /// \return The argument of e that corresponds to number
-      inline
-      data_expression number(const data_expression& e)
-      {
-        assert(is_abs_application(e) || is_succ_application(e) || is_pred_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1433,39 +1409,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_cint_application(e) || is_cneg_application(e) || is_nat2int_application(e) || is_int2nat_application(e) || is_pos2int_application(e) || is_int2pos_application(e) || is_negate_application(e) || is_dub_application(e));
-        if (is_cint_application(e) || is_cneg_application(e) || is_nat2int_application(e) || is_int2nat_application(e) || is_pos2int_application(e) || is_int2pos_application(e) || is_negate_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-        }
-        if (is_dub_application(e))
-        {
-          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-        }
-        throw mcrl2::runtime_error("Unexpected expression occurred");
-      }
-
-      ///\brief Function for projecting out argument
-      ///        bit from an application
-      /// \param e A data expression
-      /// \pre bit is defined for e
-      /// \return The argument of e that corresponds to bit
-      inline
-      data_expression bit(const data_expression& e)
-      {
-        assert(is_dub_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
-      inline
-      data_expression left(const data_expression& e)
-      {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
+        assert(is_cint_application(e) || is_cneg_application(e) || is_nat2int_application(e) || is_int2nat_application(e) || is_pos2int_application(e) || is_int2pos_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -1529,8 +1473,8 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vn, vp), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp))));
         result.push_back(data_equation(atermpp::make_vector(vn, vp), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gtesubtb(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gtesubtb(sort_bool::false_(), vq, vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vq, vp))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::monus(vm, vn))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn), less(vm, vn), minus(vm, vn), negate(sort_nat::monus(vn, vm))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), minus(vx, vy), plus(vx, negate(vy))));

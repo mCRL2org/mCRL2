@@ -15,15 +15,15 @@
 
 sort Bag(S) <"bag">;
 
-cons @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-map {} <"emptybag">: Bag(S);
-    @bagfbag <"bagfbag">: FBag(S) <"arg"> -> Bag(S);
-    @bagcomp <"bagcomprehension">: (S -> Nat) <"arg"> -> Bag(S);
-    count <"bagcount">: S <"left"> # Bag(S) <"right"> -> Nat;
-    in <"bagin">: S <"left"> # Bag(S) <"right"> -> Bool;
-    + <"bagjoin">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    * <"bagintersect">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    - <"bagdifference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+cons @bag <"constructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
+map {} <"empty">: Bag(S);
+    @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S);
+    @bagcomp <"bag_comprehension">: (S -> Nat) <"arg"> -> Bag(S);
+    count <"count">: S <"left"> # Bag(S) <"right"> -> Nat;
+    in <"in">: S <"left"> # Bag(S) <"right"> -> Bool;
+    + <"join">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    * <"intersection">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    - <"difference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S);
     Set2Bag <"set2bag">: Set(S) <"arg"> -> Bag(S);
     @zero_ <"zero_function">: S <"arg"> -> Nat;

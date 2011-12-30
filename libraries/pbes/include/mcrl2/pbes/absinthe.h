@@ -548,8 +548,8 @@ struct absinthe_algorithm
     data::data_expression operator()(const data::data_expression& x) const
     {
       data::sort_expression s = x.sort();
-      data::data_expression result = data::sort_fset::fset_empty(s);
-      result = data::sort_fset::fset_cons(s, x, result);
+      data::data_expression result = data::sort_fset::empty(s);
+      result = data::sort_fset::cons_(s, x, result);
       return result;
     }
   };
