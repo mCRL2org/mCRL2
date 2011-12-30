@@ -47,11 +47,11 @@ class next_state_generator
     /// \brief A type that represents a transition to a 'next' state.
     struct state_type
     {
-      ATermAppl transition;
+      multi_action transition;
       ATerm state;
 
       state_type()
-        : transition(0),
+        : transition(),
           state(0)
       {}
 
@@ -60,7 +60,7 @@ class next_state_generator
           state(other.state)
       {}
 
-      state_type(ATermAppl transition_, ATerm state_)
+      state_type(multi_action transition_, ATerm state_)
         : transition(transition_),
           state(state_)
       {}
@@ -73,7 +73,7 @@ class next_state_generator
       }
 
       /// \brief Returns the label of the transition.
-      atermpp::aterm_appl label() const
+      multi_action label() const
       {
         return transition;
       }
@@ -107,7 +107,7 @@ class next_state_generator
         iterator(NextState* next, NextStateGenerator* generator)
           : m_next_state(next),
             m_generator(generator),
-            m_state(0, m_next_state->getInitialState())
+            m_state(multi_action(), m_next_state->getInitialState())
         { }
 
         /// \brief Constructor.
@@ -144,7 +144,7 @@ class next_state_generator
         /// \brief Increments the iterator
         void increment()
         {
-          if (!m_generator->next(&m_state.transition, &m_state.state))
+          if (!m_generator->next(m_state.transition, &m_state.state))
           {
             // empty m_next_state, to signal that there is no next state
             m_next_state = 0;

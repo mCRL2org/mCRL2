@@ -710,7 +710,7 @@ class pins
         {
           dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = action_label_type_map()[s.label()];
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
         f(dest, labels);
       }
     }
@@ -745,7 +745,7 @@ class pins
         {
           dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = action_label_type_map()[s.label()];
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
         f(dest, labels, group);
       }
     }

@@ -244,11 +244,11 @@ int test_main(int argc, char** argv)
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
         ATerm     state;
-        ATermAppl transition;
+        multi_action transition;
 
         std::auto_ptr< NextStateGenerator > generator(explorer->getNextStates(current, i));
 
-        while (generator->next(&transition, &state))
+        while (generator->next(transition, &state))
         {
           if (known.find(state) == known.end())
           {

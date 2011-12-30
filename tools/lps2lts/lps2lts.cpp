@@ -80,9 +80,9 @@ static void check_whether_actions_on_commandline_exist(
   for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
   {
-    mCRL2log(verbose) << "checking for occurrences of action '" << string(*i) << "'.\n";
+    mCRL2log(verbose) << "checking for occurrences of action '" << pp(*i) << "'.\n";
 
-    bool found=(*i=="tau"); // If i equals tau, it does not need to be declared.
+    bool found=(pp(*i)=="tau"); // If i equals tau, it does not need to be declared.
     for(action_label_list::const_iterator j=action_labels.begin(); 
               !found && j!=action_labels.end(); ++j)
     {
@@ -90,7 +90,7 @@ static void check_whether_actions_on_commandline_exist(
     }
     if (!found)
     { 
-      throw mcrl2::runtime_error("'" + string(*i) + "' is not declared as an action in this LPS.");
+      throw mcrl2::runtime_error("'" + pp(*i) + "' is not declared as an action in this LPS.");
     }
   }
 

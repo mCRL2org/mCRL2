@@ -63,7 +63,7 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
 
   atermpp::set<atermpp::aterm> visited;
   atermpp::set<atermpp::aterm> seen;
-  atermpp::set<atermpp::aterm_appl> transition_labels;
+  atermpp::set<multi_action> transition_labels;
   size_t transitions = 0;
 
   std::queue<atermpp::aterm, atermpp::deque<atermpp::aterm> > q;
@@ -81,12 +81,11 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
         std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front(), i));
 
         ATerm     state;
-        ATermAppl transition;
-        while (generator->next(&transition, &state))
+        multi_action transition;
+        while (generator->next(transition, &state))
         {
           atermpp::aterm s(state);
-          atermpp::aterm_appl t(transition);
-          transition_labels.insert(t);
+          transition_labels.insert(transition);
           ++transitions;
           if (seen.find(s) == seen.end())
           {
@@ -101,12 +100,11 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
       std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front()));
 
       ATerm     state;
-      ATermAppl transition;
-      while (generator->next(&transition, &state))
+      multi_action transition;
+      while (generator->next(transition, &state))
       {
         atermpp::aterm s(state);
-        atermpp::aterm_appl t(transition);
-        transition_labels.insert(t);
+        transition_labels.insert(transition);
         ++transitions;
         if (seen.find(s) == seen.end())
         {

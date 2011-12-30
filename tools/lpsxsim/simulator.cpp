@@ -21,8 +21,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
-// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/trace/trace.h"
@@ -433,16 +431,16 @@ void StandardSimulator::LoadTrace(const std::string& filename)
     nextstategen = nextstate->getNextStates(state,nextstategen);
     if (gsIsMultAct(act))
     {
-      ATermAppl Transition;
+      mcrl2::lps::multi_action Transition;
       ATerm NewState;
       bool found = false;
-      while (nextstategen->next(&Transition,&NewState))
+      while (nextstategen->next(Transition,&NewState))
       {
-        if (ATisEqual(Transition,act))
+        if (Transition==mcrl2::lps::multi_action(act))
         {
           if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
           {
-            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
+            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
             state = NewState;
             found = true;
             break;
@@ -453,7 +451,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
       {
         std::stringstream ss;
         ss << "could not perform action " << idx << " (";
-        ss << core::pp_deprecated((ATerm) act);
+        ss << pp(mcrl2::lps::multi_action(act));
         ss << ") from trace";
         throw mcrl2::runtime_error(ss.str());
       }
@@ -462,18 +460,18 @@ void StandardSimulator::LoadTrace(const std::string& filename)
     {
       // Perhaps trace was in plain text format; try pp-ing actions
       // XXX Only because libtrace cannot parse text (yet)
-      ATermAppl Transition;
+      mcrl2::lps::multi_action Transition;
       ATerm NewState;
       std::string s(ATgetName(ATgetAFun(act)));
       bool found = false;
-      while (nextstategen->next(&Transition,&NewState))
+      while (nextstategen->next(Transition,&NewState))
       {
-        std::string t = core::pp_deprecated((ATerm) Transition);
+        std::string t = pp(Transition);
         if (s == t)
         {
           if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
           {
-            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
+            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
             state = NewState;
             found = true;
             break;
@@ -526,11 +524,11 @@ void StandardSimulator::UpdateTransitions()
 {
   nextstategen = nextstate->getNextStates(current_state,nextstategen);
   next_states = ATmakeList0();
-  ATermAppl transition;
+  mcrl2::lps::multi_action transition;
   ATerm newstate;
-  while (nextstategen->next(&transition,&newstate))
+  while (nextstategen->next(transition,&newstate))
   {
-    next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
+    next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(transition),newstate));
   }
 }
 

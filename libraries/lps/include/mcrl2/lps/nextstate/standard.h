@@ -16,6 +16,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/multi_action.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -79,7 +80,7 @@ class NextStateGenerator
     NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGenerator();
 
-    bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL);
+    bool next(mcrl2::lps::multi_action &Transition, ATerm* State, bool* prioritised = NULL);
 
     void reset(ATerm State, size_t SummandIndex = 0);
 

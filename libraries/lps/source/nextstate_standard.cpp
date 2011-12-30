@@ -1054,7 +1054,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
   sum_idx = SummandIndex + 1;
 }
 
-bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* prioritised)
+bool NextStateGenerator::next(mcrl2::lps::multi_action &Transition, ATerm* State, bool* prioritised)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::next(Transition, State, prioritised) called" << std::endl;
@@ -1116,7 +1116,7 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
                           atermpp::aterm(ATgetArgument(info.summands[sum_idx-1],1)),current_substitution))));
     }
 
-    *Transition = rewrActionArgs((ATermAppl) cur_act);
+    Transition = mcrl2::lps::multi_action(rewrActionArgs((ATermAppl) cur_act));
     *State = (ATerm) makeNewState(cur_state,cur_nextstate);
 
     if (prioritised != NULL)
@@ -1135,7 +1135,7 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
   }
   else
   {
-    *Transition = NULL;
+    Transition = mcrl2::lps::multi_action();
     *State = NULL;
   }
 

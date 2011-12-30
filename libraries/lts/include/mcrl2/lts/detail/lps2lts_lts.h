@@ -53,7 +53,7 @@ class lps2lts_lts
     void reset();
     void open_lts(const char* filename, lps2lts_lts_options& opts);
     void save_initial_state(size_t idx, ATerm state);
-    void save_transition(size_t idx_from, ATerm from, ATermAppl action, size_t idx_to, ATerm to);
+    void save_transition(size_t idx_from, ATerm from, const mcrl2::lps::multi_action action, size_t idx_to, ATerm to);
     void close_lts(size_t num_states, size_t num_trans);
     void remove_lts();
 
