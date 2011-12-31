@@ -13,18 +13,18 @@
 #include <math.h>
 #include <vector>
 #include <map>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_svc.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -870,7 +870,9 @@ class bisim_partitioner
       {
         // The counter trace is simply the label l.
         mcrl2::trace::Trace counter_trace;
-        counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,false)));
+        counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
+                                mcrl2::lps::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list()))); 
         resulting_counter_traces.insert(counter_trace);
       }
       else
@@ -887,8 +889,10 @@ class bisim_partitioner
             for (std::set< mcrl2::trace::Trace >::const_iterator j=counter_traces.begin();
                  j!=counter_traces.end(); ++j)
             {
-              mcrl2::trace::Trace new_counter_trace;
-              new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,false)));
+               mcrl2::trace::Trace new_counter_trace;
+              new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
+                                mcrl2::lps::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list()))); 
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();
               for (size_t k=0 ; k< old_counter_trace.getLength(); k++)

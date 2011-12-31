@@ -57,7 +57,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;
   os << "nodesep = 0.05;" << endl;
-  ATermAppl act;
+  mcrl2::lps::multi_action act;
   int i = 0;
   os << i << " [label=\"";
   if (trace.currentState() != NULL)
@@ -65,7 +65,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
     print_state(os,trace.currentState());
   }
   os << "\",peripheries=2];" << endl;
-  while ((act = trace.nextAction()) != NULL)
+  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
   {
     os << i+1 << " [label=\"";
     if (trace.currentState() != NULL)
@@ -74,15 +74,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
     }
     os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
-    }
-    else
-    {
-      // needed because trace library cannot parse strings
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(act);
     os << "\"];" << endl;
     i++;
   }
@@ -95,18 +87,11 @@ static void trace2statevector(ostream& os, Trace& trace)
   {
     print_state(os,trace.currentState());
   }
-  ATermAppl act = trace.nextAction();
-  while (act != NULL)
+  mcrl2::lps::multi_action act = trace.nextAction();
+  while (act != mcrl2::lps::multi_action())
   {
     os << " -";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
-    }
-    else
-    {
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(act);
     os << "-> " << std::endl;
     ATermAppl CurrentState = trace.currentState();
     if (CurrentState != NULL)
@@ -121,29 +106,16 @@ static void trace2statevector(ostream& os, Trace& trace)
 static void trace2aut(ostream& os, Trace& trace)
 {
   os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
-  ATermAppl act;
+  mcrl2::lps::multi_action act;
   int i = 0;
-  while ((act = trace.nextAction()) != NULL)
+  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
   {
     os << "(" << i << ",\"";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
-    }
-    else
-    {
-      // needed because trace library cannot parse strings
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
     i++;
     os << "\"," << i << ")" << endl;
   }
 }
-
-/*static void trace2svc(ostream &os, Trace &trace)
-{
-  // SVC library does not accept ostreams
-}*/
 
 inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
 {
@@ -161,10 +133,6 @@ inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
       mCRL2log(verbose) << "writing result in aut format..." << std::endl;
       trace2aut(out,trace);
       break;
-      /*      mCRL2log(verbose) << "writing result in svc format..." << std::endl;
-        case otSvc:
-        trace2svc(*OutStream,trace);
-        break;*/
     case otStates:
       mCRL2log(verbose) << "writing result in plain text with state vectors..." << std::endl;
       trace2statevector(out,trace);

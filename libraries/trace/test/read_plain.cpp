@@ -27,12 +27,12 @@ static bool read_trace(Trace& t, const char* s)
 
 void test_next_action(Trace& t, const char* s)
 {
-  ATermAppl a = t.nextAction();
-  BOOST_CHECK((a != NULL) && (ATgetType((ATerm) a) == AT_APPL));
-  if ((a != NULL) && (ATgetType((ATerm) a) == AT_APPL))
+  mcrl2::lps::multi_action a = t.nextAction();
+  BOOST_CHECK(a != mcrl2::lps::multi_action());
+  if (a != mcrl2::lps::multi_action())
   {
-    BOOST_CHECK(ATgetArity(ATgetAFun(a)) == 0);
-    BOOST_CHECK(!strcmp(ATgetName(ATgetAFun(a)),s));
+    BOOST_CHECK(a.actions().size() == 1);
+    BOOST_CHECK(pp(a)==s);
   }
 }
 

@@ -920,8 +920,7 @@ void LTS::loadTrace(std::string const& path)
 
   while (tr.getPosition() != tr.getLength())
   {
-    std::string action = mcrl2::data::pp(mcrl2::data::data_expression(ATgetArgument(
-                                         ATgetArgument(tr.nextAction(),0),0)));
+    std::string action = pp(tr.nextAction());
 
     std::vector<Transition*> posTrans = sim->getPosTrans();
     int possibilities = 0;

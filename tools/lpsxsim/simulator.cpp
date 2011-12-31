@@ -423,67 +423,35 @@ void StandardSimulator::LoadTrace(const std::string& filename)
     Reset(state);
   }
 
-  ATermAppl act;
+  mcrl2::lps::multi_action act;
   size_t idx = 0;
-  while ((act = tr.nextAction()) != NULL)
+  while ((act = tr.nextAction()) != mcrl2::lps::multi_action())
   {
     idx++;
     nextstategen = nextstate->getNextStates(state,nextstategen);
-    if (gsIsMultAct(act))
+    mcrl2::lps::multi_action Transition;
+    ATerm NewState;
+    bool found = false;
+    while (nextstategen->next(Transition,&NewState))
     {
-      mcrl2::lps::multi_action Transition;
-      ATerm NewState;
-      bool found = false;
-      while (nextstategen->next(Transition,&NewState))
+      if (Transition==mcrl2::lps::multi_action(act))
       {
-        if (Transition==mcrl2::lps::multi_action(act))
+        if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
         {
-          if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
-          {
-            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
-            state = NewState;
-            found = true;
-            break;
-          }
+          newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
+          state = NewState;
+          found = true;
+          break;
         }
-      }
-      if (!found)
-      {
-        std::stringstream ss;
-        ss << "could not perform action " << idx << " (";
-        ss << pp(mcrl2::lps::multi_action(act));
-        ss << ") from trace";
-        throw mcrl2::runtime_error(ss.str());
       }
     }
-    else
+    if (!found)
     {
-      // Perhaps trace was in plain text format; try pp-ing actions
-      // XXX Only because libtrace cannot parse text (yet)
-      mcrl2::lps::multi_action Transition;
-      ATerm NewState;
-      std::string s(ATgetName(ATgetAFun(act)));
-      bool found = false;
-      while (nextstategen->next(Transition,&NewState))
-      {
-        std::string t = pp(Transition);
-        if (s == t)
-        {
-          if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
-          {
-            newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
-            state = NewState;
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found)
-      {
-        std::stringstream ss;
-        ss << "could not perform action " << idx << " (" << ATwriteToString((ATerm) act) << ") from trace";
-        throw mcrl2::runtime_error(ss.str());
-      }
+      std::stringstream ss;
+      ss << "could not perform action " << idx << " (";
+      ss << pp(mcrl2::lps::multi_action(act));
+      ss << ") from trace";
+      throw mcrl2::runtime_error(ss.str());
     }
   }
 
@@ -507,7 +475,7 @@ void StandardSimulator::SaveTrace(const std::string& filename)
     tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
     for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
     {
-      tr.addAction(ATAgetFirst(ATLgetFirst(l)));
+      tr.addAction(mcrl2::lps::multi_action(ATAgetFirst(ATLgetFirst(l))));
       tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
     }
   }

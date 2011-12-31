@@ -323,7 +323,7 @@ bool lps2lts_algorithm::savetrace(
   for (; !ATisEmpty(tr); tr=ATgetNext(tr))
   {
     ATermList e = (ATermList) ATgetFirst(tr);
-    trace.addAction((ATermAppl) ATgetFirst(e));
+    trace.addAction(multi_action(ATgetFirst(e)));
     e = ATgetNext(e);
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }

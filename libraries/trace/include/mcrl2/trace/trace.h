@@ -26,9 +26,10 @@
 #include <string>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -78,16 +79,19 @@ enum TraceFormat
 class Trace
 {
   private:
-    // The number of states is always one less than the number of actions, and times.
-    // So, an invariant is actions.size()+1 == states.size() == times.size();
+    // The number of states is always one less than the number of actions.
+    // So, an invariant is actions.size()+1 == states.size();
     // The number of actions present is actions.size().
-    atermpp::vector < ATermAppl> states;
-    atermpp::vector < ATermAppl> actions;
-    atermpp::vector < ATermAppl> times;
+    atermpp::vector < ATermAppl > states;
+    atermpp::vector < mcrl2::lps::multi_action > actions;
+    // atermpp::vector < mcrl2::data::data_expression > times;
     size_t pos; // Invariant: pos <= actions.size().
 
     AFun trace_pair;
     int trace_pair_set;
+    const mcrl2::data::data_specification m_spec;
+    const lps::action_label_list m_act_decls;
+    bool m_data_specification_and_act_decls_are_defined;
 
 #define TRACE_MCRL2_MARKER "mCRL2Trace"
 #define TRACE_MCRL2_MARKER_SIZE 10
@@ -101,10 +105,26 @@ class Trace
     /// \details The current position
     /// and length of trace are set to 0. The initial state and time are set to NULL.
     Trace()
-      : trace_pair_set(0)
+      : trace_pair_set(0),
+        m_data_specification_and_act_decls_are_defined(false)
     {
       init();
     }
+    
+    /// \brief Constructor for an empty trace.
+    /// \details The current position
+    /// and length of trace are set to 0. The initial state and time are set to NULL.
+    /// \param[in] spec The data specification that is used when parsing multi actions.
+    /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
+    Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
+      : trace_pair_set(0),
+        m_spec(spec),
+        m_act_decls(act_decls),
+        m_data_specification_and_act_decls_are_defined(true)
+    {
+      init();
+    }
+
 
     /// \brief Construct the trace in the basis of an input stream.
     /// \details A trace is read from the input stream. If the format is tfUnknown it
@@ -113,7 +133,8 @@ class Trace
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::istream& is, TraceFormat tf = tfUnknown)
-      : trace_pair_set(0)
+      : trace_pair_set(0),
+        m_data_specification_and_act_decls_are_defined(false)
     {
       init();
       try
@@ -134,7 +155,8 @@ class Trace
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::string const& filename, TraceFormat tf = tfUnknown)
-      : trace_pair_set(0)
+      : trace_pair_set(0),
+        m_data_specification_and_act_decls_are_defined(false)
     {
       init();
       try
@@ -158,15 +180,14 @@ class Trace
     bool operator <(const Trace& t) const
     {
       return ((states<t.states) ||
-              (states==t.states && (actions<t.actions ||
-                                    (actions==t.actions && times<t.times))));
+              (states==t.states && actions<t.actions));  
     }
 
     /// \brief Set the current position back to the beginning of the trace
     /// \details The trace itself remains unaltered.
     void resetPosition()
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       pos = 0;
     }
 
@@ -186,17 +207,17 @@ class Trace
     /// \details The current position of the trace is a non negative number
     /// smaller than the length of the trace.
     /// \return The current position of the trace.
-    size_t getPosition()
+    size_t getPosition() const
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       return pos;
     }
 
     /// \brief Get the current length of the trace.
     /// \return A positive number indicating the number of actions in the trace.
-    size_t getLength()
+    size_t getLength() const
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       return actions.size();
     }
 
@@ -205,9 +226,9 @@ class Trace
     /// position 0 is the initial state. If no state is defined at
     /// the current position NULL is returned.
     /// \return The state at the current position of the trace.
-    ATermAppl currentState()
+    ATermAppl currentState() const
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       return states[pos];
     }
 
@@ -216,40 +237,39 @@ class Trace
     /// \details This routine returns the action at the current position of the
     /// trace and moves to the next position in the trace. When the current position
     /// is at the end of the trace, nothing happens and NULL is returned.
-    /// \return An ATermAppl representing the action at the current position of the
-    /// trace. This is NULL when at the end of the trace.
-    ATermAppl nextAction()
+    /// \return An action_list representing the action at the current position of the
+    /// trace. This is the default multi_action when at the end of the trace.
+    mcrl2::lps::multi_action nextAction()
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
 
       if (pos < actions.size())
       {
         pos++;
         return actions[pos-1];
       }
-      return NULL;
+      return mcrl2::lps::multi_action();
     }
 
 
     /// \brief Get the time of the current state in the trace.
     /// \details This is the time at which
     /// the last action occurred (if any).
-    /// \return An ATermAppl representing the current time, or NULL if the time is not defined.
-    ATermAppl currentTime()
-    {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
-      return times[pos];
+    /// \return A data_expression representing the current time, or a default data_expression if the time is not defined.
+    mcrl2::data::data_expression currentTime()
+    { 
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
+      return actions[pos].time(); 
     }
 
     /// \brief Truncates the trace at the current position.
     /// \details This function removes the next action at the current position and all
-    /// subsequent actions, times and states. The state and the time at the current
+    /// subsequent actions and states. The state and the time at the current
     /// position remain untouched.
     void truncate()
     {
       actions.resize(pos);
       states.resize(pos+1);
-      times.resize(pos+1);
     }
 
     /// \brief Add an action to the current trace.
@@ -260,14 +280,13 @@ class Trace
     /// \param [in] time The time to be associated with the current action and state.
     /// \return
 
-    void addAction(ATermAppl action, ATermAppl time = NULL)
+    void addAction(const mcrl2::lps::multi_action action)
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       pos++;
-      truncate(); // Take care that actions, states and times have the appropriate size.
+      truncate(); // Take care that actions and states have the appropriate size.
       actions[pos-1] = action;
       states[pos] = NULL;
-      times[pos] = time;
     }
 
     /// \brief Set the state at the current position.
@@ -276,9 +295,9 @@ class Trace
     /// \param [in] state The new state.
     /// \return The return value indicates whether the state is set.
 
-    bool setState(ATermAppl state)
+    bool setState(const ATermAppl state)
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       if (states[pos] == NULL)
       {
         states[pos] = state;
@@ -298,7 +317,7 @@ class Trace
 
     bool canSetState()
     {
-      assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+      assert(actions.size()+1 == states.size() && pos <=actions.size());
       return (states[pos] == NULL);
     }
 
@@ -336,9 +355,9 @@ class Trace
       catch (runtime_error err)
       {
         std::string s;
-        s = "error loading trace (";
+        s = "error loading trace: ";
         s += err.what();
-        s += ")";
+        s += ".";
         throw runtime_error(s);
       }
     }
@@ -443,9 +462,9 @@ class Trace
       return ATisEqualAFun(ATgetAFun(t),trace_pair);
     }
 
-    ATermAppl makeTimedMAct(ATermAppl act, ATermAppl time)
+    ATermAppl makeTimedMAct(const mcrl2::lps::multi_action &ma)
     {
-      return ATmakeAppl2(trace_pair,(ATerm) act,(ATerm) time);
+      return ATmakeAppl2(trace_pair,(ATerm)(ATermList)ma.actions(), (ATerm)(ATermAppl)ma.time());
     }
 
     void init()
@@ -551,24 +570,25 @@ class Trace
 
       ATermList trace = (ATermList) readATerm(is);
       assert(ATgetType(trace) == AT_LIST);
-
       for (; !ATisEmpty(trace); trace=ATgetNext(trace))
       {
+        using namespace mcrl2::lps;
         ATermAppl e = (ATermAppl) ATgetFirst(trace);
 
         if (core::detail::gsIsMultAct(e))   // To be compatible with old untimed version
         {
-          addAction(e);
+          addAction(multi_action(action_list(e)));
         }
         else if (isTimedMAct(e))
         {
+
           if (core::detail::gsIsNil(ATAgetArgument(e,1)))
           {
-            addAction(ATAgetArgument(e,0));
+            addAction(multi_action(action_list(ATgetArgument(e,0))));
           }
           else
           {
-            addAction(ATAgetArgument(e,0),ATAgetArgument(e,1));
+            addAction(multi_action(action_list(ATAgetArgument(e,0)),mcrl2::data::data_expression(ATAgetArgument(e,1))));
           }
         }
         else
@@ -602,8 +622,17 @@ class Trace
 
         if (is.gcount() > 0)
         {
-          // XXX need to parse trace
-          addAction(ATmakeAppl0(ATmakeAFun(buf,0,false)));
+          // XXX need to parse trace; Currently, the action with arguments is read as if it were an action label.
+          if (m_data_specification_and_act_decls_are_defined)
+          {
+            addAction(mcrl2::lps::parse_multi_action(buf,m_act_decls,m_spec));
+          }
+          else  
+          {
+            addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
+                      mcrl2::lps::action_label(mcrl2::core::identifier_string(buf),mcrl2::data::sort_expression_list()),
+                                           mcrl2::data::data_expression_list())));
+          }
         }
       }
       is.clear();
@@ -613,23 +642,22 @@ class Trace
 
     void saveMcrl2(std::ostream& os)
     {
+      assert(actions.size()+1 == states.size());
       ATermList trace = ATmakeList0();
-      assert(actions.size()+1 == states.size() && states.size() == times.size());
 
-      bool error_shown = false;
       size_t i=actions.size()+1;
       while (i > 0)
       {
         i--;
         if (i<actions.size())
         {
-          assert(actions[i]!=NULL);
-          if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
+          assert(actions.size()>i && actions[i]!=mcrl2::lps::multi_action());
+          /* if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
           {
             mCRL2log(log::error) << "saving trace that is not in mCRL2 format to a mCRL2 trace format" << std::endl;
             error_shown = true;
-          }
-          trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i], (times[i]==NULL)?core::detail::gsMakeNil():times[i]));
+          } */
+          trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i]));
         }
         if (states[i] != NULL)
         {
@@ -659,14 +687,7 @@ class Trace
     {
       for (size_t i=0; i<actions.size(); i++)
       {
-        if (core::detail::gsIsMultAct(actions[i]))
-        {
-          os << core::pp_deprecated((ATerm) actions[i]);
-        }
-        else
-        {
-          os << ATgetName(ATgetAFun(actions[i]));
-        }
+        os << pp(actions[i]);
         os << std::endl;
         if (os.bad())
         {
