@@ -895,7 +895,7 @@ class bisim_partitioner
                                 mcrl2::data::data_expression_list()))); 
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();
-              for (size_t k=0 ; k< old_counter_trace.getLength(); k++)
+              for (size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
               {
                 new_counter_trace.addAction(old_counter_trace.nextAction());
               }

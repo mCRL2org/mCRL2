@@ -898,8 +898,8 @@ void LTS::loadTrace(std::string const& path)
   sim->setInitialState(initState);
   sim->start();
 
-  // Get the first state of the trace (as an ATermAppl)
-  ATermAppl currState = tr.currentState();
+  // Get the first state of the trace 
+  mcrl2::lps::state currState = tr.currentState();
   // Now, currState ~ initState.
   //
   // In currState, free variables can occur, instantiate this with the values
@@ -907,18 +907,17 @@ void LTS::loadTrace(std::string const& path)
   //
   // Assumption: The ith parameter in currState is equal to the ith parameter
   // in initState.
-  for (size_t i = 0; i < ATgetLength(ATgetArguments(currState)); ++i)
+  for (size_t i = 0; i < currState.size(); ++i)
   {
 
-    ATerm currVal = ATgetArgument(currState, i);
-    string value = mcrl2::data::pp(mcrl2::data::data_expression(currVal));
+    string value = mcrl2::data::pp(currState[i]);
 
     std::string paramValue = getStateParameterValueStr(initState,i);
   }
 
   // Load the rest of the trace.
 
-  while (tr.getPosition() != tr.getLength())
+  while (tr.getPosition() != tr.number_of_actions())
   {
     std::string action = pp(tr.nextAction());
 
@@ -955,11 +954,10 @@ void LTS::loadTrace(std::string const& path)
         State* s = posTrans[j]->getEndState();
         int match = 0;
 
-        for (size_t i = 0; i < ATgetLength(ATgetArguments(currState));
-             ++i)
+        for (size_t i = 0; i < currState.size(); ++i)
         {
 
-          std::string currVal = mcrl2::data::pp(mcrl2::data::data_expression(ATgetArgument(currState, i)));
+          std::string currVal = mcrl2::data::pp(currState[i]);
 
           std::map<std::string, std::string>::iterator it;
 

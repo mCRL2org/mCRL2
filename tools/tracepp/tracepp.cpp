@@ -35,18 +35,18 @@ using namespace mcrl2::trace;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
-static void print_state(ostream& os, ATermAppl state)
+static void print_state(ostream& os, const mcrl2::lps::state &s)
 {
-  int arity = ATgetArity(ATgetAFun(state));
+  size_t arity = s.size();
 
   os << "(";
-  for (int i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     if (i > 0)
     {
       os << ",";
     }
-    os << mcrl2::data::pp(mcrl2::data::data_expression(ATgetArgument(state,i)));
+    os << mcrl2::data::pp(s[i]);
   }
   os << ")";
 }
@@ -60,7 +60,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
   mcrl2::lps::multi_action act;
   int i = 0;
   os << i << " [label=\"";
-  if (trace.currentState() != NULL)
+  if (trace.current_state_exists())
   {
     print_state(os,trace.currentState());
   }
@@ -68,7 +68,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
   while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
   {
     os << i+1 << " [label=\"";
-    if (trace.currentState() != NULL)
+    if (trace.current_state_exists())
     {
       print_state(os,trace.currentState());
     }
@@ -83,7 +83,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
 
 static void trace2statevector(ostream& os, Trace& trace)
 {
-  if (trace.currentState() != NULL)
+  if (trace.current_state_exists())
   {
     print_state(os,trace.currentState());
   }
@@ -93,8 +93,7 @@ static void trace2statevector(ostream& os, Trace& trace)
     os << " -";
     os << mcrl2::lps::pp(act);
     os << "-> " << std::endl;
-    ATermAppl CurrentState = trace.currentState();
-    if (CurrentState != NULL)
+    if (trace.current_state_exists())
     {
       print_state(os, trace.currentState());
     }
@@ -105,7 +104,7 @@ static void trace2statevector(ostream& os, Trace& trace)
 
 static void trace2aut(ostream& os, Trace& trace)
 {
-  os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
+  os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << endl;
   mcrl2::lps::multi_action act;
   int i = 0;
   while ((act = trace.nextAction()) != mcrl2::lps::multi_action())

@@ -44,7 +44,7 @@ int test_main(int argc, char** argv)
 
   BOOST_REQUIRE(read_trace(t,trace_str));
 
-  BOOST_REQUIRE(t.getLength() == 3);
+  BOOST_REQUIRE(t.number_of_actions() == 3);
 
   test_next_action(t,"a");
   test_next_action(t,"b(1,true)");

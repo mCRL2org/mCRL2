@@ -219,6 +219,16 @@ ATermAppl NextState::getStateArgument(ATerm state, size_t index)
   }
 }
 
+mcrl2::lps::state NextState::make_new_state_vector(ATerm s) 
+{
+  mcrl2::lps::state new_state;
+  for (size_t i=0; i<info.statelen; i++)
+  { 
+    new_state.push_back(data_expression(getStateArgument(s,i)));
+  } 
+  return new_state;
+}
+
 ATermAppl NextState::makeStateVector(ATerm state)
 {
   if (!stateAFun_made)
@@ -308,6 +318,54 @@ static bool statearg_match(const data_expression arg, const data_expression pat)
   atermpp::map < variable, data_expression > vars;
   return statearg_match(arg,pat,vars);
 
+}
+
+ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, ATerm match)
+{
+  if (!stateAFun_made)
+  {
+    stateAFun_made = true;
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,false);
+    ATprotectAFun(info.stateAFun);
+  }
+
+  bool valid = true;
+  ATermList l = info.procvars;
+  for (size_t i=0; i<info.statelen; i++)
+  {
+    stateargs[i] = (ATerm)(ATermAppl)s[i];
+    if (mcrl2::data::data_expression((ATermAppl) stateargs[i]).sort() != mcrl2::data::data_expression(ATAgetFirst(l)).sort())
+    {
+      valid = false;
+      break;
+    }
+
+    if ((match != NULL) && !statearg_match(
+                               data_expression(stateargs[i]),
+                               data_expression(getStateArgument(match,i))))
+    {
+      valid = false;
+      break;
+    }
+    stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.convert_to((data_expression)(ATermAppl) stateargs[i]);
+    l = ATgetNext(l);
+  }
+  if (valid)
+  {
+    switch (info.stateformat)
+    {
+      case GS_STATE_VECTOR:
+        return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+        break;
+      case GS_STATE_TREE:
+        return (ATerm) buildTree(stateargs);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return NULL;
 }
 
 ATerm NextState::parseStateVector(ATermAppl state, ATerm match)

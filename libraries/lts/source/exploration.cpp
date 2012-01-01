@@ -319,13 +319,13 @@ bool lps2lts_algorithm::savetrace(
   }
 
   Trace trace;
-  trace.setState(nstate->makeStateVector(s));
+  trace.setState(nstate->make_new_state_vector(s));
   for (; !ATisEmpty(tr); tr=ATgetNext(tr))
   {
     ATermList e = (ATermList) ATgetFirst(tr);
     trace.addAction(multi_action(ATgetFirst(e)));
     e = ATgetNext(e);
-    trace.setState(nstate->makeStateVector(ATgetFirst(e)));
+    trace.setState(nstate->make_new_state_vector(ATgetFirst(e)));
   }
 
   delete nsgen;

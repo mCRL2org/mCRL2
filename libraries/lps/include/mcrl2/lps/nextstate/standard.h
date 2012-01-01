@@ -17,6 +17,7 @@
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/state.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -134,7 +135,9 @@ class NextState
     size_t getStateLength();
     ATermAppl getStateArgument(ATerm state, size_t index);
     ATermAppl makeStateVector(ATerm state);
+    mcrl2::lps::state make_new_state_vector(ATerm s);
     ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
+    ATerm parse_state_vector_new(mcrl2::lps::state s, ATerm match = NULL);
     mcrl2::data::rewriter& getRewriter()   // Deprecated. Do not use.
     {
       return const_cast< mcrl2::data::detail::legacy_rewriter& >(info.m_rewriter);

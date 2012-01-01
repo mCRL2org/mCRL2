@@ -405,22 +405,22 @@ void StandardSimulator::LoadTrace(const std::string& filename)
 {
   Trace tr(filename);
 
-  ATerm state = (ATerm) tr.currentState();
+  ATerm state;
   ATermList newtrace = ATmakeList0();
-
-  if ((state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL))
+  if (tr.current_state_exists())
   {
-    throw mcrl2::runtime_error("initial state of trace is not a valid state for this specification");
-  }
 
-  if (state == NULL)
-  {
-    Reset();
-    state = current_state;
+    if ((state = nextstate->parse_state_vector_new(tr.currentState())) == NULL)
+    {
+      throw mcrl2::runtime_error("initial state of trace is not a valid state for this specification");
+    }
+
+    Reset(state);
   }
   else
   {
-    Reset(state);
+    Reset();
+    state = current_state;
   }
 
   mcrl2::lps::multi_action act;
@@ -436,7 +436,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
     {
       if (Transition==mcrl2::lps::multi_action(act))
       {
-        if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
+        if ((tr.current_state_exists()) || ((NewState = nextstate->parse_state_vector_new(tr.currentState(),NewState)) != NULL))
         {
           newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
           state = NewState;
@@ -463,7 +463,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
   for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
     (*i)->TraceChanged(newtrace,0);
-  }
+  } 
 }
 
 void StandardSimulator::SaveTrace(const std::string& filename)
@@ -472,11 +472,11 @@ void StandardSimulator::SaveTrace(const std::string& filename)
   if (!ATisEmpty(trace))
   {
     ATermList m = ATreverse(trace);
-    tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
+    tr.setState(nextstate->make_new_state_vector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
     for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
     {
       tr.addAction(mcrl2::lps::multi_action(ATAgetFirst(ATLgetFirst(l))));
-      tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
+      tr.setState(nextstate->make_new_state_vector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
     }
   }
 
