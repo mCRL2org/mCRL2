@@ -227,8 +227,7 @@ void XSimMain::CreateContent()
   bottompanel->SetSizer(bottomsizer);
 
   split->SplitHorizontally(bottompanel,toppanel);
-  split->SetMinimumPaneSize(27);
-  split->SetSashGravity(1.0);
+  split->SetSashGravity(0.5);
   mainsizer->Add(split, 1, wxEXPAND|wxALIGN_CENTER|wxALL, 5);
 
   SetMinSize(wxSize(240,160));
