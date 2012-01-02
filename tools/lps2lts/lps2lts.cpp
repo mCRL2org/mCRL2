@@ -201,8 +201,8 @@ class lps2lts_tool : public lps2lts_base
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored").
       add_option("confluence", make_optional_argument("NAME", "ctau"),
-                 "apply on-the-fly confluence reduction with NAME the confluent tau action "
-                 "(when no NAME is supplied, 'ctau' is used)", 'c').
+                 "apply on-the-fly prioritization of transitions with the action label NAME."
+                 "(when no NAME is supplied (i.e., '-c') priority is given to 'tau' (i.e., '-ctau' is used))", 'c').
       add_option("strategy", make_mandatory_argument("NAME"),
                  "explore the state space using strategy NAME:\n"
                  "  'b', 'breadth'   breadth-first search (default)\n"
