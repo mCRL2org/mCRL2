@@ -301,7 +301,7 @@ inline std::string string_for_preorder(const lts_preorder pre)
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <equivalence>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 
 inline std::string supported_lts_equivalences_text(
@@ -343,7 +343,7 @@ inline std::string supported_lts_equivalences_text(
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <equivalence>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
 {
@@ -359,7 +359,7 @@ inline std::string supported_lts_equivalences_text(const std::set<lts_equivalenc
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <preorder>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_preorders_text(
   lts_preorder default_preorder = lts_pre_none,
@@ -399,7 +399,7 @@ inline std::string supported_lts_preorders_text(
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <preorder>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_preorders_text(const std::set<lts_preorder> &supported)
 {
@@ -633,7 +633,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     }
 
     const std::vector<transition> &trans=l.get_transitions();
-    for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r) 
+    for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
     {
       if (visited[r->from()])
       {
@@ -653,7 +653,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     }
 
     const std::vector<transition> &trans1=l.get_transitions();
-    for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r) 
+    for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
     {
       if (visited[r->from()])
       {

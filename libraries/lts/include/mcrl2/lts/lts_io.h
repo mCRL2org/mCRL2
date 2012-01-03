@@ -102,7 +102,7 @@ const std::set<lts_type> &supported_lts_formats();
  *                           supported.
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
- *                           except the last is terminated with '\n'. */
+ *                           except the last is terminated with '\\n'. */
 std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type> &supported = supported_lts_formats());
 
 /** \brief Gives a textual list describing supported LTS formats.
@@ -110,7 +110,7 @@ std::string supported_lts_formats_text(lts_type default_format = lts_none, const
  *                           supported.
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
- *                           except the last is terminated with '\n'. */
+ *                           except the last is terminated with '\\n'. */
 std::string supported_lts_formats_text(const std::set<lts_type> &supported);
 
 /** \brief Gives a list of extensions for supported LTS formats.
