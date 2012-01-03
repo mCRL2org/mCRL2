@@ -802,7 +802,7 @@ void XSimMain::SetCurrentState(state s, bool showchange)
   current_state = s;
 
 
-  for (long i=0; static_cast<size_t>(i)<ATgetLength(state_varnames); i++)
+  for (long i=0; static_cast<size_t>(i)<state_varnames.size(); i++)
   {
     const data_expression oldval = old[i];
     const data_expression newval = s[i];
@@ -940,7 +940,7 @@ void XSimMain::UpdateTransitions(const atermpp::vector < multi_action > &next_ac
     state n = next_states[i];
     variable_list o = state_varnames;
     bool comma = false;
-    for (size_t i=0; i<ATgetLength(state_varnames); i++)
+    for (size_t i=0; i<state_varnames.size(); i++)
     {
       data_expression oldval = m[i];
       data_expression newval = n[i];
