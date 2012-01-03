@@ -62,12 +62,13 @@ void StandardSimulator::LoadSpec(const mcrl2::lps::specification &spec)
 
   delete nextstategen;
   delete nextstate;
+  // Reset the trace and provide it with information to parse actions. 
   m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
   nextstate = createNextState(spec, *m_rewriter, !use_dummies,GS_STATE_VECTOR);
   nextstategen = NULL;
 
   InitialiseViews();
-  Reset(nextstate->make_new_state_vector(nextstate->getInitialState()));
+  Reset();
 }
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
@@ -117,7 +118,9 @@ void StandardSimulator::Reset()
 
 void StandardSimulator::Reset(mcrl2::lps::state State)
 {
-  trace=Trace();
+  assert(IsActive());
+  trace=Trace(m_spec.data(),m_spec.action_labels());
+
   trace.setState(State);
 
   UpdateTransitions();
@@ -296,6 +299,7 @@ void StandardSimulator::InitialiseViews()
 void StandardSimulator::LoadTrace(const std::string& filename)
 {
   trace.load(filename);
+  // trace=Trace(filename,m_spec.data(),m_spec.action_labels()); 
 
   if (trace.current_state_exists())
   {
@@ -306,7 +310,8 @@ void StandardSimulator::LoadTrace(const std::string& filename)
   }
   else
   {
-    Reset();
+    assert(trace.getPosition()==0);
+    trace.setState(nextstate->make_new_state_vector(nextstate->getInitialState()));
   }
 
   // Check whether the trace matches the specification, and reconstruct the states if they are not part of the trace.

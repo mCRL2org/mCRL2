@@ -12,7 +12,7 @@
 /// Traces are sequences of state-action-time triples.
 /// The state is a vector of data values, the action is the outgoing
 /// action in this state, and the time is an absolute
-/// real number indicating the current time or NULL if the trace
+/// real number indicating the current time or NIL if the trace
 /// is untimed.
 /// \author Muck van Weerdenburg
 
@@ -107,7 +107,7 @@ class Trace
   public:
     /// \brief Default constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. The initial state and time are set to NULL.
+    /// and length of trace are set to 0. 
     Trace()
       : trace_pair_set(0),
         m_data_specification_and_act_decls_are_defined(false)
@@ -117,7 +117,7 @@ class Trace
     
     /// \brief Constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. The initial state and time are set to NULL.
+    /// and length of trace are set to 0. 
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
@@ -152,6 +152,35 @@ class Trace
       }
     }
 
+    /// \brief Construct the trace in the basis of an input stream.
+    /// \details A trace is read from the input stream. If the format is tfUnknown it
+    /// is automatically determined what the format of the trace is.
+    /// \param[in] is The input stream from which the trace is read.
+    /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
+    /// \param[in] spec The data specification that is used when parsing multi actions.
+    /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
+    /// \exception mcrl2::runtime_error message in case of failure
+    Trace(std::istream& is, 
+          const mcrl2::data::data_specification &spec, 
+          const mcrl2::lps::action_label_list &act_decls, 
+          TraceFormat tf = tfUnknown)
+      : trace_pair_set(0),
+        m_spec(spec),
+        m_act_decls(act_decls),
+        m_data_specification_and_act_decls_are_defined(true)
+    {
+      init();
+      try
+      {
+        load(is,tf);
+      }
+      catch (...)
+      {
+        cleanup();
+        throw;
+      }
+    }
+
     /// \brief Construct the trace on the basis of an input file.
     /// \details A trace is read from the input file. If the format is tfUnknown it
     /// is automatically determined what the format of the trace is.
@@ -161,6 +190,33 @@ class Trace
     Trace(std::string const& filename, TraceFormat tf = tfUnknown)
       : trace_pair_set(0),
         m_data_specification_and_act_decls_are_defined(false)
+    {
+      init();
+      try
+      {
+        load(filename,tf);
+      }
+      catch (...)
+      {
+        cleanup();
+        throw;
+      }
+    }
+
+    /// \brief Construct the trace on the basis of an input file.
+    /// \details A trace is read from the input file. If the format is tfUnknown it
+    /// is automatically determined what the format of the trace is.
+    /// \param[in] filename The name of the file from which the trace is read.
+    /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
+    /// \exception mcrl2::runtime_error message in case of failure
+    Trace(std::string const& filename, 
+          const mcrl2::data::data_specification &spec, 
+          const mcrl2::lps::action_label_list &act_decls,
+          TraceFormat tf = tfUnknown)
+      : trace_pair_set(0),
+        m_spec(spec),
+        m_act_decls(act_decls),
+        m_data_specification_and_act_decls_are_defined(true)
     {
       init();
       try
@@ -264,7 +320,7 @@ class Trace
     /// \brief Get the state at the current position in the trace.
     /// \details The state at
     /// position 0 is the initial state. If no state is defined at
-    /// the current position NULL is returned.
+    /// the next position an exception is thrown.
     /// \return The state at the current position of the trace.
     const mcrl2::lps::state &nextState() const
     {
@@ -281,7 +337,7 @@ class Trace
     /// \brief Get the state at the current position in the trace.
     /// \details The state at
     /// position 0 is the initial state. If no state is defined at
-    /// the current position NULL is returned.
+    /// the current position an exception is thrown.
     /// \return The state at the current position of the trace.
     const mcrl2::lps::state &currentState() const
     {
@@ -311,12 +367,11 @@ class Trace
     ///  move to the next position.
     /// \details This routine returns the action at the current position of the
     /// trace and moves to the next position in the trace. When the current position
-    /// is at the end of the trace, nothing happens and NULL is returned.
+    /// is at the end of the trace, nothing happens and the default mcrl2::lps::multi_action() is returned.
     /// \return An action_list representing the action at the current position of the
     /// trace. This is the default multi_action when at the end of the trace.
     mcrl2::lps::multi_action nextAction()
     {
-ATfprintf(stderr,"nextAction is deprecated\n");
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
 
       if (pos < actions.size())
@@ -325,7 +380,7 @@ ATfprintf(stderr,"nextAction is deprecated\n");
         return actions[pos-1];
       }
       return mcrl2::lps::multi_action();
-    }
+    } 
 
 
     /// \brief Get the time of the current state in the trace.
@@ -389,18 +444,6 @@ ATfprintf(stderr,"nextAction is deprecated\n");
         states[pos] = s;
       }
     }
-
-    /// \brief Determine whether a state can still be set.
-    /// \details Initially a state is set to NULL. It can be set only once. This function
-    /// returns whether a state can still be set to a new value.
-    /// \retval true The state can be set to a new value.
-    /// \retval false The state can not be set to a new value.
-
-    /* bool canSetState()
-    {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return (states[pos] == NULL);
-    } */
 
     /// \brief Replace the trace with the content of the stream.
     /// \details The trace is replaced with the trace in the stream.
@@ -710,7 +753,6 @@ ATfprintf(stderr,"nextAction is deprecated\n");
 
         if (is.gcount() > 0)
         {
-          // XXX need to parse trace; Currently, the action with arguments is read as if it were an action label.
           if (m_data_specification_and_act_decls_are_defined)
           {
             addAction(mcrl2::lps::parse_multi_action(buf,m_act_decls,m_spec));

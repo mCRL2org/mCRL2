@@ -169,7 +169,6 @@ class specification
       // LPSs it takes too much time
       assert(is_well_typed(*this));
       specification tmp(*this);
-      // tmp.data() = data::remove_all_system_defined(tmp.data());
       core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
     }
 
