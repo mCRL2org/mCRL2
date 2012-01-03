@@ -33,19 +33,27 @@ class XSimTrace: public wxFrame, public SimulatorViewInterface
     // SimulatorViewInterface
     virtual void Registered(SimulatorInterface* Simulator);
     virtual void Unregistered();
-    virtual void Initialise(ATermList Pars);
-    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
-    virtual void Reset(ATerm State);
+    virtual void Initialise(const mcrl2::data::variable_list Pars);
+    virtual void StateChanged(
+                     mcrl2::lps::multi_action,
+                     mcrl2::lps::state,
+                     atermpp::vector<mcrl2::lps::multi_action>,
+                     std::vector<mcrl2::lps::state>);
+     virtual void StateChanged(
+                     mcrl2::lps::state,
+                     atermpp::vector<mcrl2::lps::multi_action>,
+                     std::vector<mcrl2::lps::state>);
+    virtual void Reset(mcrl2::lps::state State);
     virtual void Undo(size_t Count);
     virtual void Redo(size_t Count);
-    virtual void TraceChanged(ATermList Trace, size_t From);
-    virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
+    virtual void TraceChanged(mcrl2::trace::Trace tr, size_t From);
+    virtual void TracePosChanged(size_t Index);
 
   private:
     // WDR: method declarations for XSimMain
-    void AddState(ATermAppl Transition, ATerm State, bool enabled);
-    void _add_state(ATermAppl Transition, ATerm State, bool enabled);
-    void _reset(ATerm State);
+    void AddState(const mcrl2::lps::multi_action Transition, const mcrl2::lps::state &State, bool enabled);
+    void _add_state(const mcrl2::lps::multi_action Transition, const mcrl2::lps::state &State, bool enabled);
+    void _reset(const mcrl2::lps::state &State);
     void _update();
 
   private:

@@ -29,8 +29,6 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "simbase.h"
 #include "xsimmain.h"
-// #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -41,6 +39,8 @@
 using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::data;
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -86,17 +86,13 @@ XSimMain::XSimMain(wxWindow* parent, wxWindowID id, const wxString& title,
   Connect(id, wxEVT_SIZE, wxSizeEventHandler(XSimMain::OnResize), 0, this);
   Connect(id, wxEVT_MAXIMIZE, wxMaximizeEventHandler(XSimMain::OnMaximize), 0, this);
 
-  state_varnames = ATmakeList0();
-  ATprotectList(&state_varnames);
-  current_state = NULL;
-  ATprotect(&current_state);
+  state_varnames.protect();
 
   simulator = new StandardSimulatorGUI(this);
   simulator->Register(this);
 
   tracewin = new XSimTrace(this);
   simulator->Register(tracewin);
-  //tracewin->Show(FALSE); // default, so not needed
 
   wxConfig config(wxT("xsimrc"));
   if (config.HasGroup(wxT("LoadLibrary")))
@@ -126,8 +122,7 @@ XSimMain::~XSimMain()
 
   delete tracewin;
 
-  ATunprotectList(&state_varnames);
-  ATunprotect(&current_state);
+  state_varnames.unprotect();
 
 #if wxCHECK_VERSION(2, 9, 0)
   this->PopEventHandler(true);
@@ -143,9 +138,9 @@ void XSimMain::CreateMenu()
   wxMenu* file = new wxMenu;
   openitem = file->Append(wxID_OPEN, wxT("&Open...	CTRL-o"), wxT(""));
   file->AppendSeparator();
-  ldtrcitem = file->Append(ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT(""));
+  ldtrcitem = file->Append(ID_LOADTRACE, wxT("&Load Trace...	CTRL-l"), wxT(""));
   ldtrcitem->Enable(false);
-  svtrcitem = file->Append(ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT(""));
+  svtrcitem = file->Append(ID_SAVETRACE, wxT("&Save Trace...	CTRL-s"), wxT(""));
   svtrcitem->Enable(false);
   file->AppendSeparator();
   file->Append(wxID_EXIT, wxT("&Quit	CTRL-q"), wxT(""));
@@ -336,7 +331,7 @@ void XSimMain::SetInteractiveness(bool interactive)
     {
       undo->Enable(false);
     }
-    if (simulator->GetTracePos() == simulator->GetTraceLength()-1)
+    if (simulator->GetTracePos() >= simulator->GetTraceLength())
     {
       redo->Enable(false);
     }
@@ -386,7 +381,6 @@ void XSimMain::LoadFile(const wxString& filename)
                     wxOK | wxICON_ERROR).ShowModal();
     return;
   }
-
 }
 
 void XSimMain::LoadDLL(const wxString& filename)
@@ -404,40 +398,40 @@ void XSimMain::Unregistered()
 {
 }
 
-void XSimMain::Initialise(ATermList Pars)
+void XSimMain::Initialise(const variable_list Pars)
 {
-  state_varnames = ATmakeList0();
+  state_varnames = Pars;
   stateview->DeleteAllItems();
-  for (long i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
+  size_t count=0;
+  for (variable_list::const_iterator i=Pars.begin(); i!=Pars.end(); ++i, ++count)
   {
-    wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(Pars),0)))
+    wxString s(pp(*i).c_str()
 #ifdef wxUSE_UNICODE
                ,wxConvLocal
 #endif
               );
-    stateview->InsertItem(i,s);
-    state_varnames = ATinsert(state_varnames,ATgetArgument(ATAgetFirst(Pars),0));
+    stateview->InsertItem(count,s);
   }
-  state_varnames = ATreverse(state_varnames);
-  current_state = NULL;
+  current_state = state();
 }
 
-void XSimMain::StateChanged(ATermAppl /*Transition*/, ATerm State, ATermList NextStates)
+void XSimMain::StateChanged(
+                     mcrl2::lps::state State,
+                     atermpp::vector<mcrl2::lps::multi_action> NextActions,
+                     std::vector<mcrl2::lps::state> NextStates)
 {
   try
   {
     SetCurrentState(State);
-    UpdateTransitions(NextStates);
+    UpdateTransitions(NextActions,NextStates);
 
     if( transview->GetItemCount() > 0 )
     {
       transview->Focus(0);
     }
-    // if ( simulator->ErrorOccurred() )
   }
   catch (mcrl2::runtime_error e)
   {
-    // TODO: print error message.
     wxString mystring(e.what(), wxConvUTF8);
     wxMessageDialog msg(this,
                         mystring,
@@ -449,11 +443,20 @@ void XSimMain::StateChanged(ATermAppl /*Transition*/, ATerm State, ATermList Nex
   if (interactive)
   {
     undo->Enable(simulator->GetTracePos()>0);
-    redo->Enable(simulator->GetTracePos() != simulator->GetTraceLength()-1);
+    redo->Enable(simulator->GetTracePos() < simulator->GetTraceLength());
   }
 }
 
-void XSimMain::Reset(ATerm /*State*/)
+ void XSimMain::StateChanged(
+                     mcrl2::lps::multi_action,
+                     mcrl2::lps::state State,
+                     atermpp::vector<mcrl2::lps::multi_action> NextActions,
+                     std::vector<mcrl2::lps::state> NextStates)
+{ 
+  StateChanged(State, NextActions, NextStates);
+}
+ 
+void XSimMain::Reset(state /*State*/)
 {
 }
 
@@ -465,11 +468,11 @@ void XSimMain::Redo(size_t /* Count */)
 {
 }
 
-void XSimMain::TracePosChanged(ATermAppl /*Transition*/, ATerm /*State*/, size_t /* Index */)
+void XSimMain::TracePosChanged(size_t /* Index */)
 {
 }
 
-void XSimMain::TraceChanged(ATermList /* Trace */, size_t /* From */)
+void XSimMain::TraceChanged(mcrl2::trace::Trace /* Trace */, size_t /* From */)
 {
 }
 
@@ -506,29 +509,21 @@ void XSimMain::OnReset(wxCommandEvent& /* event */)
 
 void XSimMain::OnLoadTrace(wxCommandEvent& /* event */)
 {
-  try
+  wxFileDialog dialog(this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_CHANGE_DIR);
+  if (dialog.ShowModal() == wxID_OK)
   {
-    wxFileDialog dialog(this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_CHANGE_DIR);
-    if (dialog.ShowModal() == wxID_OK)
+    string fn(dialog.GetPath().mb_str(wxConvUTF8));
+    Stopper_Enter();
+    try
     {
-      string fn(dialog.GetPath().mb_str(wxConvUTF8));
-      Stopper_Enter();
-      try
-      {
-        simulator->LoadTrace(fn);
-      }
-      catch (string err)
-      {
-        wxMessageDialog dialog(this,wxConvLocal.cMB2WX(err.c_str()),wxT("Error loading trace"),wxOK|wxICON_ERROR);
-        dialog.ShowModal();
-      }
-      Stopper_Exit();
+      simulator->LoadTrace(fn);
     }
-  }
-  catch (mcrl2::runtime_error e)
-  {
-    wxMessageDialog dialog(this, wxString(e.what(), wxConvUTF8),wxT("Error loading trace"),wxOK|wxICON_ERROR);
-    dialog.ShowModal();
+    catch (mcrl2::runtime_error &e)
+    {
+      wxMessageDialog dialog(this,wxString(e.what(), wxConvUTF8),wxT("Error loading trace"),wxOK|wxICON_ERROR);
+      dialog.ShowModal();
+    }
+    Stopper_Exit();
   }
 }
 
@@ -542,9 +537,9 @@ void XSimMain::OnSaveTrace(wxCommandEvent& /* event */)
     {
       simulator->SaveTrace(fn);
     }
-    catch (string err)
+    catch (mcrl2::runtime_error &e)
     {
-      wxMessageDialog dialog(this,wxConvLocal.cMB2WX(err.c_str()),wxT("Error saving trace"),wxOK|wxICON_ERROR);
+      wxMessageDialog dialog(this,wxString(e.what(), wxConvUTF8),wxT("Error saving trace"),wxOK|wxICON_ERROR);
       dialog.ShowModal();
     }
   }
@@ -609,7 +604,7 @@ void XSimMain::OnTauPrioritisation(wxCommandEvent& /* event */)
 
 void XSimMain::OnShowDCChanged(wxCommandEvent& /* event */)
 {
-  UpdateTransitions(simulator->GetNextStates());
+  UpdateTransitions(simulator->GetNextActions(),simulator->GetNextStates());
 }
 
 void XSimMain::OnSetDelay(wxCommandEvent& /* event */)
@@ -640,7 +635,7 @@ void XSimMain::OnSetDelay(wxCommandEvent& /* event */)
 
 void XSimMain::OnResetAndPlay(wxCommandEvent& event)
 {
-  if (!ATisEmpty(simulator->GetTrace()))
+  if (simulator->GetTraceLength()>0)
   {
     simulator->SetTracePos(0);
     OnPlay(event);
@@ -678,16 +673,16 @@ void XSimMain::OnPlayRandom(wxCommandEvent& /* event */)
   }
 }
 
-static bool IsTau(ATermAppl Transition)
+static bool IsTau(const multi_action Transition)
 {
-  return (Transition != NULL) && ATisEmpty(ATLgetArgument(Transition,0));
+  return Transition.actions().empty();
 }
 void XSimMain::OnTimer(wxTimerEvent& /* event */)
 {
   switch (timer_func)
   {
     case FUNC_PLAY:
-      if ((simulator->GetTracePos() < simulator->GetTraceLength()-1) && !stopped)
+      if ((simulator->GetTracePos() < simulator->GetTraceLength()) && !stopped)
       {
         simulator->Redo();
         while (tau_prior->IsChecked() && IsTau(simulator->GetNextTransitionFromTrace()))
@@ -706,11 +701,11 @@ void XSimMain::OnTimer(wxTimerEvent& /* event */)
       }
       break;
     case FUNC_RANDOM:
-      if (!ATisEmpty(simulator->GetNextStates()) && !stopped)
+      if (simulator->GetNextStates().size()>0 && !stopped)
       {
         try
         {
-          simulator->ChooseTransition(rand() % ATgetLength(simulator->GetNextStates()));
+          simulator->ChooseTransition(rand() % simulator->GetNextStates().size());
         }
         catch (std::exception const& e)
         {
@@ -788,32 +783,31 @@ void XSimMain::transOnListItemActivated(wxListEvent& event)
   }
   catch (std::exception const& e)
   {
-    wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"),
-                    wxOK | wxICON_ERROR).ShowModal();
-    return;
+     wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"),
+                     wxOK | wxICON_ERROR).ShowModal();
+     return;
   }
 }
 
-void XSimMain::SetCurrentState(ATerm state, bool showchange)
+void XSimMain::SetCurrentState(state s, bool showchange)
 {
-  ATerm old;
+  state old;
 
-  if (current_state == NULL)
+  if (current_state == state())
   {
-    old = state;
+    old = s;
   }
   else
   {
     old = current_state;
   }
-  current_state = state;
+  current_state = s;
 
 
-  NextState* nextstate = simulator->GetNextState();
   for (long i=0; static_cast<size_t>(i)<ATgetLength(state_varnames); i++)
   {
-    ATermAppl oldval = nextstate->getStateArgument(old,i);
-    ATermAppl newval = nextstate->getStateArgument(state,i);
+    const data_expression oldval = old[i];
+    const data_expression newval = s[i];
 
     if (mcrl2::data::is_variable(newval))
     {
@@ -821,10 +815,10 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
     }
     else
     {
-      stateview->SetItem(i,1,wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated((ATerm) newval).c_str()));
+      stateview->SetItem(i,1,wxConvLocal.cMB2WX(pp(newval).c_str()));
     }
 
-    if (showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval))))
+    if (showchange && (oldval!=newval || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval))))
     {
       wxColour col(255,255,210);
       stateview->SetItemBackgroundColour(i,col);
@@ -915,11 +909,7 @@ static void sort_transitions(wxArrayString& actions, wxArrayString& statechanges
   }
 }
 
-static ATermAppl ToStateVector(ATerm state, NextState* nstate)
-{
-  return (state != NULL)?nstate->makeStateVector(state):NULL;
-}
-void XSimMain::UpdateTransitions(ATermList nextstates)
+void XSimMain::UpdateTransitions(const atermpp::vector < multi_action > &next_actions, const std::vector < state > &next_states)
 {
   wxArrayString actions;
   wxArrayString statechanges;
@@ -928,18 +918,17 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   NextState* nextstate = simulator->GetNextState();
 
   wxArrayInt trace_next;
-  ATermAppl trace_next_transition = simulator->GetNextTransitionFromTrace();
-  ATermAppl trace_next_state = ToStateVector(simulator->GetNextStateFromTrace(),nextstate);
 
   transview->DeleteAllItems();
   long i = 0;
-  for (ATermList l=nextstates; !ATisEmpty(l); l=ATgetNext(l), i++)
+
+  for (std::vector < state >::const_iterator l=next_states.begin(); l!=next_states.end(); ++l, ++i)
   {
-    actions.Add(wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated(ATgetFirst(ATLgetFirst(l))).c_str()));
+    actions.Add(wxConvLocal.cMB2WX(pp(next_actions[i]).c_str()));
     indices.Add(i);
-    if ((trace_next_state != NULL) &&
-        ATisEqual(ATgetFirst(ATLgetFirst(l)),trace_next_transition) &&
-        (nextstate->parseStateVector(trace_next_state,ATgetFirst(ATgetNext(ATLgetFirst(l)))) != NULL))
+    if ((simulator->GetTracePos()<simulator->GetTraceLength()) &&
+        (next_actions[i]==simulator->GetNextTransitionFromTrace()) &&
+        (nextstate->parse_state_vector_new(simulator->GetNextStateFromTrace(),next_states[i],true) != NULL))
     {
       trace_next.Add(1);
     }
@@ -947,18 +936,18 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
     {
       trace_next.Add(0);
     }
-//    transview->SetItemData(i,i);
+
     stringstream ss;
-    ATerm m = current_state;
-    ATerm n = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-    ATermList o = state_varnames;
+    state m = current_state;
+    state n = next_states[i];
+    variable_list o = state_varnames;
     bool comma = false;
     for (size_t i=0; i<ATgetLength(state_varnames); i++)
     {
-      ATermAppl oldval = nextstate->getStateArgument(m,i);
-      ATermAppl newval = nextstate->getStateArgument(n,i);
+      data_expression oldval = m[i];
+      data_expression newval = n[i];
 
-      if (!ATisEqual(oldval,newval) && (!mcrl2::data::is_variable(newval) || showdc->IsChecked()))
+      if (oldval!=newval && (!mcrl2::data::is_variable(newval) || showdc->IsChecked()))
       {
         if (comma)
         {
@@ -968,7 +957,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
         {
           comma = true;
         }
-        ss << mcrl2::core::pp_deprecated(ATgetFirst(o));
+        ss << pp(o.front());
         ss << " := ";
         if (mcrl2::data::is_variable(newval))
         {
@@ -976,13 +965,12 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
         }
         else
         {
-          ss << mcrl2::core::pp_deprecated((ATerm) newval);
+          ss << pp(newval);
         }
       }
 
-      o = ATgetNext(o);
+      o = pop_front(o);
     }
-//    transview->SetItem(i,1,s);
     statechanges.Add(wxConvLocal.cMB2WX(ss.str().c_str()));
   }
 
@@ -999,7 +987,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
     }
   }
 
-  if (!ATisEmpty(nextstates))
+  if (!next_states.empty())
   {
     if (next < 0)
     {

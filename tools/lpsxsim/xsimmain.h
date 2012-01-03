@@ -67,13 +67,21 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     // SimulatorViewInterface methods
     virtual void Registered(SimulatorInterface* Simulator);
     virtual void Unregistered();
-    virtual void Initialise(ATermList Pars);
-    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
-    virtual void Reset(ATerm State);
+    virtual void Initialise(const mcrl2::data::variable_list Pars);
+    virtual void StateChanged(
+                     mcrl2::lps::multi_action, 
+                     mcrl2::lps::state, 
+                     atermpp::vector<mcrl2::lps::multi_action>, 
+                     std::vector<mcrl2::lps::state>);
+     virtual void StateChanged(
+                     mcrl2::lps::state, 
+                     atermpp::vector<mcrl2::lps::multi_action>, 
+                     std::vector<mcrl2::lps::state>);
+    virtual void Reset(mcrl2::lps::state State);
     virtual void Undo(size_t Count);
     virtual void Redo(size_t Count);
-    virtual void TraceChanged(ATermList Trace, size_t From);
-    virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
+    virtual void TraceChanged(mcrl2::trace::Trace tr, size_t From);
+    virtual void TracePosChanged(size_t Index);
 
   private:
     // WDR: method declarations for XSimMain
@@ -89,7 +97,7 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     // WDR: member variable declarations for XSimMain
     wxString base_title;
     wxTimer timer;
-    ATermList state_varnames;
+    mcrl2::data::variable_list state_varnames;
     wxMenuBar* menu;
     wxMenuItem* openitem;
     wxMenuItem* ldtrcitem;
@@ -123,7 +131,7 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     bool interactive;
     play_func_enum timer_func;
     int timer_interval;
-    ATerm current_state;
+    mcrl2::lps::state current_state;
     mcrl2::lps::specification m_specification;
 
   private:
@@ -156,8 +164,10 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     void UpdateSizes();
 
   private:
-    void SetCurrentState(ATerm state, bool showchange = false);
-    void UpdateTransitions(ATermList nextstates);
+    void SetCurrentState(mcrl2::lps::state s, bool showchange = false);
+    void UpdateTransitions(
+               const atermpp::vector<mcrl2::lps::multi_action>& next_actions, 
+               const std::vector<mcrl2::lps::state>& next_states);
 
   private:
     DECLARE_EVENT_TABLE()

@@ -27,8 +27,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
-// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -42,6 +40,8 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
 
 class sim_tool : public rewriter_tool< input_tool >
 {
@@ -49,23 +49,23 @@ class sim_tool : public rewriter_tool< input_tool >
     typedef rewriter_tool<input_tool> super;
 
   private:
-    static void PrintState(ATerm state, NextState* ns)
+    static void PrintState(const mcrl2::lps::state s)
     {
-      for (size_t i=0; i<ns->getStateLength(); i++)
+      for (size_t i=0; i<s.size(); i++)
       {
         if (i > 0)
         {
           std::cout << ", ";
         }
 
-        ATermAppl a = ns->getStateArgument(state,i);
-        if (mcrl2::data::is_variable(a))
+        const data_expression t = s[i];
+        if (mcrl2::data::is_variable(t))
         {
-        	std::cout << "_";
+          std::cout << "_";
         }
         else
         {
-        	std::cout << core::pp_deprecated(a);
+          std::cout << pp(t);
         }
       }
     }
@@ -109,30 +109,31 @@ class sim_tool : public rewriter_tool< input_tool >
       simulator.use_dummies = m_use_dummies;
       simulator.LoadSpec(lps_specification);
 
-      std::cout << "initial state: [ ";
-      PrintState(simulator.GetState(),simulator.GetNextState());
-      std::cout << " ]" << std::endl << std::endl;
+      std::cout << std::endl << "initial state: [ ";
+      PrintState(simulator.GetState());
+      std::cout << " ]" << std::endl;
 
       bool notdone = true;
       while (notdone)
       {
-        ATermList next_states=ATempty;
+        std::vector < mcrl2::lps::state > next_states;
+        atermpp::vector < mcrl2::lps::multi_action > next_actions;
+
         try
         {
           next_states = simulator.GetNextStates();
-          size_t i = 0;
-          for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l))
+          next_actions = simulator.GetNextActions();
+          for (size_t i=0; i<next_states.size(); ++i)
           {
-            ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
-            ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-            std::cout << i <<": " << core::pp_deprecated(Transition) << "  ->  [ ";
-            PrintState(NewState,simulator.GetNextState());
-            std::cout << " ]" << std::endl << std::endl;
-            i++;
+            const multi_action Transition = next_actions[i];
+            const state NewState = next_states[i];
+            std::cout << i <<": " << pp(Transition) << "  ->  [ ";
+            PrintState(NewState);
+            std::cout << " ]" << std::endl;
           }
-          if (ATisEmpty(next_states))
+          if (next_states.empty())
           {
-            std::cout << "deadlock" << std::endl << std::endl;
+            std::cout << "deadlock" << std::endl;
           }
         }
         catch (mcrl2::runtime_error& e)
@@ -181,21 +182,21 @@ class sim_tool : public rewriter_tool< input_tool >
           {
             size_t idx;
             sscanf(s.c_str(),"%zu",&idx);
-            if (idx < ATgetLength(next_states))
+            if (idx < next_states.size())
             {
-              std::cout << std::endl << "transition: " << core::pp_deprecated(ATAgetFirst(ATLelementAt(next_states,idx))) << std::endl << std::endl;
+              std::cout << std::endl << "transition: " << pp(next_actions[idx]) << std::endl;
               simulator.ChooseTransition(idx);
               std::cout << "current state: [ ";
-              PrintState(simulator.GetState(),simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(simulator.GetState());
+              std::cout << " ]" << std::endl;
               break;
             }
             else
             {
               std::cout << "invalid transition index";
-              if (ATgetLength(next_states) > 0)
+              if (next_states.size() > 0)
               {
-                std::cout << " " << idx << " (maximum is " << ATgetLength(next_states)-1 << ")";
+                std::cout << " " << idx << " (maximum is " << next_states.size()-1 << ")";
               }
               std::cout << std::endl;
             }
@@ -204,8 +205,8 @@ class sim_tool : public rewriter_tool< input_tool >
           {
             simulator.SetTracePos(0);
             std::cout << std::endl << "initial state: [ ";
-            PrintState(simulator.GetState(),simulator.GetNextState());
-            std::cout <<  " ]" << std::endl << std::endl;
+            PrintState(simulator.GetState());
+            std::cout <<  " ]" << std::endl;
             break;
           }
           else if ((s == "u") || (s == "undo"))
@@ -214,8 +215,8 @@ class sim_tool : public rewriter_tool< input_tool >
             {
               simulator.Undo();
               std::cout << std::endl << "current state: [ ";
-              PrintState(simulator.GetState(),simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(simulator.GetState());
+              std::cout << " ]" << std::endl;
               break;
             }
             else
@@ -225,14 +226,14 @@ class sim_tool : public rewriter_tool< input_tool >
           }
           else if ((s == "r") || (s == "redo"))
           {
-            ATermAppl trans = simulator.GetNextTransitionFromTrace();
-            if (trans != NULL)
+            if (simulator.GetTraceLength() > simulator.GetTracePos())
             {
+              multi_action trans = simulator.GetNextTransitionFromTrace();
+              std::cout << std::endl << "transition: "<< pp(trans) << std::endl;
               simulator.Redo();
-              std::cout << std::endl << "transition: "<< core::pp_deprecated(trans) << std::endl << std::endl;
               std::cout << "current state: [ ";
-              PrintState(simulator.GetState(),simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(simulator.GetState());
+              std::cout << " ]" << std::endl;
               break;
             }
             else
@@ -245,48 +246,44 @@ class sim_tool : public rewriter_tool< input_tool >
             std::istringstream sin(((s[1] == ' ') ? s.substr(2) : s.substr(5)));
             size_t idx;
             sin >> idx;
-            if (idx < simulator.GetTraceLength())
+            if (idx <= simulator.GetTraceLength())
             {
               simulator.SetTracePos(idx);
               std::cout << std::endl << "current state: [ ";
-              PrintState(simulator.GetState(),simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(simulator.GetState());
+              std::cout << " ]" << std::endl;
               break;
             }
             else
             {
-              std::cout << "invalid trace position " << idx << " (maximum is " << (simulator.GetTraceLength()-1) << ")" << std::endl;
+              std::cout << "invalid trace position " << idx << " (maximum is " << (simulator.GetTraceLength()) << ")" << std::endl;
             }
           }
           else if ((s == "t") || (s == "trace"))
           {
-        	std::cout << std::endl << "current trace:" << std::endl << std::endl;
-            ATermList trace = simulator.GetTrace();
+            std::cout << std::endl << "current trace:" << std::endl;
+            mcrl2::trace::Trace tr = simulator.GetTrace();
             size_t pos = simulator.GetTracePos();
-            for (size_t i=0; !ATisEmpty(trace); trace=ATgetNext(trace), ++i)
+            tr.setPosition(0);
+            std::cout << "initial state: [ "; 
+            PrintState(tr.currentState());
+            std::cout << " ]" << std::endl;
+            for (size_t i=0; i< tr.number_of_actions(); ++i)
             {
-              ATermAppl Transition = ATAgetFirst(ATLgetFirst(trace));
-              ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
+              tr.setPosition(i);
+              state NewState = tr.nextState();
+              multi_action Transition = tr.currentAction(); 
               if (i==pos)
                 { std::cout << ">"; }
               else
                 { std::cout << " "; }
-              std::cout << i;
-              if (i == 0)
-              {
-            	  std::cout << "    ";
-              }
-              else
-              {
-                std::cout << core::pp_deprecated(Transition)<< "  ->";
-              }
-              std::cout <<"  [ ";
+              std::cout << i << ": " << pp(Transition)<< "  ->  [ ";
               if (i==pos)
                 { std::cout << ">"; }
               else
                 { std::cout << " "; }
-              PrintState(NewState,simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(NewState);
+              std::cout << " ]" << std::endl;
             }
           }
           else if ((s.substr(0,2) == "s ") || (s.substr(0,5) == "save "))
@@ -297,9 +294,9 @@ class sim_tool : public rewriter_tool< input_tool >
               simulator.SaveTrace(filename);
               std::cout << "trace saved" << std::endl;
             }
-            catch (std::string err)
+            catch (mcrl2::runtime_error &err)
             {
-              std::cout << "error saving trace: " << err << std::endl;
+              std::cout << "error saving trace: " << err.what() << std::endl;
             }
           }
           else if ((s.substr(0,2) == "l ") || (s.substr(0,5) == "load "))
@@ -310,13 +307,13 @@ class sim_tool : public rewriter_tool< input_tool >
               simulator.LoadTrace(filename);
               std::cout << "trace loaded" << std::endl;
               std::cout << std::endl << "initial state: [ ";
-              PrintState(simulator.GetState(),simulator.GetNextState());
-              std::cout << " ]" << std::endl << std::endl;
+              PrintState(simulator.GetState());
+              std::cout << " ]" << std::endl;
               break;
             }
-            catch (std::string err)
+            catch (mcrl2::runtime_error &err)
             {
-              std::cout << "error loading trace: " << err << std::endl;
+              std::cout << "error loading trace: " << err.what() << std::endl;
             }
           }
           else

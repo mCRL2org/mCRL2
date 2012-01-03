@@ -19,21 +19,20 @@
  * views are the following:
  *
  * - Parameters
- *   This is an ATermList containing a sequence of DataVarIds
+ *   This is an variable_list containing a sequence of DataVarIds
  *   that describe the name and sort of the process parameters.
  * - States
- *   An ATerm containing DataExprs that are the values of the
+ *   An state type containing data_expressions that are the values of the
  *   above parameters in a state.
  * - Transitions
  *   A MultiAct that describes some transitiion.
  * - NextStates
- *   An ATermList that consist of a sequence of pairs (or
- *   actually a ATermList of length 2) of a transition and a
- *   state that describe enabled multiaction and the resulting
- *   state.
+ *   An vector of states that contains the next states from the current state.
+ * - NextActions
+ *   actually a vector of multi actions, giving the actions that can be done
+ *   in the current state. The actions in NextActions and the states in NextStates
+ *   correspond.
  *
- * Note that states may contain DataVarIds. These are free
- * variables.
  */
 
 #ifndef __simbase_H__
@@ -42,6 +41,7 @@
 #include <list>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/lps/nextstate/standard.h"
+#include "mcrl2/trace/trace.h"
 
 class SimulatorInterface;
 class SimulatorViewInterface;
@@ -63,7 +63,7 @@ class SimulatorInterface
 
     virtual void Reset() = 0;
     /* Reset trace to initial state */
-    virtual void Reset(ATerm State) = 0;
+    virtual void Reset(mcrl2::lps::state State) = 0;
     /* Reset trace to new initial state State */
     virtual bool Undo() = 0;
     /* Go to previous state in trace, if possible.
@@ -71,14 +71,17 @@ class SimulatorInterface
     virtual bool Redo() = 0;
     /* Dual of Undo(). */
 
-    virtual ATermList GetParameters() = 0;
+    virtual mcrl2::data::variable_list GetParameters() = 0;
     /* Returns the parameter names that correspond to the
      * elements in states. */
-    virtual ATerm GetState() = 0;
+    virtual mcrl2::lps::state GetState() = 0;
     /* Returns the current state. */
-    virtual ATermList GetNextStates() = 0;
-    /* Returns the currently enabled transitions and the
-     * resulting states. */
+    virtual std::vector < mcrl2::lps::state > GetNextStates()=0;
+    /* Returns the currently enabled next states; The vectors with next states and next actions
+       correspond at their respective positions */
+    virtual atermpp::vector < mcrl2::lps::multi_action > GetNextActions()=0;
+    /* Returns the currently enabled next multi_actions;  */
+
     virtual NextState* GetNextState() = 0;
     /* Returns the NextState currently in use by the
      * simulator. */
@@ -95,16 +98,14 @@ class SimulatorInterface
     virtual bool SetTracePos(size_t pos) = 0;
     /* Set the current state to the pos'th element in the
      * trace. */
-    virtual ATermList GetTrace() = 0;
+    virtual mcrl2::trace::Trace GetTrace() = 0;
     /* Get the whole trace. */
-    virtual ATerm GetNextStateFromTrace() = 0;
+    virtual mcrl2::lps::state GetNextStateFromTrace() = 0;
     /* Get the the state following the current state in the trace.
      * Returns NULL is there is no such state. */
-    virtual ATermAppl GetNextTransitionFromTrace() = 0;
+    virtual mcrl2::lps::multi_action GetNextTransitionFromTrace() = 0;
     /* Get the the transition following the current state in the trace.
      * Returns NULL is there is no such transitions. */
-    virtual bool SetTrace(ATermList Trace, size_t From = 0) = 0;
-    /* Set the trace to Trace starting at position From. */
 };
 
 class SimulatorViewInterface
@@ -119,12 +120,20 @@ class SimulatorViewInterface
     /* Is called when this View is removed from the Simulator it
      * was previously added to. */
 
-    virtual void Initialise(ATermList Pars) = 0;
+    virtual void Initialise(const mcrl2::data::variable_list Pars) = 0;
     /* Is called whenever a (new) simulation is started.
      * Pars contains the process parameters that correspond to
      * the elements in states. */
 
-    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates) = 0;
+    virtual void StateChanged(
+                  mcrl2::lps::multi_action Transition, 
+                  const mcrl2::lps::state State, 
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::state > next_states) = 0;
+    virtual void StateChanged(
+                  const mcrl2::lps::state State, 
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::state > next_states) = 0;
     /* Is called whenever the current state in the simulator is
      * changed.
      * Transition is the action that was 'executed', which can
@@ -139,7 +148,7 @@ class SimulatorViewInterface
      * Furthermore the function is called when a view is loaded
      * to initialise it with the current state. */
 
-    virtual void Reset(ATerm State) = 0;
+    virtual void Reset(mcrl2::lps::state State) = 0;
     /* Is called whenever the current trace is reset to the
      * singleton trace containing State. */
     virtual void Undo(size_t Count) = 0;
@@ -149,14 +158,14 @@ class SimulatorViewInterface
     virtual void Redo(size_t Count) = 0;
     /* Dual of Undo(). */
 
-    virtual void TraceChanged(ATermList Trace, size_t From) = 0;
+    virtual void TraceChanged(mcrl2::trace::Trace T, size_t From) = 0;
     /* Is called whenever the current trace is (partially)
      * changed. (Not when the trace is extended (or partially
      * replaced) with one state because of a normal transition.
      * Note that this is also called when a view is loaded
      * to initialise it with the current trace.
      */
-    virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index) = 0;
+    virtual void TracePosChanged(size_t Index) = 0;
     /* Is called whenever another element of the current trace
      * is selected. Note that Transition might be Nil in the
      * case that State is the initial state (i.e. Index is 0).

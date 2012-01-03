@@ -19,7 +19,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "simbase.h"
 
-class StandardSimulator: virtual public SimulatorInterface
+class StandardSimulator : virtual public SimulatorInterface
 {
   public:
     // constructors and destructors
@@ -40,9 +40,6 @@ class StandardSimulator: virtual public SimulatorInterface
      * This function throws a string on errors */
     virtual bool IsActive();
     /* Returns true iff a specification has been loaded */
-    // bool ErrorOccurred();
-    /* Returns true iff an error occurred while computing transitions
-     * from the current state */
 
     // XXX make private and use functions?
     bool use_dummies;
@@ -51,47 +48,36 @@ class StandardSimulator: virtual public SimulatorInterface
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface* View);
     virtual void Unregister(SimulatorViewInterface* View);
-    virtual ATermList GetParameters();
+    virtual mcrl2::data::variable_list GetParameters();
     virtual void Reset();
-    virtual void Reset(ATerm State);
+    virtual void Reset(mcrl2::lps::state State);
     virtual bool Undo();
     virtual bool Redo();
-    virtual ATerm GetState();
-    virtual ATermList GetNextStates();
+    virtual mcrl2::lps::state GetState();
+    virtual std::vector < mcrl2::lps::state > GetNextStates();
+    virtual atermpp::vector < mcrl2::lps::multi_action > GetNextActions();
     virtual NextState* GetNextState();
     virtual bool ChooseTransition(size_t index);
     virtual size_t GetTraceLength();
     virtual size_t GetTracePos();
     virtual bool SetTracePos(size_t pos);
-    virtual ATermList GetTrace();
-    virtual ATerm GetNextStateFromTrace();
-    virtual ATermAppl GetNextTransitionFromTrace();
-    virtual bool SetTrace(ATermList Trace, size_t From);
+    virtual mcrl2::trace::Trace GetTrace();
+    virtual mcrl2::lps::state GetNextStateFromTrace();
+    virtual mcrl2::lps::multi_action GetNextTransitionFromTrace();
     virtual void InitialiseViews();
 
   private:
-    void traceReset(ATerm state);
-    void traceSetNext(ATermList transition);
-    ATermList traceUndo();
-    ATermList traceRedo();
-
-  private:
     bool tau_prior;
-    bool error;
-    ATermList state_vars;
-    ATerm initial_state;
-    ATerm current_state;
-    ATermList next_states;
-    ATermList trace;
-    ATermList ecart;
+    mcrl2::lps::specification m_spec;
+    std::vector < mcrl2::lps::state > next_states;
+    atermpp::vector < mcrl2::lps::multi_action > next_actions;
+    mcrl2::trace::Trace trace;
     viewlist views;
-    atermpp::set < ATerm > seen_states;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
+    std::set < mcrl2::lps::state > seen_states;
     NextState* nextstate;
     NextStateGenerator* nextstategen;
 
-  private:
-    void SetCurrentState(ATerm state);
     void UpdateTransitions();
 };
 

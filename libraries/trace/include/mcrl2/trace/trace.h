@@ -93,8 +93,8 @@ class Trace
 
     AFun trace_pair;
     int trace_pair_set;
-    const mcrl2::data::data_specification m_spec;
-    const lps::action_label_list m_act_decls;
+    mcrl2::data::data_specification m_spec;
+    lps::action_label_list m_act_decls;
     bool m_data_specification_and_act_decls_are_defined;
 
 #define TRACE_MCRL2_MARKER "mCRL2Trace"
@@ -195,6 +195,26 @@ class Trace
       pos = 0;
     }
 
+    /// \brief Increase the current position by one, except if this brings one beyond the end of the trace.
+    /// \details The initial position corresponds to pos=0. 
+    void increasePosition()
+    {
+      if (pos < actions.size())
+      {
+        ++pos;
+      }
+    }
+    
+    /// \brief Decrease the current position in the trace by one provided the largest position is larger than 0.
+    /// \details The initial position corresponds to pos=0. 
+    void decreasePosition()
+    {
+      if (pos >0)
+      {
+        --pos;
+      }
+    }
+
     /// \brief Set the current position after the pos'th action of the trace.
     /// \details The initial position corresponds to pos=0. If pos is larger than
     /// the length of the trace, no new position is set.
@@ -246,6 +266,23 @@ class Trace
     /// position 0 is the initial state. If no state is defined at
     /// the current position NULL is returned.
     /// \return The state at the current position of the trace.
+    const mcrl2::lps::state &nextState() const
+    {
+      assert(actions.size()+1 >= states.size() && pos+1 <=actions.size());
+      if (pos>=states.size())
+      {
+        std::stringstream ss;
+        ss << "Requesting a non existing state in a trace at position " << pos+1;
+        throw mcrl2::runtime_error(ss.str());
+      }
+      return states[pos+1];
+    }
+
+    /// \brief Get the state at the current position in the trace.
+    /// \details The state at
+    /// position 0 is the initial state. If no state is defined at
+    /// the current position NULL is returned.
+    /// \return The state at the current position of the trace.
     const mcrl2::lps::state &currentState() const
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
@@ -258,6 +295,18 @@ class Trace
       return states[pos];
     }
 
+    /// \brief Get the outgoing action from the current position in the trace.
+    /// \details This routine returns the action at the current position of the
+    /// trace. It is not allowed to request an action if no action is available.
+    /// \return An action_list representing the action at the current position of the
+    /// trace. 
+    mcrl2::lps::multi_action currentAction()
+    {
+      assert(actions.size()+1 >= states.size() && pos <=actions.size());
+      assert(pos < actions.size());
+      return actions[pos];
+    }
+    
     /// \brief Get the outgoing action from the current position in the trace and
     ///  move to the next position.
     /// \details This routine returns the action at the current position of the
@@ -267,6 +316,7 @@ class Trace
     /// trace. This is the default multi_action when at the end of the trace.
     mcrl2::lps::multi_action nextAction()
     {
+ATfprintf(stderr,"nextAction is deprecated\n");
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
 
       if (pos < actions.size())
@@ -383,13 +433,13 @@ class Trace
         }
 
       }
-      catch (runtime_error err)
+      catch (mcrl2::runtime_error err)
       {
         std::string s;
         s = "error loading trace: ";
         s += err.what();
         s += ".";
-        throw runtime_error(s);
+        throw mcrl2::runtime_error(s);
       }
     }
 
@@ -650,7 +700,7 @@ class Trace
         is.getline(buf,MAX_LINE_SIZE);
         if (is.bad())
         {
-          throw runtime_error("error while reading from stream");
+          throw mcrl2::runtime_error("error while reading from stream");
         }
         if ((strlen(buf) > 0) && (buf[strlen(buf)-1] == '\r'))
         {

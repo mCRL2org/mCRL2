@@ -23,13 +23,13 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "xsimtrace.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
-// #include "mcrl2/lps/nextstate.h"
 
 using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::data;
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -43,23 +43,23 @@ BEGIN_EVENT_TABLE(XSimTrace,wxFrame)
 END_EVENT_TABLE()
 
 
-static void PrintState(stringstream& ss, ATerm state, NextState* ns)
+static void PrintState(stringstream& ss, const mcrl2::lps::state &s)
 {
-  for (size_t i=0; i<ns->getStateLength(); i++)
+  for (size_t i=0; i<s.size(); i++)
   {
     if (i > 0)
     {
       ss << ", ";
     }
 
-    ATermAppl a = ns->getStateArgument(state,i);
+    const data_expression a = s[i];
     if (mcrl2::data::is_variable(a))
     {
       ss << "_";
     }
     else
     {
-      ss << mcrl2::core::pp_deprecated((ATerm) a);
+      ss << pp(a);
     }
   }
 }
@@ -70,7 +70,7 @@ static int wxCALLBACK compare_items(long a, long b, T /*d*/)
   return a-b;
 }
 
-void XSimTrace::_reset(ATerm State)
+void XSimTrace::_reset(const state &State)
 {
   stringstream ss;
 
@@ -78,37 +78,34 @@ void XSimTrace::_reset(ATerm State)
   traceview->InsertItem(0,wxT("0"));
   traceview->SetItemData(0,0);
   traceview->SetItem(0,1,wxT(""));
-  PrintState(ss,State,simulator->GetNextState());
+  PrintState(ss,State);
   traceview->SetItem(0,2,wxConvLocal.cMB2WX(ss.str().c_str()));
   traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
   current_pos = 0;
 }
 
-void XSimTrace::_add_state(ATermAppl Transition, ATerm State, bool enabled)
+void XSimTrace::_add_state(const mcrl2::lps::multi_action Transition, const mcrl2::lps::state &State, bool enabled)
 {
-  if (Transition != NULL)
-  {
-    stringstream ss;
-    long l = traceview->GetItemCount();
-    long real_l;
+  stringstream ss;
+  long l = traceview->GetItemCount();
+  long real_l;
 
-    real_l = traceview->InsertItem(l,wxString::Format(wxT("%li"),l));
-    traceview->SetItemData(real_l,l);
-    real_l = traceview->FindItem(-1,l);
-    traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated((ATerm) Transition).c_str()));
-    PrintState(ss,State,simulator->GetNextState());
-    traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
-    traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
-    if (enabled)
-    {
-      wxColor col(255,255,255);
-      traceview->SetItemBackgroundColour(real_l,col);
-    }
-    else
-    {
-      wxColor col(245,245,245);
-      traceview->SetItemBackgroundColour(real_l,col);
-    }
+  real_l = traceview->InsertItem(l,wxString::Format(wxT("%li"),l));
+  traceview->SetItemData(real_l,l);
+  real_l = traceview->FindItem(-1,l);
+  traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(pp(Transition).c_str()));
+  PrintState(ss,State);
+  traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
+  traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
+  if (enabled)
+  {
+    wxColor col(255,255,255);
+    traceview->SetItemBackgroundColour(real_l,col);
+  }
+  else
+  {
+    wxColor col(245,245,245);
+    traceview->SetItemBackgroundColour(real_l,col);
   }
 }
 
@@ -150,33 +147,41 @@ void XSimTrace::Unregistered()
   traceview->DeleteAllItems();
 }
 
-void XSimTrace::Initialise(ATermList /* Pars */)
+void XSimTrace::Initialise(const mcrl2::data::variable_list /* Pars */)
 {
 }
 
-void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
+void XSimTrace::AddState(const multi_action Transition, const state &State, bool enabled)
 {
   _add_state(Transition,State,enabled);
   _update();
 }
 
-void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList /* NextStates */)
+void XSimTrace::StateChanged(
+                  mcrl2::lps::state , 
+                  atermpp::vector<mcrl2::lps::multi_action>, 
+                  std::vector<mcrl2::lps::state>)
 {
-  if (Transition != NULL)
-  {
-    size_t l = traceview->GetItemCount()-1;
-
-    while (l > current_pos)
-    {
-      traceview->DeleteItem(traceview->FindItem(-1,l));
-      l--;
-    }
-    AddState(Transition,State,true);
-    current_pos++;
-  }
 }
 
-void XSimTrace::Reset(ATerm State)
+void XSimTrace::StateChanged(
+                  mcrl2::lps::multi_action Transition, 
+                  mcrl2::lps::state State, 
+                  atermpp::vector<mcrl2::lps::multi_action>, 
+                  std::vector<mcrl2::lps::state>)
+{
+  size_t l = traceview->GetItemCount()-1;
+
+  while (l > current_pos)
+  {
+    traceview->DeleteItem(traceview->FindItem(-1,l));
+    l--;
+  }
+  AddState(Transition,State,true);
+  current_pos++;
+}
+
+void XSimTrace::Reset(const state State)
 {
   _reset(State);
   _update();
@@ -206,7 +211,7 @@ void XSimTrace::Redo(size_t Count)
   _update();
 }
 
-void XSimTrace::TraceChanged(ATermList Trace, size_t From)
+void XSimTrace::TraceChanged(mcrl2::trace::Trace tr, size_t From)
 {
   size_t l = traceview->GetItemCount();
 
@@ -216,22 +221,23 @@ void XSimTrace::TraceChanged(ATermList Trace, size_t From)
     traceview->DeleteItem(traceview->FindItem(-1,l));
   }
 
-  for (; !ATisEmpty(Trace); Trace=ATgetNext(Trace))
+  for (size_t i=0; i<tr.number_of_actions(); ++i, From++)
   {
+    tr.setPosition(i);
     if (From == 0)
     {
-      _reset(ATgetFirst(ATgetNext(ATLgetFirst(Trace))));
+      _reset(tr.currentState());
     }
     else
     {
-      _add_state(ATAgetFirst(ATLgetFirst(Trace)),ATgetFirst(ATgetNext(ATLgetFirst(Trace))),current_pos >= From);
+      _add_state(tr.nextAction(),tr.currentState(),current_pos >= From);
     }
     From++;
   }
   _update();
 }
 
-void XSimTrace::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, size_t Index)
+void XSimTrace::TracePosChanged(size_t Index)
 {
   if (current_pos > Index)
   {

@@ -23,36 +23,20 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/trace/trace.h"
 #include "simulator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
+using namespace mcrl2::data;
 using namespace mcrl2::log;
 
 StandardSimulator::StandardSimulator()
 {
   use_dummies = false;
   rewr_strat = mcrl2::data::rewriter::jitty;
-
-  state_vars = ATmakeList0();
-  ATprotectList(&state_vars);
-  initial_state = NULL;;
-  ATprotect(&initial_state);
-  current_state = NULL;
-  ATprotect(&current_state);
-  next_states = ATmakeList0();
-  ATprotectList(&next_states);
-  trace = ATmakeList0();
-  ATprotectList(&trace);
-  ecart = ATmakeList0();
-  ATprotectList(&ecart);
-
   tau_prior = false;
-  // error = false;
-
   nextstate = NULL;
   nextstategen = NULL;
 }
@@ -64,34 +48,26 @@ StandardSimulator::~StandardSimulator()
     (*i)->Unregistered();
   }
 
-  if (initial_state != NULL)
+  if (nextstategen != NULL)
   {
     delete nextstategen;
     delete nextstate;
   }
 
-  ATunprotectList(&state_vars);
-  ATunprotect(&initial_state);
-  ATunprotect(&current_state);
-  ATunprotectList(&next_states);
-  ATunprotectList(&trace);
-  ATunprotectList(&ecart);
 }
 
-void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
+void StandardSimulator::LoadSpec(const mcrl2::lps::specification &spec)
 {
-  state_vars = spec.process().process_parameters();
+  m_spec=spec;
 
   delete nextstategen;
   delete nextstate;
   m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
   nextstate = createNextState(spec, *m_rewriter, !use_dummies,GS_STATE_VECTOR);
   nextstategen = NULL;
-  initial_state = nextstate->getInitialState();
 
-  current_state = NULL;
   InitialiseViews();
-  Reset(initial_state);
+  Reset(nextstate->make_new_state_vector(nextstate->getInitialState()));
 }
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
@@ -106,7 +82,7 @@ void StandardSimulator::SetTauPrioritisation(bool enable)
 
 bool StandardSimulator::IsActive()
 {
-  return !ATisEmpty(trace);
+  return nextstate!=NULL;
 }
 
 
@@ -114,12 +90,12 @@ void StandardSimulator::Register(SimulatorViewInterface* View)
 {
   views.push_back(View);
   View->Registered(this);
-  if (!ATisEmpty(trace))
+  if (trace.number_of_actions()>0)
   {
-    View->Initialise(state_vars);
-    View->StateChanged(NULL, current_state, next_states);
+    View->Initialise(m_spec.process().process_parameters());
+    View->StateChanged(trace.currentState(), next_actions, next_states);
     View->TraceChanged(GetTrace(),0);
-    View->TracePosChanged(ATAgetFirst(ATLgetFirst(trace)),current_state,ATgetLength(trace)-1);
+    View->TracePosChanged(trace.getPosition());
   }
 }
 
@@ -129,47 +105,41 @@ void StandardSimulator::Unregister(SimulatorViewInterface* View)
   View->Unregistered();
 }
 
-ATermList StandardSimulator::GetParameters()
+variable_list StandardSimulator::GetParameters()
 {
-  return state_vars;
+  return m_spec.process().process_parameters();
 }
 
 void StandardSimulator::Reset()
 {
-  Reset(nextstate->getInitialState());
+  Reset(nextstate->make_new_state_vector(nextstate->getInitialState()));
 }
 
-void StandardSimulator::Reset(ATerm State)
+void StandardSimulator::Reset(mcrl2::lps::state State)
 {
-  initial_state = State;
-  if (initial_state != NULL)
-  {
-    traceReset(initial_state);
-    SetCurrentState(initial_state);
-    UpdateTransitions();
+  trace=Trace();
+  trace.setState(State);
 
-    for (viewlist::iterator i = views.begin(); i != views.end(); i++)
-    {
-      (*i)->Reset(initial_state);
-      (*i)->StateChanged(NULL,initial_state,next_states);
-    }
+  UpdateTransitions();
+
+  for (viewlist::iterator i = views.begin(); i != views.end(); i++)
+  {
+    (*i)->Reset(State);
+    (*i)->StateChanged(State, next_actions, next_states);
   }
 }
 
 bool StandardSimulator::Undo()
 {
-  if (ATgetLength(trace) > 1)
+  if (trace.getPosition() > 0)
   {
-    ATermList l = traceUndo();
-    ATerm state = ATgetFirst(ATgetNext(l));
-
-    SetCurrentState(state);
+    trace.decreasePosition();
     UpdateTransitions();
 
     for (viewlist::iterator i = views.begin(); i != views.end(); i++)
     {
       (*i)->Undo(1);
-      (*i)->StateChanged(NULL,state,next_states);
+      (*i)->StateChanged(trace.currentState(), next_actions, next_states);
     }
 
     return true;
@@ -182,18 +152,14 @@ bool StandardSimulator::Undo()
 
 bool StandardSimulator::Redo()
 {
-  if (!ATisEmpty(ecart))
+  if (trace.getPosition()<trace.number_of_actions())
   {
-    ATermList trans = traceRedo();
-    ATerm state = ATgetFirst(ATgetNext(trans));
-
-    SetCurrentState(state);
+    trace.increasePosition();
     UpdateTransitions();
-
     for (viewlist::iterator i = views.begin(); i != views.end(); i++)
     {
       (*i)->Redo(1);
-      (*i)->StateChanged(NULL,state,next_states);
+      (*i)->StateChanged(trace.currentState(), next_actions, next_states);
     }
 
     return true;
@@ -204,51 +170,56 @@ bool StandardSimulator::Redo()
   }
 }
 
-ATerm StandardSimulator::GetState()
+mcrl2::lps::state StandardSimulator::GetState()
 {
-  return current_state;
-}
+  return trace.currentState();
+} 
 
-ATermList StandardSimulator::GetNextStates()
+std::vector < mcrl2::lps::state > StandardSimulator::GetNextStates()
 {
   return next_states;
+}
+
+atermpp::vector < mcrl2::lps::multi_action > StandardSimulator::GetNextActions()
+{
+  return next_actions;
 }
 
 NextState* StandardSimulator::GetNextState()
 {
   return nextstate;
-}
+} 
 
 bool StandardSimulator::ChooseTransition(const size_t index)
 {
-  if (!ATisEmpty(next_states) && (index < ATgetLength(next_states)))
+  if (index < next_states.size())
   {
-    ATermList l = ATLelementAt(next_states,index);
-    ATermAppl trans = ATAgetFirst(l);
-    ATerm state = ATgetFirst(ATgetNext(l));
+    trace.truncate();
 
-    SetCurrentState(state);
+    assert(index<next_actions.size());
+    const mcrl2::lps::multi_action ma=next_actions[index];
+    trace.addAction(ma);
+    const mcrl2::lps::state s=next_states[index];
+    trace.setState(s);
+
     UpdateTransitions();
-
-    traceSetNext(l);
 
     for (viewlist::iterator i = views.begin(); i != views.end(); i++)
     {
-      (*i)->StateChanged(trans,state,next_states);
+      (*i)->StateChanged(ma, s, next_actions, next_states);
     }
 
     if (tau_prior)
     {
-      seen_states.insert(current_state);
+      seen_states.insert(s);
 
       bool found = false;
       size_t i=0;
-      for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l),i++)
+      for (size_t i=0; i<next_states.size(); ++i) 
       {
-        ATermList trans = ATLgetFirst(l);
-        if (ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)))
+        if (next_actions[i].actions().empty() )   // This is a tau action.
         {
-          if (seen_states.count(ATgetFirst(ATgetNext(trans))) ==0)  // not present.
+          if (seen_states.count(next_states[i])==0)  // not present.
           {
             found = true;
             break;
@@ -272,174 +243,89 @@ bool StandardSimulator::ChooseTransition(const size_t index)
 
 size_t StandardSimulator::GetTraceLength()
 {
-  return ATgetLength(trace)+ATgetLength(ecart);
+  return trace.number_of_actions();
 }
 
 size_t StandardSimulator::GetTracePos()
 {
-  return ATgetLength(trace)-1;
+  return trace.getPosition();
 }
 
 bool StandardSimulator::SetTracePos(size_t pos)
 {
-  if (ATgetLength(trace) == 0)
+  if (trace.number_of_actions() < pos)
   {
     return false;
   }
+ 
+  trace.setPosition(pos);
+  UpdateTransitions();
 
-  size_t l = ATgetLength(trace)-1;
-
-  if (pos <= l+ATgetLength(ecart))
+  for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
-    while (l < pos)
-    {
-      trace = ATinsert(trace,ATgetFirst(ecart));
-      ecart = ATgetNext(ecart);
-      l++;
-    }
-    while (l > pos)
-    {
-      ecart = ATinsert(ecart,ATgetFirst(trace));
-      trace = ATgetNext(trace);
-      l--;
-    }
-
-    ATermAppl trans = ATAgetFirst(ATLgetFirst(trace));
-    ATerm state = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
-
-    SetCurrentState(state);
-    UpdateTransitions();
-
-    for (viewlist::iterator i = views.begin(); i != views.end(); i++)
-    {
-      (*i)->TracePosChanged(trans,state,pos);
-      (*i)->StateChanged(NULL,state,next_states);
-    }
-
-    return true;
+    (*i)->Reset(trace.currentState());
+    (*i)->StateChanged(trace.currentState(), next_actions, next_states);
   }
-  else
-  {
-    return false;
-  }
+
+  return true;
 }
 
-ATermList StandardSimulator::GetTrace()
+Trace StandardSimulator::GetTrace()
 {
-  ATermList l = ecart;
-  ATermList m = trace;
-
-  for (; !ATisEmpty(m); m=ATgetNext(m))
-  {
-    l = ATinsert(l,ATgetFirst(m));
-  }
-
-  return l;
+  return trace;
 }
 
-ATerm StandardSimulator::GetNextStateFromTrace()
+mcrl2::lps::state StandardSimulator::GetNextStateFromTrace()
 {
-  if (ATisEmpty(ecart))
-  {
-    return NULL;
-  }
+  return trace.nextState();
+} 
 
-  return ATgetFirst(ATgetNext(ATLgetFirst(ecart)));
-}
-
-ATermAppl StandardSimulator::GetNextTransitionFromTrace()
+mcrl2::lps::multi_action StandardSimulator::GetNextTransitionFromTrace()
 {
-  if (ATisEmpty(ecart))
-  {
-    return NULL;
-  }
-
-  return ATAgetFirst(ATLgetFirst(ecart));
+  return trace.currentAction();
 }
-
-bool StandardSimulator::SetTrace(ATermList /* Trace */, size_t /* From */)
-{
-  // XXX
-  return false;
-}
-
 
 void StandardSimulator::InitialiseViews()
 {
   for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
-    (*i)->Initialise(state_vars);
+    (*i)->Initialise(m_spec.process().process_parameters());
   }
-}
-
-
-void StandardSimulator::traceReset(ATerm state)
-{
-  trace = ATmakeList1((ATerm) ATmakeList2((ATerm) gsMakeNil(), state));
-  ecart = ATmakeList0();
-}
-
-void StandardSimulator::traceSetNext(ATermList transition)
-{
-  trace = ATinsert(trace,(ATerm) transition);
-  ecart = ATmakeList0();
-}
-
-ATermList StandardSimulator::traceUndo()
-{
-  ecart = ATinsert(ecart,ATgetFirst(trace));
-  trace = ATgetNext(trace);
-
-  return ATLgetFirst(trace);
-}
-
-ATermList StandardSimulator::traceRedo()
-{
-  trace = ATinsert(trace,ATgetFirst(ecart));
-  ecart = ATgetNext(ecart);
-
-  return ATLgetFirst(trace);
 }
 
 void StandardSimulator::LoadTrace(const std::string& filename)
 {
-  Trace tr(filename);
+  trace.load(filename);
 
-  ATerm state;
-  ATermList newtrace = ATmakeList0();
-  if (tr.current_state_exists())
+  if (trace.current_state_exists())
   {
-
-    if ((state = nextstate->parse_state_vector_new(tr.currentState())) == NULL)
+    if (trace.currentState()!=nextstate->make_new_state_vector(nextstate->getInitialState()))
     {
-      throw mcrl2::runtime_error("initial state of trace is not a valid state for this specification");
+      throw mcrl2::runtime_error("The initial state of the trace is not equal to the initial state of this specification");
     }
-
-    Reset(state);
   }
   else
   {
     Reset();
-    state = current_state;
   }
 
-  mcrl2::lps::multi_action act;
-  size_t idx = 0;
-  while ((act = tr.nextAction()) != mcrl2::lps::multi_action())
+  // Check whether the trace matches the specification, and reconstruct the states if they are not part of the trace.
+  for (mcrl2::lps::multi_action act; trace.getPosition()<trace.number_of_actions(); )
   {
-    idx++;
-    nextstategen = nextstate->getNextStates(state,nextstategen);
-    mcrl2::lps::multi_action Transition;
+    act=trace.currentAction();
+    nextstategen = nextstate->getNextStates(nextstate->parse_state_vector_new(trace.currentState()),nextstategen);
+    mcrl2::lps::multi_action ma;
     ATerm NewState;
     bool found = false;
-    while (nextstategen->next(Transition,&NewState))
+    while (nextstategen->next(ma,&NewState))
     {
-      if (Transition==mcrl2::lps::multi_action(act))
+      if (ma==act)
       {
-        if ((tr.current_state_exists()) || ((NewState = nextstate->parse_state_vector_new(tr.currentState(),NewState)) != NULL))
+        mcrl2::lps::state new_state=nextstate->make_new_state_vector(NewState);
+        if (trace.getPosition()+1>=trace.number_of_states() || new_state==trace.nextState()) 
         {
-          newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(Transition),NewState));
-          state = NewState;
+          trace.increasePosition();
+          trace.setState(new_state);
           found = true;
           break;
         }
@@ -448,55 +334,35 @@ void StandardSimulator::LoadTrace(const std::string& filename)
     if (!found)
     {
       std::stringstream ss;
-      ss << "could not perform action " << idx << " (";
-      ss << pp(mcrl2::lps::multi_action(act));
-      ss << ") from trace";
+      ss << "could not perform action " << trace.getPosition() << " (";
+      ss << pp(act) << ") from trace";
       throw mcrl2::runtime_error(ss.str());
     }
   }
+  trace.setPosition(0);
 
-  for (ATermList l=newtrace; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    ecart = ATinsert(ecart,ATgetFirst(l));
-  }
-  newtrace = ATinsert(ecart,ATgetFirst(trace));
   for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
-    (*i)->TraceChanged(newtrace,0);
+    (*i)->TraceChanged(trace,0);
   } 
 }
 
 void StandardSimulator::SaveTrace(const std::string& filename)
 {
-  Trace tr;
-  if (!ATisEmpty(trace))
-  {
-    ATermList m = ATreverse(trace);
-    tr.setState(nextstate->make_new_state_vector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
-    for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
-    {
-      tr.addAction(mcrl2::lps::multi_action(ATAgetFirst(ATLgetFirst(l))));
-      tr.setState(nextstate->make_new_state_vector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
-    }
-  }
-
-  tr.save(filename);
-}
-
-void StandardSimulator::SetCurrentState(ATerm state)
-{
-  current_state = state;
+  trace.save(filename);
 }
 
 void StandardSimulator::UpdateTransitions()
 {
-  nextstategen = nextstate->getNextStates(current_state,nextstategen);
-  next_states = ATmakeList0();
-  mcrl2::lps::multi_action transition;
-  ATerm newstate;
-  while (nextstategen->next(transition,&newstate))
+  nextstategen = nextstate->getNextStates(nextstate->parse_state_vector_new(trace.currentState()),nextstategen);
+  next_states.clear();
+  next_actions.clear();
+  mcrl2::lps::multi_action ma;
+  ATerm NewState;
+  while (nextstategen->next(ma,&NewState))
   {
-    next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(transition),newstate));
+    next_states.push_back(nextstate->make_new_state_vector(NewState));
+    next_actions.push_back(ma);
   }
 }
 

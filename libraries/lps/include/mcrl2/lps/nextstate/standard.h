@@ -137,7 +137,7 @@ class NextState
     ATermAppl makeStateVector(ATerm state);
     mcrl2::lps::state make_new_state_vector(ATerm s);
     ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
-    ATerm parse_state_vector_new(mcrl2::lps::state s, ATerm match = NULL);
+    ATerm parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state match=mcrl2::lps::state(), bool check_match=false);
     mcrl2::data::rewriter& getRewriter()   // Deprecated. Do not use.
     {
       return const_cast< mcrl2::data::detail::legacy_rewriter& >(info.m_rewriter);

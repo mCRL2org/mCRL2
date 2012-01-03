@@ -320,7 +320,7 @@ static bool statearg_match(const data_expression arg, const data_expression pat)
 
 }
 
-ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, ATerm match)
+ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state match, bool check_match)
 {
   if (!stateAFun_made)
   {
@@ -340,9 +340,7 @@ ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, ATerm match)
       break;
     }
 
-    if ((match != NULL) && !statearg_match(
-                               data_expression(stateargs[i]),
-                               data_expression(getStateArgument(match,i))))
+    if (check_match && !statearg_match(data_expression(stateargs[i]),match[i]))
     {
       valid = false;
       break;
