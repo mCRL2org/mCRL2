@@ -20,23 +20,46 @@ def doxygen(library = "lts"):
   run("./doc/sphinx/generate_libref_website.sh -l6")
   os.chdir(pwd)
 
-  listing = []
+  classlisting = []
+  filelisting = []
+  
   # Transform XML into RST
   for f in os.listdir(doxygenXmlPath):
     relXmlPath = "{0}/{1}".format(doxygenXmlPath, f)
     absDoxygenXmlPath = "{0}/{1}".format(pwd, doxygenXmlPath)
     relRstPath = "{0}/{1}.rst".format(referencePath, f[:-4])
     
-    if f == "index.xml":
-      run("xsltproc --param dir \"\'{0}\'\" xslt/refindex.xsl {1} > {2}".format(absDoxygenXmlPath, relXmlPath, relRstPath))
-      
-    elif f.endswith(".xml") and ((f.startswith("class") and not f.startswith("classstd")) or f.endswith("_8h.xml")):
+    if f.endswith(".xml") and f <> "index.xml":
+      if f.startswith("class") and not f.startswith("classstd"):
+        classlisting.append(f[:-4])
+      elif f.endswith("_8h.xml"):
+        filelisting.append(f[:-4])
+      else:
+        continue
+    
       run("xsltproc --param dir \"\'{0}\'\" xslt/compound.xsl {1} > {2}".format(absDoxygenXmlPath, relXmlPath, relRstPath))
-      listing.append("   {0}".format(f[:-4]))
-      
-  f = open("{0}/listing.rst".format(referencePath), 'w')
-  f.write("\n".join([".. toctree::", "   :hidden:", "\n"]))
-  f.write("\n".join(sorted(listing)))
+
+  toc = '''Reference
+=========
+  
+Classes
+-------
+
+.. toctree::
+   :maxdepth: 1
+
+   {0}
+   
+Files
+-----
+
+.. toctree::
+   :maxdepth: 1
+   
+   {1}'''.format("\n   ".join(sorted(classlisting)), "\n   ".join(sorted(filelisting)))
+   
+  f = open("{0}/index.rst".format(referencePath), 'w')
+  f.write(toc)
   f.close()
 
 def sphinx():

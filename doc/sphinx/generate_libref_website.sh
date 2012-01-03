@@ -16,7 +16,7 @@ DOXYMASTER=doc/sphinx/Doxymaster
 
 # The directory in which the website will be generated.
 # Path is relative to the current directory, i.e. trunk.
-OUTPUT_DIR=doc/sphinx/doxy
+OUTPUT_DIR=.
 
 # The CSS file containing the style sheet of the website.
 # Path is relative to the current directory, i.e. trunk.
@@ -244,11 +244,8 @@ for L in $LIBRARY_LIST ; do
   DOXYCONFIG="
     PROJECT_NAME = \"$1\"
     INPUT = $DOXYINPUT
-    GENERATE_HTML = YES
     GENERATE_XML = YES
-    OUTPUT_DIRECTORY = $OUTPUT_DIR
     XML_OUTPUT = $TRUNK/doc/sphinx/$3/xml
-    HTML_OUTPUT = $2
     STRIP_FROM_PATH = $TRUNK/$3
     STRIP_FROM_INC_PATH = $TRUNK/$3/include $TRUNK/$3/source"
 

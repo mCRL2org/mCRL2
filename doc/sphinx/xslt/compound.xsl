@@ -115,15 +115,45 @@ Classes
     <xsl:when test="@kind='func'">
       <xsl:text>Functions</xsl:text>
     </xsl:when>
+    <xsl:when test="@kind='friend'">
+      <xsl:text>Friends</xsl:text>
+    </xsl:when>
     <xsl:when test="@kind='public-func'">
       <xsl:text>Public member functions</xsl:text>
-    </xsl:when>  
+    </xsl:when>
+    <xsl:when test="@kind='public-func'">
+      <xsl:text>Protected member functions</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='private-func'">
+      <xsl:text>Private member functions</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='public-static-func'">
+      <xsl:text>Public static member functions</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='protected-static-func'">
+      <xsl:text>Protected static member functions</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='private-static-func'">
+      <xsl:text>Private static member functions</xsl:text>
+    </xsl:when>    
     <xsl:when test="@kind='public-type'">
       <xsl:text>Public types</xsl:text>
     </xsl:when>
+    <xsl:when test="@kind='private-attrib'">
+      <xsl:text>Private attributes</xsl:text>
+    </xsl:when>  
     <xsl:when test="@kind='protected-attrib'">
       <xsl:text>Protected attributes</xsl:text>
     </xsl:when>  
+    <xsl:when test="@kind='public-attrib'">
+      <xsl:text>Public attributes</xsl:text>
+    </xsl:when>  
+    <xsl:when test="@kind='private-static-attrib'">
+      <xsl:text>Private static attributes</xsl:text>
+    </xsl:when>  
+    <xsl:when test="@kind='protected-static-attrib'">
+      <xsl:text>Protected static attributes</xsl:text>
+    </xsl:when>
     <xsl:otherwise>
       <xsl:value-of select="@kind" />
     </xsl:otherwise>
@@ -238,10 +268,23 @@ Classes
 
 <!-- a <parameterlist> -->
 <xsl:template match="parameterlist">
-  <xsl:text>
+  <xsl:choose>
+    <xsl:when test="@kind='param'">
+      <xsl:text>
   
       **Parameters:**
 </xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='retval'">
+      <xsl:text>
+      
+      **Returns:**
+</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="@kind"/>
+    </xsl:otherwise>
+  </xsl:choose>
   <xsl:apply-templates select="parameteritem"/>
 </xsl:template>
 
@@ -254,6 +297,18 @@ Classes
       **Returns:** </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
+    <xsl:when test="@kind='pre'">
+      <xsl:text>
+      
+      **Pre:** </xsl:text>
+      <xsl:value-of select="."/>
+    </xsl:when>
+    <xsl:when test="@kind='post'">
+      <xsl:text>
+      
+      **Post:** </xsl:text>
+      <xsl:value-of select="."/>
+    </xsl:when>    
     <xsl:when test="@kind='warning'">
       <xsl:text>
       .. warning:: </xsl:text>
@@ -262,6 +317,16 @@ Classes
     <xsl:when test="@kind='note'">
       <xsl:text>
       .. note:: </xsl:text>
+      <xsl:value-of select="."/>
+    </xsl:when>
+    <xsl:when test="@kind='remark'">
+      <xsl:text>
+      .. note:: </xsl:text>
+      <xsl:value-of select="."/>
+    </xsl:when>
+    <xsl:when test="@kind='attention'">
+      <xsl:text>
+      .. attention:: </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:otherwise>
