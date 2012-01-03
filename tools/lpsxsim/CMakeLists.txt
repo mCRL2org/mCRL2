@@ -8,36 +8,6 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-# #############################################
-# ########## Project mcrl2_simulator ##########
-# #############################################
-
-# project(mcrl2_simulator)
-# 
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-# include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-# include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-# include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-# include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-# 
-# add_library(${PROJECT_NAME}
-#   simulator.cpp
-#   simbase.cpp
-# )
-# 
-# target_link_libraries(${PROJECT_NAME}
-#   mcrl2_lps
-# )
-# 
-# install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
 # ######################################
 # ######## mcrl2_simulator_gui #########
 # ######################################

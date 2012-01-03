@@ -9,7 +9,7 @@
 /// \file simulator.cpp
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#pragma implementation "simulator.h"
+#pragma implementation "mcrl2/lps/simulator.h"
 #endif
 
 #ifdef __BORLANDC__

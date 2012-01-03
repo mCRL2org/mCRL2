@@ -22,7 +22,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -35,7 +34,7 @@
 
 #include "mcrl2/lps/multi_action.h"
 
-#include "simulator.h"
+#include "mcrl2/lps/simulator.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
