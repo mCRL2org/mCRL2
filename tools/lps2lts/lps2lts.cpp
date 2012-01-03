@@ -201,8 +201,11 @@ class lps2lts_tool : public lps2lts_base
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored").
       add_option("confluence", make_optional_argument("NAME", "ctau"),
-                 "apply on-the-fly prioritization of transitions with the action label NAME."
-                 "(when no NAME is supplied (i.e., '-c') priority is given to 'tau' (i.e., '-ctau' is used))", 'c').
+                 "apply prioritization of transitions with the action label NAME."
+                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
+                 "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
+                 "state space is necessarily branching bisimilar to the state space of the lps. The generation "
+                 "algorithm that is used does not require the linear process to be tau convergent.", 'c').
       add_option("strategy", make_mandatory_argument("NAME"),
                  "explore the state space using strategy NAME:\n"
                  "  'b', 'breadth'   breadth-first search (default)\n"
