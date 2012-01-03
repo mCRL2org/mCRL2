@@ -23,7 +23,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/logger.h"
-#include "simulator.h"
+#include "mcrl2/lps/simulator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

@@ -13,7 +13,7 @@
 #endif
 
 #include <list>
-#include "simbase.h"
+#include "mcrl2/lps/simbase.h"
 
 using namespace std;
 

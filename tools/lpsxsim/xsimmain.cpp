@@ -25,9 +25,7 @@
 #include <wx/textfile.h>
 #include <sstream>
 #include <cstdlib>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "simbase.h"
+#include "mcrl2/lps/simbase.h"
 #include "xsimmain.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)

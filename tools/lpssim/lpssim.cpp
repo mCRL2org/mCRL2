@@ -22,18 +22,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
-
-#include "simulator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/simulator.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

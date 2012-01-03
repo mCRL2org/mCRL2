@@ -16,7 +16,7 @@
 #include <tooltipListView.h>
 #include "mcrl2/aterm/aterm2.h"
 
-#include "simbase.h"
+#include "mcrl2/lps/simbase.h"
 #include "simulatorgui.h"
 #include "xsimtrace.h"
 

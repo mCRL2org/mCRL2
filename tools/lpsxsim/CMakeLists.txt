@@ -12,66 +12,31 @@ cmake_minimum_required(VERSION 2.6)
 # ########## Project mcrl2_simulator ##########
 # #############################################
 
-project(mcrl2_simulator)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-
-add_library(${PROJECT_NAME}
-  simulator.cpp
-  simbase.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_lps
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-# ####################################
-# ########## Project lpssim ##########
-# ####################################
-
-project(lpssim)
-
-add_executable(${PROJECT_NAME}
-  sim.cpp
-)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_simulator
-  mcrl2_utilities
-  ${Boost_LIBRARIES}
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
-
-# Generate man pages
-include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+# project(mcrl2_simulator)
+# 
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+# include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
+# include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+# include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+# include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+# 
+# add_library(${PROJECT_NAME}
+#   simulator.cpp
+#   simbase.cpp
+# )
+# 
+# target_link_libraries(${PROJECT_NAME}
+#   mcrl2_lps
+# )
+# 
+# install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 # ######################################
 # ######## mcrl2_simulator_gui #########
@@ -99,7 +64,7 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_simulator
+  mcrl2_lps
   ${wxWidgets_LIBRARIES}
 )
 

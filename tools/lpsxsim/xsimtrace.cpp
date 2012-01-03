@@ -20,8 +20,6 @@
 
 #include <wx/wx.h>
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "xsimtrace.h"
 #include "mcrl2/utilities/logger.h"
 
