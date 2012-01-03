@@ -61,9 +61,9 @@ ENDIF(WIN32)
 set(MACOSX_BUNDLE_ICON_FILE lpsxsim.icns)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
-  xsim.cpp
-  xsimmain.cpp
-  xsimtrace.cpp
+  lpsxsim.cpp
+  lpsxsimmain.cpp
+  lpsxsimtrace.cpp
   tooltipListView.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
@@ -88,7 +88,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 #Add PLUGINDIR define
-set_source_files_properties(xsimmain.cpp
+set_source_files_properties(lpsxsimmain.cpp
   PROPERTIES COMPILE_DEFINITIONS PLUGINDIR="${CMAKE_INSTALL_PREFIX}/lib/mcrl2/plugins"
 )
 

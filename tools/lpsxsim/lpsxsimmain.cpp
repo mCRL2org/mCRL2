@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file xsimmain.cpp
+/// \file lpsxsimmain.cpp
 
 #include "wx.hpp" // precompiled headers
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#pragma implementation "xsimmain.h"
+#pragma implementation "lpsxsimmain.h"
 #endif
 
 #ifdef __BORLANDC__
@@ -26,7 +26,7 @@
 #include <sstream>
 #include <cstdlib>
 #include "mcrl2/lps/simbase.h"
-#include "xsimmain.h"
+#include "lpsxsimmain.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)

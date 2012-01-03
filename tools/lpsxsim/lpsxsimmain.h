@@ -18,7 +18,7 @@
 
 #include "mcrl2/lps/simbase.h"
 #include "simulatorgui.h"
-#include "xsimtrace.h"
+#include "lpsxsimtrace.h"
 
 //----------------------------------------------------------------------------
 // XSimMain

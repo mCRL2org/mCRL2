@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file xsimtrace.cpp
+/// \file lpsxsimtrace.cpp
 
 #include "wx.hpp" // precompiled headers
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#pragma implementation "xsimtrace.h"
+#pragma implementation "lpsxsimtrace.h"
 #endif
 
 #ifdef __BORLANDC__
@@ -20,7 +20,7 @@
 
 #include <wx/wx.h>
 #include <sstream>
-#include "xsimtrace.h"
+#include "lpsxsimtrace.h"
 #include "mcrl2/utilities/logger.h"
 
 using namespace std;

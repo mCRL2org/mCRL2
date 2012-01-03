@@ -6,15 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file xsim.cpp
+/// \file lpsxsim.cpp
 
 #include "wx.hpp" // precompiled headers
 
-#define NAME "xsim"
+#define NAME "lpsxsim"
 #define AUTHOR "Muck van Weerdenburg"
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#pragma implementation "xsim.h"
+#pragma implementation "lpsxsim.h"
 #endif
 
 #ifdef __BORLANDC__
@@ -25,7 +25,7 @@
 #include <iostream>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
-#include "xsimmain.h"
+#include "lpsxsimmain.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
