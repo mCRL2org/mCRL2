@@ -17,6 +17,9 @@
 
 #include "boost/utility.hpp"
 
+// Workaround for OS X with Apples patched gcc 4.0.1
+#undef nil
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
