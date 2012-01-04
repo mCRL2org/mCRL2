@@ -8,11 +8,11 @@
 # Whether this script is indeed called from the trunk directory will be checked
 # using the following variable.
 # It contains the path to this script from the trunk directory.
-PATH_FROM_TRUNK=doc/sphinx
+PATH_FROM_TRUNK=doc/sphinx/developer_manual
 
 # The file containing the global Doxygen configuration.
 # Path is relative to the current directory, i.e. trunk.
-DOXYMASTER=doc/sphinx/Doxymaster
+DOXYMASTER=${PATH_FROM_TRUNK}/Doxymaster
 
 # The directory in which the website will be generated.
 # Path is relative to the current directory, i.e. trunk.
@@ -20,7 +20,7 @@ OUTPUT_DIR=.
 
 # The CSS file containing the style sheet of the website.
 # Path is relative to the current directory, i.e. trunk.
-STYLESHEET=doc/sphinx/doxystyle.css
+STYLESHEET=${PATH_FROM_TRUNK}/doxystyle.css
 
 # The variable LIBRARY_LIST contains the list of libraries for which
 # reference pages will be generated.
@@ -245,7 +245,7 @@ for L in $LIBRARY_LIST ; do
     PROJECT_NAME = \"$1\"
     INPUT = $DOXYINPUT
     GENERATE_XML = YES
-    XML_OUTPUT = $TRUNK/doc/sphinx/$3/xml
+    XML_OUTPUT = $TRUNK/${PATH_FROM_TRUNK}/$3/xml
     STRIP_FROM_PATH = $TRUNK/$3
     STRIP_FROM_INC_PATH = $TRUNK/$3/include $TRUNK/$3/source"
 

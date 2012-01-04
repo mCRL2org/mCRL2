@@ -7,14 +7,14 @@ def run(command):
   if ret <> 0:
     raise Exception("Execution of command {0} failed with exit code {1}".format(command, ret))
 
-libraries = ["atermpp", "core", "bes", "data", "lps", "lts", "pbes", "process", "trace"]
+libraries = ["atermpp", "core", "bes", "data", "lps", "lts", "pbes", "process", "trace", "utilities"]
 
 def doxygen():
 
   pwd = os.getcwd()
-  os.chdir("../../")
+  os.chdir("../../../")
   # For now do LTS library only
-#  run("./doc/sphinx/generate_libref_website.sh -l{0}".format(",".join([str(i) for i in range(0,len(libraries))])))
+  run("./doc/sphinx/developer_manual/generate_libref_website.sh -l{0}".format(",".join([str(i) for i in range(0,len(libraries)+1)])))
   os.chdir(pwd)
 
   for library in libraries:
