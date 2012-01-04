@@ -3,20 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to mCRL2's documentation!
-=================================
+mCRL2 user manual
+=================
 
 Contents:
 
 .. toctree::
    :maxdepth: 4
 
-   libraries/index
+   installation
+   language_reference
+   tutorial/tutorial
+   tools/index
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 

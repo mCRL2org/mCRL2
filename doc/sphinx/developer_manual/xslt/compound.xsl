@@ -205,6 +205,14 @@ Classes
       <xsl:value-of select="name"/>
     </xsl:when>
     
+    <xsl:when test="@kind='friend'">
+      <xsl:text>   </xsl:text>
+      <xsl:value-of select="type"/>
+      <xsl:text> :cpp:type:`</xsl:text>
+      <xsl:value-of select="name"/>
+      <xsl:text>`</xsl:text>
+    </xsl:when>
+    
     <xsl:otherwise>
       <xsl:value-of select="kind"/>
       <xsl:value-of select="name"/>

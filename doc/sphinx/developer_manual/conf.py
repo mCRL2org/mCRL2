@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mCRL2'
-copyright = u'2011, Jan Friso Groote, Jeroen Keiren, Frank Stappers, Wieger Wesselink'
+copyright = u'2011, Technische Universiteit Eindhoven'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -91,7 +91,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'mcrl2'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -99,7 +99,7 @@ html_theme = 'mcrl2'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['theme']
+html_theme_path = ['../theme']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -178,8 +178,8 @@ htmlhelp_basename = 'mCRL2doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'mCRL2.tex', u'mCRL2 Documentation',
-   u'Jan Friso Groote, Jeroen Keiren, Frank Stappers, Wieger Wesselink', 'manual'),
+  ('index', 'mCRL2.tex', u'mCRL2 developer manual',
+   u'Technische Universiteit Eindhoven', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'mcrl2', u'mCRL2 Documentation',
-     [u'Jan Friso Groote, Jeroen Keiren, Frank Stappers, Wieger Wesselink'], 1)
+    ('index', 'mcrl2', u'mCRL2 developer manual',
+     [u'Technische Universiteit Eindhoven'], 1)
 ]
