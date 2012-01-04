@@ -309,6 +309,13 @@ class Trace
       return states.size();
     }
 
+    /// \brief Remove the current state and all states following it.
+    void clear_current_state()
+    {
+      assert(actions.size()+1 >= states.size() && pos <=actions.size());
+      states.resize(pos);
+    }
+
     /// \brief Indicate whether a current state exists.
     /// \return A boolean indicating whether the current state exists.
     bool current_state_exists() const

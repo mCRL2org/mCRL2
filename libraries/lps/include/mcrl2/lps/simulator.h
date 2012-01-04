@@ -79,6 +79,7 @@ class StandardSimulator : virtual public SimulatorInterface
     NextStateGenerator* nextstategen;
 
     void UpdateTransitions();
+    bool match_trace_recursively(const size_t pos,size_t &culprit_pos);
 };
 
 #endif
