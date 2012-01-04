@@ -57,7 +57,7 @@ class IProtectedATerm
 
     virtual void ATmarkTerms() = 0; 
 
-    ~IProtectedATerm()
+    virtual ~IProtectedATerm()
     {
       p_aterms().erase(node);
     }

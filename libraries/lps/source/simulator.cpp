@@ -340,7 +340,7 @@ bool StandardSimulator::match_trace_recursively(const size_t pos, size_t &culpri
   { 
     if (local_actions[i]==act)
     {
-      trace.increasePosition();
+      trace.setPosition(pos+1);
       const bool state_was_defined=trace.current_state_exists();
       if (!state_was_defined || match(local_states[i],trace.currentState()))
       {
@@ -356,7 +356,6 @@ bool StandardSimulator::match_trace_recursively(const size_t pos, size_t &culpri
             trace.setPosition(pos+1);
             trace.clear_current_state();
           }
-          trace.setPosition(pos);
         }
       }
     }
@@ -365,13 +364,15 @@ bool StandardSimulator::match_trace_recursively(const size_t pos, size_t &culpri
   return false;
 }
 
+
+
 void StandardSimulator::LoadTrace(const std::string& filename)
 {
   trace.load(filename);
 
   if (trace.current_state_exists())
   {
-    if (trace.currentState()!=nextstate->make_new_state_vector(nextstate->getInitialState()))
+    if (!match(trace.currentState(),nextstate->make_new_state_vector(nextstate->getInitialState())))
     {
       throw mcrl2::runtime_error("The initial state of the trace is not equal to the initial state of this specification");
     }
@@ -395,6 +396,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
   }
 
   trace.setPosition(0);
+  UpdateTransitions();
 
   for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
