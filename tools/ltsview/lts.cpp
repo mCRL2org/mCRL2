@@ -883,6 +883,7 @@ void LTS::loadTrace(std::string const& path)
     return;
   }
 
+  try{
   Simulation* sim = new Simulation();
   // Initialize simulation with initial state of the LTS;
   State* initState;
@@ -995,6 +996,13 @@ void LTS::loadTrace(std::string const& path)
 
   // Set simulation to the LTS
   simulation = sim;
+  }
+  catch( mcrl2::runtime_error &e )
+  {
+    std::string error = e.what();
+    mediator->reportError(error);
+    return;
+  }
 }
 
 void LTS::generateBackTrace()
