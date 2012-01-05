@@ -248,7 +248,7 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
       << m_argument->get_name() << "</option_argument>" << std::endl;
   }
 
-  s << "<description>" << std::endl;
+  s << "<description>";
   // Produce output line by line, such that indentation provided in the description
   // can be preserved.
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
