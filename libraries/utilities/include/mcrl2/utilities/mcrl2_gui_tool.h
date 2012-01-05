@@ -71,29 +71,8 @@ class mcrl2_gui_tool: public Tool
 
     void print_mcrl2_gui_options() const
     {
-      /// The name of the tool
-      std::string m_name;
-
-      /// The name of the developer(s)
-      std::string m_author;
-
-      /// One-line "what is" description of the tool
-      std::string m_what_is;
-
-      /// The description of the tool
-      std::string m_tool_description;
-
-      /// Known issues of the tool
-      std::string m_known_issues;
-
       std::cout << "<tool>" << std::endl;
       std::cout << "  <name>" << m_toolname << "</name>" << std::endl;
-      std::cout << "  <authors>" << m_author << "</authors>" << std::endl;
-      std::cout << "  <what_is>" << m_what_is << "</what_is>" << std::endl;
-      //std::cout << "  <synopsis>" << "</synopsis>" << std::endl;
-      std::cout << "  <description>" << m_tool_description << "</description>" << std::endl;
-      std::cout << "  <known_issues>" << m_known_issues << "</known_issues>" << std::endl;
-
       std::cout << "  <arguments>" << std::endl;
 
       for (std::map<std::string, widget_option>::const_iterator i =
