@@ -1,4 +1,0 @@
-pbespareqelm
-===========================================
-
-.. include:: manual.rst

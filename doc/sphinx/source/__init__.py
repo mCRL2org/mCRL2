@@ -1,0 +1,56 @@
+import os
+import shutil
+import subprocess
+import logging
+import sphinx
+
+_LOG = logging.getLogger('util')
+
+def clone_rst(src, dst):
+  if os.path.isdir(src):
+    for f in os.listdir(src):
+      clone_rst(os.path.join(src, f), os.path.join(dst, f))
+  else:
+    if not os.path.exists(os.path.dirname(dst)):
+      os.makedirs(os.path.dirname(dst))
+    shutil.copyfile(src, dst)
+
+#
+# Utility functions for use by imported scripts
+#
+def call(name, cmdline, stdin=None):
+  '''Runs cmdline and pipes stdin to the process' stdin. The standard output of
+  the process is returned as a string. Any errors and warnings will be logged 
+  using the name provided. Raises a RuntimeError if the return code of the 
+  process was nonzero.'''
+  _LOG.debug('Running "{0}"'.format(' '.join(cmdline)))
+  proc = subprocess.Popen(cmdline, 
+           stdin=subprocess.PIPE, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.PIPE)
+  out, err = proc.communicate(stdin)
+  if proc.returncode:
+    _LOG.error('{0} returned with non-zero status.'.format(name))
+    _LOG.error('{0} output: {1}'.format(name, out.strip()))
+    _LOG.error('{0} error output: {1}'.format(name, err.strip()))
+    raise RuntimeError('Doxygen returned with non-zero status.')
+  if err:
+    _LOG.warning('{0} error output: {1}'.format(name, err.strip()))
+  return out
+
+def generate_rst(binpath, temppath, outpath):
+  import developer_manual
+  import user_manual
+  cfg_dev = os.path.join(os.path.dirname(__file__), 'developer_manual')
+  cfg_usr = os.path.join(os.path.dirname(__file__), 'user_manual')
+  temp_dev = os.path.join(temppath, 'rst','developer_manual')
+  temp_usr = os.path.join(temppath, 'rst','user_manual')
+  out_dev = os.path.join(outpath, 'developer_manual')
+  out_usr = os.path.join(outpath, 'user_manual')
+  logging.basicConfig(level=logging.INFO)
+  clone_rst(cfg_dev, temp_dev)
+  clone_rst(cfg_usr, temp_usr)
+  developer_manual.generate_rst()
+  user_manual.generate_rst(binpath)
+  sphinx.main(['-bhtml', '-c', cfg_dev, temp_dev, out_dev])
+  sphinx.main(['-bhtml', '-c', cfg_usr, temp_usr, out_usr])

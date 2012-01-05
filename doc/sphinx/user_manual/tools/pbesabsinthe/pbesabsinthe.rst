@@ -1,4 +1,0 @@
-pbesabsinthe
-===========================================
-
-.. include:: manual.rst

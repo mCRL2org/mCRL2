@@ -1,4 +1,0 @@
-pbesabstract
-===========================================
-
-.. include:: manual.rst

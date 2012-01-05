@@ -1,4 +1,0 @@
-pbesstategraph
-===========================================
-
-.. include:: manual.rst
