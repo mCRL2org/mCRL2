@@ -24,6 +24,7 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/lps/replace.h"
@@ -93,6 +94,25 @@ std::string myprint(const atermpp::vector<pbes_equation>& v)
   }
   out << "\n]";
   return out.str();
+}
+
+/// \brief Generates fresh variables with names that do not appear in the given context.
+/// Caveat: the implementation is very inefficient.
+/// \param update_context If true, then generated names are added to the context
+inline
+data::variable_list make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
+{
+  data::variable_vector result;
+  for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    core::identifier_string name =  id_generator(std::string(i->name()));
+    result.push_back(data::variable(name, i->sort()));
+    if (!add_to_context)
+    {
+      id_generator.remove_identifier(name);
+    }
+  }
+  return atermpp::convert<data::variable_list>(result);
 }
 
 } // namespace detail
@@ -267,8 +287,10 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-        data::variable_list b = fresh_variables(v, names, false);
+        data::set_identifier_generator id_generator;
+        id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
+        id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
+        data::variable_list b = pbes_system::detail::make_fresh_variables(v, id_generator, false);
         result = z::forall(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
       else if (a::is_exists(b))
@@ -276,8 +298,10 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-        data::variable_list b = fresh_variables(v, names, false);
+        data::set_identifier_generator id_generator;
+        id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
+        id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
+        data::variable_list b = pbes_system::detail::make_fresh_variables(v, id_generator, false);
         result = z::exists(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
       else
@@ -296,14 +320,15 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \param f A modal formula
     /// \param lps A linear process
     /// \param T A data variable
-    /// \param context A set of strings that may not be used for naming a fresh variable
+    /// \param id_generator A set of strings that may not be used for naming a fresh variable
     /// \return The function result
     pbes_expression RHS(
       state_formulas::state_formula f0,
       state_formulas::state_formula f,
       const lps::linear_process& lps,
       data::variable T,
-      std::set<std::string>& context)
+      data::set_identifier_generator& id_generator
+     )
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << state_formulas::pp(f) << std::flush;
@@ -334,29 +359,27 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_and(f))
         {
-          result = z::and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          result = z::and_(RHS(f0, a::left(f), lps, T, id_generator), RHS(f0, a::right(f), lps, T, id_generator));
         }
         else if (s::is_or(f))
         {
-          result = z::or_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          result = z::or_(RHS(f0, a::left(f), lps, T, id_generator), RHS(f0, a::right(f), lps, T, id_generator));
         }
         else if (s::is_imp(f))
         {
           // TODO: generalize
-          // result = imp(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
-          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          // result = imp(RHS(f0, a::left(f), lps, T, id_generator), RHS(f0, a::right(f), lps, T, id_generator));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, id_generator), RHS(f0, a::right(f), lps, T, id_generator));
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, T, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, T, id_generator));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, T, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, T, id_generator));
         }
         else if (s::is_must(f))
         {
@@ -372,9 +395,9 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
-            pbes_expression rhs = RHS(f0, phi, lps, T, context);
-//std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
-            data::variable_list y = fresh_variables(yi, context);
+            pbes_expression rhs = RHS(f0, phi, lps, T, id_generator);
+//std::cout << "\n" << core::detail::print_set(id_generator, "id_generator") << std::endl;
+            data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
 //std::cout << "\n" << core::detail::print_list(yi, data::stream_printer(), "yi") << std::endl;
 //std::cout << "\n" << core::detail::print_list(y, data::stream_printer(), "y") << std::endl;
             ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
@@ -409,8 +432,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
-            pbes_expression rhs = RHS(f0, phi, lps, T, context);
-            data::variable_list y = fresh_variables(yi, context);
+            pbes_expression rhs = RHS(f0, phi, lps, T, id_generator);
+            data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
             ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -513,57 +536,55 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_not(f))
         {
-          result = RHS(f0, a::arg(f), lps, T, context);
+          result = RHS(f0, a::arg(f), lps, T, id_generator);
         }
         else if (s::is_and(f))
         {
-          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, id_generator), RHS(f0, s::not_(a::right(f)), lps, T, id_generator));
         }
         else if (s::is_or(f))
         {
-          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, T, id_generator), RHS(f0, s::not_(a::right(f)), lps, T, id_generator));
         }
         else if (s::is_imp(f))
         {
-          result = z::and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::and_(RHS(f0, a::left(f), lps, T, id_generator), RHS(f0, s::not_(a::right(f)), lps, T, id_generator));
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, id_generator));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, id_generator));
         }
         else if (s::is_must(f))
         {
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
-          result = RHS(f0, s::may(alpha, s::not_(phi)), lps, T, context);
+          result = RHS(f0, s::may(alpha, s::not_(phi)), lps, T, id_generator);
         }
         else if (s::is_may(f))
         {
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
-          result = RHS(f0, s::must(alpha, s::not_(phi)), lps, T, context);
+          result = RHS(f0, s::must(alpha, s::not_(phi)), lps, T, id_generator);
         }
         else if (s::is_delay_timed(f))
         {
           data::data_expression t = a::time(f);
-          result = RHS(f0, s::yaled_timed(t), lps, T, context);
+          result = RHS(f0, s::yaled_timed(t), lps, T, id_generator);
         }
         else if (s::is_yaled_timed(f))
         {
           data::data_expression t = a::time(f);
-          result = RHS(f0, s::delay_timed(t), lps, T, context);
+          result = RHS(f0, s::delay_timed(t), lps, T, id_generator);
         }
         else if (s::is_variable(f))
         {
-          result = z::not_(RHS(f0, f, lps, T, context));
+          result = z::not_(RHS(f0, f, lps, T, id_generator));
         }
         else if (s::is_mu(f) || (s::is_nu(f)))
         {
@@ -572,11 +593,11 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           state_formulas::state_formula phi = a::arg(f);
           if (s::is_mu(f))
           {
-            result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, T, context);
+            result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, T, id_generator);
           }
           else
           {
-            result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, T, context);
+            result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, T, id_generator);
           }
         }
         else
@@ -665,8 +686,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           state_formulas::state_formula g = arg(f);
           fixpoint_symbol sigma = s::is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
-          std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, T, context);
+          data::set_identifier_generator id_generator;
+          pbes_expression expr = RHS(f0, g, lps, T, id_generator);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
         }
@@ -743,8 +764,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
           state_formulas::state_formula g = s::not_(arg(f));
           g = state_formulas::detail::negate_propositional_variable(v.name(), g);
-          std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, T, context);
+          data::set_identifier_generator id_generator;
+          pbes_expression expr = RHS(f0, g, lps, T, id_generator);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
         }
@@ -789,13 +810,13 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // make sure the lps is timed
-      std::set<core::identifier_string> context = lps::find_identifiers(spec);
+      std::set<core::identifier_string> id_generator = lps::find_identifiers(spec);
       std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(f);
-      context.insert(fcontext.begin(), fcontext.end());
+      id_generator.insert(fcontext.begin(), fcontext.end());
 
-      data::variable T = fresh_variable(context, data::sort_real::real_(), "T");
-      context.insert(T.name());
-      lps::detail::make_timed_lps(lps, context);
+      data::variable T = fresh_variable(id_generator, data::sort_real::real_(), "T");
+      id_generator.insert(T.name());
+      lps::detail::make_timed_lps(lps, id_generator);
 
       // compute the equations
       atermpp::vector<pbes_equation> e = E(f, f, lps, T);
@@ -878,8 +899,10 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-          data::variable_list y = fresh_variables(v, names, false);
+          data::set_identifier_generator id_generator;
+          id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
+          id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
+          data::variable_list y = pbes_system::detail::make_fresh_variables(v, id_generator, false);
           result = p::forall(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
@@ -893,8 +916,10 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-          data::variable_list y = fresh_variables(v, names, false);
+          data::set_identifier_generator id_generator;
+          id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
+          id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
+          data::variable_list y = pbes_system::detail::make_fresh_variables(v, id_generator, false);
           result = p::exists(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
@@ -922,12 +947,12 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
     /// \param f0 A modal formula
     /// \param f A modal formula
     /// \param lps A linear process
-    /// \param context A set of strings that may not be used for naming a fresh variable
+    /// \param id_generator A set of strings that may not be used for naming a fresh variable
     /// \return The function result
     pbes_expression RHS(state_formulas::state_formula f0,
                         state_formulas::state_formula f,
                         const lps::linear_process& lps,
-                        std::set<std::string>& context)
+                        data::set_identifier_generator& id_generator)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<RHS-untimed>" << state_formulas::pp(f) << std::flush;
@@ -958,28 +983,26 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_and(f))
         {
-          result = z::and_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
+          result = z::and_(RHS(f0, a::left(f), lps, id_generator), RHS(f0, a::right(f), lps, id_generator));
         }
         else if (s::is_or(f))
         {
-          result = z::or_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
+          result = z::or_(RHS(f0, a::left(f), lps, id_generator), RHS(f0, a::right(f), lps, id_generator));
         }
         else if (s::is_imp(f))
         {
-          // DANGEROUS! result = imp(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
-          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, a::right(f), lps, context));
+          // DANGEROUS! result = imp(RHS(f0, a::left(f), lps, id_generator), RHS(f0, a::right(f), lps, id_generator));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, id_generator), RHS(f0, a::right(f), lps, id_generator));
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, id_generator));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, id_generator));
         }
         else if (s::is_must(f))
         {
@@ -995,8 +1018,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
             data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
-            pbes_expression rhs = RHS(f0, phi, lps, context);
-            data::variable_list y = fresh_variables(yi, context);
+            pbes_expression rhs = RHS(f0, phi, lps, id_generator);
+            data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
             ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             ai = lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -1023,8 +1046,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
             data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
-            pbes_expression rhs = RHS(f0, phi, lps, context);
-            data::variable_list y = fresh_variables(yi, context);
+            pbes_expression rhs = RHS(f0, phi, lps, id_generator);
+            data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
             ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             ai = lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -1073,55 +1096,53 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_not(f))
         {
-          result = RHS(f0, a::arg(f), lps, context);
+          result = RHS(f0, a::arg(f), lps, id_generator);
         }
         else if (s::is_and(f))
         {
-          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, id_generator), RHS(f0, s::not_(a::right(f)), lps, id_generator));
         }
         else if (s::is_or(f))
         {
-          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, id_generator), RHS(f0, s::not_(a::right(f)), lps, id_generator));
         }
         else if (s::is_imp(f))
         {
-          result = z::and_(RHS(f0, a::left(f), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::and_(RHS(f0, a::left(f), lps, id_generator), RHS(f0, s::not_(a::right(f)), lps, id_generator));
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, id_generator));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
-          context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
+          id_generator.add_identifiers(data::detail::variable_names(data::find_variables(a::var(f))));
+          result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, id_generator));
         }
         else if (s::is_must(f))
         {
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
-          result = RHS(f0, s::may(alpha, s::not_(phi)), lps, context);
+          result = RHS(f0, s::may(alpha, s::not_(phi)), lps, id_generator);
         }
         else if (s::is_may(f))
         {
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
-          result = RHS(f0, s::must(alpha, s::not_(phi)), lps, context);
+          result = RHS(f0, s::must(alpha, s::not_(phi)), lps, id_generator);
         }
         else if (s::is_delay(f))
         {
-          result = RHS(f0, s::yaled(), lps, context);
+          result = RHS(f0, s::yaled(), lps, id_generator);
         }
         else if (s::is_yaled(f))
         {
-          result = RHS(f0, s::delay(), lps, context);
+          result = RHS(f0, s::delay(), lps, id_generator);
         }
         else if (s::is_variable(f))
         {
-          result = z::not_(RHS(f0, f, lps, context));
+          result = z::not_(RHS(f0, f, lps, id_generator));
         }
         else if (s::is_mu(f) || (s::is_nu(f)))
         {
@@ -1130,11 +1151,11 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           state_formulas::state_formula phi = a::arg(f);
           if (s::is_mu(f))
           {
-            result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, context);
+            result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, id_generator);
           }
           else
           {
-            result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, context);
+            result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, id_generator);
           }
         }
         else
@@ -1223,8 +1244,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           state_formulas::state_formula g = arg(f);
           fixpoint_symbol sigma = s::is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
-          std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, context);
+          data::set_identifier_generator id_generator;
+          pbes_expression expr = RHS(f0, g, lps, id_generator);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
         }
@@ -1301,8 +1322,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
           state_formulas::state_formula g = s::not_(arg(f));
           g = state_formulas::detail::negate_propositional_variable(v.name(), g);
-          std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, context);
+          data::set_identifier_generator id_generator;
+          pbes_expression expr = RHS(f0, g, lps, id_generator);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
         }
