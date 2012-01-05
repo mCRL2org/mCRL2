@@ -15,7 +15,6 @@
 #include <sstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
-// #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -1184,7 +1183,6 @@ namespace mcrl2
             }
             while (procs.count(new_pn)>0);
 
-            // mCRL2log(verbose) << "- created process " << core::pp_deprecated(new_pn) << "\n";
             mCRL2log(verbose) << "- created process " << pp(new_pn) << "\n";
             process_expression p=procs[pn];
             assert(p);

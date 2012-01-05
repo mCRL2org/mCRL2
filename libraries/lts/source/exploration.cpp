@@ -14,7 +14,6 @@
 #include <set>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/nat.h"
@@ -23,7 +22,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/find.h"
-// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/multi_action.h"
