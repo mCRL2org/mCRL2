@@ -95,7 +95,7 @@ def last_word(line):
 # returns True, False or None if a timeout occurs
 def run_pbes2bool(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbes2bool', filename, timeout)
+    text, dummy = timeout_command('pbes2bool', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
