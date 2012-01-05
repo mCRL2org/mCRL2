@@ -57,7 +57,7 @@ def main():
             else:
                 tool = path(options.tooldir) / toolname
             print tool
-            os.system('%s --mcrl2-gui > %s' % (tool, filename))
+            os.system('%s --generate-xml > %s' % (tool, filename))
             process_authors(filename)
 
             text = filename.text()
@@ -65,8 +65,8 @@ def main():
               mtext = ""
             else:
               mtext = tool_manual_file.text()
-            if len(mtext.strip()) > 0:
-                text = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + mtext + r'\2', text)
+            #if len(mtext.strip()) > 0:
+            #    text = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + mtext + r'\2', text)
             filename.write_text(text)
 
 if __name__ == '__main__':

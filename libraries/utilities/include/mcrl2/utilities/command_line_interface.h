@@ -279,7 +279,10 @@ class interface_description
         std::string man_page_description() const;
 
         /// Returns a man page description for the option
-        std::string wiki_page_description() const;
+        std::ostream& wiki_page_description(std::ostream& s) const;
+
+        /// Returns a man page description for the option
+        std::ostream& xml_page_description(std::ostream& s, const bool is_default = false) const;
 
       public:
 
@@ -688,10 +691,15 @@ class interface_description
 
     /**
      * \brief Returns the text of a wiki page
-     * \param[in] revision the revision tag used in the heading of the man page
-     * \return string containing a man page description of the interface
+     * \return string containing a wiki page description of the interface
      **/
-    std::string wiki_page() const;
+    std::ostream& wiki_page(std::ostream&) const;
+
+    /**
+     * \brief Returns the text of an page
+     * \return string containing an xml description
+     **/
+    std::ostream& xml_page(std::ostream&) const;
 
     /**
      * \brief Returns the available long arguments with their associated help description
