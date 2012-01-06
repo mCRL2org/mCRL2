@@ -2907,7 +2907,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       {
         mCRL2log(error) << "Double assignment to variable " << core::pp_deprecated(ATAgetArgument(a,0))
                         << " (detected assigned values are " << core::pp_deprecated(existing_rhs)
-                        << " and " << ATAgetArgument(a,1) << ")" << std::endl;
+                        << " and " << core::pp_deprecated(ATAgetArgument(a,1)) << ")" << std::endl;
         return NULL;
       }
     }
