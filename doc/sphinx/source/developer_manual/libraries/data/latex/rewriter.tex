@@ -1,0 +1,786 @@
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{a4wide}
+\usepackage[british]{babel}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, October 19, 2009 15:45:27}
+%TCIDATA{LastRevised=Friday, January 15, 2010 10:28:48}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{include/tcilatex}
+\begin{document}
+
+\title{Rewriter Implementation Notes}
+\author{Wieger Wesselink}
+\maketitle
+
+\section{Introduction}
+
+This document describes rewrite algorithms that can be applied in the mCRL2
+tool set. Currently only a prototype implementation in python is available.
+Most of the content is based on \cite{weerdenburg2009} and on \cite%
+{vanderwulp2009}.
+
+\subsection{Higher order rewriting}
+
+There are several formalisms for higher order rewriting. We choose
+higher-order rewriting systems (HRSs) introduced by Nipkow. In \cite%
+{DBLP:conf/rta/Raamsdonk01} HRSs are summarized as follows:
+
+In a HRS we work modulo the $\beta \eta $-relation of simply typed $\lambda $%
+-calculus. \emph{Types} are built from a non-empty set of base types and the
+binary type constructor $\rightarrow $ as usual. For every type we assume a
+countably infinite set of \emph{variables} of that type, written as $%
+x,y,z,\ldots $. A \emph{signature} is a non-empty set of typed function
+symbols. The set of \emph{preterms} of type $A$ over a signature $\Sigma $
+consists exactly of the expressions $s$for which we can derive $s:A$ using
+the following rules:
+
+\begin{enumerate}
+\item $x:A$ for a variable $x$ of type $A$,
+
+\item $f:A$ for a function symbol $f$ of type $A$ in $\Sigma $,
+
+\item if $A=A^{\prime }\rightarrow A^{\prime \prime }$, and $x:A^{\prime }$
+and $s:A^{\prime \prime }$, then $(x.s):A$,
+
+\item if $s:A^{\prime }\rightarrow A$ and $t:A^{\prime }$, then $(s$\ $t):A$.
+\end{enumerate}
+
+The abstraction operator $\_.\_$ binds variables, so occurrences of $x$ in $s
+$ in the preterm $x.s$ are bound. We work modulo type-preserving $\alpha $%
+-conversion and assume that bound variables are renamed whenever necessary
+in order to avoid unintended capturing of free variables. Parentheses may be
+omitted according to the usual conventions. We make use of the usual notions
+of \emph{substitution} of a preterm $t$ for the free occurrences of a
+variable $x$ in a preterm $s$, notation $s[x:=t]$, and \emph{replacement in
+a context}, notation $C[t]$. We write $s\supseteq s^{\prime }$ if $s^{\prime
+}$ is a subpreterm of $s$, and use $\supset $ for the strict subpreterm
+relation.
+
+The $\beta $\emph{-reduction relation}, notation $\rightarrow _{\beta }$, is
+the smallest relation on preterms that is compatible with formation of
+preterms and that satisfies the following:%
+\begin{equation*}
+(x,s)t\rightarrow _{\beta }s[x:=t]
+\end{equation*}%
+The \emph{restricted }$\eta $\emph{-expansion relation}, notation $%
+\rightarrow _{\overline{\eta }}$, is defined as follows. We have%
+\begin{equation*}
+C[s]\rightarrow _{\overline{\eta }}C[x.(s\ x)]
+\end{equation*}%
+if $s:A\rightarrow B$, and $x:A$ is a fresh variable, and no $\beta $-redex
+is created (hence the terminology restricted $\eta $-expansion). The latter
+condition is satisfied if $s$ is not an abstraction (so not of the form $%
+z.s^{\prime }$), and doesn't occur in $C[s]$ as the left part of an
+application (so doesn't occur in a sub-preterm of the form $(s\ s^{\prime })$%
+).
+
+In the sequel we employ only preterms in $\overline{\eta }$-normal form,
+where every sub-preterm has the right number of arguments. Instead of $%
+s_{0}s_{1}\ldots s_{m}$ we often write $s_{0}(s_{1},\ldots ,s_{m})$. A
+preterm is then of the form $x_{1}\ldots x_{n}.s_{0}(s_{1},\ldots ,s_{m})$
+with $s_{0}(s_{1},\ldots ,s_{m})$ of base type and all $s_{i}$ in $\overline{%
+\eta }$-normal form.
+
+A \emph{term} is a preterm in $\beta $-normal form. It is also in $\overline{%
+\eta }$-normal form because $\overline{\eta }$-normal forms are closed under 
+$\beta $-reduction. A term is of the form $x_{1}\ldots x_{n}.a(s_{1},\ldots
+,s_{m})$ with $a$ a function symbol or a variable. Because the $\beta 
+\overline{\eta }$-reduction relation is confluent and terminating on the set
+of preterms, every $\beta \overline{\eta }$-equivalence class of preterms
+contains a unique term, which is taken as the representative of that class.
+
+Because in the discussion we will often use preterms, we use here the
+notation $s^{\sigma }$ for the replacement of variables according to the
+substitution $\sigma $ (\emph{without} reduction to $\beta $-normal form),
+and write explicitly $s^{\sigma }\downarrow _{\beta }$for its $\beta $%
+-normal form. This is in contrast with the usual notations for HRSs.
+
+A \emph{rewrite rule} is a pair of terms $(l,r)$, written as $l\rightarrow r$%
+, satisfying the following requirements:
+
+\begin{enumerate}
+\item $l$ and $r$ are of the same base type,
+
+\item $l$ is of the form $f(l_{1},\ldots ,l_{n})$,
+
+\item all free variables in $r$ occur also in $l$,
+
+\item a free variable $x$ in $l$ occurs in the form $x(y_{1},\ldots ,y_{n})$
+with $y_{i}$ $\eta $-equivalent to different bound variables.
+\end{enumerate}
+
+The last requirement guarantees that the rewrite relation is decidable
+because unification of patterns is decidable. The rewrite rules induce a
+rewrite relation $\rightarrow $ on the set of terms which is defined by the
+following rules:
+
+\begin{enumerate}
+\item if $s\rightarrow t$ then $x(\ldots ,s,\ldots )\rightarrow x(\ldots
+,t,\ldots )$,
+
+\item if $s\rightarrow t$ then $f(\ldots ,s,\ldots )\rightarrow f(\ldots
+,t,\ldots )$,
+
+\item if $s\rightarrow t$ then $x.s\rightarrow x.t$,
+
+\item if $l\rightarrow r$ is a rewrite rule and $\sigma $ is a substitution
+then $l^{\sigma }\downarrow _{\beta }\rightarrow r^{\sigma }\downarrow
+_{\beta }$.
+\end{enumerate}
+
+The last clause in this definition shows that HRSs use higher-order pattern
+matching, unlike AFSs, where matching is syntactic.
+
+\subsection{mCRL2 terms}
+
+In mCRL2 we have the following terms:%
+\begin{equation*}
+t:=x\ |\ f\ |\ t(t,\cdots ,t)\ |\ \lambda _{x}.t\ |\ \forall _{x}.t\ |\
+\exists _{x}.t\ |\ t\ whr\ x=t^{\prime }
+\end{equation*}%
+where $t$ is a term, $x$ is a variable and $f$ is a function symbol.
+
+\begin{remark}
+This needs to be further elaborated. Terms are typed, and function symbols
+(and terms?) have an arity. The term $t(t,\cdots ,t)$ is rather unusual, but
+it is covered by HRSs (?).
+\end{remark}
+
+\begin{remark}
+In fact the mCRL2 language uses slightly more general terms: $\lambda
+_{x_{1}\ldots x_{n}}.t$, $\forall _{x_{1}\ldots x_{n}}.t$, $\exists
+_{x_{1}\ldots x_{n}}.t$ and $t\ whr\ x_{1}=t_{1},\ldots ,x_{n}=t_{n}$.
+\end{remark}
+
+For a rewrite algorithm $rewr$ the following rules are suggested:%
+\begin{eqnarray*}
+rewr(\lambda _{x}.t,\sigma ) &=&\lambda _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(\forall _{x}.t,\sigma ) &=&\forall _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(\exists _{x}.t,\sigma ) &=&\exists _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(t\ whr\ x &=&t^{\prime },\sigma )=rewr(t,\sigma \lbrack x:=t^{\prime }])
+\end{eqnarray*}%
+where $x^{\prime }$ is a fresh variable not appearing in $t$.
+
+\begin{remark}
+In a rewrite algorithm, the term types are unused. One can add correctness
+checks for proper typing however.
+\end{remark}
+
+\begin{remark}
+Types in mCRL2 need to be rewritten to normal form as well. A very simple
+rewrite system can be defined for this. 
+\end{remark}
+
+\begin{remark}
+What about normal forms for terms containing $\lambda $-expressions and/or
+quantifiers? Expressions can be equal modulo alpha-conversion, so the ATerm
+equality doesn't work here.
+\end{remark}
+
+\begin{remark}
+In a rewrite algorithm one has to explicitly describe where $\alpha $%
+-conversion and $\beta $-reduction is being done. Doing $\overline{\eta }$%
+-expansion is probably not necessary.
+\end{remark}
+
+\subsection{Types}
+
+A \emph{base type} is a non-function type, typical examples are the Booleans
+or Natural numbers. Let $B$ be a non-empty set of base types and $b\in B$.
+The set of types is inductively defined as follows:%
+\begin{equation*}
+type::=b\ |\ type\times type\ |\ type\rightarrow type\text{,}
+\end{equation*}%
+where $\rightarrow $ is the function-type constructor. The type constructor
+associates to the left, for example:%
+\begin{equation*}
+b\rightarrow b\rightarrow b\text{ is the same as }(b\rightarrow
+b)\rightarrow b\text{.}
+\end{equation*}%
+Product types are often not present in treatment of simply-typed lambda
+calculus. We need them later to type non-lambda terms.
+
+The \emph{arity} of a type $A$ is a natural number, denoted $arity(A)$,
+which is inductively defined on the structure of $A$ as follows:
+
+\begin{equation*}
+\begin{array}{ll}
+arity(A)=0 & \text{if }A\text{ is a base type,} \\ 
+arity(A\rightarrow A^{\prime })=arity(A^{\prime })+1 & 
+\end{array}%
+\end{equation*}
+
+A \emph{signature} $\Sigma $ is a non-empty set of \emph{function symbols}
+each of which has a type. We write $f:A$ to denote that symbol $f$ has type $%
+A$ and extend the notion arity to symbols such that if $f:A$ then $%
+arity(f)=arity(A)$. Symbols with arity zero are called \emph{constants}.
+
+Let $\Sigma $ be a signature and let $\chi _{A}$ be a countably finite set
+of variables of type $A$ such that $\Sigma \cap \chi _{A}=\emptyset $, for
+each type $A$. The set of terms over $\Sigma $, denoted $\mathcal{T}(\Sigma
+) $, is inductively defined as
+
+\begin{itemize}
+\item Let $x\in \chi _{A}$ be a variable of type $A$ then $x\in \mathcal{T}%
+(\Sigma )$.
+
+\item Let $f\in \Sigma $ be a function symbol of type $A_{1}\times \ldots
+\times A_{n}\rightarrow B$, and $t_{i}:A_{i}$ for all $i\in \{1,\ldots ,n\}$%
+, then $f(t_{1},\ldots ,t_{n})\in \mathcal{T}(\Sigma )$ is a term of type $B$%
+.
+
+\item Let $t:A_{1}\times \ldots \times A_{n}\rightarrow B$, and $t_{i}:A_{i}$
+for all $i\in \{1,\ldots ,n\}$, then $t(t_{1},\ldots ,t_{n})\in \mathcal{T}%
+(\Sigma )$ is a term of type $B$.
+
+\item Let $x\in \chi _{A}$ be a variable of type $A$ and $t$ a term of type $%
+B$, then $\lambda _{x}.(t)\in \mathcal{T}(\Sigma )$ is a term of type $%
+A\rightarrow B$.
+\end{itemize}
+
+\subsection{Simple terms}
+
+Simple terms are terms with the following syntax:%
+\begin{equation}
+t:=x\ |\ f\ |\ f(t,\cdots ,t),  \label{eq:simple_terms}
+\end{equation}%
+where $t$ is a term, $x$ is a variable and $f$ is a function symbol.
+
+\subsection{Applicative terms}
+
+Applicative terms are an extension of simple terms:%
+\begin{equation}
+t:=x\ |\ f\ |\ t(t,\cdots ,t).  \label{eq:applicative_terms}
+\end{equation}
+
+The set of all variables is denoted by $\mathbb{V}$, the set of all function
+symbols by $\mathbb{F}$ and the set of all terms by $\mathbb{T}$. In this
+document we use the convention that $x,y\in \mathbb{V}$, that $t,u\in 
+\mathbb{T}$, and that $f,g\in \mathbb{F}$.
+
+We write $var(t)$ for the set of variables that occur in $t$. Formally:%
+\begin{equation*}
+\begin{array}{lll}
+var(x) & = & \{x\} \\ 
+var(f) & = & \emptyset \\ 
+var(t(t_{1},\cdots ,t_{n}) & = & var(t)\cup \dbigcup\limits_{i=1\cdots
+n}var(t_{i}).%
+\end{array}%
+\end{equation*}
+
+\subsection{Subterms}
+
+To facilitate operations on subterms we inductively define positions ($%
+\mathbb{P}$) as follows. A position is either $\epsilon $ (the empty
+position) or an index $i$ (from 1,2,$\cdots $) combined with a position $\pi 
+$, notation $i\cdot \pi $. We lift $\cdot $ to an associative operator on
+positions with $\epsilon $ as its unit element and often write just $i$ for
+the position $i\cdot \epsilon $. We write the subterm of $t$ at position $%
+\pi $ as $t|_{\pi }$ and we write term $t$ with the subterm at position $\pi 
+$ replaced by $u$ as $t[u]_{\pi }$. These operations are defined as follows.%
+\begin{equation*}
+\begin{array}{llll}
+t|_{\epsilon } & = & t &  \\ 
+t(t_{1},\cdots ,t_{n})|_{i\cdot \pi } & = & t_{i}|_{\pi } & \text{if }1\leq
+i\leq n \\ 
+t[u]_{\epsilon } & = & u &  \\ 
+x[u]_{i\cdot \pi } & = & x &  \\ 
+f(t_{1},\cdots ,t_{n})[u]_{i\cdot \pi } & = & f(t_{1},\cdots
+,t_{i-1},t_{i}[u]_{\pi },t_{i+1,}\cdots ,t_{n}) & \text{if }i\leq n \\ 
+f(t_{1},\cdots ,t_{n})[u]_{i\cdot \pi } & = & f(t_{1},\cdots ,t_{n}) & \text{%
+if }i>n%
+\end{array}%
+\end{equation*}
+
+Some examples are:%
+\begin{equation*}
+\begin{array}{l}
+f(x,g(y))|_{1}=x \\ 
+f(x,g(y))|_{2\cdot 1}=y \\ 
+f(x,g(y))[h(x)]_{2}=f(x,h(x))%
+\end{array}%
+\end{equation*}
+
+\subsection{Substitutions}
+
+A substitution is a function $\sigma :\mathbb{V\rightarrow T}$. A
+substitution $\sigma $ can also be applied to a term $t$. This is denoted by 
+$t\sigma $ and it is defined as%
+\begin{equation*}
+\begin{array}{lll}
+x\sigma & = & \sigma (x) \\ 
+f\sigma & = & f \\ 
+t(t_{1},\cdots ,t_{n})\sigma & = & t\sigma (t_{1}\sigma ,\cdots ,t_{n}\sigma
+).%
+\end{array}%
+\end{equation*}
+
+\subsection{Rewrite rules}
+
+A rewrite rule is a rule $l\rightarrow r\ \mathbf{if}\ c$, with $l,r,c\in 
+\mathbb{T}$. We put three restrictions on rewrite rules:%
+\begin{equation*}
+\begin{array}{ll}
+1) & l\text{ is a simple term} \\ 
+2) & l\notin \mathbb{V} \\ 
+3) & var(r)\cup var(c)\subseteq var(l)%
+\end{array}%
+\end{equation*}
+
+For a set $R$ of rewrite rules we define the rewrite relation $\rightarrow
+_{R}$ as follows: $t\rightarrow _{R}u$ if there is a rule $l\rightarrow r\ 
+\mathbf{if}\ c$ in $R$ $,$ a position $\pi $ and a substitution $\sigma $
+such that%
+\begin{equation}
+t|_{\pi }=l\sigma \wedge u=t[r\sigma ]_{\pi }\wedge \eta (c\sigma ),
+\label{eq:rewriting}
+\end{equation}%
+where $\eta $ is a boolean function that determines if a condition is true.
+We write $\rightarrow $ instead of $\rightarrow _{R}$ if no confusion can
+occur. We write $\rightarrow _{R}^{\ast }$ for the reflexive and transitive
+closure of $\rightarrow _{R}$ and $t\nrightarrow _{R}$ if there is no $u$
+such that $t\rightarrow _{R}u$. A normal form is a term $u$ such that $%
+t\rightarrow _{R}^{\ast }u$ and $u\nrightarrow _{R}$.
+
+\subsection{Rewrite algorithm}
+
+We now fomulate an abstract rewrite algorithm $rewrite$, where we assume
+that $R$ is a given, fixed set of rewrite rules.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textbf{function} }rewrite(t) \\ 
+u:=t \\ 
+\text{\textbf{while} }\{v\ |\ u\rightarrow _{R}v\}\neq \emptyset \text{ 
+\textbf{do}} \\ 
+\qquad \text{\textbf{choose} }v\text{ \textbf{such that} }u\rightarrow _{R}v
+\\ 
+\qquad u:=v \\ 
+\text{\textbf{return} }u%
+\end{array}%
+\end{equation*}%
+Note that this algorithm does not need to terminate. In practice we are also
+interested in an algorithm $rewrite(t,\sigma )$, that applies a substitution 
+$\sigma $ to the variables in $t$ during rewriting. The specification of
+this algorithm is simply%
+\begin{equation*}
+rewrite(t,\sigma )=rewrite(t\sigma ).
+\end{equation*}%
+The reason we are interested in such an algorithm is that it can be
+implemented more efficiently than the straightforward solution to first
+compute $u=t\sigma $ and then compute $rewrite(u)$.
+
+\section{Match trees}
+
+A match tree is a tree structure that represents a number of rewrite rules
+that have left hand sides with the same function symbol as head. It is used
+to compute all possible results of applying one of these rules to a term.
+Currently match trees are only defined for simple terms. A match tree
+consists of nodes of the following types:
+
+\begin{itemize}
+\item $F(f,T,U):$ If the current term has the form $f(t_{1},\cdots ,t_{n})$
+replace the top of the stack by $t_{1}\rhd \cdots \rhd t_{n}$ and continue
+with $T$, otherwise continue with $U$.
+
+\item $S(x,T):$ Assign the current term to variable $x$ and continue with $T$%
+.
+
+\item $M(x,T,U):$ If the current term is equal to $x$ continue with $T$,
+otherwise continue with $U$.
+
+\item $R(Q):$ Return $Q$
+
+\item $X:$ Return the empty set.
+
+\item $N(n,T):$ Remove $n$ elements from the stack and continue with $T$. We
+abbreviate $N(1,T)$ as $N(T)$.
+
+\item $E(T,U):$ If the stack is not empty continue with $T$, otherwise
+continue with $U$.
+
+\item $C(t,T,U):$ If $t$ evaluates to $true$, continue with $T$, otherwise
+continue with $U$.
+\end{itemize}
+
+where $f$ is a function symbol, $x$ is a variable, $t$ is a term, $Q$ is a
+set of terms annotated with a rewrite rule, and $T$ and $U$ are match tree
+nodes.
+
+\subsection{Evaluating a match tree}
+
+Let $l$ be a sequence of terms, and let $\sigma $ be an arbitrary
+substitution function. Then the evaluation of a match tree with arguments $l$
+and $\sigma $ is a set of terms and is defined as follows:%
+\begin{equation*}
+\begin{array}{lll}
+F(f,T,U)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+\emptyset & \text{if }l=[] \\ 
+T(m,\sigma ) & \text{if }l=f\rhd m \\ 
+T(t_{1}\rhd \cdots \rhd t_{n}\rhd m,\sigma ) & \text{if }l=f(t_{1},\cdots
+,t_{n})\rhd m \\ 
+U(l,\sigma ) & \text{if }l=g(t_{1},\cdots ,t_{n})\rhd m\wedge f\neq g \\ 
+U(l,\sigma ) & \text{if }l=x\rhd m%
+\end{array}%
+\right. \\ 
+X(l,\sigma ) & = & \emptyset \\ 
+R(Q)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+\{\sigma (t)\ |\ t^{\alpha }\in Q\} & \text{if }l=[] \\ 
+\emptyset & \text{if }l\neq \lbrack ]%
+\end{array}%
+\right. \\ 
+S(x,T) & = & \left\{ 
+\begin{array}{ll}
+\emptyset & \text{if }l=[] \\ 
+T(l,\sigma \lbrack x\rightarrow t]) & \text{if }l=t\rhd m%
+\end{array}%
+\right. \\ 
+M(x,T,U)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+\emptyset & \text{if }l=[] \\ 
+T(l,\sigma ) & \text{if }l=t\rhd m\wedge \sigma (x)=t \\ 
+U(l,\sigma ) & \text{if }l=t\rhd m\wedge \sigma (x)\neq t%
+\end{array}%
+\right. \\ 
+N(n,T)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+\emptyset & \text{if }|l|\ <n \\ 
+T(m,\sigma ) & \text{if }l=t_{1}\rhd \cdots \rhd t_{n}\rhd m%
+\end{array}%
+\right. \\ 
+E(T,U)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+U(l,\sigma ) & \text{if }l=[] \\ 
+T(l,\sigma ) & \text{if }l=t\rhd m%
+\end{array}%
+\right. \\ 
+C(t,T,U)(l,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+T(l,\sigma ) & \text{if }t\sigma \text{ evaluates to }true \\ 
+U(l,\sigma ) & \text{if }t\sigma \text{ does not evalute to }true%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+where $T$ and $U$ are match trees, $f$ and $g$ are function symbols, $l$ and 
+$m$ are sequences of terms and $t$ and $t_{i}$ are terms. The evaluation of
+a match tree $T$ in a single term $t$ with substitution $\sigma $ is defined
+as $T([t],\sigma )$.
+
+\subsection{Building a match tree}
+
+Let $\alpha $ be a rewrite rule given by $l\rightarrow r$.Then we define the
+match tree $match\_tree(\alpha )=\gamma ([l],\{r^{\alpha }\},\emptyset )$,
+where $\gamma $ is defined as:
+
+\begin{equation*}
+\begin{array}{lll}
+\gamma ([],Q,V) & = & R(Q) \\ 
+\gamma (x\rhd s,Q,V) & = & \left\{ 
+\begin{array}{ll}
+S(x,N(\gamma (s,Q,V\cup \{x\}))) & \text{if }x\notin V \\ 
+M(x,N(\gamma (s,Q,V\cup \{x\})),X) & \text{if }x\in V%
+\end{array}%
+\right. \\ 
+\gamma (f(t_{1},\cdots ,t_{n})\rhd s,Q,V) & = & F(f,\gamma (t_{1}\rhd \cdots
+\rhd t_{n}\rhd s,Q,V),X)%
+\end{array}%
+\end{equation*}%
+Match trees are only defined for rewrite rules with simple terms at the left
+hand side.
+
+\subsection{Joining match trees}
+
+Two match trees $left$ and $right$ can be joined into one using the operator 
+$||$, which is defined as follows: $left\ ||\ right=$%
+\begin{equation*}
+\begin{array}{lllll}
+right & \text{if} & head(left)=X &  &  \\ 
+left & \text{if} & head(right)=X &  &  \\ 
+E(left,right) & \text{if} & head(right)=R &  &  \\ 
+E(right,left) & \text{if} & head(left)=R &  &  \\ 
+R(Q\cup Q^{\prime }) & \text{if} & left=R(Q) & \text{and} & 
+right=R(Q^{\prime }) \\ 
+S(x,T\ ||\ right) & \text{if} & left=S(x,T) & \text{and} & head(right)\in
+\{F,S,U\} \\ 
+M(y,left\ ||\ U,left) & \text{if} & left=S(x,T) & \text{and} & right=M(y,U,V)
+\\ 
+M(x,T\ ||\ right,T^{\prime }\ ||\ right) & \text{if} & left=M(x,T,T^{\prime
+}) & \text{and} & head(right)\in \{F,M,N,S\} \\ 
+S(x,left\ ||\ U) & \text{if} & left=F(f,T,T^{\prime }) & \text{and} & 
+right=S(x,U) \\ 
+M(x,left\ ||\ U,left) & \text{if} & left=F(f,T,T^{\prime }) & \text{and} & 
+right=M(x,U,U^{\prime }) \\ 
+F(f,T\ ||\ U,T^{\prime }) & \text{if} & left=F(f,T,T^{\prime }) & \text{and}
+& right=F(f,U,U^{\prime }) \\ 
+F(f,T,T^{\prime }\ ||\ right) & \text{if} & left=F(f,T,T^{\prime }) & \text{%
+and} & right=F(g,U,U^{\prime }),~f\neq g \\ 
+F(f,T\ ||\ N(ar(f),U),T^{\prime }\ ||\ right) & \text{if} & 
+left=F(f,T,T^{\prime }) & \text{and} & right=N(U) \\ 
+S(x,left\ ||\ U) & \text{if} & left=N(T) & \text{and} & right=S(x,U) \\ 
+M(x,left\ ||\ U,left\ ||\ U^{\prime }) & \text{if} & left=N(T) & \text{and}
+& right=M(x,U,U^{\prime }) \\ 
+F(f,N(ar(f),T)\ ||\ U,left) & \text{if} & left=N(T) & \text{and} & 
+right=F(f,U,X) \\ 
+N(T\ ||\ U) & \text{if} & left=N(T) & \text{and} & right=N(U) \\ 
+E(T,right\ ||\ T^{\prime }) & \text{if} & left=E(T,T^{\prime }) & \text{and}
+& head(right)\in \{F,M,N,R,S\},%
+\end{array}%
+\end{equation*}%
+where $head$ is defined as $head(F(f,T,U))=F$, $head(R(Q))=R$ etc.
+
+\subsection{Optimizing match trees}
+
+The result of joining match trees is often not optimal. This section gives
+two algorithms $reduce$ and $clean$ to optimize match trees.%
+\begin{equation*}
+\begin{array}{l}
+\begin{array}{llll}
+reduce(X) & = & X &  \\ 
+reduce(F(f,T,U)) & = & reduce_{F}(F(f,T,U),\emptyset ) &  \\ 
+reduce(S(x,T)) & = & reduce_{S}(S(x,T),\emptyset ) &  \\ 
+reduce(M(x,T,U)) & = & reduce_{M}(M(x,T,U),\emptyset ,\emptyset ) &  \\ 
+reduce(C(t,T,U)) & = & C(t,reduce(T),reduce(U)) &  \\ 
+reduce(N(n,T)) & = & N(n,reduce(T)) &  \\ 
+reduce(E(T,U)) & = & E(t,reduce(T),reduce(U)) &  \\ 
+reduce(R(Q)) & = & R(Q) &  \\ 
+&  &  &  \\ 
+reduce_{F}(X,F) & = & F &  \\ 
+reduce_{F}(F(f,T,U),F) & = & reduce_{F}(U,F) & \text{if }f\in F \\ 
+reduce_{F}(F(f,T,U)) & = & F(f,reduce(T),reduce_{F}(U,F\cup \{f\})) & \text{%
+if }f\notin F \\ 
+reduce_{F}(N(n,T)) & = & reduce_{M}(M(x,T,U),\emptyset ,\emptyset ) &  \\ 
+&  &  &  \\ 
+reduce_{S}(X,\emptyset ) & = & X &  \\ 
+reduce_{S}(X,\{x\}\cup V) & = & S(x,reduce(X[x/V],\emptyset )) &  \\ 
+reduce_{S}(F(f,T,U),\emptyset ) & = & reduce_{F}(F(f,T,U),\emptyset ) &  \\ 
+reduce_{S}(F(F,T,U),\{x\}\cup V) & = & S(x,reduce_{F}(F(f,T,U)[x/V],%
+\emptyset ) &  \\ 
+reduce_{S}(S(x,T),V) & = & reduce_{S}(T,V\cup \{x\}) &  \\ 
+reduce_{S}(N(n,T),\emptyset ) & = & reduce(N(n,T),\emptyset ) &  \\ 
+reduce_{S}(N(n,T),\{x\}\cup V) & = & S(x,reduce(N(n,T)[x/V])) &  \\ 
+&  &  &  \\ 
+reduce_{M}(X,M_{t},M_{f}) & = & reduce(X) &  \\ 
+reduce_{M}(F(f,T,U),M_{t},M_{f}) & = & reduce_{F}(F(f,T,U),\emptyset ) &  \\ 
+reduce_{M}(S(x,T),M_{t},M_{f}) & = & reduce_{S}(S(x,T),\emptyset ) &  \\ 
+reduce_{M}(M(x,T,U),M_{t},M_{f}) & = & reduce_{M}(T,M_{t},M_{f}) & \text{if }%
+x\in M_{t} \\ 
+reduce_{M}(M(x,T,U),M_{t},M_{f}) & = & reduce_{M}(U,M_{t},M_{f}) & \text{if }%
+x\in M_{f} \\ 
+reduce_{M}(M(x,T,U),M_{t},M_{f}) & = & M(x,reduce_{M}(T,M_{t}\cup
+\{x\},M_{f}), & \text{if }x\notin M_{t}\wedge x\notin M_{f} \\ 
+&  & reduce_{M}(U,M_{t}\cup \{x\},M_{f}\cup \{x\})) &  \\ 
+reduce_{M}(N(n,T)) & = & reduce(N(n,T)), & 
+\end{array}%
+\end{array}%
+\end{equation*}%
+with%
+\begin{equation*}
+\begin{array}{llll}
+X[x/V] & = & X &  \\ 
+F(f,T,U)[x/V] & = & F(f,T[x/V],U[x/V]) &  \\ 
+S(x,T)[y/V] & = & S(x,T[y/(V\setminus \{x\})]) &  \\ 
+M(x,T,U)[y/V] & = & M(y,T[y/V],U[y/V]) & \text{if }x\in V \\ 
+M(x,T,U)[y/V] & = & M(x,T[y/V],U[y/V]) & \text{if }x\notin V \\ 
+C(t,T,U)[x/V] & = & C(t[x/y:y\in V],T[x/V],U[x/V) &  \\ 
+N(n,T)[x/V] & = & N(n,T[x/V]) &  \\ 
+E(T,U)[x/V] & = & E(t,T[x/V],U[x/V]) &  \\ 
+R(Q)[x/V] & = & R(Q[x/y:y\in V]) & 
+\end{array}%
+\end{equation*}%
+$%
+\begin{array}{llll}
+clean(T) & = & T^{\prime } & \text{if }\chi (T)=\left\langle T^{\prime
+},V\right\rangle ,%
+\end{array}%
+$
+
+where $\chi $ is defined as%
+\begin{equation*}
+\begin{array}{llll}
+\chi (X) & = & \left\langle X,\emptyset \right\rangle &  \\ 
+\chi (F(f,T,U)) & = & \left\langle F(f,T^{\prime },U^{\prime }),V\cup
+W\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
+\wedge \chi (U)=\left\langle U^{\prime },W\right\rangle \\ 
+\chi (S(x,T)) & = & \left\langle S(x,T^{\prime }),V\setminus
+\{x\}\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+},V\right\rangle \wedge x\in V \\ 
+\chi (S(x,T)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }\chi
+(T)=\left\langle T^{\prime },V\right\rangle \wedge x\notin V \\ 
+\chi (M(x,T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }%
+\chi (T)=\left\langle T^{\prime },V\right\rangle \wedge \chi
+(U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime }=U^{\prime }
+\\ 
+\chi (M(x,T,U)) & = & \left\langle M(x,T^{\prime },U^{\prime }),V\cup W\cup
+\{x\}\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+},V\right\rangle \wedge \chi (U)=\left\langle U^{\prime },W\right\rangle
+\wedge T^{\prime }\neq U^{\prime } \\ 
+\chi (C(t,T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }%
+\chi (T)=\left\langle T^{\prime },V\right\rangle \wedge \chi
+(U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime }=U^{\prime }
+\\ 
+\chi (C(t,T,U)) & = & \left\langle C(t,T^{\prime },U^{\prime }),V\cup W\cup
+var(t)\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+},V\right\rangle \wedge \chi (U)=\left\langle U^{\prime },W\right\rangle
+\wedge T^{\prime }\neq U^{\prime } \\ 
+\chi (N(n,T)) & = & \left\langle N(n,T^{\prime }),V\right\rangle & \text{if }%
+\left\langle T^{\prime },V\right\rangle =\chi (T) \\ 
+\chi (E(T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }\chi
+(T)=\left\langle T^{\prime },V\right\rangle \wedge \chi (U)=\left\langle
+X,W\right\rangle \\ 
+\chi (E(T,U)) & = & \left\langle U^{\prime },W\right\rangle & \text{if }\chi
+(T)=\left\langle X,V\right\rangle \wedge \chi (U)=\left\langle U^{\prime
+},W\right\rangle \\ 
+\chi (E(T,U)) & = & \left\langle E(T^{\prime },U^{\prime }),V\cup
+W\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
+\wedge \chi (U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime
+}\neq X\wedge U^{\prime }\neq X \\ 
+\chi (R(Q)) & = & \left\langle R(Q),var(Q)\right\rangle & 
+\end{array}%
+\end{equation*}
+
+\subsection{Prioritized rewrite rules}
+
+By adding priorities to rewrite rules, the selection of rewrite rules that
+is considered for a term can be reduced. We model priorities of rewrite
+rules using a function $\varphi $, that returns the rules of highest
+priority for a set of rules. So $\varphi (R)\subseteq R$ and $\varphi
+(R)=\emptyset $ if and only if $R=\emptyset $. We define a function $prior$
+that applies a priority function $\varphi $ to a match tree:%
+\begin{equation*}
+\begin{array}{lll}
+prior(X,\varphi ) & = & X \\ 
+prior(F(f,T,U),\varphi ) & = & F(f,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(S(x,T),\varphi ) & = & S(x,prior(T,\varphi )) \\ 
+prior(M(x,T,U),\varphi ) & = & M(x,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(C(t,T,U),\varphi ) & = & C(t,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(N(n,T),\varphi ) & = & N(n,prior(T,\varphi )) \\ 
+prior(R(Q),\varphi ) & = & R(\varphi (Q)) \\ 
+prior(E(T,U),\varphi ) & = & E(prior(T,\varphi ),prior(U,\varphi )).%
+\end{array}%
+\end{equation*}%
+The effect of applying $prior$ to a match tree is that the $R$-nodes will
+contain less elements. This can be useful to remove unwanted results.
+Consider for example the rewrite system%
+\begin{equation*}
+\left\{ 
+\begin{array}{ccc}
+x=x & \rightarrow & true \\ 
+x=y & \rightarrow & false%
+\end{array}%
+\right.
+\end{equation*}%
+This system can have both $true$ and $false$ as a result of rewriting the
+term $true=true$. But if we give the first equation a higher priority than
+the second, the undesired derivation $true=true\rightarrow false$ is
+eliminated.
+
+\section{Rewriting}
+
+In this section we describe rewriting strategies. For the moment we only
+consider innermost rewriting.
+
+\subsection{Rewriting using match trees}
+
+Suppose that we have a rewrite system, and that for each function symbol $f$
+a match tree $M_{f}$ has been constructed that corresponds to rewrite rules
+with head symbol $f$. We define the function $rewr_{M}$ as:%
+\begin{equation*}
+\begin{array}{lll}
+rewr_{M}(x,\sigma ) & = & \sigma (x) \\ 
+rewr_{M}(f,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+f & \text{if }M_{f}([f],\sigma )=\emptyset \\ 
+u\in M_{f}([f],\sigma ) & \text{if }M_{f}([f],\sigma )\neq \emptyset%
+\end{array}%
+\right. \\ 
+rewr_{M}(f(t_{1},\cdots ,t_{n}),\sigma ) & = & \left\{ 
+\begin{array}{ll}
+f(t_{1},\cdots ,t_{n}) & \text{if }M_{f}([f(t_{1},\cdots ,t_{n})],\sigma
+)=\emptyset \\ 
+u\in M_{f}([f(t_{1},\cdots ,t_{n})],\sigma ) & \text{if }M_{f}([f(t_{1},%
+\cdots ,t_{n})],\sigma )\neq \emptyset%
+\end{array}%
+\right. \\ 
+rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n}) \\ 
+rewr_{M}(u(u_{1},\cdots ,u_{m})(t_{1},\cdots ,t_{n}),\sigma ) & = & 
+u(u_{1},\cdots ,u_{m})(t_{1},\cdots ,t_{n})%
+\end{array}%
+\end{equation*}
+
+\subsection{Innermost rewriting}
+
+We now define an algorithm $rewr_{I}$ for innermost rewriting. It is defined
+for applicative terms. We assume that $\sigma (x)$ is always in normal form
+already.%
+\begin{equation*}
+\begin{array}{lll}
+rewr_{I}(x,\sigma ) & = & \sigma (x) \\ 
+rewr_{I}(f,\sigma ) & = & rewr_{M}(f,\sigma ) \\ 
+rewr_{I}(t(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(rewr_{I}(t,\sigma
+)(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma )),\sigma )%
+\end{array}%
+\end{equation*}
+
+\section{Further work}
+
+\begin{itemize}
+\item Extend the definition of terms with lambda expressions and quantifier
+expressions, and extend the algorithms so they can handle them.
+
+\item Design an algorithm for rewriting using strategies as defined in \cite%
+{weerdenburg2009}.
+
+\item Extend the rewrite algorithms so they handle evaluation of conditions
+(as is required in the evaluation of a $C$-node).
+
+\item Extend the rewrite algorithms for rewrite rules with more general left
+hand sides.
+
+\item Collect examples of higher order rewrite systems for testing the
+algorithms.
+\end{itemize}
+
+\bibliographystyle{alpha}
+\bibliography{rewriter}
+
+\end{document}

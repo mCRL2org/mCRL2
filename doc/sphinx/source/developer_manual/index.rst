@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 mCRL2 developer documentation
-=============================
+#############################
 
 Welcome to the mCRL2 developer documentation. If you are looking for information 
 on the use of the mCRL2 toolkit or for tutorials or examples, please consult
@@ -27,6 +27,8 @@ the `user manual <../user_manual/index.html>`_.
           :maxdepth: 2
 
           libraries/bes/reference
+
+       .. include:: libraries/bes/articles.rst
    * - **Core**
 
        .. toctree::
@@ -39,12 +41,16 @@ the `user manual <../user_manual/index.html>`_.
           :maxdepth: 2
 
           libraries/data/reference
+
+       .. include:: libraries/data/articles.rst
    * - **LPS**
 
        .. toctree::
           :maxdepth: 2
 
           libraries/lps/reference
+
+       .. include:: libraries/lps/articles.rst
      - **LTS**
 
        .. toctree::
@@ -52,6 +58,8 @@ the `user manual <../user_manual/index.html>`_.
 
           libraries/lts/lts_library
           libraries/lts/reference
+
+       .. include:: libraries/lts/articles.rst
    * - **PBES**
 
        .. toctree::
@@ -67,6 +75,8 @@ the `user manual <../user_manual/index.html>`_.
           :maxdepth: 2
 
           libraries/process/reference
+
+       .. include:: libraries/process/articles.rst
    * - **Trace**
 
        .. toctree::

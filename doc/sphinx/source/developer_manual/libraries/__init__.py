@@ -39,7 +39,11 @@ def xsltproc(src, transform, dst, xmldir):
   open(dst, 'w+').write(rst)
 
 def makepdf(src):
-  title = re.search(r'\\title{(.*?)}', open(src + '.tex').read(), re.DOTALL).group(1)
+  title = re.search(r'\\title{(.*?)}', open(src + '.tex').read(), re.DOTALL)
+  title = title.group(1) if title else os.path.basename(src)
+  title = ' '.join(title.splitlines())
+  if '{' in title or '\\' in title:
+    title = os.path.basename(src)
   call('pdflatex', ['pdflatex', src])
   try:
     call('bibtex', ['bibtex', src])
