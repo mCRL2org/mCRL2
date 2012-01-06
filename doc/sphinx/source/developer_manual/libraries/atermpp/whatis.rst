@@ -2,8 +2,8 @@ What is an ATerm?
 =================
 
 ATerms are hierarchical terms composed of two building blocks: lists and function applications.
-Simple examples of these are `[0,1,2]` and `f(x,y)`. Terms can be nested arbitrarily, take for
-example `[0,[f(1),2]]` or `f(g(x,[a,b]),h(z))`.
+Simple examples of these are ``[0,1,2]`` and ``f(x,y)``. Terms can be nested arbitrarily, take for
+example ``[0,[f(1),2]]`` or ``f(g(x,[a,b]),h(z))``.
 
 ATerm types
 -----------
@@ -36,7 +36,7 @@ for the most commonly used variants:
 
 A :cpp:class:`term_list\<T\> <atermpp::term_list>` models a read-only singly linked list with elements of type
 :cpp:type:`T`. The element type should be :cpp:class:`aterm <atermpp::aterm>` or one of its derivatives, or a user
-defined aterm (see section [link aterm___library.programming.user_defined User defined terms]).
+defined aterm (see :ref:`atermpp_programming_user_defined`).
 A :cpp:class:`term_appl\<T\> <atermpp::term_appl>` is a function application with leafs of type :cpp:type:`T`.
 
 Besides this the library contains a few more data types that use
@@ -61,14 +61,14 @@ of the underlying ATerm Library. Copying an aterm is thus a very cheap operation
 ATerm sharing
 ^^^^^^^^^^^^^
 The most important feature of the ATerm Library is that subterms are shared in memory. Consider
-the terms `f(x,g(y))` and `h(f(x,g(y)),g(y))`. The ATerm Library makes sure that the subterm
-`f(x,g(y))` will only appear once in memory. Even the term `g(y)` exists only once. In the
+the terms ``f(x,g(y))`` and ``h(f(x,g(y)),g(y))``. The ATerm Library makes sure that the subterm
+``f(x,g(y))`` will only appear once in memory. Even the term ``g(y)`` exists only once. In the
 case of lists, the ATerm Library shares only the tail parts. For example, from the lists
-`[0,1,2,3]` and `[0,1,2,4,1,2,3]` the tail part `[1,2,3]` will appear only once in memory.
-The front parts `[0,1,2]` will *not* be shared.
+``[0,1,2,3]`` and ``[0,1,2,4,1,2,3]`` the tail part ``[1,2,3]`` will appear only once in memory.
+The front parts ``[0,1,2]`` will *not* be shared.
 
 Contrary to what one might expect, the argument lists of function applications are not
-shared. So for the terms `f(a,b,c)` and `g(a,b,c)` the sequences of arguments `[a,b,c]`
+shared. So for the terms ``f(a,b,c)`` and ``g(a,b,c)`` the sequences of arguments ``[a,b,c]``
 are stored in separate locations.
 
 Read-only terms

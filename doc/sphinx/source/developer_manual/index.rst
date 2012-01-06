@@ -35,6 +35,8 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/core/core_library
+          libraries/core/common_functionality
           libraries/core/reference
      - **Data**
 

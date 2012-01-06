@@ -33,8 +33,8 @@ All aterm types have their own appropriate constructors for creating them:
     aterm_real r(2.5);
     aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y")); // represents f(x,y)
 
-There is also a convenience function `make_term` for easily creating aterms from
-strings: `make_term(const std::string& format, ...)`. The `format` argument is
+There is also a convenience function :cpp:func:`~atermpp::make_term` for easily creating aterms from
+strings: :cpp:func:`make_term(const std::string& format, ...)`. The `format` argument is
 a string that may contain several patterns as given in the table below. For each
 occurrence of a pattern, one or more additional arguments need to be supplied to
 the function `make_term`.
@@ -54,7 +54,7 @@ the function `make_term`.
   Term          <term>        ``aterm`` 
   ===========   ============= =============================
 
-The following program illustrates the usage of `make_term`.
+The following program illustrates the usage of :cpp:func:`make_term <atermpp::make_term>`.
 
 .. code-block:: c++
 
@@ -94,7 +94,7 @@ The following program illustrates the usage of `make_term`.
     return 0;
   }
 
-The function `match` can be used to extract pieces of aterms, as illustrated by the
+The function :cpp:func:`match <atermpp::match>` can be used to extract pieces of aterms, as illustrated by the
 following program fragment:
 
 .. code-block:: c++
@@ -122,9 +122,8 @@ retained:
    All other terms will be destroyed during garbage collection!
 
 The garbage collector of the ATerm Library assumes that all aterms that are
-not on the program stack can be safely destroyed
-[footnote There is no standard way to determine if an object is located
-on the stack, which makes the garbage collection potentially unreliable.].
+not on the program stack can be safely destroyed [#footnote_stack]_.
+
 The terms in the `atermpp`
 library all have a `protect` member function that can be called to prevent
 this behavior.
@@ -166,7 +165,7 @@ The following program illustrates this.
       c->unprotect();
       delete c;             // After calling unprotect the term can be safely deleted.
     }
-
+    
 ATerms and the C++ Standard Library
 -----------------------------------
 
@@ -199,7 +198,8 @@ terms, extra precautions are needed.
 
 Iterator interfaces
 ^^^^^^^^^^^^^^^^^^^
-The classes `term_list` and `term_appl` have C++ standard conforming iterator interfaces.
+The classes :cpp:func:`term_list <atermpp::term_list>` and
+:cpp:func:`term_appl <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
 Thus they operate well with the C++ Standard Library, as illustrated by the following
 example:
 
@@ -242,10 +242,12 @@ example:
       }
     }
 
+.. _atermpp_programming_user_defined:
+
 User defined terms
 ^^^^^^^^^^^^^^^^^^
 
-Suppose we want to create a class `MyTerm` that has an ATerm as attribute:
+Suppose we want to create a class :cpp:class:`MyTerm` that has an ATerm as attribute:
 
 .. code-block:: c++
 
@@ -260,14 +262,14 @@ Suppose we want to create a class `MyTerm` that has an ATerm as attribute:
 
 To make this class usable within the `atermpp` library, we must specify how
 to protect it from garbage collection, and how to obtain an ATerm representation
-of the term. For this the `aterm_traits` class must be used.
+of the term. For this the :cpp:class:`aterm_traits <atermpp::aterm_traits>` class must be used.
 
 ATerm traits
 ------------
-In the `atermpp` a class is considered a term if a specialization of the class
-`aterm_traits` exists for it. This is a traits class that describes how the
+In the `atermpp` library a class is considered a term if a specialization of the class
+`aterm_traits <atermpp::aterm_traits>` exists for it. This is a traits class that describes how the
 specialized type can be protected from garbage collection and how an ATerm
-can be obtained from it. For the class `MyTerm`, the specialization looks like
+can be obtained from it. For the class :cpp:class:`MyTerm`, the specialization looks like
 this:
 
 .. code-block:: c++
@@ -287,7 +289,7 @@ this:
      };
    } // namespace atermpp
 
-Now that we have defined `aterm_traits<MyTerm>`, it is safe to use `MyTerm` in a protected container:
+Now that we have defined :cpp:class:`aterm_traits<MyTerm>`, it is safe to use :cpp:class:`MyTerm` in a protected container:
 
 .. code-block:: c++
 
@@ -297,22 +299,24 @@ Now that we have defined `aterm_traits<MyTerm>`, it is safe to use `MyTerm` in a
    v.push_back(MyTerm("f(x)");
    v.push_back(MyTerm("g(y)");
 
-Also the search and replace algorithms of section
-[link aterm___library.programming.algorithms ATerm algorithms]
+Also the search and replace algorithms of section :ref:`atermpp_programming_algorithms`
 can be applied to `MyTerm`.
+
+.. _atermpp_programming_algorithms:
 
 ATerm algorithms
 ----------------
 
-For the `atermpp` library has a couple of algorithms are defined. Most
+For the `atermpp` library a couple of algorithms are defined. Most
 of these algorithms have template parameters for the terms that they
-operate on. These algorithms work on every class for which an `aterm_traits`
+operate on. These algorithms work on every class for which an :cpp:class:`aterm_traits`
 specialization exists.
 
 Find algorithms
 ^^^^^^^^^^^^^^^
-There are two find algorithms, `find_if` for searching a subterm that matches a
-given predicate, and `find_all_if` for finding all subterms that match a
+There are two find algorithms, :cpp:func:`find_if <atermpp::find_if>`
+for searching a subterm that matches a given predicate, and
+:cpp:func:`find_all_if <atermpp::find_all_if>` for finding all subterms that match a
 predicate. The program fragment below illustrates this:
 
 .. code-block:: c++
@@ -337,15 +341,15 @@ predicate. The program fragment below illustrates this:
   assert(v.front() == make_term("f(y)"));
   assert(v.back() == make_term("f(z)"));
 
-The find algorithms also work on user defined types. So if `t` is of type `MyTerm`
-and `aterm_traits<MyTerm>` is defined, then it is possible to call `find_if(t, is_f())`
+The find algorithms also work on user defined types. So if `t` is of type :cpp:class:`MyTerm`
+and :cpp:class:`aterm_traits<MyTerm>` is defined, then it is possible to call :cpp:func:`find_if(t, is_f())`
 as well.
 
 Replace algorithms
 ^^^^^^^^^^^^^^^^^^
 There are several algorithms for replacing subterms. The `replace` algorithm replaces
 a subterm with another term, `bottom_up_replace` does the same but with a different traversal
-order. The algorithm `replace_if` makes replacements based on a predicate. There is also
+order. The algorithm :cpp:func:`~atermpp::replace_if` makes replacements based on a predicate. There is also
 `partial_replace`, that has the option to prevent further recursion based on a predicate.
 
 .. code-block:: c++
@@ -375,8 +379,8 @@ order. The algorithm `replace_if` makes replacements based on a predicate. There
 Miscellaneous algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The algorithm `apply` applies an operation to the elements
-of a list, and returns the result. The `for_each` algorithm applies
+The algorithm :cpp:func:`~atermpp::apply` applies an operation to the elements
+of a list, and returns the result. The :cpp:func:`~atermpp::for_each` algorithm applies
 an operation to each subterm of a term.
 
 .. code-block:: c++
@@ -418,3 +422,7 @@ unexpected garbage collection of terms.
    Using the g++ compiler, the -O3 flag should not be used.
 
 
+.. rubric:: Footnotes
+
+.. [#footnote_stack]  There is no standard way to determine if an object is located
+   on the stack, which makes the garbage collection potentially unreliable.
