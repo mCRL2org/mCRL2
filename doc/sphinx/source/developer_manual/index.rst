@@ -10,17 +10,73 @@ Welcome to the mCRL2 developer documentation. If you are looking for information
 on the use of the mCRL2 toolkit or for tutorials or examples, please consult
 the `user manual <../user_manual/index.html>`_. 
 
-Library documentation
----------------------
+.. list-table:: 
 
-.. toctree::
-   :maxdepth: 3
+   * - **ATerm++**
 
-   libraries/index
+       .. toctree::
+          :maxdepth: 2
 
-Indices and tables
-------------------
+          libraries/atermpp/introduction     
+          libraries/atermpp/whatis
+          libraries/atermpp/programming
+          libraries/atermpp/reference
+     - **BES**
 
-* :ref:`genindex`
-* :ref:`search`
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/bes/reference
+   * - **Core**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/core/reference
+     - **Data**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/data/reference
+   * - **LPS**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/lps/reference
+     - **LTS**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/lts/lts_library
+          libraries/lts/reference
+   * - **PBES**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/pbes/reference
+
+       .. include:: libraries/pbes/articles.rst
+
+     - **Process**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/process/reference
+   * - **Trace**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/trace/reference
+     - **Utilities**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/utilities/reference
 

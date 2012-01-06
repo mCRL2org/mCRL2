@@ -13,23 +13,32 @@ the `developers' documentation <../developer_manual/index.html>`_.
 Contents
 --------
 
-.. toctree::
-   :maxdepth: 4
+   **Manuals**
 
-   installation
-   language_reference
-   tutorial/tutorial
+   .. toctree::
+      :maxdepth: 4
 
-.. _man pages:
+      installation
+      language_reference
+      tutorial/tutorial
 
-Tool documentation
-------------------
+   **Articles**
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
+   .. toctree::
+      :maxdepth: 1
+      :glob:
 
-   tools/*
+      articles/*
+
+   .. _man pages:
+
+   **Tool documentation**
+
+   .. toctree::
+      :maxdepth: 1
+      :glob:
+
+      tools/*
 
 Indices and tables
 ------------------

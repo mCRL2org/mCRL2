@@ -33,7 +33,7 @@ def call(name, cmdline, stdin=None):
     _LOG.error('{0} returned with non-zero status.'.format(name))
     _LOG.error('{0} output: {1}'.format(name, out.strip()))
     _LOG.error('{0} error output: {1}'.format(name, err.strip()))
-    raise RuntimeError('Doxygen returned with non-zero status.')
+    raise RuntimeError('{0} returned with non-zero status.'.format(name))
   if err:
     _LOG.warning('{0} error output: {1}'.format(name, err.strip()))
   return out
