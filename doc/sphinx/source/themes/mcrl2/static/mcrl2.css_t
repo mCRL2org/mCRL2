@@ -23,7 +23,7 @@ body {
 }
 
 div.document {
-    margin-top: 2em;
+    margin-top: 4em;
     background-color: white;
 }
 
@@ -59,15 +59,30 @@ div.footer a {
 }
 
 div.related {
-    display: block;
     width: 100%;
-    height: 2em;
-    position: fixed;
-    left: 0%;
-    top: 0%;
     background-color: {{ theme_relbarbgcolor }};
     line-height: 30px;
     color: #ffffff;
+}
+
+div.header {
+    position: fixed;
+    width: 100%;
+    left: 0%;
+    top: 0%;
+}
+
+div.header div.mainmenu {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: white;
+    border-bottom: 2px solid {{ theme_relbarbgcolor }};
+    font-family: sans-serif;
+    text-align: center;
+}
+
+div.header div.mainmenu span {
+    margin-left: 10px;
 }
 
 div.related a {

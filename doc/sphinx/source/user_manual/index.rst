@@ -3,42 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-mCRL2 user manual
-=================
+#####
+mCRL2
+#####
 
-Welcome to the mCRL2 user documentation. If you are looking for information on
-the use of the mCRL2 libraries or for source code documentation, please consult
-the `developers' documentation <../developer_manual/index.html>`_. 
+Welcome to the mCRL2 documentation. 
 
 Contents
 --------
 
-   **Manuals**
-
-   .. toctree::
-      :maxdepth: 4
-
-      installation
-      language_reference
-      tutorial/tutorial
-
-   **Articles**
-
    .. toctree::
       :maxdepth: 1
-      :glob:
 
-      articles/*
-
-   .. _man pages:
-
-   **Tool documentation**
-
-   .. toctree::
-      :maxdepth: 1
-      :glob:
-
-      tools/*
+      user
 
 Indices and tables
 ------------------
