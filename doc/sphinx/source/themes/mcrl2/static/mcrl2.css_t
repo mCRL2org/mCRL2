@@ -11,6 +11,29 @@
     font-variant: small-caps;
 }
 
+table.libdoc strong {
+    display: block;
+    background-color: #f0f0f0;
+    padding: 4px;
+    font-family: Trebuchet MS, sans-serif;
+    font-size: x-large;
+    font-weight: normal;
+    border-bottom: 1px solid #406756;
+}
+
+table.libdoc td {
+    border: none;
+}
+
+table.libdoc td p {
+    margin: 0px;
+    margin-bottom: -10px;
+}
+
+table.libdoc td p em {
+    padding-left: 20px;
+}
+
 /* -- page layout ----------------------------------------------------------- */
 
 body {

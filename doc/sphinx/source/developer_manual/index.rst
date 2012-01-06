@@ -11,6 +11,7 @@ on the use of the mCRL2 toolkit or for tutorials or examples, please consult
 the `user manual <../user_manual/index.html>`_. 
 
 .. list-table:: 
+   :class: libdoc
 
    * - **ATerm++**
 
