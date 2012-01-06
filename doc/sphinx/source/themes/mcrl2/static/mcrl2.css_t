@@ -45,7 +45,8 @@ div.body {
 div.footer {
     color: #ffffff;
     width: 100%;
-    padding: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     text-align: center;
     font-size: 75%;
     background-color: #406756;
