@@ -379,8 +379,8 @@ class InternalFormatInfo
     /// \brief Indicates whether or not a term is a single variable.
     virtual bool is_variable(const atermpp::aterm_appl a_term)
     {
-      return is_variable(a_term);
-    }
+      return mcrl2::data::is_variable(a_term);
+    } 
 
     /// \brief Indicates whether or not a term is an equality.
     virtual bool is_equality(atermpp::aterm_appl a_term)
