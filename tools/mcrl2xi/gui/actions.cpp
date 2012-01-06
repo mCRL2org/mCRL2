@@ -65,7 +65,7 @@ bool parse_data_specification_with_variables(const std::string s, mcrl2::data::d
     data_spec = mcrl2::data::parse_data_specification(s);
     mcrl2_logger::set_reporting_level(old_level);
   }
-  catch(mcrl2::runtime_error& e)
+  catch(mcrl2::runtime_error& )
   {
     mcrl2_logger::set_reporting_level(old_level);
     mcrl2::process::process_specification spec;
