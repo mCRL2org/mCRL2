@@ -1,6 +1,5 @@
-------------
 Introduction
-------------
+============
 The LTS library provides data structures and methods to handle *labelled
 transition systems* (LTS). LTS's can be created, transfered from and to 
 file and transformed by for instance a bisimulation reduction, determinisation
@@ -22,9 +21,8 @@ of data expressions as state labels. Furthermore, this latter contains
 a data specification, action declarations and a declaration of process
 parameters. 
 
----------
 Structure
----------
+=========
 The LTS library resides in the namespace mcrl2::lts. The main class of this
 library is the :cpp:class:`lts` class. This class represents an LTS and contains almost all
 available functionality to work with LTSs. States and actions are identified by unsigned integers of
@@ -50,9 +48,8 @@ There are six standard template instantiations of labelled transitions systems:
 Each of these six classes contains at least load and save functionality, as well as as function pp to
 transform state and label values to strings. 
 
------------------------------
 Creating and accessing an LTS
------------------------------
+=============================
 
 As an example we create a transition system with strings as values for action
 labels and states. We add 2 states, and one transition. The initial state is
@@ -126,9 +123,8 @@ action values. There are however standard functions to make actions internal, ba
 of action strings, as well as utility functions to sort the transitions based on various criteria.
 See the __lts_reference__ for this.
 
-----------------------------------------
 The standard labelled transition systems
-----------------------------------------
+========================================
 
 There are six standard labelled transition systems. In addition to determining the 
 value types of states and action labels, they can contain additional information. 
@@ -198,9 +194,8 @@ The output is as follows::
 Note that the initial state is 1. To verify this one could also print
 ``l.initial_state()``. 
 
---------------------------------------------------
 Reducing and comparing labelled transition systems
---------------------------------------------------
+==================================================
 
 It is possible to reduce an lts modulo different equivalencies. 
 The transition system will be replaced by another transition system
@@ -266,9 +261,8 @@ transition systems.
     { cout << "Lts l1 is not strongly simulated by l2";
     }
 
-----------------------
 Some utility functions
-----------------------
+======================
 Explain:
    
   * determinise(l);

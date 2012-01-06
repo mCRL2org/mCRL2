@@ -1,13 +1,12 @@
------------------
 What is an ATerm?
------------------
+=================
 
 ATerms are hierarchical terms composed of two building blocks: lists and function applications.
 Simple examples of these are `[0,1,2]` and `f(x,y)`. Terms can be nested arbitrarily, take for
 example `[0,[f(1),2]]` or `f(g(x,[a,b]),h(z))`.
 
 ATerm types
-^^^^^^^^^^^
+-----------
 
 There are 6 predefined ATerm types, as shown in the following table.
 The class :cpp:class:`aterm <atermpp::aterm>` is a base class for all others.
@@ -54,13 +53,13 @@ ATerms internally.
    ===========  ==============================
 
 ATerm properties
-^^^^^^^^^^^^^^^^
+----------------
 The aterms in the ATerm++ Library have some properties that need to be understood
 to use the library effectively. The aterm classes all wrap pointers to ATerm objects
 of the underlying ATerm Library. Copying an aterm is thus a very cheap operation.
 
 ATerm sharing
-"""""""""""""
+^^^^^^^^^^^^^
 The most important feature of the ATerm Library is that subterms are shared in memory. Consider
 the terms `f(x,g(y))` and `h(f(x,g(y)),g(y))`. The ATerm Library makes sure that the subterm
 `f(x,g(y))` will only appear once in memory. Even the term `g(y)` exists only once. In the
@@ -73,7 +72,7 @@ shared. So for the terms `f(a,b,c)` and `g(a,b,c)` the sequences of arguments `[
 are stored in separate locations.
 
 Read-only terms
-"""""""""""""""
+^^^^^^^^^^^^^^^
 
 As a result of the maximal sharing, ATerms have the property that they are read-only.
 All member functions of the `atermpp` classes (except the assignment operator) are constant.
@@ -86,7 +85,7 @@ All member functions of the `atermpp` classes (except the assignment operator) a
 Needless to say that this has a significant effect on the way ATerms are used.
 
 Type conversions
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 
 In the underlying ATerm Library, terms are usually represented using generic
 `ATerm` pointers, and casted back and forth to specific ATerm types using
@@ -123,7 +122,7 @@ used like this:
     f(l,x);
 
 String representations
-""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^
 
 The predefined ATerm types have a `to_string` member function that can be used
 to obtain a string representation of a term:
@@ -137,7 +136,7 @@ In most cases this string can be converted back to an ATerm using the :cpp:func:
 function. However, in some subtle cases the result will not be the same.
 
 Comparing ATerms
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 Comparing ATerms can be done with the `==` operator. Due to the maximal sharing property,
 comparing ATerms is a cheap operation. It boils down to a pointer comparison.
 

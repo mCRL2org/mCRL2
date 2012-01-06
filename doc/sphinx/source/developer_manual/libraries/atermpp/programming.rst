@@ -1,8 +1,8 @@
 Programming with ATerms
------------------------
+=======================
 
 ATerm Library initialization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 The :cpp:func:`main` function of each program that uses the ATerm Library
 must start with the following initialization code:
@@ -23,7 +23,7 @@ the bottom of the program stack, that is used to determine which
 terms are candidates to be destroyed.
 
 ATerm creation
-^^^^^^^^^^^^^^
+--------------
 
 All aterm types have their own appropriate constructors for creating them:
 
@@ -109,7 +109,7 @@ following program fragment:
   }
 
 The garbage collector
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 The ATerm Library uses a very agressive garbage collection scheme.
 When the garbage collector is triggered, only the following terms will be
 retained:
@@ -168,10 +168,10 @@ The following program illustrates this.
     }
 
 ATerms and the C++ Standard Library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 Protected containers
-""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^
 Most of the container classes of the C++ Standard Library put their data on the heap.
 As a result, putting ATerms in a container without taking precautions is unsafe.
 For example:
@@ -198,7 +198,7 @@ terms, extra precautions are needed.
    v.push_back(atermpp::make_term("g(y)");
 
 Iterator interfaces
-"""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^
 The classes `term_list` and `term_appl` have C++ standard conforming iterator interfaces.
 Thus they operate well with the C++ Standard Library, as illustrated by the following
 example:
@@ -243,7 +243,7 @@ example:
     }
 
 User defined terms
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 Suppose we want to create a class `MyTerm` that has an ATerm as attribute:
 
@@ -263,7 +263,7 @@ to protect it from garbage collection, and how to obtain an ATerm representation
 of the term. For this the `aterm_traits` class must be used.
 
 ATerm traits
-^^^^^^^^^^^^
+------------
 In the `atermpp` a class is considered a term if a specialization of the class
 `aterm_traits` exists for it. This is a traits class that describes how the
 specialized type can be protected from garbage collection and how an ATerm
@@ -302,7 +302,7 @@ Also the search and replace algorithms of section
 can be applied to `MyTerm`.
 
 ATerm algorithms
-^^^^^^^^^^^^^^^^
+----------------
 
 For the `atermpp` library has a couple of algorithms are defined. Most
 of these algorithms have template parameters for the terms that they
@@ -310,7 +310,7 @@ operate on. These algorithms work on every class for which an `aterm_traits`
 specialization exists.
 
 Find algorithms
-"""""""""""""""
+^^^^^^^^^^^^^^^
 There are two find algorithms, `find_if` for searching a subterm that matches a
 given predicate, and `find_all_if` for finding all subterms that match a
 predicate. The program fragment below illustrates this:
@@ -342,7 +342,7 @@ and `aterm_traits<MyTerm>` is defined, then it is possible to call `find_if(t, i
 as well.
 
 Replace algorithms
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 There are several algorithms for replacing subterms. The `replace` algorithm replaces
 a subterm with another term, `bottom_up_replace` does the same but with a different traversal
 order. The algorithm `replace_if` makes replacements based on a predicate. There is also
@@ -373,7 +373,7 @@ order. The algorithm `replace_if` makes replacements based on a predicate. There
   assert(e == make_term("h(g(u),f(u),p(u,q(u)))"));
 
 Miscellaneous algorithms
-""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The algorithm `apply` applies an operation to the elements
 of a list, and returns the result. The `for_each` algorithm applies
@@ -406,7 +406,7 @@ an operation to each subterm of a term.
    l = atermpp::apply(l, apply_f());        // results in [f(0),f(1),f(2),f(3)]
 
 Compiler optimizations
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 One should be very careful with choosing optimization flags when compiling
 code using the ATerm Library. It is reported that the -O3 flag of the g++ compiler

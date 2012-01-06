@@ -1,6 +1,5 @@
-------------
 Introduction
-------------
+============
 
 The `atermpp` library is a C++ wrapper around the ATerm Library, which is a C library for
 manipulating tree-like data structures. Important features of the ATerm Library are maximal
