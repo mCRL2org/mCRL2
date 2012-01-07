@@ -356,7 +356,7 @@ class specification_basic_type:public boost::noncopyable
       fresh_identifier_generator.add_identifier(str);
     }
 
-    void insertsort(const sort_expression sortterm)
+    /* void insertsort(const sort_expression sortterm)
     {
       data.add_sort(sortterm);
 
@@ -386,12 +386,12 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
       throw mcrl2::runtime_error("expected a sortterm (2): " + data::pp(sortterm));
-    }
+    }  */
 
-    void insert_equation(const data_equation eqn)
+    /* void insert_equation(const data_equation eqn)
     {
       data.add_equation(eqn);
-    }
+    } */
 
     process_expression action_list_to_process(const action_list ma)
     {
@@ -4444,7 +4444,7 @@ class specification_basic_type:public boost::noncopyable
          C(e,x,x,x,...x)=x for a variable x. */
       const sort_expression s=enumeratedtypes[index].sortId;
       const variable v=get_fresh_variable("e",s);
-      insert_equation(
+      data.add_equation(
         data_equation(
           push_front(push_front(variable_list(),v),v1),
           application(functionname,push_front(xxxterm,data_expression(v))),
@@ -4457,7 +4457,7 @@ class specification_basic_type:public boost::noncopyable
            w!=elementnames.end() ; ++w)
       {
         assert(auxvars.size()>0);
-        insert_equation(data_equation(
+        data.add_equation(data_equation(
                           vars,
                           application(functionname,push_front(args,*w)),
                           auxvars.front()));
