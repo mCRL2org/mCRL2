@@ -18,6 +18,7 @@ Contents
    .. toctree::
       :maxdepth: 4
 
+      introduction
       installation
       language_reference
       tutorial/tutorial

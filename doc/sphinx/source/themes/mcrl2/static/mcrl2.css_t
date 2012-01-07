@@ -7,6 +7,15 @@
 
 /* -- non-standard classes -------------------------------------------------- */
 
+.admonition.tip {
+    border: 1px solid #3030ff;
+    background-color: #d0d0ff;
+}
+
+.invisible {
+    display: none;
+}
+
 .smallcaps {
     font-variant: small-caps;
 }
