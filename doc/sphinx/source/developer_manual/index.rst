@@ -43,6 +43,7 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/data/data_library
           libraries/data/reference
 
        .. include:: libraries/data/articles.rst
