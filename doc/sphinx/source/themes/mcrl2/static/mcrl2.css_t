@@ -7,6 +7,25 @@
 
 /* -- non-standard classes -------------------------------------------------- */
 
+.admonition.platform-specific {
+  background-position: top left;
+  background-repeat: no-repeat;
+  padding-left: 40px;
+}
+.admonition.win-only {
+  background-image: url('win-only.png');
+}
+.admonition.mac-only {
+  background-image: url('mac-only.jpg');
+}
+.admonition.linux-only {
+  background-image: url('linux-only.jpg');
+}
+.admonition.platform-specific .admonition-title {
+  display: none;
+}
+
+
 .admonition.tip {
     border: 1px solid #3030ff;
     background-color: #d0d0ff;

@@ -19,11 +19,12 @@ Contents
       :maxdepth: 4
 
       introduction
-      installation
+      download
+      build
       language_reference
       tutorial/tutorial
 
-   **Articles**
+   **Background**
 
    .. toctree::
       :maxdepth: 1

@@ -28,9 +28,23 @@ A ``Nightly`` build builds and tests a build of the most recent SVN version at
 00:00:00 CEST that night. The ``Experimental`` build should be used to test new 
 features. A ``Continuous`` build uses the most recent SVN version.
 
-More available options can be found using using::
+Specific tests can be run by using ``ctest``. Below some examples are given. 
 
-  ctest -D List 
+* To displays the list of tests, without running them, execute::
+
+    ctest -N .
+
+* To execute the 2nd up until the 5th test targets, execute::
+
+    ctest -I2,5 .
+
+* To execute tests targets that match the description "FOO", execute::
+
+    ctest -R FOO .
+
+For additional help, run::
+
+  ctest --help
 
 .. note::
 

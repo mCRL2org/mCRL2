@@ -3,6 +3,11 @@ Prerequisites
 
 .. include:: toggle-platform.inc
 
+.. toctree::
+   :hidden:
+
+   boost
+
 To build the source code, the first requirement is to have a compiler, and,
 optionally, the necessary tools to build the documentation.
 To build the documentation, the following is needed:
