@@ -75,7 +75,7 @@ is sufficient to add Real to the context sorts as follows:
 
 .. code-block:: c++
 
-    add_context_sort(sort_real::real());
+   add_context_sort(sort_real::real());
 
 The function context_sorts gives a list of sorts added to the context.
 
@@ -121,12 +121,12 @@ rewriter. Eg. in the following process specification
 
 .. code-block:: mcrl2
 
-  sort Time=Nat;
-  map too_late:Time->Bool;
-  var t:Time;
-  eqn too_late(t) = t>10;
-  proc P(u:Time)=too_late(u) -> a.delta;
-  init P(9);
+   sort Time=Nat;
+   map too_late:Time->Bool;
+   var t:Time;
+   eqn too_late(t) = t>10;
+   proc P(u:Time)=too_late(u) -> a.delta;
+   init P(9);
 
 the data specification will normalise the equation too_late(t)= t>10 to
 such that t has sort Nat as all occurrences of the sort Time are replaced
@@ -163,16 +163,16 @@ of which can be represented in the data library.
 
 .. table:: Sort expressions
 
-  =========================  =========================================
-  Type                       Meaning
-  =========================  =========================================
-  `basic_sort`               basic sort
-  `function_sort`            function sort
-  `structured_sort`          structured sort
-  `container_sort`           container sort
-  `multiple_possible_sorts`  expression matching any of multiple sorts
-  `unknown_sort`             unknown sort expression
-  =========================  =========================================
+   =========================  =========================================
+   Type                       Meaning
+   =========================  =========================================
+   basic_sort                 basic sort
+   function_sort              function sort
+   structured_sort            structured sort
+   container_sort             container sort
+   multiple_possible_sorts    expression matching any of multiple sorts
+   unknown_sort               unknown sort expression
+   =========================  =========================================
 
 .. warning::
    multiple_possible_sorts= and =unknown_sort= should not be used
@@ -208,10 +208,10 @@ In general, structured sorts have the following form (with =n= a positive number
  
 .. code-block:: mcrl2
  
-     struct c1(pr1,1:S1,1, ..., pr1,k1:S1,k1)?is_c1 |
-            c2(pr2,1:S2,1, ..., pr2,k2:S2,k2)?is_c2 |
-            ...
-            cn(prn,1:Sn,1, ..., prn,kn:Sn,kn)?is_cn;
+   struct c1(pr1,1:S1,1, ..., pr1,k1:S1,k1)?is_c1 |
+          c2(pr2,1:S2,1, ..., pr2,k2:S2,k2)?is_c2 |
+          ...
+          cn(prn,1:Sn,1, ..., prn,kn:Sn,kn)?is_cn;
  
 We refer to =ci= as the constructors of the structured sort. =Si,j= are the
 sorts of the arguments of the constructors. =pri,j= are names for optional
@@ -224,33 +224,33 @@ snippet that constructs a structured sort
 
 .. code-block:: mcrl2
  
-  struct c1(p0:S0, S1)?is_c1 |
-         c2(p0:S0);
+   struct c1(p0:S0, S1)?is_c1 |
+          c2(p0:S0);
          
 The construction of this structured sort is as follows, assuming that also all
 of the subexpressions still need to be defined:
          
 .. code-block:: c++
 
-  basic_sort s0("S0");                               /* Name for the sort S0 */
-  basic_sort s1("S1");                               /* Name for the sort S1 */
-  structured_sort_constructor_argument p0(s0, "p0"); /* Constructor argument p0: S0 */
-  structured_sort_constructor_argument p1(s1);       /* Constructor argument S1 */
+   basic_sort s0("S0");                               /* Name for the sort S0 */
+   basic_sort s1("S1");                               /* Name for the sort S1 */
+   structured_sort_constructor_argument p0(s0, "p0"); /* Constructor argument p0: S0 */
+   structured_sort_constructor_argument p1(s1);       /* Constructor argument S1 */
 
-  structured_sort_constructor_argument_vector a1;    /* p0: S0, S1 */
-  a1.push_back(p0);
-  a1.push_back(p1);
-  structured_sort_constructor_argument_vector a2;    /* p0 */
-  a2.push_back(p0);
-  
-  structured_sort_constructor c1("c1", a1, "is_c1"); /* c1(p0:S0, S1)?is_c1 */
-  structured_sort_constructor c2("c2", a2);          /* c2(p0:S0) */
-  
-  structured_sort_constructor_vector cs;             /* c1(p0:S0, S1)?is_c1 | c2(p0:S0) */
-  cs.push_back(c1);
-  cs.push_back(c2);
+   structured_sort_constructor_argument_vector a1;    /* p0: S0, S1 */
+   a1.push_back(p0);
+   a1.push_back(p1);
+   structured_sort_constructor_argument_vector a2;    /* p0 */
+   a2.push_back(p0);
+   
+   structured_sort_constructor c1("c1", a1, "is_c1"); /* c1(p0:S0, S1)?is_c1 */
+   structured_sort_constructor c2("c2", a2);          /* c2(p0:S0) */
+   
+   structured_sort_constructor_vector cs;             /* c1(p0:S0, S1)?is_c1 | c2(p0:S0) */
+   cs.push_back(c1);
+   cs.push_back(c2);
 
-  structured_sort s(cs);                             /* struct c1(p0:S0, S1)?is_c1 | c2(p0:S0) */
+   structured_sort s(cs);                             /* struct c1(p0:S0, S1)?is_c1 | c2(p0:S0) */
 
 Data expressions
 ----------------
@@ -262,40 +262,40 @@ that constructs the numbers two and three, and builds the expression 2 + 3:
 
 .. code-block:: c++
 
-    #include "mcrl2/data/data.h"
-    #include "mcrl2/atermpp/aterm_init.h"
-    #include <cassert>
+   #include "mcrl2/data/data.h"
+   #include "mcrl2/atermpp/aterm_init.h"
+   #include <cassert>
 
-    using namespace mcrl2::data;
+   using namespace mcrl2::data;
 
-    int main(int argc, char* argv[])
-    {
-      MCRL2_ATERMPP_INIT(argc, argv)
+   int main(int argc, char* argv[])
+   {
+     MCRL2_ATERMPP_INIT(argc, argv)
 
-      data_expression two   = sort_nat::nat(2);
-      data_expression three = sort_nat::nat(3);
-      data_expression five  = sort_nat::plus(two, three);
+     data_expression two   = sort_nat::nat(2);
+     data_expression three = sort_nat::nat(3);
+     data_expression five  = sort_nat::plus(two, three);
 
-      assert(five.sort() == sort_nat::nat());
-      return 0;
-    }
+     assert(five.sort() == sort_nat::nat());
+     return 0;
+   }
 
 .. table:: Data Expressions
 
-  =================  =======================================================
-  Expression         Meaning
-  =================  =======================================================
-  `data_expression`  any data expression
-  `function_symbol`  function symbol
-  `variable`         variable
-  `abstraction`      expression with variable binding
-  `lambda`           lambda abstraction
-  `forall`           universal quantification
-  `exists`           existential quantification
-  `where_clause`     where clause
-  `application`      function application
-  `identifier`       untyped identifier (not to be used after type checking)
-  =================  =======================================================
+   =================  =======================================================
+   Expression         Meaning
+   =================  =======================================================
+   data_expression    any data expression
+   function_symbol    function symbol
+   variable           variable
+   abstraction        expression with variable binding
+   lambda             lambda abstraction
+   forall             universal quantification
+   exists             existential quantification
+   where_clause       where clause
+   application        function application
+   identifier         untyped identifier (not to be used after type checking)
+   =================  =======================================================
 
 .. warning::
 
@@ -335,30 +335,30 @@ The mCRL2 language has a number of predefined sorts, given in the table below:
 
 .. table:: Predefined sorts
 
-  ==================== ================
-  Expression           Sort
-  ==================== ================
-  `sort_bool::bool_()` booleans
-  `sort_pos::pos()`    positive numbers
-  `sort_nat::nat()`    natural numbers
-  `sort_int::int_()`   integers
-  `sort_real::real()`  real numbers
-  ==================== ================
+   ==================== ================
+   Expression           Sort
+   ==================== ================
+   sort_bool::bool_()   booleans
+   sort_pos::pos()      positive numbers
+   sort_nat::nat()      natural numbers
+   sort_int::int_()     integers
+   sort_real::real()    real numbers
+   ==================== ================
 
 Furthermore, a number of container sorts is predefined. Assuming that `s` is
 a sort expression, all container sorts are given in the table below:
 
 .. table:: Container sorts
 
-  ==================== ===========
-  Expression           Type
-  ==================== ===========
-  `sort_list::list(s)` lists
-  `sort_set::set_(s)`  sets
-  `sort_fset::fset(s)` finite sets
-  `sort_bag::bag(s)`   bags
-  `sort_fbag::fbag(s)` finite bags
-  ==================== ===========
+   ==================== ===========
+   Expression           Type
+   ==================== ===========
+   sort_list::list(s)   lists
+   sort_set::set_(s)    sets
+   sort_fset::fset(s)   finite sets
+   sort_bag::bag(s)     bags
+   sort_fbag::fbag(s)   finite bags
+   ==================== ===========
 
 Note that the source code for all predefined sorts is generated from
 specification files.
@@ -377,17 +377,17 @@ operations are supported:
 
 .. table:: Operations on all data types
 
-  ====================  =========  =========================
-  Expression            Syntax     Meaning
-  ====================  =========  =========================
-  `equal_to(x, y)    `  x == y     equality
-  `not_equal_to(x, y)`  x != y     inequality
-  `if_(b, x, y)      `  if(b,x,y)  conditional expression
-  `less(x,y)         `  x < y      less than
-  `less_equal(x,y)   `  x <= y     less than or equal to
-  `greater(x,y)      `  x > y      greater than
-  `greater_equal(x,y)`  x >= y     greater than or equal to
-  ====================  =========  =========================
+   ====================  =========  =========================
+   Expression            Syntax     Meaning
+   ====================  =========  =========================
+   equal_to(x, y)        x == y     equality
+   not_equal_to(x, y)    x != y     inequality
+   if_(b, x, y)          if(b,x,y)  conditional expression
+   less(x,y)             x < y      less than
+   less_equal(x,y)       x <= y     less than or equal to
+   greater(x,y)          x > y      greater than
+   greater_equal(x,y)    x >= y     greater than or equal to
+   ====================  =========  =========================
 
 For the predefined sorts, the most important operations are also available
 by default.
@@ -408,26 +408,26 @@ the two constants =true= and =false= can be constructed.
 
 .. table:: Constructors for sort Bool
 
-  ==========  ======  =======
-  Expression  Syntax  Meaning
-  ==========  ======  =======
-  `true()  `  true    true
-  `false() `  false   false
-  ==========  ======  =======
+   ==========  ======  =======
+   Expression  Syntax  Meaning
+   ==========  ======  =======
+   true()      true    true
+   false()     false   false
+   ==========  ======  =======
 
 Furthermore the following functions are available on Booleans (for details
 about the allowed types also see bool.spec). Let =b= and =c= be Boolean expressions.
 
 .. table:: Functions for sort Bool
 
-  ===============  =======  ===========
-  Expression       Syntax   Meaning
-  ===============  =======  ===========
-  `not_(b,c)  `    !b       negation
-  `and_(b,c) `     b && c   conjunction
-  `or_(b,c) `      b || c   disjunction
-  `implies(b,c) `  b => c   implication
-  ===============  =======  ===========
+   ===============  =======  ===========
+   Expression       Syntax   Meaning
+   ===============  =======  ===========
+   not_(b,c)        !b       negation
+   and_(b,c)        b && c   conjunction
+   or_(b,c)         b || c   disjunction
+   implies(b,c)     b => c   implication
+   ===============  =======  ===========
 
 Positive numbers
 """"""""""""""""
@@ -439,29 +439,29 @@ Let =b= be a Boolean expression, and =p= be a positive expression.
 
 .. table:: Constructors for sort Pos
 
-  ===========  ==========  =======
-  Expression   Syntax      Meaning
-  ===========  ==========  =======
-  `c1()  `     @1          1
-  `cdub(b,p)`  @cDub(b,p)  2*p + b
-  ===========  ==========  =======
+   ===========  ==========  =======
+   Expression   Syntax      Meaning
+   ===========  ==========  =======
+   c1()         @1          1
+   cdub(b,p)    @cDub(b,p)  2*p + b
+   ===========  ==========  =======
 
 Furthermore the standard operations are available on Positive numbers.
 Let =b= and =c= be Boolean expressions, and =p=, =q=, and =r= be positive
 numbers.
 
 .. table:: Functions for sort Pos
-
-  ======================= ============  ===============================
-  Expression              Syntax        Meaning
-  ======================= ============  ===============================
-  `max(p,q)`              max(p,q)      maximum
-  `min(p,q)`              min(p,q)      minimum
-  `abs(p)`                abs(p)        absolute value
-  `succ(p)`               succ(p)       successor
-  `plus(p,q)`             p+q           addition
-  `add_with_carry(b,p,q)` @addc(b,p,q)  addition with carry (p + q + b)
-  ======================= ============  ===============================
+ 
+   ======================= ============  ===============================
+   Expression              Syntax        Meaning
+   ======================= ============  ===============================
+   `max(p,q)`              max(p,q)      maximum
+   `min(p,q)`              min(p,q)      minimum
+   `abs(p)`                abs(p)        absolute value
+   `succ(p)`               succ(p)       successor
+   `plus(p,q)`             p+q           addition
+   `add_with_carry(b,p,q)` @addc(b,p,q)  addition with carry (p + q + b)
+   ======================= ============  ===============================
 
 Natural numbers
 """""""""""""""
@@ -474,12 +474,12 @@ Let =p= be a positive expression.
 
 .. table:: Constructors for sort Nat
 
-  ==========  ========  ===============================
-  Expression  Syntax    Meaning
-  ==========  ========  ===============================
-  `c0()`      @0        0
-  `cnat(p)`   @cNat(p)  p interpreted as natural number
-  ==========  ========  ===============================
+   ==========  ========  ===============================
+   Expression  Syntax    Meaning
+   ==========  ========  ===============================
+   `c0()`      @0        0
+   `cnat(p)`   @cNat(p)  p interpreted as natural number
+   ==========  ========  ===============================
 
 Furthermore the standard operations are available on Natural numbers.
 Let =b= and =c= be Boolean expressions, =p=, =q= be positive numbers,
@@ -525,11 +525,11 @@ Let =m=, =n= be expressions of sort Nat.
 
 .. table:: Constructors for sort @NatPair
 
-  ==========  ===========  ===========
-  Expression  Syntax       Meaning
-  ==========  ===========  ===========
-  cpair(m,n)  @cPair(m,n)  tuple (m,n)
-  ==========  ===========  ===========
+   ==========  ===========  ===========
+   Expression  Syntax       Meaning
+   ==========  ===========  ===========
+   cpair(m,n)  @cPair(m,n)  tuple (m,n)
+   ==========  ===========  ===========
 
 Also functions for these pairs are available.
 Let =b= be a Boolean expression, =p=, =q= be positive numbers,
@@ -537,15 +537,15 @@ and =n=, =m=, =u=, =v= be natural numbers.
 
 .. table:: Functions for sort @NatPair
 
-  ========================  ==========================  =====================================================
-  Expression                Syntax                      Meaning
-  ========================  ==========================  =====================================================
-  first(cpair(m,n))         @first(@cPair(m,n))         projection of first argument
-  second(cpair(m,n))        @second(@cPair(m,n))        projection of second argument
-  divmod(p,q)               @divmod(p,q)                simultaneous division and modulus
-  gdivmod(pair(m,n), b, p)  @gdivmod(@pair(m,n), b, p)  generalised simultaneous division and modulus
-  ggdivmod(m, n, p)         @ggdivmod(m ,n, p)          doubly generalised simultaneous division and modulus
-  ========================  ==========================  =====================================================
+   ========================  ==========================  =====================================================
+   Expression                Syntax                      Meaning
+   ========================  ==========================  =====================================================
+   first(cpair(m,n))         @first(@cPair(m,n))         projection of first argument
+   second(cpair(m,n))        @second(@cPair(m,n))        projection of second argument
+   divmod(p,q)               @divmod(p,q)                simultaneous division and modulus
+   gdivmod(pair(m,n), b, p)  @gdivmod(@pair(m,n), b, p)  generalised simultaneous division and modulus
+   ggdivmod(m, n, p)         @ggdivmod(m ,n, p)          doubly generalised simultaneous division and modulus
+   ========================  ==========================  =====================================================
 
 Integers
 """"""""
@@ -556,44 +556,51 @@ interpreting a positive number as a negative integer.
 
 Let =p= be a positive expression, and =n= be a natural number.
 
-[table Constructors for sort Int
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`cint(n)  `] [ [^ @cInt(n)  ] ]   [ =n= interpreted as an integer ] ]
-  [ [`cneg(p) `] [ [^ @cNeg(p) ] ]   [ =p= interpreted as the integer =-p= ] ]
-]
+.. table:: Constructors for sort Int
+
+   ==========  ========  =====================================
+   Expression  Syntax    Meaning
+   ==========  ========  =====================================
+   cint(n)     @cInt(n)   =n= interpreted as an integer
+   cneg(p)     @cNeg(p)   =p= interpreted as the integer =-p=
+   ==========  ========  =====================================
 
 Furthermore the standard operations are available on Natural numbers.
 Let =b= be a Boolean expression, =p=, =q= be positive numbers,
 =n=, =m= be natural numbers, and =x=, =y= be integers.
-[table Functions for sort Int
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`Nat2Int(n)  `] [ [^ Nat2Int(n) ] ]   [ explicit conversion of =n= to sort Int ] ]
-  [ [`Int2Nat(x)  `] [ [^ Int2Nat(x) ] ]   [ explicit conversion of =x= to sort Nat ] ]
-  [ [`Pos2Int(p)  `] [ [^ Pos2Int(p) ] ]   [ explicit conversion of =p= to sort Int ] ]
-  [ [`Int2Pos(x)  `] [ [^ Int2Pos(x) ] ]   [ explicit conversion of =x= to sort Pos ] ]
-  [ [`max(p,x) `]  [ [^ max(p,x) ] ]   [ maximum ] ]
-  [ [`max(x,p) `]  [ [^ max(x,p) ] ]   [ maximum ] ]
-  [ [`max(n,x) `]  [ [^ max(n,x) ] ]   [ maximum ] ]
-  [ [`max(x,n) `]  [ [^ max(x,n) ] ]   [ maximum ] ]
-  [ [`max(x,y) `]  [ [^ max(x,y) ] ]   [ maximum ] ]
-  [ [`min(x,y) `]  [ [^ min(x,y) ] ]   [ minimum ] ]
-  [ [ [`abs(x) `]  [ [^ abs(x) ] ]   [ absolute value ] ]
-  [ [ [`negate(p) `]  [ [^ -p ] ]   [ unary minus ] ]
-  [ [ [`negate(n) `]  [ [^ -n ] ]   [ unary minus ] ]
-  [ [ [`negate(x) `]  [ [^ -x ] ]   [ unary minus ] ]
-  [ [`succ(x) `]  [ [^ succ(x)] ]   [ successor ] ]
-  [ [`pred(n) `]  [ [^ pred(n)] ]   [ predecessor ] ]
-  [ [`pred(x) `]  [ [^ pred(x)] ]   [ predecessor ] ]
-  [ [`dub(b,x) `]  [ [^ @dub(b,x)] ]   [ ??? ] ]
-  [ [`plus(x,y) `]  [ [^ x+y ] ]   [ addition ] ]
-  [ [`minus(p,q) `]  [ [^ p-q ] ]   [ subtraction ] ]
-  [ [`minus(n,m) `]  [ [^ n-m ] ]   [ subtraction ] ]
-  [ [`minus(x,y) `]  [ [^ x-y ] ]   [ subtraction ] ]
-  [ [`times(x,y) `]  [ [^ x*y ] ]   [ multiplication ] ]
-  [ [`div(x,p) `]  [ [^ x div p ] ]   [ integer division ] ]
-  [ [`mod(x,p) `]  [ [^ x mod p ] ]   [ modulus ] ]
-  [ [`exp(x,n) `]  [ [^ x^n ] ]   [ exponentiation ] ]
-]
+
+.. table:: Functions for sort Int
+
+   ==========  ==========     =======================================
+   Expression  Syntax         Meaning
+   ==========  ==========     =======================================
+   Nat2Int(n)  Nat2Int(n)     explicit conversion of =n= to sort Int
+   Int2Nat(x)  Int2Nat(x)     explicit conversion of =x= to sort Nat
+   Pos2Int(p)  Pos2Int(p)     explicit conversion of =p= to sort Int
+   Int2Pos(x)  Int2Pos(x)     explicit conversion of =x= to sort Pos
+   max(p,x)    max(p,x)       maximum
+   max(x,p)    max(x,p)       maximum
+   max(n,x)    max(n,x)       maximum
+   max(x,n)    max(x,n)       maximum
+   max(x,y)    max(x,y)       maximum
+   min(x,y)    min(x,y)       minimum
+   abs(x)      abs(x)         absolute value
+   negate(p)   -p             unary minus
+   negate(n)   -n             unary minus
+   negate(x)   -x             unary minus
+   succ(x)     succ(x)        successor 
+   pred(n)     pred(n)        predecessor
+   pred(x)     pred(x)        predecessor
+   dub(b,x)    @dub(b,x)      ???
+   plus(x,y)   x+y            addition
+   minus(p,q)  p-q            subtraction
+   minus(n,m)  n-m            subtraction
+   minus(x,y)  x-y            subtraction
+   times(x,y)  x*y            multiplication
+   div(x,p)    x div p        integer division
+   mod(x,p)    x mod p        modulus 
+   exp(x,n)    x^n            exponentiation 
+   ==========  ==========     =======================================
 
 Real numbers
 """"""""""""
@@ -604,92 +611,114 @@ any constructors, because they cannot be finitely enumerated.
 Standard functions for real are available however.
 Let =p=, =q= be positive numbers,=n=, =m= be natural numbers, =x=, =y= be integers,
 and =r=, =s= be real numbers.
-[table Functions for sort Real
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`Pos2Real(p)  `] [ [^ Pos2Real(p) ] ]   [ explicit conversion of =p= to sort Real ] ]
-  [ [`Nat2Real(n)  `] [ [^ Nat2Real(n) ] ]   [ explicit conversion of =n= to sort Real ] ]
-  [ [`Int2Real(x)  `] [ [^ Int2Real(x) ] ]   [ explicit conversion of =x= to sort Real ] ]
-  [ [`Real2Pos(r)  `] [ [^ Real2Pos(r) ] ]   [ explicit conversion of =r= to sort Pos ] ]
-  [ [`Real2Nat(r)  `] [ [^ Real2Nat(r) ] ]   [ explicit conversion of =r= to sort Nat ] ]
-  [ [`Real2Int(r)  `] [ [^ Real2Int(r) ] ]   [ explicit conversion of =r= to sort Int ] ]
-  [ [`max(r,s) `]  [ [^ max(r,s) ] ]   [ maximum ] ]
-  [ [`min(r,s) `]  [ [^ min(r,s) ] ]   [ minimum ] ]
-  [ [`abs(r) `]  [ [^ abs(r) ] ]   [ absolute value ] ]
-  [ [`negate(r) `]  [ [^ -r ] ]   [ unary minus ] ]
-  [ [`succ(r) `]  [ [^ succ(r)] ]   [ successor ] ]
-  [ [`pred(r) `]  [ [^ pred(r)] ]   [ predecessor ] ]
-  [ [`plus(r,s) `]  [ [^ r+s ] ]   [ addition ] ]
-  [ [`minus(r,s) `]  [ [^ r-s ] ]   [ subtraction ] ]
-  [ [`times(r,s) `]  [ [^ r*s ] ]   [ multiplication ] ]
-  [ [`divides(p,q) `]  [ [^ p / q ] ]   [ division ] ]
-  [ [`divides(m,n) `]  [ [^ m / n ] ]   [ division ] ]
-  [ [`divides(x,y) `]  [ [^ x / y ] ]   [ division ] ]
-  [ [`divides(r,s) `]  [ [^ r / s ] ]   [ division ] ]
-  [ [`floor(r) `]  [ [^ floor(r)] ]   [ floor ] ]
-  [ [`ceil(r) `]  [ [^ ceil(r)] ]   [ ceil ] ]
-  [ [`round(r) `]  [ [^ round(r)] ]   [ round ] ]
-  [ [`redfrac(x,y) `]  [ [^ @redfrac(x,y)] ]   [ reduce fraction x/y w.r.t. lowest common multiple ] ]
-  [ [`redfracwhr(p,x,n) `]  [ [^ @redfracwhr(p,x,n)] ]   [ ??? ] ]
-  [ [`redfrachlp(r,x) `]  [ [^ @redfrachlp(r,x)] ]   [ ??? ] ]
-]
+
+.. table:: Functions for sort Real
+
+   =================  ==================  ===================================================
+   Expression         Syntax              Meaning
+   =================  ==================  ===================================================
+   Pos2Real(p)        Pos2Real(p)         explicit conversion of =p= to sort Real
+   Nat2Real(n)        Nat2Real(n)         explicit conversion of =n= to sort Real
+   Int2Real(x)        Int2Real(x)         explicit conversion of =x= to sort Real
+   Real2Pos(r)        Real2Pos(r)         explicit conversion of =r= to sort Pos 
+   Real2Nat(r)        Real2Nat(r)         explicit conversion of =r= to sort Nat 
+   Real2Int(r)        Real2Int(r)         explicit conversion of =r= to sort Int 
+   max(r,s)           max(r,s)            maximum 
+   min(r,s)           min(r,s)            minimum 
+   abs(r)             abs(r)              absolute value
+   negate(r)          -r                  unary minus  
+   succ(r)            succ(r)             successor  
+   pred(r)            pred(r)             predecessor  
+   plus(r,s)          r+s                 addition 
+   minus(r,s)         r-s                 subtraction  
+   times(r,s)         r*s                 multiplication
+   divides(p,q)       p / q               division
+   divides(m,n)       m / n               division
+   divides(x,y)       x / y               division
+   divides(r,s)       r / s               division
+   floor(r)           floor(r)            floor
+   ceil(r)            ceil(r)             ceil 
+   round(r)           round(r)            round
+   redfrac(x,y)       @redfrac(x,y)       reduce fraction x/y w.r.t. lowest common multiple
+   redfracwhr(p,x,n)  @redfracwhr(p,x,n)  ???
+   redfrachlp(r,x)    @redfrachlp(r,x)    ???
+   =================  ==================  ===================================================
 
 .. important::
 
    The sorts that are allowed as arguments to the functions for numeric sorts
    are exactly the ones that correspond to the sorts of the variables in the tables
    with functions. Note that e.g. `sort_real::max(p,q)` is also allowed, and the
-   correct result sort of =Pos= will automatically be inferred.]
+   correct result sort of =Pos= will automatically be inferred.
 
 Lists
 """""
 All standard operations for lists are available in `list.h`, and can
-be found in the namespace =data::sort_list=. The lists have two
+be found in the namespace data::sort_list. The lists have two
 constructors, the empty list ([]), and inserting an element into a list (|>).
 
-Let =x= be an element of sort =S=, and =l= of sort =List(S)=.
-[table Constructors for sort List(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`nil(S)  `] [ [^ \[\] ] ]   [ The empty list of sort =S= ] ]
-  [ [`cons(S,x,l) `] [ [^ x |> l ] ]   [ The list =l= prefixed with =x= ] ]
-]
+Let x be an element of sort S, and l of sort List(S).
+
+.. table:: Constructors for sort List(S)
+
+   ===========  ======  ==============================
+   Expression   Syntax  Meaning
+   ===========  ======  ==============================
+   nil(S)       []      The empty list of sort S
+   cons(S,x,l)  x |> l  The list l prefixed with x
+   ===========  ======  ==============================
 
 Also, the following functions operating on lists are available. Again,
-let =x= be an element of sort =S=, =l= of sort =List(S)=, and =n= of sort Nat.
-[table Functions for sort List(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`in(S,x,l)  `] [ [^ x in l ] ]   [ Test whether =x= is an element of =l= ] ]
-  [ [`count(S,l) `] [ [^ #l ] ]   [ The size of =l= ] ]
-  [ [`snoc(S,l,x) `] [ [^ l <| x ] ]   [ The list =l= suffixed with =x= ] ]
-  [ [`element_at(S,l,n)  `] [ [^ l.n ] ]   [ The element at position =n= in =l= ] ]
-  [ [`head(S,l) `] [ [^ head(l) ] ]   [ The first element of =l= ] ]
-  [ [`tail(S,l) `] [ [^ tail(l) ] ]   [ =l= from which the first element has been removed ] ]
-  [ [`rhead(S,l) `] [ [^ rhead(l) ] ]   [ The last element of =l= ] ]
-  [ [`rtail(S,l) `] [ [^ rtail(l) ] ]   [ =l= from which the last element has been removed ] ]
-]
+let x be an element of sort S, l of sort List(S), and n of sort Nat.
+
+.. table:: Functions for sort List(S)
+
+   =================  =========  ==================================================
+   Expression         Syntax     Meaning
+   =================  =========  ==================================================
+   in(S,x,l)          x in l     Test whether =x= is an element of =l=
+   count(S,l)         #l         The size of =l=
+   snoc(S,l,x)        l <| x     The list =l= suffixed with =x=
+   element_at(S,l,n)  l.n        The element at position =n= in =l=
+   head(S,l)          head(l)    The first element of =l=
+   tail(S,l)          tail(l)    =l= from which the first element has been removed
+   rhead(S,l)         rhead(l)   The last element of =l=
+   rtail(S,l)         rtail(l)   =l= from which the last element has been removed
+   =================  =========  ==================================================
 
 Finite sets
 """""""""""
 The finite sets quite closely resemble lists. For sort =FSet(S)= the following
 constructors are available, assuming a sort =S=, an element =x= of sort =S=, and
 =t= being of sort =FSet(S)=.
-[table Constructors for sort FSet(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`fset_empty(S)  `] [ [^ @fset_empty() ] ]   [ The empty finite set of sort =s= ] ]
-  [ [`fset_cons(S,x,t) `] [ [^ @fset_cons ] ]   [ The finite set =t= extended with =x= ] ]
-]
+
+.. table:: Constructors for sort FSet(S)
+
+   ================  =============  ====================================
+   Expression        Syntax         Meaning
+   ================  =============  ====================================
+   fset_empty(S)     @fset_empty()  The empty finite set of sort =s=
+   fset_cons(S,x,t)  @fset_cons     The finite set =t= extended with =x=
+   ================  =============  ====================================
+
 
 Let =b= be a Boolean, =x= an element of sort =S=, =f=,=g= be functions of sort
 =S -> Bool=, and =s=,=t= be of sort =FSet(S)=. The operations of finite
 sets are defined as follows.
-[table Functions for sort FSet(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`fsetinsert(S,x,s)  `] [ [^ @fsetinsert(x,s) ] ]   [ Insert =x= into =s= ] ]
-  [ [`fsetcinsert(S,x,b,s)  `] [ [^ @fsetinsert(x,b,s) ] ]   [ ??? ] ]
-  [ [`fsetin(S,x,s)  `] [ [^ @fsetin(x,s) ] ]   [ Test whether =x= is in =s= ] ]
-  [ [`fsetlte(S,f,s,t)  `] [ [^ @fsetlte(f,s,t) ] ]   [ =s= is a subset of =t= ] ]
-  [ [`fsetunion(S,f,g,s,t)  `] [ [^ @fsetunion(f,g,s,t) ] ]   [ Union of =s= and =t= ] ]
-  [ [`fsetintersection(S,f,g,s,t)  `] [ [^ @fsetinter(f,g,s,t) ] ]   [ Intersection of =s= and =t= ] ]
-]
+
+.. table:: Functions for sort FSet(S)
+
+   ===========================  ===================  ===========================
+   Expression                   Syntax               Meaning
+   ===========================  ===================  ===========================
+   insert(S,x,s)                @fsetinsert(x,s)     Insert =x= into =s=
+   cinsert(S,x,b,s)             @fsetinsert(x,b,s)   ???
+   in(S,x,s)                    @fsetin(x,s)         Test whether =x= is in =s=
+   lte(S,f,s,t)                 @fsetlte(f,s,t)      =s= is a subset of =t=
+   union(S,f,g,s,t)             @fsetunion(f,g,s,t)  Union of =s= and =t=
+   intersection(S,f,g,s,t)      @fsetinter(f,g,s,t)  Intersection of =s= and =t=
+   ===========================  ===================  ===========================
+
 
 Finite bags
 """""""""""
@@ -698,27 +727,35 @@ For sort =FBag(S)= the following
 constructors are available, assuming a sort =S=, an element =x= of sort =S=,
 =p= being a positive number, and
 =b= being of sort =FBag(S)=.
-[table Constructors for sort FSet(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`fbag_empty(S)  `] [ [^ @fbag_empty() ] ]   [ The empty finite bag of sort =s= ] ]
-  [ [`fbag_cons(S,x,p,b) `] [ [^ @bag_cons(x,p,b) ] ]   [ The finite bag =b=, extended with =p= occurrences of =x= ] ]
-]
+
+.. table:: Constructors for sort FSet(S)
+
+   ==================  ================  =========================================================
+   Expression          Syntax            Meaning
+   ==================  ================  =========================================================
+   fbag_empty(S)       @fbag_empty()     The empty finite bag of sort =s=
+   fbag_cons(S,x,p,b)  @bag_cons(x,p,b)  The finite bag =b=, extended with =p= occurrences of =x=
+   ==================  ================  =========================================================
 
 Let =x= an element of sort =S=, =f=,=g= be functions of sort
 =S -> Nat=, =t= of sort =FSet(S)=, and =b=,=c= be elements of sort =FBag(S)=.
 The operations on finite bags are defined as follows.
-[table Functions for sort FSet(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`fbaginsert(S,x,p,b)  `] [ [^ @fbag_insert(x,p,b) ] ]   [ Insert =p= occurrences of =x= into =b= ] ]
-  [ [`fsetcinsert(S,x,n,b)  `] [ [^ @fbag_cinsert(x,n,b) ] ]   [ ??? ] ]
-  [ [`fbagcount(S,x,b)  `] [ [^ @fbag_count(x,b) ] ]   [ Test count the number of occurrences of =x= in =b= ] ]
-  [ [`fbagin(S,x,b)  `] [ [^ @fbag_in(x,b) ] ]   [ Test whether =x= is in =b= ] ]
-  [ [`fbaglte(S,f,b,c)  `] [ [^ @fbag_lte(f,b,c) ] ]   [ =b= is a subset of =c= ] ]
-  [ [`fbagjoin(S,f,g,b,c)  `] [ [^ @fbag_join(f,g,b,c) ] ]   [ Join of =b= and =c= ] ]
-  [ [`fbagintersect(S,f,g,b,c)  `] [ [^ @fbag_inter(f,g,b,c) ] ]   [ Intersection of =b= and =c= ] ]
-  [ [`fbagdifference(S,f,g,b,c)  `] [ [^ @fbag_diff(f,g,b,c) ] ]   [ Difference of =b= and =c= ] ]
-  [ [`fset2fbag(S,t)  `] [ [^ @fset2fbag(t) ] ]   [ Convert =t= to a finite bag ] ]
-]
+
+.. table:: Functions for sort FSet(S)
+
+   =========================  ====================  ===================================================
+   Expression                 Syntax                Meaning
+   =========================  ====================  ===================================================
+   fbaginsert(S,x,p,b)        @fbag_insert(x,p,b)   Insert =p= occurrences of =x= into =b=
+   fsetcinsert(S,x,n,b)       @fbag_cinsert(x,n,b)  ???
+   fbagcount(S,x,b)           @fbag_count(x,b)      Test count the number of occurrences of =x= in =b= 
+   fbagin(S,x,b)              @fbag_in(x,b)         Test whether =x= is in =b=
+   fbaglte(S,f,b,c)           @fbag_lte(f,b,c)      =b= is a subset of =c=
+   fbagjoin(S,f,g,b,c)        @fbag_join(f,g,b,c)   Join of =b= and =c=
+   fbagintersect(S,f,g,b,c)   @fbag_inter(f,g,b,c)  Intersection of =b= and =c=
+   fbagdifference(S,f,g,b,c)  @fbag_diff(f,g,b,c)   Difference of =b= and =c=
+   fset2fbag(S,t)             @fset2fbag(t)         Convert =t= to a finite bag
+   =========================  ====================  ===================================================
 
 Sets
 """"
@@ -729,26 +766,30 @@ as well as their more simple counterparts, the finite sets and bags.
 For sets the following functions are available. Let =d=, =e= be of sort Set(S),
 =x= be of sort =S=, =s= be of sort =FSet(S)=, and =f= and =g= be function of
 sort =S -> Bool=.
-[table Functions for sort Set(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`setconstructor(S, f, s)`] [ [^ @set(f,s) ] ] [ Construct a set from a function and a finite set ] ]
-  [ [`emptyset(S)`] [ [^ {} ] ] [ Empty set of sort S ] ]
-  [ [`setfset(S, s)`] [ [^ @setfset(s) ] ] [ Interpret finite set s as a set ] ]
-  [ [`setcomprehension(S, f)`] [ [^ @setcomp(f) ] ] [ The set of all elements of sort =S= satisfying =f= ] ]
-  [ [`in(S,x,d)  `] [ [^ x in d ] ]   [ Test whether =x= is an element of =d= ] ]
-  [ [`setcomplement(S,d)  `] [ [^ !d ] ]   [ Set complement of =d= ] ]
-  [ [`setunion_(S,d,e)  `] [ [^ d + e ] ]   [ Union of =d= and =e= ] ]
-  [ [`setintersection(S,d,e)  `] [ [^ d * e ] ]   [ Intersection of =d= and =e= ] ]
-  [ [`setdifference(S,d,e)  `] [ [^ d - e ] ]   [ Difference of =d= and =e= ] ]
-  [ [`false_function(S) `] [ [^ @false_ ] ] [ The constant function returning false ] ]
-  [ [`true_function(S) `] [ [^ @true_ ] ] [ The constant function returning true ] ]
-  [ [`false_function(S) `] [ [^ @false_ ] ] [ The constant function returning false ] ]
-  [ [`not_function(S,f) `] [ [^ @not_(f) ] ] [ The function returning =!f(x)= for all elements =x= in =S= ] ]
-  [ [`and_function(S,f,g) `] [ [^ @and_(f,g) ] ] [ The function returning =f(x) && g(x)= for all elements =x= in =S= ] ]
-  [ [`or_function(S,f,g) `] [ [^ @or_(f,g) ] ] [ The function returning =f(x) || g(x)= for all elements =x= in =S= ] ]
-]
 
-Note that the *_function operations are used as implementation details
+.. table:: Functions for sort Set(S)
+
+   =======================  ===========  ===================================================================
+   Expression               Syntax       Meaning
+   =======================  ===========  ===================================================================
+   setconstructor(S, f, s)  @set(f,s)    Construct a set from a function and a finite set
+   emptyset(S)              {}           Empty set of sort S
+   setfset(S, s)            @setfset(s)  Interpret finite set s as a set
+   setcomprehension(S, f)   @setcomp(f)  The set of all elements of sort =S= satisfying =f=
+   in(S,x,d)                x in d       Test whether =x= is an element of =d=
+   setcomplement(S,d)       !d           Set complement of =d=
+   setunion_(S,d,e)         d + e        Union of =d= and =e=
+   setintersection(S,d,e)   d * e        Intersection of =d= and =e=
+   setdifference(S,d,e)     d - e        Difference of =d= and =e=
+   false_function(S)        @false_      The constant function returning false
+   true_function(S)         @true_       The constant function returning true
+   false_function(S)        @false_      The constant function returning false 
+   not_function(S,f)        @not_(f)     The function returning =!f(x)= for all elements =x= in =S=
+   and_function(S,f,g)      @and_(f,g)   The function returning =f(x) && g(x)= for all elements =x= in =S=
+   or_function(S,f,g)       @or_(f,g)    The function returning =f(x) || g(x)= for all elements =x= in =S=
+   =======================  ===========  ===================================================================
+
+Note that the \*_function operations are used as implementation details
 for representing sets.
 
 Bags
@@ -756,29 +797,33 @@ Bags
 For bags the following functions are available. Let =b=, =c= be of sort =FBag(S)=,
 =e= of sort =S=, =f=,=g=, of sort =S -> Nat=, =h= of sort =S -> Bool=, =s= of sort
 =FSet(S)=, and =x=,=y= of sort =Bag(S)=.
-[table Functions for sort Bag(S)
-  [ [Expression] [Syntax]         [Meaning] ]
-  [ [`bagconstructor(S, f, b)`] [ [^ @bag(f,b) ] ] [ Construct a bag from a function and a finite bag ] ]
-  [ [`emptybag(S)`] [ [^ {} ] ] [ Empty bag of sort S ] ]
-  [ [`bagfbag(S, b)`] [ [^ @bagfset(b) ] ] [ Interpret finite bag =b= as a bag ] ]
-  [ [`bagcomprehension(S, f)`] [ [^ @bagcomp(f) ] ] [ The bag of all elements of sort =S= given by =f= ] ]
-  [ [`bagcount(S,e,x)  `] [ [^ count(e,x) ] ]   [ The number of occurrences of =e= in =x= ] ]
-  [ [`bagin(S,e,x)  `] [ [^ in(e,x) ] ]   [ Determine whether =e= occurs in =x= ] ]
-  [ [`bagjoin(S,x,y)  `] [ [^ x + y ] ]   [ Join of =x= and =y= ] ]
-  [ [`bagintersect(S,x,y)  `] [ [^ x * y ] ]   [ Intersection of =x= and =y= ] ]
-  [ [`bagdifference(S,x,y)  `] [ [^ x - y ] ]   [ Difference of =x= and =y= ] ]
-  [ [`bag2set(S,x)`] [ [^ Bag2Set(x) ] ] [ Convert bag =x= to a set ]]
-  [ [`set2bag(S,t)`] [ [^ Set2Bag(t) ] ] [ Convert set =t= to a bag ]]
-  [ [`zero_function(S) `] [ [^ @zero_ ] ] [ The constant function returning =0= ] ]
-  [ [`one_function(S) `] [ [^ @one_ ] ] [ The constant function returning =1= ] ]
-  [ [`add_function(S,f,g) `] [ [^ @add_(f,g) ] ] [ The function returning =f(x) + g(x)= for all elements =x= in =S= ] ]
-  [ [`min_function(S,f,g) `] [ [^ @min_(f,g) ] ] [ The function returning =min(f(x),g(x))= for all elements =x= in =S= ] ]
-  [ [`monus_function(S,f,g) `] [ [^ @monus_(f,g) ] ] [ The function returning =monus(f(x),g(x))= for all elements =x= in =S= ] ]
-  [ [`nat2bool_function(S,f) `] [ [^ @Nat2Bool_(f) ] ] [ The function returning false if =f(x)=0=, and true otherwise ] ]
-  [ [`bool2nat_function(S,h) `] [ [^ @Bool2Nat_(h) ] ] [ The function returning =1= if =f(x)=, =0= otherwise ] ]
-]
 
-Note that, like for sets, the *_function operations are used as implementation
+.. table:: Functions for sort Bag(S)
+
+   =======================  =============  ========================================================================
+   Expression               Syntax         Meaning
+   =======================  =============  ========================================================================
+   bagconstructor(S, f, b)  @bag(f,b)      Construct a bag from a function and a finite bag 
+   emptybag(S)              {}             Empty bag of sort S
+   bagfbag(S, b)            @bagfset(b)    Interpret finite bag =b= as a bag
+   bagcomprehension(S, f)   @bagcomp(f)    The bag of all elements of sort =S= given by =f=
+   bagcount(S,e,x)          count(e,x)     The number of occurrences of =e= in =x=
+   bagin(S,e,x)             in(e,x)        Determine whether =e= occurs in =x=
+   bagjoin(S,x,y)           x + y          Join of =x= and =y=
+   bagintersect(S,x,y)      x * y          Intersection of =x= and =y=
+   bagdifference(S,x,y)     x - y          Difference of =x= and =y=
+   bag2set(S,x)             Bag2Set(x)     Convert bag =x= to a set
+   set2bag(S,t)             Set2Bag(t)     Convert set =t= to a bag
+   zero_function(S)         @zero_         The constant function returning =0=
+   one_function(S)          @one_          The constant function returning =1=
+   add_function(S,f,g)      @add_(f,g)     The function returning =f(x) + g(x)= for all elements =x= in =S=
+   min_function(S,f,g)      @min_(f,g)     The function returning =min(f(x),g(x))= for all elements =x= in =S=
+   monus_function(S,f,g)    @monus_(f,g)   The function returning =monus(f(x),g(x))= for all elements =x= in =S=
+   nat2bool_function(S,f)   @Nat2Bool_(f)  The function returning false if =f(x)=0=, and true otherwise
+   bool2nat_function(S,h)   @Bool2Nat_(h)  The function returning =1= if =f(x)=, =0= otherwise
+   =======================  =============  ========================================================================
+
+Note that, like for sets, the \*_function operations are used as implementation
 details for representing bags.
 
 Creating data expressions
@@ -791,14 +836,14 @@ Constructing data expressions directly can be quite tedious:
 
 .. code-block:: c++
 
-    basic_sort X("X");
-    basic_sort Y("Y");
-    basic_sort Z("Z");
-    sort_expression XYZ = function_sort(function_sort(X, Y), Z);
-    variable x("x", XYZ);
+   basic_sort X("X");
+   basic_sort Y("Y");
+   basic_sort Z("Z");
+   sort_expression XYZ = function_sort(function_sort(X, Y), Z);
+   variable x("x", XYZ);
 
-    variable three("3", sort_pos::pos());
-    variable zero("0", sort_nat::nat());
+   variable three("3", sort_pos::pos());
+   variable zero("0", sort_nat::nat());
 
 For convenience a function `parse_data_expression` is available. This function
 takes a variable declaration as optional second argument, that can be used to
@@ -807,28 +852,28 @@ is:
 
 .. code-block:: c++
 
-    #include "mcrl2/new_data/data.h"
-    #include "mcrl2/new_data/parser.h"
-    #include "mcrl2/new_data/pos.h"
-    #include "mcrl2/new_data/nat.h"
-    #include "mcrl2/atermpp/aterm_init.h"
+   #include "mcrl2/new_data/data.h"
+   #include "mcrl2/new_data/parser.h"
+   #include "mcrl2/new_data/pos.h"
+   #include "mcrl2/new_data/nat.h"
+   #include "mcrl2/atermpp/aterm_init.h"
 
-    using namespace mcrl2::new_data;
+   using namespace mcrl2::new_data;
 
-    int main(int argc, char* argv[])
-    {
-      MCRL2_ATERMPP_INIT(argc, argv)
+   int main(int argc, char* argv[])
+   {
+     MCRL2_ATERMPP_INIT(argc, argv)
 
-      // two ways to create the expression m + n
-      std::string var_decl = "m, n: Pos;\n";
-      data_expression d1 = parse_data_expression("m+n", var_decl);
+     // two ways to create the expression m + n
+     std::string var_decl = "m, n: Pos;\n";
+     data_expression d1 = parse_data_expression("m+n", var_decl);
 
-      variable m = parse_data_expression("m", var_decl);
-      variable n = parse_data_expression("n", var_decl);
-      data_expression d2 = sort_pos::plus(m, n);
+     variable m = parse_data_expression("m", var_decl);
+     variable n = parse_data_expression("n", var_decl);
+     data_expression d2 = sort_pos::plus(m, n);
 
-      return 0;
-    }
+     return 0;
+   }
 
 
 Sort aliases and sort normalisation
@@ -839,10 +884,10 @@ expression. Typical examples are (expressed in MCRL2):
 
 .. code-block:: mcrl2
 
-    sort Time=Nat;
-         L=List(List(Bool));
-         Tree=struct leaf(Nat) | node(Tree,Tree);
-         F=Nat->List(Nat);
+   sort Time=Nat;
+        L=List(List(Bool));
+        Tree=struct leaf(Nat) | node(Tree,Tree);
+        F=Nat->List(Nat);
 
 Sort aliases are used to give alternative names or shorthands for existing
 sorts. Moreover, they allow to define recursive structured sorts. Note that
@@ -853,20 +898,20 @@ An alias is declared as follows:
 
 .. code-block:: c++
 
-    #include "mcrl2/data/alias.h"
-    #include "mcrl2/data/container_sort.h"
+   #include "mcrl2/data/alias.h"
+   #include "mcrl2/data/container_sort.h"
 
-    using namespace mcrl2::data;
+   using namespace mcrl2::data;
 
-    void alias_demo()
-    {
-      basic_sort b("sort_id");
-      container_sort c(bag,sort_nat::sort_nat());
-      
-      alias a(b,c);
+   void alias_demo()
+   {
+     basic_sort b("sort_id");
+     container_sort c(bag,sort_nat::sort_nat());
+     
+     alias a(b,c);
 
-      std::cout << "Alias name: " << a.name() << " Alias rhs: " << pp(a.reference()) << "\n";
-    }
+     std::cout << "Alias name: " << a.name() << " Alias rhs: " << pp(a.reference()) << "\n";
+   }
 
 An important consequence of the use of aliases is that different sort
 expressions can denote the same sort. In the example above, Time and
@@ -883,7 +928,7 @@ More concretely, for a sort alias
 
 .. code-block:: mcrl2
 
-    sort A=B;
+   sort A=B;
 
 sort A and B are equal. Sort normalisation will rewrite each sort B to A, except
 if B is a Bool, Pos, Nat, Int or Real.  
@@ -892,8 +937,8 @@ example below there are more options for the unique sort.
 
 .. code-block:: mcrl2
 
-    sort A1=List(B);
-         A2=List(B);
+   sort A1=List(B);
+        A2=List(B);
 
 In this case either A1, or A2 is chosen as the representation for List(B).
 
@@ -905,7 +950,7 @@ If the elements of a data type are requested, e.g. the sorts, constructors,
 mappings and equations of a data type, then these are provided with 
 normalised sorts. The functions user_defined_aliases, user_defined_sorts, etc.
 are provided to extract the aliases, sorts, mappings, constructors and equations
-in exactly the form they were added to the specification using the add_.... functions.
+in exactly the form they were added to the specification using the add\_.... functions.
 
 However, objects outside the data specification are not automatically normalised.
 These must be normalized explicitly. Normalisation functions, normalise_sort, exist for all types
@@ -914,34 +959,34 @@ as well as for lists of these types.
 
 .. code-block:: c++
 
-    #include mcrl2/data/data_specification.h
-    #include "mcrl2/data/alias.h"
-    #include "mcrl2/data/function_symbol.h"
+   #include mcrl2/data/data_specification.h
+   #include "mcrl2/data/alias.h"
+   #include "mcrl2/data/function_symbol.h"
 
-    using namespace mcrl2::data;
+   using namespace mcrl2::data;
 
-    void normalise_sort_demo()
-    {
-      data_specification spec;
-      const basic_sort a("A");
-      const basic_sort b("B");
-      spec.add_alias(alias(a,b));
+   void normalise_sort_demo()
+   {
+     data_specification spec;
+     const basic_sort a("A");
+     const basic_sort b("B");
+     spec.add_alias(alias(a,b));
    
-      const function_symbol f("f",b));
+     const function_symbol f("f",b));
 
-      // An example of normalising a function symbol explicitly. 
-      std::cout << "Not normalised: " << pp(f) << " has sort " << pp(f.sort()) << "\n";
-      const function_symbol normalised_f=spec.normalise(f);
-      std::cout << "Normalised: " << pp(normalised_f) << " has sort " << pp(normalised_f.sort()) << "\n";
+     // An example of normalising a function symbol explicitly. 
+     std::cout << "Not normalised: " << pp(f) << " has sort " << pp(f.sort()) << "\n";
+     const function_symbol normalised_f=spec.normalise(f);
+     std::cout << "Normalised: " << pp(normalised_f) << " has sort " << pp(normalised_f.sort()) << "\n";
    
-      spec.add_mapping(function_symbol);
+     spec.add_mapping(function_symbol);
 
-      // Get the mapping and the sorts, which are normalised. So, f:A is replaced by f:B.
-      mappings_const_range m=mappings();
-      for(function_symbol::const_iterator i=m.begin(); i!=m.end(); ++i)
-      { std::cout << "Function symbol " << pp(*i) << " has sort " << pp(i->sort()) << "\n";
-      }
-    }
+     // Get the mapping and the sorts, which are normalised. So, f:A is replaced by f:B.
+     mappings_const_range m=mappings();
+     for(function_symbol::const_iterator i=m.begin(); i!=m.end(); ++i)
+     { std::cout << "Function symbol " << pp(*i) << " has sort " << pp(i->sort()) << "\n";
+     }
+   }
 
 Given a particular sort, it is sometimes useful to find the sort it represents. E.g.
 suppose that sort F is defined by F=A->B. Then from sort F alone it cannot be seen
@@ -962,12 +1007,12 @@ The function `default_data_rewriter` returns a rewriter containing rewrite rules
 
 .. code-block:: c++
 
-    // rewrite two data expressions, and check if they are the same
-    rewriter r = default_data_rewriter();
-    data_expression d1 = parse_data_expression("2+7");
-    data_expression d2 = parse_data_expression("4+5");
-    assert(d1 != d2);
-    assert(r(d1) == r(d2));
+   // rewrite two data expressions, and check if they are the same
+   rewriter r = default_data_rewriter();
+   data_expression d1 = parse_data_expression("2+7");
+   data_expression d2 = parse_data_expression("4+5");
+   assert(d1 != d2);
+   assert(r(d1) == r(d2));
 
 .. tip::
 
@@ -979,11 +1024,11 @@ For efficiency reasons a rewriter can be invoked with an optional substitution f
 __sigma as a second argument, where __sigma maps data variables to data expressions. The
 function __sigma must satisfy the property that for all data variables =v=
 
-    __sigma(v) == r(__sigma(v)).
+   __sigma(v) == r(__sigma(v)).
 
 Under this condition the following property holds:
 
-    r(d,__sigma) == r(__sigma(d)).
+   r(d,__sigma) == r(__sigma(d)).
 
 Note that in general the computation of [^r(d,__sigma)] can be done more efficiently than the
 computation of [^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
@@ -993,17 +1038,18 @@ predefined wrapper class =rewriter_map= to create a substitution function based 
 
 .. code-block:: c++
 
-  rewriter r = default_data_rewriter();
+   rewriter r = default_data_rewriter();
 
-  // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
-  std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<atermpp::map<data_variable, data_expression> > sigma;
-  sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
-  sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
+   std::string var_decl = "m, n: Pos;\n";
+   rewriter_map<atermpp::map<data_variable, data_expression> > sigma;
+   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
+   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
-  data::data_expression d1 = parse_data_expression("m+n", var_decl);
-  data::data_expression d2 = parse_data_expression("7");
-  assert(r(d1, sigma) == r(d2));
+   data::data_expression d1 = parse_data_expression("m+n", var_decl);
+   data::data_expression d2 = parse_data_expression("7");
+   assert(r(d1, sigma) == r(d2));
+
 .. caution::
 
    The current implementation of rewriting with substitutions to data variables is
@@ -1015,30 +1061,39 @@ Rewriter Concept
 
 In the mCRL2 toolset a =Rewriter= is a concept with the following requirements:
 
-[table Associated types
-    [[Expression] [Meaning]]
-    [ [ [^Rewriter::term_type    ] ] [the type of the terms on which the rewriter operates ]]
-    [ [ [^Rewriter::variable_type] ] [the type of the variables ]]
-]
+.. table:: Associated types
+
+   =======================  ====================================================
+   Expression               Meaning
+   =======================  ====================================================
+   Rewriter::term_type      the type of the terms on which the rewriter operates
+   Rewriter::variable_type  the type of the variables
+   =======================  ====================================================
 
 A =SubstitutionFunction= is a function that maps variables to terms. Let =sigma= be a
 substitution function, and let =v= be an expression of type =Rewriter::variable_type=.
 
-[table Expression semantics for SubstitutionFunction
-    [[Expression] [Result]]
-    [ [ [^sigma(v)       ] ] [Returns an expression of type =Rewriter::term_type=]]
-]
+.. table:: Expression semantics for SubstitutionFunction
+
+   ==========  ===================================================
+   Expression  Result
+   ==========  ===================================================
+   sigma(v)    Returns an expression of type =Rewriter::term_type=
+   ==========  ===================================================
 
 Let =r= be a =Rewriter=, let =d= be an expression of type =Rewriter::term_type=
 and let =sigma= be a =SubstitutionFunction=.
 
-[table Expression semantics for Rewriter
-    [[Expression] [Result]]
-    [ [ [^r(d)           ] ] [Returns an expression of type =Rewriter::term_type= that is the result of applying the rewriter =r= to term =d= ]]
-    [ [ [^r(d, sigma)    ] ] [Returns an expression of type =Rewriter::term_type= that is the result of applying the rewriter =r= to term =d=,
-                              while on the fly applying the substitution function =sigma= to all data variables in =d=.]
-                             ]
-]
+.. table:: Expression semantics for Rewriter
+
+   +-------------+-----------------------------------------------------------------------------------------------------------+
+   | Expression  | Result                                                                                                    |
+   +=============+===========================================================================================================+
+   | r(d)        | Returns an expression of type Rewriter::term_type that is the result of applying the rewriter r to term d |
+   +-------------+-----------------------------------------------------------------------------------------------------------+
+   | r(d, sigma) | Returns an expression of type Rewriter::term_type that is the result of applying the rewriter r to term , |
+   |             | while on the fly applying the substitution function sigma to all data variables in d.                     |
+   +-------------+-----------------------------------------------------------------------------------------------------------+
 
 Algorithms using a rewriter
 ---------------------------

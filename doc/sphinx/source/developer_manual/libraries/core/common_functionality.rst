@@ -12,13 +12,13 @@ different types of travelsals possible:
 
 .. table Traversal types
 
-  =======================  ====================================================================
-  Type                     Meaning
-  =======================  ====================================================================
-  normal traversal         Traverse an object completely
-  binding aware traversal  Traverse an object completely, while maintaining the bound variables
-  sort traversal           Traverses only the parts of an object that contain sorts
-  =======================  ====================================================================
+   =======================  ====================================================================
+   Type                     Meaning
+   =======================  ====================================================================
+   normal traversal         Traverse an object completely
+   binding aware traversal  Traverse an object completely, while maintaining the bound variables
+   sort traversal           Traverses only the parts of an object that contain sorts
+   =======================  ====================================================================
 
 
 Each library defines classes that support these traversal types, namely
@@ -31,8 +31,8 @@ When deriving from a traverser class, the `enter` and `leave` functions must be 
 
 .. code-block:: c++
 
-    using super::enter;
-    using super::leave;
+   using super::enter;
+   using super::leave;
 
 .. note::
 
@@ -41,14 +41,14 @@ When deriving from a traverser class, the `enter` and `leave` functions must be 
 
 .. code-block:: c++
 
-    #if BOOST_MSVC
-          // Workaround for malfunctioning MSVC 2008 overload resolution
-          template < typename Container >
-          void operator()(Container const& a)
-          {
-            super::operator()(a);
-          }
-    #endif
+   #if BOOST_MSVC
+         // Workaround for malfunctioning MSVC 2008 overload resolution
+         template < typename Container >
+         void operator()(Container const& a)
+         {
+           super::operator()(a);
+         }
+   #endif
 
 .. note::
 
@@ -62,20 +62,20 @@ The traverser classes have the following structure:
 
 .. code-block:: c++
 
-    template < typename Derived >
-    class traverser
-    {
-      public:     
-        void operator()(function_symbol const& e);
-        void operator()(data_expression const& e);
-        ...
-    };
+   template < typename Derived >
+   class traverser
+   {
+     public:     
+       void operator()(function_symbol const& e);
+       void operator()(data_expression const& e);
+       ...
+   };
 
-    template < typename Derived >
-    class binding_aware_traverser : public traverser< Derived >;
+   template < typename Derived >
+   class binding_aware_traverser : public traverser< Derived >;
 
-    template < typename Derived >
-    class sort_traverser : public traverser< Derived >;
+   template < typename Derived >
+   class sort_traverser : public traverser< Derived >;
         
 The default implementation for `operator()` calls the function `enter` upon
 entering and `leave` upon leaving an object. By default these functions have an
@@ -86,14 +86,14 @@ below this is done with the `name()` attribute of a `variable`.
 
 .. code-block:: c++
 
-      void operator()(variable const& e)
-      {
-        ...
-        static_cast< Derived& >(*this).enter(e);
-        static_cast< Derived& >(*this)(e.name());
-        static_cast< Derived& >(*this).leave(e);
-        ...
-      }
+   void operator()(variable const& e)
+   {
+     ...
+     static_cast< Derived& >(*this).enter(e);
+     static_cast< Derived& >(*this)(e.name());
+     static_cast< Derived& >(*this).leave(e);
+     ...
+   }
 
 Note that the `Curiously recurring template pattern <http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern>`_
 needs to be applied in the implementation of `traverser`, since it needs access
@@ -104,17 +104,17 @@ The LPS Library defines classes `lps_data_traverser` and `lps_binding_aware_trav
 
 .. code-block:: c++
 
-    template < typename Derived, template < class > class Traverser = mcrl2::data::detail::traverser >
-    class lps_data_traverser : public Traverser< Derived >
-    {
-      public:
-        void operator()(const multi_action& a);
-        void operator()(const linear_process& p);
-        ...
-    };
-        
-    template < typename Derived >
-    struct lps_binding_aware_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::binding_aware_traverser >
+   template < typename Derived, template < class > class Traverser = mcrl2::data::detail::traverser >
+   class lps_data_traverser : public Traverser< Derived >
+   {
+     public:
+       void operator()(const multi_action& a);
+       void operator()(const linear_process& p);
+       ...
+   };
+       
+   template < typename Derived >
+   struct lps_binding_aware_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::binding_aware_traverser >
 
 .. warning::
 
@@ -159,51 +159,52 @@ The mCRL2 Library contains a range of generic find functions. These are:
 
 .. table:: Generic find functions
 
-  =======================  ===============================================
-  Function                 Meaning
-  =======================  ===============================================
-  `find_basic_sorts`       Finds basic sorts that occur in an object
-  `find_data_expressions`  Finds data expressions that occur in an object
-  `find_free_variables`    Finds free variables that occur in an object
-  `find_identifiers`       Finds identifiers that occur in an object
-  `find_sort_expressions`  Finds sort expressions that occur in an object
-  `find_variables`         Finds variables that occur in an object
-  =======================  ===============================================
+   =======================  ===============================================
+   Function                 Meaning
+   =======================  ===============================================
+   `find_basic_sorts`       Finds basic sorts that occur in an object
+   `find_data_expressions`  Finds data expressions that occur in an object
+   `find_free_variables`    Finds free variables that occur in an object
+   `find_identifiers`       Finds identifiers that occur in an object
+   `find_sort_expressions`  Finds sort expressions that occur in an object
+   `find_variables`         Finds variables that occur in an object
+   =======================  ===============================================
 
 These functions can be applied to a wide range of objects in the mCRL2 Library,
 ranging from `data_expression` to `action_summand`.
 
 .. table:: Find functions for data specifications
 
-  ==================  ===================================================================
-  Function            Meaning
-  ==================  ===================================================================
-  `find_constructor`  Finds a constructor
-  `find_equations`    Finds equations with a given expression as head on one of its sides
-  `find_mapping`      Finds a mapping
-  `find_sort`         Finds a sort
-  ==================  ===================================================================
+   ==================  ===================================================================
+   Function            Meaning
+   ==================  ===================================================================
+   `find_constructor`  Finds a constructor
+   `find_equations`    Finds equations with a given expression as head on one of its sides
+   `find_mapping`      Finds a mapping
+   `find_sort`         Finds a sort
+   ==================  ===================================================================
 
 .. table:: Generic replace functions
 
-  ===============================  ==================================================================================================================================
-  Function                          Meaning
-  ===============================  ==================================================================================================================================
-  `replace_sort_expressions`        Applies a substitution to sort expressions that occur in an object. Optionally it can be applied to nested expressions.
-  `replace_variables`               Applies a substitution to variables that occur in an object within the context of a data expression.
-  `replace_free_variables`          Applies a substitution to free variables that occur in an object within the context of a data expression.
-  `replace_data_expressions`        Applies a substitution to data expressions that occur in an object. Optionally it can be applied to nested expressions. 
-  `replace_propositional_variables` Applies a substitution to propositional variable instantiations that occur in an object within the context of a pbes expression.
-  ===============================  ==================================================================================================================================
+   =================================  ==================================================================================================================================
+   Function                           Meaning
+   =================================  ==================================================================================================================================
+   `replace_sort_expressions`         Applies a substitution to sort expressions that occur in an object. Optionally it can be applied to nested expressions.
+   `replace_variables`                Applies a substitution to variables that occur in an object within the context of a data expression.
+   `replace_free_variables`           Applies a substitution to free variables that occur in an object within the context of a data expression.
+   `replace_data_expressions`         Applies a substitution to data expressions that occur in an object. Optionally it can be applied to nested expressions. 
+   `replace_propositional_variables`  Applies a substitution to propositional variable instantiations that occur in an object within the context of a pbes expression.
+   =================================  ==================================================================================================================================
 
 .. table:: Other generic traverser based functions
-  =========================  ==========================================================================================
-  Function                   Meaning
-  =========================  ==========================================================================================
-  `translate_user_notation`  Applies a transformation to numbers, sets and bags that is needed after parsing.
-  `normalize_sorts`          Brings embedded sorts into normal form.
-  `rewrite`                  Applies a rewriter to embedded expressions, optionally in combination with a substitution.
-  =========================  ==========================================================================================
+
+   =========================  ==========================================================================================
+   Function                   Meaning
+   =========================  ==========================================================================================
+   `translate_user_notation`  Applies a transformation to numbers, sets and bags that is needed after parsing.
+   `normalize_sorts`          Brings embedded sorts into normal form.
+   `rewrite`                  Applies a rewriter to embedded expressions, optionally in combination with a substitution.
+   =========================  ==========================================================================================
 
 
 These functions can be applied to a wide range of objects in the mCRL2 Library, ranging from `data::data_expression` to
@@ -222,22 +223,23 @@ how to extend the functionality of the Data Library to other libraries.
 The file `mcrl2/lps/find.h` currently contains this:
 
 .. code-block:: c++
-    /// \brief Returns all data variables that occur in a range of expressions
-    /// \param[in] container a container with expressions
-    /// \return All data variables that occur in the term t
-    template <typename Container, typename OutputIterator >
-    void find_free_variables(Container const& container, OutputIterator o)
-    {
-      data::detail::make_free_variable_find_helper< lps::detail::lps_binding_aware_traverser >(o)(container);
-    }
 
-    /// \brief Returns all data variables that occur in a range of expressions
-    /// \param[in] container a container with expressions
-    /// \return All data variables that occur in the term t
-    /// TODO replace uses by data::find_free_variables
-    template <typename Container >
-    std::set< data::variable > find_free_variables(Container const& container)
-    { ... }
+   /// \brief Returns all data variables that occur in a range of expressions
+   /// \param[in] container a container with expressions
+   /// \return All data variables that occur in the term t
+   template <typename Container, typename OutputIterator >
+   void find_free_variables(Container const& container, OutputIterator o)
+   {
+     data::detail::make_free_variable_find_helper< lps::detail::lps_binding_aware_traverser >(o)(container);
+   }
+
+   /// \brief Returns all data variables that occur in a range of expressions
+   /// \param[in] container a container with expressions
+   /// \return All data variables that occur in the term t
+   /// TODO replace uses by data::find_free_variables
+   template <typename Container >
+   std::set< data::variable > find_free_variables(Container const& container)
+   { ... }
 
                                                                                                                                                                                                                         
 Generic programming techniques
@@ -250,17 +252,17 @@ other types:
 
 .. code-block:: c++
 
-    template <typename Container>
-    void operator()(const Container& t, typename data::detail::enable_if_container<Container>::type* = 0)
-    {
-      traverse_container(t);
-    }
+   template <typename Container>
+   void operator()(const Container& t, typename data::detail::enable_if_container<Container>::type* = 0)
+   {
+     traverse_container(t);
+   }
 
-    template <typename Term>
-    void operator()(const Term& t, typename data::detail::disable_if_container<Term>::type* = 0)
-    {
-      traverse(t);
-    }
+   template <typename Term>
+   void operator()(const Term& t, typename data::detail::disable_if_container<Term>::type* = 0)
+   {
+     traverse(t);
+   }
 
 Static polymorphism
 -------------------
@@ -275,47 +277,47 @@ and C models data::detail::find_helper.
 
 .. code-block:: c++
   
-  #include <iostream>
-  
-  // base class
-  template <typename Derived>
-  struct A
-  {
-    void a()
-    {
-      std::cout << "A::a()" << std::endl;
-    }
-  };
-  
-  // extended class
-  template <typename Derived>
-  struct B: public A<Derived>
-  {
-    void b()
-    {
-      std::cout << "B::b()" << std::endl;
-      static_cast<Derived&>(*this).a();
-    } 
-  };
-  
-  // override the a() function
-  template <template <class> class T>
-  struct override: public T<override<T> >
-  {
-    void a()
-    {
-      std::cout << "override::a()" << std::endl;
-    }
-  };
-  
-  int main()
-  { 
-    override<B> f;
-    f.a();
-    f.b();
-  
-    return 0;
-  }
+   #include <iostream>
+   
+   // base class
+   template <typename Derived>
+   struct A
+   {
+     void a()
+     {
+       std::cout << "A::a()" << std::endl;
+     }
+   };
+   
+   // extended class
+   template <typename Derived>
+   struct B: public A<Derived>
+   {
+     void b()
+     {
+       std::cout << "B::b()" << std::endl;
+       static_cast<Derived&>(*this).a();
+     } 
+   };
+   
+   // override the a() function
+   template <template <class> class T>
+   struct override: public T<override<T> >
+   {
+     void a()
+     {
+       std::cout << "override::a()" << std::endl;
+     }
+   };
+   
+   int main()
+   { 
+     override<B> f;
+     f.a();
+     f.b();
+   
+     return 0;
+   }
 
 Concepts
 --------
@@ -331,12 +333,12 @@ semantics.
 
 .. table:: Substitution Requirements
 
-  ==========  ===========
-  Expression  Return Type
-  ==========  ===========
-  s(e)        E
-  s(v)        E
-  ==========  ===========
+   ==========  ===========
+   Expression  Return Type
+   ==========  ===========
+   s(e)        E
+   s(v)        E
+   ==========  ===========
 
 A class or built-in type X models the Mutable Substitution concept if it models
 the Substitution concept and if X::variable_type can be assigned to
@@ -345,12 +347,12 @@ semantics.
 
 .. table:: Mutable Substitution Requirements (in addition to Substitution)
 
-  ==========  ===========  ==============================
-  Expression  Return Type  Assertion/ Pre-/Post-condition
-  ==========  ===========  ==============================
-  s\[v\] = e               post: s(v) == e
-  s\[v\] = v               post: s(v) == v
-  ==========  ===========  ==============================
+   ==========  ===========  ==============================
+   Expression  Return Type  Assertion/ Pre-/Post-condition
+   ==========  ===========  ==============================
+   s\[v\] = e               post: s(v) == e
+   s\[v\] = v               post: s(v) == v
+   ==========  ===========  ==============================
 
 The `mutable_substition` template class implements the Mutable Substitution
 concept. In addition, it has a number additional member functions in common

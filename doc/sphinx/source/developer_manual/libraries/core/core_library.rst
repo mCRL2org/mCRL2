@@ -58,31 +58,33 @@ For the tutorial the following core and core/detail headers need to be included:
 
 .. code-block:: c++
 
-  // Core libraries 
-  #include "mcrl2/core/messaging.h"           // Messaging library
-  #include "mcrl2/core/parse.h"               // Parse library
-  #include "mcrl2/core/typecheck.h"           // Type check library
-  #include "mcrl2/core/data_implementation.h" // Data implementation library
-  #include "mcrl2/core/alpha.h"               // Alpha reduction library
+   // Core libraries 
+   #include "mcrl2/core/messaging.h"           // Messaging library
+   #include "mcrl2/core/parse.h"               // Parse library
+   #include "mcrl2/core/typecheck.h"           // Type check library
+   #include "mcrl2/core/data_implementation.h" // Data implementation library
+   #include "mcrl2/core/alpha.h"               // Alpha reduction library
  
-  // Core/detail libraries 
-  #include "mcrl2/core/detail/struct.h"       // ATerm building blocks
+   // Core/detail libraries 
+   #include "mcrl2/core/detail/struct.h"       // ATerm building blocks
 
 To address the methods and members in the libraries, the following namespaces are used:
 
 .. code-block:: c++
 
-  using namespace mcrl2::core;                // core namespace
-  using namespace mcrl2::core::detail;        // core::detail namespace
+   using namespace mcrl2::core;                // core namespace
+   using namespace mcrl2::core::detail;        // core::detail namespace
 
 The specification
 -----------------
 For the tutorial, we consider the following specification, which is stored in
 the `std::string` variable `spec`. 
 
-  act a: Bool;
- 
-  init a(true);
+.. code-block:: mcrl2
+
+   act a: Bool;
+  
+   init a(true);
   
 The program
 -----------
@@ -95,9 +97,9 @@ as an argument. The initialisation of the program is as follows:
 
 .. code-block:: c++
 
-  MCRL2_ATERM_INIT(argc, argv)   // initialise ATerm library
-  gsSetVerboseMsg();             // enable Verbose logging 
-  istringstream istr( spec );    // convert string to stringstream
+   MCRL2_ATERM_INIT(argc, argv)   // initialise ATerm library
+   gsSetVerboseMsg();             // enable Verbose logging 
+   istringstream istr( spec );    // convert string to stringstream
 
 To ensure that our specification is correct, we need to parse and type check
 the specification. To parse the specification we call the parse_spec method
@@ -112,21 +114,21 @@ performed in an analogue way.
 
 .. code-block:: c++
 
-  ATermAppl parsed_spec = parse_proc_spec( istr );
-  if (parsed_spec == NULL) 
-  {
-    gsErrorMsg("parsing failed\n");
-    return 1;
-  }
-  gsVerboseMsg("parsing succeeded!\n");
+   ATermAppl parsed_spec = parse_proc_spec( istr );
+   if (parsed_spec == NULL) 
+   {
+     gsErrorMsg("parsing failed\n");
+     return 1;
+   }
+   gsVerboseMsg("parsing succeeded!\n");
  
-  ATermAppl typed_checked_parsed_spec = type_check_proc_spec( parsed_spec );
-  if (typed_checked_parsed_spec == NULL) 
-  {
-    gsErrorMsg("type checking failed!\n");
-    return 1;
-  }
-  gsVerboseMsg("type checking succeeded!\n");
+   ATermAppl typed_checked_parsed_spec = type_check_proc_spec( parsed_spec );
+   if (typed_checked_parsed_spec == NULL) 
+   {
+     gsErrorMsg("type checking failed!\n");
+     return 1;
+   }
+   gsVerboseMsg("type checking succeeded!\n");
 
 Once we know that our specification is correct, we show how the methods defined
 in the messaging header can be used to print ATerms. The first case shows how
@@ -134,27 +136,27 @@ ATerms can be pretty printed. The second case show normal printing of ATerms.
 
 .. code-block:: c++
 
-  gsVerboseMsg("pretty printed specification:\n%P\n", typed_checked_parsed_spec );
-  gsVerboseMsg("textual ATerm representation of the specification\n%T\n", typed_checked_parsed_spec );
+   gsVerboseMsg("pretty printed specification:\n%P\n", typed_checked_parsed_spec );
+   gsVerboseMsg("textual ATerm representation of the specification\n%T\n", typed_checked_parsed_spec );
 
 The output of the first case looks similar to the specification provided.
 The second case shows output which looks like:
 
-  SpecV1(
-   DataSpec(SortSpec([]),
-     ConsSpec([]),
-     MapSpec([]),
-     DataEqnSpec([])
-   ),
-   ActSpec([ActId("a",[SortId("Bool")])]),
-   ProcEqnSpec([]),
-   ProcessInit([],
-     Action(
-       ActId("a",[SortId("Bool")]),
-       [OpId("true",SortId("Bool"))]
-     )
+   SpecV1(
+    DataSpec(SortSpec([]),
+      ConsSpec([]),
+      MapSpec([]),
+      DataEqnSpec([])
+    ),
+    ActSpec([ActId("a",[SortId("Bool")])]),
+    ProcEqnSpec([]),
+    ProcessInit([],
+      Action(
+        ActId("a",[SortId("Bool")]),
+        [OpId("true",SortId("Bool"))]
+      )
+    )
    )
-  )
 
 It is possible log the output, but it is not always needed to show the logging.
 Therefore it is desirable to only log the output in debug mode. This can be
@@ -162,14 +164,14 @@ accomplished by the following line.
 
 .. code-block:: c++
 
-  gsDebugMsg("pretty printed specification:\n%P\n", data_impl_typed_checked_parsed_spec );
+   gsDebugMsg("pretty printed specification:\n%P\n", data_impl_typed_checked_parsed_spec );
 
 To ensure that the acquired specification is correct, the following line is
 added.
 
 .. code-block:: c++
 
-  assert( gsIsSpecV1( data_impl_typed_checked_parsed_spec ) );
+   assert( gsIsSpecV1( data_impl_typed_checked_parsed_spec ) );
   
 Manipulating the specification
 ------------------------------
@@ -190,7 +192,7 @@ one. The task can be accomplished with the following piece of code:
 
 .. code-block:: c++
 
-  ATermAppl actIdB = gsMakeActSpec( ATmakeList1( (ATerm) gsMakeActId( gsString2ATermAppl("b"), ATmakeList0() ) ) );
+   ATermAppl actIdB = gsMakeActSpec( ATmakeList1( (ATerm) gsMakeActId( gsString2ATermAppl("b"), ATmakeList0() ) ) );
 
 The variable `actIdB` is used to derive the action transistion b in the
 initialisation. To solely acquire the action transition, the `actIdB`, we are taking
@@ -203,16 +205,17 @@ consider time, an empty list is supplied.
 
 .. warning::
 
-  be careful when casting `ATerm`, `ATermAppl` and `ATermList`. These formats are interchangeable.
+   Be careful when casting `ATerm`, `ATermAppl` and `ATermList`. These formats are interchangeable.
 
 .. code-block:: c++
-  ATermAppl actB = gsMakeAction( (ATermAppl) ATgetFirst( ATgetArgument(actIdB, 0 ) ), ATmakeList0() );
+
+   ATermAppl actB = gsMakeAction( (ATermAppl) ATgetFirst( ATgetArgument(actIdB, 0 ) ), ATmakeList0() );
 
 To create the initialisation we take the variable `actB`:
 
 .. code-block:: c++
 
-  ATermAppl init = gsMakeProcessInit( ATmakeList0(), actB );
+   ATermAppl init = gsMakeProcessInit( ATmakeList0(), actB );
 
 To reconstruct the new specification we take the first and third argument of
 the original specification, because their are untouched. The second and the
@@ -223,14 +226,14 @@ correct, addition logging information is printed.
 
 .. code-block:: c++
 
-  ATermAppl new_spec = gsMakeSpecV1( 
-                           ATAgetArgument(data_impl_typed_checked_parsed_spec, 0 )
-                         , actIdB 
-                         , ATAgetArgument(data_impl_typed_checked_parsed_spec, 2 )
-                         , init 
-                        ); 
+   ATermAppl new_spec = gsMakeSpecV1( 
+                            ATAgetArgument(data_impl_typed_checked_parsed_spec, 0 )
+                          , actIdB 
+                          , ATAgetArgument(data_impl_typed_checked_parsed_spec, 2 )
+                          , init 
+                         ); 
  
-  gsVerboseMsg("pretty printed version of the specification:\n%P", new_spec );
+   gsVerboseMsg("pretty printed version of the specification:\n%P", new_spec );
 
 Alphabet reduction
 ------------------
@@ -242,9 +245,9 @@ an addition check is performed.
 
 .. code-block:: c++
 
-  ATermAppl new_alpha_spec = gsAlpha(new_spec);
+   ATermAppl new_alpha_spec = gsAlpha(new_spec);
  
-  assert( gsIsSpecV1( new_alpha_spec ) );
+   assert( gsIsSpecV1( new_alpha_spec ) );
 
 Source
 ------
