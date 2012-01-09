@@ -39,6 +39,7 @@ Contents
    .. toctree::
       :maxdepth: 1
       :glob:
+      :class: tool-list
 
       tools/*
 
