@@ -52,6 +52,7 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/lps/lps_library
           libraries/lps/reference
 
        .. include:: libraries/lps/articles.rst
@@ -69,6 +70,7 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/pbes/pbes_library
           libraries/pbes/reference
 
        .. include:: libraries/pbes/articles.rst
@@ -78,6 +80,7 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/process/process_library
           libraries/process/reference
 
        .. include:: libraries/process/articles.rst
@@ -86,11 +89,13 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
+          libraries/trace/trace_library
           libraries/trace/reference
      - **Utilities**
 
        .. toctree::
           :maxdepth: 2
-
+          
+          libraries/utilities/utilities_library
           libraries/utilities/reference
 
