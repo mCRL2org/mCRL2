@@ -179,6 +179,11 @@ Classes
     <xsl:when test="@kind='typedef'">
       <xsl:text>   .. cpp:type:: </xsl:text>
       <xsl:value-of select="name"/>
+      <xsl:text>
+      
+      typedef for :cpp:type:`</xsl:text>
+      <xsl:apply-templates select="type"/>
+    <xsl:text>`</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='enum'">
       <xsl:text>   .. cpp:type:: </xsl:text>
@@ -352,6 +357,37 @@ Classes
   <xsl:text>
   
 </xsl:text>
+</xsl:template>
+
+<xsl:template match="type">
+  <xsl:call-template name="string-replace-all">
+    <xsl:with-param name="text" select="."/>
+    <xsl:with-param name="replace" select="'&lt;'"/>
+    <xsl:with-param name="by" select="'\&lt;'"/>
+  </xsl:call-template>
+</xsl:template>
+
+<!-- template to replace all occurrences of a string
+     taken from geekswithblogs.net/Erik/archive/2008/04/01/120915.aspx -->
+<xsl:template name="string-replace-all">
+ <xsl:param name="text" />
+ <xsl:param name="replace" />
+ <xsl:param name="by" />
+ <xsl:choose>
+   <xsl:when test="contains($text, $replace)">
+     <xsl:value-of select="substring-before($text,$replace)" />
+     <xsl:value-of select="$by" />
+     <xsl:call-template name="string-replace-all">
+       <xsl:with-param name="text"
+       select="substring-after($text,$replace)" />
+       <xsl:with-param name="replace" select="$replace" />
+       <xsl:with-param name="by" select="$by" />
+     </xsl:call-template>
+   </xsl:when>
+   <xsl:otherwise>
+     <xsl:value-of select="$text" />
+   </xsl:otherwise>
+ </xsl:choose>
 </xsl:template>
 
 </xsl:stylesheet> 

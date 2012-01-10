@@ -122,8 +122,8 @@ def generate_library_rst(lib_dir):
         xsltproc(src, transform, dst, "'{0}'".format(xml_path))
         _LOG.info('Generated {0}'.format(dst))
   open(refindex, 'w+').write(_REFINDEXTEMPLATE.substitute(
-    CLASSES='\n   '.join(classrst),
-    FILES='\n   '.join(headerrst)
+    CLASSES='\n   '.join(sorted(classrst)),
+    FILES='\n   '.join(sorted(headerrst))
   ))
   _LOG.info('Generated {0}'.format(refindex))
 
