@@ -118,6 +118,7 @@ div.related {
 
 div.header {
     position: fixed;
+    z-index: 50;
     width: 100%;
     left: 0%;
     top: 0%;
