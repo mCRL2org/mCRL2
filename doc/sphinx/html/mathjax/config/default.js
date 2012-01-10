@@ -84,7 +84,7 @@ MathJax.Hub.Config({
   //  
   //  Example:    extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js"],
   //
-  extensions: ["tex2jax.js"],
+  extensions: ["tex2jax.js", "TeX/AMSmath.js", "TeX/AMSsymbols.js"],
   
   //
   //  Patterns to remove from before and after math script tags.  If you are not
