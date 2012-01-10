@@ -6,7 +6,24 @@
 @import url("basic.css");
 
 /* -- non-standard classes -------------------------------------------------- */
+table.news td { border: none; padding: 1em 0.5em; }
+table.news caption { display: none; }
+table.news tr.row-odd { border: 1px solid #406756; }
 
+.admonition.quick-links .admonition-title { display: none; }
+.admonition.quick-links {
+  font-family: sans-serif;
+  padding: 10px;
+  background-color: #e0e0ff;
+  border: 1px solid #3030ff;
+  text-align: center;
+  color: #3030ff;
+}
+.admonition.quick-links a em {
+  font-style: normal;
+  font-weight: normal;
+  padding: 0em 0.5em;
+}
 .admonition.platform-specific {
   background-position: top left;
   background-repeat: no-repeat;
