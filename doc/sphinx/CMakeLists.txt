@@ -14,7 +14,8 @@ add_custom_target(doc ${MCRL2_GENERATE_DOC_SCRIPT}
   COMMENT "Generating mCRL2 documentation" VERBATIM
 )
 
-add_custom_target(doc/fast ${MCRL2_GENERATE_DOC_SCRIPT}
-  COMMENT "Generating mCRL2 documentation" VERBATIM
-)
+# /fast is not allowed in CMake > 2.2
+#add_custom_target(doc/fast ${MCRL2_GENERATE_DOC_SCRIPT}
+#  COMMENT "Generating mCRL2 documentation" VERBATIM
+#)
 
