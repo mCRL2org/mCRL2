@@ -24,6 +24,11 @@
  *  limitations under the License.
  */
 
+MathJax.Hub.Config({
+  "HTML-CSS": {
+    imageFont: null
+  }
+});
 
 MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
   var TEX = MathJax.InputJax.TeX;

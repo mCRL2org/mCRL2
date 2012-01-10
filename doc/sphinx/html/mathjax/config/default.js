@@ -46,7 +46,7 @@ MathJax.Hub.Config({
   //  Example:    config: ["local/local.js"],
   //  Example:    config: ["local/local.js","MMLtoHTML.js"],
   //
-  config: [],
+  config: ["local/local.js"],
   
   //
   //  A comma-separated list of CSS stylesheet files to be loaded
@@ -84,7 +84,7 @@ MathJax.Hub.Config({
   //  
   //  Example:    extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js"],
   //
-  extensions: ["tex2jax.js", "TeX/AMSmath.js", "TeX/AMSsymbols.js"],
+  extensions: ["tex2jax.js"],
   
   //
   //  Patterns to remove from before and after math script tags.  If you are not
@@ -442,7 +442,7 @@ MathJax.Hub.Config({
     //  will be required to to download and install either the STIX fonts or the
     //  MathJax TeX fonts.
     //
-    imageFont: null, //"TeX",
+    imageFont: "TeX",
     
     //
     //  This is the font-family CSS value used for characters that are not

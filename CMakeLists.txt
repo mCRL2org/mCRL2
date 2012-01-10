@@ -428,6 +428,11 @@ if(MCRL2_ENABLE_DEPRECATED)
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
+## Documentation
+##---------------------------------------------------
+add_subdirectory ( doc/sphinx )
+
+##---------------------------------------------------
 ## Configure compiling rewriters
 ##---------------------------------------------------
 
