@@ -430,7 +430,31 @@ endif(MCRL2_ENABLE_DEPRECATED)
 ##---------------------------------------------------
 ## Documentation
 ##---------------------------------------------------
-add_subdirectory ( doc/sphinx )
+
+# Documentation requires python
+include(ConfigurePython)
+# Documentation requires doxygen 
+include(ConfigureDoxygen)
+# Documentation requires xsltproc
+include(FindXsltproc) 
+
+if(PYTHONINTERP_FOUND)
+  if ( MCRL2_PY_SPHINX )
+    if( DOXYGEN_FOUND )
+      if (XSLTPROC )
+        add_subdirectory ( doc/sphinx )
+      else( XSLTPROC )
+        message( STATUS "Documentation cannot be generated: xsltproc is missing." )
+      endif( XSLTPROC)
+    else( DOXYGEN_FOUND )
+      message( STATUS "Documentation cannot be generated: doxygen is missing." )
+    endif( DOXYGEN_FOUND )
+  else ( MCRL2_PY_SPHINX )
+    message( STATUS "Documentation cannot be generated: Python sphinx-module is missing." )
+  endif( MCRL2_PY_SPHINX )
+elseif(PYTHONINTERP_FOUND)
+  message( STATUS "Documentation cannot be generated: Python is missing." )
+endif(PYTHONINTERP_FOUND)
 
 ##---------------------------------------------------
 ## Configure compiling rewriters
@@ -496,6 +520,7 @@ include(MCRL2TestTargets)
 ## Create make targets
 ##---------------------------------------------------
 
+# Create make targets requires python, covered by documentation
 include(MCRL2MakeTargets)
 
 ##---------------------------------------------------
