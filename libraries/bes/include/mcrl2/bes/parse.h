@@ -35,9 +35,9 @@ struct bes_actions: public core::default_parser_actions
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return bes::false_(); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "BesExpr")) { return bes::not_(parse_BesExpr(node.child(1))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::imp(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::and_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::or_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (node.child(1).string() == "=>") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::imp(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (node.child(1).string() == "&&") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::and_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::or_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "BesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_BesExpr(node.child(1)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "BesVar")) { return parse_BesVar(node.child(0)); }
     report_unexpected_node(node);

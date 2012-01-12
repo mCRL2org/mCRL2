@@ -71,7 +71,6 @@ std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
   visitor.visit(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
 std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
-  visitor.visit(t1);
   data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))
@@ -89,7 +88,7 @@ std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
 void test_pfnf_visitor()
 {
   test_pfnf_expression("forall m:Nat. false");
-  test_pfnf_expression("X && Y(3) || X");
+  test_pfnf_expression("X && (Y(3) || X)");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
   core::garbage_collect();
