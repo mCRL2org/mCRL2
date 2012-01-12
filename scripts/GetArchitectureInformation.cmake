@@ -14,8 +14,10 @@ if(MSVC)
   ## Architecture detection for MSVC
   if(CMAKE_CL_64)
     message( STATUS "Architecture: 64bit Windows" )
+    add_definitions("-DAT_64BIT")
   else(CMAKE_CL_64)
     message( STATUS "Architecture: 32bit Windows" )
+    add_definitions("-DAT_32BIT")
   endif(CMAKE_CL_64)
 else(MSVC)
   ## Architecture detection for non-MSVC
