@@ -223,7 +223,7 @@ struct parser
   {
     m_parser->start_state = start_symbol_index;
     m_parser->partial_parses = partial_parses ? 1 : 0;
-    D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), text.size());
+    D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), static_cast<int>(text.size()));
     if (!result || m_parser->syntax_errors)
     {
       throw mcrl2::runtime_error("syntax error");
