@@ -24,6 +24,15 @@ Contents
       language_reference
       tutorial/tutorial
 
+
+   **Showcases**
+   
+   .. toctree::
+      :maxdepth: 1
+      :glob:
+      
+      showcases/*
+
    **Background**
 
    .. toctree::
