@@ -5,8 +5,8 @@ Control Software of the CMS Experiment at CERN's Large Hadron Collider
    :align: right
    :width: 250px
 
-The Large Hadron Collider (LHC) experiment at the European Organization for
-Nuclear Research (CERN) has been built in a tunnel 27 kilometres in
+The Large Hadron Collider (LHC) experiment at the `European Organization for
+Nuclear Research (CERN) <http://www.cern.ch>`_ has been built in a tunnel 27 kilometres in
 circumference and is designed to yield head-on collisions of two proton (or ion)
 beams of 7 TeV each. The Compact Muon Solenoid (CMS) experiment is one of the
 four big experiments of the LHC. It is a general purpose detector to study the
@@ -32,9 +32,9 @@ Techniques
 
 Formalisation
 ^^^^^^^^^^^^^
-
 We have developed a prototype translation of SML to mCRL2. The transformation is
-coded using the ASF+SDF meta-environment. As a result, any finite state machine
+coded using the `ASF+SDF meta-environment <http://www.meta-environment.org/Meta-Environment/ASF%2BSDF>`_.
+As a result, any finite state machine
 in production at CERN can be transformed to an mCRL2 process and analysed. The
 correctness of the translation was, on the one hand, assessed using simulation
 and visualisation of finite state machines in isolation, and on the other hand,
@@ -114,5 +114,6 @@ Publications
    
 .. [HKW11a] Y.L. Hwong, V.J.J. Kusters and T.A.C. Willemse,
    ''Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider.''
-   `CoRR abs/1101.5324 <http://arxiv.org/abs/1101.5324>`_.
+   CoRR abs/1101.5324.
+   `(DOI) <http://arxiv.org/abs/1101.5324>`_.
 

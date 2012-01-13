@@ -39,7 +39,7 @@ Homepage of the mCRL2 modelling language
 .. admonition:: Quick links
    :class: quick-links
 
-   :doc:`user` | :doc:`download` 
+   :doc:`user` | :doc:`download`
 
 
 .. image:: statespace.*

@@ -8,8 +8,8 @@ Automatic Document Feeder
 An Automatic Document Feeder (ADF) is an important component of a copier
 machine. Its task is to feed a document to the scanner automatically, one sheet
 at a time. We have analyzed the embedded software of an ADF prototype. We
-constructed a model of the ADF in &mu;CRL and expressed seven requirements in
-the modal &mu;-calculus. Next, we used the &mu;CRL and CADP toolsets to check
+constructed a model of the ADF in µCRL and expressed seven requirements in
+the modal µ-calculus. Next, we used the µCRL and CADP toolsets to check
 whether the system meets its requirements. This analysis revealed two errors in
 the ADF and we proposed solutions to these problems. We showed that the system
 that incorporates these solutions, meets all of the requirements. Also, we
@@ -54,7 +54,7 @@ Organizational context
   * - **Institution**
     - Technische Universiteit Eindhoven, The Netherlands.
   * - **Industrial partner**
-    - Oc&eacute; Technologies B.V., Venlo, The Netherlands
+    - Océ Technologies B.V., Venlo, The Netherlands
   * - **Time period**
     - May 2005 -- August 2005
 
@@ -62,12 +62,14 @@ Publications
 ------------
 
 .. [PS06] Bas Ploeger and Lou Somers. Analysis and Verification of an Automatic Document Feeder.
-   CS-Report 06-25, Technische Universiteit Eindhoven (2006). 
+   CS-Report 06-25, Technische Universiteit Eindhoven (2006).
+   `(PDF) <http://alexandria.tue.nl/extra1/wskrap/publichtml/200625.pdf>`_
 
 .. [PS07] Bas Ploeger and Lou Somers. Analysis and Verification of an Automatic Document Feeder.
-   In: ''Proceedings of the 2007 ACM Symposium on Applied Computing (ACMSAC'07)'', pages 1499-1505, Seoul, Korea. ACM, March 2007.
+   In: "Proceedings of the 2007 ACM Symposium on Applied Computing (ACMSAC'07)", pages 1499-1505, Seoul, Korea. ACM, March 2007.
+   `(DOI) <http://doi.acm.org/10.1145/1244002.1244324>`_
 
 Links
 -----
-Another description of this showcase is available on the `CADP homepage <http://www.inrialpes.fr/vasy/cadp/case-studies/06-b-adf.html>`.
+Another description of this showcase is available on the `CADP homepage <http://www.inrialpes.fr/vasy/cadp/case-studies/06-b-adf.html>`_.
 

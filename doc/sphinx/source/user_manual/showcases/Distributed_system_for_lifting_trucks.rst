@@ -5,7 +5,7 @@ Distributed system for lifting trucks
    :align: right
    :width: 250px
 
-&mu;CRL was used in the analysis of a real-life system for lifting trucks
+µCRL was used in the analysis of a real-life system for lifting trucks
 (lorries, railway carriages, buses and other vehicles). The system consists of a
 number of lifts; each lift supports one wheel of the truck that is being lifted
 and has its own microcontroller. The controls of the different lifts are
@@ -22,14 +22,14 @@ Type of verification
 ^^^^^^^^^^^^^^^^^^^^
 Deadlock and safety properties violations detection by explicit state-space generation
 (breadth-first search). CADP toolset was used to model-check the properties formulated in 
-regular alternation-free modal &mu;-calculus.
+regular alternation-free modal µ-calculus.
  
 Equipment (computers, CPU, RAM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Models
 ^^^^^^
-The model is available as a part of the &mu;CRL Toolset. A translation of this
+The model is available as a part of the µCRL Toolset. A translation of this
 model to mCRL2, performed by Bas Ploeger, is distributed with the mCRL2 Toolset.
 
 Organizational context
@@ -55,7 +55,9 @@ Publications
 .. [GPW03] Analysis of a distributed system for lifting trucks.
    Jan Friso Groote, Jun Pang, and Arno Wouters.
    Journal of Logic and Algebraic Programming, 55(1-2): 21-56, 2003.
+   `(DOI) <http://dx.doi.org/10.1016/S1567-8326(02)00038-3>`_
 
 Links
 -----
-Another description of this showcase is available on the `CADP homepage <http://www.inrialpes.fr/vasy/cadp/case-studies/01-b-lift.html>`.
+Another description of this showcase is available on the
+`CADP homepage <http://www.inrialpes.fr/vasy/cadp/case-studies/01-b-lift.html>`_.

@@ -71,4 +71,5 @@ Publications
 ------------
 .. [Ploeger09] Bas Ploeger. Analysis of ACS using mCRL2.
    CS-Report 09-11, Technische Universiteit Eindhoven (2009).
+   `(PDF) <http://alexandria.tue.nl/repository/books/653251.pdf>`_
 

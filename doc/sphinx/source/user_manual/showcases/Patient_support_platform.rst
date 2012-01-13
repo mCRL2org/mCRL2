@@ -43,8 +43,8 @@ positioning, a Patient Support Platform is used.
 
 Purpose
 ^^^^^^^
-The Patient Support Platform base is mounted to the floor. Its upper part
-(called ''carrier'') can move along two axes: a horizontal and a vertical one.
+The Patient Support Platform base is mounted to the floor. Its carrier can move
+along two axes: a horizontal and a vertical one.
 
 An MRI scanner is about 1m above the floor. The carrier can be moved downwards and upwards to facilitate a
 patient (un)mounting it. When the carrier is in line with the entrance

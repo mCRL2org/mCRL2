@@ -23,15 +23,13 @@ Contents
       build
       language_reference
       tutorial/tutorial
-
-
+      
    **Showcases**
-   
+    
    .. toctree::
       :maxdepth: 1
-      :glob:
       
-      showcases/*
+      Overview <showcases>
 
    **Background**
 

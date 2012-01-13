@@ -18,9 +18,7 @@ the `user manual <../user_manual/index.html>`_.
        .. toctree::
           :maxdepth: 2
 
-          libraries/atermpp/introduction     
-          libraries/atermpp/whatis
-          libraries/atermpp/programming
+          libraries/atermpp/aterm_library
           libraries/atermpp/reference
      - **BES**
 

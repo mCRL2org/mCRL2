@@ -5,27 +5,38 @@ Dogfooding the structural operational semantics of mCRL2
    :align: right
    :width: 250px
 
-The mCRL2 language is a formal specification language that is used to specify and model the behavior of distributed systems and protocols.
-With the accompanying toolset, it is possible to simulate, visualize, analyze and verify behavioral properties of mCRL2 models automatically.
-The semantics of the mCRL2 language is defined formally using Structural Operational Semantics (SOS) but implemented manually in the underlying toolset using C++.
+The mCRL2 language is a formal specification language that is used to specify
+and model the behavior of distributed systems and protocols. With the
+accompanying toolset, it is possible to simulate, visualize, analyze and verify
+behavioral properties of mCRL2 models automatically. The semantics of the mCRL2
+language is defined formally using Structural Operational Semantics (SOS) but
+implemented manually in the underlying toolset using C++.
 
-Like with most formal languages, the underlying toolset was created with the formal semantics in mind but there is no way to actually guarantee that the implementation matches the intended semantics.
+Like with most formal languages, the underlying toolset was created with the
+formal semantics in mind but there is no way to actually guarantee that the
+implementation matches the intended semantics.
 
-To validate that the implemented behavior for the mCRL2 language corresponds to its formal semantics, we describe
-the SOS deduction rules of the mCRL2 language, and perform 
-the transformation from the mCRL2's SOS deduction rules to a Linear Process Specification.
-As our transformation directly takes the SOS deduction rules and transforms
-them into mCRL2 data equations, we are basically feeding the mCRL2 toolset its
-own formal language definition.
+To validate that the implemented behavior for the mCRL2 language corresponds to
+its formal semantics, we describe the SOS deduction rules of the mCRL2 language,
+and perform the transformation from the mCRL2's SOS deduction rules to a Linear
+Process Specification. As our transformation directly takes the SOS deduction
+rules and transforms them into mCRL2 data equations, we are basically feeding
+the mCRL2 toolset its own formal language definition.
 
-This report describes (i) the semantics for the untimed fragment of the mCRL2 language, (ii) the transformation of the deduction rules into data equations including the underlying
-design decisions and (iii) the experiments that have been conducted with our semantic transformation.
+This report describes (i) the semantics for the untimed fragment of the mCRL2
+language, (ii) the transformation of the deduction rules into data equations
+including the underlying design decisions and (iii) the experiments that have
+been conducted with our semantic transformation.
 
-Despite its formal characterization, thorough study and broad use in many areas, our semantic dogfooding approach revealed a number of (subtle) differences between the mCRL2's intended semantics, the defined semantics and its actual implementation.
+Despite its formal characterization, thorough study and broad use in many areas,
+our semantic dogfooding approach revealed a number of (subtle) differences
+between the mCRL2's intended semantics, the defined semantics and its actual
+implementation.
 
 Technical details
 -----------------
-With our approach we capture the untimed semantics of mCRL2 in (roughly) 1000 lines of mCRL2 code. 
+With our approach we capture the untimed semantics of mCRL2 in (roughly) 1000
+lines of mCRL2 code. 
  
 Type of verification
 ^^^^^^^^^^^^^^^^^^^^
@@ -55,7 +66,7 @@ Organizational context
   * - **Institution**
     - Technische Universiteit Eindhoven, The Netherlands.
   * - **Industrial partner**
-    - The project was a cooperation with `ASML <http://www.asml.com/>` in Veldhoven, The Netherlands.
+    - The project was a cooperation with `ASML <http://www.asml.com/>`_ in Veldhoven, The Netherlands.
 
 Publications
 ------------
