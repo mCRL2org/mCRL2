@@ -43,7 +43,7 @@ proc WGC(s: Shores, p: Position) =
      + (!({wolf,goat} <= items(s, opp(p))) && !({goat,cabbage} <= items(s, opp(p)))) ->
        ( move(opp(p)) . WGC(s, opp(p))
        + sum i:Item. (i in items(s, p)) -> move(opp(p), i) . WGC(update(s, opp(p), i), opp(p))
-       + (items(s, right) == {wolf,goat,cabbage}) -> done
+       + (items(s, right) == {wolf,goat,cabbage}) -> done . delta
        );
 
 init WGC(shores({wolf,goat,cabbage}, {}), left);
