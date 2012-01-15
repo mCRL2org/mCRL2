@@ -232,7 +232,11 @@ class logger
       + std::string(8 - log_level_to_string(m_level).size(), ' ')
       + std::string(2*indentation(), ' ');
 
-      bool s_ends_with_newline = (s[s.size()-1] == '\n');
+      bool s_ends_with_newline = false;
+	  if (s.size() > 0)
+	  { 
+		s_ends_with_newline = (s[s.size()-1] == '\n');
+	  }
 
       std::string result = s;
       // Avoid adding spurious start of line after the last line in the log.
