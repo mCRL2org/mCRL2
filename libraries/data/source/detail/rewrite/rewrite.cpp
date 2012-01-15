@@ -215,7 +215,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   count=0;
   for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
   {
-    assert(count<number_of_renamed_variables);
+    assert(count<new_variables.size());
     const variable v= *it;
     if (v!=new_variables[count])
     {

@@ -84,7 +84,7 @@ class alphabet_reduction
     atermpp::term_list< core::identifier_string_list > apply_unrename(core::identifier_string_list l, rename_expression_list R);
     atermpp::term_list < core::identifier_string_list > gsaMakeMultActNameL(atermpp::term_list< atermpp::term_list < core::identifier_string > > l);
     atermpp::term_list < core::identifier_string_list > apply_unrename_allow_list(atermpp::term_list < core::identifier_string_list > V, rename_expression_list R);
-    alphabet_reduction::action_label_list_list  apply_comms(lps::action_label_list l, communication_expression_list C, core::identifier_string_list lhs);
+    alphabet_reduction::action_label_list_list  apply_comms(lps::action_label_list l, communication_expression_list C);
     atermpp::term_list < core::identifier_string_list > extend_allow_comm_with_alpha(
             atermpp::term_list < core::identifier_string_list > V,
             communication_expression_list  C, 

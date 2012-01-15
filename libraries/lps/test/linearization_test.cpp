@@ -1073,6 +1073,23 @@ BOOST_AUTO_TEST_CASE(test_bug_775b)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(test_bug_alphabet_reduction)
+{
+  const std::string spec =
+    "sort Variables = struct s;\n"
+    "\n"
+    "act send_c, recv_c, comm_c: Bool;\n"
+    "    chng: Set(Variables);\n"
+    "\n"
+    "init allow( { comm_c | chng | chng } ,\n"
+    "  comm( { send_c | recv_c -> comm_c,\n"
+    "          chng | chng -> chng},\n"
+    "          send_c(false) | chng( {} ) || recv_c(false) | chng( {s} )\n"
+    "       ) );\n";
+  run_linearisation_test_case(spec);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

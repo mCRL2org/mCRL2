@@ -72,6 +72,20 @@ namespace mcrl2
       }
 
       template < class T >
+      static inline atermpp::term_list <T> remove_element(atermpp::term_list <T> l, T e)
+      {
+        atermpp::term_list <T> r;
+        for(typename atermpp::term_list <T>::const_iterator i=l.begin(); i!=l.end(); ++i)
+        {
+          if (*i!=e)
+          {
+            r=push_front(r,*i);
+          }
+        }
+        return r;
+      }
+
+      template < class T >
       static bool gsaATisDisjoint(atermpp::term_list <T>  l, atermpp::term_list <T> m)
       {
         return (gsaATintersectList(l,m)).empty();
@@ -149,6 +163,10 @@ namespace mcrl2
       template < class T >
         static atermpp::term_list<T>  list_minus(atermpp::term_list<T> l, atermpp::term_list<T> m)
         {
+          if (m.empty())
+          { 
+            return l;
+          }
           atermpp::term_list<T> n;
           for (typename atermpp::term_list<T>::const_iterator i=l.begin(); i!=l.end(); ++i)
           {
@@ -542,7 +560,9 @@ namespace mcrl2
       return reverse(m);
     }
 
-    alphabet_reduction::action_label_list_list alphabet_reduction::filter_allow_list(action_label_list_list l, atermpp::term_list < core::identifier_string_list > V)
+    alphabet_reduction::action_label_list_list alphabet_reduction::filter_allow_list(
+              action_label_list_list l, 
+              atermpp::term_list < core::identifier_string_list > V)
     {
       //filters l to contain only multiactions matching the untyped multiactions from V
       action_label_list_list m;
@@ -701,50 +721,50 @@ namespace mcrl2
       return m;
     }
 
+    // Establishes the possible multi_actions that can be done if the communications
+    // in C are applied to the multi_action in l. If C constains a|b->c and l
+    // contains actions a,b and d, then the result is typically {<a,b,d>,<c,d>}.
+    
     alphabet_reduction::action_label_list_list alphabet_reduction::apply_comms(
                     lps::action_label_list l, 
-                    communication_expression_list C, 
-                    core::identifier_string_list lhs)
+                    communication_expression_list C)
     {
-      //can be optimized
-      //filter out actions nor in lhs of C;
+      
+      //filter out actions not in the lhs of C;
       //split the rest of l to a composition of subactions of a similar type
       //to those apply a simplified procedure??
 
-      //filter out l
-      lps::action_label_list ll=detail::list_minus_ignore_type(l,lhs);
+      lps::action_label_list ll=detail::list_minus_ignore_type(l,detail::comm_lhs(C));
       if (detail::gsaATsortList(l)==detail::gsaATsortList(ll))
       {
         return push_front(action_label_list_list(),l);  //C does not apply
       }
-      if (!ll.empty())
-      {
-        l=detail::list_minus(l,ll);  //apply to the rest
-      }
+      
+      l=detail::list_minus(l,ll);  //apply to the rest
 
-      //gives all possible results of application of C to a multiaction l
-      //explanation: applying {a:Nat|b:Nat-c:Nat} to a|b can either give c, or a|b,
+      //Gives all possible results of application of C to a multiaction l.
+      //Explanation: applying {a:Nat|b:Nat-c:Nat} to a|b can either give c, or a|b,
       //depending on the parameters of a and b. (in case a,b have no parameters,
-      //the result is definitely c)
-      //so the result is an alphabet, not a single multiaction
+      //the result is definitely c).
+      //So, the result is an alphabet, not a single multiaction
 
       action_label_list_list m=push_front(action_label_list_list(),lps::action_label_list());
       lps::action_label_list r=l;
       while (r.size() > 0)
       {
-        lps::action_label a = r.front();  // Deze front werkt niet met huidige library.
+        lps::action_label a = r.front();  
         r = pop_front(r);
         bool applied=false;
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
         {
-          core::identifier_string_list c = i->action_name().names();
+          const core::identifier_string_list c = i->action_name().names();
           if (std::find(c.begin(),c.end(),a.name()) !=c.end())
           {
-            sort_expression_list s = a.sorts();
+            const sort_expression_list s = a.sorts();
             lps::action_label_list tr = r;
             bool b=true;
-            c = remove_one_element(c,a.name());
-            for (core::identifier_string_list::const_iterator j=c.begin(); j!=c.end(); ++j)
+            const core::identifier_string_list c1 = remove_one_element(c,a.name());
+            for (core::identifier_string_list::const_iterator j=c1.begin(); j!=c1.end(); ++j)
             {
               lps::action_label act(*j,s);
               if (std::find(tr.begin(),tr.end(),act) != tr.end())
@@ -767,15 +787,9 @@ namespace mcrl2
               {
                 tm=push_front(action_label_list_list(),detail::add_typeMA(c,s));
               }
-              if (!gsIsNil(rhs_c))
-              {
-                tm=detail::merge_list(tm,push_front(action_label_list_list(),
-                                            push_front(lps::action_label_list(),lps::action_label(rhs_c,s))));
-              }
-              else
-              {
-                tm=detail::merge_list(tm,push_front(action_label_list_list(),lps::action_label_list()));
-              }
+              assert(!gsIsNil(rhs_c));
+              tm=detail::merge_list(tm,push_front(action_label_list_list(),
+                                      push_front(lps::action_label_list(),lps::action_label(rhs_c,s))));
               m=sync_list(m,tm);
               break;
             }
@@ -786,15 +800,16 @@ namespace mcrl2
           m=sync_list(m,push_front(action_label_list_list(),push_front(lps::action_label_list(),a)));
         }
       }
+
       if (!r.empty())
       {
         m=sync_list(m,push_front(action_label_list_list(),r));
-      }
+      } 
 
       if (!ll.empty())
       {
         m=sync_list(push_front(action_label_list_list(),ll),m);
-      }
+      } 
 
       return m;
 
@@ -818,15 +833,13 @@ namespace mcrl2
       
       nV=push_front(nV,core::identifier_string_list()); //to include possible communications to tau
 
-      core::identifier_string_list lhs=detail::comm_lhs(C); //should be a set because of properties of C
-
       atermpp::term_list < core::identifier_string_list > r;
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
         core::identifier_string_list ma=untypeMA(*i);
         if (std::find(r.begin(),r.end(),ma)==r.end())
         {
-          atermpp::term_list < core::identifier_string_list > mas=untypeMAL(apply_comms(*i,C,lhs));
+          atermpp::term_list < core::identifier_string_list > mas=untypeMAL(apply_comms(*i,C));
           if (!detail::gsaATisDisjoint(nV,mas))
           {
             r=push_front(r,ma);
@@ -898,16 +911,18 @@ namespace mcrl2
       return l;
     }
 
-    alphabet_reduction::action_label_list_list alphabet_reduction::filter_comm_list(action_label_list_list l, communication_expression_list C)
+    alphabet_reduction::action_label_list_list alphabet_reduction::filter_comm_list(
+              action_label_list_list l, 
+              communication_expression_list C)
     {
+
       //apply C to all elements of l
 
       atermpp::set < lps::action_label_list > m;
 
-      core::identifier_string_list lhs=detail::comm_lhs(C); //should be a set because of properties of C
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        action_label_list_list mas=apply_comms(*i,C,lhs);
+        action_label_list_list mas=apply_comms(*i,C);
         mas=remove_one_element(mas,lps::action_label_list());
         detail::gsaATindexedSetPutList(m,mas);
       }
@@ -1279,8 +1294,9 @@ namespace mcrl2
       }
       else if (is_allow(a))
       {
-        return PushAllow(detail::gsaATintersectList(V,detail::sort_multiactions_allow(detail::transform_list(allow(a).allow_set()))),
+        a=PushAllow(detail::gsaATintersectList(V,detail::sort_multiactions_allow(detail::transform_list(allow(a).allow_set()))),
                          allow(a).operand());
+        return a;
       }
       else if (is_comm(a))
       {
@@ -1482,10 +1498,9 @@ namespace mcrl2
           atermpp::term_list < core::identifier_string_list > V2=extend_allow_comm(V,C);
           if (detail::gsaATsortList(V)==detail::gsaATsortList(V2))
           {
-            core::identifier_string_list lhs=detail::comm_lhs(C);
             for (action_label_list_list::const_iterator lt=l.begin(); lt!=l.end(); ++lt)
             {
-              atermpp::term_list < core::identifier_string_list > mas=untypeMAL(apply_comms(*lt,C,lhs));
+              atermpp::term_list < core::identifier_string_list > mas=untypeMAL(apply_comms(*lt,C));
               V2=detail::merge_list(V2,mas);
             }
             process_expression p=allow(a).operand();
@@ -2129,7 +2144,8 @@ l_ok:
       }
       else if (is_process_instance(a) || is_process_instance_assignment(a))
       {
-        process_identifier pn=is_process_instance(a)?process_instance(a).identifier():process_instance_assignment(a).identifier();
+        process_identifier pn=is_process_instance(a)?process_instance(a).identifier():
+                         process_instance_assignment(a).identifier();
         const process_identifier_list r=push_front(process_identifier_list(),pn);
         if (deps.count(pn)>0)
         {
