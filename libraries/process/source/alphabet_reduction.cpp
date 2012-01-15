@@ -1033,8 +1033,9 @@ namespace mcrl2
         alphas[a]=l;
         return a;
       }
-      else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a)
-          || is_if_then(a) || is_if_then_else(a) || is_sync(a) || is_merge(a) || is_left_merge(a) || is_bounded_init(a))
+      else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a) ||
+               is_if_then(a) || is_if_then_else(a) || is_sync(a) || 
+               is_merge(a) || is_left_merge(a) || is_bounded_init(a))
       {
         // Do not distribute over these operator.
         a = gsApplyAlpha(a);
@@ -1113,8 +1114,9 @@ namespace mcrl2
         alphas[a]=filter_hide_list(l,I);
         return a;
       }
-      else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a)
-          || is_if_then(a) || is_if_then_else(a) || is_sync(a) || is_merge(a) || is_left_merge(a) || is_bounded_init(a))
+      else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a) ||
+               is_if_then(a) || is_if_then_else(a) || is_sync(a) || 
+               is_merge(a) || is_left_merge(a) || is_bounded_init(a))
       {
         // Distributing hide over these operators disallows the
         // linearizer to work properly.
@@ -1361,10 +1363,10 @@ namespace mcrl2
         alphas[a]=filter_allow_list(l,V);
         return a;
       }
-      else if (is_sync(a) || is_merge(a) || is_left_merge(a))
+      else if (is_merge(a))
       {
-        process_expression p = is_sync(a)?sync(a).left():is_merge(a)?merge(a).left():left_merge(a).left();
-        process_expression q = is_sync(a)?sync(a).right():is_merge(a)?merge(a).right():left_merge(a).right();
+        process_expression p = merge(a).left();
+        process_expression q = merge(a).right();
 
         {
           atermpp::term_list < core::identifier_string_list > Vp,Vq;
@@ -1391,9 +1393,7 @@ namespace mcrl2
         assert(alphas.count(q)>0);
         action_label_list_list l2=alphas[q];
         l=detail::merge_list(detail::merge_list(l,l2),sync_list(l,l2));
-        if (is_sync(a)) a=sync(p,q);
-        else if (is_merge(a)) a=merge(p,q);
-        else a=left_merge(p,q);
+        a=merge(p,q);
 
         {
           action_label_list_list ll=l;
@@ -1411,8 +1411,9 @@ namespace mcrl2
         alphas[a]=l;
         return a;
       }
-      else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a)
-          || is_if_then(a) || is_if_then_else(a) || is_bounded_init(a))
+      else if (is_sync(a)  || is_left_merge(a) ||
+               is_sum(a) || is_at(a) || is_choice(a) || is_seq(a) ||
+               is_if_then(a) || is_if_then_else(a) || is_bounded_init(a))
       {
         a = gsApplyAlpha(a);
         assert(alphas.count(a)>0);
@@ -1516,12 +1517,12 @@ namespace mcrl2
         alphas[a]=filter_comm_list(l,C);
         return a;
       }
-      else if (is_sync(a) || is_merge(a) || is_left_merge(a))
+      else if (is_merge(a))
       {
         if (detail::can_split_comm(C))
         {
-          process_expression p = is_sync(a)?sync(a).left():is_merge(a)?merge(a).left():left_merge(a).left();
-          process_expression q = is_sync(a)?sync(a).right():is_merge(a)?merge(a).right():left_merge(a).right();
+          process_expression p = merge(a).left();
+          process_expression q = merge(a).right();
 
           action_label_list_list lp=alphas.count(p)>0?alphas[p]:gsaGetAlpha(p);
           action_label_list_list lq=alphas.count(q)>0?alphas[q]:gsaGetAlpha(q);
@@ -1580,9 +1581,8 @@ namespace mcrl2
               action_label_list_list l2=alphas[q];
               l=sync_list_ht(l,l2);
             }
-            if (is_sync(a)) a=sync(p,q);
-            else if (is_merge(a)) a=merge(p,q);
-            else a=left_merge(p,q);
+            
+            a=merge(p,q);
             alphas[a]=l;
           }
           else
@@ -1605,10 +1605,12 @@ namespace mcrl2
           return a;
         }
       }
-      else if (is_sum(a) || is_at(a) || is_choice(a)
-          || is_if_then(a) || is_if_then_else(a) || is_bounded_init(a)|| is_seq(a))
+      else if (is_sync(a) || is_left_merge(a) ||
+               is_sum(a) || is_at(a) || is_choice(a) ||
+               is_if_then(a) || is_if_then_else(a) || is_bounded_init(a)|| is_seq(a))
       {
         //Yarick, 2009-05-25: do not distribute comm over seq compositions.
+        //and also not over sync and leftmerge.
         a = gsApplyAlpha(a);
         assert(alphas.count(a)>0);
         action_label_list_list l = alphas[a];

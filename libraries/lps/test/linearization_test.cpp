@@ -1089,6 +1089,19 @@ BOOST_AUTO_TEST_CASE(test_bug_alphabet_reduction)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(test_bug_alphabet_reduction1)
+{
+  const std::string spec =
+    "act a: Bool;\n"
+    "    b: Nat;\n"
+    "\n"
+    "proc X = allow( {b | a | a },\n"
+    "          a(true)| b(5) | a(false) );\n"
+    "\n"
+    "init X;\n";
+  run_linearisation_test_case(spec);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
