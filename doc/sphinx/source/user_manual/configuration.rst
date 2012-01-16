@@ -32,7 +32,7 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``BOOST_ROOT``
   *Default*:: Automatically detected
 
-  .. keyword:: BOOST_ROOT
+  .. index:: BOOST_ROOT
 
   Specifies the path to the *Boost* libraries. This is normally automatically
   detected, but may have to be set manually when *Boost* was compiled manually,
@@ -41,7 +41,7 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``CMAKE_BUILD_TYPE``
   *Default*: ``Release``
 
-  .. keyword:: CMAKE_BUILD_TYPE
+  .. index:: CMAKE_BUILD_TYPE
 
   This variable controls the type of build when using a single-configuration
   generator like the Makefile generator. This variable has no effect for Visual
@@ -73,14 +73,14 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``CMAKE_INSTALL_PREFIX``
   *Default*: ``/usr/local/``
 
-  .. keyword:: CMAKE_INSTALL_PREFIX
+  .. index:: CMAKE_INSTALL_PREFIX
 
   The installation prefix for mCRL2. All mCRL2 files will be installed there.
 
 ``BUILD_SHARED_LIBS``
   *Default*: ``ON``
 
-  .. keyword:: BUILD_SHARED_LIBS
+  .. index:: BUILD_SHARED_LIBS
 
   ======= ======================================================================
   ``ON``  Generate shared libraries, to which the executables link. 
@@ -92,7 +92,7 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``MCRL2_ENABLE_EXPERIMENTAL``
   *Default*: ``OFF``
 
-  .. keyword:: MCRL2_ENABLE_EXPERIMENTAL
+  .. index:: MCRL2_ENABLE_EXPERIMENTAL
 
   ======= ======================================================================
   ``ON``  Compile experimental tools.

@@ -28,7 +28,7 @@ sys.path.append(os.path.abspath('../sphinxext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'mcrl2_pygment']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'mcrl2_pygment', 'dparser_grammar']
 mathjax_path = '../../mathjax/MathJax.js?config=default'
 
 # Add any paths that contain templates here, relative to this directory.

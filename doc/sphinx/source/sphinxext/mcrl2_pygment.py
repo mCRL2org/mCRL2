@@ -47,10 +47,14 @@ class mCRL2Lexer(RegexLexer):
      'builtin': [
        (r'sum', Operator.Word),
        (r'mod', Operator.Word),
+       (r'div', Operator.Word),
        (r'hide', Operator.Word),
+       (r'rename', Operator.Word),
        (r'allow', Operator.Word),
        (r'block', Operator.Word),
        (r'comm', Operator.Word),
+       (r'delay', Operator.Word),
+       (r'yaled', Operator.Word),
        (r'lambda', Operator.Word),
        (r'if', Operator.Word),
        (r'in', Operator.Word),
@@ -62,12 +66,16 @@ class mCRL2Lexer(RegexLexer):
        (r'end', Operator.Word)
      ],
      'constant': [
-       (r'tau', Keyword.Constant),
-       (r'delta', Keyword.Constant)
+       (r'true', Name.Constant),
+       (r'false', Name.Constant),
+       (r'tau', Name.Constant),
+       (r'nil', Name.Constant),
+       (r'delta', Name.Constant)
      ],
      'keywords': [
        (r'map', Keyword.Declaration),
        (r'eqn', Keyword.Declaration),
+       (r'cons', Keyword.Declaration),
        (r'glob', Keyword.Declaration),
        (r'proc', Keyword.Declaration),
        (r'pbes', Keyword.Declaration),
@@ -79,29 +87,27 @@ class mCRL2Lexer(RegexLexer):
        (r'val', Keyword.Declaration)
      ],
      'types': [
+       (r'List', Keyword.Type),
+       (r'Bag', Keyword.Type),
+       (r'Set', Keyword.Type),
        (r'Bool', Keyword.Type),
        (r'Nat', Keyword.Type),
        (r'Pos', Keyword.Type),
        (r'Int', Keyword.Type),
        (r'Real', Keyword.Type)
      ],
-     'boolean': [
-       (r'true', Name.Constant),
-       (r'false', Name.Constant)
-     ],
      'identifier': [
        (r'[a-zA-z_][a-zA-Z0-9_]*', String)
      ],
      'root': [
+       include('keywords'),
        include('comment'),
        include('whitespace'),
        include('decimal'),
        include('operator'),
        include('builtin'),
        include('constant'),
-       include('keywords'),
        include('types'),
-       include('boolean'),
        include('identifier')
      ]
   }

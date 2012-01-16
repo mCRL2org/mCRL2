@@ -13,7 +13,9 @@ def clone_rst(src, dst):
   else:
     if not os.path.exists(os.path.dirname(dst)):
       os.makedirs(os.path.dirname(dst))
-    shutil.copyfile(src, dst)
+    if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
+      _LOG.info('Copying changed file: {0}'.format(src))
+      shutil.copyfile(src, dst)
 
 #
 # Utility functions for use by imported scripts
@@ -50,7 +52,7 @@ def generate_rst(binpath, temppath, outpath):
   logging.basicConfig(level=logging.INFO)
   clone_rst(cfg_dev, temp_dev)
   clone_rst(cfg_usr, temp_usr)
-  developer_manual.generate_rst()
-  user_manual.generate_rst(binpath)
+  developer_manual.generate_rst(temppath, outpath)
+  user_manual.generate_rst(temppath, outpath, binpath)
   sphinx.main(['-bhtml', '-c', cfg_dev, temp_dev, out_dev])
   sphinx.main(['-bhtml', '-c', cfg_usr, temp_usr, out_usr])

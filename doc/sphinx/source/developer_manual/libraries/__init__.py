@@ -11,8 +11,11 @@ from ... import call
 _LOG = logging.getLogger('developer_manual')
 _PWD = os.path.abspath(os.path.dirname(__file__))
 _TRUNK = os.path.abspath(os.path.join(_PWD, '..', '..', '..', '..', '..'))
-_XML = os.path.join(_TRUNK, 'doc', 'sphinx', '_temp', 'xml')
-_RST = os.path.join(_TRUNK, 'doc', 'sphinx', '_temp', 'rst', 'developer_manual')
+_XML = None
+_RST = None
+_DOXYTAG = None
+_RSTTAG = None
+_PDFTAG = None
 _LIBRARIES = {
   'atermpp':   'ATerm++',    'core':      'Core',     'bes':       'BES',
   'data':      'Data',       'lps':       'LPS',      'lts':       'LTS',
@@ -25,6 +28,19 @@ _REFINDEXTEMPLATE = string.Template(
   open(os.path.join(_PWD, 'reference.rst.template')).read())
 _ARTICLEINDEXTEMPLATE= string.Template(
   open(os.path.join(_PWD, 'articles.rst.template')).read())
+
+def setvars(temppath, outpath):
+  global _XML
+  global _RST
+  global _DOXYTAG
+  global _RSTTAG
+  global _PDFTAG
+  _XML = os.path.join(temppath, 'xml')
+  _RST = os.path.join(temppath, 'rst', 'developer_manual')
+  _DOXYTAG = os.path.join(temppath, 'doxy.cached')  
+  _RSTTAG = os.path.join(temppath, 'doxyrst.cached') 
+  _PDFTAG = os.path.join(temppath, 'libpdf.cached')   
+
 #
 # Generation functions
 #
@@ -81,7 +97,8 @@ def generate_xml():
 def generate_library_pdf(lib_dir):
   '''Search for LaTeX files in lib_dir/latex, compile them and generate 
   an index file called articles.rst.'''
-  texdir = os.path.join(_RST, 'libraries', lib_dir, 'latex')
+  subdir = os.path.join('libraries', lib_dir, 'latex')
+  texdir = os.path.join(_RST, subdir)
   if os.path.exists(texdir):
     olddir = os.getcwd()
     os.chdir(texdir)
@@ -91,8 +108,8 @@ def generate_library_pdf(lib_dir):
       for f in os.listdir('.'):
         if f.endswith('.tex'):
           fn = os.path.splitext(f)[0]
-          titles.append(':download:`{0} <libraries/{2}/latex/{1}.pdf>`'.format(makepdf(fn), fn, lib_dir))
-      open(os.path.join('..', 'articles.rst'), 'w+').write(
+          titles.append(':download:`{0} <{2}/{1}.pdf>`'.format(makepdf(fn), fn, subdir))
+      open(os.path.join('..', 'articles.txt'), 'w+').write(
         _ARTICLEINDEXTEMPLATE.substitute(ARTICLES='* ' + '\n* '.join(titles))
       )
     finally:
@@ -127,22 +144,27 @@ def generate_library_rst(lib_dir):
   ))
   _LOG.info('Generated {0}'.format(refindex))
 
-def generate_rst():
+def generate_rst(temppath, outpath):
   '''Generate reStructuredText documentation for all libraries.'''
-  if os.path.exists(_XML):
-    _LOG.info('Assuming Doxygen XML is up-to-date. Remove directory "{0}" to '
-      're-generate.'.format(_XML))
+  setvars(temppath, outpath)
+
+  doxychanged = False
+
+  if os.path.exists(_DOXYTAG):
+    _LOG.info('Assuming Doxygen XML is up-to-date.')
   else:
+    open(_DOXYTAG, 'w+').close()
+    doxychanged = True
     generate_xml()
-  if os.path.exists(os.path.join(_RST, 'libraries', 'atermpp', 'reference.rst')):
-      _LOG.info('Assuming reStructuredText is up-to-date. Remove directory '
-        '"{0}" to re-generate.'.format(_RST))
+  if os.path.exists(_RSTTAG) and not doxychanged:
+      _LOG.info('Assuming Doxygen RST is up-to-date.')
   else:
+    open(_RSTTAG, 'w+').close()
     for dirname in _LIBRARIES:
       generate_library_rst(dirname)
-  if os.path.exists(os.path.join(_RST, 'libraries', 'pbes', 'articles.rst')):
-      _LOG.info('Assuming generated PDF is up-to-date. Remove directory '
-        '"{0}" to re-generate.'.format(_RST))
+  if os.path.exists(_PDFTAG):
+      _LOG.info('Assuming generated PDF is up-to-date.')
   else:
+    open(_PDFTAG, 'w+').close()
     for dirname in _LIBRARIES:
       generate_library_pdf(dirname)

@@ -10,6 +10,10 @@ table.news td { border: none; padding: 1em 0.5em; }
 table.news caption { display: none; }
 table.news tr.row-odd { border: 1px solid #406756; }
 
+table.docutils { margin: 0 auto; }
+table.docutils td { padding: 0.3em 0; }
+table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
+
 .admonition.quick-links .admonition-title { display: none; }
 .admonition.quick-links {
   font-family: sans-serif;

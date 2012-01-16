@@ -27,7 +27,7 @@ the `user manual <../user_manual/index.html>`_.
 
           libraries/bes/reference
 
-       .. include:: libraries/bes/articles.rst
+       .. include:: libraries/bes/articles.txt
    * - **Core**
 
        .. toctree::
@@ -44,7 +44,7 @@ the `user manual <../user_manual/index.html>`_.
           libraries/data/data_library
           libraries/data/reference
 
-       .. include:: libraries/data/articles.rst
+       .. include:: libraries/data/articles.txt
    * - **LPS**
 
        .. toctree::
@@ -53,7 +53,7 @@ the `user manual <../user_manual/index.html>`_.
           libraries/lps/lps_library
           libraries/lps/reference
 
-       .. include:: libraries/lps/articles.rst
+       .. include:: libraries/lps/articles.txt
      - **LTS**
 
        .. toctree::
@@ -62,7 +62,7 @@ the `user manual <../user_manual/index.html>`_.
           libraries/lts/lts_library
           libraries/lts/reference
 
-       .. include:: libraries/lts/articles.rst
+       .. include:: libraries/lts/articles.txt
    * - **PBES**
 
        .. toctree::
@@ -71,7 +71,7 @@ the `user manual <../user_manual/index.html>`_.
           libraries/pbes/pbes_library
           libraries/pbes/reference
 
-       .. include:: libraries/pbes/articles.rst
+       .. include:: libraries/pbes/articles.txt
 
      - **Process**
 
@@ -81,7 +81,7 @@ the `user manual <../user_manual/index.html>`_.
           libraries/process/process_library
           libraries/process/reference
 
-       .. include:: libraries/process/articles.rst
+       .. include:: libraries/process/articles.txt
    * - **Trace**
 
        .. toctree::

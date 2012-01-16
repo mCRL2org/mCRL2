@@ -1,4 +1,4 @@
 import tools
 
-def generate_rst(binpath):
-  tools.generate_rst(binpath)
+def generate_rst(temppath, outpath, binpath):
+  tools.generate_rst(temppath, outpath, binpath)

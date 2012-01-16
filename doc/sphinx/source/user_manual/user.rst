@@ -21,7 +21,7 @@ Contents
       introduction
       download
       build
-      language_reference
+      language_reference/index
       tutorial/tutorial
       
    **Showcases**

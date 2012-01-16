@@ -26,6 +26,22 @@ call ``<BOOSTROOT>``.
        bootstrap.bat 
        bjam -j8 address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex 
 
+   .. warning::
+
+      The ``bjam`` build system is compiled by ``bootstrap.bat``, but the 
+      bootstrapping system seems to have problems getting the x64 build to work
+      (it unnecessarily calls ``vcvars32.bat``, which does not work in a command
+      prompt that was configured for x64 development. To get around it, open a
+      regular command prompt, and run
+      ::
+
+        "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.Cmd" /x86
+        cd <BOOSTROOT>
+        bootstrap.bat
+
+      This should build ``bjam.exe``. You can now run the ``bjam`` command-line
+      above from an x64 development command prompt.
+
 .. admonition:: Mac OS X
    :class: platform-specific mac-only
 
