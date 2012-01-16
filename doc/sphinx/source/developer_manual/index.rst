@@ -1,99 +1,16 @@
-.. mCRL2 documentation master file, created by
-   sphinx-quickstart on Wed Dec 21 08:20:17 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-mCRL2 developer documentation
-#############################
+Developer page of the mCRL2 toolset
+###################################
 
 Welcome to the mCRL2 developer documentation. If you are looking for information 
 on the use of the mCRL2 toolkit or for tutorials or examples, please consult
 the `user manual <../user_manual/index.html>`_. 
 
-.. list-table:: 
-   :class: libdoc
+.. admonition:: Quick links
+   :class: quick-links
 
-   * - **ATerm++**
+   :doc:`developer` | `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_ | `Regression test results <http://mcrl2devel.win.tue.nl/cdash/index.php?project=mCRL2>`_ | `Performance measurements <http://www.mcrl2.org/performance>`_
 
-       .. toctree::
-          :maxdepth: 2
+.. toctree::
+   :hidden:
 
-          libraries/atermpp/aterm_library
-          libraries/atermpp/reference
-     - **BES**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/bes/reference
-
-       .. include:: libraries/bes/articles.txt
-   * - **Core**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/core/core_library
-          libraries/core/common_functionality
-          libraries/core/reference
-     - **Data**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/data/data_library
-          libraries/data/reference
-
-       .. include:: libraries/data/articles.txt
-   * - **LPS**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/lps/lps_library
-          libraries/lps/reference
-
-       .. include:: libraries/lps/articles.txt
-     - **LTS**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/lts/lts_library
-          libraries/lts/reference
-
-       .. include:: libraries/lts/articles.txt
-   * - **PBES**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/pbes/pbes_library
-          libraries/pbes/reference
-
-       .. include:: libraries/pbes/articles.txt
-
-     - **Process**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/process/process_library
-          libraries/process/reference
-
-       .. include:: libraries/process/articles.txt
-   * - **Trace**
-
-       .. toctree::
-          :maxdepth: 2
-
-          libraries/trace/trace_library
-          libraries/trace/reference
-     - **Utilities**
-
-       .. toctree::
-          :maxdepth: 2
-          
-          libraries/utilities/utilities_library
-          libraries/utilities/reference
-
+   developer
