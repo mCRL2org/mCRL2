@@ -50,24 +50,26 @@ Organizational context
 ----------------------
 
 
-.. list-table:: 
+.. list-table::
+  :stub-columns: 1
+  :widths: 1,3 
 
-  * - **Contact person**
+  * - Contact person
     - Yaroslav S. Usenko (LaQuSo Eindhoven)
-  * - **Other people involved**
+  * - Other people involved
     -   * Marko van Eekelen (LaQuSo Nijmegen)
         * Stefan ten Hoedt (AIA)
         * René Schreurs (AIA)
-  * - **Institution**
+  * - Institution
     - The project was a cooperation between two branches of `LaQuSo <http://www.laquso.com>`_:
       LaQuSo Nijmegen, a part of Radboud Universiteit Nijmegen, and
       LaQuSo Eindhoven, a part of Technische Universiteit Eindhoven
-  * - **Industrial partner**
+  * - Industrial partner
     - `Aia Software B.V. <http://www.aia-itp.com>`_, a mid-size software development
       company with headquaters in Nijmegen, The Netherlands.
-  * - **Project**
+  * - Project
     - The work was supported by `SenterNovem <http://www.senternovem.nl>`_ Innovation Voucher Inv053967.
-  * - **Time period**
+  * - Time period
     - Main project including the modeling and verification was the first half of 2006.
       Later on verification of  bigger instances were performed.
 

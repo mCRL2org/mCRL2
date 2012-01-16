@@ -6,28 +6,34 @@
 @import url("basic.css");
 
 /* -- non-standard classes -------------------------------------------------- */
-table.news td { border: none; padding: 1em 0.5em; }
-table.news caption { display: none; }
-table.news tr.row-odd { border: 1px solid #406756; }
-
 table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
-.admonition.quick-links .admonition-title { display: none; }
-.admonition.quick-links {
+div.header ul.mainmenu {
+  display: table;
+  margin: 0 auto;
   font-family: sans-serif;
-  padding: 10px;
-  background-color: #e0e0ff;
-  border: 1px solid #3030ff;
-  text-align: center;
-  color: #3030ff;
 }
-.admonition.quick-links a em {
-  font-style: normal;
-  font-weight: normal;
-  padding: 0em 0.5em;
+
+div.header ul.mainmenu li {
+  float: left;
+  display: inline;
+  padding: 4px;
 }
+div.header ul.mainmenu li a {
+  color: #104020;
+}
+
+div.header ul.mainmenu li:before {
+  content: '|';
+  color: white;
+  padding-right: 4px;
+}
+div.header ul.mainmenu li:first-child:before {
+  content: '';
+}
+
 .admonition.platform-specific {
   background-position: top left;
   background-repeat: no-repeat;
@@ -46,6 +52,8 @@ table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-
   display: none;
 }
 
+.admonition.admonition-release .admonition-title { display: none; }
+.admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; }
 
 .admonition.tip {
     border: 1px solid #3030ff;
@@ -143,19 +151,6 @@ div.header {
     width: 100%;
     left: 0%;
     top: 0%;
-}
-
-div.header div.mainmenu {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    background-color: white;
-    border-bottom: 2px solid {{ theme_relbarbgcolor }};
-    font-family: sans-serif;
-    text-align: center;
-}
-
-div.header div.mainmenu span {
-    margin-left: 10px;
 }
 
 div.related a {

@@ -2,13 +2,14 @@
 {% block relbar1 %}
 <div class="header">
   {{ relbar() }}
-  <div class="mainmenu">
-  <span>
-  <a href="{{ pathto('../user_manual/index.html', 1) }}">Home</a> |
-  <a href="{{ pathto('../user_manual/user.html', 1) }}">User documentation</a> |
-  <a href="{{ pathto('../developer_manual/index.html', 1) }}">Developer documentation</a>
-  </span>
-  </div>
+  <ul class="mainmenu">
+  <li><a href="{{ pathto('../user_manual/index.html', 1) }}">Home</a></li>
+  <li><a href="{{ pathto('../user_manual/download.html', 1) }}">Download</a></li>
+  <li><a href="{{ pathto('../user_manual/user.html', 1) }}">User documentation</a></li>
+  <li><a href="{{ pathto('../user_manual/support.html', 1) }}">Support</a></li>
+  <li><a href="{{ pathto('../user_manual/showcases.html', 1) }}">Showcases</a></li>
+  <li><a href="{{ pathto('../developer_manual/index.html', 1) }}">Developer documentation</a></li>
+  </ul>
 </div>
 {% endblock %}
 {% block relbar2 %}{% endblock %}
