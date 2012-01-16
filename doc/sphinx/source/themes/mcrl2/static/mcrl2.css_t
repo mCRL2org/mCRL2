@@ -10,6 +10,8 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
+div.tool-docs li { float: left; display: inline; width: 20%; }
+
 div.header ul.mainmenu {
   display: table;
   margin: 0 auto;
@@ -146,6 +148,7 @@ div.related {
 }
 
 div.header {
+    background-color: white;
     position: fixed;
     z-index: 50;
     width: 100%;

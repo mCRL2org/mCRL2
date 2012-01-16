@@ -13,23 +13,26 @@ the `developers' documentation <../developer_manual/index.html>`_.
 Contents
 --------
 
+   .. These hidden entries are shown in the main menu above, and therefore not
+      shown again on this page.
+
+   .. toctree::
+      :hidden:
+
+      download
+      showcases
+      support
+
    **Manuals**
 
    .. toctree::
-      :maxdepth: 4
+      :maxdepth: 2
 
       introduction
-      download
       build
       language_reference/index
       tutorial/tutorial
-      
-   **Showcases**
-    
-   .. toctree::
-      :maxdepth: 1
-      
-      Overview <showcases>
+      tools
 
    **Background**
 
@@ -38,20 +41,4 @@ Contents
       :glob:
 
       articles/*
-
-   .. _man pages:
-
-   **Tool documentation**
-
-   .. toctree::
-      :maxdepth: 1
-      :glob:
-
-      tools/*
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`search`
 
