@@ -75,3 +75,20 @@ implementation of the analysis tools. For more straightforward use this is not
 needed. An effective rule of thumb is that everything that could be done using
 languages such as LOTOS, PSF and µCRL, can be done without a problem using
 mCRL2.
+
+Toolset overview
+----------------
+The structure of the mCRL2 toolset is schematically described by the following
+picture.
+
+.. figure:: ToolsetOverview.png
+   :align: center
+
+The mCRL2 toolset contains tools to automatically:
+  * Translate any mCRL2 specification to a linear process.
+  * Manipulate and simulate linear processes.
+  * Generate the state space associated with a linear process.
+  * Manipulate and visualize state spaces.
+  * Generate a PBES from a formula and a linear process.
+  * Generate a BES from a PBES.
+  * Manipulate and solve (P)BESs.
