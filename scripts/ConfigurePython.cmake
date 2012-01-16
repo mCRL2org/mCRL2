@@ -51,6 +51,12 @@ if( PYTHONINTERP_FOUND )
   if ( MCRL2_PY_SPHINX )
     message( STATUS "Python Sphinx-module found" )
   endif( MCRL2_PY_SPHINX )
+
+  #Find argparse. When found sets MCRL2_PY_ARGPARSE
+  find_python_module(argparse)
+  if ( MCRL2_PY_ARGPARSE )
+    message( STATUS "Python Argparse-module found" )
+  endif( MCRL2_PY_ARGPARSE )
 endif( PYTHONINTERP_FOUND )
 
 
