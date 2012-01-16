@@ -62,7 +62,16 @@ bool parse_data_specification_with_variables(const std::string s, mcrl2::data::d
   try
   {
     mcrl2_logger::set_reporting_level(quiet);
+
+    // Dirty hack: redirect cerr such that is becomes silent and parse errors are ignored.
+    std::streambuf *old = std::cerr.rdbuf();
+    std::stringstream ss;
+    std::cerr.rdbuf (ss.rdbuf());
+
     data_spec = mcrl2::data::parse_data_specification(s);
+
+    //Restore cerr such that parse errors become visible.
+    std::cerr.rdbuf (old);
     mcrl2_logger::set_reporting_level(old_level);
   }
   catch(mcrl2::runtime_error& )
