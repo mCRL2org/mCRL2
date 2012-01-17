@@ -27,7 +27,8 @@
 MathJax.Hub.Config({
   "HTML-CSS": {
     imageFont: null
-  }
+  },
+  extensions: ["tex2jax.js", "TeX/AMSmath.js", "TeX/AMSsymbols.js"]
 });
 
 MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
