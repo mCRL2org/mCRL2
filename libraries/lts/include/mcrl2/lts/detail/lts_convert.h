@@ -1056,6 +1056,12 @@ class bcg_aut_convertor
   public:
     action_label_string translate_label(const action_label_string& l) const
     {
+      if (l.find('"')!=std::string::npos)
+      {
+        throw mcrl2::runtime_error(std::string("The action label \"") + l + 
+                     "\" constains a double quote. The resulting aut label will be invalid.");
+      }
+
       return l;
     }
 
