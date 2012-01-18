@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-mCRL2 developer documentation
-#############################
+mCRL2 library documentation
+###########################
 
 .. list-table:: 
    :class: libdoc
@@ -23,7 +23,7 @@ mCRL2 developer documentation
 
           libraries/bes/reference
 
-       .. include:: libraries/bes/articles.rst
+       .. include:: libraries/bes/articles.txt
    * - **Core**
 
        .. toctree::
@@ -40,7 +40,7 @@ mCRL2 developer documentation
           libraries/data/data_library
           libraries/data/reference
 
-       .. include:: libraries/data/articles.rst
+       .. include:: libraries/data/articles.txt
    * - **LPS**
 
        .. toctree::
@@ -49,7 +49,7 @@ mCRL2 developer documentation
           libraries/lps/lps_library
           libraries/lps/reference
 
-       .. include:: libraries/lps/articles.rst
+       .. include:: libraries/lps/articles.txt
      - **LTS**
 
        .. toctree::
@@ -58,7 +58,7 @@ mCRL2 developer documentation
           libraries/lts/lts_library
           libraries/lts/reference
 
-       .. include:: libraries/lts/articles.rst
+       .. include:: libraries/lts/articles.txt
    * - **PBES**
 
        .. toctree::
@@ -67,7 +67,7 @@ mCRL2 developer documentation
           libraries/pbes/pbes_library
           libraries/pbes/reference
 
-       .. include:: libraries/pbes/articles.rst
+       .. include:: libraries/pbes/articles.txt
 
      - **Process**
 
@@ -77,7 +77,7 @@ mCRL2 developer documentation
           libraries/process/process_library
           libraries/process/reference
 
-       .. include:: libraries/process/articles.rst
+       .. include:: libraries/process/articles.txt
    * - **Trace**
 
        .. toctree::
