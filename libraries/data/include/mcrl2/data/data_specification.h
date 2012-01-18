@@ -1125,7 +1125,7 @@ inline data_specification operator +(data_specification spec1, const data_specif
   const function_symbol_vector mv=spec2.user_defined_mappings();
   for(function_symbol_vector::const_iterator i=mv.begin(); i!=mv.end(); ++i)
   {
-    spec1.add_constructor(*i);
+    spec1.add_mapping(*i);
   }
 
   const data_equation_vector ev=spec2.user_defined_equations();
