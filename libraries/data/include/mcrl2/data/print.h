@@ -686,13 +686,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fset_false(data_expression x)
   {
-    derived().print("{");
-    // TODO: check if this is correct (it is just a hack to fix a test)
-    if (!sort_fset::is_empty_function_symbol(sort_set::right(x)))
+    if (sort_fset::is_empty_function_symbol(sort_set::right(x)))
+    {
+      derived().print("{}");
+    }
+    else
     {
       derived()(sort_set::right(x));
     }
-    derived().print("}");
   }
 
   void print_fset_lambda(data_expression x)
