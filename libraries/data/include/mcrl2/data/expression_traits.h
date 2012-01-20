@@ -310,12 +310,12 @@ struct expression_traits : public core::term_traits< Expression >
 
   static data_expression and_(data_expression const& e1, data_expression const& e2)
   {
-    return sort_bool::and_(e1, e1);
+    return sort_bool::and_(e1, e2);
   }
 
   static data_expression or_(data_expression const& e1, data_expression const& e2)
   {
-    return sort_bool::or_(e1, e1);
+    return sort_bool::or_(e1, e2);
   }
 };
 

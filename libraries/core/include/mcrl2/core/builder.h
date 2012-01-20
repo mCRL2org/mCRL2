@@ -100,7 +100,7 @@ struct builder
 
   // non-container visit
   template <typename T>
-  void visit(T& x,
+  void visit(T&,
              typename atermpp::detail::disable_if_container<T>::type* = 0
             )
   {
