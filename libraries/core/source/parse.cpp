@@ -9,6 +9,7 @@
 /// \file parse.cpp
 
 #include "mcrl2/core/detail/dparser_functions.h"
+#include "mcrl2/core/dparser.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "d.h"
@@ -65,6 +66,11 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseN
 
 void syntax_error_fn(struct D_Parser *ap)
 {
+  core::detail::increment_dparser_error_message_count();
+  if (core::detail::get_dparser_error_message_count() > core::detail::get_dparser_max_error_message_count())
+  {
+    return;
+  }
   Parser *p = (Parser *) ap;
   std::string fn;
   if (p->user.loc.pathname)

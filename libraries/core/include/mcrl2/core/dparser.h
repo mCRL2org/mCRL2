@@ -26,6 +26,54 @@ namespace mcrl2 {
 
 namespace core {
 
+namespace detail
+{
+
+template <class T> // note, T is only a dummy
+struct dparser_error_message_count
+{
+  static std::size_t value;
+  static std::size_t max_value;
+};
+
+template <class T>
+std::size_t dparser_error_message_count<T>::value = 0;
+
+template <class T>
+std::size_t dparser_error_message_count<T>::max_value = 1;
+
+inline
+void reset_dparser_error_message_count()
+{
+  dparser_error_message_count<std::size_t>::value = 0;
+}
+
+inline
+void increment_dparser_error_message_count()
+{
+  dparser_error_message_count<std::size_t>::value++;
+}
+
+inline
+std::size_t get_dparser_error_message_count()
+{
+  return dparser_error_message_count<std::size_t>::value;
+}
+
+inline
+std::size_t get_dparser_max_error_message_count()
+{
+  return dparser_error_message_count<std::size_t>::max_value;
+}
+
+inline
+void set_dparser_max_error_message_count(std::size_t n)
+{
+  dparser_error_message_count<std::size_t>::max_value = n;
+}
+
+} // namespace detail
+
 /// \brief Wrapper for D_ParseNode
 struct parse_node
 {
@@ -183,10 +231,12 @@ struct parser
 {
   parser_table m_table;
   D_Parser* m_parser;
+  std::size_t m_max_error_message_count;
 
-  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0)
+  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0, std::size_t max_error_message_count = 1)
     : m_table(tables)
   {
+    detail::set_dparser_max_error_message_count(max_error_message_count);
     m_parser = new_D_Parser(&tables, 0);
     m_parser->initial_globals = this;
     m_parser->save_parse_tree = 1;
@@ -221,6 +271,7 @@ struct parser
   /// value by calling destroy_parse_node!!!
   parse_node parse(const std::string& text, unsigned int start_symbol_index = 0, bool partial_parses = false)
   {
+    detail::reset_dparser_error_message_count();
     m_parser->start_state = start_symbol_index;
     m_parser->partial_parses = partial_parses ? 1 : 0;
     D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), static_cast<int>(text.size()));
