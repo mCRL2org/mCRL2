@@ -114,6 +114,265 @@ There is no tutorial for the use of this library, the reference documentation co
 
 The command line interfacing library is part of the mCRL2 utilities library. It contains only infrastructure functionality for the construction of tools that provide the doorway to the core functionality of the mCRL2 toolset. The references pages are part of the utilities library reference pages.
 
+.. _tool_classes
+
+Tool classes
+============
+To simplify the creation of a tool, a number of tool classes is available in the
+Utilities Library. They all inherit from the class `tool`, and they can be found
+in the namespace `utilities::tools`. The main purpose of the tool classes is to
+standardize the behavior of tools. Tool classes use the :ref:`cli_library` for
+handling command line arguments.
+
+Using the tool classes ensure that all tools adhere to the following
+guidelines
+
+Tool interface guidelines
+-------------------------
+
+Command line interface
+^^^^^^^^^^^^^^^^^^^^^^
+The command line interface of each tool should adhere to the following guidelines.
+
+Options
+"""""""
+
+Options can be provided in the following two forms:
+
+* a long form (mandatory): ``--option``, where ``option`` is a string of the
+  form ``[a-z][a-z0-9\-]*``;
+* a short form (strongly recommended): ``-o``, where ``o`` is a
+  character of the form ``[a-zA-Z0-9]``. Furthermore, the options should
+  adhere to the following:
+  * Options may take arguments, either mandatory or optionally;
+    the mandatory argument of an option must be accepted as ``--option=ARG``
+    for long forms and as ``-oARG`` or ``-o␣ARG`` for short forms, where
+    ``␣`` stands for one or more whitespace characters.
+    The optional argument of an option must be accepted as ``--option=ARG`` for
+    long forms and as ``-oARG`` for short forms.
+
+* Short forms of options may be concatenated, where the last option in the chain
+  may take an argument. For instance, given options ``-o`` and
+  ``-p`` where the latter takes an argument ``ARG``, the chain
+  ``-opARG`` is valid (but ``-pARGo`` is not).
+* Users should not be allowed to specify an option more than once.
+* Every tool should provide the following standard options::
+
+  -q, --quiet              do not display warning messages
+  -v, --verbose            display short intermediate messages
+  -d, --debug              display detailed intermediate messages
+  -h, --help               display help information
+      --version            display version information
+
+* Every tool that utilises ''rewriting'' should additionally provide the
+  following option::
+
+  -rNAME, --rewriter=NAME  use rewrite strategy NAME:
+                           'jitty' for jitty rewriting (default),
+                           'jittyp' for jitty rewriting with prover,
+                           'jittyc' for compiled jitty rewriting.
+
+Input and output files
+""""""""""""""""""""""
+Some tools require input and/or output files; these include
+transformation and conversion tools (but not GUI tools). The most important
+input file and the most important output file (if any) should be accepted as
+optional command line arguments, in the following way:
+
+* the first argument is treated as the input file, the second argument is
+  treated as the output file (if present);
+* when the input file is not supplied, input is read from ``stdin`;
+* when the output file is not supplied, output is written to ``stdout``.
+
+It is only allowed to deviate from these rules if it is technically
+infeasible to read from ``stdin`` or write to ``stdout``.
+
+Furthermore, the following features are not allowed:
+
+* designate the input file without its extension, e.g.
+  * wrong: ``mcrl22lps abp``
+  * right: ``mcrl22lps abp.mcrl2``
+* option ``-`` to indicate input should be read from ``stdin``, e.g.
+  * wrong: ``... | lpsrewr - abp.rewr.lps``
+  * right: ``... | lpsrewr > abp.rewr.lps``
+
+Exit codes
+""""""""""
+The command line interface should have an exit code of ``0`` upon
+successful termination, and non-zero upon unsuccessful termination. Success here
+means that during executing of the tool, no errors have occurred.
+No special meaning may be assigned to specific non-zero exit codes.
+
+Handling interface errors
+"""""""""""""""""""""""""
+When parsing the command line, errors may be encountered, for instance due to an
+invalid number of arguments, unrecognised options or illegal arguments to
+options. When such errors are encountered the following actions should be taken,
+depending on whether the tool has a GUI or not:
+
+A tool that does not have a GUI should print the following message to ``stderr``::
+
+  TOOL: ERROR_MSG
+  Try `TOOL --help' for more information.
+
+where:
+
+* ``TOOL`` stands for the name of the tool that the user called, i.e. ``argv[0]``;
+* ``ERROR_MSG`` stands for the error message corresponding to the first
+  error that is encountered when parsing the command line. After that, the tool
+  should terminate with exit code ``1``.
+
+A tool that has a GUI should show an error message dialog containing the error
+message corresponding to the first error that is encountered when parsing
+the command line.
+
+Exceptions
+""""""""""
+It is not allowed for tools to pass unhandled exceptions to the operating system.
+
+Graphical user interface
+^^^^^^^^^^^^^^^^^^^^^^^^
+Every tool that has a graphical user interface tool should provide a help
+menu containing the following menu items:
+* Contents: a link to the tool user manual;
+* About: a message dialog containing the tool version information.
+
+Use of the :cpp:class:`mcrl2::utilities::wx::tool` class takes care of both by
+default. This class must be used for all wxWidgets tools to get the correct
+command line interface behaviour.
+
+Help and version information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Tool help and version information should adhere to the following guidelines.
+
+Help information
+""""""""""""""""
+Help information should be provided by the command line option ``-h, --help``.
+
+It basically is a condensed version of the tool user manual in plain text with a
+maximum width of 80 characters.
+
+Version information
+"""""""""""""""""""
+Version information should be provided by:
+
+* the command line option ``--version``;
+* the ``About`` menu item.
+
+Available tool classes
+----------------------
+
+The table below gives an overview of the
+available tool classes, and the command line options that they handle.
+                           
+.. table:: Tool classes and their supported command line arguments
+
+   ================================================================================  ===================================================================
+   tool class                                                                        command line arguments
+   ================================================================================  ===================================================================
+   class :cpp:class:`mcrl2::utilities::tool`                                         handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
+   class :cpp:class:`mcrl2::utilities::input_tool`                                   in addition handles a positional input file argument
+   class :cpp:class:`mcrl2::utilities::input_output_tool`                            in addition handles a positional output file argument
+   template <typename Tool> class :cpp:class:`mcrl2::utilities::rewriter_tool`       extends a tool with a =--rewriter= option
+   template <typename Tool> class :cpp:class:`mcrl2::utilities::pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
+   ================================================================================  ===================================================================
+                                                                                 
+The class :cpp:class:`mcrl2::utilities::rewriter_tool` makes strategies of the
+data rewriter available to the user. The class
+:cpp:class:`mcrl2::utilities::pbes_rewriter_tool` makes pbes rewriters available
+to the user.
+                                                           
+Example
+-------
+
+Below an example is given for the pbesparelm tool. Since this is a tool that
+takes a file as input and also writes output to a file, it derives from the
+class :cpp:class:`mcrl2:utilities:input_output_tool`.
+
+.. literalinclude:: ../../../../../../../tools/pbesparelm/pbesparelm.cpp
+   :language: c++
+
+using the :cpp:member:`execute` member function, that accepts the command line
+arguments specified by the user.
+
+In the constructor a few settings are provided.
+
+This is enough to create a tool with the follow help message::
+
+  Usage: pbesparelm [OPTION]... [INFILE [OUTFILE]]
+  Reads a file containing a PBES, and applies parameter elimination to it. If 
+  OUTFILE is not present, standard output is used. If INFILE is not present,     
+  standard input is used.
+
+Tool properties
+^^^^^^^^^^^^^^^
+
+.. table:: Tool properties
+
+   ========  ==============================
+   Property  Meaning
+   ========  ============================== 
+   synopsis  Summary of command-line syntax
+   what is   don't know
+   ========  ==============================
+
+
+Creating a new tool
+^^^^^^^^^^^^^^^^^^^
+To create a new tool, the following needs to be done:
+
+  #. Override the :cpp:member:`run` member function
+  
+     The actual execution of the tool happens in the virtual member function :cpp:member:`run`.
+     The developer has to override this function to add the behavior of the tool
+     The :cpp:member:`run` function is called from the :cpp:member:`execute` member function, after the
+     command line parameters have been parsed.
+
+  #. Set some parameters in the constructor
+     
+     In the constructor of a tool, one has to supply a name for the tool,
+     an author and a description:
+
+     .. code-block:: c++
+     
+        class my_tool: public input_tool
+        {
+          public:
+            my_tool()
+              : input_tool(
+                  "mytool",
+                  "John Doe",
+                  "Reads a file and processes it"
+                )
+            {}
+        };
+
+  #. Optionally add additional command line arguments]
+     Additional command line arguments can be specified by overriding the virtual
+     methods :cpp:member:`parse_options` and :cpp:member:`add_options`:
+
+     .. code-block:: c++
+
+        class pbes_constelm_tool: public filter_tool_with_pbes_rewriter
+        {
+          protected:
+            bool m_compute_conditions;
+
+            void parse_options(const command_line_parser& parser)
+            {
+              m_compute_conditions = parser.options.count("compute-conditions") > 0;
+            }
+
+            void add_options(interface_description& clinterface)
+            {
+              clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
+            }
+          ...
+        };
+
+One can change this selection
+by overriding the method :cpp:member:`available_rewriters`.
+
 .. _logging_library:
 
 Logging Library
@@ -396,121 +655,4 @@ The file logger_test_file.txt contains the following::
   [11:52:35.381 my_algorithm::debug]     Iteration 2
   [11:52:35.381 my_algorithm::debug]       iteration number >= 2, treating specially
   [11:52:35.381 my_algorithm::debug]       doing something special
-
-Tool classes
-============
-To simplify the creation of a tool, a number of tool classes is available in the
-Utilities Library. They all inherit from the class `tool`, and they can be found
-in the namespace `utilities::tools`. The main purpose of the tool classes is to
-standardize the behavior of tools. Tool classes use the :ref:`cli_library` for
-handling command line arguments. The table below gives an overview of the
-available tool classes, and the command line options that they handle.
-                           
-.. table:: Tool classes and their supported command line arguments
-
-   ==============================================================  ===================================================================
-   tool class                                                      command line arguments
-   ==============================================================  ===================================================================
-   class :cpp:class:`tool`                                         handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
-   class :cpp:class:`input_tool`                                   in addition handles a positional input file argument
-   class :cpp:class:`input_output_tool`                            in addition handles a positional output file argument
-   template <typename Tool> class :cpp:class:`rewriter_tool`       extends a tool with a =--rewriter= option
-   template <typename Tool> class :cpp:class:`pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
-   ==============================================================  ===================================================================
-                                                                                 
-The class :cpp:class:`rewriter_tool` makes strategies of the data rewriter
-available to the user. The class :cpp:class:`pbes_rewriter_tool` makes pbes rewriters
-available to the user.
-                                                           
-Example
--------
-
-Below an example is given for the pbesparelm tool. Since this is a tool that
-takes a file as input and also writes output to a file, it derives from the
-class :cpp:class:`input_output_tool`.
-
-.. literalinclude:: ../../../../../../../tools/pbesparelm/pbesparelm.cpp
-   :language: c++
-
-using the :cpp:member:`execute` member function, that accepts the command line
-arguments specified by the user.
-
-In the constructor a few settings are provided.
-
-This is enough to create a tool with the follow help message::
-
-  Usage: pbesparelm [OPTION]... [INFILE [OUTFILE]]
-  Reads a file containing a PBES, and applies parameter elimination to it. If 
-  OUTFILE is not present, standard output is used. If INFILE is not present,     
-  standard input is used.
-
-Tool properties
-^^^^^^^^^^^^^^^
-
-.. table:: Tool properties
-
-   ========  ==============================
-   Property  Meaning
-   ========  ============================== 
-   synopsis  Summary of command-line syntax
-   what is   don't know
-   ========  ==============================
-
-
-Creating a new tool
-^^^^^^^^^^^^^^^^^^^
-To create a new tool, the following needs to be done:
-
-  #. Override the :cpp:member:`run` member function
-  
-     The actual execution of the tool happens in the virtual member function :cpp:member:`run`.
-     The developer has to override this function to add the behavior of the tool
-     The :cpp:member:`run` function is called from the :cpp:member:`execute` member function, after the
-     command line parameters have been parsed.
-
-  #. Set some parameters in the constructor
-     
-     In the constructor of a tool, one has to supply a name for the tool,
-     an author and a description:
-
-     .. code-block:: c++
-     
-        class my_tool: public input_tool
-        {
-          public:
-            my_tool()
-              : input_tool(
-                  "mytool",
-                  "John Doe",
-                  "Reads a file and processes it"
-                )
-            {}
-        };
-
-  #. Optionally add additional command line arguments]
-     Additional command line arguments can be specified by overriding the virtual
-     methods :cpp:member:`parse_options` and :cpp:member:`add_options`:
-
-     .. code-block:: c++
-
-        class pbes_constelm_tool: public filter_tool_with_pbes_rewriter
-        {
-          protected:
-            bool m_compute_conditions;
-
-            void parse_options(const command_line_parser& parser)
-            {
-              m_compute_conditions = parser.options.count("compute-conditions") > 0;
-            }
-
-            void add_options(interface_description& clinterface)
-            {
-              clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
-            }
-          ...
-        };
-
-One can change this selection
-by overriding the method :cpp:member:`available_rewriters`.
-
 

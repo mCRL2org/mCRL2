@@ -12,6 +12,8 @@ Contents
    :class: toctree-wrapper
 
    - :doc:`developer`
+   - :doc:`guidelines`
+   - :doc:`cronjobs`
    - `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_ 
    - `Regression test results <http://mcrl2devel.win.tue.nl/cdash/index.php?project=mCRL2>`_ 
    - `Performance measurements <http://www.mcrl2.org/performance>`_
