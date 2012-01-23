@@ -1,0 +1,13 @@
+% There is a path of 2^N - 1 steps after which Tower 1 or 2 is done
+% (i.e. contains the full stack of N discs)
+mu X(n:Nat = 0) . (val(n+1 == exp(2,N)) && < done(1) ||  done(2)> true) 
+               || (val(n+1 <  exp(2,N)) && <!done(1) && !done(2)> X(n+1))
+
+% There is no path shorter than 2^N - 1 steps after which Tower 1 or 2 is done
+% pbes2bool will not terminate on this formula: it keeps generating
+% equations for X(n) for all n >= 0.
+%nu X(n:Nat = 0) . [true] X(n+1) && (val(n+1 >= exp(2,N)) || [done(1) || done(2)] false)
+
+% There is no path shorter than 2^N - 1 steps after which Tower 1 or 2 is done
+% weaker variant to make pbes2bool terminate
+%nu X(n:Nat = 0) . val(n+1 >= exp(2,N)) || ([true] X(n+1) && [done(1) || done(2)] false)

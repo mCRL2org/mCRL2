@@ -1,0 +1,11 @@
+% TODO (Exercise 6): 
+% Express property B as a formula in the modal mu-calculus.
+%
+% It is not possible for all adventurers to reach the `finish' side in
+% less than 17 minutes.
+
+forall x:Nat . val(x < 17) => [true* . report(x)] false
+
+% Other version by Tim Willemse; on this one, pbes2bool does not
+% terminate
+%forall x:Nat . [true* . report(x)] val(x >= 17)

@@ -1,0 +1,5 @@
+%% file watercan.mcf
+
+%% [ (!done)* ] <(!done)*.done> true
+ <(!done)*.done> true
+

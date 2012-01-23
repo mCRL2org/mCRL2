@@ -32,6 +32,7 @@ Contents
       build
       language_reference/index
       tutorial/tutorial
+      tutorial/babysteps/babysteps
       tools
 
    **Background**

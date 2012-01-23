@@ -1,0 +1,5 @@
+%% file vm01b.mcf
+
+%% a ready is always possible (false)
+[ true* ] < ready > true
+

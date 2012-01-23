@@ -1,0 +1,46 @@
+% Towers of Hanoi - optimal strategy enforced by Judge process
+
+map
+  FullStack: List(Nat);
+  N: Nat;
+  next: Nat -> Nat;
+var
+  x:Nat;
+eqn
+  FullStack = [0,1,2,3,4,5];
+  N = #FullStack;
+  (N mod 2 == 0) -> next(x) = (x+1) mod 3;
+  (N mod 2 == 1) -> next(x) = (x-1) mod 3;
+
+act
+  full,done,done_ok: Nat;
+  send,receive,move,move_ok: Nat # Nat # Nat;
+
+proc
+  Judge(move_small:Bool,t_small:Nat) =
+      % move the smallest disc
+      (move_small) -> 
+        move_ok(t_small,next(t_small),0) . Judge(!move_small,next(t_small))
+    +
+      % allow any move except for those that involve the smallest disc
+      (!move_small) ->
+        sum x,y,z:Nat . (z > 0) -> move_ok(x,y,z) . Judge(!move_small,t_small)
+    +
+      % allow done for any tower except tower 0
+      sum n:Nat . (n > 0) -> done_ok(n) . Judge(move_small,t_small);
+
+proc
+  Tower(id:Nat, stack:List(Nat)) = 
+    sum n,p:Nat .
+      (stack == [] || head(stack) > n) -> receive(p,id,n) . Tower(id,n |> stack)
+    + 
+    sum p:Nat .
+      (stack != []) -> send(id,p,head(stack)) . Tower(id,tail(stack))
+    +
+      (#stack == N) -> full(id) . Tower(id,stack);
+
+init
+  allow( {move,done},
+  comm( {send|receive|move_ok -> move, full|done_ok -> done},
+    Tower(0,FullStack) || Tower(1,[]) || Tower(2,[]) || Judge(true,0)
+  ));

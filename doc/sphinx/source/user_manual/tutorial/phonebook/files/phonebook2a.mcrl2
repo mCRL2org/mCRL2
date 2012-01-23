@@ -1,0 +1,28 @@
+%% file phonebook2a.mcrl2
+%% Telephone directory, modified to actually report the phone number as an
+%% answer to a query instantaneously.
+
+sort Name;
+     PhoneNumber;
+     PhoneBook = Name -> PhoneNumber;
+
+%% Phone number representing the non-existant or undefined phone number,
+%% must be different from any "real" phone number.
+map  p0: PhoneNumber; 
+
+%% Operations supported by the phone book.
+act  addPhone: Name # PhoneNumber;
+     delPhone: Name;
+     findPhone: Name # PhoneNumber; % Added phone number as argument
+
+%% Process representing the phone book.
+proc PhoneDir(b: PhoneBook) = 
+     sum n: Name, p: PhoneNumber . (p != p0) -> addPhone(n, p) . PhoneDir(b[n->p])
+   + sum n: Name . findPhone(n,b(n)) . PhoneDir()
+   + sum n: Name . delPhone(n) . PhoneDir(b[n->p0])
+   ;
+   
+%% Initially the phone book is empty.
+init PhoneDir(lambda n: Name . p0);
+
+

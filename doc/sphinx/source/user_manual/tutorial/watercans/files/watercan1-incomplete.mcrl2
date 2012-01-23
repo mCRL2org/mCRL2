@@ -1,0 +1,33 @@
+act
+
+  empty, fill, done;
+  lose, gain, pour: Nat ;
+
+proc
+
+  Can(n:Nat,m:Nat) =
+    ( m != 4 ) -> (
+      %% empty, if non-empty
+      (m > 0) -> ( empty . Can(n,0) ) +
+      %% fill, if not full
+      (m < n) -> ( fill . Can(n,n) ) +
+      %% pour to other if not empty
+      (m > 0) -> (
+        sum l:Nat . ( 
+          ( (0 < l) && (l <= m) ) -> (
+            lose(l) . Can(n,Int2Nat(m-l)) ) ) )  +
+      %% pour from other if not full
+      (m < n) -> (
+        sum l:Nat . ( 
+          ( (0 < l) && (l <= n-m) ) -> (
+            gain(l) . Can(n,m+l) ) ) )
+    ) <> done ; 
+
+init
+
+  allow( 
+    { empty, fill, done, pour },
+  comm(
+    { lose|gain -> pour },
+  Can(5,0) || Can(8,0) 
+    ) ) ;
