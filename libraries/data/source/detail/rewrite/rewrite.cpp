@@ -269,7 +269,12 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   const variable_list vl=lambda_term(1);
   const atermpp::aterm_appl lambda_body=rewrite_internal(lambda_term(2),sigma);
   size_t arity=t.size();
-  assert(vl.size()<=arity);
+  assert(arity>0);
+  if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
+  { 
+    return rewrite_single_lambda(vl, lambda_body, true, sigma);
+  }
+  assert(vl.size()<arity);
 
   mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
   size_t count=1;
@@ -289,7 +294,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   {
     sigma[it->second]=it->second;
   }
-  if (vl.size()==arity)
+  if (vl.size()+1==arity)
   {
     return result;
   }
