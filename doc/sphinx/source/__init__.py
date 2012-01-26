@@ -40,7 +40,7 @@ def call(name, cmdline, stdin=None):
     _LOG.warning('{0} error output: {1}'.format(name, err.strip()))
   return out
 
-def generate_rst(binpath, temppath, outpath):
+def generate_rst(binpath, temppath, outpath, version):
   import developer_manual
   import user_manual
   cfg_dev = os.path.join(os.path.dirname(__file__), 'developer_manual')
@@ -54,5 +54,13 @@ def generate_rst(binpath, temppath, outpath):
   clone_rst(cfg_usr, temp_usr)
   developer_manual.generate_rst(temppath, outpath)
   user_manual.generate_rst(temppath, outpath, binpath)
-  sphinx.main(['-bhtml', '-c', cfg_dev, temp_dev, out_dev])
-  sphinx.main(['-bhtml', '-c', cfg_usr, temp_usr, out_usr])
+  sphinx.main(['-bhtml', 
+               '-D', 'version={0}'.format('.'.join(version)), 
+               '-D', 'release={0}'.format(version[0]), 
+               '-c', cfg_dev, 
+               temp_dev, out_dev])
+  sphinx.main(['-bhtml', 
+               '-D', 'version={0}'.format('.'.join(version)), 
+               '-D', 'release={0}'.format(version[0]), 
+               '-c', cfg_usr, 
+               temp_usr, out_usr])

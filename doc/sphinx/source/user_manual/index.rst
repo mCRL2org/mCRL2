@@ -1,3 +1,5 @@
+.. include:: toplevel.inc
+
 .. image:: _static/mcrl2.png
    :align: center
    :class: frontpage-logo
@@ -8,15 +10,6 @@
 .. admonition:: Release
 
    Latest mCRL2 as of |today| release: |release|_. Current SVN version |version|_.
-
-.. raw:: html
-
-   <style type="text/css">
-   div.sphinxsidebar { display: none; }
-   div.bodywrapper { margin: 0 auto; width: 800px; }
-   table.frontpage-table td { border: 0; margin: 0; padding: 0; }
-   img.frontpage-logo { margin-top: 1.5em; }
-   </style>
 
 .. list-table::
    :class: frontpage-table

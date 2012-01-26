@@ -1,3 +1,5 @@
+.. include:: toplevel.inc
+
 Support
 =======
 

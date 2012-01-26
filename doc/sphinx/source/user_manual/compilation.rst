@@ -5,7 +5,7 @@ Compilation
 
 After :doc:`configuring <configuration>` CMake, build files for your build 
 system can be generated and used to build the binaries.
-
+ 
 .. admonition:: Windows
    :class: platform-specific win-only
 

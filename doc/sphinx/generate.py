@@ -32,6 +32,11 @@ def getarguments():
                     help="Force rebuild of selected targets. Choose from %(choices)s. "
                          "Use this flag more than once to force rebuilding multiple "
                          "targets.")
+  parser.add_argument("-v", "--version", dest="version", metavar="REL.SVN", action="store",
+                      default="unknown.unknown", 
+                      help="The version number to be used in the documentation. This "
+                           "should be a release number, followed by a period, followed "
+                           "by the SVN revision number.")
   return parser.parse_args()
 
 #
@@ -46,6 +51,7 @@ if __name__ == '__main__':
     clearcache(temppath, args.force)
   if args.clean:
     clean(temppath, outpath)
-  
+
+  sys.path = [os.path.dirname(__file__)] + sys.path
   import source
-  source.generate_rst('', temppath, outpath)
+  source.generate_rst('', temppath, outpath, args.version.split('.'))

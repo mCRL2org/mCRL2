@@ -10,7 +10,7 @@
 
 set( MCRL2_GENERATE_DOC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate.py )
 
-add_custom_target(doc ${MCRL2_GENERATE_DOC_SCRIPT}
+add_custom_target(doc ${MCRL2_GENERATE_DOC_SCRIPT} "-v=${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}"
   COMMENT "Generating mCRL2 documentation" VERBATIM
 )
 
