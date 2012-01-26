@@ -9,7 +9,7 @@ The Rope Bridge
 #. use of advanced visualisation techniques.
 
 **New tools**:
-:ref:`ltsview`, :ref:`tracepp`
+:ref:`tool-ltsview`, :ref:`tool-tracepp`
 
 .. image:: img/bridge.*
    :align: center
@@ -169,7 +169,7 @@ We shall now verify both properties again using the LTS tools.
   state space generation. Also, a trace is written to file for the first 20
   occurrences of this action. Properties A and B can now be checked by observing
   the output messages. Moreover, the trace for property A can be printed by
-  passing the corresponding trace file name as an argument to the :ref:`tracepp`
+  passing the corresponding trace file name as an argument to the :ref:`tool-tracepp`
   command, e.g.::
   
   $ tracepp file.trc

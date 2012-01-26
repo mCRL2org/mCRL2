@@ -11,8 +11,8 @@ A Vending Machine
 #. verification of modal mu-calculus properties.
 
 **New tools**:
-:ref:`mcrl22lps`, :ref:`lps2lts`, :ref:`ltsgraph`, :ref:`ltscompare`,
-:ref:`ltsconvert`, :ref:`lps2pbes`, :ref:`pbes2bool`.
+:ref:`tool-mcrl22lps`, :ref:`tool-lps2lts`, :ref:`tool-ltsgraph`, :ref:`tool-ltscompare`,
+:ref:`tool-ltsconvert`, :ref:`tool-lps2pbes`, :ref:`tool-pbes2bool`.
 
 Our first little step consists of number of variations on the good old
 vending machine, a user ``User`` interacting with a machine ``Mach``. By
@@ -81,7 +81,7 @@ obtained by running::
 
   $ lps2lts vm01.lps vm01.lts
    
-which can be viewed by the :ref:`ltsgraph` facility, by typing::
+which can be viewed by the :ref:`tool-ltsgraph` facility, by typing::
 
    $ ltsgraph vm01.lts
 
@@ -146,7 +146,7 @@ further variation involving conjunction ``&&``.
 Model checking with mCRL2 is done by constructing a so-called
 parameterised boolean equation system or PBES from a linear process
 specification and a modal :math:`\mu`-calculus formula. For example, to
-verify property (a) above, we call the :ref:`lps2pbes`
+verify property (a) above, we call the :ref:`tool-lps2pbes`
 tool. Assuming property (a) to be in file :download:`vm01a.mcf
 <files/vm01a.mcf>`, running::
 
@@ -237,20 +237,20 @@ the natural transition length may provide better results.
 
 The file :file:`vm02-taus.mcrl2` contains the specification of a system
 performing ``coin10`` and ``coin20`` actions as well as
-so-called :math:`\tau`-steps.  Use the :ref:`ltscompare` tool to compare
+so-called :math:`\tau`-steps.  Use the :ref:`tool-ltscompare` tool to compare
 your model under branching bisimilarity with the LTS of the system
 :file:`vm02-taus`, after hiding the actions ``readyA``, ``readyC``,
 ``out10``, ``out20``, ``prod``. This can be done as follows::
 
   $ ltscompare -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.svc vm02-taus.svc
 
-Minimize the LTS for :file:`vm02.mcrl2` using :ref:`ltsconvert` with
+Minimize the LTS for :file:`vm02.mcrl2` using :ref:`tool-ltsconvert` with
 respect to branching bisimulation after hiding the readies and returns::
 
   $ ltsconvert -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.svc vm02min.svc
   
 Also, compare the LTSs :file:`vm02min.svc` and `vm02-taus.svc` visually using
-:ref:`ltsgraph`.
+:ref:`tool-ltsgraph`.
 
 Third variation
 ^^^^^^^^^^^^^^^

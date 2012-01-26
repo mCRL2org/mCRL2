@@ -8,15 +8,7 @@
 </xsl:template>
 
 <xsl:template match="tool">
-  <xsl:text>
-.. index:: </xsl:text>
-  <xsl:apply-templates select="name"/>
-  <xsl:text>
-.. _</xsl:text>
-  <xsl:apply-templates select="name"/>
-  <xsl:text>:
-  
-Manual page for </xsl:text>
+  <xsl:text>Manual page for </xsl:text>
   <xsl:apply-templates select="name"/>
   <xsl:text>
 --------------------------------------------------------------------------------

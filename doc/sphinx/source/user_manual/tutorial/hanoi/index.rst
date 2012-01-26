@@ -175,7 +175,7 @@ The state space for ``N=3`` is depicted in Figure :ref:`fig-hanoi3`.
    
    State space of the Hanoi puzzle for 3 discs
 
-We use the tool :ref:`lps2lts` to see if there are any deadlocks by
+We use the tool :ref:`tool-lps2lts` to see if there are any deadlocks by
 passing the ``-D`` option.
 No deadlocks are reported.
 This implies that this specification allows to continue moving discs
@@ -190,7 +190,7 @@ the ``Peg`` process to:
 This ensures that the system deadlocks when all discs are on peg 3.
 When checking for deadlocks of the new specification we find precisely
 one, as expected. We save a trace to this deadlock in a file by adding the ``-t``
-option. The contents of the file can be printed using :ref:`tracepp`:
+option. The contents of the file can be printed using :ref:`tool-tracepp`:
 
 .. code-block:: mcrl2
 
@@ -296,9 +296,9 @@ composition.
        AllowSmall
      ));
 
-Generating the state space via :ref:`mcrl22lps` and :ref:`lps2lts` yields 8
+Generating the state space via :ref:`tool-mcrl22lps` and :ref:`tool-lps2lts` yields 8
 states and 7 transitions for ``N=3``. In general, the state space has
 :math:`2^N` states and :math:`2^N-1` transitions, as may be expected after our
 model-checking exercises on the complete model in the previous section. The
-action trace can be visualized by loading the state space into :ref:`ltsgraph`,
-or it can be simulated by loading the LPS into :ref:`lpsxsim`.
+action trace can be visualized by loading the state space into :ref:`tool-ltsgraph`,
+or it can be simulated by loading the LPS into :ref:`tool-lpsxsim`.

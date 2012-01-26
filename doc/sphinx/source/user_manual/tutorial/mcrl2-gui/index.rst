@@ -1,8 +1,8 @@
-Using :ref:`mcrl2-gui`
-======================
+Using :ref:`tool-mcrl2-gui`
+===========================
 
 All tools in the mCRL2 toolset are, besides their command-line interface, also
-available through the graphical user interface in :ref:`mcrl2-gui`.
+available through the graphical user interface in :ref:`tool-mcrl2-gui`.
 In this section we show by example how to use the toolset through the graphical
 user interface.
 
@@ -33,7 +33,7 @@ installation.
 |    :target: `tutorial-img1`_      |    :target: `tutorial-img2`_       |    :target: `tutorial-img3`_         |    :target: `tutorial-img4`_      |
 |    :align: center                 |    :align: center                  |    :align: center                    |    :align: center                 |
 |                                   |                                    |                                      |                                   |
-|    The :ref:`mcrl2-gui`           |    The :ref:`ltsgraph <ltsgraph>`  |    The ABP statespace after          |    The :ref:`ltsview <ltsview>`   |
+|    The :ref:`tool-mcrl2-gui`      |    The :ref:`tool-ltsgraph`        |    The ABP statespace after          |    The :ref:`tool-ltsview`        |
 |    interface.                     |    tool, showing the statespace of |    branching bisimulation reduction. |    tool showing the ABP           |
 |                                   |    the alternating bit protocol.   |                                      |    statespace in 3D.              |
 +-----------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
@@ -47,7 +47,7 @@ After right-clicking on the file ``abp.mcrl2``, a pop up menu shows up that
 displays the available operations that can be applied to the selected file.
 Operations differ per file, per extension and per folder. To transform the mcrl2
 specification into a linear specification, we need to use the tool 
-:ref:`mcrl22lps <mcrl22lps>`. This tool can be found under
+:ref:`tool-mcrl22lps`. This tool can be found under
 :menuselection:`Transformation --> mcrl22lps`. After selecting *mcrl22lps*, the
 *mcrl2-gui* displays the configuration panel, as shown below.
 
@@ -69,7 +69,7 @@ Generating a labelled transition system
 Now we right-click on the new created file. Note that files with an ``.lps``
 extension, have more tools that can use the input for the analysis or
 transformation. To generate a labeled transition system, we apply the
-transformation :ref:`lps2lts <lps2lts>` (:menuselection:`Transformation --> 
+transformation :ref:`tool-lps2lts` (:menuselection:`Transformation --> 
 lps2lts`). By selecting *lps2lts*, a new tab with options pops up in the
 configuration panel. For the moment we ignore all options, and simply click the
 run button. A new file called ``abp.lps2lts00.lts`` is generated.
@@ -78,7 +78,7 @@ run button. A new file called ``abp.lps2lts00.lts`` is generated.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There are several tools that work on ``.lts`` files. In particular, they can be
-visualized using the tool ltsgraph. When starting :ref:`ltsgraph <ltsgraph>`
+visualized using the tool ltsgraph. When starting :ref:`tool-ltsgraph`
 (:menuselection:`Analysis --> ltsgraph`), the states and transitions occur at
 random places. The states and labels can be moved around using the left mouse
 button. By pushing the neaten button, a simple positioning algorithm will start
@@ -89,8 +89,8 @@ resulting layout can be saved and exported to scalable graphics format (SVG) or
 LaTeX (pstricks). It is also possible to colour individual states and to change
 the curvature of transitions.
 
-Another tool that works on labelled transition systems, is :ref:`ltsconvert
-<ltsconvert>`. This is a very versatile tool to translate various
+Another tool that works on labelled transition systems, is :ref:`tool-ltsconvert`.
+This is a very versatile tool to translate various
 representations of labelled transitions systems to each other (e.g. the
 ``.aut``, ``.svc`` and ``.fsm`` formats). Moreover, it can apply strong,
 branching and trace equivalence reductions on the transition systems. Let's
@@ -106,8 +106,8 @@ in case it has two data items *d1* and *d2*.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Using *ltsconvert* it is also possible to create a ``.fsm`` file, which is the
-input format for two other graphical tools, namely :ref:`ltsview <ltsview>` and
-:ref:`diagraphica <diagraphica>`. Start *ltsconvert* on ``abp.lts``. Select as
+input format for two other graphical tools, namely :ref:`tool-ltsview` and
+:ref:`tool-diagraphica`. Start *ltsconvert* on ``abp.lts``. Select as
 an output file ``abp.fsm`` and put ``abp.lps`` as the linear process
 specification to be used. This last step is needed because the ``.fsm`` format
 requires the names, sorts and values of the process variables in each state.
@@ -165,7 +165,7 @@ layout changes while doing simulation steps.
 Simulating a linear process specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The tool :ref:`lpsxsim <lpsxsim>` operates on ``.lps`` files and can be used to
+The tool :ref:`tool-lpsxsim` operates on ``.lps`` files and can be used to
 simulate a process. The third picture above shows its interface. A very useful
 feature of *lpsxsim* is its capability to load traces. Traces generated with
 other tools (such as *lps2lts*) can easily be investigated in this way. For this

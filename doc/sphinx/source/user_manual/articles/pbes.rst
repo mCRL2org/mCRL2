@@ -5,7 +5,7 @@ Introduction
 ------------
 "Parameterised Boolean Equation Systems" (PBESs) can be used to encode model
 checking problems (such as verifying first-order modal :math:`\mu`-calculus
-formulae on LPSs, implemented in the tool :ref:`lps2pbes`; the translation of
+formulae on LPSs, implemented in the tool :ref:`tool-lps2pbes`; the translation of
 the first-order modal :math:`\mu`-calculus model checking problem on LPSs is
 documented in the `PBES library manual <../../developer_manual/libraries/pbes/pbes_library.html>`_.
 Furthermore, PBESs can be used to code equivalence and preorder relations on
@@ -140,8 +140,8 @@ be clear, one is most-often interested in the solution of a PBES, as it provides
 the answer to some verification task. Currently, two strategies have been
 implemented for solving PBESs:
 
-* Enumerative, by translation to BES, implemented in :ref:`pbes2bool`.
-* Enumerative, by translation to parity games, implemented in :ref:`pbespgsolve`.
+* Enumerative, by translation to BES, implemented in :ref:`tool-pbes2bool`.
+* Enumerative, by translation to parity games, implemented in :ref:`tool-pbespgsolve`.
 
 Symbolic approximation + Gauß elimination
 """""""""""""""""""""""""""""""""""""""""

@@ -86,7 +86,7 @@ to get a feeling for the relevant concepts and tools, we describe the workflow
 of a typical analysis using mCRL2 below.
 
 All tools can be accessed via a command-line interface. Another possibility is
-to use the :ref:`mcrl2-gui` tool which provides access to the tools via a GUI.
+to use the :ref:`tool-mcrl2-gui` tool which provides access to the tools via a GUI.
 
 .. figure:: ToolsetOverview.png
    :align: center
@@ -117,7 +117,7 @@ of its much simpler form, the LPS is much more suitable for automated analysis
 than an mCRL2 specification. Therefore, most tools in the mCRL2 toolset operate
 on LPSs.
 
-The main tool for linearisation is :ref:`mcrl22lps`. Given an mCRL2
+The main tool for linearisation is :ref:`tool-mcrl22lps`. Given an mCRL2
 specification, it produces an equivalent LPS on which other tools can be run. We
 investigate these tools below.
 
@@ -129,51 +129,51 @@ the initial state, sequences of actions can be performed which can quickly
 reveal unexpected or erroneous behaviour. It is also a good way of getting
 acquainted with the modelled behaviour.
 
-The mCRL2 toolset contains two tools for simulation of an LPS: :ref:`lpssim`
+The mCRL2 toolset contains two tools for simulation of an LPS: :ref:`tool-lpssim`
 (command-line interface) and xsim (graphical user interface).
 
 Some statistical information about an LPS can be collected using the
-:ref:`lpsinfo` tool. The LPS itself can also be printed in a pretty,
-human-readable format. The tool for this task is :ref:`lpspp`.
+:ref:`tool-lpsinfo` tool. The LPS itself can also be printed in a pretty,
+human-readable format. The tool for this task is :ref:`tool-lpspp`.
 
 In essence, the LPS is a symbolic (or implicit) representation of the state
 space or labelled transition system (LTS) that describes the behaviour of the
 system explicitly. This LTS can be constructed from the LPS using a state space
-generator. In mCRL2 the tool that performs this task is :ref:`lps2lts`.
+generator. In mCRL2 the tool that performs this task is :ref:`tool-lps2lts`.
 
 As state space generation can take a lot of time, it is often beneficial to
 reduce the LPS or make it more suitable for state space generation. Several
-tools are available for this, of which we mention a few here: :ref:`lpssumelm`,
-:ref:`lpssuminst`, :ref:`lpsparelm`, :ref:`lpsconstelm` and :ref:`lpsrewr`.
+tools are available for this, of which we mention a few here: :ref:`tool-lpssumelm`,
+:ref:`tool-lpssuminst`, :ref:`tool-lpsparelm`, :ref:`tool-lpsconstelm` and :ref:`tool-lpsrewr`.
 
 LTS tools
 ^^^^^^^^^
 Once an LTS has been generated from an LPS, it can be visualised in several ways
 using interactive GUI tools. The most straightforward way of visualising an LTS
-is by showing it as a node-link diagram or graph. The :ref:`ltsgraph` tool
+is by showing it as a node-link diagram or graph. The :ref:`tool-ltsgraph` tool
 performs this task. It can reorganise the produced image using a force-directed
 algorithm.
 
 The picture produced by ltsgraph can become very cluttered for larger LTSs.
-Another LTS visualisation tool is :ref:`ltsview` which employs a clustering
+Another LTS visualisation tool is :ref:`tool-ltsview` which employs a clustering
 technique to reduce the complexity of the image. It produces a 3D visualisation
 of the LTS and aims to show symmetry in the behaviour of the system.
 
-The tool :ref:`diagraphica` also clusters states to reduce complexity, producing
+The tool :ref:`tool-diagraphica` also clusters states to reduce complexity, producing
 a 2D image. It clusters states based on state parameter values, instead of on
-structural properties like :ref:`ltsview`.
+structural properties like :ref:`tool-ltsview`.
 
-Apart from these visualisation tools, a powerful tool is :ref:`ltsconvert` which
+Apart from these visualisation tools, a powerful tool is :ref:`tool-ltsconvert` which
 can reduce an LTS modulo various equivalences. This often produces an LTS that
 is dramatically smaller than the original LTS, while important properties are
 maintained. The tool can also convert between various LTS file formats, some of
 which are textual, others binary.
 
-An equally powerful tool is :ref:`ltscompare` which can check whether two LTSs
+An equally powerful tool is :ref:`tool-ltscompare` which can check whether two LTSs
 are behaviourally equivalent or similar using various notions of
 equivalence/similarity.
 
-The tool :ref:`lts2lps` can transform an LTS into an LPS, such that symbolic
+The tool :ref:`tool-lts2lps` can transform an LTS into an LPS, such that symbolic
 computation can be continued, e.g. after minimisation.
 
 Model checking using PBESs
@@ -199,20 +199,20 @@ Given an LPS and a formula, the tool lps2pbes produces a PBES in which the model
 checking question of "does the formula hold for this LPS?" is encoded. The PBES
 is stored in a binary file format. By solving the PBES, an answer to this
 question can be found. The main tool for trying to solve a PBES is
-:ref:`pbes2bool`. It attempts to solve a given PBES and (if successful) returns
+:ref:`tool-pbes2bool`. It attempts to solve a given PBES and (if successful) returns
 either true or false.
 
 Note that solving PBESs is generally undecidable, so the attempt may fail. In
 this case, more in-depth analysis of the PBES may be required. The tool
-:ref:`pbespp` is provided to pretty print a PBES in a human-readable format.
-Statistical information can be obtained using :ref:`pbesinfo` and the PBES can
-be simplified using :ref:`pbesrewr`. Furthermore some tools for simplifying the
-PBES are available, such as :ref:`pbesparelm` and :ref:`pbesconstelm`.
+:ref:`tool-pbespp` is provided to pretty print a PBES in a human-readable format.
+Statistical information can be obtained using :ref:`tool-pbesinfo` and the PBES can
+be simplified using :ref:`tool-pbesrewr`. Furthermore some tools for simplifying the
+PBES are available, such as :ref:`tool-pbesparelm` and :ref:`tool-pbesconstelm`.
 
 Import and export
 ^^^^^^^^^^^^^^^^^
 The mCRL2 toolset also provides tools for converting system specifications in
 other languages to mCRL2. This can be done for Chi-models using
-:ref:`chi2mcrl2`, and for typed LySa using :ref:`lysa2mcrl2`. Furthermore a μCRL
-linear process can be converted to an mCRL2 LPS using :ref:`tbf2lps`. Finally,
-an interface with the TorX tool is provided by :ref:`lps2torx`.
+:ref:`tool-chi2mcrl2`, and for typed LySa using :ref:`tool-lysa2mcrl2`. Furthermore a μCRL
+linear process can be converted to an mCRL2 LPS using :ref:`tool-tbf2lps`. Finally,
+an interface with the TorX tool is provided by :ref:`tool-lps2torx`.
