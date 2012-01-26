@@ -72,10 +72,10 @@ void syntax_error_fn(struct D_Parser *ap)
     return;
   }
   Parser *p = (Parser *) ap;
-  std::string fn;
+  std::string filename;
   if (p->user.loc.pathname)
   {
-    fn = std::string(p->user.loc.pathname);
+    filename = std::string(p->user.loc.pathname);
   }
   std::string after;
   ZNode *z = p->snode_hash.last_all ? p->snode_hash.last_all->zns.v[0] : 0;
@@ -87,7 +87,7 @@ void syntax_error_fn(struct D_Parser *ap)
   {
     after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
   }
-  std::cerr << fn << ":" << p->user.loc.line << ":" << p->user.loc.col << " syntax error";
+  std::cerr << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
   if (!after.empty())
   {
     std::cerr << " after '" << after << "'";
