@@ -54,4 +54,4 @@ if __name__ == '__main__':
 
   sys.path = [os.path.dirname(__file__)] + sys.path
   import source
-  source.generate_rst('', temppath, outpath, args.version.split('.'))
+  source.generate_rst('', temppath, outpath, args.version.rsplit('.', 1))
