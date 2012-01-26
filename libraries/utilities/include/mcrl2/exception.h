@@ -34,7 +34,7 @@ class runtime_error : public std::runtime_error
 
     /// \brief Constructor
     /// \param[in] message the exception message
-    runtime_error(std::string const& message) : std::runtime_error(message), m_message(std::string("error: ").append(message))
+    runtime_error(std::string const& message) : std::runtime_error(message), m_message(message)
     {
     }
 
