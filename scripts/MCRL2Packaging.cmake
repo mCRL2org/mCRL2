@@ -7,25 +7,17 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 ##---------------------------------------------------
-## File for packaging
-##---------------------------------------------------
-
-##---------------------------------------------------
 ## CPack configuration
 ##---------------------------------------------------
 
 INCLUDE(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "mcrl2")
-if(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "svn${SVN_REV}")
-else(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "${MCRL2_SVN_LABEL}")
-endif(MCRL2_SVN_LABEL STREQUAL "")
+set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
 set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}
+set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
 
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")

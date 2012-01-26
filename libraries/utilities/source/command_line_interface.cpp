@@ -396,7 +396,7 @@ std::string interface_description::copyright_message()
 
 std::string interface_description::version_information() const
 {
-  return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
+  return m_name + " mCRL2 toolset " + get_toolset_version() + "\n" +
          copyright_message() + "\nWritten by " + m_authors + ".\n";
 }
 
@@ -526,7 +526,7 @@ std::string interface_description::man_page() const
 
   s.imbue(std::locale(s.getloc()));
 
-  s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
+  s << ".\\\" " << "Manual page for " << m_name << " version " << get_toolset_version() << "." << " .\\\"" << std::endl
     << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
 
   // Determine month and year, to prevent using boost date/time
@@ -541,7 +541,7 @@ std::string interface_description::man_page() const
   std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
   s << ".TH " << name_upper << " \"1\" \""
     << std::string(buffer) << "\" \""
-    << m_name << " mCRL2 toolset " << version_tag()
+    << m_name << " mCRL2 toolset " << get_toolset_version()
     << "\" \"User Commands\"" << std::endl;
 
   s << ".SH NAME" << std::endl

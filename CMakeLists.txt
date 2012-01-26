@@ -219,24 +219,9 @@ include(ConfigureWxWidgets)
 ## Determine latest SVN revision
 ##---------------------------------------------------
 
-set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
-if( MCRL2_SVN_LABEL STREQUAL "" )
-  if( MCRL2_ENABLE_SVN )
-  FIND_PACKAGE(Subversion)
-    IF(SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-      Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  	  set(SVN_REV ${Project_WC_REVISION})
-    ELSE(SUBVERSION_FOUND)
-      set(SVN_REV "Unknown")
-    ENDIF(SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-  else( MCRL2_ENABLE_SVN )
-    set( SVN_REV "Unknown" )	
-  endif( MCRL2_ENABLE_SVN )
-else( MCRL2_SVN_LABEL STREQUAL "" )
-  set( SVN_REV ${MCRL2_SVN_LABEL} )	
-endif( MCRL2_SVN_LABEL STREQUAL "" )
-
-message(STATUS "SVN revision: ${SVN_REV}")
+include(MCRL2Version)
+message(STATUS "mCRL2 version: ${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}")
+message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
 
 ##---------------------------------------------------
 ## Find cvc3 

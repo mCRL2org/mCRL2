@@ -6,13 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file toolset_revision.cpp
+/// \file toolset_version.cpp
 
-//Note: compilation of this file requires MCRL2_REVISION to be defined
+//Note: compilation of this file requires MCRL2_VERSION to be defined
 
-#include "mcrl2/utilities/toolset_revision.h"
+#include "mcrl2/utilities/toolset_version.h"
 
-std::string mcrl2::utilities::get_toolset_revision()
+std::string mcrl2::utilities::get_toolset_version()
 {
-  return MCRL2_REVISION;
+  return MCRL2_VERSION;
 }

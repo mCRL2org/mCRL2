@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/toolset_revision.h
+/// \file mcrl2/utilities/toolset_version.h
 ///
 /// \brief Get the toolset revision
 
-#ifndef MCRL2_UTILITIES_TOOLSET_REVISION_H
-#define MCRL2_UTILITIES_TOOLSET_REVISION_H
+#ifndef MCRL2_UTILITIES_TOOLSET_VERSION_H
+#define MCRL2_UTILITIES_TOOLSET_VERSION_H
 
 #include <string>
 
@@ -22,9 +22,9 @@ namespace utilities
 
 /// \brief  Get the toolset revision
 /// \return A string representation of the toolset revision
-std::string get_toolset_revision();
+std::string get_toolset_version();
 
 }
 }
 
-#endif // MCRL2_UTILITIES_TOOLSET_REVISION_H
+#endif // MCRL2_UTILITIES_TOOLSET_VERSION_H

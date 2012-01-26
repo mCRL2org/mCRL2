@@ -15,7 +15,7 @@
 ##---------------------------------------------------
 
 ## Set properties for testing
-set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
+set(MCRL2_TEST_LABEL "rev.${MCRL2_VERSION}-${CMAKE_BUILD_TYPE}")
 
 
 option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
