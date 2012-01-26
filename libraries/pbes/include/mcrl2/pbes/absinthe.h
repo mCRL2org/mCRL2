@@ -432,7 +432,6 @@ struct absinthe_algorithm
       }
       else
       {
-        pbes_expression y = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
         result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
       }
       return result;
@@ -979,7 +978,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
 
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
-      data::function_symbol f1 = i->first;
+      // data::function_symbol f1 = i->first;
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
