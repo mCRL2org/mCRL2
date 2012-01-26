@@ -15,9 +15,14 @@ cmake_minimum_required(VERSION 2.6)
 # Silence warnings while compiling generated C code (mcrl2_syntax.c is the only
 # C code in this library)
 if(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w") # Disable all warnings
 else(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
+  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w") # Disable all warnings
+  else (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    # Assuming GCC: disable only the missing-field-initializer warning.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
+  endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 endif(MSVC)
 
 add_custom_command(
