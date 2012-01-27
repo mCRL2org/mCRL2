@@ -208,7 +208,7 @@ class data_property_map
     /// be redefined in derived classes.
     /// \return An empty string if the two values are equal, otherwise a string indicating
     /// the differences between the two.
-    std::string compare_property(std::string property, std::string x, std::string y) const
+    std::string compare_property(std::string property, std::string /* x */, std::string /* y */) const
     {
       return "ERROR: unknown property " + property + " encountered!";
     }
