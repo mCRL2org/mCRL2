@@ -889,7 +889,8 @@ bool is_deterministic(const LTS_TYPE& l)
 }
 
 
-static bool compare_transition_label_to_from(const transition& t1, const transition& t2)
+inline
+bool compare_transition_label_to_from(const transition& t1, const transition& t2)
 {
   if (t1.label() != t2.label())
   {
@@ -905,7 +906,10 @@ static bool compare_transition_label_to_from(const transition& t1, const transit
   }
 }
 
-static void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
+namespace detail
+{
+inline
+void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
                       tree_set_store* tss,
                       size_t d,
                       std::vector<transition> &d_trans)
@@ -927,6 +931,7 @@ static void get_trans(std::multimap < transition::size_type, std::pair < transit
     }
   }
 }
+} // namespace detail
 
 
 template <class LTS_TYPE>
@@ -960,7 +965,7 @@ void determinise(LTS_TYPE& l)
   {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
-    get_trans(begin,tss,tss->get_set(d_id),d_transs);
+    detail::get_trans(begin,tss,tss->get_set(d_id),d_transs);
 
     // sort d_transs by label and (if labels are equal) by destination
     sort(d_transs.begin(),d_transs.end(),compare_transition_label_to_from);

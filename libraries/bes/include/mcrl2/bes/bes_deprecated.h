@@ -134,7 +134,8 @@ static size_t largest_power_of_2_smaller_than(size_t i)
   return j;
 }
 
-static void assign_variables_in_tree(
+inline
+void assign_variables_in_tree(
      ATerm t,
      mcrl2::data::variable_list::iterator& var_iter,
      mcrl2::data::detail::legacy_rewriter& rewriter,

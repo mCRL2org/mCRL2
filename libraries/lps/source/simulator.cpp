@@ -8,7 +8,7 @@
 //
 /// \file simulator.cpp
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "mcrl2/lps/simulator.h"
 #endif
 

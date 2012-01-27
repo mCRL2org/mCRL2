@@ -103,40 +103,6 @@ static data::function_symbol& negate_function_symbol(const sort_expression s)
   return f;
 }
 
-/// \brief Returns a list of all real expressions in l
-/// \param l a list of data expressions
-/// \ret The list of all e in l such that e.sort() == real()
-static inline
-data_expression_list get_real_expressions(const data_expression_list& l)
-{
-  data_expression_list r;
-  for (data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    if (i->sort() == sort_real::real_())
-    {
-      r = push_front(r, *i);
-    }
-  }
-  return r;
-}
-
-/// \brief Returns a list of all nonreal expressions in l
-/// \param l a list of data expressions
-/// \ret The list of all e in l such that e.sort() != real()
-static inline
-data_expression_list get_nonreal_expressions(const data_expression_list& l)
-{
-  data_expression_list r;
-  for (data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    if (i->sort() != sort_real::real_())
-    {
-      r = push_front(r, *i);
-    }
-  }
-  return r;
-}
-
 /// \brief Returns a list of all real assignments in l
 /// \param l a list of data assignments
 /// \ret The list of all x := e in l such that x.sort() == e.sort() == real()
@@ -452,30 +418,6 @@ static void normalize_specification(
 
   // s = set_lps(s, lps);
   //return s;
-}
-
-/// \brief Determine the inequalities ranging over real numbers in a data expression.
-/// \param e A data expression
-/// \param inequalities A list of inequalities
-/// \post inequalities contains all inequalities ranging over real numbers in e.
-static
-void determine_real_inequalities(
-  const data_expression& e,
-  std::vector < linear_inequality > &inequalities,
-  const rewriter& r)
-{
-  // mCRL2log(debug) << "Real inequalities in" << data::pp(e) << "\n";
-  if (sort_bool::is_and_application(e))
-  {
-    determine_real_inequalities(application(e).left(), inequalities,r);
-    determine_real_inequalities(application(e).right(), inequalities,r);
-  }
-  else if (is_inequality(e) && (application(e).right().sort() == sort_real::real_()))
-  {
-    inequalities.push_back(linear_inequality(e,r));
-  }
-  // mCRL2log(debug) << "Real inequalities out" << pp_vector(inequalities) << "\n";
-  //else Do nothing, as it is not an expression on reals
 }
 
 /// \brief Add postponed inequalities to variable context
