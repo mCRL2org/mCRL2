@@ -134,7 +134,8 @@ As a running example, consider the following PBES:
 
 .. math::
 
-  (\mu X(b \colon Bool) = b \lor X(\neg b) \lor Y(b) )  (\nu Y(b \colon Bool) = X(b) \land Y(b) )
+  \mu X(b \colon Bool) & = b \lor X(\neg b) \lor Y(b)\\
+  \nu Y(b \colon Bool) & = X(b) \land Y(b)
 
 Gauß Elimination basically employs the migration and substitution
 transformations to solve the global PBES, whereas symbolic approximation tries
@@ -144,12 +145,12 @@ sequence of approximations is needed for computing the solution to :math:`Y`:
 
 .. math::
 
-  Y_0 = true
-  Y_1 = (X(b) \land Y(b))[Y := \lambda b \colon Bool. true]
-      = X(b)
-  Y_2 = (X(b) \land Y(b))[Y := \lambda b \colon Bool. X(b)]
-      = X(b) \land X(b)
-      = X(b)
+  Y_0 & = true \\
+  Y_1 & = (X(b) \land Y(b))[Y := \lambda b \colon Bool. true] \\
+      & = X(b) \\
+  Y_2 & = (X(b) \land Y(b))[Y := \lambda b \colon Bool. X(b)] \\
+      & = X(b) \land X(b) \\
+      & = X(b)
 
 Since the approximation process stabilises at the second approximant, the
 solution to :math:`Y` is the predicate formula :math:`X(b)`. A solution that is
@@ -159,11 +160,13 @@ PBES:
 
 .. math::
 
-  (\mu X(b \colon Bool) = b \lor X(\neg b) \lor Y(b)) (\nu Y(b \colon Bool) = X(b) )
+  \mu X(b \colon Bool) & = b \lor X(\neg b) \lor Y(b) \\
+  \nu Y(b \colon Bool) & = X(b)
 
 Substitution then gives the following equivalent PBES:
 
-  (\mu X(b \colon Bool) = b \lor X(\neg b) \lor X(b) ) (\nu Y(b\colon Bool) = X(b) )
+  \mu X(b \colon Bool) & = b \lor X(\neg b) \lor X(b) \\
+  \nu Y(b \colon Bool) & = X(b)
 
 Observe that the equation for :math:`X` is *closed*, meaning that it does not
 refer to predicate variables, other than :math:`X`. Solving the equation for
@@ -171,12 +174,12 @@ refer to predicate variables, other than :math:`X`. Solving the equation for
 
 .. math::
 
-  X_0 = false
-  X_1 = (b \lor X(\neg b) \lor X(b))[ X := \lambda b \colon Bool . false]
-      = b
-  X_2 = (b \lor X(\neg b) \lor X(b))[ X := \lambda b \colon Bool . b]
-      = b \lor \neg b \lor b
-      = true
+  X_0 & = false \\
+  X_1 & = (b \lor X(\neg b) \lor X(b))[ X := \lambda b \colon Bool . false]\\
+      & = b\\
+  X_2 & = (b \lor X(\neg b) \lor X(b))[ X := \lambda b \colon Bool . b]\\
+      & = b \lor \neg b \lor b\\
+      & = true
 
 Since there is no predicate formula weaker than :math:`true`, the solution to
 :math:`X` is also :math:`true`. Replacing the solution :math:`true` for the
@@ -185,14 +188,16 @@ equivalent equation system:
 
 .. math::
 
-  (\mu X(b \colon Bool) = true )  (\nu Y(b \colon Bool) = X(b) )
+  \mu X(b \colon Bool) & = true \\
+  \nu Y(b \colon Bool) & = X(b)
 
 Using migration, and, subsequently a substitution, the following **solved** PBES
 is obtained:
 
 .. math::
 
-  (\nu Y(b \colon Bool) = true )(\mu X(b \colon Bool) = true )
+  \nu Y(b \colon Bool) & = true \\
+  \mu X(b \colon Bool) & = true
 
 Suppose we would be interested in knowning whether :math:`X(false)` would be
 :math:`true` or :math:`false` then requires looking at the solved PBES and
@@ -204,7 +209,8 @@ Again, as a running example, consider the following PBES:
 
 .. math::
 
-  (\mu X(b \colon Bool) = b \lor X(\neg b) \lor Y(b) )  (\nu Y(b \colon Bool) = X(b) \land Y(b) )
+  \mu X(b \colon Bool) & = b \lor X(\neg b) \lor Y(b)\\
+  \nu Y(b \colon Bool) & = X(b) \land Y(b)
 
 The enumerative approach explores the equations of a PBES on demand. Suppose we
 are interested in knowning whether :math:`X(false)` would be :math:`true` or
@@ -225,10 +231,10 @@ For the example, this yields the following strategy:
 
 .. math::
 
-    (b \lor X(\neg b) \lor Y(b) )[b := false]
-  = X(true) \lor Y(false)
+    & (b \lor X(\neg b) \lor Y(b) )[b := false]\\
+  = & X(true) \lor Y(false)
 
-Introduce an equation :math:(\mu X_{false} = X_{true} \lor Y_{false} )` and
+Introduce an equation :math:`(\mu X_{false} = X_{true} \lor Y_{false} )` and
 continue with the computation for the equations for :math:`X(true)` and
 :math:`Y(false)`. This yields two more equations:
 :math:`(\mu X_{true} = true )` and
@@ -238,7 +244,9 @@ following PBES:
 
 .. math::
 
-  (\mu X_{false} = X_{true} \lor Y_{false} ) (\mu X_{true} = true ) (\nu Y_{false} = X_{false} \land Y_{false})
+  \mu X_{false} & = X_{true} \lor Y_{false} \\ 
+  \mu X_{true} & = true  \\
+  \nu Y_{false} & = X_{false} \land Y_{false}
 
 The resulting PBES is a BES, for which several well-documented algorithms exist
 for computing the solution. The solution to :math:`X(false)` is effectively
