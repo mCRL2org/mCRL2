@@ -380,9 +380,9 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 
 
       values.clear();
-      values.push_back("vector");
       values.push_back("tree");
-
+      values.push_back("vector");
+      
       m_gui_options["state-format"] = create_radiobox_widget(values);
       m_gui_options["divergence"] = create_checkbox_widget();
       m_gui_options["init-tsize"] = create_textctrl_widget();
