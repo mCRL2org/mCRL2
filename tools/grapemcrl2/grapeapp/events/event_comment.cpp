@@ -224,7 +224,7 @@ bool grape_event_attach_comment::Do(void)
   dia_ptr->attach_comment_to_object(comm_ptr, obj_ptr);
   finish_modification();
   return true;
-  comm_ptr->set_reference_selected(true);
+  //comm_ptr->set_reference_selected(true);
 }
 
 bool grape_event_attach_comment::Undo(void)

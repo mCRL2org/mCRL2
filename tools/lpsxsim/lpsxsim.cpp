@@ -13,7 +13,7 @@
 #define NAME "lpsxsim"
 #define AUTHOR "Muck van Weerdenburg"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "lpsxsim.h"
 #endif
 

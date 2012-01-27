@@ -10,7 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "lpsxsimtrace.h"
 #endif
 
