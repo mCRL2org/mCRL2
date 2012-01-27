@@ -334,7 +334,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
       const variable_list vl,
       const atermpp::aterm_appl t1,
-      const bool t1_is_normal_form,
+      const bool /* t1_is_normal_formi */,
       internal_substitution_type &sigma)
 {
   // First rename the bound variables to unique
@@ -411,7 +411,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
       const variable_list vl,
       const atermpp::aterm_appl t1,
-      const bool t1_is_normal_form,
+      const bool /* t1_is_normal_formi */,
       internal_substitution_type &sigma)
 {
   // First rename the bound variables to unique
