@@ -65,17 +65,25 @@ string Converter::make_proc_def(string proc_name, string process, Context& conte
   bool b = false;
   BOOST_FOREACH(mv, context.mvars)
   {
-    if (b++)
+    if (b)
     {
       proc_args << ", ";
+    }
+    else
+    {
+      b = true;
     }
     proc_args << mv.first << ": Nat";
   }
   BOOST_FOREACH(v, context.vars)
   {
-    if (b++)
+    if (b)
     {
       proc_args << ", ";
+    }
+    else
+    {
+      b = true;
     }
     proc_args << v.second << ": Value";
   }
@@ -109,9 +117,13 @@ void stream_cartesian_product_args(ostringstream& process, vector<vector<size_t>
     bool b = false;
     while (!stop)
     {
-      if (b++)
+      if (b)
       {
         process << separator;
+      }
+      else
+      {
+    	b = true;
       }
 
       //draw proc call
@@ -206,9 +218,13 @@ string Converter::to_mcrl2(IndexedParallel& ipar, Context context)
     bool bb = false;
     BOOST_FOREACH(v, context.vars)
     {
-      if (bb++)
+      if (bb)
       {
         add_args += ", ";
+      }
+      else
+      {
+    	bb = true;
       }
       add_args += v.second;
     }
@@ -271,9 +287,13 @@ string Converter::to_mcrl2(OrdinaryParallel& opar, Context context)
     bool bb = false;
     BOOST_FOREACH(string proc_name, proc_names)
     {
-      if (bb++)
+      if (bb)
       {
         process << " || ";
+      }
+      else
+      {
+    	  bb = true;
       }
       pair<string, string> mv, v;
       ostringstream proc_args;
@@ -283,18 +303,26 @@ string Converter::to_mcrl2(OrdinaryParallel& opar, Context context)
       bool b = false;
       BOOST_FOREACH(mv, context.mvars)
       {
-        if (b++)
+        if (b)
         {
           proc_args << ", ";
+        }
+        else
+        {
+          b = true;
         }
         proc_args << mv.first;
       }
       //pass vars
       BOOST_FOREACH(v, context.vars)
       {
-        if (b++)
+        if (b)
         {
           proc_args << ", ";
+        }
+        else
+        {
+          b = true;
         }
         proc_args << v.second;
       }
@@ -303,12 +331,20 @@ string Converter::to_mcrl2(OrdinaryParallel& opar, Context context)
       {
         process << proc_args.str();
       }
+      else
+      {
+        b = true;
+      }
     }
     BOOST_FOREACH(string par_subproc, par_subprocs)
     {
-      if (bb++)
+      if (bb)
       {
         process << " || ";
+      }
+      else
+      {
+        bb = true;
       }
       process << par_subproc;
     }
@@ -322,9 +358,13 @@ string Converter::to_mcrl2(Send& send, Context context)
   bool b = false;
   BOOST_FOREACH(shared_ptr<Term> t, *send.terms)
   {
-    if (b++)
+    if (b)
     {
       st["terms"] << ", ";
+    }
+    else
+    {
+      b = true;
     }
     st["terms"] << to_mcrl2(t, context);
   }
@@ -373,18 +413,26 @@ string Converter::to_mcrl2(DY& dy, Context context)
       ds.push_back(d);
     }
 
-    if (b++)
+    if (b)
     {
       st["known_names"] << ", ";
+    }
+    else
+    {
+      b = true;
     }
     stream_cartesian_product_args(st["known_names"], ds, n.first, "", ", ");
   }
   string hint = dy.hint();
   if (!hint.empty())
   {
-    if (b++)
+    if (b)
     {
       st["known_names"] << ", ";
+    }
+    else
+    {
+      b = true;
     }
     st["known_names"] << hint;
   }
@@ -484,9 +532,13 @@ void Converter::to_mcrl2(PMatchTerms& pmt, Context& context, StringTemplate& st,
     bool b = false;
     BOOST_FOREACH(shared_ptr<Term> t, *pmt.match_terms)
     {
-      if (b++)
+      if (b)
       {
         st["pm_terms"] << ", ";
+      }
+      else
+      {
+        b = true;
       }
       st["pm_terms"] << to_mcrl2(t, context);
     }
@@ -518,9 +570,13 @@ void Converter::to_mcrl2(PMatchTerms& pmt, Context& context, StringTemplate& st,
         if (v != context.vars.end())
         {
           v->second += "'";
-          if (b++)
+          if (b)
           {
             prime_vars << ", ";
+          }
+          else
+          {
+            b = true;
           }
           prime_vars << v->second;
         }
@@ -545,9 +601,13 @@ void Converter::to_mcrl2(PMatchTerms& pmt, Context& context, StringTemplate& st,
     bool b = false;
     BOOST_FOREACH(shared_ptr<Term> t, *pmt.match_terms)
     {
-      if (b++)
+      if (b)
       {
         st["pm_terms_updated"] << ", ";
+      }
+      else
+      {
+        b = true;
       }
       st["pm_terms_updated"] << to_mcrl2(t, context);
     }
@@ -573,10 +633,14 @@ void Converter::to_mcrl2(PMatchTerms& pmt, Context& context, StringTemplate& st,
       context.vars[tv->name] = tv->name;
 
       //draw separators
-      if (b++)
+      if (b)
       {
         st["vars"] << ", ";
         st["type_exprs"] << templates.fmt_string("type_sep");
+      }
+      else
+      {
+        b = true;
       }
 
       //draw type expr
@@ -674,9 +738,13 @@ string Converter::to_mcrl2(Ciphertext& ct, const Context& context)
   bool b = false;
   BOOST_FOREACH(shared_ptr<Term> t, *ct.terms)
   {
-    if (b++)
+    if (b)
     {
       st["terms"] << ", ";
+    }
+    else
+    {
+      b = true;
     }
     st["terms"] << to_mcrl2(t, context);
   }
@@ -742,9 +810,13 @@ string Converter::to_mcrl2(Annotation& anno, const Context& context)
       //Cryptopoint_list& cps = *(anno.dest_orig);
       BOOST_FOREACH(shared_ptr<Cryptopoint> cp, *anno.dest_orig)
       {
-        if (b++)
+        if (b)
         {
           st["destorig"] << ", ";
+        }
+        else
+        {
+          b = true;
         }
         st["destorig"] << to_mcrl2(*cp);
       }
@@ -761,9 +833,13 @@ string Converter::to_mcrl2(Annotation& anno, const Context& context)
           pair<string, string> mv;
           BOOST_FOREACH(mv, context.mvars)
           {
-            if (b++)
+            if (b)
             {
               sf_ai["indices"] << ", ";
+            }
+            else
+            {
+              b = true;
             }
             sf_ai["indices"] << mv.first;
           }
@@ -821,13 +897,14 @@ void stream_sort_def(ostringstream& structs, map<string, size_t>& m)
   bool b = false;
   BOOST_FOREACH(p, m)
   {
-    if (b++)
+    if (b)
     {
       structs << "  | ";
     }
     else
     {
       structs << "    ";
+      b = true;
     }
     structs << p.first;
     if (p.second>0)
