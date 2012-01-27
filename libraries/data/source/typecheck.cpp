@@ -178,7 +178,6 @@ static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
 static bool gstcMActIn(ATermList MAct, ATermList MActs);
 static bool gstcMActEq(ATermList MAct1, ATermList MAct2);
-static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
 static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type);
@@ -5744,38 +5743,6 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
     {
       MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
       return gstcMActEq(MAct1,MAct2);
-    }
-    else
-    {
-      NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
-    }
-  }
-  return false;
-}
-
-static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
-{
-  //returns true if MAct1 is a submultiaction of MAct2.
-  if (ATgetLength(MAct1)>ATgetLength(MAct2))
-  {
-    return false;
-  }
-  if (ATisEmpty(MAct1))
-  {
-    return true;
-  }
-  ATermAppl Act1=ATAgetFirst(MAct1);
-  MAct1=ATgetNext(MAct1);
-
-  //remove Act1 once from MAct2. if not there -- return ATfalse.
-  ATermList NewMAct2=ATmakeList0();
-  for (; !ATisEmpty(MAct2); MAct2=ATgetNext(MAct2))
-  {
-    ATermAppl Act2=ATAgetFirst(MAct2);
-    if (ATisEqual(Act1,Act2))
-    {
-      MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
-      return gstcMActSubEq(MAct1,MAct2);
     }
     else
     {
