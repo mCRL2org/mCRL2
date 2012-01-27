@@ -199,9 +199,20 @@ void Simulation::followTrans()
 
 void Simulation::chooseTrans(int i)
 {
-  chosenTrans = i;
-  // Fire signal
-  selChangeSignal();
+  // Prevent infinite looping behaviour through signals and slots:
+  // Updating the selection in the selector in the simulation dialog triggers
+  // an update of the transition that was chosen, leading to a chooseTrans call.
+  // This chooseTrans call triggers a selChangeSignal, which may again lead to
+  // an update of the selection in the simulation dialog, leading to an infinite
+  // recursion.
+  // This is prevented by only updating the chosen transition if it is really changed.
+  // See also mCRL2 bug #932 (https://svn.win.tue.nl/trac/MCRL2/ticket/932)
+  if(chosenTrans != i)
+  {
+    chosenTrans = i;
+    // Fire signal
+    selChangeSignal();
+  }
 }
 
 void Simulation::undoStep()
