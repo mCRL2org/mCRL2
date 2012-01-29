@@ -60,7 +60,7 @@ class Simulation
     std::vector< Transition* > posTrans;
     std::vector< State* > stateHis;
     std::vector< Transition* > transHis;
-    simulationSignal snd_signal;
+    simulationSignal signal;
     simulationSignal selChangeSignal;
 };
 
