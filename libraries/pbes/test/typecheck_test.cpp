@@ -38,7 +38,7 @@ void test_pbes_specification(const std::string& pbes_in, bool test_type_checker 
   core::garbage_collect();
 }
 
-void test_pbes_specifications()
+void test_pbes_specification1()
 {
   //test PBES specification involving global variables
   test_pbes_specification(
@@ -51,11 +51,24 @@ void test_pbes_specifications()
   );
 }
 
+void test_pbes_specification2()
+{
+  //test PBES specification where the type of [10,m] should become List(Nat), not List(Pos).
+  //This failed in revision 10180 and before.
+  test_pbes_specification(
+   "pbes nu X0(m: Nat) =\n"
+   "       forall i: Nat. val(!(i < 2)) || X0([10, m] . i);\n"
+   "\n"
+   "init X0(0);\n"
+  );
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_pbes_specifications();
+  test_pbes_specification1();
+  test_pbes_specification2();
 
   return 0;
 }
