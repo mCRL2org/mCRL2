@@ -286,8 +286,9 @@ static const size_t INT_SIZE_IN_BAF = 32;
 
 static const size_t MAX_ARITY = MAX_LENGTH;
 
-static const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
-static const size_t INITIAL_MAX_TERM_SIZE = 256;
+/* The constants below are not static to prevent some compiler warnings */
+const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
+const size_t INITIAL_MAX_TERM_SIZE = 256;
 
 } // namespace aterm
 

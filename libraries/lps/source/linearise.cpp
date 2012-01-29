@@ -3047,9 +3047,9 @@ class specification_basic_type:public boost::noncopyable
       if (objectdata[n].processstatus==mCRL)
       {
         objectdata[n].processstatus=mCRLbusy;
-        const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,todo,
+        procstorealGNFbody(objectdata[n].processbody,first,todo,
                                    regular,mCRL,objectdata[n].parameters);
-        /* if t is not equal to NULL,
+        /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
         objectdata[n].processstatus=mCRLdone;
