@@ -55,7 +55,7 @@ void Simulation::start()
   }
   started = true;
   //Fire signal
-  signal();
+  snd_signal();
 }
 void Simulation::stop()
 {
@@ -76,7 +76,7 @@ void Simulation::stop()
   posTrans.clear();
   currState = NULL;
   // Fire signal
-  signal();
+  snd_signal();
 }
 
 Simulation::~Simulation()
@@ -167,7 +167,7 @@ void Simulation::traceBack(State* initState)
   // Undo reversion
   reverse(transHis.begin(), transHis.end());
   reverse(stateHis.begin(), stateHis.end());
-  signal();
+  snd_signal();
 }
 
 void Simulation::followTrans()
@@ -207,7 +207,7 @@ void Simulation::followTrans()
       chosenTrans = -1;
     }
     //Fire signal
-    signal();
+    snd_signal();
   }
 }
 
@@ -265,7 +265,7 @@ void Simulation::undoStep()
     chosenTrans = -1;
   }
   // Fire signal
-  signal();
+  snd_signal();
 }
 
 void Simulation::resetSim()
@@ -300,7 +300,7 @@ void Simulation::resetSim()
     chosenTrans = -1;
   }
   // Fire signal
-  signal();
+  snd_signal();
 }
 
 Simulation::simConnection Simulation::connectSel(
@@ -315,9 +315,9 @@ Simulation::simConnection Simulation::connectSel(
 Simulation::simConnection Simulation::connect(
   simulationSignal::slot_function_type subscriber)
 {
-  simConnection result = signal.connect(subscriber);
+  simConnection result = snd_signal.connect(subscriber);
   // Send acknowledge to subscriber
-  signal();
+  snd_signal();
   // return value
   return result;
 }
