@@ -113,10 +113,10 @@ bool grape_event_open::Do(void)
       return false;
     }
 
-  } catch( mcrl2::runtime_error &e )
-  {
-    wxMessageBox(m_filename.GetName() + _T(".gra is not loaded.\n") + _T( e.what() ) , _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
-
+  } catch( mcrl2::runtime_error &e ) 
+  { 
+    wxMessageBox(m_filename.GetName() + _T(".gra is not loaded.\n") +
+                  wxString( e.what(), wxConvUTF8 ) , _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
     // opening was unsuccessful
     return false;
   }
