@@ -194,6 +194,7 @@ static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
 static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+static ATermAppl replace_possible_sorts(ATermAppl Type);
 
 
 static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
@@ -3917,7 +3918,6 @@ static ATermAppl gstcTraverseVarConsTypeD(
         return Type;
       }
     }
-
     ATermList NewArgumentTypes=ATmakeList0();
     ATermList NewArguments=ATmakeList0();
 
@@ -3938,7 +3938,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
     //function
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                      &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
+                      &Data,
+                      data::unknown_sort() /* gsMakeSortArrow(ArgumentTypes,PosType) */,
                       FreeVars,false,nArguments,warn_upcasting);
     mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
@@ -3960,6 +3961,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     //1) a cast has happened
     //2) some parameter Types became sharper.
     //we do the arguments again with the types.
+
 
     if (gsIsSortArrow(gstcUnwindType(NewType)))
     {
@@ -3996,7 +3998,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on (1) " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4070,7 +4072,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on (2) " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4473,7 +4475,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is (1) " << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4497,7 +4499,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is (2)" << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4534,7 +4536,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
     if (ATgetLength(ParList)==1)
     {
+      // replace PossibleSorts by a single possibility.
       ATermAppl Type=ATAgetFirst(ParList);
+
       ATermAppl OldType=Type;
       if (gstcHasUnknown(Type))
       {
@@ -4744,6 +4748,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
 
 
+      Type=replace_possible_sorts(Type); // Set the type to one option in possible sorts, if there are more options.
       *DataTerm=gsMakeOpId(Name,Type);
       if (variable)
       {
@@ -5478,6 +5483,47 @@ static ATermList gstcGetVarTypes(ATermList VarDecls)
   }
   return ATreverse(Result);
 }
+
+// Replace occurrences of multiple_possible_sorts([s1,...,sn]) by selecting
+// one of the possible sorts from s1,...,sn. Currently, the first is chosen.
+static ATermAppl replace_possible_sorts(ATermAppl Type)
+{
+  if (gsIsSortsPossible(data::sort_expression(Type)))
+  {
+    return ATAgetFirst(ATLgetArgument(Type,0)); // get the first element of the possible sorts.
+  }
+  if (data::is_unknown_sort(data::sort_expression(Type)))
+  {
+    return data::unknown_sort();
+  }
+  if (gsIsSortId(Type))
+  {
+    return Type;
+  }
+  if (gsIsSortCons(Type)) 
+  {
+    return ATsetArgument(Type,(ATerm)replace_possible_sorts(ATAgetArgument(Type,1)),1);
+  }
+
+  if (gsIsSortStruct(Type))
+  {
+    return Type;  // I assume that there are no possible sorts in sort constructors. JFG.
+  }
+
+  if (gsIsSortArrow(Type))
+  {
+    ATermList NewTypeList=ATmakeList0();
+    for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+    {
+      NewTypeList=ATinsert(NewTypeList,(ATerm)replace_possible_sorts(ATAgetFirst(TypeList)));
+    }
+    ATermAppl ResultType=ATAgetArgument(Type,1);
+    return gsMakeSortArrow(ATreverse(NewTypeList),replace_possible_sorts(ResultType));
+  }
+  assert(0); // All cases are dealt with above.
+  return Type; // Avoid compiler warnings.
+}
+
 
 static bool gstcHasUnknown(ATermAppl Type)
 {

@@ -469,6 +469,22 @@ BOOST_AUTO_TEST_CASE(test_plus)
   check_lps2lts_specification(spec, 1, 2, 1);
 }
 
+// The example below fails if #[0,1] does not have a decent
+// type. The tricky thing is that the type of the list can be List(Nat),
+// List(Int) or List(Real). Toolset version 10180 resolved this by 
+// delivering the type List({Nat, Int, Real}), i.e. a set of possible
+// options. But this was not expected and understood by the other tools.
+// This is related to bug report #949.
+BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
+{
+  std::string spec(
+    "proc B (i:Int) = (i >= 2) -> tau. B();\n"
+    "init B(#[0,1]);\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
