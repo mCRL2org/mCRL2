@@ -154,7 +154,7 @@ static inline ATermAppl INIT_KEY(void)
   return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());
 }
 
-static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl* Par, bool warn_upcasting=false, const bool print_cast_error=true);
+static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl* Par, bool warn_upcasting=false);
 static ATermAppl gstcMaximumType(ATermAppl Type1, ATermAppl Type2);
 
 static ATermList gstcGetNotInferredList(ATermList TypeListList);
@@ -3994,7 +3994,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         if (!gstcEqTypesA(NeededType,Type))
         {
           //upcasting
-          ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting,print_cast_error);
+          ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting);
           if (CastedNewType)
           {
             Type=CastedNewType;
@@ -4068,7 +4068,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         if (!gstcEqTypesA(NeededType,Type))
         {
           //upcasting
-          ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting,print_cast_error);
+          ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting);
           if (CastedNewType)
           {
             Type=CastedNewType;
@@ -4142,7 +4142,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
 
       //upcasting
-      ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm,warn_upcasting,print_cast_error);
+      ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
       if (!CastedNewType)
       {
         mCRL2log(error) << "cannot (up)cast number " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
@@ -4171,7 +4171,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       else
       {
         //upcasting
-        ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting,print_cast_error);
+        ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if ((!CastedNewType) && print_cast_error)
         {
           mCRL2log(error) << "cannot (up)cast variable " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
@@ -4203,7 +4203,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         // The type cannot be unified. Try upcasting the type.
         *DataTerm=gsMakeOpId(Name,Type);
-        ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting,print_cast_error);
+        ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if (NewType==NULL)
         {
           mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
@@ -4269,7 +4269,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermAppl Type=ATAgetFirst(ParList);
       *DataTerm=gsMakeOpId(Name,Type);
-      ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting,print_cast_error);
+      ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
       if (NewType==NULL)
       {
         mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
@@ -4844,7 +4844,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
   return Result;
 }
 
-static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl* Par, bool warn_upcasting, const bool print_cast_error)
+static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl* Par, bool warn_upcasting)
 {
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
   // Moreover, *Par is extended with the required type transformations.

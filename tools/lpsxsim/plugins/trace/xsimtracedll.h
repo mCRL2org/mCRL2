@@ -78,4 +78,8 @@ class XSimTraceDLL: public wxFrame, public SimulatorViewDLLInterface
     DECLARE_EVENT_TABLE()
 };
 
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface* Simulator);
+extern "C" __attribute__((constructor)) void SimulatorViewDLLInit();
+extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp();
+
 #endif
