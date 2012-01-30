@@ -25,19 +25,10 @@ using namespace mcrl2;
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
   pbes_system::pbes<> p = pbes_system::parse_pbes_new(pbes_in);
-  std::string pbes_out = pbes_system::pp(p);
-  if (pbes_in!=pbes_out)
-  {
-    std::cerr << "PBES IN AND PBES OUT ARE DIFFERENT (without typechecking).\n";
-    std::cerr << "PBES IN: " << pbes_in << "\n";
-    std::cerr << "PBES OUT: " << pbes_out << "\n";
-  }
-  BOOST_CHECK(pbes_in == pbes_out);
-
   if (test_type_checker)
   {
     pbes_system::type_check(p);
-    pbes_out = pbes_system::pp(p);
+    std::string pbes_out = pbes_system::pp(p);
 
     if (pbes_in!=pbes_out)
     {
