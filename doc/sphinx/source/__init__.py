@@ -7,9 +7,10 @@ import sphinx
 _LOG = logging.getLogger('util')
 
 def clone_rst(src, dst):
-  if os.path.isdir(src) and not src.startswith('.'):
-    for f in os.listdir(src):
-      clone_rst(os.path.join(src, f), os.path.join(dst, f))
+  if os.path.isdir(src):
+    if not src.startswith('.'):
+      for f in os.listdir(src):
+        clone_rst(os.path.join(src, f), os.path.join(dst, f))
   else:
     if not os.path.exists(os.path.dirname(dst)):
       os.makedirs(os.path.dirname(dst))

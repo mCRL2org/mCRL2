@@ -10,6 +10,9 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
+dl { border: solid 1px #80B090; }
+dl dt { background-color: #A0E0C0; }
+
 div.tool-docs li { float: left; display: inline; width: 20%; }
 
 div.header ul.mainmenu {

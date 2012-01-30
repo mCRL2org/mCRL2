@@ -31,9 +31,6 @@
 
 <xsl:choose>
   <xsl:when test="@kind!='namespace'">
-<xsl:text>
-===============================================================================
-</xsl:text>
 <xsl:value-of select="compoundname"/>
 <xsl:text>
 ===============================================================================
@@ -47,30 +44,30 @@
       <xsl:text>.. cpp:class:: </xsl:text>
       <xsl:value-of select="compoundname"/>
       <xsl:text>
-      
-   </xsl:text>
+
+  </xsl:text>
       <xsl:value-of select="briefdescription"/>
       <xsl:text>
-      
-   </xsl:text>
+
+  </xsl:text>
       <xsl:value-of select="detaileddescription"/>
       <xsl:text>
-      
+
 </xsl:text>
       
       <xsl:apply-templates select="sectiondef"/>
     </xsl:when>
 
     <xsl:when test="@kind='file'">
-      <xsl:text>File </xsl:text>
+<xsl:text>File </xsl:text>
       <xsl:value-of select="compoundname"/>
       <xsl:text>
-      
-   </xsl:text>
+
+</xsl:text>
       <xsl:value-of select="briefdescription"/>
       <xsl:text>
-      
-   </xsl:text>
+
+</xsl:text>
       <xsl:value-of select="detaileddescription"/>
       <xsl:text>
 
@@ -121,7 +118,7 @@ Classes
     <xsl:when test="@kind='public-func'">
       <xsl:text>Public member functions</xsl:text>
     </xsl:when>
-    <xsl:when test="@kind='public-func'">
+    <xsl:when test="@kind='protected-func'">
       <xsl:text>Protected member functions</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='private-func'">
@@ -138,6 +135,12 @@ Classes
     </xsl:when>    
     <xsl:when test="@kind='public-type'">
       <xsl:text>Public types</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='protected-type'">
+      <xsl:text>Protected types</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='private-type'">
+      <xsl:text>Private types</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='private-attrib'">
       <xsl:text>Private attributes</xsl:text>
@@ -177,26 +180,27 @@ Classes
  
   <xsl:choose>
     <xsl:when test="@kind='typedef'">
-      <xsl:text>   .. cpp:type:: </xsl:text>
+      <xsl:text>.. cpp:type:: </xsl:text>
       <xsl:value-of select="name"/>
       <xsl:text>
-      
-      typedef for :cpp:type:`</xsl:text>
+
+  typedef for :cpp:type:`</xsl:text>
       <xsl:apply-templates select="type"/>
     <xsl:text>`</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='enum'">
-      <xsl:text>   .. cpp:type:: </xsl:text>
+      <xsl:text>.. cpp:type:: </xsl:text>
       <xsl:value-of select="name"/>
       <xsl:text>
-      
-      **Values:**
-</xsl:text>
+
+  **Values:**
+
+  </xsl:text>
       <xsl:apply-templates select="enumvalue"/>
     </xsl:when>
     
     <xsl:when test="@kind='function'">
-      <xsl:text>   .. cpp:function:: </xsl:text>
+      <xsl:text>.. cpp:function:: </xsl:text>
       <xsl:value-of select="type"/>
       <xsl:text> </xsl:text>
       <xsl:value-of select="name"/>
@@ -204,14 +208,13 @@ Classes
     </xsl:when>
     
     <xsl:when test="@kind='variable'">
-      <xsl:text>   .. cpp:member:: </xsl:text>
+      <xsl:text>.. cpp:member:: </xsl:text>
       <xsl:value-of select="type"/>
       <xsl:text> </xsl:text>
       <xsl:value-of select="name"/>
     </xsl:when>
     
     <xsl:when test="@kind='friend'">
-      <xsl:text>   </xsl:text>
       <xsl:value-of select="type"/>
       <xsl:text> :cpp:type:`</xsl:text>
       <xsl:value-of select="name"/>
@@ -224,15 +227,15 @@ Classes
     </xsl:otherwise>
   </xsl:choose>
   <xsl:text>
-      
-      </xsl:text>
+  
+  </xsl:text>
   <xsl:value-of select="briefdescription"/>
   <xsl:text>
-  
-      </xsl:text>
+
+  </xsl:text>
   <xsl:apply-templates select="detaileddescription"/>
     <xsl:text>
-    
+
 </xsl:text>
 </xsl:when>
 </xsl:choose>
@@ -246,10 +249,10 @@ Classes
 <!-- a <innerclass> directive. This contains information about the defined
      class in a file -->
 <xsl:template match="innerclass">
-  <xsl:text>   * :cpp:class:`</xsl:text>
+  <xsl:text>* :cpp:class:`</xsl:text>
   <xsl:value-of select="."/>
   <xsl:text>`
-  
+
 </xsl:text>
 </xsl:template>
 
@@ -264,13 +267,13 @@ Classes
 
 <!-- an <enumvalue> -->
 <xsl:template match="enumvalue">
-  <xsl:text>        * **</xsl:text>
+  <xsl:text>  * **</xsl:text>
   <xsl:value-of select="name"/>
   <xsl:text>** </xsl:text>
   <xsl:value-of select="briefdescription"/>
   <xsl:value-of select="detaileddescription"/>
   <xsl:text>
-  
+
 </xsl:text>
 </xsl:template>
 
@@ -285,13 +288,14 @@ Classes
     <xsl:when test="@kind='param'">
       <xsl:text>
   
-      **Parameters:**
+  **Parameters:**
+
 </xsl:text>
     </xsl:when>
     <xsl:when test="@kind='retval'">
       <xsl:text>
       
-      **Returns:**
+  **Returns:**
 </xsl:text>
     </xsl:when>
     <xsl:otherwise>
@@ -307,39 +311,39 @@ Classes
     <xsl:when test="@kind='return'">
       <xsl:text>
       
-      **Returns:** </xsl:text>
+  **Returns:** </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:when test="@kind='pre'">
       <xsl:text>
       
-      **Pre:** </xsl:text>
+  **Pre:** </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:when test="@kind='post'">
       <xsl:text>
       
-      **Post:** </xsl:text>
+  **Post:** </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>    
     <xsl:when test="@kind='warning'">
       <xsl:text>
-      .. warning:: </xsl:text>
+  .. warning:: </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:when test="@kind='note'">
       <xsl:text>
-      .. note:: </xsl:text>
+  .. note:: </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:when test="@kind='remark'">
       <xsl:text>
-      .. note:: </xsl:text>
+  .. note:: </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:when test="@kind='attention'">
       <xsl:text>
-      .. attention:: </xsl:text>
+  .. attention:: </xsl:text>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:otherwise>
@@ -350,12 +354,12 @@ Classes
 
 <!-- a <parameteritem>, an element of a parameterlist -->
 <xsl:template match="parameteritem">
-  <xsl:text>        * **</xsl:text>
+  <xsl:text>  * **</xsl:text>
   <xsl:value-of select="parameternamelist"/>
   <xsl:text>** </xsl:text>
   <xsl:value-of select="parameterdescription"/>
   <xsl:text>
-  
+
 </xsl:text>
 </xsl:template>
 
