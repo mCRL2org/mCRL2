@@ -130,7 +130,7 @@ def generate_library_rst(lib_dir):
     if ext == '.xml' and base != "index":
       src = os.path.join(xml_path, f)
       dst = os.path.join(rst_path, base + '.rst')
-      if base.startswith('class') and not base.startswith('classstd'):
+      if base.startswith('class') and not base.startswith('classstd') and not base.endswith('_8h'):
         classrst.append(base)
         xsltproc(src, transform, dst, "'{0}'".format(xml_path))
         _LOG.info('Generated {0}'.format(dst))

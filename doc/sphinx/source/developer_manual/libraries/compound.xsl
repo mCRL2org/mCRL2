@@ -26,11 +26,16 @@
   <xsl:text>:
   
 </xsl:text>
+  <xsl:value-of select="substring-after(location/@file,'include/')"/>
+<xsl:text>
+===============================================================================
+
+</xsl:text>
   </xsl:when>
 </xsl:choose>
 
 <xsl:choose>
-  <xsl:when test="@kind!='namespace'">
+  <xsl:when test="@kind='class'">
 <xsl:value-of select="compoundname"/>
 <xsl:text>
 ===============================================================================
@@ -60,7 +65,7 @@
 
     <xsl:when test="@kind='file'">
 <xsl:text>File </xsl:text>
-      <xsl:value-of select="compoundname"/>
+      <xsl:value-of select="substring-after(location/@file,'include/')"/>
       <xsl:text>
 
 </xsl:text>
