@@ -31,7 +31,7 @@ The folder ``RopeBridge`` contains the files for these exercises:
 
 * :download:`bridge.mcrl2 <files/bridge.mcrl2>` which contains an incomplete
   mCRL2 specification of the rope bridge problem;
-* :download:`formula_A.mcf <files/formula_A.mcf>` and :download:`formula_B.mcf <files/formula_B.mcrl2>` to which
+* :download:`formula_A.mcf <files/formula_A.mcf>` and :download:`formula_B.mcf <files/formula_B.mcf>` to which
   :math:`\mu`-calculus formulae will be added.
 
 .. admonition:: Exercise
@@ -127,15 +127,15 @@ The folder ``RopeBridge`` contains the files for these exercises:
 
 We shall now verify the following properties using the toolset:
 
-A. It is possible for all adventurers to reach the `finish' side in 17 minutes.
-B. It is not possible for all adventurers to reach the `finish' side in less
+A. It is possible for all adventurers to reach the `finish` side in 17 minutes.
+B. It is not possible for all adventurers to reach the `finish` side in less
    than 17 minutes.
 
 .. admonition:: Exercise
 
-Express each of these properties in the modal :math:`\mu`-calculus.
-Add the formulas to the files :file:`formula_A.mcf` and :file:`formula_B.mcf`
-using a text editor.
+   Express each of these properties in the modal :math:`\mu`-calculus.
+   Add the formulas to the files :file:`formula_A.mcf` and :file:`formula_B.mcf`
+   using a text editor.
 
 .. admonition:: Exercise
 

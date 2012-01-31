@@ -1,5 +1,5 @@
-Using :ref:`tool-mcrl2-gui`
-===========================
+Using mcrl2-gui
+===============
 
 All tools in the mCRL2 toolset are, besides their command-line interface, also
 available through the graphical user interface in :ref:`tool-mcrl2-gui`.
@@ -186,5 +186,5 @@ Concluding remarks
 ------------------
 
 With these tools many basic analyses on behavioural descriptions can be
-performed. All available tools are described in the :ref:`tool manual pages <man
-pages>`, although generally in terms of command line invocation.
+performed. All available tools are described in the :ref:`tool-documentation`,
+although generally in terms of command line invocation.

@@ -1,3 +1,5 @@
+.. _tool-documentation:
+
 Tool documentation
 ==================
 

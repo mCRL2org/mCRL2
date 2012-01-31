@@ -1,7 +1,7 @@
 CMake F.A.Q.
 ============
 
-:ref:`CMake <http://www.cmake.org/>` is a cross-platform, open-source make
+`CMake <http://www.cmake.org/>`_ is a cross-platform, open-source make
 system. CMake generates native makefiles and workspaces that are used in the
 compiler environment of your choice. CMake supports preprocessor generation,
 code generation, and template instantiation.

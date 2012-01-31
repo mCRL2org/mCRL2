@@ -72,7 +72,7 @@ call ``<BOOSTROOT>``.
        ./bjam --build-type=complete --layout=tagged --with-filesystem --with-serialization --with-signals --with-regex 
    
 After the build, Boost reports information on the build. The compiler path
-specified here, must be used to set the CMake variable :keyword:`BOOST_ROOT`. 
+specified here, must be used to set the CMake variable :envvar:`BOOST_ROOT`. 
 
 |enable_toggle|
 

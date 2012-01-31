@@ -155,8 +155,8 @@ wxWidgets
 .. _wx: http://www.wxwidgets.org
 
 The mCRL2 toolset requires |wx|_ or higher for compilation of the graphical 
-tools (:keyword:`diagraphica`, :keyword:`ltsgraph`, :keyword:`ltsview`,
-:keyword:`lpsxsim`, :keyword:`mcrl2-gui`). 
+tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
+:ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`). 
 
 .. warning::
 

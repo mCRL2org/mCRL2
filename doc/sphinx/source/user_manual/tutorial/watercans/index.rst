@@ -222,7 +222,7 @@ constants over the natural numbers, called ``sizeA``,
 and ``4``, respectively. The corresonding LTS has 35 states and
 94 transitions. The LTS of a smaller example, can sizes 4 and 3 and
 target volume 2 with 18 states and 46 transitions after reduction modulo
-strong bisimulation is depicted in Figure :ref:`fig-watercan03`.
+strong bisimulation is depicted in Figure :ref:`fig-watercan3`.
 
 .. _fig-watercan3:
 
