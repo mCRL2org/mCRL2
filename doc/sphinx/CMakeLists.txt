@@ -10,12 +10,12 @@
 
 set( MCRL2_GENERATE_DOC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate.py )
 
-add_custom_target(doc ${MCRL2_GENERATE_DOC_SCRIPT} "-v=${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}"
-  COMMENT "Generating mCRL2 documentation" VERBATIM
+add_custom_target(doc
+  ${MCRL2_GENERATE_DOC_SCRIPT} -c -v=${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION} --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html
+  COMMAND ${MCRL2_GENERATE_DOC_SCRIPT} -v=${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION} --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html
+  COMMENT "(Re)-generating mCRL2 documentation (regenerates all cached documentation)" VERBATIM
 )
 
-# /fast is not allowed in CMake > 2.2
-#add_custom_target(doc/fast ${MCRL2_GENERATE_DOC_SCRIPT}
-#  COMMENT "Generating mCRL2 documentation" VERBATIM
-#)
-
+add_custom_target(fastdoc ${MCRL2_GENERATE_DOC_SCRIPT} --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html
+  COMMENT "Generating mCRL2 documentation (does not regenerate cached PDF, manual pages and Doxygen documentation)" VERBATIM
+)

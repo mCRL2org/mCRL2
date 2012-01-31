@@ -37,16 +37,22 @@ def getarguments():
                       help="The version number to be used in the documentation. This "
                            "should be a release number, followed by a period, followed "
                            "by the SVN revision number.")
+  parser.add_argument("-t", "--temp", dest="temp", metavar="DIR", action="store",
+                    default=os.path.join(os.path.dirname(__file__), '_temp'),
+                    help="Store temporary files in DIR")
+  parser.add_argument("-o", "--output", dest="out", metavar="DIR", action="store",
+                    default=os.path.join(os.path.dirname(__file__), 'html'),
+                    help="Store output to DIR")                    
   return parser.parse_args()
 
 #
 # Main program
 #
 if __name__ == '__main__':
-  temppath = os.path.abspath(os.path.join(os.path.dirname(__file__), '_temp'))
-  outpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'html'))
 
   args = getarguments()
+  temppath = os.path.abspath(args.temp)
+  outpath = os.path.abspath(args.out)
   if args.force:
     clearcache(temppath, args.force)
   if args.clean:
