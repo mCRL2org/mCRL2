@@ -400,7 +400,7 @@ void XSimMain::Initialise(const variable_list Pars)
 {
   state_varnames = Pars;
   stateview->DeleteAllItems();
-  size_t count=0;
+  int count=0;
   for (variable_list::const_iterator i=Pars.begin(); i!=Pars.end(); ++i, ++count)
   {
     wxString s(pp(*i).c_str()
