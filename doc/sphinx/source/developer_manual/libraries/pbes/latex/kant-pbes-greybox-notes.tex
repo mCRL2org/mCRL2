@@ -1,0 +1,462 @@
+\documentclass{article}
+\usepackage{include/prelude}
+\usepackage{amsmath}
+
+\newcommand{\Title}{PBES greybox implementation notes}
+\newcommand{\ShortTitle}{PBES greybox implementation notes}
+\newcommand{\Author}{Gijs Kant}
+\newcommand{\AuthorEmail}{kant@cs.utwente.nl}
+
+\title{\Title}
+\author{\Author}
+\begin{document}
+
+\maketitle
+
+
+\section{Instantiation from PBES to Parity Game}
+
+\subsection{PBES}
+
+\begin{definition}
+\emph{Predicate formulae} $\phi$ are defined by the following grammar:
+\[ \phi \Coloneqq b \mid \propvar{X}(\vec{e}) \mid \neg \phi \mid \phi \oplus \phi \mid \mathsf{Q} d \oftype D \suchthat \phi \]
+where $\oplus \in \set{\land, \lor, \impl}$, $\mathsf{Q} \in \set{\forall, \exists}$, 
+$b$ is a data term of sort $\Bool$, 
+$\propvar{X} \in \X$ is a predicate variable, 
+$d$ is a data variable of sort $D$, and 
+$\vec{e}$ is a vector of data terms.
+We will call any predicate formula without predicate variables a \emph{simple formula}.
+We denote the class of predicate formulae $\PF$.
+\end{definition}
+
+\begin{definition}
+A \emph{First-Order Boolean Equation} is an equation of the form:
+\[ \sigma \propvar{X}(d \oftype D) = \phi \]
+where $\sigma \in \set{\mu, \nu}$ is a minimum ($\mu$) or maximum ($\nu$) fixed point operator,
+$d$ is a data variable of sort $D$, and
+$\phi$ is a predicate formula.
+\end{definition}
+
+\begin{definition}
+A \emph{Parameterised Boolean Equation System (PBES)} is a sequence of First-Order Boolean Equations:
+\[ \eqsys = (\sigma_1 \propvar{X}_1(d_1 \oftype D_1) = \phi_1) 
+   \eqsep \dotsc 
+   \eqsep (\sigma_n \propvar{X}_n(d_n \oftype D_n) = \phi_n) \]
+\end{definition}
+
+We adopt the standard limitations: expressions are in positive form (negation occurs only in data expressions) and every variable occurs only once as the left hand side of an equation.
+A PBES that contains no quantifiers and parameters is called a \emph{Boolean Equation System} (BES).
+A PBES can be \emph{instantantiated} to a BES by expanding the quantifiers to finite conjunctions
+or disjunctions and substituting concrete values for the data parameters.
+
+A one-to-one mapping can be made from a BES to an equivalent \emph{parity game} if the BES has only expressions that are either conjunctive or disjunctive. The parity game is then represented by a game graph with nodes that represent propositional variables with concrete parameters and edges that represent dependencies.
+To make instantiation of a PBES to a parity game more directly 
+we will preprocess the PBES to a format that only allows expressions to be either conjunctive or disjunctive. 
+This format is a normal form for PBESs that we call
+the \emph{Parameterised Parity Game}, defined as follows:
+
+\begin{definition}
+A PBES is a \emph{Parameterised Parity Game} (PPG) if every right hand side of an equation is a formula of the form:
+\begin{align*} 
+\mathsf{PPG} \Coloneqq &\quad
+          \Land_{i \in I} f_i \land
+          \Land_{j \in J} \forall_{\vec{v} \in D_j} \suchthat \big( g_j \impl \propvar{X}_j(e_j) \big) \quad
+\vert \quad
+          \Lor_{i \in I} f_i \lor
+          \Lor_{j \in J} \exists_{\vec{v} \in D_j} \suchthat \big( g_j \land \propvar{X}_j(e_j) \big). 
+\end{align*}
+where $f_i$ and $g_j$ are simple boolean formulae, and $e_j$ is a data expression. $I$ and $J$ are finite (possibly empty) index sets.
+\end{definition}
+
+The expressions range over two index sets $I$ and $J$. The left part is a conjunction (or disjunction) of simple expressions $f_i$ that can be seen as conditions that should hold in the current state. The right part is a conjunction (or disjunction) of quantifiers over a (possibly empty) vector of variables for next states $\propvar{X}_j$ with parameters $e_j$, guarded by simple expression $g_j$.
+
+Before transforming arbitrary PBESs to PPG we first define another Normal Form on PBESs to make the transformation easier.
+This normal form can have an arbitrary sequence of bounded quantifiers as outermost operators and has
+a conjunctive normal form at the inner.
+We call this the Bounded Quantifier Normal Form (BQNF):
+
+\begin{definition}
+A First-Order Boolean formula is in \emph{Bounded Quantifier Normal Form (BQNF)} if it has the form:
+\begin{align*}
+\mathsf{BQNF} \Coloneqq &\quad
+    \forall {\vec{d} \in D} \suchthat b \impl \mathsf{BQNF}
+\quad \vert \quad
+    \exists {\vec{d} \in D} \suchthat b \land \mathsf{BQNF}
+\quad \vert \quad
+    \mathsf{CONJ} \\
+\mathsf{CONJ} \Coloneqq &\quad
+    \Land_{k \in K} f_k \land
+    \Land_{i \in I} \forall_{\vec{v} \in D_I} \suchthat \big( g_i \impl \mathsf{DISJ}^i \big) \\
+\mathsf{DISJ}^i \Coloneqq &\quad
+    \Lor_{\ell \in L_i} f_{i\ell} \lor
+    \Lor_{j \in J_i} \exists_{\vec{w} \in D_{ij}} \suchthat \big( g_{ij} \land \propvar{X}_{ij}(e_{ij}) \big)
+\end{align*}
+where $b$, $f_k$, $f_{i\ell}$, $g_i$, and $g_{ij}$ are simple boolean formulae, and $e_{ij}$ is a data expression. 
+$K$, $I$, $L_i$, and $J_i$ are finite (possibly empty) index sets.
+\end{definition}
+
+This BQNF is similar to \emph{Predicate Formula Normal Form} (PFNF), defined elsewhere\footnote{
+A transformation to PFNF is implemented in the \texttt{pbesrewr} tool and documented at
+\url{http://www.win.tue.nl/mcrl2/wiki/index.php/Parameterised_Boolean_Equation_Systems}.},
+in that quantification is outermost and in that the core is a conjunctive normal form. 
+However, unlike PFNF, BQNF allows bounds on the quantified variables (hence bounded quantifiers), and universal quantification
+is allowed within the conjunctive part and existential quantification is allowed within the disjunctive parts.
+These bounds are needed to avoid problems when transforming to PPG. 
+
+
+
+\subsection{Translation from BQNF to Parameterised Parity Game}
+
+In order to automatically transform a PBES to a PPG, we define a transformation function from BQNF to PPG.
+For brevity, we leave out the types of the parameters.\\
+For equation system
+$ \eqsys = (\sigma \propvar{X}_1(\vec{d}_1) = \xi_1) \eqsep \ldots \eqsep (\sigma \propvar{X}_n(\vec{d}_n) = \xi_n), $
+with each $\xi_i$ in BQNF, the translation to PPG is defined as follows:
+\begin{center}
+\scalebox{1}{
+\begin{tabular}{l@{\hspace{2pt}}l}
+$s\big(\eqsys \big)$ & $\eqdef
+    s\big( \sigma \propvar{X}_1(\vec{d}_1) = \xi_1 \big) \eqsep \ldots \eqsep s\big( \sigma \propvar{X}_n(\vec{d}_n) = \xi_n \big)$
+    \defsep
+    
+$s\big(\sigma \propvar{X}(\vec{d}) = f \big)$ & $\eqdef
+    \sigma \propvar{X}(\vec{d}) = f$
+    \defsep
+$s\big(\sigma \propvar{X}(\vec{d}) = \forall \vec{v} \suchthat b \impl \phi \big)$ & $\eqdef
+    \Big( \sigma \propvar{X}(\vec{d}) = \forall \vec{v} \suchthat b \impl t(\fresh{\propvar{X}},\vec{d}+\vec{v},\phi) \Big)$
+    \\&
+    $\qquad
+    t'(\sigma,\fresh{\propvar{X}},\vec{d}+\vec{v},\phi)$
+    \defsep
+$s\big(\sigma \propvar{X}(\vec{d}) = \exists \vec{v} \suchthat b \land \phi \big)$ & $\eqdef
+    \Big( \sigma \propvar{X}(\vec{d}) = \exists \vec{v} \suchthat b \land t(\fresh{\propvar{X}},\vec{d}+\vec{v},\phi) \Big)$
+    \\&
+    $\qquad
+    t'(\sigma,\fresh{\propvar{X}},\vec{d}+\vec{v},\phi)$
+    \defsep
+    
+$s\big(\sigma \propvar{X}(\vec{d}) = 
+      \Land_{k \in K} f_k$ \\
+      \qquad\qquad $\land \Land_{i \in I} (\forall_{\vec{v}_i} \suchthat g_i \impl \phi_i) \big)$ & $\eqdef
+    \Big( \sigma \propvar{X}(\vec{d}) = 
+      \Land_{k \in K} f_k$ \\
+    & \qquad\qquad\quad $\land
+      \Land_{i \in I} \big(\forall_{\vec{v}_i} \suchthat g_i \impl t(\fresh{\propvar{X}}_i,\vec{d}+\vec{v}_i,\phi_i)\big) \Big)$
+    \\
+    &
+    $\qquad
+    t'(\sigma,\fresh{\propvar{X}}_1,\vec{d}+\vec{v}_1,\phi_1)
+    \eqsep
+    \ldots
+    \eqsep
+    t'(\sigma,\fresh{\propvar{X}}_m,\vec{d}+\vec{v}_m,\phi_m)$
+    \defsep
+    
+$s\big(\sigma \propvar{X}(\vec{d}) = 
+      \Lor_{k \in K} f_k$ \\
+      \qquad\qquad $\lor \Lor_{i \in I} (\exists_{\vec{v}_i} \suchthat g_i \land \phi_i) \big)$ & $\eqdef
+    \Big( \sigma \propvar{X}(\vec{d}) = 
+      \Lor_{k \in K} f_k$ \\
+    & \qquad\qquad\quad $\lor
+      \Lor_{i \in I} \big(\exists_{\vec{v}_i} \suchthat g_i \land t(\fresh{\propvar{X}}_i,\vec{d}+\vec{v}_i,\phi_i)\big) \Big)$
+    \\&
+    $\qquad
+    t'(\sigma,\fresh{\propvar{X}}_1,\vec{d}+\vec{v}_1,\phi_1)
+    \eqsep
+    \ldots
+    \eqsep
+    t'(\sigma,\fresh{\propvar{X}}_m,\vec{d}+\vec{v}_m,\phi_m)$
+\end{tabular}
+}
+\end{center}
+with 
+$I = 1 \ldots m$, $\vec{v} \cap \vec{d} = \emptyset$ (variables in $\vec{v}$ do not occur in $\vec{d}$), $b$, $f$, $f_k$, $g_i$ are simple formulae, $\phi$, $\phi_i$ are formulae that may contain predicate variables, and
+\begin{align*}
+t(\propvar{X},\vec{d},\phi) &\eqdef
+\begin{cases}
+\phi                              
+  & \text{ if } \phi = \propvar{X}'(e), \\
+\propvar{X}(\vec{d})
+  & \text{ otherwise; }
+\end{cases}\\
+t'(\sigma,\propvar{X},\vec{d},\phi) &\eqdef
+\begin{cases}
+\emptyseq
+  & \text{ if } \phi = \propvar{X}'(e), \\
+s( \sigma \propvar{X}(\vec{d}) = \phi )  
+  & \text{ otherwise. }
+\end{cases}
+\end{align*}
+
+
+
+
+\subsection{Move Quantifiers Inward}
+
+Note the following equality:
+\[
+  \forall_{\vec{d} \in D} \suchthat \Land_{i \in I} \phi_i
+  = \Land_{i \in I} \left( \forall_{\vec{d} \in D} \suchthat \phi_i \right).
+\]
+
+Since the PPG form requires conjuncts of quantifiers rather than quantifiers over conjuncts, it is useful to rewrite expression such that conjunctions are more on the outside and universal quantifiers more to the inside. 
+In the rewriting, not all parameters of the quantifier have to be moved inward (see e.g., Example~\ref{example:quantifier-rewrite}).
+For this we introduce the quantifier inward rewriter $s_{QI}$:
+\begin{align*}
+& s_{QI}(b) & \eqdef\eqsep & b \\
+& s_{QI}(X(e)) & \eqdef\eqsep & X(e) \\
+& s_{QI}( \exists_{\vec{d} \in D} \suchthat \phi ) & \eqdef\eqsep &
+    \exists_{\vec{d} \in D} \suchthat s_{QI}(\phi) \\
+& s_{QI}( \Lor_{i \in I} \phi_i ) & \eqdef\eqsep &
+    \Lor_{i \in I} s_{QI}(\phi_i) \\
+& s_{QI}( \Land_{i \in I} \phi_i ) & \eqdef\eqsep &
+    \Land_{i \in I} s_{QI}(\phi_i) \\
+& s_{QI}( \forall_{\vec{d} \in D} \suchthat g \implies \Land_{i \in I} \phi_i ) & \eqdef\eqsep &
+    \Land_{i \in I} \left( \forall_{\vec{d} \cap \free(\phi_i)} \suchthat g_i \implies s_{QI}(\phi_i) \right)
+\end{align*}
+with $\phi$ an arbitrary expression in BQNF and $b$ a data term of sort $\Bool$
+and where 
+\[
+  g_i = \left( \exists_{\vec{d} \cap (\free(g) \setminus \free(\phi_i))} \suchthat \filter(g, \vec{d} \setminus \free(\phi_i)) \right) \land \filter(g, \vec{d} \cap \free(\phi_i))
+\]
+and $\filter$ is defined recursively as follows:
+\begin{align*}
+& \filter(b, \vec{d})                    & \eqdef\eqsep &
+  \begin{cases}
+    b & \text{ if } \left(\free(b) \cap \vec{d}\right) = \emptyset, \\
+    \emptyseq & \text{ otherwise. }
+  \end{cases}\\
+& \filter(\phi_1 \oplus \phi_2, \vec{d}) & \eqdef\eqsep & 
+  \begin{cases}
+    \emptyseq & \text{ if } \phi_1' = \emptyseq \land \phi_2' = \emptyseq, \\
+    \phi_1' & \text{ if } \phi_1' \neq \emptyseq \land \phi_2' = \emptyseq, \\
+    \phi_2' & \text{ if } \phi_1' = \emptyseq \land \phi_2' \neq \emptyseq, \\
+    \phi_1' \oplus \phi_2' & \text{ otherwise. }
+  \end{cases}\\
+\end{align*}
+with $\phi_i' = \filter(\phi_i, \vec{d})$, $\oplus \in \set{\land, \lor}$ and $b$ is a data term of sort $\Bool$.
+
+\begin{example}\label{example:quantifier-rewrite}
+Example transformation:
+\begin{verbatim}
+forall x,y . (x < 5) => ((x==a) /\ (y==b));
+\end{verbatim}
+should translate to:
+\begin{verbatim}
+(forall x . (x < 5) => (x==a)) /\ (forall y . (exists x . x < 5) => (y==b))
+\end{verbatim}
+\end{example}
+
+
+
+
+
+
+
+\subsection{Partitioned state vector, transition groups, and dependency matrix}
+
+We regard the instantiation of PBESs to Parity Games as generating a transition system, where states are propositional variables with concrete parameters and transitions are dependencies, specified by the right hand side of the corresponding equation in the PBES.
+
+We use the tool \LTSMIN to generate a Parity Game given a PBES.
+
+
+\subsubsection{Partitioned state vector}
+
+A vector $\tuple{x_1, x_2, \dotsc, x_m}$ for a fixed $m$.
+\textit{In casu} PBES instantiation, the state vector is partitioned as follows:
+\[ \tuple{\propvar{X}, x_1, x_2, \dotsc, x_k }, \]
+where $\propvar{X}$ is a propositional variable, and for $i \in \set{1 \ldots k}$ each $x_i$ is the value of parameter $i$. $k$ is the total number of parameter signatures in the system, ordered alphabetically; the signature consists of the name and type of the parameter.
+From the propositional variable $\propvar{X}$, the $type \in \set{\land, \lor}$, $priority$ (an integer value) and fixpoint operator $\sigma \in \set{\mu, \nu}$ can be derived. 
+
+
+\subsubsection{Transition groups}
+The equations in the PBES specify the transitions between states. These transitions can be partitioned by the part of the equation system they originate from.
+In this case, these are the parts of the right hand sides of the equations.
+
+For a PBES of the form
+\[ \sigma \propvar{X}(d \oftype D) = \Land_{i \in I} \forall_{\ell \oftype D_i} \cdot g_i(d, \ell) \implies \propvar{X}_i(h_i(d, \ell)), \]
+for each $i \in I$ there is a transition group $\propvar{X}_i$ which an associated transition relation $\to_{\propvar{X}_i}$, defined as:
+\[ \propvar{X}_i(d \oftype D) \to_{\propvar{X}_i} \propvar{X}_i(h_i(d, \ell)), \]
+for all $\ell \oftype D_i$ such that $g_i(d, \ell)$.
+
+
+\begin{example}\label{example:buffer2}
+A specification of two sequential buffers (\texttt{buffer.2}):
+\begin{quote}
+\begin{tabular}{l@{}l@{\hspace{3pt}}l}
+%$\sort$ & $D = \struct d1 \mid d2;$ \\
+%$\act$  & $\action{r1}, \action{s4} \oftype D;$ \\
+%$\act$  &	$\action{r}, \action{w}, \action{c} \oftype \Pos \# D;$ \\
+%$\mcrlmap$  & $N \oftype \Pos;$ \\
+$\eqn$  & $N = 2;$ \\
+
+$\proc$ & $\procname{In}(i: \Pos, q: \container{List}(D)) = $
+        & $\displaystyle\sum_{d \oftype D}\ (\#q < N) \guards \action{r_1}(d) \suchthat \procname{In}(i, q \append d)$ \\
+      & & $\quad + \ (q \neq []) \guards \action{w}(i+1, \head(q)) \suchthat \procname{In}(i, \tail(q));$ \\
+
+$\proc$ & $\procname{Out}(i: \Pos, q: \container{List}(D)) = $
+        & $\displaystyle\sum_{d \oftype D}\ (\#q < N) \guards \action{r}(i, d) \suchthat \procname{Out}(i, q \append d)$ \\
+      & & $\quad + \ (q \neq []) \guards \action{s_4}(\head(q)) \suchthat \procname{Out}(i, \tail(q));$ \\
+
+$\init$  
+  & \multicolumn{2}{@{}l@{}}{$\allow(\{\action{r_1},\action{c},\action{s_4}\}, \comm(\{\action{w} \mid \action{r} \to \action{c}\}, \; \procname{In}(1,[]) \parallel \procname{Out}(2,[]) \; ));$}\\
+\end{tabular}
+\end{quote}\medskip
+with the property that if a message is read through $\action{r_1}$, it will
+ eventually be sent through $\action{s_4}$:
+\[ \always{\ttrue^\ast}(\forall d \oftype D \suchthat (\always{\action{r_1}(d)}(\nu \propvar{X} \suchthat \mu \propvar{Y} \suchthat (\always{\action{s_4}(d)}\propvar{X} \land \always{\neg\action{s_4}(d)}\propvar{Y})))) \]
+The resulting PBES looks as follows:%
+\vspace*{-\bigskipamount}
+\begin{center}%
+\scalebox{0.93}{%
+\begin{minipage}{6in}%
+\begin{align}
+\pbes   & \nu \propvar{Z}(q_{in},q_{out} \oftype \container{List}(D)) = 
+          \; (\forall_{d \oftype D} \suchthat (\#q_{in} < 2) \impl \propvar{X}(q_{in} \append d_1, q_{out}, d)) 
+          \label{ex:pbes-groups:first} \\
+\label{group:Z2} & \quad \land (\forall_{d_0 \oftype D} \suchthat (\#q_{in} < 2) \impl \propvar{Z}(q_{in} \append d_0, q_{out})) \\
+\label{group:Z3} & \quad \land ((q_{out} \neq []) \impl \propvar{Z}(q_{in}, \tail(q_{out})))\\
+        & \quad \land ((q_{in} \neq [] \land \#q_{out} < 2) \impl \propvar{Z}(\tail(q_{in}), q_{out} \append \head(q_{in})));\\
+\label{group:X} & \nu \propvar{X}(q_{in},q_{out} \oftype \container{List}(D), d \oftype D) =
+          \; \propvar{Y}(q_{in}, q_{out}, d);\\
+        & \mu \propvar{Y}(q_{in},q_{out} \oftype \container{List}(D), d \oftype D) =
+          \; (\head(q_{out}) \neq d) \lor (q_{out} = []) \lor \propvar{X}(q_{in}, \tail(q_{out}), d)) \\
+        & \quad \land (\forall_{d_0 \oftype D} \suchthat (\#q_{in} < 2) \impl \propvar{Y}(q_{in} \append d_0, q_{out}, d))\\
+        & \quad \land ( (\head(q_{out}) = d) \lor (q_{out} = []) \lor \propvar{Y}(q_{in}, \tail(q_{out}), d)) \\
+        & \quad \land ( (q_{in} \neq [] \land \#q_{out} < 2) \impl \propvar{Y}(\tail(q_{in}), q_{out} \append \head(q_{in}), d) ); \label{ex:pbes-groups:last}\\
+\notag
+\init & \propvar{Z}([], []);
+\end{align}
+\end{minipage}
+}
+\end{center}
+For this equation system, the structure of the state vector is $\tuple{\propvar{X}, q_{in}, q_{out}, d}$.
+The initial state would be encoded as $\tuple{\propvar{Z}, [], [], 0}$. Since the initial
+state has no parameter $d$, a default value is chosen.
+The numbers \ref{ex:pbes-groups:first}--\ref{ex:pbes-groups:last} behind the equation parts denote the different transition groups, i.e.,
+each conjunct of a conjunctive expression forms a group.
+E.g., $\var(\ref{group:Z3}) = \propvar{Z}$, $\params(\var(\ref{group:Z3})) = \tuple{q_{in}, q_{out}}$
+and 
+$ \expression(\ref{group:Z3}) =((q_{out} \neq []) \impl \propvar{Z}(q_{in}, \tail(q_{out})). $
+$\groupnext(\propvar{Z}([], []), \ref{group:Z3})$ yields the empty set because $q_{out} = []$.
+$\groupnext(\propvar{Z}([], []), \ref{group:Z2})$ results in $\set{\propvar{Z}([d_1], []), \propvar{Z}([d_2], [])}$.
+\end{example}
+
+
+\subsubsection{Dependency matrix}
+
+For an equation $\sigma \propvar{X}(d \oftype D) = \phi$, the list of parameters is $\params(\propvar{X}) \eqdef d \oftype D$.
+Let $\free(d)$ be the set of \emph{free data variables} occurring in a data term $d$. 
+Let $\used(\phi)$ be the 
+set of free data variables occurring in an expression $\phi$ such that
+the variables are not merely passed on to the next state.
+E.g., with $\propvar{X}(a, b) = \xi$, for the expression $\phi = a \land \propvar{X}(c, b)$,
+$\used(\phi) = \set{a, c}$. $b$ is not in the set because it does not influence the computation,\
+but is only passed on to the next state.
+For a formula $\phi$, the function $\changed(\phi)$
+computes the variable parameters changed in the formula:
+\[ \changed(\propvar{X}(d_1, \ldots, d_m))  \eqdef\eqsep \set{p_i \mid i \in \set{1 \ldots m} \land p_i = \params(\propvar{X})_i \land d_i \neq p_i } \]
+The function $\booleanResult(\phi)$
+determines if $\phi$ contains a branch that directly results in a \ttrue or \tfalse (not a variable).
+For group $g$ and part $i$, we define read dependence $d_{R}$ and write dependence $d_{W}$:
+\begin{align*}
+d_{R}(g, i) &\eqdef \begin{cases}
+\ttrue & \text{ if } i=1;\\
+p_i \in ( \params(\var(g)) \cap \used(\expression(g)) ) & \text{ otherwise. }
+\end{cases}\\
+d_{W}(g, i) &\eqdef \begin{cases}
+\left( \occ(\expression(g)) \setminus \set{\var(g)} \neq \emptyset \right) 
+\; \lor \; \booleanResult(\expression(g)) 
+& \text{ if } i=1;\\
+p_i \in \changed(\expression(g), \emptyset)
+& \text{ otherwise. }
+\end{cases}
+\end{align*}
+
+\begin{definition}[PPG Dependency matrix]\label{def:dependencymatrix}
+For a PPG $P$ the dependency matrix $DM(P)$ is a $K \times M$ matrix
+defined for $1 \leq g \leq K$ and $1 \leq i \leq M$ as:
+\begin{align*}
+DM(P)_{g,i} &= 
+\begin{cases}
++ & \text{ if } d_{R}(g, i) \land d_{W}(g, i); \\
+r & \text{ if } d_{R}(g, i) \land \neg d_{W}(g, i); \\
+w & \text{ if } \neg d_{R}(g, i) \land d_{W}(g, i); \\
+- & \text{ otherwise. }
+\end{cases}
+\end{align*}
+\end{definition}
+
+
+\begin{example}
+For the PBES in Example~\ref{example:buffer2}, the dependency matrix looks like this:\\
+\begin{tabular*}{\textwidth}{@{}c@{\extracolsep{\fill}}m{4in}@{}}
+\scalebox{0.9}{
+\begin{tabular}{l|cccc}
+$g$ & $\propvar{X}$ & $q_{in}$ & $q_{out}$ & $d$\\
+\hline
+1&+&+&-&w\\
+2&+&+&-&-\\
+3&+&-&+&-\\
+4&+&+&+&-\\
+5&+&-&-&-\\
+6&+&-&+&r\\
+7&+&+&-&-\\
+8&+&-&+&r\\
+9&+&+&+&-\\
+\end{tabular}
+}
+& \smallskip
+The first row lists the state vector parts. The left column lists the group numbers. A `+' denotes both read and write dependency, `w' denotes write dependency, `r' read dependency, and `-' no dependency between the group and the state vector part.
+The effect of caching due to this matrix can be explained by row number \ref{group:X}. Transition group number 
+\ref{group:X} only moves states from $\propvar{X}$ to $\propvar{Y}$ without affecting the parameters.
+Once such a transition has been computed (by $\groupnext$) it can be easily seen 
+that the transition can be applied to any $\propvar{X}$-state by replacing the $\propvar{X}$ with
+$\propvar{Y}$. 
+\end{tabular*}
+\end{example}
+
+\paragraph{Helpful functions}
+For an equation $\sigma \propvar{X}(d \oftype D) = \phi$,
+\[ \params(\propvar{X}) \eqdef d \oftype D \text{ . } \]
+
+Let $\free(d)$ be the set of \emph{free data variables} occurring in a data term $d$. The function $\used$ is defined using:
+\begin{align*}
+& \used(d)                                      & \eqdef\eqsep & \free(d) \\
+& \used(\propvar{X}(e))                         & \eqdef\eqsep & \ldots \text{(parameters that are used/read, not only passed on)} \\
+& \used(\phi_1 \oplus \phi_2)                   & \eqdef\eqsep & \used(\phi_1) \cup \used(\phi_2) \\
+& \used(\mathsf{Q} d \oftype D \suchthat \phi)  & \eqdef\eqsep & \used(\phi) \setminus \free(d)
+\end{align*}
+
+For a formula $\phi$, the function $\changed(\phi,\emptyset)$
+computes the variable parameters changed in the formula, defined as follows:
+\begin{align*}
+& \changed(b, L)                                      & \eqdef\eqsep & \emptyset \\
+& \changed(\neg \phi, L)                              & \eqdef\eqsep & \changed(\phi, L) \\
+& \changed(\phi_1 \oplus \phi_2, L)                       & \eqdef\eqsep & \changed(\phi_1, L) \cup \changed(\phi_2, L) \\
+& \changed(\mathsf{Q} d \oftype D \suchthat \phi, L)  & \eqdef\eqsep & \changed(\phi, L \cup \set{d}) \\
+& \changed(\propvar{X}(d_1, \ldots, d_m), L)          & \eqdef\eqsep & \set{p_i \mid i \in \set{1 \ldots m} \land p_i = \params(\propvar{X})_i \land ( d_i \neq p_i \lor d_i \in L ) }
+\end{align*}
+
+For a formula $\phi$, the function $\reset(\phi,\vec{d})$
+computes the variable parameters in $\vec{d}$ that are reset in the formula (meaning that in a successor state that parameter value will not be used), defined as follows:
+\begin{align*}
+& \reset(b, \vec{d})                                      & \eqdef\eqsep & \emptyset \\
+& \reset(\neg \phi, \vec{d})                              & \eqdef\eqsep & \reset(\phi, \vec{d}) \\
+& \reset(\phi_1 \oplus \phi_2, \vec{d})                       & \eqdef\eqsep & \reset(\phi_1, \vec{d}) \cup \reset(\phi_2, \vec{d}) \\
+& \reset(\mathsf{Q} v \oftype V \suchthat \phi, \vec{d})  & \eqdef\eqsep & \reset(\phi, \vec{d}) \\
+& \reset(\propvar{X}(e), \vec{d})          & \eqdef\eqsep &  \vec{d} \setminus \params(\propvar{X}) 
+\end{align*}
+
+For a formula $\phi$, the function $\booleanResult(\phi)$
+determines if contains a branch that directly results in a boolean value (not a variable), defined as follows:
+\begin{align*}
+& \booleanResult(b)                                     & \eqdef\eqsep & \mathsf{true} \\
+& \booleanResult(\neg \phi)                             & \eqdef\eqsep & \booleanResult(\phi) \\
+& \booleanResult(\phi_1 \oplus \phi_2)                  & \eqdef\eqsep & \booleanResult(\phi_1) \lor \booleanResult(\phi_2) \\
+& \booleanResult(\mathsf{Q} d \oftype D \suchthat \phi) & \eqdef\eqsep & \booleanResult(\phi) \\
+& \booleanResult(\propvar{X}(e))                        & \eqdef\eqsep &  \mathsf{false} 
+\end{align*}
+
+\end{document} 

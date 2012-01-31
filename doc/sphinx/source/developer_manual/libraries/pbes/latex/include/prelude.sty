@@ -1,0 +1,191 @@
+
+\usepackage{etex}
+\usepackage{calc}
+%\usepackage[a4paper,hmargin=0.75in,vmargin=1in,marginparwidth=1in,columnsep=0.25in]{geometry}
+\usepackage[a4paper]{geometry}
+\setlength{\linewidth}{\textwidth}
+\usepackage[british]{babel}
+\hyphenation{coarse coar-sest in-valid check-ing through-out}
+\usepackage[nodayofweek]{datetime}
+\usepackage{amsmath,amsthm}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{undertilde}
+\usepackage{epsfig}
+\usepackage{subfig}
+%\usepackage{wrapfig}
+\usepackage{multirow}
+%\usepackage{lscape}
+\usepackage{listings}
+\usepackage[section]{algorithm}
+\usepackage{algorithmic}
+\usepackage{paralist}
+\setdefaultenum{1)}{(a)}{i)}{A)}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,patterns}
+\usepackage{xspace}
+\usepackage{fix-cm}
+\usepackage{caption}
+\captionsetup{labelfont=bf}
+
+% Fonts
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+%\usepackage[urw-garamond]{mathdesign}
+%\usepackage[bitstream-charter]{mathdesign}
+
+% Super/Subscript
+\newcommand{\super}[1]{\textsuperscript{#1}}
+\newcommand{\sub}[1]{\textsubscript{#1}}
+
+% Abs, Floor, Ceil
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\floor}[1]{\lfloor#1\rfloor}
+\providecommand{\ceil}[1]{\lceil#1\rceil}
+
+% Containers
+\providecommand{\tuple}[1]{\left\langle #1 \right\rangle}
+\providecommand{\set}[1]{\left\lbrace #1 \right\rbrace}
+\providecommand{\sequence}[1]{\left( #1 \right)}
+\providecommand{\vect}[1]{( \begin{matrix} #1 \end{matrix} )}
+\providecommand{\always}[1]{\left[ #1 \right]}
+\providecommand{\possibly}[1]{\left\langle #1 \right\rangle}
+
+% Operators
+\DeclareMathOperator*{\lub}{lub}
+\DeclareMathOperator*{\glb}{glb}
+\DeclareMathOperator*{\head}{head}
+\DeclareMathOperator*{\tail}{tail}
+\DeclareMathOperator*{\dom}{dom}
+\DeclareMathOperator*{\ran}{ran}
+\DeclareMathOperator*{\id}{id}
+\DeclareMathOperator*{\successors}{\mathit{succ}}
+\DeclareMathOperator*{\psplit}{\mathit{split}}
+\DeclareMathOperator*{\type}{\mathit{type}}
+\DeclareMathOperator*{\val}{\mathit{val}}
+\DeclareMathOperator*{\values}{\mathit{values}}
+\DeclareMathOperator*{\ord}{\mathit{ord}}
+\DeclareMathOperator*{\out}{\mathit{out}}
+\DeclareMathOperator*{\col}{\mathit{col}}
+\DeclareMathOperator*{\ind}{\mathit{ind}}
+\DeclareMathOperator*{\num}{\mathit{num}}
+\DeclareMathOperator*{\map}{\mathit{map}}
+\DeclareMathOperator*{\enc}{\mathit{enc}}
+\DeclareMathOperator*{\dec}{\mathit{dec}}
+\DeclareMathOperator*{\Aut}{Aut}
+\DeclareMathOperator*{\Refine}{\mathit{refine}}
+\DeclareMathOperator*{\can}{\mathit{can}}
+\DeclareMathOperator*{\occ}{\mathsf{occ}}
+\DeclareMathOperator*{\bnd}{\mathsf{bnd}}
+\DeclareMathOperator*{\params}{\mathsf{params}}
+\DeclareMathOperator*{\vars}{\mathsf{vars}}
+\DeclareMathOperator*{\free}{\mathsf{free}}
+\DeclareMathOperator*{\used}{\mathsf{used}}
+\DeclareMathOperator*{\dvar}{\mathsf{dvar}}
+\DeclareMathOperator*{\var}{\mathsf{var}}
+\DeclareMathOperator*{\expression}{\mathsf{expr}}
+\DeclareMathOperator*{\changed}{\mathsf{changed}}
+\DeclareMathOperator*{\reset}{\mathsf{reset}}
+\DeclareMathOperator*{\booleanResult}{\mathsf{tf}}
+\DeclareMathOperator*{\filter}{\mathsf{filter}}
+\DeclareMathOperator*{\Inf}{Inf}
+\newcommand{\eqdef}{\ensuremath{\mathrel{\displaystyle
+\mathop{=}^{\text{def}}}}}
+\newcommand{\individ}{\ensuremath{\mathbin\downarrow}}
+\newcommand{\powerset}[1]{\mathcal{P}({#1})}
+%\newcommand{\powerset}[1]{\mathbf{2}^{#1}}
+\newcommand{\lubop}{\ensuremath{\sqcup}}
+\newcommand{\biglubop}{\ensuremath{\bigsqcup}}
+\newcommand{\glbop}{\ensuremath{\sqcap}}
+\newcommand{\bigglbop}{\ensuremath{\bigsqcap}}
+\newcommand{\finerthan}{\ensuremath{\sqsubset}}
+\newcommand{\finereq}{\ensuremath{\sqsubseteq}}
+\newcommand{\coarserthan}{\ensuremath{\sqsupset}}
+\newcommand{\coarsereq}{\ensuremath{\sqsupseteq}}
+\newcommand{\Nat}{\ensuremath{\mathbb{N}}}
+\newcommand{\Int}{\ensuremath{\mathsf{Int}}}
+\newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\emptyseq}{\ensuremath{\varnothing}}
+\newcommand{\followsfrom}{\ensuremath{\mathbin{\Longleftarrow}}}
+\newcommand{\impl}{\ensuremath{\mathbin{\Rightarrow}}}
+\newcommand{\after}{\ensuremath{\circ}}
+\newcommand{\becomes}{\coloneqq}
+\newcommand{\suchthat}{\mathrel{.}}
+\newcommand{\eqsys}{\mathcal{E}}
+\newcommand{\eqsep}{\ \ }
+\newcommand{\defsep}{\medskip\smallskip\\}
+\newcommand{\oftype}{:}
+\newcommand{\Land}{\ensuremath{\bigwedge}}
+\newcommand{\Lor}{\ensuremath{\bigvee}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\PF}{\mathcal{F}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Eloise}{\ensuremath{\mathbf{0}}\xspace}
+\newcommand{\Abelard}{\ensuremath{\mathbf{1}}\xspace}
+\newcommand{\VEloise}{\ensuremath{V_{\Eloise}}}
+\newcommand{\VAbelard}{\ensuremath{V_{\Abelard}}}
+\newcommand{\fresh}[1]{\ensuremath{\widetilde{#1}}}
+\newcommand{\propvar}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\cache}{\ensuremath{\mathcal{C}}}
+\newcommand{\true}{\ensuremath{\top}}
+\newcommand{\false}{\ensuremath{\bot}}
+\newcommand{\ttrue}{\ensuremath{\mathbf{true}}\xspace}
+\newcommand{\tfalse}{\ensuremath{\mathbf{false}}\xspace}
+\newcommand{\groupnext}{\textsc{Group-Next}}
+\newcommand{\nextst}{\textsc{Next}}
+\newcommand{\nextcache}{\textsc{Next-Cache}}
+\newcommand{\nextcacheall}{\textsc{Next-Cache-All}}
+\newcommand{\updatecache}{\textsc{Update-Cache}}
+\newcommand{\nextapply}{\textsc{Next-Apply}}
+\newcommand{\Generate}{\textsc{Generate}}
+
+\DeclareMathOperator*{\sort}{\mathbf{sort}\ }
+\DeclareMathOperator*{\struct}{\mathbf{struct}\ }
+\DeclareMathOperator*{\act}{\mathbf{act}\ }
+\DeclareMathOperator*{\proc}{\mathbf{proc}\ }
+\DeclareMathOperator*{\eqn}{\mathbf{eqn}\ }
+\DeclareMathOperator*{\mcrlmap}{\mathbf{map}\ }
+\DeclareMathOperator*{\allow}{\mathbf{allow}\xspace}
+\DeclareMathOperator*{\comm}{\mathbf{comm}\xspace}
+\DeclareMathOperator*{\pbes}{\mathbf{pbes}\ }
+\DeclareMathOperator*{\init}{\mathbf{init}\ }
+\newcommand{\procname}[1]{\mathsf{#1}}
+\newcommand{\action}[1]{\mathrm{#1}}
+\newcommand{\container}[1]{\mathrm{#1}}
+\newcommand{\buildin}[1]{\mathrm{#1}}
+\newcommand{\guards}{\ensuremath{\mathbin{\rightarrow}}}
+\newcommand{\mcrlelse}{\ensuremath{\mathbin{\diamond}}}
+\newcommand{\append}{\ensuremath{\mathbin{\triangleleft}}}
+\newcommand{\Pos}{\buildin{Pos}}
+
+\newcommand{\LTSMIN}{{\scshape LTSmin}\xspace}
+\newcommand{\PINS}{{\scshape Pins}\xspace}
+\newcommand{\MCRLTWO}{mCRL2\xspace}
+\newcommand{\MUCALC}{$\mathrm{\mu}$-calculus\xspace}
+\newcommand{\Gauss}{Gau\ss\xspace}
+\newcommand{\LNCS}{LNCS\xspace}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[thm]{Definition}
+\newtheorem{example}[thm]{Example}
+
+\floatstyle{plain}
+\newfloat{listing}{thp}{lop}
+\floatname{listing}{Listing}
+
+\def\keywordname{{\bf Key words:}}
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
