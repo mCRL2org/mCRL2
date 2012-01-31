@@ -31,6 +31,7 @@ Technical details
 To reduce the complexity and the corresponding mCRL2 models the system is
 designed using a layered architecture. Similar actions and functionality are
 grouped together into several layers, each having its own specific tasks:
+
   * Physical layer, this layer reads and writes bits from and to the network.
     It processes the digital information into analogue data and vice versa.
   * Service layer, this layer is responsible for reliable message exchange and collision prevention.

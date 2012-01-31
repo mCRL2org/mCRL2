@@ -30,15 +30,15 @@ the following requirements:
 
 .. table:: BooleanExpressionTraits Requirements
 
-   ==================  ===========================================================   =========
-   Expression          Requirement                                                   Semantics
-   ==================  ===========================================================   =========
+   ==================  ============================================================   =========
+   Expression          Requirement                                                    Semantics
+   ==================  ============================================================   =========
    T::equation_type    is a valid C++ type that models the FixpointEquation concept
    T::expression_type  is a valid C++ type
    T::variable_type    is a valid C++ type
    T::symbol_type      is a valid C++ type
    s = print(eq)`      is a valid expression
-   ==================  ===========================================================   =========
+   ==================  ============================================================   =========
 
 where
 `eq` is an expression of type `T::equation_type`,
