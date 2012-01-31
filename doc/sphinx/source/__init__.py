@@ -44,6 +44,7 @@ def call(name, cmdline, stdin=None):
 def generate_rst(binpath, temppath, outpath, version):
   import developer_manual
   import user_manual
+  html_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../html'))
   cfg_dev = os.path.join(os.path.dirname(__file__), 'developer_manual')
   cfg_usr = os.path.join(os.path.dirname(__file__), 'user_manual')
   temp_dev = os.path.join(temppath, 'rst','developer_manual')
@@ -51,6 +52,8 @@ def generate_rst(binpath, temppath, outpath, version):
   out_dev = os.path.join(outpath, 'developer_manual')
   out_usr = os.path.join(outpath, 'user_manual')
   logging.basicConfig(level=logging.INFO)
+  if html_dir <> outpath:
+    clone_rst(html_dir, outpath)
   clone_rst(cfg_dev, temp_dev)
   clone_rst(cfg_usr, temp_usr)
   developer_manual.generate_rst(temppath, outpath)
