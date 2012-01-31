@@ -574,8 +574,9 @@ class bes_bisimulation_tool: public super
       super::add_options(desc);
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
-                      "generate an equivalent BES, preserving equivalence NAME:\n"
-                      "supported equivalences: bisim, stuttering (default stuttering)", 'e');
+                      "generate an equivalent BES, preserving equivalence NAME:"
+                      "  'bisim' for strong bisimulation,\n"
+                      "  'stuttering' for stuttering equivalence (default)", 'e');
       desc.add_option("intermediate", make_mandatory_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
