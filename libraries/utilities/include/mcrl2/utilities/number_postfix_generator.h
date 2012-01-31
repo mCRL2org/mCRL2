@@ -63,7 +63,7 @@ class number_postfix_generator
 {
   protected:
     /// \brief A map that maintains the highest index for each prefix.
-    std::map<std::string, int> m_index;
+    std::map<std::string, std::size_t> m_index;
 
     /// \brief The default hint.
     std::string m_hint;

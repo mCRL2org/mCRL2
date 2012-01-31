@@ -41,6 +41,7 @@ class set_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
+      m_generator = utilities::number_postfix_generator();
     }
 
     /// \brief Adds the identifier s to the context.
@@ -96,6 +97,7 @@ class multiset_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
+      m_generator = utilities::number_postfix_generator();
     }
 
     /// \brief Adds the identifier s to the context.
