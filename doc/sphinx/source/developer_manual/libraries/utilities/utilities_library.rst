@@ -114,7 +114,7 @@ There is no tutorial for the use of this library, the reference documentation co
 
 The command line interfacing library is part of the mCRL2 utilities library. It contains only infrastructure functionality for the construction of tools that provide the doorway to the core functionality of the mCRL2 toolset. The references pages are part of the utilities library reference pages.
 
-.. _tool_classes
+.. _tool_classes:
 
 Tool classes
 ============
@@ -461,7 +461,8 @@ Formatting the output
 By default each line in the output is prefixed with a fixed string,
 including a timestamp, the log level and, if provided, a hint. Furthermore,
 the user of the library can control indentation (at a global level) using
-the routines :cpp:member:`mcrl2_logger::indent()` and :cpp:member:`mcrl2_logger::unindent()`.
+the routines :cpp:member:`mcrl2_logger::indent()` and
+:cpp:member:`mcrl2_logger::unindent()`.
 
 Tutorial
 --------

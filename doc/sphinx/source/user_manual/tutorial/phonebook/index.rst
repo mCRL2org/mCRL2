@@ -147,17 +147,16 @@ data structures used in a specification.
 
 .. admonition:: Exercise
 
-Modify the specification in :download:`phonebook2b.mcrl2 <files/phonebook2b.mcrl2>`
-by adding functions ``emptybook, add_phone, del_phone`` and ``find_phone`` with
-the following signatures.
+   Modify the specification in :download:`phonebook2b.mcrl2 <files/phonebook2b.mcrl2>`
+   by adding functions ``emptybook, add_phone, del_phone`` and ``find_phone`` with
+   the following signatures.
 
-.. code-block:: mcrl2
+   .. code-block:: mcrl2
 
-  map  emptybook: PhoneBook;
-       add_phone: PhoneBook # Name # PhoneNumber -> PhoneBook;
-       del_phone: PhoneBook # Name -> PhoneBook;
-       find_phone: PhoneBook # Name -> PhoneNumber;
-
+      map  emptybook: PhoneBook;
+           add_phone: PhoneBook # Name # PhoneNumber -> PhoneBook;
+           del_phone: PhoneBook # Name -> PhoneBook;
+           find_phone: PhoneBook # Name -> PhoneNumber;
 
 A solution to the above exercise is given by the specification in
 :download:`phonebook3.mcrl2 <files/phonebook3.mcrl2>`.

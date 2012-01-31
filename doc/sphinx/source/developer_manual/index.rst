@@ -31,3 +31,5 @@ Contents
    :hidden:
 
    developer
+   guidelines
+   cronjobs

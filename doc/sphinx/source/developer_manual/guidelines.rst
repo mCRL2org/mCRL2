@@ -90,7 +90,7 @@ The following naming conventions regarding file contents should be used:
 * Names (except as noted below) should be all lowercase, with words separated by
   underscores.
 * Template parameter names begin with an uppercase letter.
-* Macro names all uppercase and begin with MCRL2_.
+* Macro names all uppercase and begin with ``MCRL2_``.
 * Choose meaningful names - explicit is better than implicit, and readability
   counts. There is a strong preference for clear and descriptive names, even if
   lengthy.

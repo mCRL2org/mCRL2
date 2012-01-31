@@ -94,16 +94,16 @@ The following restrictions apply to propositional variables:
 * no overloading: it is not allowed to declare two propositional variables with
   the same name but with a different type.
 
-.. remark::
+.. note::
 
    The tool lps2pbes uses mu-calculus formulas files, which contain precisely one
    state formula.
 
-.. remark::
+.. note::
 
    The suggested extension of formula files is ".mcf".
 
-.. remark::
+.. note::
 
    Data variables declared using ``forall``, ``exists``, ``nu`` and ``mu`` quantifiers,
    we have the following variable conventions:

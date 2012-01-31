@@ -152,8 +152,9 @@ graphical user interfaces, some advanced settings are initially hidden.
   *Default*: ``ON``
 
   ======= ======================================================================
-  ``ON``  Compile graphical tools (|diagraphica|, |ltsgraph|, |ltsview|, 
-          |mcrl2-gui|, |lpsxsim|).
+  ``ON``  Compile graphical tools (:ref:`tool-diagraphica`,
+          :ref:`tool-ltsgraph`, :ref:`tool-ltsview`, :ref:`tool-mcrl2-gui`,
+          :ref:`tool-lpsxsim`).
   ------- ----------------------------------------------------------------------
   ``OFF`` Do not compile graphical tools.
   ======= ======================================================================
