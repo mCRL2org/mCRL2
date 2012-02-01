@@ -64,9 +64,13 @@
     </xsl:when>
 
     <xsl:when test="@kind='file'">
-<xsl:text>File </xsl:text>
+<xsl:text>Include file: 
+
+.. code-block:: c++ 
+
+   #include "</xsl:text>
       <xsl:value-of select="substring-after(location/@file,'include/')"/>
-      <xsl:text>
+      <xsl:text>"
 
 </xsl:text>
       <xsl:value-of select="briefdescription"/>
