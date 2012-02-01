@@ -1,0 +1,3 @@
+% no chocolate after 10 cents
+
+[ true* . !(coin10) . coin10 . readyC ] false

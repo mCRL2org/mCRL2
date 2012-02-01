@@ -10,11 +10,8 @@ tools. For the latter, we refer to [GMRUW09]_ as a brief
 introduction of the main concepts, and to [GR11]_ for an in-depth
 discussion.
 
-Before starting this tutorial you should first get a copy of mCRL2 for
-your platform from the mCRL2 website at
-`<http://mcrl2.org/mcrl2/wiki/index.php/Download>`_. Installation
-instructions can be found at
-`<http://mcrl2.org/mcrl2/wiki/index.php/Installation_instructions>`_.
+Before starting this tutorial you should first :ref:`download <download>` a copy
+of mCRL2. See also the :ref:`build instructions <build>`.
 
 .. note::
 
@@ -35,4 +32,5 @@ terminal. Commands that should be enterend at the prompt are displayed as::
    hanoi/index
    ropebridge/index
    phonebook/index
+   gossip/index
    mcrl2-gui/index

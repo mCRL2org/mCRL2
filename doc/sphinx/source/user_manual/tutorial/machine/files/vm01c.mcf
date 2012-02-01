@@ -1,5 +1,4 @@
-%% file vm01c.mcf
+% after every ready only a coin follows (true)
 
-%% after every ready only a coin follows (true)
 [ true* . ready . !coin ] false
 

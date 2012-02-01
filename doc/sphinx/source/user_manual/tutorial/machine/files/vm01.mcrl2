@@ -1,5 +1,3 @@
-%% file vm01.mcrl2
-
 act
   ins10, optA, acc10, putA, coin, ready ;
 proc

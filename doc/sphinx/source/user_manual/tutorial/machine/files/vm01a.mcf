@@ -1,5 +1,4 @@
-%% file vm01a.mcf
+% always, eventually a ready is possible (true)
 
-%% always, eventually a ready is possible (true)
-   [ true* ] < true* . ready > true
+[ true* ] < true* . ready > true
 

@@ -15,6 +15,8 @@
 .. |src_tgz| replace:: GZipped Tarball
 .. _src_tgz: http://www.win.tue.nl/mcrl2/download/release/mcrl2-201107.1-src.tar.gz
 
+.. _download:
+
 Download mCRL2
 ==============
 

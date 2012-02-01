@@ -1,0 +1,15 @@
+act
+  ins10, ins20, acc10, acc20, coin10, coin20, ret10, ret20 ;
+  optA, optC, chg10, chg20, putA, putC, prod, 
+  readyA, readyC, out10, out20 ;
+
+proc
+  User = 
+    *1*
+
+  Mach = 
+    acc10.( putA.prod + acc10.( putC.prod + ret20 ) + ret10 ).Mach +
+    acc20.( putA.prod.ret10 + putC.prod + ret20 ).Mach ;
+
+init
+  *2* ;
