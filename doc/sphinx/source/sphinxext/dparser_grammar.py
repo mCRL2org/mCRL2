@@ -71,9 +71,18 @@ class DParserGrammarDirective(ProductionList):
 
   def run(self):
     try:
-      rst = '\n'.join([str(_PROD[name]) for name in self.arguments[0].split()])
+      names = self.arguments[0].split()
+      rst = '\n'.join([str(_PROD[name]) for name in names])
       self.arguments = [rst]
-      return ProductionList.run(self)
+      p = nodes.compound()
+      p['classes'] += ['dparser', 'admonition', 'collapse']
+      title = nodes.paragraph()
+      title['classes'] += ['first', 'admonition-title']
+      title += nodes.Text(' '.join(names))
+      body = ProductionList.run(self)[0]
+      body['classes'] += ['last']
+      p += [title, body]
+      return [p]
     except KeyError as e:
       self.state.document.reporter.severe("Unknown nonterminal: " + str(e))
       return []

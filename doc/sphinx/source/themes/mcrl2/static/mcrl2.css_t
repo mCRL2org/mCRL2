@@ -10,26 +10,60 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
-dl { border: solid 1px #80B090; }
-dl dt { background-color: #A0E0C0; }
+div.admonition.collapse p.admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
+div.admonition.collapse p.admonition-title { display: block; }
+div.admonition.collapse p.admonition-title:after { content: ''; }
+div.admonition.collapse p.admonition-title:before { content: '▾ '; }
+div.admonition.collapse.visible p.admonition-title:before { content: '▴ '; }
+div.admonition.collapse .last { display: none; }
+div.admonition.collapse.visible .last { display: inline; }
 
 div.tool-docs li { float: left; display: inline; width: 20%; }
 
-div.header ul.mainmenu {
+div.dparser pre {
+  display: none;
+}
+div.dparser.visible pre {
+  display: block;
+  border: 0px;
+  padding: 0px;
+  margin: 0px;
+  margin-top: 5px;
+  background-color: white;
+}
+div.dparser {
+  display: block;
+  padding: 5px;
+  background-color: white;
+  color: #333333;
+  line-height: 120%;
+  border: 1px solid #ac9;
+  border-left: none;
+  border-right: none;
+}
+
+div.dparser .admonition-title {
+  font-family: monospace;
+}
+
+
+div.mainmenu { background-color: white; }
+div.mainmenu ul {
   display: table;
   margin: 0 auto;
   font-family: sans-serif;
 }
-
-div.header ul.mainmenu li {
+div.mainmenu ul li {
   float: left;
   display: inline;
   padding: 4px;
+  padding-left: 8px;
 }
-div.header ul.mainmenu li a {
+div.mainmenu ul li a {
   color: #104020;
 }
 
+/*
 div.header ul.mainmenu li:before {
   content: '|';
   color: white;
@@ -38,6 +72,7 @@ div.header ul.mainmenu li:before {
 div.header ul.mainmenu li:first-child:before {
   content: '';
 }
+*/
 
 .admonition.platform-specific {
   background-position: top left;
@@ -151,7 +186,11 @@ div.related {
 }
 
 div.header {
-    background-color: white;
+    padding-bottom: 30px;
+    background-image: url('gradient.png');
+    background-repeat: repeat-x;
+    background-position: bottom;
+    /* background-color: none; */
     position: fixed;
     z-index: 50;
     width: 100%;

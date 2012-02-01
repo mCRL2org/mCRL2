@@ -8,13 +8,13 @@ _LOG = logging.getLogger('util')
 
 def clone_rst(src, dst):
   if os.path.isdir(src):
-    if not src.startswith('.'):
-      for f in os.listdir(src):
+    for f in os.listdir(src):
+      if not f.startswith('.'):
         clone_rst(os.path.join(src, f), os.path.join(dst, f))
   else:
     if not os.path.exists(os.path.dirname(dst)):
       os.makedirs(os.path.dirname(dst))
-    if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
+    if not os.path.exists(dst) or (os.path.getmtime(src) > os.path.getmtime(dst)):
       _LOG.info('Copying changed file: {0}'.format(src))
       shutil.copyfile(src, dst)
 
