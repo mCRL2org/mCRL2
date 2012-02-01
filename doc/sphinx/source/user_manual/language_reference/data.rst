@@ -57,6 +57,8 @@ predefined sorts, or a sort that you specified yourself (or will specify later
 in the specification, as the order of the statements in an mCRL2 specification
 does not change the meaning of the specification).
 
+.. _binaryint:
+
 Let's have a look at a slightly more complicated encoding of numbers, in this
 case the positive numbers. We will use the predefined sort ``Bool``, which 
 consists of the (distinct) elements ``true`` and ``false``::
@@ -86,6 +88,21 @@ instance, ``cdub(false, one)`` represents the number 2, and
 Data expressions
 ----------------
 
+Data expressions are descriptions of an element of a sort. Therefore, any 
+closed, well-typed expression is a data expression. The full grammar is given
+below. 
+
+.. table:: Examples of data expressions
+
+  =============================== ==========
+  ``true && false``               Data expression of sort ``Bool``
+  ------------------------------- ----------
+  ``1981``                        Data expression of sort ``Pos`` (or ``Nat``, 
+                                  ``Int`` or ``Real``)
+  ------------------------------- ----------
+  ``if(true, 1981, 12 + 4 / 13)`` Data expression of sort ``Real``
+  =============================== ==========
+
 .. dparser:: DataExpr DataExprList BagEnumElt BagEnumEltList IdList VarDecl 
    VarsDecl VarsDeclList Assignment AssignmentList
 
@@ -104,41 +121,116 @@ can be specified by the following grammar:
 
 Equational specifications give further information about how the elements that
 these aliases represent behave. Equational specifications are given by the 
-grammar below:
+grammar below.
 
 .. dparser:: VarsDecl VarsDeclList VarSpec EqnDecl EqnSpec
 
-These specifications define a conditional rewrite system. Every rewrite rule is
-of the form ``c -> d = e``, where ``c`` is a condition, and ``d`` and ``e`` are
-data expressions. The meaning of such a rule is that if you encounter a data
-expression ``d``, and the condition ``c`` is true, then you may substitute ``e``
-for ``d`` to obtain an equivalent expression.
+Equation systems are optionally preceded by a ``var`` block that defines 
+variables that are used in the ``eqn`` block that follows. Variables are used to
+do pattern matching in equation systems. To illustrate this, let us look at a
+specification of the Fibonacci sequence::
 
-Given sorts ``A`` and ``B``, a unary mapping ``f`` and a binary mapping ``g``
-can be specified as follows::
+   map fib: Nat -> Nat;
+   var n: Nat;
+   eqn n <= 1 -> fib(n) = n;
+       n > 1 -> fib(n) = fib(Int2Nat(n - 1)) + fib(Int2Nat(n - 2))
+   
+Going through the code line by line, we see a mapping ``fib`` being defined that
+maps natural numbers to natural numbers. Then a variable ``n`` of sort ``Nat``
+is declared. 
 
-  map f: A -> B;
-      g: A # A -> B;
+On the third line, the first rewrite rule is declared, that says that if a term 
+of the form ``fib(n)`` is encountered, where ``n`` is the variable and can hence
+match any term of sort ``Nat``, then it can be rewritten to the value that
+matches the variable, *if* that value is at most 1. 
 
-This statement only says that ``f`` and ``g`` are mappings, but it does not yet
-say how they behave. In order to describe the behaviour of mappings, we need to
-give mCRL2 an equational specification of the mapping we wish to define. As an
-example, we will specify the exclusive or operation on booleans::
+The second rewrite rule says that if a term of the form ``fib(n)`` is
+encountered, then it can be rewritten to ``fib(Int2Nat(n - 1)) + fib(Int2Nat(n 
+- 2))`` if ``n`` was larger than 1.
 
-  map xor: Bool # Bool -> Bool;
-  eqn xor(false, false) = false;
-      xor(false, true) = true;
-      xor(true, false) = true;
-      xor(true, true) = false;
+In the above, we need to use ``Int2Nat`` to convince the type checking system 
+that ``n-1`` and ``n-2`` will indeed be natural numbers. In general this is not
+true (for ``n <= 1``), but we are making the executive decision that we know 
+better than the type checker, because we know that the condition of the rewrite
+rule will prevent us from getting into trouble.
 
-This is rather verbose if we know that we already have a definition of
-inequality of booleans. We could therefore also specify it as follows::
+.. admonition:: Example (underspecification)
+   :class: collapse
 
-  map xor: Bool # Bool -> Bool;
-  var a, b: Bool;
-  eqn xor(a, b) = a != b;
+   Consider the following data specification::
 
+     sort A, B;
+     cons b: B;
+     map f: A;
+         g: B;
+         h: A -> B;
+     var a: A;
+     eqn h(a) = b; 
 
+   The sort ``B`` is defined as the singleton set ``{b}``, but ``A`` is left 
+   unspecified. Therefore, we cannot know what element ``f`` maps to. For ``g``
+   on the other hand, we know that ``g`` maps to ``b``, as it is the only
+   element of ``B``, but as this is not specified in the equational
+   specification, mCRL2 will not detect this. However, the data expression
+   ``h(f)`` will be rewritten to ``b``, as it matches the only rule in this
+   equation system.
+
+.. admonition:: Example (rewrite rules)
+   :class: collapse
+
+   In order to describe the behaviour of mappings, we need to
+   give mCRL2 an equational specification of the mapping we wish to define. As an
+   example, we will specify the exclusive or operation on booleans::
+
+    map xor: Bool # Bool -> Bool;
+    eqn xor(false, false) = false;
+        xor(false, true) = true;
+        xor(true, false) = true;
+        xor(true, true) = false;
+
+   This is rather verbose if we know that we already have a definition of
+   inequality of booleans. We could therefore also specify it as follows::
+
+     map xor: Bool # Bool -> Bool;
+     var a, b: Bool;
+     eqn xor(a, b) = a != b;
+
+   Yet another way of specifying the same mapping would be to use the rewrite
+   conditions to test for equality::
+
+     map xor: Bool # Bool -> Bool;
+     var a, b: Bool;
+     eqn a == b -> xor(a, b) = false;
+         a != b -> xor(a, b) = true;
+
+.. warning::
+
+   Functional programmers might have written down the following specification for
+   the Fibonacci sequence::
+
+     map fib: Nat -> Nat;
+     var n: Nat;
+     eqn fib(0) = 0;
+         fib(1) = 1;
+         fib(n + 2) = fib(n) + fib(n + 1);
+
+   This, however, will not work in mCRL2: ``fib(10)`` will not rewrite at all. 
+   The reason is that the pattern matching used in the rewrite system fails to 
+   match ``n + 2`` to ``10``, because the number 10 is internally represented
+   using a :ref:`binary encoding <binaryint>`, and therefore has a different
+   structure than ``n + 2``.
+
+   This kind of pattern matching can still be used, but it is advisable to only
+   match terms that consist of only constructors and variables. One particularly
+   useful example is that of lists, for which the constructors ``[]`` and ``|>``
+   are defined::
+
+     map remove: List(Nat) # Nat -> Nat;
+     var x, y: Nat;
+         l: List(Nat);
+     eqn remove(x, []) = [];
+         x == y -> remove(x |> l, y) = l;
+         x != y -> remove(x |> l, y) = x |> remove(l, y);
 
 .. _predefinedsorts:
 

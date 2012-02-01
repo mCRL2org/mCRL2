@@ -10,37 +10,15 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
-div.admonition.collapse p.admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
-div.admonition.collapse p.admonition-title { display: block; }
-div.admonition.collapse p.admonition-title:after { content: ''; }
-div.admonition.collapse p.admonition-title:before { content: '▾ '; }
-div.admonition.collapse.visible p.admonition-title:before { content: '▴ '; }
-div.admonition.collapse .last { display: none; }
-div.admonition.collapse.visible .last { display: inline; }
+div.admonition.collapse .admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
+div.admonition.collapse .admonition-title:after { content: ''; }
+div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
+div.admonition.collapse .admonition-title:before { content: '▴ '; }
+div.admonition.collapse .collapsed { display: none; }
+div.admonition.collapse .admonition-title { display: block; }
+div.admonition.collapse { border: 1px solid #e0e0e0; }
 
 div.tool-docs li { float: left; display: inline; width: 20%; }
-
-div.dparser pre {
-  display: none;
-}
-div.dparser.visible pre {
-  display: block;
-  border: 0px;
-  padding: 0px;
-  margin: 0px;
-  margin-top: 5px;
-  background-color: white;
-}
-div.dparser {
-  display: block;
-  padding: 5px;
-  background-color: white;
-  color: #333333;
-  line-height: 120%;
-  border: 1px solid #ac9;
-  border-left: none;
-  border-right: none;
-}
 
 div.dparser .admonition-title {
   font-family: monospace;
@@ -62,17 +40,6 @@ div.mainmenu ul li {
 div.mainmenu ul li a {
   color: #104020;
 }
-
-/*
-div.header ul.mainmenu li:before {
-  content: '|';
-  color: white;
-  padding-right: 4px;
-}
-div.header ul.mainmenu li:first-child:before {
-  content: '';
-}
-*/
 
 .admonition.platform-specific {
   background-position: top left;
