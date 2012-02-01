@@ -25,6 +25,7 @@
 #
 # Package maintainers may set the variable below to issue a new release.
 set( MCRL2_MAJOR_VERSION "201107.1" )
+string( SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR )
 
 option( MCRL2_PACKAGE_RELEASE "Include release version information. This discards SVN revision information and uses only the MCRL2_LATEST_RELEASE CMake variable." FALSE)
 mark_as_advanced( MCRL2_PACKAGE_RELEASE )
