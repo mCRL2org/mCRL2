@@ -1,3 +1,5 @@
+.. index:: data; specification
+
 Data specifications
 ===================
 
@@ -20,8 +22,18 @@ case that an element can be described by several constructors (in which case it
 violates a property commonly known as "no confusion"). The only exception to
 this are the booleans; ``true`` and ``false`` are distinct elements.
 
+In mCRL2, a sort is either a :ref:`predefined sort <predefinedsorts>`, a 
+:ref:`constructed sort <constructedsorts>`, or a sort that was declared in a 
+:ref:`sort specification <sortspec>`. The grammar of a sort description is given
+by the non-terminal :token:`SortExpr`. 
+
+.. dparser:: ProjDecl ProjDeclList ConstrDecl ConstrDeclList SortExprList 
+             SortExpr
+
 
 .. _sortspec:
+
+.. index:: sort, cons
 
 Specifying sorts
 ----------------
@@ -85,6 +97,8 @@ instance, ``cdub(false, one)`` represents the number 2, and
    able to make a :ref:`constructed sort <constructedsorts>` that suits your 
    needs.
 
+.. index:: data; expression, whr, where clause
+
 Data expressions
 ----------------
 
@@ -92,19 +106,34 @@ Data expressions are descriptions of an element of a sort. Therefore, any
 closed, well-typed expression is a data expression. The full grammar is given
 below. 
 
-.. table:: Examples of data expressions
-
-  =============================== ==========
-  ``true && false``               Data expression of sort ``Bool``
-  ------------------------------- ----------
-  ``1981``                        Data expression of sort ``Pos`` (or ``Nat``, 
-                                  ``Int`` or ``Real``)
-  ------------------------------- ----------
-  ``if(true, 1981, 12 + 4 / 13)`` Data expression of sort ``Real``
-  =============================== ==========
-
 .. dparser:: DataExpr DataExprList BagEnumElt BagEnumEltList IdList VarDecl 
    VarsDecl VarsDeclList Assignment AssignmentList
+
+A notable construction that is not standard is the *where clause*, which can be
+used to substitute subexpressions in a data expression. Where clauses can be 
+useful for efficiency reasons. For example, we can define a function that 
+computes the square of the sum of two numbers as follows::
+
+  map square_sum: Int # Int -> Int;
+  var x, y: Int;
+  eqn square_sum(x, y) = (x + y) * (x + y);
+
+When evaluating ``square_sum(2, 3)``, this will rewrite to ``(2 + 3) * (2 + 3)``, 
+which causes the expression ``2 + 3`` to be evaluated twice.
+
+Using a where clause we enforce that the right-hand sides of local definitions
+is evaluated exactly once::
+
+  var x, y: Int;
+  eqn square_sum(x,y) = z * z whr z = x + y end;
+
+Note that technically a where clause just introduces a beta-redex, so we could
+also have defined the following::
+
+  var x, y: Int;
+  eqn square_sum(x, y) = (lambda z: Int . z * z)(x + y);
+
+.. index:: map, var, eqn
 
 Specifying mappings
 -------------------
@@ -234,6 +263,80 @@ rule will prevent us from getting into trouble.
 
 .. _predefinedsorts:
 
+.. index:: ==;equality,==,
+           <,<;less than, <;subset, <;lexicographical ordering,
+           >,>;greater than, >;superset, >;lexicographical ordering,
+           <=,<=;less than or equal to, <=;subset or equal to, <=;lexicographical ordering,
+           >=,>=;greater than or equal to, >=;subset or equal to, >=;lexicographical ordering,
+   single: if(_,_,_)
+
+Predefined mappings
+-------------------
+
+The mappings in the following table are defined on all sorts, even on 
+user-defined sorts.
+
+.. list-table:: Predefined operations on *all* sorts
+   :header-rows: 1
+   :widths: 7 12 50
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`{a} == {b}`
+     - :samp:`{S} # {S} -> Bool`
+     - Equality
+   * - :samp:`{a} != {b}`
+     - :samp:`{S} # {S} -> Bool`
+     - Inequality, always equivalent to :samp:`!({a} == {b})`
+   * - :samp:`{a} < {b}`
+     - :samp:`{S} # {S} -> Bool`
+     - Less than
+   * - :samp:`{a} > {b}`
+     - :samp:`{S} # {S} -> Bool`
+     - Greater than, always equivalent to :samp:`{b} < {a}`
+   * - :samp:`{a} <= {b}``
+     - :samp:`{S} # {S} -> Bool`
+     - Less than or equal to, always equivalent to :samp:`{a} < {b} || {a} == {b}`.
+   * - :samp:`{a} >= {b}`
+     - :samp:`{S} # {S} -> Bool`
+     - Greater than or equal to, always equivalent to :samp:`{b} <= {a}`
+   * - :samp:`if({c}, {a}, {b})`
+     - :samp:`Bool # {S} # {S} -> {S}`
+     - Conditional value
+
+For any sort ``S`` (even for user defined sorts), the mappings have the 
+following equational properties::
+
+  var s, t: S;
+      b: Bool;
+  eqn s == s -> true;
+      s < s -> false;
+      s <= s -> true;
+      if(true, s, t) = s;
+      if(false, s, t) = t;
+      if(b, s, s) = s;
+
+For mapping sorts and user defined sorts, only these equations are specified.
+
+For the predefined sorts, the mappings work as expected (so ``12 < 16`` and
+``23/12 == 46/24``). For lists, the ``<`` and ``<=`` operators define the
+lexicographical ordering (so ``[2, 3] > [1, 2, 3]``, and ``[] < [1]``). For sets
+and bags, they define the subset (resp. subbag) relation.
+
+Finally, for structured sorts, the definitions of ``<`` and ``<=`` are a bit 
+more involved; they are described in the section about :ref:`structured sorts
+<structuredsorts>`.
+
+.. warning:: 
+
+   Be careful when specifying user defined sorts: the above operations are only
+   partially defined. Trying to compare two syntactically different data 
+   expressions may not lead to the desired result, unless additional rewrite
+   rules for ``==``, ``<`` and ``<=`` are added.
+
+.. index:: Bool, Nat, Pos, Int, Real, true, false
+
 Predefined sorts
 ----------------
 
@@ -244,17 +347,20 @@ discussed in more detail elsewhere in this document.
 
 .. table:: Basic sorts in mCRL2
 
-   =========== =======================
-   ``Bool``    Booleans
-   ----------- -----------------------
-   ``Pos``     Positive numbers
-   ----------- -----------------------
-   ``Nat``     Natural numbers
-   ----------- -----------------------
-   ``Int``     Integers
-   ----------- -----------------------
-   ``Real``    Rationals
-   =========== =======================
+   ======== ================
+   Sort     Semantics       
+   ======== ================
+   ``Bool`` Booleans         
+   -------- ----------------
+   ``Pos``  Positive numbers 
+   -------- ----------------
+   ``Nat``  Natural numbers
+   -------- ----------------
+   ``Int``  Integers
+   -------- ----------------
+   ``Real`` Rationals
+   ======== ================
+
 
 The constants ``true`` and ``false`` are defined as the only constructors for
 the sort ``Bool``.
@@ -277,10 +383,167 @@ in any of these domains, and there are no smallest integers and reals.
    To specify the decimal fractional value ``3.141592``, you will need to 
    specify it as a fraction, *i.e.*, ``3141592/1000000``.
 
-.. note::
-   :class: collapse 
+.. index:: min, max, mod, div, exp, 
+           succ, pred, forall, exists, round, floor, ceil
+   triple: mathematical;addition;+
+   triple: mathematical;multiplication;*
+   triple: mathematical;subtraction;-
+   triple: mathematical;negation;-
+   triple: logical;not;!
+   triple: logical;and;&&
+   triple: logical;or;||
+   triple: logical;implication;=>
 
-   Blabla
+Mappings on predefined sorts
+""""""""""""""""""""""""""""
+
+For the predefined sorts, mCRL2 defines some common operations. The predefined
+operations on the Booleans are given in the table below.
+
+.. list-table:: Predefined operations on Booleans
+   :header-rows: 1
+   :widths: 20 30 50
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`! {a}`
+     - ``Bool -> Bool``
+     - Logical negation
+   * - :samp:`{a} && {b}`
+     - ``Bool # Bool -> Bool``
+     - Logical and
+   * - :samp:`{a} || {b}`
+     - ``Bool # Bool -> Bool``
+     - Logical or
+   * - :samp:`{a} => {b}`
+     - ``Bool # Bool -> Bool``
+     - Logical implication
+   * - :samp:`forall {V} . {b}`
+     - ``Bool -> Bool``
+     - Universal quantifier
+   * - :samp:`exists {V} . {b}`
+     - :samp:`Bool -> Bool`
+     - Existential quantifier
+
+The universal and existential quantifier need some extra clarification. Their
+concrete syntax (as given by the non-terminal :token:`DataExpr`) is illustrated
+in the example below::
+
+  exists n, m: Nat, p: Pos . n + m == p;
+
+The :samp:`{V}` in the table above is a specification of locally bound 
+variables, that occur in the expression after the period (``.``). Evaluation of
+quantifiers is done by using the constructors of a sort to enumerate all 
+possible values of that sort, and then check for each such value whether the
+expression holds. This means that evaluation some quantifiers will not 
+terminate::
+
+  exists n: Nat . n + 1 == n + 2
+  exists n: Nat . n - 1 == n - 2
+
+The upper expression will evaluate to ``false``, because the rewriter happens to
+rewrite ``n + 1`` and ``n + 2`` to a form in which it can prove that they are
+not equal. The expression below that, however, will be rewritten forever, 
+because the rewriter will decide to check the equality for every value of ``n``.
+
+For the numeric sorts, the predefined mappings are listed in the table below.
+Where :samp:`{N}` is used in the sort of a mapping, any numeric sort may be
+substituted.
+
+.. list-table:: Predefined operations on numeric sorts
+   :header-rows: 1
+   :widths: 15 20 50
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`- {a}`
+     - | ``Pos -> Int``
+       | ``Nat -> Int``
+       | ``Int -> Int``
+       | ``Real -> Real``
+     - Negation
+   * - :samp:`min({a}, {b})`
+     - :samp:`{N} # {N} -> {N}`
+     - Minimum of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`max({a}, {b})`
+     - :samp:`{N} # {N} -> {N}`
+     - Maximum of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`{a} + {b}`
+     - | ``Pos # Pos -> Pos``
+       | ``Pos # Nat -> Pos``
+       | ``Nat # Pos -> Pos``
+       | ``Nat # Nat -> Nat``
+       | ``Int # Int -> Int``
+       | ``Real # Real -> Real``
+     - Sum (addition) of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`{a} - {b}`
+     - | ``Pos # Pos -> Int``
+       | ``Nat # Nat -> Int``
+       | ``Int # Int -> Int``
+       | ``Real # Real -> Real``
+     - Difference (subtraction) of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`{a} * {b}`
+     - :samp:`{N} # {N} -> {N}`
+     - Product (multiplication) of :samp:`{a}` and :samp:`{b}`
+   * - :samp:`{a} / {b}`
+     - :samp:`{N} # {N} -> Real`
+     - Quotient (division) of :samp:`{a}` and :samp:`{b}`
+   * - :samp:`succ({a})`
+     - | ``Pos -> Pos``
+       | ``Nat -> Pos``
+       | ``Int -> Int``
+       | ``Real -> Real``
+     - Successor (equivalent to :samp:`a + 1`)
+   * - :samp:`pred({a})`
+     - | ``Pos -> Nat``
+       | ``Nat -> Int``
+       | ``Int -> Int``
+       | ``Real -> Real``
+     - Predecessor (equivalent to :samp:`a - 1`)
+   * - ``div({a}, {b})``
+     - | ``Nat # Pos -> Nat``
+       | ``Int # Pos -> Int``
+     - Integer division
+   * - :samp:`mod({a}, {b})`
+     - | ``Nat # Pos -> Nat``
+       | ``Int # Pos -> Nat``
+     - Remainder of :samp:`{a}` divided by :samp:`{b}`.
+   * - ``exp({a}, {b})``
+     - | ``Pos # Nat -> Pos``
+       | ``Nat # Nat -> Nat``
+       | ``Int # Nat -> Int``
+       | ``Real # Int -> Real``
+     - Exponentiation (:samp:`{a}` raised to the power :samp:`{b}`).
+   * - :samp:`abs({a})`
+     - | ``Int -> Nat``
+       | ``Real -> Real``
+     - Absolute value of :samp:`{a}`.
+   * - :samp:`floor({a})`
+     - ``Real -> Int``
+     - The greatest integer smaller than :samp:`{a}`.
+   * - :samp:`ceil({a})`
+     - ``Real -> Int``
+     - The least integer larger than :samp:`{a}`.
+   * - :samp:`round({a})`
+     - ``Real -> Int``
+     - Equal to :samp:`floor({a} + 1/2)`.
+   * - ``Pos2Nat(_)``
+     - ``Pos -> Nat``
+     - Cast
+   * - ``Nat2Pos(_)``
+     - ``Nat -> Pos``
+     - Cast
+
+.. index:: Casts;Pos2Nat, Casts;Nat2Pos, Casts;Int2Nat, Casts;Nat2Int,
+           Casts;Pos2Int, Casts;Int2Pos, Casts;Pos2Real, Casts;Real2Pos,
+           Casts;Nat2Real, Casts;Real2Nat, Casts;Int2Real, Casts;Real2Int
+
+Lastly, there are a number of casts that allow the user to interpret a numeric
+value as if it were of a different sort. To this end, the mappings :samp:`{A2B}`
+are defined, where :samp:`{A}` and :samp:`{B}` are either of ``Pos``, ``Nat``,
+``Int`` or ``Real``.
 
 .. _constructedsorts:
 
@@ -289,35 +552,265 @@ Constructed sorts
 
 To enable users to quickly specify more complicated sorts without having to 
 resort to manually specifying constructors and operations on those sorts, mCRL2
-provides some standard constructs to build new sorts out of existing ones. The 
-grammar of a sort specification is given by the non-terminal :token:`SortExpr`. 
+provides some standard constructs to build new sorts out of existing ones. 
 
-.. dparser:: ProjDecl ProjDeclList ConstrDecl ConstrDeclList SortExprList 
-             SortExpr
+.. index:: ->, #, lambda, ();function application, function application
 
-A sort is either a :ref:`predefined sort <predefinedsorts>`, a sort that was 
-declared in a :ref:`sort specification <sortspec>`, or 
+Mapping sorts
+"""""""""""""
 
-*Mapping sorts*
+If ``D1``, ``D2``, ..., ``DN`` are sorts, and ``I`` is a sort, then ``D1 # D2
+# ... # DN -> I`` is the sort of a mapping from the carthesian product of
+``D1`` through ``DN`` to ``I``.
 
-  If ``D1``, ``D2``, ..., ``DN`` are sorts, and ``I`` is a sort, then ``D1 # D2
-  # ... # DN -> I`` is the sort of a mapping from the carthesian product of
-  ``D1`` through ``DN`` to ``I``.
+.. list-table:: Predefined operations on mapping sorts
+   :header-rows: 1
+   :widths: 15 20 50
 
-*Lists, sets and bags*
-  .. table:: Container sorts in mCRL2
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`{a}({b1}, ..., {bN})`
+     - :samp:`({S1} # ... # {SN} -> {I}) # {S1} # ... # {SN} -> {I}`
+     - Function application (applies :samp:`{a}` to arguments :samp:`{b1}` 
+       through :samp:`{bN}`).
+   * - :samp:`{a}[{b} -> {c}]`
+     - :samp:`({S} -> {I}) # {S} # {I} -> ({S} -> {I})`
+     - Function update; returns a mapping that maps :samp:`{b}` to :samp:`{c}`,
+       and that maps all other elements like :samp:`{a}` does.
+   * - :samp:`lambda {V} . {a}`
+     - :samp:`{S} -> {I}`
+     - Lambda abstraction.
 
-     =================== =======================================
-     :samp:`List({S})`   Lists with elements of sort :samp:`{S}`
-     ------------------- ---------------------------------------
-     :samp:`Set({S})`    Sets with elements of sort :samp:`{S}`
-     ------------------- ---------------------------------------
-     :samp:`Bag({S})`    Bags with elements of sort :samp:`{S}`
-     =================== =======================================
+The syntax of lambda abstraction is similar to that of quantifiers. As an 
+example, we define the mapping ``f`` that returns ``true`` if the sum of its 
+first two arguments is equal to the third argument::
 
-*Structured sorts*
-  Structured sorts are a short way to specify recursive data types as are 
-  commonly used in functional programming languages. They are defined 
+  map f: Nat # Nat # Pos -> Bool;
+  eqn f = lambda x,y: Nat, p: Pos . x + y == p
+
+For mappings that take one argument, we can use function updates to change a
+mapping locally, which can be useful to model (infinite) arrays::
+
+  sort Array = Nat -> Bool;
+  map set: Array # Nat -> Array;
+      clear: Array # Nat -> Array;
+  var a: Array;
+      n: Nat;
+  eqn set(a, n) = a[n -> true];
+      clear(a, n) = a[n -> false];
+
+.. index:: in, List, Set, Bag
+
+Lists, sets and bags
+""""""""""""""""""""
+
+mCRL2 defines a number of "containers": meta-sorts that allow you to specify a
+list, set or bag (multiset) of a certain sort.
+
+.. table:: Container sorts in mCRL2
+
+   =================== =======================================
+   Sort                Semantics
+   =================== =======================================
+   :samp:`List({S})`   Lists with elements of sort :samp:`{S}`
+   ------------------- ---------------------------------------
+   :samp:`Set({S})`    Sets with elements of sort :samp:`{S}`
+   ------------------- ---------------------------------------
+   :samp:`Bag({S})`    Bags with elements of sort :samp:`{S}`
+   =================== =======================================
+
+For these container sorts, a number of operations is defined. One operation is
+defined on all containers (substitute ``List``, ``Set`` or ``Bag`` for 
+:samp:`{C}`):
+
+.. list-table:: Predefined operations on containers
+   :header-rows: 1
+   :widths: 10 20 60
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`{a} in {b}`
+     - :samp:`{C}(S) # S -> {C}(S)``
+     - True if :samp:`{a}` occurs in :samp:`{b}`, false otherwise.
+
+.. index:: head, tail, rhead, rtail, empty;list
+   triple: list;constructor;[]
+   triple: list;enumeration;[]
+   triple: list;constructor;|>
+   triple: list;snoc;<|
+   triple: list;length;#
+   triple: list;concatenation;++
+   triple: list;element extraction;.
+
+Lists
+'''''
+
+For a given sort :samp:`{S}`, mCRL2 defines the ``[]`` as a constructor of 
+sort ``List(S)``, representing the empty list. Furthermore, the constructor
+``|>`` (pronounce "cons") of sort ``S # List(S) -> List(S)`` is defined. List
+enumeration is defined as a shorthand to denote lists::
+
+  [a, b, ...] == a |> b |> ... |> []
+
+.. list-table:: Predefined operations on lists
+   :header-rows: 1
+   :widths: 15 30 40
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`{a} <| {b}` ("snoc")
+     - ``List(S) # S -> List(S)``
+     - :samp:`{a}` with :samp:`{b}` appended to it.
+   * - :samp:`{a} in {b}`
+     - ``S # List(S) -> Bool``
+     - True if :samp:`{a}` occurs in :samp:`{b}`, false otherwise.
+   * - :samp:`# {a}`
+     - ``List(S) -> Nat``
+     - The length of :samp:`{a}`.
+   * - :samp:`{a} . {b}`
+     - ``List(S) # Nat -> S``
+     - The element of :samp:`{a}` at position :samp:`{b}`. Indices are zero-based.
+   * - :samp:`{a} ++ {b}`
+     - ``List(S) # List(S) -> List(S)``
+     - :samp:`{a}` concatenated with :samp:`{b}`.
+   * - :samp:`head({a})`
+     - ``List(S) -> S``
+     - The first element :samp:`{a}`.
+   * - :samp:`tail({a})`
+     - ``List(S) -> List(S)``
+     - :samp:`{a}` without its first element.
+   * - :samp:`rhead({a})`
+     - ``List(S) -> Nat``
+     - The last element of :samp:`{a}`.
+   * - :samp:`rtail({a})`
+     - ``List(S) -> Nat``
+     - :samp:`{a}` without its last element.
+  
+.. warning::
+
+   Lists are implemented as singly-linked lists. This means that the ``#``
+   operation is quite expensive (it has to run through the entire list), as 
+   are the ``<|``, ``rhead`` and ``rtail`` operations.
+
+.. warning::
+
+   The ``head`` (or ``rhead``) of an empty list is not defined. In practice, 
+   this means that ``head([])`` will not be rewritten any further.
+
+.. index:: empty;set
+   triple: set;constructor;{}
+   triple: set;enumeration;{}
+   triple: set;comprehension;{}
+   triple: set;difference;-
+   triple: set;union;+
+   triple: set;intersection;*
+   triple: set;complement;!
+
+Sets
+''''
+
+Sets are defined in a similar fashion to lists. For every sort``S``, ``Set(S)``
+denotes the sort of sets of elements from ``S``. One constructor is publicly
+available: ``{}``, the empty set. The other constructors are hidden from the 
+user, as they are implementation specific. Sets can, like lists, be enumerated: 
+``{a, b, c}`` denotes the set containing elements ``a``, ``b`` and ``c``.
+Operations on sets are given by the following table.
+
+.. list-table:: Predefined operations on sets
+   :header-rows: 1
+   :widths: 15 30 40
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`{ {a} : {S} | {b(a)} }`
+     - :samp:`({S} -> Bool) -> Set({S})`
+     - Set comprehension: denotes the set of elements :samp:`{a}` in :samp:`{S}`
+       for which :samp:`{b(a)}` is true.
+   * - :samp:`!{a}`
+     - :samp:`Set({S}) -> Set({S})`
+     - Set complement of :samp:`{a}`.
+   * - :samp:`{a} + {b}`
+     - :samp:`Set({S}) # Set({S}) -> Set({S})`
+     - Set union of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`{a} - {b}`
+     - :samp:`Set({S}) # Set({S}) -> Set({S})`
+     - Set difference of :samp:`{a}` and :samp:`{b}`.
+   * - :samp:`{a} * {b}`
+     - :samp:`Set({S}) # Set({S}) -> Set({S})`
+     - Set intersection of :samp:`{a}` and :samp:`{b}`.
+
+A typical use of the set comprehension is for instance the following definition
+of the set of all prime numbers::
+
+  { n: Pos | n > 1 && forall m, m': Pos . (m > 1 && m' > 1) => n != m * m' }
+
+.. index:: empty;bag, count, Set2Bag, Bag2Set
+   triple: bag;constructor;{}
+   triple: bag;enumeration;{}
+   triple: bag;comprehension;{}
+   triple: bag;difference;-
+   triple: bag;union;+
+   triple: bag;intersection;*
+   triple: bag;complement;!
+
+Bags
+''''
+
+Bags (or multisets) are denoted much like sets, but require a count for every
+element::
+
+  {a:1, b:4, c:0} == {a:1, b:2, b:2} == {a:1, b:4}
+
+The same operations as for sets are defined on bags, with the difference that
+bag comprehensions specify the number of times an element occurs in that bag.
+For example, the bag that contains every natural number twice is defined as
+follows::
+
+  { n: Nat | 2 }
+
+One additional operation is defined on bags:
+
+.. list-table:: Predefined operations on sets
+   :header-rows: 1
+   :widths: 15 30 40
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`count({a}, {b})`
+     - :samp:`Bag({S}) # {S} -> Nat`
+     - The number :samp:`{b}`s in :samp:`{a}`.
+
+To make it easy to interpret sets as bags, and to convert bags to sets, the 
+following operations are also defined:
+
+.. list-table:: Predefined operations on sets
+   :header-rows: 1
+   :widths: 10 15 40
+
+   * - Name
+     - Sort(s)
+     - Semantics
+   * - :samp:`Set2Bag({a})`
+     - :samp:`Set({S}) -> Bag({S})`
+     - The bag ``b`` such that for all ``x`` in :samp:`{S}`, 
+       ``count(b, x)`` is 1 if :samp:`x in {a}`, and 0 otherwise.
+   * - :samp:`Bag2Set({a})`
+     - :samp:`Bag({S}) -> Set({S})`
+     - The set ``b`` such that for all ``x`` in :samp:`{S}`, ``x in b`` iff 
+       :samp:`x in {a}`.
+
+.. _structuredsorts:
+
+Structured sorts
+""""""""""""""""
+
+Structured sorts are a short way to specify recursive data types as are 
+commonly used in functional programming languages. They are defined 
 
 Global variables
 ----------------

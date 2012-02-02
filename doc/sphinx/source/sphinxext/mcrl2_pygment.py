@@ -97,7 +97,7 @@ class mCRL2Lexer(RegexLexer):
        (r'Real\b', Keyword.Type)
      ],
      'identifier': [
-       (r'[a-zA-z_][a-zA-Z0-9_]*', String)
+       (r"[a-zA-z_'][a-zA-Z0-9_']*", String)
      ],
      'root': [
        include('keywords'),
