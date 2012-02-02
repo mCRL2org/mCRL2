@@ -25,7 +25,7 @@ proc Peg(id:Pos, stack:Stack) =
      sum d,p:Pos . (empty(stack) || top(stack) > d) ->
        receive(d,p,id) . Peg(id,push(d,stack))
      +
-     sum p:Pos . (!empty(stack)) ->
+     sum p:Pos . (!empty(stack) && !(#stack==N && id==3)) ->
        send(top(stack),id,p) . Peg(id,pop(stack));
 
 init allow({move},

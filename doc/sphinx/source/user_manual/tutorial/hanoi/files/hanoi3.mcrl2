@@ -25,10 +25,23 @@ proc Peg(id:Pos, stack:Stack) =
      sum d,p:Pos . (empty(stack) || top(stack) > d) ->
        receive(d,p,id) . Peg(id,push(d,stack))
      +
-     sum p:Pos . (!empty(stack)) ->
+     sum p:Pos . (!empty(stack) && !(#stack==N && id==3)) ->
        send(top(stack),id,p) . Peg(id,pop(stack));
 
+map  next: Pos -> Pos;
+var  x:Pos;
+eqn  (N mod 2 == 0) -> next(x) = x mod 3 + 1;
+     (N mod 2 == 1) -> next(x) = (x-2) mod 3 + 1;
+
+act  allowed: Pos # Pos # Pos;
+
+proc AllowSmall =
+       sum p:Pos . allowed(1,p,next(p)) . AllowOther;
+
+     AllowOther =
+       sum d,p,q:Pos . (d > 1) -> allowed(d,p,q) . AllowSmall;
+
 init allow({move},
-     comm({send|receive -> move},
-       Peg(1,build_stack(1,N)) || Peg(2,[]) || Peg(3,[])
+     comm({send|receive|allowed -> move},
+       Peg(1,build_stack(1,N)) || Peg(2,[]) || Peg(3,[]) || AllowSmall
      ));

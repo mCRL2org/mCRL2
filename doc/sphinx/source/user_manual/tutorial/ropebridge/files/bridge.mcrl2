@@ -1,69 +1,55 @@
 % Specification for the rope bridge problem
 % Written by Bas Ploeger, June 2008.
 
-% Adventurers are identified by their "speeds", i.e. the number of
-% minutes they need for crossing the bridge. For this we use the basic
-% integer data type of mCRL2 called 'Int'.
-
-% Data type for the position of adventurers and the flashlight.
-% Initially, they are all on the 'start' side of the bridge. In the end,
-% they should all have reached the 'finish' side.
-
+% Sort for the position of adventurers and flashlight. Initially, they
+% are all on the 'start' side of the bridge. In the end, they should all
+% have reached the 'finish' side.
 sort Position = struct start | finish;
 
+act forward_adventurer, % an adventurer moves forward
+    forward_flashlight, % the flashlight moves forward
+    forward_referee,    % the referee processes a forward movement
+    forward: Int # Int; % two adventurers and a flashlight move forward
+                        % and the referee processes this
 
-act
-    % Action declarations:
-    % - 'forward'  means:  from start to finish
-    % - 'back'     means:  from finish to start
-
-    % The flashlight moves forward together with two adventurers,
-    % identified by the action's parameters.
-    forward_flashlight: Int # Int;
-
-    % The flashlight moves back together with one adventurer, identified
-    % by the action's parameter.
-    back_flashlight: Int;
-
-
-%%% TODO (Exercise 1): 
-%%% Add action declarations for Adventurer process here
-
-%%% TODO (Exercise 2):
-%%% Add action declarations for synchronised events.
-
-%%% TODO (Exercise 5):
-%%% Add action declarations for Referee process.
+    back_adventurer, % an adventurer moves back
+    back_flashlight, % the flashlight moves back
+    back_referee,    % the referee processes a back movement
+    back: Int;       % one adventurer and a flashlight move back and the
+                     % referee processes this
+    
+    report: Int; % the referee reports that all adventurers have
+                 % crossed the bridge along with the time that it took
 
 
-% The Flashlight process models the flashlight:
-% 1. If it is at the 'start' side, it can move forward together with any
-%    pair of adventurers.
-% 2. If it is at the 'finish' side, it can move back together with any
-%    adventurer.
+% Models the flashlight which can move to the other side of the bridge
 proc Flashlight(pos:Position) =
        (pos == start) ->
-         % Case 1.
          sum s,s':Int . forward_flashlight(s,s') . Flashlight(finish)
-       <> 
-         % Case 2.
+       <> % position == finish
          sum s:Int . back_flashlight(s) . Flashlight(start);
 
 
-%%% TODO (Exercise 1):
-%%% Add Adventurer process definition here
+% Models an adventurer who can move to the other side of the bridge with
+% its designated speed
+proc Adventurer(speed:Int, pos:Position) =
+       (pos == start) ->
+         ( sum s:Int . 
+             % keep the parameters of forward actions sorted; otherwise
+             % we get two transitions for every forward movement of
+             % adventurers with speeds X and Y -- forward(X,Y) and
+             % forward(Y,X) -- both leading to the same state and
+             % modelling the same event.
+             (s > speed) -> forward_adventurer(speed,s) . Adventurer(speed,finish) 
+                         <> forward_adventurer(s,speed) . Adventurer(speed,finish) 
+         )
+       <> % position == finish
+         back_adventurer(speed) . Adventurer(speed,start);
 
-%%% TODO (Exercise 5):
-%%% Add Referee process definition here
-
-
-
-% Initial process definition: the system currently only consists of a
-% flashlight at the 'start' side.
-init  Flashlight(start) ;
-
-%%% TODO (Exercise 2):
-%%% Add the four Adventurer processes to this definition
-
-%%% TODO (Exercise 5):
-%%% Add the Referee process to this definition
+init allow( { forward, back, report },
+     comm(  { forward_adventurer | forward_adventurer | forward_flashlight -> forward,
+              back_adventurer | back_flashlight -> back },
+       Adventurer(1,start) || Adventurer(2,start)  || 
+       Adventurer(5,start) || Adventurer(10,start) || 
+       Flashlight(start)
+     ));

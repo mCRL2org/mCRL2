@@ -1,0 +1,16 @@
+sort Stack = List(Pos);
+map  N: Pos;
+     empty: Stack -> Bool;       
+     push:  Pos # Stack -> Stack;
+     pop:   Stack -> Stack;      
+     top:   Stack -> Pos;
+     build_stack: Pos # Pos -> Stack;
+var  s: Stack;
+     x, y: Pos;
+eqn  N = 3;
+     empty(s)  = s == [];             % return whether s is empty
+     push(x,s) = x |> s;              % put x on top of s
+     pop(s)    = tail(s);             % remove top element from s
+     (!empty(s)) -> top(s) = head(s); % return top element of s
+     (x == y) -> build_stack(x, y) = [x];
+     (x < y) -> build_stack(x, y) = x |> build_stack(x+1, y);
