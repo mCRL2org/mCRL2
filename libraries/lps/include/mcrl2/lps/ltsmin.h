@@ -393,13 +393,13 @@ class pins
     }
 
     /// \brief Returns the process of the LPS specification
-    const linear_process& process()
+    const linear_process& process() const
     {
       return m_generator.get_specification().process();
     }
 
     /// \brief Returns the data specification of the LPS specification
-    const data::data_specification& data()
+    const data::data_specification& data() const
     {
       return m_generator.get_specification().data();
     }
@@ -680,6 +680,19 @@ class pins
 	    {
 	      s[i] = state_type_map(i)[init(i)];
       }
+    }
+
+    /// \brief Returns the names of the actions that appear in the summand with index i,
+    /// with 0 <= i < group_count().
+    std::set<std::string> summand_action_names(std::size_t i) const
+    {
+      std::set<std::string> result;
+      const action_list& l = process().action_summands()[i].multi_action().actions();
+      for (action_list::const_iterator i = l.begin(); i != l.end(); ++i)
+      {
+        result.insert(std::string(i->label().name()));
+      }
+      return result;
     }
 
     /// \brief Iterates over the 'next states' of state src, and invokes a callback function for each discovered state.
