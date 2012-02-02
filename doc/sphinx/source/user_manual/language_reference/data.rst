@@ -328,12 +328,39 @@ Finally, for structured sorts, the definitions of ``<`` and ``<=`` are a bit
 more involved; they are described in the section about :ref:`structured sorts
 <structuredsorts>`.
 
+.. note::
+
+   The fact that every predefined and constructed sort has a strict ordering 
+   associated with it makes it possible for mCRL2 to define a fairly efficient 
+   implementation of sets. 
+
 .. warning:: 
 
    Be careful when specifying user defined sorts: the above operations are only
    partially defined. Trying to compare two syntactically different data 
    expressions may not lead to the desired result, unless additional rewrite
    rules for ``==``, ``<`` and ``<=`` are added.
+
+   In particular, the following will not work as expected::
+
+     sort S;
+     cons a, b: S;
+     map x: Set(S);
+     eqn x = {a} + {b};
+
+   Evaluating ``x`` will show you that it is equal to 
+   ``@fset_union(@false_, @false_, {a}, {b})``, which may not be what you were
+   expecting to see. Completing the definition of ``<`` for ``S`` fixes the 
+   problem::
+
+     sort S;
+     cons a, b: S;
+     map x: Set(S);
+     eqn x = {a} + {b};
+         a < b = true;
+         b < a = false;
+
+   Now, ``x`` evaluates to ``{a, b}``.
 
 .. index:: Bool, Nat, Pos, Int, Real, true, false
 
@@ -810,11 +837,192 @@ Structured sorts
 """"""""""""""""
 
 Structured sorts are a short way to specify recursive data types as are 
-commonly used in functional programming languages. They are defined 
+commonly used in functional programming languages. 
+
+A structured type is of the following form::
+
+  struct c_1(p_1_1: S_1_1, ..., p_1_k1: S_1_k1)?r_1
+         c_2(p_2_1: S_2_1, ..., p_2_k2: S_2_k2)?r_2
+         ...
+         c_n(p_n_1: S_n_1, ..., p_n_kn: S_n_kn)?r_n
+
+This defines the type which we designate by ``S`` for brevity, together with the 
+following functions::
+
+  cons c_i: S_i_1 # ... # S_i_ki -> S;
+  map p_i_j: S -> S_i_j;
+      r_i: S -> Bool;
+
+Here, ``p_i_j`` are projection functions, and ``r_i`` are recogniser functions.
+Projection and recogniser functions are optional; if a projection function is
+not specified the subsequent ``:`` symbol should also be left out, likewise if a
+recogniser function is not specified its preceding ``?`` symbol should also be 
+left out (see below for examples).
+
+Note that structured sorts are often used in combination with sort references::
+
+  sort S = struct ... ;
+
+This defines a structured sort which has ``S`` as an alias.
+
+.. note::
+
+   The constructors of a structured sorts can be compared with the ``<`` and 
+   ``<=`` operators. They are defined as lexicographical orderings on the 
+   constructors and their elements: the first constructor specified is the least
+   element, the last constructor the greatest; if a constructor has arguments,
+   then two terms that have the same constructor as outermost symbol are 
+   compared by comparing their arguments lexicographically (left-to-right).
+
+.. admonition:: Example
+   :class: example collapse
+
+   A well known and illustrative example of a structured sort is the definition
+   of the tree data structure in which elements of some sort ``A`` can be 
+   stored::
+
+     sort Tree = struct leaf(A) | node(Tree, Tree);
+
+   This specifies that a tree is either an expression of the form ``leaf(a)``
+   where ``a`` is an expression of sort ``A``, or a tree is an expression of the
+   form ``node(u, v)`` where ``u`` and ``v`` are expressions of sort ``Tree``.
+   What is actually generated out of this one line, is the following data 
+   specification::
+
+      sort Tree;
+      cons leaf: A -> Tree;
+           node: Tree # Tree -> Tree;
+      var a, a': A;
+          l, r, l', r': Tree;
+      eqn leaf(a) == leaf(a') = a == b;
+          leaf(a) == node(l, r) = false;
+          node(l, r) == leaf(a) = false;
+          node(l, r) == node(l', r') = l == l' && r == r';
+          leaf(a) < leaf(a') = a < a';
+          leaf(a) < node(l, r) = true;
+          node(l, r) < leaf(a) = false;
+          node(l, r) < node(l', r') = l < l' || (l == l' && r < r');
+          leaf(a) <= leaf(a') = a <= a';
+          leaf(a) <= node(l, r) = true;
+          node(l, r) <= leaf(a) = false;
+          node(l, r) <= node(l', r') = l < l' || (l == l' && r <= r');
+
+   We can extend our tree to also have recogniser and projection functions::
+
+     sort Tree = struct leaf(value: A) ? is_leaf 
+                      | node(left: Tree, right: Tree) ? is_node;
+
+   This causes the following additional data specification to be added::
+
+     map value: Tree -> A;
+         left: Tree -> Tree;
+         right: Tree -> Tree;
+         is_leaf: Tree -> Bool;
+         is_node: Tree -> Bool;
+     var a: A;
+         l, r: Tree;
+     eqn value(leaf(a)) = a;
+         left(node(l, r)) = l;
+         right(node(l, r)) = r;
+         is_leaf(leaf(a)) = true;
+         is_leaf(node(l, r)) = false;
+         is_node(leaf(a)) = false;
+         is_node(node(l, r)) = true;
+
+   The projection functions now enable you to extract data from trees::
+
+     map dfs: Tree -> List(A);
+     var t: Tree;
+     eqn is_leaf(t) -> dfs(t) = [value(t)];
+         is_node(t) -> dfs(t) = dfs(left(t)) ++ dfs(right(t));
+
+.. admonition:: Example
+   :class: example collapse
+
+   An often used structured type is the enumerated type that consists of a
+   finite number of elements. For instance, the sort ``MachineMode`` can be 
+   declared by
+   ::
+
+     sort MachineMode = struct idle ? is_idle 
+                             | running ? is_running 
+                             | broken ? is_broken;
+
+   Note that ``idle < running`` and ``running < broken``: there is a strict 
+   ordering on the constructors of the structured sort.
+
+.. admonition:: Example
+   :class: example collapse
+
+   A common example is the sort of pairs for given sorts ``A`` and ``B``::
+
+     sort Pair = struct pair(fst: A, snd: B);
+
+   For a pair ``p`` the expression ``fst(p)`` gives its first element and 
+   ``snd(p)`` the second element.
+
+.. index:: glob
 
 Global variables
 ----------------
 
 .. dparser:: GlobVarSpec
+
+In process specifications and in parameterised boolean equation systems (PBESs),
+it is possible to use free variables. An example is the following::
+
+  act a;
+  glob x: Nat;
+  proc P = a(x) . P;
+  init P;
+
+This represents a whole class of processes, namely for every value of x this
+process has a different value. The keyword ``glob`` stands for *global variable*. In
+each specification the keyword ``glob`` can be used once any arbitrary number of times.
+
+All ``glob`` declarations are grouped together. The names of the variables cannot
+coincide with other declared functions, processes, actions, variables (both in
+equations and in sum operators) and process and PBES parameters. Global
+variables can occur in process equations, in parameterised fixed point formulas
+and in ``init`` sections.
+
+Global variables can be used in the common mathematical way. Consider for 
+instance the equation: :math:`ax^2 + bx + c = 0`. There are four variables in 
+this equation, namely :math:`a, b, c` and :math:`x`. The use of the variables 
+:math:`a, b` and :math:`c` allow to study this polynomial in a far more general 
+setting than when these variables would have concrete values.
+
+In some cases, the concrete values for global variables do not have influence
+on the process. In such a case instantiating the global variables to various
+concrete values will mean that the process has the same behaviour modulo
+strong bisimulation, or the same solution as a parameterised boolean equation
+system. In this case we call the process or PBES *global variable insensitive*. 
+
+An example is the following linearisation of a buffer::
+
+  sort D;
+  glob dummy1, dummy2: D;
+  act read, send: D;
+  proc P(b: Bool, d: D) = 
+         sum e: D . b -> read(e) . P(false, e) + 
+                   !b -> send(d) . P(true, dummy1);
+  init P(true, dummy2);
+
+The idea is that if the parameter ``b`` is true, the value of the second 
+parameter is not relevant anymore. Therefore, it can be set to any arbitrary 
+value, which is indicated by the use of ``dummy1`` and ``dummy2``. As this 
+specification is global variable insensitive, arbitrary concrete values can be 
+chosen for these global variables if this is opportune.
+
+The tool :ref:`tool-mcrl22lps` may generate linear processes with global
+variables. It guarantees that the resulting specification is global variable
+insensitive. Certain transformation tools, like :ref:`tool-lpsconstelm` and
+:ref:`tool-lps2pbes` yield global variable insensitive output, provided the
+input in global variable insensitive. In case systems are not global variable
+insensitive the output of these tools can be garbage. It is the responsibility
+of those who apply the tools that the tools are used in a proper way. It is
+likely that most tools leave global variables untouched, unless a switch
+indicates that global variable insensitivity can be used.
+
 
 
