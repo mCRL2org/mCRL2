@@ -87,12 +87,12 @@ void syntax_error_fn(struct D_Parser *ap)
   {
     after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
   }
-  std::cerr << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
+  mCRL2log(log::error, "parser") << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
   if (!after.empty())
   {
-    std::cerr << " after '" << after << "'";
+    mCRL2log(log::error, "parser") << " after '" << after << "'";
   }
-  std::cerr << std::endl;
+  mCRL2log(log::error, "parser") << std::endl;
 }
 
 } // namespace detail
