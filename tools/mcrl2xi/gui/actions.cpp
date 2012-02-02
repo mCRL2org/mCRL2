@@ -99,7 +99,7 @@ void Options::OnEval(wxCommandEvent& /*event*/)
 
   try
   {
-    mCRL2log(info) << "Evaluate: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Evaluate: \"" << ev->getDataExprVal().mb_str() << "\"" << std::endl;
     mCRL2log(info) << "Parsing and type checking specification" << std::endl;
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
@@ -112,17 +112,17 @@ void Options::OnEval(wxCommandEvent& /*event*/)
       return;
     }
 
-    mCRL2log(info) << "Parsing data expression: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Parsing data expression: \"" << ev->getDataExprVal().mb_str() << "\"" << std::endl;
 
     mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(std::string(ev->getDataExprVal().mb_str()),
         vars.begin(), vars.end(), data_spec);
 
-    mCRL2log(info) << "Rewriting data expression: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Rewriting data expression: \"" << ev->getDataExprVal().mb_str() << "\"" << std::endl;
 
     mcrl2::data::rewriter rewr(data_spec,m_rewrite_strategy);
     mcrl2::data::mutable_map_substitution < atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
 
-    mCRL2log(info) << "Result: \"" << pp(rewr(term,assignments)).c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Result: \"" << pp(rewr(term,assignments)) << "\"" << std::endl;
 
   }
   catch (mcrl2::runtime_error e)
@@ -160,7 +160,7 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
   p_solutions->Clear();
   try
   {
-    mCRL2log(info) << "Solving: \"" << dataexpr.c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Solving: \"" << dataexpr.mb_str() << "\"" << std::endl;
 
     int dotpos = dataexpr.Find('.');
     if (dotpos  == -1)
