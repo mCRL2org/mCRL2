@@ -16,6 +16,10 @@ act  addPhone: Name # PhoneNumber;
      delPhone: Name;
      findPhone: Name;
      reportPhone: Name # PhoneNumber; % Added action
+     
+map emptybook: Name -> PhoneNumber;
+var n: Name;
+eqn emptybook(n) = p0;
 
 %% Process representing the phone book.
 proc PhoneDir(b: PhoneBook) = 
@@ -26,6 +30,6 @@ proc PhoneDir(b: PhoneBook) =
    ;
    
 %% Initially the phone book is empty.
-init PhoneDir(lambda n: Name . p0);
+init PhoneDir(emptybook);
 
 
