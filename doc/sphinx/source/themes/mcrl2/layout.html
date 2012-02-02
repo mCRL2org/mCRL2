@@ -14,7 +14,16 @@
   <li><a href="{{ pathto('../user_manual/support.html', 1) }}">Support</a></li>
   <li><a href="{{ pathto('../user_manual/showcases.html', 1) }}">Showcases</a></li>
   <li><a href="{{ pathto('../developer_manual/index.html', 1) }}">Developer documentation</a></li>
-  </ul></div>
+  <li class="search">
+    <form class="search" action="{{ pathto('search') }}" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="{{ _('Search') }}" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+  </li>
+  </ul>
+  </div>
 </div>
 {% endblock %}
 {% block relbar2 %}{% endblock %}

@@ -23,22 +23,30 @@ div.tool-docs li { float: left; display: inline; width: 20%; }
 div.dparser .admonition-title {
   font-family: monospace;
 }
-
-
-div.mainmenu { background-color: white; }
+div.mainmenu {
+  background-color: white; 
+}
 div.mainmenu ul {
   display: table;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0 6px;
+  padding: 0;
   font-family: sans-serif;
 }
 div.mainmenu ul li {
   float: left;
   display: inline;
   padding: 4px;
-  padding-left: 8px;
+  padding-right: 8px;
 }
 div.mainmenu ul li a {
   color: #104020;
+}
+
+div.mainmenu ul li.search {
+  float: right;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .admonition.platform-specific {
