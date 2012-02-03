@@ -33,14 +33,17 @@ class postfix_identifier_generator: public set_identifier_generator
       : m_generator(postfix)
     {}
 
-    core::identifier_string operator()(const std::string& hint)
+    core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {
       core::identifier_string id(hint + std::string(m_generator()));
       while (has_identifier(id))
       {
         id = core::identifier_string(hint + std::string(m_generator()));
       }
-      add_identifier(id);
+      if (add_to_context)
+      {
+        add_identifier(id);
+      }
       return id;
     }
 };

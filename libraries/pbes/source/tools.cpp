@@ -13,7 +13,6 @@
 #include <sstream>
 
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -35,6 +34,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {

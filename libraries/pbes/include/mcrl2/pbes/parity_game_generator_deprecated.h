@@ -23,7 +23,6 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/pbes/normalize.h"

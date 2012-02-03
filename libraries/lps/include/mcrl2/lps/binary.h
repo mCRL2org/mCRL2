@@ -18,7 +18,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/classic_enumerator.h"
