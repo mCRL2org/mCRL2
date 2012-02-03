@@ -353,6 +353,7 @@ class exists: public pbes_expression
 //--- end generated classes ---//
 
 // template function overloads
+std::string pp(const core::identifier_string& x);
 std::string pp(const pbes_expression& x);
 std::string pp(const pbes_expression_list& x);
 std::string pp(const pbes_expression_vector& x);
