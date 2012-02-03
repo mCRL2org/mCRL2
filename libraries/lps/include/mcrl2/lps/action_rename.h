@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
 
@@ -452,7 +452,7 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
 
   for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
   {
-    mcrl2::core::identifier_string new_name = generator(i->name());
+    mcrl2::core::identifier_string new_name = generator(std::string(i->name()));
 
     if (new_name != i->name())
     {
@@ -538,7 +538,7 @@ lps::specification action_rename(
   deadlock_summand_vector lps_deadlock_summands = lps_old_spec.process().deadlock_summands();
   action_list lps_new_actions;
 
-  data::postfix_identifier_generator generator("");
+  data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(lps_old_spec));
 
   //go through the rename rules of the rename file

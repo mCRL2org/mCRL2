@@ -14,7 +14,7 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
 
@@ -569,7 +569,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
     data_expression substituted_lowerbound=
        data::replace_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
-       data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
+       data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
     // mCRL2log(debug) << "Lower Upper " << data::pp(substituted_lowerbound) << "  " << data::pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
     // mCRL2log(debug) << "INequality: " << string(e) << "\n";
@@ -762,7 +762,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
                     v));
 
   s.data() = ds;
-  postfix_identifier_generator variable_generator("");
+  set_identifier_generator variable_generator;
   variable_generator.add_identifiers(lps::find_identifiers((s)));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());

@@ -24,40 +24,6 @@ namespace mcrl2 {
 namespace utilities {
 
 /// \brief Identifier generator that generates names consisting of a prefix followed by a number.
-/// After each call to operator() the number is incremented.
-class simple_number_postfix_generator
-{
-  protected:
-    /// \brief A prefix.
-    std::string m_prefix;
-
-    /// \brief An index.
-    unsigned int m_index;
-
-  public:
-    /// \brief Constructor.
-    simple_number_postfix_generator()
-      : m_prefix("x"), m_index(0)
-    {}
-
-    /// \brief Constructor.
-    /// \param prefix A string
-    /// \param index A positive integer
-    simple_number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-      : m_prefix(prefix), m_index(index)
-    {}
-
-    /// \brief Generates a fresh identifier that doesn't appear in the context.
-    /// \return A fresh identifier.
-    std::string operator()()
-    {
-      std::ostringstream out;
-      out << m_prefix << m_index++;
-      return out.str();
-    }
-};
-
-/// \brief Identifier generator that generates names consisting of a prefix followed by a number.
 /// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
 class number_postfix_generator
 {
