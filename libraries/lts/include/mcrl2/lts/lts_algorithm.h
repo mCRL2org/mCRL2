@@ -134,7 +134,7 @@ inline const std::set<lts_preorder> &supported_lts_preorders()
 
 static std::string equivalence_desc_strings[] =
 {
-  "unknown equivalence",
+  "identity equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
   "divergence preserving branching bisimilarity",
@@ -171,6 +171,7 @@ inline std::string name_of_preorder(const lts_preorder pre)
 
 /** \brief Determines the equivalence from a string.
  * \details The following strings may be used:
+ * \li "none" for identity equivalence;
  * \li "bisim" for strong bisimilarity;
  * \li "branching-bisim" for branching bisimilarity;
  * \li "dpbranching-bisim" for divergence preserving branching bisimilarity;
@@ -223,7 +224,7 @@ inline lts_equivalence parse_equivalence(std::string const& s)
 
 static std::string equivalence_strings[] =
 {
-  "unknown",
+  "none",
   "bisim",
   "branching-bisim",
   "dpbranching-bisim",
@@ -309,6 +310,19 @@ inline std::string supported_lts_equivalences_text(
   const std::set<lts_equivalence> &supported = supported_lts_equivalences())
 {
   std::vector<lts_equivalence> types(supported.begin(),supported.end());
+
+  {
+    std::vector<lts_equivalence> validtypes;
+    for (std::vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
+    {
+      if( (*i) != lts_eq_none)
+      {
+        validtypes.push_back(*i);
+      }
+    }
+    types = validtypes;
+  }
+
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
 
   std::string r;

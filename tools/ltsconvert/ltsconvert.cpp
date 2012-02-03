@@ -33,6 +33,7 @@ using namespace mcrl2::log;
 static const std::set<lts_equivalence> &initialise_allowed_eqs()
 {
   static std::set<lts_equivalence> s;
+  s.insert(lts_eq_none);
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
   s.insert(lts_eq_divergence_preserving_branching_bisim);
@@ -436,6 +437,7 @@ class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
       m_gui_options["determinise"] = create_checkbox_widget();
 
       values.clear();
+      values.push_back("none");
       values.push_back("bisim");
       values.push_back("branching-bisim");
       values.push_back("dpbranching-bisim");
