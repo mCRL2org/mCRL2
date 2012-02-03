@@ -77,8 +77,8 @@ DataExpr
   | Number
   | 'true'
   | 'false'
-  | '[]'
-  | '{}'
+  | '[' ']'
+  | '{' '}'
   | '[' DataExprList ']'
   | '{' BagEnumEltList '}'
   | '{' VarDecl '|' DataExpr '}'

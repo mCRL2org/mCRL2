@@ -190,8 +190,8 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "[]")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "{}")) { return identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "]")) { return identifier("[]"); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "}")) { return identifier("{}"); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "]")) { return make_list_enumeration(parse_DataExprList(node.child(1))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "BagEnumEltList") && (symbol_name(node.child(2)) == "}")) { return make_bag_enumeration(parse_BagEnumEltList(node.child(1))); }
     else if ((node.child_count() == 5) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "VarDecl") && (symbol_name(node.child(2)) == "|") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "}")) { return make_set_or_bag_comprehension(parse_VarDecl(node.child(1)), parse_DataExpr(node.child(3))); }
