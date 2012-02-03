@@ -10,6 +10,7 @@
 
 #include "actions.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/data/parse.h"
 #include "mainframe.h"
 #include <wx/textfile.h>
 
@@ -136,17 +137,32 @@ void Options::OnTypeCheck(wxCommandEvent& /*event*/)
   p_output->Clear();
   try
   {
-    mCRL2log(info) << "Parsing and type checking specification" << std::endl;
-
+    mCRL2log(info) << "Parsing and type checking data specification" << std::endl;
     wxString wx_spec = p_editor->GetStringFromDataEditor();
-    mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
-    mCRL2log(info) << "Specification is valid" << std::endl;
+    mcrl2::data::data_specification spec = mcrl2::data::parse_data_specification(std::string(wx_spec.mb_str()));
+    mCRL2log(info) << "Specification is a valid data specification" << std::endl;
 
   }
   catch (mcrl2::runtime_error e)
   {
-    mCRL2log(error) << e.what() << std::endl;
+    p_output->Clear();
+    try
+    {
+      mCRL2log(info) << "Parsing and type checking mCRL2 specification" << std::endl;
+
+      wxString wx_spec = p_editor->GetStringFromDataEditor();
+      mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
+      mCRL2log(info) << "Specification is a valid mCRL2 specification" << std::endl;
+
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      mCRL2log(error) << "Specification contains no valid data or mCRL2 specification." << std::endl;
+      mCRL2log(error) << e.what() << std::endl;
+    }
   }
+
+
 };
 
 void Options::SolveExpr(wxCommandEvent& /*e*/)
