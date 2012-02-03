@@ -86,7 +86,7 @@ class identifier_generator
     /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {
-      core::identifier_string id(hint);
+      core::identifier_string id(add_to_context?hint:m_generator(hint));
       while (has_identifier(id))
       {
         id = core::identifier_string(m_generator(hint));

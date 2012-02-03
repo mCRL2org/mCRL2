@@ -513,7 +513,7 @@ bool EnumeratorSolutionsStandard::next(
           var_array[0]=OpId2Int(*it);
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
-            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@enum@"),*i);
+            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
             var_list = push_front(var_list,fv);
             var_array[j]=fv;
 
