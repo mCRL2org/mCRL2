@@ -1898,7 +1898,7 @@ static bool gstcReadInActs(ATermList Acts)
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
-    mCRL2log(debug) << "Read-in Act Name " << core::pp_deprecated(ActName) << ", Types " << core::pp_deprecated(atermpp::aterm_list(Types)) << std::endl;
+    mCRL2log(debug) << "Read-in Act Name " << core::pp_deprecated(ActName) << ", Types " << pp(atermpp::term_list < sort_expression_list >(Types)) << std::endl;
   }
 
   return Result;
@@ -4862,6 +4862,20 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
   {
     return Type;
   }
+  
+  if (data::is_multiple_possible_sorts(data::sort_expression(NeededType)))
+  {
+    sort_expression_list l=ATLgetArgument(NeededType,0);
+    for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    {
+      ATermAppl r=gstcUpCastNumericType(*i,Type,Par,warn_upcasting);
+      if (r!=NULL)
+      {
+        return r;
+      }
+      return NULL;
+    }
+  }
 
   if (warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(ATAgetArgument(*Par,0))))
   {
@@ -5215,7 +5229,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
         return NULL;
       }
       Type=gsMakeSortArrow(ArgTypes,ResType);
-      mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
+      // mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
       return Type;
     }
   }
