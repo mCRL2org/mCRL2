@@ -77,6 +77,19 @@ static void resize_table()
 {
   MachineWord i;
   size_t new_class = afun_table_class+1;
+#ifdef AT_32BIT
+  if (new_class>=23) // In 32 bit mode only 22 bits are reserved for function symbols.
+  {
+    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^22 (= 4.194.304) different afuns on a 32 bit machine.");
+  }
+#endif
+#ifdef AT_64BIT
+  if (new_class>=31)
+  {
+    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^30 (= 1.073.741.824) different afuns on a 64 bit machine.");
+  }
+#endif
+
   MachineWord new_size  = AT_TABLE_SIZE(new_class);
   size_t new_mask  = AT_TABLE_MASK(new_class);
 
