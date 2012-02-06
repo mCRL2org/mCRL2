@@ -1,0 +1,36 @@
+% 6 Gossiping girls
+
+% Note: when changing Gossips, change the init process accordingly!
+map N: Nat;
+    Gossips: List(Pos);
+eqn Gossips = [1,2,3,4,5,6];
+    N = #Gossips;
+
+map merge: List(Pos) # List(Pos) -> List(Pos);
+var l,l': List(Pos);
+    p,p': Pos;
+eqn merge([],l) = l;
+    merge(l,[]) = l;
+    (p <  p') -> merge(p |> l,p' |> l') = p  |> merge(l,p' |> l');
+    (p >  p') -> merge(p |> l,p' |> l') = p' |> merge(p |> l,l');
+    (p == p') -> merge(p |> l,p' |> l') = p' |> merge(l,l');
+
+act done,all_done;
+    call,answer,exchange: Pos # Pos # List(Pos) # List(Pos);
+
+proc Girl(id:Pos,knowledge:List(Pos)) =
+       sum i:Pos, s:List(Pos) . (
+         (call(id,i,knowledge,s) + answer(i,id,s,knowledge)) 
+         . Girl(id,merge(knowledge,s))
+       )
+       +
+       (knowledge == Gossips) -> done . Girl(id,knowledge);
+
+proc Girl_init(id:Pos) = Girl(id,[id]);
+
+init allow({exchange,all_done},
+     comm({call|answer -> exchange,
+     done|done|done|done|done|done->all_done},
+       Girl_init(1) || Girl_init(2) || Girl_init(3) || 
+       Girl_init(4) || Girl_init(5) || Girl_init(6)
+     ));

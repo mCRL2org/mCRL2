@@ -1,0 +1,28 @@
+% N Gossiping girls
+
+% Note: when changing N, change the init process accordingly!
+map N: Pos;
+    Gossips: Set(Pos);
+eqn N = 5;
+    Gossips = { k:Pos | k >= 1 && k <= N };
+
+act done,all_done;
+    call,answer,exchange: Pos # Pos # Set(Pos) # Set(Pos);
+
+proc Girl(id:Pos,knowledge:Set(Pos)) =
+       sum i:Pos, s:Set(Pos) . (
+         ( id != i ) -> (
+           (call(id,i,knowledge,s) + answer(i,id,s,knowledge)) 
+           . Girl(id,knowledge + s) )
+       )
+       +
+       (knowledge == Gossips) -> done . Girl(id,knowledge);
+
+proc Girl_init(id:Pos) = Girl(id,{id});
+
+init allow({exchange,all_done},
+     comm({call|answer -> exchange,
+     done|done|done|done|done->all_done},
+       Girl_init(1) || Girl_init(2) || Girl_init(3) || 
+       Girl_init(4) || Girl_init(5)
+     ));
