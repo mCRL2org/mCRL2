@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/xyz_identifier_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -71,12 +72,33 @@ void multiset_identifier_generator_test()
   BOOST_CHECK(!generator.has_identifier(str("c2")));
 }
 
+void xyz_identifier_generator_test()
+{
+  xyz_identifier_generator generator;
+  generator.add_identifier(str("X"));
+  generator.add_identifier(str("Y0"));
+  core::identifier_string s;
+
+  s = generator("X");
+  BOOST_CHECK(s == str("Y"));
+
+  s = generator("X");
+  BOOST_CHECK(s == str("Z"));
+
+  s = generator("X");
+  BOOST_CHECK(s == str("X0"));
+
+  s = generator("X");
+  BOOST_CHECK(s == str("Z0"));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   set_identifier_generator_test();
   multiset_identifier_generator_test();
+  xyz_identifier_generator_test();
 
   return EXIT_SUCCESS;
 }

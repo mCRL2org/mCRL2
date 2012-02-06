@@ -76,7 +76,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// The returned variable is added to the context.
     /// \param hint A string
     /// \return A fresh identifier.
-    core::identifier_string operator()(const std::string& hint)
+    core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {
       core::identifier_string result(hint);
 
@@ -91,7 +91,10 @@ class xyz_identifier_generator: public multiset_identifier_generator
         while (m_identifiers.find(result) != m_identifiers.end());
       }
 
-      add_identifier(result);
+      if (add_to_context)
+      {
+        add_identifier(result);
+      }
       return result;
     }
 };
