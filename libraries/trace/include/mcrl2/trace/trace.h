@@ -590,7 +590,7 @@ class Trace
 
     bool isTimedMAct(ATermAppl t)
     {
-      return ATisEqualAFun(ATgetAFun(t),trace_pair);
+      return ATgetType(t)==AT_APPL && ATgetAFun(t)==trace_pair;
     }
 
     ATermAppl makeTimedMAct(const mcrl2::lps::multi_action &ma)
@@ -712,7 +712,6 @@ class Trace
         }
         else if (isTimedMAct(e))
         {
-
           if (core::detail::gsIsNil(ATAgetArgument(e,1)))
           {
             addAction(multi_action(action_list(ATgetArgument(e,0))));
