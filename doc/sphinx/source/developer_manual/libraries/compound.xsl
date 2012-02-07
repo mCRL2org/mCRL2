@@ -41,6 +41,18 @@
 ===============================================================================
 
 </xsl:text>
+<xsl:if test="includes">
+<xsl:text>
+Include file:
+
+.. code-block:: c++
+
+   #include "</xsl:text>
+   <xsl:value-of select="includes"/>
+   <xsl:text>
+
+</xsl:text>
+</xsl:if>
   </xsl:when>
 </xsl:choose>
 
@@ -210,9 +222,7 @@ Classes
     
     <xsl:when test="@kind='function'">
       <xsl:text>.. cpp:function:: </xsl:text>
-      <xsl:value-of select="type"/>
-      <xsl:text> </xsl:text>
-      <xsl:value-of select="name"/>
+      <xsl:value-of select="definition"/>
       <xsl:value-of select="argsstring"/>
     </xsl:when>
     

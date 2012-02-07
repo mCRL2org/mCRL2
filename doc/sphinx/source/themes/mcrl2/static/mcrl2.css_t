@@ -10,6 +10,13 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
+dl.function, dl.type, dl.member, dl.class  { border: solid 1px #80B090; } /* For reference manual */
+dl.function dt, dl.type dt, dl.member dt, dl.class dt {
+  background-color: #A0E0C0;
+  padding: 2px;
+  padding-left: 4px;
+}
+
 div.admonition.collapse .admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
 div.admonition.collapse .admonition-title:after { content: ''; }
 div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
