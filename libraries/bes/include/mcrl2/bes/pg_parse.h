@@ -101,7 +101,7 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
   // Parse node specifications (store in map)
   std::map<identifier_t, node_t> game;
   bool init = false;
-  identifier_t initial_node;
+  identifier_t initial_node = 0;
 
   while (isalnum(from.peek()))
   {
