@@ -59,13 +59,13 @@ if( MCRL2_ENABLE_SVN )
 endif( MCRL2_ENABLE_SVN )
 
 # Try to read build/SourceVersion, and set that version
-if( MCRL2_MINOR_VERSION STREQUAL "Unknown" )
+if( MCRL2_MINOR_VERSION STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion")
   include(${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion)
   if( MCRL2_SOURCE_PACKAGE_REVISION )
     message( STATUS "WARNING! You are building from a source package; assuming no local modifications." )
     set( MCRL2_MINOR_VERSION ${MCRL2_SOURCE_PACKAGE_REVISION} )
   endif( MCRL2_SOURCE_PACKAGE_REVISION )
-endif( MCRL2_MINOR_VERSION STREQUAL "Unknown" ) 
+endif( MCRL2_MINOR_VERSION STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion") 
 
 if( MCRL2_PACKAGE_RELEASE )
   if( MCRL2_MINOR_VERSION STREQUAL "Unknown")
