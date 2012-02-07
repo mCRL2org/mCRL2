@@ -4,7 +4,7 @@ Compiling Boost
 .. include:: toggle-platform.inc
 
 Compiling *Boost* yourself is not recommended, unless you have ample experience
-with sotware development, or if you simply have no other option than to compile
+with software development, or if you simply have no other option than to compile
 it yourself.
 
 To compile *Boost* manually, download the sources to a directory that we will
@@ -24,7 +24,7 @@ call ``<BOOSTROOT>``.
 
        cd <BOOSTROOT> 
        bootstrap.bat 
-       bjam -j8 address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex 
+       bjam address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex 
 
    .. warning::
 

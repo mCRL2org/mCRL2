@@ -5,7 +5,7 @@ mCRL2 specification
 
 Every mCRL2 specification defines a *process*. The language elements that allow
 you to specify processes rely on the use of *data*. These aspects are presented
-in seperate parts of the documentation. For the sake of completeness, a separate
+in separate parts of the documentation. For the sake of completeness, a separate
 section is included that describes the lexical elements of the mCRL2 language.
 
 .. toctree::

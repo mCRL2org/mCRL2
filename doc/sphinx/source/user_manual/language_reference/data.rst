@@ -978,7 +978,7 @@ it is possible to use free variables. An example is the following::
 
 This represents a whole class of processes, namely for every value of x this
 process has a different value. The keyword ``glob`` stands for *global variable*. In
-each specification the keyword ``glob`` can be used once any arbitrary number of times.
+each specification the keyword ``glob`` can be used an arbitrary number of times.
 
 All ``glob`` declarations are grouped together. The names of the variables cannot
 coincide with other declared functions, processes, actions, variables (both in

@@ -1,7 +1,7 @@
 .. tip::
 
    In the instructions below, some parts are specific to an operating system.
-   Clicking on operating system specific instructions will toggle visibility of
+   Clicking on the operating system logo will toggle visibility of
    instructions for other operating systems.   
 
 .. raw:: html

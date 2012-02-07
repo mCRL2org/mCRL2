@@ -41,7 +41,7 @@ setup:
      - Win32 development tools
 
      Alternatively, one can install *Microsoft Visual C++ Express 2010* or a 
-     more recent or costly version of Visual Studio. 
+     more recent or complete version of Visual Studio. 
    - |cmake|_ or higher.
 
    We will assume that there is a command prompt available that performs the 
@@ -124,7 +124,7 @@ version). The following libraries are required:
 
    Boost can be installed using MacPorts by doing the following:
 
-   - First goto http://www.macports.org/.
+   - First go to http://www.macports.org/.
    - In the left menu bar select "Available Downloads" and download the 
      appropriate version.
    - Install the downloaded image.
@@ -208,9 +208,9 @@ tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 
      cmake -DwxWidgets_LIB_DIR="<wxdir>/lib/vc_lib" -DwxWidgets_ROOT_DIR="<wxdir>"
 
-   Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC). 
-   This provides features within mcrl2xi as syntax highlighting and bracket 
-   matching. To enable these features, perform the following steps:
+   Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
+   This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
+   bracket matching. To enable these features, perform the following steps:
 
    - After having wxWidgets compiled, goto "<wxdir>/contrib/build/stc"
    - Open ``stc.dsw`` with MSVC.
@@ -244,5 +244,9 @@ tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
    following configuration::
 
      ./configure  --disable-shared --disable-compat24 --disable-mediactrl --disable-sound --with-opengl 
+     
+   On linux it is also required to install OpenGL related development packages.
+   The exact package to be installed depends on your distribution. For Ubuntu
+   this are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
 
 |enable_toggle|

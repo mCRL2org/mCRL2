@@ -74,8 +74,8 @@ can be achieved by running::
 
   $ mcrl22lps vm01.mcrl2 vm01.lps
 
-on the command line. The linear process in the internal representation
-format of mCRL2, not meant for human inspection. However, from
+on the command line. The linear process is the internal representation
+format of mCRL2, and is not meant for human inspection. However, from
 :file:`vm01.lps` a labeled transition system, LTS for short, can be
 obtained by running::
 
