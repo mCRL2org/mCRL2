@@ -15,6 +15,7 @@ div.admonition.collapse .admonition-title:after { content: ''; }
 div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
 div.admonition.collapse .admonition-title:before { content: '▴ '; }
 div.admonition.collapse .collapsed { display: none; }
+div.admonition.collapse.collapsed { display: block; }
 div.admonition.collapse .admonition-title { display: block; }
 div.admonition.collapse { border: 1px solid #e0e0e0; }
 
@@ -370,4 +371,11 @@ tt {
 
 .note tt {
     background: #d6d6d6;
+}
+
+@media print {
+    div.header,
+    div.admonition.collapse.collapsed {
+        display: none;
+    }
 }
