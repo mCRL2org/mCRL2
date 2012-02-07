@@ -182,15 +182,15 @@ Next we are going to investigate some properties of the gossiping girls.
       
 .. admonition:: Exercse
 
-   We claim that, for ``N`` gossiping girls, there is a path of length ``(N - 1)
-   + (N - 2)`` states leading to the situation where all girls know all gossips.
+   It is straightforward to see that for ``N`` gossiping girls, there is a path
+   of length ``(N - 1) + (N - 2)`` states leading to the situation where all
+   girls know all gossips. Simply have the first girl call all other (``N-1``)
+   girls; then the first and the last girl know all gossips. Then the first girl
+   calls the ``N - 2`` remaining girls.
    
-   .. note::
-   
-   This means the number of transitions is one less!
-   
-   Verify this claim for ``N=5``, i.e. show that for 5 gossiping girls, there
-   is a path of length ``7`` to the situation where all girls know all gossips.
+   Verify this claim for ``N = 5``, i.e. show that for 5 gossiping girls, there
+   is a path of ``7`` phone calss to the situation where all girls know all
+   gossips.
    
 .. admonition:: Solution
    :class: collapse
@@ -205,8 +205,8 @@ Next we are going to investigate some properties of the gossiping girls.
       .. literalinclude:: files/gossip3.mcf
          :language: mcrl2
          
-      This simply says that there is a path of length 7, of 6 actions that are
-      not ``all_done``, and the seventh action is ``all_done``.
+      This simply says that there is a path of length 7 to a state in which
+      an ``all_done`` action can be performed.
       
       However, if we try to verify this property using::
       
@@ -214,7 +214,7 @@ Next we are going to investigate some properties of the gossiping girls.
         
       It seems that :ref:`tool-lps2pbes` is getting stuck. This is caused by the
       translation of µ-calculus formula with an LPS to a PBES, that has to look
-      ahead 7 levels in the state space, by recursively evaluating the guards in
+      ahead 8 levels in the state space, by recursively evaluating the guards in
       the LPS. This causes a vast blowup in the computations that are performed
       internally. We can restrict the number of levels that the tool needs to
       look ahead by introducing fixed points as is done in
@@ -269,8 +269,17 @@ Next we are going to investigate some properties of the gossiping girls.
         exchange(4, 1, {3, 4, 5}, {1, 2})
         all_done
         
-      We see that the trace that we stored is six exchanges long, and the number
-      of states traversed is 7, so we verify the property.
+      We see that the only trace that we stored is six exchanges long, instead
+      of the seven exchanges that we are looking for. The previous approach
+      proved that there is a path of seven exchanges though. This can be
+      explained by the way in which :ref:`tool-lps2lts` generates traces. When
+      searching for an ``all_done`` action, the tool will save the trace to the
+      state that is reached with the ``all_done`` action. It will, however, only
+      store one trace per state that is reached, i.e. if there is another path
+      to the state doing the ``all_done`` action, it will not store this trace.
+      As a result, this approach cannot be used for the verification task at
+      hand.
+      
       
 .. admonition:: Exercise
 
@@ -283,9 +292,9 @@ Next we are going to investigate some properties of the gossiping girls.
    Again various approaches are possible here. We discuss two of them.
    
    #. In the previous exercise, we generated a trace to an ``all_done`` action
-      using :ref:`tool-lps2lts`. As a breadth first search was used to generate
-      the state space, we know that it is the *shortest trace* to such a state.
-      This trace was of length 7, so no shorter trace is possible.
+      using :ref:`tool-lps2lts`. The trace comprised six exchanges, so we easily
+      verify that a trace shorter than 7 exchanges to the situation in which all
+      girls know all gossips is possible.
       
    #. The second approach formalises this property using the modal µ-calculus.
       The following, propositional µ-calculus formula
@@ -294,15 +303,18 @@ Next we are going to investigate some properties of the gossiping girls.
       .. literalinclude:: files/gossip4.mcf
          :language: mcrl2
          
-      This property can be verified to hold using the following commands::
+      We verify this using the following commands::
       
         $ lps2pbes -f gossip4.mcf | pbes2bool -rjittyc        
-        true
+        false
+        
+      Indeed the property does not hold, as we also observed from the
+      :ref:`tool-lps2lts` output.
         
 .. note::
 
    In all the verification above, the command :ref:`tool-pbes2bool` can be
-   replace by :ref:`tool-pbespgsolve`. The latter uses a different algorithm
+   replaced by :ref:`tool-pbespgsolve`. The latter uses a different algorithm
    for doing the actual verification; it first translates the pbes into a
    parity game, and then solves the parity game.
             

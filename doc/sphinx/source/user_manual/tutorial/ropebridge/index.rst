@@ -320,11 +320,11 @@ B. It is not possible for all adventurers to reach the `finish` side in less
    assuming that this file contains the specification including the ``Referee``
    process::
    
-   $ mcrl22lps bridge.mcrl2 bridge.lps
-   $ lps2pbes --formula=formula_A.mcf bridge.lps | pbes2bool
-   true
-   $ lps2pbes --formula=formula_B-final.mcf bridge-referee.lps | pbes2bool
-   true
+     $ mcrl22lps bridge.mcrl2 bridge.lps
+     $ lps2pbes --formula=formula_A.mcf bridge.lps | pbes2bool
+     true
+     $ lps2pbes --formula=formula_B-final.mcf bridge-referee.lps | pbes2bool
+     true
    
 A disadvantage of using PBESs for model checking is that insightful diagnostic
 information is hard to obtain. We shall now verify both properties again using
