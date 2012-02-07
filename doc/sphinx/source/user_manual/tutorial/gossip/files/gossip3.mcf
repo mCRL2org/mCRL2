@@ -1,4 +1,5 @@
 % There is a path of length 7 leading to the situation where all
 % girls know all gossips (true)
 
-<!all_done><!all_done><!all_done><!all_done><!all_done><!all_done><!all_done><all_done>true
+<!all_done><!all_done><!all_done><!all_done>
+<!all_done><!all_done><!all_done><all_done>true

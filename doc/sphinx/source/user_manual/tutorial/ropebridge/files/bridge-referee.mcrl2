@@ -50,16 +50,19 @@ proc Adventurer(speed:Int, pos:Position) =
 % Models the referee who counts the number of minutes passed and the
 % number of adventurers that have reached the far side of the bridge
 proc Referee(minutes:Int, num_finished:Int) =
-       sum s,s':Int . forward_referee(s,s') . Referee(minutes + max(s,s'), num_finished + 2)
+       sum s,s':Int . forward_referee(s,s')
+                    . Referee(minutes + max(s,s'), num_finished + 2)
        +
        (num_finished < 4) ->
-         sum s:Int . back_referee(s) . Referee(minutes + s, num_finished - 1)
+         sum s:Int . back_referee(s)
+                   . Referee(minutes + s, num_finished - 1)
        <> % num_finished >= 4
          report(minutes) . Referee(minutes, num_finished);
 
 
 init allow( { forward, back, report },
-     comm(  { forward_adventurer | forward_adventurer | forward_flashlight | forward_referee -> forward,
+     comm(  { forward_adventurer | forward_adventurer |
+              forward_flashlight | forward_referee -> forward,
               back_adventurer | back_flashlight | back_referee -> back },
        Adventurer(1,start) || Adventurer(2,start)  || 
        Adventurer(5,start) || Adventurer(10,start) || 

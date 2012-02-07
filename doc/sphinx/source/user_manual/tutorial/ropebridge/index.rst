@@ -116,7 +116,7 @@ all adventurers to cross the bridge.
    
    .. literalinclude:: files/bridge.mcrl2
       :language: mcrl2
-      :lines: 33-47
+      :lines: 33-49
 
 .. admonition:: Exercise
 
@@ -159,7 +159,8 @@ all adventurers to cross the bridge.
    
    .. code-block:: mcrl2
    
-      init comm({ forward_adventurer | forward_adventurer | forward_flashlight -> forward,
+      init comm({ forward_adventurer | forward_adventurer
+                  | forward_flashlight -> forward,
                   back_adventurer | back_flashlight -> back },
               Adventurer(1,start) || Adventurer(2,start)  || 
               Adventurer(5,start) || Adventurer(10,start) || 
@@ -170,7 +171,7 @@ all adventurers to cross the bridge.
    
    .. literalinclude:: files/bridge.mcrl2
       :language: mcrl2
-      :lines: 49-
+      :lines: 51-
 
 .. admonition:: Exercise
 
@@ -243,7 +244,7 @@ all adventurers to cross the bridge.
    
    .. literalinclude:: files/bridge-referee.mcrl2
       :language: mcrl2
-      :lines: 50-58
+      :lines: 50-60
       
    Observe that the referee keeps track of the minutes that have passed, and
    that the ``forward_referee``, ``back_referee`` and ``report`` actions have
@@ -256,7 +257,7 @@ all adventurers to cross the bridge.
    
    .. literalinclude:: files/bridge-referee.mcrl2
       :language: mcrl2
-      :lines: 61-
+      :lines: 63-
    
    The complete specification is available as
    :download:`bridge-referee.mcrl2 <files/bridge-referee.mcrl2>`
@@ -315,6 +316,7 @@ B. It is not possible for all adventurers to reach the `finish` side in less
     $ lps2pbes --formula=formula_X.mcf bridge.lps | pbes2bool
     
 .. admonition:: Solution
+   :class: collapse
 
    This boils down to executing the following commands on :file:`bridge.mcrl2`,
    assuming that this file contains the specification including the ``Referee``
@@ -350,28 +352,29 @@ the LTS tools.
   claimed by the computer scientist adventurer.
   
 .. admonition:: Solution
+   :class: collapse
 
-  The following is the output for our solution::
+   The following is the output for our solution::
   
-    $ lps2lts --action=report -t20 bridge.lps
-    [16:11:01.848 info]    detect: action 'report(50)' found and saved to 'bridge-referee.lps_act_0_report.trc'(state index: 87).
-    [16:11:02.271 info]    detect: action 'report(40)' found and saved to 'bridge-referee.lps_act_1_report.trc'(state index: 88).
-    [16:11:02.273 info]    detect: action 'report(34)' found and saved to 'bridge-referee.lps_act_2_report.trc'(state index: 89).
-    [16:11:02.274 info]    detect: action 'report(33)' found and saved to 'bridge-referee.lps_act_3_report.trc'(state index: 90).
-    [16:11:02.276 info]    detect: action 'report(37)' found and saved to 'bridge-referee.lps_act_4_report.trc'(state index: 91).
-    [16:11:02.278 info]    detect: action 'report(30)' found and saved to 'bridge-referee.lps_act_5_report.trc'(state index: 92).
-    [16:11:02.279 info]    detect: action 'report(24)' found and saved to 'bridge-referee.lps_act_6_report.trc'(state index: 93).
-    [16:11:02.281 info]    detect: action 'report(23)' found and saved to 'bridge-referee.lps_act_7_report.trc'(state index: 94).
-    [16:11:02.282 info]    detect: action 'report(36)' found and saved to 'bridge-referee.lps_act_8_report.trc'(state index: 95).
-    [16:11:02.284 info]    detect: action 'report(27)' found and saved to 'bridge-referee.lps_act_9_report.trc'(state index: 96).
-    [16:11:02.286 info]    detect: action 'report(21)' found and saved to 'bridge-referee.lps_act_10_report.trc'(state index: 97).
-    [16:11:02.288 info]    detect: action 'report(20)' found and saved to 'bridge-referee.lps_act_11_report.trc'(state index: 98).
-    [16:11:02.290 info]    detect: action 'report(26)' found and saved to 'bridge-referee.lps_act_12_report.trc'(state index: 99).
-    [16:11:02.292 info]    detect: action 'report(19)' found and saved to 'bridge-referee.lps_act_13_report.trc'(state index: 100).
-    [16:11:02.295 info]    detect: action 'report(17)' found and saved to 'bridge-referee.lps_act_14_report.trc'(state index: 101).
+     $ lps2lts --action=report -t20 bridge.lps
+     [16:11:01.848 info]    detect: action 'report(50)' found and saved to 'bridge-referee.lps_act_0_report.trc'(state index: 87).
+     [16:11:02.271 info]    detect: action 'report(40)' found and saved to 'bridge-referee.lps_act_1_report.trc'(state index: 88).
+     [16:11:02.273 info]    detect: action 'report(34)' found and saved to 'bridge-referee.lps_act_2_report.trc'(state index: 89).
+     [16:11:02.274 info]    detect: action 'report(33)' found and saved to 'bridge-referee.lps_act_3_report.trc'(state index: 90).
+     [16:11:02.276 info]    detect: action 'report(37)' found and saved to 'bridge-referee.lps_act_4_report.trc'(state index: 91).
+     [16:11:02.278 info]    detect: action 'report(30)' found and saved to 'bridge-referee.lps_act_5_report.trc'(state index: 92).
+     [16:11:02.279 info]    detect: action 'report(24)' found and saved to 'bridge-referee.lps_act_6_report.trc'(state index: 93).
+     [16:11:02.281 info]    detect: action 'report(23)' found and saved to 'bridge-referee.lps_act_7_report.trc'(state index: 94).
+     [16:11:02.282 info]    detect: action 'report(36)' found and saved to 'bridge-referee.lps_act_8_report.trc'(state index: 95).
+     [16:11:02.284 info]    detect: action 'report(27)' found and saved to 'bridge-referee.lps_act_9_report.trc'(state index: 96).
+     [16:11:02.286 info]    detect: action 'report(21)' found and saved to 'bridge-referee.lps_act_10_report.trc'(state index: 97).
+     [16:11:02.288 info]    detect: action 'report(20)' found and saved to 'bridge-referee.lps_act_11_report.trc'(state index: 98).
+     [16:11:02.290 info]    detect: action 'report(26)' found and saved to 'bridge-referee.lps_act_12_report.trc'(state index: 99).
+     [16:11:02.292 info]    detect: action 'report(19)' found and saved to 'bridge-referee.lps_act_13_report.trc'(state index: 100).
+     [16:11:02.295 info]    detect: action 'report(17)' found and saved to 'bridge-referee.lps_act_14_report.trc'(state index: 101).
     
-  So we indeed observe that ``report(17)`` is the trace with the lowest time.
-  The optimal trace that we obtain is the following::
+   So we indeed observe that ``report(17)`` is the trace with the lowest time.
+   The optimal trace that we obtain is the following::
   
-  $ tracepp bridge-referee.lps_act_14_report.trc  
+     $ tracepp bridge-referee.lps_act_14_report.trc  
   

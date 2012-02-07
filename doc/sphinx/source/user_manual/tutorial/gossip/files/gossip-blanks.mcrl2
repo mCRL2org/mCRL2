@@ -9,7 +9,8 @@ act done, all_done;
 proc Girl(myid:Pos,mygs:Set(Pos)) =
      sum herid:Pos, hergs:Set(Pos) . (
          ( myid != herid ) -> (
-             ( call(myid,herid,mygs,hergs) + answer(herid,myid,hergs,mygs) ) .
+             ( call(myid,herid,mygs,hergs)
+               + answer(herid,myid,hergs,mygs) ) .
              Girl(myid,mygs + hergs) ) ) +
      ( mygs == Gossips ) -> done . delta;
 
