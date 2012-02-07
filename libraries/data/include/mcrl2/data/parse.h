@@ -884,6 +884,24 @@ data_expression parse_data_expression(std::string text, std::string var_decl, st
   return parse_data_expression(text,var_decl,data::parse_data_specification(data_spec));
 }
 
+// parse a string like 'tail: List(D) -> List(D)'
+//
+// TODO: replace this by a proper parse function once the current parser and type checker have been replaced
+inline
+data::function_symbol parse_function_symbol(std::string text, const std::string& dataspec_text = "")
+{
+  const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
+  boost::algorithm::trim(text);
+  std::string::size_type pos = text.find_first_of(':');
+  std::string name = boost::algorithm::trim_copy(text.substr(0, pos));
+  std::string type = prefix + text.substr(pos);
+  std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
+  data::data_specification dataspec = data::parse_data_specification(spec_text);
+  data::function_symbol f = dataspec.user_defined_mappings().back();
+  data::function_symbol result = data::function_symbol(name, f.sort());
+  return result;
+}
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {
