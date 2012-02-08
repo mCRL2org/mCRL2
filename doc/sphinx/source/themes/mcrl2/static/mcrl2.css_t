@@ -16,6 +16,12 @@ dl.function dt, dl.type dt, dl.member dt, dl.class dt {
   padding: 2px;
   padding-left: 4px;
 }
+dl.function dd, dl.type dd, dl.member dd, dl.class dd {
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 div.admonition.collapse .admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
 div.admonition.collapse .admonition-title:after { content: ''; }
