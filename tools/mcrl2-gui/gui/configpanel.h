@@ -85,13 +85,24 @@ class ConfigPanel: public wxNotebookPage
 
       wxGridBagSizer* fgs = new wxGridBagSizer(5, 5);
 
+      m_working_directory = wxFileName(wxString(m_fileIO.input_file.c_str(), wxConvUTF8)).GetPath();
+
+      fgs->Add(new wxStaticText(top, wxID_ANY, wxT("Working directory:") ) , wxGBPosition(row,0));
+      fgs->Add(new wxStaticText(top, wxID_ANY, m_working_directory.GetFullPath()), wxGBPosition(row,1),
+          wxGBSpan(1,2));
+
+      row++;
       for( vector< string >::iterator s = m_tool.m_input_types.begin() ; s != m_tool.m_input_types.end(); s++  )
       {
         if ( s == m_tool.m_input_types.begin() )
         {
 
           fgs->Add(new wxStaticText(top, wxID_ANY, wxT("input file:") ) , wxGBPosition(row,0));
-          fgs->Add(new wxStaticText(top, wxID_ANY, wxString(m_fileIO.input_file.c_str(), wxConvUTF8)), wxGBPosition(row,1),
+
+          wxFileName inf = wxFileName( wxString(m_fileIO.input_file.c_str(), wxConvUTF8));
+          inf.MakeRelativeTo(  m_working_directory.GetFullPath() );
+
+          fgs->Add(new wxStaticText(top, wxID_ANY,inf.GetFullPath()), wxGBPosition(row,1),
               wxGBSpan(1,2));
 
         } else {
@@ -134,8 +145,16 @@ class ConfigPanel: public wxNotebookPage
           suggested_output_file->SetToolTip(wxT("Leave blank if the output should be written to screen."))  ;
         }
 
-        suggested_output_file->SetPath(filesuggestion);
-        fgs->Add(suggested_output_file, wxGBPosition(row, 1), wxGBSpan(1,2));
+        wxFileName ouf = wxFileName( filesuggestion );
+        ouf.MakeRelativeTo(  m_working_directory.GetFullPath() );
+
+        suggested_output_file->SetPath( ouf.GetFullPath() );
+        suggested_output_file->SetMinSize(wxSize(350,30));
+        suggested_output_file->SetTextCtrlProportion(6);
+
+        fgs->Add(suggested_output_file , wxGBPosition(row, 1), wxGBSpan(1,2));
+
+        m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
 
         // Display different output formats if there are more than one
         if (tool.m_extentions.size() > 1)
@@ -166,10 +185,8 @@ class ConfigPanel: public wxNotebookPage
           fgs->Add(output_ext , wxGBPosition(row, 1), wxGBSpan(1,2));
         }
 
-        suggested_output_file->SetMinSize(wxSize(350,30));
-        suggested_output_file->SetTextCtrlProportion(6);
 
-        m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
+
       }
 
       //fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
@@ -415,17 +432,50 @@ class ConfigPanel: public wxNotebookPage
         }
       }
 
-      for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
-           != m_filepicker_ptrs.end(); ++i)
+
+      std::vector<wxString> absolutefilepickerpaths;
+
+      /* Conversion of relative filepaths to absolute filepaths */
+      for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin();
+          i != m_filepicker_ptrs.end(); ++i)
       {
         if (!(*i)->GetPath().IsEmpty())
         {
 
-          wxString arg = (*i)->GetPath();
+          /*Normalize absolute filepath*/
+          wxFileName fn;
+          fn = wxFileName((*i)->GetPath());
 
-          arg = StringSpaceEscape(arg);
+          if(!fn.IsAbsolute())
+          {
+            /* Relative to Absolute Path */
+            fn = wxFileName(m_working_directory.GetFullPath() + wxFileName::GetPathSeparator() + (*i)->GetPath());
+          }
 
-          run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") + arg ;
+          /*Normalize absolute filepath*/
+          if(!fn.MakeAbsolute())
+          {
+            wxMessageDialog *dial = new wxMessageDialog(NULL,
+               wxString("Cannot normalize \"")+ (*i)->GetPath() + wxString("\" for argument \"")+ (*i)->GetLabel() + wxT("\".") , wxT("Error"), wxOK | wxICON_ERROR);
+            dial->ShowModal();
+            return;
+          }
+
+          absolutefilepickerpaths.push_back( StringSpaceEscape(fn.GetFullPath()) );
+
+        }
+      }
+
+
+      for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin();
+          i != m_filepicker_ptrs.end(); ++i)
+      {
+        if (!(*i)->GetPath().IsEmpty())
+        {
+
+          run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") + absolutefilepickerpaths.front();
+          absolutefilepickerpaths.erase( absolutefilepickerpaths.begin() );
+
         }
       }
 
@@ -440,7 +490,23 @@ class ConfigPanel: public wxNotebookPage
             ; i != m_additional_input_files.end()
             ; ++i ){
           run.Append(wxT(" "));
-          run.Append( StringSpaceEscape( (*i)->GetPath() ) );
+
+          wxFileName inf = wxFileName( (*i)->GetPath() );
+
+          if(!inf.IsAbsolute())
+          {
+            inf = wxFileName( m_working_directory.GetFullPath() + wxFileName::GetPathSeparator() + inf.GetFullPath() );
+          }
+
+          if(inf.MakeAbsolute())
+          {
+            run.Append( StringSpaceEscape( inf.GetFullPath() ) );
+          } else {
+            wxMessageDialog *dial = new wxMessageDialog(NULL,
+               wxString("Could not normalize input file \"")+ inf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
+            dial->ShowModal();
+            return;
+          }
         }
       }
 
@@ -453,7 +519,23 @@ class ConfigPanel: public wxNotebookPage
         if ( !output_file.IsEmpty() )
         {
           run.Append(wxT(" "));
-          run.Append( StringSpaceEscape ( output_file ) );
+
+          wxFileName ouf = wxFileName( output_file );
+
+          if(!ouf.IsAbsolute())
+          {
+            ouf = wxFileName( m_working_directory.GetFullPath() + wxFileName::GetPathSeparator() + ouf.GetFullPath() );
+          }
+
+          if(ouf.MakeAbsolute())
+          {
+            run.Append( StringSpaceEscape( ouf.GetFullPath() ) );
+          } else {
+            wxMessageDialog *dial = new wxMessageDialog(NULL,
+               wxString("Could not normalize output file \"")+ ouf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
+            dial->ShowModal();
+            return;
+          }
         }
       }
 
@@ -612,6 +694,8 @@ class ConfigPanel: public wxNotebookPage
     Tool m_tool;
 
     FileIO m_fileIO;
+
+    wxFileName m_working_directory;
 
     vector<wxFilePickerCtrl*> m_additional_input_files;
     vector<wxRadioBox*> m_radiobox_ptrs;
