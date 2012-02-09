@@ -779,7 +779,7 @@ inline void lts_convert(
   const lts_fsm_t&,
   lts_lts_t&)
 {
-  throw mcrl2::runtime_error("Cannot translate .fsm into .lts format without additional information (data, action declarations and process parameters)");
+  throw mcrl2::runtime_error("Cannot translate .fsm into .lts format without additional LPS information (data, action declarations and process parameters).");
 }
 
 inline void lts_convert(

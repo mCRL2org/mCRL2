@@ -286,7 +286,7 @@ class ltsconvert_tool : public ltsconvert_base
                       "leave out state information when saving in dot format", 'n');
       desc.add_option("determinise", "determinise LTS", 'D');
       desc.add_option("lps", make_mandatory_argument("FILE"),
-                      "use FILE as the LPS from which the input LTS was generated; this might"
+                      "use FILE as the LPS from which the input LTS was generated; this might "
                       "be needed to store the correct parameter names of states when saving "
                       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
       desc.add_option("in", make_mandatory_argument("FORMAT"),
