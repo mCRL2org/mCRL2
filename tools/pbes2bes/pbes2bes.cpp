@@ -320,13 +320,6 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
       m_gui_options["hashtables"] = create_checkbox_widget();
 
       values.clear();
-      values.push_back("pbes");
-      values.push_back("cwi");
-      values.push_back("bes");
-      values.push_back("pgsolver");
-      m_gui_options["out"] = create_radiobox_widget(values, 3);
-
-      values.clear();
       values.push_back("simplify");
       values.push_back("quantifier-all");
       values.push_back("quantifier-finite");
