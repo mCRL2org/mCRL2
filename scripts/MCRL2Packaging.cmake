@@ -66,7 +66,7 @@ ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
-SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\doc\\\\images\\\\mcrl2-install-logo.bmp")
+SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
 
 # Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64. 
 if(CMAKE_CL_64)

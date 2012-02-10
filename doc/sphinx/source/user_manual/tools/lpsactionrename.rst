@@ -1,3 +1,5 @@
+.. index:: lpsactionrename
+
 .. _tool-lpsactionrename:
 
 .. highlight:: mcrl2
