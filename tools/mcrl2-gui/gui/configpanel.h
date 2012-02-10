@@ -456,7 +456,7 @@ class ConfigPanel: public wxNotebookPage
           if(!fn.MakeAbsolute())
           {
             wxMessageDialog *dial = new wxMessageDialog(NULL,
-               wxString("Cannot normalize \"")+ (*i)->GetPath() + wxString("\" for argument \"")+ (*i)->GetLabel() + wxT("\".") , wxT("Error"), wxOK | wxICON_ERROR);
+               wxString("Cannot normalize \"",wxConvUTF8)+ (*i)->GetPath() + wxString("\" for argument \"",wxConvUTF8)+ (*i)->GetLabel() + wxT("\".") , wxT("Error"), wxOK | wxICON_ERROR);
             dial->ShowModal();
             return;
           }
@@ -503,7 +503,7 @@ class ConfigPanel: public wxNotebookPage
             run.Append( StringSpaceEscape( inf.GetFullPath() ) );
           } else {
             wxMessageDialog *dial = new wxMessageDialog(NULL,
-               wxString("Could not normalize input file \"")+ inf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
+               wxString("Could not normalize input file \"",wxConvUTF8)+ inf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
             dial->ShowModal();
             return;
           }
@@ -515,7 +515,7 @@ class ConfigPanel: public wxNotebookPage
       if( suggested_output_file )
       {
         wxString output_file = suggested_output_file->GetPath();
-  
+
         if ( !output_file.IsEmpty() )
         {
           run.Append(wxT(" "));
@@ -532,7 +532,7 @@ class ConfigPanel: public wxNotebookPage
             run.Append( StringSpaceEscape( ouf.GetFullPath() ) );
           } else {
             wxMessageDialog *dial = new wxMessageDialog(NULL,
-               wxString("Could not normalize output file \"")+ ouf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
+               wxString("Could not normalize output file \"",wxConvUTF8)+ ouf.GetFullPath() + wxT("\" .") , wxT("Error"), wxOK | wxICON_ERROR);
             dial->ShowModal();
             return;
           }
