@@ -1,3 +1,5 @@
+.. language-mcrl2:
+
 mCRL2 specification
 ===================
 

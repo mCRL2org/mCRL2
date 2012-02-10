@@ -116,6 +116,3 @@ Applying sum elimination will give the following result::
        + sum y_P0: Nat.(((y_P0 < 6 && !x_P0) && !((y_P0 == y_P0 * 2) == x_P0)) &&
                      !(5 == y_P0)) -> a(x_P0, y_P0) .P(!x_P0)
 
-.. _manpage-lpsactionrename:
-
-.. include:: man/lpsactionrename.txt
