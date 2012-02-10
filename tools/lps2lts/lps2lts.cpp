@@ -125,7 +125,16 @@ class lps2lts_tool : public lps2lts_base
                    "The format of OUTFILE is determined by its extension (unless it is specified "
                    "by an option). The supported formats are:\n"
                    "\n"
-                   +mcrl2::lts::detail::supported_lts_formats_text()
+                   +mcrl2::lts::detail::supported_lts_formats_text()+"\n"
+                   "If the jittyc rewriter is used, then the MCRL2_COMPILEREWRITER environment "
+                   "variable (default value: mcrl2compilerewriter) determines the script that "
+                   "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') "
+                   "determines where temporary files are stored."
+                   "\n"
+                   "Note that lps2lts can deliver multiple transitions with the same "
+                   "label between any pair of states. If this is not desired, such "
+                   "transitions can be removed by applying a strong bisimulation reducton "
+                   "using for instance the tool ltsconvert."
                   )
     {
     }
@@ -178,9 +187,14 @@ class lps2lts_tool : public lps2lts_base
                  "  'vector' for a vector (slightly faster, often far less memory efficient)"
                  , 'f').
       add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
-                 "use bit hashing to store states and store at most NUM states; note that this "
-                 "option may cause states to be mistaken for others (default value for NUM is "
-                 "approximately 2*10^8)",'b').
+                 "use bit hashing to store states and store at most NUM states. "
+                 "This means that instead of keeping a full record of all states "
+                 "that have been visited, a bit array is used that indicate whether "
+                 "or not a hash of a state has been seen before. Although this means "
+                 "that this option may cause states to be mistaken for others (because "
+                 "they are mapped to the same hash), it can be useful to explore very "
+                 "large LTSs that are otherwise not explorable. The default value for NUM is "
+                 "approximately 2*10^8 (this corresponds to about 25MB of memory)",'b').
       add_option("max", make_mandatory_argument("NUM"),
                  "explore at most NUM states", 'l').
       add_option("todo-max", make_mandatory_argument("NUM"),
@@ -190,13 +204,25 @@ class lps2lts_tool : public lps2lts_base
       add_option("deadlock",
                  "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
       add_option("divergence",
-                 "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed).", 'F').
+                 "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
+                 "The algorithm to detect the divergences is linear for every state, "
+                 "so state space exploration becomes quadratic with this option on, causing a state "
+                 "space exploration to become slow when this option is enabled.", 'F').
       add_option("action", make_mandatory_argument("NAMES"),
-                 "detect actions from NAMES, a comma-separated list of action names; a message "
-                 "is printed for every occurrence of one of these action names", 'a').
+                 "detect and report actions in the transitions system that have action "
+                 "names from NAMES, a comma-separated list. This is for instance useful "
+                 "to find (or prove the absence) of an action error. A message "
+                 "is printed for every occurrence of one of these action names. "
+                 "With the -t flag traces towards these actions are generated", 'a').
       add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
-                 "write at most NUM traces to states detected with the --deadlock, --divergence or --action "
-                 "options (default is unlimited)", 't').
+                 "Write a shortest trace to each state that is reached with an action from NAMES "
+                 "from option --action, is a deadlock detected with --deadlock, or is a "
+                 "divergence detected with --divergence to a file. "
+                 "No more than NUM traces will be written. If NUM is not supplied the number of "
+                 "traces is unbounded."
+                 "For each trace that is to be written a unique file with extension .trc (trace) "
+                 "will be created containing a shortest trace from the initial state to the deadlock "
+                 "state. The traces can be pretty printed and converted to other formats using tracepp.", 't').
       add_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored").
@@ -215,8 +241,17 @@ class lps2lts_tool : public lps2lts_base
                  "  'r', 'random'    random simulation. Out of all next states one is chosen at random independently of whether this state has already been observed. Consequently, random simultation only terminates when a deadlocked state is encountered.", 's').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "save the output in the specified FORMAT", 'o').
-      add_option("no-info", "do not add state information to OUTFILE").
-      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions").
+      add_option("no-info", "do not add state information to OUTFILE"
+                 "Without this option lps2lts adds state vector to the LTS. This "
+                 "option causes this information to be discarded and states are only "
+                 "indicated by a sequence number. Explicit state information is useful "
+                 "for visualisation purposes, for instance, but can cause the OUTFILE "
+                 "to grow considerably. Note that this option is implicit when writing "
+                 "in the AUT format.").
+      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions"
+                 "For large state spaces the number of progress messages can be quite "
+                 "horrendous. This feature helps to suppress those. Other verbose messages, "
+                 "such as the total number of states explored, just remain visible.").
       add_option("init-tsize", make_mandatory_argument("NUM"),
                  "set the initial size of the internally used hash tables (default is 10000)");
     }
