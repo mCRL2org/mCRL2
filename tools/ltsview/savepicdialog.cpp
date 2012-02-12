@@ -291,6 +291,7 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
   statusbar->Update();
   GetParent()->Enable();
   GetParent()->SetCursor(wxNullCursor);
+  this->EndModal(wxOK);
 }
 
 void SavePicDialog::update_file_name()
