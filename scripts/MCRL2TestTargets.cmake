@@ -139,7 +139,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   set_tests_properties( lps2pbes_abp PROPERTIES DEPENDS lpssuminst_abp )
   add_test(pbes2bool_abp ${pbes2bool_BINARY_DIR}/pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
   set_tests_properties( pbes2bool_abp PROPERTIES DEPENDS lps2pbes_abp )
-  add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
   add_test(tracepp_test ${tracepp_BINARY_DIR}/tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
   add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
   set_tests_properties( lts2lps_test PROPERTIES DEPENDS lps2lts_abp_lts )
@@ -152,8 +151,13 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   endif( MCRL2_ENABLE_EXPERIMENTAL )
 
   if( MCRL2_ENABLE_DEPRECATED )
+    add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
     add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2)
-    set_tests_properties(chi2mcrl2_test PROPERTIES
+
+    set_tests_properties(
+       chi2mcrl2_test 
+       lysa2mcrl2_test
+     PROPERTIES
        LABELS "${MCRL2_TEST_LABEL}"
      )
   endif( MCRL2_ENABLE_DEPRECATED )
@@ -203,7 +207,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     ltsinfo_abp
     pbes2bool_abp
     lps2pbes_abp
-    lysa2mcrl2_test
     tracepp_test
     lts2lps_test
     ltsconvert_bisim_test
