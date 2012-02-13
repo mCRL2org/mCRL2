@@ -17,6 +17,7 @@ Contents
       :hidden:
 
       download
+      historic_releases
       showcases
       support
 

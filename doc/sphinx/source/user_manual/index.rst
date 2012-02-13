@@ -9,7 +9,7 @@
 
 .. admonition:: Release
 
-   Latest mCRL2 as of |today| release: |release|_. Current SVN version |version|_.
+   Latest mCRL2 as of |today| release: |release|_.
 
 .. list-table::
    :class: frontpage-table
