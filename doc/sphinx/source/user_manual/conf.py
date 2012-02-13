@@ -28,7 +28,7 @@ sys.path.append(os.path.abspath('../sphinxext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'mcrl2_pygment', 'dparser_grammar']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'sphinx.ext.ifconfig', 'mcrl2_pygment', 'dparser_grammar']
 mathjax_path = '../../mathjax/MathJax.js?config=default'
 
 # Add any paths that contain templates here, relative to this directory.
@@ -90,7 +90,6 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
-
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -100,6 +99,8 @@ html_theme = 'mcrl2'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
+# Part of this is set through generate.py.
+# html_theme_options = {}
 html_theme_options = {
   'relbarbgcolor': '#406756'
 }

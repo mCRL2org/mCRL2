@@ -58,13 +58,19 @@ def generate_rst(binpath, temppath, outpath, version):
   clone_rst(cfg_usr, temp_usr)
   developer_manual.generate_rst(temppath, outpath)
   user_manual.generate_rst(temppath, outpath, binpath)
+  if '.'.join(version) == version[0]:
+    color='#406756'
+  else:
+    color='#c1272d'
   sphinx.main(['-bhtml', 
                '-D', 'version={0}'.format('.'.join(version)), 
-               '-D', 'release={0}'.format(version[0]), 
+               '-D', 'release={0}'.format(version[0]),
+               '-D', 'html_theme_options.relbarbgcolor={0}'.format(color),
                '-c', cfg_dev, 
                temp_dev, out_dev])
   sphinx.main(['-bhtml', 
                '-D', 'version={0}'.format('.'.join(version)), 
                '-D', 'release={0}'.format(version[0]), 
+               '-D', 'html_theme_options.relbarbgcolor={0}'.format(color),
                '-c', cfg_usr, 
                temp_usr, out_usr])

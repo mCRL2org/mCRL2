@@ -100,11 +100,12 @@ html_theme = 'mcrl2'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
+# Part of this is set through generate.py.
+# html_theme_options = {}
 html_theme_options = {
-#  'relbarbgcolor': '#c1272d'
   'relbarbgcolor': '#406756'
 }
-
+  
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['../themes']
 

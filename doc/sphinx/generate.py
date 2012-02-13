@@ -26,6 +26,8 @@ def getarguments():
   parser = argparse.ArgumentParser()
   parser.add_argument("-c", "--clean", dest="clean", action="store_true",
                     help="Clean up all generated files (output + temporary).")
+  parser.add_argument("-r", "--release", dest="release", action="store_true",
+                    help="Generate release documentation.")
   parser.add_argument("-f", "--force", dest="force", metavar="TARGET", action="append",
                     default=[],
                     choices=["all", "doxy", "doxyrst", "man", "libpdf"],
@@ -42,7 +44,7 @@ def getarguments():
                     help="Store temporary files in DIR")
   parser.add_argument("-o", "--output", dest="out", metavar="DIR", action="store",
                     default=os.path.join(os.path.dirname(__file__), 'html'),
-                    help="Store output to DIR")                    
+                    help="Store output to DIR")               
   return parser.parse_args()
 
 #
@@ -57,7 +59,8 @@ if __name__ == '__main__':
     clearcache(temppath, args.force)
   if args.clean:
     clean(temppath, outpath)
+  
 
   sys.path = [os.path.dirname(__file__)] + sys.path
   import source
-  source.generate_rst('', temppath, outpath, args.version.rsplit('.', 1))
+  source.generate_rst('', temppath, outpath, [args.version] if args.release else args.version.rsplit('.', 1))

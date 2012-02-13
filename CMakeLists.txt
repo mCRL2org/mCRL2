@@ -220,7 +220,7 @@ include(ConfigureWxWidgets)
 ##---------------------------------------------------
 
 include(MCRL2Version)
-message(STATUS "mCRL2 version: ${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}")
+message(STATUS "mCRL2 version: ${MCRL2_VERSION}")
 message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
 
 ##---------------------------------------------------

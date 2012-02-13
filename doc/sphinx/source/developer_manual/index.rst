@@ -6,6 +6,8 @@
    table.frontpage-table td { border: 0; margin: 0; padding: 0; }
    img.frontpage-logo { margin-top: 1.5em; }
    </style>
+   
+.. _developer_manual:
 
 Developer page of the mCRL2 toolset
 ###################################
