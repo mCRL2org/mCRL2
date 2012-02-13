@@ -202,7 +202,7 @@ def render_tikz(self,tikz,libs='',stringsubst=False):
         raise TikzExtError('Error (tikz extension): pdftoppm exited with error:'
                            '\n[stderr]\n%s\n[stdout]\n%s' % (stderr, stdout))
 
-    rename('tikz-1.png', outfn)
+    shutil.move('tikz-1.png', outfn)
 
     chdir(curdir)
     return relfn
