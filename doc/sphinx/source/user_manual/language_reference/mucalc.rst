@@ -1,3 +1,5 @@
+.. _language-mu-calculus:
+
 µ-Calculus
 ==========
 

@@ -1,4 +1,4 @@
-.. language-mcrl2:
+.. _language-mcrl2:
 
 mCRL2 specification
 ===================

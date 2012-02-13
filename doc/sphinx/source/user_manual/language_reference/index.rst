@@ -6,7 +6,10 @@ mCRL2 language reference
 .. toctree::
 
    mcrl2
+   lps
+   lts
    mucalc
    bes
    pbes
+   file_formats
 

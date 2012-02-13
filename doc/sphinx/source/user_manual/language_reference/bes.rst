@@ -1,3 +1,5 @@
+.. _language-bes:
+
 Boolean Equation Systems
 ========================
 

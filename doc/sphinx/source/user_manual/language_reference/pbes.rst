@@ -1,3 +1,5 @@
+.. _language-pbes:
+
 Parameterised Boolean Equation Systems
 ======================================
 
