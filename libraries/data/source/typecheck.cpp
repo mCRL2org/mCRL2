@@ -4862,7 +4862,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
   {
     return Type;
   }
-  
+
   if (data::is_multiple_possible_sorts(data::sort_expression(NeededType)))
   {
     sort_expression_list l=ATLgetArgument(NeededType,0);
@@ -4873,8 +4873,8 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       {
         return r;
       }
-      return NULL;
     }
+    return NULL;
   }
 
   if (warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(ATAgetArgument(*Par,0))))
