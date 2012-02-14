@@ -22,17 +22,17 @@ The following C++ classes are defined for PBESs:
 
 .. table:: PBES classes
 
-   ===================================  =================================================
+   ===================================  ====================================================================================================================
    Expression                           C++ class
-   ===================================  =================================================
-   :math:`\cal{E}`                      ``template<typename Container> class pbes``
-   :math:`\sigma X(d:D)=\varphi`        ``pbes_equation``
-   :math:`\sigma`                       ``fixed_point_symbol``
-   :math:`X(d:D)`                       ``propositional_variable``
-   :math:`\varphi`                      ``pbes_expression``
-   :math:`d:D`                          ``data::variable_list``
-   :math:`e`                            ``data::data_expression_list``
-   ===================================  =================================================
+   ===================================  ====================================================================================================================
+   :math:`\cal{E}`                      :cpp:class:`template \<typename Container> class pbes <template <typename Container> class pbes>`
+   :math:`\sigma X(d:D)=\varphi`        :cpp:class:`pbes_equation                             <mcrl2::pbes_system::pbes_equation>`
+   :math:`\sigma`                       :cpp:class:`fixpoint_symbol                           <mcrl2::pbes_system::fixpoint_symbol>`
+   :math:`X(d:D)`                       :cpp:class:`propositional_variable                    <mcrl2::pbes_system::propositional_variable>`
+   :math:`\varphi`                      :cpp:class:`pbes_expression                           <mcrl2::pbes_system::pbes_expression>`
+   :math:`d:D`                          :cpp:type:`data::variable_list                        <mcrl2::data::variable_list>`
+   :math:`e`                            :cpp:type:`data::data_expression_list                 <mcrl2::data::data_expression_list>`
+   ===================================  ====================================================================================================================
 
 PBES expressions
 ----------------
@@ -70,18 +70,18 @@ The following C++ classes are defined for PBES expressions:
 
 .. table:: PBES expression classes
 
-   ===================================  =================================================
+   ===================================  ============================================================================================================
    Expression                           C++ class
-   ===================================  =================================================
-   :math:`c`                            ``data::data_expression``
-   :math:`\neg \varphi`                 ``not_``
-   :math:`\varphi \wedge \psi`          ``and_``
-   :math:`\varphi \vee \psi`            ``or_``
-   :math:`\varphi \implies \psi`        ``imp``
-   :math:`\forall d{:}D .\:\varphi`     ``forall``
-   :math:`\exists d{:}D .\:\varphi`     ``exists``
-   :math:`X(e)`                         ``propositional_variable_instantiation``
-   ===================================  =================================================
+   ===================================  ============================================================================================================
+   :math:`c`                            :cpp:class:`data::data_expression                <mcrl2::data::data_expression>`
+   :math:`\neg \varphi`                 :cpp:class:`not_                                 <mcrl2::pbes_system::not_>`
+   :math:`\varphi \wedge \psi`          :cpp:class:`and_                                 <mcrl2::pbes_system::and_>`
+   :math:`\varphi \vee \psi`            :cpp:class:`or_                                  <mcrl2::pbes_system::or_>`
+   :math:`\varphi \implies \psi`        :cpp:class:`imp                                  <mcrl2::pbes_system::imp>`
+   :math:`\forall d{:}D .\:\varphi`     :cpp:class:`forall                               <mcrl2::pbes_system::forall>`
+   :math:`\exists d{:}D .\:\varphi`     :cpp:class:`exists                               <mcrl2::pbes_system::exists>`
+   :math:`X(e)`                         :cpp:class:`propositional_variable_instantiation <mcrl2::pbes_system::propositional_variable_instantiation>`
+   ===================================  ============================================================================================================
 
 .. note::
 
@@ -104,43 +104,43 @@ Algorithms on PBESs
 
 .. table:: Algorithms on PBES data types
 
-   ====================================================================================   =================================================================================================================
-   algorithm                                                                              description
-   ====================================================================================   =================================================================================================================
-   :cpp:func:`txt2pbes                     <pbes_system::txt2pbes>`                       Parses a textual description of a PBES
-   :cpp:func:`lps2pbes                     <pbes_system::lps2pbes>`                       Generates a PBES from a linear process specification and a state formula
-   :cpp:func:`constelm                     <pbes_system::constelm>`                       Removes constant parameters from a PBES
-   :cpp:func:`parelm                       <pbes_system::parelm>`                         Removes unused parameters from a PBES
-   :cpp:func:`pbesrewr                     <pbes_system::pbesrewr>`                       Rewrites the predicate formulae of a PBES
-   :cpp:func:`pbesinst                     <pbes_system::pbesinst>`                       Transforms a PBES to a BES by instantiating predicate variables
-   :cpp:func:`gauss_elimination            <pbes_system::gauss_elimination>`              Solves a PBES using Gauss elimination
-   :cpp:func:`remove_parameters            <pbes_system::remove_parameters>`              Removes propositional variable parameters
-   :cpp:func:`remove_unreachable_variables <pbes_system::remove_unreachable_variables>`   Removes equations that are not (syntactically) reachable from the initial state of a PBES
-   :cpp:func:`is_bes                       <pbes_system::is_bes>`                         Returns true if a PBES data type is in BES form
-   :cpp:func:`complement                   <pbes_system::complement>`                     Pushes negations as far as possible inwards towards data expressions
-   :cpp:func:`normalize                    <pbes_system::normalize>`                      Brings a PBES expression into positive normal form, i.e. without occurrences of :math:`\neg` and :math:`\implies`
-   ====================================================================================   =================================================================================================================
+   ===========================================================================================   =================================================================================================================
+   algorithm                                                                                     description
+   ===========================================================================================   =================================================================================================================
+   :cpp:func:`txt2pbes                     <mcrl2::pbes_system::txt2pbes>`                       Parses a textual description of a PBES
+   :cpp:func:`lps2pbes                     <mcrl2::pbes_system::lps2pbes>`                       Generates a PBES from a linear process specification and a state formula
+   :cpp:func:`constelm                     <mcrl2::pbes_system::constelm>`                       Removes constant parameters from a PBES
+   :cpp:func:`parelm                       <mcrl2::pbes_system::parelm>`                         Removes unused parameters from a PBES
+   :cpp:func:`pbesrewr                     <mcrl2::pbes_system::pbesrewr>`                       Rewrites the predicate formulae of a PBES
+   :cpp:func:`pbesinst                     <mcrl2::pbes_system::pbesinst>`                       Transforms a PBES to a BES by instantiating predicate variables
+   :cpp:func:`gauss_elimination            <mcrl2::pbes_system::gauss_elimination>`              Solves a PBES using Gauss elimination
+   :cpp:func:`remove_parameters            <mcrl2::pbes_system::remove_parameters>`              Removes propositional variable parameters
+   :cpp:func:`remove_unreachable_variables <mcrl2::pbes_system::remove_unreachable_variables>`   Removes equations that are not (syntactically) reachable from the initial state of a PBES
+   :cpp:func:`is_bes                       <mcrl2::pbes_system::is_bes>`                         Returns true if a PBES data type is in BES form
+   :cpp:func:`complement                   <mcrl2::pbes_system::complement>`                     Pushes negations as far as possible inwards towards data expressions
+   :cpp:func:`normalize                    <mcrl2::pbes_system::normalize>`                      Brings a PBES expression into positive normal form, i.e. without occurrences of :math:`\neg` and :math:`\implies`
+   ===========================================================================================   =================================================================================================================
 
 Search and Replace functions
 ----------------------------
 
 .. table:: Search and Replace functions
 
-   =================================================================================================================  =============================================================================
-   algorithm                                                                                                          description
-   =================================================================================================================  =============================================================================
-   :cpp:func:`find_identifiers                            <pbes_system::find_identifiers>`                            Finds all identifiers occurring in a PBES data type
-   :cpp:func:`find_sort_expressions                       <pbes_system::find_sort_expressions>`                       Finds all sort expressions occurring in a PBES  data type
-   :cpp:func:`find_function_symbols                       <pbes_system::find_function_symbols>`                       Finds all function symbols occurring in a PBES  data type
-   :cpp:func:`find_variables                              <pbes_system::find_variables>`                              Finds all variables occurring in a PBES  data type
-   :cpp:func:`find_free_variables                         <pbes_system::find_free_variables>`                         Finds all free variables occurring in a PBES  data type
-   :cpp:func:`find_propositional_variable_instantiations  <pbes_system::find_propositional_variable_instantiations>`  Finds all propositional variable instantiations occurring in a PBES data type
-   :cpp:func:`replace_sort_expressions                    <pbes_system::replace_sort_expressions>`                    Replaces sort expressions in a PBES data type
-   :cpp:func:`replace_data_expressions                    <pbes_system::replace_data_expressions>`                    Replaces data expressions in a PBES data type
-   :cpp:func:`replace_variables                           <pbes_system::replace_variables>`                           Replaces variables in a PBES data type
-   :cpp:func:`replace_free_variables                      <pbes_system::replace_free_variables>`                      Replaces free variables in a PBES data type
-   :cpp:func:`replace_propositional_variables             <pbes_system::replace_propositional_variables>`             Replaces propositional variables in a PBES data type
-   =================================================================================================================  =============================================================================
+   ========================================================================================================================  =============================================================================
+   algorithm                                                                                                                 description
+   ========================================================================================================================  =============================================================================
+   :cpp:func:`find_identifiers                            <mcrl2::pbes_system::find_identifiers>`                            Finds all identifiers occurring in a PBES data type
+   :cpp:func:`find_sort_expressions                       <mcrl2::pbes_system::find_sort_expressions>`                       Finds all sort expressions occurring in a PBES  data type
+   :cpp:func:`find_function_symbols                       <mcrl2::pbes_system::find_function_symbols>`                       Finds all function symbols occurring in a PBES  data type
+   :cpp:func:`find_variables                              <mcrl2::pbes_system::find_variables>`                              Finds all variables occurring in a PBES  data type
+   :cpp:func:`find_free_variables                         <mcrl2::pbes_system::find_free_variables>`                         Finds all free variables occurring in a PBES  data type
+   :cpp:func:`find_propositional_variable_instantiations  <mcrl2::pbes_system::find_propositional_variable_instantiations>`  Finds all propositional variable instantiations occurring in a PBES data type
+   :cpp:func:`replace_sort_expressions                    <mcrl2::pbes_system::replace_sort_expressions>`                    Replaces sort expressions in a PBES data type
+   :cpp:func:`replace_data_expressions                    <mcrl2::pbes_system::replace_data_expressions>`                    Replaces data expressions in a PBES data type
+   :cpp:func:`replace_variables                           <mcrl2::pbes_system::replace_variables>`                           Replaces variables in a PBES data type
+   :cpp:func:`replace_free_variables                      <mcrl2::pbes_system::replace_free_variables>`                      Replaces free variables in a PBES data type
+   :cpp:func:`replace_propositional_variables             <mcrl2::pbes_system::replace_propositional_variables>`             Replaces propositional variables in a PBES data type
+   ========================================================================================================================  =============================================================================
 
 Rewriters for PBES expressions
 ------------------------------
@@ -148,15 +148,15 @@ The following rewriters are available
 
 .. table:: PBES expression rewriters
 
-   ===========================================================================================  =========================================================================
-   name                                                                                         description
-   ===========================================================================================  =========================================================================
-   :cpp:class:`simplifying_rewriter            <pbes_system::simplifying_rewriter>`             Simplifies a PBES expression
-   :cpp:class:`simplifying_quantifier_rewriter <pbes_system::simplifying_quantifier_rewriter>`  Simplifies quantifiers
-   :cpp:class:`enumerate_quantifiers_rewriter  <pbes_system::enumerate_quantifiers_rewriter>`   Eliminates quantifiers by enumerating quantifier variables
-   :cpp:class:`data_rewriter                   <pbes_system::data_rewriter>`                    Rewrites data expressions that appear as a subterm of the PBES expression
-   :cpp:class:`pfnf_rewriter                   <pbes_system::pfnf_rewriter>`                    Brings a PBES expression into PFNF normal form
-   ===========================================================================================  =========================================================================
+   ==================================================================================================  =========================================================================
+   name                                                                                                description
+   ==================================================================================================  =========================================================================
+   :cpp:class:`simplifying_rewriter            <mcrl2::pbes_system::simplifying_rewriter>`             Simplifies a PBES expression
+   :cpp:class:`simplifying_quantifier_rewriter <mcrl2::pbes_system::simplifying_quantifier_rewriter>`  Simplifies quantifiers
+   :cpp:class:`enumerate_quantifiers_rewriter  <mcrl2::pbes_system::enumerate_quantifiers_rewriter>`   Eliminates quantifiers by enumerating quantifier variables
+   :cpp:class:`data_rewriter                   <mcrl2::pbes_system::data_rewriter>`                    Rewrites data expressions that appear as a subterm of the PBES expression
+   :cpp:class:`pfnf_rewriter                   <mcrl2::pbes_system::pfnf_rewriter>`                    Brings a PBES expression into PFNF normal form
+   ==================================================================================================  =========================================================================
 
 Examples
 ^^^^^^^^
