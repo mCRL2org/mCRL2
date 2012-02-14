@@ -191,8 +191,7 @@ def render_tikz(self,tikz,libs='',stringsubst=False):
     except OSError, e:
         if e.errno != ENOENT:   # No such file or directory
             raise
-        self.builder.warn('pdftoppm command cannot be run')
-        self.builder.warn(err)
+        self.builder.warn('pdftoppm command cannot be run({0})'.format(e))
         self.builder._tikz_warned = True
         chdir(curdir)
         return None

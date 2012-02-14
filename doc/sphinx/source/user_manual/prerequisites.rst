@@ -59,15 +59,15 @@ setup:
    - *XCode* must be installed. It can be found on the OS X installation DVDs.
      Consult the following table for the required version.
 
-       ============ =================
-       OS X version XCode version
-       ============ =================
-       10.4         2.5
-       ------------ -----------------
-       10.5         3.1
-       ------------ -----------------
-       10.6         3.2.5
-       ============ =================
+     +-----------------+-----------------+
+     | OS X versio     |  XCode version  |
+     +=================+=================+
+     | 10.5            | 3.1             |
+     +-----------------+-----------------+
+     | 10.6            | 3.2.5           |
+     +-----------------+-----------------+
+     | 10.7            | 4.2.1           |
+     +-----------------+-----------------+
 
    - |cmake|_ or higher.
      
@@ -152,6 +152,7 @@ wxWidgets
 ---------
 
 .. |wx| replace:: *wxWidgets 2.8.11*
+.. |wxdev| replace:: *wxWidgets 2.9.3* 
 .. _wx: http://www.wxwidgets.org
 
 The mCRL2 toolset requires |wx|_ or higher for compilation of the graphical 
@@ -166,7 +167,7 @@ tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 
 .. warning::
 
-   To be able to use all graphical tools, wxWidgets must be configured to
+   To use all graphical tools, wxWidgets must be configured with
    support OpenGL.
 
 .. admonition:: Windows
@@ -227,12 +228,72 @@ tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 .. admonition:: Mac OS X
    :class: platform-specific mac-only
 
-   wxWidgets can be installed using MacPorts::
+   |wx| only supports the carbon-framework. The 
+   carbon-framework requires that the entire toolset (dependencies included) 
+   is compiled in the i386 architecture.
+   By default Mac OS X 10.5 builds executables for the i386 architecture.
+   These executable are compatible with Mac OS X 10.6 and Mac OS X 10.7.
 
-     sudo port install wxWidgets
+   |wxdev| and higher support the cacoa-framework. The 
+   cacoa-framework requires that the entire toolset (dependencies included) 
+   is compiled in the x86_64 architecture.
+   By default Mac OS X 10.6 and Mac OS X 10.7 build executables for the x86_64 
+   architecture.   
+   
+   **Mac OS X 10.5**
 
-   See the :ref:`notes <osx-boost>` on installing *Boost* for information on how
-   to install MacPorts. Installing wxWidgets may take a while.
+   Options to build with |wx|:
+
+   1. wxWidgets can be installed using MacPorts::
+
+        sudo port install wxWidgets
+
+   2. To build from source, download the sources for the latest stable release version  
+      and build, using the following configuration::
+
+        ./configure  --disable-shared --disable-compat24 --disable-mediactrl --disable-sound --with-opengl
+
+   **Mac OS X 10.6 - 10.7**
+
+   To build with |wx| the architecture must be set to i386. 
+   This can be accomplished by:
+   
+   1. To build from source, download the sources for |wx| 
+      and build, using the following configuration::
+      
+        arch_flags="-arch i386"
+        ./configure --disable-shared --disable-compat24 CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags"  --disable-mediactrl --disable-sound --with-opengl --with-macosx-version-min=10.5 --with-macosx-sdk=/Developer/SDKs/MacOSX10.5.sdk 
+
+   To build with |wxdev| for the x86_64 architecture, use one of the following options: 
+
+   1. wxWidgets can be installed using MacPorts::
+
+        sudo port install wxWidgets-devel
+
+   2. To build from source, download the sources for the latest development version 
+      and build, using the following configuration::
+      
+        set arch_flags="-arch x86_64"
+        ./configure -with-osx_cocoa --disable-shared --disable-compat24 --disable-unicode CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --prefix=`pwd`/Release/ --with-libiconv-prefix=/opt/local/ --disable-mediactrl --disable-sound
+
+   **Note**
+
+   To configure the mCRL2 toolset set the location of ``wx-config`` and 
+   ``wxrc`` to the locations of these tools. 
+   Make sure to build the toolset static, i.e., the value of
+   ``BUILD_SHARED_LIBS`` needs to be set to ``FALSE``.
+
+   **Warning**
+
+   Graphical tools might give the following warning when being built::
+
+     Linking CXX executable mcrl2-gui.app/Contents/MacOS/mcrl2-gui
+     ld: warning: in /System/Library/Frameworks//QuickTime.framework/QuickTime, missing required architecture x86_64 in file
+
+   Since we do not use the media controls or the sound library, we can remove 
+   all occurrences of "-framework QuickTime" from the "configure" and 
+   "configure.in", to remove this warning. This requires a make clean, 
+   configure, make and install of the wxWidgets.
 
 .. admonition:: Linux
    :class: platform-specific linux-only
