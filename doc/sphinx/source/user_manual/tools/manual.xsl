@@ -8,7 +8,11 @@
 </xsl:template>
 
 <xsl:template match="tool">
-  <xsl:text>Manual page for </xsl:text>
+  <xsl:text>.. manpage-</xsl:text>
+  <xsl:apply-templates select="name"/>
+  <xsl:text>
+  
+Manual page for </xsl:text>
   <xsl:apply-templates select="name"/>
   <xsl:text>
 --------------------------------------------------------------------------------

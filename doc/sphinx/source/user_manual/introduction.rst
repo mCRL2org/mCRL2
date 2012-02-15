@@ -4,8 +4,9 @@ Introduction to mCRL2
 mCRL2 stands for micro Common Representation Language 2. It is a specification
 language that can be used to specify and analyse the behaviour of distributed
 systems and protocols and is the successor to `µCRL <http://www.cwi.nl/~mcrl>`_.
-Using its accompanying toolset systems can be analysed and verified
-automatically. 
+Extensive theory is available for verifying processes manually. A major part of
+this theory has been implemented in the accompanying toolset, allowing automatic
+analysis and verification of systems.
 
 Philosophy
 ----------

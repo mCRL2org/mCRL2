@@ -76,6 +76,11 @@ graphical user interfaces, some advanced settings are initially hidden.
   .. index:: CMAKE_INSTALL_PREFIX
 
   The installation prefix for mCRL2. All mCRL2 files will be installed there.
+  
+  .. note::
+  
+     Write permissions are required for the path set in
+     ``CMAKE_INSTALL_PREFIX``.
 
 ``BUILD_SHARED_LIBS``
   *Default*: ``ON``

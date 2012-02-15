@@ -72,7 +72,9 @@ Include file:
 
 </xsl:text>
       
-      <xsl:apply-templates select="sectiondef"/>
+      <xsl:apply-templates select="sectiondef">
+        <xsl:with-param name="file" select="$file"/>
+      </xsl:apply-templates>
     </xsl:when>
 
     <xsl:when test="@kind='file'">
@@ -110,6 +112,7 @@ Classes
     </xsl:when>
     
     <xsl:when test="@kind='namespace'">
+      
       <xsl:apply-templates select="sectiondef">
         <xsl:with-param name="file" select="$file"/>
       </xsl:apply-templates>
@@ -122,13 +125,16 @@ Classes
 <xsl:template match="sectiondef">
   <xsl:param name="file"/>
   
-  <xsl:if test="not(memberdef/location) or contains(memberdef/location/@file, $file)">
+  <xsl:if test="not(memberdef/location) or memberdef/location[contains(@file, $file)]">
   <xsl:choose>
     <xsl:when test="@kind='enum'">
       <xsl:text>Enumerated types</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='var'">
       <xsl:text>Variables</xsl:text>
+    </xsl:when>
+    <xsl:when test="@kind='typedef'">
+      <xsl:text>Typedefs</xsl:text>
     </xsl:when>
     <xsl:when test="@kind='func'">
       <xsl:text>Functions</xsl:text>
