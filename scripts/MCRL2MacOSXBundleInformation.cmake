@@ -7,14 +7,14 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # Raise warning if MCRL2_COPYRIGHT_TEXT is not set.
-if( ${MCRL2_COPYRIGHT_TEXT})
+if( NOT(MCRL2_COPYRIGHT_TEXT) )
   message(WARNING "MCRL2_COPYRIGHT_TEXT is not set.")
-endif( ${MCRL2_COPYRIGHT_TEXT})
+endif( NOT(MCRL2_COPYRIGHT_TEXT) )
 
 # Raise warning if MCRL2_VERSION is not set.
-if( ${MCRL2_VERSION})
+if( NOT(MCRL2_VERSION) )
   message(WARNING "MCRL2_VERSION is not set." )
-endif( ${MCRL2_VERSION})
+endif( NOT(MCRL2_VERSION) )
 
 # Set default bundle information
 SET(MACOSX_BUNDLE_NAME ${PROJECT_NAME})
