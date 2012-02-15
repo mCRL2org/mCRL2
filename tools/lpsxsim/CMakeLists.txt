@@ -57,8 +57,10 @@ IF(WIN32)
   SET(SRCS ${SRCS} lpsxsim.rc)
 ENDIF(WIN32)
 
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
+
 # ######### General setup ##########
-set(MACOSX_BUNDLE_ICON_FILE lpsxsim.icns)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   lpsxsim.cpp

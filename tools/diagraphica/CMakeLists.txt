@@ -12,7 +12,8 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_ENABLE_GUI_TOOLS )
 
-SET(MACOSX_BUNDLE_ICON_FILE diagraphica.icns)
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
 # ######### General setup ##########
 

@@ -224,6 +224,11 @@ message(STATUS "mCRL2 version: ${MCRL2_VERSION}")
 message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
 
 ##---------------------------------------------------
+## Store copyright information in variable
+##---------------------------------------------------
+file(READ COPYING MCRL2_COPYRIGHT_TEXT)
+
+##---------------------------------------------------
 ## Find cvc3 
 ##---------------------------------------------------
 
@@ -374,8 +379,10 @@ add_subdirectory ( tools/mcrl2parse )
     # Install "install_tools" in share/installer
     # install_tools contains the tools marked for symlink export
     install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
+    #Process Info.plist with Copyright Information
+    configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
     #Install Info.plist for single application bundle
-    install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist DESTINATION . )
+    install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
     #Install mcrl2-logo for single application bundle
     install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
   endif(APPLE AND MCRL2_SINGLE_BUNDLE)
