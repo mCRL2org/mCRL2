@@ -20,19 +20,19 @@ unsigned char RGB_Color::blend(unsigned char c1, unsigned char c2, float f)
   return static_cast<float>(c1 * f) + static_cast<float>(c2 * (1 - f));
 }
 
-void RGB_Color::blendWith(RGB_Color c, float factor)
+void RGB_Color::blendWith(const RGB_Color &c, float factor)
 {
   _red = blend(_red, c.red(), factor);
   _green = blend(_green, c.green(), factor);
   _blue = blend(_blue, c.blue(), factor);
 }
 
-bool RGB_Color::operator==(RGB_Color& c)
+bool RGB_Color::operator==(const RGB_Color& c) const
 {
   return _red == c.red() && _green == c.green() && _blue == c.blue();
 }
 
-bool RGB_Color::operator!=(RGB_Color& c)
+bool RGB_Color::operator!=(const RGB_Color& c) const
 {
   return _red != c.red() || _green != c.green() || _blue != c.blue();
 }

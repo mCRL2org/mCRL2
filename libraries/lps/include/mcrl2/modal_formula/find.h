@@ -12,6 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_FIND_H
 #define MCRL2_MODAL_FORMULA_FIND_H
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/add_binding.h"
@@ -421,6 +422,41 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
   return result;
 }
 //--- end generated state_formulas find code ---//
+
+namespace detail {
+
+/// \cond INTERNAL_DOCS
+struct nil_traverser: public state_formulas::regular_formula_traverser<nil_traverser>
+{
+  typedef state_formulas::regular_formula_traverser<nil_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  bool result;
+
+  nil_traverser()
+    : result(false)
+  {}
+
+  void operator()(const regular_formulas::nil&)
+  {
+    result = true;
+  }
+};
+/// \endcond
+
+} // namespace detail
+
+/// \brief Returns true if the regular expression nil occurs in the object x
+/// \param[in] x
+template <typename T>
+bool find_nil(const T& x)
+{
+  detail::nil_traverser f;
+  f(x);
+  return f.result;
+}
 
 } // namespace state_formulas
 

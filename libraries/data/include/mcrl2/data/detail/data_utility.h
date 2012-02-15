@@ -28,7 +28,6 @@
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/find.h"
 
 namespace mcrl2
 {

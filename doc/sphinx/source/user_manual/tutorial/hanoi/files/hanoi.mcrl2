@@ -1,0 +1,29 @@
+% Towers of Hanoi
+
+map
+  FullStack: List(Nat);
+  N: Nat;
+eqn
+  FullStack = [0,1,2,3,4,5];
+  N = #FullStack;
+
+act
+  full,done: Nat;
+  send,receive,move: Nat # Nat # Nat;
+
+proc
+  Tower(id:Nat, stack:List(Nat)) = 
+    sum n,p:Nat .
+      (stack == [] || head(stack) > n) -> receive(p,id,n) . Tower(id,n |> stack)
+    + 
+    sum p:Nat .
+      (stack != []) -> send(id,p,head(stack)) . Tower(id,tail(stack))
+    +
+      (#stack == N) -> full(id) . Tower(id,stack);
+
+init
+  allow( {move,done},
+  comm( {send|receive -> move},
+  rename( {full -> done},
+    Tower(0,FullStack) || Tower(1,[]) || Tower(2,[])
+  )));

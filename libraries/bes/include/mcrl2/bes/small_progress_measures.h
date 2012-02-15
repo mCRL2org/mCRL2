@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_SMALL_PROGRESS_MEASURES_H
 #define MCRL2_BES_SMALL_PROGRESS_MEASURES_H
 
+// TODO: Make it possible to undefine this flag
 #define MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
 
 #include <iomanip>
@@ -24,7 +25,6 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -154,7 +154,7 @@ std::ostream& operator<<(std::ostream& out, const progress_measure& pm)
   }
   else
   {
-    out << core::detail::print_list(pm.v);
+    out << core::detail::print_list(pm.v, core::detail::default_printer());
   }
   return out;
 }
@@ -250,7 +250,7 @@ std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
 }
 
 /// \brief Algorithm class for the small progress measures algorithm
-class small_progress_measures_algorithm: public utilities::algorithm
+class small_progress_measures_algorithm
 {
   protected:
     typedef progress_measures_vertex vertex;
@@ -326,41 +326,15 @@ class small_progress_measures_algorithm: public utilities::algorithm
       return out.str();
     }
 
-    /// \brief Logs the vertices
-    void LOG_VERTICES_VERBOSE(const std::string& msg = "") const
-    {
-      mCRL2log(verbose) << msg << print_vertices();
-    }
-
-    /// \brief Logs the vertices
-    void LOG_VERTICES_DEBUG(const std::string& msg = "") const
-    {
-      mCRL2log(debug) << msg << print_vertices();
-    }
-
-    /// \brief Logs a vertex
-    void LOG_VERTEX_DEBUG(const vertex& v, const std::string& msg = "") const
-    {
-      mCRL2log(debug) << msg << print_vertex(v);
-    }
-
-    /// \brief Logs a vertex
-    void LOG_VERTEX_VERBOSE(const vertex& v, const std::string& msg = "") const
-    {
-      mCRL2log(verbose) << msg << print_vertex(v);
-    }
-
     /// \brief Logs the neighbors of a vertex
-    void LOG_NEIGHBORS_DEBUG(const progress_measures_vertex& v, const std::string& msg = "") const
+    std::string print_neighbors(const progress_measures_vertex& v) const
     {
-      if (mCRL2logEnabled(debug))
+      std::ostringstream out;
+      for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
       {
-        mCRL2log(debug) << msg;
-        for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
-        {
-          LOG_VERTEX_DEBUG(**i, "\n      ");
-        }
+        out << "\n      " << print_vertex(**i);
       }
+      return out.str();
     }
 
     vertex_map m_vertices;
@@ -375,45 +349,45 @@ class small_progress_measures_algorithm: public utilities::algorithm
 
     bool run(const boolean_variable& first_variable)
     {
-      LOG_DEBUG("--- applying small progress measures to ---\n" + bes::pp(m_bes) + "\n\n");
+      mCRL2log(log::verbose) << "--- applying small progress measures to ---\n" << bes::pp(m_bes) << "\n\n";
       initialize_vertices();
-      LOG_VERTICES_VERBOSE("--- vertices ---\n");
-      LOG_VERBOSE("\nbeta = " + core::detail::print_list(m_beta) + "\n");
+      mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::verbose) << "\nbeta = " << core::detail::print_list(m_beta, core::detail::default_printer()) << "\n";
       for (;;) // forever
       {
         bool changed = false;
         for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
           vertex& v = i->second;
-          LOG_VERTEX_DEBUG(v, "\nchoose vertex ");
+          mCRL2log(log::debug) << "\nchoose vertex " << print_vertex(v);
           unsigned int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;
-          LOG_NEIGHBORS_DEBUG(v, "\n    neighbors:");
+          mCRL2log(log::debug) << "\n    neighbors:" << print_neighbors(v);
           if (v.even)
           {
             j = std::min_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            LOG_VERTEX_DEBUG(**j, "\n    minimum neighbor ");
+            mCRL2log(log::debug) << "\n    minimum neighbor " << print_vertex(**j);
           }
           else
           {
             j = std::max_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            LOG_VERTEX_DEBUG(**j, "\n    maximum neighbor ");
+            mCRL2log(log::debug) << "\n    maximum neighbor " << print_vertex(**j);
           }
           std::vector<int> alpha(m_d, 0);
           const progress_measures_vertex& w = **j;
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (is_odd(m))
           {
-            LOG_DEBUG("\n    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
+            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha, core::detail::default_printer()) << ", " << boost::lexical_cast<std::string>(m) << ") = ";
             inc(alpha, m, m_beta);
-            LOG_DEBUG((alpha[0] < 0 ? "top" : core::detail::print_list(alpha)));
+            mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha, core::detail::default_printer()));
           }
 
           if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))
           {
             changed = true;
             v.alpha.v = alpha;
-            LOG_VERTEX_VERBOSE(v, "\nupdate vertex ");
+            mCRL2log(log::verbose) << "\nupdate vertex " << print_vertex(v);
           }
         }
         if (!changed)
@@ -421,7 +395,7 @@ class small_progress_measures_algorithm: public utilities::algorithm
           break;
         }
       }
-      LOG_VERTICES_DEBUG("\n--- vertices ---\n");
+      mCRL2log(log::verbose) << "\n--- vertices ---\n" << print_vertices();
       return !m_vertices[first_variable].alpha.is_top();
     }
 };

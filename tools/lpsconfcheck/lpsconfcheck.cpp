@@ -32,6 +32,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 /// \mainpage lpsconfcheck
 /// \section section_introduction Introduction

@@ -17,8 +17,6 @@
 #include <vector>
 
 #include "boost/bind.hpp"
-#include "boost/iterator/transform_iterator.hpp"
-#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
@@ -28,7 +26,6 @@
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/translate_user_notation.h"
 
 // data expressions
 #include "mcrl2/data/data_expression.h"
@@ -37,7 +34,6 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/function_update.h"
-#include "mcrl2/data/detail/normalize_sorts_fwd.h"
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
@@ -65,15 +61,14 @@ namespace data
 // prototype
 class data_specification;
 
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-data_equation translate_user_notation_data_equation(const data_equation& x);
-} // namespace detail
-
-// prototype, find.h included at the end of this file to prevent circular dependencies.
-template < typename Container >
-std::set<sort_expression> find_sort_expressions(Container const& container);
+// template function overloads
+std::string pp(const data::data_specification& x);
+sort_expression normalize_sorts(const sort_expression& x, const data::data_specification& dataspec);
+data_expression normalize_sorts(const data_expression& x, const data::data_specification& dataspec);
+variable_list normalize_sorts(const variable_list& x, const data::data_specification& dataspec);
+data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec);
+data_equation_list normalize_sorts(const data_equation_list& x, const data::data_specification& dataspec);
+void normalize_sorts(data_equation_vector& x, const data::data_specification& dataspec);
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -376,27 +371,6 @@ class data_specification
       m_non_typed_checked_data_spec=t;
     }
 
-    ///\brief Constructor
-    template < typename SortsRange, typename AliasesRange, typename ConstructorsRange,
-             typename MappingsRange, typename EquationsRange >
-    data_specification(const SortsRange& sorts,
-                       const AliasesRange& aliases,
-                       const ConstructorsRange& constructors,
-                       const MappingsRange& mappings,
-                       const EquationsRange& equations)
-      : m_data_specification_is_type_checked(true),
-        m_normalised_data_is_up_to_date(false)
-    {
-      std::for_each(sorts.begin(), sorts.end(),
-                    boost::bind(&data_specification::add_sort, this, _1));
-      std::for_each(constructors.begin(), constructors.end(),
-                    boost::bind(&data_specification::add_constructor, this, _1));
-      std::for_each(mappings.begin(), mappings.end(),
-                    boost::bind(&data_specification::add_mapping, this, _1));
-      std::for_each(equations.begin(), equations.end(),
-                    boost::bind(&data_specification::add_equation, this, _1));
-    }
-
     /// \brief Indicates that the data specification is type checked.
     /// \details This builds up internal data structures and allows
     ///  access to the data specification using all the utility functions.
@@ -622,7 +596,7 @@ class data_specification
     void add_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      m_equations.push_back(detail::translate_user_notation_data_equation(e));
+      m_equations.push_back(data::translate_user_notation(e));
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -1028,7 +1002,7 @@ class data_specification
     void remove_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      const data_equation e1=data::detail::translate_user_notation_data_equation(e);
+      const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
       detail::remove(m_equations, e1);
@@ -1120,6 +1094,49 @@ class data_specification
 }; // class data_specification
 
 
+/// \brief Merges two data specifications into one.
+/// \details It is assumed that the two specs can be merged. I.e.
+///          that the second is a safe extension of the first.
+/// \param spec1[in] One of the input specifications.
+/// \param spec2[in] The second input specification.
+/// \return A specification that is merged.
+
+inline data_specification operator +(data_specification spec1, const data_specification &spec2)
+{
+  const sort_expression_vector sv=spec2.user_defined_sorts();
+  for(sort_expression_vector::const_iterator i=sv.begin(); i!=sv.end(); ++i)
+  {
+    spec1.add_sort(*i);
+  }
+// void declare_data_specification_to_be_type_checked()
+
+  const alias_vector av=spec2.user_defined_aliases();
+  for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
+  {
+    spec1.add_alias(*i);
+  }
+
+  const function_symbol_vector cv=spec2.user_defined_constructors();
+  for(function_symbol_vector::const_iterator i=cv.begin(); i!=cv.end(); ++i)
+  {
+    spec1.add_constructor(*i);
+  }
+
+  const function_symbol_vector mv=spec2.user_defined_mappings();
+  for(function_symbol_vector::const_iterator i=mv.begin(); i!=mv.end(); ++i)
+  {
+    spec1.add_mapping(*i);
+  }
+
+  const data_equation_vector ev=spec2.user_defined_equations();
+  for(data_equation_vector::const_iterator i=ev.begin(); i!=ev.end(); ++i)
+  {
+    spec1.add_equation(*i);
+  }
+
+  return spec1;
+}
+
 /// \brief Finds a mapping in a data specification.
 /// \param data A data specification
 /// \param s A string
@@ -1198,16 +1215,6 @@ data_equation_vector find_equations(data_specification const& specification, con
 } // namespace data
 
 } // namespace mcrl2
-
-#ifndef MCRL2_DATA_FIND_H
-#include "mcrl2/data/find.h"
-#endif
-
-#ifndef MCRL2_DATA_TRANSLATE_USER_NOTATION_H
-#include "mcrl2/data/translate_user_notation.h"
-#endif
-
-#include "mcrl2/data/normalize_sorts.h"
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
 

@@ -23,7 +23,6 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 
 namespace mcrl2
 {
@@ -66,7 +65,7 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
 
     std::string print(const propositional_variable& v) const
     {
-      return core::pp(v);
+      return pbes_system::pp(v);
     }
 
     // super class compare functions

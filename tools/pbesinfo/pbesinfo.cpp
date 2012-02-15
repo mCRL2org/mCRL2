@@ -28,23 +28,21 @@
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 
-class pbesinfo_tool: public input_tool
+class pbesinfo_tool: public pbes_input_tool<input_tool>
 {
   protected:
-    typedef input_tool super;
+    typedef pbes_input_tool<input_tool> super;
 
     bool opt_full;
 
@@ -86,41 +84,13 @@ class pbesinfo_tool: public input_tool
     /// - Give error
     bool run()
     {
-      pbes<> p;
-      p.load(input_filename());
-
-      pbes_system::detail::pbes_property_map info(p);
-
-      // Show file from which PBES was read
-      std::cout << input_file_message() << "\n\n";
-
-      // Show if PBES is closed and well formed
-      std::cout << "The PBES is " << (p.is_closed() ? "" : "not ") << "closed and " << (p.is_well_typed() ? "" : "not ") << "well formed" << std::endl;
-
-      // Show number of equations
-      std::cout << "Number of equations: " << p.equations().size() << std::endl;
-
-      // Show number of mu's with the predicate variables from the mu's
-      std::cout << "Number of mu's:      " << info["mu_equation_count"] << std::endl;
-
-      // Show number of nu's with the predicate variables from the nu's
-      std::cout << "Number of nu's:      " << info["nu_equation_count"] << std::endl;
-
-      // Show number of nu's with the predicate variables from the nu's
-      std::cout << "Block nesting depth: " << info["block_nesting_depth"] << std::endl;
-
-      // Show binding variables with their signature
-      if (opt_full)
-      {
-        std::cout << "Predicate variables:\n";
-        for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-        {
-          std::cout << core::pp(i->symbol()) << "." << core::pp(i->variable()) << std::endl;
-        }
-      }
+      pbesinfo(input_filename(),
+               input_file_message(),
+               pbes_input_format(),
+               opt_full
+              );
       return true;
     }
-
 };
 
 class pbesinfo_gui_tool: public mcrl2_gui_tool<pbesinfo_tool>

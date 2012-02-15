@@ -15,16 +15,14 @@
 #include <deque>
 #include <map>
 #include <set>
+#include <sstream>
 #include <vector>
 #include <algorithm>
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -35,7 +33,7 @@ namespace pbes_system
 
 /// \brief Algorithm class for the eqelm algorithm
 template <typename Term, typename DataRewriter, typename PbesRewriter>
-class pbes_eqelm_algorithm: public utilities::algorithm
+class pbes_eqelm_algorithm
 {
   public:
     /// \brief The term type
@@ -90,6 +88,27 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     /// \brief Used for determining if a vertex has been visited before.
     std::map<string_type, bool> m_discovered;
 
+    // TODO: design a more generic solution for printing sets
+    std::string print(const core::identifier_string& x) const
+    {
+      return core::pp(x);
+    }
+    template <typename Set>
+    std::string print_set(const Set& s) const
+    {
+      std::ostringstream out;
+      out << "{ ";
+      for (typename Set::const_iterator i = s.begin(); i != s.end(); ++i)
+      {
+        if (i != s.begin())
+        {
+          out << ", ";
+        }
+        out << print(*i);
+      }
+      return out.str();
+    }
+
     /// \brief Puts all parameters of the same sort in the same equivalence set.
     std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable_decl_type& X) const
     {
@@ -110,64 +129,58 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     }
 
     /// \brief Prints the vertices of the dependency graph.
-    void LOG_VERTICES_VERBOSE(const std::string& msg = "") const
+    std::string print_vertices() const
     {
-      if (mCRL2logEnabled(verbose))
+      std::ostringstream out;
+      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        mCRL2log(verbose) << msg;
-        for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        out << data::pp(i->first) << " -> [ ";
+        const std::vector<equivalence_class>& v = i->second;
+        for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
         {
-          mCRL2log(verbose) << core::pp(i->first) << " -> [ ";
-          const std::vector<equivalence_class>& v = i->second;
-          for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
+          if (j != v.begin())
           {
-            if (j != v.begin())
-            {
-              mCRL2log(verbose) << ", ";
-            }
-            mCRL2log(verbose) << core::detail::print_pp_set(*j);
+            out << ", ";
           }
-          mCRL2log(verbose) << " ]" << std::endl;
+          out << print_set(*j);
         }
+        out << " ]" << std::endl;
       }
+      return out.str();
     }
 
     /// \brief Prints the edges of the dependency graph.
-    void LOG_EDGES_VERBOSE(const std::string& msg = "") const
+    std::string print_edges() const
     {
-      if (mCRL2logEnabled(verbose))
+      std::ostringstream out;
+      for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        mCRL2log(verbose) << msg;
-        for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
-        {
-          mCRL2log(verbose) << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
-        }
+        out << data::pp(i->first) << " -> " << print_set(i->second) << std::endl;
       }
+      return out.str();
     }
 
     /// \brief Prints the equivalence classes
-    void LOG_EQUIVALENCE_CLASSES_DEBUG(const std::string& msg = "") const
+    std::string print_equivalence_classes() const
     {
-      if (mCRL2logEnabled(debug))
+      std::ostringstream out;
+      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        mCRL2log(debug) << msg;
-        for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        out << "  vertex " << data::pp(i->first) << ": ";
+        for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
         {
-          mCRL2log(debug) << "  vertex " << core::pp(i->first) << ": ";
-          for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-          {
-            mCRL2log(debug) << core::detail::print_pp_set(*j) << " ";
-          }
-          mCRL2log(debug) << std::endl;
+          out << print_set(*j) << " ";
         }
+        out << std::endl;
       }
+      return out.str();
     }
 
     /// \brief Prints the todo list
-    void LOG_TODO_LIST(const std::set<string_type>& todo, const std::string& msg = "") const
+    void log_todo_list(const std::set<string_type>& todo, const std::string& msg = "") const
     {
-      mCRL2log(debug) << msg;
-      mCRL2log(debug) << core::detail::print_pp_set(todo) << "\n";
+      mCRL2log(log::debug) << msg;
+      mCRL2log(log::debug) << print_set(todo) << "\n";
     }
 
     /// \brief Returns true if the vertex X should propagate its values to Y
@@ -221,7 +234,7 @@ class pbes_eqelm_algorithm: public utilities::algorithm
       }
       else if (!m_discovered[Y])
       {
-        todo.insert(Y);        
+        todo.insert(Y);
         m_discovered[Y] = true;
       }
     }
@@ -313,30 +326,30 @@ class pbes_eqelm_algorithm: public utilities::algorithm
         propositional_variable_type kappa = p.initial_state();
         string_type X = kappa.name();
         data::mutable_map_substitution<> vX = compute_substitution(X);
-        
+
         // propagate the equivalence relations in X over the edge kappa
         if (evaluate_guard(X, kappa))
         {
           todo.insert(X);
           m_discovered[X] = true;
           update_equivalence_classes(kappa, vX, todo);
-          LOG_EQUIVALENCE_CLASSES_DEBUG("updated equivalence classes using initial state " + pbes_system::pp(kappa) + "\n");
+          mCRL2log(log::debug) << "updated equivalence classes using initial state " << pbes_system::pp(kappa) << "\n" << print_equivalence_classes();
         }
       }
 
-      LOG_VERTICES_VERBOSE("--- vertices ---\n");
-      LOG_EDGES_VERBOSE("\n--- edges ---\n");
-      LOG_EQUIVALENCE_CLASSES_DEBUG("computed initial equivalence classes\n");
+      mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::verbose) << "\n--- edges ---\n" << print_edges();
+      mCRL2log(log::debug) << "computed initial equivalence classes\n" << print_equivalence_classes();
 
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        LOG_DEBUG("todo list = " + core::detail::print_pp_set(todo) + "\n");
-        LOG_VERTICES_VERBOSE("--- vertices ---\n");
+        mCRL2log(log::debug) << "todo list = " << print_set(todo) << "\n";
+        mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
 
         string_type X = *todo.begin();
         todo.erase(X);
-        LOG_DEBUG("choose todo element " + core::pp(X) + "\n");
+        mCRL2log(log::debug) << "choose todo element " << core::pp(X) << "\n";
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
@@ -348,12 +361,12 @@ class pbes_eqelm_algorithm: public utilities::algorithm
           if (evaluate_guard(X, Ye))
           {
             update_equivalence_classes(Ye, vX, todo);
-            LOG_EQUIVALENCE_CLASSES_DEBUG("updated equivalence classes using edge " + pbes_system::pp(Ye) + "\n");
+            mCRL2log(log::debug) << "updated equivalence classes using edge " << pbes_system::pp(Ye) << "\n" << print_equivalence_classes();
           }
         }
       }
       apply_equivalence_relations(p);
-      LOG_VERTICES_VERBOSE("\n--- result ---\n");
+      mCRL2log(log::verbose) << "\n--- result ---\n" << print_vertices();
     }
 };
 

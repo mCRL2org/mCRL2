@@ -17,10 +17,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "mcrl2/aterm/aterm2.h"
-
-// XXX remove
-using namespace aterm;
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/core/detail/construction_utility.h"
 
 namespace mcrl2
 {
@@ -34,3702 +32,2643 @@ namespace detail
 //--- start generated code ---//
 // ActAnd
 inline
-AFun initAFunActAnd(AFun& f)
+atermpp::function_symbol function_symbol_ActAnd()
 {
-  f = ATmakeAFun("ActAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActAnd = core::detail::initialise_static_expression(function_symbol_ActAnd, atermpp::function_symbol("ActAnd", 2));
+  return function_symbol_ActAnd;
 }
 
 inline
-AFun gsAFunActAnd()
+bool gsIsActAnd(atermpp::aterm_appl Term)
 {
-  static AFun AFunActAnd = initAFunActAnd(AFunActAnd);
-  return AFunActAnd;
-}
-
-inline
-bool gsIsActAnd(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActAnd();
+  return ATgetAFun(Term) == function_symbol_ActAnd();
 }
 
 // ActAt
 inline
-AFun initAFunActAt(AFun& f)
+atermpp::function_symbol function_symbol_ActAt()
 {
-  f = ATmakeAFun("ActAt", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActAt = core::detail::initialise_static_expression(function_symbol_ActAt, atermpp::function_symbol("ActAt", 2));
+  return function_symbol_ActAt;
 }
 
 inline
-AFun gsAFunActAt()
+bool gsIsActAt(atermpp::aterm_appl Term)
 {
-  static AFun AFunActAt = initAFunActAt(AFunActAt);
-  return AFunActAt;
-}
-
-inline
-bool gsIsActAt(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActAt();
+  return ATgetAFun(Term) == function_symbol_ActAt();
 }
 
 // ActExists
 inline
-AFun initAFunActExists(AFun& f)
+atermpp::function_symbol function_symbol_ActExists()
 {
-  f = ATmakeAFun("ActExists", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActExists = core::detail::initialise_static_expression(function_symbol_ActExists, atermpp::function_symbol("ActExists", 2));
+  return function_symbol_ActExists;
 }
 
 inline
-AFun gsAFunActExists()
+bool gsIsActExists(atermpp::aterm_appl Term)
 {
-  static AFun AFunActExists = initAFunActExists(AFunActExists);
-  return AFunActExists;
-}
-
-inline
-bool gsIsActExists(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActExists();
+  return ATgetAFun(Term) == function_symbol_ActExists();
 }
 
 // ActFalse
 inline
-AFun initAFunActFalse(AFun& f)
+atermpp::function_symbol function_symbol_ActFalse()
 {
-  f = ATmakeAFun("ActFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActFalse = core::detail::initialise_static_expression(function_symbol_ActFalse, atermpp::function_symbol("ActFalse", 0));
+  return function_symbol_ActFalse;
 }
 
 inline
-AFun gsAFunActFalse()
+bool gsIsActFalse(atermpp::aterm_appl Term)
 {
-  static AFun AFunActFalse = initAFunActFalse(AFunActFalse);
-  return AFunActFalse;
-}
-
-inline
-bool gsIsActFalse(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActFalse();
+  return ATgetAFun(Term) == function_symbol_ActFalse();
 }
 
 // ActForall
 inline
-AFun initAFunActForall(AFun& f)
+atermpp::function_symbol function_symbol_ActForall()
 {
-  f = ATmakeAFun("ActForall", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActForall = core::detail::initialise_static_expression(function_symbol_ActForall, atermpp::function_symbol("ActForall", 2));
+  return function_symbol_ActForall;
 }
 
 inline
-AFun gsAFunActForall()
+bool gsIsActForall(atermpp::aterm_appl Term)
 {
-  static AFun AFunActForall = initAFunActForall(AFunActForall);
-  return AFunActForall;
-}
-
-inline
-bool gsIsActForall(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActForall();
+  return ATgetAFun(Term) == function_symbol_ActForall();
 }
 
 // ActId
 inline
-AFun initAFunActId(AFun& f)
+atermpp::function_symbol function_symbol_ActId()
 {
-  f = ATmakeAFun("ActId", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActId = core::detail::initialise_static_expression(function_symbol_ActId, atermpp::function_symbol("ActId", 2));
+  return function_symbol_ActId;
 }
 
 inline
-AFun gsAFunActId()
+bool gsIsActId(atermpp::aterm_appl Term)
 {
-  static AFun AFunActId = initAFunActId(AFunActId);
-  return AFunActId;
-}
-
-inline
-bool gsIsActId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActId();
+  return ATgetAFun(Term) == function_symbol_ActId();
 }
 
 // ActImp
 inline
-AFun initAFunActImp(AFun& f)
+atermpp::function_symbol function_symbol_ActImp()
 {
-  f = ATmakeAFun("ActImp", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActImp = core::detail::initialise_static_expression(function_symbol_ActImp, atermpp::function_symbol("ActImp", 2));
+  return function_symbol_ActImp;
 }
 
 inline
-AFun gsAFunActImp()
+bool gsIsActImp(atermpp::aterm_appl Term)
 {
-  static AFun AFunActImp = initAFunActImp(AFunActImp);
-  return AFunActImp;
-}
-
-inline
-bool gsIsActImp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActImp();
+  return ATgetAFun(Term) == function_symbol_ActImp();
 }
 
 // ActNot
 inline
-AFun initAFunActNot(AFun& f)
+atermpp::function_symbol function_symbol_ActNot()
 {
-  f = ATmakeAFun("ActNot", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActNot = core::detail::initialise_static_expression(function_symbol_ActNot, atermpp::function_symbol("ActNot", 1));
+  return function_symbol_ActNot;
 }
 
 inline
-AFun gsAFunActNot()
+bool gsIsActNot(atermpp::aterm_appl Term)
 {
-  static AFun AFunActNot = initAFunActNot(AFunActNot);
-  return AFunActNot;
-}
-
-inline
-bool gsIsActNot(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActNot();
+  return ATgetAFun(Term) == function_symbol_ActNot();
 }
 
 // ActOr
 inline
-AFun initAFunActOr(AFun& f)
+atermpp::function_symbol function_symbol_ActOr()
 {
-  f = ATmakeAFun("ActOr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActOr = core::detail::initialise_static_expression(function_symbol_ActOr, atermpp::function_symbol("ActOr", 2));
+  return function_symbol_ActOr;
 }
 
 inline
-AFun gsAFunActOr()
+bool gsIsActOr(atermpp::aterm_appl Term)
 {
-  static AFun AFunActOr = initAFunActOr(AFunActOr);
-  return AFunActOr;
-}
-
-inline
-bool gsIsActOr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActOr();
+  return ATgetAFun(Term) == function_symbol_ActOr();
 }
 
 // ActSpec
 inline
-AFun initAFunActSpec(AFun& f)
+atermpp::function_symbol function_symbol_ActSpec()
 {
-  f = ATmakeAFun("ActSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActSpec = core::detail::initialise_static_expression(function_symbol_ActSpec, atermpp::function_symbol("ActSpec", 1));
+  return function_symbol_ActSpec;
 }
 
 inline
-AFun gsAFunActSpec()
+bool gsIsActSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunActSpec = initAFunActSpec(AFunActSpec);
-  return AFunActSpec;
-}
-
-inline
-bool gsIsActSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActSpec();
+  return ATgetAFun(Term) == function_symbol_ActSpec();
 }
 
 // ActTrue
 inline
-AFun initAFunActTrue(AFun& f)
+atermpp::function_symbol function_symbol_ActTrue()
 {
-  f = ATmakeAFun("ActTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActTrue = core::detail::initialise_static_expression(function_symbol_ActTrue, atermpp::function_symbol("ActTrue", 0));
+  return function_symbol_ActTrue;
 }
 
 inline
-AFun gsAFunActTrue()
+bool gsIsActTrue(atermpp::aterm_appl Term)
 {
-  static AFun AFunActTrue = initAFunActTrue(AFunActTrue);
-  return AFunActTrue;
-}
-
-inline
-bool gsIsActTrue(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActTrue();
+  return ATgetAFun(Term) == function_symbol_ActTrue();
 }
 
 // Action
 inline
-AFun initAFunAction(AFun& f)
+atermpp::function_symbol function_symbol_Action()
 {
-  f = ATmakeAFun("Action", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Action = core::detail::initialise_static_expression(function_symbol_Action, atermpp::function_symbol("Action", 2));
+  return function_symbol_Action;
 }
 
 inline
-AFun gsAFunAction()
+bool gsIsAction(atermpp::aterm_appl Term)
 {
-  static AFun AFunAction = initAFunAction(AFunAction);
-  return AFunAction;
-}
-
-inline
-bool gsIsAction(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunAction();
+  return ATgetAFun(Term) == function_symbol_Action();
 }
 
 // ActionRenameRule
 inline
-AFun initAFunActionRenameRule(AFun& f)
+atermpp::function_symbol function_symbol_ActionRenameRule()
 {
-  f = ATmakeAFun("ActionRenameRule", 4, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActionRenameRule = core::detail::initialise_static_expression(function_symbol_ActionRenameRule, atermpp::function_symbol("ActionRenameRule", 4));
+  return function_symbol_ActionRenameRule;
 }
 
 inline
-AFun gsAFunActionRenameRule()
+bool gsIsActionRenameRule(atermpp::aterm_appl Term)
 {
-  static AFun AFunActionRenameRule = initAFunActionRenameRule(AFunActionRenameRule);
-  return AFunActionRenameRule;
-}
-
-inline
-bool gsIsActionRenameRule(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActionRenameRule();
+  return ATgetAFun(Term) == function_symbol_ActionRenameRule();
 }
 
 // ActionRenameRules
 inline
-AFun initAFunActionRenameRules(AFun& f)
+atermpp::function_symbol function_symbol_ActionRenameRules()
 {
-  f = ATmakeAFun("ActionRenameRules", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActionRenameRules = core::detail::initialise_static_expression(function_symbol_ActionRenameRules, atermpp::function_symbol("ActionRenameRules", 1));
+  return function_symbol_ActionRenameRules;
 }
 
 inline
-AFun gsAFunActionRenameRules()
+bool gsIsActionRenameRules(atermpp::aterm_appl Term)
 {
-  static AFun AFunActionRenameRules = initAFunActionRenameRules(AFunActionRenameRules);
-  return AFunActionRenameRules;
-}
-
-inline
-bool gsIsActionRenameRules(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActionRenameRules();
+  return ATgetAFun(Term) == function_symbol_ActionRenameRules();
 }
 
 // ActionRenameSpec
 inline
-AFun initAFunActionRenameSpec(AFun& f)
+atermpp::function_symbol function_symbol_ActionRenameSpec()
 {
-  f = ATmakeAFun("ActionRenameSpec", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ActionRenameSpec = core::detail::initialise_static_expression(function_symbol_ActionRenameSpec, atermpp::function_symbol("ActionRenameSpec", 3));
+  return function_symbol_ActionRenameSpec;
 }
 
 inline
-AFun gsAFunActionRenameSpec()
+bool gsIsActionRenameSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunActionRenameSpec = initAFunActionRenameSpec(AFunActionRenameSpec);
-  return AFunActionRenameSpec;
-}
-
-inline
-bool gsIsActionRenameSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActionRenameSpec();
+  return ATgetAFun(Term) == function_symbol_ActionRenameSpec();
 }
 
 // Allow
 inline
-AFun initAFunAllow(AFun& f)
+atermpp::function_symbol function_symbol_Allow()
 {
-  f = ATmakeAFun("Allow", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Allow = core::detail::initialise_static_expression(function_symbol_Allow, atermpp::function_symbol("Allow", 2));
+  return function_symbol_Allow;
 }
 
 inline
-AFun gsAFunAllow()
+bool gsIsAllow(atermpp::aterm_appl Term)
 {
-  static AFun AFunAllow = initAFunAllow(AFunAllow);
-  return AFunAllow;
-}
-
-inline
-bool gsIsAllow(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunAllow();
+  return ATgetAFun(Term) == function_symbol_Allow();
 }
 
 // AtTime
 inline
-AFun initAFunAtTime(AFun& f)
+atermpp::function_symbol function_symbol_AtTime()
 {
-  f = ATmakeAFun("AtTime", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_AtTime = core::detail::initialise_static_expression(function_symbol_AtTime, atermpp::function_symbol("AtTime", 2));
+  return function_symbol_AtTime;
 }
 
 inline
-AFun gsAFunAtTime()
+bool gsIsAtTime(atermpp::aterm_appl Term)
 {
-  static AFun AFunAtTime = initAFunAtTime(AFunAtTime);
-  return AFunAtTime;
-}
-
-inline
-bool gsIsAtTime(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunAtTime();
+  return ATgetAFun(Term) == function_symbol_AtTime();
 }
 
 // BES
 inline
-AFun initAFunBES(AFun& f)
+atermpp::function_symbol function_symbol_BES()
 {
-  f = ATmakeAFun("BES", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BES = core::detail::initialise_static_expression(function_symbol_BES, atermpp::function_symbol("BES", 2));
+  return function_symbol_BES;
 }
 
 inline
-AFun gsAFunBES()
+bool gsIsBES(atermpp::aterm_appl Term)
 {
-  static AFun AFunBES = initAFunBES(AFunBES);
-  return AFunBES;
-}
-
-inline
-bool gsIsBES(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBES();
+  return ATgetAFun(Term) == function_symbol_BES();
 }
 
 // BInit
 inline
-AFun initAFunBInit(AFun& f)
+atermpp::function_symbol function_symbol_BInit()
 {
-  f = ATmakeAFun("BInit", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BInit = core::detail::initialise_static_expression(function_symbol_BInit, atermpp::function_symbol("BInit", 2));
+  return function_symbol_BInit;
 }
 
 inline
-AFun gsAFunBInit()
+bool gsIsBInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunBInit = initAFunBInit(AFunBInit);
-  return AFunBInit;
-}
-
-inline
-bool gsIsBInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBInit();
+  return ATgetAFun(Term) == function_symbol_BInit();
 }
 
 // BagComp
 inline
-AFun initAFunBagComp(AFun& f)
+atermpp::function_symbol function_symbol_BagComp()
 {
-  f = ATmakeAFun("BagComp", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BagComp = core::detail::initialise_static_expression(function_symbol_BagComp, atermpp::function_symbol("BagComp", 0));
+  return function_symbol_BagComp;
 }
 
 inline
-AFun gsAFunBagComp()
+bool gsIsBagComp(atermpp::aterm_appl Term)
 {
-  static AFun AFunBagComp = initAFunBagComp(AFunBagComp);
-  return AFunBagComp;
-}
-
-inline
-bool gsIsBagComp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBagComp();
+  return ATgetAFun(Term) == function_symbol_BagComp();
 }
 
 // Binder
 inline
-AFun initAFunBinder(AFun& f)
+atermpp::function_symbol function_symbol_Binder()
 {
-  f = ATmakeAFun("Binder", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Binder = core::detail::initialise_static_expression(function_symbol_Binder, atermpp::function_symbol("Binder", 3));
+  return function_symbol_Binder;
 }
 
 inline
-AFun gsAFunBinder()
+bool gsIsBinder(atermpp::aterm_appl Term)
 {
-  static AFun AFunBinder = initAFunBinder(AFunBinder);
-  return AFunBinder;
-}
-
-inline
-bool gsIsBinder(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBinder();
+  return ATgetAFun(Term) == function_symbol_Binder();
 }
 
 // Block
 inline
-AFun initAFunBlock(AFun& f)
+atermpp::function_symbol function_symbol_Block()
 {
-  f = ATmakeAFun("Block", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Block = core::detail::initialise_static_expression(function_symbol_Block, atermpp::function_symbol("Block", 2));
+  return function_symbol_Block;
 }
 
 inline
-AFun gsAFunBlock()
+bool gsIsBlock(atermpp::aterm_appl Term)
 {
-  static AFun AFunBlock = initAFunBlock(AFunBlock);
-  return AFunBlock;
-}
-
-inline
-bool gsIsBlock(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBlock();
+  return ATgetAFun(Term) == function_symbol_Block();
 }
 
 // BooleanAnd
 inline
-AFun initAFunBooleanAnd(AFun& f)
+atermpp::function_symbol function_symbol_BooleanAnd()
 {
-  f = ATmakeAFun("BooleanAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanAnd = core::detail::initialise_static_expression(function_symbol_BooleanAnd, atermpp::function_symbol("BooleanAnd", 2));
+  return function_symbol_BooleanAnd;
 }
 
 inline
-AFun gsAFunBooleanAnd()
+bool gsIsBooleanAnd(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanAnd = initAFunBooleanAnd(AFunBooleanAnd);
-  return AFunBooleanAnd;
-}
-
-inline
-bool gsIsBooleanAnd(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanAnd();
+  return ATgetAFun(Term) == function_symbol_BooleanAnd();
 }
 
 // BooleanEquation
 inline
-AFun initAFunBooleanEquation(AFun& f)
+atermpp::function_symbol function_symbol_BooleanEquation()
 {
-  f = ATmakeAFun("BooleanEquation", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanEquation = core::detail::initialise_static_expression(function_symbol_BooleanEquation, atermpp::function_symbol("BooleanEquation", 3));
+  return function_symbol_BooleanEquation;
 }
 
 inline
-AFun gsAFunBooleanEquation()
+bool gsIsBooleanEquation(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanEquation = initAFunBooleanEquation(AFunBooleanEquation);
-  return AFunBooleanEquation;
-}
-
-inline
-bool gsIsBooleanEquation(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanEquation();
+  return ATgetAFun(Term) == function_symbol_BooleanEquation();
 }
 
 // BooleanFalse
 inline
-AFun initAFunBooleanFalse(AFun& f)
+atermpp::function_symbol function_symbol_BooleanFalse()
 {
-  f = ATmakeAFun("BooleanFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanFalse = core::detail::initialise_static_expression(function_symbol_BooleanFalse, atermpp::function_symbol("BooleanFalse", 0));
+  return function_symbol_BooleanFalse;
 }
 
 inline
-AFun gsAFunBooleanFalse()
+bool gsIsBooleanFalse(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanFalse = initAFunBooleanFalse(AFunBooleanFalse);
-  return AFunBooleanFalse;
-}
-
-inline
-bool gsIsBooleanFalse(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanFalse();
+  return ATgetAFun(Term) == function_symbol_BooleanFalse();
 }
 
 // BooleanImp
 inline
-AFun initAFunBooleanImp(AFun& f)
+atermpp::function_symbol function_symbol_BooleanImp()
 {
-  f = ATmakeAFun("BooleanImp", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanImp = core::detail::initialise_static_expression(function_symbol_BooleanImp, atermpp::function_symbol("BooleanImp", 2));
+  return function_symbol_BooleanImp;
 }
 
 inline
-AFun gsAFunBooleanImp()
+bool gsIsBooleanImp(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanImp = initAFunBooleanImp(AFunBooleanImp);
-  return AFunBooleanImp;
-}
-
-inline
-bool gsIsBooleanImp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanImp();
+  return ATgetAFun(Term) == function_symbol_BooleanImp();
 }
 
 // BooleanNot
 inline
-AFun initAFunBooleanNot(AFun& f)
+atermpp::function_symbol function_symbol_BooleanNot()
 {
-  f = ATmakeAFun("BooleanNot", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanNot = core::detail::initialise_static_expression(function_symbol_BooleanNot, atermpp::function_symbol("BooleanNot", 1));
+  return function_symbol_BooleanNot;
 }
 
 inline
-AFun gsAFunBooleanNot()
+bool gsIsBooleanNot(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanNot = initAFunBooleanNot(AFunBooleanNot);
-  return AFunBooleanNot;
-}
-
-inline
-bool gsIsBooleanNot(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanNot();
+  return ATgetAFun(Term) == function_symbol_BooleanNot();
 }
 
 // BooleanOr
 inline
-AFun initAFunBooleanOr(AFun& f)
+atermpp::function_symbol function_symbol_BooleanOr()
 {
-  f = ATmakeAFun("BooleanOr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanOr = core::detail::initialise_static_expression(function_symbol_BooleanOr, atermpp::function_symbol("BooleanOr", 2));
+  return function_symbol_BooleanOr;
 }
 
 inline
-AFun gsAFunBooleanOr()
+bool gsIsBooleanOr(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanOr = initAFunBooleanOr(AFunBooleanOr);
-  return AFunBooleanOr;
-}
-
-inline
-bool gsIsBooleanOr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanOr();
+  return ATgetAFun(Term) == function_symbol_BooleanOr();
 }
 
 // BooleanTrue
 inline
-AFun initAFunBooleanTrue(AFun& f)
+atermpp::function_symbol function_symbol_BooleanTrue()
 {
-  f = ATmakeAFun("BooleanTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanTrue = core::detail::initialise_static_expression(function_symbol_BooleanTrue, atermpp::function_symbol("BooleanTrue", 0));
+  return function_symbol_BooleanTrue;
 }
 
 inline
-AFun gsAFunBooleanTrue()
+bool gsIsBooleanTrue(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanTrue = initAFunBooleanTrue(AFunBooleanTrue);
-  return AFunBooleanTrue;
-}
-
-inline
-bool gsIsBooleanTrue(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanTrue();
+  return ATgetAFun(Term) == function_symbol_BooleanTrue();
 }
 
 // BooleanVariable
 inline
-AFun initAFunBooleanVariable(AFun& f)
+atermpp::function_symbol function_symbol_BooleanVariable()
 {
-  f = ATmakeAFun("BooleanVariable", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_BooleanVariable = core::detail::initialise_static_expression(function_symbol_BooleanVariable, atermpp::function_symbol("BooleanVariable", 1));
+  return function_symbol_BooleanVariable;
 }
 
 inline
-AFun gsAFunBooleanVariable()
+bool gsIsBooleanVariable(atermpp::aterm_appl Term)
 {
-  static AFun AFunBooleanVariable = initAFunBooleanVariable(AFunBooleanVariable);
-  return AFunBooleanVariable;
-}
-
-inline
-bool gsIsBooleanVariable(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBooleanVariable();
+  return ATgetAFun(Term) == function_symbol_BooleanVariable();
 }
 
 // Choice
 inline
-AFun initAFunChoice(AFun& f)
+atermpp::function_symbol function_symbol_Choice()
 {
-  f = ATmakeAFun("Choice", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Choice = core::detail::initialise_static_expression(function_symbol_Choice, atermpp::function_symbol("Choice", 2));
+  return function_symbol_Choice;
 }
 
 inline
-AFun gsAFunChoice()
+bool gsIsChoice(atermpp::aterm_appl Term)
 {
-  static AFun AFunChoice = initAFunChoice(AFunChoice);
-  return AFunChoice;
-}
-
-inline
-bool gsIsChoice(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunChoice();
+  return ATgetAFun(Term) == function_symbol_Choice();
 }
 
 // Comm
 inline
-AFun initAFunComm(AFun& f)
+atermpp::function_symbol function_symbol_Comm()
 {
-  f = ATmakeAFun("Comm", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Comm = core::detail::initialise_static_expression(function_symbol_Comm, atermpp::function_symbol("Comm", 2));
+  return function_symbol_Comm;
 }
 
 inline
-AFun gsAFunComm()
+bool gsIsComm(atermpp::aterm_appl Term)
 {
-  static AFun AFunComm = initAFunComm(AFunComm);
-  return AFunComm;
-}
-
-inline
-bool gsIsComm(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunComm();
+  return ATgetAFun(Term) == function_symbol_Comm();
 }
 
 // CommExpr
 inline
-AFun initAFunCommExpr(AFun& f)
+atermpp::function_symbol function_symbol_CommExpr()
 {
-  f = ATmakeAFun("CommExpr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_CommExpr = core::detail::initialise_static_expression(function_symbol_CommExpr, atermpp::function_symbol("CommExpr", 2));
+  return function_symbol_CommExpr;
 }
 
 inline
-AFun gsAFunCommExpr()
+bool gsIsCommExpr(atermpp::aterm_appl Term)
 {
-  static AFun AFunCommExpr = initAFunCommExpr(AFunCommExpr);
-  return AFunCommExpr;
-}
-
-inline
-bool gsIsCommExpr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunCommExpr();
+  return ATgetAFun(Term) == function_symbol_CommExpr();
 }
 
 // ConsSpec
 inline
-AFun initAFunConsSpec(AFun& f)
+atermpp::function_symbol function_symbol_ConsSpec()
 {
-  f = ATmakeAFun("ConsSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ConsSpec = core::detail::initialise_static_expression(function_symbol_ConsSpec, atermpp::function_symbol("ConsSpec", 1));
+  return function_symbol_ConsSpec;
 }
 
 inline
-AFun gsAFunConsSpec()
+bool gsIsConsSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunConsSpec = initAFunConsSpec(AFunConsSpec);
-  return AFunConsSpec;
-}
-
-inline
-bool gsIsConsSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunConsSpec();
+  return ATgetAFun(Term) == function_symbol_ConsSpec();
 }
 
 // DataAppl
 inline
-AFun initAFunDataAppl(AFun& f)
+atermpp::function_symbol function_symbol_DataAppl()
 {
-  f = ATmakeAFun("DataAppl", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataAppl = core::detail::initialise_static_expression(function_symbol_DataAppl, atermpp::function_symbol("DataAppl", 2));
+  return function_symbol_DataAppl;
 }
 
 inline
-AFun gsAFunDataAppl()
+bool gsIsDataAppl(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataAppl = initAFunDataAppl(AFunDataAppl);
-  return AFunDataAppl;
-}
-
-inline
-bool gsIsDataAppl(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataAppl();
+  return ATgetAFun(Term) == function_symbol_DataAppl();
 }
 
 // DataEqn
 inline
-AFun initAFunDataEqn(AFun& f)
+atermpp::function_symbol function_symbol_DataEqn()
 {
-  f = ATmakeAFun("DataEqn", 4, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataEqn = core::detail::initialise_static_expression(function_symbol_DataEqn, atermpp::function_symbol("DataEqn", 4));
+  return function_symbol_DataEqn;
 }
 
 inline
-AFun gsAFunDataEqn()
+bool gsIsDataEqn(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataEqn = initAFunDataEqn(AFunDataEqn);
-  return AFunDataEqn;
-}
-
-inline
-bool gsIsDataEqn(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataEqn();
+  return ATgetAFun(Term) == function_symbol_DataEqn();
 }
 
 // DataEqnSpec
 inline
-AFun initAFunDataEqnSpec(AFun& f)
+atermpp::function_symbol function_symbol_DataEqnSpec()
 {
-  f = ATmakeAFun("DataEqnSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataEqnSpec = core::detail::initialise_static_expression(function_symbol_DataEqnSpec, atermpp::function_symbol("DataEqnSpec", 1));
+  return function_symbol_DataEqnSpec;
 }
 
 inline
-AFun gsAFunDataEqnSpec()
+bool gsIsDataEqnSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataEqnSpec = initAFunDataEqnSpec(AFunDataEqnSpec);
-  return AFunDataEqnSpec;
-}
-
-inline
-bool gsIsDataEqnSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataEqnSpec();
+  return ATgetAFun(Term) == function_symbol_DataEqnSpec();
 }
 
 // DataSpec
 inline
-AFun initAFunDataSpec(AFun& f)
+atermpp::function_symbol function_symbol_DataSpec()
 {
-  f = ATmakeAFun("DataSpec", 4, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataSpec = core::detail::initialise_static_expression(function_symbol_DataSpec, atermpp::function_symbol("DataSpec", 4));
+  return function_symbol_DataSpec;
 }
 
 inline
-AFun gsAFunDataSpec()
+bool gsIsDataSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataSpec = initAFunDataSpec(AFunDataSpec);
-  return AFunDataSpec;
-}
-
-inline
-bool gsIsDataSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataSpec();
+  return ATgetAFun(Term) == function_symbol_DataSpec();
 }
 
 // DataVarId
 inline
-AFun initAFunDataVarId(AFun& f)
+atermpp::function_symbol function_symbol_DataVarId()
 {
-  f = ATmakeAFun("DataVarId", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataVarId = core::detail::initialise_static_expression(function_symbol_DataVarId, atermpp::function_symbol("DataVarId", 2));
+  return function_symbol_DataVarId;
 }
 
 inline
-AFun gsAFunDataVarId()
+bool gsIsDataVarId(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataVarId = initAFunDataVarId(AFunDataVarId);
-  return AFunDataVarId;
-}
-
-inline
-bool gsIsDataVarId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataVarId();
+  return ATgetAFun(Term) == function_symbol_DataVarId();
 }
 
 // DataVarIdInit
 inline
-AFun initAFunDataVarIdInit(AFun& f)
+atermpp::function_symbol function_symbol_DataVarIdInit()
 {
-  f = ATmakeAFun("DataVarIdInit", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_DataVarIdInit = core::detail::initialise_static_expression(function_symbol_DataVarIdInit, atermpp::function_symbol("DataVarIdInit", 2));
+  return function_symbol_DataVarIdInit;
 }
 
 inline
-AFun gsAFunDataVarIdInit()
+bool gsIsDataVarIdInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunDataVarIdInit = initAFunDataVarIdInit(AFunDataVarIdInit);
-  return AFunDataVarIdInit;
-}
-
-inline
-bool gsIsDataVarIdInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataVarIdInit();
+  return ATgetAFun(Term) == function_symbol_DataVarIdInit();
 }
 
 // Delta
 inline
-AFun initAFunDelta(AFun& f)
+atermpp::function_symbol function_symbol_Delta()
 {
-  f = ATmakeAFun("Delta", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Delta = core::detail::initialise_static_expression(function_symbol_Delta, atermpp::function_symbol("Delta", 0));
+  return function_symbol_Delta;
 }
 
 inline
-AFun gsAFunDelta()
+bool gsIsDelta(atermpp::aterm_appl Term)
 {
-  static AFun AFunDelta = initAFunDelta(AFunDelta);
-  return AFunDelta;
-}
-
-inline
-bool gsIsDelta(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDelta();
+  return ATgetAFun(Term) == function_symbol_Delta();
 }
 
 // Exists
 inline
-AFun initAFunExists(AFun& f)
+atermpp::function_symbol function_symbol_Exists()
 {
-  f = ATmakeAFun("Exists", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Exists = core::detail::initialise_static_expression(function_symbol_Exists, atermpp::function_symbol("Exists", 0));
+  return function_symbol_Exists;
 }
 
 inline
-AFun gsAFunExists()
+bool gsIsExists(atermpp::aterm_appl Term)
 {
-  static AFun AFunExists = initAFunExists(AFunExists);
-  return AFunExists;
-}
-
-inline
-bool gsIsExists(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunExists();
+  return ATgetAFun(Term) == function_symbol_Exists();
 }
 
 // Forall
 inline
-AFun initAFunForall(AFun& f)
+atermpp::function_symbol function_symbol_Forall()
 {
-  f = ATmakeAFun("Forall", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Forall = core::detail::initialise_static_expression(function_symbol_Forall, atermpp::function_symbol("Forall", 0));
+  return function_symbol_Forall;
 }
 
 inline
-AFun gsAFunForall()
+bool gsIsForall(atermpp::aterm_appl Term)
 {
-  static AFun AFunForall = initAFunForall(AFunForall);
-  return AFunForall;
-}
-
-inline
-bool gsIsForall(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunForall();
+  return ATgetAFun(Term) == function_symbol_Forall();
 }
 
 // GlobVarSpec
 inline
-AFun initAFunGlobVarSpec(AFun& f)
+atermpp::function_symbol function_symbol_GlobVarSpec()
 {
-  f = ATmakeAFun("GlobVarSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_GlobVarSpec = core::detail::initialise_static_expression(function_symbol_GlobVarSpec, atermpp::function_symbol("GlobVarSpec", 1));
+  return function_symbol_GlobVarSpec;
 }
 
 inline
-AFun gsAFunGlobVarSpec()
+bool gsIsGlobVarSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunGlobVarSpec = initAFunGlobVarSpec(AFunGlobVarSpec);
-  return AFunGlobVarSpec;
-}
-
-inline
-bool gsIsGlobVarSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunGlobVarSpec();
+  return ATgetAFun(Term) == function_symbol_GlobVarSpec();
 }
 
 // Hide
 inline
-AFun initAFunHide(AFun& f)
+atermpp::function_symbol function_symbol_Hide()
 {
-  f = ATmakeAFun("Hide", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Hide = core::detail::initialise_static_expression(function_symbol_Hide, atermpp::function_symbol("Hide", 2));
+  return function_symbol_Hide;
 }
 
 inline
-AFun gsAFunHide()
+bool gsIsHide(atermpp::aterm_appl Term)
 {
-  static AFun AFunHide = initAFunHide(AFunHide);
-  return AFunHide;
-}
-
-inline
-bool gsIsHide(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunHide();
+  return ATgetAFun(Term) == function_symbol_Hide();
 }
 
 // Id
 inline
-AFun initAFunId(AFun& f)
+atermpp::function_symbol function_symbol_Id()
 {
-  f = ATmakeAFun("Id", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Id = core::detail::initialise_static_expression(function_symbol_Id, atermpp::function_symbol("Id", 1));
+  return function_symbol_Id;
 }
 
 inline
-AFun gsAFunId()
+bool gsIsId(atermpp::aterm_appl Term)
 {
-  static AFun AFunId = initAFunId(AFunId);
-  return AFunId;
-}
-
-inline
-bool gsIsId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunId();
+  return ATgetAFun(Term) == function_symbol_Id();
 }
 
 // IdAssignment
 inline
-AFun initAFunIdAssignment(AFun& f)
+atermpp::function_symbol function_symbol_IdAssignment()
 {
-  f = ATmakeAFun("IdAssignment", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_IdAssignment = core::detail::initialise_static_expression(function_symbol_IdAssignment, atermpp::function_symbol("IdAssignment", 2));
+  return function_symbol_IdAssignment;
 }
 
 inline
-AFun gsAFunIdAssignment()
+bool gsIsIdAssignment(atermpp::aterm_appl Term)
 {
-  static AFun AFunIdAssignment = initAFunIdAssignment(AFunIdAssignment);
-  return AFunIdAssignment;
-}
-
-inline
-bool gsIsIdAssignment(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunIdAssignment();
+  return ATgetAFun(Term) == function_symbol_IdAssignment();
 }
 
 // IdInit
 inline
-AFun initAFunIdInit(AFun& f)
+atermpp::function_symbol function_symbol_IdInit()
 {
-  f = ATmakeAFun("IdInit", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_IdInit = core::detail::initialise_static_expression(function_symbol_IdInit, atermpp::function_symbol("IdInit", 2));
+  return function_symbol_IdInit;
 }
 
 inline
-AFun gsAFunIdInit()
+bool gsIsIdInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunIdInit = initAFunIdInit(AFunIdInit);
-  return AFunIdInit;
-}
-
-inline
-bool gsIsIdInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunIdInit();
+  return ATgetAFun(Term) == function_symbol_IdInit();
 }
 
 // IfThen
 inline
-AFun initAFunIfThen(AFun& f)
+atermpp::function_symbol function_symbol_IfThen()
 {
-  f = ATmakeAFun("IfThen", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_IfThen = core::detail::initialise_static_expression(function_symbol_IfThen, atermpp::function_symbol("IfThen", 2));
+  return function_symbol_IfThen;
 }
 
 inline
-AFun gsAFunIfThen()
+bool gsIsIfThen(atermpp::aterm_appl Term)
 {
-  static AFun AFunIfThen = initAFunIfThen(AFunIfThen);
-  return AFunIfThen;
-}
-
-inline
-bool gsIsIfThen(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunIfThen();
+  return ATgetAFun(Term) == function_symbol_IfThen();
 }
 
 // IfThenElse
 inline
-AFun initAFunIfThenElse(AFun& f)
+atermpp::function_symbol function_symbol_IfThenElse()
 {
-  f = ATmakeAFun("IfThenElse", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_IfThenElse = core::detail::initialise_static_expression(function_symbol_IfThenElse, atermpp::function_symbol("IfThenElse", 3));
+  return function_symbol_IfThenElse;
 }
 
 inline
-AFun gsAFunIfThenElse()
+bool gsIsIfThenElse(atermpp::aterm_appl Term)
 {
-  static AFun AFunIfThenElse = initAFunIfThenElse(AFunIfThenElse);
-  return AFunIfThenElse;
-}
-
-inline
-bool gsIsIfThenElse(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunIfThenElse();
+  return ATgetAFun(Term) == function_symbol_IfThenElse();
 }
 
 // LMerge
 inline
-AFun initAFunLMerge(AFun& f)
+atermpp::function_symbol function_symbol_LMerge()
 {
-  f = ATmakeAFun("LMerge", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_LMerge = core::detail::initialise_static_expression(function_symbol_LMerge, atermpp::function_symbol("LMerge", 2));
+  return function_symbol_LMerge;
 }
 
 inline
-AFun gsAFunLMerge()
+bool gsIsLMerge(atermpp::aterm_appl Term)
 {
-  static AFun AFunLMerge = initAFunLMerge(AFunLMerge);
-  return AFunLMerge;
-}
-
-inline
-bool gsIsLMerge(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLMerge();
+  return ATgetAFun(Term) == function_symbol_LMerge();
 }
 
 // Lambda
 inline
-AFun initAFunLambda(AFun& f)
+atermpp::function_symbol function_symbol_Lambda()
 {
-  f = ATmakeAFun("Lambda", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Lambda = core::detail::initialise_static_expression(function_symbol_Lambda, atermpp::function_symbol("Lambda", 0));
+  return function_symbol_Lambda;
 }
 
 inline
-AFun gsAFunLambda()
+bool gsIsLambda(atermpp::aterm_appl Term)
 {
-  static AFun AFunLambda = initAFunLambda(AFunLambda);
-  return AFunLambda;
-}
-
-inline
-bool gsIsLambda(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLambda();
+  return ATgetAFun(Term) == function_symbol_Lambda();
 }
 
 // LinProcSpec
 inline
-AFun initAFunLinProcSpec(AFun& f)
+atermpp::function_symbol function_symbol_LinProcSpec()
 {
-  f = ATmakeAFun("LinProcSpec", 5, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_LinProcSpec = core::detail::initialise_static_expression(function_symbol_LinProcSpec, atermpp::function_symbol("LinProcSpec", 5));
+  return function_symbol_LinProcSpec;
 }
 
 inline
-AFun gsAFunLinProcSpec()
+bool gsIsLinProcSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunLinProcSpec = initAFunLinProcSpec(AFunLinProcSpec);
-  return AFunLinProcSpec;
-}
-
-inline
-bool gsIsLinProcSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLinProcSpec();
+  return ATgetAFun(Term) == function_symbol_LinProcSpec();
 }
 
 // LinearProcess
 inline
-AFun initAFunLinearProcess(AFun& f)
+atermpp::function_symbol function_symbol_LinearProcess()
 {
-  f = ATmakeAFun("LinearProcess", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_LinearProcess = core::detail::initialise_static_expression(function_symbol_LinearProcess, atermpp::function_symbol("LinearProcess", 2));
+  return function_symbol_LinearProcess;
 }
 
 inline
-AFun gsAFunLinearProcess()
+bool gsIsLinearProcess(atermpp::aterm_appl Term)
 {
-  static AFun AFunLinearProcess = initAFunLinearProcess(AFunLinearProcess);
-  return AFunLinearProcess;
-}
-
-inline
-bool gsIsLinearProcess(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLinearProcess();
+  return ATgetAFun(Term) == function_symbol_LinearProcess();
 }
 
 // LinearProcessInit
 inline
-AFun initAFunLinearProcessInit(AFun& f)
+atermpp::function_symbol function_symbol_LinearProcessInit()
 {
-  f = ATmakeAFun("LinearProcessInit", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_LinearProcessInit = core::detail::initialise_static_expression(function_symbol_LinearProcessInit, atermpp::function_symbol("LinearProcessInit", 1));
+  return function_symbol_LinearProcessInit;
 }
 
 inline
-AFun gsAFunLinearProcessInit()
+bool gsIsLinearProcessInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunLinearProcessInit = initAFunLinearProcessInit(AFunLinearProcessInit);
-  return AFunLinearProcessInit;
-}
-
-inline
-bool gsIsLinearProcessInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLinearProcessInit();
+  return ATgetAFun(Term) == function_symbol_LinearProcessInit();
 }
 
 // LinearProcessSummand
 inline
-AFun initAFunLinearProcessSummand(AFun& f)
+atermpp::function_symbol function_symbol_LinearProcessSummand()
 {
-  f = ATmakeAFun("LinearProcessSummand", 5, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_LinearProcessSummand = core::detail::initialise_static_expression(function_symbol_LinearProcessSummand, atermpp::function_symbol("LinearProcessSummand", 5));
+  return function_symbol_LinearProcessSummand;
 }
 
 inline
-AFun gsAFunLinearProcessSummand()
+bool gsIsLinearProcessSummand(atermpp::aterm_appl Term)
 {
-  static AFun AFunLinearProcessSummand = initAFunLinearProcessSummand(AFunLinearProcessSummand);
-  return AFunLinearProcessSummand;
-}
-
-inline
-bool gsIsLinearProcessSummand(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLinearProcessSummand();
+  return ATgetAFun(Term) == function_symbol_LinearProcessSummand();
 }
 
 // MapSpec
 inline
-AFun initAFunMapSpec(AFun& f)
+atermpp::function_symbol function_symbol_MapSpec()
 {
-  f = ATmakeAFun("MapSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_MapSpec = core::detail::initialise_static_expression(function_symbol_MapSpec, atermpp::function_symbol("MapSpec", 1));
+  return function_symbol_MapSpec;
 }
 
 inline
-AFun gsAFunMapSpec()
+bool gsIsMapSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunMapSpec = initAFunMapSpec(AFunMapSpec);
-  return AFunMapSpec;
-}
-
-inline
-bool gsIsMapSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunMapSpec();
+  return ATgetAFun(Term) == function_symbol_MapSpec();
 }
 
 // Merge
 inline
-AFun initAFunMerge(AFun& f)
+atermpp::function_symbol function_symbol_Merge()
 {
-  f = ATmakeAFun("Merge", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Merge = core::detail::initialise_static_expression(function_symbol_Merge, atermpp::function_symbol("Merge", 2));
+  return function_symbol_Merge;
 }
 
 inline
-AFun gsAFunMerge()
+bool gsIsMerge(atermpp::aterm_appl Term)
 {
-  static AFun AFunMerge = initAFunMerge(AFunMerge);
-  return AFunMerge;
-}
-
-inline
-bool gsIsMerge(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunMerge();
+  return ATgetAFun(Term) == function_symbol_Merge();
 }
 
 // Mu
 inline
-AFun initAFunMu(AFun& f)
+atermpp::function_symbol function_symbol_Mu()
 {
-  f = ATmakeAFun("Mu", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Mu = core::detail::initialise_static_expression(function_symbol_Mu, atermpp::function_symbol("Mu", 0));
+  return function_symbol_Mu;
 }
 
 inline
-AFun gsAFunMu()
+bool gsIsMu(atermpp::aterm_appl Term)
 {
-  static AFun AFunMu = initAFunMu(AFunMu);
-  return AFunMu;
-}
-
-inline
-bool gsIsMu(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunMu();
+  return ATgetAFun(Term) == function_symbol_Mu();
 }
 
 // MultAct
 inline
-AFun initAFunMultAct(AFun& f)
+atermpp::function_symbol function_symbol_MultAct()
 {
-  f = ATmakeAFun("MultAct", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_MultAct = core::detail::initialise_static_expression(function_symbol_MultAct, atermpp::function_symbol("MultAct", 1));
+  return function_symbol_MultAct;
 }
 
 inline
-AFun gsAFunMultAct()
+bool gsIsMultAct(atermpp::aterm_appl Term)
 {
-  static AFun AFunMultAct = initAFunMultAct(AFunMultAct);
-  return AFunMultAct;
-}
-
-inline
-bool gsIsMultAct(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunMultAct();
+  return ATgetAFun(Term) == function_symbol_MultAct();
 }
 
 // MultActName
 inline
-AFun initAFunMultActName(AFun& f)
+atermpp::function_symbol function_symbol_MultActName()
 {
-  f = ATmakeAFun("MultActName", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_MultActName = core::detail::initialise_static_expression(function_symbol_MultActName, atermpp::function_symbol("MultActName", 1));
+  return function_symbol_MultActName;
 }
 
 inline
-AFun gsAFunMultActName()
+bool gsIsMultActName(atermpp::aterm_appl Term)
 {
-  static AFun AFunMultActName = initAFunMultActName(AFunMultActName);
-  return AFunMultActName;
-}
-
-inline
-bool gsIsMultActName(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunMultActName();
+  return ATgetAFun(Term) == function_symbol_MultActName();
 }
 
 // Nil
 inline
-AFun initAFunNil(AFun& f)
+atermpp::function_symbol function_symbol_Nil()
 {
-  f = ATmakeAFun("Nil", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Nil = core::detail::initialise_static_expression(function_symbol_Nil, atermpp::function_symbol("Nil", 0));
+  return function_symbol_Nil;
 }
 
 inline
-AFun gsAFunNil()
+bool gsIsNil(atermpp::aterm_appl Term)
 {
-  static AFun AFunNil = initAFunNil(AFunNil);
-  return AFunNil;
-}
-
-inline
-bool gsIsNil(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunNil();
+  return ATgetAFun(Term) == function_symbol_Nil();
 }
 
 // Nu
 inline
-AFun initAFunNu(AFun& f)
+atermpp::function_symbol function_symbol_Nu()
 {
-  f = ATmakeAFun("Nu", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Nu = core::detail::initialise_static_expression(function_symbol_Nu, atermpp::function_symbol("Nu", 0));
+  return function_symbol_Nu;
 }
 
 inline
-AFun gsAFunNu()
+bool gsIsNu(atermpp::aterm_appl Term)
 {
-  static AFun AFunNu = initAFunNu(AFunNu);
-  return AFunNu;
-}
-
-inline
-bool gsIsNu(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunNu();
+  return ATgetAFun(Term) == function_symbol_Nu();
 }
 
 // OpId
 inline
-AFun initAFunOpId(AFun& f)
+atermpp::function_symbol function_symbol_OpId()
 {
-  f = ATmakeAFun("OpId", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_OpId = core::detail::initialise_static_expression(function_symbol_OpId, atermpp::function_symbol("OpId", 2));
+  return function_symbol_OpId;
 }
 
 inline
-AFun gsAFunOpId()
+bool gsIsOpId(atermpp::aterm_appl Term)
 {
-  static AFun AFunOpId = initAFunOpId(AFunOpId);
-  return AFunOpId;
-}
-
-inline
-bool gsIsOpId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunOpId();
+  return ATgetAFun(Term) == function_symbol_OpId();
 }
 
 // PBES
 inline
-AFun initAFunPBES(AFun& f)
+atermpp::function_symbol function_symbol_PBES()
 {
-  f = ATmakeAFun("PBES", 4, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBES = core::detail::initialise_static_expression(function_symbol_PBES, atermpp::function_symbol("PBES", 4));
+  return function_symbol_PBES;
 }
 
 inline
-AFun gsAFunPBES()
+bool gsIsPBES(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBES = initAFunPBES(AFunPBES);
-  return AFunPBES;
-}
-
-inline
-bool gsIsPBES(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBES();
+  return ATgetAFun(Term) == function_symbol_PBES();
 }
 
 // PBESAnd
 inline
-AFun initAFunPBESAnd(AFun& f)
+atermpp::function_symbol function_symbol_PBESAnd()
 {
-  f = ATmakeAFun("PBESAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESAnd = core::detail::initialise_static_expression(function_symbol_PBESAnd, atermpp::function_symbol("PBESAnd", 2));
+  return function_symbol_PBESAnd;
 }
 
 inline
-AFun gsAFunPBESAnd()
+bool gsIsPBESAnd(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESAnd = initAFunPBESAnd(AFunPBESAnd);
-  return AFunPBESAnd;
-}
-
-inline
-bool gsIsPBESAnd(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESAnd();
+  return ATgetAFun(Term) == function_symbol_PBESAnd();
 }
 
 // PBESExists
 inline
-AFun initAFunPBESExists(AFun& f)
+atermpp::function_symbol function_symbol_PBESExists()
 {
-  f = ATmakeAFun("PBESExists", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESExists = core::detail::initialise_static_expression(function_symbol_PBESExists, atermpp::function_symbol("PBESExists", 2));
+  return function_symbol_PBESExists;
 }
 
 inline
-AFun gsAFunPBESExists()
+bool gsIsPBESExists(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESExists = initAFunPBESExists(AFunPBESExists);
-  return AFunPBESExists;
-}
-
-inline
-bool gsIsPBESExists(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESExists();
+  return ATgetAFun(Term) == function_symbol_PBESExists();
 }
 
 // PBESFalse
 inline
-AFun initAFunPBESFalse(AFun& f)
+atermpp::function_symbol function_symbol_PBESFalse()
 {
-  f = ATmakeAFun("PBESFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESFalse = core::detail::initialise_static_expression(function_symbol_PBESFalse, atermpp::function_symbol("PBESFalse", 0));
+  return function_symbol_PBESFalse;
 }
 
 inline
-AFun gsAFunPBESFalse()
+bool gsIsPBESFalse(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESFalse = initAFunPBESFalse(AFunPBESFalse);
-  return AFunPBESFalse;
-}
-
-inline
-bool gsIsPBESFalse(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESFalse();
+  return ATgetAFun(Term) == function_symbol_PBESFalse();
 }
 
 // PBESForall
 inline
-AFun initAFunPBESForall(AFun& f)
+atermpp::function_symbol function_symbol_PBESForall()
 {
-  f = ATmakeAFun("PBESForall", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESForall = core::detail::initialise_static_expression(function_symbol_PBESForall, atermpp::function_symbol("PBESForall", 2));
+  return function_symbol_PBESForall;
 }
 
 inline
-AFun gsAFunPBESForall()
+bool gsIsPBESForall(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESForall = initAFunPBESForall(AFunPBESForall);
-  return AFunPBESForall;
-}
-
-inline
-bool gsIsPBESForall(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESForall();
+  return ATgetAFun(Term) == function_symbol_PBESForall();
 }
 
 // PBESImp
 inline
-AFun initAFunPBESImp(AFun& f)
+atermpp::function_symbol function_symbol_PBESImp()
 {
-  f = ATmakeAFun("PBESImp", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESImp = core::detail::initialise_static_expression(function_symbol_PBESImp, atermpp::function_symbol("PBESImp", 2));
+  return function_symbol_PBESImp;
 }
 
 inline
-AFun gsAFunPBESImp()
+bool gsIsPBESImp(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESImp = initAFunPBESImp(AFunPBESImp);
-  return AFunPBESImp;
-}
-
-inline
-bool gsIsPBESImp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESImp();
+  return ATgetAFun(Term) == function_symbol_PBESImp();
 }
 
 // PBESNot
 inline
-AFun initAFunPBESNot(AFun& f)
+atermpp::function_symbol function_symbol_PBESNot()
 {
-  f = ATmakeAFun("PBESNot", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESNot = core::detail::initialise_static_expression(function_symbol_PBESNot, atermpp::function_symbol("PBESNot", 1));
+  return function_symbol_PBESNot;
 }
 
 inline
-AFun gsAFunPBESNot()
+bool gsIsPBESNot(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESNot = initAFunPBESNot(AFunPBESNot);
-  return AFunPBESNot;
-}
-
-inline
-bool gsIsPBESNot(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESNot();
+  return ATgetAFun(Term) == function_symbol_PBESNot();
 }
 
 // PBESOr
 inline
-AFun initAFunPBESOr(AFun& f)
+atermpp::function_symbol function_symbol_PBESOr()
 {
-  f = ATmakeAFun("PBESOr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESOr = core::detail::initialise_static_expression(function_symbol_PBESOr, atermpp::function_symbol("PBESOr", 2));
+  return function_symbol_PBESOr;
 }
 
 inline
-AFun gsAFunPBESOr()
+bool gsIsPBESOr(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESOr = initAFunPBESOr(AFunPBESOr);
-  return AFunPBESOr;
-}
-
-inline
-bool gsIsPBESOr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESOr();
+  return ATgetAFun(Term) == function_symbol_PBESOr();
 }
 
 // PBESTrue
 inline
-AFun initAFunPBESTrue(AFun& f)
+atermpp::function_symbol function_symbol_PBESTrue()
 {
-  f = ATmakeAFun("PBESTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBESTrue = core::detail::initialise_static_expression(function_symbol_PBESTrue, atermpp::function_symbol("PBESTrue", 0));
+  return function_symbol_PBESTrue;
 }
 
 inline
-AFun gsAFunPBESTrue()
+bool gsIsPBESTrue(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBESTrue = initAFunPBESTrue(AFunPBESTrue);
-  return AFunPBESTrue;
-}
-
-inline
-bool gsIsPBESTrue(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBESTrue();
+  return ATgetAFun(Term) == function_symbol_PBESTrue();
 }
 
 // PBEqn
 inline
-AFun initAFunPBEqn(AFun& f)
+atermpp::function_symbol function_symbol_PBEqn()
 {
-  f = ATmakeAFun("PBEqn", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBEqn = core::detail::initialise_static_expression(function_symbol_PBEqn, atermpp::function_symbol("PBEqn", 3));
+  return function_symbol_PBEqn;
 }
 
 inline
-AFun gsAFunPBEqn()
+bool gsIsPBEqn(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBEqn = initAFunPBEqn(AFunPBEqn);
-  return AFunPBEqn;
-}
-
-inline
-bool gsIsPBEqn(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBEqn();
+  return ATgetAFun(Term) == function_symbol_PBEqn();
 }
 
 // PBEqnSpec
 inline
-AFun initAFunPBEqnSpec(AFun& f)
+atermpp::function_symbol function_symbol_PBEqnSpec()
 {
-  f = ATmakeAFun("PBEqnSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBEqnSpec = core::detail::initialise_static_expression(function_symbol_PBEqnSpec, atermpp::function_symbol("PBEqnSpec", 1));
+  return function_symbol_PBEqnSpec;
 }
 
 inline
-AFun gsAFunPBEqnSpec()
+bool gsIsPBEqnSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBEqnSpec = initAFunPBEqnSpec(AFunPBEqnSpec);
-  return AFunPBEqnSpec;
-}
-
-inline
-bool gsIsPBEqnSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBEqnSpec();
+  return ATgetAFun(Term) == function_symbol_PBEqnSpec();
 }
 
 // PBInit
 inline
-AFun initAFunPBInit(AFun& f)
+atermpp::function_symbol function_symbol_PBInit()
 {
-  f = ATmakeAFun("PBInit", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PBInit = core::detail::initialise_static_expression(function_symbol_PBInit, atermpp::function_symbol("PBInit", 1));
+  return function_symbol_PBInit;
 }
 
 inline
-AFun gsAFunPBInit()
+bool gsIsPBInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunPBInit = initAFunPBInit(AFunPBInit);
-  return AFunPBInit;
-}
-
-inline
-bool gsIsPBInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPBInit();
+  return ATgetAFun(Term) == function_symbol_PBInit();
 }
 
 // ParamId
 inline
-AFun initAFunParamId(AFun& f)
+atermpp::function_symbol function_symbol_ParamId()
 {
-  f = ATmakeAFun("ParamId", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ParamId = core::detail::initialise_static_expression(function_symbol_ParamId, atermpp::function_symbol("ParamId", 2));
+  return function_symbol_ParamId;
 }
 
 inline
-AFun gsAFunParamId()
+bool gsIsParamId(atermpp::aterm_appl Term)
 {
-  static AFun AFunParamId = initAFunParamId(AFunParamId);
-  return AFunParamId;
-}
-
-inline
-bool gsIsParamId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunParamId();
+  return ATgetAFun(Term) == function_symbol_ParamId();
 }
 
 // ProcEqn
 inline
-AFun initAFunProcEqn(AFun& f)
+atermpp::function_symbol function_symbol_ProcEqn()
 {
-  f = ATmakeAFun("ProcEqn", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcEqn = core::detail::initialise_static_expression(function_symbol_ProcEqn, atermpp::function_symbol("ProcEqn", 3));
+  return function_symbol_ProcEqn;
 }
 
 inline
-AFun gsAFunProcEqn()
+bool gsIsProcEqn(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcEqn = initAFunProcEqn(AFunProcEqn);
-  return AFunProcEqn;
-}
-
-inline
-bool gsIsProcEqn(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcEqn();
+  return ATgetAFun(Term) == function_symbol_ProcEqn();
 }
 
 // ProcEqnSpec
 inline
-AFun initAFunProcEqnSpec(AFun& f)
+atermpp::function_symbol function_symbol_ProcEqnSpec()
 {
-  f = ATmakeAFun("ProcEqnSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcEqnSpec = core::detail::initialise_static_expression(function_symbol_ProcEqnSpec, atermpp::function_symbol("ProcEqnSpec", 1));
+  return function_symbol_ProcEqnSpec;
 }
 
 inline
-AFun gsAFunProcEqnSpec()
+bool gsIsProcEqnSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcEqnSpec = initAFunProcEqnSpec(AFunProcEqnSpec);
-  return AFunProcEqnSpec;
-}
-
-inline
-bool gsIsProcEqnSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcEqnSpec();
+  return ATgetAFun(Term) == function_symbol_ProcEqnSpec();
 }
 
 // ProcSpec
 inline
-AFun initAFunProcSpec(AFun& f)
+atermpp::function_symbol function_symbol_ProcSpec()
 {
-  f = ATmakeAFun("ProcSpec", 5, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcSpec = core::detail::initialise_static_expression(function_symbol_ProcSpec, atermpp::function_symbol("ProcSpec", 5));
+  return function_symbol_ProcSpec;
 }
 
 inline
-AFun gsAFunProcSpec()
+bool gsIsProcSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcSpec = initAFunProcSpec(AFunProcSpec);
-  return AFunProcSpec;
-}
-
-inline
-bool gsIsProcSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcSpec();
+  return ATgetAFun(Term) == function_symbol_ProcSpec();
 }
 
 // ProcVarId
 inline
-AFun initAFunProcVarId(AFun& f)
+atermpp::function_symbol function_symbol_ProcVarId()
 {
-  f = ATmakeAFun("ProcVarId", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcVarId = core::detail::initialise_static_expression(function_symbol_ProcVarId, atermpp::function_symbol("ProcVarId", 2));
+  return function_symbol_ProcVarId;
 }
 
 inline
-AFun gsAFunProcVarId()
+bool gsIsProcVarId(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcVarId = initAFunProcVarId(AFunProcVarId);
-  return AFunProcVarId;
-}
-
-inline
-bool gsIsProcVarId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcVarId();
+  return ATgetAFun(Term) == function_symbol_ProcVarId();
 }
 
 // Process
 inline
-AFun initAFunProcess(AFun& f)
+atermpp::function_symbol function_symbol_Process()
 {
-  f = ATmakeAFun("Process", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Process = core::detail::initialise_static_expression(function_symbol_Process, atermpp::function_symbol("Process", 2));
+  return function_symbol_Process;
 }
 
 inline
-AFun gsAFunProcess()
+bool gsIsProcess(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcess = initAFunProcess(AFunProcess);
-  return AFunProcess;
-}
-
-inline
-bool gsIsProcess(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcess();
+  return ATgetAFun(Term) == function_symbol_Process();
 }
 
 // ProcessAssignment
 inline
-AFun initAFunProcessAssignment(AFun& f)
+atermpp::function_symbol function_symbol_ProcessAssignment()
 {
-  f = ATmakeAFun("ProcessAssignment", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcessAssignment = core::detail::initialise_static_expression(function_symbol_ProcessAssignment, atermpp::function_symbol("ProcessAssignment", 2));
+  return function_symbol_ProcessAssignment;
 }
 
 inline
-AFun gsAFunProcessAssignment()
+bool gsIsProcessAssignment(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcessAssignment = initAFunProcessAssignment(AFunProcessAssignment);
-  return AFunProcessAssignment;
-}
-
-inline
-bool gsIsProcessAssignment(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcessAssignment();
+  return ATgetAFun(Term) == function_symbol_ProcessAssignment();
 }
 
 // ProcessInit
 inline
-AFun initAFunProcessInit(AFun& f)
+atermpp::function_symbol function_symbol_ProcessInit()
 {
-  f = ATmakeAFun("ProcessInit", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_ProcessInit = core::detail::initialise_static_expression(function_symbol_ProcessInit, atermpp::function_symbol("ProcessInit", 1));
+  return function_symbol_ProcessInit;
 }
 
 inline
-AFun gsAFunProcessInit()
+bool gsIsProcessInit(atermpp::aterm_appl Term)
 {
-  static AFun AFunProcessInit = initAFunProcessInit(AFunProcessInit);
-  return AFunProcessInit;
-}
-
-inline
-bool gsIsProcessInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunProcessInit();
+  return ATgetAFun(Term) == function_symbol_ProcessInit();
 }
 
 // PropVarDecl
 inline
-AFun initAFunPropVarDecl(AFun& f)
+atermpp::function_symbol function_symbol_PropVarDecl()
 {
-  f = ATmakeAFun("PropVarDecl", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PropVarDecl = core::detail::initialise_static_expression(function_symbol_PropVarDecl, atermpp::function_symbol("PropVarDecl", 2));
+  return function_symbol_PropVarDecl;
 }
 
 inline
-AFun gsAFunPropVarDecl()
+bool gsIsPropVarDecl(atermpp::aterm_appl Term)
 {
-  static AFun AFunPropVarDecl = initAFunPropVarDecl(AFunPropVarDecl);
-  return AFunPropVarDecl;
-}
-
-inline
-bool gsIsPropVarDecl(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPropVarDecl();
+  return ATgetAFun(Term) == function_symbol_PropVarDecl();
 }
 
 // PropVarInst
 inline
-AFun initAFunPropVarInst(AFun& f)
+atermpp::function_symbol function_symbol_PropVarInst()
 {
-  f = ATmakeAFun("PropVarInst", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_PropVarInst = core::detail::initialise_static_expression(function_symbol_PropVarInst, atermpp::function_symbol("PropVarInst", 2));
+  return function_symbol_PropVarInst;
 }
 
 inline
-AFun gsAFunPropVarInst()
+bool gsIsPropVarInst(atermpp::aterm_appl Term)
 {
-  static AFun AFunPropVarInst = initAFunPropVarInst(AFunPropVarInst);
-  return AFunPropVarInst;
-}
-
-inline
-bool gsIsPropVarInst(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunPropVarInst();
+  return ATgetAFun(Term) == function_symbol_PropVarInst();
 }
 
 // RegAlt
 inline
-AFun initAFunRegAlt(AFun& f)
+atermpp::function_symbol function_symbol_RegAlt()
 {
-  f = ATmakeAFun("RegAlt", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RegAlt = core::detail::initialise_static_expression(function_symbol_RegAlt, atermpp::function_symbol("RegAlt", 2));
+  return function_symbol_RegAlt;
 }
 
 inline
-AFun gsAFunRegAlt()
+bool gsIsRegAlt(atermpp::aterm_appl Term)
 {
-  static AFun AFunRegAlt = initAFunRegAlt(AFunRegAlt);
-  return AFunRegAlt;
-}
-
-inline
-bool gsIsRegAlt(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRegAlt();
+  return ATgetAFun(Term) == function_symbol_RegAlt();
 }
 
 // RegNil
 inline
-AFun initAFunRegNil(AFun& f)
+atermpp::function_symbol function_symbol_RegNil()
 {
-  f = ATmakeAFun("RegNil", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RegNil = core::detail::initialise_static_expression(function_symbol_RegNil, atermpp::function_symbol("RegNil", 0));
+  return function_symbol_RegNil;
 }
 
 inline
-AFun gsAFunRegNil()
+bool gsIsRegNil(atermpp::aterm_appl Term)
 {
-  static AFun AFunRegNil = initAFunRegNil(AFunRegNil);
-  return AFunRegNil;
-}
-
-inline
-bool gsIsRegNil(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRegNil();
+  return ATgetAFun(Term) == function_symbol_RegNil();
 }
 
 // RegSeq
 inline
-AFun initAFunRegSeq(AFun& f)
+atermpp::function_symbol function_symbol_RegSeq()
 {
-  f = ATmakeAFun("RegSeq", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RegSeq = core::detail::initialise_static_expression(function_symbol_RegSeq, atermpp::function_symbol("RegSeq", 2));
+  return function_symbol_RegSeq;
 }
 
 inline
-AFun gsAFunRegSeq()
+bool gsIsRegSeq(atermpp::aterm_appl Term)
 {
-  static AFun AFunRegSeq = initAFunRegSeq(AFunRegSeq);
-  return AFunRegSeq;
-}
-
-inline
-bool gsIsRegSeq(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRegSeq();
+  return ATgetAFun(Term) == function_symbol_RegSeq();
 }
 
 // RegTrans
 inline
-AFun initAFunRegTrans(AFun& f)
+atermpp::function_symbol function_symbol_RegTrans()
 {
-  f = ATmakeAFun("RegTrans", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RegTrans = core::detail::initialise_static_expression(function_symbol_RegTrans, atermpp::function_symbol("RegTrans", 1));
+  return function_symbol_RegTrans;
 }
 
 inline
-AFun gsAFunRegTrans()
+bool gsIsRegTrans(atermpp::aterm_appl Term)
 {
-  static AFun AFunRegTrans = initAFunRegTrans(AFunRegTrans);
-  return AFunRegTrans;
-}
-
-inline
-bool gsIsRegTrans(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRegTrans();
+  return ATgetAFun(Term) == function_symbol_RegTrans();
 }
 
 // RegTransOrNil
 inline
-AFun initAFunRegTransOrNil(AFun& f)
+atermpp::function_symbol function_symbol_RegTransOrNil()
 {
-  f = ATmakeAFun("RegTransOrNil", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RegTransOrNil = core::detail::initialise_static_expression(function_symbol_RegTransOrNil, atermpp::function_symbol("RegTransOrNil", 1));
+  return function_symbol_RegTransOrNil;
 }
 
 inline
-AFun gsAFunRegTransOrNil()
+bool gsIsRegTransOrNil(atermpp::aterm_appl Term)
 {
-  static AFun AFunRegTransOrNil = initAFunRegTransOrNil(AFunRegTransOrNil);
-  return AFunRegTransOrNil;
-}
-
-inline
-bool gsIsRegTransOrNil(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRegTransOrNil();
+  return ATgetAFun(Term) == function_symbol_RegTransOrNil();
 }
 
 // Rename
 inline
-AFun initAFunRename(AFun& f)
+atermpp::function_symbol function_symbol_Rename()
 {
-  f = ATmakeAFun("Rename", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Rename = core::detail::initialise_static_expression(function_symbol_Rename, atermpp::function_symbol("Rename", 2));
+  return function_symbol_Rename;
 }
 
 inline
-AFun gsAFunRename()
+bool gsIsRename(atermpp::aterm_appl Term)
 {
-  static AFun AFunRename = initAFunRename(AFunRename);
-  return AFunRename;
-}
-
-inline
-bool gsIsRename(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRename();
+  return ATgetAFun(Term) == function_symbol_Rename();
 }
 
 // RenameExpr
 inline
-AFun initAFunRenameExpr(AFun& f)
+atermpp::function_symbol function_symbol_RenameExpr()
 {
-  f = ATmakeAFun("RenameExpr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_RenameExpr = core::detail::initialise_static_expression(function_symbol_RenameExpr, atermpp::function_symbol("RenameExpr", 2));
+  return function_symbol_RenameExpr;
 }
 
 inline
-AFun gsAFunRenameExpr()
+bool gsIsRenameExpr(atermpp::aterm_appl Term)
 {
-  static AFun AFunRenameExpr = initAFunRenameExpr(AFunRenameExpr);
-  return AFunRenameExpr;
-}
-
-inline
-bool gsIsRenameExpr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunRenameExpr();
+  return ATgetAFun(Term) == function_symbol_RenameExpr();
 }
 
 // Seq
 inline
-AFun initAFunSeq(AFun& f)
+atermpp::function_symbol function_symbol_Seq()
 {
-  f = ATmakeAFun("Seq", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Seq = core::detail::initialise_static_expression(function_symbol_Seq, atermpp::function_symbol("Seq", 2));
+  return function_symbol_Seq;
 }
 
 inline
-AFun gsAFunSeq()
+bool gsIsSeq(atermpp::aterm_appl Term)
 {
-  static AFun AFunSeq = initAFunSeq(AFunSeq);
-  return AFunSeq;
-}
-
-inline
-bool gsIsSeq(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSeq();
+  return ATgetAFun(Term) == function_symbol_Seq();
 }
 
 // SetBagComp
 inline
-AFun initAFunSetBagComp(AFun& f)
+atermpp::function_symbol function_symbol_SetBagComp()
 {
-  f = ATmakeAFun("SetBagComp", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SetBagComp = core::detail::initialise_static_expression(function_symbol_SetBagComp, atermpp::function_symbol("SetBagComp", 0));
+  return function_symbol_SetBagComp;
 }
 
 inline
-AFun gsAFunSetBagComp()
+bool gsIsSetBagComp(atermpp::aterm_appl Term)
 {
-  static AFun AFunSetBagComp = initAFunSetBagComp(AFunSetBagComp);
-  return AFunSetBagComp;
-}
-
-inline
-bool gsIsSetBagComp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSetBagComp();
+  return ATgetAFun(Term) == function_symbol_SetBagComp();
 }
 
 // SetComp
 inline
-AFun initAFunSetComp(AFun& f)
+atermpp::function_symbol function_symbol_SetComp()
 {
-  f = ATmakeAFun("SetComp", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SetComp = core::detail::initialise_static_expression(function_symbol_SetComp, atermpp::function_symbol("SetComp", 0));
+  return function_symbol_SetComp;
 }
 
 inline
-AFun gsAFunSetComp()
+bool gsIsSetComp(atermpp::aterm_appl Term)
 {
-  static AFun AFunSetComp = initAFunSetComp(AFunSetComp);
-  return AFunSetComp;
-}
-
-inline
-bool gsIsSetComp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSetComp();
+  return ATgetAFun(Term) == function_symbol_SetComp();
 }
 
 // SortArrow
 inline
-AFun initAFunSortArrow(AFun& f)
+atermpp::function_symbol function_symbol_SortArrow()
 {
-  f = ATmakeAFun("SortArrow", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortArrow = core::detail::initialise_static_expression(function_symbol_SortArrow, atermpp::function_symbol("SortArrow", 2));
+  return function_symbol_SortArrow;
 }
 
 inline
-AFun gsAFunSortArrow()
+bool gsIsSortArrow(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortArrow = initAFunSortArrow(AFunSortArrow);
-  return AFunSortArrow;
-}
-
-inline
-bool gsIsSortArrow(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortArrow();
+  return ATgetAFun(Term) == function_symbol_SortArrow();
 }
 
 // SortBag
 inline
-AFun initAFunSortBag(AFun& f)
+atermpp::function_symbol function_symbol_SortBag()
 {
-  f = ATmakeAFun("SortBag", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortBag = core::detail::initialise_static_expression(function_symbol_SortBag, atermpp::function_symbol("SortBag", 0));
+  return function_symbol_SortBag;
 }
 
 inline
-AFun gsAFunSortBag()
+bool gsIsSortBag(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortBag = initAFunSortBag(AFunSortBag);
-  return AFunSortBag;
-}
-
-inline
-bool gsIsSortBag(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortBag();
+  return ATgetAFun(Term) == function_symbol_SortBag();
 }
 
 // SortCons
 inline
-AFun initAFunSortCons(AFun& f)
+atermpp::function_symbol function_symbol_SortCons()
 {
-  f = ATmakeAFun("SortCons", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortCons = core::detail::initialise_static_expression(function_symbol_SortCons, atermpp::function_symbol("SortCons", 2));
+  return function_symbol_SortCons;
 }
 
 inline
-AFun gsAFunSortCons()
+bool gsIsSortCons(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortCons = initAFunSortCons(AFunSortCons);
-  return AFunSortCons;
-}
-
-inline
-bool gsIsSortCons(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortCons();
+  return ATgetAFun(Term) == function_symbol_SortCons();
 }
 
 // SortFBag
 inline
-AFun initAFunSortFBag(AFun& f)
+atermpp::function_symbol function_symbol_SortFBag()
 {
-  f = ATmakeAFun("SortFBag", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortFBag = core::detail::initialise_static_expression(function_symbol_SortFBag, atermpp::function_symbol("SortFBag", 0));
+  return function_symbol_SortFBag;
 }
 
 inline
-AFun gsAFunSortFBag()
+bool gsIsSortFBag(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortFBag = initAFunSortFBag(AFunSortFBag);
-  return AFunSortFBag;
-}
-
-inline
-bool gsIsSortFBag(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortFBag();
+  return ATgetAFun(Term) == function_symbol_SortFBag();
 }
 
 // SortFSet
 inline
-AFun initAFunSortFSet(AFun& f)
+atermpp::function_symbol function_symbol_SortFSet()
 {
-  f = ATmakeAFun("SortFSet", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortFSet = core::detail::initialise_static_expression(function_symbol_SortFSet, atermpp::function_symbol("SortFSet", 0));
+  return function_symbol_SortFSet;
 }
 
 inline
-AFun gsAFunSortFSet()
+bool gsIsSortFSet(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortFSet = initAFunSortFSet(AFunSortFSet);
-  return AFunSortFSet;
-}
-
-inline
-bool gsIsSortFSet(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortFSet();
+  return ATgetAFun(Term) == function_symbol_SortFSet();
 }
 
 // SortId
 inline
-AFun initAFunSortId(AFun& f)
+atermpp::function_symbol function_symbol_SortId()
 {
-  f = ATmakeAFun("SortId", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortId = core::detail::initialise_static_expression(function_symbol_SortId, atermpp::function_symbol("SortId", 1));
+  return function_symbol_SortId;
 }
 
 inline
-AFun gsAFunSortId()
+bool gsIsSortId(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortId = initAFunSortId(AFunSortId);
-  return AFunSortId;
-}
-
-inline
-bool gsIsSortId(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortId();
+  return ATgetAFun(Term) == function_symbol_SortId();
 }
 
 // SortList
 inline
-AFun initAFunSortList(AFun& f)
+atermpp::function_symbol function_symbol_SortList()
 {
-  f = ATmakeAFun("SortList", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortList = core::detail::initialise_static_expression(function_symbol_SortList, atermpp::function_symbol("SortList", 0));
+  return function_symbol_SortList;
 }
 
 inline
-AFun gsAFunSortList()
+bool gsIsSortList(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortList = initAFunSortList(AFunSortList);
-  return AFunSortList;
-}
-
-inline
-bool gsIsSortList(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortList();
+  return ATgetAFun(Term) == function_symbol_SortList();
 }
 
 // SortRef
 inline
-AFun initAFunSortRef(AFun& f)
+atermpp::function_symbol function_symbol_SortRef()
 {
-  f = ATmakeAFun("SortRef", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortRef = core::detail::initialise_static_expression(function_symbol_SortRef, atermpp::function_symbol("SortRef", 2));
+  return function_symbol_SortRef;
 }
 
 inline
-AFun gsAFunSortRef()
+bool gsIsSortRef(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortRef = initAFunSortRef(AFunSortRef);
-  return AFunSortRef;
-}
-
-inline
-bool gsIsSortRef(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortRef();
+  return ATgetAFun(Term) == function_symbol_SortRef();
 }
 
 // SortSet
 inline
-AFun initAFunSortSet(AFun& f)
+atermpp::function_symbol function_symbol_SortSet()
 {
-  f = ATmakeAFun("SortSet", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortSet = core::detail::initialise_static_expression(function_symbol_SortSet, atermpp::function_symbol("SortSet", 0));
+  return function_symbol_SortSet;
 }
 
 inline
-AFun gsAFunSortSet()
+bool gsIsSortSet(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortSet = initAFunSortSet(AFunSortSet);
-  return AFunSortSet;
-}
-
-inline
-bool gsIsSortSet(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortSet();
+  return ATgetAFun(Term) == function_symbol_SortSet();
 }
 
 // SortSpec
 inline
-AFun initAFunSortSpec(AFun& f)
+atermpp::function_symbol function_symbol_SortSpec()
 {
-  f = ATmakeAFun("SortSpec", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortSpec = core::detail::initialise_static_expression(function_symbol_SortSpec, atermpp::function_symbol("SortSpec", 1));
+  return function_symbol_SortSpec;
 }
 
 inline
-AFun gsAFunSortSpec()
+bool gsIsSortSpec(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortSpec = initAFunSortSpec(AFunSortSpec);
-  return AFunSortSpec;
-}
-
-inline
-bool gsIsSortSpec(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortSpec();
+  return ATgetAFun(Term) == function_symbol_SortSpec();
 }
 
 // SortStruct
 inline
-AFun initAFunSortStruct(AFun& f)
+atermpp::function_symbol function_symbol_SortStruct()
 {
-  f = ATmakeAFun("SortStruct", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortStruct = core::detail::initialise_static_expression(function_symbol_SortStruct, atermpp::function_symbol("SortStruct", 1));
+  return function_symbol_SortStruct;
 }
 
 inline
-AFun gsAFunSortStruct()
+bool gsIsSortStruct(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortStruct = initAFunSortStruct(AFunSortStruct);
-  return AFunSortStruct;
-}
-
-inline
-bool gsIsSortStruct(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortStruct();
+  return ATgetAFun(Term) == function_symbol_SortStruct();
 }
 
 // SortUnknown
 inline
-AFun initAFunSortUnknown(AFun& f)
+atermpp::function_symbol function_symbol_SortUnknown()
 {
-  f = ATmakeAFun("SortUnknown", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortUnknown = core::detail::initialise_static_expression(function_symbol_SortUnknown, atermpp::function_symbol("SortUnknown", 0));
+  return function_symbol_SortUnknown;
 }
 
 inline
-AFun gsAFunSortUnknown()
+bool gsIsSortUnknown(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortUnknown = initAFunSortUnknown(AFunSortUnknown);
-  return AFunSortUnknown;
-}
-
-inline
-bool gsIsSortUnknown(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortUnknown();
+  return ATgetAFun(Term) == function_symbol_SortUnknown();
 }
 
 // SortsPossible
 inline
-AFun initAFunSortsPossible(AFun& f)
+atermpp::function_symbol function_symbol_SortsPossible()
 {
-  f = ATmakeAFun("SortsPossible", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_SortsPossible = core::detail::initialise_static_expression(function_symbol_SortsPossible, atermpp::function_symbol("SortsPossible", 1));
+  return function_symbol_SortsPossible;
 }
 
 inline
-AFun gsAFunSortsPossible()
+bool gsIsSortsPossible(atermpp::aterm_appl Term)
 {
-  static AFun AFunSortsPossible = initAFunSortsPossible(AFunSortsPossible);
-  return AFunSortsPossible;
-}
-
-inline
-bool gsIsSortsPossible(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortsPossible();
+  return ATgetAFun(Term) == function_symbol_SortsPossible();
 }
 
 // StateAnd
 inline
-AFun initAFunStateAnd(AFun& f)
+atermpp::function_symbol function_symbol_StateAnd()
 {
-  f = ATmakeAFun("StateAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateAnd = core::detail::initialise_static_expression(function_symbol_StateAnd, atermpp::function_symbol("StateAnd", 2));
+  return function_symbol_StateAnd;
 }
 
 inline
-AFun gsAFunStateAnd()
+bool gsIsStateAnd(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateAnd = initAFunStateAnd(AFunStateAnd);
-  return AFunStateAnd;
-}
-
-inline
-bool gsIsStateAnd(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateAnd();
+  return ATgetAFun(Term) == function_symbol_StateAnd();
 }
 
 // StateDelay
 inline
-AFun initAFunStateDelay(AFun& f)
+atermpp::function_symbol function_symbol_StateDelay()
 {
-  f = ATmakeAFun("StateDelay", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateDelay = core::detail::initialise_static_expression(function_symbol_StateDelay, atermpp::function_symbol("StateDelay", 0));
+  return function_symbol_StateDelay;
 }
 
 inline
-AFun gsAFunStateDelay()
+bool gsIsStateDelay(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateDelay = initAFunStateDelay(AFunStateDelay);
-  return AFunStateDelay;
-}
-
-inline
-bool gsIsStateDelay(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateDelay();
+  return ATgetAFun(Term) == function_symbol_StateDelay();
 }
 
 // StateDelayTimed
 inline
-AFun initAFunStateDelayTimed(AFun& f)
+atermpp::function_symbol function_symbol_StateDelayTimed()
 {
-  f = ATmakeAFun("StateDelayTimed", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateDelayTimed = core::detail::initialise_static_expression(function_symbol_StateDelayTimed, atermpp::function_symbol("StateDelayTimed", 1));
+  return function_symbol_StateDelayTimed;
 }
 
 inline
-AFun gsAFunStateDelayTimed()
+bool gsIsStateDelayTimed(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateDelayTimed = initAFunStateDelayTimed(AFunStateDelayTimed);
-  return AFunStateDelayTimed;
-}
-
-inline
-bool gsIsStateDelayTimed(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateDelayTimed();
+  return ATgetAFun(Term) == function_symbol_StateDelayTimed();
 }
 
 // StateExists
 inline
-AFun initAFunStateExists(AFun& f)
+atermpp::function_symbol function_symbol_StateExists()
 {
-  f = ATmakeAFun("StateExists", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateExists = core::detail::initialise_static_expression(function_symbol_StateExists, atermpp::function_symbol("StateExists", 2));
+  return function_symbol_StateExists;
 }
 
 inline
-AFun gsAFunStateExists()
+bool gsIsStateExists(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateExists = initAFunStateExists(AFunStateExists);
-  return AFunStateExists;
-}
-
-inline
-bool gsIsStateExists(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateExists();
+  return ATgetAFun(Term) == function_symbol_StateExists();
 }
 
 // StateFalse
 inline
-AFun initAFunStateFalse(AFun& f)
+atermpp::function_symbol function_symbol_StateFalse()
 {
-  f = ATmakeAFun("StateFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateFalse = core::detail::initialise_static_expression(function_symbol_StateFalse, atermpp::function_symbol("StateFalse", 0));
+  return function_symbol_StateFalse;
 }
 
 inline
-AFun gsAFunStateFalse()
+bool gsIsStateFalse(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateFalse = initAFunStateFalse(AFunStateFalse);
-  return AFunStateFalse;
-}
-
-inline
-bool gsIsStateFalse(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateFalse();
+  return ATgetAFun(Term) == function_symbol_StateFalse();
 }
 
 // StateForall
 inline
-AFun initAFunStateForall(AFun& f)
+atermpp::function_symbol function_symbol_StateForall()
 {
-  f = ATmakeAFun("StateForall", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateForall = core::detail::initialise_static_expression(function_symbol_StateForall, atermpp::function_symbol("StateForall", 2));
+  return function_symbol_StateForall;
 }
 
 inline
-AFun gsAFunStateForall()
+bool gsIsStateForall(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateForall = initAFunStateForall(AFunStateForall);
-  return AFunStateForall;
-}
-
-inline
-bool gsIsStateForall(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateForall();
+  return ATgetAFun(Term) == function_symbol_StateForall();
 }
 
 // StateImp
 inline
-AFun initAFunStateImp(AFun& f)
+atermpp::function_symbol function_symbol_StateImp()
 {
-  f = ATmakeAFun("StateImp", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateImp = core::detail::initialise_static_expression(function_symbol_StateImp, atermpp::function_symbol("StateImp", 2));
+  return function_symbol_StateImp;
 }
 
 inline
-AFun gsAFunStateImp()
+bool gsIsStateImp(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateImp = initAFunStateImp(AFunStateImp);
-  return AFunStateImp;
-}
-
-inline
-bool gsIsStateImp(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateImp();
+  return ATgetAFun(Term) == function_symbol_StateImp();
 }
 
 // StateMay
 inline
-AFun initAFunStateMay(AFun& f)
+atermpp::function_symbol function_symbol_StateMay()
 {
-  f = ATmakeAFun("StateMay", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateMay = core::detail::initialise_static_expression(function_symbol_StateMay, atermpp::function_symbol("StateMay", 2));
+  return function_symbol_StateMay;
 }
 
 inline
-AFun gsAFunStateMay()
+bool gsIsStateMay(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateMay = initAFunStateMay(AFunStateMay);
-  return AFunStateMay;
-}
-
-inline
-bool gsIsStateMay(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateMay();
+  return ATgetAFun(Term) == function_symbol_StateMay();
 }
 
 // StateMu
 inline
-AFun initAFunStateMu(AFun& f)
+atermpp::function_symbol function_symbol_StateMu()
 {
-  f = ATmakeAFun("StateMu", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateMu = core::detail::initialise_static_expression(function_symbol_StateMu, atermpp::function_symbol("StateMu", 3));
+  return function_symbol_StateMu;
 }
 
 inline
-AFun gsAFunStateMu()
+bool gsIsStateMu(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateMu = initAFunStateMu(AFunStateMu);
-  return AFunStateMu;
-}
-
-inline
-bool gsIsStateMu(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateMu();
+  return ATgetAFun(Term) == function_symbol_StateMu();
 }
 
 // StateMust
 inline
-AFun initAFunStateMust(AFun& f)
+atermpp::function_symbol function_symbol_StateMust()
 {
-  f = ATmakeAFun("StateMust", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateMust = core::detail::initialise_static_expression(function_symbol_StateMust, atermpp::function_symbol("StateMust", 2));
+  return function_symbol_StateMust;
 }
 
 inline
-AFun gsAFunStateMust()
+bool gsIsStateMust(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateMust = initAFunStateMust(AFunStateMust);
-  return AFunStateMust;
-}
-
-inline
-bool gsIsStateMust(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateMust();
+  return ATgetAFun(Term) == function_symbol_StateMust();
 }
 
 // StateNot
 inline
-AFun initAFunStateNot(AFun& f)
+atermpp::function_symbol function_symbol_StateNot()
 {
-  f = ATmakeAFun("StateNot", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateNot = core::detail::initialise_static_expression(function_symbol_StateNot, atermpp::function_symbol("StateNot", 1));
+  return function_symbol_StateNot;
 }
 
 inline
-AFun gsAFunStateNot()
+bool gsIsStateNot(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateNot = initAFunStateNot(AFunStateNot);
-  return AFunStateNot;
-}
-
-inline
-bool gsIsStateNot(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateNot();
+  return ATgetAFun(Term) == function_symbol_StateNot();
 }
 
 // StateNu
 inline
-AFun initAFunStateNu(AFun& f)
+atermpp::function_symbol function_symbol_StateNu()
 {
-  f = ATmakeAFun("StateNu", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateNu = core::detail::initialise_static_expression(function_symbol_StateNu, atermpp::function_symbol("StateNu", 3));
+  return function_symbol_StateNu;
 }
 
 inline
-AFun gsAFunStateNu()
+bool gsIsStateNu(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateNu = initAFunStateNu(AFunStateNu);
-  return AFunStateNu;
-}
-
-inline
-bool gsIsStateNu(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateNu();
+  return ATgetAFun(Term) == function_symbol_StateNu();
 }
 
 // StateOr
 inline
-AFun initAFunStateOr(AFun& f)
+atermpp::function_symbol function_symbol_StateOr()
 {
-  f = ATmakeAFun("StateOr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateOr = core::detail::initialise_static_expression(function_symbol_StateOr, atermpp::function_symbol("StateOr", 2));
+  return function_symbol_StateOr;
 }
 
 inline
-AFun gsAFunStateOr()
+bool gsIsStateOr(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateOr = initAFunStateOr(AFunStateOr);
-  return AFunStateOr;
-}
-
-inline
-bool gsIsStateOr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateOr();
+  return ATgetAFun(Term) == function_symbol_StateOr();
 }
 
 // StateTrue
 inline
-AFun initAFunStateTrue(AFun& f)
+atermpp::function_symbol function_symbol_StateTrue()
 {
-  f = ATmakeAFun("StateTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateTrue = core::detail::initialise_static_expression(function_symbol_StateTrue, atermpp::function_symbol("StateTrue", 0));
+  return function_symbol_StateTrue;
 }
 
 inline
-AFun gsAFunStateTrue()
+bool gsIsStateTrue(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateTrue = initAFunStateTrue(AFunStateTrue);
-  return AFunStateTrue;
-}
-
-inline
-bool gsIsStateTrue(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateTrue();
+  return ATgetAFun(Term) == function_symbol_StateTrue();
 }
 
 // StateVar
 inline
-AFun initAFunStateVar(AFun& f)
+atermpp::function_symbol function_symbol_StateVar()
 {
-  f = ATmakeAFun("StateVar", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateVar = core::detail::initialise_static_expression(function_symbol_StateVar, atermpp::function_symbol("StateVar", 2));
+  return function_symbol_StateVar;
 }
 
 inline
-AFun gsAFunStateVar()
+bool gsIsStateVar(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateVar = initAFunStateVar(AFunStateVar);
-  return AFunStateVar;
-}
-
-inline
-bool gsIsStateVar(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateVar();
+  return ATgetAFun(Term) == function_symbol_StateVar();
 }
 
 // StateYaled
 inline
-AFun initAFunStateYaled(AFun& f)
+atermpp::function_symbol function_symbol_StateYaled()
 {
-  f = ATmakeAFun("StateYaled", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateYaled = core::detail::initialise_static_expression(function_symbol_StateYaled, atermpp::function_symbol("StateYaled", 0));
+  return function_symbol_StateYaled;
 }
 
 inline
-AFun gsAFunStateYaled()
+bool gsIsStateYaled(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateYaled = initAFunStateYaled(AFunStateYaled);
-  return AFunStateYaled;
-}
-
-inline
-bool gsIsStateYaled(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateYaled();
+  return ATgetAFun(Term) == function_symbol_StateYaled();
 }
 
 // StateYaledTimed
 inline
-AFun initAFunStateYaledTimed(AFun& f)
+atermpp::function_symbol function_symbol_StateYaledTimed()
 {
-  f = ATmakeAFun("StateYaledTimed", 1, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StateYaledTimed = core::detail::initialise_static_expression(function_symbol_StateYaledTimed, atermpp::function_symbol("StateYaledTimed", 1));
+  return function_symbol_StateYaledTimed;
 }
 
 inline
-AFun gsAFunStateYaledTimed()
+bool gsIsStateYaledTimed(atermpp::aterm_appl Term)
 {
-  static AFun AFunStateYaledTimed = initAFunStateYaledTimed(AFunStateYaledTimed);
-  return AFunStateYaledTimed;
-}
-
-inline
-bool gsIsStateYaledTimed(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStateYaledTimed();
+  return ATgetAFun(Term) == function_symbol_StateYaledTimed();
 }
 
 // StructCons
 inline
-AFun initAFunStructCons(AFun& f)
+atermpp::function_symbol function_symbol_StructCons()
 {
-  f = ATmakeAFun("StructCons", 3, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StructCons = core::detail::initialise_static_expression(function_symbol_StructCons, atermpp::function_symbol("StructCons", 3));
+  return function_symbol_StructCons;
 }
 
 inline
-AFun gsAFunStructCons()
+bool gsIsStructCons(atermpp::aterm_appl Term)
 {
-  static AFun AFunStructCons = initAFunStructCons(AFunStructCons);
-  return AFunStructCons;
-}
-
-inline
-bool gsIsStructCons(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStructCons();
+  return ATgetAFun(Term) == function_symbol_StructCons();
 }
 
 // StructProj
 inline
-AFun initAFunStructProj(AFun& f)
+atermpp::function_symbol function_symbol_StructProj()
 {
-  f = ATmakeAFun("StructProj", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_StructProj = core::detail::initialise_static_expression(function_symbol_StructProj, atermpp::function_symbol("StructProj", 2));
+  return function_symbol_StructProj;
 }
 
 inline
-AFun gsAFunStructProj()
+bool gsIsStructProj(atermpp::aterm_appl Term)
 {
-  static AFun AFunStructProj = initAFunStructProj(AFunStructProj);
-  return AFunStructProj;
-}
-
-inline
-bool gsIsStructProj(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunStructProj();
+  return ATgetAFun(Term) == function_symbol_StructProj();
 }
 
 // Sum
 inline
-AFun initAFunSum(AFun& f)
+atermpp::function_symbol function_symbol_Sum()
 {
-  f = ATmakeAFun("Sum", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Sum = core::detail::initialise_static_expression(function_symbol_Sum, atermpp::function_symbol("Sum", 2));
+  return function_symbol_Sum;
 }
 
 inline
-AFun gsAFunSum()
+bool gsIsSum(atermpp::aterm_appl Term)
 {
-  static AFun AFunSum = initAFunSum(AFunSum);
-  return AFunSum;
-}
-
-inline
-bool gsIsSum(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSum();
+  return ATgetAFun(Term) == function_symbol_Sum();
 }
 
 // Sync
 inline
-AFun initAFunSync(AFun& f)
+atermpp::function_symbol function_symbol_Sync()
 {
-  f = ATmakeAFun("Sync", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Sync = core::detail::initialise_static_expression(function_symbol_Sync, atermpp::function_symbol("Sync", 2));
+  return function_symbol_Sync;
 }
 
 inline
-AFun gsAFunSync()
+bool gsIsSync(atermpp::aterm_appl Term)
 {
-  static AFun AFunSync = initAFunSync(AFunSync);
-  return AFunSync;
-}
-
-inline
-bool gsIsSync(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSync();
+  return ATgetAFun(Term) == function_symbol_Sync();
 }
 
 // Tau
 inline
-AFun initAFunTau(AFun& f)
+atermpp::function_symbol function_symbol_Tau()
 {
-  f = ATmakeAFun("Tau", 0, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Tau = core::detail::initialise_static_expression(function_symbol_Tau, atermpp::function_symbol("Tau", 0));
+  return function_symbol_Tau;
 }
 
 inline
-AFun gsAFunTau()
+bool gsIsTau(atermpp::aterm_appl Term)
 {
-  static AFun AFunTau = initAFunTau(AFunTau);
-  return AFunTau;
-}
-
-inline
-bool gsIsTau(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTau();
+  return ATgetAFun(Term) == function_symbol_Tau();
 }
 
 // Whr
 inline
-AFun initAFunWhr(AFun& f)
+atermpp::function_symbol function_symbol_Whr()
 {
-  f = ATmakeAFun("Whr", 2, false);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_Whr = core::detail::initialise_static_expression(function_symbol_Whr, atermpp::function_symbol("Whr", 2));
+  return function_symbol_Whr;
 }
 
 inline
-AFun gsAFunWhr()
+bool gsIsWhr(atermpp::aterm_appl Term)
 {
-  static AFun AFunWhr = initAFunWhr(AFunWhr);
-  return AFunWhr;
-}
-
-inline
-bool gsIsWhr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunWhr();
+  return ATgetAFun(Term) == function_symbol_Whr();
 }
 
 inline
 ATermAppl gsMakeActAnd(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(gsAFunActAnd(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActAnd(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
 }
 
 inline
 ATermAppl gsMakeActAt(ATermAppl ActFrm_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunActAt(), (ATerm) ActFrm_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_ActAt(), (ATerm) ActFrm_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeActExists(ATermList DataVarId_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(gsAFunActExists(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActExists(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
 }
 
 inline
 ATermAppl gsMakeActFalse()
 {
-  return ATmakeAppl0(gsAFunActFalse());
+  return ATmakeAppl0(function_symbol_ActFalse());
 }
 
 inline
 ATermAppl gsMakeActForall(ATermList DataVarId_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(gsAFunActForall(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActForall(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
 }
 
 inline
 ATermAppl gsMakeActId(ATermAppl String_0, ATermList SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunActId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_ActId(), (ATerm) String_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeActImp(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(gsAFunActImp(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActImp(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
 }
 
 inline
 ATermAppl gsMakeActNot(ATermAppl ActFrm_0)
 {
-  return ATmakeAppl1(gsAFunActNot(), (ATerm) ActFrm_0);
+  return ATmakeAppl1(function_symbol_ActNot(), (ATerm) ActFrm_0);
 }
 
 inline
 ATermAppl gsMakeActOr(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(gsAFunActOr(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActOr(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
 }
 
 inline
 ATermAppl gsMakeActSpec(ATermList ActId_0)
 {
-  return ATmakeAppl1(gsAFunActSpec(), (ATerm) ActId_0);
+  return ATmakeAppl1(function_symbol_ActSpec(), (ATerm) ActId_0);
 }
 
 inline
 ATermAppl gsMakeActTrue()
 {
-  return ATmakeAppl0(gsAFunActTrue());
+  return ATmakeAppl0(function_symbol_ActTrue());
 }
 
 inline
 ATermAppl gsMakeAction(ATermAppl ActId_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunAction(), (ATerm) ActId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_Action(), (ATerm) ActId_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl ParamIdOrAction_2, ATermAppl ActionRenameRuleRHS_3)
 {
-  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
+  return ATmakeAppl4(function_symbol_ActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
 }
 
 inline
 ATermAppl gsMakeActionRenameRules(ATermList ActionRenameRule_0)
 {
-  return ATmakeAppl1(gsAFunActionRenameRules(), (ATerm) ActionRenameRule_0);
+  return ATmakeAppl1(function_symbol_ActionRenameRules(), (ATerm) ActionRenameRule_0);
 }
 
 inline
 ATermAppl gsMakeActionRenameSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ActionRenameRules_2)
 {
-  return ATmakeAppl3(gsAFunActionRenameSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ActionRenameRules_2);
+  return ATmakeAppl3(function_symbol_ActionRenameSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ActionRenameRules_2);
 }
 
 inline
 ATermAppl gsMakeAllow(ATermList MultActName_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunAllow(), (ATerm) MultActName_0, (ATerm) ProcExpr_1);
+  assert(!ATisEmpty(MultActName_0));
+  return ATmakeAppl2(function_symbol_Allow(), (ATerm) MultActName_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeAtTime(ATermAppl ProcExpr_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunAtTime(), (ATerm) ProcExpr_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_AtTime(), (ATerm) ProcExpr_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeBES(ATermList BooleanEquation_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(gsAFunBES(), (ATerm) BooleanEquation_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BES(), (ATerm) BooleanEquation_0, (ATerm) BooleanExpression_1);
 }
 
 inline
 ATermAppl gsMakeBInit(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunBInit(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_BInit(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeBagComp()
 {
-  return ATmakeAppl0(gsAFunBagComp());
+  return ATmakeAppl0(function_symbol_BagComp());
 }
 
 inline
 ATermAppl gsMakeBinder(ATermAppl BindingOperator_0, ATermList DataVarId_1, ATermAppl DataExpr_2)
 {
-  return ATmakeAppl3(gsAFunBinder(), (ATerm) BindingOperator_0, (ATerm) DataVarId_1, (ATerm) DataExpr_2);
+  return ATmakeAppl3(function_symbol_Binder(), (ATerm) BindingOperator_0, (ATerm) DataVarId_1, (ATerm) DataExpr_2);
 }
 
 inline
 ATermAppl gsMakeBlock(ATermList String_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunBlock(), (ATerm) String_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Block(), (ATerm) String_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeBooleanAnd(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(gsAFunBooleanAnd(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanAnd(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
 }
 
 inline
 ATermAppl gsMakeBooleanEquation(ATermAppl FixPoint_0, ATermAppl BooleanVariable_1, ATermAppl BooleanExpression_2)
 {
-  return ATmakeAppl3(gsAFunBooleanEquation(), (ATerm) FixPoint_0, (ATerm) BooleanVariable_1, (ATerm) BooleanExpression_2);
+  return ATmakeAppl3(function_symbol_BooleanEquation(), (ATerm) FixPoint_0, (ATerm) BooleanVariable_1, (ATerm) BooleanExpression_2);
 }
 
 inline
 ATermAppl gsMakeBooleanFalse()
 {
-  return ATmakeAppl0(gsAFunBooleanFalse());
+  return ATmakeAppl0(function_symbol_BooleanFalse());
 }
 
 inline
 ATermAppl gsMakeBooleanImp(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(gsAFunBooleanImp(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanImp(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
 }
 
 inline
 ATermAppl gsMakeBooleanNot(ATermAppl BooleanExpression_0)
 {
-  return ATmakeAppl1(gsAFunBooleanNot(), (ATerm) BooleanExpression_0);
+  return ATmakeAppl1(function_symbol_BooleanNot(), (ATerm) BooleanExpression_0);
 }
 
 inline
 ATermAppl gsMakeBooleanOr(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(gsAFunBooleanOr(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanOr(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
 }
 
 inline
 ATermAppl gsMakeBooleanTrue()
 {
-  return ATmakeAppl0(gsAFunBooleanTrue());
+  return ATmakeAppl0(function_symbol_BooleanTrue());
 }
 
 inline
 ATermAppl gsMakeBooleanVariable(ATermAppl String_0)
 {
-  return ATmakeAppl1(gsAFunBooleanVariable(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_BooleanVariable(), (ATerm) String_0);
 }
 
 inline
 ATermAppl gsMakeChoice(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunChoice(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Choice(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeComm(ATermList CommExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunComm(), (ATerm) CommExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Comm(), (ATerm) CommExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeCommExpr(ATermAppl MultActName_0, ATermAppl StringOrNil_1)
 {
-  return ATmakeAppl2(gsAFunCommExpr(), (ATerm) MultActName_0, (ATerm) StringOrNil_1);
+  return ATmakeAppl2(function_symbol_CommExpr(), (ATerm) MultActName_0, (ATerm) StringOrNil_1);
 }
 
 inline
 ATermAppl gsMakeConsSpec(ATermList OpId_0)
 {
-  return ATmakeAppl1(gsAFunConsSpec(), (ATerm) OpId_0);
+  return ATmakeAppl1(function_symbol_ConsSpec(), (ATerm) OpId_0);
 }
 
 inline
 ATermAppl gsMakeDataAppl(ATermAppl DataExpr_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunDataAppl(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_DataAppl(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeDataEqn(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl DataExpr_2, ATermAppl DataExpr_3)
 {
-  return ATmakeAppl4(gsAFunDataEqn(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) DataExpr_2, (ATerm) DataExpr_3);
+  return ATmakeAppl4(function_symbol_DataEqn(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) DataExpr_2, (ATerm) DataExpr_3);
 }
 
 inline
 ATermAppl gsMakeDataEqnSpec(ATermList DataEqn_0)
 {
-  return ATmakeAppl1(gsAFunDataEqnSpec(), (ATerm) DataEqn_0);
+  return ATmakeAppl1(function_symbol_DataEqnSpec(), (ATerm) DataEqn_0);
 }
 
 inline
 ATermAppl gsMakeDataSpec(ATermAppl SortSpec_0, ATermAppl ConsSpec_1, ATermAppl MapSpec_2, ATermAppl DataEqnSpec_3)
 {
-  return ATmakeAppl4(gsAFunDataSpec(), (ATerm) SortSpec_0, (ATerm) ConsSpec_1, (ATerm) MapSpec_2, (ATerm) DataEqnSpec_3);
+  return ATmakeAppl4(function_symbol_DataSpec(), (ATerm) SortSpec_0, (ATerm) ConsSpec_1, (ATerm) MapSpec_2, (ATerm) DataEqnSpec_3);
 }
 
 inline
 ATermAppl gsMakeDataVarId(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunDataVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_DataVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeDataVarIdInit(ATermAppl DataVarId_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunDataVarIdInit(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_DataVarIdInit(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeDelta()
 {
-  return ATmakeAppl0(gsAFunDelta());
+  return ATmakeAppl0(function_symbol_Delta());
 }
 
 inline
 ATermAppl gsMakeExists()
 {
-  return ATmakeAppl0(gsAFunExists());
+  return ATmakeAppl0(function_symbol_Exists());
 }
 
 inline
 ATermAppl gsMakeForall()
 {
-  return ATmakeAppl0(gsAFunForall());
+  return ATmakeAppl0(function_symbol_Forall());
 }
 
 inline
 ATermAppl gsMakeGlobVarSpec(ATermList DataVarId_0)
 {
-  return ATmakeAppl1(gsAFunGlobVarSpec(), (ATerm) DataVarId_0);
+  return ATmakeAppl1(function_symbol_GlobVarSpec(), (ATerm) DataVarId_0);
 }
 
 inline
 ATermAppl gsMakeHide(ATermList String_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunHide(), (ATerm) String_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Hide(), (ATerm) String_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeId(ATermAppl String_0)
 {
-  return ATmakeAppl1(gsAFunId(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_Id(), (ATerm) String_0);
 }
 
 inline
 ATermAppl gsMakeIdAssignment(ATermAppl String_0, ATermList IdInit_1)
 {
-  return ATmakeAppl2(gsAFunIdAssignment(), (ATerm) String_0, (ATerm) IdInit_1);
+  return ATmakeAppl2(function_symbol_IdAssignment(), (ATerm) String_0, (ATerm) IdInit_1);
 }
 
 inline
 ATermAppl gsMakeIdInit(ATermAppl String_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunIdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_IdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeIfThen(ATermAppl DataExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunIfThen(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_IfThen(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeIfThenElse(ATermAppl DataExpr_0, ATermAppl ProcExpr_1, ATermAppl ProcExpr_2)
 {
-  return ATmakeAppl3(gsAFunIfThenElse(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1, (ATerm) ProcExpr_2);
+  return ATmakeAppl3(function_symbol_IfThenElse(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1, (ATerm) ProcExpr_2);
 }
 
 inline
 ATermAppl gsMakeLMerge(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunLMerge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_LMerge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeLambda()
 {
-  return ATmakeAppl0(gsAFunLambda());
+  return ATmakeAppl0(function_symbol_Lambda());
 }
 
 inline
 ATermAppl gsMakeLinProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl LinearProcess_3, ATermAppl LinearProcessInit_4)
 {
-  return ATmakeAppl5(gsAFunLinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) LinearProcess_3, (ATerm) LinearProcessInit_4);
+  return ATmakeAppl5(function_symbol_LinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) LinearProcess_3, (ATerm) LinearProcessInit_4);
 }
 
 inline
 ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList LinearProcessSummand_1)
 {
-  return ATmakeAppl2(gsAFunLinearProcess(), (ATerm) DataVarId_0, (ATerm) LinearProcessSummand_1);
+  return ATmakeAppl2(function_symbol_LinearProcess(), (ATerm) DataVarId_0, (ATerm) LinearProcessSummand_1);
 }
 
 inline
 ATermAppl gsMakeLinearProcessInit(ATermList DataVarIdInit_0)
 {
-  return ATmakeAppl1(gsAFunLinearProcessInit(), (ATerm) DataVarIdInit_0);
+  return ATmakeAppl1(function_symbol_LinearProcessInit(), (ATerm) DataVarIdInit_0);
 }
 
 inline
 ATermAppl gsMakeLinearProcessSummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList DataVarIdInit_4)
 {
-  return ATmakeAppl5(gsAFunLinearProcessSummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
+  return ATmakeAppl5(function_symbol_LinearProcessSummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
 }
 
 inline
 ATermAppl gsMakeMapSpec(ATermList OpId_0)
 {
-  return ATmakeAppl1(gsAFunMapSpec(), (ATerm) OpId_0);
+  return ATmakeAppl1(function_symbol_MapSpec(), (ATerm) OpId_0);
 }
 
 inline
 ATermAppl gsMakeMerge(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunMerge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Merge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeMu()
 {
-  return ATmakeAppl0(gsAFunMu());
+  return ATmakeAppl0(function_symbol_Mu());
 }
 
 inline
 ATermAppl gsMakeMultAct(ATermList ParamIdOrAction_0)
 {
-  return ATmakeAppl1(gsAFunMultAct(), (ATerm) ParamIdOrAction_0);
+  return ATmakeAppl1(function_symbol_MultAct(), (ATerm) ParamIdOrAction_0);
 }
 
 inline
 ATermAppl gsMakeMultActName(ATermList String_0)
 {
-  return ATmakeAppl1(gsAFunMultActName(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_MultActName(), (ATerm) String_0);
 }
 
 inline
 ATermAppl gsMakeNil()
 {
-  return ATmakeAppl0(gsAFunNil());
+  return ATmakeAppl0(function_symbol_Nil());
 }
 
 inline
 ATermAppl gsMakeNu()
 {
-  return ATmakeAppl0(gsAFunNu());
+  return ATmakeAppl0(function_symbol_Nu());
 }
 
 inline
 ATermAppl gsMakeOpId(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunOpId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_OpId(), (ATerm) String_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermAppl GlobVarSpec_1, ATermAppl PBEqnSpec_2, ATermAppl PBInit_3)
 {
-  return ATmakeAppl4(gsAFunPBES(), (ATerm) DataSpec_0, (ATerm) GlobVarSpec_1, (ATerm) PBEqnSpec_2, (ATerm) PBInit_3);
+  return ATmakeAppl4(function_symbol_PBES(), (ATerm) DataSpec_0, (ATerm) GlobVarSpec_1, (ATerm) PBEqnSpec_2, (ATerm) PBInit_3);
 }
 
 inline
 ATermAppl gsMakePBESAnd(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(gsAFunPBESAnd(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESAnd(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
 }
 
 inline
 ATermAppl gsMakePBESExists(ATermList DataVarId_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(gsAFunPBESExists(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESExists(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
 }
 
 inline
 ATermAppl gsMakePBESFalse()
 {
-  return ATmakeAppl0(gsAFunPBESFalse());
+  return ATmakeAppl0(function_symbol_PBESFalse());
 }
 
 inline
 ATermAppl gsMakePBESForall(ATermList DataVarId_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(gsAFunPBESForall(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESForall(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
 }
 
 inline
 ATermAppl gsMakePBESImp(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(gsAFunPBESImp(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESImp(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
 }
 
 inline
 ATermAppl gsMakePBESNot(ATermAppl PBExpr_0)
 {
-  return ATmakeAppl1(gsAFunPBESNot(), (ATerm) PBExpr_0);
+  return ATmakeAppl1(function_symbol_PBESNot(), (ATerm) PBExpr_0);
 }
 
 inline
 ATermAppl gsMakePBESOr(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(gsAFunPBESOr(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESOr(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
 }
 
 inline
 ATermAppl gsMakePBESTrue()
 {
-  return ATmakeAppl0(gsAFunPBESTrue());
+  return ATmakeAppl0(function_symbol_PBESTrue());
 }
 
 inline
 ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl PBExpr_2)
 {
-  return ATmakeAppl3(gsAFunPBEqn(), (ATerm) FixPoint_0, (ATerm) PropVarDecl_1, (ATerm) PBExpr_2);
+  return ATmakeAppl3(function_symbol_PBEqn(), (ATerm) FixPoint_0, (ATerm) PropVarDecl_1, (ATerm) PBExpr_2);
 }
 
 inline
 ATermAppl gsMakePBEqnSpec(ATermList PBEqn_0)
 {
-  return ATmakeAppl1(gsAFunPBEqnSpec(), (ATerm) PBEqn_0);
+  return ATmakeAppl1(function_symbol_PBEqnSpec(), (ATerm) PBEqn_0);
 }
 
 inline
 ATermAppl gsMakePBInit(ATermAppl PropVarInst_0)
 {
-  return ATmakeAppl1(gsAFunPBInit(), (ATerm) PropVarInst_0);
+  return ATmakeAppl1(function_symbol_PBInit(), (ATerm) PropVarInst_0);
 }
 
 inline
 ATermAppl gsMakeParamId(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunParamId(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_ParamId(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeProcEqn(ATermAppl ProcVarId_0, ATermList DataVarId_1, ATermAppl ProcExpr_2)
 {
-  return ATmakeAppl3(gsAFunProcEqn(), (ATerm) ProcVarId_0, (ATerm) DataVarId_1, (ATerm) ProcExpr_2);
+  return ATmakeAppl3(function_symbol_ProcEqn(), (ATerm) ProcVarId_0, (ATerm) DataVarId_1, (ATerm) ProcExpr_2);
 }
 
 inline
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqn_0)
 {
-  return ATmakeAppl1(gsAFunProcEqnSpec(), (ATerm) ProcEqn_0);
+  return ATmakeAppl1(function_symbol_ProcEqnSpec(), (ATerm) ProcEqn_0);
 }
 
 inline
 ATermAppl gsMakeProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl ProcEqnSpec_3, ATermAppl ProcInit_4)
 {
-  return ATmakeAppl5(gsAFunProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) ProcEqnSpec_3, (ATerm) ProcInit_4);
+  return ATmakeAppl5(function_symbol_ProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) ProcEqnSpec_3, (ATerm) ProcInit_4);
 }
 
 inline
 ATermAppl gsMakeProcVarId(ATermAppl String_0, ATermList SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunProcVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_ProcVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_Process(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeProcessAssignment(ATermAppl ProcVarId_0, ATermList DataVarIdInit_1)
 {
-  return ATmakeAppl2(gsAFunProcessAssignment(), (ATerm) ProcVarId_0, (ATerm) DataVarIdInit_1);
+  return ATmakeAppl2(function_symbol_ProcessAssignment(), (ATerm) ProcVarId_0, (ATerm) DataVarIdInit_1);
 }
 
 inline
 ATermAppl gsMakeProcessInit(ATermAppl ProcExpr_0)
 {
-  return ATmakeAppl1(gsAFunProcessInit(), (ATerm) ProcExpr_0);
+  return ATmakeAppl1(function_symbol_ProcessInit(), (ATerm) ProcExpr_0);
 }
 
 inline
 ATermAppl gsMakePropVarDecl(ATermAppl String_0, ATermList DataVarId_1)
 {
-  return ATmakeAppl2(gsAFunPropVarDecl(), (ATerm) String_0, (ATerm) DataVarId_1);
+  return ATmakeAppl2(function_symbol_PropVarDecl(), (ATerm) String_0, (ATerm) DataVarId_1);
 }
 
 inline
 ATermAppl gsMakePropVarInst(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunPropVarInst(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_PropVarInst(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeRegAlt(ATermAppl RegFrm_0, ATermAppl RegFrm_1)
 {
-  return ATmakeAppl2(gsAFunRegAlt(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
+  return ATmakeAppl2(function_symbol_RegAlt(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
 }
 
 inline
 ATermAppl gsMakeRegNil()
 {
-  return ATmakeAppl0(gsAFunRegNil());
+  return ATmakeAppl0(function_symbol_RegNil());
 }
 
 inline
 ATermAppl gsMakeRegSeq(ATermAppl RegFrm_0, ATermAppl RegFrm_1)
 {
-  return ATmakeAppl2(gsAFunRegSeq(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
+  return ATmakeAppl2(function_symbol_RegSeq(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
 }
 
 inline
 ATermAppl gsMakeRegTrans(ATermAppl RegFrm_0)
 {
-  return ATmakeAppl1(gsAFunRegTrans(), (ATerm) RegFrm_0);
+  return ATmakeAppl1(function_symbol_RegTrans(), (ATerm) RegFrm_0);
 }
 
 inline
 ATermAppl gsMakeRegTransOrNil(ATermAppl RegFrm_0)
 {
-  return ATmakeAppl1(gsAFunRegTransOrNil(), (ATerm) RegFrm_0);
+  return ATmakeAppl1(function_symbol_RegTransOrNil(), (ATerm) RegFrm_0);
 }
 
 inline
 ATermAppl gsMakeRename(ATermList RenameExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunRename(), (ATerm) RenameExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Rename(), (ATerm) RenameExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeRenameExpr(ATermAppl String_0, ATermAppl String_1)
 {
-  return ATmakeAppl2(gsAFunRenameExpr(), (ATerm) String_0, (ATerm) String_1);
+  return ATmakeAppl2(function_symbol_RenameExpr(), (ATerm) String_0, (ATerm) String_1);
 }
 
 inline
 ATermAppl gsMakeSeq(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunSeq(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Seq(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeSetBagComp()
 {
-  return ATmakeAppl0(gsAFunSetBagComp());
+  return ATmakeAppl0(function_symbol_SetBagComp());
 }
 
 inline
 ATermAppl gsMakeSetComp()
 {
-  return ATmakeAppl0(gsAFunSetComp());
+  return ATmakeAppl0(function_symbol_SetComp());
 }
 
 inline
 ATermAppl gsMakeSortArrow(ATermList SortExpr_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunSortArrow(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortArrow(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeSortBag()
 {
-  return ATmakeAppl0(gsAFunSortBag());
+  return ATmakeAppl0(function_symbol_SortBag());
 }
 
 inline
 ATermAppl gsMakeSortCons(ATermAppl SortConsType_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunSortCons(), (ATerm) SortConsType_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortCons(), (ATerm) SortConsType_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeSortFBag()
 {
-  return ATmakeAppl0(gsAFunSortFBag());
+  return ATmakeAppl0(function_symbol_SortFBag());
 }
 
 inline
 ATermAppl gsMakeSortFSet()
 {
-  return ATmakeAppl0(gsAFunSortFSet());
+  return ATmakeAppl0(function_symbol_SortFSet());
 }
 
 inline
 ATermAppl gsMakeSortId(ATermAppl String_0)
 {
-  return ATmakeAppl1(gsAFunSortId(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_SortId(), (ATerm) String_0);
 }
 
 inline
 ATermAppl gsMakeSortList()
 {
-  return ATmakeAppl0(gsAFunSortList());
+  return ATmakeAppl0(function_symbol_SortList());
 }
 
 inline
 ATermAppl gsMakeSortRef(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunSortRef(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortRef(), (ATerm) String_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeSortSet()
 {
-  return ATmakeAppl0(gsAFunSortSet());
+  return ATmakeAppl0(function_symbol_SortSet());
 }
 
 inline
 ATermAppl gsMakeSortSpec(ATermList SortDecl_0)
 {
-  return ATmakeAppl1(gsAFunSortSpec(), (ATerm) SortDecl_0);
+  return ATmakeAppl1(function_symbol_SortSpec(), (ATerm) SortDecl_0);
 }
 
 inline
 ATermAppl gsMakeSortStruct(ATermList StructCons_0)
 {
-  return ATmakeAppl1(gsAFunSortStruct(), (ATerm) StructCons_0);
+  return ATmakeAppl1(function_symbol_SortStruct(), (ATerm) StructCons_0);
 }
 
 inline
 ATermAppl gsMakeSortUnknown()
 {
-  return ATmakeAppl0(gsAFunSortUnknown());
+  return ATmakeAppl0(function_symbol_SortUnknown());
 }
 
 inline
 ATermAppl gsMakeSortsPossible(ATermList SortExpr_0)
 {
-  return ATmakeAppl1(gsAFunSortsPossible(), (ATerm) SortExpr_0);
+  return ATmakeAppl1(function_symbol_SortsPossible(), (ATerm) SortExpr_0);
 }
 
 inline
 ATermAppl gsMakeStateAnd(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateAnd(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateAnd(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateDelay()
 {
-  return ATmakeAppl0(gsAFunStateDelay());
+  return ATmakeAppl0(function_symbol_StateDelay());
 }
 
 inline
 ATermAppl gsMakeStateDelayTimed(ATermAppl DataExpr_0)
 {
-  return ATmakeAppl1(gsAFunStateDelayTimed(), (ATerm) DataExpr_0);
+  return ATmakeAppl1(function_symbol_StateDelayTimed(), (ATerm) DataExpr_0);
 }
 
 inline
 ATermAppl gsMakeStateExists(ATermList DataVarId_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateExists(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateExists(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateFalse()
 {
-  return ATmakeAppl0(gsAFunStateFalse());
+  return ATmakeAppl0(function_symbol_StateFalse());
 }
 
 inline
 ATermAppl gsMakeStateForall(ATermList DataVarId_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateForall(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateForall(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateImp(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateImp(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateImp(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateMay(ATermAppl RegFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateMay(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateMay(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateMu(ATermAppl String_0, ATermList DataVarIdInit_1, ATermAppl StateFrm_2)
 {
-  return ATmakeAppl3(gsAFunStateMu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
+  return ATmakeAppl3(function_symbol_StateMu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
 }
 
 inline
 ATermAppl gsMakeStateMust(ATermAppl RegFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateMust(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateMust(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateNot(ATermAppl StateFrm_0)
 {
-  return ATmakeAppl1(gsAFunStateNot(), (ATerm) StateFrm_0);
+  return ATmakeAppl1(function_symbol_StateNot(), (ATerm) StateFrm_0);
 }
 
 inline
 ATermAppl gsMakeStateNu(ATermAppl String_0, ATermList DataVarIdInit_1, ATermAppl StateFrm_2)
 {
-  return ATmakeAppl3(gsAFunStateNu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
+  return ATmakeAppl3(function_symbol_StateNu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
 }
 
 inline
 ATermAppl gsMakeStateOr(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(gsAFunStateOr(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateOr(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
 }
 
 inline
 ATermAppl gsMakeStateTrue()
 {
-  return ATmakeAppl0(gsAFunStateTrue());
+  return ATmakeAppl0(function_symbol_StateTrue());
 }
 
 inline
 ATermAppl gsMakeStateVar(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunStateVar(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_StateVar(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
 ATermAppl gsMakeStateYaled()
 {
-  return ATmakeAppl0(gsAFunStateYaled());
+  return ATmakeAppl0(function_symbol_StateYaled());
 }
 
 inline
 ATermAppl gsMakeStateYaledTimed(ATermAppl DataExpr_0)
 {
-  return ATmakeAppl1(gsAFunStateYaledTimed(), (ATerm) DataExpr_0);
+  return ATmakeAppl1(function_symbol_StateYaledTimed(), (ATerm) DataExpr_0);
 }
 
 inline
 ATermAppl gsMakeStructCons(ATermAppl String_0, ATermList StructProj_1, ATermAppl StringOrNil_2)
 {
-  return ATmakeAppl3(gsAFunStructCons(), (ATerm) String_0, (ATerm) StructProj_1, (ATerm) StringOrNil_2);
+  return ATmakeAppl3(function_symbol_StructCons(), (ATerm) String_0, (ATerm) StructProj_1, (ATerm) StringOrNil_2);
 }
 
 inline
 ATermAppl gsMakeStructProj(ATermAppl StringOrNil_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunStructProj(), (ATerm) StringOrNil_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_StructProj(), (ATerm) StringOrNil_0, (ATerm) SortExpr_1);
 }
 
 inline
 ATermAppl gsMakeSum(ATermList DataVarId_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunSum(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Sum(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeSync(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(gsAFunSync(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Sync(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
 ATermAppl gsMakeTau()
 {
-  return ATmakeAppl0(gsAFunTau());
+  return ATmakeAppl0(function_symbol_Tau());
 }
 
 inline
 ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
-  return ATmakeAppl2(gsAFunWhr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
+  return ATmakeAppl2(function_symbol_Whr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
 }
 //--- end generated code ---//
 

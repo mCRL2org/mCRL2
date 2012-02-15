@@ -10,9 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/parelm.h"
-
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -39,10 +37,9 @@ class lps_parelm_tool : public input_output_tool
 
     bool run()
     {
-      lps::specification spec;
-      spec.load(m_input_filename);
-      lps::parelm(spec, true);
-      spec.save(m_output_filename);
+      lps::lpsparelm(input_filename(),
+                     output_filename()
+                    );
       return true;
     }
 

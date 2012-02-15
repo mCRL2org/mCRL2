@@ -14,6 +14,8 @@
 
 #include "mcrl2/utilities/logger.h"
 
+using namespace mcrl2::log;
+
 void print_all_log_levels()
 {
   mCRL2log(error) << "An error message" << std::endl;
@@ -31,7 +33,7 @@ void print_all_log_levels()
 BOOST_AUTO_TEST_CASE(test_logging_basic)
 {
   // Messages will only be printed up to debug, due to standard MCRL2_MAX_LOG_LEVEL
-  mcrl2_logger::set_reporting_level(log_debug2);
+  mcrl2_logger::set_reporting_level(debug2);
   print_all_log_levels();
 }
 
@@ -78,12 +80,12 @@ BOOST_AUTO_TEST_CASE(test_logging_multiline)
 
 BOOST_AUTO_TEST_CASE(test_logging_hint)
 {
-  mcrl2_logger::set_reporting_level(log_info);
+  mcrl2_logger::set_reporting_level(info);
   mCRL2log(debug, "test_hint") << "Testing hint, should not be printed" << std::endl;
-  mcrl2_logger::set_reporting_level(log_debug, "test_hint");
+  mcrl2_logger::set_reporting_level(debug, "test_hint");
   mCRL2log(debug, "test_hint") << "Testing hint, should be printed" << std::endl;
   mCRL2log(debug) << "Testing hint, should not be printed" << std::endl;
-  mcrl2_logger::set_reporting_level(log_verbose, "test_hint");
+  mcrl2_logger::set_reporting_level(verbose, "test_hint");
   mCRL2log(info) << "Testing hint, should still be printed" << std::endl;
   mcrl2_logger::clear_reporting_level("test_hint");
 }
@@ -112,7 +114,7 @@ std::string test_assert()
 // never be triggered.
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 {
-  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL < log_debug5);
+  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL < debug5);
   mCRL2log(debug5) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
 
@@ -121,8 +123,8 @@ BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 // never be triggered.
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_dynamic)
 {
-  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL >= log_debug);
-  mcrl2_logger::set_reporting_level(log_verbose);
+  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL >= debug);
+  mcrl2_logger::set_reporting_level(verbose);
   mCRL2log(debug) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
 

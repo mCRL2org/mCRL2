@@ -1,0 +1,10 @@
+.. |bin_w32n| replace:: Windows Installer (32-bit)
+.. _bin_w32n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@-win32.exe
+
+.. |bin_w64n| replace:: Windows Installer (64-bit)
+.. _bin_w64n: http://http://mcrl2win64.dyndns.org/mcrl2-@MCRL2_VERSION@-win64.exe
+
+.. |src_tgzn| replace:: GZipped Tarball
+.. _src_tgzn: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@.tar.gz
+
+

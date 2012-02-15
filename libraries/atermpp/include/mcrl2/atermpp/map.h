@@ -31,7 +31,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     map()
       : IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -40,7 +40,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -50,7 +50,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -59,7 +59,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(right),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -70,7 +70,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(first, last),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -82,7 +82,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(first, last, comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -95,20 +95,19 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       : std::map<Key, T, Compare, Allocator>(first, last, comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// Destructor.
-    ~map()
+    virtual ~map()
     {
-      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::map.ATmarkTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::map<Key, T, Compare, Allocator>::iterator i = std::map<Key, T, Compare, Allocator>::begin(); i != std::map<Key, T, Compare, Allocator>::end(); ++i)
       {
@@ -127,7 +126,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     multimap()
       : IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -136,7 +135,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -146,7 +145,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -155,7 +154,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(right),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -166,7 +165,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(first, last),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -178,7 +177,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -191,20 +190,19 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// Destructor.
-    ~multimap()
+    virtual ~multimap()
     {
-      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multimap.ATmarkTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multimap<Key, T, Compare, Allocator>::iterator i = std::multimap<Key, T, Compare, Allocator>::begin(); i != std::multimap<Key, T, Compare, Allocator>::end(); ++i)
       {

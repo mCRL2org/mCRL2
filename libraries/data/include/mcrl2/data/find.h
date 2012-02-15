@@ -200,6 +200,7 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
   using super::leave;
   using super::operator();
   using super::is_bound;
+  using super::bind_count;
   using super::increase_bind_count;
 
   OutputIterator out;
@@ -439,49 +440,6 @@ bool search_data_expression(Container const& container, const data_expression& s
 {
   std::set<data::data_expression> data_expressions = data::find_data_expressions(container);
   return data_expressions.find(s) != data_expressions.end();
-}
-
-/// \brief Returns the names of a set of data variables.
-/// \param variables A set of data variables
-inline
-std::set<core::identifier_string> variable_names(const std::set<data::variable>& variables)
-{
-  std::set<core::identifier_string> result;
-  for (std::set<variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    result.insert(i->name());
-  }
-  return result;
-}
-
-/// \brief Returns the names of a set of data variables as a set of strings.
-/// \param variables A set of data variables
-inline
-std::set<std::string> variable_name_strings(const std::set<data::variable>& variables)
-{
-  std::set<std::string> result;
-  for (std::set<variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    result.insert(std::string(i->name()));
-  }
-  return result;
-}
-
-/// \brief Returns the names of a set of data variables.
-/// \param variables A set of data variables
-inline
-std::set<std::string> variable_name_strings(const std::set<data::variable>& variables1, const std::set<data::variable>& variables2)
-{
-  std::set<std::string> result;
-  for (std::set<variable>::const_iterator i = variables1.begin(); i != variables1.end(); ++i)
-  {
-    result.insert(std::string(i->name()));
-  }
-  for (std::set<variable>::const_iterator i = variables2.begin(); i != variables2.end(); ++i)
-  {
-    result.insert(std::string(i->name()));
-  }
-  return result;
 }
 
 } // namespace data

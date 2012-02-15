@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -19,16 +20,22 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 set(mcrl2_lps_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/lps.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/simulator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/simbase.cpp
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 

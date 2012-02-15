@@ -27,11 +27,13 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
+inline
 data_expression operator+(data_expression const& l, data_expression const& r)
 {
   return sort_nat::plus(l, r);
 }
 
+inline
 data_expression operator*(data_expression const& l, data_expression const& r)
 {
   return sort_nat::times(l, r);
@@ -74,6 +76,51 @@ void test_basic()
 
   // Replacing free variables only
   mutable_map_substitution< atermpp::map< variable, data_expression > > sb;
+
+  sb[y] = c;
+
+  BOOST_CHECK(data::replace_free_variables(lambda(y,y), sb) == lambda(y,y));
+  BOOST_CHECK(data::replace_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
+  core::garbage_collect();
+}
+
+void test_indexed_substitution()
+{
+  using namespace mcrl2::data::sort_nat;
+
+  variable        x("x", sort_nat::nat());
+  variable        y("y", sort_nat::nat());
+  data_expression e(variable("z", sort_nat::nat()) + (x + y));
+
+  using mcrl2::data::concepts::MutableSubstitution;
+
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, atermpp::vector< data_expression > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, atermpp::vector< variable > > >));
+
+  mutable_indexed_substitution< variable, atermpp::vector< data_expression > > s;
+
+  BOOST_CHECK(static_cast< variable >(s(x)) == x);
+  BOOST_CHECK(static_cast< variable >(s(y)) != x);
+
+  function_symbol c("c", sort_nat::nat());
+
+  BOOST_CHECK(c + x == c + x);
+  BOOST_CHECK(data::replace_free_variables(data_expression(c + x), s) == c + x);
+  BOOST_CHECK(data::replace_free_variables(data_expression(c + x * y), s) == c + x * y);
+
+  s[y] = c;
+
+  BOOST_CHECK(data::replace_free_variables(x, s) == x);
+#ifdef MCRL2_NEW_REPLACE_VARIABLES
+// in the old version this fails due to the unfortunate interface of replace_free_variables
+  BOOST_CHECK(data::replace_free_variables(y, s) == c);
+#endif
+  BOOST_CHECK(data::replace_free_variables(c + x * y, s) == c + x * c);
+  BOOST_CHECK(data::replace_free_variables(lambda(x,x), s) == lambda(x,x));
+  BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
+
+  // Replacing free variables only
+  mutable_indexed_substitution< variable, atermpp::vector< data_expression > > sb;
 
   sb[y] = c;
 
@@ -137,8 +184,6 @@ void test_my_assignment_sequence_substitution()
 
 void test_my_list_substitution()
 {
-  using namespace atermpp;
-
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
@@ -194,8 +239,6 @@ void test_assignment_sequence_substitution()
 
 void test_list_substitution()
 {
-  using namespace atermpp;
-
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
@@ -336,6 +379,7 @@ int test_main(int a, char** aa)
   test_list_substitution();
   test_mutable_substitution();
   test_sort_substitution();
+  test_indexed_substitution();
 
   return EXIT_SUCCESS;
 }

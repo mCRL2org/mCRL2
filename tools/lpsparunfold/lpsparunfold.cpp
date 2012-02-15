@@ -28,7 +28,7 @@
 
 //DATA
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/normalize_sorts.h"
+#include "mcrl2/data/parse.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -42,6 +42,7 @@ using namespace mcrl2::data;
 
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 class parunfold_tool: public  rewriter_tool<input_output_tool>
 {
@@ -172,13 +173,13 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         {
           m_set_index.clear();
 
-          mcrl2::data::basic_sort b_sort(m_unfoldsort);
+          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort, lps_specification.data() );
           mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
 
 
           if (!search_sort_expression(lps_specification.data().sorts(), sort))
           {
-            std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
+            mCRL2log(warning) << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
           }
           mcrl2::data::assignment_list assignments = lps_specification.initial_process().assignments();
@@ -195,7 +196,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
           if (m_set_index.empty())
           {
-            std::cerr << "No process parameters found of sort " << m_unfoldsort << std::endl;
+            mCRL2log(warning) << "No process parameters found of sort " << m_unfoldsort << std::endl;
             break;
           }
         }

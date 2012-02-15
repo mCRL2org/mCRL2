@@ -105,19 +105,19 @@ class tool
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE
       if (parser.options.count("quiet"))
       {
-        mcrl2_logger::set_reporting_level(log_quiet);
+        log::mcrl2_logger::set_reporting_level(log::quiet);
       }
       if (parser.options.count("verbose"))
       {
-        mcrl2_logger::set_reporting_level(log_verbose);
+        log::mcrl2_logger::set_reporting_level(log::verbose);
       }
       if (parser.options.count("debug"))
       {
-        mcrl2_logger::set_reporting_level(log_debug);
+        log::mcrl2_logger::set_reporting_level(log::debug);
       }
       if (parser.options.count("log-level") > 0)
       {
-        mcrl2_logger::set_reporting_level(log_level_from_string(parser.option_argument("log-level")));
+        log::mcrl2_logger::set_reporting_level(log::log_level_from_string(parser.option_argument("log-level")));
       }
 #endif
     }
@@ -219,9 +219,13 @@ class tool
 
         return EXIT_SUCCESS;
       }
+      catch (mcrl2::runtime_error& e)
+      {
+        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
+      }
       catch (std::exception& e)
       {
-        std::cerr << e.what() << std::endl;
+        mCRL2log(mcrl2::log::error) << "Standard exception: " << e.what() << std::endl;
       }
       return EXIT_FAILURE;
     }

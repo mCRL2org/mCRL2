@@ -75,7 +75,7 @@ std::string print_term_container(const Container& c)
   result << "[";
   for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
   {
-    result << (i == c.begin() ? "" : ", ") << core::pp(*i);
+    result << (i == c.begin() ? "" : ", ") << data::pp(*i);
   }
   result << "]";
   return result.str();
@@ -219,7 +219,7 @@ class quantifier_enumerator
       {
         PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
+        std::cerr << "        Z = Z + " << pbes_system::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
         if (stop_(c))
         {
@@ -228,7 +228,7 @@ class quantifier_enumerator
         else if (empty_intersection(c.variables(), v_))
         {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-          std::cerr << "        A = A + " << core::pp(c) << std::endl;
+          std::cerr << "        A = A + " << pbes_system::pp(c) << std::endl;
 #endif
           A_.insert(c);
         }
@@ -269,8 +269,8 @@ class quantifier_enumerator
     {
       std::cerr << "<enumerate>"
                 << (tr::is_false(stop_value) ? "forall " : "exists ")
-                << core::pp(x) << ". "
-                << core::pp(phi)
+                << data::pp(x) << ". "
+                << pbes_system::pp(phi)
                 << data::print_substitution(sigma) << std::endl;
     }
 
@@ -303,7 +303,7 @@ class quantifier_enumerator
       // const variable_type& xk = boost::get<0>(e);
       const data_term_type& y = boost::get<1>(e);
       size_t k          = boost::get<2>(e);
-      return "(" + core::pp(y) + ", " + boost::lexical_cast<std::string>(k) + ")";
+      return "(" + data::pp(y) + ", " + boost::lexical_cast<std::string>(k) + ")";
     }
 
     /// \brief Prints a todo list to standard error
@@ -410,7 +410,7 @@ class quantifier_enumerator
           for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
           {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-            std::cerr << "      e = " << core::pp(*i) << std::endl;
+            std::cerr << "      e = " << data::pp(*i) << std::endl;
 #endif
             dependencies.insert(i->variables().begin(), i->variables().end());
             sigma[xk] = *i;
@@ -455,7 +455,7 @@ class quantifier_enumerator
           sigma[*j] = *j; // erase *j
         }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
+        std::cerr << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
 #endif
         redo_substitutions(sigma, undo);
         return stop_value;
@@ -468,7 +468,7 @@ class quantifier_enumerator
       }
       term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-      std::cerr << "<return> " << core::pp(result) << std::endl;
+      std::cerr << "<return> " << pbes_system::pp(result) << std::endl;
 #endif
       redo_substitutions(sigma, undo);
       return result;
@@ -522,12 +522,15 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// If true, quantifier variables of infinite sort are enumerated.
   bool m_enumerate_infinite_sorts;
 
+  /// If true, data expressions are not rewritten.
+  bool m_skip_data;
+
   /// \brief Constructor.
   /// \param r A data rewriter
   /// \param enumerator A data enumerator
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-  enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
-    : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
+  enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true, bool skip_data = false)
+    : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
   { }
 
 
@@ -595,6 +598,24 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
     std::cerr << "<visit_exists_result>" << tr::pp(result) << std::endl;
 #endif
     return result;
+  }
+
+  /// \brief Visit data_expression node
+  /// Visit data expression node.
+  /// \param x A term
+  /// \param d A data term
+  /// \param sigma A substitution function
+  /// \return The result of visiting the node
+  term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
+  {
+    if (m_skip_data)
+    {
+      return x;
+    }
+    else
+    {
+      return super::visit_data_expression(x, d, sigma);
+    }
   }
 };
 

@@ -41,6 +41,9 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
 
   const DataRewriter& m_data_rewriter;
 
+  /// If true, data expressions are not rewritten.
+  bool m_skip_data;
+
   /// \brief Is called in the case rewriting is done with a substitution function.
   /// \param d A data term
   /// \param sigma A substitution function
@@ -49,7 +52,7 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   data_term_type rewrite(data_term_type d, T& sigma)
   {
 //data_term_type result = m_data_rewriter(d, sigma);
-//std::cerr << m_data_rewriter.type() << "<d>" << core::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
+//std::cerr << m_data_rewriter.type() << "<d>" << data::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
     return m_data_rewriter(d, sigma);
   }
 
@@ -63,8 +66,9 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
 
   /// \brief Constructor.
   /// \param rewr A data rewriter
-  simplify_rewrite_builder(const DataRewriter& rewr)
-    : m_data_rewriter(rewr)
+  simplify_rewrite_builder(const DataRewriter& rewr, bool skip_data = false)
+    : m_data_rewriter(rewr),
+      m_skip_data(skip_data)
   { }
 
   /// \brief Visit data_expression node
@@ -75,6 +79,10 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   /// \return The result of visiting the node
   term_type visit_data_expression(const term_type& /* x */, const data_term_type& d, SubstitutionFunction& sigma)
   {
+    if (m_skip_data)
+    {
+      return d;
+    }
     return tr::dataterm2term(rewrite(d, sigma));
   }
 
@@ -249,6 +257,10 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   /// \return The result of visiting the node
   term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& v, SubstitutionFunction& sigma)
   {
+    if (m_skip_data)
+    {
+      return v;
+    }
     atermpp::vector<data_term_type> d;
     data_term_sequence_type e = tr::param(v);
     for (typename data_term_sequence_type::const_iterator i = e.begin(); i != e.end(); ++i)

@@ -14,7 +14,6 @@
 
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/print.h"
 #include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2

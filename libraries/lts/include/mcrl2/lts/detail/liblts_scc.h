@@ -112,17 +112,17 @@ template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   :aut(l)
 {
-  mCRL2log(debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
+  mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;
 
   // read and store tau transitions.
   std::map < state_type, std::vector < state_type > > src_tgt;
-  for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+  const std::vector <transition> &trans=aut.get_transitions();
+  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t=r.front();
-    if (aut.is_tau(t.label()))
+    if (aut.is_tau(r->label()))
     {
-      src_tgt[t.from()].push_back(t.to());
+      src_tgt[r->from()].push_back(r->to());
     }
   }
   // Initialise the data structures
@@ -136,12 +136,11 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   src_tgt.clear();
 
   std::map < state_type, std::vector < state_type > > tgt_src;
-  for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t=r.front();
-    if (aut.is_tau(t.label()))
+    if (aut.is_tau(r->label()))
     {
-      tgt_src[t.to()].push_back(t.from());
+      tgt_src[r->to()].push_back(r->from());
     }
   }
   equivalence_class_index=0;
@@ -155,7 +154,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
       equivalence_class_index++;
     }
   }
-  mCRL2log(debug) << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states." << std::endl;
+  mCRL2log(log::debug) << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states." << std::endl;
 
   dfsn2state.clear();
 }
@@ -172,18 +171,18 @@ void scc_partitioner<LTS_TYPE>::replace_transitions(const bool preserve_divergen
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
   std::set < transition > resulting_transitions;
-  for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+  const std::vector <transition> &trans=aut.get_transitions();
+  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    const transition t=r.front();
-    if (!aut.is_tau(t.label()) ||
+    if (!aut.is_tau(r->label()) ||
         preserve_divergence_loops ||
-        block_index_of_a_state[t.from()]!=block_index_of_a_state[t.to()])
+        block_index_of_a_state[r->from()]!=block_index_of_a_state[r->to()])
     {
       resulting_transitions.insert(
         transition(
-          block_index_of_a_state[t.from()],
-          t.label(),
-          block_index_of_a_state[t.to()]));
+          block_index_of_a_state[r->from()],
+          r->label(),
+          block_index_of_a_state[r->to()]));
     }
   }
 

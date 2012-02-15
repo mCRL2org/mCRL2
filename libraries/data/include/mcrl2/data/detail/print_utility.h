@@ -48,7 +48,7 @@ data::data_expression bool_to_numeric(data::data_expression const& e, data::sort
 
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
-{ 
+{
   //std::cout << "\n<reconstruct_pos_mult>" << data::pp(x) << " " << x << std::endl;
   data_expression reconstruction_result;
   if (data::sort_pos::is_c1_function_symbol(x))
@@ -59,10 +59,11 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
   else if (data::sort_pos::is_cdub_application(x))
   {
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
-    data_expression bool_arg = sort_pos::bit(x);
-    data_expression pos_arg = sort_pos::number(x);
-    data::detail::decimal_number_multiply_by_two(result);
-    pos_arg = reconstruct_pos_mult(pos_arg, result);
+    data_expression bool_arg = sort_pos::left(x);
+    data_expression pos_arg = sort_pos::right(x);
+    std::vector<char> double_result = result;
+    data::detail::decimal_number_multiply_by_two(double_result);
+    pos_arg = reconstruct_pos_mult(pos_arg, double_result);
     if (data::sort_bool::is_false_function_symbol(bool_arg))
     {
       //result*v(b) = 0
@@ -175,8 +176,8 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   }
   else if (data::sort_real::is_creal_application(x))
   {
-    data_expression numerator = reconstruct_numeric_expression(sort_real::numerator(x));
-    data_expression denominator = reconstruct_numeric_expression(sort_real::denominator(x));
+    data_expression numerator = reconstruct_numeric_expression(sort_real::left(x));
+    data_expression denominator = reconstruct_numeric_expression(sort_real::right(x));
     if (denominator == data::function_symbol("1", data::sort_pos::pos()))
     {
       x = data::sort_real::int2real(data::data_expression(numerator));
@@ -205,7 +206,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
       }
     }
   }
-  else if (data::sort_real::is_redfracwhr_application(x))
+  else if (data::sort_real::is_reduce_fraction_where_application(x))
   {
     x = data::sort_real::plus(sort_real::int2real(sort_real::arg2(x)),
                               sort_real::divides(sort_real::arg3(x),

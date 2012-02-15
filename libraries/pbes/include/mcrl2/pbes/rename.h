@@ -13,7 +13,6 @@
 #define MCRL2_PBES_RENAME_H
 
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 

@@ -15,15 +15,15 @@ cmake_minimum_required(VERSION 2.6)
 
 set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logger.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
 )
 
 set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)
 
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
-  PROPERTIES COMPILE_DEFINITIONS MCRL2_REVISION="${SVN_REV} - ${CMAKE_BUILD_TYPE}"
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.cpp
+  PROPERTIES COMPILE_DEFINITIONS MCRL2_VERSION="${MCRL2_VERSION} \(${CMAKE_BUILD_TYPE}\)"
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -42,7 +42,7 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 # ##    mcrl2_utilities_wx    ##
 # ##############################
 
-if(MCRL2_BUILD_GUI_TOOLS)
+if(MCRL2_ENABLE_GUI_TOOLS)
 
 project(mcrl2_utilities_wx)
 cmake_minimum_required(VERSION 2.6)
@@ -71,4 +71,4 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 
-endif(MCRL2_BUILD_GUI_TOOLS)
+endif(MCRL2_ENABLE_GUI_TOOLS)

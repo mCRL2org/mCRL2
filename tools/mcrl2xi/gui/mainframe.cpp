@@ -55,8 +55,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 //EVT_MENU(wxID_REPLACE, MainFrame::ShowReplaceDialog)
   EVT_FIND(wxID_ANY, MainFrame::OnFind)
   EVT_FIND_NEXT(wxID_ANY, MainFrame::OnFind)
-//EVT_FIND_REPLACE(wxID_ANY, MainFrame::OnReplace)
-//EVT_FIND_REPLACE_ALL(wxID_ANY, MainFrame::OnReplaceAll)
+  EVT_FIND_REPLACE(wxID_ANY, MainFrame::OnReplace)
+  EVT_FIND_REPLACE_ALL(wxID_ANY, MainFrame::OnReplaceAll)
   EVT_FIND_CLOSE(wxID_ANY, MainFrame::OnFindClose)
 
 
@@ -181,6 +181,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   Centre();
   SetMinSize(wxSize(800, 600));
   editor->SetFocus();
+
+  // Set downward search as default
+  findData.SetFlags( wxFR_DOWN );
 
 }
 ;
@@ -415,16 +418,12 @@ void MainFrame::OnOpenFind(wxCommandEvent& /* event */)
 {
 
   focussed_editor_for_find = focussed_editor;
-
   m_dlgReplace = new wxFindReplaceDialog
   (
     this,
     &findData,
     wxT("Find and replace dialog"),
-    0
-#ifndef MCRL2_WITH_WXSTC
-    | wxFR_NOUPDOWN
-#endif
+    wxFR_REPLACEDIALOG   
   );
   m_dlgReplace->Show(true);
 
@@ -452,7 +451,7 @@ void MainFrame::OnFind(wxFindDialogEvent& event)
     {
 
       /* fwd */
-      if (event.GetFlags() == wxFR_DOWN)
+      if (findData.GetFlags() == wxFR_DOWN)
       {
         i = focussed_editor_for_find->FindText(focussed_editor_for_find->GetSelectionStart(), focussed_editor_for_find->GetTextLength() , event.GetFindString());
       }
@@ -465,14 +464,16 @@ void MainFrame::OnFind(wxFindDialogEvent& event)
 
     if (i != -1)
     {
-      focussed_editor_for_find->SetSelection(i,i);
+      focussed_editor_for_find->SetInsertionPoint(i);
 
       m_dlgReplace->Destroy();
       m_dlgReplace = NULL;
+
+      focussed_editor_for_find->SetFocus();
     }
     else
     {
-      if (event.GetFlags() == wxFR_DOWN)
+      if (findData.GetFlags() == wxFR_DOWN)
       {
         wxMessageBox(wxT("No match found downward."));
       }
@@ -485,4 +486,99 @@ void MainFrame::OnFind(wxFindDialogEvent& event)
 };
 
 
+void MainFrame::OnReplace(wxFindDialogEvent& event)
+{
+  if (focussed_editor_for_find)
+  {
+
+    int i;
+
+    if (focussed_editor_for_find->GetSelectionStart() != focussed_editor_for_find->GetSelectionEnd())
+    {
+      i = focussed_editor_for_find->FindText(focussed_editor_for_find->GetSelectionStart(),
+                                             focussed_editor_for_find->GetSelectionEnd(), event.GetFindString());
+    }
+    else
+    {
+
+      /* fwd */
+      if (findData.GetFlags() == wxFR_DOWN)
+      {
+        i = focussed_editor_for_find->FindText(focussed_editor_for_find->GetSelectionStart(), focussed_editor_for_find->GetTextLength() , event.GetFindString());
+      }
+      else
+      {
+        /* rev */
+        i = focussed_editor_for_find->FindText(focussed_editor_for_find->GetSelectionStart(), 0 , event.GetFindString());
+      }
+    }
+
+    if (i != -1)
+    {
+
+      focussed_editor_for_find->Replace(i, i + event.GetFindString().Length(), event.GetReplaceString() );;
+
+      m_dlgReplace->Destroy();
+      m_dlgReplace = NULL;
+
+      focussed_editor_for_find->SetInsertionPoint(i);
+      focussed_editor_for_find->SetFocus();
+    }
+    else
+    {
+      if (findData.GetFlags() == wxFR_DOWN)
+      {
+        wxMessageBox(wxT("No match found downward."));
+      }
+      else
+      {
+        wxMessageBox(wxT("No match found upward."));
+      }
+    }
+  }
+};
+
+void MainFrame::OnReplaceAll(wxFindDialogEvent& event)
+{
+  if (focussed_editor_for_find)
+  {
+
+    int begin, end;
+
+    if (focussed_editor_for_find->GetSelectionStart() != focussed_editor_for_find->GetSelectionEnd())
+    {
+      begin = focussed_editor_for_find->GetSelectionStart();
+      end   = focussed_editor_for_find->GetSelectionEnd();
+    }
+    else
+    {
+      begin = 0; 
+      end   = focussed_editor_for_find->GetTextLength();
+    }
+
+    int i = focussed_editor_for_find->FindText(begin, end , event.GetFindString());
+    if( i != -1 ) 
+    {
+      int count = 0;
+      while( i != -1 )
+      {
+        focussed_editor_for_find->Replace(i, i + event.GetFindString().Length(), event.GetReplaceString() );
+        end = end - event.GetFindString().Length() +  event.GetReplaceString().Length();
+        i = focussed_editor_for_find->FindText(i, end , event.GetFindString());
+        count++;
+      }
+
+      m_dlgReplace->Destroy();
+      m_dlgReplace = NULL;
+      wxMessageBox(wxT("Replaced ") + wxString::Format(wxT("%d"), count) + wxT(" occurrences."));
+
+      focussed_editor_for_find->SetFocus();
+
+    }
+    else
+    {
+      wxMessageBox(wxT("No match found"));
+    }
+  }
+};
 

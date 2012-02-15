@@ -139,7 +139,7 @@ struct boolean_expr_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-    std::cerr << "<visit>" << tr::pp(e) << std::endl;
+    mCRL2log(debug) << "<visit>" << tr::pp(e) << std::endl;
 #endif
 
     term_type result;
@@ -217,7 +217,7 @@ struct boolean_expr_builder
     }
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-    std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+    mCRL2log(debug) << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -269,7 +269,7 @@ struct boolean_expr_builder<Term, void>
   /// \brief Visit not node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
+  virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */)
   {
     return term_type();
   }
@@ -320,7 +320,7 @@ struct boolean_expr_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-    std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
+    mCRL2log(debug) << "<visit>" << tr::pp(e) << " " << e << std::endl;
 #endif
 
     term_type result;
@@ -390,7 +390,7 @@ struct boolean_expr_builder<Term, void>
     }
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-    std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+    mCRL2log(debug) << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;

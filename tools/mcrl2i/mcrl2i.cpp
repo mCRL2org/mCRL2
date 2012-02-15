@@ -196,7 +196,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       rewriter rewr(spec,m_rewrite_strategy);
 
-      atermpp::map < variable, data_expression > assignments;
+      mutable_map_substitution < atermpp::map < variable, data_expression > > assignments;
 
       bool done = false;
       while (!done)
@@ -258,7 +258,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << data::pp(rewr(term,make_map_substitution(assignments))) << "\n";
+            cout << data::pp(rewr(term,assignments)) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
@@ -311,7 +311,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
-            term = rewr(term,make_map_substitution(assignments));
+            term = rewr(term,assignments);
             cout << data::pp(term) << "\n";
             assignments[var]=term;
             context_variables.insert(var);

@@ -13,25 +13,22 @@
 #define SMT_LIB_SOLVER_H
 
 #include <string>
+#include <sstream>
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/print.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
-#include "mcrl2/data/detail/prover/expression_info.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
 #endif
-
-#undef ATAgetFirst
-#undef ATAgetArgument
 
 namespace mcrl2
 {
@@ -50,7 +47,6 @@ namespace detail
 class SMT_LIB_Solver: public SMT_Solver
 {
   private:
-    Expression_Info f_expression_info;
     std::string f_sorts_notes;
     std::string f_operators_notes;
     std::string f_predicates_notes;
@@ -59,36 +55,30 @@ class SMT_LIB_Solver: public SMT_Solver
     std::string f_variables_extrafuns;
     std::string f_extrapreds;
     std::string f_formula;
-    ATermIndexedSet f_sorts;
-    ATermIndexedSet f_operators;
-    ATermIndexedSet f_variables;
-    ATermIndexedSet f_nat_variables;
-    ATermIndexedSet f_pos_variables;
+    atermpp::map < sort_expression, size_t > f_sorts;
+    atermpp::map < function_symbol, size_t > f_operators;
+    atermpp::set < variable > f_variables;
+    atermpp::set < variable > f_nat_variables;
+    atermpp::set < variable > f_pos_variables;
     bool f_bool2pred;
 
     void declare_sorts()
     {
       f_extrasorts = "";
-      ATermList v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts))
+      if (!f_sorts.empty())
       {
         f_extrasorts = "  :extrasorts (";
-        ATermAppl v_sort = 0;
-        while (!ATisEmpty(v_sorts))
+        sort_expression v_sort;
+        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
-          if (v_sort != 0)
+          if (v_sort != sort_expression())
           {
             f_extrasorts = f_extrasorts + " ";
           }
-          v_sort = ATAgetFirst(v_sorts);
-          v_sorts = ATgetNext(v_sorts);
-          size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
-          assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-          sprintf(v_sort_string, "sort%lu", v_sort_number);
-          f_extrasorts = f_extrasorts + v_sort_string;
-          free(v_sort_string);
-          v_sort_string = 0;
+          v_sort = i->first;
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << i->second;
+          f_extrasorts = f_extrasorts + v_sort_string.str();
         }
         f_extrasorts = f_extrasorts + ")\n";
       }
@@ -97,25 +87,18 @@ class SMT_LIB_Solver: public SMT_Solver
     void declare_operators()
     {
       f_operators_extrafuns = "";
-      ATermList v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators))
+      if (!f_operators.empty())
       {
         f_operators_extrafuns = "  :extrafuns (";
-        while (!ATisEmpty(v_operators))
+        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
-          ATermAppl v_operator = ATAgetFirst(v_operators);
-          v_operators = ATgetNext(v_operators);
-          size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-          sprintf(v_operator_string, "op%lu", v_operator_number);
-          f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
-          free(v_operator_string);
-          v_operator_string = 0;
-          sort_expression v_sort = data_expression(v_operator).sort();
+          std::stringstream v_operator_string;
+          v_operator_string << "op" << i->second;
+          f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string.str();
+          sort_expression v_sort = data_expression(i->first).sort();
           do
           {
-            ATermList v_sort_domain_list;
+            sort_expression_list v_sort_domain_list;
             if (is_function_sort(v_sort))
             {
               v_sort_domain_list = function_sort(v_sort).domain();
@@ -123,15 +106,16 @@ class SMT_LIB_Solver: public SMT_Solver
             }
             else
             {
-              v_sort_domain_list = ATmakeList1((ATerm) static_cast<ATermAppl>(v_sort));
+              v_sort_domain_list = sort_expression_list(v_sort);
               v_sort = sort_expression();
             }
-            for (ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
+            for (sort_expression_list::const_iterator l = v_sort_domain_list.begin();
+                                 l!=v_sort_domain_list.end() ; ++l)
             {
-              sort_expression v_sort_domain_elt(ATAgetFirst(l));
+              sort_expression v_sort_domain_elt(*l);
               if (is_function_sort(v_sort_domain_elt))
               {
-                throw mcrl2::runtime_error("Function " + core::pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + data::pp(i->first) +
                                            " cannot be translated to the SMT-LIB format.");
               }
               if (sort_int::is_int(v_sort_domain_elt))
@@ -152,12 +136,19 @@ class SMT_LIB_Solver: public SMT_Solver
               }
               else
               {
-                size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
-                char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-                sprintf(v_sort_string, "sort%lu", v_sort_number);
-                f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
-                free(v_sort_string);
-                v_sort_string = 0;
+                atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
+                size_t v_sort_number=f_sorts.size();
+                if (j==f_sorts.end())  // not found
+                {
+                  f_sorts[v_sort_domain_elt]=v_sort_number; // Assign a new number to v_sort_domain_elt.
+                }
+                else
+                {
+                  v_sort_number=j->second; // get the previously assigned number.
+                }
+                std::stringstream v_sort_string;
+                v_sort_string << "sort" << v_sort_number;
+                f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string.str();
               }
             }
           }
@@ -171,43 +162,52 @@ class SMT_LIB_Solver: public SMT_Solver
     void declare_variables()
     {
       f_variables_extrafuns = "";
-      ATermList v_variables = ATindexedSetElements(f_variables);
-      if (!ATisEmpty(v_variables))
+      if (!f_variables.empty())
       {
         f_variables_extrafuns = "  :extrafuns (";
-        while (!ATisEmpty(v_variables))
+      }
+
+      for(atermpp::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
+      {
+        const variable v_variable = *i;
+        std::string v_variable_string = v_variable.name();
+        sort_expression v_sort = data_expression(v_variable).sort();
+        if (sort_real::is_real(v_sort))
         {
-          ATermAppl v_variable = ATAgetFirst(v_variables);
-          v_variables = ATgetNext(v_variables);
-          char* v_variable_string;
-          v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          sort_expression v_sort = data_expression(v_variable).sort();
-          if (sort_real::is_real(v_sort))
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
+        }
+        else if (sort_int::is_int(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else if (sort_nat::is_nat(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else if (sort_pos::is_pos(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else
+        {
+          atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort);
+          size_t v_sort_number=f_sorts.size();
+          if (j==f_sorts.end())  // not found
           {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
-          }
-          else if (sort_int::is_int(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          }
-          else if (sort_nat::is_nat(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          }
-          else if (sort_pos::is_pos(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+            f_sorts[v_sort]=v_sort_number; // Assign a new number to v_sort.
           }
           else
           {
-            size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
-            char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-            sprintf(v_sort_string, "sort%lu", v_sort_number);
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
-            free(v_sort_string);
-            v_sort_string = 0;
+            v_sort_number=j->second; // get the previously assigned number.
           }
+
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << v_sort_number;
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string.str() +")";
         }
+      }
+      if (!f_variables.empty())
+      {
         f_variables_extrafuns = f_variables_extrafuns + ")\n";
       }
     }
@@ -217,16 +217,12 @@ class SMT_LIB_Solver: public SMT_Solver
       f_extrapreds = "";
       if (f_bool2pred)
       {
-        char* v_sort_string;
-
-        size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
-        assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-        v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-        sprintf(v_sort_string, "sort%lu", v_sort_number);
+        assert(f_sorts.count(sort_bool::bool_())>0);
+        size_t v_sort_number = f_sorts[sort_bool::bool_()];
+        std::stringstream v_sort_string;
+        v_sort_string << "sort" << v_sort_number;
         f_extrapreds = "  :extrapreds ((bool2pred ";
-        f_extrapreds = f_extrapreds + v_sort_string + ")";
-        free(v_sort_string);
-        v_sort_string = 0;
+        f_extrapreds = f_extrapreds + v_sort_string.str() + ")";
         f_extrapreds = f_extrapreds + ")\n";
       }
     }
@@ -234,22 +230,15 @@ class SMT_LIB_Solver: public SMT_Solver
     void produce_notes_for_sorts()
     {
       f_sorts_notes = "";
-      ATermList v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts))
+      if (!f_sorts.empty())
       {
         f_sorts_notes = "  :notes \"";
-        while (!ATisEmpty(v_sorts))
+        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
-          sort_expression v_sort(ATAgetFirst(v_sorts));
-          v_sorts = ATgetNext(v_sorts);
-          size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort));
-          assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-          sprintf(v_sort_string, "sort%lu", v_sort_number);
-          const char* v_sort_original_id = basic_sort(v_sort).name().to_string().c_str();
-          f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
-          free(v_sort_string);
-          v_sort_string = 0;
+          std::stringstream v_sort_string;
+          v_sort_string << "sort" << i->second;
+          std::string v_sort_original_id = pp(i->first);
+          f_sorts_notes = f_sorts_notes + "(" + v_sort_string.str() + " = " + v_sort_original_id + ")";
         }
         f_sorts_notes = f_sorts_notes + "\"\n";
       }
@@ -258,22 +247,15 @@ class SMT_LIB_Solver: public SMT_Solver
     void produce_notes_for_operators()
     {
       f_operators_notes = "";
-      ATermList v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators))
+      if (!f_operators.empty())
       {
         f_operators_notes = "  :notes \"";
-        while (!ATisEmpty(v_operators))
+        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i) 
         {
-          ATermAppl v_operator = ATAgetFirst(v_operators);
-          v_operators = ATgetNext(v_operators);
-          size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-          sprintf(v_operator_string, "op%lu", v_operator_number);
-          char* v_operator_original_id = core::detail::gsATermAppl2String(ATAgetArgument(v_operator, 0));
-          f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
-          free(v_operator_string);
-          v_operator_string = 0;
+          std::stringstream v_operator_string;
+          v_operator_string << "op" << i->second;
+          std::string v_operator_original_id = i->first.name();
+          f_operators_notes = f_operators_notes + "(" + v_operator_string.str() + " = " + v_operator_original_id + ")";
         }
         f_operators_notes = f_operators_notes + "\"\n";
       }
@@ -290,7 +272,7 @@ class SMT_LIB_Solver: public SMT_Solver
       }
     }
 
-    void translate_clause(ATermAppl a_clause, bool a_expecting_predicate)
+    void translate_clause(const data_expression a_clause, const bool a_expecting_predicate)
     {
       if (sort_bool::is_not_application(data_expression(a_clause)))
       {
@@ -409,7 +391,7 @@ class SMT_LIB_Solver: public SMT_Solver
           translate_variable(a_clause);
         }
       }
-      else if (f_expression_info.is_operator(a_clause))
+      else if (is_application(a_clause))
       {
         if (a_expecting_predicate)
         {
@@ -427,11 +409,11 @@ class SMT_LIB_Solver: public SMT_Solver
       else
       {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                                   core::pp(a_clause) + ").");
+                                   data::pp(a_clause) + ").");
       }
     }
 
-    void add_bool2pred_and_translate_clause(ATermAppl a_clause)
+    void add_bool2pred_and_translate_clause(const data_expression a_clause)
     {
       f_bool2pred = true;
       f_formula = f_formula + "(bool2pred ";
@@ -439,22 +421,18 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_not(ATermAppl a_clause)
+    void translate_not(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause=application(a_clause).argument(0);
       f_formula = f_formula + "(not ";
       translate_clause(v_clause, true);
       f_formula = f_formula + ")";
     }
 
-    void translate_equality(ATermAppl a_clause)
+    void translate_equality(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -462,12 +440,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_inequality(ATermAppl a_clause)
+    void translate_inequality(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(distinct ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -475,12 +451,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than(ATermAppl a_clause)
+    void translate_greater_than(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(> ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -488,12 +462,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than_or_equal(ATermAppl a_clause)
+    void translate_greater_than_or_equal(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(>= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -501,12 +473,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than(ATermAppl a_clause)
+    void translate_less_than(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(< ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -514,12 +484,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than_or_equal(ATermAppl a_clause)
+    void translate_less_than_or_equal(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(<= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -527,12 +495,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_plus(ATermAppl a_clause)
+    void translate_plus(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(+ ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -540,22 +506,18 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_unary_minus(ATermAppl a_clause)
+    void translate_unary_minus(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       f_formula = f_formula + "(~";
       translate_clause(v_clause, false);
       f_formula = f_formula + ")";
     }
 
-    void translate_binary_minus(ATermAppl a_clause)
+    void translate_binary_minus(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(- ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -563,12 +525,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_multiplication(ATermAppl a_clause)
+    void translate_multiplication(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(* ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -576,12 +536,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_max(ATermAppl a_clause)
+    void translate_max(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(ite (>= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -593,12 +551,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_min(ATermAppl a_clause)
+    void translate_min(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
       f_formula = f_formula + "(ite (<= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -610,11 +566,9 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_abs(ATermAppl a_clause)
+    void translate_abs(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       f_formula = f_formula + "(ite (< 0 ";
       translate_clause(v_clause, false);
       f_formula = f_formula + ") ~";
@@ -624,33 +578,27 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_succ(ATermAppl a_clause)
+    void translate_succ(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       f_formula = f_formula + "(+ ";
       translate_clause(v_clause, false);
       f_formula = f_formula + " 1)";
     }
 
-    void translate_pred(ATermAppl a_clause)
+    void translate_pred(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       f_formula = f_formula + "(- ";
       translate_clause(v_clause, false);
       f_formula = f_formula + " 1)";
     }
 
-    void translate_add_c(ATermAppl a_clause)
+    void translate_add_c(const data_expression a_clause)
     {
-      ATermAppl v_clause_1, v_clause_2, v_clause_3;
-
-      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
-      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
-      v_clause_3 = f_expression_info.get_argument(a_clause, 2);
+      const data_expression v_clause_1 = application(a_clause).argument(0);
+      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_3 = application(a_clause).argument(2);
       f_formula = f_formula + "(ite ";
       translate_clause(v_clause_1, true);
       f_formula = f_formula + " (+ ";
@@ -664,38 +612,36 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "))";
     }
 
-    void translate_c_nat(ATermAppl a_clause)
+    void translate_c_nat(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       translate_clause(v_clause, false);
     }
 
-    void translate_c_int(ATermAppl a_clause)
+    void translate_c_int(const data_expression a_clause)
     {
-      ATermAppl v_clause;
-
-      v_clause = f_expression_info.get_argument(a_clause, 0);
+      const data_expression v_clause = application(a_clause).argument(0);
       translate_clause(v_clause, false);
     }
 
-    //void translate_c_real(ATermAppl a_clause);
-
-    void translate_unknown_operator(ATermAppl a_clause)
+    void translate_unknown_operator(const data_expression a_clause)
     {
-      size_t v_operator_number;
-      ATermAppl v_operator;
-      char* v_operator_string;
+      const data_expression v_operator = application(a_clause).head();
+      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+      
+      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      if (i==f_operators.end()) // not found.
+      { 
+        f_operators[v_operator]=v_operator_number;
+      }
+      else
+      {
+        v_operator_number=i->second; // this is the number already assigned to v_operator.
+      }
+      std::stringstream v_operator_string;
+      v_operator_string << "op" << v_operator_number;
+      f_formula = f_formula + "(" + v_operator_string.str();
 
-      v_operator = f_expression_info.get_operator(a_clause);
-      v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
-
-      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%lu", v_operator_number);
-      f_formula = f_formula + "(" + v_operator_string;
-      free(v_operator_string);
-      v_operator_string = 0;
       if (data::is_application(a_clause))
       {
         data::application a = data::application(data::data_expression(a_clause));
@@ -708,39 +654,33 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_variable(ATermAppl a_clause)
+    void translate_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
+      f_variables.insert(a_clause);
     }
 
-    void translate_nat_variable(ATermAppl a_clause)
+    void translate_nat_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
-      ATindexedSetPut(f_nat_variables, (ATerm) a_clause, 0);
+      f_variables.insert(a_clause);
+      f_nat_variables.insert(a_clause);
     }
 
-    void translate_pos_variable(ATermAppl a_clause)
+    void translate_pos_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
-      ATindexedSetPut(f_pos_variables, (ATerm) a_clause, 0);
+      f_variables.insert(a_clause);
+      f_pos_variables.insert(a_clause);
     }
 
-    void translate_int_constant(ATermAppl a_clause)
+    void translate_int_constant(const data_expression a_clause)
     {
       std::string v_value(data::sort_int::integer_constant_as_string(data::data_expression(a_clause)));
       if (v_value[0] == '-')
@@ -754,13 +694,13 @@ class SMT_LIB_Solver: public SMT_Solver
       }
     }
 
-    void translate_nat_constant(ATermAppl a_clause)
+    void translate_nat_constant(const data_expression a_clause)
     {
       std::string v_value(data::sort_nat::natural_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 
-    void translate_pos_constant(ATermAppl a_clause)
+    void translate_pos_constant(const data_expression a_clause)
     {
       std::string v_value(data::sort_pos::positive_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
@@ -776,49 +716,41 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "false";
     }
 
-    void translate_constant(ATermAppl a_clause)
+    void translate_constant(const data_expression a_clause)
     {
-      size_t v_operator_number;
-      ATermAppl v_operator;
-      char* v_operator_string;
+      const data_expression v_operator = application(a_clause).head();
+      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
-      v_operator = f_expression_info.get_operator(a_clause);
-      v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
+      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      if (i==f_operators.end()) // not found.
+      {
+        f_operators[v_operator]=v_operator_number;
+      }
+      else
+      {
+        v_operator_number=i->second; // this is the number already assigned to v_operator.
+      }
 
-      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%lu", v_operator_number);
-      f_formula = f_formula + v_operator_string;
-      free(v_operator_string);
-      v_operator_string = 0;
+      std::stringstream v_operator_string;
+      v_operator_string << "op" << v_operator_number;
+      f_formula = f_formula + v_operator_string.str();
     }
 
     void add_nat_clauses()
     {
-      ATermList v_variables = ATindexedSetElements(f_nat_variables);
-      if (!ATisEmpty(v_variables))
+      for(atermpp::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
       {
-        while (!ATisEmpty(v_variables))
-        {
-          ATermAppl v_variable = ATAgetFirst(v_variables);
-          v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          f_formula = f_formula + " (>= " + v_variable_string + " 0)";
-        }
+        std::string v_variable_string = i->name();
+        f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
     }
 
     void add_pos_clauses()
     {
-      ATermList v_variables = ATindexedSetElements(f_pos_variables);
-      if (!ATisEmpty(v_variables))
+      for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
       {
-        while (!ATisEmpty(v_variables))
-        {
-          ATermAppl v_variable = ATAgetFirst(v_variables);
-          v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          f_formula = f_formula + " (>= " + v_variable_string + " 1)";
-        }
+        std::string v_variable_string = i->name();
+        f_formula = f_formula + " (>= " + v_variable_string + " 1)";
       }
     }
 
@@ -828,23 +760,21 @@ class SMT_LIB_Solver: public SMT_Solver
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    void translate(ATermList a_formula)
+    void translate(data_expression_list a_formula)
     {
-      ATermAppl v_clause;
+      data_expression v_clause;
 
-      ATindexedSetReset(f_sorts);
-      ATindexedSetReset(f_operators);
-      ATindexedSetReset(f_variables);
-      ATindexedSetReset(f_nat_variables);
-      ATindexedSetReset(f_pos_variables);
+      f_variables.clear();
+      f_nat_variables.clear();
+      f_pos_variables.clear();
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      mCRL2log(verbose) << "Formula to be solved: " << core::pp(a_formula) << std::endl;
-      while (!ATisEmpty(a_formula))
+      mCRL2log(log::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
+      while (!a_formula.empty())
       {
-        v_clause = ATAgetFirst(a_formula);
-        a_formula = ATgetNext(a_formula);
+        v_clause = a_formula.front();
+        a_formula = pop_front(a_formula);
         f_formula = f_formula + " ";
         translate_clause(v_clause, true);
       }
@@ -862,27 +792,17 @@ class SMT_LIB_Solver: public SMT_Solver
         "(benchmark nameless\n" + f_sorts_notes + f_operators_notes + f_predicates_notes +
         f_extrasorts + f_operators_extrafuns + f_variables_extrafuns + f_extrapreds + f_formula +
         ")\n";
-      mCRL2log(verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
+      mCRL2log(log::verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
     }
 
 
   public:
     SMT_LIB_Solver()
     {
-      f_sorts = ATindexedSetCreate(100, 75);
-      f_operators = ATindexedSetCreate(100, 75);
-      f_variables = ATindexedSetCreate(100, 75);
-      f_nat_variables = ATindexedSetCreate(100, 75);
-      f_pos_variables = ATindexedSetCreate(100, 75);
     }
 
     virtual ~SMT_LIB_Solver()
     {
-      ATindexedSetDestroy(f_sorts);
-      ATindexedSetDestroy(f_operators);
-      ATindexedSetDestroy(f_variables);
-      ATindexedSetDestroy(f_nat_variables);
-      ATindexedSetDestroy(f_pos_variables);
     }
 };
 
@@ -956,7 +876,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(ATermList a_formula)
+    bool is_satisfiable(const data_expression_list a_formula)
     {
       translate(a_formula);
 
@@ -993,7 +913,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(ATermList a_formula)
+    bool is_satisfiable(const data_expression_list a_formula)
     {
       translate(a_formula);
 

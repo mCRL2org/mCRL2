@@ -36,7 +36,7 @@ std::string t1 =
   "                                        \n"
   " init X(0, 0);                          \n"
   ;
-std::string x1 = "binding_variables = X(n: Nat)";
+std::string x1 = "binding_variables = X(m: Nat)";
 
 // Example provided by Tim Willemse.
 // The parameters n and m are not equivalent, and thus should not

@@ -13,12 +13,14 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/pbes/parelm.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
@@ -45,22 +47,12 @@ class pbes_parelm_tool: public input_output_tool
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
-      // load the pbes
-      pbes_system::pbes<> p;
-      p.load(input_filename()); /*< The functions `input_filename()` and `output_filename()`
-                                    return the corresponding values that the user has entered
-                                    on the command line. >*/
-
-      // apply the algorithm
-      pbes_system::pbes_parelm_algorithm algorithm;
-      algorithm.run(p);
-
-      // save the result
-      p.save(output_filename());
+      pbesparelm(input_filename(),
+                 output_filename()
+                );
 
       return true;
     }
-
 };
 
 class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool>
@@ -68,7 +60,8 @@ class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool>
   public:
     pbes_parelm_gui_tool() {}
 };
-int main(int argc, char** argv)
+
+int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

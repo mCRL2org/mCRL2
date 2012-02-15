@@ -482,6 +482,7 @@ static yyconst flex_int16_t yy_chk[142] =
 // #include <aterm2.h>
 #include "mcrl2/utilities/logger.h"
 #include "liblts_dotlexer.h"
+#include "liblts_dotparser.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 
 //using namespace std;
@@ -528,7 +529,7 @@ dot_lexer *dot_lexer_obj = NULL;    /* lexer object, used by dotparser */
 static int lineNo=1, posNo=1;
 extern void dotyyerror(const char* s);
 
-#line 534 "liblts_dotlexer.cpp"
+#line 533 "liblts_dotlexer.cpp"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -634,10 +635,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 72 "liblts_dotlexer.ll"
+#line 71 "liblts_dotlexer.ll"
 
 
-#line 643 "liblts_dotlexer.cpp"
+#line 642 "liblts_dotlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -722,157 +723,157 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 74 "liblts_dotlexer.ll"
+#line 73 "liblts_dotlexer.ll"
 { posNo += 2; BEGIN(COMMENT); }
 	YY_BREAK
 
 case 2:
 YY_RULE_SETUP
-#line 76 "liblts_dotlexer.ll"
+#line 75 "liblts_dotlexer.ll"
 { posNo += 2;  BEGIN(INITIAL); }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 77 "liblts_dotlexer.ll"
+#line 76 "liblts_dotlexer.ll"
 { lineNo++; posNo=1; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 78 "liblts_dotlexer.ll"
+#line 77 "liblts_dotlexer.ll"
 { posNo++; }
 	YY_BREAK
 
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 80 "liblts_dotlexer.ll"
+#line 79 "liblts_dotlexer.ll"
 { lineNo++; posNo=1; }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 81 "liblts_dotlexer.ll"
+#line 80 "liblts_dotlexer.ll"
 { lineNo++; posNo=1; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "liblts_dotlexer.ll"
+#line 82 "liblts_dotlexer.ll"
 { posNo += YYLeng(); }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 84 "liblts_dotlexer.ll"
+#line 83 "liblts_dotlexer.ll"
 { lineNo++; posNo=1; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 85 "liblts_dotlexer.ll"
+#line 84 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return DIGRAPH; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 86 "liblts_dotlexer.ll"
+#line 85 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return GRAPH; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 87 "liblts_dotlexer.ll"
+#line 86 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return STRICT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 88 "liblts_dotlexer.ll"
+#line 87 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return SUBGRAPH; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 89 "liblts_dotlexer.ll"
+#line 88 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return NODE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 90 "liblts_dotlexer.ll"
+#line 89 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return EDGE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 91 "liblts_dotlexer.ll"
+#line 90 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return COMMA; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 92 "liblts_dotlexer.ll"
+#line 91 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return COLON; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 93 "liblts_dotlexer.ll"
+#line 92 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return SEMICOLON; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 94 "liblts_dotlexer.ll"
+#line 93 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return IS; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 95 "liblts_dotlexer.ll"
+#line 94 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return LBRACE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 96 "liblts_dotlexer.ll"
+#line 95 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return RBRACE; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 97 "liblts_dotlexer.ll"
+#line 96 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return LBRACK; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 98 "liblts_dotlexer.ll"
+#line 97 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return RBRACK; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 99 "liblts_dotlexer.ll"
+#line 98 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return ARROW; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 100 "liblts_dotlexer.ll"
+#line 99 "liblts_dotlexer.ll"
 { posNo += YYLeng(); return ARROW; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 101 "liblts_dotlexer.ll"
+#line 100 "liblts_dotlexer.ll"
 { processId(); return ID; }
 	YY_BREAK
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 102 "liblts_dotlexer.ll"
+#line 101 "liblts_dotlexer.ll"
 { processQuoted(); return ID; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 103 "liblts_dotlexer.ll"
+#line 102 "liblts_dotlexer.ll"
 { processId(); return ID; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 104 "liblts_dotlexer.ll"
+#line 103 "liblts_dotlexer.ll"
 { posNo += YYLeng(); dotyyerror("unknown character"); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 106 "liblts_dotlexer.ll"
+#line 105 "liblts_dotlexer.ll"
 ECHO;
 	YY_BREAK
-#line 878 "liblts_dotlexer.cpp"
+#line 877 "liblts_dotlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -1771,7 +1772,7 @@ void dotyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 106 "liblts_dotlexer.ll"
+#line 105 "liblts_dotlexer.ll"
 
 
 
@@ -1792,7 +1793,6 @@ void concrete_dot_lexer::processQuoted()
 }
 
 //Implementation of parse_dot
-
 bool parse_dot(std::istream &stream, lts_dot_t &l) 
 {
   clexer = new concrete_dot_lexer();

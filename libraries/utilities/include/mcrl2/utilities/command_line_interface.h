@@ -22,7 +22,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/type_traits/is_pod.hpp"
 #include "boost/shared_ptr.hpp"
-#include "mcrl2/utilities/toolset_revision.h"
+#include "mcrl2/utilities/toolset_version.h"
 
 namespace mcrl2
 {
@@ -32,23 +32,19 @@ namespace utilities
 class interface_description;
 class command_line_parser;
 
-/** \brief toolset version tag */
-inline std::string version_tag()
-{
-  return "July 2011";
-}
-
 /** \brief toolset copyright period description */
 inline std::string copyright_period()
 {
-  return "2011";
+  // We assume that the version number always starts with a four digit year 
+  // in which the version was released.
+  if (get_toolset_version().size() >= 4)
+    return get_toolset_version().substr(0, 4);
+  return "Today";
 }
 
 // \cond INTERNAL
 namespace detail
 {
-template < typename T >
-struct initialiser;
 
 /// Helper class to prevent uninitialised variable warnings
 template < typename T, bool = boost::is_pod< T >::value >
@@ -169,9 +165,6 @@ class interface_description
 {
     friend class command_line_parser;
 
-    template < typename T >
-    friend struct detail::initialiser;
-
   private:
 
     /// \cond INTERNAL
@@ -279,7 +272,10 @@ class interface_description
         std::string man_page_description() const;
 
         /// Returns a man page description for the option
-        std::string wiki_page_description() const;
+        std::ostream& wiki_page_description(std::ostream& s) const;
+
+        /// Returns a man page description for the option
+        std::ostream& xml_page_description(std::ostream& s, const bool is_default = false) const;
 
       public:
 
@@ -445,14 +441,6 @@ class interface_description
     inline static void register_initialiser()
     {
       T::add_options(get_standard_description());
-    }
-
-    /// \brief Returns the revision number
-    inline static std::string const& revision()
-    {
-      static std::string revision;
-
-      return revision;
     }
 
     /// \brief Internal use only
@@ -688,10 +676,15 @@ class interface_description
 
     /**
      * \brief Returns the text of a wiki page
-     * \param[in] revision the revision tag used in the heading of the man page
-     * \return string containing a man page description of the interface
+     * \return string containing a wiki page description of the interface
      **/
-    std::string wiki_page() const;
+    std::ostream& wiki_page(std::ostream&) const;
+
+    /**
+     * \brief Returns the text of an page
+     * \return string containing an xml description
+     **/
+    std::ostream& xml_page(std::ostream&) const;
 
     /**
      * \brief Returns the available long arguments with their associated help description
@@ -771,9 +764,6 @@ class interface_description
  **/
 class command_line_parser
 {
-    template < typename T >
-    friend struct detail::initialiser;
-
   public:
 
     /// Used to maps options to arguments
@@ -1202,21 +1192,6 @@ class interface_description::mandatory_argument : public typed_argument< T >
 };
 
 #if !defined(__COMMAND_LINE_INTERFACE__)
-namespace detail
-{
-template <>
-struct initialiser< void >
-{
-  static bool set_revision(std::string const& r)
-  {
-    const_cast< std::string& >(interface_description::revision()) = r;
-
-    return true;
-  }
-};
-
-static bool initialised = initialiser< void >::set_revision(get_toolset_revision());
-}
 
 template <>
 inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
@@ -1224,8 +1199,6 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 {
 
   collect(d, convert(c, a));
-
-  static_cast< void >(mcrl2::utilities::detail::initialised); // prevents unused variable warnings
 
   process_default_options(d);
 }

@@ -36,6 +36,9 @@ bool is_identifier_string(atermpp::aterm t)
 /// \brief Read-only singly linked list of identifier strings
 typedef atermpp::term_list<identifier_string> identifier_string_list;
 
+// template function overloads
+std::string pp(const identifier_string& x);
+
 } // namespace core
 
 } // namespace mcrl2

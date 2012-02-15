@@ -67,18 +67,20 @@ void test_pfnf_expression(std::string s)
 {
   pbes_system::detail::pfnf_visitor visitor;
   pbes_system::pbes_expression t1 = expr(s);
+std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
   visitor.visit(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
+std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))
   {
     BOOST_CHECK(R(t1) == R(t2));
     std::cout << "--- failed test --- " << std::endl;
-    std::cout << "t1    " << core::pp(t1) << std::endl;
-    std::cout << "t2    " << core::pp(t2) << std::endl;
-    std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
-    std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
+    std::cout << "t1    " << pbes_system::pp(t1) << std::endl;
+    std::cout << "t2    " << pbes_system::pp(t2) << std::endl;
+    std::cout << "R(t1) " << pbes_system::pp(R(t1)) << std::endl;
+    std::cout << "R(t2) " << pbes_system::pp(R(t2)) << std::endl;
   }
   core::garbage_collect();
 }
@@ -86,7 +88,7 @@ void test_pfnf_expression(std::string s)
 void test_pfnf_visitor()
 {
   test_pfnf_expression("forall m:Nat. false");
-  test_pfnf_expression("X && Y(3) || X");
+  test_pfnf_expression("X && (Y(3) || X)");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
   core::garbage_collect();

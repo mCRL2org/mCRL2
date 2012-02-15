@@ -13,12 +13,11 @@
 #define MCRL2_MODAL_STATE_VARIABLE_RENAME_H
 
 #include <deque>
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
@@ -137,25 +136,71 @@ state_formula rename_predicate_variables(const state_formula& f, IdentifierGener
   return make_state_formula_predicate_variable_rename_builder(generator)(f);
 }
 
-/// \brief Renames all data variables in the formula f using the supplied identifier generator.
-/// \param f A modal formula
-/// \param generator A generator for fresh identifiers
-/// \return The rename result
-template <typename IdentifierGenerator>
-state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
+/// Visitor that renames variables using the specified identifier generator. Also bound variables are renamed!
+struct state_formula_variable_rename_builder: public state_formulas::sort_expression_builder<state_formula_variable_rename_builder>
 {
-  // find all data variables in f
-  std::set<data::variable> src = state_formulas::find_free_variables(f);
+  typedef state_formulas::sort_expression_builder<state_formula_variable_rename_builder> super;
 
-  // create a mapping of replacements
-  data::mutable_map_substitution<> replacements;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
-  for (std::set<data::variable>::const_iterator i = src.begin(); i != src.end(); ++i)
+  /// \brief The set of identifiers that may not be used as a variable name.
+  const std::set<core::identifier_string>& forbidden_identifiers;
+
+  atermpp::map<core::identifier_string, core::identifier_string> generated_identifiers;
+
+  utilities::number_postfix_generator generator;
+
+  core::identifier_string create_name(const core::identifier_string& x)
   {
-    replacements[*i] = data::variable(generator(i->name()), i->sort());
+    atermpp::map<core::identifier_string, core::identifier_string>::iterator i = generated_identifiers.find(x);
+    if (i != generated_identifiers.end())
+    {
+      return i->second;
+    }
+    std::string name = generator(std::string(x));
+    generated_identifiers[x] = core::identifier_string(name);
+    return core::identifier_string(name);
   }
 
-  return state_formulas::replace_variables(f, replacements);
+  /// \brief Constructor
+  state_formula_variable_rename_builder(const std::set<core::identifier_string>& forbidden_identifiers_)
+    : forbidden_identifiers(forbidden_identifiers_)
+  {
+    for (std::set<core::identifier_string>::const_iterator i = forbidden_identifiers.begin(); i != forbidden_identifiers.end(); ++i)
+    {
+      generator.add_identifier(std::string(*i));
+    }
+  }
+
+  // do not traverse sorts
+  data::sort_expression operator()(const data::sort_expression& x)
+  {
+    return x;
+  }
+
+  data::variable operator()(const data::variable& x)
+  {
+    if (forbidden_identifiers.find(x.name()) == forbidden_identifiers.end())
+    {
+      return x;
+    }
+    return data::variable(create_name(x.name()), x.sort());
+  }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+/// \brief Renames all data variables in the formula f such that the forbidden identifiers are not used
+/// \param f A modal formula
+/// \return The rename result
+inline
+state_formula rename_variables(const state_formula& f, const std::set<core::identifier_string>& forbidden_identifiers)
+{
+  return state_formula_variable_rename_builder(forbidden_identifiers)(f);
 }
 
 } // namespace state_formulas

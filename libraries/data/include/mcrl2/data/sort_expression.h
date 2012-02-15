@@ -12,8 +12,7 @@
 #ifndef MCRL2_DATA_SORT_EXPRESSION_H
 #define MCRL2_DATA_SORT_EXPRESSION_H
 
-#include "boost/range/iterator_range.hpp"
-
+#include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -124,6 +123,12 @@ class sort_expression: public atermpp::aterm_appl
 typedef atermpp::term_list< sort_expression >  sort_expression_list;
 /// \brief vector of sorts
 typedef atermpp::vector< sort_expression >     sort_expression_vector;
+
+// template function overloads
+std::string pp(const sort_expression& x);
+std::string pp(const sort_expression_list& x);
+std::string pp(const sort_expression_vector& x);
+std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x);
 
 } // namespace data
 

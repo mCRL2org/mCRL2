@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -80,6 +81,9 @@ class fixpoint_symbol: public atermpp::aterm_appl
       return core::detail::gsIsNu(*this);
     }
 };
+
+// template function overloads
+std::string pp(const fixpoint_symbol& x);
 
 } // namespace pbes_system
 

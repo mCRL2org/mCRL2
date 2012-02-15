@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -85,7 +86,7 @@ void test_free_variables()
   data::variable n = nat("n");
 
   std::set<data::variable> free_variables = pbes_system::find_free_variables(x);
-  std::cout << "free variables: " << core::detail::print_pp_set(free_variables) << std::endl;
+  std::cout << "free variables: " << core::detail::print_set(free_variables, data::stream_printer()) << std::endl;
   BOOST_CHECK(free_variables.find(m) == free_variables.end());
   BOOST_CHECK(free_variables.find(n) != free_variables.end());
 }
@@ -104,23 +105,23 @@ void test_find_free_variables()
   pbes<> p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
-  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
+  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[0]);
-  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
+  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[1]);
-  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
+  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[0].formula());
-  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
+  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
   v = find_free_variables(p.equations()[1].formula());
-  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
+  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
   core::garbage_collect();

@@ -159,7 +159,7 @@ void check_lps2lts_specification(std::string const& specification,
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
-  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies());
+  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
@@ -346,6 +346,9 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
 {
   std::string spec(
     "act  set,s: Pos;\n"
+    "map  f:Pos->Bool;\n"
+    "var  n:Pos;\n"
+    "eqn  f(n)=false;\n"
     "\n"
     "proc P(b_Sensor: Pos -> Bool) =\n"
     "       sum n_Sensor: Pos.\n"
@@ -358,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
     "         P(b_Sensor = b_Sensor[n_Sensor0 -> false])\n"
     "     + delta;\n"
     "\n"
-    "init P(lambda n: Pos. false);\n"
+    "init P(f);\n"
   );
   check_lps2lts_specification(spec, 4, 12, 4);
 }
@@ -448,6 +451,35 @@ BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
     "eqn All = {  r: R | true };\n"
     "proc P=({r1, r2} == All) -> tau.P;\n"
     "init P;"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
+// Example from bug #832
+BOOST_AUTO_TEST_CASE(test_plus)
+{
+  // This example provides two identical transitions between a state.
+  // There is a discussion on whether this is desirable. Currently, for 
+  // efficiency reasons such extra transitions are not removed by lps2lts.
+  std::string spec(
+    "act a;\n"
+    "proc P = a.P + a.P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 1);
+}
+
+// The example below fails if #[0,1] does not have a decent
+// type. The tricky thing is that the type of the list can be List(Nat),
+// List(Int) or List(Real). Toolset version 10180 resolved this by 
+// delivering the type List({Nat, Int, Real}), i.e. a set of possible
+// options. But this was not expected and understood by the other tools.
+// This is related to bug report #949.
+BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
+{
+  std::string spec(
+    "proc B (i:Int) = (i >= 2) -> tau. B();\n"
+    "init B(#[0,1]);\n"
   );
   check_lps2lts_specification(spec, 1, 1, 1);
 }

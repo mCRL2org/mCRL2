@@ -30,8 +30,6 @@ namespace state_formulas
 inline
 bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>& negated_variables)
 {
-  //std::cout << "<formula>" << core::pp(f) << "<negated_variables>" << core::detail::print_pp_set(negated_variables) << std::endl;
-
   using namespace state_formulas::detail::accessors;
 
   //--- handle negations ---//

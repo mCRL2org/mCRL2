@@ -8,75 +8,11 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-# #############################################
-# ########## Project mcrl2_simulator ##########
-# #############################################
-
-project(mcrl2_simulator)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-
-add_library(${PROJECT_NAME}
-  simulator.cpp
-  simbase.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_lps
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-# ####################################
-# ########## Project lpssim ##########
-# ####################################
-
-project(lpssim)
-
-add_executable(${PROJECT_NAME}
-  sim.cpp
-)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_simulator
-  mcrl2_utilities
-  ${Boost_LIBRARIES}
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
-
-# Generate man pages
-include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-
 # ######################################
 # ######## mcrl2_simulator_gui #########
 # ######################################
 
-if (MCRL2_BUILD_GUI_TOOLS )
+if (MCRL2_ENABLE_GUI_TOOLS )
 
 project(mcrl2_simulator_gui)
 
@@ -89,7 +25,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
@@ -98,21 +34,21 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_simulator
+  mcrl2_lps
   ${wxWidgets_LIBRARIES}
 )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif (MCRL2_BUILD_GUI_TOOLS )
+endif (MCRL2_ENABLE_GUI_TOOLS )
 
 
 # #####################################
 # ########## Project lpsxsim ##########
 # #####################################
 
-if (MCRL2_BUILD_GUI_TOOLS)
+if (MCRL2_ENABLE_GUI_TOOLS)
 
 project(lpsxsim)
 
@@ -121,13 +57,15 @@ IF(WIN32)
   SET(SRCS ${SRCS} lpsxsim.rc)
 ENDIF(WIN32)
 
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
+
 # ######### General setup ##########
-set(MACOSX_BUNDLE_ICON_FILE lpsxsim.icns)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
-  xsim.cpp
-  xsimmain.cpp
-  xsimtrace.cpp
+  lpsxsim.cpp
+  lpsxsimmain.cpp
+  lpsxsimtrace.cpp
   tooltipListView.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
@@ -152,7 +90,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 #Add PLUGINDIR define
-set_source_files_properties(xsimmain.cpp
+set_source_files_properties(lpsxsimmain.cpp
   PROPERTIES COMPILE_DEFINITIONS PLUGINDIR="${CMAKE_INSTALL_PREFIX}/lib/mcrl2/plugins"
 )
 
@@ -178,4 +116,4 @@ if( NOT WIN32 )
   add_subdirectory ( plugins/trace )
 endif( NOT WIN32 )
 
-endif (MCRL2_BUILD_GUI_TOOLS)
+endif (MCRL2_ENABLE_GUI_TOOLS)

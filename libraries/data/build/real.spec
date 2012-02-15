@@ -12,18 +12,21 @@
 #include pos.spec
 #include nat.spec
 #include int.spec
+#supertypeof Pos
+#supertypeof Nat
+#supertypeof Int
 
 sort Real <"real_">;
 
-map @cReal <"creal">: Int <"numerator"> # Pos <"denominator"> -> Real;
+map @cReal <"creal">: Int <"left"> # Pos <"right"> -> Real;
     Pos2Real <"pos2real"> : Pos <"arg"> -> Real;
     Nat2Real <"nat2real"> : Nat <"arg"> -> Real;
     Int2Real <"int2real"> : Int <"arg"> -> Real;
     Real2Pos <"real2pos"> : Real <"arg"> -> Pos;
     Real2Nat <"real2nat"> : Real <"arg"> -> Nat;
     Real2Int <"real2int"> : Real <"arg"> -> Int;
-    min <"minimum"> : Real <"left"> # Real <"right"> -> Real;
     max <"maximum"> : Real <"left"> # Real <"right"> -> Real;
+    min <"minimum"> : Real <"left"> # Real <"right"> -> Real;
     abs <"abs"> : Real <"arg"> -> Real;
     - <"negate"> : Real <"arg"> -> Real;
     succ <"succ"> : Real <"arg"> -> Real;
@@ -39,9 +42,9 @@ map @cReal <"creal">: Int <"numerator"> # Pos <"denominator"> -> Real;
     floor <"floor"> : Real <"arg"> -> Int;
     ceil <"ceil"> : Real <"arg"> -> Int;
     round <"round"> : Real <"arg"> -> Int;
-    @redfrac <"redfrac"> : Int # Int -> Real;
-    @redfracwhr <"redfracwhr"> : Pos <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real;
-    @redfrachlp <"redfrachlp"> : Real <"left"> # Int <"right"> -> Real;
+    @redfrac <"reduce_fraction"> : Int <"left"> # Int <"right"> -> Real;
+    @redfracwhr <"reduce_fraction_where"> : Pos <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real;
+    @redfrachlp <"reduce_fraction_helper"> : Real <"left"> # Int <"right"> -> Real;
 
 var m:Nat;
     n:Nat;
@@ -53,9 +56,7 @@ var m:Nat;
     s:Real;
 
 eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
-     <(r,r) = false;
      <(@cReal(x, p), @cReal(y, q))  =  <(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
-     <=(r,r) = true;
      <=(@cReal(x, p), @cReal(y, q))  =  <=(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
      Int2Real(x)  =  @cReal(x, @c1);
      Nat2Real(n)  =  @cReal(@cInt(n), @c1);

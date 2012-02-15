@@ -28,10 +28,12 @@ using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 static const std::set<lts_equivalence> &initialise_allowed_eqs()
 {
   static std::set<lts_equivalence> s;
+  s.insert(lts_eq_none);
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
   s.insert(lts_eq_divergence_preserving_branching_bisim);
@@ -188,7 +190,7 @@ class ltsconvert_tool : public ltsconvert_base
           return true;
         }
         case lts_none:
-          std::cerr << "Cannot determine type of output. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
         case lts_aut:
         {
           lts_aut_t l_out;
@@ -246,7 +248,7 @@ class ltsconvert_tool : public ltsconvert_base
           return load_convert_and_save<lts_lts_t>();
         }
         case lts_none:
-          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
           return load_convert_and_save<lts_aut_t>();
@@ -284,7 +286,7 @@ class ltsconvert_tool : public ltsconvert_base
                       "leave out state information when saving in dot format", 'n');
       desc.add_option("determinise", "determinise LTS", 'D');
       desc.add_option("lps", make_mandatory_argument("FILE"),
-                      "use FILE as the LPS from which the input LTS was generated; this might"
+                      "use FILE as the LPS from which the input LTS was generated; this might "
                       "be needed to store the correct parameter names of states when saving "
                       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
       desc.add_option("in", make_mandatory_argument("FORMAT"),
@@ -318,7 +320,7 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("lps"))
         {
-          std::cerr << "warning: multiple LPS files specified; can only use one\n";
+          mCRL2log(warning) << "multiple LPS files specified; can only use one\n";
         }
 
         tool_options.lpsfile = parser.option_argument("lps");
@@ -327,14 +329,14 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("in"))
         {
-          std::cerr << "warning: multiple input formats specified; can only use one\n";
+          mCRL2log(warning) << "multiple input formats specified; can only use one\n";
         }
 
         tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
 
         if (tool_options.intype == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("in") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("in") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -342,14 +344,14 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("out"))
         {
-          std::cerr << "warning: multiple output formats specified; can only use one\n";
+          mCRL2log(warning) << "multiple output formats specified; can only use one\n";
         }
 
         tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (tool_options.outtype == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("out") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("out") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -435,6 +437,7 @@ class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
       m_gui_options["determinise"] = create_checkbox_widget();
 
       values.clear();
+      values.push_back("none");
       values.push_back("bisim");
       values.push_back("branching-bisim");
       values.push_back("dpbranching-bisim");

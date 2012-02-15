@@ -12,6 +12,7 @@
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -40,6 +41,18 @@ BOOST_AUTO_TEST_CASE(pbes_with_reals)
 
   BOOST_CHECK(output.find("Real;") == std::string::npos);
 
+}
+
+BOOST_AUTO_TEST_CASE(pbes_print)
+{
+  std::string PBES =
+    "pbes nu X = true; \n"
+    "init X;           \n"
+   ;
+
+  pbes<> p;
+  p = txt2pbes(PBES);
+  pbes_system::pp(p);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

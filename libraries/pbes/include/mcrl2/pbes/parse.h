@@ -21,20 +21,13 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/pbes/normalize_sorts.h"
-#include "mcrl2/pbes/translate_user_notation.h"
-
-//#define MCRL2_LOG_PARSER_OUTPUT
-#ifdef MCRL2_LOG_PARSER_OUTPUT
-#include <fstream>
-#include "mcrl2/utilities/file_utility.h"
-#endif
 
 namespace mcrl2
 {
@@ -42,33 +35,133 @@ namespace mcrl2
 namespace pbes_system
 {
 
-/// \brief Reads a PBES from an input stream.
-/// \param from An input stream
-/// \param p A PBES
-/// \return The input stream
-template <typename Container>
-std::istream& operator>>(std::istream& from, pbes<Container>& p)
+struct pbes_actions: public data::data_specification_actions
 {
-  ATermAppl result = core::parse_pbes_spec(from);
-  if (result == NULL)
+  pbes_actions(const core::parser_table& table_)
+    : data::data_specification_actions(table_)
+  {}
+
+  pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
   {
-    throw mcrl2::runtime_error("parsing failed");
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return pbes_system::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return pbes_system::false_(); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "PbesExpr")) { return pbes_system::forall(parse_VarsDeclList(node.child(1)), parse_PbesExpr(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "PbesExpr")) { return pbes_system::exists(parse_VarsDeclList(node.child(1)), parse_PbesExpr(node.child(3))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "PbesExpr")) { return pbes_system::not_(parse_PbesExpr(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (node.child(1).string() == "=>") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::imp(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (node.child(1).string() == "&&") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::and_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::or_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "PbesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_PbesExpr(node.child(1)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "PropVarInst")) { return parse_PropVarInst(node.child(0)); }
+    report_unexpected_node(node);
+    return pbes_system::pbes_expression();
   }
 
-#ifdef MCRL2_LOG_PARSER_OUTPUT
-  std::string filename = utilities::create_filename("pbes", ".txt");
-  std::ofstream out(filename.c_str());
-  out << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
-  out << core::pp(result) << std::endl << std::endl;
-  out << atermpp::aterm_appl(result).to_string() << std::endl;
-#endif
+  pbes_system::propositional_variable parse_PropVarDecl(const core::parse_node& node)
+  {
+    return pbes_system::propositional_variable(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)));
+  }
 
-  p = pbes<Container>(result,false);
-  type_check(p);
-  pbes_system::translate_user_notation(p);
-  pbes_system::normalize_sorts(p, p.data());
-  complete_data_specification(p);
+  pbes_system::propositional_variable_instantiation parse_PropVarInst(const core::parse_node& node)
+  {
+    return pbes_system::propositional_variable_instantiation(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+  }
+
+  pbes_system::propositional_variable_instantiation parse_PbesInit(const core::parse_node& node)
+  {
+    return parse_PropVarInst(node.child(1));
+  }
+
+  pbes_system::fixpoint_symbol parse_FixedPointOperator(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
+    report_unexpected_node(node);
+    return pbes_system::fixpoint_symbol();
+  }
+
+  pbes_equation parse_PbesEqnDecl(const core::parse_node& node)
+  {
+    return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
+  }
+
+  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
+  {
+    return parse_vector<pbes_equation>(node, "PbesEqnDecl", boost::bind(&pbes_actions::parse_PbesEqnDecl, this, _1));
+  }
+
+  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
+  {
+    return parse_PbesEqnDeclList(node.child(1));
+  }
+
+  pbes_system::pbes<> parse_PbesSpec(const core::parse_node& node)
+  {
+    return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<atermpp::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
+  }
+};
+
+inline
+pbes_expression parse_pbes_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  p.destroy_parse_node(node);
+  return result;
+}
+
+inline
+pbes<> parse_pbes_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  pbes<> result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
+  p.destroy_parse_node(node);
+  return result;
+}
+
+inline
+void complete_pbes(pbes<>& x)
+{
+  type_check(x);
+  pbes_system::translate_user_notation(x);
+  pbes_system::normalize_sorts(x, x.data());
+  complete_data_specification(x);
+}
+
+inline
+pbes<> parse_pbes(std::istream& in)
+{
+  std::string text = utilities::read_text(in);
+  pbes<> result = parse_pbes_new(text);
+  complete_pbes(result);
+  return result;
+}
+
+/// \brief Reads a PBES from an input stream.
+/// \param from An input stream
+/// \param result A PBES
+/// \return The input stream
+inline
+std::istream& operator>>(std::istream& from, pbes<>& result)
+{
+  result = parse_pbes(from);
   return from;
+}
+
+inline
+pbes<> parse_pbes(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_pbes(in);
 }
 
 /// \brief Parses a sequence of pbes expressions. The format of the text is as
@@ -270,12 +363,12 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
     data::variable v = i->first;
-    datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + core::pp(v) + ": " + core::pp(v.sort());
+    datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + data::pp(v) + ": " + data::pp(v.sort());
   }
 
   pbes<> q = p;
-  q.initial_state() == tr::true_();
-  std::string pbesspec = core::pp(q);
+  q.initial_state() = tr::true_();
+  std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration
   pbesspec = pbesspec.substr(0, std::find_end(pbesspec.begin(), pbesspec.end(), init.begin(), init.end()) - pbesspec.begin());

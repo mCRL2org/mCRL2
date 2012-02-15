@@ -1,0 +1,53 @@
+sort
+
+  Name = struct A | B ;
+
+act
+
+  empty, fill, done: Name ;
+  lose_all, gain_some, lose_some, gain_all, pour: Name # Name # Nat ;
+
+map 
+  sizeA, sizeB, target: Nat;
+
+eqn 
+  sizeA = 5;
+  sizeB = 8;
+  target = 4;
+
+proc
+
+  Can(N:Name,n:Nat,m:Nat) =
+    ( m != target ) -> (
+      %% empty, if non-empty
+      (m > 0) -> ( empty(N) . Can(N,n,0) ) +
+      %% fill, if not full
+      (m < n) -> ( fill(N) . Can(N,n,n) ) +
+      %% pour all to other if not empty
+      (m > 0) -> (
+        sum M:Name . (
+          lose_all(N,M,m) . Can(N,n,0) ) ) +
+      %% pour some to other if not empty
+      (m > 0) -> (
+        sum l:Nat,M:Name . ( 
+          ( (0 < l) && (l <= m) ) -> (
+            lose_some(N,M,l) . Can(N,n,Int2Nat(m-l)) ) ) )  +
+      %% pour all from other if not full
+      (m < n) -> (
+        sum M:Name . (
+          gain_all(M,N,Int2Nat(n-m)) . Can(N,n,n) ) ) +
+      %% pour some from other if not full
+      (m < n) -> (
+        sum l:Nat,M:Name . ( 
+          ( (0 < l) && (l <= Int2Nat(n-m)) ) -> (
+            gain_some(M,N,l) . Can(N,n,m+l) ) ) )
+    ) <> done(N) ; 
+
+init
+
+  allow( 
+    { empty, fill, done, pour },
+  comm(
+    { lose_all|gain_some -> pour, lose_some|gain_all -> pour },
+  Can(A,sizeA,0) || Can(B,sizeB,0) 
+    ));

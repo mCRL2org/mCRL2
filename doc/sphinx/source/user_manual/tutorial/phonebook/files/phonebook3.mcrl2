@@ -1,0 +1,43 @@
+%% file phonebook3.mcrl2
+%% Telephone directory, modified to asynchronously report the phone number
+%% corresponding to the queried name. Functions have been added to increase
+%% readability and flexibility.
+
+sort Name;
+     PhoneNumber;
+     PhoneBook = Name -> PhoneNumber;
+
+%% Phone number representing the non-existant or undefined phone number,
+%% must be different from any "real" phone number.
+map  p0: PhoneNumber; 
+     emptybook: PhoneBook;
+     add_phone: PhoneBook # Name # PhoneNumber -> PhoneBook;
+     del_phone: PhoneBook # Name -> PhoneBook;
+     find_phone: PhoneBook # Name -> PhoneNumber;
+
+eqn  emptybook = lambda n: Name . p0;
+
+var b: PhoneBook;
+    n: Name;
+    p: PhoneNumber;
+eqn  add_phone(b, n, p) = b[n->p];
+     del_phone(b, n) = b[n->p0];
+     find_phone(b, n) = b(n);
+
+%% Operations supported by the phone book.
+act  addPhone: Name # PhoneNumber;
+     delPhone: Name;
+     findPhone: Name;
+     reportPhone: Name # PhoneNumber; % Added action
+
+%% Process representing the phone book.
+proc PhoneDir(b: PhoneBook) = 
+     sum n: Name, p: PhoneNumber . (p != p0) -> addPhone(n, p) . PhoneDir(add_phone(b,n,p))
+   + sum n: Name . findPhone(n) . reportPhone(n, find_phone(b,n)) . PhoneDir()
+   + sum n: Name . delPhone(n) . PhoneDir(del_phone(b,n))
+   ;
+   
+%% Initially the phone book is empty.
+init PhoneDir(emptybook);
+
+

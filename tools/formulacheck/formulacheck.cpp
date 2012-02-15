@@ -32,6 +32,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::log;
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;

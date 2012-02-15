@@ -42,6 +42,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
+using namespace mcrl2::log;
 
 static atermpp::set < identifier_string > parse_action_list(const std::string& s)
 {
@@ -79,9 +80,9 @@ static void check_whether_actions_on_commandline_exist(
   for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
   {
-    mCRL2log(verbose) << "checking for occurrences of action '" << string(*i) << "'.\n";
+    mCRL2log(verbose) << "checking for occurrences of action '" << pp(*i) << "'.\n";
 
-    bool found=(*i=="tau"); // If i equals tau, it does not need to be declared.
+    bool found=(pp(*i)=="tau"); // If i equals tau, it does not need to be declared.
     for(action_label_list::const_iterator j=action_labels.begin(); 
               !found && j!=action_labels.end(); ++j)
     {
@@ -89,7 +90,7 @@ static void check_whether_actions_on_commandline_exist(
     }
     if (!found)
     { 
-      throw mcrl2::runtime_error("'" + string(*i) + "' is not declared as an action in this LPS.");
+      throw mcrl2::runtime_error("'" + pp(*i) + "' is not declared as an action in this LPS.");
     }
   }
 
@@ -117,9 +118,23 @@ class lps2lts_tool : public lps2lts_base
                    "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') determines "
                    "where temporary files are stored.\n"
                    "\n"
+                   "Note that lps2lts can deliver multiple transitions with the same label between"
+                   "any pair of states. If this is not desired, such transitions can be removed by"
+                   "applying a strong bisimulation reducton using for instance the tool ltsconvert.\n"
+                   "\n"
                    "The format of OUTFILE is determined by its extension (unless it is specified "
                    "by an option). The supported formats are:\n"
-                   +mcrl2::lts::detail::supported_lts_formats_text()
+                   "\n"
+                   +mcrl2::lts::detail::supported_lts_formats_text()+"\n"
+                   "If the jittyc rewriter is used, then the MCRL2_COMPILEREWRITER environment "
+                   "variable (default value: mcrl2compilerewriter) determines the script that "
+                   "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') "
+                   "determines where temporary files are stored."
+                   "\n"
+                   "Note that lps2lts can deliver multiple transitions with the same "
+                   "label between any pair of states. If this is not desired, such "
+                   "transitions can be removed by applying a strong bisimulation reducton "
+                   "using for instance the tool ltsconvert."
                   )
     {
     }
@@ -146,7 +161,7 @@ class lps2lts_tool : public lps2lts_base
       }
       catch (mcrl2::runtime_error& e)
       {
-        std::cerr << e.what() << std::endl;
+        mCRL2log(error) << e.what() << std::endl;
         lps2lts.finalise_lts_generation();
         return false;
       }
@@ -168,13 +183,18 @@ class lps2lts_tool : public lps2lts_base
                  "do not remove unused parts of the data specification", 'u').
       add_option("state-format", make_mandatory_argument("NAME"),
                  "store state internally in format NAME:\n"
-                 "  'vector' for a vector (fastest, default), or\n"
-                 "  'tree' for a tree (for memory efficiency)"
+                 "  'tree' for a tree (memory efficient, default), or\n"
+                 "  'vector' for a vector (slightly faster, often far less memory efficient)"
                  , 'f').
       add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
-                 "use bit hashing to store states and store at most NUM states; note that this "
-                 "option may cause states to be mistaken for others (default value for NUM is "
-                 "approximately 2*10^8)",'b').
+                 "use bit hashing to store states and store at most NUM states. "
+                 "This means that instead of keeping a full record of all states "
+                 "that have been visited, a bit array is used that indicate whether "
+                 "or not a hash of a state has been seen before. Although this means "
+                 "that this option may cause states to be mistaken for others (because "
+                 "they are mapped to the same hash), it can be useful to explore very "
+                 "large LTSs that are otherwise not explorable. The default value for NUM is "
+                 "approximately 2*10^8 (this corresponds to about 25MB of memory)",'b').
       add_option("max", make_mandatory_argument("NUM"),
                  "explore at most NUM states", 'l').
       add_option("todo-max", make_mandatory_argument("NUM"),
@@ -184,19 +204,34 @@ class lps2lts_tool : public lps2lts_base
       add_option("deadlock",
                  "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
       add_option("divergence",
-                 "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed).", 'F').
+                 "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
+                 "The algorithm to detect the divergences is linear for every state, "
+                 "so state space exploration becomes quadratic with this option on, causing a state "
+                 "space exploration to become slow when this option is enabled.", 'F').
       add_option("action", make_mandatory_argument("NAMES"),
-                 "detect actions from NAMES, a comma-separated list of action names; a message "
-                 "is printed for every occurrence of one of these action names", 'a').
+                 "detect and report actions in the transitions system that have action "
+                 "names from NAMES, a comma-separated list. This is for instance useful "
+                 "to find (or prove the absence) of an action error. A message "
+                 "is printed for every occurrence of one of these action names. "
+                 "With the -t flag traces towards these actions are generated", 'a').
       add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
-                 "write at most NUM traces to states detected with the --deadlock, --divergence or --action "
-                 "options (default is unlimited)", 't').
+                 "Write a shortest trace to each state that is reached with an action from NAMES "
+                 "from option --action, is a deadlock detected with --deadlock, or is a "
+                 "divergence detected with --divergence to a file. "
+                 "No more than NUM traces will be written. If NUM is not supplied the number of "
+                 "traces is unbounded."
+                 "For each trace that is to be written a unique file with extension .trc (trace) "
+                 "will be created containing a shortest trace from the initial state to the deadlock "
+                 "state. The traces can be pretty printed and converted to other formats using tracepp.", 't').
       add_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
                  "not be explored").
       add_option("confluence", make_optional_argument("NAME", "ctau"),
-                 "apply on-the-fly confluence reduction with NAME the confluent tau action "
-                 "(when no NAME is supplied, 'ctau' is used)", 'c').
+                 "apply prioritization of transitions with the action label NAME."
+                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
+                 "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
+                 "state space is necessarily branching bisimilar to the state space of the lps. The generation "
+                 "algorithm that is used does not require the linear process to be tau convergent.", 'c').
       add_option("strategy", make_mandatory_argument("NAME"),
                  "explore the state space using strategy NAME:\n"
                  "  'b', 'breadth'   breadth-first search (default)\n"
@@ -206,8 +241,17 @@ class lps2lts_tool : public lps2lts_base
                  "  'r', 'random'    random simulation. Out of all next states one is chosen at random independently of whether this state has already been observed. Consequently, random simultation only terminates when a deadlocked state is encountered.", 's').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "save the output in the specified FORMAT", 'o').
-      add_option("no-info", "do not add state information to OUTFILE").
-      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions").
+      add_option("no-info", "do not add state information to OUTFILE"
+                 "Without this option lps2lts adds state vector to the LTS. This "
+                 "option causes this information to be discarded and states are only "
+                 "indicated by a sequence number. Explicit state information is useful "
+                 "for visualisation purposes, for instance, but can cause the OUTFILE "
+                 "to grow considerably. Note that this option is implicit when writing "
+                 "in the AUT format.").
+      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions"
+                 "For large state spaces the number of progress messages can be quite "
+                 "horrendous. This feature helps to suppress those. Other verbose messages, "
+                 "such as the total number of states explored, just remain visible.").
       add_option("init-tsize", make_mandatory_argument("NUM"),
                  "set the initial size of the internally used hash tables (default is 10000)");
     }
@@ -371,9 +415,9 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 
 
       values.clear();
-      values.push_back("vector");
       values.push_back("tree");
-
+      values.push_back("vector");
+      
       m_gui_options["state-format"] = create_radiobox_widget(values);
       m_gui_options["divergence"] = create_checkbox_widget();
       m_gui_options["init-tsize"] = create_textctrl_widget();
@@ -405,6 +449,7 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 
 lps2lts_tool *tool_instance;
 
+static
 void premature_termination_handler(int)
 {
   // Reset signal handlers.

@@ -1,0 +1,4 @@
+# This file contains the version for the MCRL2 source package.
+# This file is used to generate the version number if the sources originate
+# from a make package_source command.
+set(MCRL2_SOURCE_PACKAGE_REVISION @MCRL2_MINOR_VERSION@)

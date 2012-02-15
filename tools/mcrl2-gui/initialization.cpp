@@ -29,6 +29,7 @@
 #include <wx/mimetype.h>
 
 #include "mcrl2/utilities/basename.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <wx/xml/xml.h>
 #include <wx/sstream.h>
@@ -46,7 +47,9 @@ Initialization::Initialization()
   m_extention_tool_mapping.insert(pair<string, string> ("aut", "lts"));
   m_extention_tool_mapping.insert(pair<string, string> ("dot", "lts"));
   m_extention_tool_mapping.insert(pair<string, string> ("svc", "lts"));
+#ifdef USE_BCG
   m_extention_tool_mapping.insert(pair<string, string> ("bcg", "lts"));
+#endif
   m_extention_tool_mapping.insert(pair<string, string> ("pbes", "pbes"));
   m_extention_tool_mapping.insert(pair<string, string> ("txt", "txt"));
   m_extention_tool_mapping.insert(pair<string, string> ("chi", "chi"));
@@ -57,6 +60,9 @@ Initialization::Initialization()
 
   m_extention_tool_mapping.insert(pair<string, string> ("mcf", "mcf"));
   m_extention_tool_mapping.insert(pair<string, string> ("trc", "trc"));
+  m_extention_tool_mapping.insert(pair<string, string> ("gm", "bes"));
+  m_extention_tool_mapping.insert(pair<string, string> ("cwi", "bes"));
+  m_extention_tool_mapping.insert(pair<string, string> ("pbes", "bes"));
 
   mcrl2::utilities::basename basename;
   m_executable_basename = basename.get_executable_basename();
@@ -103,7 +109,7 @@ Initialization::Initialization()
 #endif
     if (result != 0)
     {
-      std::cerr << "Failed to execute " << cmd << std::endl;
+      mCRL2log(mcrl2::log::error) << "Failed to execute " << cmd << std::endl;
     }
     else
     {

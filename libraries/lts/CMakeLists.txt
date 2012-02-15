@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
@@ -21,9 +22,9 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-
 
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
@@ -61,10 +62,12 @@ target_link_libraries(${PROJECT_NAME}
   svc
   mcrl2_data
   mcrl2_lps
+  mcrl2_syntax
+  dparser
 )
 
 if( USE_BCG STREQUAL "" )
-  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )	
+  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )
   target_link_libraries(${PROJECT_NAME}
 		imp_bcg_io
     imp_bcg

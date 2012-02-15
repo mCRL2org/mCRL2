@@ -12,6 +12,7 @@
 #include <io.h>
 #endif
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/afun.h"
@@ -485,19 +486,19 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
         {
           case AT_INT:
           case AT_LIST:
-            fprintf(stream, "[...(%lu)]", ATgetLength((ATermList) t));
+            fprintf(stream, "[...(%zu)]", ATgetLength((ATermList) t));
             break;
 
           case AT_APPL:
             if (AT_isValidAFun(ATgetAFun((ATermAppl)t)))
             {
               AT_printAFun(ATgetAFun((ATermAppl)t), stream);
-              fprintf(stream, "(...(%lu))",
+              fprintf(stream, "(...(%zu))",
                       GET_ARITY(t->header));
             }
             else
             {
-              fprintf(stream, "<sym>(...(%lu))",
+              fprintf(stream, "<sym>(...(%zu))",
                       GET_ARITY(t->header));
             }
             break;
@@ -545,7 +546,7 @@ resize_buffer(const size_t n)
  * Write a term in text format to file.
  */
 
-bool
+static bool
 writeToTextFile(const ATerm t, FILE* f)
 {
   AFun          sym;
@@ -704,6 +705,7 @@ symbolTextSize(const AFun sym)
           break;
         default:
           len++;
+          break;
       }
       id++;
     }
@@ -984,7 +986,7 @@ fnext_skip_layout(int* c, FILE* f)
  * Parse a list of arguments.
  */
 
-ATermList
+static ATermList
 fparse_terms(int* c, FILE* f)
 {
   ATermList list;
@@ -1247,6 +1249,7 @@ fparse_term(int* c, FILE* f)
       {
         result = NULL;
       }
+      break;
   }
 
   return result;
@@ -1260,7 +1263,7 @@ fparse_term(int* c, FILE* f)
  * Read a term from a text file. The first character has been read.
  */
 
-ATerm
+static ATerm
 readFromTextFile(int* c, FILE* file)
 {
   ATerm term;
@@ -1275,18 +1278,17 @@ readFromTextFile(int* c, FILE* file)
   else
   {
     int i;
-    fprintf(stderr, "readFromTextFile: parse error at line %d, col %d%s",
-            line, col, (line||col)?":\n":"");
+    mCRL2log(mcrl2::log::error) << "readFromTextFile: parse error at line " << line
+                                << ", col " << col << ((line||col)?":\n":"");
     for (i = 0; i < ERROR_SIZE; ++i)
     {
       char c = error_buf[(i + error_idx) % ERROR_SIZE];
       if (c)
       {
-        fprintf(stderr, "%c", c);
+        mCRL2log(mcrl2::log::error) << c;
       }
     }
-    fprintf(stderr, "\n");
-    fflush(stderr);
+    mCRL2log(mcrl2::log::error) << std::endl;
   }
 
   return term;
@@ -1419,7 +1421,7 @@ void snext_skip_layout(int* c, char** s)
  * Parse a list of arguments.
  */
 
-ATermList
+static ATermList
 sparse_terms(int* c, char** s)
 {
   ATermList list;
@@ -1685,6 +1687,7 @@ sparse_term(int* c, char** s)
       {
         result = NULL;
       }
+      break;
   }
 
   if (result != NULL)
@@ -1718,13 +1721,13 @@ ATreadFromString(const char* string)
   if (term == NULL)
   {
     int i;
-    fprintf(stderr, "ATreadFromString: parse error at or near:\n");
-    fprintf(stderr, "%s\n", orig);
+    mCRL2log(mcrl2::log::error) << "ATreadFromString: parse error at or near:" << std::endl
+                                << orig << std::endl;
     for (i = 1; i < string - orig; ++i)
     {
-      fprintf(stderr, " ");
+      mCRL2log(mcrl2::log::error) << " ";
     }
-    fprintf(stderr, "^\n");
+    mCRL2log(mcrl2::log::error) << "^" << std::endl;
   }
   else
   {
@@ -1837,7 +1840,6 @@ void AT_markTerm_young(ATerm t)
 
   if (IS_MARKED(t->header) || IS_OLD(t->header))
   {
-    /*fprintf(stderr,"AT_markTerm_young (%p) STOP MARK: age = %d\n",t,GET_AGE(t->header));*/
     return;
   }
 
@@ -1889,7 +1891,6 @@ void AT_markTerm_young(ATerm t)
 
       case AT_APPL:
         sym = ATgetAFun((ATermAppl) t);
-        /*fprintf(stderr,"AT_markTerm_young: AT_markAFun_young(%d)\n",sym);*/
         if (AT_isValidAFun(sym))
         {
           AT_markAFun_young(sym);
@@ -1931,7 +1932,6 @@ void AT_unmarkIfAllMarked(ATerm t)
 {
   if (IS_MARKED(t->header))
   {
-    /*ATfprintf(stderr, "* unmarking %t\n", t);*/
     CLR_MARK(t->header);
     switch (ATgetType(t))
     {

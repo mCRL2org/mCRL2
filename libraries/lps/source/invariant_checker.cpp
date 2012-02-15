@@ -16,6 +16,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/exception.h"
 
@@ -29,6 +30,7 @@ namespace detail
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 // Class Invariant_Checker ------------------------------------------------------------------------
 // Class Invariant_Checker - Functions declared private -----------------------------------------
@@ -153,10 +155,11 @@ bool Invariant_Checker::check_summands(const data::data_expression a_invariant)
 // Class Invariant_Checker - Functions declared public --------------------------------------------
 
 Invariant_Checker::Invariant_Checker(
-  mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+  mcrl2::lps::specification const& a_lps,
+  mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, smt_solver_type a_solver_type,
   bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
 ):
-  f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+  f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
 {
   f_init = a_lps.initial_process();
   f_summands = a_lps.process().action_summands();

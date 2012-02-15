@@ -43,10 +43,10 @@ class rewriter_tool: public Tool
         "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
         "use rewrite strategy NAME:\n"
         "  'jitty' for jitty rewriting (default),\n"
-        "  'jittyp' for jitty rewriting with prover,\n"
 #ifdef MCRL2_JITTYC_AVAILABLE
         "  'jittyc' for compiled jitty rewriting,\n"
 #endif
+        "  'jittyp' for jitty rewriting with prover\n"
         ,'r'
       );
     }

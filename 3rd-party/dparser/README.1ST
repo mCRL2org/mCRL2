@@ -1,0 +1,4 @@
+This is a stripped version of DParser 1.26. Only the files
+necessary to build the parser generator and the dparser
+library are included, together with the original copyright
+notice, readme and changelog.

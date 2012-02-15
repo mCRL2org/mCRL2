@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
+#include <boost/lexical_cast.hpp>
+
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/lps/traverser.h"
@@ -41,9 +43,53 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   using super::print_list;
   using super::print_variables;
 
+  bool m_print_summand_numbers;
+
+  printer()
+    : m_print_summand_numbers(false)
+  {}
+
+  bool& print_summand_numbers()
+  {
+  	return m_print_summand_numbers;
+  }
+
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
+  }
+
+  template <typename Container>
+  void print_numbered_list(const Container& container,
+                           const std::string& separator = ", ",
+                           const std::string& number_separator = "",
+                           std::size_t index = 0,
+                           bool print_start_separator = false,
+                           bool print_empty_container = false
+                          )
+  {
+    if (container.empty() && !print_empty_container)
+    {
+      return;
+    }
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      derived().print("\n");
+      derived().print(number_separator);
+      derived().print("%");
+      derived().print(boost::lexical_cast<std::string>(index++));
+
+      derived().print("\n");
+      if (i == container.begin() && !print_start_separator)
+      {
+        derived().print(number_separator);
+      }
+      else
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
   }
 
   // Container contains elements of type T such that t.sort() is a sort_expression.
@@ -55,7 +101,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
                                 )
   {
     typedef typename Container::value_type T;
-    
+
     // print nothing if the container is empty
     if (container.empty())
     {
@@ -65,7 +111,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     typename Container::const_iterator first = container.begin();
     typename Container::const_iterator last = container.end();
 
-    derived().print(opener);   
+    derived().print(opener);
 
     while (first != last)
     {
@@ -87,7 +133,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
         derived().print(": ");
         print_list(first->sorts(), "", "", " # ");
       }
-      
+
       first = i;
     }
     derived().print(closer);
@@ -102,7 +148,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
                                                  )
   {
     typedef typename Container::value_type T;
-    
+
     // print nothing if the container is empty
     if (container.empty())
     {
@@ -126,7 +172,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     }
 
     // do the actual printing
-    derived().print(opener);   
+    derived().print(opener);
     for (std::vector<data::sort_expression_list>::iterator i = sort_lists.begin(); i != sort_lists.end(); ++i)
     {
       if (i != sort_lists.begin())
@@ -180,7 +226,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     }
     else
     {
-      derived()(x.actions());
+      print_list(x.actions(), "", "", "|");
     }
     if (x.has_time())
     {
@@ -226,20 +272,38 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().enter(x);
     derived().print("proc P");
     print_variables(x.process_parameters(), true, true, false, "(", ")", ", ");
-    derived().print(" =\n       ");
 
-    // print action summands
-    std::string opener = "";
-    std::string closer = "";
-    std::string separator = "\n     + ";
-    print_list(x.action_summands(), opener, closer, separator);
-
-    // print deadlock summands
-    if (!x.deadlock_summands().empty())
+    if (m_print_summand_numbers)
     {
-      opener = separator;
+      derived().print(" =");
+
+      std::string separator        = "     + ";
+      std::string number_separator = "       ";
+
+      // print action summands
+      print_numbered_list(x.action_summands(), separator, number_separator, 1, false);
+
+      // print deadlock summands
+      print_numbered_list(x.deadlock_summands(), separator, number_separator, x.action_summands().size() + 1, true);
     }
-    print_list(x.deadlock_summands(), opener, closer, separator);
+    else
+    {
+      derived().print(" =\n       ");
+
+      // print action summands
+      std::string opener = "";
+      std::string closer = "";
+      std::string separator = "\n     + ";
+      print_list(x.action_summands(), opener, closer, separator);
+
+      // print deadlock summands
+      if (!x.action_summands().empty())
+      {
+        opener = separator;
+      }
+      print_list(x.deadlock_summands(), opener, closer, separator);
+    }
+
     derived().print(";\n");
     derived().leave(x);
   }
@@ -260,46 +324,24 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<lps::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<lps::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  lps::print(t, out);
+  stream_printer()(x, out);
   return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  MCRL2_CHECK_PP(core::pp(t), lps::print(t), t.to_string());
-  return core::pp(t);
-}
-
-/// \brief Pretty print a linear process
-inline
-std::string pp(const linear_process& p, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(linear_process_to_aterm(p)), lps::print(p), linear_process_to_aterm(p).to_string());
-  return core::pp(linear_process_to_aterm(p), pp_format);
-}
-
-/// \brief Pretty print a specification 
-inline
-std::string pp(const specification& spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(specification_to_aterm(spec)), lps::print(spec), specification_to_aterm(spec).to_string());
-  return core::pp(specification_to_aterm(spec), pp_format);
 }
 
 } // namespace lps

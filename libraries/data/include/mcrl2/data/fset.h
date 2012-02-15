@@ -69,8 +69,8 @@ namespace mcrl2 {
         structured_sort fset_struct(const sort_expression& s)
         {
           structured_sort_constructor_vector constructors;
-          constructors.push_back(structured_sort_constructor("@fset_empty", "fset_empty"));
-          constructors.push_back(structured_sort_constructor("@fset_cons", atermpp::make_vector(structured_sort_constructor_argument("head", s), structured_sort_constructor_argument("tail", fset(s))), "fset_cons"));
+          constructors.push_back(structured_sort_constructor("@fset_empty", "empty"));
+          constructors.push_back(structured_sort_constructor("@fset_cons", atermpp::make_vector(structured_sort_constructor_argument("left", s), structured_sort_constructor_argument("right", fset(s))), "cons_"));
           return structured_sort(constructors);
         }
 
@@ -79,20 +79,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_empty
       /// \return Identifier \@fset_empty
       inline
-      core::identifier_string const& fset_empty_name()
+      core::identifier_string const& empty_name()
       {
-        static core::identifier_string fset_empty_name = data::detail::initialise_static_expression(fset_empty_name, core::identifier_string("@fset_empty"));
-        return fset_empty_name;
+        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("@fset_empty"));
+        return empty_name;
       }
 
       /// \brief Constructor for function symbol \@fset_empty
       /// \param s A sort expression
-      /// \return Function symbol fset_empty
+      /// \return Function symbol empty
       inline
-      function_symbol fset_empty(const sort_expression& s)
+      function_symbol empty(const sort_expression& s)
       {
-        function_symbol fset_empty(fset_empty_name(), fset(s));
-        return fset_empty;
+        function_symbol empty(empty_name(), fset(s));
+        return empty;
       }
 
 
@@ -100,11 +100,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_empty
       inline
-      bool is_fset_empty_function_symbol(const atermpp::aterm_appl& e)
+      bool is_empty_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fset_empty_name();
+          return function_symbol(e).name() == empty_name();
         }
         return false;
       }
@@ -112,20 +112,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_cons
       /// \return Identifier \@fset_cons
       inline
-      core::identifier_string const& fset_cons_name()
+      core::identifier_string const& cons_name()
       {
-        static core::identifier_string fset_cons_name = data::detail::initialise_static_expression(fset_cons_name, core::identifier_string("@fset_cons"));
-        return fset_cons_name;
+        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("@fset_cons"));
+        return cons_name;
       }
 
       /// \brief Constructor for function symbol \@fset_cons
       /// \param s A sort expression
-      /// \return Function symbol fset_cons
+      /// \return Function symbol cons_
       inline
-      function_symbol fset_cons(const sort_expression& s)
+      function_symbol cons_(const sort_expression& s)
       {
-        function_symbol fset_cons(fset_cons_name(), make_function_sort(s, fset(s), fset(s)));
-        return fset_cons;
+        function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
+        return cons_;
       }
 
 
@@ -133,11 +133,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_cons
       inline
-      bool is_fset_cons_function_symbol(const atermpp::aterm_appl& e)
+      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fset_cons_name();
+          return function_symbol(e).name() == cons_name();
         }
         return false;
       }
@@ -148,21 +148,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression
       /// \return Application of \@fset_cons to a number of arguments
       inline
-      application fset_cons(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fset_cons(s)(arg0, arg1);
+        return cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_cons
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fset_cons to a
+      /// \return true iff e is an application of function symbol cons_ to a
       ///     number of arguments
       inline
-      bool is_fset_cons_application(const atermpp::aterm_appl& e)
+      bool is_cons_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fset_cons_function_symbol(application(e).head());
+          return is_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -182,20 +182,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_insert
       /// \return Identifier \@fset_insert
       inline
-      core::identifier_string const& fsetinsert_name()
+      core::identifier_string const& insert_name()
       {
-        static core::identifier_string fsetinsert_name = data::detail::initialise_static_expression(fsetinsert_name, core::identifier_string("@fset_insert"));
-        return fsetinsert_name;
+        static core::identifier_string insert_name = core::detail::initialise_static_expression(insert_name, core::identifier_string("@fset_insert"));
+        return insert_name;
       }
 
       /// \brief Constructor for function symbol \@fset_insert
       /// \param s A sort expression
-      /// \return Function symbol fsetinsert
+      /// \return Function symbol insert
       inline
-      function_symbol fsetinsert(const sort_expression& s)
+      function_symbol insert(const sort_expression& s)
       {
-        function_symbol fsetinsert(fsetinsert_name(), make_function_sort(s, fset(s), fset(s)));
-        return fsetinsert;
+        function_symbol insert(insert_name(), make_function_sort(s, fset(s), fset(s)));
+        return insert;
       }
 
 
@@ -203,11 +203,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_insert
       inline
-      bool is_fsetinsert_function_symbol(const atermpp::aterm_appl& e)
+      bool is_insert_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetinsert_name();
+          return function_symbol(e).name() == insert_name();
         }
         return false;
       }
@@ -218,21 +218,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression
       /// \return Application of \@fset_insert to a number of arguments
       inline
-      application fsetinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fsetinsert(s)(arg0, arg1);
+        return insert(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_insert
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetinsert to a
+      /// \return true iff e is an application of function symbol insert to a
       ///     number of arguments
       inline
-      bool is_fsetinsert_application(const atermpp::aterm_appl& e)
+      bool is_insert_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetinsert_function_symbol(application(e).head());
+          return is_insert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -240,20 +240,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_cinsert
       /// \return Identifier \@fset_cinsert
       inline
-      core::identifier_string const& fsetcinsert_name()
+      core::identifier_string const& cinsert_name()
       {
-        static core::identifier_string fsetcinsert_name = data::detail::initialise_static_expression(fsetcinsert_name, core::identifier_string("@fset_cinsert"));
-        return fsetcinsert_name;
+        static core::identifier_string cinsert_name = core::detail::initialise_static_expression(cinsert_name, core::identifier_string("@fset_cinsert"));
+        return cinsert_name;
       }
 
       /// \brief Constructor for function symbol \@fset_cinsert
       /// \param s A sort expression
-      /// \return Function symbol fsetcinsert
+      /// \return Function symbol cinsert
       inline
-      function_symbol fsetcinsert(const sort_expression& s)
+      function_symbol cinsert(const sort_expression& s)
       {
-        function_symbol fsetcinsert(fsetcinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
-        return fsetcinsert;
+        function_symbol cinsert(cinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
+        return cinsert;
       }
 
 
@@ -261,11 +261,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_cinsert
       inline
-      bool is_fsetcinsert_function_symbol(const atermpp::aterm_appl& e)
+      bool is_cinsert_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetcinsert_name();
+          return function_symbol(e).name() == cinsert_name();
         }
         return false;
       }
@@ -277,21 +277,21 @@ namespace mcrl2 {
       /// \param arg2 A data expression
       /// \return Application of \@fset_cinsert to a number of arguments
       inline
-      application fsetcinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return fsetcinsert(s)(arg0, arg1, arg2);
+        return cinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetcinsert to a
+      /// \return true iff e is an application of function symbol cinsert to a
       ///     number of arguments
       inline
-      bool is_fsetcinsert_application(const atermpp::aterm_appl& e)
+      bool is_cinsert_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetcinsert_function_symbol(application(e).head());
+          return is_cinsert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -299,20 +299,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_in
       /// \return Identifier \@fset_in
       inline
-      core::identifier_string const& fsetin_name()
+      core::identifier_string const& in_name()
       {
-        static core::identifier_string fsetin_name = data::detail::initialise_static_expression(fsetin_name, core::identifier_string("@fset_in"));
-        return fsetin_name;
+        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("@fset_in"));
+        return in_name;
       }
 
       /// \brief Constructor for function symbol \@fset_in
       /// \param s A sort expression
-      /// \return Function symbol fsetin
+      /// \return Function symbol in
       inline
-      function_symbol fsetin(const sort_expression& s)
+      function_symbol in(const sort_expression& s)
       {
-        function_symbol fsetin(fsetin_name(), make_function_sort(s, fset(s), sort_bool::bool_()));
-        return fsetin;
+        function_symbol in(in_name(), make_function_sort(s, fset(s), sort_bool::bool_()));
+        return in;
       }
 
 
@@ -320,11 +320,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_in
       inline
-      bool is_fsetin_function_symbol(const atermpp::aterm_appl& e)
+      bool is_in_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetin_name();
+          return function_symbol(e).name() == in_name();
         }
         return false;
       }
@@ -335,80 +335,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression
       /// \return Application of \@fset_in to a number of arguments
       inline
-      application fsetin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fsetin(s)(arg0, arg1);
+        return in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_in
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetin to a
+      /// \return true iff e is an application of function symbol in to a
       ///     number of arguments
       inline
-      bool is_fsetin_application(const atermpp::aterm_appl& e)
+      bool is_in_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetin_function_symbol(application(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@fset_lte
-      /// \return Identifier \@fset_lte
-      inline
-      core::identifier_string const& fsetlte_name()
-      {
-        static core::identifier_string fsetlte_name = data::detail::initialise_static_expression(fsetlte_name, core::identifier_string("@fset_lte"));
-        return fsetlte_name;
-      }
-
-      /// \brief Constructor for function symbol \@fset_lte
-      /// \param s A sort expression
-      /// \return Function symbol fsetlte
-      inline
-      function_symbol fsetlte(const sort_expression& s)
-      {
-        function_symbol fsetlte(fsetlte_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), sort_bool::bool_()));
-        return fsetlte;
-      }
-
-
-      /// \brief Recogniser for function \@fset_lte
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_lte
-      inline
-      bool is_fsetlte_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == fsetlte_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fset_lte
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fset_lte to a number of arguments
-      inline
-      application fsetlte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return fsetlte(s)(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@fset_lte
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetlte to a
-      ///     number of arguments
-      inline
-      bool is_fsetlte_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_fsetlte_function_symbol(application(e).head());
+          return is_in_function_symbol(application(e).head());
         }
         return false;
       }
@@ -416,20 +357,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_union
       /// \return Identifier \@fset_union
       inline
-      core::identifier_string const& fsetunion_name()
+      core::identifier_string const& union_name()
       {
-        static core::identifier_string fsetunion_name = data::detail::initialise_static_expression(fsetunion_name, core::identifier_string("@fset_union"));
-        return fsetunion_name;
+        static core::identifier_string union_name = core::detail::initialise_static_expression(union_name, core::identifier_string("@fset_union"));
+        return union_name;
       }
 
       /// \brief Constructor for function symbol \@fset_union
       /// \param s A sort expression
-      /// \return Function symbol fsetunion
+      /// \return Function symbol union_
       inline
-      function_symbol fsetunion(const sort_expression& s)
+      function_symbol union_(const sort_expression& s)
       {
-        function_symbol fsetunion(fsetunion_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
-        return fsetunion;
+        function_symbol union_(union_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
+        return union_;
       }
 
 
@@ -437,11 +378,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_union
       inline
-      bool is_fsetunion_function_symbol(const atermpp::aterm_appl& e)
+      bool is_union_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetunion_name();
+          return function_symbol(e).name() == union_name();
         }
         return false;
       }
@@ -454,21 +395,21 @@ namespace mcrl2 {
       /// \param arg3 A data expression
       /// \return Application of \@fset_union to a number of arguments
       inline
-      application fsetunion(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return fsetunion(s)(arg0, arg1, arg2, arg3);
+        return union_(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_union
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetunion to a
+      /// \return true iff e is an application of function symbol union_ to a
       ///     number of arguments
       inline
-      bool is_fsetunion_application(const atermpp::aterm_appl& e)
+      bool is_union_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetunion_function_symbol(application(e).head());
+          return is_union_function_symbol(application(e).head());
         }
         return false;
       }
@@ -476,20 +417,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_inter
       /// \return Identifier \@fset_inter
       inline
-      core::identifier_string const& fsetintersection_name()
+      core::identifier_string const& intersection_name()
       {
-        static core::identifier_string fsetintersection_name = data::detail::initialise_static_expression(fsetintersection_name, core::identifier_string("@fset_inter"));
-        return fsetintersection_name;
+        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("@fset_inter"));
+        return intersection_name;
       }
 
       /// \brief Constructor for function symbol \@fset_inter
       /// \param s A sort expression
-      /// \return Function symbol fsetintersection
+      /// \return Function symbol intersection
       inline
-      function_symbol fsetintersection(const sort_expression& s)
+      function_symbol intersection(const sort_expression& s)
       {
-        function_symbol fsetintersection(fsetintersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
-        return fsetintersection;
+        function_symbol intersection(intersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
+        return intersection;
       }
 
 
@@ -497,11 +438,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_inter
       inline
-      bool is_fsetintersection_function_symbol(const atermpp::aterm_appl& e)
+      bool is_intersection_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetintersection_name();
+          return function_symbol(e).name() == intersection_name();
         }
         return false;
       }
@@ -514,21 +455,21 @@ namespace mcrl2 {
       /// \param arg3 A data expression
       /// \return Application of \@fset_inter to a number of arguments
       inline
-      application fsetintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return fsetintersection(s)(arg0, arg1, arg2, arg3);
+        return intersection(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetintersection to a
+      /// \return true iff e is an application of function symbol intersection to a
       ///     number of arguments
       inline
-      bool is_fsetintersection_application(const atermpp::aterm_appl& e)
+      bool is_intersection_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetintersection_function_symbol(application(e).head());
+          return is_intersection_function_symbol(application(e).head());
         }
         return false;
       }
@@ -536,20 +477,20 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_diff
       /// \return Identifier \@fset_diff
       inline
-      core::identifier_string const& fsetdifference_name()
+      core::identifier_string const& difference_name()
       {
-        static core::identifier_string fsetdifference_name = data::detail::initialise_static_expression(fsetdifference_name, core::identifier_string("@fset_diff"));
-        return fsetdifference_name;
+        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("@fset_diff"));
+        return difference_name;
       }
 
       /// \brief Constructor for function symbol \@fset_diff
       /// \param s A sort expression
-      /// \return Function symbol fsetdifference
+      /// \return Function symbol difference
       inline
-      function_symbol fsetdifference(const sort_expression& s)
+      function_symbol difference(const sort_expression& s)
       {
-        function_symbol fsetdifference(fsetdifference_name(), make_function_sort(fset(s), fset(s), fset(s)));
-        return fsetdifference;
+        function_symbol difference(difference_name(), make_function_sort(fset(s), fset(s), fset(s)));
+        return difference;
       }
 
 
@@ -557,11 +498,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_diff
       inline
-      bool is_fsetdifference_function_symbol(const atermpp::aterm_appl& e)
+      bool is_difference_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == fsetdifference_name();
+          return function_symbol(e).name() == difference_name();
         }
         return false;
       }
@@ -572,21 +513,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression
       /// \return Application of \@fset_diff to a number of arguments
       inline
-      application fsetdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fsetdifference(s)(arg0, arg1);
+        return difference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_diff
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetdifference to a
+      /// \return true iff e is an application of function symbol difference to a
       ///     number of arguments
       inline
-      bool is_fsetdifference_application(const atermpp::aterm_appl& e)
+      bool is_difference_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_fsetdifference_function_symbol(application(e).head());
+          return is_difference_function_symbol(application(e).head());
         }
         return false;
       }
@@ -598,27 +539,14 @@ namespace mcrl2 {
       function_symbol_vector fset_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(fsetinsert(s));
-        result.push_back(fsetcinsert(s));
-        result.push_back(fsetin(s));
-        result.push_back(fsetlte(s));
-        result.push_back(fsetunion(s));
-        result.push_back(fsetintersection(s));
-        result.push_back(fsetdifference(s));
+        result.push_back(insert(s));
+        result.push_back(cinsert(s));
+        result.push_back(in(s));
+        result.push_back(union_(s));
+        result.push_back(intersection(s));
+        result.push_back(difference(s));
         return result;
       }
-      ///\brief Function for projecting out argument
-      ///        head from an application
-      /// \param e A data expression
-      /// \pre head is defined for e
-      /// \return The argument of e that corresponds to head
-      inline
-      data_expression head(const data_expression& e)
-      {
-        assert(is_fset_cons_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
-      }
-
       ///\brief Function for projecting out argument
       ///        right from an application
       /// \param e A data expression
@@ -627,7 +555,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_fsetinsert_application(e) || is_fsetin_application(e));
+        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
@@ -639,7 +567,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
+        assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -651,7 +579,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
+        assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
@@ -663,7 +591,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
+        assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
@@ -675,20 +603,8 @@ namespace mcrl2 {
       inline
       data_expression arg4(const data_expression& e)
       {
-        assert(is_fsetunion_application(e) || is_fsetintersection_application(e));
+        assert(is_union_application(e) || is_intersection_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 3);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        tail from an application
-      /// \param e A data expression
-      /// \pre tail is defined for e
-      /// \return The argument of e that corresponds to tail
-      inline
-      data_expression tail(const data_expression& e)
-      {
-        assert(is_fset_cons_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -699,7 +615,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_fsetinsert_application(e) || is_fsetin_application(e));
+        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -719,49 +635,43 @@ namespace mcrl2 {
         data_equation_vector result;
         data_equation_vector fset_equations = detail::fset_struct(s).constructor_equations(fset(s));
         result.insert(result.end(), fset_equations.begin(), fset_equations.end());
-        result.push_back(data_equation(atermpp::make_vector(vd), fsetinsert(s, vd, fset_empty(s)), fset_cons(s, vd, fset_empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetinsert(s, vd, fset_cons(s, vd, vs)), fset_cons(s, vd, vs)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, vd, fset_cons(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(ve, vd), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, ve, fsetinsert(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::false_(), vs), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::true_(), vs), fsetinsert(s, vd, vs)));
-        result.push_back(data_equation(atermpp::make_vector(vd), fsetin(s, vd, fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), fsetin(s, vd, fset_cons(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), fsetin(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf), fsetlte(s, vf, fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs), fsetlte(s, vf, fset_cons(s, vd, vs), fset_empty(s)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vt), fsetlte(s, vf, fset_empty(s), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs, vt), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetlte(s, vf, vs, vt)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(vd, ve), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(ve, vd), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg), fsetunion(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fsetunion(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetunion(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg), fsetintersection(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fsetintersection(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetintersection(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vs), fsetdifference(s, vs, fset_empty(s)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vt), fsetdifference(s, fset_empty(s), vt), vt));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), fsetdifference(s, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetdifference(s, vs, vt)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), fsetdifference(s, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fset_cons(s, vd, fsetdifference(s, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), fsetdifference(s, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fset_cons(s, ve, fsetdifference(s, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(variable_list(), equal_to(fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::and_(equal_to(ve, vd), equal_to(vt, vs))));
-        result.push_back(data_equation(variable_list(), less(fset_empty(s), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less(vt, vs)))));
-        result.push_back(data_equation(variable_list(), less_equal(fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less_equal(vt, vs)))));
+        result.push_back(data_equation(atermpp::make_vector(vd), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), insert(s, vd, cons_(s, ve, vs)), cons_(s, vd, cons_(s, ve, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(ve, vd), insert(s, vd, cons_(s, ve, vs)), cons_(s, ve, insert(s, vd, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), cinsert(s, vd, sort_bool::false_(), vs), vs));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), cinsert(s, vd, sort_bool::true_(), vs), insert(s, vd, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), union_(s, vf, vg, empty(s), empty(s)), empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), union_(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, sort_bool::not_(vg(vd)), union_(s, vf, vg, vs, empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), union_(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), union_(s, vf, vg, empty(s), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), union_(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), union_(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), union_(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, sort_bool::not_(vg(vd)), union_(s, vf, vg, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), union_(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), union_(s, vf, vg, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), intersection(s, vf, vg, empty(s), empty(s)), empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), intersection(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, vg(vd), intersection(s, vf, vg, vs, empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), intersection(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), intersection(s, vf, vg, empty(s), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), intersection(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, vg(vd), intersection(s, vf, vg, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), intersection(s, vf, vg, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vs), difference(s, vs, empty(s)), vs));
+        result.push_back(data_equation(atermpp::make_vector(vt), difference(s, empty(s), vt), vt));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, difference(s, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, ve, difference(s, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(variable_list(), equal_to(empty(s), empty(s)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(empty(s), cons_(s, ve, vs)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::and_(equal_to(ve, vd), equal_to(vt, vs))));
+        result.push_back(data_equation(variable_list(), less(empty(s), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(empty(s), cons_(s, ve, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less(vt, vs)))));
+        result.push_back(data_equation(variable_list(), less_equal(empty(s), empty(s)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(empty(s), cons_(s, ve, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less_equal(vt, vs)))));
         return result;
       }
 

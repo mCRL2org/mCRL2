@@ -1,5 +1,0 @@
-
-
-By default, the following information about the PBES is shown: 
-* information if the PBES is closed and well-formed;
-* number of equations, &mu;s and &nu;s.

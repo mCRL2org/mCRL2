@@ -30,11 +30,11 @@ void test_print()
 
   // print using the one argument function print
   std::ostringstream out2;
-  core::print(s, out2);
+  core::stream_printer()(s, out2);
   BOOST_CHECK(out2.str() == "abc");
 
   // print using the two argument function print
-  BOOST_CHECK(core::print(s) == "abc");
+  BOOST_CHECK(core::pp(s) == "abc");
 
   core::garbage_collect();
 }

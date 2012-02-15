@@ -13,11 +13,13 @@
 #define MCRL2_LPS_ACTION_LABEL_H
 
 #include <cassert>
+#include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -25,71 +27,73 @@ namespace mcrl2
 namespace lps
 {
 
-///////////////////////////////////////////////////////////////////////////////
-// action_label
-/// \brief Represents a label of an action.
-// <ActId>        ::= ActId(<String>, <SortExpr>*)
+//--- start generated class action_label ---//
+/// \brief An action label
 class action_label: public atermpp::aterm_appl
 {
-  protected:
-    /// \brief The name of the label
-    core::identifier_string m_name;
-
-    /// \brief The sorts of the label
-    data::sort_expression_list m_sorts;
-
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     action_label()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructActId())
+      : atermpp::aterm_appl(core::detail::constructActId())
     {}
 
     /// \brief Constructor.
-    /// \param t A term
-    action_label(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
+    /// \param term A term
+    action_label(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_ActId(m_term));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_name  = *i++;
-      m_sorts = *i;
+      assert(core::detail::check_term_ActId(m_term));
     }
 
     /// \brief Constructor.
-    /// \param name A
-    /// \param sorts A sequence of sort expressions
     action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
-        m_name(name),
-        m_sorts(sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts))
     {}
 
-    /// \brief Returns the name of the action label.
-    /// \return The name of the action label.
+    /// \brief Constructor.
+    action_label(const std::string& name, const data::sort_expression_list& sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeActId(core::identifier_string(name), sorts))
+    {}
+
     core::identifier_string name() const
     {
-      return m_name;
+      return atermpp::arg1(*this);
     }
 
-    /// \brief Returns the sorts of the action label
-    /// \return The sorts of the action label
-    data::sort_expression_list const& sorts() const
+    data::sort_expression_list sorts() const
     {
-      return m_sorts;
+      return atermpp::list_arg2(*this);
     }
 };
 
-/// \brief Read-only singly linked list of action labels
+/// \brief list of action_labels
 typedef atermpp::term_list<action_label> action_label_list;
 
-/// \brief Returns true if the term t is an action label
+/// \brief vector of action_labels
+typedef atermpp::vector<action_label>    action_label_vector;
+
+
+/// \brief Test for a action_label expression
 /// \param t A term
-/// \return True if the term t is an action label
+/// \return True if it is a action_label expression
 inline
-bool is_action_label(atermpp::aterm_appl t)
+bool is_action_label(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActId(t);
 }
+
+//--- end generated class action_label ---//
+
+// template function overloads
+std::string pp(const action_label& x);
+std::string pp(const action_label_list& x);
+std::string pp(const action_label_vector& x);
+action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
+std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
+
+// TODO: These should be removed when the ATerm code has been replaced.
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace lps
 

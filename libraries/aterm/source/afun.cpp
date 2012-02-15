@@ -45,9 +45,9 @@ static const size_t MAGIC_PRIME = 7;
 
 char afun_id[] = "$Id$";
 
-static size_t table_class = INITIAL_AFUN_TABLE_CLASS;
-static MachineWord table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
-static size_t table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
+static size_t afun_table_class = INITIAL_AFUN_TABLE_CLASS;
+static MachineWord afun_table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
+static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry* hash_table     = NULL;
 
@@ -76,7 +76,20 @@ extern char* _strdup(const char* s);
 static void resize_table()
 {
   MachineWord i;
-  size_t new_class = table_class+1;
+  size_t new_class = afun_table_class+1;
+#ifdef AT_32BIT
+  if (new_class>=23) // In 32 bit mode only 22 bits are reserved for function symbols.
+  {
+    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^22 (= 4.194.304) different afuns on a 32 bit machine.");
+  }
+#endif
+#ifdef AT_64BIT
+  if (new_class>=31)
+  {
+    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^30 (= 1.073.741.824) different afuns on a 64 bit machine.");
+  }
+#endif
+
   MachineWord new_size  = AT_TABLE_SIZE(new_class);
   size_t new_mask  = AT_TABLE_MASK(new_class);
 
@@ -86,7 +99,7 @@ static void resize_table()
   {
     throw std::runtime_error("afun.c:resize_table - could not allocate space for lookup table of " + to_string(new_size) + " afuns");
   }
-  for (i = table_size; i < new_size; i++)
+  for (i = afun_table_size; i < new_size; i++)
   {
     at_lookup_table[i] = (SymEntry) SYM_SET_NEXT_FREE(first_free);
     first_free = i;
@@ -99,7 +112,7 @@ static void resize_table()
   }
   memset(hash_table, 0, new_size*sizeof(SymEntry));
 
-  for (i=0; i<table_size; i++)
+  for (i=0; i<afun_table_size; i++)
   {
     SymEntry entry = at_lookup_table[i];
     if (!SYM_IS_FREE(entry))
@@ -111,9 +124,9 @@ static void resize_table()
     }
   }
 
-  table_class = new_class;
-  table_size  = new_size;
-  table_mask  = new_mask;
+  afun_table_class = new_class;
+  afun_table_size  = new_size;
+  afun_table_mask  = new_mask;
 }
 
 /*}}}  */
@@ -122,7 +135,7 @@ static void resize_table()
 
 MachineWord AT_symbolTableSize()
 {
-  return table_size;
+  return afun_table_size;
 }
 
 /*}}}  */
@@ -132,25 +145,25 @@ void AT_initAFun(int, char**)
 {
   AFun sym;
 
-  hash_table = (SymEntry*) AT_calloc(table_size, sizeof(SymEntry));
+  hash_table = (SymEntry*) AT_calloc(afun_table_size, sizeof(SymEntry));
   if (hash_table == NULL)
   {
-    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(table_size) + " hash-entries.");
+    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(afun_table_size) + " hash-entries.");
   }
 
-  at_lookup_table = (SymEntry*) AT_calloc(table_size, sizeof(SymEntry));
+  at_lookup_table = (SymEntry*) AT_calloc(afun_table_size, sizeof(SymEntry));
   at_lookup_table_alias = (ATerm*)at_lookup_table;
   if (at_lookup_table == NULL)
   {
-    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(table_size) + " lookup-entries.");
+    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(afun_table_size) + " lookup-entries.");
   }
 
   first_free = 0;
-  for (sym = 0; sym < table_size; sym++)
+  for (sym = 0; sym < afun_table_size; sym++)
   {
     at_lookup_table[sym] = (SymEntry) SYM_SET_NEXT_FREE(sym+1);
   }
-  at_lookup_table[table_size-1] = (SymEntry) SYM_SET_NEXT_FREE((MachineWord)(-1));    /* Sentinel */
+  at_lookup_table[afun_table_size-1] = (SymEntry) SYM_SET_NEXT_FREE((MachineWord)(-1));    /* Sentinel */
 
   protected_symbols = (AFun*)AT_calloc(INITIAL_PROTECTED_SYMBOLS,
                                        sizeof(AFun));
@@ -235,6 +248,7 @@ size_t AT_printAFun(const AFun fun, FILE* f)
         default:
           fputc(*id, f);
           size++;
+          break;
       }
       id++;
     }
@@ -281,6 +295,7 @@ std::string ATwriteAFunToString(const AFun fun)
           break;
         default:
           oss << *id;
+          break;
       }
       ++id;
     }
@@ -321,7 +336,7 @@ ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
-  ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
+  ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
   SymEntry cur;
 
   if (arity >= MAX_ARITY)
@@ -346,7 +361,7 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
       resize_table();
 
       /* Hashtable size changed, so recalculate hashnumber */
-      hnr = AT_hashAFun(name, arity) & table_mask;
+      hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
       free_entry = first_free;
       if (free_entry == (AFun)(-1))
@@ -354,7 +369,6 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
         throw std::runtime_error("AT_initAFun: out of symbol slots!");
       }
     }
-    /* fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free); */
     first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
 
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
@@ -395,7 +409,7 @@ void AT_freeAFun(SymEntry sym)
 
   /* Calculate hashnumber */
   hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header));
-  hnr &= table_mask;
+  hnr &= afun_table_mask;
 
   /* Update hashtable */
   if (hash_table[hnr] == sym)

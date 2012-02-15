@@ -155,8 +155,7 @@ class MainFrame: public wxFrame
       windowMenu->Append(Exec_PerspectiveReset, wxT("&Reset Perspective"),
                          wxT("Reset Perspective"));
       windowMenu->AppendSeparator();
-      windowMenu->Append(wxID_PREFERENCES, wxT("&Preferences \tCtrl-P"),
-                         wxT("mCRL2-gui Preferences"));
+      windowMenu->Append(wxID_PREFERENCES, wxT("Preferences\tCtrl-,"),wxT("Preferences"));
 
       // add menus to the menu bar
       wxMenuBar* menuBar = new wxMenuBar();

@@ -18,7 +18,6 @@
 #include "mcrl2/core/detail/struct_core.h"        // ATerm building blocks.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
-#include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -26,6 +25,8 @@
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/process/parse.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
@@ -34,104 +35,71 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
 
-ATermAppl grape::mcrl2gen::convert_numeric_sorts_to_real(ATermAppl sort_expr)
+data::sort_expression grape::mcrl2gen::convert_numeric_sorts_to_real(data::sort_expression sort_expr)
 {
-  assert(gsIsSortExpr(sort_expr));
-  if (data::sort_pos::is_pos(data::sort_expression(sort_expr)) ||
-      data::sort_nat::is_nat(data::sort_expression(sort_expr)) ||
-      data::sort_int::is_int(data::sort_expression(sort_expr)))
-  {
-    return data::sort_real::real_();
-  }
-  else if (gsIsSortId(sort_expr))
-  {
-    return sort_expr;
-  }
-  else if (gsIsSortCons(sort_expr))
-  {
-    ATermAppl sort_cons_type = ATAgetArgument(sort_expr, 0);
-    ATermAppl sort_cons_arg  = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
-    return gsMakeSortCons(sort_cons_type, sort_cons_arg);
-  }
-  else if (gsIsSortStruct(sort_expr))
-  {
-    ATermList struct_conss = ATmakeList0();
-    for (ATermList l = ATLgetArgument(sort_expr, 0); !ATisEmpty(l); l = ATgetNext(l))
-    {
-      ATermAppl struct_cons = ATAgetFirst(l);
-      ATermAppl struct_cons0 = ATAgetArgument(struct_cons, 0);
-      ATermList struct_cons1 = ATLgetArgument(struct_cons, 1);
-      ATermAppl struct_cons2 = ATAgetArgument(struct_cons, 2);
-      ATermList struct_projs = ATmakeList0();
-      for (ATermList m = struct_cons1; !ATisEmpty(m); m = ATgetNext(m))
-      {
-        ATermAppl struct_proj = ATAgetFirst(m);
-        ATermAppl struct_proj0 = ATAgetArgument(struct_proj, 0);
-        ATermAppl struct_proj1 = ATAgetArgument(struct_proj, 1);
-        struct_proj = gsMakeStructProj(struct_proj0, convert_numeric_sorts_to_real(struct_proj1));
-        struct_projs = ATinsert(struct_projs, (ATerm) struct_proj);
-      }
-      struct_projs = ATreverse(struct_projs);
-      struct_cons = gsMakeStructCons(struct_cons0, struct_projs, struct_cons2);
-      struct_conss = ATinsert(struct_conss, (ATerm) struct_cons);
-    }
-    struct_conss = ATreverse(struct_conss);
-    return gsMakeSortStruct(struct_conss);
-  }
-  else if (gsIsSortArrow(sort_expr))
-  {
-    ATermList domain = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
-    ATermAppl result = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
-    return gsMakeSortArrow(domain, result);
-  }
-  else if (gsIsSortUnknown(sort_expr))
-  {
-    return sort_expr;
-  }
-  else if (gsIsSortsPossible(sort_expr))
-  {
-    ATermList sort_exprs = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
-    return gsMakeSortsPossible(sort_exprs);
-  }
-  else
-  {
-    throw mcrl2::runtime_error(pp(sort_expr) + "is not a sort expression");
-  }
+  atermpp::map<data::basic_sort, data::sort_expression> substitution;
+  substitution[data::sort_pos::pos()] = data::sort_real::real_();
+  substitution[data::sort_nat::nat()] = data::sort_real::real_();
+  substitution[data::sort_int::int_()] = data::sort_real::real_();
+  return data::substitute_sorts(sort_expr, data::make_map_substitution(substitution));
 }
 
-ATermList grape::mcrl2gen::convert_numeric_sorts_to_real(ATermList sort_exprs)
+data::sort_expression_list grape::mcrl2gen::convert_numeric_sorts_to_real(data::sort_expression_list sort_exprs)
 {
-  ATermList result = ATmakeList0();
-  for (ATermList l = sort_exprs; !ATisEmpty(l); l = ATgetNext(l))
+  data::sort_expression_list result;
+  for (data::sort_expression_list::const_iterator i = sort_exprs.begin(); i != sort_exprs.end(); ++i)
   {
-    ATermAppl sort_expr = convert_numeric_sorts_to_real(ATAgetFirst(l));
-    result = ATinsert(result, (ATerm) sort_expr);
+    result = push_front(result, convert_numeric_sorts_to_real(*i));
   }
-  return ATreverse(result);
+  return reverse(result);
 }
 
 ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 {
-  istringstream r(string(p_identifier.mb_str()).c_str());
-  return mcrl2::core::parse_identifier(r);
+  return mcrl2::core::identifier_string(std::string(p_identifier.mb_str()));
 }
 
 ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
 {
-  istringstream r(string(p_sort_expression.mb_str()).c_str());
-  return mcrl2::core::parse_sort_expr(r);
+  std::string s(p_sort_expression.mb_str());
+  try
+  {
+    return data::parse_sort_expression_new(s);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
 {
-  istringstream r(string(p_data_expression.mb_str()).c_str());
-  return mcrl2::core::parse_data_expr(r);
+  std::string s(p_data_expression.mb_str());
+  try
+  {
+    return data::parse_data_expression_new(s);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
 {
-  istringstream r(string(p_proc_spec.mb_str()).c_str());
-  return mcrl2::core::parse_proc_spec(r);
+  std::string s(p_proc_spec.mb_str());
+  try
+  {
+    mcrl2::process::process_specification procspec = mcrl2::process::parse_process_specification_new(s);
+    return mcrl2::process::process_specification_to_aterm(procspec);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 // TODO: when is_user_identifier is working properly. This function can be removed.
@@ -139,7 +107,7 @@ ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
 bool grape::mcrl2gen::is_identifier(wxString p_identifier)
 {
   ATermAppl a_parsed_identifier = parse_identifier(p_identifier);
-  return (a_parsed_identifier && wxString(pp(a_parsed_identifier).c_str(), wxConvLocal) == p_identifier);
+  return (a_parsed_identifier && wxString(core::pp(a_parsed_identifier).c_str(), wxConvLocal) == p_identifier);
 }
 
 wxXmlNode* grape::mcrl2gen::get_child(wxXmlNode* p_parent, wxString p_child_name)
@@ -407,7 +375,6 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
     return visibles;
   }
 
-  bool found = false;
   // loop through channel communications
   wxXmlNode* channel_communication_node = channel_communications->GetChildren();
   while (channel_communication_node != 0)
@@ -529,7 +496,6 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
         new_action.set_name(channel_communication_visible_name);
         new_action.set_parameters(actions_found[i].get_parameters());
         visibles.Add(new_action);
-        found = true;
       }
     }
     channel_communication_node = channel_communication_node->GetNext();
@@ -816,26 +782,29 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode* p_doc_root, ATe
   // make datatype specification
   if (!datatype_specification.IsEmpty())
   {
+    std::string s(datatype_specification.mb_str());
+
     // try to parse the mCRL2 specification
-    istringstream r(string(datatype_specification.mb_str()).c_str());
-    ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(r);
-    if (a_parsed_mcrl2_datatype_specification == 0)
+    data::data_specification dataspec;
+    try
+    {
+      dataspec = data::parse_data_specification_new(s);
+    }
+    catch (...)
     {
       throw DATA_TYPE_SPEC_PARSE_ERROR;
+    }
+
+    // parse succeeded: try to type check
+    ATermAppl a_parsed_mcrl2_datatype_specification = data::detail::data_specification_to_aterm_data_spec(dataspec);
+    ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
+    if (a_type_checked_mcrl2_datatype_specification == 0)
+    {
+      throw DATA_TYPE_SPEC_TYPE_CHECK_ERROR;
       return false;
     }
-    else
-    {
-      // parse succeeded: try to type check
-      ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
-      if (a_type_checked_mcrl2_datatype_specification == 0)
-      {
-        throw DATA_TYPE_SPEC_TYPE_CHECK_ERROR;
-        return false;
-      }
-      // update datatype specification
-      datatype_spec = a_type_checked_mcrl2_datatype_specification;
-    }
+    // update datatype specification
+    datatype_spec = a_type_checked_mcrl2_datatype_specification;
   }
   return true;
 }
@@ -1932,9 +1901,9 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode* p_transition_
           }
 
           // get action parameter type
-          ATermAppl sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
-          ATermAppl new_sort_expr = convert_numeric_sorts_to_real(sort_expr);
-          string sort_expr_string = PrintPart_CXX(ATerm(new_sort_expr));
+          data::sort_expression sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
+          data::sort_expression new_sort_expr = convert_numeric_sorts_to_real(sort_expr);
+          string sort_expr_string = mcrl2::data::pp(new_sort_expr);
           wxString action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
 
           dataexpression param;

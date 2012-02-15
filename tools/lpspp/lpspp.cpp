@@ -15,15 +15,14 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/lps/tools.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -32,7 +31,6 @@ using namespace mcrl2;
 class lpspp_tool: public input_output_tool
 {
   private:
-
     typedef input_output_tool super;
 
   public:
@@ -42,17 +40,22 @@ class lpspp_tool: public input_output_tool
               "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      m_format(print_default)
     {}
 
     bool run()
     {
-      print_specification();
+      lps::lpspp(input_filename(),
+                 output_filename(),
+                 m_print_summand_numbers,
+                 m_format
+                );
       return true;
     }
 
   protected:
-    t_pp_format  format;
+    print_format_type m_format;
+    bool m_print_summand_numbers;
 
     void add_options(interface_description& desc)
     {
@@ -60,9 +63,8 @@ class lpspp_tool: public input_output_tool
       desc.add_option("format", make_mandatory_argument("FORMAT"),
                       "print the LPS in the specified FORMAT:\n"
                       "  'default' for a process specification (default),\n"
-                      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, each data equation is put in a separate data equation section, and next states of process references are printed in assignment notation,\n"
-                      "  'internal' for a textual ATerm representation of the internal format, or\n"
-                      "  'internal-debug' for 'internal' with an indented layout", 'f');
+                      "  'internal' for a textual ATerm representation of the internal format", 'f');
+      desc.add_option("print-summand_numbers", "print numbers in front of summands", 'n');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -73,53 +75,15 @@ class lpspp_tool: public input_output_tool
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          format = ppInternal;
-        }
-        else if (str_format == "internal-debug")
-        {
-          format = ppInternalDebug;
-        }
-        else if (str_format == "debug")
-        {
-          format = ppDebug;
+          m_format = print_internal;
         }
         else if (str_format != "default")
         {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
         }
       }
+      m_print_summand_numbers = parser.options.count("print-summand_numbers") > 0;
     }
-
-  private:
-    void print_specification()
-    {
-      lps::specification specification;
-      specification.load(input_filename());
-
-      mCRL2log(verbose) << "printing LPS from "
-                        << (input_filename().empty()?"standard input":input_filename())
-                        << " to " << (output_filename().empty()?"standard output":output_filename())
-                        << " in the " << pp_format_to_string(format) << " format" << std::endl;
-
-      if (output_filename().empty())
-      {
-        std::cout << lps::pp(specification, format);
-      }
-      else
-      {
-        std::ofstream output_stream(output_filename().c_str());
-        if (output_stream.is_open())
-        {
-          output_stream << lps::pp(specification, format);
-          output_stream.close();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
-        }
-      }
-    }
-
 };
 
 class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
@@ -132,9 +96,7 @@ class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
 
       values.clear();
       values.push_back("default");
-      values.push_back("debug");
       values.push_back("internal");
-      values.push_back("internal-debug");
       m_gui_options["format"] = create_radiobox_widget(values);
     }
 };

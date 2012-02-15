@@ -29,7 +29,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     deque()
       : IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -38,7 +38,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -47,7 +47,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(count),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -57,7 +57,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(count, val),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -68,7 +68,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(count, val, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -77,7 +77,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(right),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -88,7 +88,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(first, last),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -100,20 +100,19 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       : std::deque<T, Allocator>(first, last, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// Destructor.
     ~deque()
     {
-      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::deque.ATmarkTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::deque<T, Allocator>::iterator i = std::deque<T, Allocator>::begin(); i != std::deque<T, Allocator>::end(); ++i)
       {

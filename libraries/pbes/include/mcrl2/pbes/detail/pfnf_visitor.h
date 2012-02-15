@@ -66,7 +66,7 @@ struct variable_variable_substitution: public std::unary_function<data::variable
     }
     return atermpp::convert<data::variable_list>(result);
   }
-  
+
   std::string to_string() const
   {
     std::ostringstream out;
@@ -77,7 +77,7 @@ struct variable_variable_substitution: public std::unary_function<data::variable
       {
         out << ", ";
       }
-      out << core::pp(i->first) << " := " << core::pp(i->second);
+      out << data::pp(i->first) << " := " << data::pp(i->second);
     }
     out << "]";
     return out.str();
@@ -125,17 +125,17 @@ struct pfnf_visitor_implication
     }
     g = pbes_system::replace_free_variables(g, variable_data_expression_substitution(sigma));
   }
-  
+
   void mark() const
   {
   	g.mark();
   }
-  
+
   void protect() const
   {
   	g.protect();
   }
-  
+
   void unprotect() const
   {
   	g.unprotect();
@@ -143,7 +143,7 @@ struct pfnf_visitor_implication
 };
 
 struct pfnf_visitor_expression
-{ 
+{
 	pbes_expression expr;
   atermpp::vector<pfnf_visitor_quantifier> quantifiers;
   atermpp::vector<pfnf_visitor_implication> implications;
@@ -176,12 +176,12 @@ struct pfnf_visitor_expression
   {
   	expr.mark();
   }
-  
+
   void protect() const
   {
   	expr.protect();
   }
-  
+
   void unprotect() const
   {
   	expr.unprotect();
@@ -298,7 +298,7 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
         std::set_intersection(left_variables.begin(), left_variables.end(), j->second.begin(), j->second.end(), std::inserter(name_clashes, name_clashes.end()));
       }
 #ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "NAME CLASHES: " << core::detail::print_pp_set(name_clashes) << std::endl;
+std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes, data::stream_printer()) << std::endl;
 #endif
       if (!name_clashes.empty())
       {
@@ -376,12 +376,12 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
       const atermpp::vector<pfnf_visitor_implication>& g = expr.implications;
       for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
-        std::cout << (i->first ? "forall " : "exists ") << core::pp(i->second) << " ";
+        std::cout << (i->first ? "forall " : "exists ") << data::pp(i->second) << " ";
       }
-      std::cout << (q.empty() ? "" : " . ") << core::pp(h) << "\n";
+      std::cout << (q.empty() ? "" : " . ") << pbes_system::pp(h) << "\n";
       for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
-        std::cout << " /\\ " << core::pp(i->g) << " => ";
+        std::cout << " /\\ " << pbes_system::pp(i->g) << " => ";
         if (i->rhs.empty())
         {
           std::cout << "true";
@@ -395,7 +395,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
             {
               std::cout << " \\/ ";
             }
-            std::cout << core::pp(*j);
+            std::cout << pbes_system::pp(*j);
           }
           std::cout << " )";
           std::cout << std::endl;
@@ -413,7 +413,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
       {
         print_expression(*i);
       }
-      std::cout << "value = " << core::pp(evaluate()) << std::endl;
+      std::cout << "value = " << pbes_system::pp(evaluate()) << std::endl;
     }
 
     /// \brief Visit data_expression node

@@ -15,6 +15,8 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -25,22 +27,14 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_process_specification(const std::string& ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {
-  std::istringstream ps_in_stream(ps_in);
-  ATermAppl ps_aterm = core::parse_proc_spec(ps_in_stream);
-  BOOST_REQUIRE(ps_aterm != NULL);
-
-  std::string ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
-  //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in << std::endl << "and" << std::endl << ps_out << std::endl;
-  BOOST_CHECK_EQUAL(ps_in, ps_out);
-
+  process::process_specification p = process::parse_process_specification_new(ps_in);
+  std::string ps_out;
   if (test_type_checker)
   {
-    process::process_specification ps(ps_aterm);
+    process::process_specification ps = p;
     if (expected_result)
     {
       process::type_check(ps);
-
-      //ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
       ps_out = process::pp(ps);
       //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
       BOOST_CHECK_EQUAL(ps_in, ps_out);

@@ -38,7 +38,10 @@ namespace data
 class used_data_equation_selector
 {
   private:
-    std::set< function_symbol > m_used_symbols;
+
+    atermpp::set< function_symbol > m_used_symbols;
+
+    bool add_all;
 
     template < typename Range >
     void add_symbols(Range const& r)
@@ -49,21 +52,14 @@ class used_data_equation_selector
   protected:
     void add_data_specification_symbols(const data_specification& specification)
     {
+      // Always add if:Bool#Bool#Bool->Bool; This symbol is used in the prover.
+      m_used_symbols.insert(if_(sort_bool::bool_()));
+
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
       atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
       for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
       {
         add_symbols(specification.constructors(*j));
-      }
-
-      // Add all equality function symbols, as they may be used when eliminating
-      // quantifiers.
-      for (function_symbol_vector::const_iterator i = specification.mappings().begin(); i != specification.mappings().end(); ++i)
-      {
-        if(is_equal_to_function_symbol(*i))
-        {
-          m_used_symbols.insert(*i);
-        }
       }
 
       std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
@@ -85,8 +81,10 @@ class used_data_equation_selector
         {
           if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
           {
-            data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-            data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+            add_function_symbols(i->rhs());
+            add_function_symbols(i->condition());
             equations.erase(i++);
           }
           else
@@ -99,17 +97,23 @@ class used_data_equation_selector
 
   public:
 
-    bool operator()(data_equation const& e) const
+    /// \brief Check whether the symbol is used.
+    bool operator()(const data::function_symbol f) const
     {
-      // return true;
-      // Disabled because of too agressive removal of equations,
-      // causing the statespace of 1394-fin to exists of a single state
-      // and no transitions. (JK & JFG, 7/10/2009)
-      // Potentially repaired by also adding the constructors of all sorts into m_used_symbols (JFG 7/10/2009)
-      // It turns out that this does not work properly, due to the fact that
-      // linear specifications are not properly timed normalized, causing
-      // identical functions to have different types. Incomplete type normalisation
-      // can cause many other problems also.
+      if (add_all)
+      {
+        return true;
+      }
+      return m_used_symbols.count(f)>0;
+    }
+
+    /// \brief Check whether data equation relates to used symbols, and therefore is important.
+    bool operator()(const data_equation e) const
+    {
+      if (add_all)
+      {
+        return true;
+      }
 
       std::set< function_symbol > used_symbols;
 
@@ -118,9 +122,20 @@ class used_data_equation_selector
       return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
     }
 
+    void add_function_symbols(const data_expression t)
+    {
+      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(t);
+    }
+
+    /// \brief default constructor
+    used_data_equation_selector():
+       add_all(true)
+    {}
+
     /// \brief context is a range of function symbols
     template <typename Range>
-    used_data_equation_selector(data_specification const& data_spec, Range const& context)
+    used_data_equation_selector(data_specification const& data_spec, Range const& context):
+       add_all(false)
     {
       add_symbols(context);
       add_data_specification_symbols(data_spec);
@@ -129,7 +144,7 @@ class used_data_equation_selector
     used_data_equation_selector(const data_specification& specification,
                                 const std::set<function_symbol>& function_symbols,
                                 const atermpp::set<data::variable>& global_variables
-                               )
+                               ):add_all(false)
     {
       // Compensate for symbols that could be used as part of an instantiation of free variables
       for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
@@ -141,6 +156,14 @@ class used_data_equation_selector
       add_data_specification_symbols(specification);
     }
 
+    /// \brief select all equations
+    used_data_equation_selector(const data_specification& /* specification */):
+       add_all(true)
+    {
+      /* add_symbols(specification.constructors());
+      add_symbols(specification.mappings());
+      add_data_specification_symbols(specification); */
+    }
 };
 
 } // namespace data

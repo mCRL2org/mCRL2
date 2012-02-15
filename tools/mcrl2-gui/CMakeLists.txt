@@ -10,12 +10,12 @@
 project(mcrl2-gui)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
+
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
 # ######### General setup ##########
-
-set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
-
 if(NOT APPLE)
   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
@@ -75,4 +75,4 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
-endif ( MCRL2_BUILD_GUI_TOOLS )
+endif ( MCRL2_ENABLE_GUI_TOOLS )

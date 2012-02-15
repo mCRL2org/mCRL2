@@ -10,11 +10,12 @@
 project(grapemcrl2)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
+
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
 # ######### General setup ##########
-
-set(MACOSX_BUNDLE_ICON_FILE grapemcrl2.icns )
 
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
@@ -129,12 +130,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/dialogs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libgrape)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mcrl2gen)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
@@ -143,6 +146,8 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_core
   mcrl2_utilities
+  mcrl2_syntax
+  dparser
   mcrl2_utilities_wx
 )
 
@@ -158,4 +163,4 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
-endif ( MCRL2_BUILD_GUI_TOOLS )
+endif ( MCRL2_ENABLE_GUI_TOOLS )

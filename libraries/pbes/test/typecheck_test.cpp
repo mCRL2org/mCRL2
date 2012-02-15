@@ -16,34 +16,32 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
-  std::istringstream pbes_in_stream(pbes_in);
-  ATermAppl pbes_aterm = core::parse_pbes_spec(pbes_in_stream);
-  BOOST_REQUIRE(pbes_aterm != NULL);
-
-  std::string pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
-  //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in << std::endl << "and" << std::endl << pbes_out << std::endl;
-  BOOST_CHECK(pbes_in == pbes_out);
-
+  pbes_system::pbes<> p = pbes_system::parse_pbes_new(pbes_in);
   if (test_type_checker)
   {
-    pbes_system::pbes<> p(pbes_aterm);
     pbes_system::type_check(p);
+    std::string pbes_out = pbes_system::pp(p);
 
-    //pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
-    pbes_out = pbes_system::pp(p);
-    //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in  << std::endl << "and" << std::endl << pbes_out << std::endl;
+    if (pbes_in!=pbes_out)
+    {
+      std::cerr << "PBES IN AND PBES OUT ARE DIFFERENT (with typechecking).\n";
+      std::cerr << "PBES IN: " << pbes_in << "\n";
+      std::cerr << "PBES OUT: " << pbes_out << "\n";
+    }
     BOOST_CHECK(pbes_in == pbes_out);
   }
   core::garbage_collect();
 }
 
-void test_pbes_specifications()
+void test_pbes_specification1()
 {
   //test PBES specification involving global variables
   test_pbes_specification(
@@ -56,11 +54,24 @@ void test_pbes_specifications()
   );
 }
 
+void test_pbes_specification2()
+{
+  //test PBES specification where the type of [10,m] should become List(Nat), not List(Pos).
+  //This failed in revision 10180 and before.
+  test_pbes_specification(
+   "pbes nu X0(m: Nat) =\n"
+   "       forall i: Nat. val(!(i < 2)) || X0([10, m] . i);\n"
+   "\n"
+   "init X0(0);\n"
+  );
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_pbes_specifications();
+  test_pbes_specification1();
+  test_pbes_specification2();
 
   return 0;
 }

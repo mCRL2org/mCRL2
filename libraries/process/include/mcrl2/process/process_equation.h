@@ -60,17 +60,15 @@ class process_equation: public atermpp::aterm_appl
     /// \return The name of the process equation
     process_identifier identifier() const
     {
-      using namespace atermpp;
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// \brief Returns the formal parameters of the equation
     /// \return The formal parameters of the equation
     data::variable_list formal_parameters() const
     {
-      using namespace atermpp;
       return data::variable_list(
-               atermpp::term_list_iterator<data::variable>(list_arg2(*this)),
+               atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
                atermpp::term_list_iterator<data::variable>());
     }
 
@@ -78,13 +76,22 @@ class process_equation: public atermpp::aterm_appl
     /// \return The expression of the process equation
     process_expression expression() const
     {
-      using namespace atermpp;
-      return arg3(*this);
+      return atermpp::arg3(*this);
     }
 };
 
 /// \brief Read-only singly linked list of process equations
 typedef atermpp::term_list<process_equation> process_equation_list;
+
+/// \brief vector of process equations
+typedef atermpp::vector<process_equation> process_equation_vector;
+
+// template function overloads
+std::string pp(const process_equation& x);
+std::string pp(const process_equation_list& x);
+std::string pp(const process_equation_vector& x);
+void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);
+std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x);
 
 } // namespace process
 

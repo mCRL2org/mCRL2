@@ -23,6 +23,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 
 set(mcrl2_process_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/alphabet_reduction.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/process.cpp
 )
 
 set(mcrl2_process_src ${mcrl2_process_src} PARENT_SCOPE)

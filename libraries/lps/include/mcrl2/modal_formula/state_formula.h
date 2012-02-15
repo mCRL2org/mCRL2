@@ -21,11 +21,10 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/assignment.h"
 
 namespace mcrl2
 {
@@ -144,6 +143,7 @@ class not_: public state_formula
     not_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
+ATfprintf(stderr,"Apply not\n");
       assert(core::detail::check_term_StateNot(m_term));
     }
 
@@ -756,11 +756,51 @@ bool is_mu(const state_formula& t)
 
 //--- end generated classes ---//
 
-/// \brief Returns a pretty print representation of f.
-inline std::string pp(const state_formula& f)
+inline
+int precedence(const state_formula& x)
 {
-  return core::pp(f);
+  if (is_mu(x) || is_nu(x))
+  {
+    return 1;
+  }
+  else if (is_forall(x) || is_exists(x))
+  {
+    return 2;
+  }
+  else if (is_imp(x))
+  {
+    return 3;
+  }
+  else if (is_or(x))
+  {
+    return 4;
+  }
+  else if (is_and(x))
+  {
+    return 5;
+  }
+  else if (is_must(x) || is_may(x))
+  {
+    return 6;
+  }
+  else if (is_not(x))
+  {
+    return 7;
+  }
+  return core::detail::precedences::max_precedence;
 }
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const mu& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const nu& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const forall& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const exists& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const imp& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const and_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const or_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const must& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
 
 } // namespace state_formulas
 
@@ -833,12 +873,18 @@ bool state_formula::has_time() const
   return is_timed(*this);
 }
 
+// template function overloads
+std::string pp(const state_formula& x);
+state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
+state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
+std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);
+std::set<data::variable> find_variables(const state_formulas::state_formula& x);
+std::set<data::variable> find_free_variables(const state_formulas::state_formula& x);
+std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x);
+bool find_nil(const state_formulas::state_formula& x);
+
 } // namespace state_formulas
 
 } // namespace mcrl2
-
-#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-#include "mcrl2/modal_formula/print.h"
-#endif
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

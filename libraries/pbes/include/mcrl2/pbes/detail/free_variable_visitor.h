@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 #define MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 

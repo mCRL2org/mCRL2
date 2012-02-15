@@ -12,8 +12,6 @@
 #include "wx/wx.h"
 #include <sstream>
 #include "mcrl2gen/mcrl2gen_validate.h"
-#include "mcrl2/core/print.h"
-
 #include "decl.h"
 
 using namespace mcrl2::core;
@@ -55,24 +53,10 @@ bool decl::set_decl(const wxString& p_decl)
     return false;
   }
 
-  ATermAppl a_parsed_identifier = parse_identifier(name);
+  set_name( name );
+  set_type( type );
 
-// TODO: use other line
-  if (is_identifier(name))
-//  if ( a_parsed_identifier )
-  {
-    string a_name = identifier_string(a_parsed_identifier);
-    set_name(wxString(a_name.c_str(), wxConvLocal));
-
-    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
-    if (a_parsed_sort_expr)
-    {
-      string a_type = pp(a_parsed_sort_expr);
-      set_type(wxString(a_type.c_str(), wxConvLocal));
-      return true;
-    }
-  }
-  return false;
+  return true;
 }
 
 wxString decl::get_name(void) const
@@ -138,30 +122,11 @@ bool decl_init::set_decl_init(const wxString& p_decl_init)
     return false;
   }
 
-  ATermAppl a_parsed_identifier = parse_identifier(name);
-// TODO: use other line
-  if (is_identifier(name))
-//  if ( a_parsed_identifier )
-  {
-    string a_name = identifier_string(a_parsed_identifier);
-    set_name(wxString(a_name.c_str(), wxConvLocal));
+  set_name(name);
+  set_type(type);
+  set_value(value);
 
-    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
-    if (a_parsed_sort_expr)
-    {
-      string a_type = pp(a_parsed_sort_expr);
-      set_type(wxString(a_type.c_str(), wxConvLocal));
-
-      ATermAppl a_parsed_data_expr = parse_data_expr(value);
-      if (a_parsed_data_expr)
-      {
-        string a_value = pp(a_parsed_data_expr);
-        set_value(wxString(a_value.c_str(), wxConvLocal));
-        return true;
-      }
-    }
-  }
-  return false;
+  return true;
 }
 
 wxString decl_init::get_value(void) const

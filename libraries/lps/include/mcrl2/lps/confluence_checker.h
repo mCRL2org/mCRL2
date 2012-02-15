@@ -18,6 +18,7 @@
 #include <string>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
@@ -92,7 +93,7 @@
     Confluent tau-summands will be marked by renaming their tau-actions to ctau. The constructor
     Confluence_Checker::Confluence_Checker initializes the BDD based prover with the parameters a_rewrite_strategy,
     a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction and a_lps. The parameter a_rewrite_strategy
-    specifies which rewrite strategy is used by the prover's rewriter. It can be set to either 
+    specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
     GS_REWR_JITTY or GS_REWR_JITTYC. The parameter a_time_limit specifies the maximum amount of time in
     seconds to be spent by the prover on proving a single expression. If a_time_limit is set to 0, no time limit will be
     enforced. The parameter a_path_eliminator specifies whether or not path elimination is applied. When path
@@ -181,7 +182,7 @@ class Confluence_Checker
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
-    BDD2Dot f_bdd2dot;
+    mcrl2::data::detail::BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
     const mcrl2::lps::specification& f_lps;
@@ -242,7 +243,7 @@ class Confluence_Checker
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_no_marking = false,
       bool a_check_all = false,

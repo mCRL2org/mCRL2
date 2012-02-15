@@ -42,15 +42,6 @@ function_symbol const& true_();
 class data_equation: public atermpp::aterm_appl
 {
   public:
-
-    /// \brief iterator range over a list of variables
-    typedef atermpp::term_list< variable > variables_const;
-
-    /// \brief iterator range over a constant list of variables
-    typedef atermpp::term_list< variable > variables_const_range;
-
-  public:
-
     /// \brief Constructor.
     ///
     data_equation()
@@ -123,7 +114,7 @@ class data_equation: public atermpp::aterm_appl
     {}
 
     /// \brief Returns the variables of the data equation.
-    variables_const_range variables() const
+    variable_list variables() const
     {
       return atermpp::list_arg1(appl());
     }
@@ -153,6 +144,14 @@ typedef atermpp::term_list< data_equation >    data_equation_list;
 
 /// \brief list of data_equations
 typedef atermpp::vector< data_equation >       data_equation_vector;
+
+// template function overloads
+std::string pp(const data_equation& x);
+std::string pp(const data_equation_list& x);
+std::string pp(const data_equation_vector& x);
+data::data_equation translate_user_notation(const data::data_equation& x);
+std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x);
+std::set<data::function_symbol> find_function_symbols(const data::data_equation& x);
 
 } // namespace data
 

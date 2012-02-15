@@ -21,7 +21,9 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -256,12 +258,35 @@ bool is_trans_or_nil(const regular_formula& t)
 
 //--- end generated classes ---//
 
+inline
+int precedence(const regular_formula& x)
+{
+  if (is_seq(x))
+  {
+    return 1;
+  }
+  else if (is_alt(x))
+  {
+    return 2;
+  }
+  else if (is_trans(x) || is_trans_or_nil(x))
+  {
+    return 3;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes?
+inline int precedence(const seq& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const alt& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
+
+// template function overloads
+std::string pp(const regular_formula& x);
+
 } // namespace regular_formulas
 
 } // namespace mcrl2
-
-#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-#include "mcrl2/modal_formula/print.h"
-#endif
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

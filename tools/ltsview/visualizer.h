@@ -68,7 +68,7 @@ class Visualizer: public Subscriber
     void computeStateAbsPos(Cluster* root,int rot);
     void computeSubtreeBounds(Cluster* root,float& boundWidth,
                               float& boundHeight);
-    void drawBackPointer(State* startState,State* endState);
+    void drawBackPointer(State* startState, const RGB_Color& startColor, State* endState, const RGB_Color& endColor);
     void drawForwardPointer(State* startState,State* endState);
     void drawLoop(State* state);
     void drawStates(Cluster* root,bool simulating);

@@ -95,7 +95,7 @@ def last_word(line):
 # returns True, False or None if a timeout occurs
 def run_pbes2bool(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbes2bool', filename, timeout)
+    text, dummy = timeout_command('pbes2bool', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
@@ -113,6 +113,14 @@ def run_pbespgsolve(filename, timeout = 3):
 def run_txt2pbes(txtfile, pbesfile):
     add_temporary_files(txtfile, pbesfile)
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+
+def run_pbesabsinthe(pbesfile1, pbesfile2, strategy, abstraction_file = None):
+    add_temporary_files(pbesfile1, pbesfile2)
+    if abstraction_file != None:
+        add_temporary_files(abstraction_file)
+        run_program('pbesabsinthe', '--abstraction-file="%s" --strategy=%s %s %s' % (abstraction_file, strategy, pbesfile1, pbesfile2))
+    else:
+        run_program('pbesabsinthe', '--strategy=%s %s %s' % (strategy, pbesfile1, pbesfile2))
 
 def run_pbesabstract(pbesfile1, pbesfile2, abstraction_value, selection = '*(*:*)'):
     add_temporary_files(pbesfile1, pbesfile2)
@@ -144,7 +152,7 @@ def run_pbesinst(pbesfile, besfile, strategy = 'lazy', selection = '', timeout =
         options = options + ' -f"%s"' % selection
     dummy, text = timeout_command('pbesinst',  '%s %s %s' % (options, pbesfile, besfile), timeout)
     if text == None:
-        print 'WARNING: timeout on %s' % pbesfile     
+        print 'WARNING: timeout on %s' % pbesfile
         return False
     if text.startswith('error'):
         print 'WARNING: pbesinst failed on %s (%s)' % (pbesfile, text)

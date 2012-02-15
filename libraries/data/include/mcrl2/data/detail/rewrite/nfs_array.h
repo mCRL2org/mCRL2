@@ -1,4 +1,4 @@
-// Author(s): Sjoerd Cranen (?)
+// Author(s): Sjoerd Cranen 
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -78,7 +78,7 @@ public:
   }
   bool get(size_t i)
   {
-    return m_array[i/(sizeof(size_t)*8)] & (((size_t) 1) << (i%(sizeof(size_t)*8)));
+    return (m_array[i/(sizeof(size_t)*8)] & (((size_t) 1) << (i%(sizeof(size_t)*8))))>0;
   }
   void set(size_t i, bool val = true)
   {

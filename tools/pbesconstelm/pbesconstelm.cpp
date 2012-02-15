@@ -15,19 +15,15 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/constelm.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
@@ -74,45 +70,13 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
-      // load the pbes
-      pbes<> p;
-      p.load(m_input_filename);
-
-      // data rewriter
-      data::rewriter datar = create_rewriter(p.data());
-
-      // pbes rewriter
-      switch (rewriter_type())
-      {
-        case simplify:
-        {
-          typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
-          my_pbes_rewriter pbesr(datar);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
-          break;
-        }
-        case quantifier_all:
-        case quantifier_finite:
-        {
-          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
-          bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, name_generator);
-          data::rewriter_with_variables datarv(datar);
-          my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
-          break;
-        }
-        default:
-        { }
-      }
-
-      // save the result
-      p.save(m_output_filename);
-
+      pbesconstelm(input_filename(),
+                   output_filename(),
+                   rewrite_strategy(),
+                   rewriter_type(),
+                   m_compute_conditions,
+                   m_remove_redundant_equations
+                  );
       return true;
     }
 

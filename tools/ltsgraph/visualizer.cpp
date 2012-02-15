@@ -653,7 +653,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double xState, yState, zState;
   double xVirtual, yVirtual, zVirtual;
 
-  double alpha = tr->getControlAlpha();
   double beta = tr->getControlBeta();
   double gamma = tr->getControlGamma();
 
@@ -663,15 +662,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
   tr->getControl(xVirtual, yVirtual, zVirtual);
 
-  double theAngle;
-  if (draw3d)
-  {
-    theAngle = beta;
-  }
-  else
-  {
-    theAngle = alpha;
-  }
   // Calculate control points of the curve
   // TODO: Explain
   double zeta = beta + piover4;

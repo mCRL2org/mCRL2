@@ -31,9 +31,10 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules)
+RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector):
+  Rewriter()
 {
-  prover_obj = new BDD_Prover(DataSpec,strat,add_rewrite_rules);
+  prover_obj = new BDD_Prover(DataSpec, equations_selector, strat);
   rewr_obj = prover_obj->get_rewriter();
 }
 
@@ -42,92 +43,60 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(ATermAppl Rule)
+bool RewriterProver::addRewriteRule(const data_equation Rule)
 {
   return rewr_obj->addRewriteRule(Rule);
 }
 
-bool RewriterProver::removeRewriteRule(ATermAppl Rule)
+bool RewriterProver::removeRewriteRule(const data_equation Rule)
 {
   return rewr_obj->removeRewriteRule(Rule);
 }
 
-ATerm RewriterProver::rewriteInternal(ATerm Term)
-{
-  return rewr_obj->toRewriteFormat(
-           rewrite(
-             rewr_obj->fromRewriteFormat(Term)
-           )
-         );
-}
-
-ATermAppl RewriterProver::rewrite(ATermAppl Term)
+data_expression RewriterProver::rewrite(
+            const data_expression Term, 
+            substitution_type &sigma)
 {
   if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
   {
+    prover_obj->set_substitution(sigma);
     prover_obj->set_formula(Term);
     return prover_obj->get_bdd();
   }
   else
   {
-    return rewr_obj->rewrite(Term);
+    return rewr_obj->rewrite(Term,sigma);
   }
 }
 
-ATerm RewriterProver::toRewriteFormat(ATermAppl Term)
+atermpp::aterm_appl RewriterProver::rewrite_internal(
+            const atermpp::aterm_appl Term, 
+            internal_substitution_type &sigma)
+{
+  // Code below is not very efficient, due to the translation to and from internal
+  // rewrite format. This requires further investigation...
+  const data_expression t=rewr_obj->fromRewriteFormat(Term);
+  if (t.sort() == mcrl2::data::sort_bool::bool_())
+  {
+    prover_obj->set_substitution_internal(sigma);
+    prover_obj->set_formula(t);
+    return rewr_obj->toRewriteFormat(prover_obj->get_bdd());
+  }
+  else
+  {
+    return rewr_obj->rewrite_internal(Term,sigma); 
+  }
+}
+
+atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
 {
   return rewr_obj->toRewriteFormat(Term);
 }
 
-ATermAppl RewriterProver::fromRewriteFormat(ATerm Term)
+/* data_expression RewriterProver::fromRewriteFormat(const atermpp::aterm_appl Term)
 {
   return rewr_obj->fromRewriteFormat(Term);
-}
-
-void RewriterProver::setSubstitution(ATermAppl Var, ATermAppl Expr)
-{
-  return rewr_obj->setSubstitution(Var,Expr);
-}
-
-void RewriterProver::setSubstitutionList(ATermList Substs)
-{
-  return rewr_obj->setSubstitutionList(Substs);
-}
-
-void RewriterProver::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
-{
-  return rewr_obj->setSubstitutionInternal(Var,Expr);
-}
-
-void RewriterProver::setSubstitutionInternalList(ATermList Substs)
-{
-  return rewr_obj->setSubstitutionInternalList(Substs);
-}
-
-ATermAppl RewriterProver::getSubstitution(ATermAppl Var)
-{
-  return rewr_obj->getSubstitution(Var);
-}
-
-ATerm RewriterProver::getSubstitutionInternal(ATermAppl Var)
-{
-  return rewr_obj->getSubstitutionInternal(Var);
-}
-
-void RewriterProver::clearSubstitution(ATermAppl Var)
-{
-  return rewr_obj->clearSubstitution(Var);
-}
-
-void RewriterProver::clearSubstitutions()
-{
-  return rewr_obj->clearSubstitutions();
-}
-
-void RewriterProver::clearSubstitutions(ATermList Vars)
-{
-  return rewr_obj->clearSubstitutions(Vars);
-}
+} */
 
 RewriteStrategy RewriterProver::getStrategy()
 {

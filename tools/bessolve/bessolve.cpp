@@ -20,12 +20,15 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -33,6 +36,7 @@ using namespace mcrl2;
 
 typedef enum { gauss, spm } solution_strategy_t;
 
+static
 std::string solution_strategy_to_string(const solution_strategy_t s)
 {
   switch (s)
@@ -51,10 +55,10 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
 
 //local declarations
 
-class bessolve_tool: public input_output_tool
+class bessolve_tool: public bes_input_tool<input_output_tool>
 {
   private:
-    typedef input_output_tool super;
+    typedef bes_input_tool<input_output_tool> super;
 
   public:
     bessolve_tool()
@@ -68,7 +72,7 @@ class bessolve_tool: public input_output_tool
     bool run()
     {
       bes::boolean_equation_system<> bes;
-      bes.load(input_filename());
+      load_bes(bes,input_filename(),bes_input_format());
 
       mCRL2log(verbose) << "solving BES in " <<
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<

@@ -28,33 +28,37 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     set()
+      : IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit set(const Compare& comp)
-      : std::set<T, Compare, Allocator>(comp)
+      : std::set<T, Compare, Allocator>(comp),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param comp A compare function.
     /// \param a An allocator.
     set(const Compare& comp, const Allocator& a)
-      : std::set<T, Compare, Allocator>(comp, a)
+      : std::set<T, Compare, Allocator>(comp, a),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
     /// \param right A set.
     set(const set& right)
-      : std::set<T, Compare, Allocator>(right)
+      : std::set<T, Compare, Allocator>(right),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -62,9 +66,10 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param last The end of a range of set elements.
     template<class InIt>
     set(InIt first, InIt last)
-      : std::set<T, Compare, Allocator>(first, last)
+      : std::set<T, Compare, Allocator>(first, last),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -73,9 +78,10 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp)
-      : std::set<T, Compare, Allocator>(first, last, comp)
+      : std::set<T, Compare, Allocator>(first, last, comp),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -85,15 +91,15 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp, const Allocator& a)
-      : std::set<T, Compare, Allocator>(first, last, comp, a)
+      : std::set<T, Compare, Allocator>(first, last, comp, a),
+        IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// Destructor.
     ~set()
     {
-      ATunprotectProtectedATerm(this);
     }
 
     /// Assignment operator.
@@ -105,10 +111,10 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::set.ATmarkTerms() : protecting " << set<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::set<T, Compare, Allocator>::iterator i = std::set<T, Compare, Allocator>::begin(); i != std::set<T, Compare, Allocator>::end(); ++i)
       {
@@ -126,7 +132,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     multiset()
       : IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -135,7 +141,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -145,7 +151,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -154,7 +160,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(right),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -165,7 +171,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(first, last),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -177,7 +183,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(first, last, comp),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// \brief Constructor.
@@ -190,20 +196,19 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
       : std::multiset<T, Compare, Allocator>(first, last, comp, a),
         IProtectedATerm()
     {
-      ATprotectProtectedATerm(this);
+      protect_aterms(this);
     }
 
     /// Destructor.
     ~multiset()
     {
-      ATunprotectProtectedATerm(this);
     }
 
     /// \brief Protects the elements from being garbage collected.
-    void ATprotectTerms()
+    void ATmarkTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-      std::cout << "atermpp::multiset.ATprotectTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multiset.ATmarkTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multiset<T, Compare, Allocator>::iterator i = std::multiset<T, Compare, Allocator>::begin(); i != std::multiset<T, Compare, Allocator>::end(); ++i)
       {

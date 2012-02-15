@@ -24,11 +24,9 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -54,7 +52,7 @@ struct pbesinst_finite_rename
     out << std::string(name);
     for (typename ExpressionContainer::const_iterator i = parameters.begin(); i != parameters.end(); ++i)
     {
-      out << "@" << core::pp(*i);
+      out << "@" << data::pp(*i);
     }
     return core::identifier_string(out.str());
   }
@@ -147,26 +145,23 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       m_variable_map(variable_map)
   {}
 
-  void LOG_PARAMETERS_DEBUG(const std::vector<data::data_expression>& finite_parameters,
-                            const std::vector<data::data_expression>& infinite_parameters
-                           ) const
+  std::string print_parameters(const std::vector<data::data_expression>& finite_parameters,
+                               const std::vector<data::data_expression>& infinite_parameters
+                              ) const
   {
-    if (mcrl2_logger::get_reporting_level("pbesinst_finite") >= log_debug)
+    std::ostringstream out;
+    out << "<finite>";
+    for (std::vector<data::data_expression>::const_iterator i = finite_parameters.begin(); i != finite_parameters.end(); ++i)
     {
-      std::ostringstream out;
-      out << "<finite>";
-      for (std::vector<data::data_expression>::const_iterator i = finite_parameters.begin(); i != finite_parameters.end(); ++i)
-      {
-        out << core::pp(*i) << " ";
-      }
-      out << "<infinite>";
-      for (std::vector<data::data_expression>::const_iterator i = infinite_parameters.begin(); i != infinite_parameters.end(); ++i)
-      {
-        out << core::pp(*i) << " ";
-      }
-      out << std::endl;
-      mCRL2log(debug, "pbesinst_finite") << out.str();
+      out << data::pp(*i) << " ";
     }
+    out << "<infinite>";
+    for (std::vector<data::data_expression>::const_iterator i = infinite_parameters.begin(); i != infinite_parameters.end(); ++i)
+    {
+      out << data::pp(*i) << " ";
+    }
+    out << std::endl;
+    return out.str();
   }
 
   /// \brief Computes the condition 'for all i: variables[i] == expressions[i]'.
@@ -196,13 +191,13 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
   /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
   {
-    mCRL2log(debug1) << "visit " << core::pp(x) << "\n";
+    mCRL2log(log::debug1) << "visit " << data::pp(x) << "\n";
 
     // TODO: this code contains too much conversion between vectors and ATerm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
-    split_parameters(v, m_index_map, finite_parameters, infinite_parameters);   
-    LOG_PARAMETERS_DEBUG(finite_parameters, infinite_parameters);
+    split_parameters(v, m_index_map, finite_parameters, infinite_parameters);
+    mCRL2log(log::debug, "pbesinst_finite") << print_parameters(finite_parameters, infinite_parameters);
     data::data_expression_list d = atermpp::convert<data::data_expression_list>(finite_parameters);
     data::data_expression_list e = atermpp::convert<data::data_expression_list>(infinite_parameters);
     core::identifier_string Xi = v.name();
@@ -217,11 +212,11 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 
     atermpp::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(m_data_spec, super::m_data_rewriter);
-    for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_()); 
+    for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_());
               i != enumerator.end(); ++i)
     {
-      mCRL2log(debug1) << "sigma = " << data::print_substitution(sigma) << "\n";
-      mCRL2log(debug1) << "*i    = " << data::print_substitution(*i) << "\n";
+      mCRL2log(log::debug1) << "sigma = " << data::print_substitution(sigma) << "\n";
+      mCRL2log(log::debug1) << "*i    = " << data::print_substitution(*i) << "\n";
       data::data_expression_list d_copy = d;
       data::detail::rewrite_container(d_copy, super::m_data_rewriter, sigma);
       data::data_expression_list e_copy = e;
@@ -231,14 +226,14 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       di_copy = data::replace_free_variables(di_copy, *i);
 
       data::data_expression c = make_condition(di_copy, d_copy);
-      mCRL2log(debug1) << "c = " << core::pp(c) << "\n";
+      mCRL2log(log::debug1) << "c = " << data::pp(c) << "\n";
 
       core::identifier_string Y = m_rename(Xi, di_copy);
       result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_copy)));
     }
 
     pbes_expression result1 = pbes_expr::join_or(result.begin(), result.end());
-    mCRL2log(debug1) << "result1 = " << core::pp(result1) << "\n";
+    mCRL2log(log::debug1) << "result1 = " << pbes_system::pp(result1) << "\n";
     return result1;
   }
 
@@ -261,7 +256,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 } // namespace detail
 
 /// \brief Algorithm class for the finite pbesinst algorithm.
-class pbesinst_finite_algorithm: public utilities::algorithm
+class pbesinst_finite_algorithm
 {
   protected:
     /// \brief The strategy of the data rewriter.
@@ -305,16 +300,16 @@ class pbesinst_finite_algorithm: public utilities::algorithm
       }
     }
 
-    /// \brief Prints a log message for every 1000-th equation
-    void LOG_EQUATION_COUNT_DEBUG(size_t size) const
+    /// \brief Prints a message for every 1000-th equation
+    std::string print_equation_count(size_t size) const
     {
-      if (mcrl2_logger::get_reporting_level("pbesinst_finite") >= log_debug)
+      if (size > 0 && size % 1000 == 0)
       {
-        if (size > 0 && size % 1000 == 0)
-        {
-          mCRL2log(debug, "pbesinst_finite") << "Generated " << size << " BES equations" << std::endl;
-        }
+        std::ostringstream out;
+        out << "Generated " << size << " BES equations" << std::endl;
+        return out.str();
       }
+      return "";
     }
 
   public:
@@ -353,9 +348,9 @@ class pbesinst_finite_algorithm: public utilities::algorithm
         std::vector<data::variable> infinite_parameters;
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
-        
+
         data::classic_enumerator<> enumerator(p.data(),rewr);
-        for (data::classic_enumerator<>::iterator j=enumerator.begin(finite_parameters, data::sort_bool::true_()); 
+        for (data::classic_enumerator<>::iterator j=enumerator.begin(finite_parameters, data::sort_bool::true_());
                      j != enumerator.end(); ++j)
         {
           // apply the substitution *j
@@ -363,19 +358,19 @@ class pbesinst_finite_algorithm: public utilities::algorithm
           std::vector<data::data_expression> finite;
           for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)
           {
-            LOG_DEBUG1("sigma(" + core::pp(*k) + ") = " + core::pp((*j)(*k)) + "\n");
+            mCRL2log(log::debug1) << "sigma(" << data::pp(*k) << ") = " << data::pp((*j)(*k)) << "\n";
             finite.push_back((*j)(*k));
           }
           core::identifier_string name = pbesinst_finite_rename()(i->variable().name(), finite);
           propositional_variable X(name, infinite);
-          LOG_DEBUG1("formula before = " + core::pp(i->formula()) + "\n");
-          LOG_DEBUG1("sigma = " + data::print_substitution(*j) + "\n");
+          mCRL2log(log::debug1) << "formula before = " << pbes_system::pp(i->formula()) << "\n";
+          mCRL2log(log::debug1) << "sigma = " << data::print_substitution(*j) << "\n";
           pbes_expression formula = visitor(i->formula(), *j);
-          LOG_DEBUG1("formula after  = " + core::pp(formula) + "\n");
+          mCRL2log(log::debug1) << "formula after  = " << pbes_system::pp(formula) << "\n";
           pbes_equation eqn(i->symbol(), X, formula);
           equations.push_back(eqn);
-          LOG_EQUATION_COUNT_DEBUG(++m_equation_count);
-          mCRL2log(debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
+          mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
+          mCRL2log(log::debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
         }
       }
 

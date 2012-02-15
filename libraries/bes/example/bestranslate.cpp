@@ -19,36 +19,34 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/bes/pg_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::bes;
 using namespace mcrl2;
 
-namespace mcrl2
-{
-namespace bes
-{
-
 /// \brief Guess output file format based on filename
-bes_output_format guess_file_format(std::string const& filename)
+pbes_file_format guess_file_format(std::string const& filename)
 {
   std::string extension = *(utilities::split(filename, ".").rbegin());
 
-  bes_output_format result;
+  pbes_file_format result;
   if (extension == "bes")
   {
-    result = bes_output_bes;
+    result = pbes_file_bes;
   }
   else if (extension == "cwi")
   {
-    result = bes_output_cwi;
+    result = pbes_file_cwi;
   }
   else if (extension == "gm")
   {
-    result = bes_output_pgsolver;
+    result = pbes_file_pgsolver;
   }
   else
   {
@@ -64,18 +62,18 @@ template <typename Container>
 inline
 void load_bes(boolean_equation_system<Container>& bes, std::string const& input_filename)
 {
-  bes_output_format format = guess_file_format(input_filename);
+  pbes_file_format format = guess_file_format(input_filename);
   std::ifstream input; // Cannot declare in switch
 
   switch (format)
   {
-    case bes_output_bes:
+    case pbes_file_bes:
       bes.load(input_filename);
       break;
-    case bes_output_cwi:
+    case pbes_file_cwi:
       throw mcrl2::runtime_error("Reading BES from cwi format is not supported");
       break;
-    case bes_output_pgsolver:
+    case pbes_file_pgsolver:
       input.open(input_filename.c_str());
       parse_pgsolver(input, bes);
       break;
@@ -90,11 +88,8 @@ template <typename Container>
 inline
 void save_bes(boolean_equation_system<Container> const& bes, std::string const& output_filename)
 {
-  bes_output_format format = guess_file_format(output_filename);
+  pbes_file_format format = guess_file_format(output_filename);
   save_bes(bes, output_filename, format);
-}
-
-}
 }
 
 class bestranslate_tool: public input_output_tool
@@ -116,8 +111,8 @@ class bestranslate_tool: public input_output_tool
     {
       using namespace mcrl2::bes;
       boolean_equation_system<> bes;
-      load_bes(bes, input_filename());
-      save_bes(bes, output_filename());
+      ::load_bes(bes, input_filename());
+      ::save_bes(bes, output_filename());
       return true;
     }
 };

@@ -13,12 +13,12 @@
 #define MCRL2_PBES_ALGORITHMS_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/gauss_elimination.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
@@ -32,10 +32,10 @@ namespace pbes_system
 /// \return A bes.
 pbes<> pbesinst(const pbes<>& p, bool lazy = false)
 {
-  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
+  typedef data::data_enumerator<utilities::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   data::rewriter datar(p.data());
-  data::number_postfix_generator name_generator("x");
+  utilities::number_postfix_generator name_generator("x");
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
   if (lazy)

@@ -13,10 +13,13 @@
 #include <stdexcept>
 #include <string>
 #include <cstring>
+#include <limits>
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -24,10 +27,9 @@
 #ifdef MCRL2_JITTYC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
-using namespace mcrl2::data::detail;
+
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
 #include "mcrl2/data/data_expression.h"
@@ -36,7 +38,9 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace std;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {
@@ -45,243 +49,469 @@ namespace data
 namespace detail
 {
 
-Rewriter::Rewriter()
+// function object to test if it is an aterm_appl with function symbol "f"
+struct is_a_variable
 {
-}
-
-Rewriter::~Rewriter()
-{
-}
-
-ATermList Rewriter::rewriteList(ATermList Terms)
-{
-  ATermList l = ATmakeList0();
-  for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
+  bool operator()(atermpp::aterm t) const
   {
-    l = ATinsert(l,(ATerm) rewrite((ATermAppl) ATgetFirst(Terms)));
+    return is_variable(t);
   }
-  return ATreverse(l);
-}
+};
 
-ATerm Rewriter::toRewriteFormat(ATermAppl Term)
+#ifndef NDEBUG
+static
+bool occur_check(const variable v, const atermpp::aterm_appl e)
 {
-  return (ATerm) Term;
-}
-
-ATermAppl Rewriter::fromRewriteFormat(ATerm Term)
-{
-  return (ATermAppl) Term;
-}
-
-ATerm Rewriter::rewriteInternal(ATerm Term)
-{
-  return (ATerm) rewrite((ATermAppl) Term);
-}
-
-ATermList Rewriter::rewriteInternalList(ATermList Terms)
-{
-  ATermList l = ATmakeList0();
-  for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
+  if (v==e)
   {
-    l = ATinsert(l,rewriteInternal(ATgetFirst(Terms)));
+    // The variable is reset. This is ok.
+    return true;
   }
-  return ATreverse(l);
+  std::set<variable> s;
+  find_all_if(e,is_a_variable(),std::inserter(s,s.begin()));
+  if (s.count(v)>0)
+  {
+    return false; // Occur check failed.
+  }
+  return true;
+}
+#endif
+
+
+data_expression_list Rewriter::rewrite_list(
+     const data_expression_list terms,
+     substitution_type &sigma)
+{
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
+  size_t position=0;
+  for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
+  {
+    term_array[position]=rewrite(*i,sigma);
+  }
+  ++position;
+  data_expression_list l;
+  for( ; position>0 ; )
+  {
+    --position;
+    l = push_front(l,term_array[position]);
+  }
+  return l;
 }
 
-bool Rewriter::addRewriteRule(ATermAppl /*Rule*/)
+atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression /*Term*/)
 {
+  assert(0);
+  return atermpp::aterm_appl();
+}
+
+data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl t)
+{
+  return fromInner(t);
+}
+
+atermpp::aterm_appl Rewriter::rewrite_internal(
+     const atermpp::aterm_appl /*Term*/,
+     internal_substitution_type & /*sigma*/)
+{
+  assert(0);
+  return data_expression();
+}
+
+atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
+    const atermpp::term_list<atermpp::aterm_appl> terms,
+    internal_substitution_type &sigma)
+{
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, atermpp::aterm_appl, terms.size());
+  size_t position=0;
+  for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
+  {
+    term_array[position]=rewrite_internal(*i,sigma);
+  }
+  atermpp::term_list<atermpp::aterm_appl> l;
+  for( ; position>0 ; )
+  {
+    --position;
+    l = push_front(l,term_array[position]);
+  }
+  return l;
+}
+
+bool Rewriter::addRewriteRule(const data_equation /*Rule*/)
+{
+  assert(0);
   return false;
 }
 
-bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
+bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
 {
+  assert(0);
   return false;
 }
 
-ATerm Rewriter::internal_existential_quantifier_enumeration(ATerm ATermInInnerFormat)
+atermpp::aterm_appl Rewriter::rewrite_where(
+                      const atermpp::aterm_appl term,
+                      internal_substitution_type &sigma)
 {
-  /* Get Body of Exists */
-  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-  data_expression d(fromRewriteFormat(t1));
+  const atermpp::term_list < atermpp::aterm_appl > assignment_list(term(1));
+  const atermpp::aterm_appl body(term(0));
 
-  /* Get Sort for enumeration from Body*/
-  sort_expression_list fsdomain = function_sort(d.sort()).domain();
-
-  static data::fresh_variable_generator<> generator;
-  generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var");
-
-  /* Create for each of the sorts for enumeration a new variable*/
-  variable_vector vv;
-  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  for(atermpp::term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
   {
-    variable v(generator(*i));
-    vv.push_back(v);
+    const variable v=variable((*i)(0));
+    const variable v_fresh(generator("whr_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
+  const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
 
-  /* Create Enumerator */
-  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
-
-  /* Find A solution*/
-  const variable_list vl=atermpp::convert< variable_list >(vv);
-
-  EnumeratorSolutionsStandard sol(vl,
-      toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
-      true,&ES,100);
-
-  /* Create ATermList to store solutions */
-  atermpp::term_list<atermpp::aterm_appl> x;
-  bool has_exact_solution = false;
-  bool has_no_solution =true;
-  bool solution_possible=true;
-
-  size_t loop_upperbound=5;
-  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  // Reset variables in sigma
+  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+      it!=variable_renaming.end(); ++it)
   {
-    has_no_solution = false;
-    loop_upperbound--;
+    sigma[it->second]=it->second;
   }
-
-  if (solution_possible)
-  {
-    if (has_exact_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return true (exist)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::true_());
-    }
-    else if (has_no_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return false (exist)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::false_());
-    }
-  }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  std::cerr << "An existential quantifier could not be eliminated and remains unchanged.\n";
-#endif
-
- return ATermInInnerFormat;
+  return result;
 }
 
-ATerm Rewriter::internal_universal_quantifier_enumeration(ATerm ATermInInnerFormat)
+atermpp::aterm_appl Rewriter::rewrite_single_lambda(
+                      const variable_list vl,
+                      const atermpp::aterm_appl body,
+                      const bool body_in_normal_form,
+                      internal_substitution_type &sigma)
 {
-  /* Get Body of forall */
-  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-  data_expression d(fromRewriteFormat(t1));
-  
-  /* Get Sort for enumeration from Body*/
-  sort_expression_list fsdomain = function_sort(d.sort()).domain();
-  
-  data::fresh_variable_generator<> generator;
-  generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var");
-  
-  /* Create for each of the sorts for enumeration a new variable*/
-  variable_vector vv;
-  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
-  {
-    variable v(generator(*i));
-    vv.push_back(v);
-  }
-  
-  /* Create Enumerator */
-  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
-  
-  /* Find A solution*/
-  const variable_list vl=atermpp::convert< variable_list >(vv);
-  EnumeratorSolutionsStandard sol(vl,
-      toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
-      false,&ES,100);
-  
-  /* Create ATermList to store solutions */
-  atermpp::term_list<atermpp::aterm_appl> x;
-  bool has_exact_solution = false;
-  bool has_no_solution =true;
-  bool solution_possible=true;
-  
-  size_t loop_upperbound=5;
-  
-  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
-  {
-    has_no_solution = false;
-    loop_upperbound--;
-  }
+  assert(vl.size()>0);
+  // A lambda term without arguments; Take care that the bound variable is made unique with respect to
+  // the variables occurring in sigma. But in case vl is empty, just rewrite...
 
-  if (solution_possible)
+  // First filter the variables in vl by those occuring as left/right hand sides in sigma.
+
+  size_t number_of_renamed_variables=0;
+  size_t count=0;
+  atermpp::vector <variable> new_variables(vl.size());
   {
-    if (has_exact_solution)
+    // Restrict the scope of identifiers_in_sigma.
+    atermpp::set < core::identifier_string > identifiers_in_sigma(get_identifiers(sigma));
+    // Create new unique variables to replace the old and create storage for
+    // storing old values for variables in vl.
+    for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return false (forall)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::false_());
-    }
-    else if (has_no_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return true (forall)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::true_());
-    }
-  }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  std::cerr << "  A universal quantifier could not be eliminated and remains unchanged.\n";
-#endif
-  return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
-}
-
-ATerm Rewriter::internal_quantifier_enumeration(ATerm ATermInInnerFormat)
-{
-
-#ifndef MCRL2_DISABLE_QUANTIFIER_ENUMERATION
-  if (ATisAppl(ATermInInnerFormat))
-  {
-    ATerm arg = ATgetArgument(ATermInInnerFormat,0);
-
-    /* Make sure that we have indeed a rewrite rule */
-    if (ATisInt(arg))
-    {
-      /* Convert internal rewrite number to ATerm representation*/
-      ATermAppl a = get_int2term(ATgetInt((ATermInt) arg));
-
-      if (is_function_symbol(a))
+      const variable v= *it;
+      if (identifiers_in_sigma.find(v.name()) != identifiers_in_sigma.end())
       {
-        /* Check for universal quantifier */
-        if (function_symbol(a).name() == forall_function_symbol())
-        {
-          ATermInInnerFormat = internal_universal_quantifier_enumeration(ATermInInnerFormat);
-        }
-        /* Check for existential quantifier */
-        if (function_symbol(a).name() == exists_function_symbol())
-        {
-          ATermInInnerFormat = internal_existential_quantifier_enumeration(ATermInInnerFormat);
-        }
+        number_of_renamed_variables++;
+        new_variables[count]=data::variable(generator("x_"), v.sort());
       }
+      else new_variables[count]=v;
     }
   }
-#endif
-  return ATermInInnerFormat;
+
+  if (number_of_renamed_variables==0)
+  {
+    atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),vl,(body_in_normal_form?body:rewrite_internal(body,sigma)));
+    return a;
+  }
+
+  atermpp::vector <atermpp::aterm_appl> saved_substitutions;
+  count=0;
+  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  {
+    assert(count<new_variables.size());
+    const variable v= *it;
+    if (v!=new_variables[count])
+    {
+      saved_substitutions.push_back(sigma(v));
+      assert(occur_check(v,atermpp::aterm_appl(new_variables[count])));
+      sigma[v]=atermpp::aterm_appl(new_variables[count]);
+    }
+  }
+  const atermpp::aterm_appl result=(body_in_normal_form?body:rewrite_internal(body,sigma));
+
+  // restore saved substitutions;
+
+  count=0;
+  size_t new_variable_count=0;
+  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  {
+    assert(count<vl.size());
+    const variable v= *it;
+    if (v!=new_variables[count])
+    {
+      assert(new_variable_count<saved_substitutions.size());
+      assert(occur_check(v,saved_substitutions[new_variable_count]));
+      sigma[v]=saved_substitutions[new_variable_count];
+      new_variable_count++;
+    }
+  }
+
+  variable_list new_variable_list;
+
+  for(atermpp::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
+  {
+    new_variable_list=push_front(new_variable_list,*it);
+  }
+  const atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),new_variable_list,result);
+  return a;
 }
 
 
-Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy, const bool add_rewrite_rules)
+// The function rewrite_lambda_application rewrites a lambda term to a set of
+// arguments which are the arguments 1,...,n of t. If t has the shape
+// #REWR#(t0,t1,....,tn) and the lambda term is L, we calculate the normal form
+// in internal format for L(t1,...,tn). Note that the term t0 is ignored.
+// Note that we assume that neither L, nor t is in normal form.
+
+atermpp::aterm_appl Rewriter::rewrite_lambda_application(
+                      const atermpp::aterm_appl lambda_term,
+                      const atermpp::aterm_appl t,
+                      internal_substitution_type &sigma)
+{
+  assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
+  const variable_list vl=lambda_term(1);
+  const atermpp::aterm_appl lambda_body=rewrite_internal(lambda_term(2),sigma);
+  size_t arity=t.size();
+  assert(arity>0);
+  if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
+  { 
+    return rewrite_single_lambda(vl, lambda_body, true, sigma);
+  }
+  assert(vl.size()<arity);
+
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  size_t count=1;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
+  {
+    const variable v= (*i);
+    const variable v_fresh(generator("x_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    sigma[v_fresh]=rewrite_internal(t(count),sigma);
+  }
+
+  const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
+
+  // Reset variables in sigma
+  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+                 it!=variable_renaming.end(); ++it)
+  {
+    sigma[it->second]=it->second;
+  }
+  if (vl.size()+1==arity)
+  {
+    return result;
+  }
+
+  // There are more arguments than bound variables.
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+  args[0]=result;
+  for(size_t i=1; i<arity-vl.size(); ++i)
+  {
+    assert(vl.size()+i<arity);
+    args[i]=t(vl.size()+i);
+  }
+  // We do not employ the knowledge that the first argument is in normal form... TODO.
+  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),args),sigma);
+  return result1;
+}
+
+atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
+     const atermpp::aterm_appl t,
+     internal_substitution_type &sigma)
+{
+  // This is a quantifier elimination that works on the existential quantifier as specified
+  // in data types, i.e. without applying the implement function anymore. 
+
+  assert(is_abstraction(t) && t(0)==gsMakeExists());
+  /* Get Body of Exists */
+  const atermpp::aterm_appl t1 = t(2);
+
+  // Put the variables in the right order in vl.
+  variable_list vl=t(1);
+  return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
+}
+
+// Generate a term equivalent to exists vl.t1.
+// The variable t1_is_normal_form indicates whether t1 is in normal
+// form, but this information is not used as it stands.
+atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
+      const variable_list vl,
+      const atermpp::aterm_appl t1,
+      const bool /* t1_is_normal_formi */,
+      internal_substitution_type &sigma)
+{
+  // First rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  
+  variable_list vl_new;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= (*i);
+    const variable v_fresh(generator("ex_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    vl_new=push_front(vl_new,v_fresh);
+  }
+
+  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+
+  /* Create Enumerator */
+  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
+
+  /* Find A solution*/
+  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,true,&ES,100);
+
+  /* Create a list to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  atermpp::aterm_appl evaluated_condition=internal_false;
+  atermpp::aterm_appl partial_result=internal_false;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+  while (loop_upperbound>0 &&
+         partial_result!=internal_true &&
+         sol.next(evaluated_condition,x,solution_possible))
+  {
+    if (partial_result==internal_false)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_true)
+    {
+      partial_result=internal_true;
+    }
+    else
+    {
+      partial_result=Apply2(internal_or, partial_result,evaluated_condition);
+    }
+    loop_upperbound--;
+  }
+
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_true))
+  {
+    return partial_result;
+  }
+
+  return gsMakeBinder(gsMakeExists(),vl,rewrite_internal(t1,sigma));
+}
+
+
+atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
+     const atermpp::aterm_appl t,
+     internal_substitution_type &sigma)
+{
+  assert(is_abstraction(t) && t(0)==gsMakeForall());
+  /* Get Body of forall */
+  const atermpp::aterm_appl t1 = t(2);
+  const variable_list vl=t(1);
+  return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
+}
+
+// Generate a term equivalent to forall vl.t1.
+// The variable t1_is_normal_form indicates whether t1 is in normal
+// form, but this information is not used as it stands.
+atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
+      const variable_list vl,
+      const atermpp::aterm_appl t1,
+      const bool /* t1_is_normal_formi */,
+      internal_substitution_type &sigma)
+{
+  // First rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  
+  variable_list vl_new;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= (*i);
+    const variable v_fresh(generator("all_"), v.sort());
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    vl_new=push_front(vl_new,v_fresh);
+  }
+
+  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+
+  /* Create Enumerator */
+  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
+
+  /* Find A solution*/
+  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,false,&ES,100);
+
+  /* Create lists to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  atermpp::aterm_appl evaluated_condition=internal_true;
+  atermpp::aterm_appl partial_result=internal_true;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+  while (loop_upperbound>0 &&
+         partial_result!=internal_false &&
+         sol.next(evaluated_condition,x,solution_possible))
+  {
+    // The returned evaluated condition is the negation of the entered condition,
+    // as is not_equal_to_true_or_false is set to false in sol. So, we must first
+    // negate it.
+
+    if (evaluated_condition == internal_true)
+    {
+      evaluated_condition=internal_false;
+    }
+    else if (evaluated_condition == internal_false)
+    {
+      evaluated_condition=internal_true;
+    }
+    else if (evaluated_condition(0) == internal_not)
+    {
+      evaluated_condition=evaluated_condition(1);
+    }
+    else
+    {
+      evaluated_condition=Apply1(internal_not, evaluated_condition);
+    }
+
+
+    if (partial_result==internal_true)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_false)
+    {
+      partial_result=internal_false;
+    }
+    else
+    {
+      partial_result=Apply2(internal_and, partial_result, evaluated_condition);
+    }
+    loop_upperbound--;
+  }
+
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_false))
+  {
+    return partial_result;
+  }
+
+  return gsMakeBinder(gsMakeForall(),vl,rewrite_internal(t1,sigma));
+}
+
+
+Rewriter* createRewriter(
+            const data_specification& DataSpec,
+            const used_data_equation_selector &equations_selector,
+            const RewriteStrategy Strategy)
 {
   switch (Strategy)
   {
     case GS_REWR_JITTY:
-      return new RewriterJitty(DataSpec,add_rewrite_rules);
+      return new RewriterJitty(DataSpec,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
-      return new RewriterCompilingJitty(DataSpec,add_rewrite_rules);
+      return new RewriterCompilingJitty(DataSpec,equations_selector);
 #endif
     case GS_REWR_JITTY_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,add_rewrite_rules);
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC_P:
-      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,add_rewrite_rules);
+      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,equations_selector);
 #endif
     default:
       return NULL;
@@ -289,131 +519,129 @@ Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrate
 }
 
 //Prototype
-static void checkVars(ATermAppl Expr, ATermList Vars, ATermList* UsedVars = NULL);
+static void check_vars(const data_expression expr, const std::set <variable> &vars, std::set <variable> &used_vars);
 
-static void checkVars(ATermList Exprs, ATermList Vars, ATermList* UsedVars = NULL)
+static void check_vars(const data_expression_list exprs, const std::set <variable> &vars, std::set <variable> &used_vars)
 {
-  assert(ATgetType(Exprs) == AT_LIST);
-
-  for (; !ATisEmpty(Exprs); Exprs = ATgetNext(Exprs))
+  for (data_expression_list::const_iterator i=exprs.begin(); i!=exprs.end(); ++i)
   {
-    checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
+    check_vars(*i,vars,used_vars);
   }
 }
 
-static void checkVars(ATermAppl Expr, ATermList Vars, ATermList* UsedVars)
+static void check_vars(const data_expression expr, const std::set <variable> &vars, std::set <variable> &used_vars)
 {
-  assert(ATgetType(Expr) == AT_APPL);
-
-  if (gsIsDataAppl(Expr))
+  if (is_application(expr))
   {
-    checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars);
-    checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
+    check_vars(application(expr).head(),vars,used_vars);
+    check_vars(application(expr).arguments(),vars,used_vars);
   }
-  else if (gsIsDataVarId(Expr))
+  else if (is_variable(expr))
   {
-    if ((UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION))
-    {
-      *UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
-    }
+    used_vars.insert(variable(expr));
 
-    if (ATindexOf(Vars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION)
+    if (vars.count(variable(expr))==0)
     {
-      throw Expr;
+      throw variable(expr);
     }
   }
 }
 
 //Prototype
-static void checkPattern(ATermAppl p);
+static void checkPattern(const data_expression p);
 
-static void checkPattern(ATermList l)
+static void checkPattern(const data_expression_list l)
 {
-  for (; !ATisEmpty(l); l = ATgetNext(l))
+  for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    checkPattern(ATAgetFirst(l));
+    checkPattern(*i);
   }
 }
 
-static void checkPattern(ATermAppl p)
+static void checkPattern(const data_expression p)
 {
-  if (gsIsDataAppl(p))
+  if (is_application(p))
   {
-    if (gsIsDataVarId(ATAgetArgument(p,0)))
+    if (is_variable(application(p).head()))
     {
-      throw string("variable "+PrintPart_CXX(ATgetArgument(p,0),ppDefault)+" is used as head symbol in an application, which is not supported");
+      throw mcrl2::runtime_error(string("variable ") + data::pp(application(p).head()) +
+               " is used as head symbol in an application, which is not supported");
     }
-    checkPattern(ATAgetArgument(p,0));
-    checkPattern(ATLgetArgument(p,1));
+    checkPattern(application(p).head());
+    checkPattern(application(p).arguments());
   }
 }
 
-void CheckRewriteRule(ATermAppl DataEqn)
+void CheckRewriteRule(const data_equation data_eqn)
 {
-  assert(gsIsDataEqn(DataEqn));
-
-  ATermList rule_vars = ATLgetArgument(DataEqn,0);
+  const variable_list rule_var_list = data_eqn.variables();
+  const atermpp::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars
-  ATermList lhs_vars = ATmakeList0();
+  std::set <variable> lhs_vars;
   try
   {
-    checkVars(ATAgetArgument(DataEqn,2),rule_vars,&lhs_vars);
+    check_vars(data_eqn.lhs(),rule_vars,lhs_vars);
   }
-  catch (ATermAppl var)
+  catch (variable& var)
   {
-    // This should never occur if DataEqn is a valid data equation
-    mCRL2log(error) << "Data Equation: " << atermpp::aterm_appl(DataEqn) << std::endl;
+    // This should never occur if data_eqn is a valid data equation
+    mCRL2log(log::error) << "Data Equation: " << atermpp::aterm_appl(data_eqn) << std::endl;
     assert(0);
-    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
+    throw runtime_error("variable " + pp(var) + " occurs in left-hand side of equation but is not defined (in equation: " + pp(data_eqn) + ")");
   }
 
   // check that variables from the condition occur in the lhs
   try
   {
-    checkVars(ATAgetArgument(DataEqn,1),lhs_vars);
+    std::set <variable> dummy;
+    check_vars(data_eqn.condition(),lhs_vars,dummy);
   }
-  catch (ATermAppl var)
+  catch (variable& var)
   {
-    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in condition of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+    throw runtime_error("variable " + pp(var) + " occurs in condition of equation but not in left-hand side (in equation: " +
+                    pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 
   // check that variables from the rhs are occur in the lhs
   try
   {
-    checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
+    std::set <variable> dummy;
+    check_vars(data_eqn.rhs(),lhs_vars,dummy);
   }
-  catch (ATermAppl var)
+  catch (variable& var)
   {
-    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in right-hand side of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+    throw runtime_error("variable " + pp(var) + " occurs in right-hand side of equation but not in left-hand side (in equation: " +
+                pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 
   // check that the lhs is a supported pattern
-  if (gsIsDataVarId(ATAgetArgument(DataEqn,2)))
+  if (is_variable(data_eqn.lhs()))
   {
     throw runtime_error("left-hand side of equation is a variable; this is not allowed for rewriting");
   }
   try
   {
-    checkPattern(ATAgetArgument(DataEqn,2));
+    checkPattern(data_eqn.lhs());
   }
-  catch (string& s)
+  catch (mcrl2::runtime_error &s)
   {
-    throw runtime_error(s+" (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+    throw runtime_error(string(s.what()) + " (in equation: " + pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 }
 
-bool isValidRewriteRule(ATermAppl DataEqn)
+bool isValidRewriteRule(const data_equation data_eqn)
 {
   try
   {
-    CheckRewriteRule(DataEqn);
+    CheckRewriteRule(data_eqn);
     return true;
   }
   catch (runtime_error&)
   {
     return false;
   }
+  return false; // compiler warning
 }
 
 void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
@@ -444,7 +672,7 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
   }
 }
 
-RewriteStrategy RewriteStrategyFromString(const char* s)
+RewriteStrategy RewriteStrategyFromString(char const* s)
 {
   static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -460,7 +688,7 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
   if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
   {
     main_strategy = 1;
-  
+
     if (s[5] == '\0')   // interpreting
     {
       return strategies[main_strategy];
@@ -487,78 +715,29 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
 
 std::vector <AFun> apples;
 
-/* static size_t num_apples = 0;
-static AFun* apples = NULL;
-
-AFun get_appl_afun_value(size_t arity)
-{
-  if (arity >= num_apples)
-  {
-    size_t old_num = num_apples;
-    num_apples = arity+1;
-    apples = (AFun*) realloc(apples,num_apples*sizeof(AFun));
-    if (apples == NULL)
-    {
-      throw mcrl2::runtime_error("Cannot allocate enough memory.");
-    }
-
-    for (; old_num < num_apples; old_num++)
-    {
-      apples[old_num] = ATmakeAFun("#REWR#",old_num,false);
-      ATprotectAFun(apples[old_num]);
-    }
-  }
-  return apples[arity];
-}
-
-ATermAppl Apply(ATermList l)
-{
-  const size_t n=ATgetLength(l);
-  return ATmakeApplList(get_appl_afun_value(n),l);
-}
-
-ATermAppl ApplyArray(const size_t size, ATerm *l)
-{
-  return ATmakeApplArray(get_appl_afun_value(size),l);
-}
-
-ATermAppl Apply0(const ATerm head)
-{
- return ATmakeAppl1(get_appl_afun_value(1),head);
-}
-
-ATermAppl Apply1(const ATerm head, const ATerm arg1)
-{
- return ATmakeAppl2(get_appl_afun_value(2),head,arg1);
-}
-
-ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
-{
- return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
-} */
-
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
-
-atermpp::map< ATerm, ATermInt > &term2int()
-{ 
-  static atermpp::map< ATerm, ATermInt > term2int;
+static
+atermpp::map< function_symbol, atermpp::aterm_int > &term2int()
+{
+  static atermpp::map< function_symbol, atermpp::aterm_int > term2int;
   return term2int;
 }
 
-atermpp::map< ATerm, ATermInt >::const_iterator term2int_begin()
-{ 
+atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_begin()
+{
   return term2int().begin();
 }
 
-atermpp::map< ATerm, ATermInt >::const_iterator term2int_end()
-{ 
+atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end()
+{
   return term2int().end();
 }
 
-atermpp::vector < ATermAppl > &int2term()
-{ 
-  static atermpp::vector < ATermAppl > int2term;
+static
+atermpp::vector < data::function_symbol > &int2term()
+{
+  static atermpp::vector < data::function_symbol > int2term;
   return int2term;
 }
 
@@ -567,201 +746,143 @@ size_t get_num_opids()
   return int2term().size();
 }
 
-ATermAppl get_int2term(const size_t n)
+function_symbol get_int2term(const size_t n)
 {
   assert(n<int2term().size());
   return int2term()[n];
 }
 
-void set_int2term(const size_t n, const ATermAppl t)
+atermpp::aterm_int OpId2Int(const function_symbol term)
 {
-  if (n>=int2term().size())
-  {
-    int2term().resize(n+1);
-  }
-  int2term()[n]=t;
-}
-
-size_t getArity(ATermAppl op)
-{
-  ATermAppl sort = ATAgetArgument(op,1);
-  size_t arity = 0;
-
-  while (is_function_sort(sort_expression(sort)))
-  {
-    ATermList sort_dom = ATLgetArgument(sort, 0);
-    arity += ATgetLength(sort_dom);
-    sort = ATAgetArgument(sort, 1);
-  }
-  return arity;
-}
-
-void initialize_internal_translation_table_rewriter()
-{
-}
-
-ATerm OpId2Int(ATermAppl Term, bool add_opids)
-{
-  atermpp::map< ATerm, ATermInt >::iterator f = term2int().find((ATerm) Term);
+  atermpp::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
   {
-    if (!add_opids)
-    {
-      return (ATerm) Term;
-    }
     const size_t num_opids=get_num_opids();
-    ATermInt i = ATmakeInt(num_opids);
-    term2int()[(ATerm) Term] =  i;
-    int arity = getArity(Term);
-    if (arity > NF_MAX_ARITY)
-    {
-      arity = NF_MAX_ARITY;
-    }
+    assert(num_opids<=static_cast<size_t>(std::numeric_limits<int>::max())); // Check that num_opids is not too big, to be casted to an int.
+    atermpp::aterm_int i(static_cast<int>(num_opids));
+    term2int()[term] =  i;
     assert(int2term().size()==num_opids);
-    int2term().push_back(Term);
-    size_t num_aux = (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2; Reserve extra space
-                                                   // to accomodate function symbols that represent
-                                                   // terms with partially normalized arguments.
-    if (arity <= NF_MAX_ARITY)
-    {
-      for(size_t k=0; k<num_aux; ++k)
-      {
-        int2term().push_back((ATermAppl)atermpp::aterm_appl()); 
-      }
-    }
-    return (ATerm) i;
+    int2term().push_back(term);
+    return i;
   }
 
-  ATermInt j = f->second;
-  return (ATerm) j;
-} 
-
-ATerm toInner(ATermAppl Term, bool add_opids)
-{
-  if (gsIsDataAppl(Term))
-  {
-    ATermList l = ATmakeList0();
-    for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
-    {
-      l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
-    }
-
-    l = ATreverse(l);
-
-    ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
-    if (ATisList(arg0))
-    {
-      l = ATconcat((ATermList) arg0, l);
-    }
-    else
-    {
-      l = ATinsert(l, arg0);
-    }
-    return (ATerm) l;
-  }
-  else
-  {
-    if (gsIsOpId(Term))
-    {
-      return (ATerm) OpId2Int(Term,add_opids);
-    }
-    else
-    {
-      return (ATerm) Term;
-    }
-  }
-
+  return f->second;
 }
 
-ATermAppl toInnerc(ATermAppl Term, const bool add_opids)
+atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
 {
-
-  if (gsIsNil(Term) || gsIsDataVarId(Term))
+  if (is_variable(term))
   {
-    return Term;
+    return term;
   }
-
-  ATermList l = ATmakeList0();
-
-  if (!gsIsDataAppl(Term))
+  else if (is_application(term))
   {
-    if (gsIsOpId(Term))
-    {
-      // l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-      return Apply0(OpId2Int(Term,add_opids));
-    }
-    else
-    {
-      return Apply0((ATerm) Term);
-    }
-  }
-  else
-  {
-    ATermAppl arg0 = toInnerc(ATAgetArgument(Term, 0), add_opids);
+    atermpp::term_list <atermpp::aterm_appl> l;
+    atermpp::aterm_appl arg0 = toInner(application(term).head(), add_opids);
     // Reflect the way of encoding the other arguments!
-    if (gsIsNil(arg0) || gsIsDataVarId(arg0))
+    if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
     {
-      l = ATinsert(l, (ATerm) arg0);
+      l = push_front(l, arg0);
     }
     else
     {
-      size_t arity = ATgetArity(ATgetAFun(arg0));
+      size_t arity = arg0.size(); //ATgetArity(ATgetAFun(arg0));
       for (size_t i = 0; i < arity; ++i)
       {
-        l = ATinsert(l, ATgetArgument(arg0, i));
+        l = push_front(l, atermpp::aterm_appl(arg0(i)));
       }
     }
-    for (ATermList args = ATLgetArgument((ATermAppl) Term,1); !ATisEmpty(args) ; args = ATgetNext(args))
+    const data_expression_list args= application(term).arguments();
+    for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i)
     {
-      l = ATinsert(l,(ATerm) toInnerc((ATermAppl) ATgetFirst(args),add_opids));
+      l = push_front(l, toInner(*i,add_opids));
     }
-    l = ATreverse(l);
+    l = reverse(l);
+    return Apply(l);
   }
-  return Apply(l);
+  else if (is_function_symbol(term))
+  {
+    return Apply0(OpId2Int(term));
+  }
+  else if (is_where_clause(term))
+  {
+    const where_clause t=term;
+    atermpp::term_list<atermpp::aterm> l;
+    const atermpp::vector < assignment_expression > lv=atermpp::convert < atermpp::vector < assignment_expression > >(t.declarations());
+    for(atermpp::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
+    {
+      l=atermpp::push_front(l,atermpp::aterm(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids))));
+    }
+    return gsMakeWhr(toInner(t.body(),add_opids),l);
+  }
+  else if (is_abstraction(term))
+  {
+    const abstraction t=term;
+
+    return gsMakeBinder(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
+  }
+  assert(0); // term has unexpected format.
+  return atermpp::aterm_appl();
 }
 
-ATermAppl fromInner(ATerm Term)
+data_expression fromInner(atermpp::aterm_appl term)
 {
-  ATermAppl a;
-
-  if (gsIsDataVarId((ATermAppl)Term))
+  if (is_variable(term))
   {
-    return (ATermAppl)Term;
+    return variable(term);
   }
 
-  size_t arity = ATgetArity(ATgetAFun(Term));
-  ATerm t = ATgetArgument(Term,0);
-  if (ATisInt(t))
+  if (is_where_clause(term))
   {
-    a = get_int2term(ATgetInt((ATermInt) t));
+    const data_expression body=fromInner(term(0));
+    const atermpp::term_list<atermpp::aterm_appl> l=term(1);
+
+    atermpp::vector < assignment_expression > lv;
+    for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
+    {
+      const atermpp::aterm_appl ass_expr= *it;
+      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(ass_expr(1))));
+    }
+    return where_clause(body,lv);
+  }
+
+  if (is_abstraction(term))
+  {
+    return abstraction(binder_type(term(0)),variable_list(term(1)),fromInner(term(2)));
+  }
+
+  size_t arity = ATgetArity(ATgetAFun(term));
+  atermpp::aterm_appl t = term(0);
+  data_expression a;
+
+  if (t.type()==AT_INT)
+  {
+    a = get_int2term((atermpp::aterm_int(t)).value());
   }
   else
   {
-    a = (ATermAppl) t;
+    a = fromInner(t);
   }
 
-  if (gsIsOpId(a) || gsIsDataVarId(a))
+  size_t i = 1;
+  sort_expression sort = a.sort();
+  while (is_function_sort(sort) && (i < arity))
   {
-    size_t i = 1;
-    ATermAppl sort = ATAgetArgument(a, 1);
-    while (is_function_sort(sort_expression(sort)) && (i < arity))
+    sort_expression_list sort_dom = function_sort(sort).domain();
+    data_expression_list list;
+    while (!ATisEmpty(sort_dom))
     {
-      ATermList sort_dom = ATLgetArgument(sort, 0);
-      ATermList list = ATmakeList0();
-      while (!ATisEmpty(sort_dom))
-      {
-        assert(i < arity);
-        list = ATinsert(list, (ATerm) fromInner(ATgetArgument(Term,i)));
-        sort_dom = ATgetNext(sort_dom);
-        ++i;
-      }
-      list = ATreverse(list);
-      a = gsMakeDataAppl(a, list);
-      sort = ATAgetArgument(sort, 1);
+      assert(i < arity);
+      list = push_front(list, fromInner(ATgetArgument(term,i)));
+      sort_dom = pop_front(sort_dom);
+      ++i;
     }
+    list = reverse(list);
+    a = application(a, list);
+    sort = function_sort(sort).codomain();
   }
   return a;
-} 
+}
 
 
 }

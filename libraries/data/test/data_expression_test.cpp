@@ -242,7 +242,7 @@ void set_comprehension_test()
   basic_sort s("S");
   variable x("x", s);
   function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
-  data_expression e(sort_set::setcomprehension(s, x));
+  data_expression e(sort_set::set_comprehension(s, x));
   BOOST_CHECK(e.sort() == sort_set::set_(s));
 }
 
@@ -251,7 +251,7 @@ void bag_comprehension_test()
   basic_sort s("S");
   variable x("x", s);
   function_symbol f("f", make_function_sort(s, sort_nat::nat()));
-  data_expression e(sort_bag::bagcomprehension(s, f(x)));
+  data_expression e(sort_bag::bag_comprehension(s, f(x)));
   BOOST_CHECK(e.sort() == sort_bag::bag(s));
 }
 

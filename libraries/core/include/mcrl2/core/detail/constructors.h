@@ -202,2245 +202,1057 @@ ATermAppl constructBooleanExpression();
 
 // BooleanOr
 inline
-ATermAppl initConstructBooleanOr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBooleanOr(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanOr()
 {
-  static ATermAppl t = initConstructBooleanOr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanOr(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // StateOr
 inline
-ATermAppl initConstructStateOr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateOr(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateOr()
 {
-  static ATermAppl t = initConstructStateOr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateOr(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // Hide
 inline
-ATermAppl initConstructHide(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunHide(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructHide()
 {
-  static ATermAppl t = initConstructHide(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Hide(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // SortArrow
 inline
-ATermAppl initConstructSortArrow(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSortArrow(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSortArrow()
 {
-  static ATermAppl t = initConstructSortArrow(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortArrow(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // ProcessAssignment
 inline
-ATermAppl initConstructProcessAssignment(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunProcessAssignment(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructProcessAssignment()
 {
-  static ATermAppl t = initConstructProcessAssignment(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcessAssignment(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // Forall
 inline
-ATermAppl initConstructForall(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunForall());
-  return t;
-}
-
-inline
 ATermAppl constructForall()
 {
-  static ATermAppl t = initConstructForall(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Forall())));
   return t;
 }
 
 // CommExpr
 inline
-ATermAppl initConstructCommExpr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunCommExpr(), reinterpret_cast<ATerm>(constructMultActName()), reinterpret_cast<ATerm>(constructStringOrNil()));
-  return t;
-}
-
-inline
 ATermAppl constructCommExpr()
 {
-  static ATermAppl t = initConstructCommExpr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_CommExpr(), reinterpret_cast<ATerm>(constructMultActName()), reinterpret_cast<ATerm>(constructStringOrNil()))));
   return t;
 }
 
 // StateNot
 inline
-ATermAppl initConstructStateNot(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunStateNot(), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateNot()
 {
-  static ATermAppl t = initConstructStateNot(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateNot(), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // BooleanFalse
 inline
-ATermAppl initConstructBooleanFalse(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunBooleanFalse());
-  return t;
-}
-
-inline
 ATermAppl constructBooleanFalse()
 {
-  static ATermAppl t = initConstructBooleanFalse(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_BooleanFalse())));
   return t;
 }
 
 // SortFSet
 inline
-ATermAppl initConstructSortFSet(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortFSet());
-  return t;
-}
-
-inline
 ATermAppl constructSortFSet()
 {
-  static ATermAppl t = initConstructSortFSet(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortFSet())));
   return t;
 }
 
 // StateImp
 inline
-ATermAppl initConstructStateImp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateImp(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateImp()
 {
-  static ATermAppl t = initConstructStateImp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateImp(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // PBESExists
 inline
-ATermAppl initConstructPBESExists(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPBESExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESExists()
 {
-  static ATermAppl t = initConstructPBESExists(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // PBESImp
 inline
-ATermAppl initConstructPBESImp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPBESImp(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESImp()
 {
-  static ATermAppl t = initConstructPBESImp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESImp(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // Binder
 inline
-ATermAppl initConstructBinder(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunBinder(), reinterpret_cast<ATerm>(constructBindingOperator()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructBinder()
 {
-  static ATermAppl t = initConstructBinder(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_Binder(), reinterpret_cast<ATerm>(constructBindingOperator()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // SortsPossible
 inline
-ATermAppl initConstructSortsPossible(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunSortsPossible(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructSortsPossible()
 {
-  static ATermAppl t = initConstructSortsPossible(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortsPossible(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // SortRef
 inline
-ATermAppl initConstructSortRef(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSortRef(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSortRef()
 {
-  static ATermAppl t = initConstructSortRef(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortRef(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // ProcEqnSpec
 inline
-ATermAppl initConstructProcEqnSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunProcEqnSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructProcEqnSpec()
 {
-  static ATermAppl t = initConstructProcEqnSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcEqnSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // StateForall
 inline
-ATermAppl initConstructStateForall(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateForall()
 {
-  static ATermAppl t = initConstructStateForall(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // BooleanImp
 inline
-ATermAppl initConstructBooleanImp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBooleanImp(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanImp()
 {
-  static ATermAppl t = initConstructBooleanImp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanImp(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // SortId
 inline
-ATermAppl initConstructSortId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunSortId(), reinterpret_cast<ATerm>(constructString()));
-  return t;
-}
-
-inline
 ATermAppl constructSortId()
 {
-  static ATermAppl t = initConstructSortId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortId(), reinterpret_cast<ATerm>(constructString()))));
   return t;
 }
 
 // StateNu
 inline
-ATermAppl initConstructStateNu(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunStateNu(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateNu()
 {
-  static ATermAppl t = initConstructStateNu(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateNu(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // RegNil
 inline
-ATermAppl initConstructRegNil(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunRegNil());
-  return t;
-}
-
-inline
 ATermAppl constructRegNil()
 {
-  static ATermAppl t = initConstructRegNil(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_RegNil())));
   return t;
 }
 
 // DataSpec
 inline
-ATermAppl initConstructDataSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl4(gsAFunDataSpec(), reinterpret_cast<ATerm>(constructSortSpec()), reinterpret_cast<ATerm>(constructConsSpec()), reinterpret_cast<ATerm>(constructMapSpec()), reinterpret_cast<ATerm>(constructDataEqnSpec()));
-  return t;
-}
-
-inline
 ATermAppl constructDataSpec()
 {
-  static ATermAppl t = initConstructDataSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataSpec(), reinterpret_cast<ATerm>(constructSortSpec()), reinterpret_cast<ATerm>(constructConsSpec()), reinterpret_cast<ATerm>(constructMapSpec()), reinterpret_cast<ATerm>(constructDataEqnSpec()))));
   return t;
 }
 
 // Tau
 inline
-ATermAppl initConstructTau(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunTau());
-  return t;
-}
-
-inline
 ATermAppl constructTau()
 {
-  static ATermAppl t = initConstructTau(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Tau())));
   return t;
 }
 
 // StateYaledTimed
 inline
-ATermAppl initConstructStateYaledTimed(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunStateYaledTimed(), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructStateYaledTimed()
 {
-  static ATermAppl t = initConstructStateYaledTimed(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateYaledTimed(), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // SortCons
 inline
-ATermAppl initConstructSortCons(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSortCons(), reinterpret_cast<ATerm>(constructSortConsType()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSortCons()
 {
-  static ATermAppl t = initConstructSortCons(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortCons(), reinterpret_cast<ATerm>(constructSortConsType()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // DataEqnSpec
 inline
-ATermAppl initConstructDataEqnSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunDataEqnSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructDataEqnSpec()
 {
-  static ATermAppl t = initConstructDataEqnSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_DataEqnSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // LinearProcessSummand
 inline
-ATermAppl initConstructLinearProcessSummand(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl5(gsAFunLinearProcessSummand(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructMultActOrDelta()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructLinearProcessSummand()
 {
-  static ATermAppl t = initConstructLinearProcessSummand(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinearProcessSummand(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructMultActOrDelta()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // SortSpec
 inline
-ATermAppl initConstructSortSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunSortSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructSortSpec()
 {
-  static ATermAppl t = initConstructSortSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActionRenameRules
 inline
-ATermAppl initConstructActionRenameRules(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunActionRenameRules(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructActionRenameRules()
 {
-  static ATermAppl t = initConstructActionRenameRules(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActionRenameRules(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // BooleanEquation
 inline
-ATermAppl initConstructBooleanEquation(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunBooleanEquation(), reinterpret_cast<ATerm>(constructFixPoint()), reinterpret_cast<ATerm>(constructBooleanVariable()), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanEquation()
 {
-  static ATermAppl t = initConstructBooleanEquation(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_BooleanEquation(), reinterpret_cast<ATerm>(constructFixPoint()), reinterpret_cast<ATerm>(constructBooleanVariable()), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // ConsSpec
 inline
-ATermAppl initConstructConsSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunConsSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructConsSpec()
 {
-  static ATermAppl t = initConstructConsSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ConsSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // SortList
 inline
-ATermAppl initConstructSortList(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortList());
-  return t;
-}
-
-inline
 ATermAppl constructSortList()
 {
-  static ATermAppl t = initConstructSortList(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortList())));
   return t;
 }
 
 // Sum
 inline
-ATermAppl initConstructSum(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSum(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSum()
 {
-  static ATermAppl t = initConstructSum(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sum(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // DataVarId
 inline
-ATermAppl initConstructDataVarId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunDataVarId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructDataVarId()
 {
-  static ATermAppl t = initConstructDataVarId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // ProcVarId
 inline
-ATermAppl initConstructProcVarId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunProcVarId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructProcVarId()
 {
-  static ATermAppl t = initConstructProcVarId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcVarId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ProcessInit
 inline
-ATermAppl initConstructProcessInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunProcessInit(), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructProcessInit()
 {
-  static ATermAppl t = initConstructProcessInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcessInit(), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // BES
 inline
-ATermAppl initConstructBES(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBES(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBES()
 {
-  static ATermAppl t = initConstructBES(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BES(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // MapSpec
 inline
-ATermAppl initConstructMapSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunMapSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructMapSpec()
 {
-  static ATermAppl t = initConstructMapSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MapSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // StateYaled
 inline
-ATermAppl initConstructStateYaled(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunStateYaled());
-  return t;
-}
-
-inline
 ATermAppl constructStateYaled()
 {
-  static ATermAppl t = initConstructStateYaled(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_StateYaled())));
   return t;
 }
 
 // BooleanAnd
 inline
-ATermAppl initConstructBooleanAnd(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBooleanAnd(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanAnd()
 {
-  static ATermAppl t = initConstructBooleanAnd(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanAnd(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // LinProcSpec
 inline
-ATermAppl initConstructLinProcSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl5(gsAFunLinProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructLinearProcess()), reinterpret_cast<ATerm>(constructLinearProcessInit()));
-  return t;
-}
-
-inline
 ATermAppl constructLinProcSpec()
 {
-  static ATermAppl t = initConstructLinProcSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructLinearProcess()), reinterpret_cast<ATerm>(constructLinearProcessInit()))));
   return t;
 }
 
 // SetBagComp
 inline
-ATermAppl initConstructSetBagComp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSetBagComp());
-  return t;
-}
-
-inline
 ATermAppl constructSetBagComp()
 {
-  static ATermAppl t = initConstructSetBagComp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SetBagComp())));
   return t;
 }
 
 // Choice
 inline
-ATermAppl initConstructChoice(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunChoice(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructChoice()
 {
-  static ATermAppl t = initConstructChoice(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Choice(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // LinearProcessInit
 inline
-ATermAppl initConstructLinearProcessInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunLinearProcessInit(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructLinearProcessInit()
 {
-  static ATermAppl t = initConstructLinearProcessInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_LinearProcessInit(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // MultAct
 inline
-ATermAppl initConstructMultAct(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunMultAct(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructMultAct()
 {
-  static ATermAppl t = initConstructMultAct(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultAct(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // PropVarInst
 inline
-ATermAppl initConstructPropVarInst(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPropVarInst(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructPropVarInst()
 {
-  static ATermAppl t = initConstructPropVarInst(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarInst(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // BagComp
 inline
-ATermAppl initConstructBagComp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunBagComp());
-  return t;
-}
-
-inline
 ATermAppl constructBagComp()
 {
-  static ATermAppl t = initConstructBagComp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_BagComp())));
   return t;
 }
 
 // StateDelay
 inline
-ATermAppl initConstructStateDelay(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunStateDelay());
-  return t;
-}
-
-inline
 ATermAppl constructStateDelay()
 {
-  static ATermAppl t = initConstructStateDelay(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_StateDelay())));
   return t;
 }
 
 // IdAssignment
 inline
-ATermAppl initConstructIdAssignment(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunIdAssignment(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructIdAssignment()
 {
-  static ATermAppl t = initConstructIdAssignment(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdAssignment(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // RegAlt
 inline
-ATermAppl initConstructRegAlt(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunRegAlt(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructRegFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructRegAlt()
 {
-  static ATermAppl t = initConstructRegAlt(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegAlt(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructRegFrm()))));
   return t;
 }
 
 // StructCons
 inline
-ATermAppl initConstructStructCons(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunStructCons(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStringOrNil()));
-  return t;
-}
-
-inline
 ATermAppl constructStructCons()
 {
-  static ATermAppl t = initConstructStructCons(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StructCons(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStringOrNil()))));
   return t;
 }
 
 // IdInit
 inline
-ATermAppl initConstructIdInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunIdInit(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructIdInit()
 {
-  static ATermAppl t = initConstructIdInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdInit(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // Mu
 inline
-ATermAppl initConstructMu(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunMu());
-  return t;
-}
-
-inline
 ATermAppl constructMu()
 {
-  static ATermAppl t = initConstructMu(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Mu())));
   return t;
 }
 
 // PBEqnSpec
 inline
-ATermAppl initConstructPBEqnSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunPBEqnSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructPBEqnSpec()
 {
-  static ATermAppl t = initConstructPBEqnSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBEqnSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActNot
 inline
-ATermAppl initConstructActNot(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunActNot(), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActNot()
 {
-  static ATermAppl t = initConstructActNot(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActNot(), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // BooleanTrue
 inline
-ATermAppl initConstructBooleanTrue(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunBooleanTrue());
-  return t;
-}
-
-inline
 ATermAppl constructBooleanTrue()
 {
-  static ATermAppl t = initConstructBooleanTrue(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_BooleanTrue())));
   return t;
 }
 
 // Block
 inline
-ATermAppl initConstructBlock(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBlock(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructBlock()
 {
-  static ATermAppl t = initConstructBlock(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Block(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // Rename
 inline
-ATermAppl initConstructRename(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunRename(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructRename()
 {
-  static ATermAppl t = initConstructRename(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Rename(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // Exists
 inline
-ATermAppl initConstructExists(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunExists());
-  return t;
-}
-
-inline
 ATermAppl constructExists()
 {
-  static ATermAppl t = initConstructExists(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Exists())));
   return t;
 }
 
 // Sync
 inline
-ATermAppl initConstructSync(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSync(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSync()
 {
-  static ATermAppl t = initConstructSync(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sync(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // ActExists
 inline
-ATermAppl initConstructActExists(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActExists()
 {
-  static ATermAppl t = initConstructActExists(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // ProcSpec
 inline
-ATermAppl initConstructProcSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl5(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
-  return t;
-}
-
-inline
 ATermAppl constructProcSpec()
 {
-  static ATermAppl t = initConstructProcSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_ProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()))));
   return t;
 }
 
 // StateMu
 inline
-ATermAppl initConstructStateMu(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunStateMu(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateMu()
 {
-  static ATermAppl t = initConstructStateMu(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateMu(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // StateFalse
 inline
-ATermAppl initConstructStateFalse(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunStateFalse());
-  return t;
-}
-
-inline
 ATermAppl constructStateFalse()
 {
-  static ATermAppl t = initConstructStateFalse(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_StateFalse())));
   return t;
 }
 
 // PBESForall
 inline
-ATermAppl initConstructPBESForall(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPBESForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESForall()
 {
-  static ATermAppl t = initConstructPBESForall(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // StateTrue
 inline
-ATermAppl initConstructStateTrue(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunStateTrue());
-  return t;
-}
-
-inline
 ATermAppl constructStateTrue()
 {
-  static ATermAppl t = initConstructStateTrue(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_StateTrue())));
   return t;
 }
 
 // BInit
 inline
-ATermAppl initConstructBInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunBInit(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructBInit()
 {
-  static ATermAppl t = initConstructBInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BInit(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // PBESFalse
 inline
-ATermAppl initConstructPBESFalse(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunPBESFalse());
-  return t;
-}
-
-inline
 ATermAppl constructPBESFalse()
 {
-  static ATermAppl t = initConstructPBESFalse(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_PBESFalse())));
   return t;
 }
 
 // DataAppl
 inline
-ATermAppl initConstructDataAppl(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunDataAppl(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructDataAppl()
 {
-  static ATermAppl t = initConstructDataAppl(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataAppl(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // RegTrans
 inline
-ATermAppl initConstructRegTrans(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunRegTrans(), reinterpret_cast<ATerm>(constructRegFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructRegTrans()
 {
-  static ATermAppl t = initConstructRegTrans(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTrans(), reinterpret_cast<ATerm>(constructRegFrm()))));
   return t;
 }
 
 // StateDelayTimed
 inline
-ATermAppl initConstructStateDelayTimed(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunStateDelayTimed(), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructStateDelayTimed()
 {
-  static ATermAppl t = initConstructStateDelayTimed(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateDelayTimed(), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // Nu
 inline
-ATermAppl initConstructNu(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunNu());
-  return t;
-}
-
-inline
 ATermAppl constructNu()
 {
-  static ATermAppl t = initConstructNu(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Nu())));
   return t;
 }
 
 // SortStruct
 inline
-ATermAppl initConstructSortStruct(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunSortStruct(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructSortStruct()
 {
-  static ATermAppl t = initConstructSortStruct(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortStruct(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // AtTime
 inline
-ATermAppl initConstructAtTime(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunAtTime(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructAtTime()
 {
-  static ATermAppl t = initConstructAtTime(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_AtTime(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // ActOr
 inline
-ATermAppl initConstructActOr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActOr(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActOr()
 {
-  static ATermAppl t = initConstructActOr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActOr(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // Comm
 inline
-ATermAppl initConstructComm(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunComm(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructComm()
 {
-  static ATermAppl t = initConstructComm(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Comm(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // BooleanNot
 inline
-ATermAppl initConstructBooleanNot(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunBooleanNot(), reinterpret_cast<ATerm>(constructBooleanExpression()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanNot()
 {
-  static ATermAppl t = initConstructBooleanNot(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanNot(), reinterpret_cast<ATerm>(constructBooleanExpression()))));
   return t;
 }
 
 // Delta
 inline
-ATermAppl initConstructDelta(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunDelta());
-  return t;
-}
-
-inline
 ATermAppl constructDelta()
 {
-  static ATermAppl t = initConstructDelta(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Delta())));
   return t;
 }
 
 // StateAnd
 inline
-ATermAppl initConstructStateAnd(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateAnd(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateAnd()
 {
-  static ATermAppl t = initConstructStateAnd(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateAnd(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // LMerge
 inline
-ATermAppl initConstructLMerge(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunLMerge(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructLMerge()
 {
-  static ATermAppl t = initConstructLMerge(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LMerge(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // SetComp
 inline
-ATermAppl initConstructSetComp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSetComp());
-  return t;
-}
-
-inline
 ATermAppl constructSetComp()
 {
-  static ATermAppl t = initConstructSetComp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SetComp())));
   return t;
 }
 
 // ActForall
 inline
-ATermAppl initConstructActForall(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActForall()
 {
-  static ATermAppl t = initConstructActForall(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActForall(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // RenameExpr
 inline
-ATermAppl initConstructRenameExpr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunRenameExpr(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructString()));
-  return t;
-}
-
-inline
 ATermAppl constructRenameExpr()
 {
-  static ATermAppl t = initConstructRenameExpr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RenameExpr(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructString()))));
   return t;
 }
 
 // Merge
 inline
-ATermAppl initConstructMerge(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunMerge(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructMerge()
 {
-  static ATermAppl t = initConstructMerge(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Merge(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // IfThen
 inline
-ATermAppl initConstructIfThen(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunIfThen(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructIfThen()
 {
-  static ATermAppl t = initConstructIfThen(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IfThen(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // BooleanVariable
 inline
-ATermAppl initConstructBooleanVariable(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunBooleanVariable(), reinterpret_cast<ATerm>(constructString()));
-  return t;
-}
-
-inline
 ATermAppl constructBooleanVariable()
 {
-  static ATermAppl t = initConstructBooleanVariable(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanVariable(), reinterpret_cast<ATerm>(constructString()))));
   return t;
 }
 
 // Action
 inline
-ATermAppl initConstructAction(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunAction(), reinterpret_cast<ATerm>(constructActId()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructAction()
 {
-  static ATermAppl t = initConstructAction(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Action(), reinterpret_cast<ATerm>(constructActId()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // PBESAnd
 inline
-ATermAppl initConstructPBESAnd(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPBESAnd(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESAnd()
 {
-  static ATermAppl t = initConstructPBESAnd(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESAnd(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // Lambda
 inline
-ATermAppl initConstructLambda(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunLambda());
-  return t;
-}
-
-inline
 ATermAppl constructLambda()
 {
-  static ATermAppl t = initConstructLambda(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Lambda())));
   return t;
 }
 
 // StateMust
 inline
-ATermAppl initConstructStateMust(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateMust(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateMust()
 {
-  static ATermAppl t = initConstructStateMust(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMust(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // Seq
 inline
-ATermAppl initConstructSeq(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunSeq(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructSeq()
 {
-  static ATermAppl t = initConstructSeq(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Seq(), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // DataVarIdInit
 inline
-ATermAppl initConstructDataVarIdInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunDataVarIdInit(), reinterpret_cast<ATerm>(constructDataVarId()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructDataVarIdInit()
 {
-  static ATermAppl t = initConstructDataVarIdInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarIdInit(), reinterpret_cast<ATerm>(constructDataVarId()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // Process
 inline
-ATermAppl initConstructProcess(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunProcess(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructProcess()
 {
-  static ATermAppl t = initConstructProcess(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Process(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActAnd
 inline
-ATermAppl initConstructActAnd(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActAnd(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActAnd()
 {
-  static ATermAppl t = initConstructActAnd(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAnd(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // ActionRenameSpec
 inline
-ATermAppl initConstructActionRenameSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunActionRenameSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructActionRenameRules()));
-  return t;
-}
-
-inline
 ATermAppl constructActionRenameSpec()
 {
-  static ATermAppl t = initConstructActionRenameSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ActionRenameSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructActionRenameRules()))));
   return t;
 }
 
 // PBES
 inline
-ATermAppl initConstructPBES(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl4(gsAFunPBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructPBEqnSpec()), reinterpret_cast<ATerm>(constructPBInit()));
-  return t;
-}
-
-inline
 ATermAppl constructPBES()
 {
-  static ATermAppl t = initConstructPBES(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_PBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructPBEqnSpec()), reinterpret_cast<ATerm>(constructPBInit()))));
   return t;
 }
 
 // StateVar
 inline
-ATermAppl initConstructStateVar(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateVar(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructStateVar()
 {
-  static ATermAppl t = initConstructStateVar(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateVar(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActionRenameRule
 inline
-ATermAppl initConstructActionRenameRule(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructParamIdOrAction()), reinterpret_cast<ATerm>(constructActionRenameRuleRHS()));
-  return t;
-}
-
-inline
 ATermAppl constructActionRenameRule()
 {
-  static ATermAppl t = initConstructActionRenameRule(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_ActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructParamIdOrAction()), reinterpret_cast<ATerm>(constructActionRenameRuleRHS()))));
   return t;
 }
 
 // LinearProcess
 inline
-ATermAppl initConstructLinearProcess(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunLinearProcess(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructLinearProcess()
 {
-  static ATermAppl t = initConstructLinearProcess(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LinearProcess(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActAt
 inline
-ATermAppl initConstructActAt(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActAt(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructActAt()
 {
-  static ATermAppl t = initConstructActAt(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAt(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // DataEqn
 inline
-ATermAppl initConstructDataEqn(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl4(gsAFunDataEqn(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructDataEqn()
 {
-  static ATermAppl t = initConstructDataEqn(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataEqn(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()))));
   return t;
 }
 
 // PBESNot
 inline
-ATermAppl initConstructPBESNot(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunPBESNot(), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESNot()
 {
-  static ATermAppl t = initConstructPBESNot(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBESNot(), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // StateExists
 inline
-ATermAppl initConstructStateExists(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateExists()
 {
-  static ATermAppl t = initConstructStateExists(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateExists(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // StateMay
 inline
-ATermAppl initConstructStateMay(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStateMay(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructStateMay()
 {
-  static ATermAppl t = initConstructStateMay(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMay(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructStateFrm()))));
   return t;
 }
 
 // ParamId
 inline
-ATermAppl initConstructParamId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunParamId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructParamId()
 {
-  static ATermAppl t = initConstructParamId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ParamId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // PBESTrue
 inline
-ATermAppl initConstructPBESTrue(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunPBESTrue());
-  return t;
-}
-
-inline
 ATermAppl constructPBESTrue()
 {
-  static ATermAppl t = initConstructPBESTrue(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_PBESTrue())));
   return t;
 }
 
 // MultActName
 inline
-ATermAppl initConstructMultActName(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunMultActName(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructMultActName()
 {
-  static ATermAppl t = initConstructMultActName(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultActName(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // IfThenElse
 inline
-ATermAppl initConstructIfThenElse(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunIfThenElse(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructIfThenElse()
 {
-  static ATermAppl t = initConstructIfThenElse(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_IfThenElse(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // Nil
 inline
-ATermAppl initConstructNil(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunNil());
-  return t;
-}
-
-inline
 ATermAppl constructNil()
 {
-  static ATermAppl t = initConstructNil(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_Nil())));
   return t;
 }
 
 // ProcEqn
 inline
-ATermAppl initConstructProcEqn(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunProcEqn(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructProcEqn()
 {
-  static ATermAppl t = initConstructProcEqn(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ProcEqn(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // StructProj
 inline
-ATermAppl initConstructStructProj(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunStructProj(), reinterpret_cast<ATerm>(constructStringOrNil()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructStructProj()
 {
-  static ATermAppl t = initConstructStructProj(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StructProj(), reinterpret_cast<ATerm>(constructStringOrNil()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // PBEqn
 inline
-ATermAppl initConstructPBEqn(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl3(gsAFunPBEqn(), reinterpret_cast<ATerm>(constructFixPoint()), reinterpret_cast<ATerm>(constructPropVarDecl()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBEqn()
 {
-  static ATermAppl t = initConstructPBEqn(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_PBEqn(), reinterpret_cast<ATerm>(constructFixPoint()), reinterpret_cast<ATerm>(constructPropVarDecl()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // Whr
 inline
-ATermAppl initConstructWhr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunWhr(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructWhr()
 {
-  static ATermAppl t = initConstructWhr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Whr(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // OpId
 inline
-ATermAppl initConstructOpId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunOpId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructOpId()
 {
-  static ATermAppl t = initConstructOpId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_OpId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructSortExpr()))));
   return t;
 }
 
 // SortSet
 inline
-ATermAppl initConstructSortSet(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortSet());
-  return t;
-}
-
-inline
 ATermAppl constructSortSet()
 {
-  static ATermAppl t = initConstructSortSet(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortSet())));
   return t;
 }
 
 // ActFalse
 inline
-ATermAppl initConstructActFalse(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunActFalse());
-  return t;
-}
-
-inline
 ATermAppl constructActFalse()
 {
-  static ATermAppl t = initConstructActFalse(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_ActFalse())));
   return t;
 }
 
 // ActId
 inline
-ATermAppl initConstructActId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructActId()
 {
-  static ATermAppl t = initConstructActId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActId(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // SortUnknown
 inline
-ATermAppl initConstructSortUnknown(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortUnknown());
-  return t;
-}
-
-inline
 ATermAppl constructSortUnknown()
 {
-  static ATermAppl t = initConstructSortUnknown(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortUnknown())));
   return t;
 }
 
 // PBESOr
 inline
-ATermAppl initConstructPBESOr(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPBESOr(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructPBESOr()
 {
-  static ATermAppl t = initConstructPBESOr(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESOr(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()))));
   return t;
 }
 
 // RegSeq
 inline
-ATermAppl initConstructRegSeq(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunRegSeq(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructRegFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructRegSeq()
 {
-  static ATermAppl t = initConstructRegSeq(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegSeq(), reinterpret_cast<ATerm>(constructRegFrm()), reinterpret_cast<ATerm>(constructRegFrm()))));
   return t;
 }
 
 // SortFBag
 inline
-ATermAppl initConstructSortFBag(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortFBag());
-  return t;
-}
-
-inline
 ATermAppl constructSortFBag()
 {
-  static ATermAppl t = initConstructSortFBag(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortFBag())));
   return t;
 }
 
 // Allow
 inline
-ATermAppl initConstructAllow(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunAllow(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
-  return t;
-}
-
-inline
 ATermAppl constructAllow()
 {
-  static ATermAppl t = initConstructAllow(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Allow(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()))));
   return t;
 }
 
 // PropVarDecl
 inline
-ATermAppl initConstructPropVarDecl(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunPropVarDecl(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructPropVarDecl()
 {
-  static ATermAppl t = initConstructPropVarDecl(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarDecl(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActImp
 inline
-ATermAppl initConstructActImp(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl2(gsAFunActImp(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructActImp()
 {
-  static ATermAppl t = initConstructActImp(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActImp(), reinterpret_cast<ATerm>(constructActFrm()), reinterpret_cast<ATerm>(constructActFrm()))));
   return t;
 }
 
 // SortBag
 inline
-ATermAppl initConstructSortBag(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunSortBag());
-  return t;
-}
-
-inline
 ATermAppl constructSortBag()
 {
-  static ATermAppl t = initConstructSortBag(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_SortBag())));
   return t;
 }
 
 // PBInit
 inline
-ATermAppl initConstructPBInit(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunPBInit(), reinterpret_cast<ATerm>(constructPropVarInst()));
-  return t;
-}
-
-inline
 ATermAppl constructPBInit()
 {
-  static ATermAppl t = initConstructPBInit(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBInit(), reinterpret_cast<ATerm>(constructPropVarInst()))));
   return t;
 }
 
 // ActTrue
 inline
-ATermAppl initConstructActTrue(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl0(gsAFunActTrue());
-  return t;
-}
-
-inline
 ATermAppl constructActTrue()
 {
-  static ATermAppl t = initConstructActTrue(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl0(function_symbol_ActTrue())));
   return t;
 }
 
 // RegTransOrNil
 inline
-ATermAppl initConstructRegTransOrNil(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunRegTransOrNil(), reinterpret_cast<ATerm>(constructRegFrm()));
-  return t;
-}
-
-inline
 ATermAppl constructRegTransOrNil()
 {
-  static ATermAppl t = initConstructRegTransOrNil(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTransOrNil(), reinterpret_cast<ATerm>(constructRegFrm()))));
   return t;
 }
 
 // GlobVarSpec
 inline
-ATermAppl initConstructGlobVarSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunGlobVarSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructGlobVarSpec()
 {
-  static ATermAppl t = initConstructGlobVarSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_GlobVarSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // ActSpec
 inline
-ATermAppl initConstructActSpec(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunActSpec(), reinterpret_cast<ATerm>(constructList()));
-  return t;
-}
-
-inline
 ATermAppl constructActSpec()
 {
-  static ATermAppl t = initConstructActSpec(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActSpec(), reinterpret_cast<ATerm>(constructList()))));
   return t;
 }
 
 // Id
 inline
-ATermAppl initConstructId(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl1(gsAFunId(), reinterpret_cast<ATerm>(constructString()));
-  return t;
-}
-
-inline
 ATermAppl constructId()
 {
-  static ATermAppl t = initConstructId(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_Id(), reinterpret_cast<ATerm>(constructString()))));
   return t;
 }
 

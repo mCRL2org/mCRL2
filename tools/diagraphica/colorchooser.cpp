@@ -133,18 +133,16 @@ void ColorChooser::handleMouseLftDownEvent(
     if (dragIdx == NON_EXISTING)
     {
       double w, h;
-      double xLft, xRgt;
-      double yBot, yTop;
+      double xRgt;
+      double yTop;
       double xCur, yCur;
 
       // get size of sides
       canvas->getSize(w, h);
 
       // calc size of bounding box
-      xLft = -0.5*w;
       xRgt =  0.5*w;
       yTop =  0.5*h;
-      yBot = -0.5*h;
 
       // get cur mouse position
       canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
@@ -244,7 +242,7 @@ void ColorChooser::drawColorSpectrum()
   double w, h;
   double xLft, xRgt;
   double yBot, yTop;
-  double xItv, yItv;
+  double xItv;
   ColorRGB col;
 
   // get size of sides
@@ -257,7 +255,6 @@ void ColorChooser::drawColorSpectrum()
   yBot = -0.5*h;
 
   xItv = (xRgt-xLft)/255.0;
-  yItv = (yTop-yBot)/255.0;
   for (int i = 0; i < 255; ++i)
   {
     VisUtils::mapColorSpectral(
@@ -276,8 +273,8 @@ void ColorChooser::drawPath(const bool& inSelectMode)
 // ----------------------------------------------------
 {
   double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
+  double xRgt;
+  double yTop;
   double pix;
   double size;
 
@@ -287,11 +284,8 @@ void ColorChooser::drawPath(const bool& inSelectMode)
   pix = canvas->getPixelSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
   xRgt =  0.5*w;
   yTop =  0.5*h;
-  yBot = -0.5*h;
-
   // size of positions
   size = positionsX.size();
 
@@ -325,8 +319,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 // ------------------------------------------------------
 {
   double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
+  double xRgt;
+  double yTop;
   double pix;
   size_t    size;
   double hdlDOF;
@@ -337,10 +331,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   pix = canvas->getPixelSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
   xRgt =  0.5*w;
   yTop =  0.5*h;
-  yBot = -0.5*h;
 
   // size of handle
   hdlDOF = hdlSize*pix;
@@ -548,18 +540,16 @@ void ColorChooser::handleDrag()
   if (dragIdx != NON_EXISTING && static_cast <size_t>(dragIdx) < positionsX.size())
   {
     double w, h;
-    double xLft, xRgt;
-    double yBot, yTop;
+    double xRgt;
+    double yTop;
     double xCur, yCur;
 
     // get size of sides
     canvas->getSize(w, h);
 
     // calc size of bounding box
-    xLft = -0.5*w;
     xRgt =  0.5*w;
     yTop =  0.5*h;
-    yBot = -0.5*h;
 
     // get cur mouse position
     canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);

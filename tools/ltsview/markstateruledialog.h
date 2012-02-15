@@ -32,11 +32,9 @@ class MarkStateRuleDialog : public wxDialog
     ~MarkStateRuleDialog();
     int getParamIndex();
     bool getNegated();
-    // atermpp::set<ATerm> getValues();
     std::set<std::string> getValues();
     RGB_Color getColor();
     wxString getMarkRuleString();
-    // void setData(int p,RGB_Color col,bool neg, atermpp::set<ATerm> vals);
     void setData(int p,RGB_Color col,bool neg, const std::set<std::string> &vals);
     void onParameterChoice(wxCommandEvent& event);
   private:

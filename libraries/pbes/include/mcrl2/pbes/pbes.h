@@ -48,19 +48,20 @@ namespace mcrl2
 namespace pbes_system
 {
 
-using mcrl2::core::pp;
-
-template <typename Container> class pbes;
+template <typename Container = atermpp::vector<pbes_equation> > class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
-template <typename Container>
-std::set<data::variable> find_free_variables(Container const& container);
+// template function overloads
+std::string pp(const pbes<>& x);
+void normalize_sorts(pbes<>& x, const data::data_specification& dataspec);
+void translate_user_notation(pbes_system::pbes<>& x);
+std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x);
+std::set<data::variable> find_variables(const pbes_system::pbes<>& x);
+std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x);
+std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x);
 
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
-
-template <typename Container, typename OutputIterator>
-void find_sort_expressions(Container const& container, OutputIterator o);
 
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
@@ -83,7 +84,7 @@ std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator l
 /// \brief parameterized boolean equation system
 // <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
-template <typename Container = atermpp::vector<pbes_equation> >
+template <typename Container>
 class pbes
 {
     friend struct atermpp::aterm_traits<pbes<Container> >;
@@ -502,7 +503,7 @@ class pbes
            )
         {
           std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
-                    << mcrl2::core::pp(i->variable())
+                    << data::pp(i->variable())
                     << " are not declared in the data specification "
                     << data::pp(data().sorts())
                     << std::endl;
@@ -575,7 +576,7 @@ class pbes
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {
-          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << mcrl2::core::pp(*i) << " conflicts with its declaration!" << std::endl;
+          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << data::pp(*i) << " conflicts with its declaration!" << std::endl;
           return false;
         }
       }
@@ -583,7 +584,7 @@ class pbes
       // check 9)
       if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
       {
-        std::cerr << "pbes::is_well_typed() failed: the initial state " << mcrl2::core::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
+        std::cerr << "pbes::is_well_typed() failed: the initial state " << pbes_system::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
         return false;
       }
 
@@ -629,8 +630,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
-  std::set<data::sort_expression> s;
-  pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
+  std::set<data::sort_expression> s = pbes_system::find_sort_expressions(p);
   p.data().add_context_sorts(s);
 }
 
@@ -674,9 +674,5 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 };
 }
 /// \endcond
-
-#ifndef MCRL2_PBES_FIND_H
-#include "mcrl2/pbes/find.h"
-#endif
 
 #endif // MCRL2_PBES_PBES_H

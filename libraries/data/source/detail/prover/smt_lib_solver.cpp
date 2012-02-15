@@ -9,6 +9,8 @@
 #include <iostream>
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 
+using namespace mcrl2::log;
+
 namespace mcrl2
 {
 namespace data
@@ -25,9 +27,20 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   int pipe_stderr[2];
 
   // Create pipes (two pairs r/w)
-  ::pipe(&pipe_stdin[0]);
-  ::pipe(&pipe_stdout[0]);
-  ::pipe(&pipe_stderr[0]);
+  if (::pipe(&pipe_stdin[0]) < 0)
+  {
+    throw mcrl2::runtime_error("failed to create pipe");
+  }
+
+  if (::pipe(&pipe_stdout[0]) < 0)
+  {
+    throw mcrl2::runtime_error("failed to create pipe");
+  }
+
+  if (::pipe(&pipe_stderr[0]) < 0)
+  {
+    throw mcrl2::runtime_error("failed to create pipe");
+  }
 
   // fork process
   pid_t pid = ::fork();
@@ -61,7 +74,10 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   }
   else
   {
-    ::write(pipe_stdin[1], benchmark.c_str(), benchmark.size());
+    if(::write(pipe_stdin[1], benchmark.c_str(), benchmark.size()) < 0)
+    {
+      throw mcrl2::runtime_error("failed to write benchmark");
+    }
 
     ::close(pipe_stdin[0]);
     ::close(pipe_stdin[1]);
@@ -104,8 +120,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
         message.append(output, 0, i);
       }
 
-      mCRL2log(error) << "Fatal: SMT prover " << T::name() << " returned :" << std::endl << std::endl
-                      << message << std::endl;
+      throw mcrl2::runtime_error(std::string("The SMT prover ") + T::name() + " does not work properly. " + message );
     }
 
     ::close(pipe_stdout[0]);
@@ -125,8 +140,8 @@ bool binary_smt_solver< T >::usable()
 {
   if (!binary_smt_solver::execute("(benchmark nameless :formula true)"))
   {
-    mCRL2log(error) << "The SMT solver " << T::name() << " is not available." << std::endl
-                    << "Consult the manual of the tool you are using for instructions on how to obtain " << T::name() << "." << std::endl;
+    throw mcrl2::runtime_error(std::string("The SMT solver ") + T::name() + " is not available. \n" + 
+                     "Consult the manual of the tool you are using for instructions on how to obtain " + T::name() + ".");
 
     return false;
   }

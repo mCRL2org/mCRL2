@@ -23,6 +23,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -99,6 +100,9 @@ class propositional_variable: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of propositional variable declarations
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
+/// \brief Vector of propositional variable declarations
+typedef atermpp::vector<propositional_variable> propositional_variable_vector;
+
 /// \brief Returns true if the term t is a propositional variable declaration
 /// \param t A term
 /// \return True if the term t is a propositional variable declaration
@@ -107,6 +111,11 @@ bool is_propositional_variable(atermpp::aterm_appl t)
 {
   return core::detail::gsIsPropVarDecl(t);
 }
+
+// template function overloads
+std::string pp(const propositional_variable& x);
+std::string pp(const propositional_variable_list& x);
+std::string pp(const propositional_variable_vector& x);
 
 } // namespace pbes_system
 

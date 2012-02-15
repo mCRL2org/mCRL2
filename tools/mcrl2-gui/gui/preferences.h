@@ -31,7 +31,13 @@ class CustomDialog : public wxDialog
 
   public:
     CustomDialog(const wxString& title, wxString ext, wxString cmd, MimeManager* mm)
-      : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(400, 140))
+      : wxDialog(NULL, -1, title, wxDefaultPosition, 
+#ifdef __WIN32__
+	  wxSize(490, 160)
+#else
+	  wxSize(490, 140)
+#endif
+	  )
     {
 
       m_mm = mm;
@@ -41,11 +47,11 @@ class CustomDialog : public wxDialog
       wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
       wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 
-      new wxStaticBox(panel, -1, wxT("Mapping"),
-                      wxPoint(5, 5), wxSize(390, 85));
+      new wxStaticBox(panel, wxID_ANY , wxT("Mapping"),
+                      wxPoint(5, 5), wxSize(450, 85));
       new wxStaticText(panel, -1,
                        wxT("Extension"), wxPoint(15, 25));
-      tc = new wxTextCtrl(panel, -1, ext,
+      tc = new wxTextCtrl(panel, wxID_ANY , ext,
                           wxPoint(95, 25));
 
       if (title.compare(wxT("Edit")) == 0)
@@ -54,28 +60,31 @@ class CustomDialog : public wxDialog
       }
 
 
-      new wxStaticText(panel, -1,
+      new wxStaticText(panel,wxID_ANY,
                        wxT("Command"), wxPoint(15, 55));
 
       fp = new wxFilePickerCtrl(panel, wxID_ANY,  cmd,
-                                wxT("Select a program"), wxT("*.*"), wxPoint(95 , 55), wxDefaultSize,
+                                wxT("Select a program"), wxT("*.*"),wxPoint(90, 55), wxDefaultSize,
                                 wxFLP_USE_TEXTCTRL | wxFLP_OPEN);
 
-      fp->SetSize(wxSize(250,10));
+      fp->SetMinSize(wxSize(300,30));
+      fp->SetTextCtrlProportion(6);
+      fp->SetSize(wxSize(350,30));
 
       wxButton* okButton = new wxButton(this, wxID_OK, wxT("Ok"),
-                                        wxDefaultPosition, wxSize(95, 30));
+                                        wxDefaultPosition, wxSize(115, 30));
       wxButton* closeButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"),
-                                           wxDefaultPosition, wxSize(95, 30));
-
+                                           wxDefaultPosition, wxSize(115, 30));
       hbox->Add(okButton, 1);
       hbox->Add(closeButton, 1, wxLEFT, 5);
 
       vbox->Add(panel, 1);
-      vbox->Add(hbox, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
+#ifdef __WIN32__
+	  vbox->AddSpacer(10);
+#endif
+      vbox->Add(hbox, 0, wxALIGN_CENTER,5);
 
       SetSizer(vbox);
-
       Centre();
       ShowModal();
 
@@ -239,12 +248,12 @@ class Preferences: public wxDialog
     void OnSaveClick(wxCommandEvent& /*evt*/)
     {
       mm.saveExtensionMapping();
-      Destroy();
+      EndModal(wxID_SAVE);
     }
 
     void OnCancelClick(wxCommandEvent& /*evt*/)
     {
-      Destroy();
+      EndModal(wxID_CANCEL);
     }
 
     /*void OnListBoxClick(wxListEvent& evt){

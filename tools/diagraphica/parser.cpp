@@ -155,15 +155,15 @@ void Parser::parseFile(const string& path, Graph* graph)
     parseStates(line, graph);
   }
 
-  for (transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
+  const std::vector<transition> &trans=l.get_transitions();
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r) 
   {
-    const transition ti=r.front();
     line.clear();
-    line.append(to_string(ti.from()+1));
+    line.append(to_string(r->from()+1));
     line.append(" ");
-    line.append(to_string(ti.to()+1));
+    line.append(to_string(r->to()+1));
     line.append(" \"");
-    line.append(detail::pp(l.action_label(ti.label())));
+    line.append(detail::pp(l.action_label(r->label())));
     line.append("\"");
     parseTransitions(
       line,
@@ -171,65 +171,6 @@ void Parser::parseFile(const string& path, Graph* graph)
   }
 
   mediator->updateProgress(1);
-
-
-  /////////////////////////////////////////////////////
-
-  /*    file.open( path.c_str() );
-      if ( !file.is_open() )
-      {
-          string* msg = new string(
-              "Error opening file for parsing." );
-          throw msg;
-      }
-      try
-      {
-          while ( getline( file, line ) )
-          {
-              ++lineCnt;
-              // add size of line + 1 for EOL char
-              byteCnt = byteCnt + line.size() + 1;
-
-              if ( lineCnt % 1000 == 0 )
-                  mediator->updateProgress( byteCnt );
-
-              // linux, mac and windows EOL
-              if ( line == "---"   ||
-                   line == "---\n" ||
-                   line == "---\r" ||
-                   line == "---\0" )
-                  ++sect;
-              else
-              {
-                  line += '\n';
-                  switch ( sect )
-                  {
-                      case 0:
-                          parseStateVarDescr(
-                              line,
-                              graph );
-                          break;
-
-                      case 1:
-                          parseStates(
-                              line,
-                              graph );
-                          break;
-
-                      case 2:
-                          parseTransitions(
-                              line,
-                              graph );
-                          break;
-
-                      default:
-                          break;
-                  }
-              }
-          }
-
-          file.close();
-     } */
 }
 
 
@@ -1244,7 +1185,6 @@ void Parser::parseAttr(
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
-  wxXmlNode* ssbp = NULL;
 
   Attribute* attr;
 
@@ -1265,7 +1205,6 @@ void Parser::parseAttr(
   {
     prop = NULL;
     subp = NULL;
-    ssbp = NULL;
     throw mcrl2::runtime_error("Missing attribute.");
   }
 
@@ -1279,7 +1218,6 @@ void Parser::parseAttr(
     {
       prop = NULL;
       subp = NULL;
-      ssbp = NULL;
       throw mcrl2::runtime_error("Types do not match.");
     }
   }
@@ -1287,7 +1225,6 @@ void Parser::parseAttr(
   {
     prop = NULL;
     subp = NULL;
-    ssbp = NULL;
     throw mcrl2::runtime_error("Missing type.");
   }
 
@@ -1471,7 +1408,6 @@ void Parser::parseShape(
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
-  wxXmlNode* ssbp = NULL;
 
   double xCtr, yCtr;
   double xDFC, yDFC;
@@ -1941,7 +1877,6 @@ void Parser::parseShape(
 
   prop = NULL;
   subp = NULL;
-  ssbp = NULL;
 }
 
 

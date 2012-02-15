@@ -62,15 +62,19 @@ enum Answer
 
 class Prover:protected mcrl2::data::rewriter
 {
+  public:
+    typedef mcrl2::data::rewriter::substitution_type substitution_type;
+    typedef mcrl2::data::rewriter::internal_substitution_type internal_substitution_type;
+
   protected:
     /// \brief An expression of sort Bool in the internal format of mCRL2.
-    ATermAppl f_formula;
+    data_expression f_formula;
 
     /// \brief A class that can be used to manipulate expressions in the internal format of the rewriter.
-    ATerm_Manipulator* f_manipulator;
+    InternalFormatManipulator f_manipulator;
 
     /// \brief A class that provides information about expressions in the internal format of the rewriter.
-    ATerm_Info* f_info;
+    InternalFormatInfo f_info;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
     bool f_processed;
@@ -86,12 +90,16 @@ class Prover:protected mcrl2::data::rewriter
 
     /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
     time_t f_deadline;
+
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(const data_specification& a_data_spec,
+           const used_data_equation_selector& equations_selector,
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
            int a_time_limit = 0): 
-                       mcrl2::data::rewriter(a_data_spec, a_rewrite_strategy)
+                       mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
+                       f_manipulator(m_rewriter, f_info),
+                       f_info(m_rewriter)
     {
       f_time_limit = a_time_limit;
       f_processed = false;
@@ -99,30 +107,20 @@ class Prover:protected mcrl2::data::rewriter
       switch (a_rewrite_strategy)
       {
         case(mcrl2::data::rewriter::jitty):
-        {
-          f_info = new AI_Jitty(m_rewriter);
-          f_manipulator = new AM_Jitty(m_rewriter, f_info);
-          break;
-        }
 #ifdef MCRL2_JITTYC_AVAILABLE
         case(mcrl2::data::rewriter::jitty_compiling):
-        {
-          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
 #endif
-        case(mcrl2::data::rewriter::jitty_prover):
         {
-          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
+          /* These provers are ok */
           break;
         }
+        case(mcrl2::data::rewriter::jitty_prover):
 #ifdef MCRL2_JITTYC_AVAILABLE
         case(mcrl2::data::rewriter::jitty_compiling_prover):
-        {
-          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
 #endif
+        {
+          throw mcrl2::runtime_error("The proving rewriters are not supported by the prover (only jitty and jittyc are supported).");
+        }
         default:
         {
           throw mcrl2::runtime_error("Unknown type of rewriter.");
@@ -134,20 +132,15 @@ class Prover:protected mcrl2::data::rewriter
     /// \brief Destroys Prover::f_manipulator, Prover::f_info and Prover::f_rewriter.
     virtual ~Prover()
     {
-      delete f_manipulator;
-      f_manipulator = 0;
-      delete f_info;
-      f_info = 0;
-      mCRL2log(debug) << "Rewriter, ATerm_Info and ATerm_Manipulator have been freed." << std::endl;
     }
 
     /// \brief Sets Prover::f_formula to a_formula.
     /// precondition: the argument passed as parameter a_formula is an expression of sort Bool in internal mCRL2 format
-    void set_formula(ATermAppl a_formula)
+    void set_formula(const data_expression a_formula)
     {
       f_formula = a_formula;
       f_processed = false;
-      mCRL2log(debug) << "The formula has been set." << std::endl;
+      mCRL2log(log::debug) << "The formula has been set." << std::endl;
     }
 
     /// \brief Sets Prover::f_time_limit to the value a_time_limit.
@@ -170,11 +163,11 @@ class Prover:protected mcrl2::data::rewriter
 
     /// \brief Returns a witness corresponding to a situation for which the formula Prover::f_formula holds.
     /// precondition: the method Prover::set_formula has been called
-    virtual ATermAppl get_witness() = 0;
+    virtual data_expression get_witness() = 0;
 
     /// \brief Returns a counterexample corresponding to a situation for which the formula Prover::f_formula does not hold.
     /// precondition: the method Prover::set_formula has been called
-    virtual ATermAppl get_counter_example() = 0;
+    virtual data_expression get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
     boost::shared_ptr<detail::Rewriter> get_rewriter()

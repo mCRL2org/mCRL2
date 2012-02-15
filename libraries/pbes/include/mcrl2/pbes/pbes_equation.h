@@ -14,7 +14,9 @@
 
 #include <string>
 #include <sstream>
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -224,7 +226,7 @@ class pbes_equation
           )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << mcrl2::core::pp(pbes_equation_to_aterm(*this)) << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(formula()) << std::endl;
         return false;
       }
 
@@ -233,7 +235,7 @@ class pbes_equation
       nvisitor.visit(formula());
       if (nvisitor.result)
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << mcrl2::core::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << data::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
         return false;
       }
 
@@ -262,6 +264,15 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
 }
+
+/// \brief vector of process equations
+typedef atermpp::vector<pbes_equation> pbes_equation_vector;
+
+// template function overloads
+std::string pp(const pbes_equation& x);
+std::string pp(const pbes_equation_vector& x);
+void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
+std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);
 
 } // namespace pbes_system
 

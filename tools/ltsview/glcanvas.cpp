@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <wx/image.h>
+#include "mcrl2/utilities/logger.h"
 #include "glcanvas.h"
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
@@ -329,7 +330,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
     GLenum gl_error_code = glGetError();
     if (gl_error_code != GL_NO_ERROR)
     {
-      std::cerr << "OpenGL error: " << gluErrorString(gl_error_code) << std::endl;
+      mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(gl_error_code) << std::endl;
     }
 
     if (!collectingData)

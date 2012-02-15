@@ -13,10 +13,9 @@
 #define TOOLNAME "lpsinfo"
 #define AUTHOR "Wieger Wesselink and Frank Stappers"
 
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -43,11 +42,9 @@ class lpsinfo_tool: public input_tool
 
     bool run()
     {
-      specification spec;
-      spec.load(input_filename());
-      lps::detail::specification_property_map info(spec);
-      std::cout << input_file_message() << "\n\n";
-      std::cout << info.info();
+      lpsinfo(input_filename(),
+              input_file_message()
+             );
       return true;
     }
 

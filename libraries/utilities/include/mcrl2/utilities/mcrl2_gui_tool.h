@@ -71,10 +71,8 @@ class mcrl2_gui_tool: public Tool
 
     void print_mcrl2_gui_options() const
     {
-
       std::cout << "<tool>" << std::endl;
       std::cout << "  <name>" << m_toolname << "</name>" << std::endl;
-
       std::cout << "  <arguments>" << std::endl;
 
       for (std::map<std::string, widget_option>::const_iterator i =
@@ -203,11 +201,6 @@ class mcrl2_gui_tool: public Tool
 #if !defined(_WIN32)
       values.push_back("jittyc");
 #endif
-//       values.push_back("inner");
-//      values.push_back("innerp");
-/* #if !defined(_WIN32)
-      values.push_back("innerc");
-#endif */
       m_gui_options["rewriter"] = create_radiobox_widget(values);
     }
 

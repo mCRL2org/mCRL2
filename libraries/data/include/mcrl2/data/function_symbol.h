@@ -71,6 +71,12 @@ typedef atermpp::term_list< function_symbol > function_symbol_list;
 /// \brief vector of function symbols
 typedef atermpp::vector< function_symbol >    function_symbol_vector;
 
+// template function overloads
+std::string pp(const function_symbol& x);
+std::string pp(const function_symbol_list& x);
+std::string pp(const function_symbol_vector& x);
+std::set<data::variable> find_variables(const data::function_symbol& x);
+
 } // namespace data
 
 } // namespace mcrl2

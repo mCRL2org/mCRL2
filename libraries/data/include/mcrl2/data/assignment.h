@@ -114,7 +114,7 @@ class assignment: public assignment_expression
     /// \param[in] x A term
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
     template < typename Expression >
-    data_expression operator()(const Expression& x) const
+    data_expression operator()(const Expression& /*x*/) const
     {
       throw std::runtime_error("data::assignment::operator(const Expression&) is a deprecated interface!");
       return data_expression();
@@ -157,11 +157,16 @@ class identifier_assignment: public assignment_expression
     }
 
     /// \brief Constructor.
-    identifier_assignment(const identifier& lhs, const data_expression& rhs)
+    identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
       : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
     {}
 
-    identifier lhs() const
+    /// \brief Constructor.
+    identifier_assignment(const std::string& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeIdInit(core::identifier_string(lhs), rhs))
+    {}
+
+    core::identifier_string lhs() const
     {
       return atermpp::arg1(*this);
     }
@@ -183,13 +188,20 @@ class identifier_assignment: public assignment_expression
     /// \param[in] x A term
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
     template < typename Expression >
-    data_expression operator()(const Expression& x) const
+    data_expression operator()(const Expression& /*x*/) const
     {
       throw std::runtime_error("data::identifier_assignment::operator(const Expression&) is a deprecated interface!");
       return data_expression();
     }
 //--- end user section identifier_assignment ---//
 };
+
+/// \brief list of identifier_assignments
+typedef atermpp::term_list<identifier_assignment> identifier_assignment_list;
+
+/// \brief vector of identifier_assignments
+typedef atermpp::vector<identifier_assignment>    identifier_assignment_vector;
+
 
 /// \brief Test for a identifier_assignment expression
 /// \param t A term
@@ -315,6 +327,11 @@ inline assignment_list make_assignment_vector(Container const& container, typena
 //      return core::detail::gsIsIdInit(t);
 //    }
 ////--- end generated is-functions ---//
+
+// template function overloads
+std::string pp(const assignment& x);
+std::string pp(const assignment_list& x);
+std::string pp(const assignment_vector& x);
 
 } // namespace data
 

@@ -73,20 +73,20 @@ public:
         // flush script output to the log.
         if (!file_exists(line))
         {
-          mCRL2log(error) << "Compile script produced unexpected output:\n";
-          mcrl2_logger::indent();
-          mCRL2log(error) << line << std::endl;
+          mCRL2log(mcrl2::log::error) << "Compile script produced unexpected output:\n";
+          mcrl2::log::mcrl2_logger::indent();
+          mCRL2log(mcrl2::log::error) << line << std::endl;
           while (fgets(buf, 1024, stream) != NULL) 
           {
-            mCRL2log(error) << std::string(buf);
+            mCRL2log(mcrl2::log::error) << std::string(buf);
           }
-          mcrl2_logger::unindent();
+          mcrl2::log::mcrl2_logger::unindent();
           pclose(stream);
           throw std::runtime_error("Compile script failed.");
         }
         else
         {
-          mCRL2log(debug, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
+          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
         }
         m_tempfiles.push_back(line);
       }
@@ -119,7 +119,7 @@ public:
         }
         else
         {
-           mCRL2log(debug, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
+           mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
         }
       }
     }
@@ -132,7 +132,7 @@ public:
       }
       catch (std::runtime_error &error)
       {
-        mCRL2log(error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+        mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
       }
     }
 

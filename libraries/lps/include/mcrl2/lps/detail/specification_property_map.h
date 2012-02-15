@@ -78,17 +78,17 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
 
     std::string print(const action& a) const
     {
-      return core::pp(a);
+      return lps::pp(a);
     }
 
-    std::string print(const deadlock&) const
+    std::string print(const deadlock& x) const
     {
-      return "<pp(deadlock) Not yet implemented>";
+      return lps::pp(x);
     }
 
-    std::string print(const multi_action&) const
+    std::string print(const multi_action& x) const
     {
-      return "<pp(multi_action) Not yet implemented>";
+      return lps::pp(x);
     }
 
     std::string print(const std::set<std::multiset<action_label> >& v) const

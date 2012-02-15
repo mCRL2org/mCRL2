@@ -264,6 +264,7 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
   statusbar->Update();
   GetParent()->Enable();
   GetParent()->SetCursor(wxNullCursor);
+  this->EndModal(wxOK);
 }
 
 void SaveVecDialog::update_file_name()

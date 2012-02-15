@@ -4346,7 +4346,6 @@ void Frame::onPopupMenu(wxCommandEvent& e)
         }
         else
         {
-          bool hasDomain = true;
           string name = "";
           if (!x->IsChecked())
           {
@@ -4359,11 +4358,7 @@ void Frame::onPopupMenu(wxCommandEvent& e)
             Graph* g = (Graph*)(mediator->getGraph());  // Obtain graph from the mediator for retrieving attribute properties
             Attribute* attribute = g->getAttribute(idxAttr); // Get selected attribute
             name = attribute->getName(); // Get the name of the selected attribute
-            if (attribute->getSizeCurValues() == 0)
-            {
-              hasDomain = false;
-            }
-            else
+            if (attribute->getSizeCurValues() != 0)
             {
               string value = attribute->getCurValue(0)->getValue(); // Get current value of the selected attribute
               name.append(": ");

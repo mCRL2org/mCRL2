@@ -27,11 +27,14 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_lts
   mcrl2_utilities
+  mcrl2_syntax
+  dparser
 )
 
 # install target:

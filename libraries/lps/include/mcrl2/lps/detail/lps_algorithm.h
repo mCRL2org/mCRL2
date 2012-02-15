@@ -18,11 +18,8 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/utilities/algorithm.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/remove.h"
@@ -38,25 +35,35 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
-class lps_algorithm: public utilities::algorithm
+class lps_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
     specification& m_spec;
 
-    template <typename OutIter>
-    void sumelm_find_variables(const action_summand& s, OutIter result) const
+    void sumelm_find_variables(const action_summand& s, std::set<data::variable>& result) const
     {
-      data::find_free_variables(s.condition(), result);
-      lps::find_free_variables(s.multi_action(), result);
-      data::find_free_variables(s.assignments(), result);
+      std::set<data::variable> tmp;
+
+      tmp = data::find_free_variables(s.condition());
+      result.insert(tmp.begin(), tmp.end());
+
+      tmp = lps::find_free_variables(s.multi_action());
+      result.insert(tmp.begin(), tmp.end());
+
+      tmp = data::find_free_variables(s.assignments());
+      result.insert(tmp.begin(), tmp.end());
     }
 
-    template <typename OutIter>
-    void sumelm_find_variables(const deadlock_summand& s, OutIter result) const
+    void sumelm_find_variables(const deadlock_summand& s, std::set<data::variable>& result) const
     {
-      data::find_free_variables(s.condition(), result);
-      lps::find_free_variables(s.deadlock(), result);
+      std::set<data::variable> tmp;
+
+      tmp = data::find_free_variables(s.condition());
+      result.insert(tmp.begin(), tmp.end());
+
+      tmp = lps::find_free_variables(s.deadlock());
+      result.insert(tmp.begin(), tmp.end());
     }
 
     template <typename SummandType>
@@ -65,7 +72,7 @@ class lps_algorithm: public utilities::algorithm
       data::variable_vector new_summation_variables;
 
       std::set<data::variable> occurring_vars;
-      sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
+      sumelm_find_variables(summand_, occurring_vars);
 
       std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
       std::set_intersection(summation_variables.begin(), summation_variables.end(),
@@ -84,7 +91,7 @@ class lps_algorithm: public utilities::algorithm
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return mCRL2logEnabled(verbose);
+      return mCRL2logEnabled(log::verbose);
     }
 
     /// \brief Applies the next state substitution to the variable v.

@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
   lpsactionrename.cpp
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
@@ -25,10 +26,13 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_utilities
+  mcrl2_syntax
+  dparser
 )
 
 # install target:

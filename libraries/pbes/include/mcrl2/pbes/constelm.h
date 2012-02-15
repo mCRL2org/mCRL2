@@ -18,13 +18,12 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -403,8 +402,8 @@ void print_constraint_map(const MapContainer& constraints)
 {
   for (typename MapContainer::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
   {
-    std::string lhs = mcrl2::core::pp(i->first);
-    std::string rhs = mcrl2::core::pp(i->second);
+    std::string lhs = data::pp(i->first);
+    std::string rhs = data::pp(i->second);
     std::cout << "{" << lhs << " := " << rhs << "} ";
   }
 }
@@ -414,7 +413,7 @@ void print_constraint_map(const MapContainer& constraints)
 
 /// \brief Algorithm class for the constelm algorithm
 template <typename Term, typename DataRewriter, typename PbesRewriter>
-class pbes_constelm_algorithm: public utilities::algorithm
+class pbes_constelm_algorithm
 {
   public:
     /// \brief The term type
@@ -499,7 +498,7 @@ class pbes_constelm_algorithm: public utilities::algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << mcrl2::core::pp(m_target) << "  condition = " << mcrl2::core::pp(condition());
+          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << pbes_system::pp(m_target) << "  condition = " << mcrl2::data::pp(condition());
           return out.str();
         }
 
@@ -604,11 +603,11 @@ class pbes_constelm_algorithm: public utilities::algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << mcrl2::core::pp(m_variable) << "  assertions = ";
+          out << mcrl2::data::pp(m_variable) << "  assertions = ";
           for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
           {
-            std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = mcrl2::core::pp(i->second);
+            std::string lhs = mcrl2::data::pp(i->first);
+            std::string rhs = mcrl2::data::pp(i->second);
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -687,76 +686,68 @@ class pbes_constelm_algorithm: public utilities::algorithm
     /// \brief The redundant parameters.
     std::map<string_type, std::vector<size_t> > m_redundant_parameters;
 
-    /// \brief The redundant propositional variables.
-    std::set<propositional_variable_decl_type> m_redundant_equations;
-
     /// \brief Logs the vertices of the dependency graph.
-    void LOG_VERTICES_DEBUG(const std::string& msg) const
+    std::string print_vertices() const
     {
-      if (mCRL2logEnabled(debug))
+      std::ostringstream out;
+      for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        mCRL2log(debug) << msg;
-        for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
-        {
-          for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-          {
-            mCRL2log(debug) << j->to_string() << std::endl;
-          }
-        }
+        out << i->second.to_string() << std::endl;
       }
+      return out.str();
     }
 
     /// \brief Logs the edges of the dependency graph.
-    void LOG_EDGES_DEBUG(const std::string& msg)
+    std::string print_edges()
     {
-      if (mCRL2logEnabled(debug))
+      std::ostringstream out;
+      for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        mCRL2log(debug) << msg;
-        for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+        for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
         {
-          for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-          {
-            mCRL2log(debug) << j->to_string() << std::endl;
-          }
+          out << j->to_string() << std::endl;
         }
       }
+      return out.str();
     }
 
-    void LOG_TODO_LIST_DEBUG(const std::deque<propositional_variable_decl_type>& todo)
+    std::string print_todo_list(const std::deque<propositional_variable_decl_type>& todo)
     {
-      if (mCRL2logEnabled(debug))
+      std::ostringstream out;
+      out << "\n<todo list> [";
+      for (typename std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
       {
-        mCRL2log(debug) << "\n<todo list> [";
-        for (typename std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+        if (i != todo.begin())
         {
-          if (i != todo.begin())
-          {
-            mCRL2log(debug) << ", ";
-          }
-          mCRL2log(debug) << core::pp(i->name());
+          out << ", ";
         }
-        mCRL2log(debug) << "]" << std::endl;
+        out << core::pp(i->name());
       }
+      out << "]" << std::endl;
+      return out.str();
     }
 
-    void LOG_EDGE_UPDATE_DEBUG(const edge& e, const vertex& u, const vertex& v)
+    std::string print_edge_update(const edge& e, const vertex& u, const vertex& v)
     {
-      if (mCRL2logEnabled(debug))
-      {
-        mCRL2log(debug) << "\n<updating edge>" << e.to_string() << std::endl;
-        mCRL2log(debug) << "  <source vertex       >" << u.to_string() << std::endl;
-        mCRL2log(debug) << "  <target vertex before>" << v.to_string() << std::endl;
-      }
+      std::ostringstream out;
+      out << "\n<updating edge>" << e.to_string() << std::endl;
+      out << "  <source vertex       >" << u.to_string() << std::endl;
+      out << "  <target vertex before>" << v.to_string() << std::endl;
+      return out.str();
     }
 
-    void LOG_CONDITION_DEBUG(const edge& e, const vertex& u, const term_type& value)
+    std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
-      mCRL2log(debug) << "\nEvaluated condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+      std::ostringstream out;
+      out << "\nEvaluated condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << data::pp(value) << std::endl;
+      return out.str();
     }
 
-    void LOG_EVALUATION_FAILURE_DEBUG(const edge& e, const vertex& u)
+    std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
-      mCRL2log(debug) << "\nCould not evaluate condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      std::ostringstream out;
+      out << "\nCould not evaluate condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      return out.str();
     }
 
   public:
@@ -764,7 +755,7 @@ class pbes_constelm_algorithm: public utilities::algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
+    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
       : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
     {}
 
@@ -792,28 +783,19 @@ class pbes_constelm_algorithm: public utilities::algorithm
       return result;
     }
 
-    /// \brief Returns the propositional variables that have optionally been removed by the constelm algorithm
-    /// \return The removed variables
-    const std::set<propositional_variable_decl_type>& redundant_equations() const
-    {
-      return m_redundant_equations;
-    }
-
     /// \brief Runs the constelm algorithm
     /// \param p A pbes
     /// \param name_generator A generator for fresh identifiers
-    /// \param remove_redundant_equations If true, redundant equations are removed from the PBES
     /// The call \p name_generator() should return an identifier that doesn't appear
     /// in the pbes \p p
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
     template <typename Container>
-    void run(pbes<Container>& p, bool compute_conditions = false, bool remove_redundant_equations = false)
+    void run(pbes<Container>& p, bool compute_conditions = false)
     {
       m_vertices.clear();
       m_edges.clear();
       m_redundant_parameters.clear();
-      m_redundant_equations.clear();
 
       // compute the vertices and edges of the dependency graph
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -854,25 +836,20 @@ class pbes_constelm_algorithm: public utilities::algorithm
       }
 
       // initialize the todo list of vertices that need to be processed
+      propositional_variable_instantiation init = p.initial_state();
       std::deque<propositional_variable_decl_type> todo;
-      std::set<propositional_variable_decl_type> visited;
-      std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(p.initial_state());
-      for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
-      {
-        data_term_sequence_type e = i->parameters();
-        vertex& u = m_vertices[i->name()];
-        u.update(e, constraint_map(), m_data_rewriter);
-        todo.push_back(u.variable());
-        visited.insert(u.variable());
-      }
+      data_term_sequence_type e = init.parameters();
+      vertex& u = m_vertices[init.name()];
+      u.update(e, constraint_map(), m_data_rewriter);
+      todo.push_back(u.variable());
 
-      LOG_VERTICES_DEBUG("\n--- initial vertices ---\n");
-      LOG_EDGES_DEBUG("\n--- edges ---\n");
+      mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\n--- edges ---\n" << print_edges();
 
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        LOG_TODO_LIST_DEBUG(todo);
+        mCRL2log(log::debug) << print_todo_list(todo);
         propositional_variable_decl_type var = todo.front();
 
         // remove all occurrences of var from todo
@@ -885,15 +862,15 @@ class pbes_constelm_algorithm: public utilities::algorithm
         {
           const edge& e = *ei;
           vertex& v = m_vertices[e.target().name()];
-          LOG_EDGE_UPDATE_DEBUG(e, u, v);
+          mCRL2log(log::debug) << print_edge_update(e, u, v);
 
           // TODO: why not use R(t, sigma) interface here?
           term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution(u.constraints()));
-          LOG_CONDITION_DEBUG(e, u, value);
+          mCRL2log(log::debug) << print_condition(e, u, value);
 
           if (!tr::is_false(value) && !tr::is_true(value))
           {
-            LOG_EVALUATION_FAILURE_DEBUG(e, u);
+            mCRL2log(log::debug) << print_evaluation_failure(e, u);
           }
           if (!tr::is_false(value))
           {
@@ -902,27 +879,19 @@ class pbes_constelm_algorithm: public utilities::algorithm
             {
               todo.push_back(v.variable());
             }
-            visited.insert(v.variable());
           }
-          LOG_DEBUG("  <target vertex after >" + v.to_string() + "\n");
+          mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
         }
       }
 
-      LOG_VERTICES_DEBUG("\n--- final vertices ---\n");
+      mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
 
       // compute the redundant parameters and the redundant equations
       for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         vertex& v = m_vertices[name];
-        if (v.constraints().empty())
-        {
-          if (visited.find(i->variable()) == visited.end())
-          {
-            m_redundant_equations.insert(i->variable());
-          }
-        }
-        else
+        if (!v.constraints().empty())
         {
           std::vector<size_t> r = v.constant_parameter_indices();
           if (!r.empty())
@@ -948,33 +917,19 @@ class pbes_constelm_algorithm: public utilities::algorithm
         }
       }
 
-      // remove the redundant parameters and variables/equations
+      // remove the redundant parameters
       remove_parameters(p, m_redundant_parameters);
-      if (remove_redundant_equations)
-      {
-        remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
-      }
 
       // print the parameters and equation that are removed
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << "\nremoved the following constant parameters:" << std::endl;
+        mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
         std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
         for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
         {
           for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(verbose) << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
-          }
-        }
-
-        if (remove_redundant_equations)
-        {
-          mCRL2log(verbose) << "\nremoved the following equations:" << std::endl;
-          const std::set<propositional_variable_decl_type> r = redundant_equations();
-          for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
-          {
-            mCRL2log(verbose) << "  equation " << core::pp(i->name()) << std::endl;
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << data::pp(*j) << ")" << std::endl;
           }
         }
       }

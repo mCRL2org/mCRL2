@@ -42,7 +42,7 @@ void test_parse()
   s >> p;
 
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", VARSPEC);
-  std::cout << "x = " << mcrl2::core::pp(x) << std::endl;
+  std::cout << "x = " << pbes_system::pp(x) << std::endl;
 }
 
 int test_main(int argc, char* argv[])

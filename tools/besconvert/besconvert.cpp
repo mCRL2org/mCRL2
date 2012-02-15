@@ -14,6 +14,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/atermpp/map.h"
@@ -25,6 +26,7 @@
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -32,6 +34,7 @@
 
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {
@@ -373,9 +376,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       }
 
       m_lts.sort_transitions(lts::src_lbl_tgt);
-      lts::transition_const_range transitions(m_lts.get_transitions());
+      const std::vector<lts::transition> &transitions=m_lts.get_transitions();
 
-      for (lts::transition_const_range::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
       {
         has_outgoing_transition[i->from()] = true;
       }
@@ -400,7 +403,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
       // Build formulas
       size_t cur_state = 0;
-      lts::transition_const_range::const_iterator i = transitions.begin();
+      std::vector<lts::transition>::const_iterator i = transitions.begin();
       atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())
@@ -518,7 +521,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
     void run(utilities::execution_timer& timing)
     {
-      mCRL2log(verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      mCRL2log(log::verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
       mCRL2log(debug) << "Converting BES to standard form" << std::endl;
 
       timing.start("standard form conversion");
@@ -544,7 +547,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       lts_to_bes();
       timing.finish("conversion to BES");
 
-      mCRL2log(verbose) << "Removing unreachable equations" << std::endl;
+      mCRL2log(log::verbose) << "Removing unreachable equations" << std::endl;
       super::remove_unreachable_equations();
     }
 
@@ -555,7 +558,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
-typedef mcrl2::utilities::tools::input_output_tool super;
+typedef bes_input_output_tool<input_output_tool> super;
 class bes_bisimulation_tool: public super
 {
   protected:
@@ -571,8 +574,9 @@ class bes_bisimulation_tool: public super
       super::add_options(desc);
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
-                      "generate an equivalent BES, preserving equivalence NAME:\n"
-                      "supported equivalences: bisim, stuttering (default stuttering)", 'e');
+                      "generate an equivalent BES, preserving equivalence NAME:"
+                      "  'bisim' for strong bisimulation,\n"
+                      "  'stuttering' for stuttering equivalence (default)", 'e');
       desc.add_option("intermediate", make_mandatory_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
@@ -593,7 +597,6 @@ class bes_bisimulation_tool: public super
       {
         boolean_equation_system<> b; // TODO: build proper solution.
         mcrl2::bes::bes_reduction_algorithm<> a(b);
-        std::cerr << "Allowed eqs: " << a.allowed_equivalences() << std::endl;
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if (a.allowed_eqs().count(equivalence) == 0)
         {
@@ -659,7 +662,7 @@ class bes_bisimulation_tool: public super
       boolean_equation_system<> b;
 
       mCRL2log(verbose) << "Loading BES from input file...";
-      b.load(m_input_filename);
+      load_bes(b, input_filename(), bes_input_format());
 
       bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
       if(!reach)
@@ -669,7 +672,7 @@ class bes_bisimulation_tool: public super
 
       mCRL2log(verbose) << "done" << std::endl;
       bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
-      b.save(m_output_filename);
+      save_bes(b, output_filename(), bes_output_format());
 
       return true;
     }

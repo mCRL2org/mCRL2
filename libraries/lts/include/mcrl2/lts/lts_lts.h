@@ -29,11 +29,10 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lps/normalize_sorts.h"
-#include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lts/lts.h"
-
+#include "mcrl2/lps/detail/multi_action_print.h"
 
 namespace mcrl2
 {
@@ -140,7 +139,7 @@ inline std::string pp(const state_label_lts l)
   s = "(";
   for (size_t i=0; i<l.size(); ++i)
   {
-    s += core::pp(l[i]);
+    s += data::pp(l[i]);
     if (i+1<l.size())
     {
       s += ",";
@@ -179,7 +178,7 @@ class action_label_lts:public mcrl2::lps::multi_action
       if (this->has_time())
       {
         throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   to_string() + " to an ATerm as it contains time.");
+                                   lps::detail::multi_action_print(*this) + " to an ATerm as it contains time.");
       }
       return (ATerm)mcrl2::core::detail::gsMakeMultAct(this->actions());
     }
@@ -215,7 +214,7 @@ class action_label_lts:public mcrl2::lps::multi_action
 /** \brief Print the action label to string. */
 inline std::string pp(const action_label_lts l)
 {
-  return pp1(mcrl2::lps::multi_action(l));
+  return lps::detail::multi_action_print(mcrl2::lps::multi_action(l));
 }
 
 /** \brief Parse a string into an action label.
@@ -231,14 +230,8 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const lps::action_list& act_decls)
 {
-  std::stringstream ss(multi_action_string);
-
-  ATermAppl t = mcrl2::core::parse_mult_act(ss);
-  if (t == NULL)
-  {
-    throw mcrl2::runtime_error("Fail to parse multi action " + multi_action_string);
-  }
-
+  // TODO: rewrite this cryptic code
+  ATermAppl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
   lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
   lps::type_check(ma,data_spec,act_decls);
   lps::translate_user_notation(ma);

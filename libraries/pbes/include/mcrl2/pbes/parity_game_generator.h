@@ -16,19 +16,19 @@
 #include <iomanip>
 #include <map>
 #include <set>
+#include <sstream>
 #include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
@@ -44,7 +44,7 @@ namespace pbes_system
 /// no holes in the sequence.
 /// Each vertex is labeled with a priority value, which is the
 /// block nesting depth of the proposition variable in the BES.
-class parity_game_generator: public utilities::algorithm
+class parity_game_generator
 {
   protected:
     /// \brief The traits class of the expression type.
@@ -61,7 +61,7 @@ class parity_game_generator: public utilities::algorithm
     pbes<>& m_pbes;
 
     /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
-    data::number_postfix_generator generator;
+    utilities::number_postfix_generator generator;
 
     /// \brief Data rewriter.
     data::rewriter datar;
@@ -99,7 +99,7 @@ class parity_game_generator: public utilities::algorithm
     virtual
     std::string print(const pbes_expression& e)
     {
-      return core::pp(e);
+      return pbes_system::pp(e);
     }
 
     /// \brief Check whether e corresponds to true
@@ -126,7 +126,7 @@ class parity_game_generator: public utilities::algorithm
     {
       size_t result;
 
-      mCRL2log(debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
+      mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
       atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
@@ -144,7 +144,7 @@ class parity_game_generator: public utilities::algorithm
         }
         m_bes.push_back(std::make_pair(t, priority));
         detail::check_bes_equation_limit(m_bes.size());
-        LOG_EQUATION_COUNT(m_bes.size());
+        mCRL2log(log::verbose) << print_equation_count(m_bes.size());
         result = p;
       }
 
@@ -177,9 +177,9 @@ class parity_game_generator: public utilities::algorithm
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
+        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
         pbes_expression result(R(pbes_eqn.formula(), sigma));
-        mCRL2log(debug2, "parity_game_generator") << print(result) << std::endl;
+        mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
       }
       return psi;
@@ -243,33 +243,32 @@ class parity_game_generator: public utilities::algorithm
 
     // prints the BES equation with left hand side 'index' and right hand side 'rhs'
     virtual
-    void LOG_BES_EQUATION(size_t index, const std::set<size_t>& rhs)
+    std::string print_bes_equation(size_t index, const std::set<size_t>& rhs)
     {
-      if (mCRL2logEnabled(debug, "parity_game_generator"))
+      std::ostringstream out;
+      const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
+      const size_t priority = eqn.second;
+      out << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
+      std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
+      for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
       {
-        const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
-        const size_t priority = eqn.second;
-        mCRL2log(debug, "parity_game_generator") << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
-        std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
-        for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
-        {
-          mCRL2log(debug, "parity_game_generator") << (i == rhs.begin() ? "" : op) << "Y" << *i;
-        }
-        mCRL2log(debug, "parity_game_generator") <<  " (priority = " << priority << ")" << std::endl;
+        out << (i == rhs.begin() ? "" : op) << "Y" << *i;
       }
+      out <<  " (priority = " << priority << ")" << std::endl;
+      return out.str();
     }
 
     /// \brief Prints a log message for every step-th equation
     virtual
-    void LOG_EQUATION_COUNT(size_t size, size_t step = 1000) const
+    std::string print_equation_count(size_t size, size_t step = 1000) const
     {
-      if (mCRL2logEnabled(verbose))
+      if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
       {
-        if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
-        {
-          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
-        }
+        std::ostringstream out;
+        out << "Generated " << size << " BES equations" << std::endl;
+        return out.str();
       }
+      return "";
     }
 
     virtual
@@ -406,7 +405,7 @@ class parity_game_generator: public utilities::algorithm
       pbes_expression& psi = eqn.first;
       const size_t priority = eqn.second;
 
-      mCRL2log(debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
+      mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
 
       // expand the right hand side if needed
       psi = expand_rhs(psi);
@@ -454,7 +453,7 @@ class parity_game_generator: public utilities::algorithm
       {
         throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + print(psi) + "\n" + psi.to_string()));
       }
-      LOG_BES_EQUATION(index, result);
+      mCRL2log(log::debug, "parity_game_generator") << print_bes_equation(index, result);
       return result;
     }
 
@@ -470,7 +469,7 @@ class parity_game_generator: public utilities::algorithm
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
+        std::cerr << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
       }
       std::cerr << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)

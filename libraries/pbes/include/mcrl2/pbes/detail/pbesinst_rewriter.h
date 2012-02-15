@@ -57,13 +57,11 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   /// \return A name that uniquely corresponds to the propositional variable.
   term_type rename(const term_type& v)
   {
-std::cout << "<rename>" << core::pp(v) << std::endl;    
     assert(tr::is_prop_var(v));
     if (!tr::is_constant(v))
     {
       return v;
     }
-std::cout << "constant!" << std::endl;    
     const data::data_expression_list del = tr::param(v);
     std::string propvar_name_current = tr::name(v);
     if (!del.empty())
@@ -73,25 +71,25 @@ std::cout << "constant!" << std::endl;
         if (is_function_symbol(*del_i))
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         else if (is_application(*del_i))
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         else if (is_abstraction(*del_i)) // case added by Wieger, 24-05-2011
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         // else if (data::is_variable(*del_i))
         // {
-        //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + core::pp(v));
+        //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + data::pp(v));
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v) + " " + core::pp(*del_i) + " " + del_i->to_string());
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + del_i->to_string());
         }
       }
     }
@@ -117,7 +115,7 @@ class pbesinst_rewriter
 {
   public:
     typedef pbes_expression_with_propositional_variables term_type;
-    typedef data::data_enumerator<data::number_postfix_generator> pbesinst_enumerator;
+    typedef data::data_enumerator<utilities::number_postfix_generator> pbesinst_enumerator;
     typedef data::data_expression_with_variables data_term_type;
     typedef data::variable variable_type;
 
@@ -144,7 +142,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << " [default]-> " << core::pp(result) << std::endl;
+        std::cerr << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -159,7 +157,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << core::pp(result) << std::endl;
+        std::cerr << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -186,7 +184,7 @@ class pbesinst_rewriter
   protected:
     data::rewriter datar;
     data::rewriter_with_variables datarv;
-    data::number_postfix_generator name_generator;
+    utilities::number_postfix_generator name_generator;
     pbesinst_enumerator datae;
     bool m_print_rewriter_output;
 };

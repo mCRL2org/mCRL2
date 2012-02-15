@@ -59,6 +59,8 @@ class MainFrame: public wxFrame
   private:
     void OnFindClose(wxFindDialogEvent& /* event */);
     void OnFind(wxFindDialogEvent& event);
+    void OnReplace(wxFindDialogEvent& event);
+    void OnReplaceAll(wxFindDialogEvent& event);
 
     wxMenu* m_PanelMenu;
     wxMenu* editMenu;

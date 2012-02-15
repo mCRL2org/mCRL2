@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
@@ -29,7 +28,7 @@ namespace detail
 
 /// \brief Algorithm class for algorithms on linear process specifications.
 template <typename Container = atermpp::vector<boolean_equation> >
-class bes_algorithm: public utilities::algorithm
+class bes_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
@@ -44,7 +43,7 @@ class bes_algorithm: public utilities::algorithm
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return mCRL2logEnabled(verbose);
+      return mCRL2logEnabled(log::verbose);
     }
 
     /// \brief Perform reachability analysis on equations of m_bes, and remove
@@ -100,7 +99,7 @@ class bes_algorithm: public utilities::algorithm
 
       m_bes.equations() = reachable_equations;
 
-      mCRL2log(verbose) << "Removed the following unreachable equations: " << bes::pp(unreachable_equations) << std::endl;
+      mCRL2log(log::verbose) << "Removed the following unreachable equations: " << bes::pp(unreachable_equations) << std::endl;
 
       return false;
     }

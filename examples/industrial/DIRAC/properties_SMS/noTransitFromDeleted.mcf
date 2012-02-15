@@ -1,0 +1,7 @@
+% A deleted task will never be referenced for transition to any other state. (safety)
+% - the property violation trace (noTransitFromDeleted.trc)
+% shows a situation in which the Task is referenced by an 
+% agent, after it has been deleted.
+
+[true*.state([tDeleted]). true*. (state([tNew]) || state([tStageSubmitted]) || state([tStaged]) || state([tFailed]) )]false
+

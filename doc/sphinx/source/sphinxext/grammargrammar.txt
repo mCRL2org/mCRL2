@@ -1,0 +1,103 @@
+/*
+ Grammar Grammar
+*/
+
+grammar: top_level_statement*;
+
+top_level_statement: global_code | production | include_statement;
+
+include_statement: 'include' regex ;
+
+global_code
+  : '%<' balanced_code* '%>'
+  | curly_code 
+  | '${scanner' balanced_code+ '}' 
+  | '${declare' declarationtype identifier* '}' 
+  | '${token' identifier+ '}'
+  | '${pass' identifier pass_type+ '}' 
+  ;
+
+pass_type 
+  : 'preorder' 
+  | 'postorder'
+  | 'manual' 
+  | 'for_all'
+  | 'for_undefined'
+  ;
+
+declarationtype
+  : 'tokenize'
+  | 'longest_match'
+  | 'whitespace'
+  | 'all_matches'
+  | 'set_op_priority_from_rule'
+  | 'all_subparsers'
+  | 'subparser'
+  | 'save_parse_tree'
+  ;
+
+rules : rule ('|' rule)*; 
+
+simple_element
+  : string
+  | regex 
+  | unicode_char
+  | identifier_ref
+  | '${scan' balanced_code+ '}'
+  | '(' rules ')' 
+  ;
+
+element
+  : simple_element
+  | bracket_code 
+  | curly_code
+  ;
+
+element_modifier 
+  : '$term' integer 
+  | '$name' (string|regex) 
+  | '/i' 
+  | '?' 
+  | '*' 
+  | '+' 
+  | '@' integer 
+  | '@' integer ':' integer  
+  ;
+
+rule_modifier : rule_assoc integer | external_action;
+
+rule_assoc
+  : '$unary_op_right'
+  | '$unary_op_left'
+  | '$binary_op_right'
+  | '$binary_op_left'
+  | '$unary_right'
+  | '$unary_left'
+  | '$binary_right'
+  | '$binary_left'
+  | '$right'
+  | '$left'
+  ;
+
+external_action
+  : '${action}'
+  | '${action' integer '}'
+  ;
+
+rule_code : bracket_code? curly_code? (identifier ':' curly_code)* ;
+
+curly_code: '{' balanced_code* '}';
+bracket_code: '[' balanced_code* ']';
+balanced_code 
+  : '(' balanced_code* ')' | '[' balanced_code* ']' | '{' balanced_code* '}'
+  | string | identifier | regex | integer | symbols;
+symbols : "[!~`@#$%^&*\-_+=|:;\\<,>.?/]";
+string: "'([^'\\]|\\[^])*'";
+regex: "\"([^\"\\]|\\[^])*\"";
+unicode_char: "[uU]\+[0-9a-fA-F]+";
+identifier: "[a-zA-Z_][a-zA-Z_0-9]*" $term -1;
+integer: decimalint | hexint | octalint;
+decimalint: "-?[1-9][0-9]*[uUlL]?";
+hexint: "-?(0x|0X)[0-9a-fA-F]+[uUlL]?";
+octalint: "-?0[0-7]*[uUlL]?"
+

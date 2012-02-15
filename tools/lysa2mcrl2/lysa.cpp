@@ -14,6 +14,7 @@
 
 using namespace boost;
 using namespace std;
+using namespace mcrl2::log;
 
 namespace lysa
 {

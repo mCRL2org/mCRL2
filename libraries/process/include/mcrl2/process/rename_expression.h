@@ -53,16 +53,14 @@ class rename_expression: public atermpp::aterm_appl
     /// \return The source of the rename rule
     core::identifier_string source() const
     {
-      using namespace atermpp;
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// \brief Returns the target of the rename rule
     /// \return The target of the rename rule
     core::identifier_string target() const
     {
-      using namespace atermpp;
-      return arg2(*this);
+      return atermpp::arg2(*this);
     }
 };
 

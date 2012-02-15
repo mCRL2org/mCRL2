@@ -10,11 +10,12 @@
 project(ltsview)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
+
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
 # ######### General setup ##########
-set(MACOSX_BUNDLE_ICON_FILE ltsview.icns )
-
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
   SET(SRCS ${SRCS} ltsview.rc)
@@ -61,6 +62,7 @@ IF (APPLE)
  SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ENDIF (APPLE)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
@@ -72,6 +74,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 if(GL2PS_FOUND)
   include_directories(${GL2PS_INCLUDE_DIRS})
 else(GL2PS_FOUND)
@@ -84,6 +87,8 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lts
   mcrl2_utilities
   mcrl2_utilities_wx
+  mcrl2_syntax
+  dparser
   tr
 )
 
@@ -106,4 +111,4 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
-endif ( MCRL2_BUILD_GUI_TOOLS )
+endif ( MCRL2_ENABLE_GUI_TOOLS )

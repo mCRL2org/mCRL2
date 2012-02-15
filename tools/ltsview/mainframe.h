@@ -23,8 +23,6 @@ class InfoDialog;
 class SimDialog;
 class MarkDialog;
 class SettingsDialog;
-class SavePicDialog;
-class SaveVecDialog;
 class GLCanvas;
 class Mediator;
 class Settings;
@@ -101,8 +99,6 @@ class MainFrame : public wxFrame
     Mediator*         mediator;
     wxRadioButton*    nomarksRadio;
     wxProgressDialog* progDialog;
-    SavePicDialog*    savePicDialog;
-    SaveVecDialog*    saveVecDialog;
     SettingsDialog*   settingsDialog;
     InfoDialog*       infoDialog;
     MarkDialog*       markDialog;

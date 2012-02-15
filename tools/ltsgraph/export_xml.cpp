@@ -11,6 +11,7 @@
 
 #include "export_xml.h"
 #include <iostream>
+#include "mcrl2/utilities/logger.h"
 #include <wx/xml/xml.h>
 
 ExporterXML::ExporterXML(Graph* g) : Exporter(g)
@@ -94,7 +95,7 @@ bool ExporterXML::export_to(wxString _filename)
   }
   catch (std::exception& e)
   {
-    std::cerr << "Exception when exporting: " << e.what();
+    mCRL2log(mcrl2::log::error) << "Exception when exporting: " << e.what();
     return false;
   }
 

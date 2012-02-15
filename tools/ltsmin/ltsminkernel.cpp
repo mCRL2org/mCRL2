@@ -9,6 +9,7 @@
 /// \file ltsminkernel.cpp
 
 #include <iostream>
+#include "mcrl2/utilities/logger.h"
 #include "ltsmin.h"
 
 using namespace aterm;
@@ -332,7 +333,9 @@ blocks */
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
-      std::cerr << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    {
+      mCRL2log(mcrl2::log::verbose) << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    }
     cnt++;
     last_nBlocks = nBlocks;
   }
@@ -486,7 +489,7 @@ static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
   strcat(buf,"V   ");
   strncat(buf, ATwriteToString(q).c_str(),24);
   strcat(buf, (tq?"'!":"'"));
-  ATfprintf(stderr,"%s\n",buf);
+  mCRL2log(mcrl2::log::verbose) << buf << std::endl;
 }
 
 static bool PrintNonBisimilarStates(int* p, int* q)
@@ -497,9 +500,6 @@ static bool PrintNonBisimilarStates(int* p, int* q)
   p_lab = (ATerm) ATmakeInt(*p),
   q_lab = (ATerm) ATmakeInt(*q-offset);
   Parent(&b1, &b2);
-  /*
-  ATfprintf(stderr,"QQ2: b1 = %d b2 = %d %t %t\n",b1, b2, p_lab, q_lab);
-  */
   splitter = blok[b1].splitter;
   action = blok[b1].action == -1? blok[b2].action: blok[b1].action;
   tgt1 = (ATermList) ATtableGet(lab_src_tgt[action],(ATerm) ATmakeInt(*p));
@@ -568,7 +568,7 @@ static bool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
     {
       if (traceLevel)
       {
-        std::cerr << "Not " << (branching?"branching":"strongly") << "bisimilar. Generation of witness trace." << std::endl;
+        mCRL2log(mcrl2::log::verbose) << "Not " << (branching?"branching":"strongly") << "bisimilar. Generation of witness trace." << std::endl;
         while (PrintNonBisimilarStates((int*) &init1, (int*) &init2)) {};
       }
       *different = true;
@@ -612,7 +612,9 @@ int Compare(SVCstateIndex init1, SVCstateIndex init2)
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
-      std::cerr << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    {
+      mCRL2log(mcrl2::log::verbose) << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
+    }
     cnt++;
     last_nBlocks = nBlocks;
   }

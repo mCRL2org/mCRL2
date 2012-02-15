@@ -22,12 +22,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
@@ -37,7 +34,7 @@
 
 #include "mcrl2/lps/multi_action.h"
 
-#include "simulator.h"
+#include "mcrl2/lps/simulator.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -76,9 +73,9 @@ class torx_tool : public rewriter_tool< input_tool >
       }
     }
 
-    atermpp::set<ATerm>     visited_states;
-    atermpp::map<int,ATerm> int_to_seenstate_mapping;
-    atermpp::map<ATerm,int> seenstate_to_int_mapping;
+    std::set< mcrl2::lps::state >     visited_states;
+    std::map<int,mcrl2::lps::state> int_to_seenstate_mapping;
+    std::map<mcrl2::lps::state,int> seenstate_to_int_mapping;
 
     /* Multi-actions:  a_1(d^1_1,...,d^1_m)|...|a_n(n^1_1, ..., d^n_m)
      * are printed as: a_1!d^1_1!...!d^1_m!...!a_n!n^1_1!...!d^n_m
@@ -188,7 +185,6 @@ class torx_tool : public rewriter_tool< input_tool >
           }
           else if (s[0] == 'e')
           {
-
             if(s[1] != ' ' || s.size() <= 2)
             {
               std::cout << "incorrect syntax (try 'h' for help)" << std::endl;
@@ -196,7 +192,7 @@ class torx_tool : public rewriter_tool< input_tool >
             }
 
             int index = atoi(s.substr(1, s.size()-1 ).c_str());
-            atermpp::map<int,ATerm>::iterator it = int_to_seenstate_mapping.find( index );
+            atermpp::map<int,state>::iterator it = int_to_seenstate_mapping.find( index );
 
             if (it == int_to_seenstate_mapping.end())
             {
@@ -207,21 +203,19 @@ class torx_tool : public rewriter_tool< input_tool >
             try
             {
               simulator.Reset( it->second );
-              ATermList next_states=ATempty;
+              std::vector < state > next_states=simulator.GetNextStates();
+              atermpp::vector < multi_action > next_actions=simulator.GetNextActions();
 
               visited_states.insert( simulator.GetState() );
-              next_states = simulator.GetNextStates();
 
               std::cout << "EB" << std::endl;
-              for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l))
+              for (size_t i=0; i<next_states.size(); ++i) 
               {
                 max_state++;
 
-                ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
-                ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
+                const multi_action ma = next_actions[i];
+                const state NewState = next_states[i]; 
 
-                /* Interpret Transition as multi-action*/
-                multi_action ma = multi_action(Transition);
                 int is_tau = ma.actions().empty()?0:1;
 
                 /* Rebuild transition string in Torx format*/

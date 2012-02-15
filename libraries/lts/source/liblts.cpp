@@ -32,6 +32,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::log;
 
 #ifdef USE_BCG
 // #include <bcg_user.h>
@@ -50,13 +51,6 @@ namespace detail
 {
 
 atermpp::vector < ATermAppl > state_label_lts::vector_templates;
-
-lps::specification const& empty_specification()
-{
-  static lps::specification dummy;
-
-  return dummy;
-}
 
 lts_type guess_format(string const& s)
 {

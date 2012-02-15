@@ -13,7 +13,6 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
@@ -40,11 +39,12 @@ using detail::pbesinst_rewriter;
 /// \param out An output stream
 /// \param sigma A pbesinst substitution function
 /// \return The output stream
+inline
 std::ostream& operator<<(std::ostream& out, const pbesinst_substitution_function& sigma)
 {
   for (pbesinst_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
-    out << "  " << core::pp(i->first) << " -> " << core::pp(i->second) << std::endl;
+    out << "  " << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
   }
   return out;
 }
@@ -69,7 +69,7 @@ pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v,
 }
 
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
-class pbesinst_algorithm: public utilities::algorithm
+class pbesinst_algorithm
 {
   protected:
     /// \brief The rewriter.
@@ -98,15 +98,15 @@ class pbesinst_algorithm: public utilities::algorithm
     bool m_print_equations;
 
     /// \brief Prints a log message for every 1000-th equation
-    void LOG_EQUATION_COUNT_VERBOSE(size_t size) const
+    std::string print_equation_count(size_t size) const
     {
-      if (mCRL2logEnabled(verbose))
+      if (size > 0 && size % 1000 == 0)
       {
-        if (size > 0 && size % 1000 == 0)
-        {
-          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
-        }
+        std::ostringstream out;
+        out << "Generated " << size << " BES equations" << std::endl;
+        return out.str();
       }
+      return "";
     }
 
   public:
@@ -164,10 +164,10 @@ class pbesinst_algorithm: public utilities::algorithm
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), psi_e);
         if (m_print_equations)
         {
-          std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
+          std::cerr << pbes_system::pp(eqn.symbol()) << " " << pbes_system::pp(X_e) << " = " << pbes_system::pp(psi_e) << std::endl;
         }
         E[index].push_back(new_eqn);
-        LOG_EQUATION_COUNT_VERBOSE(++m_equation_count);
+        mCRL2log(log::verbose) << print_equation_count(++m_equation_count);
         detail::check_bes_equation_limit(m_equation_count);
       }
     }

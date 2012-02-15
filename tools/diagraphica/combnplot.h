@@ -88,9 +88,6 @@ class CombnPlot : public Visualizer
       GLuint buffer[]);
 
     // -- data members ----------------------------------------------
-    enum
-    {
-    };
 
     // data
     std::vector< std::string >        attributeLabels;

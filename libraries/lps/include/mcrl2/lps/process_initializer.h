@@ -22,6 +22,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -74,6 +75,10 @@ class process_initializer: public atermpp::aterm_appl
       return data::replace_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(m_assignments));
     }
 };
+
+// template function overloads
+std::string pp(const process_initializer& x);
+std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 
 } // namespace lps
 

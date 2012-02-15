@@ -1,0 +1,22 @@
+sort
+  AbsNat  = struct arbitrary;
+
+var
+  an: AbsNat;
+  n : Nat;
+eqn
+  absplus (an,an)           = {an};     
+  abslt (an,an)             = {false,true}; 
+  absle (an,an)             = {false,true}; 
+  abseqn (an,an)            = {false,true};
+
+  h(n)                      = arbitrary;
+
+absmap
+  h: Nat -> AbsNat;
+
+absfunc
+  +: Nat # Nat -> Nat          := absplus :AbsNat # AbsNat -> Set(AbsNat)
+  <: Nat # Nat -> Bool         := abslt : AbsNat # AbsNat -> Set(Bool)
+  <=: Nat # Nat -> Bool        := absle : AbsNat # AbsNat -> Set(Bool)
+  ==: Nat # Nat -> Bool        := abseqn : AbsNat # AbsNat -> Set(Bool)

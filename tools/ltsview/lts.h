@@ -89,16 +89,12 @@ class LTS
     int getNumTransitions() const;
 
     size_t getNumParameters() const;
-    // atermpp::set<ATermAppl> getParameterDomain(size_t parindex);
     std::vector<std::string> getParameterDomain(size_t parindex);
     std::string getParameterName(size_t parindex) ;
-    // ATerm getStateParameterValue(State* state,size_t param);
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
                                           size_t param);
-    // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, size_t param);
     std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
-    // std::string prettyPrintParameterValue(ATerm parvalue);
 
     State* selectStateByID(int id);
     Cluster* selectCluster(const int rank, const int pos);

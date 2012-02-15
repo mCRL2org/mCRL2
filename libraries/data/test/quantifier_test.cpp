@@ -214,16 +214,13 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
        "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
   data_expression t18d2 = parse_data_expression("true");
   BOOST_CHECK(r(t18d1) == r(t18d2));
-  
-
-
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies());
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << data::pp(*strat) << std::endl;

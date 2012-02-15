@@ -1,14 +1,13 @@
 % This formula is applicable to games/othello/othello.mcrl2
 %
-% The following formula expresses that with a perfect play white
-% can always win the game. Either white wins right away, or if white can move, 
-% there is a winning move of White, or
-% if Red can do a move, all moves of Red will lead to a winning
-% situation for White.
-
-mu X.(<WhiteWins>true || 
+% See specification for an explanation.
+mu X.((<Outcome(win(white))>true) || 
        (
-         (forall x,y:Pos.[WhiteMove(x,y)]false) ||
-         (exists x,y:Pos.<WhiteMove(x,y)>X)
-       ) && (forall x,y:Pos.[RedMove(x,y)]X)
+         (exists x,y:Nat.<Put(x, y, white)>X)
+       ) ||
+       (
+         (exists x,y:Nat.<Put(x, y, red)>true) &&
+         (forall x,y:Nat.[Put(x, y, red)]X)
+       ) ||
+         ((<Pass>X) && ([Pass]X))
      )

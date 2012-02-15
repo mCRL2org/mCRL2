@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/find.h"
@@ -37,7 +38,7 @@ void type_check(sort_expression& sort_expr, const data_specification& data_spec)
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
+    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(sort_expr));
   }
   sort_expr = sort_expression(t);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
@@ -76,7 +77,7 @@ void type_check(data_expression& data_expr,
   if (t == 0)
   {
     data_expr = data_expression();
-    throw mcrl2::runtime_error("error type checking data expression");
+    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(data_expr));
   }
   else
   {
@@ -112,7 +113,7 @@ void type_check(data_specification& data_spec)
   t = core::type_check_data_spec(t);
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check data specification");
+    throw mcrl2::runtime_error("could not type check data specification " + core::pp_deprecated(data::detail::data_specification_to_aterm_data_spec(data_spec)));
   }
   data_spec = data_specification(t);
   data_spec.declare_data_specification_to_be_type_checked();

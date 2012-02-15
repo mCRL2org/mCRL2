@@ -40,7 +40,7 @@ void test_pbesrewr1()
     ;
   pbes<> p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::rewriter::jitty);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
@@ -58,7 +58,7 @@ void test_pbesrewr2()
   BOOST_CHECK(p.is_well_typed());
 
   data::rewriter datar(p.data(), data::rewriter::jitty);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
@@ -80,7 +80,7 @@ void test_pbesrewr3()
 
   pbes<> p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::rewriter::jitty);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;

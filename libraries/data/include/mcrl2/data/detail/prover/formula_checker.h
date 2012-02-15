@@ -16,6 +16,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 
@@ -87,9 +88,7 @@ class Formula_Checker
     {
       if (f_witness)
       {
-        ATermAppl v_witness;
-
-        v_witness = f_bdd_prover.get_witness();
+        const data_expression v_witness = f_bdd_prover.get_witness();
         if (v_witness == 0)
         {
           throw mcrl2::runtime_error(
@@ -99,7 +98,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(info) << "  Witness: " << core::pp(v_witness) << std::endl;
+          mCRL2log(log::info) << "  Witness: " << data::pp(v_witness) << std::endl;
         }
       }
     }
@@ -109,9 +108,7 @@ class Formula_Checker
     {
       if (f_counter_example)
       {
-        ATermAppl v_counter_example;
-
-        v_counter_example = f_bdd_prover.get_counter_example();
+        const data_expression v_counter_example = f_bdd_prover.get_counter_example();
         if (v_counter_example == 0)
         {
           throw mcrl2::runtime_error(
@@ -121,7 +118,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(info) << "  Counter-example: " << core::pp(v_counter_example) << std::endl;
+          mCRL2log(log::info) << "  Counter-example: " << data::pp(v_counter_example) << std::endl;
         }
       }
     }
@@ -148,13 +145,13 @@ class Formula_Checker
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_witness = false,
       char const* a_dot_file_name = 0
     ):
-      f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
+      f_bdd_prover(a_data_spec, used_data_equation_selector(a_data_spec),a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
     {
       f_counter_example = a_counter_example;
       f_witness = a_witness;
@@ -166,34 +163,33 @@ class Formula_Checker
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(ATermList a_formulas)
+    void check_formulas(const data_expression_list a_formulas)
     {
-      ATermAppl v_formula;
       int v_formula_number = 1;
 
-      while (!ATisEmpty(a_formulas))
+      for(data_expression_list::const_iterator i=a_formulas.begin();
+                i!=a_formulas.end(); ++i)
       {
-        v_formula = ATAgetFirst(a_formulas);
-        mCRL2log(info) << "'" << core::pp(v_formula) << "'";
+        atermpp::aterm_appl v_formula = *i;
+        mCRL2log(log::info) << "'" << data::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();
         if (v_is_tautology == answer_yes)
         {
-          mCRL2log(info) << "Tautology" << std::endl;
+          mCRL2log(log::info) << "Tautology" << std::endl;
         }
         else if (v_is_contradiction == answer_yes)
         {
-          mCRL2log(info) << "Contradiction" << std::endl;
+          mCRL2log(log::info) << "Contradiction" << std::endl;
         }
         else
         {
-          mCRL2log(info) << "Undeterminable" << std::endl;
+          mCRL2log(log::info) << "Undeterminable" << std::endl;
           print_counter_example();
           print_witness();
           save_dot_file(v_formula_number);
         }
-        a_formulas = ATgetNext(a_formulas);
         v_formula_number++;
       }
     }

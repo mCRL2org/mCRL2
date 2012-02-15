@@ -18,7 +18,6 @@
 #include <map>
 
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/structured_sort.h"

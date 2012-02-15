@@ -30,6 +30,8 @@
 #include "boost/xpressive/xpressive_static.hpp"
 #include "boost/algorithm/string/replace.hpp"
 
+#include "mcrl2/utilities/text_utility.h"
+
 /// \cond DUMMY
 // dummy necessary for compiling
 #define __COMMAND_LINE_INTERFACE__
@@ -229,11 +231,39 @@ std::string interface_description::option_descriptor::man_page_description() con
   return s.str();
 }
 
-std::string interface_description::option_descriptor::wiki_page_description() const
+std::ostream& interface_description::option_descriptor::xml_page_description(std::ostream& s, const bool is_standard) const
 {
+  s << "<option standard=\"" << (is_standard?"yes":"no") << "\">";
 
-  std::ostringstream s;
+  if (m_short != '\0')
+  {
+    s << "<short>" << m_short << "</short>" << std::endl;
+  }
 
+  s << "<long>" << m_long << "</long>" << std::endl;
+
+  if (m_argument.get() != 0)
+  {
+    s << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") << "\">"
+      << m_argument->get_name() << "</option_argument>" << std::endl;
+  }
+
+  s << "<description>";
+  // Produce output line by line, such that indentation provided in the description
+  // can be preserved.
+  std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
+  for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+  {
+    s << *i << "<br/>";
+  }
+  s << "</description>" << std::endl;
+  s << "</option>" << std::endl;
+
+  return s;
+}
+
+std::ostream& interface_description::option_descriptor::wiki_page_description(std::ostream& s) const
+{
   s << "; ";
 
   if (m_short != '\0')
@@ -287,7 +317,7 @@ std::string interface_description::option_descriptor::wiki_page_description() co
 
   s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 
-  return s.str();
+  return s;
 }
 
 interface_description::option_descriptor const& interface_description::find_option(std::string const& long_identifier) const
@@ -366,7 +396,7 @@ std::string interface_description::copyright_message()
 
 std::string interface_description::version_information() const
 {
-  return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
+  return m_name + " mCRL2 toolset " + get_toolset_version() + "\n" +
          copyright_message() + "\nWritten by " + m_authors + ".\n";
 }
 
@@ -496,7 +526,7 @@ std::string interface_description::man_page() const
 
   s.imbue(std::locale(s.getloc()));
 
-  s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
+  s << ".\\\" " << "Manual page for " << m_name << " version " << get_toolset_version() << "." << " .\\\"" << std::endl
     << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
 
   // Determine month and year, to prevent using boost date/time
@@ -511,7 +541,7 @@ std::string interface_description::man_page() const
   std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
   s << ".TH " << name_upper << " \"1\" \""
     << std::string(buffer) << "\" \""
-    << m_name << " mCRL2 toolset " << version_tag()
+    << m_name << " mCRL2 toolset " << get_toolset_version()
     << "\" \"User Commands\"" << std::endl;
 
   s << ".SH NAME" << std::endl
@@ -595,10 +625,56 @@ std::map<std::string, std::string> interface_description::get_long_argument_with
   return result;
 }
 
-std::string interface_description::wiki_page() const
+std::ostream& interface_description::xml_page(std::ostream& s) const
 {
-  std::ostringstream s;
+  s << "<tool>" << std::endl;
+  s << "  <name>" << m_name << "</name>" << std::endl;
+  s << "  <usage>" << m_usage << "</usage>" << std::endl;
+  s << "  <description>" << std::endl;
 
+  std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
+  for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+  {
+    s << *i << "<br/>";
+  }
+  s << "  </description>" << std::endl;
+
+  if (0 < m_options.size())
+  {
+    s << "  <options>" << std::endl;
+
+    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    {
+      option_descriptor const& option(i->second);
+
+      if (option.m_show)
+      {
+        option.xml_page_description(s);
+      }
+    }
+  }
+
+  m_options.find("quiet")->second.xml_page_description(s);
+  m_options.find("verbose")->second.xml_page_description(s);
+  m_options.find("debug")->second.xml_page_description(s);
+  m_options.find("log-level")->second.xml_page_description(s);
+  m_options.find("help")->second.xml_page_description(s);
+  m_options.find("version")->second.xml_page_description(s);
+
+  s << "  </options>" << std::endl;
+
+  if (0 < m_known_issues.size())
+  {
+    s << "  <known_issues>" << m_known_issues << "</known_issues>" << std::endl;
+  }
+  s << "  <author>" << m_authors << "</author>" << std::endl;
+  s << "</tool>" << std::endl;
+
+  return s;
+}
+
+std::ostream& interface_description::wiki_page(std::ostream& s) const
+{
   s << "{{Hierarchy header}}" << std::endl
     << std::endl;
 
@@ -620,7 +696,7 @@ std::string interface_description::wiki_page() const
 
       if (option.m_show)
       {
-        s << option.wiki_page_description();
+        option.wiki_page_description(s);
       }
     }
   }
@@ -634,16 +710,16 @@ std::string interface_description::wiki_page() const
   {
     s << "''OPTION'' can be any of the following standard options:" << std::endl;
   }
-  s << m_options.find("quiet")->second.wiki_page_description()
-    << m_options.find("verbose")->second.wiki_page_description()
-    << m_options.find("debug")->second.wiki_page_description()
-    << m_options.find("log-level")->second.wiki_page_description()
-    << m_options.find("help")->second.wiki_page_description()
-    << m_options.find("version")->second.wiki_page_description();
+  m_options.find("quiet")->second.wiki_page_description(s);
+  m_options.find("verbose")->second.wiki_page_description(s);
+  m_options.find("debug")->second.wiki_page_description(s);
+  m_options.find("log-level")->second.wiki_page_description(s);
+  m_options.find("help")->second.wiki_page_description(s);
+  m_options.find("version")->second.wiki_page_description(s);
 
   if (!m_known_issues.empty())
   {
-    s << "== Kown Issues" << std::endl
+    s << "== Known Issues ==" << std::endl
       << word_wrap(m_known_issues, 80) << std::endl;
   }
 
@@ -656,7 +732,7 @@ std::string interface_description::wiki_page() const
     << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
     << "{{Hierarchy footer}}" << std::endl;
 
-  return s.str();
+  return s;
 }
 
 /**
@@ -708,7 +784,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
         if (d.m_options.find(option) == d.m_options.end())
         {
-          if (argument == "--generate-man-page" || argument == "--generate-wiki-page")
+          if (argument == "--generate-man-page" || argument == "--generate-wiki-page" || argument == "--generate-xml")
           {
             // Special option
             m_options.insert(std::make_pair(argument.substr(2), ""));
@@ -1063,7 +1139,11 @@ void command_line_parser::process_default_options(interface_description& d)
   }
   else if (m_options.count("generate-wiki-page"))
   {
-    std::cout << d.wiki_page();
+    std::cout << d.wiki_page(std::cout);
+  }
+  else if (m_options.count("generate-xml"))
+  {
+    d.xml_page(std::cout);
   }
   else
   {

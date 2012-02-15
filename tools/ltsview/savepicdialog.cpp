@@ -21,11 +21,6 @@
 
 using namespace std;
 
-// For compatibility with older wxWidgets versions (pre 2.8)
-#if (wxMINOR_VERSION < 8)
-# define wxFD_SAVE wxSAVE
-#endif
-
 BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
   EVT_SPINCTRL(SavePicDialog::myID_W_SPIN,SavePicDialog::onSpin)
   EVT_SPINCTRL(SavePicDialog::myID_H_SPIN,SavePicDialog::onSpin)
@@ -296,6 +291,7 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
   statusbar->Update();
   GetParent()->Enable();
   GetParent()->SetCursor(wxNullCursor);
+  this->EndModal(wxOK);
 }
 
 void SavePicDialog::update_file_name()

@@ -10,24 +10,16 @@ from path import *
 
 LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
-AFun initAFun%(name)s(AFun& f)
+atermpp::function_symbol function_symbol_%(name)s()
 {
-  f = ATmakeAFun("%(name)s", %(arity)d, ATfalse);
-  ATprotectAFun(f);
-  return f;
+  static atermpp::function_symbol function_symbol_%(name)s = core::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
+  return function_symbol_%(name)s;
 }
 
 inline
-AFun gsAFun%(name)s()
+bool gsIs%(name)s(atermpp::aterm_appl Term)
 {
-  static AFun AFun%(name)s = initAFun%(name)s(AFun%(name)s);
-  return AFun%(name)s;
-}
-
-inline
-bool gsIs%(name)s(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFun%(name)s();
+  return ATgetAFun(Term) == function_symbol_%(name)s();
 }
 
 '''
@@ -35,7 +27,7 @@ bool gsIs%(name)s(ATermAppl Term)
 LIBSTRUCT_MAKE_FUNCTION = '''inline
 ATermAppl gsMake%(name)s(%(parameters)s)
 {
-  return ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
+  return ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s);
 }
 
 '''
@@ -178,7 +170,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
                 elif arg.repetitions == '+':
                     body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
-                body = body + '    std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
+                body = body + '    mCRL2log(log::debug, "soundness_checks") << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'
                 body = body + '  }\n'
             body = body + '#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
@@ -197,18 +189,9 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
-ATermAppl initConstruct%(name)s(ATermAppl& t)
-{
-  t = 0;
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
-  return t;
-}
-
-inline
 ATermAppl construct%(name)s()
 {
-  static ATermAppl t = initConstruct%(name)s(t);
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s)));
   return t;
 }
 

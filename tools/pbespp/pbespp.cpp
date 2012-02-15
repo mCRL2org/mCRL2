@@ -20,20 +20,21 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/tools.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace mcrl2;
 
 //local declarations
 
-class pbespp_tool: public input_output_tool
+class pbespp_tool: public pbes_input_tool<input_output_tool>
 {
   private:
-    typedef input_output_tool super;
+    typedef pbes_input_tool<input_output_tool> super;
 
   public:
     pbespp_tool()
@@ -42,17 +43,21 @@ class pbespp_tool: public input_output_tool
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      format(core::print_default)
     {}
 
     bool run()
     {
-      print_specification();
+      pbespp(input_filename(),
+             output_filename(),
+             pbes_input_format(),
+             format
+            );
       return true;
     }
 
   protected:
-    t_pp_format  format;
+    core::print_format_type  format;
 
     void add_options(interface_description& desc)
     {
@@ -60,9 +65,7 @@ class pbespp_tool: public input_output_tool
       desc.add_option("format", make_mandatory_argument("FORMAT"),
                       "print the PBES in the specified FORMAT:\n"
                       "  'default' for a PBES specification (default),\n"
-                      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section,\n"
-                      "  'internal' for a textual ATerm representation of the internal format, or\n"
-                      "  'internal-debug' for 'internal' with an indented layout", 'f');
+                      "  'internal' for a textual ATerm representation of the internal format", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -73,49 +76,11 @@ class pbespp_tool: public input_output_tool
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          format = ppInternal;
-        }
-        else if (str_format == "internal-debug")
-        {
-          format = ppInternalDebug;
-        }
-        else if (str_format == "debug")
-        {
-          format = ppDebug;
+          format = core::print_internal;
         }
         else if (str_format != "default")
         {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
-        }
-      }
-    }
-
-  private:
-    void print_specification()
-    {
-      pbes_system::pbes<> pbes_specification;
-      pbes_specification.load(input_filename());
-
-      mCRL2log(verbose) << "printing PBES from "
-                        << (input_filename().empty()?"standard input":input_filename())
-                        << " to " << (output_filename().empty()?"standard output":output_filename())
-                        << " in the " << pp_format_to_string(format) << " format" << std::endl;
-
-      if (output_filename().empty())
-      {
-        std::cout << pbes_system::pp(pbes_specification, format);
-      }
-      else
-      {
-        std::ofstream output_stream(output_filename().c_str());
-        if (output_stream.is_open())
-        {
-          output_stream << pbes_system::pp(pbes_specification, format);
-          output_stream.close();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
         }
       }
     }

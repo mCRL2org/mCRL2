@@ -87,10 +87,10 @@ ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
              gsMakeDataEqnSpec(DataEqnDecls)
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
-  //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
-  //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
-  //std::cerr << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
-  //std::cerr << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX:              " << SIZE_MAX << std::endl;
+  //mCRL2log(debug) << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
+  //mCRL2log(debug) << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
   return Result;
 }
 
@@ -119,7 +119,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //ProcInit != NULL
-        mCRL2log(error) << "parse error: multiple initialisations" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple initialisations" << std::endl;
         return NULL;
       }
     }
@@ -159,7 +159,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   //check whether an initialisation is present
   if (ProcInit == NULL)
   {
-    mCRL2log(error) << "parse error: missing initialisation" << std::endl;
+    mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
   Result = gsMakeProcSpec(
@@ -175,10 +175,10 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
              ProcInit
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
-  //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
-  //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
-  //std::cerr << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
-  //std::cerr << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX:              " << SIZE_MAX << std::endl;
+  //mCRL2log(debug) << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
+  //mCRL2log(debug) << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
   return Result;
 }
 
@@ -206,7 +206,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //PBEqnSpec != NULL
-        mCRL2log(error) << "parse error: multiple parameterised boolean equation specifications" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple parameterised boolean equation specifications" << std::endl;
         return NULL;
       }
     }
@@ -219,7 +219,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //PBInit != NULL
-        mCRL2log(error) << "parse error: multiple initialisations" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple initialisations" << std::endl;
         return NULL;
       }
     }
@@ -251,13 +251,13 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   //check whether a parameterised boolean equation specification is present
   if (PBEqnSpec == NULL)
   {
-    mCRL2log(error) << "parse error: missing parameterised boolean equation specification" << std::endl;
+    mCRL2log(log::error) << "parse error: missing parameterised boolean equation specification" << std::endl;
     return NULL;
   }
   //check whether an initialisation is present
   if (PBInit == NULL)
   {
-    mCRL2log(error) << "parse error: missing initialisation" << std::endl;
+    mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
   Result = gsMakePBES(

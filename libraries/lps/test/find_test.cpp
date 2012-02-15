@@ -88,12 +88,12 @@ void test_free_variables()
 
   specification = parse_linear_process_specification(
                     "act a;\n"
-                    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
+                    "proc X(z : Bool) = (z && (forall x : Nat. exists y : Nat. x < y)) -> a.X(!z);\n"
                     "init X(true);\n"
                   );
   free_variables = find_free_variables(specification.process());
   std::cerr << "--- lps ---\n" << lps::pp(specification) << std::endl;
-  std::cerr << core::detail::print_pp_set(free_variables, "free variables") << std::endl;
+  std::cerr << core::detail::print_set(free_variables, data::stream_printer(), "free variables") << std::endl;
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
@@ -113,6 +113,18 @@ void test_search()
   lps::search_free_variable(spec.process().action_summands(), d);
 }
 
+void test_search_sort_expression()
+{
+  std::string text =
+    "act a: List(Bool);                   \n"
+    "proc X(x: List(Bool)) = a(x) . X(x); \n"
+    "init X([true]);                      \n"
+    ;
+  lps::specification spec = parse_linear_process_specification(text);
+  data::sort_expression s = data::parse_sort_expression("List(Bool)");
+  BOOST_CHECK(data::search_sort_expression(spec.data().sorts(), s));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -120,6 +132,7 @@ int test_main(int argc, char* argv[])
   test_find();
   test_free_variables();
   test_search();
+  test_search_sort_expression();
 
   return EXIT_SUCCESS;
 }

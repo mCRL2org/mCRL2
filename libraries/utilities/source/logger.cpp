@@ -12,7 +12,11 @@
 #include <ctime>
 #include <string>
 #include <cassert>
+#include <iostream>
 #include "mcrl2/utilities/logger.h"
+
+namespace mcrl2 {
+  namespace log {
 
 // Implementation of now_time; platform specific.
 // used to print timestamps in front of debug messages.
@@ -65,4 +69,8 @@ custom_message_handler_t& mcrl2_custom_message_handler_func()
 {
   static custom_message_handler_t mcrl2_custom_message_handler = 0; //< Do not access directly
   return mcrl2_custom_message_handler;
+}
+
+
+  }
 }

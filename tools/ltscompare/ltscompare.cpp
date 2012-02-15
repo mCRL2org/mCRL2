@@ -37,6 +37,7 @@ using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 static const char* equivalent_string(lts_equivalence eq)
 {
@@ -374,14 +375,14 @@ class ltscompare_tool : public ltscompare_base
       {
         if (1 < parser.options.count("in1"))
         {
-          std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
+          mCRL2log(warning) << "multiple input formats specified for first LTS; can only use one\n";
         }
 
         tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
 
         if (tool_options.format_for_first == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("in1") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("in1") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -398,14 +399,14 @@ class ltscompare_tool : public ltscompare_base
       {
         if (1 < parser.options.count("in2"))
         {
-          std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
+          mCRL2log(warning) << "multiple input formats specified for second LTS; can only use one\n";
         }
 
         tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
 
         if (tool_options.format_for_second == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("in2") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("in2") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }

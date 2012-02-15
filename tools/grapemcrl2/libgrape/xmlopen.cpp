@@ -14,6 +14,7 @@
 
 #include "specification.h"
 #include "xmlopen.h"
+#include "mcrl2/exception.h"
 
 using namespace grape::libgrape;
 
@@ -47,13 +48,13 @@ bool grape::libgrape::xml_open(grape_specification* p_spec, const wxString& p_fi
   wxXmlNode* xml_grape = xml_document.GetRoot();
   if (!xml_grape)   // if document is empty or has no root
   {
-    return false;
+    throw mcrl2::runtime_error("Empty document or no root element.");
   }
 
   if (xml_grape->GetName() != _T("grape"))
   {
     // The root has aan incorrect name
-    return false;
+    throw mcrl2::runtime_error("Root has an incorrect name.");
   }
 
   /* look at nodes inside <grape> </grape> */
@@ -77,7 +78,7 @@ bool grape::libgrape::xml_open(grape_specification* p_spec, const wxString& p_fi
     else
     {
       /* invalid node name! */
-      return false;
+      throw mcrl2::runtime_error("Invalid node name, expected: \"datatypespecificationlist\", \"processdiagramlist\", or \"architecturediagramlist\".");
     }
 
     child = child->GetNext();
@@ -107,7 +108,7 @@ bool grape::libgrape::open_datatype_specification(grape_specification* p_spec, w
   if (name != _T("datatypespecification"))
   {
     // Wrong node name, the XML file cannot be used.
-    return false;
+    throw mcrl2::runtime_error("Invalid node name, expected: datatypespecification.");
   }
 
   p_spec->get_datatype_specification()->set_declarations(d_spec_content->GetNodeContent());
@@ -116,7 +117,6 @@ bool grape::libgrape::open_datatype_specification(grape_specification* p_spec, w
 
 bool grape::libgrape::open_process_diagrams(grape_specification* p_spec, wxXmlNode* p_proc_list_node)
 {
-  bool result = true;
   // The children of a proc list are all process diagrams
   wxXmlNode* proc_dia_node = p_proc_list_node->GetChildren();
   while (proc_dia_node)
@@ -165,14 +165,14 @@ bool grape::libgrape::open_process_diagrams(grape_specification* p_spec, wxXmlNo
                   if (!valid)
                   {
                     /* invalid syntax! */
-                    return false;
+                    throw mcrl2::runtime_error("Invalid syntax \"param\" node content.");
                   }
                   preamble_parameters.Add(preamble_parameter_decl);
                 }
                 else
                 {
                   /* invalid node name! */
-                  return false;
+                  throw mcrl2::runtime_error("Invalid node name. Expected \"param\".");
                 }
               }
             }
@@ -189,21 +189,21 @@ bool grape::libgrape::open_process_diagrams(grape_specification* p_spec, wxXmlNo
                   if (!valid)
                   {
                     /* invalid syntax! */
-                    return false;
+                    throw mcrl2::runtime_error("Invalid syntax \"var\" node content.");
                   }
                   preamble_variables.Add(preamble_local_var_decl);
                 }
                 else
                 {
                   /* invalid node name! */
-                  return false;
+                  throw mcrl2::runtime_error("Invalid node name. Expected \"var\".");
                 }
               }
             }
             else
             {
               /* invalid node name! */
-              return false;
+              throw mcrl2::runtime_error("Invalid node name, expected: \"localvariablelist\" or \"parameterlist\".");
             }
           }
         }
@@ -219,24 +219,42 @@ bool grape::libgrape::open_process_diagrams(grape_specification* p_spec, wxXmlNo
       new_process_diagram->get_preamble()->set_parameter_declarations_list(preamble_parameters);
       new_process_diagram->get_preamble()->set_local_variable_declarations_list(preamble_variables);
 
-      result = result && open_states(p_spec, proc_dia_node, new_process_diagram);
-      result = result && open_reference_states(p_spec, proc_dia_node, new_process_diagram);
-      result = result && open_nonterminating_transitions(p_spec, proc_dia_node, new_process_diagram);
-      result = result && open_terminating_transitions(p_spec, proc_dia_node, new_process_diagram);
-      result = result && open_initial_designators(p_spec, proc_dia_node, new_process_diagram);
-      result = result && open_comments(p_spec, proc_dia_node, new_process_diagram);
+      if (!open_states(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening states.");
+      }
+      if(!open_reference_states(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening reference states.");
+      }
+      if(!open_nonterminating_transitions(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening non-terminating transitions.");
+      }
+      if(!open_terminating_transitions(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening terminating transitions.");
+      }
+      if(!open_initial_designators(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening initial designators.");
+      }
+      if(!open_comments(p_spec, proc_dia_node, new_process_diagram))
+      {
+        throw mcrl2::runtime_error("Failed opening comments.");
+      }
     }
     else
     {
       /* invalid node name! */
-      return false;
+      throw mcrl2::runtime_error("Invalid node name. Expected \"processdiagram\".");
     }
 
     // get next diagram.
     proc_dia_node = proc_dia_node->GetNext();
   }
 
-  return result;
+  return true;
 }
 
 bool grape::libgrape::open_states(grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr)
@@ -308,7 +326,7 @@ bool grape::libgrape::open_states(grape_specification* /*p_spec*/, wxXmlNode* p_
                     else
                     {
                       /* invalid node name! */
-                      return false;
+                      throw mcrl2::runtime_error("Invalid node name. Expected \"width\" or \"height\".");
                     }
                     size_info = size_info->GetNext();
                   }
@@ -335,7 +353,7 @@ bool grape::libgrape::open_states(grape_specification* /*p_spec*/, wxXmlNode* p_
                     else
                     {
                       /* invalid node name! */
-                      return false;
+                      throw mcrl2::runtime_error("Invalid node name. Expected \"x\" or \"y\".");
                     }
                     size_info = size_info->GetNext();
                   }
@@ -343,7 +361,7 @@ bool grape::libgrape::open_states(grape_specification* /*p_spec*/, wxXmlNode* p_
                 else
                 {
                   /* invalid node name! */
-                  return false;
+                  throw mcrl2::runtime_error("Invalid node name. Expected \"name\", \"size\", or \"coord\".");
                 }
 
                 // find the next piece of information about the state
@@ -369,7 +387,7 @@ bool grape::libgrape::open_states(grape_specification* /*p_spec*/, wxXmlNode* p_
   else
   {
     /* invalid node name! */
-    return false;
+    throw mcrl2::runtime_error("Invalid node name. Expected \"processdiagram\".");
   }
 
   return true;

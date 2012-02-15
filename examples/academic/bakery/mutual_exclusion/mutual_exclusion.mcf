@@ -1,0 +1,4 @@
+% Two processes can never be in the critical section at the same time.
+% Taken from "Model-Checking Processes with Data"
+% J.F. Groote and T.A.C. Willemse
+nu X.([true]X && forall b:Bool . ([enter(b)] nu Y.([enter(!b)]false && [!leave(b)]Y)))

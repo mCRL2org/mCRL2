@@ -1,0 +1,23 @@
+act
+  ins10, ins20, acc10, acc20, coin10, coin20, ret10, ret20 ;
+  optA, optC, chg10, chg20, putA, putC, prod, 
+  readyA, readyC, out10, out20 ;
+
+proc
+  User = 
+    ins10.( optA + ins10.( optC + chg20 ) + chg10 ).User +
+    ins20.( optA.chg10 + optC + chg20 ).User ;
+
+  Mach = 
+    acc10.( putA.prod + acc10.( putC.prod + ret20 ) + ret10 ).Mach +
+    acc20.( putA.prod.ret10 + putC.prod + ret20 ).Mach ;
+
+init
+  allow(
+    { coin10, coin20, readyA, readyC, out10, out20, prod },
+    comm(
+      { ins10|acc10 -> coin10, ins20|acc20 -> coin20,
+        chg10|ret10 -> out10, chg20|ret20 -> out20,
+        optA|putA -> readyA, optC|putC -> readyC },
+      User || Mach
+  ) ) ;

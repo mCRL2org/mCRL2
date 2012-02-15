@@ -38,6 +38,7 @@
 #include "mcrl2/data/data_specification.h"
 
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -47,7 +48,7 @@
 #define FIXPOINT_MASK 2
 #define RANK_SHIFT 2
 
-// TODO: 
+// TODO:
 namespace bes
 {
 
@@ -133,26 +134,31 @@ static size_t largest_power_of_2_smaller_than(size_t i)
   return j;
 }
 
-static void assign_variables_in_tree(
-  ATerm t,
-  mcrl2::data::variable_list::iterator& var_iter,
-  mcrl2::data::detail::legacy_rewriter& rewriter,
-  const bool opt_precompile_pbes)
+inline
+void assign_variables_in_tree(
+     ATerm t,
+     mcrl2::data::variable_list::iterator& var_iter,
+     mcrl2::data::detail::legacy_rewriter& rewriter,
+     const bool opt_precompile_pbes,
+     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   if (is_pair(t))
   {
-    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes);
-    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
+    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
   }
   else
   {
     if (opt_precompile_pbes)
     {
-      rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
+      // rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
+      sigma_internal[*var_iter]=atermpp::aterm_appl(t);
     }
     else
     {
-      rewriter.set_internally_associated_value(*var_iter,(mcrl2::data::data_expression)t);
+      // rewriter.set_internally_associated_value(*var_iter,(mcrl2::data::data_expression)t);
+      sigma[*var_iter]=mcrl2::data::data_expression(t);
     }
     var_iter++;
   }
@@ -1098,7 +1104,7 @@ static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
   }
   else
   {
-    mCRL2log(error) << "Unexpected expression" << std::endl;
+    mCRL2log(mcrl2::log::error) << "Unexpected expression" << std::endl;
     assert(0);
   }
 
@@ -1131,10 +1137,11 @@ inline bes_expression toBDD(bes_expression b)
 /// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
 
 inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
-  mcrl2::pbes_system::pbes_expression p,
-  bool opt_precompile_pbes,
-  mcrl2::data::detail::legacy_rewriter& R
-  )
+     mcrl2::pbes_system::pbes_expression p,
+     bool opt_precompile_pbes,
+     mcrl2::data::detail::legacy_rewriter& R,
+     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
@@ -1158,14 +1165,14 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
     if (is_pbes_false(l))
     {
       result = pbes_expr::false_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
       //Options for left and right
       if (is_pbes_false(rt))
       {
@@ -1193,14 +1200,14 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
     if (is_pbes_true(l))
     {
       result = pbes_expr::true_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
       if (is_pbes_true(rt))
       {
         result = pbes_expr::true_();
@@ -1227,12 +1234,12 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = forall(data::data_expression_list, pbes_expression)
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
     //Remove data_vars which do not occur in expr
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
-      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
         occurred_data_vars = push_front(occurred_data_vars, *i);
       }
@@ -1252,12 +1259,12 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = exists(data::data_expression_list, pbes_expression)
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
     //Remove data_vars which does not occur in expr
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
-      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
         occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
       }
@@ -1285,8 +1292,8 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       parameters = atermpp::push_front(parameters,
                 ((opt_precompile_pbes?
-                       data::data_expression(R.rewrite_internal(R.convert_to(*l))):
-                       R(*l))));
+                       data::data_expression(R.rewrite_internal(R.convert_to(*l),sigma_internal)):
+                       R(*l,sigma))));
     }
     parameters = atermpp::reverse(parameters);
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
@@ -1297,12 +1304,12 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
 
     if (opt_precompile_pbes)
     {
-      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p));
-      if (d==R.internal_true)
+      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
+      if (d==R.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();
       }
-      else if (d==R.internal_false)
+      else if (d==R.get_rewriter().internal_false)
       {
         result = pbes_expr::false_();
       }
@@ -1313,7 +1320,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     }
     else
     {
-      data::data_expression d(R(p));
+      data::data_expression d(R(p,sigma));
       if (d == data::sort_bool::true_())
       {
         result = pbes_expr::true_();
@@ -1358,6 +1365,9 @@ class boolean_equation_system
     bool construct_counter_example;
     atermpp::indexed_set variable_index;  //Used for constructing counter examples
     mcrl2::data::detail::legacy_rewriter Mucks_rewriter;
+    typedef mcrl2::data::detail::legacy_rewriter::substitution_type substitution_type;
+    typedef mcrl2::data::detail::legacy_rewriter::internal_substitution_type internal_substitution_type;
+
     const bool opt_precompile_pbes;
     const bool internal_opt_store_as_tree;
 
@@ -1466,7 +1476,6 @@ class boolean_equation_system
     {
       if (v>nr_of_variables())
       {
-        // fprintf(stderr,"ACCESSING A VARIABLE THAT DOES NOT EXIST\n");
         return dummy();
       }
       else
@@ -2024,12 +2033,12 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(Mucks_rewriter.convert_from((ATermAppl)p)) + "\n");
+                                   mcrl2::data::pp(Mucks_rewriter.convert_from(p)));
       }
       else
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(p) + "\n");
+                                   mcrl2::data::pp(mcrl2::data::data_expression(p)));
       }
       return false_();
     }
@@ -2075,11 +2084,16 @@ class boolean_equation_system
       // Verbose msg: doing naive algorithm
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
-      // This can be removed if the jittyc or innerc compilers are not in use anymore.
+      // This can be removed if the jittyc compiler is not in use anymore.
       std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(pbes_spec);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
+
+      // Declare two variable substitutions for use in the rewriters. Only one is necessary if precompilation
+      // can be switched off.
+      substitution_type sigma;
+      internal_substitution_type sigma_internal;
 
       std::set < sort_expression > bounded_sorts;
       for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
@@ -2088,7 +2102,7 @@ class boolean_equation_system
       }
       for(std::set < sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
       {
-        const function_symbol_vector constructors(pbes_spec.data().constructors(*i)); 
+        const function_symbol_vector constructors(pbes_spec.data().constructors(*i));
         for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
         {
           Mucks_rewriter.convert_to(*j);
@@ -2121,12 +2135,12 @@ class boolean_equation_system
 #ifndef NDEBUG
       if (internal_opt_store_as_tree)
       {
-        mCRL2log(warning) << "Do not store pbes variables in a tree structure in a debug build of pbes2bool" << std::endl;
+        mCRL2log(mcrl2::log::warning) << "Do not store pbes variables in a tree structure in a debug build of pbes2bool" << std::endl;
       }
 #endif
       pbes_expression p=// pbes_rewriter(pbes_spec.initial_state());
         pbes_expression_rewrite_and_simplify(
-          pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter);
+          pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal);
 
       variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
@@ -2150,7 +2164,7 @@ class boolean_equation_system
       atermpp::table variable_rank(2*static_cast<int>(eqsys.size()),50);
 
       // Fill the pbes_equations table
-      mCRL2log(verbose) << "Retrieving pbes_equations from equation system..." << std::endl;
+      mCRL2log(mcrl2::log::verbose) << "Retrieving pbes_equations from equation system..." << std::endl;
 
       assert(eqsys.size()>0); // There should be at least one equation
       fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
@@ -2166,7 +2180,7 @@ class boolean_equation_system
               eqi->symbol(),
               eqi->variable(),
               pbes_expression_rewrite_and_simplify(
-                eqi->formula(), opt_precompile_pbes, Mucks_rewriter
+                eqi->formula(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal
               ))));
         // Rewriting terms here can lead to non termination, in
         // case the quantifier-all rewriter is used. This kind of rewriting
@@ -2184,7 +2198,7 @@ class boolean_equation_system
       size_t relevance_counter_limit=100;
 #define RELEVANCE_DIVIDE_FACTOR 100
 
-      mCRL2log(verbose) << "Computing a BES from the PBES...." << std::endl;
+      mCRL2log(mcrl2::log::verbose) << "Computing a BES from the PBES...." << std::endl;
 
       // Set the first BES equation X1=X2
       add_equation(
@@ -2223,7 +2237,7 @@ class boolean_equation_system
           // Add the required substitutions
           if (internal_opt_store_as_tree)
           {
-            // The current varable instantiation is stored as a tree, and this tree must be unfolded.
+            // The current variable instantiation is stored as a tree, and this tree must be unfolded.
             ATerm t=variable_index.get(variable_to_be_processed);
             if (!is_pair(t))
             {
@@ -2241,7 +2255,7 @@ class boolean_equation_system
 
               t=ATgetArgument(t,1);
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
-              assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes);
+              assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes,sigma,sigma_internal);
             }
 
           }
@@ -2264,11 +2278,13 @@ class boolean_equation_system
               assert(elist!=current_variable_instantiation.parameters().end());
               if (opt_precompile_pbes)
               {
-                Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
+                // Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
+                sigma_internal[*vlist]=atermpp::aterm_appl(*elist);
               }
               else
               {
-                Mucks_rewriter.set_internally_associated_value(*vlist,*elist);
+                // Mucks_rewriter.set_internally_associated_value(*vlist,*elist);
+                sigma[*vlist]=data_expression(*elist);
               }
 
               // sigma[*vlist]=*elist;
@@ -2277,32 +2293,63 @@ class boolean_equation_system
             assert(elist==current_variable_instantiation.parameters().end());
           }
 
-          pbes_expression new_pbes_expression =
-            // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
-            // rewriters work with an acceptable performance.
-            mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
-            (current_pbeq.formula(),
-             pbes_spec.data(),
-             Mucks_rewriter,
-             opt_precompile_pbes
-            );
+          bes_expression new_bes_expression;
+          try
+          {
+              // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
+              // rewriters work with an acceptable performance.
+            pbes_expression new_pbes_expression=
+              mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
+              (current_pbeq.formula(),
+               pbes_spec.data(),
+               Mucks_rewriter,
+               opt_precompile_pbes,
+               sigma,
+               sigma_internal
+              );
 
-          bes_expression new_bes_expression=
-            add_propositional_variable_instantiations_to_indexed_set_and_translate(
-              new_pbes_expression,
-              variable_index,
-              nr_of_generated_variables,
-              opt_use_hashtables,
-              opt_strategy,
-              opt_construct_counter_example,
-              variable_to_be_processed);
+            new_bes_expression=
+              add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                new_pbes_expression,
+                variable_index,
+                nr_of_generated_variables,
+                opt_use_hashtables,
+                opt_strategy,
+                opt_construct_counter_example,
+                variable_to_be_processed);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            propositional_variable_instantiation prop_var=propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+            if (opt_precompile_pbes)
+            {
+              // translate the arguments from internal format.
+              data_expression_list pars=prop_var.parameters();
+              data_expression_list resulting_pars;
+              for(data_expression_list::const_iterator it=pars.begin(); it!=pars.end(); ++it)
+              {
+                resulting_pars=push_front(resulting_pars,Mucks_rewriter.convert_from(*it));
+              }
+              prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
+            }
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " +
+                  mcrl2::pbes_system::pp(prop_var));
+          }
 
           /* No need to clear up sigma, as it was locally declared. */
           /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter(); */
           for (variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
           {
-            Mucks_rewriter.clear_internally_associated_value(*vlist);
+            // Mucks_rewriter.clear_internally_associated_value(*vlist);
+            if (opt_precompile_pbes)
+            {
+              sigma_internal[*vlist]=atermpp::aterm_appl(*vlist);
+            }
+            else
+            {
+              sigma[*vlist]=data_expression(*vlist);
+            }
           }
 
 
@@ -2392,7 +2439,7 @@ class boolean_equation_system
                 // Take the lowest element for substitution, to generate
                 // short counterexample.
 
-                // mCRL2log(verbose) << "------------------ " << (size_t)w << "" << std::endl;
+                // mCRL2log(mcrl2::log::verbose) << "------------------ " << (size_t)w << "" << std::endl;
                 to_set_to_true_or_false.erase(w);
                 for (std::set <variable_type>::iterator
                      v=variable_occurrence_set_begin(w);
@@ -2432,7 +2479,7 @@ class boolean_equation_system
         if (nr_of_processed_variables % 10 == 0)
 #endif
         {
-          mCRL2log(verbose) << "Processed " << nr_of_processed_variables <<
+          mCRL2log(mcrl2::log::verbose) << "Processed " << nr_of_processed_variables <<
                       " and generated " << nr_of_generated_variables <<
                       " boolean variables" << std::endl;
         }
@@ -2458,12 +2505,12 @@ class boolean_equation_system
         if (opt_precompile_pbes)
         {
           data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
-          f << c << mcrl2::core::pp(t1);
+          f << c << mcrl2::data::pp(t1);
         }
         else
         {
           data_expression t1(t);
-          f << c << mcrl2::core::pp(t1);
+          f << c << mcrl2::data::pp(t1);
         }
       }
     }
@@ -2504,11 +2551,11 @@ class boolean_equation_system
           if (opt_precompile_pbes)
           {
             const atermpp::aterm_appl term=*t;
-            f << mcrl2::core::pp(Mucks_rewriter.convert_from(term));
+            f << mcrl2::data::pp(Mucks_rewriter.convert_from(term));
           }
           else
           {
-            f << mcrl2::core::pp(*t);
+            f << mcrl2::data::pp(*t);
           }
         }
         f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()
@@ -2556,7 +2603,7 @@ class boolean_equation_system
         }
         catch (std::exception& e)
         {
-          mCRL2log(warning) << "Fail to write counterexample to " << filename <<
+          mCRL2log(mcrl2::log::warning) << "Fail to write counterexample to " << filename <<
                     "(" << e.what() << ")" << std::endl;
         }
       }
@@ -2603,390 +2650,6 @@ inline void save_bes_in_pbes_format(
   boolean_equation_system& bes_equations,
   const typename mcrl2::pbes_system::pbes<Container> &p);
 inline void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations);
-inline void save_bes_in_vasy_format(const std::string& outfilename,boolean_equation_system bes_equations);
-
-
-static void save_rhs_in_cwi_form(std::ostream& outputfile,
-                                 bes_expression p,
-                                 boolean_equation_system& bes_equations);
-
-static void save_rhs_in_vasy_form(std::ostream& outputfile,
-                                  bes_expression p,
-                                  std::vector<size_t> &variable_index,
-                                  const size_t current_rank,
-                                  boolean_equation_system& bes_equations);
-
-
-//function save_bes_in_vasy_format
-//--------------------------------
-
-typedef enum { both, and_form, or_form} expression_sort;
-
-static bes_expression translate_equation_for_vasy(const size_t i,
-    const bes_expression b,
-    const expression_sort s,
-    boolean_equation_system& bes_equations)
-{
-  if (is_true(b))
-  {
-    return b;
-  }
-  else if (is_false(b))
-  {
-    return b;
-  }
-  else if (is_and(b))
-  {
-    if (s==or_form)
-    {
-      /* make a new equation B=b, and return B */
-      variable_type v=bes_equations.nr_of_variables()+1;
-      bes_equations.add_equation(v,
-                                 bes_equations.get_fixpoint_symbol(i),
-                                 bes_equations.get_rank(i),
-                                 b);
-      return variable(v);
-    }
-    else
-    {
-      bes_expression b1=translate_equation_for_vasy(i,lhs(b),and_form,bes_equations);
-      bes_expression b2=translate_equation_for_vasy(i,rhs(b),and_form,bes_equations);
-      return and_(b1,b2);
-    }
-  }
-  else if (is_or(b))
-  {
-    if (s==and_form)
-    {
-      /* make a new equation B=b, and return B */
-      variable_type v=bes_equations.nr_of_variables()+1;
-      bes_equations.add_equation(v,
-                                 bes_equations.get_fixpoint_symbol(i),
-                                 bes_equations.get_rank(i),
-                                 b);
-      return variable(v);
-    }
-    else
-    {
-      bes_expression b1=translate_equation_for_vasy(i,lhs(b),or_form,bes_equations);
-      bes_expression b2=translate_equation_for_vasy(i,rhs(b),or_form,bes_equations);
-      return or_(b1,b2);
-    }
-  }
-  else if (is_variable(b))
-  {
-    return b;
-  }
-  else if (is_if(b))
-  {
-    //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
-    return translate_equation_for_vasy(i,
-                                       and_optimized(then_branch(b),
-                                           or_optimized(condition(b),else_branch(b))),s,bes_equations);
-    /* const bes_expression y=then_branch(b);
-    const bes_expression z=else_branch(b);
-    if (is_true(y))
-    { if (is_false(z))
-      { return translate_equation_for_vasy(i,condition(b),s,bes_equations);
-      }
-      else
-      { return translate_equation_for_vasy(i,or_(condition(b),z),s,bes_equations);
-      }
-    }
-    else if (is_false(z))
-    { // not is_true(y)
-      { return translate_equation_for_vasy(i,and_(condition(b),y),s,bes_equations);
-      }
-    }
-    else
-    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
-      e x i t(1);
-    } */
-  }
-  else
-  {
-    throw mcrl2::runtime_error("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
-  }
-  return b;
-}
-
-/// \brief Save the bes in the format in use by the VASY group, INRIA, Grenoble
-/// \detail Save the BES in blocks with equal rank.
-/// \param string The name of the output file
-/// \parar bes_equations The bes equations to bes saved.
-inline
-void save_bes_in_vasy_format(const std::string& outfilename,bes::boolean_equation_system bes_equations)
-{
-  using namespace mcrl2::pbes_system;
-  mCRL2log(verbose) << "Converting result to VASY-format..." << std::endl;
-
-  // Use an indexed set to keep track of the variables and their vasy-representations
-
-  /* First translate the right hand sides of the equations such that they only
-     contain only conjunctions of disjunctions. Note that dynamically new
-     equations are added during the translation process in "translate_equation_for_vasy"
-     that must also be translated. */
-
-  for (size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
-  {
-    bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
-  }
-
-  /* Second give a consecutive index to each variable of a particular rank */
-
-  std::vector<size_t> variable_index(bes_equations.nr_of_variables()+1);
-  for (size_t r=1 ; r<=bes_equations.max_rank ; r++)
-  {
-    size_t index=0;
-    for (size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
-    {
-      if (bes_equations.get_rank(i)==r)
-      {
-        variable_index[i]=index;
-        index++;
-      }
-    }
-  }
-
-  /* Third save the equations in the forms of blocks of equal rank */
-
-  std::ofstream outputfile;
-  if (outfilename!="")
-  {
-    outputfile.open(outfilename.c_str(), std::ios::trunc);
-    if (!outputfile.is_open())
-    {
-      throw mcrl2::runtime_error("Could not save BES to " + outfilename + "\n");
-    }
-  }
-
-  for (size_t r=1 ; r<=bes_equations.max_rank ; r++)
-  {
-    bool first=true;
-    for (size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
-    {
-      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
-      {
-        if (first)
-        {
-          ((outfilename=="")?std::cout:outputfile) <<
-              "block " <<
-              ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
-              r-1 <<
-              " is " << std::endl;
-          first=false;
-        }
-        ((outfilename=="")?std::cout:outputfile) << "  X" << variable_index[i] << " = ";
-        save_rhs_in_vasy_form(((outfilename=="")?std::cout:outputfile),
-                              bes_equations.get_rhs(i),
-                              variable_index,
-                              r,
-                              bes_equations);
-        ((outfilename=="")?std::cout:outputfile) << std::endl;
-      }
-    }
-    ((outfilename=="")?std::cout:outputfile) << "end block" << std::endl << std::endl;
-  }
-
-  outputfile.close();
-}
-
-//function save_rhs_in_vasy_form
-//---------------------------
-static void save_rhs_in_vasy_form(std::ostream& outputfile,
-                                  bes_expression b,
-                                  std::vector<size_t> &variable_index,
-                                  const size_t current_rank,
-                                  bes::boolean_equation_system& bes_equations)
-{
-  if (is_true(b))
-  {
-    outputfile << "true";
-  }
-  else if (is_false(b))
-  {
-    outputfile << "false";
-  }
-  else if (is_and(b))
-  {
-    //BESAnd(a,b) => a and b
-    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank,bes_equations);
-    outputfile << " and ";
-    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank,bes_equations);
-  }
-  else if (is_or(b))
-  {
-    //BESOr(a,b) => a or b
-    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank,bes_equations);
-    outputfile << " or ";
-    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank,bes_equations);
-  }
-  else if (is_variable(b))
-  {
-    // PropVar => <Int>
-    outputfile << "X" << variable_index[get_variable(b)];
-    if (bes_equations.get_rank(get_variable(b))!=current_rank)
-    {
-      outputfile << "_" << bes_equations.get_rank(get_variable(b))-1;
-    }
-  }
-  else if (is_if(b))
-  {
-    //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
-    save_rhs_in_vasy_form(outputfile,
-                          and_optimized(then_branch(b),
-                                        or_optimized(condition(b),else_branch(b))),
-                          variable_index,
-                          current_rank,
-                          bes_equations);
-  }
-  else
-  {
-    throw std::runtime_error("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
-  }
-  return;
-}
-
-//function save_bes_in_cwi_format
-//--------------------------------
-/// \brief Save the bes in the format in use by CWI, Amsterdam
-/// \detail The BES equations are saved using rules of the form
-///         min Xi = expression or max Xi = expression, where i is an index and
-///         expression of the synax E = (E&E) | (E|E) | Xj | T | F.  The equations
-///         are saved with increasing rank. Variable X1 is the initial variable.
-/// \param string The name of the output file
-/// \param bes_equations The bes equations to bes saved.
-inline
-void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations)
-{
-  using namespace mcrl2::pbes_system;
-  mCRL2log(verbose) << "Converting result to CWI-format..." << std::endl;
-
-  // Use an indexed set to keep track of the variables and their cwi-representations
-
-  std::ofstream outputfile;
-  if (outfilename!="")
-  {
-    outputfile.open(outfilename.c_str(), std::ios::trunc);
-    if (!outputfile.is_open())
-    {
-      throw mcrl2::runtime_error("Could not save BES to " + outfilename + "\n");
-    }
-  }
-
-  for (size_t r=1 ; r<=bes_equations.max_rank ; r++)
-  {
-    for (size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
-    {
-      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
-      {
-        ((outfilename=="")?std::cout:outputfile) <<
-            ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        save_rhs_in_cwi_form(((outfilename=="")?std::cout:outputfile),bes_equations.get_rhs(i),bes_equations);
-        ((outfilename=="")?std::cout:outputfile) << std::endl;
-      }
-    }
-  }
-
-  outputfile.close();
-}
-
-//function save_rhs_in_cwi
-//---------------------------
-static void save_rhs_in_cwi_form(std::ostream& outputfile,
-                                 bes_expression b,
-                                 boolean_equation_system& bes_equations)
-{
-  if (is_true(b))
-  {
-    outputfile << "T";
-  }
-  else if (is_false(b))
-  {
-    outputfile << "F";
-  }
-  else if (is_and(b))
-  {
-    //BESAnd(a,b) => (a & b)
-    outputfile << "(";
-    save_rhs_in_cwi_form(outputfile,lhs(b),bes_equations);
-    outputfile << "&";
-    save_rhs_in_cwi_form(outputfile,rhs(b),bes_equations);
-    outputfile << ")";
-  }
-  else if (is_or(b))
-  {
-    //BESOr(a,b) => (a | b)
-    outputfile << "(";
-    save_rhs_in_cwi_form(outputfile,lhs(b),bes_equations);
-    outputfile << "|";
-    save_rhs_in_cwi_form(outputfile,rhs(b),bes_equations);
-    outputfile << ")";
-  }
-  else if (is_variable(b))
-  {
-    // PropVar => <Int>
-    outputfile << "X" << get_variable(b);
-  }
-  else if (is_if(b))
-  {
-    //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
-    save_rhs_in_cwi_form(outputfile,and_optimized(then_branch(b),
-                         or_optimized(condition(b),else_branch(b))),bes_equations);
-  }
-  else
-  {
-    throw mcrl2::runtime_error("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
-  }
-  return;
-}
-
-static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expression b);
-
-//function save_bes_in_pbes_format
-//--------------------------------
-/// \brief Save the bes as a PBES without parameters
-/// \detail The BES equations are saved as a PBES file in ATerm format with name
-///         outfilename. All datatypes are taken from the pbes p.
-/// \param string The name of the output file
-/// \param bes_equations The bes equations to bes saved.
-/// \param p A PBES from which the datatypes are taken for the PBES that is saved.
-template <class Container>
-inline
-void save_bes_in_pbes_format(
-  const std::string& outfilename,
-  boolean_equation_system& bes_equations,
-  const typename mcrl2::pbes_system::pbes<Container> &p)
-{
-  using namespace mcrl2::pbes_system;
-  using namespace mcrl2::data;
-  mCRL2log(verbose) << "Converting result to PBES-format..." << std::endl;
-
-  // Use an indexed set to keep track of the variables and their pbes-representations
-
-  atermpp::vector < pbes_equation > eqns;
-  for (size_t r=1 ; r<=bes_equations.max_rank ; r++)
-  {
-    for (size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
-    {
-      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
-      {
-        pbes_expression pbe=generate_rhs_as_formula(bes_equations.get_rhs(i));
-        std::stringstream variable_name;
-        variable_name << "X" << i;
-        eqns.push_back(
-          mcrl2::pbes_system::pbes_equation(
-            bes_equations.get_fixpoint_symbol(i),
-            propositional_variable(variable_name.str()),
-            pbe));
-      }
-    }
-  }
-
-  pbes<> p1(p.data(),eqns,atermpp::set<mcrl2::data::variable>(),
-            propositional_variable_instantiation("X1"));
-  p1.save(outfilename);
-}
 
 //function generate_rhs_as_bes_formula
 //---------------------------
@@ -3030,66 +2693,12 @@ static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(bes_expression
   return mcrl2::bes::true_();
 }
 
-//function save_rhs_in_pbes
-//---------------------------
-static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expression b)
-{
-  using namespace mcrl2::pbes_system;
-  if (is_true(b))
-  {
-    return mcrl2::pbes_system::pbes_expr::true_();
-  }
-  else if (is_false(b))
-  {
-    return pbes_expr::false_();
-  }
-  else if (is_and(b))
-  {
-    return pbes_expr::and_(generate_rhs_as_formula(lhs(b)),
-                           generate_rhs_as_formula(rhs(b)));
-  }
-  else if (is_or(b))
-  {
-    return pbes_expr::or_(generate_rhs_as_formula(lhs(b)),
-                          generate_rhs_as_formula(rhs(b)));
-  }
-  else if (is_variable(b))
-  {
-    std::stringstream converter;
-    converter << "X" << get_variable(b);
-    return propositional_variable_instantiation(converter.str());
-  }
-  else if (is_if(b))
-  {
-    //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
-    return generate_rhs_as_formula(and_optimized(then_branch(b),
-                                   or_optimized(condition(b),else_branch(b))));
-  }
-  else
-  {
-    throw mcrl2::runtime_error("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
-  }
-  return pbes_expr::true_();
-}
-
-
-
-//function save_bes_in_bes_format
-//--------------------------------
-/// \brief Save the bes as a BES
-/// \detail The BES equations are saved as a BES file in ATerm format with name
-///         outfilename.
-/// \param string The name of the output file
-/// \param bes_equations The bes equations to bes saved.
-
 inline
-void save_bes_in_bes_format(
-  const std::string& outfilename,
-  boolean_equation_system& bes_equations)
+mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::bes;
-  mCRL2log(verbose) << "Converting result to BES-format..." << std::endl;
+  mCRL2log(mcrl2::log::verbose) << "Converting result to BES-format..." << std::endl;
   // Use an indexed set to keep track of the variables and their bes-representations
 
   atermpp::vector < boolean_equation > eqns;
@@ -3113,9 +2722,9 @@ void save_bes_in_bes_format(
 
   mcrl2::bes::boolean_equation_system<> result(eqns,
       boolean_variable("X1"));
-  result.save(outfilename);
-}
 
+  return result;
+}
 
 /// From here there are routines to solve a BES.
 
@@ -3481,7 +3090,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   using namespace std;
   using namespace mcrl2::pbes_system;
 
-  mCRL2log(verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
+  mCRL2log(mcrl2::log::verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
               " equations." << std::endl;
 
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
@@ -3518,7 +3127,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   for (size_t current_rank=bes_equations.max_rank;
        current_rank>0 ; current_rank--)
   {
-    mCRL2log(verbose) << "Solve equations of rank " << current_rank << "." << std::endl;
+    mCRL2log(mcrl2::log::verbose) << "Solve equations of rank " << current_rank << "." << std::endl;
 
     /* Calculate the stable solution for the current rank */
 

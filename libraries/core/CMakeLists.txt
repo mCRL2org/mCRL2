@@ -10,16 +10,52 @@
 project(mcrl2_core)
 cmake_minimum_required(VERSION 2.6)
 
+# ##### Generate parser tables ######
+
+# Silence warnings while compiling generated C code (mcrl2_syntax.c is the only
+# C code in this library)
+if(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w") # Disable all warnings
+else(MSVC)
+  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w") # Disable all warnings
+  else (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    # Assuming GCC: disable only the missing-field-initializer warning.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
+  endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+endif(MSVC)
+
+add_custom_command(
+  OUTPUT ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.c
+  COMMAND make_dparser -A -H1 -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+  DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+)
+
+include_directories(
+  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
+)
+
+add_library(mcrl2_syntax
+  source/mcrl2_syntax.c
+)
+
+target_link_libraries(mcrl2_syntax
+  dparser
+)
+
+# add install target:
+install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR})
+
 # ######### Set policies ############
 
-# ################################### 
-# "core" links to some transitive 
+# ###################################
+# "core" links to some transitive
 # libraries for which the linker must
 # search:
 #   wxWidgets
 # Therefore CMP0003 is set to NEW
 # If not set, a BUILD_SHARED_LIB=TRUE
-# combined with a wxWidgets build 
+# combined with a wxWidgets build
 # raises a warning
 # ###################################
 
@@ -30,17 +66,15 @@ endif(COMMAND cmake_policy)
 # ######### General setup ##########
 
 set(mcrl2_core_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/core.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include )
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include )
@@ -56,7 +90,9 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   mcrl2_aterm
   mcrl2_utilities
+  mcrl2_syntax
 )
+
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

@@ -3,8 +3,9 @@
 #include <assert.h>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-// #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 using namespace aterm;
 using namespace mcrl2::data::detail;
@@ -16,22 +17,24 @@ using namespace mcrl2::data::detail;
 #endif // _MSC_VER
 
 extern "C" {
-  DLLEXPORT ATermAppl rewrite(ATermAppl);
-  DLLEXPORT void set_subst(ATermAppl Var, ATerm Expr);
-  DLLEXPORT void clear_subst(ATermAppl Var);
-  DLLEXPORT void clear_substs();
   DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
   DLLEXPORT void rewrite_cleanup();
-  DLLEXPORT ATermAppl rewrite(const ATermAppl t);
+  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t);
 }
 
-static inline ATermAppl rewrite(const ATerm t) { return rewrite((ATermAppl)t); }
+static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl t);
 
-static inline ATermAppl makeAppl0(AFun a, ATerm h) { return ATmakeAppl1(a,h); }
-static inline ATermAppl makeAppl1(AFun a, ATerm h, ATermAppl t) { return ATmakeAppl2(a,h,(ATerm) t); }
-static inline ATermAppl makeAppl2(AFun a, ATerm h, ATermAppl t1, ATermAppl t2) { return ATmakeAppl3(a,h,(ATerm) t1, (ATerm) t2); }
-static inline ATermAppl makeAppl3(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3) { return ATmakeAppl4(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3); }
-static inline ATermAppl makeAppl4(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4) { return ATmakeAppl5(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4); }
-static inline ATermAppl makeAppl5(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4, ATermAppl t5) { return ATmakeAppl6(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4, (ATerm) t5); }
+static inline atermpp::aterm_appl makeAppl0(AFun a, atermpp::aterm h) 
+              { return ATmakeAppl1(a,(ATerm)h); }
+static inline atermpp::aterm_appl makeAppl1(AFun a, atermpp::aterm h, atermpp::aterm_appl t1) 
+              { return ATmakeAppl2(a,(ATerm)h,(ATerm)(ATermAppl) t1); }
+static inline atermpp::aterm_appl makeAppl2(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2) 
+              { return ATmakeAppl3(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2); }
+static inline atermpp::aterm_appl makeAppl3(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2, atermpp::aterm_appl t3) 
+              { return ATmakeAppl4(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3); }
+static inline atermpp::aterm_appl makeAppl4(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2, atermpp::aterm_appl t3, atermpp::aterm_appl t4) 
+              { return ATmakeAppl5(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3, (ATerm)(ATermAppl) t4); }
+static inline atermpp::aterm_appl makeAppl5(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2, atermpp::aterm_appl t3, atermpp::aterm_appl t4, atermpp::aterm_appl t5) 
+              { return ATmakeAppl6(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3, (ATerm)(ATermAppl) t4, (ATerm)(ATermAppl) t5); }
 
 

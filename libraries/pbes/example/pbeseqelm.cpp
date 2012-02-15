@@ -18,13 +18,13 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -68,9 +68,9 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
 
     bool run()
     {
-      mCRL2log(verbose) << "pbeseqelm parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log::verbose) << "pbeseqelm parameters:" << std::endl;
+      mCRL2log(log::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -87,7 +87,6 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
           typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
           pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_use_initial_state);
           break;
         }
@@ -96,7 +95,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         {
           typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
           bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          utilities::number_postfix_generator name_generator("UNIQUE_PREFIX");
           data::data_enumerator<> datae(p.data(), datar, name_generator);
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);

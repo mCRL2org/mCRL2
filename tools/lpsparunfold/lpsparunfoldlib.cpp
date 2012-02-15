@@ -6,22 +6,22 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
 #include <iterator>
 
 #include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 #include <mcrl2/lps/linear_process.h>
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/print.h"
 
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
+using namespace mcrl2::log;
 
 /* Remarks
 - replace on vectors does not work
@@ -82,7 +82,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
 mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort(std::string str)
 {
   //Generate a fresh Basic Sort
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   generator.add_identifiers(sort_names);
   mcrl2::core::identifier_string nstr = generator(str);
   mCRL2log(verbose) << "Generated fresh sort \"" <<  string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
@@ -96,7 +96,7 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapp
 
   str.resize(std::remove_if(str.begin(), str.end(), &char_filter) - str.begin());
 
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   generator.add_identifiers(mapping_and_constructor_names);
   mcrl2::core::identifier_string nstr = generator(str);
   mCRL2log(debug) << "Generated a fresh mapping: " <<  string(nstr) << std::endl;
@@ -206,7 +206,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   variable_vector vars;        /* Equation variables  */
   data_equation_vector del;    /* Generated equations */
   atermpp::set<mcrl2::core::identifier_string> var_names; /* var_names */
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   variable v;
 
 
@@ -342,7 +342,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         data_expression v = variable(istr, element_sort);
         sort_vars[ element_sort ].push_back(v);
       }
-      variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
+      //variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
       sort_index[ element_sort ] = sort_index[ element_sort ]+1;
 
       data_expression lhs, rhs;
@@ -387,7 +387,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 
 mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, atermpp::set<mcrl2::core::identifier_string>& process_parameter_names)
 {
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   generator.add_identifiers(process_parameter_names);
   mcrl2::core::identifier_string idstr = generator(str.append("_pp"));
   process_parameter_names.insert(idstr);
@@ -556,7 +556,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     mcrl2::lps::replace_variables( new_lps, s );
   }
 
-  mCRL2log(debug) << "\nNew LPS:\n" <<  core::pp(lps::linear_process_to_aterm(new_lps)) << std::endl;
+  mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
 
   assert(is_well_typed(new_lps));
 
@@ -741,7 +741,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
 
   if (is_structured_sort(lps_proc_pars[parameter_at_index].sort()))
   {
-    mcrl2::data::postfix_identifier_generator generator("");
+    mcrl2::data::set_identifier_generator generator;
     mcrl2::core::identifier_string nstr;
     nstr = generator("S");
     sort_names.insert(nstr);
@@ -757,7 +757,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
 
   if (is_container_sort(lps_proc_pars[parameter_at_index].sort()))
   {
-    mcrl2::data::postfix_identifier_generator generator("");
+    mcrl2::data::set_identifier_generator generator;
     mcrl2::core::identifier_string nstr;
     nstr = generator("S");
     sort_names.insert(nstr);
@@ -777,7 +777,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
 {
   assert(function_sort(case_function.sort()).codomain() == function_sort(function_for_distribution.sort()).domain().front());
 
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   variable_vector variables_used;
   mcrl2::core::identifier_string istr;
 
@@ -839,7 +839,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   /* Generate variable identifier string for projection */
   data_equation_vector del;    /* Generated equations */
   std::string fstr = "y";
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::data::set_identifier_generator generator;
   mcrl2::core::identifier_string istr = generator(fstr);
 
   variable_vector vars;

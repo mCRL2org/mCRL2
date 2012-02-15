@@ -24,7 +24,9 @@ The following packages are required:
 - boost >= 1.35: package boost
 
 The following packages are recommended:
-- wxWidgets >= 2.8.4: package libwxgtk2.8-dev or libwxgtk2.8-dbg
+- wxWidgets    >= 2.8.11: package libwxgtk2.8-dev or libwxgtk2.8-dbg
+- wxWidgets-gl >= 2.8.11 
+- OpenGL       >= 7.0.1 : package Mesa (GL and GLU) 
 
 These packages enable the following tools:
 - diagraphica (wxWidgets must be compiled with OpenGL support)

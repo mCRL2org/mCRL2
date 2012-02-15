@@ -468,7 +468,7 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   static inline
   std::string pp(term_type t)
   {
-    return core::pp(t) + " variables: " + data::pp(t.variables());
+    return pbes_system::pp(t) + " variables: " + data::pp(t.variables());
   }
 };
 

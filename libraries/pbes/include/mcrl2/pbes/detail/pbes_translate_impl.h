@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"

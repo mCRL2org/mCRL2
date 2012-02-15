@@ -1,0 +1,62 @@
+{% extends "basic/layout.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <script type="text/javascript" src="{{ pathto('_static/mcrl2.js', 1) }}"></script>
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-8820488-1']);
+    _gaq.push(['_trackPageview']);
+  </script>
+{% endblock %}
+
+{% block relbar1 %}
+<div class="header">
+  {{ relbar() }}
+  <div class="mainmenu"><ul>
+  <li><a href="{{ pathto('../user_manual/index.html', 1) }}">Home</a></li>
+  <li><a href="{{ pathto('../user_manual/download.html', 1) }}">Download</a></li>
+  <li><a href="{{ pathto('../user_manual/user.html', 1) }}">User documentation</a></li>
+  <li><a href="{{ pathto('../user_manual/support.html', 1) }}">Support</a></li>
+  <li><a href="{{ pathto('../user_manual/showcases.html', 1) }}">Showcases</a></li>
+  <li><a href="{{ pathto('../developer_manual/index.html', 1) }}">Developer documentation</a></li>
+  <li class="search">
+    <form class="search" action="{{ pathto('search') }}" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="{{ _('Search') }}" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+  </li>
+  </ul>
+  </div>
+</div>
+{% endblock %}
+{% block relbar2 %}{% endblock %}
+
+{% block sidebarsourcelink %}
+{%- if show_source and has_source and sourcename %}
+<div class="sourcelink">
+  <h4>This page</h4>
+  <ul class="this-page-menu">
+    <li><a href="{{ pathto('_sources/' + sourcename, true)|e }}"
+           rel="nofollow">{{ _('Show Source') }}</a></li>
+  </ul>
+</div>
+{%- endif %}
+{% endblock %}
+
+{% block footer %}
+{{ super() }}
+<div class="footer">
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+{% endblock %}

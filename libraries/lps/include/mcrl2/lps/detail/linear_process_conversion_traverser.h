@@ -128,7 +128,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
       clear_summand();
     }
-// std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
+// std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << lps::pp(m_summand) << std::endl;
   }
 
   /// \brief Visit delta node
@@ -172,7 +172,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const sum& x)
   {
     m_sum_variables = m_sum_variables + x.bound_variables();
-// std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
+// std::cout << "adding sum variables\n" << data::pp(v) << std::endl;
   }
 
   /// \brief Visit block node
@@ -276,7 +276,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       // Check 2) The process equation and and the process instance must match
       if (!detail::check_process_instance(m_equation, p))
       {
-        std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+        std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
@@ -288,7 +288,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       // Check 2) The process equation and and the process instance assignment must match
       if (!detail::check_process_instance_assignment(m_equation, p))
       {
-        std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+        std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = p.assignments(); // TODO: check if this is correct
@@ -296,11 +296,11 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     }
     else
     {
-      std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+      std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
       throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
     }
 
-// std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
+// std::cout << "adding next state\n" << data::pp(m_next_state) << std::endl;
   }
 
   /// \brief Visit if_then node
@@ -311,7 +311,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const if_then& x)
   {
     m_condition = x.condition();
-// std::cout << "adding condition\n" << core::pp(m_condition) << std::endl;
+// std::cout << "adding condition\n" << data::pp(m_condition) << std::endl;
   }
 
   /// \brief Visit if_then_else node

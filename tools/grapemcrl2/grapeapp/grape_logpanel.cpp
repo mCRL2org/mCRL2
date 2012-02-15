@@ -21,7 +21,7 @@ using namespace grape::grapeapp;
 
 class message_relay;
 
-static void relay_message(const ::mcrl2_message_t t, const char* data);
+static void relay_message(const mcrl2::log::message_t t, const char* data);
 
 class text_control_buf : public std::streambuf
 {
@@ -59,7 +59,7 @@ std::auto_ptr < message_relay > communicator;
 
 class message_relay
 {
-    friend void relay_message(const ::mcrl2_message_t, const char* data);
+    friend void relay_message(const mcrl2::log::message_t, const char* data);
 
   private:
 
@@ -79,7 +79,7 @@ class message_relay
     {
       m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
 
-      mcrl2_logger::set_custom_message_handler(relay_message);
+      mcrl2::log::mcrl2_logger::set_custom_message_handler(relay_message);
     }
 
     void message(const char* data)
@@ -98,21 +98,22 @@ class message_relay
 
     ~message_relay()
     {
-      mcrl2_logger::set_custom_message_handler(0);
+      mcrl2::log::mcrl2_logger::set_custom_message_handler(0);
 
       delete std::cerr.rdbuf(m_error_stream);
     }
 };
 
-static void relay_message(const ::mcrl2_message_t t, const char* data)
+static void relay_message(const mcrl2::log::message_t t, const char* data)
 {
+  using namespace mcrl2::log;
   switch (t)
   {
-    case mcrl2_notice:
+    case msg_notice:
       break;
-    case mcrl2_warning:
+    case msg_warning:
       break;
-    case mcrl2_error:
+    case msg_error:
     default:
       communicator->message(data);
       break;

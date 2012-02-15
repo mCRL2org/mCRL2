@@ -65,6 +65,8 @@ class application_base: public data_expression
       return atermpp::arg1(*this);
     }
 
+    /// \brief Give the arguments of this term as a list. 
+    /// \details time for this operation is constant.
     data_expression_list arguments() const
     {
       return atermpp::list_arg2(*this);
@@ -132,6 +134,14 @@ class application: public detail::application_base
     {
       assert(arguments().size() == 2);
       return *(++(arguments().begin()));
+    }
+
+    /// \brief Returns the n-th argument of the application, where the first argument has index 0.
+    /// \pre The number of arguments must be at least n.
+    data_expression argument(const size_t n)
+    {
+      assert(arguments().size() > n);
+      return data_expression((ATermAppl)ATelementAt(arguments(),n));
     }
 }; // class application
 

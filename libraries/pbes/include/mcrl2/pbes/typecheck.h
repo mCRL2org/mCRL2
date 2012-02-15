@@ -13,6 +13,7 @@
 #define MCRL2_PBES_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
@@ -35,7 +36,7 @@ void type_check(pbes<Container>& pbes_spec)
   ATermAppl t2 = core::type_check_pbes_spec(t1);
   if (!t2)
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp(t1));
+    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(pbes_spec));
   }
   pbes_spec = pbes<Container>(t2, true);
 }

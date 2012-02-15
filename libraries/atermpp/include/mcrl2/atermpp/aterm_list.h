@@ -318,6 +318,16 @@ term_list<Term> reverse(term_list<Term> l)
   return term_list<Term>(ATreverse(l));
 }
 
+/// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
+/// \param l A list.
+/// \param x A list element.
+template <typename Term>
+inline
+term_list<Term> remove_one_element(const term_list<Term>& l, const Term& x)
+{
+  return term_list<Term>(ATremoveElement(l, aterm_traits<Term>::term(x)));
+}
+
 /// \brief Applies a function to all elements of the list and returns the result.
 /// \param l The list that is transformed.
 /// \param f The function that is applied to the elements of the list.

@@ -27,16 +27,16 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 {
   public:
     typedef lts::lts_lts_t::states_size_type state_type;
-  
+
   protected:
     const lts::lts_lts_t& lts0;
     state_formulas::state_formula f0;
-    
+
     core::identifier_string make_identifier(const core::identifier_string& name, state_type s)
     {
       return core::identifier_string(std::string(name) + "@" + boost::lexical_cast<std::string>(s));
     }
-    
+
     /// \brief The \p RHS function of the translation
     /// \param f A modal formula
     /// \param s A state of an LTS
@@ -88,13 +88,13 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
-        for (lts::transition_const_range r = lts0.get_transitions(); !r.empty(); r.advance_begin(1))
+        const std::vector<lts::transition> &trans=lts0.get_transitions();
+        for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
-          lts::transition tr = r.front();
-          if (s == tr.from())
+          if (s == r->from())
           {
-            lts::detail::action_label_lts a = lts0.action_label(tr.label());
-            state_type t = tr.to();
+            lts::detail::action_label_lts a = lts0.action_label(r->label());
+            state_type t = r->to();
             v.push_back(imp(sat_top(a, alpha), RHS(phi, t)));
           }
         }
@@ -107,13 +107,13 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
-        for (lts::transition_const_range r = lts0.get_transitions(); !r.empty(); r.advance_begin(1))
+        const std::vector<lts::transition> &trans=lts0.get_transitions();
+        for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
-          lts::transition tr = r.front();
-          if (s == tr.from())
+          if (s == r->from())
           {
-            lts::detail::action_label_lts a = lts0.action_label(tr.label());
-            state_type t = tr.to();
+            lts::detail::action_label_lts a = lts0.action_label(r->label());
+            state_type t = r->to();
             v.push_back(and_(sat_top(a, alpha), RHS(phi, t)));
           }
         }
@@ -208,7 +208,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
           core::identifier_string X = make_identifier(af::name(f), s);
           propositional_variable Xs(X, d + Par(X, data::variable_list(), f0));
           v.push_back(pbes_equation(sigma, Xs, RHS(af::arg(f), s)));
-        }      
+        }
         result = v + E(af::arg(f));
       }
       else
@@ -264,7 +264,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);      
+      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
       return result;
     }
 };

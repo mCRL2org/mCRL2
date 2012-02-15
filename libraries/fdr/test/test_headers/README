@@ -1,2 +1,0 @@
-Facility for testing headers. Each header file is compiled standalone.
-It can be run using the command 'bjam'.

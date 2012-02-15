@@ -11,7 +11,7 @@
 #ifndef __xsimtracedll_H__
 #define __xsimtracedll_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma interface "xsimtracedll.h"
 #endif
 
@@ -19,8 +19,7 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
-#include "mcrl2/aterm/aterm2.h"
-#include "simbase.h"
+#include "mcrl2/lps/simbase.h"
 
 //----------------------------------------------------------------------------
 // XSimTraceDLL
@@ -39,19 +38,27 @@ class XSimTraceDLL: public wxFrame, public SimulatorViewDLLInterface
     // SimulatorViewInterface
     virtual void Registered(SimulatorInterface* Simulator);
     virtual void Unregistered();
-    virtual void Initialise(ATermList Pars);
-    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
-    virtual void Reset(ATerm State);
+    virtual void Initialise(const mcrl2::data::variable_list Pars);
+    virtual void StateChanged(
+                  mcrl2::lps::multi_action Transition,
+                  const mcrl2::lps::state State,
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::state > next_states);
+    virtual void StateChanged(
+                  const mcrl2::lps::state State,
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::state > next_states);
+    virtual void Reset(mcrl2::lps::state  State);
     virtual void Undo(size_t Count);
     virtual void Redo(size_t Count);
-    virtual void TraceChanged(ATermList Trace, size_t From);
-    virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
+    virtual void TraceChanged(mcrl2::trace::Trace  Trace, size_t From);
+    virtual void TracePosChanged(size_t Index);
 
   private:
     // WDR: method declarations for XSimMain
-    void AddState(ATermAppl Transition, ATerm State, bool enabled);
-    void _add_state(ATermAppl Transition, ATerm State, bool enabled);
-    void _reset(ATerm State);
+    void AddState(const mcrl2::lps::multi_action Transition, const mcrl2::lps::state &State, bool enabled);
+    void _add_state(const mcrl2::lps::multi_action Transition, const mcrl2::lps::state & State, bool enabled);
+    void _reset(const mcrl2::lps::state &State);
     void _update();
 
   private:
@@ -70,5 +77,9 @@ class XSimTraceDLL: public wxFrame, public SimulatorViewDLLInterface
   private:
     DECLARE_EVENT_TABLE()
 };
+
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface* Simulator);
+extern "C" __attribute__((constructor)) void SimulatorViewDLLInit();
+extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp();
 
 #endif

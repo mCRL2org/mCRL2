@@ -16,7 +16,7 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/lps/action_parse.h"
 #include "label.h"
 #include "action.h"
 #include "dataexpression.h"
@@ -76,8 +76,16 @@ void label::set_actions_text(const wxString& p_actions)
 {
   m_actions.Clear();
 
-  std::istringstream r(string(p_actions.mb_str()).c_str());
-  atermpp::aterm_appl a_parsed_multi_action(mcrl2::core::parse_mult_act(r));
+  std::string s(p_actions.mb_str());
+  atermpp::aterm_appl a_parsed_multi_action;
+  try
+  {
+    a_parsed_multi_action = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(s));
+  }
+  catch (...)
+  {
+    // skip
+  }
 
   if (a_parsed_multi_action)
   {
@@ -87,7 +95,7 @@ void label::set_actions_text(const wxString& p_actions)
     for (atermpp::aterm_list::const_iterator i = al.begin(); i != al.end(); ++i)
     {
       action action;
-      action.set_name(wxString(pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
+      action.set_name(wxString(mcrl2::core::pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
       action.set_parameters_text(atermpp::aterm_appl(*i).argument(1));
       m_actions.Add(action);
     }

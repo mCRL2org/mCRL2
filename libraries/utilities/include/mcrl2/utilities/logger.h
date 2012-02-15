@@ -16,31 +16,34 @@
 #include <string>
 #include <sstream>
 #include <map>
-#include <iostream>
 
 #include "mcrl2/utilities/text_utility.h"
 
+namespace mcrl2 {
+
+  namespace log {
+
 /// \brief Log levels that are supported
 /// \note log_debugi with i>=1 automatically indent 2*i spaces.
-enum mcrl2_log_level_t
+enum log_level_t
 {
-  log_quiet, // No log message should ever be printed to this log level!
-  log_error,
-  log_warning,
-  log_info,
-  log_verbose,
-  log_debug,
-  log_debug1,
-  log_debug2,
-  log_debug3,
-  log_debug4,
-  log_debug5
+  quiet, // No log message should ever be printed to this log level!
+  error,
+  warning,
+  info,
+  verbose,
+  debug,
+  debug1,
+  debug2,
+  debug3,
+  debug4,
+  debug5
 };
 
 /// \brief Convert log level to string
 /// This string is used to prefix messages in the logging output.
 inline
-std::string log_level_to_string(const mcrl2_log_level_t level)
+std::string log_level_to_string(const log_level_t level)
 {
   static const char* const buffer[] = {"quiet", "error", "warning", "info", "verbose", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
   return buffer[level];
@@ -48,51 +51,51 @@ std::string log_level_to_string(const mcrl2_log_level_t level)
 
 /// \brief Convert string to log level
 inline
-mcrl2_log_level_t log_level_from_string(const std::string& s)
+log_level_t log_level_from_string(const std::string& s)
 {
   if (s == "quiet")
   {
-    return log_quiet;
+    return quiet;
   }
   else if (s == "error")
   {
-    return log_error;
+    return error;
   }
   else if (s == "warning")
   {
-    return log_warning;
+    return warning;
   }
   else if (s == "info")
   {
-    return log_info;
+    return info;
   }
   else if (s == "verbose")
   {
-    return log_verbose;
+    return verbose;
   }
   else if (s == "debug")
   {
-    return log_debug;
+    return debug;
   }
   else if (s == "debug1")
   {
-    return log_debug1;
+    return debug1;
   }
   else if (s == "debug2")
   {
-    return log_debug2;
+    return debug2;
   }
   else if (s == "debug3")
   {
-    return log_debug3;
+    return debug3;
   }
   else if (s == "debug4")
   {
-    return log_debug4;
+    return debug4;
   }
   else if (s == "debug5")
   {
-    return log_debug5;
+    return debug5;
   }
   else
   {
@@ -102,11 +105,11 @@ mcrl2_log_level_t log_level_from_string(const std::string& s)
 
 /// \brief Type for message distinction (by purpose).
 /// Should only be used for custom message handlers.
-enum mcrl2_message_t
+enum message_t
 {
-  mcrl2_notice,
-  mcrl2_warning,
-  mcrl2_error
+  msg_notice,
+  msg_warning,
+  msg_error
 };
 
 /// \prototype
@@ -115,7 +118,7 @@ std::string now_time();
 /// \brief Type for function pointer for a custom message printing routine
 /// \deprecated
 /// provided for backward compatibility with gs*Msg
-typedef void (*custom_message_handler_t)(mcrl2_message_t, const char*);
+typedef void (*custom_message_handler_t)(message_t, const char*);
 custom_message_handler_t& mcrl2_custom_message_handler_func(); // prototype
 
 static
@@ -150,7 +153,7 @@ class logger
     std::ostringstream m_os;
     
     /// \brief The loglevel of the current message
-    mcrl2_log_level_t m_level;
+    log_level_t m_level;
 
     /// \brief The message hint of the current message
     std::string m_hint;
@@ -167,9 +170,9 @@ class logger
     /// message hint all messages up to debug level are printed, whereas for other
     /// message hints no messages are printed at all.
     static
-    std::map<std::string, mcrl2_log_level_t>& hint_to_level()
+    std::map<std::string, log_level_t>& hint_to_level()
     {
-      static std::map<std::string, mcrl2_log_level_t> m_hint_to_level;
+      static std::map<std::string, log_level_t> m_hint_to_level;
       return m_hint_to_level;
     }
 
@@ -181,35 +184,35 @@ class logger
       return indentation;
     }
 
-    mcrl2_message_t to_message_type(const mcrl2_log_level_t level) const
+    message_t to_message_type(const log_level_t level) const
     {
-      if (level <= log_error)
+      if (level <= error)
       {
-        return mcrl2_error;
+        return msg_error;
       }
-      else if (level <= log_warning)
+      else if (level <= warning)
       {
-        return mcrl2_warning;
+        return msg_warning;
       }
       else
       {
-        return mcrl2_notice;
+        return msg_notice;
       }
     }
 
     /// \brief The default log level that is used if no specific log level has
     /// been set.
     static
-    mcrl2_log_level_t default_reporting_level()
+    log_level_t default_reporting_level()
     {
-      std::map<std::string, mcrl2_log_level_t>::const_iterator i = hint_to_level().find(OutputPolicy::default_hint());
+      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(OutputPolicy::default_hint());
       if(i != hint_to_level().end())
       {
         return i->second;
       }
       else
       {
-        return log_info;
+        return info;
       }
     }
 
@@ -229,7 +232,11 @@ class logger
       + std::string(8 - log_level_to_string(m_level).size(), ' ')
       + std::string(2*indentation(), ' ');
 
-      bool s_ends_with_newline = (s[s.size()-1] == '\n');
+      bool s_ends_with_newline = false;
+	  if (s.size() > 0)
+	  { 
+		s_ends_with_newline = (s[s.size()-1] == '\n');
+	  }
 
       std::string result = s;
       // Avoid adding spurious start of line after the last line in the log.
@@ -281,7 +288,7 @@ class logger
     /// \param[in] level Log level
     /// \param[in] hint The hint for which to set log level
     static
-    void set_reporting_level(const mcrl2_log_level_t level, const std::string& hint = OutputPolicy::default_hint())
+    void set_reporting_level(const log_level_t level, const std::string& hint = OutputPolicy::default_hint())
     {
       hint_to_level()[hint] = level;
     }
@@ -289,9 +296,9 @@ class logger
     /// \brief Get reporting level
     /// \param[in] hint The hint for which to get log level
     static
-    mcrl2_log_level_t get_reporting_level(const std::string& hint = OutputPolicy::default_hint())
+    log_level_t get_reporting_level(const std::string& hint = OutputPolicy::default_hint())
     {
-      std::map<std::string, mcrl2_log_level_t>::const_iterator i = hint_to_level().find(hint);
+      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(hint);
       if(i != hint_to_level().end())
       {
         return i->second;
@@ -330,7 +337,7 @@ class logger
     /// Get access to the stream provided by the logger.
     /// \param[in] l Log level for the stream
     /// \param[in] hint The hint for which the stream has to be provided.
-    std::ostringstream& get(const mcrl2_log_level_t l, const std::string& hint = OutputPolicy::default_hint())
+    std::ostringstream& get(const log_level_t l, const std::string& hint = OutputPolicy::default_hint())
     {
       m_level = l;
       m_hint = hint;
@@ -440,7 +447,7 @@ typedef logger<file_output> mcrl2_logger;
 /// Unless otherwise specified, we compile away all debug messages that have
 /// a log level greater than MCRL2_MAX_LOG_LEVEL.
 #ifndef MCRL2_MAX_LOG_LEVEL
-#define MCRL2_MAX_LOG_LEVEL log_debug
+#define MCRL2_MAX_LOG_LEVEL mcrl2::log::debug
 #endif
 
 /// mCRL2log(level) provides the function used to log. It performs two
@@ -456,11 +463,13 @@ typedef logger<file_output> mcrl2_logger;
 // We also use the facilities to provide a variable number of arguments to a macro, in order
 // to allow mCRL2log(level) as well as mCRL2log(level, "hint")
 #define mCRL2log(level, ...) \
-if (log_##level > MCRL2_MAX_LOG_LEVEL) ; \
-else if (log_##level > mcrl2_logger::get_reporting_level(__VA_ARGS__)) ; \
-else mcrl2_logger().get(log_##level, ##__VA_ARGS__)
+if ((level) > MCRL2_MAX_LOG_LEVEL) ; \
+else if ((level) > (mcrl2::log::mcrl2_logger::get_reporting_level(__VA_ARGS__))) ; \
+else mcrl2::log::mcrl2_logger().get(level, ##__VA_ARGS__)
 
 #define mCRL2logEnabled(level, ...) \
-((log_##level <= MCRL2_MAX_LOG_LEVEL) && log_##level <= mcrl2_logger::get_reporting_level(__VA_ARGS__))
+(((level) <= MCRL2_MAX_LOG_LEVEL) && ((level) <= (mcrl2::log::mcrl2_logger::get_reporting_level(__VA_ARGS__))))
 
+  } // namespace log
+} // namespace mcrl2
 #endif /* MCRL_UTILITIES_LOGGER_H */

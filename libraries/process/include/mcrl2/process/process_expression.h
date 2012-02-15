@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_H
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
+#include <set>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -874,38 +875,82 @@ int precedence(const process_expression& x)
 {
   if (is_choice(x))
   {
-    return 0;
+    return 1;
   }
   else if (is_sum(x))
   {
-    return 1;
-  }
-  else if (is_merge(x) || is_left_merge(x))
-  {
     return 2;
   }
-  else if (is_if_then(x) || is_if_then_else(x))
+  else if (is_merge(x))
   {
     return 3;
   }
-  else if (is_bounded_init(x))
+  else if (is_left_merge(x))
   {
     return 4;
   }
-  else if (is_seq(x))
+  else if (is_if_then(x) || is_if_then_else(x))
   {
     return 5;
   }
-  else if (is_at(x))
+  else if (is_bounded_init(x))
   {
     return 6;
   }
-  else if (is_sync(x))
+  else if (is_seq(x))
   {
     return 7;
   }
+  else if (is_at(x))
+  {
+    return 8;
+  }
+  else if (is_sync(x))
+  {
+    return 9;
+  }
   return max_precedence;
 }
+
+inline int precedence(const choice& x)       { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const sum& x)          { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const merge& x)        { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const left_merge& x)   { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const if_then& x)      { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const if_then_else& x) { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const bounded_init& x) { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const seq& x)          { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
+
+// template function overloads
+std::string pp(const process_expression& x);
+std::string pp(const process_expression_list& x);
+std::string pp(const process_expression_vector& x);
+std::string pp(const process_instance& x);
+std::string pp(const process_instance_assignment& x);
+std::string pp(const delta& x);
+std::string pp(const tau& x);
+std::string pp(const sum& x);
+std::string pp(const block& x);
+std::string pp(const hide& x);
+std::string pp(const rename& x);
+std::string pp(const comm& x);
+std::string pp(const allow& x);
+std::string pp(const sync& x);
+std::string pp(const at& x);
+std::string pp(const seq& x);
+std::string pp(const if_then& x);
+std::string pp(const if_then_else& x);
+std::string pp(const bounded_init& x);
+std::string pp(const merge& x);
+std::string pp(const left_merge& x);
+std::string pp(const choice& x);
+std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
+
+// TODO: These should be removed when the ATerm code has been replaced.
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace process
 

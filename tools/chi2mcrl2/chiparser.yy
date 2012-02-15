@@ -30,6 +30,7 @@ extern int yylex( void );
 extern char* yytext; */
 
 using namespace std;
+using namespace mcrl2::log;
 
 //external declarations from lexer.ll
 void chiyyerror( const char *s );

@@ -115,7 +115,7 @@ typeCheckSpec::typeCheckSpec(wxWindow* parent, wxWindowID id):
   p_parent = parent;
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Parse and type check specification")), 0, wxLEFT|wxALL, 5);
-  sizer->Add(new wxButton(this, OPTION_TC, wxT("Parse and type check")), 0, wxLEFT | wxALL, 5);
+  sizer->Add(new wxButton(this, OPTION_TC, wxT("Run")), 0, wxLEFT | wxALL, 5);
   sizer->SetSizeHints(this);
   SetSizer(sizer);
 }

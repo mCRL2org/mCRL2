@@ -53,7 +53,7 @@ struct lts_generation_options
     strat(mcrl2::data::rewriter::jitty),
     usedummies(true),
     removeunused(true),
-    stateformat(GS_STATE_VECTOR),
+    stateformat(GS_STATE_TREE),
     outformat(mcrl2::lts::lts_none),
     outinfo(true),
     suppress_progress_messages(false),
@@ -95,7 +95,7 @@ struct lts_generation_options
   size_t max_states;
   std::string priority_action;
   bool trace;
-  atermpp::set < mcrl2::core::identifier_string > trace_actions;
+  atermpp::set < mcrl2::core::identifier_string > trace_actions; // strings representing action labels, but without the sorts.
   size_t max_traces;
   bool detect_deadlock;
   bool detect_divergence;
@@ -188,7 +188,7 @@ class lps2lts_algorithm
       if (!must_abort)
       {
         must_abort = true;
-        std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+        mCRL2log(log::warning) << "state space generation was aborted prematurely" << std::endl;
       }
     }
 
@@ -205,13 +205,13 @@ class lps2lts_algorithm
     state_t get_repr(const state_t state);
 
     // trace functions
-    bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma);
+    bool occurs_in(const core::identifier_string name, const mcrl2::lps::multi_action ma);
     bool savetrace(std::string const& info,
                    const state_t state,
                    NextState* nstate,
                    const state_t extra_state = state_t(),
-                   ATermAppl extra_transition = NULL);
-    void check_actiontrace(const state_t OldState, ATermAppl Transition, const state_t NewState);
+                   const lps::multi_action extra_transition = lps::multi_action());
+    void check_actiontrace(const state_t OldState, const mcrl2::lps::multi_action Transition, const state_t NewState);
     void save_error_trace(const state_t state);
     void check_deadlocktrace(const state_t state);
 
@@ -219,7 +219,7 @@ class lps2lts_algorithm
     size_t state_index(const state_t state);
 
     // Main routine
-    bool add_transition(const state_t from, ATermAppl action, const state_t to);
+    bool add_transition(const state_t from, mcrl2::lps::multi_action action, const state_t to);
 };
 
 }

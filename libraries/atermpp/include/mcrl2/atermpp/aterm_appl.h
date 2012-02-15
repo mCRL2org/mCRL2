@@ -13,14 +13,62 @@
 #define MCRL2_ATERMPP_ATERM_APPL_H
 
 #include <cassert>
+#include <iterator>
 #include <vector>
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/aterm_appl_iterator.h"
+#include "mcrl2/atermpp/aterm_traits.h"
 
 namespace atermpp
 {
+
+namespace detail
+{
+
+// Function object for conversion to ATerm
+struct aterm_converter
+{
+  template <typename T>
+  ATerm operator()(const T& x)
+  {
+    return aterm_traits<T>::term(x);
+  }
+};
+
+// Note: ATmakeAppl requires a forward iterator, so we have to make a special case for input iterators.
+template <class InputIterator>
+inline ATermAppl at_make_appl(const function_symbol& sym, InputIterator first, InputIterator last, std::input_iterator_tag)
+{
+   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,ATerm,sym.arity());
+  // std::vector<ATerm> arguments;
+  size_t c=0;
+  for (InputIterator i = first; i != last; ++i, ++c)
+  {
+    arguments[c]=aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i);
+    // arguments.push_back(aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i));
+  }
+  assert(c==sym.arity());
+  // return ATmakeApplArray(sym, &(arguments.front()));
+  return ATmakeApplArray(sym, arguments);
+}
+
+template <class ForwardIterator>
+inline ATermAppl at_make_appl(const function_symbol& sym, ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
+{
+  return ATmakeAppl(sym, first, last, aterm_converter());
+}
+
+template <class Iterator>
+inline ATermAppl at_make_appl(const function_symbol& sym, Iterator first, Iterator last)
+{
+  return at_make_appl(sym, first, last, typename std::iterator_traits<Iterator>::iterator_category());
+}
+
+} // namespace detail
+
 /// \brief A term that represents a function application.
 template <typename Term>
 class term_appl: public aterm_base
@@ -32,7 +80,7 @@ class term_appl: public aterm_base
     /// built-in C++ operator[](ATermAppl, int)
     /// \param i A positive integer
     /// \return The default constructed term
-    Term operator[](size_t i) const
+    Term operator[](size_t /*i*/) const
     {
       return Term();
     }
@@ -108,12 +156,7 @@ class term_appl: public aterm_base
     template <typename Iter>
     term_appl(function_symbol sym, Iter first, Iter last)
     {
-      std::vector<ATerm> arguments;
-      for (Iter i = first; i != last; ++i)
-      {
-        arguments.push_back(aterm_traits<typename std::iterator_traits<Iter>::value_type>::term(*i));
-      }
-      m_term = reinterpret_cast< ATerm >(ATmakeApplArray(sym, &(arguments.front())));
+      m_term = reinterpret_cast<ATerm>(detail::at_make_appl(sym, first, last));
     }
 
     /// \brief Constructor.

@@ -2,6 +2,9 @@
 % Variable K indicates the number of philosophers (and forks)
 %
 % Note: When changing the value of K, change the KForkPhil process accordingly!
+%
+% Note: Since revision 9975 the construct as used below to describe K processes in parallel
+% has been disabled. This example can not be linearised as it stands. 
 
 eqn K = 10;
 

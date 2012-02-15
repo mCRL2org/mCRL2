@@ -18,6 +18,8 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 
+using namespace mcrl2::log;
+
 xEditor::xEditor(wxWindow* parent, wxWindowID id, outputpanel* output) :
   wxAuiNotebook(parent , id)
 {
@@ -39,7 +41,7 @@ bool xEditor::LoadFile(const wxString& filename)
   p_data_editor = new xStcEditor(this, wxID_ANY);
   this->AddPage(p_data_editor, wxFileName(filename).GetFullName());
   p_data_editor->SetFocus();
-  mCRL2log(info) << "Opened file:" << filename.c_str() << std::endl;
+  mCRL2log(info) << "Opened file:" << filename.mb_str() << std::endl;
 
   try
   {
@@ -121,7 +123,7 @@ bool xEditor::SaveFile(const wxString& filename)
 
       return false;
     }
-    mCRL2log(info) << "Saving: " << filename.c_str() << std::endl;
+    mCRL2log(info) << "Saving: " << filename.mb_str() << std::endl;
 
     /* Action for saving to lps */
     if (wxFileName(filename).GetExt() == wxT("lps"))
@@ -130,13 +132,13 @@ bool xEditor::SaveFile(const wxString& filename)
       mCRL2log(warning) << "+++ Formatting and comments will be removed +++" << std::endl;
       mCRL2log(warning) << "+++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 
-      mCRL2log(info) << "Parsing and type checking specification: " << filename.c_str() << std::endl;
+      mCRL2log(info) << "Parsing and type checking specification: " << filename.mb_str() << std::endl;
 
       std::string str_spec = std::string(GetStringFromDataEditor().mb_str());
       mcrl2::lps::specification spec = mcrl2::lps::parse_linear_process_specification(str_spec);
       spec.save(std::string(filename.mb_str()));
 
-      mCRL2log(info) << "Successfully saved to: " << filename.c_str() << std::endl;
+      mCRL2log(info) << "Successfully saved to: " << filename.mb_str() << std::endl;
 
       /* Reassign filename in use */
       p_data_editor->SetFileInUse(filename);
@@ -153,7 +155,7 @@ bool xEditor::SaveFile(const wxString& filename)
       if (f.Write(spec, wxConvUTF8))
       {
 
-        mCRL2log(info) << "Successfully saved to: " << filename.c_str() << std::endl;
+        mCRL2log(info) << "Successfully saved to: " << filename.mb_str() << std::endl;
 
         /* Reassign filename in use */
         p_data_editor->SetFileInUse(filename);
@@ -161,7 +163,7 @@ bool xEditor::SaveFile(const wxString& filename)
       }
       else
       {
-        mCRL2log(error) << "Failed to saved to:: " << filename.c_str() << std::endl;
+        mCRL2log(error) << "Failed to saved to:: " << filename.mb_str() << std::endl;
       }
       p_data_editor->SetSavePoint();
       return true;

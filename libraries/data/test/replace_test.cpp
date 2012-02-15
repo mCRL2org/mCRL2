@@ -27,7 +27,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 

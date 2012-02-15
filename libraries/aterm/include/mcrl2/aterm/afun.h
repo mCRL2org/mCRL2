@@ -13,9 +13,9 @@ namespace aterm
 typedef size_t AFun;
 
 const size_t AS_INT = 0;
-const size_t AS_REAL = 1;
-const size_t AS_BLOB = 2;
-const size_t AS_PLACEHOLDER = 3;
+// const size_t AS_REAL = 1;
+// const size_t AS_BLOB = 2;
+// const size_t AS_PLACEHOLDER = 3;
 const size_t AS_LIST = 4;
 const size_t AS_EMPTY_LIST = 5;
 

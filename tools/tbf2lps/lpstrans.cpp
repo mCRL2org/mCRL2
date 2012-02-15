@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
+#include "lpstrans.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/identifier_string.h"
@@ -37,6 +38,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -203,14 +205,10 @@ static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
 
 static ATermList get_substs(ATermList ids)
 {
-  ATermIndexedSet used = ATindexedSetCreate(1000,50);
+  atermpp::set < ATerm > used;
   ATermList substs = ATmakeList0();
 
-//  if ( !remove_standard_functions )
-  {
-    bool b;
-    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)),&b);
-  }
+  used.insert((ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)));
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
   {
@@ -243,14 +241,13 @@ static ATermList get_substs(ATermList ids)
     size_t i = 0;
     ATermAppl new_id = 0;
     while (!is_user_identifier(s) ||
-           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >=0)
+           (used.count((ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >0))
     {
-      sprintf(t,"%lu",i);
+      sprintf(t,"%zu",i);
       i++;
     }
 
-    bool b;
-    ATindexedSetPut(used,(ATerm) new_id,&b);
+    used.insert((ATerm) new_id);
 
     substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
   }
@@ -356,7 +353,7 @@ static ATermList convert_datas(ATermAppl spec, ATermList* ids)
     }
     ATermAppl lhs_before_translation=ATAgetArgument(ATAgetFirst(eqns),1);
     if (strcmp(ATgetName(ATgetAFun(lhs_before_translation)),"eq#Bool#Bool"))
-    { 
+    {
       // No match.
       lhs = dataterm2ATermAppl(lhs_before_translation,args);
       rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);

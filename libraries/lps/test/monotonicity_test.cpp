@@ -42,10 +42,7 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
     f = state_formulas::detail::resolve_name_clashes(f);
     std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
-  else
-  {
-    BOOST_CHECK(is_monotonous(f) == expect_success);
-  }
+  BOOST_CHECK(is_monotonous(f) == expect_success);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
@@ -61,6 +58,12 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))", lps_spec, true);
   run_monotonicity_test_case("mu X. !X", lps_spec, false);
   run_monotonicity_test_case("mu X. nu Y. (X => Y)", lps_spec, false);
+  run_monotonicity_test_case("mu X. X || mu X. X", lps_spec, true);
+  run_monotonicity_test_case("mu X. (X || mu X. X)", lps_spec, true);
+  run_monotonicity_test_case("mu X. (X || mu Y. Y)", lps_spec, true);
+  run_monotonicity_test_case("!(mu X. X || mu X. X)", lps_spec, true);
+  run_monotonicity_test_case("!(mu X. (X || mu X. X))", lps_spec, true);
+  run_monotonicity_test_case("!(mu X. (X || mu Y. Y))", lps_spec, true);
 }
 
 // Test case provided by Jeroen Keiren, 10-9-2010
@@ -121,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("(nu X . mu Y. X) => true", lps_spec, true);
   run_monotonicity_test_case("!(nu X . mu Y. X)", lps_spec, true);
 
-#ifdef MCRL2_DISABLE_MONOTONICITY_CHECKS
+#ifndef MCRL2_DISABLE_MONOTONICITY_CHECKS
   run_monotonicity_test_case("mu X . X", lps_spec, true);
   run_monotonicity_test_case("nu X . X", lps_spec, true);
   run_monotonicity_test_case("mu X . !X", lps_spec, false);

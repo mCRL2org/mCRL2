@@ -14,6 +14,7 @@
 
 #include "../../../../../tools/pbespgsolve/pbespgsolve.h"
 #include "mcrl2/utilities/execution_timer.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2 {
 
@@ -24,7 +25,18 @@ namespace pbes_system {
 inline
 bool pbespgsolve(pbes<>& p, const pbespgsolve_options& options = pbespgsolve_options())
 {
-  utilities::execution_timer timer("pbes_solve_test");
+  utilities::execution_timer timer;
+  pbes_system::detail::instantiate_global_variables(p);
+  pbespgsolve_algorithm algorithm(timer, options);
+  return algorithm.run(p);
+}
+
+/// \brief Solves a pbes using a parity game solver
+/// \return The solution of the pbes
+inline
+bool pbespgsolve(pbes<>& p, utilities::execution_timer& timer, const pbespgsolve_options& options = pbespgsolve_options())
+{
+  pbes_system::detail::instantiate_global_variables(p);
   pbespgsolve_algorithm algorithm(timer, options);
   return algorithm.run(p);
 }

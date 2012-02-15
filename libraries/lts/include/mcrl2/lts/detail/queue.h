@@ -12,6 +12,7 @@
 #define MCRL2_LTS_DETAIL_QUEUE_H
 
 #include <limits.h>
+#include <cassert>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/utilities/logger.h"
@@ -101,12 +102,12 @@ class queue
       if (queue_put.size() > queue_size_max)
       {
         queue_put.resize(queue_size_max);
-        std::cerr << "Warning: resizing put queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "resizing put queue loses elements" << std::endl;
       }
       if (queue_get.size() > queue_size_max)
       {
         queue_get.resize(queue_size_max);
-        std::cerr << "Warning: resizing get queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "resizing get queue loses elements" << std::endl;
       }
     }
 

@@ -14,21 +14,18 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/data/parse.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/invariant_eliminator.h"
-#include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/lps/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-using namespace mcrl2::lps;
-using namespace mcrl2::lps::detail;
+using namespace mcrl2::log;
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -155,7 +152,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       add_option("no-check",
                  "do not check if the invariant holds before eliminating unreachable summands", 'n').
       add_option("no-elimination",
-                 "do not eliminate or simplify summands", 'e').
+                 "do not eliminate or simplify summands, but add the invariant to each condition", 'e').
       add_option("simplify-all",
                  "simplify the conditions of all summands, instead of just eliminating the summands "
                  "whose conditions in conjunction with the invariant are contradictions", 'l').
@@ -200,55 +197,21 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     bool run()
     {
-      lps::specification specification;
-
-      specification.load(m_input_filename);
-
-      if (!m_invariant_file_name.empty())
-      {
-        std::ifstream instream(m_invariant_file_name.c_str());
-
-        if (!instream.is_open())
-        {
-          throw mcrl2::runtime_error("cannot open input file '" + m_invariant_file_name + "'");
-        }
-
-        mCRL2log(verbose) << "parsing input file '" <<  m_invariant_file_name << "'..." << std::endl;
-
-        data::variable_list& parameters=specification.process().process_parameters();
-        m_invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
-
-        instream.close();
-      }
-      else
-      {
-        std::cerr << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
-        return false;
-      }
-
-      bool invariance_result = true;
-      if (m_no_check)
-      {
-        mCRL2log(warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
-      }
-      else
-      {
-        Invariant_Checker v_invariant_checker(
-          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(),
-          m_apply_induction, m_counter_example, m_all_violations, m_dot_file_name
-        );
-
-        invariance_result = v_invariant_checker.check_invariant(m_invariant);
-      }
-
-      if (invariance_result)
-      {
-        Invariant_Eliminator v_invariant_eliminator(
-          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_simplify_all
-        );
-
-        mcrl2::lps::specification(v_invariant_eliminator.simplify(m_invariant, m_no_elimination, m_summand_number)).save(m_output_filename);
-      }
+      lps::lpsinvelm(m_input_filename,
+                m_output_filename,
+                m_invariant_file_name,
+                m_dot_file_name,
+                rewrite_strategy(),
+                solver_type(),
+                m_summand_number,
+                m_no_check,
+                m_no_elimination,
+                m_simplify_all,
+                m_all_violations,
+                m_counter_example,
+                m_path_eliminator,
+                m_apply_induction,
+                m_time_limit);
 
       return true;
     }

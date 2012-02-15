@@ -500,10 +500,9 @@ SVCint SVCnumTransitions(SVCfile* file)
 std::string SVCerror(int errnum)
 {
 
-  switch (errnum)
+/* switch (errnum)
   {
-    default:
+    default: */
       return svcError(errnum);
-  }
-
+/*  } */
 }

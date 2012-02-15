@@ -11,6 +11,8 @@
 #include bool.spec
 #include pos.spec
 #include nat.spec
+#supertypeof Pos
+#supertypeof Nat
 
 sort Int <"int_">;
 
@@ -27,22 +29,22 @@ map Nat2Int <"nat2int"> : Nat <"arg"> -> Int;
     max <"maximum">:Int <"left"> #Nat <"right">->Nat;
     max <"maximum">:Int <"left"> #Int <"right">->Int;
     min <"minimum">:Int <"left"> #Int <"right">->Int;
-    abs <"abs">:Int <"number">->Nat;
+    abs <"abs">:Int <"arg">->Nat;
     - <"negate">:Pos <"arg">->Int;
     - <"negate">:Nat <"arg">->Int;
     - <"negate">:Int <"arg">->Int;
-    succ <"succ">:Int <"number">->Int;
-    pred <"pred">:Nat <"number">->Int;
-    pred <"pred">:Int <"number">->Int;
-    @dub <"dub">:Bool <"bit"> # Int <"arg"> -> Int;
+    succ <"succ">:Int <"arg">->Int;
+    pred <"pred">:Nat <"arg">->Int;
+    pred <"pred">:Int <"arg">->Int;
+    @dub <"dub">:Bool <"left"> # Int <"right"> -> Int;
     + <"plus">:Int <"left"> #Int <"right">->Int;
     - <"minus">:Pos <"left"> # Pos <"right">->Int;
     - <"minus">:Nat <"left"> # Nat <"right">->Int;
     - <"minus">:Int <"left"> # Int <"right">->Int;
     * <"times">:Int <"left"> # Int <"right">->Int;
-    div <"div">: Int <"arg1"> # Pos <"arg2"> -> Int;
-    mod <"mod">:Int <"arg1"> # Pos <"arg2"> -> Nat;
-    exp <"exp">:Int <"arg1"> # Nat <"arg2"> -> Int;
+    div <"div">: Int <"left"> # Pos <"right"> -> Int;
+    mod <"mod">:Int <"left"> # Pos <"right"> -> Nat;
+    exp <"exp">:Int <"left"> # Nat <"right"> -> Int;
 
 var b:Bool;
     n:Nat;
@@ -100,8 +102,8 @@ eqn ==(@cInt(m),@cInt(n)) = ==(m,n);
     +(@cNeg(p),@cNeg(q)) = @cNeg(@addc(false,p,q));
     <=(q,p) -> -(p,q) = @cInt(@gtesubtb(false,p,q));
     <(p,q) -> -(p,q) = -(@gtesubtb(false,q,p));
-    <=(n,m) -> -(m,n) = @cInt(@gtesubt(m,n));
-    <(m,n) -> -(m,n) = -(@gtesubt(n,m));
+    <=(n,m) -> -(m,n) = @cInt(@monus(m,n));
+    <(m,n) -> -(m,n) = -(@monus(n,m));
     -(x,y) = +(x, -(y));
     *(@cInt(m),@cInt(n)) = @cInt(*(m,n));
     *(@cInt(n),@cNeg(p)) = -(*(@cNat(p),n));

@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PRINT_H
 
 #include "mcrl2/lps/print.h"
-#include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/traverser.h"
 
 namespace mcrl2 {
@@ -61,7 +60,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
     // is_list(x) may return the wrong result.
     atermpp::vector<process_equation> normalized_equations = x.equations();
-    process::normalize_sorts(normalized_equations, x.data());   
+    process::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "proc ", "\n\n", "\n     ");
 
     print_initial_state(x.init());
@@ -71,7 +70,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::process_identifier& x)
   {
     derived().enter(x);
-    derived()(x.sorts());
+    derived()(x.name());
     derived().leave(x);
   }
 
@@ -98,7 +97,9 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.identifier().name());
-    print_assignments(x.assignments(), false);
+    derived().print("(");
+    print_assignments(x.assignments(), true, "", "");
+    derived().print(")");
     derived().leave(x);
   }
 
@@ -121,7 +122,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().enter(x);
     derived().print("sum ");
     print_variables(x.bound_variables(), true, true, false, "", "");
-    derived().print(". ");   
+    derived().print(". ");
     print_expression(x.operand(), precedence(x));
     derived().leave(x);
   }
@@ -176,8 +177,11 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.action_name());
-    derived().print(" -> ");
-    derived()(x.name());
+    if (!data::is_nil(x.name()))
+    {
+      derived().print(" -> ");
+      derived()(x.name());
+    }
     derived().leave(x);
   }
 
@@ -278,49 +282,24 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<process::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<process::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  process::print(t, out);
+  stream_printer()(x, out);
   return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  MCRL2_CHECK_PP(core::pp(t),
-                 process::print(t),
-                 t.to_string()
-                );
-  return core::pp(t);
-}
-
-///// \brief Pretty prints the contents of a container
-///// \param[in] t A container
-//template <typename T>
-//inline std::string pp(const T& t, typename atermpp::detail::enable_if_container<T>::type* = 0)
-//{
-//  return data::pp(t);
-//}
-
-/// \brief Pretty print function
-/// \param spec A process specification
-/// \return A pretty print representation of the specification
-inline std::string pp(const process_specification& spec)
-{
-  return core::pp(process_specification_to_aterm(spec));
 }
 
 } // namespace process

@@ -78,15 +78,15 @@ Graph* LTSImporter::importFile(const std::string& fn)
       s->setZ(z);
     }
 
-    for (mcrl2::lts::transition_const_range r = fileLTS.get_transitions(); !r.empty(); r.advance_begin(1))
+    const std::vector<mcrl2::lts::transition> &trans=fileLTS.get_transitions();
+    for (std::vector<mcrl2::lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
     {
-      const transition ti=r.front();
       size_t idFrom, idTo;
       State* stFrom, *stTo;
 
-      std::string label = mcrl2::lts::detail::pp(fileLTS.action_label(ti.label()));
-      idFrom = ti.from();
-      idTo = ti.to();
+      std::string label = mcrl2::lts::detail::pp(fileLTS.action_label(r->label()));
+      idFrom = r->from();
+      idTo = r->to();
 
       stFrom = numsToStates.find(idFrom)->second;
       stTo = numsToStates.find(idTo)->second;

@@ -23,6 +23,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -30,8 +31,10 @@
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
 #include "mcrl2/pbes/pbespgsolve.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/pg_parse.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
@@ -39,8 +42,9 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using utilities::tools::input_tool;
+using utilities::tools::pbes_input_tool;
 using utilities::tools::rewriter_tool;
-//using utilities::tools::pbes_rewriter_tool;
+using namespace mcrl2::log;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 // TODO: extend the tool with rewriter options
@@ -48,10 +52,10 @@ using utilities::tools::rewriter_tool;
 // scc decomposition can be compiled in using directive
 // PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
 
-class pg_solver_tool : public rewriter_tool<input_tool>
+class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
-    typedef rewriter_tool<input_tool> super;
+    typedef rewriter_tool<pbes_input_tool<input_tool> > super;
 
     pbespgsolve_options m_options;
 
@@ -113,8 +117,9 @@ class pg_solver_tool : public rewriter_tool<input_tool>
       : super(
         "pbespgsolve",
         "Maks Verver and Wieger Wesselink; Michael Weber",
-        "Solve a (P)BES using a parity game solver",
-        "Reads a file containing a (P)BES, instantiates it into a BES, and applies a\n"
+        "Solve a (P)BES or parity game using a parity game solver",
+        "Reads a file containing a (P)BES or a max parity game in PGSolver format,"
+        "instantiates it into a BES, and applies a\n"
         "parity game solver to it. If INFILE is not present, standard input is used."
       )
     {
@@ -133,27 +138,12 @@ class pg_solver_tool : public rewriter_tool<input_tool>
       mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
 
       pbes<> p;
-      try
-      {
-        p.load(input_filename());
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        try
-        {
-          mcrl2::bes::boolean_equation_system<> b;
-          b.load(input_filename());
-          p = mcrl2::bes::bes2pbes(b);
-        }
-        catch (mcrl2::runtime_error&)
-        {
-          throw(e);
-        }
-      }
+      load_pbes(p, input_filename(), pbes_input_format());
 
-      bool value = pbespgsolve(p, m_options);
+      bool value = pbespgsolve(p, timer(), m_options);
       std::string result = (value ? "true" : "false");
-      std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
+      mCRL2log(verbose) << "The solution for the initial variable of the pbes is " << result << std::endl;
+      std::cout << result << std::endl;
 
       return true;
     }

@@ -13,6 +13,7 @@
 // #include <aterm2.h>
 #include "mcrl2/utilities/logger.h"
 #include "liblts_dotlexer.h"
+#include "liblts_dotparser.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 
 //using namespace std;
@@ -120,7 +121,6 @@ void concrete_dot_lexer::processQuoted()
 }
 
 //Implementation of parse_dot
-
 bool parse_dot(std::istream &stream, lts_dot_t &l) 
 {
   clexer = new concrete_dot_lexer();

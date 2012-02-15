@@ -21,6 +21,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
+using namespace mcrl2::log;
 
 
 static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
@@ -80,9 +81,10 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
   // print transitions
   mCRL2log(verbose) << "writing transitions..." << std::endl;
   os << "---" << std::endl;
-  for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
+  const std::vector<transition> &trans=l.get_transitions();
+  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
   {
-    transition::size_type from = t.front().from();
+    transition::size_type from = t->from();
     // correct state numbering
     if (from == 0)
     {
@@ -92,7 +94,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
     {
       from = 0;
     }
-    transition::size_type to = t.front().to();
+    transition::size_type to = t->to();
     if (to == 0)
     {
       to = l.initial_state();
@@ -103,7 +105,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
     }
     // correct state numbering
     os << from+1 << " " << to+1 << " \"";
-    os << mcrl2::lts::detail::pp(l.action_label(t.front().label()));
+    os << mcrl2::lts::detail::pp(l.action_label(t->label()));
     os << "\"" << std::endl;
   }
 }

@@ -15,6 +15,7 @@
 #include <cassert>
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action_label.h"
 
 namespace mcrl2
@@ -23,70 +24,65 @@ namespace mcrl2
 namespace lps
 {
 
-/// \brief Represents an action.
-// <Action>       ::= Action(<ActId>, <DataExpr>*)
+//--- start generated class action ---//
+/// \brief An action
 class action: public atermpp::aterm_appl
 {
-  protected:
-
-    /// \brief The label of the action
-    action_label m_label;
-
-    /// \brief The arguments of the action
-    data::data_expression_list m_arguments;
-
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     action()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructAction())
+      : atermpp::aterm_appl(core::detail::constructAction())
     {}
 
     /// \brief Constructor.
-    /// \param t A term
-    action(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
+    /// \param term A term
+    action(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_Action(m_term));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_label = action_label(*i++);
-      m_arguments = *i;
+      assert(core::detail::check_term_Action(m_term));
     }
 
     /// \brief Constructor.
-    /// \param label An action label
-    /// \param arguments A sequence of data expressions
     action(const action_label& label, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
-        m_label(label),
-        m_arguments(arguments)
+      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments))
     {}
 
-    /// \brief Returns the label of the action.
-    /// \return The label of the action.
     action_label label() const
     {
-      return m_label;
+      return atermpp::arg1(*this);
     }
 
-    /// \brief Returns the arguments of the action.
-    /// \return The arguments of the action.
     data::data_expression_list arguments() const
     {
-      return m_arguments;
+      return atermpp::list_arg2(*this);
     }
 };
 
-/// Read-only singly linked list of actions
+/// \brief list of actions
 typedef atermpp::term_list<action> action_list;
 
-/// \brief Returns true if the term t is an action
+/// \brief vector of actions
+typedef atermpp::vector<action>    action_vector;
+
+
+/// \brief Test for a action expression
 /// \param t A term
-/// \return True if the term t is an action
+/// \return True if it is a action expression
 inline
-bool is_action(atermpp::aterm_appl t)
+bool is_action(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsAction(t);
 }
+
+//--- end generated class action ---//
+
+// template function overloads
+std::string pp(const action& x);
+std::string pp(const action_list& x);
+std::string pp(const action_vector& x);
+action normalize_sorts(const action& x, const data::data_specification& dataspec);
+lps::action translate_user_notation(const lps::action& x);
+std::set<data::variable> find_free_variables(const lps::action& x);
 
 /// \brief Compares the signatures of two actions
 /// \param a An action

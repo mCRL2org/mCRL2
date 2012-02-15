@@ -303,6 +303,7 @@ void Bfree(tBlock* nodeList)
 } */
 
 
+static
 void Bdump(FILE* fp, tBlock* block)
 {
   struct HFnode* tmp;

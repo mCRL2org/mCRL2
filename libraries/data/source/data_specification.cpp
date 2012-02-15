@@ -10,7 +10,6 @@
 /// \brief The class data_specification.
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/replace.h"
 
@@ -243,11 +242,12 @@ void data_specification::check_for_alias_loop(
 // This normal form is obtained by repeatedly applying map1 and map2, until this
 // is not possible anymore. It is assumed that this procedure terminates. There is
 // no check for loops.
+static
 sort_expression find_normal_form(
   const sort_expression& e,
   const atermpp::multimap< sort_expression, sort_expression >  &map1,
   const atermpp::multimap< sort_expression, sort_expression >  &map2,
-  std::set < sort_expression > sorts_already_seen = std::set < sort_expression >()) 
+  std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
   assert(!is_unknown_sort(e));
@@ -419,7 +419,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
           const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
           assert(is_basic_sort(pre_normal_form));
-          // const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases, 
+          // const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
           //             sort_aliases_to_be_investigated);
           const sort_expression e2=pre_normal_form;
           if (e2!=left_hand_side)

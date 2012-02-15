@@ -21,6 +21,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::log;
 
 static void read_from_lts(lts_lts_t& l, string const& filename)
 {
@@ -201,7 +202,8 @@ static void add_extra_mcrl2_lts_data(
    */
   char c;
   fseek(f,0,SEEK_END);
-  fread(&c,1,1,f);
+  if(fread(&c,1,1,f) != 0)
+    throw mcrl2::runtime_error("Unexpectedly able to read past end of file.");
 
   long position = ftell(f);
   if (position == -1)
@@ -263,13 +265,14 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
 
-  for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
+  const std::vector < transition> &trans=l.get_transitions();
+  for (std::vector < transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
   {
-    assert(t.front().from()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().from()) : (ATerm) ATmakeInt((int)t.front().from()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()).aterm_without_time(), &b);
-    assert(t.front().to()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().to()) : (ATerm) ATmakeInt((int)t.front().to()) ,&b);
+    assert(t->from()< ((size_t)1 << (sizeof(int)*8-1)));
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->from()) : (ATerm) ATmakeInt((int)t->from()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t->label()).aterm_without_time(), &b);
+    assert(t->to()< ((size_t)1 << (sizeof(int)*8-1)));
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->to()) : (ATerm) ATmakeInt((int)t->to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 

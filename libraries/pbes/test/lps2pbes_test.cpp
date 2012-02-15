@@ -20,6 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
@@ -237,7 +238,39 @@ void test_lps2pbes3()
   bool timed = false;
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
+  core::garbage_collect();
+}
+
+// Trac ticket #841, example supplied by Tim Willemse.
+void test_lps2pbes4()
+{
+  std::string SPEC =
+    "act  a: Nat;                    \n"
+    "                                \n"
+    "proc P(s3: Pos, n: Nat) =       \n"
+    "       sum m: Nat.              \n"
+    "         (s3 == 1) ->           \n"
+    "         a(m) .                 \n"
+    "         P(s3 = 2, n = m)       \n"
+    "     + sum m0: Nat.             \n"
+    "         (s3 == 2 && n < m0) -> \n"
+    "         a(m0) .                \n"
+    "         P(s3 = 2, n = m0)      \n"
+    "     + delta;                   \n"
+    "                                \n"
+    "init P(1, 0);                   \n"
+    ;
+
+  std::string FORMULA = "nu X(n :Nat=0). X(n+1)";
+
+  lps::specification spec = lps::parse_linear_process_specification(SPEC);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
+  std::cout << "formula = " << state_formulas::pp(formula) << std::endl;
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
+  BOOST_CHECK(p.is_well_typed());
   core::garbage_collect();
 }
 
@@ -429,7 +462,7 @@ void test_example()
   bool timed = false;
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
 
   bool result = pbes2_bool_test(p);
   BOOST_CHECK(result == true);
@@ -514,6 +547,7 @@ int test_main(int argc, char* argv[])
   test_lps2pbes();
   test_lps2pbes2();
   test_lps2pbes3();
+  test_lps2pbes4();
   test_trivial();
   test_formulas();
   test_timed();

@@ -14,15 +14,17 @@
 
 sort Set(S) <"set_">;
 
-cons @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
-map {} <"emptyset"> : Set(S);
-    @setfset <"setfset"> : FSet(S) <"arg"> -> Set(S);
-    @setcomp <"setcomprehension"> : (S -> Bool) <"arg"> -> Set(S);
-    in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;
-    ! <"setcomplement"> : Set(S) <"arg"> -> Set(S);
-    + <"setunion_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    * <"setintersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    - <"setdifference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+cons @set <"constructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
+map {} <"empty"> : Set(S);
+% I think that @setfset and @setcomp should not be part of the rewrite system, but
+% become part of the internal generation of set representations. JFG
+    @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S);
+    @setcomp <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S);
+    in <"in"> : S <"left"> # Set(S) <"right"> -> Bool;
+    ! <"complement"> : Set(S) <"arg"> -> Set(S);
+    + <"union_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+    * <"intersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+    - <"difference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
     @false_ <"false_function"> : S <"arg"> -> Bool;
     @true_ <"true_function"> : S <"arg"> -> Bool;
     @not_ <"not_function"> : (S -> Bool) <"arg"> -> S -> Bool;

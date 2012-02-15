@@ -98,10 +98,6 @@ int HFinit(HFtree* tree, HTable* terms)
 
 void HFfree(HFtree* tree)
 {
-  /*
-  fprintf(stderr,"Code table dump:\n");
-  HFdumpCodes(tree->codes);
-  */
   BLfree(&tree->blockList);
 
   HFfreeLoop(tree->codes);
@@ -181,33 +177,10 @@ void HFdump(struct HFnode* tree, int d)
 
 }
 
-void HFdumpCodes(struct HFnode* tree)
-{
-
-  if (tree!=NULL)
-  {
-
-    if (tree->low==NULL && tree->high==NULL)
-    {
-
-      ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)));
-      HFdumpCode(stderr, tree);
-      fprintf(stderr, "\n");
-
-    }
-    else
-    {
-      HFdumpCodes(tree->low);
-      HFdumpCodes(tree->high);
-    }
-  }
-}
-
-
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */
 
-static struct HFnode* HFsuccessor(HFtree* t, struct HFnode* current)
+static struct HFnode* HFsuccessor(HFtree*, struct HFnode* current)
 {
 
   tBlock* currentBlock;
@@ -216,8 +189,6 @@ static struct HFnode* HFsuccessor(HFtree* t, struct HFnode* current)
   currentBlock=current->block;
   last=Blast(currentBlock);
   prelast=Bprevious(last);
-
-  t = t; /* Prevent unused parameter warning */
 
   if (last==current)
   {

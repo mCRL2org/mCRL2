@@ -1,0 +1,11 @@
+sort Stack = List(Pos);
+map  empty: Stack -> Bool;       
+     push:  Pos # Stack -> Stack;
+     pop:   Stack -> Stack;      
+     top:   Stack -> Pos;
+var  s: Stack;
+     x: Pos;
+eqn  empty(s)  = s == [];             % return whether s is empty
+     push(x,s) = x |> s;              % put x on top of s
+     pop(s)    = tail(s);             % remove top element from s
+     (!empty(s)) -> top(s) = head(s); % return top element of s

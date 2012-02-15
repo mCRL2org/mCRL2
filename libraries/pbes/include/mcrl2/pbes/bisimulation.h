@@ -24,7 +24,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -231,23 +230,69 @@ class bisimulation_algorithm
     /// \detail After this substitution the following holds:
     /// \f[ ((param(p)\cup glob(p))\cap ((param(q)\cup glob(q))=\emptyset \f]
     /// where param(p) denotes p.process().process_parameters() and glob(p) denotes p.global_variables().
-    atermpp::map<data::variable, data::variable> compute_name_clashes(const specification& p, const specification& q) const
+    atermpp::map<data::variable, data::variable> compute_process_parameter_name_clashes(const specification& p, const specification& q) const
     {
       atermpp::map<data::variable, data::variable> result;
 
-      std::set<data::variable> pvars;
-      pvars.insert(p.global_variables().begin(), p.global_variables().end());
-      pvars.insert(p.process().process_parameters().begin(), p.process().process_parameters().end());
-
-      std::set<data::variable> qvars;
-      qvars.insert(q.global_variables().begin(), q.global_variables().end());
-      qvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
-
-      // put the names of variables appearing in pvars in an identifier generator
+      // put the names of variables appearing in p and q in an identifier generator
+      std::set<data::variable> context = lps::find_variables(p);
+      std::set<variable> vars = lps::find_variables(q);
+      context.insert(vars.begin(), vars.end());
       data::set_identifier_generator generator;
-      for (std::set<data::variable>::iterator i = pvars.begin(); i != pvars.end(); ++i)
+      for (std::set<data::variable>::iterator i = context.begin(); i != context.end(); ++i)
       {
         generator.add_identifier(i->name());
+      }
+
+      // put the process parameters of q in qvars
+      std::set<data::variable> qvars;
+      data::variable_list pvars = p.process().process_parameters();
+      qvars.insert(pvars.begin(), pvars.end());
+
+      // generate renamings for variables appearing in qvars
+      for (std::set<data::variable>::iterator i = qvars.begin(); i != qvars.end(); ++i)
+      {
+        data::variable v(generator(i->name()), i->sort());
+        if (v != *i)
+        {
+          result[*i] = v;
+        }
+      }
+      return result;
+    }
+
+    /// \brief Returns a substitution of variables in q such that there are no name clashes
+    /// between the summation variables of p and q.
+    /// \param p A linear process specification
+    /// \param q A linear process specification
+    /// \return A substitution that should be applied to q to remove name clashes between p and q.
+    atermpp::map<data::variable, data::variable> compute_summand_variable_name_clashes(const specification& p, const specification& q) const
+    {
+      atermpp::map<data::variable, data::variable> result;
+
+      // put the names of variables appearing in p and q in an identifier generator
+      std::set<data::variable> context = lps::find_variables(p);
+      std::set<variable> vars = lps::find_variables(q);
+      context.insert(vars.begin(), vars.end());
+      data::set_identifier_generator generator;
+      for (std::set<data::variable>::iterator i = context.begin(); i != context.end(); ++i)
+      {
+        generator.add_identifier(i->name());
+      }
+
+      // put the summation variables of q in qvars
+      std::set<data::variable> qvars;
+      const action_summand_vector& qa = q.process().action_summands();
+      for (action_summand_vector::const_iterator i = qa.begin(); i != qa.end(); ++i)
+      {
+        data::variable_list v = i->summation_variables();
+        qvars.insert(v.begin(), v.end());
+      }
+      const deadlock_summand_vector& qd = q.process().deadlock_summands();
+      for (deadlock_summand_vector::const_iterator i = qd.begin(); i != qd.end(); ++i)
+      {
+        data::variable_list v = i->summation_variables();
+        qvars.insert(v.begin(), v.end());
       }
 
       // generate renamings for variables appearing in qvars
@@ -259,28 +304,23 @@ class bisimulation_algorithm
           result[*i] = v;
         }
       }
-
       return result;
     }
 
     /// \brief Resolves name clashes between model and spec.
-    void resolve_name_clashes(const specification& model, specification& spec)
+    void resolve_name_clashes(const specification& model, specification& spec, bool include_summand_variables = false)
     {
-      atermpp::map<data::variable, data::variable> sigma = compute_name_clashes(model, spec);
-
-      if (sigma.empty())
+      atermpp::map<data::variable, data::variable> sigma = compute_process_parameter_name_clashes(model, spec);
+      if (!sigma.empty())
       {
-        return;
+        lps::replace_process_parameters(spec, data::make_map_substitution(sigma));
       }
 
-      // rename unbound data variables
-      data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_map_substitution(sigma))(spec);
-
-      // rename process parameters
-      spec.process().process_parameters() = data::replace_variables(spec.process().process_parameters(), data::make_map_substitution(sigma));
-
-      // rename global variable declaration
-      data::replace_variables(spec.global_variables(), data::make_map_substitution(sigma));
+      if (include_summand_variables)
+      {
+        sigma = compute_summand_variable_name_clashes(model, spec);
+        lps::replace_summand_variables(spec, data::make_map_substitution(sigma));
+      }
     }
 
     /// \brief Initializes the name lookup table.
@@ -430,7 +470,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       namespace z = pbes_expr_optimized;
 
       specification spec1 = spec;
-      resolve_name_clashes(model, spec1);
+      resolve_name_clashes(model, spec1, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -466,6 +506,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching bisimulation between the two specifications.
+inline
 pbes<> branching_bisimulation(const specification& model, const specification& spec)
 {
   return branching_bisimulation_algorithm().run(model, spec);
@@ -529,7 +570,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
-      resolve_name_clashes(model, spec1);
+      resolve_name_clashes(model, spec1, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -551,6 +592,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses strong bisimulation between the two specifications.
+inline
 pbes<> strong_bisimulation(const specification& model, const specification& spec)
 {
   return strong_bisimulation_algorithm().run(model, spec);
@@ -675,9 +717,10 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<data::variable> used_variables;
-        lps::find_variables(p, std::inserter(used_variables, used_variables.end()));
-        lps::find_variables(q, std::inserter(used_variables, used_variables.end()));
+        std::set<data::variable> used_variables = lps::find_variables(p);
+        std::set<data::variable> tmp = lps::find_variables(q);
+        used_variables.insert(tmp.begin(), tmp.end());
+
         std::set<std::string> used_names;
         for (std::set<data::variable>::const_iterator k = used_variables.begin(); k != used_variables.end(); ++k)
         {
@@ -701,7 +744,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
-      resolve_name_clashes(model, spec1);
+      resolve_name_clashes(model, spec1, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -740,6 +783,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses weak bisimulation between the two specifications.
+inline
 pbes<> weak_bisimulation(const specification& model, const specification& spec)
 {
   return weak_bisimulation_algorithm().run(model, spec);
@@ -761,7 +805,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
-      resolve_name_clashes(model, spec1);
+      resolve_name_clashes(model, spec1, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -797,6 +841,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching simulation equivalence between the two specifications.
+inline
 pbes<> branching_simulation_equivalence(const specification& model, const specification& spec)
 {
   return branching_simulation_equivalence_algorithm().run(model, spec);

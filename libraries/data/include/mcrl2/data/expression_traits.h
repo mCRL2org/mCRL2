@@ -18,20 +18,10 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
 namespace mcrl2
 {
-
-namespace data
-{
-template < typename Container >
-std::set< variable > find_free_variables(Container const& container);
-
-template < typename Container >
-std::set< variable > find_variables(Container const& container);
-}
 
 namespace core
 {
@@ -320,21 +310,17 @@ struct expression_traits : public core::term_traits< Expression >
 
   static data_expression and_(data_expression const& e1, data_expression const& e2)
   {
-    return sort_bool::and_(e1, e1);
+    return sort_bool::and_(e1, e2);
   }
 
   static data_expression or_(data_expression const& e1, data_expression const& e2)
   {
-    return sort_bool::or_(e1, e1);
+    return sort_bool::or_(e1, e2);
   }
 };
 
 } // namespace core
 
 } // namespace mcrl2
-
-#ifndef MCRL2_DATA_FIND_H
-#include "mcrl2/data/find.h"
-#endif
 
 #endif // MCRL2_DATA_TERM_TRAITS_H

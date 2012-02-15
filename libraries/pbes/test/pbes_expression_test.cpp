@@ -24,14 +24,11 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::core;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
-
-using mcrl2::core::pp;
 
 std::string EXPRESSIONS =
   "datavar                                  \n"
@@ -48,7 +45,7 @@ void print(atermpp::set<pbes_expression> q)
 {
   for (atermpp::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
   {
-    std::cout << mcrl2::core::pp(*i) << std::endl;
+    std::cout << pbes_system::pp(*i) << std::endl;
   }
 }
 

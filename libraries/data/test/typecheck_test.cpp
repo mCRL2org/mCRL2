@@ -16,6 +16,7 @@
 #include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/unknown_sort.h"
@@ -39,63 +40,76 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
-data::sort_expression parse_sort_expression(const std::string& se_in)
+data::sort_expression parse_sort_expression(const std::string& de_in)
 {
-  std::istringstream se_in_stream(se_in);
-  atermpp::aterm_appl se_aterm = core::parse_sort_expr(se_in_stream);
-  bool test = se_aterm != NULL;
-  BOOST_CHECK(se_aterm != NULL);
-
-  if (test)
-  {
-    return data::sort_expression(se_aterm);
+  data::sort_expression result;
+  try {
+    result = data::parse_sort_expression_new(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+    std::string de_out = core::pp_deprecated(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << result << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following sort expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
+#endif
   }
-
-  return data::sort_expression();
+  catch (...)
+  {
+    BOOST_CHECK(false);
+  }
+  return result;
 }
 
 data::data_expression parse_data_expression(const std::string& de_in)
 {
-  std::istringstream de_in_stream(de_in);
-  ATermAppl de_aterm = core::parse_data_expr(de_in_stream);
-  bool test = de_aterm != NULL;
-  BOOST_CHECK(de_aterm != NULL);
-
-  if (test)
-  {
-    std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
-    //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-    BOOST_CHECK_EQUAL(de_in, de_out);
-
-    return data::data_expression(de_aterm);
+  data::data_expression result;
+  try {
+    result = data::parse_data_expression_new(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+    std::string de_out = core::pp_deprecated(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << result << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
+#endif
   }
-  else
+  catch (...)
   {
-    return data::data_expression();
+    BOOST_CHECK(false);
   }
+  return result;
 }
 
-data::data_specification parse_data_specification(const std::string& ds_in, bool expect_success = true)
+data::data_specification parse_data_specification(const std::string& de_in, bool expect_success = true)
 {
-  std::istringstream ds_in_stream(ds_in);
-  ATermAppl ds_aterm = core::parse_data_spec(ds_in_stream);
-  bool test = ds_aterm != NULL;
-
-  if (expect_success)
-  {
-    BOOST_CHECK(test);
+  data::data_specification result;
+  try {
+    result = data::parse_data_specification_new(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+    std::string de_out = core::pp_deprecated(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
+#endif
   }
-
-  if (test) // If term is successfully parsed, always check that the printed result is equal!
+  catch (...)
   {
-    std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-    std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
-    BOOST_CHECK_EQUAL(ds_in, ds_out);
-
-    return data::data_specification(ds_aterm);
+    BOOST_CHECK(!expect_success);
   }
-
-  return data::data_specification();
+  return result;
 }
 
 template <typename VariableIterator>
@@ -126,7 +140,7 @@ void test_data_expression(const std::string& de_in,
       // If exception was thrown, x is data_expression()
       if (x != data::data_expression())
       {
-        std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
+        std::string de_out = core::pp_deprecated((ATerm) de_aterm);
         //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
         BOOST_CHECK_EQUAL(de_in, de_out);
         // TODO: this check should be uncommented
@@ -862,7 +876,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
       data::type_check(de, begin, end, ds);
       atermpp::aterm de_aterm = de;
 
-      std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
+      std::string de_out = core::pp_deprecated((ATerm) de_aterm);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
       if (expected_sort != "")
@@ -1531,6 +1545,31 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
     "map  R: T -> Bool;\n",
     v.begin(),v.end(),
     false     // <-------------- Should be set to true with a new typechecker ---------------------------------------
+  );
+}
+
+
+BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
+{
+  /* The typechecker couldn't catch the wrongly typed term below in november 2012,
+     which led to a core dump */
+  test_data_expression("((lambda x:Nat.x)(1,2)>0)",false);
+}
+
+/* The example below has the nasty feature that the sort of
+   # in the expression below can be #:List(Nat)->Nat,
+      List(Int)->Nat and List(Real)->Nat. In version 10169 of
+      the toolset the type of # became List(PossibleTypes([Nat, Int, Real]) 
+      causing confusion in the other tools */
+BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "#[0, 1] == -1",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bool"
   );
 }
 

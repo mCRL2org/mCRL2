@@ -19,7 +19,7 @@
 
 using namespace mcrl2::lts;
 using namespace std;
-
+using namespace mcrl2::log;
 
 // BCG library initialisation
 static bool initialise()
@@ -95,11 +95,11 @@ static void write_to_bcg(const lts_bcg_t& l, const string& filename)
   bool warn_non_i = true;
   bool warn_i = true;
 
-  for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
+  const std::vector<transition> &trans=l.get_transitions();
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    transition t=r.front();
-    string label_str = l.action_label(t.label());
-    if (l.is_tau(t.label()))
+    string label_str = l.action_label(r->label());
+    if (l.is_tau(r->label()))
     {
       if (warn_non_i && (label_str != "i"))
       {
@@ -130,7 +130,7 @@ static void write_to_bcg(const lts_bcg_t& l, const string& filename)
       }
     }
     strcpy(buf,label_str.c_str());
-    BCG_IO_WRITE_BCG_EDGE(t.from(),buf,t.to());
+    BCG_IO_WRITE_BCG_EDGE(r->from(),buf,r->to());
   }
 
   free(buf);

@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PRINT_H
 
 #include "mcrl2/data/print.h"
-#include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
@@ -81,9 +80,9 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pbes_binary_operation(const T& x, const std::string& op)
   {
-    print_pbes_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.left(), pbes_system::is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
     derived().print(op);
-    print_pbes_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.right(), pbes_system::is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
   }
 
   // N.B. We need a special version due to the "val" operator that needs to be
@@ -93,9 +92,9 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     derived().print(op + " ");
-    print_variables(x.variables(), true, true, false, "", "", ", ");   
+    print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
-    print_pbes_expression(x.body());
+    print_pbes_expression(x.body(), precedence(x));
     derived().leave(x);
   }
 
@@ -119,8 +118,12 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
+#ifdef BOOST_MSVC
+  void operator()(const pbes_system::pbes<>& x)
+#else
   template <typename Container>
   void operator()(const pbes_system::pbes<Container>& x)
+#endif
   {
     derived().enter(x);
     derived()(x.data());
@@ -128,7 +131,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
     // N.B. We have to normalize the sorts of the equations first.
     atermpp::vector<pbes_equation> normalized_equations = x.equations();
-    pbes_system::normalize_sorts(normalized_equations, x.data());   
+    pbes_system::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "pbes ", "\n\n", "\n     ");
 
     derived().print("init ");
@@ -141,7 +144,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     derived()(x.name());
-    print_variables(x.parameters(), false);
+    print_list(x.parameters(), "(", ")", ", ", false);
     derived().leave(x);
   }
 
@@ -204,47 +207,24 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<pbes_system::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<pbes_system::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  pbes_system::print(t, out);
+  stream_printer()(x, out);
   return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
-  return core::pp(t);
-}
-
-inline
-std::string pp(const pbes_equation& eqn)
-{
-  MCRL2_CHECK_PP(core::pp(pbes_equation_to_aterm(eqn)), pbes_system::print(eqn), pbes_equation_to_aterm(eqn).to_string());
-  return core::pp(pbes_equation_to_aterm(eqn));
-}
-
-/// \brief Pretty print function
-/// \param spec A pbes specification
-/// \return A pretty print representation of the specification
-template <typename Container>
-std::string pp(const pbes<Container>& spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(pbes_to_aterm(spec)), pbes_system::print(spec), pbes_to_aterm(spec).to_string());
-  return core::pp(pbes_to_aterm(spec), pp_format);
 }
 
 } // namespace pbes_system

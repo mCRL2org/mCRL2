@@ -1,5 +1,5 @@
 mCRL2 toolset
-Copyright (C) 2005-2008 Eindhoven University of Technology
+Copyright (C) 2005-2012 Eindhoven University of Technology
 
 All files except for those found under the 3rd-party directory are distributed
 under the Boost Software License, Version 1.0 (see accompanying
@@ -7,5 +7,3 @@ file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 The software under the 3rd-party directory have their own licenses, which can
 be found in their respective COPYING files.
-
-January 15th, 2008, Eindhoven, The Netherlands.

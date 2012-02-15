@@ -38,6 +38,8 @@ namespace mcrl2
 namespace bes
 {
 
+template <typename T> std::string pp(const T& t);
+
 using namespace core::detail::precedences;
 
 //--- start generated classes ---//
@@ -342,17 +344,21 @@ bool is_boolean_variable(const boolean_expression& t)
 inline
 int precedence(const boolean_expression& x)
 {
-  if (is_imp(x)) 
-  {
-    return 1;
-  }
-  else if (is_and(x) || is_or(x)) 
+  if (is_imp(x))
   {
     return 2;
   }
-  else if (is_not(x)) 
+  else if (is_or(x))
   {
     return 3;
+  }
+  else if (is_and(x))
+  {
+    return 4;
+  }
+  else if (is_not(x))
+  {
+    return 5;
   }
   return core::detail::precedences::max_precedence;
 }
@@ -627,7 +633,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   std::string pp(term_type t)
   {
-    return mcrl2::core::pp(t);
+    return bes::pp(t);
   }
 };
 

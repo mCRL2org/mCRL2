@@ -27,7 +27,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
@@ -338,22 +337,21 @@ void test_rename()
   data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
-  BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
+  BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
   std::cout << "formula: " << pp(formula) << std::endl;
 
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(spec));
-  formula = parse_state_formula("mu X. mu X. X", spec);
+  formula = parse_state_formula("mu X. mu X. X", spec, false);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
-  BOOST_CHECK(pp(formula) == "mu X. mu X0. X0");
+  BOOST_CHECK(pp(formula) == "mu X. mu X1. X1");
   core::garbage_collect();
 }
 
 void test_normalize()
 {
-  using mcrl2::core::pp;
   using namespace state_formulas::detail::accessors;
   std::cerr << "test_normalize\n";
 
@@ -367,17 +365,17 @@ void test_normalize()
   f = imp(not_(x), y);
   f1 = normalize(f);
   f2 = or_(x, y);
-  std::cout << "f  = " << pp(f) << std::endl;
-  std::cout << "f1 = " << pp(f1) << std::endl;
-  std::cout << "f2 = " << pp(f2) << std::endl;
+  std::cout << "f  = " << state_formulas::pp(f) << std::endl;
+  std::cout << "f1 = " << state_formulas::pp(f1) << std::endl;
+  std::cout << "f2 = " << state_formulas::pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
   f  = not_(and_(not_(x), not_(y)));
   f1 = normalize(f);
   f2 = or_(x, y);
-  std::cout << "f  = " << pp(f) << std::endl;
-  std::cout << "f1 = " << pp(f1) << std::endl;
-  std::cout << "f2 = " << pp(f2) << std::endl;
+  std::cout << "f  = " << state_formulas::pp(f) << std::endl;
+  std::cout << "f1 = " << state_formulas::pp(f1) << std::endl;
+  std::cout << "f2 = " << state_formulas::pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
   /* this takes too much time with linearise...
@@ -443,10 +441,22 @@ void test_parse()
   std::string formula_text = "<a(1)>true";
   lps::specification spec = lps::linearise(spec_text);
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
-  std::cerr << "--- f ---\n" << core::pp(f) << "\n\n" << f << std::endl;
+  std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
+}
+
+void test_find_nil()
+{
+  state_formula formula;
+  specification spec;
+
+  formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  BOOST_CHECK(find_nil(formula) == false);
+
+  formula = parse_state_formula("[nil]true", spec);
+  BOOST_CHECK(find_nil(formula) == true);
 }
 
 int test_main(int argc, char* argv[])
@@ -458,6 +468,9 @@ int test_main(int argc, char* argv[])
   test_type_checking();
   test_not();
   test_parse();
+
+  // TODO: this test fails due to a bug in translate_reg_frms
+  // test_find_nil();
 
   return 0;
 }

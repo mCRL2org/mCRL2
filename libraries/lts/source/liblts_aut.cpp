@@ -246,10 +246,11 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
 {
   os << "des (0," << l.num_transitions() << "," << l.num_states() << ")" << endl;
 
-  for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
+  const std::vector<transition> &trans=l.get_transitions();
+  for (std::vector<transition>::const_iterator t=trans.begin();  t!=trans.end(); ++t)
   {
-    transition::size_type from = t.front().from();
-    transition::size_type to = t.front().to();
+    transition::size_type from = t->from();
+    transition::size_type to = t->to();
     // AUT files need the initial state to be 0, so we will swap state 0 and
     // the initial state
     if (from == 0)
@@ -269,7 +270,7 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
       to = 0;
     }
     os << "(" << from << ",\""
-       << detail::pp(l.action_label(t.front().label()))
+       << detail::pp(l.action_label(t->label()))
        << "\"," << to << ")" << endl;
   }
 }

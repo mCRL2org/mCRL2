@@ -14,7 +14,7 @@
 #include <wx/wx.h>
 #include <string>
 #include "simbasegui.h"
-#include "simulator.h"
+#include "mcrl2/lps/simulator.h"
 
 class StandardSimulatorGUI: public StandardSimulator, public SimulatorInterfaceGUI
 {

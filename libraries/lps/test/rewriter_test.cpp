@@ -19,13 +19,11 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
@@ -100,7 +98,6 @@ void test1()
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
 
-  // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(plus(n4, n5)) == r(plus(n2, n7)));
 
   specification spec1 = spec;

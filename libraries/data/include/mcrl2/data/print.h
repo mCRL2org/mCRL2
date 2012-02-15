@@ -26,7 +26,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/standard.h"
@@ -36,10 +35,9 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/traverser.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -47,43 +45,6 @@ namespace mcrl2
 
 namespace data
 {
-
-// forward declaration
-template <typename T> std::string print(const T& t);
-
-/// \brief Pretty prints a term
-template <typename T>
-std::string pp(const T& t, typename atermpp::detail::disable_if_container<T>::type* = 0)
-{
-  MCRL2_CHECK_PP(core::pp(t), data::print(t), t.to_string());
-  return core::pp(t);
-}
-
-/// \brief Pretty prints the contents of a container
-/// \param[in] c a container with data or sort expressions
-template <typename Container>
-std::string pp(Container const& c, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-{
-  std::string result;
-
-  if (c.begin() != c.end())
-  {
-    result.append(data::pp(*c.begin()));
-
-    for (typename Container::const_iterator i = ++(c.begin()); i != c.end(); ++i)
-    {
-      result.append(", ").append(data::pp(*i));
-    }
-  }
-  MCRL2_CHECK_PP(result, data::print(c), "unknown");
-  return result;
-}
-
-inline
-std::string pp(const data_specification& x)
-{
-  return core::pp(data::detail::data_specification_to_aterm_data_spec(x));
-}
 
 namespace detail
 {
@@ -112,7 +73,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       return false;
     }
-    core::identifier_string name = function_symbol(x.head()).name();
+    core::identifier_string name;
+    if (is_function_symbol(x.head()))
+    {
+      name = function_symbol(x.head()).name();
+    }
+    else if (is_identifier(x.head()))
+    {
+      name = identifier(x.head()).name();
+    }
+    else
+    {
+      return false;
+    }
     return
       (name == data::sort_bool::implies_name())          ||
       (name == data::sort_bool::and_name())          ||
@@ -129,23 +102,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_list::concat_name())       ||
       (name == data::sort_real::plus_name())          ||
       (name == data::sort_real::minus_name())         ||
-      (name == data::sort_set::setunion_name())     ||
-      (name == data::sort_set::setdifference_name())      ||
-      (name == data::sort_bag::bagjoin_name())      ||
-      (name == data::sort_bag::bagdifference_name())      ||
+      (name == data::sort_set::union_name())     ||
+      (name == data::sort_set::difference_name())      ||
+      (name == data::sort_bag::join_name())      ||
+      (name == data::sort_bag::difference_name())      ||
       (name == data::sort_int::div_name())          ||
       (name == data::sort_int::mod_name())          ||
       (name == data::sort_real::divides_name())       ||
       (name == data::sort_int::times_name())         ||
       (name == data::sort_list::element_at_name())        ||
-      (name == data::sort_set::setintersection_name()) ||
-      (name == data::sort_bag::bagintersect_name());
+      (name == data::sort_set::intersection_name()) ||
+      (name == data::sort_bag::intersection_name());
   }
 
   void print_sort(const application& x)
   {
-    std::cout << "<value>" << core::pp(x) << " " << x << " ";
-    if (is_numeric_value(x))
+    std::cout << "<value>" << x << " ";
+    if (is_numeric_expression(x))
     {
       std::cout << "<numeric value>";
     }
@@ -158,11 +131,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       std::cout << "<pos>";
     }
     else if (sort_nat::is_nat(x.sort()))
-    {   
+    {
       std::cout << "<nat>";
     }
     else if (sort_int::is_int(x.sort()))
-    {   
+    {
       std::cout << "<int>";
     }
     else if (sort_real::is_real(x.sort()))
@@ -182,7 +155,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       std::cout << "<fset>";
     }
     else if (sort_bag::is_bag(x.sort()))
-    {   
+    {
       std::cout << "<bag>";
     }
     else if (sort_fbag::is_fbag(x.sort()))
@@ -214,7 +187,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     return generator(prefix);
   }
-  
+
   template <typename Container>
   void print_container(const Container& container,
                        int container_precedence = -1,
@@ -261,10 +234,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   }
 
   struct get_sort_default
-  { 
+  {
     template <typename T>
     sort_expression operator()(const T& t) const
-    {                                           
+    {
       return t.sort();
     }
   };
@@ -290,18 +263,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     derived().print(opener);
-    
+
     if (maximally_shared)
     {
       typedef typename Container::value_type T;
-      
+
       // sort_map[s] will contain all elements t of container with t.sort() == s.
       std::map<sort_expression, std::vector<T> > sort_map;
-      
+
       // sorts will contain all sort expressions s that appear as a key in sort_map,
       // in the order they are encountered in container
       std::vector<sort_expression> sorts;
-      
+
       for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
       {
         if (sort_map.find(i->sort()) == sort_map.end())
@@ -310,7 +283,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         sort_map[i->sort()].push_back(*i);
       }
-      
+
       // do the actual printing
       for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
       {
@@ -332,7 +305,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         {
           derived().print(separator);
         }
-      
+
         if (print_sorts && join_sorts)
         {
           // determine a consecutive interval [first, i) with elements of the same sorts
@@ -341,10 +314,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           {
             ++i;
           }
-      
+
           // print the elements of the interval [first, i)
           while (i != last && i->sort() == first->sort());
-      
+
           for (iterator j = first; j != i; ++j)
           {
             if (j != first)
@@ -353,28 +326,28 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
             }
             derived()(*j);
           }
-      
+
           // print the sort
           if (print_sorts)
           {
             derived().print(": ");
             derived()(get_sort(*first));
           }
-      
+
           // update first
           first = i;
         }
         else
         {
           derived()(*first);
-      
+
           // print the sort
           if (print_sorts)
           {
             derived().print(": ");
             derived()(get_sort(*first));
           }
-          
+
           // update first
           ++first;
         }
@@ -382,7 +355,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     derived().print(closer);
   }
-  
+
   template <typename Container>
   void print_variables(const Container& container,
                        bool print_sorts = true,
@@ -477,7 +450,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     while (sort_list::is_cons_application(x))
     {
-      x = sort_list::tail(x);
+      x = sort_list::right(x);
     }
     return sort_list::is_nil_function_symbol(x);
   }
@@ -486,42 +459,28 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     while (sort_list::is_snoc_application(x))
     {
-      x = sort_list::rtail(x);
+      x = sort_list::left(x);
     }
     return sort_list::is_nil_function_symbol(x);
   }
 
   bool is_fset_cons_list(data_expression x)
   {
-    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
+    while (sort_fset::is_cons_application(x) || sort_fset::is_insert_application(x))
     {
-      if (sort_fset::is_fset_cons_application(x))
-      {
-        x = sort_fset::tail(x);
-      }
-      else // if (sort_fset::is_fsetinsert_application(x))
-      {
-        x = sort_fset::right(x);
-      }
+      x = sort_fset::right(x);
     }
-    return sort_fset::is_fset_empty_function_symbol(x);
+    return sort_fset::is_empty_function_symbol(x);
   }
 
   /// \brief Returns true if x is a list composed of cons, insert and cinsert applications.
   bool is_fbag_cons_list(data_expression x)
   {
-    while (sort_fbag::is_fbag_cons_application(x) || sort_fbag::is_fbaginsert_application(x) || sort_fbag::is_fbagcinsert_application(x))
+    while (sort_fbag::is_cons_application(x) || sort_fbag::is_insert_application(x) || sort_fbag::is_cinsert_application(x))
     {
-      if (sort_fbag::is_fbag_cons_application(x))
-      {
-        x = sort_fbag::tail(x);
-      }
-      else
-      {
-        x = sort_fbag::arg3(x);
-      }
+      x = sort_fbag::arg3(x);
     }
-    return sort_fbag::is_fbag_empty_function_symbol(x);
+    return sort_fbag::is_empty_function_symbol(x);
   }
 
   bool is_numeric_cast(const data_expression& x)
@@ -535,14 +494,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            ;
   }
 
-  bool is_numeric_value(const application& x)
-  {
-    return is_numeric_expression(x);
-  }
-
   bool is_numeric_expression(const application& x)
   {
-    return    sort_pos::is_pos(x.sort()) 
+    return    sort_pos::is_pos(x.sort())
            || sort_nat::is_nat(x.sort())
            || sort_int::is_int(x.sort())
            || sort_real::is_real(x.sort());
@@ -550,7 +504,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_standard_sort(const sort_expression& x)
   {
-    return    sort_pos::is_pos(x) 
+    return    sort_pos::is_pos(x)
            || sort_bool::is_bool(x)
            || sort_nat::is_nat(x)
            || sort_int::is_int(x)
@@ -569,7 +523,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_fset_lambda(data_expression x)
   {
-    return is_lambda(sort_set::left(x)) && sort_fset::is_fset_empty_function_symbol(sort_set::right(x));
+    return is_lambda(sort_set::left(x)) && sort_fset::is_empty_function_symbol(sort_set::right(x));
   }
 
   bool is_fbag_zero(const data_expression& x)
@@ -584,7 +538,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_fbag_lambda(data_expression x)
   {
-    return is_lambda(sort_bag::left(x)) && sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x));
+    return is_lambda(sort_bag::left(x)) && sort_fbag::is_empty_function_symbol(sort_bag::right(x));
   }
 
   void print_cons_list(data_expression x)
@@ -592,8 +546,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     data_expression_vector arguments;
     while (sort_list::is_cons_application(x))
     {
-      arguments.push_back(sort_list::head(x));
-      x = sort_list::tail(x);
+      arguments.push_back(sort_list::left(x));
+      x = sort_list::right(x);
     }
     derived().print("[");
     print_container(arguments, 6);
@@ -605,8 +559,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     data_expression_vector arguments;
     while (sort_list::is_snoc_application(x))
     {
-      arguments.insert(arguments.begin(), sort_list::rhead(x));
-      x = sort_list::rtail(x);
+      arguments.insert(arguments.begin(), sort_list::right(x));
+      x = sort_list::left(x);
     }
     derived().print("[");
     print_container(arguments, 7);
@@ -616,29 +570,21 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_cons_list(data_expression x)
   {
     data_expression_vector arguments;
-    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
+    while (sort_fset::is_cons_application(x) || sort_fset::is_insert_application(x))
     {
-      if (sort_fset::is_fset_cons_application(x))
-      {
-        arguments.push_back(sort_fset::head(x));
-        x = sort_fset::tail(x);
-      }
-      else // if (sort_fset::is_fsetinsert_application(x))
-      {
-        arguments.push_back(sort_fset::left(x));
-        x = sort_fset::right(x);
-      }
+      arguments.push_back(sort_fset::left(x));
+      x = sort_fset::right(x);
     }
     derived().print("{");
     print_container(arguments, 6);
     derived().print("}");
   }
- 
+
   void print_fbag_zero(const data_expression& x)
   {
     // TODO: check if this is the correct way to handle this case
     data_expression y = sort_bag::right(x);
-    if (sort_fbag::is_fbag_empty_function_symbol(y))
+    if (sort_fbag::is_empty_function_symbol(y))
     {
       derived().print("{}");
     }
@@ -650,29 +596,27 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else
     {
-      derived().print("{");
       derived()(y);
-      derived().print("}");
     }
-  } 
-  
+  }
+
   void print_fbag_one(const data_expression& x)
   {
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
     data_expression body = number(sort_nat::nat(), "1");
-    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    if (!sort_fbag::is_empty_function_symbol(sort_bag::right(x)))
     {
-      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+      body = sort_nat::swap_zero(body, sort_bag::count(s, var, sort_bag::bag_fbag(s, sort_bag::right(x))));
     }
     derived().print("{ ");
     print_variable(var, true);
     derived().print(" | ");
     derived()(body);
     derived().print(" }");
-  } 
-  
+  }
+
   void print_fbag_lambda(data_expression x)
   {
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
@@ -680,47 +624,45 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     variable var(name, s);
     data::lambda left(sort_bag::left(x));
     data_expression body = left.body();
-    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    if (!sort_fbag::is_empty_function_symbol(sort_bag::right(x)))
     {
-      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+      body = sort_nat::swap_zero(body, sort_bag::count(s, var, sort_bag::bag_fbag(s, sort_bag::right(x))));
     }
     derived().print("{ ");
     print_variables(left.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
     derived()(body);
     derived().print(" }");
-  }   
-  
+  }
+
   void print_fbag_default(const data_expression& x)
   {
-    // std::cout << "<fbag_default>" << core::pp(x) << " " << core::pp(sort_bag::left(x)) << " " << sort_bag::left(x) << std::endl;
-    data_expression right = sort_bag::right(x);
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
     data_expression body = sort_bag::left(x)(var);
-    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    if (!sort_fbag::is_empty_function_symbol(sort_bag::right(x)))
     {
-      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+      body = sort_nat::swap_zero(body, sort_bag::count(s, var, sort_bag::bag_fbag(s, sort_bag::right(x))));
     }
     derived().print("{ ");
     print_variable(var, true);
     derived().print(" | ");
     derived()(body);
     derived().print(" }");
-  }  
+  }
 
   void print_fbag_cons_list(data_expression x)
   {
     atermpp::vector<std::pair<data_expression, data_expression> > arguments;
-    while (sort_fbag::is_fbag_cons_application(x) || sort_fbag::is_fbaginsert_application(x) || sort_fbag::is_fbagcinsert_application(x))
+    while (sort_fbag::is_cons_application(x) || sort_fbag::is_insert_application(x) || sort_fbag::is_cinsert_application(x))
     {
-      if (sort_fbag::is_fbag_cons_application(x))
+      if (sort_fbag::is_cons_application(x))
       {
-        arguments.push_back(std::make_pair(sort_fbag::head(x), sort_fbag::headcount(x)));
-        x = sort_fbag::tail(x);
+        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_fbag::arg2(x)));
+        x = sort_fbag::arg3(x);
       }
-      else if (sort_fbag::is_fbaginsert_application(x))
+      else if (sort_fbag::is_insert_application(x))
       {
         arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
         x = sort_fbag::arg3(x);
@@ -736,26 +678,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fset_true(data_expression x)
   {
-    derived().print("!{");
-    // TODO: compute the complement of the set
+    derived().print("!");
     derived()(sort_set::right(x));
-    derived().print("}");
   }
-  
+
   void print_fset_false(data_expression x)
   {
-    derived().print("{");
-    // TODO: check if this is correct (it is just a hack to fix a test)
-    if (!sort_fset::is_fset_empty_function_symbol(sort_set::right(x)))
+    if (sort_fset::is_empty_function_symbol(sort_set::right(x)))
+    {
+      derived().print("{}");
+    }
+    else
     {
       derived()(sort_set::right(x));
     }
-    derived().print("}");   
   }
-  
+
   void print_fset_lambda(data_expression x)
   {
-    sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
     print_variables(left.variables(), true, true, false, "", "", ", ");
@@ -763,12 +703,67 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(left.body());
     derived().print(" }");
   }
-  
+
+  void print_fset_set_operation(const data_expression& x, const std::string& op)
+  {
+    data_expression f = sort_fset::arg1(x);
+    data_expression g = sort_fset::arg2(x);
+
+    // print lhs
+    if (sort_set::is_false_function_function_symbol(g))
+    {
+      derived()(sort_fset::arg3(x));
+    }
+    else if (sort_set::is_true_function_function_symbol(g))
+    {
+      derived().print("!");
+      derived()(sort_fset::arg3(x));
+    }
+    else
+    {
+      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_fset::arg3(x)));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
+
+    // print operator
+    derived().print(op);
+
+    // print rhs
+    if (sort_set::is_false_function_function_symbol(f))
+    {
+      derived()(sort_fset::arg4(x));
+    }
+    else if (sort_set::is_true_function_function_symbol(f))
+    {
+      derived().print("!");
+      derived()(sort_fset::arg4(x));
+    }
+    else
+    {
+      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body = sort_bool::and_(sort_bool::not_(f(var)), sort_set::in(s, var, sort_fset::arg4(x)));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
+  }
+
   void print_fset_default(data_expression x)
   {
     data_expression right = sort_set::right(x);
     // TODO: check if this is the correct way to handle this case
-    if (sort_fset::is_fset_empty_function_symbol(right))
+    if (sort_fset::is_empty_function_symbol(right))
     {
         sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
         core::identifier_string name = generate_identifier("x", x);
@@ -778,7 +773,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         print_variable(var, true);
         derived().print(" | ");
         derived()(body);
-        derived().print(" }");         
+        derived().print(" }");
     }
     else
     {
@@ -786,22 +781,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         core::identifier_string name = generate_identifier("x", x);
         variable var(name, s);
         data_expression lhs(sort_set::left(x)(var));
-        data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
-        data_expression body = not_equal_to(lhs, rhs);     
+        data_expression rhs(sort_set::in(s, var, sort_set::set_fset(s, right)));
+        data_expression body = not_equal_to(lhs, rhs);
         derived().print("{ ");
         print_variable(var, true);
         derived().print(" | ");
         derived()(body);
-        derived().print(" }");         
+        derived().print(" }");
     }
-  }  
+  }
 
   template <typename Abstraction>
   void print_abstraction(const Abstraction& x, const std::string& op)
   {
     derived().enter(x);
     derived().print(op + " ");
-    print_variables(x.variables(), true, true, false, "", "", ", ");   
+    print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
     derived()(x.body());
     derived().leave(x);
@@ -812,7 +807,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (is_infix_operation(x))
     {
       data_expression_list::const_iterator i = x.arguments().begin();
-      core::identifier_string name = function_symbol(x.head()).name();
       data_expression left = *i++;
       data_expression right = *i;
       print_expression(left, infix_precedence_left(left));
@@ -822,7 +816,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_expression(right, infix_precedence_right(right));
       return;
     }
-    
+
     // print the head
     bool print_parentheses = is_abstraction(x.head());
     if (print_parentheses)
@@ -833,7 +827,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (print_parentheses)
     {
       derived().print(")");
-    }   
+    }
 
     // print the arguments
     print_parentheses = x.arguments().size() > 0;
@@ -853,7 +847,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (print_parentheses)
     {
       derived().print(")");
-    }   
+    }
   }
 
   // N.B. This is interpreted as the bag element 'x.first: x.second'
@@ -1092,18 +1086,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       derived().print("1");
     }
-    else if (sort_fbag::is_fbag_empty_function_symbol(x))
+    else if (sort_fbag::is_empty_function_symbol(x))
     {
       derived().print("{}");
     }
-    else if (sort_fset::is_fset_empty_function_symbol(x))
+    else if (sort_fset::is_empty_function_symbol(x))
     {
       derived().print("{}");
     }
     else
     {
       derived().print(x.name());
-    }    
+    }
     derived().leave(x);
   }
 
@@ -1112,7 +1106,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     // TODO: this copy is done because of the "numeric reconstruction", which
     // will hopefully be removed in the future.
     data::application x = y;
-      
+
 #ifdef MCRL2_DEBUG_PRINT
     print_sort(x);
 #endif
@@ -1121,9 +1115,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     //                            numeric values
     //-------------------------------------------------------------------//
-    if (is_numeric_value(x))
+    if (is_numeric_expression(x))
     {
-//std::cout << "<reconstruct>" << core::pp(x) << " -> ";
       data_expression z = detail::reconstruct_numeric_expression(x);
       if (is_function_symbol(z))
       {
@@ -1155,7 +1148,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (data::is_not_equal_to_application(x))
       {
         print_binary_operation(x, " != ");
-      }     
+      }
       else if (data::is_less_application(x))
       {
         print_binary_operation(x, " < ");
@@ -1192,6 +1185,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_binary_operation(x, " . ");
       }
+      else if (sort_fset::is_in_application(x))
+      {
+        print_binary_operation(x, " in ");
+      }
+      else if (sort_fbag::is_in_application(x))
+      {
+        print_binary_operation(x, " in ");
+      }
       else
       {
         print_function_application(x);
@@ -1223,7 +1224,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            nat
     //-------------------------------------------------------------------//
     else if (sort_nat::is_nat(x.sort()))
-    {   
+    {
       if (sort_nat::is_plus_application(x))
       {
         print_binary_operation(x, " + ");
@@ -1235,16 +1236,53 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_nat::is_div_application(x))
       {
         // TODO: make a proper binary operation of div
-        print_expression(sort_nat::arg1(x), precedence(x));
+        print_expression(sort_nat::left(x), precedence(x));
         derived().print(" div ");
-        print_expression(sort_nat::arg2(x), precedence(x));
-      }     
+        print_expression(sort_nat::right(x), precedence(x));
+      }
       else if (sort_nat::is_mod_application(x))
       {
         // TODO: make a proper binary operation of mod
-        print_expression(sort_nat::arg1(x), precedence(x));
+        print_expression(sort_nat::left(x), precedence(x));
         derived().print(" mod ");
-        print_expression(sort_nat::arg2(x), precedence(x));
+        print_expression(sort_nat::right(x), precedence(x));
+      }
+      else if (sort_int::is_mod_application(x))
+      {
+        // TODO: make a proper binary operation of mod
+        print_expression(sort_int::left(x), precedence(x));
+        derived().print(" mod ");
+        print_expression(sort_int::right(x), precedence(x));
+      }
+      else if (sort_nat::is_first_application(x))
+      {
+      	// TODO: verify if this is the correct way of dealing with first/divmod
+      	data_expression y = sort_nat::arg(x);
+      	if (!sort_nat::is_divmod_application(y))
+        {
+          print_function_application(x);
+        }
+        else
+        {
+          print_expression(sort_nat::left(y), precedence(y));
+          derived().print(" div ");
+          print_expression(sort_nat::right(y), precedence(y));
+        }
+      }
+      else if (sort_nat::is_last_application(x))
+      {
+      	// TODO: verify if this is the correct way of dealing with last/divmod
+        data_expression y = sort_nat::arg(x);
+      	if (!sort_nat::is_divmod_application(y))
+        {
+          print_function_application(x);
+        }
+        else
+        {
+          print_expression(sort_nat::left(y), precedence(y));
+          derived().print(" mod ");
+          print_expression(sort_nat::right(y), precedence(y));
+        }
       }
       else if (sort_nat::is_exp_application(x))
       {
@@ -1265,7 +1303,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            int
     //-------------------------------------------------------------------//
     else if (sort_int::is_int(x.sort()))
-    {   
+    {
       if (sort_int::is_negate_application(x))
       {
         derived().print("-");
@@ -1286,16 +1324,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_int::is_div_application(x))
       {
         // TODO: make a proper binary operation of div
-        print_expression(sort_int::arg1(x), precedence(x));
+        print_expression(sort_int::left(x), precedence(x));
         derived().print(" div ");
-        print_expression(sort_int::arg2(x), precedence(x));
-      }
-      else if (sort_int::is_mod_application(x))
-      {
-        // TODO: make a proper binary operation of mod
-        print_expression(sort_int::arg1(x), precedence(x));
-        derived().print(" mod ");
-        print_expression(sort_int::arg2(x), precedence(x));
+        print_expression(sort_int::right(x), precedence(x));
       }
       else if (sort_int::is_cint_application(x))
       {
@@ -1335,7 +1366,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_real::is_creal_application(x)) // TODO: fix this!!!
       {
-        derived()(sort_real::numerator(x));
+        derived()(sort_real::arg(x));
       }
       else
       {
@@ -1391,24 +1422,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_set::is_set(x.sort()))
     {
-      if (sort_set::is_setcomplement_application(x))
+      if (sort_set::is_complement_application(x))
       {
         derived().print("!");
         derived()(x.arguments().front());
       }
-      else if (sort_set::is_setunion_application(x))
+      else if (sort_set::is_union_application(x))
       {
         print_binary_operation(x, " + ");
       }
-      else if (sort_set::is_setintersection_application(x))
+      else if (sort_set::is_intersection_application(x))
       {
         print_binary_operation(x, " * ");
       }
-      else if (sort_set::is_setdifference_application(x))
+      else if (sort_set::is_difference_application(x))
       {
         print_binary_operation(x, " - ");
       }
-      else if (sort_set::is_setconstructor_application(x))
+      else if (sort_set::is_constructor_application(x))
       {
         if (is_fset_true(x))
         {
@@ -1427,7 +1458,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           print_fset_default(x);
         }
       }
-      else if (sort_set::is_setcomprehension_application(x))
+      else if (sort_set::is_set_comprehension_application(x))
       {
         sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
         core::identifier_string name = generate_identifier("x", x);
@@ -1437,12 +1468,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         print_variable(var, true);
         derived().print(" | ");
         derived()(body);
-        derived().print(" }");   
+        derived().print(" }");
       }
-      else if (sort_set::is_setfset_application(x))
+      else if (sort_set::is_set_fset_application(x))
       {
         data_expression y = sort_set::arg(x);
-        if (sort_fset::is_fset_empty_function_symbol(y))
+        if (sort_fset::is_empty_function_symbol(y))
         {
           derived().print("{}");
         }
@@ -1472,6 +1503,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_fset_cons_list(x);
       }
+      else if (sort_fset::is_union_application(x))
+      {
+        print_fset_set_operation(x, " + ");
+      }
+      else if (sort_fset::is_intersection_application(x))
+      {
+        print_fset_set_operation(x, " * ");
+      }
+      else if (sort_fset::is_difference_application(x))
+      {
+        derived()(sort_fset::arg1(x));
+        derived().print(" - ");
+        derived()(sort_fset::arg2(x));
+      }
       else
       {
         print_function_application(x);
@@ -1482,21 +1527,21 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            bag
     //-------------------------------------------------------------------//
     else if (sort_bag::is_bag(x.sort()))
-    {   
-      if (sort_bag::is_bagjoin_application(x))
+    {
+      if (sort_bag::is_join_application(x))
       {
         print_binary_operation(x, " + ");
       }
-      else if (sort_bag::is_bagintersect_application(x))
+      else if (sort_bag::is_intersection_application(x))
       {
         print_binary_operation(x, " * ");
       }
-      else if (sort_bag::is_bagdifference_application(x))
+      else if (sort_bag::is_difference_application(x))
       {
         print_binary_operation(x, " - ");
       }
 
-      else if (sort_bag::is_bagconstructor_application(x))
+      else if (sort_bag::is_constructor_application(x))
       {
         if (is_fbag_zero(x))
         {
@@ -1515,7 +1560,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           print_fbag_default(x);
         }
       }
-      else if (sort_bag::is_bagcomprehension_application(x))
+      else if (sort_bag::is_bag_comprehension_application(x))
       {
         sort_expression s = function_sort(sort_bag::arg(x).sort()).domain().front();
         core::identifier_string name = generate_identifier("x", x);
@@ -1525,12 +1570,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         print_variable(var, true);
         derived().print(" | ");
         derived()(body);
-        derived().print(" }");   
+        derived().print(" }");
       }
-      else if (sort_bag::is_bagfbag_application(x))
+      else if (sort_bag::is_bag_fbag_application(x))
       {
         data_expression y = sort_bag::arg(x);
-        if (sort_fbag::is_fbag_empty_function_symbol(y))
+        if (sort_fbag::is_empty_function_symbol(y))
         {
           derived().print("{}");
         }
@@ -1556,6 +1601,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_fbag::is_fbag(x.sort()))
     {
+      // cons / insert / cinsert
       if (is_fbag_cons_list(x))
       {
         print_fbag_cons_list(x);
@@ -1597,7 +1643,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (is_abstraction_application(x))
     {
       if (x.arguments().size() > 0) {
-        derived().print("(");         
+        derived().print("(");
       }
       derived()(x.head());
       if (x.arguments().size() > 0)
@@ -1610,7 +1656,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().print(")");
       }
     }
-    
+
     //-------------------------------------------------------------------//
     //                            function application
     //-------------------------------------------------------------------//
@@ -1779,7 +1825,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     typename Container::const_iterator first = equations.begin();
     typename Container::const_iterator last = equations.end();
-      
+
     Container normalized_equations = equations;
     data::normalize_sorts(normalized_equations, data_spec);
 
@@ -1813,27 +1859,30 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(static_cast<const data::data_expression&>(x));
-    derived().leave(x);   
+    derived().leave(x);
   }
 
 };
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<data::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<data::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  data::print(t, out);
+  stream_printer()(x, out);
   return out.str();
 }
 

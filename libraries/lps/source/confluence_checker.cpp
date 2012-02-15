@@ -20,6 +20,7 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/exception.h"
 
+using namespace mcrl2::log;
 
 namespace mcrl2
 {
@@ -37,6 +38,7 @@ using namespace mcrl2::core::detail;
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
+static
 atermpp::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
 {
   atermpp::map < variable,data_expression> v_substitutions;
@@ -49,7 +51,7 @@ atermpp::map < variable,data_expression> get_substitutions_from_assignments(cons
 }
 
 // ----------------------------------------------------------------------------------------------
-
+static
 data_expression get_subst_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
@@ -120,50 +122,51 @@ data_expression get_subst_equation_from_assignments(
 
 // ----------------------------------------------------------------------------------------------
 
+static
 data_expression get_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
   assignment_list a_assignments_2)
 {
   data_expression v_result = sort_bool::true_();
-  
-  for (variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end(); ++i) 
-  { 
-    const variable v_variable=*i; 
-    if (!a_assignments_1.empty() && v_variable == a_assignments_1.front().lhs()) 
-    { 
-      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs()) 
-      { 
-        // Create a condition from the assigments from both lists. 
-        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs())); 
-        a_assignments_2=pop_front(a_assignments_2); 
-      } 
-      else 
-      { 
-        // Create a condition from first assigment only. 
-        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable)); 
-      } 
-      a_assignments_1=pop_front(a_assignments_1); 
-    } 
-    else  
-    { 
-      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs()) 
-      { 
-        // Create a condition from the second assigments only. 
-        v_result = sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs())); 
-        a_assignments_2=pop_front(a_assignments_2); 
-      } 
-    } 
-  } 
- 	
+
+  for (variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end(); ++i)
+  {
+    const variable v_variable=*i;
+    if (!a_assignments_1.empty() && v_variable == a_assignments_1.front().lhs())
+    {
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the assigments from both lists.
+        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs()));
+        a_assignments_2=pop_front(a_assignments_2);
+      }
+      else
+      {
+        // Create a condition from first assigment only.
+        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable));
+      }
+      a_assignments_1=pop_front(a_assignments_1);
+    }
+    else
+    {
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the second assigments only.
+        v_result = sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs()));
+        a_assignments_2=pop_front(a_assignments_2);
+      }
+    }
+  }
+
   assert(a_assignments_1.empty()); // If this is not the case, the assignments do not have the
   assert(a_assignments_2.empty()); // same order as the list of variables. This means that some equations
-  // have not been generated.
+                                   // have not been generated.
   return v_result;
 }
 
 // ----------------------------------------------------------------------------------------------
-
+static
 data_expression get_subst_equation_from_actions(
   const action_list a_actions,
   const atermpp::map<variable,data_expression> &a_substitutions)
@@ -185,6 +188,7 @@ data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
+static
 data_expression get_confluence_condition(
   const data_expression a_invariant,
   const action_summand a_summand_1,
@@ -233,6 +237,7 @@ data_expression get_confluence_condition(
 
 // --------------------------------------------------------------------------------------------
 
+static
 bool has_ctau_action(const specification& a_lps)
 {
   const action_label_list v_action_specification = a_lps.action_labels();
@@ -446,7 +451,7 @@ Confluence_Checker::Confluence_Checker(
   mcrl2::data::rewriter::strategy a_rewrite_strategy,
   int a_time_limit,
   bool a_path_eliminator,
-  SMT_Solver_Type a_solver_type,
+  smt_solver_type a_solver_type,
   bool a_apply_induction,
   bool a_no_marking,
   bool a_check_all,
@@ -455,7 +460,8 @@ Confluence_Checker::Confluence_Checker(
   std::string const& a_dot_file_name):
   f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
   f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-  f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
+  f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
+                     a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
   f_lps(a_lps),
   f_no_marking(a_no_marking),
   f_check_all(a_check_all),

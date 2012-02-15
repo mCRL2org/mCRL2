@@ -16,8 +16,11 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/data/parse.h"
+#include <string>
 
 #include "varupdate.h"
 
@@ -55,24 +58,25 @@ bool varupdate::set_varupdate(const wxString& p_varupdate)
   variable_update_rhs.Trim(false);
   if (variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty())
   {
-    return false;
+    throw mcrl2::runtime_error("Invalid variable update.");
   }
 
-  istringstream r(string(variable_update_lhs.mb_str()).c_str());
-  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
-  if (a_parsed_identifier)
+  try
   {
-    string a_name = identifier_string(a_parsed_identifier);
-    set_lhs(wxString(a_name.c_str(), wxConvLocal));
+    std::string lhs(variable_update_lhs.mb_str());
+    mcrl2::core::parse_identifier(lhs); // will throw if lhs is not a valid identifier
+    set_lhs(wxString(lhs.c_str(), wxConvLocal));
 
-    istringstream s(string(variable_update_rhs.mb_str()).c_str());
-    ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(s);
-    if (a_parsed_data_expr)
-    {
-      string a_value = PrintPart_CXX(ATerm(a_parsed_data_expr));
-      set_rhs(wxString(a_value.c_str(), wxConvLocal));
-      return true;
-    }
+    std::string rhs(variable_update_rhs.mb_str());
+    // Assuming that the data expression is valid....
+    //mcrl2::data::parse_data_expression(rhs); // will throw if rhs is not a valid data expression
+    set_rhs(wxString(rhs.c_str(), wxConvLocal));
+
+    return true;
+  }
+  catch (...)
+  {
+    throw mcrl2::runtime_error("Invalid variable update.");
   }
   return false;
 }

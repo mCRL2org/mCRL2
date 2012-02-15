@@ -43,6 +43,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
+using namespace mcrl2::log;
 
 
 
@@ -250,20 +251,20 @@ class lts2lps_tool : public input_output_tool
           assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       const lps::specification spec(l.data(),l.action_labels(),global_variables,lps,initial_process);
 
-      for (mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
+      const std::vector<transition> &trans=l.get_transitions();
+      for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
       {
-        const transition t=r.front();
-        const lps::multi_action actions=l.action_label(t.label());
+        const lps::multi_action actions=l.action_label(r->label());
 
         assignment_list assignments;
-        if (t.from()!=t.to())
+        if (r->from()!=r->to())
         {
-          assignments=push_back(assignments,assignment(process_parameter,sort_pos::pos(t.to()+1)));
+          assignments=push_back(assignments,assignment(process_parameter,sort_pos::pos(r->to()+1)));
         }
 
         const action_summand summand(
           variable_list(),
-          equal_to(process_parameter,sort_pos::pos(t.from()+1)),
+          equal_to(process_parameter,sort_pos::pos(r->from()+1)),
           actions,
           assignments);
         action_summands.push_back(summand);

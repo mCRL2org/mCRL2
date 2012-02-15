@@ -145,6 +145,18 @@ std::string test16 =
   "init X(lambda x: Nat. S);\n"
   ;
 
+// Test case with global variables
+std::string test17 =
+  "sort D = struct d1 | d2;         \n"
+  "                                 \n"
+  "glob d: D;                       \n"
+  "                                 \n"
+  "pbes nu X =                      \n"
+  "       forall e: D. val(d == e); \n"
+  "                                 \n"
+  "init X;                          \n"
+  ;
+
 // N.B. The test cases below should not terminate, since they correspond
 // to infinite BESs.
 // TODO: Test that no solution for these cases is found within a certain number of steps.
@@ -171,7 +183,7 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::re
   if (result != expected_result)
   {
     std::cout << "--- pbes2bool failed ---\n";
-    std::cout << core::pp(pbes_to_aterm(p)) << std::endl;
+    std::cout << pbes_system::pp(p) << std::endl;
     std::cout << "result: " << std::boolalpha << result << std::endl;
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
@@ -196,7 +208,7 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
-  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies();
+  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies(false);
 
   for(std::vector<data::basic_rewriter<data::data_expression>::strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
   {
@@ -244,11 +256,13 @@ void test_all()
   std::cerr << "Test13\n";
   test_pbes_solve(test13, true);
   std::cerr << "Test14\n";
-  test_pbes_solve(test14, true); 
+  test_pbes_solve(test14, true);
   std::cerr << "Test15\n";
   test_pbes_solve(test15, false);
   std::cerr << "Test16\n";
   test_pbes_solve(test16, false);
+  std::cerr << "Test17\n";
+  test_pbes_solve(test17, false);
 }
 
 std::string frm_nodeadlock = "[true*]<true*>true";
@@ -275,7 +289,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_all(); 
+  test_all();
   test_abp();
 
   return 0;

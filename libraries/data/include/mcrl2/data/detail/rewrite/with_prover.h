@@ -29,30 +29,28 @@ class RewriterProver: public Rewriter
     BDD_Prover* prover_obj;
     boost::shared_ptr<detail::Rewriter> rewr_obj; 
 
+    typedef Rewriter::substitution_type substitution_type;
+    typedef Rewriter::internal_substitution_type internal_substitution_type;
+
   public:
-    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules);
-    ~RewriterProver();
+    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
+    virtual ~RewriterProver();
 
     mcrl2::data::detail::RewriteStrategy getStrategy();
 
-    ATermAppl rewrite(ATermAppl Term);
+    data_expression rewrite(
+         const data_expression term,
+         substitution_type &sigma);
 
-    ATerm toRewriteFormat(ATermAppl Term);
-    ATermAppl fromRewriteFormat(ATerm Term);
-    ATerm rewriteInternal(ATerm Term);
+    atermpp::aterm_appl rewrite_internal(
+         const atermpp::aterm_appl term,
+         internal_substitution_type &sigma);
 
-    bool addRewriteRule(ATermAppl Rule);
-    bool removeRewriteRule(ATermAppl Rule);
+    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
 
-    void setSubstitution(ATermAppl Var, ATermAppl Expr);
-    void setSubstitutionList(ATermList Substs);
-    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-    void setSubstitutionInternalList(ATermList Substs);
-    ATermAppl getSubstitution(ATermAppl Var);
-    ATerm getSubstitutionInternal(ATermAppl Var);
-    void clearSubstitution(ATermAppl Var);
-    void clearSubstitutions();
-    void clearSubstitutions(ATermList Vars);
+    bool addRewriteRule(const data_equation rule);
+    bool removeRewriteRule(const data_equation rule);
 
 };
 

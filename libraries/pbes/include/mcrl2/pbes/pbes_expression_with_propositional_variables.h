@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_PROPOSITIONAL_VARIABLES_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/atermpp/make_list.h"
 
 namespace mcrl2
@@ -483,7 +482,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   static inline
   std::string pp(term_type t)
   {
-    return core::pp(static_cast<const atermpp::aterm_appl&>(t)) + " variables: " + data::pp(t.variables()) + " propositional variables: " + core::pp(t.propositional_variables());
+    return pbes_system::pp(static_cast<const pbes_system::pbes_expression&>(t)) + " variables: " + data::pp(t.variables()) + " propositional variables: " + pbes_system::pp(t.propositional_variables());
   }
 };
 

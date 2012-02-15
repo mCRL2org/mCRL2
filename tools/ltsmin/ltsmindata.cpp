@@ -8,7 +8,6 @@
 //
 /// \file ltsmindata.cpp
 
-#include "mcrl2/core/print.h"
 #include "ltsmin.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -19,6 +18,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::utilities;
+using namespace mcrl2::log;
 
 /* Data definition */
 
@@ -191,6 +191,7 @@ static void RemoveExtraNode(void)
   dfsn--;
 }
 
+static
 void DfsNumbering(ATerm t)
 {
   int d = ATgetInt((ATermInt) t);
@@ -223,6 +224,7 @@ void DfsNumbering(ATerm t)
   }
 }
 
+static
 int TakeComponent(ATerm t)
 {
   static int s_pt = 0;
@@ -231,6 +233,7 @@ int TakeComponent(ATerm t)
   {
     return s_pt;
   }
+  else
   {
     ATermList sources = (ATermList) ATtableGet(graph_i, t);
     if (visited[d] == dfsn)
@@ -383,6 +386,7 @@ void add_tau_action(std::string const& action)
   num_tau_actions++;
 }
 
+static
 bool is_tau_action(char const* action)
 {
   for (int i=0; i<num_tau_actions; i++)
@@ -395,6 +399,7 @@ bool is_tau_action(char const* action)
   return false;
 }
 
+static
 bool is_tau_mact(atermpp::aterm_appl const& mact)
 {
   mcrl2::lps::multi_action m(mact);
@@ -639,6 +644,7 @@ static ATermList  BlockNumbers(ATermList sources)
   return result;
 }
 
+static
 void GetBlockBoundaries(SVCint b, SVCstateIndex* left, SVCstateIndex* right)
 {
   *left = Pi[b].left;
@@ -707,13 +713,12 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
     if (classes && npar > 1)
     {
       pars = par[s[i]];
-      ATfprintf(stdout, "Summands:\t");
+      std::cout << "Summands:\t";
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
-        ATfprintf(stdout, "%t ",
-                  par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
+        std::cout << atermpp::aterm(par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
       }
-      ATfprintf(stdout, "\n");
+      std::cout << std::endl;
     }
   }
   newlab[newb] = newlabels;
@@ -846,16 +851,16 @@ static ATermList  StableBlockNumbers(void)
   return result;
 }
 
+static
 SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
                                        deleteTauLoops)
 {
   ATermList blocks = StableBlockNumbers();
   omitTauLoops = deleteTauLoops;
-  {
-    SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
-    BlockCode(-1);
-    return result;
-  }
+
+  SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
+  BlockCode(-1);
+  return result;
 }
 
 int WriteData(SVCstateIndex initState, int omit_tauloops)
@@ -901,6 +906,7 @@ size_t state_arity = (size_t)-1; // Yikes... why is this declared here?
 ATerm* state_args;
 AFun state_afun;
 
+static
 SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
 {
   ATermAppl state = (ATermAppl) SVCstate2ATerm(in,s);
@@ -925,12 +931,14 @@ SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
   return SVCnewState(outFile,(ATerm) state, &nnew);
 }
 
+static
 SVClabelIndex get_new_label(SVCfile* in, SVClabelIndex l)
 {
   SVCbool nnew;
   return SVCnewLabel(outFile,SVClabel2ATerm(in,l), &nnew);
 }
 
+static
 SVCparameterIndex get_new_param()
 {
   SVCbool nnew;

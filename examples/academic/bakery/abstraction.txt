@@ -1,0 +1,35 @@
+sort
+  AbsNat  = struct nul | meer;
+
+var
+  n: Nat;
+  an,an': AbsNat;
+eqn
+  absplus (nul,nul) = {nul};  
+  absplus (meer,meer) = {meer};
+  absplus (meer,nul) = {meer};
+  absplus (nul,meer) = {meer};
+
+  abslt (nul,meer)  = {true};
+  abslt (meer,meer) = {false,true};
+  abslt (an,nul) = {false};
+
+  absle (an,nul) = {an == nul};   
+  absle (meer,meer) = {false,true};
+  absle (nul,meer) = {true};
+
+  abseqn (nul,nul) = {true};      
+  an != an' -> abseqn (an, an') = {false};
+  abseqn (meer,meer) = {false,true}; 
+
+  h(0) = nul;
+  (n > 0) -> h(n) = meer;
+
+absmap
+h: Nat -> AbsNat;
+
+absfunc
+  +: Nat # Nat -> Nat          := absplus :AbsNat # AbsNat -> Set(AbsNat)
+  <: Nat # Nat -> Bool         := abslt : AbsNat # AbsNat -> Set(Bool)
+  <=: Nat # Nat -> Bool        := absle : AbsNat # AbsNat -> Set(Bool)
+  ==: Nat # Nat -> Bool        := abseqn : AbsNat # AbsNat -> Set(Bool)

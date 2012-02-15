@@ -15,31 +15,34 @@ set(PREFIX "data")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/build/workarounds/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
 
 file(GLOB TERM_OBJS "*.cpp")
 
 #set(FAILING_TESTS
-# data_typecheck_test      
+# data_typecheck_test
 #)
 
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
-  project( "${PREFIX}_${result}" )
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL  "${OBJ}" )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
      mcrl2_utilities
+     mcrl2_syntax
+     dparser
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )
 
-  list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM ) 
+  list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM )
   if( -1 EQUAL FIND_ELM )
     set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}" )
   else( -1 EQUAL FIND_ELM )

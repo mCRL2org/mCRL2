@@ -1,0 +1,70 @@
+% Specification for the rope bridge problem
+% Written by Bas Ploeger, June 2008.
+
+% Sort for the position of adventurers and flashlight. Initially, they
+% are all on the 'start' side of the bridge. In the end, they should all
+% have reached the 'finish' side.
+sort Position = struct start | finish;
+
+act forward_adventurer, % an adventurer moves forward
+    forward_flashlight, % the flashlight moves forward
+    forward_referee,    % the referee processes a forward movement
+    forward: Int # Int; % two adventurers and a flashlight move forward
+                        % and the referee processes this
+
+    back_adventurer, % an adventurer moves back
+    back_flashlight, % the flashlight moves back
+    back_referee,    % the referee processes a back movement
+    back: Int;       % one adventurer and a flashlight move back and the
+                     % referee processes this
+    
+    report: Int; % the referee reports that all adventurers have
+                 % crossed the bridge along with the time that it took
+
+
+% Models the flashlight which can move to the other side of the bridge
+proc Flashlight(pos:Position) =
+       (pos == start) ->
+         sum s,s':Int . forward_flashlight(s,s') . Flashlight(finish)
+       <> % position == finish
+         sum s:Int . back_flashlight(s) . Flashlight(start);
+
+
+% Models an adventurer who can move to the other side of the bridge with
+% its designated speed
+proc Adventurer(speed:Int, pos:Position) =
+       (pos == start) ->
+         ( sum s:Int . 
+             % keep the parameters of forward actions sorted; otherwise
+             % we get two transitions for every forward movement of
+             % adventurers with speeds X and Y -- forward(X,Y) and
+             % forward(Y,X) -- both leading to the same state and
+             % modelling the same event.
+             (s > speed) -> forward_adventurer(speed,s) . Adventurer(speed,finish) 
+                         <> forward_adventurer(s,speed) . Adventurer(speed,finish) 
+         )
+       <> % position == finish
+         back_adventurer(speed) . Adventurer(speed,start);
+
+
+% Models the referee who counts the number of minutes passed and the
+% number of adventurers that have reached the far side of the bridge
+proc Referee(minutes:Int, num_finished:Int) =
+       sum s,s':Int . forward_referee(s,s')
+                    . Referee(minutes + max(s,s'), num_finished + 2)
+       +
+       (num_finished < 4) ->
+         sum s:Int . back_referee(s)
+                   . Referee(minutes + s, num_finished - 1)
+       <> % num_finished >= 4
+         report(minutes) . Referee(minutes, num_finished);
+
+
+init allow( { forward, back, report },
+     comm(  { forward_adventurer | forward_adventurer |
+              forward_flashlight | forward_referee -> forward,
+              back_adventurer | back_flashlight | back_referee -> back },
+       Adventurer(1,start) || Adventurer(2,start)  || 
+       Adventurer(5,start) || Adventurer(10,start) || 
+       Flashlight(start)   || Referee(0,0)
+     ));

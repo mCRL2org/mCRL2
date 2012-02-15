@@ -25,30 +25,42 @@ namespace detail
 class RewriterJitty: public Rewriter
 {
   public:
-    RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
-    ~RewriterJitty();
+    typedef Rewriter::substitution_type substitution_type;
+    typedef Rewriter::internal_substitution_type internal_substitution_type;
+
+    RewriterJitty(const data_specification& DataSpec, const used_data_equation_selector &);
+    virtual ~RewriterJitty();
 
     RewriteStrategy getStrategy();
 
-    ATermAppl rewrite(ATermAppl Term);
+    data_expression rewrite(const data_expression term, substitution_type &sigma);
 
-    ATerm toRewriteFormat(ATermAppl Term);
-    ATermAppl fromRewriteFormat(ATerm Term);
-    ATerm rewriteInternal(ATerm Term);
+    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    // data_expression fromRewriteFormat(atermpp::aterm_appl term); 
+    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl term, internal_substitution_type &sigma);
 
-    bool addRewriteRule(ATermAppl Rule);
-    bool removeRewriteRule(ATermAppl Rule);
+    bool addRewriteRule(const data_equation Rule);
+    bool removeRewriteRule(const data_equation Rule);
 
   private:
     // unsigned int num_opids;
     size_t max_vars;
     bool need_rebuild;
 
-    ATermAppl jitty_true;
+    atermpp::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
+    atermpp::vector < ATermList >  jitty_strat;
+    atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, internal_substitution_type &sigma);
+    void build_strategies();
 
-    atermpp::map< ATermInt, ATermList > jitty_eqns;
-    ATermList* jitty_strat;
-    ATermAppl rewrite_aux(ATermAppl Term);
+    atermpp::aterm_appl rewrite_aux_function_symbol(
+                      const atermpp::aterm_int op,
+                      const atermpp::aterm_appl term,
+                      internal_substitution_type &sigma);
+
+    /* Auxiliary function to take care that the array jitty_strat is sufficiently large
+       to access element i */
+    void make_jitty_strat_sufficiently_larger(const size_t i);
+
 };
 }
 }

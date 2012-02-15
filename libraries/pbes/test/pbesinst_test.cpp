@@ -199,7 +199,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     {
       using namespace pbes_system;
       pbes<> q1 = pbesinst_finite(p);
-      std::cout << core::pp(q1) << std::endl;
+      std::cout << pbes_system::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
     {
@@ -214,7 +214,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     {
       using namespace pbes_system;
       pbes<> q1 = pbesinst_lazy(p);
-      std::cout << core::pp(q1) << std::endl;
+      std::cout << pbes_system::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
     {
@@ -480,7 +480,7 @@ void test_pbesinst_finite()
 }
 
 void test_abp_no_deadlock()
-{ 
+{
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;

@@ -36,9 +36,6 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
 
     data_expression operator()(const abstraction& x)
     {
-      using namespace sort_set;
-      using namespace sort_bag;
-
       //variable_list bound_variables = atermpp::convert<variable_list>((*this)(x.variables()));
       variable_list bound_variables = x.variables();
 
@@ -46,13 +43,13 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
       {
         //sort_expression element_sort((*this)(x.variables().begin()->sort()));
         sort_expression element_sort(x.variables().begin()->sort());
-        return setconstructor(element_sort, lambda(bound_variables, static_cast<Derived&>(*this)(x.body())),sort_fset::fset_empty(element_sort));
+        return sort_set::constructor(element_sort, lambda(bound_variables, static_cast<Derived&>(*this)(x.body())),sort_fset::empty(element_sort));
       }
       else if (atermpp::function_symbol(atermpp::arg1(x).function()).name() == "BagComp")
       {
         sort_expression element_sort(x.variables().begin()->sort());
 
-        return bagconstructor(element_sort, lambda(bound_variables, static_cast<Derived&>(*this)(x.body())), sort_fbag::fbag_empty(element_sort));
+        return sort_bag::constructor(element_sort, lambda(bound_variables, static_cast<Derived&>(*this)(x.body())), sort_fbag::empty(element_sort));
       }
       return abstraction(x.binding_operator(), bound_variables, static_cast<Derived&>(*this)(x.body()));
     }
@@ -90,14 +87,14 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
           // convert to finite set
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
 
-          return sort_set::setfset(element_sort, sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          return sort_set::set_fset(element_sort, sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments())));
         }
         else if (head.name() == "@BagEnum")
         {
           // convert to finite bag
           using namespace sort_bag;
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
-          return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          return sort_bag::bag_fbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
         }
       }
       data_expression result = application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));

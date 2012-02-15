@@ -35,6 +35,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using utilities::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
+using namespace mcrl2::log;
 
 
 class lpsrealelm_tool: public rewriter_tool<input_output_tool >

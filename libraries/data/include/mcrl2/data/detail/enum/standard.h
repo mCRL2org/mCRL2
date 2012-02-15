@@ -32,19 +32,19 @@ class ss_solution
 {
   protected:
     atermpp::term_list< atermpp::aterm_appl > m_solution;  // A list containing the solution of a condition in internal format.
-    bool m_solution_is_exact;                              // An indication whether the solution made the solution exactly false or true.
+    atermpp::aterm_appl m_evaluated_condition;             // The condition after substituting the solution, in internal format.
 
   public:
 
     // Constructor.
-    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const bool solution_is_exact) :
+    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const atermpp::aterm_appl evaluated_condition) :
       m_solution(solution),
-      m_solution_is_exact(solution_is_exact)
+      m_evaluated_condition(evaluated_condition)
     {} 
    
-    bool solution_is_exact() const
+    atermpp::aterm_appl evaluated_condition() const
     { 
-      return m_solution_is_exact;
+      return m_evaluated_condition;
     }
 
     atermpp::term_list< atermpp::aterm_appl > solution() const
@@ -118,11 +118,6 @@ class EnumeratorStandard
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
-    atermpp::aterm_appl rewr_true, rewr_false;
-  
-    atermpp::aterm_int opidAnd;
-    atermpp::aterm_int opidOr;
-    atermpp::aterm_int opidNot;
     atermpp::set< atermpp::aterm_int > eqs;
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
@@ -140,6 +135,10 @@ class EnumeratorStandard
 
 class EnumeratorSolutionsStandard 
 {
+  public:
+    typedef Rewriter::substitution_type substitution_type;
+    typedef Rewriter::internal_substitution_type internal_substitution_type;
+
   protected:
 
     detail::EnumeratorStandard *m_enclosing_enumerator;
@@ -149,6 +148,7 @@ class EnumeratorSolutionsStandard
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
     atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
+    internal_substitution_type &enum_sigma;
 
     atermpp::deque < fs_expr> fs_stack;
     atermpp::vector< ss_solution > ss_stack;
@@ -157,15 +157,22 @@ class EnumeratorSolutionsStandard
     size_t max_vars;
     size_t m_max_internal_variables;
 
+    internal_substitution_type &default_sigma()
+    {
+      static internal_substitution_type default_sigma;
+      return default_sigma;
+    }
+
   public:
 
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
+       enum_sigma(default_sigma()),
        m_max_internal_variables(0)
     {
       enum_vars.protect();
       enum_expr.protect();
-    }
+    } 
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
     /// If not equal_to_false is set all solutions are generated that make Expr not equal to false.
@@ -189,12 +196,14 @@ class EnumeratorSolutionsStandard
     EnumeratorSolutionsStandard(
                    const variable_list &vars, 
                    const atermpp::aterm_appl &expr, 
+                   internal_substitution_type &sigma,
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
                    const size_t max_internal_variables=0) :
       m_enclosing_enumerator(enclosing_enumerator),
       enum_vars(vars),
       enum_expr(expr),
+      enum_sigma(sigma),
       used_vars(0),
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
@@ -213,8 +222,8 @@ class EnumeratorSolutionsStandard
  
    /**
     * \brief Get next solution as a term_list in internal format if available.
-    * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true
-    *             or false. The enumerator enumerates all solutions that are not false or not true.
+    * \param[out] evaluated_condition This optional parameter is used to return the
+    *             condition in which solution is substituted. 
     * \param[out] solution Place to store the solutions.
     *             The aterm_list solution contains solutions for the variables in internal
     *             format in the same order as the variable list Vars.
@@ -236,7 +245,7 @@ class EnumeratorSolutionsStandard
     *
     **/
 
-    bool next(bool &solution_is_exact,
+    bool next(atermpp::aterm_appl &evaluated_condition,
               atermpp::term_list<atermpp::aterm_appl> &solution, 
               bool &solution_possible);
 
@@ -246,7 +255,7 @@ class EnumeratorSolutionsStandard
 
   /** \brief Get next solution as a term_list in internal format.
    **/
-    bool next(bool &solution_is_exact,
+    bool next(atermpp::aterm_appl &evaluated_condition,
               atermpp::term_list<atermpp::aterm_appl> &solution);
 
   /** \brief Get next solution as a term_list in internal format.
@@ -258,14 +267,12 @@ class EnumeratorSolutionsStandard
   private:
     void reset(const bool not_equal_to_false); 
 
-    bool FindInnerCEquality(const atermpp::aterm_appl T, 
+    bool find_equality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
                             mcrl2::data::variable &v, 
                             atermpp::aterm_appl &e);
 
     void EliminateVars(fs_expr &e);
-
-    bool FindInnerCEquality_aux(const atermpp::aterm_appl t);
 
     atermpp::aterm_appl build_solution_single(
                  const atermpp::aterm_appl t,
@@ -281,7 +288,7 @@ class EnumeratorSolutionsStandard
                  const variable_list vars,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;
-    atermpp::aterm_appl build_solution_aux_innerc(
+    atermpp::aterm_appl build_solution_aux(
                  const atermpp::aterm_appl t,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;
@@ -290,6 +297,14 @@ class EnumeratorSolutionsStandard
                  const atermpp::term_list< atermpp::aterm_appl > negation_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or(
+                 atermpp::deque < fs_expr> &fs_stack,
+                 const variable_list var_list,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
+                 const atermpp::aterm_appl condition,
+                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                 const bool negated) const;
+    void push_on_fs_stack_and_split_or_without_rewriting(
                  atermpp::deque < fs_expr> &fs_stack,
                  const variable_list var_list,
                  const variable_list substituted_vars,

@@ -23,8 +23,8 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
@@ -67,7 +67,7 @@ struct data_enumerator_helper
 /// \endcond
 
 /// \brief Class for enumerating data expressions.
-template <typename IdentifierGenerator = number_postfix_generator>
+template <typename IdentifierGenerator = utilities::number_postfix_generator>
 class data_enumerator
 {
   protected:

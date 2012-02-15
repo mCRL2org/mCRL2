@@ -535,6 +535,7 @@ static yyconst flex_int16_t yy_chk[368] =
 #line 2 "lysalexer.ll"
 
 #include "lysa.h"
+#include "lysalexer.h"
 #include <string.h>
 #include <math.h>
 #include <iostream>
@@ -544,6 +545,8 @@ static yyconst flex_int16_t yy_chk[368] =
 #include <utility>
 #include <sstream>
 
+
+using namespace mcrl2::log;
 
 /*
  * we store the semantic values of all lexical tokens in an object
@@ -626,7 +629,7 @@ lysaLexer *lexer = NULL;
 
 
 
-#line 630 "lysalexer.cpp"
+#line 633 "lysalexer.cpp"
 
 #define INITIAL 0
 #define INIT 1
@@ -734,9 +737,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 107 "lysalexer.ll"
+#line 110 "lysalexer.ll"
 
-#line 740 "lysalexer.cpp"
+#line 743 "lysalexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -821,38 +824,38 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 108 "lysalexer.ll"
+#line 111 "lysalexer.ll"
 { col_nr += YYLeng();			/* whitespace */ }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 109 "lysalexer.ll"
+#line 112 "lysalexer.ll"
 { col_nr = 1; ++line_nr;	/* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 110 "lysalexer.ll"
+#line 113 "lysalexer.ll"
 { col_nr += YYLeng();			/* comment until end-of-line */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 112 "lysalexer.ll"
+#line 115 "lysalexer.ll"
 {BEGIN(COMMENT); col_nr += YYLeng();	/* comment start */ }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 113 "lysalexer.ll"
+#line 116 "lysalexer.ll"
 {BEGIN(INIT); col_nr += YYLeng();			/* comment end */ }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 114 "lysalexer.ll"
+#line 117 "lysalexer.ll"
 {col_nr += YYLeng();									/* comment contents */}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 116 "lysalexer.ll"
+#line 119 "lysalexer.ll"
 {
 	BEGIN(HINT); 
 	update_pos(); 
@@ -862,7 +865,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 122 "lysalexer.ll"
+#line 125 "lysalexer.ll"
 {
 	if(!hint_paren_depth)
 	{
@@ -880,7 +883,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 136 "lysalexer.ll"
+#line 139 "lysalexer.ll"
 {
 	update_pos();
 	hint_collect << YYText();
@@ -890,7 +893,7 @@ YY_RULE_SETUP
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 141 "lysalexer.ll"
+#line 144 "lysalexer.ll"
 {
 	update_pos();
 	hint_collect << YYText();
@@ -898,230 +901,230 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 146 "lysalexer.ll"
+#line 149 "lysalexer.ll"
 { update_pos(); return T_DECRYPT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 147 "lysalexer.ll"
+#line 150 "lysalexer.ll"
 { update_pos(); return T_AS; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 148 "lysalexer.ll"
+#line 151 "lysalexer.ll"
 { update_pos(); return T_IN; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 149 "lysalexer.ll"
+#line 152 "lysalexer.ll"
 { update_pos(); return T_LET; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 150 "lysalexer.ll"
+#line 153 "lysalexer.ll"
 { update_pos(); return T_SUBSET; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 151 "lysalexer.ll"
+#line 154 "lysalexer.ll"
 { update_pos(); return T_UNION; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 152 "lysalexer.ll"
+#line 155 "lysalexer.ll"
 { update_pos(); return T_DY; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 153 "lysalexer.ll"
+#line 156 "lysalexer.ll"
 { process_iset(lysa::ZERO);				 return T_ISET_DEF; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 154 "lysalexer.ll"
+#line 157 "lysalexer.ll"
 { process_iset(lysa::NATURAL1);  return T_ISET_DEF; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 155 "lysalexer.ll"
+#line 158 "lysalexer.ll"
 { process_iset(lysa::NATURAL2);  return T_ISET_DEF; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 156 "lysalexer.ll"
+#line 159 "lysalexer.ll"
 { process_iset(lysa::NATURAL3);  return T_ISET_DEF; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 157 "lysalexer.ll"
+#line 160 "lysalexer.ll"
 { process_iset(lysa::NATURAL01); return T_ISET_DEF; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 158 "lysalexer.ll"
+#line 161 "lysalexer.ll"
 { process_iset(lysa::NATURAL02); return T_ISET_DEF; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 159 "lysalexer.ll"
+#line 162 "lysalexer.ll"
 { process_iset(lysa::NATURAL03); return T_ISET_DEF; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 160 "lysalexer.ll"
+#line 163 "lysalexer.ll"
 { update_pos(); return T_NEW; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 161 "lysalexer.ll"
+#line 164 "lysalexer.ll"
 { update_pos(); return T_AT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 162 "lysalexer.ll"
+#line 165 "lysalexer.ll"
 { update_pos(); return T_DEST; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 163 "lysalexer.ll"
+#line 166 "lysalexer.ll"
 { update_pos(); return T_ORIG; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 164 "lysalexer.ll"
+#line 167 "lysalexer.ll"
 { update_pos(); return T_CPDY; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 166 "lysalexer.ll"
+#line 169 "lysalexer.ll"
 { process_string(); return T_PLUS_OR_MINUS; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 167 "lysalexer.ll"
+#line 170 "lysalexer.ll"
 { process_string(); return T_TYPENAME; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 168 "lysalexer.ll"
+#line 171 "lysalexer.ll"
 { update_pos(); return T_LBRACE_SUBSCRIPT; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 169 "lysalexer.ll"
+#line 172 "lysalexer.ll"
 { update_pos(); return T_UNDERSCORE; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 170 "lysalexer.ll"
+#line 173 "lysalexer.ll"
 { update_pos(); return T_LPAREN; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 171 "lysalexer.ll"
+#line 174 "lysalexer.ll"
 { update_pos(); return T_RPAREN; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 172 "lysalexer.ll"
+#line 175 "lysalexer.ll"
 { update_pos(); return T_LBOX; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 173 "lysalexer.ll"
+#line 176 "lysalexer.ll"
 { update_pos(); return T_RBOX; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 174 "lysalexer.ll"
+#line 177 "lysalexer.ll"
 { update_pos(); return T_LT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 175 "lysalexer.ll"
+#line 178 "lysalexer.ll"
 { update_pos(); return T_GT; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 176 "lysalexer.ll"
+#line 179 "lysalexer.ll"
 { update_pos(); return T_EQUALS; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 177 "lysalexer.ll"
+#line 180 "lysalexer.ll"
 { update_pos(); return T_SEMICOLON; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 178 "lysalexer.ll"
+#line 181 "lysalexer.ll"
 { update_pos(); return T_COLON; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 179 "lysalexer.ll"
+#line 182 "lysalexer.ll"
 { update_pos(); return T_DOT; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 180 "lysalexer.ll"
+#line 183 "lysalexer.ll"
 { update_pos(); return T_COMMA; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 181 "lysalexer.ll"
+#line 184 "lysalexer.ll"
 { update_pos(); return T_PIPE; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 182 "lysalexer.ll"
+#line 185 "lysalexer.ll"
 { update_pos(); return T_LBRACE; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 183 "lysalexer.ll"
+#line 186 "lysalexer.ll"
 { update_pos(); return T_RBRACE; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 184 "lysalexer.ll"
+#line 187 "lysalexer.ll"
 { update_pos(); return T_LBRACE_PIPE; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 185 "lysalexer.ll"
+#line 188 "lysalexer.ll"
 { update_pos(); return T_RBRACE_PIPE; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 186 "lysalexer.ll"
+#line 189 "lysalexer.ll"
 { update_pos(); return T_BANG; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 187 "lysalexer.ll"
+#line 190 "lysalexer.ll"
 { update_pos(); return T_PLUS_MINUS; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 189 "lysalexer.ll"
+#line 192 "lysalexer.ll"
 { process_string(); return T_IDENT; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 190 "lysalexer.ll"
+#line 193 "lysalexer.ll"
 { process_string(); return T_NUM; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 191 "lysalexer.ll"
+#line 194 "lysalexer.ll"
 { process_string(); return T_ALNUM; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 193 "lysalexer.ll"
+#line 196 "lysalexer.ll"
 ECHO;
 	YY_BREAK
-#line 1125 "lysalexer.cpp"
+#line 1128 "lysalexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(INIT):
 case YY_STATE_EOF(COMMENT):
@@ -1953,7 +1956,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 
 void yyFlexLexer::LexerError( yyconst char msg[] )
 {
-    	std::cerr << msg << std::endl;
+  mCRL2log(error) << msg << std::endl;
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -2024,7 +2027,7 @@ void lysayyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 193 "lysalexer.ll"
+#line 196 "lysalexer.ll"
 
 
 //Implementation of the global functions, needed for interfacing with bison.

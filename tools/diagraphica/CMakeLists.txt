@@ -10,9 +10,10 @@
 project(diagraphica)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
 
-SET(MACOSX_BUNDLE_ICON_FILE diagraphica.icns)
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
 # ######### General setup ##########
 
@@ -75,12 +76,15 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_lts
+  mcrl2_syntax
+  dparser
   mcrl2_utilities
   mcrl2_utilities_wx
 )
@@ -94,4 +98,4 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
-endif ( MCRL2_BUILD_GUI_TOOLS )
+endif ( MCRL2_ENABLE_GUI_TOOLS )

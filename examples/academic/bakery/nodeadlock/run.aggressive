@@ -1,0 +1,10 @@
+mcrl22lps -fDnw ../bakery.mcrl2 |lpsconstelm | lpsparelm > ../bakery.lps
+lps2pbes -f no_deadlock.mcf ../bakery.lps | pbesrewr -psimplify | pbesconstelm | pbesparelm  > bakery.no_deadlock.pbes
+echo -ne 'Answer by under-approximation: '
+pbesabsinthe -sunder -a../aggressive_abstraction.txt bakery.no_deadlock.pbes bakery.no_deadlock.absinthe.pbes
+pbes2bool bakery.no_deadlock.absinthe.pbes
+echo -ne 'Answer by over-approximation: '
+pbesabsinthe -sover -a../aggressive_abstraction.txt bakery.no_deadlock.pbes bakery.no_deadlock.absinthe.pbes
+pbes2bool bakery.no_deadlock.absinthe.pbes
+rm *.pbes
+rm ../*.lps

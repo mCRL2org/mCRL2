@@ -17,6 +17,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 
@@ -189,6 +190,16 @@ std::string t15 =
   ;
 std::string x15 = "binding_variables = X0, X1";
 
+std::string t16 =
+  "pbes                      \n"
+  " nu X(n:Nat) = Y && X(n); \n"
+  " mu Y = Z;                \n"
+  " nu Z = Y;                \n"
+  "                          \n"
+  " init X(0);               \n"
+  ;
+std::string x16 = "binding_variables = X, Y, Z";
+
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
@@ -203,10 +214,16 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, 2);
+  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
-  algorithm.run(q, compute_conditions, remove_equations);
+  algorithm.run(q, compute_conditions);
+  if (remove_equations)
+  {
+    remove_unreachable_variables(q);
+  }
+  BOOST_CHECK(q.is_well_typed());
+  std::cout << "\n--- q ---\n" << pbes_system::pp(q) << std::endl;
 
   pbes_system::detail::pbes_property_map info1(q);
   pbes_system::detail::pbes_property_map info2(expected_result);
@@ -245,6 +262,7 @@ int test_main(int argc, char** argv)
   test_pbes(t13, x13, false);
   test_pbes(t14, x14, false);
   test_pbes(t15, x15, false);
+  test_pbes(t16, x16, true);
 
   return 0;
 }

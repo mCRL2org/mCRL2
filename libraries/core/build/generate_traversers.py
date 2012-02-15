@@ -123,19 +123,9 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
     insert_text_in_file(filename, text, 'generated %s code' % label)
 
 if __name__ == "__main__":
-    class_map = {
-          'core'             : CORE_CLASSES,
-          'data'             : DATA_EXPRESSION_CLASSES + ASSIGNMENT_EXPRESSION_CLASSES + SORT_EXPRESSION_CLASSES + CONTAINER_TYPES + BINDER_TYPES + ABSTRACTION_EXPRESSION_CLASSES + STRUCTURED_SORT_ELEMENTS + DATA_CLASSES,
-          'state_formulas'   : STATE_FORMULA_CLASSES,
-          'regular_formulas' : REGULAR_FORMULA_CLASSES,
-          'action_formulas'  : ACTION_FORMULA_CLASSES,
-          'lps'              : LPS_CLASSES,
-          'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
-          'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
-          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES
-        }
-
+    class_map = mcrl2_class_map()
     all_classes = parse_class_map(class_map)
+    modifiability_map = make_modifiability_map(all_classes)
 
     boolean_expression_dependencies = find_dependencies(all_classes, 'bes::boolean_expression')
     data_expression_dependencies    = find_dependencies(all_classes, 'data::data_expression')
@@ -151,8 +141,6 @@ if __name__ == "__main__":
     identifier_string_dependencies  = find_dependencies(all_classes, 'core::identifier_string')
 
     #print_dependencies(data_expression_dependencies, "data_expression_dependencies")
-
-    modifiability_map = make_modifiability_map(all_classes)
 
     # sort_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'sort_expression_builder', 'add_sort_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
@@ -246,3 +234,4 @@ if __name__ == "__main__":
 
     # regular_formula_traverser
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'regular_formula_traverser', 'add_traverser_regular_formula_expressions', 'regular_formulas::regular_formula_traverser_base', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies)
+    make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'regular_formula_traverser', 'add_traverser_regular_formula_expressions', 'regular_formulas::regular_formula_traverser', class_map, all_classes, 'state_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies)

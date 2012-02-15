@@ -24,6 +24,7 @@ void AT_markTerm_young(ATerm t);
 
 void AT_unmarkIfAllMarked(ATerm t);
 size_t  AT_calcUniqueAFuns(ATerm t);
+void AT_cleanup(void);
 
 } // namespace aterm
 

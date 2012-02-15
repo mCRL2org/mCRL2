@@ -134,7 +134,7 @@ inline const std::set<lts_preorder> &supported_lts_preorders()
 
 static std::string equivalence_desc_strings[] =
 {
-  "unknown equivalence",
+  "identity equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
   "divergence preserving branching bisimilarity",
@@ -171,6 +171,7 @@ inline std::string name_of_preorder(const lts_preorder pre)
 
 /** \brief Determines the equivalence from a string.
  * \details The following strings may be used:
+ * \li "none" for identity equivalence;
  * \li "bisim" for strong bisimilarity;
  * \li "branching-bisim" for branching bisimilarity;
  * \li "dpbranching-bisim" for divergence preserving branching bisimilarity;
@@ -223,7 +224,7 @@ inline lts_equivalence parse_equivalence(std::string const& s)
 
 static std::string equivalence_strings[] =
 {
-  "unknown",
+  "none",
   "bisim",
   "branching-bisim",
   "dpbranching-bisim",
@@ -301,7 +302,7 @@ inline std::string string_for_preorder(const lts_preorder pre)
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <equivalence>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 
 inline std::string supported_lts_equivalences_text(
@@ -309,6 +310,19 @@ inline std::string supported_lts_equivalences_text(
   const std::set<lts_equivalence> &supported = supported_lts_equivalences())
 {
   std::vector<lts_equivalence> types(supported.begin(),supported.end());
+
+  {
+    std::vector<lts_equivalence> validtypes;
+    for (std::vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
+    {
+      if( (*i) != lts_eq_none)
+      {
+        validtypes.push_back(*i);
+      }
+    }
+    types = validtypes;
+  }
+
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
 
   std::string r;
@@ -343,7 +357,7 @@ inline std::string supported_lts_equivalences_text(
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <equivalence>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
 {
@@ -359,7 +373,7 @@ inline std::string supported_lts_equivalences_text(const std::set<lts_equivalenc
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <preorder>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_preorders_text(
   lts_preorder default_preorder = lts_pre_none,
@@ -399,7 +413,7 @@ inline std::string supported_lts_preorders_text(
  *                                considered supported.
  * \return                        A string containing lines of the form
  *                                "  'name' for <preorder>". Every line
- *                                except the last is terminated with '\n'.
+ *                                except the last is terminated with '\\n'.
  */
 inline std::string supported_lts_preorders_text(const std::set<lts_preorder> &supported)
 {
@@ -459,7 +473,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        std::cerr << "Warning: cannot generate counter example traces for simulation equivalence\n";
+        mCRL2log(log::warning) << "cannot generate counter example traces for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -632,12 +646,12 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
+    const std::vector<transition> &trans=l.get_transitions();
+    for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
     {
-      const transition t=r.front();
-      if (visited[t.from()])
+      if (visited[r->from()])
       {
-        label_map[t.label()] = 1;
+        label_map[r->label()] = 1;
       }
     }
 
@@ -652,12 +666,12 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
+    const std::vector<transition> &trans1=l.get_transitions();
+    for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
     {
-      const transition t=r.front();
-      if (visited[t.from()])
+      if (visited[r->from()])
       {
-        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
+        new_lts.add_transition(transition(state_map[r->from()],label_map[r->label()],state_map[r->to()]));
       }
     }
 
@@ -864,7 +878,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
       return destructive_compare(l1,l2,lts_pre_trace);
     }
     default:
-      std::cerr << "Comparison for this preorder is not available\n";
+      mCRL2log(log::error) << "Comparison for this preorder is not available\n";
       return false;
   }
 }
@@ -889,7 +903,8 @@ bool is_deterministic(const LTS_TYPE& l)
 }
 
 
-static bool compare_transition_label_to_from(const transition& t1, const transition& t2)
+inline
+bool compare_transition_label_to_from(const transition& t1, const transition& t2)
 {
   if (t1.label() != t2.label())
   {
@@ -905,7 +920,10 @@ static bool compare_transition_label_to_from(const transition& t1, const transit
   }
 }
 
-static void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
+namespace detail
+{
+inline
+void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
                       tree_set_store* tss,
                       size_t d,
                       std::vector<transition> &d_trans)
@@ -927,6 +945,7 @@ static void get_trans(std::multimap < transition::size_type, std::pair < transit
     }
   }
 }
+} // namespace detail
 
 
 template <class LTS_TYPE>
@@ -960,7 +979,7 @@ void determinise(LTS_TYPE& l)
   {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
-    get_trans(begin,tss,tss->get_set(d_id),d_transs);
+    detail::get_trans(begin,tss,tss->get_set(d_id),d_transs);
 
     // sort d_transs by label and (if labels are equal) by destination
     sort(d_transs.begin(),d_transs.end(),compare_transition_label_to_from);
@@ -993,7 +1012,7 @@ void determinise(LTS_TYPE& l)
 
         if (d_ntransitions%10000 == 0)
         {
-          mCRL2log(debug) <<
+          mCRL2log(log::debug) <<
             "generated " << tss->get_next_tag() << " states and " << d_ntransitions
                          << " transitions; explored " << d_id << " states" << std::endl;
         }

@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -45,10 +46,10 @@ void test_multi_actions(action_list a, action_list b, data_expression expected_r
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);
-  std::cout << "a               = " << core::pp(a) << std::endl;
-  std::cout << "b               = " << core::pp(b) << std::endl;
-  std::cout << "result          = " << core::pp(result) << std::endl;
-  std::cout << "expected_result = " << core::pp(expected_result) << std::endl;
+  std::cout << "a               = " << lps::pp(a) << std::endl;
+  std::cout << "b               = " << lps::pp(b) << std::endl;
+  std::cout << "result          = " << lps::pp(result) << std::endl;
+  std::cout << "expected_result = " << lps::pp(expected_result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
   core::garbage_collect();
 }
@@ -93,7 +94,7 @@ void test_pp()
   action_list b1  = make_list(act("b", make_list(d1)));
   action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
   multi_action m(a11);
-  std::string s = pp1(m);
+  std::string s = lps::pp(m);
   std::cout << "s = " << s << std::endl;
   BOOST_CHECK(s == "a(d1)|a(d1)");
 }

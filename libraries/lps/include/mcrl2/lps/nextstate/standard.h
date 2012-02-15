@@ -16,6 +16,8 @@
 #include "mcrl2/data/classic_enumerator.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/state.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -34,6 +36,8 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator< mcrl2::data::detail::legacy_rewriter > enumerator_type;
+  typedef enumerator_type::substitution_type substitution_type;
+  typedef enumerator_type::internal_substitution_type internal_substitution_type;
 
   const mcrl2::data::data_specification &m_specification;
   // Storing the legacy rewriter below by reference can lead to problems.
@@ -51,9 +55,10 @@ struct ns_info
   AFun stateAFun;
   size_t* current_id;
 
-  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c)
+  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c, 
+                                              internal_substitution_type &sigma)
   {
-    return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c); // Laatste expressie is intern.
+    return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c, sigma); // Laatste expressie is intern.
   }
 
   ns_info(const mcrl2::data::data_specification & specification,
@@ -70,10 +75,13 @@ struct ns_info
 class NextStateGenerator 
 {
   public:
+    typedef ns_info::substitution_type substitution_type;
+    typedef ns_info::internal_substitution_type internal_substitution_type;
+
     NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGenerator();
 
-    bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL);
+    bool next(mcrl2::lps::multi_action &Transition, ATerm* State, bool* prioritised = NULL);
 
     void reset(ATerm State, size_t SummandIndex = 0);
 
@@ -88,6 +96,7 @@ class NextStateGenerator
     size_t sum_idx;
 
     ATerm cur_state;
+    internal_substitution_type current_substitution;
     ATerm cur_act;
     ATermList cur_nextstate;
 
@@ -108,6 +117,9 @@ class NextState
 {
     friend class NextStateGenerator;
   public:
+    typedef NextStateGenerator::substitution_type substitution_type;
+    typedef NextStateGenerator::internal_substitution_type internal_substitution_type;
+
     NextState(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, const mcrl2::data::detail::legacy_rewriter& e);
     ~NextState();
 
@@ -123,7 +135,9 @@ class NextState
     size_t getStateLength();
     ATermAppl getStateArgument(ATerm state, size_t index);
     ATermAppl makeStateVector(ATerm state);
+    mcrl2::lps::state make_new_state_vector(ATerm s);
     ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
+    ATerm parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state match=mcrl2::lps::state(), bool check_match=false);
     mcrl2::data::rewriter& getRewriter()   // Deprecated. Do not use.
     {
       return const_cast< mcrl2::data::detail::legacy_rewriter& >(info.m_rewriter);

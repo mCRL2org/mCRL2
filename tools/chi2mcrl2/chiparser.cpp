@@ -87,6 +87,7 @@ extern int yylex( void );
 extern char* yytext; */
 
 using namespace std;
+using namespace mcrl2::log;
 
 //external declarations from lexer.ll
 void chiyyerror( const char *s );
@@ -1959,7 +1960,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 168 "chiparser.yy"
     {
-          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
     	  mCRL2log(debug) << "inputs contains a valid Chi-specification" << std::endl;
           safe_assign(((*yyvalp).appl), gsMakeChiSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl),ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
 		  chi_spec_tree = ((*yyvalp).appl);
@@ -2372,7 +2373,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 490 "chiparser.yy"
     {
-          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 		  ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
 		  size_t n = ATgetLength( list );
 		  for(size_t i = 0; i < n ; ++i ){
@@ -2420,7 +2421,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 533 "chiparser.yy"
     {
-          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl),1), "Nat");
@@ -2525,7 +2526,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 625 "chiparser.yy"
     {
-          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
           mCRL2log(debug) << "ChannelDefinition" << std::endl;
 		  ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
 		  size_t n = ATgetLength( list );
@@ -2572,7 +2573,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 667 "chiparser.yy"
     {
-          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl),1), "Nat");
@@ -6025,7 +6026,7 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 
 void UnaryTypeCheck(ATermAppl arg1, std::string type)
 {
-    mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+    mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
     mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
     ATermAppl arg2 = gsMakeType(gsString2ATermAppl(type.c_str()));
     mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
@@ -6041,7 +6042,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
-  mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+  mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
   mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
   mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
   if(arg1 == arg2)

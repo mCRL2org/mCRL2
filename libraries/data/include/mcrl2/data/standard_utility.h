@@ -264,8 +264,8 @@ inline bool is_positive_constant(data_expression const& n)
 {
   return sort_pos::is_c1_function_symbol(n) ||
          (sort_pos::is_cdub_application(n) &&
-          sort_bool::is_boolean_constant(sort_pos::bit(n)) &&
-          sort_pos::is_positive_constant(sort_pos::number(n))
+          sort_bool::is_boolean_constant(sort_pos::left(n)) &&
+          sort_pos::is_positive_constant(sort_pos::right(n))
          );
 }
 
@@ -282,8 +282,8 @@ std::string positive_constant_as_string(data_expression n)
 
   while (sort_pos::is_cdub_application(n))
   {
-    bits.push_back(sort_bool::is_true_function_symbol(sort_pos::bit(n)));
-    n = sort_pos::number(n);
+    bits.push_back(sort_bool::is_true_function_symbol(sort_pos::left(n)));
+    n = sort_pos::right(n);
   }
 
   assert(sort_pos::is_c1_function_symbol(n));
@@ -513,7 +513,7 @@ application list(const sort_expression& s,
 inline
 core::identifier_string const& list_enumeration_name()
 {
-  static core::identifier_string list_enumeration_name = data::detail::initialise_static_expression(list_enumeration_name, core::identifier_string("@ListEnum"));
+  static core::identifier_string list_enumeration_name = core::detail::initialise_static_expression(list_enumeration_name, core::identifier_string("@ListEnum"));
   return list_enumeration_name;
 }
 
@@ -606,7 +606,7 @@ namespace sort_set
 inline
 core::identifier_string const& set_enumeration_name()
 {
-  static core::identifier_string set_enumeration_name = data::detail::initialise_static_expression(set_enumeration_name, core::identifier_string("@SetEnum"));
+  static core::identifier_string set_enumeration_name = core::detail::initialise_static_expression(set_enumeration_name, core::identifier_string("@SetEnum"));
   return set_enumeration_name;
 }
 
@@ -708,7 +708,7 @@ application fset(const sort_expression& s,
                  Sequence const& range,
                  typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
 {
-  data_expression fset_expression(sort_fset::fset_empty(s));
+  data_expression fset_expression(sort_fset::empty(s));
 
   // We process the elements in reverse order to have a resulting enumeration
   // in the same order as the input
@@ -716,7 +716,7 @@ application fset(const sort_expression& s,
   {
     // BOOST_ASSERT(is_convertible(i->sort(), s));
 
-    fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
+    fset_expression = sort_fset::insert(s, *i, fset_expression);
   }
 
   return static_cast< application >(fset_expression);
@@ -742,7 +742,7 @@ namespace sort_bag
 inline
 core::identifier_string const& bag_enumeration_name()
 {
-  static core::identifier_string bag_enumeration_name = data::detail::initialise_static_expression(bag_enumeration_name, core::identifier_string("@BagEnum"));
+  static core::identifier_string bag_enumeration_name = core::detail::initialise_static_expression(bag_enumeration_name, core::identifier_string("@BagEnum"));
   return bag_enumeration_name;
 }
 
@@ -860,7 +860,7 @@ inline
 application fbag(const sort_expression& s, Sequence const& range,
                  typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
 {
-  data_expression fbag_expression(sort_fbag::fbag_empty(s));
+  data_expression fbag_expression(sort_fbag::empty(s));
 
   // The sequence contains element, count, ...
   // As we process the list in reverse, we have count, element, ...
@@ -869,7 +869,7 @@ application fbag(const sort_expression& s, Sequence const& range,
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
   {
     // BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
-    fbag_expression = sort_fbag::fbagcinsert(s, *boost::next(i, 1), *i, fbag_expression);
+    fbag_expression = sort_fbag::cinsert(s, *boost::next(i, 1), *i, fbag_expression);
   }
 
   return static_cast< application >(fbag_expression);

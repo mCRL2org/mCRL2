@@ -14,7 +14,7 @@
 #include <conio.h>
 #endif
 #ifndef _WIN32
-bool _getch()
+static bool _getch()
 {
   return true;
 }
@@ -41,6 +41,7 @@ bool _getch()
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
+using namespace mcrl2::log;
 using namespace std;
 
 class lysa2mcrl2_tool: public input_output_tool

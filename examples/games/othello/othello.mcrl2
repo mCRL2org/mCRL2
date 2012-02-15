@@ -1,247 +1,147 @@
 % This specification describes the game `Othello' or `Reversi', which is a two
-% player board game. There is a board of N by M where N and M are generally both 8.
-% One player has white pieces (W) and the
-% other has red pieces (R). Initially, the board is set up as:
+% player board game. There is a board of N = R + 1 by M = C + 1 where N and M 
+% are generally both 8 (i.e., R=C=3). One player has white pieces (W) and the
+% other has red pieces (R). Initially, the board is set up as follows (in the
+% example, R=C=2):
 %
-%      . . . . . . . .
-%      . . . . . . . .
-%      . . . . . . . .
-%      . . . R W . . .
-%      . . . W R . . .
-%      . . . . . . . .
-%      . . . . . . . .
-%      . . . . . . . .
+%   . . . . . . 
+%   . . . . . . 
+%   . . R W . . 
+%   . . W R . . 
+%   . . . . . .
+%   . . . . . . 
 %
-% Red makes the first move and the players alternatingly put a piece on
-% the board, unless a player cannot put a piece on the board,
-% in which case he must skip his turn.
-% A move is made by putting a piece on the board such that at least
-% one piece of the opponent is enclosed with two opposite colors.
-% Subsequently all pieces that are enclosed will change color.
+% Red makes the first move and the players alternatingly put a piece on the 
+% board, unless a player cannot put a piece on the board, in which case he
+% must skip his turn. A move is made by putting a piece on the board such 
+% that at least one piece of the opponent is enclosed with two opposite 
+% colors. Subsequently all pieces that are enclosed will change color.
 %
-% The game ends when both players cannot do a move anymore. 
-% The player with the largest number of pieces
-% on the board wins. If both players have the same number of pieces
-% it is a draw.
+% The game ends when both players cannot do a move anymore. The player with
+% the largest number of pieces on the board wins. If both players have the 
+% same number of pieces it is a draw.
 %
-% The following formula expresses that with a perfect play white
-% can always win the game. Either white wins right away, or if white can move, 
-% there is a winning move of White, or
-% if Red can do a move, all moves of Red will lead to a winning
-% situation for White.
+% The following formula expresses that with a perfect play white can always 
+% win the game: if white is not victorious already, then either white can do 
+% a move to bring it closer to a victory, or red moves and all moves that red
+% can do will bring white closer to a victory, or a player passes, in which
+% case again white will be closer to victory.
 % 
-% mu X.(<WhiteWins>true || 
-%       (( forall x,y:Pos.[WhiteMove(x,y)]false || exists x,y:Pos.<WhiteMove(x,y)>X) &&
-%          forall x,y:Pos.[RedMove(x,y)]X ))
+% mu X.((<Outcome(win(white))>true) || 
+%       (exists x,y:Nat.<Put(x, y, white)>X) ||
+%       ((exists x,y:Nat.<Put(x, y, red)>true) &&
+%        (forall x,y:Nat.[Put(x, y, red)]X)) ||
+%       ((<Pass>X) && ([Pass]X)))
 %
 % On a 4x4 board this formula is true, i.e. white can always win the game.
-% When verifying this formula, it is useful to apply lpssuminst and lpsparunfold.
-% It is also useful to avoid rewriting when linearising this example (flag -o), as
-% rewriting will give a huge specification.
+% The converse (the same formula with red and white interchanged) obviously
+% does not hold.
 %
-% The formula that expresses that red has a winning strategy is the following.
-% On a 4x4 board it does not hold.
-%
-% mu X.(<RedWins>true || 
-%        ((forall x,y:Pos.[RedMove(x,y)]false || exists x,y:Pos.<RedMove(x,y)>X) &&
-%          forall x,y:Pos.[WhiteMove(x,y)]X ))
-%
-% Commands to generate and explore the state space efficiently are:
-% 
-% mcrl22lps -vDo othello.mcrl2 othello.lps &&
-% lpssuminst -v -rjittyc othello.lps temp0.lps &&
-% lpsparunfold -lv -n4 -sBoard temp0.lps temp1.lps &&
-% lpsparunfold -lv -n4 -sRow temp1.lps   temp2.lps &&
-% lpsconstelm -c -t -rjittyc -v temp2.lps temp4.lps &&
-% lps2lts -v temp4.lps &&
-% echo ---------------------------------------------- &&
-% echo Red wins always. &&
-% echo ----------------------------------------------  &&
-% lps2pbes -v -fred_wins_always.mcf temp4.lps othello.pbes &&
-% pbes2bool -v -rjittyc othello.pbes &&
-% echo ---------------------------------------------- &&
-% echo White wins always. &&
-% echo ----------------------------------------------  &&
-% lps2pbes -v -fwhite_wins_always.mcf temp4.lps othello.pbes &&
-% pbes2bool -v -rjittyc othello.pbes &&
-% echo ---------------------------------------------- 
-%
-% Thanks go to Mark Winands for suggesting the game.
-%
-% Reijkjavik, May 16, 2006, Jan Friso Groote
-% Improvements made in Juli 2009.
+% This specification is loosely based on the 2009 specification by Jan Friso
+% Groote.
 
-sort Piece = struct Red | White | None;
-map N,M:Pos;
-eqn N=4;
-    M=4;
+sort Player = struct red | white;
+     Square = struct piece(Player) | empty | invalid;
+     Outcome = struct win(Player) | draw;
+     Direction = List(Int);
+     Row = List(Square);
+     Board = List(Row);
+map N, M, R, C: Pos;
+    B: Board;
+    alldirections: List(Direction);
+    outcome: Board -> Outcome;
+    count: Board # Player -> Nat;
+    count: Row # Player -> Nat;
+    canplay: Board # Nat # Nat # Player -> Bool;
+    at: Board # Int # Int -> Square;
+    updated: Board # Nat # Nat # Player # Direction -> Board;
+    update: Board # Nat # Nat # Player # List(Direction) -> Board;
+    update: Board # Nat # Nat # Player -> Board;
+    replace: Board # Nat # Nat # Player -> Board;
+    replace: Row # Nat # Player -> Row;
+    nextn, nextm: Nat # Direction -> Nat;
+    opponent: Player -> Player;
+    pad: Row # Nat -> Row;
+    pad: Board # Nat -> Board;
+var n, m: Nat;
+    i, j: Int;
+    b: Board;
+    r: Row;
+    s: Square;
+    P: Player;
+    d: Direction;
+    l: List(Direction);
+eqn % Directions to search in, as (n,m) vectors
+    alldirections = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]];
+    
+    % Generalize the board to have sentinels ("invalid") at the borders
+    0 <= i && i < N && 0 <= j && j < M -> at(b, i, j) = b.Int2Nat(i).Int2Nat(j);
+    0 > i || i >= N || 0 > j || j >= M -> at(b, i, j) = invalid;
 
-sort Row=List(Piece);
-     Board=List(Row);
-map  At:Nat#Nat#Board->Piece;                       % At(x,y,b) give the piece at position x,y. If there is no
-                                                    % piece, or if x,y is outside the board, give None.
-     At:Nat#Row->Piece;                             % See At above. Now for a single row.
-     Put:Piece#Pos#Pos#Board->Board;                % Put piece p at the indicated position in a board.
-     Put:Piece#Pos#Row->Row;                        % Put piece p at the indicated position in a row.
-     Count:Piece#Board->Nat;                        % Count the number of pieces p on the board.
-     Count:Piece#Pos#Pos#Board->Nat;                % Auxiliary function to count the number of pieces on the board.
-     Enclosing:Piece#Pos#Pos#Board->Bool;           % Find out whether putting a piece p at coordinates x,y
-                                                    % will enclose a set of pieces of the opponent.
-     Search:Piece#Pos#Pos#Int#Int#Bool#Board->Bool; % Search is an auxialiary function, which finds out whether
-                                                    % on the board, from position x,y in direction dx,dy pieces of the
-                                                    % opponent can be found, followed by a piece of the own color. The 
-                                                    % boolean indicates whether pieces of the opponent have already
-                                                    % been observed.
+    % Calculate outcome of board
+    outcome(b) = if(i == j, draw, if(i > j, win(red), win(white)))
+                 whr i = count(b, red), j = count(b, white) end;
+    count(r |> b, P) = count(r, P) + count(b, P);
+    b == [] -> count(b, P) = 0;
+    s == piece(P) -> count(s |> r, P) = count(r, P) + 1;
+    s != piece(P) -> count(s |> r, P) = count(r, P);
+    r == [] -> count(r, P) = 0;
 
-     Swap,Swap1:Piece#Pos#Pos#Int#Int#Board->Board; % Swap the pieces of the opposite color than the given piece to that of 
-                                                    % the given piece in the given direction, until an empty spot, or a piece
-                                                    % of color p is encountered. The initial position x,y is not considered.
-                                                    % Swap1 is an auxiliary function.
-     CanMove:Piece#Board->Bool;                     % Indicates whether the indicated piece can be put on the board.
-     CanMove:Piece#Pos#Pos#Board->Bool;             % Indicates whether the indicated piece can be put on the given coordinates 
-                                                    % on the board.
-     PutPiece:Piece#Pos#Pos#Board->Board;           % Put a piece p at the given coordinates and swap pieces of the opposite
-                                                    % color in all directions starting at this point.
-     Opposite:Piece->Piece;                         % Give the opposite color of the current piece.
+    % Calculate whether player p may place a piece on (n,m)
+    canplay(b, n, m, P) = at(b, n, m) == empty && update(b, n, m, P) != b;
 
+    % Let player P place a piece on position (n,m) of b. Return
+    % the altered board. If this is not a valid move, the same
+    % board is returned.
+    update(b, n, m, P) = update(b, n, m, P, alldirections);
+    at(b, n + d . 0, m + d . 1) == piece(opponent(P)) ->
+      update(b, n, m, P, d |> l) = if(newboard != b,
+                                      update(replace(newboard, n, m, P), n, m, P, l),
+                                      update(b, n, m, P, l)) 
+                                   whr newboard = updated(b, n, m, P, d) end;
+    at(b, n + d . 0, m + d . 1) != piece(opponent(P)) ->
+      update(b, n, m, P, d |> l) = update(b, n, m, P, l);
+    update(b, n, m, P, []) = b; 
+    updated(b, n, m, P, d) = if(lookahead == empty || lookahead == invalid, b,
+                             if(lookahead == piece(P), replace(b, n, m, P),
+                                updated(b, Int2Nat(n + d . 0), Int2Nat(m + d . 1), P, d)))
+                             whr lookahead = at(b, n + d . 0, m + d . 1) end;
+   
+    % Assign a piece of player P to position (n, m) of board b
+    n > 0 -> replace(r |> b, n, m, P) = r |> replace(b, Int2Nat(n - 1), m, P);
+    n == 0 -> replace(r |> b, n, m, P) = replace(r, m, P) |> b;
+    m > 0 -> replace(s |> r, m, P) = s |> replace(r, Int2Nat(m - 1), P);
+    m == 0 -> replace(s |> r, m, P) = piece(P) |> r;
 
-var b,b':Board;
-    r:Row;
-    p,p':Piece;
-    x,y:Nat;
-    c:Bool;
-    z:Pos;
-eqn Opposite(Red)=White;
-    Opposite(White)=Red;
-    Opposite(None)=None;
+    % Opponent definition
+    opponent(red) = white;
+    opponent(white) = red;
 
-    y==1 -> At(x,y,r|>b)=At(x,r);
-    1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Nat(y-1),b);
-    y==0 || y>M || x==0 || x>N -> At(x,y,b)=None;
-    At(x,y,if(c,b,b'))=if(c,At(x,y,b),At(x,y,b'));  % This rewrite rule is instrumental to let lpsconstelm reduce the system substantially,
-                                                    % after applying lpsparunfold.
-    x==1 -> At(x,p|>r)=p;
-    1<x && x<=N -> At(x,p|>r)=At(Int2Nat(x-1),r);
-    x==0 || x>N -> At(x,p|>r)=None;
+    % Initial board:
+    B = pad([pad([piece(red), piece(white)], 0), pad([piece(white),piece(red)], 0)], 0); 
+    R = 1;          % Extra rows
+    C = 1;          % Extra columns
+    N = 2 * R + 2;  % Board height
+    M = 2 * C + 2;  % Board width
+    n < C -> pad(r, n) = pad(empty |> r <| empty, n + 1);
+    n == C -> pad(r, n) = r;
+    n < C -> pad(b, n) = pad(r |> b <| r, n + 1) whr r = pad([empty, empty], 0) end;
+    n == C -> pad(b, n) = b;
 
-    At(x,Put(p,z,r))=if(x==z,p,At(x,r));
+act Put: Nat # Nat # Player; % A player puts a piece on the board
+    Outcome: Outcome;        % The game has ended with this outcome
+    Pass;                    % A player is forced to skip a turn
 
-var b,b':Board;
-    r:Row;
-    p,p':Piece;
-    x,y:Pos;
-    dx,dy:Int;
-    c,othercolorseen:Bool;
-eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
-    y>1 && y<=M -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
-    Put(p,x,y,if(c,b,b'))=if(c,Put(p,x,y,b),Put(p,x,y,b'));  % See comments for distribution of At over if.
-    x==1 -> Put(p,x,p'|>r)=p|>r;
-    x>1 && x<=N -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
+proc Othello(board: Board, turn: Player, canpass: Bool) =
+  % All next moves for the current player
+  sum n, m: Nat . 
+    canplay(board, n, m, turn) -> Put(n, m, turn) . Othello(update(board, n, m, turn), opponent(turn), true)
+  % If no next moves exist for the current player, and the opponent
+  % did not pass in the last turn, then this player can pass.
++ ( canpass && !exists n, m: Nat . canplay(board, n, m, turn)) -> Pass . Othello(board, opponent(turn), false)
+  % If both players have passed, then the game is finished and the
+  % outcome is reported.
++ (!canpass && !exists n, m: Nat . canplay(board, n, m, turn)) -> Outcome(outcome(board)) . Othello()
++ delta;
 
-    Count(p,b)=Count(p,1,1,b);
-
-    x==N && y==M ->
-      Count(p,x,y,b)=if(At(x,y,b)==p,1,0);
-
-    x==N && y<M ->
-         Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,1,y+1,b);
-
-    x<N -> Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,x+1,y,b);
-
-    Enclosing(p,x,y,b)=
-       Search(p,x,y,1,0,false,b)||
-       Search(p,x,y,1,-1,false,b)||
-       Search(p,x,y,0,-1,false,b)||
-       Search(p,x,y,-1,-1,false,b)||
-       Search(p,x,y,-1,0,false,b)||
-       Search(p,x,y,-1,1,false,b)||
-       Search(p,x,y,0,1,false,b)||
-       Search(p,x,y,1,1,false,b);
-
-    0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M ->
-       Search(p,x,y,dx,dy,othercolorseen,b)=
-         if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==None,false,
-            if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p,othercolorseen,
-                       Search(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,true,b)));
-
-    !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
-        Search(p,x,y,dx,dy,othercolorseen,b)=false;
-
-    Swap(p,x,y,dx,dy,b)=if(Search(p,x,y,dx,dy,false,b),Swap1(p,x,y,dx,dy,b),b);
-
-    0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M ->
-      Swap1(p,x,y,dx,dy,b)=
-        if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Opposite(p), 
-             Put(p,Int2Pos(x+dx),Int2Pos(y+dy),Swap1(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,b)),
-             b);
-
-    !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
-        Swap1(p,x,y,dx,dy,b)=b;
-
-    #b!=0 -> 
-     PutPiece(p,x,y,b)=                      % See for the condition remark below at CanMove.
-       Put(p,x,y,
-       Swap(p,x,y,1,0,
-       Swap(p,x,y,1,-1,
-       Swap(p,x,y,0,-1,
-       Swap(p,x,y,-1,-1,
-       Swap(p,x,y,-1,0,
-       Swap(p,x,y,-1,1,
-       Swap(p,x,y,0,1,
-       Swap(p,x,y,1,1,b)))))))));
-
-
-    #b!=0 -> CanMove(p,b)=CanMove(p,1,1,b);   % The condition is only required to prevent
-                                              % rewriting when linearising. When premature
-                                              % rewriting starts, terms become far too big
-                                              % and termination appears endless.
-    CanMove(p,if(c,b,b'))=if(c,CanMove(p,b),CanMove(p,b'));
-
-    x==N && y==M ->
-      CanMove(p,x,y,b)=At(x,y,b)==None && Enclosing(p,x,y,b);
-
-    x==N && y<M ->
-      CanMove(p,x,y,b)=
-         (At(x,y,b)==None && Enclosing(p,x,y,b)) || CanMove(p,1,y+1,b);
-
-    x<N ->
-      CanMove(p,x,y,b)=
-         (At(x,y,b)==None && Enclosing(p,x,y,b)) || CanMove(p,x+1,y,b);
-
-
-act WhiteMove,RedMove:Pos#Pos;
-    WhiteWins,RedWins,Draw;
-
-proc Othello(b:Board,WhiteMoves,RedMoves:Bool)=
-       sum x,y:Pos. (WhiteMoves &&
-                     x<=N && y<=M &&
-                     At(x,y,b)==None &&
-                     Enclosing(White,x,y,b))->
-           WhiteMove(x,y).
-             Othello(PutPiece(White,x,y,b),
-                     !CanMove(Red,b) && CanMove(White,b),
-                     CanMove(Red,b))+
-       sum x,y:Pos. (RedMoves &&
-                     x<=N && y<=M &&
-                     At(x,y,b)==None &&
-                     Enclosing(Red,x,y,b))->
-           RedMove(x,y).
-             Othello(PutPiece(Red,x,y,b),
-                     CanMove(White,PutPiece(Red,x,y,b)),
-                     !CanMove(White,PutPiece(Red,x,y,b)) && CanMove(Red,PutPiece(Red,x,y,b)))+
-       (!WhiteMoves && !RedMoves &&
-                     Count(Red,b)>Count(White,b)) ->
-           RedWins.Othello(b,false,false)+
-       (!WhiteMoves && !RedMoves &&
-                     Count(Red,b)<Count(White,b)) ->
-           WhiteWins.Othello(b,false,false)+
-       (!WhiteMoves && !RedMoves &&
-                     Count(Red,b)==Count(White,b)) ->
-           Draw.Othello(b,false,false)+
-       delta;
-
-
-init Othello([[None,None,None,None],
-              [None,Red,White,None],
-              [None,White,Red,None],
-              [None,None,None,None]],false,true);
+init Othello(B, red, true);

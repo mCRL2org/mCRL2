@@ -14,6 +14,7 @@
 #endif
 #endif
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/afun.h"
 #include "mcrl2/aterm/memory.h"
@@ -51,9 +52,9 @@ bool at_mark_young;
 /*}}}  */
 
 #ifdef WIN32
-#define VOIDCDECL void __cdecl
+#define VOIDCDECL static void __cdecl
 #else
-#define VOIDCDECL void
+#define VOIDCDECL static void
 #endif
 
 /*{{{  local functions */
@@ -97,6 +98,7 @@ void AT_setBottomOfStack(ATerm* bottomOfStack)
 /*}}}  */
 /*{{{  ATerm *stack_top() */
 
+static
 ATerm* stack_top()
 {
   ATerm topOfStack;
@@ -502,6 +504,7 @@ VOIDCDECL mark_phase_young()
 
 /*{{{  void sweep_phase()  */
 
+static
 void sweep_phase()
 {
   size_t size;
@@ -709,7 +712,9 @@ void check_unmarked_block(size_t blocks)
       header_type* cur;
       for (cur=block->data ; cur<end ; cur+=size)
       {
+#ifndef NDEBUG
         ATerm t = (ATerm)cur;
+#endif
         if (blocks==AT_OLD_BLOCK)
         {
           assert(GET_TYPE(t->header)==AT_FREE || IS_OLD(t->header));
@@ -1110,7 +1115,7 @@ void minor_sweep_phase_young()
       {
         if (!EQUAL_HEADER(data->header,FREE_HEADER))
         {
-          fprintf(stderr,"data = %p header = %lu\n",(void*)data,(size_t) data->header);
+          mCRL2log(mcrl2::log::error) << "data = " << (void*)data << " header = " << (size_t) data->header << std::endl;
         }
         assert(EQUAL_HEADER(data->header,FREE_HEADER));
         assert(ATgetType(data) == AT_FREE);

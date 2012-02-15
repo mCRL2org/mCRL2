@@ -1,0 +1,12 @@
+mcrl22lps -fDnw ../bakery.mcrl2 |lpsconstelm | lpsparelm > ../bakery.lps
+lps2pbes -f get_at_least_number_circulating.mcf ../bakery.lps | pbesrewr -psimplify | pbesconstelm  | pbesparelm  > bakery.get_at_least_number_circulating.pbes
+echo -ne 'Answer by under-approximation: '
+pbesabsinthe -sunder -a../aggressive_abstraction.txt bakery.get_at_least_number_circulating.pbes bakery.get_at_least_number_circulating.absinthe.pbes
+pbes2bool -s3 bakery.get_at_least_number_circulating.absinthe.pbes
+echo -ne 'Answer by over-approximation:  '
+pbesabsinthe -sover -a../aggressive_abstraction.txt bakery.get_at_least_number_circulating.pbes bakery.get_at_least_number_circulating.absinthe.pbes
+pbes2bool -s3 bakery.get_at_least_number_circulating.absinthe.pbes
+#rm *.pbes
+#rm ../*.lps
+
+

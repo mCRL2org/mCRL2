@@ -13,6 +13,7 @@
 #define MCRL2_LPS_TYPECHECK_H
 
 #include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
 
@@ -40,7 +41,7 @@ void type_check(
                   (ATermList)action_decls);
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check multi action " + core::pp(core::detail::gsMakeMultAct(mult_act.actions())));
+    throw mcrl2::runtime_error("could not type check multi action " + core::pp_deprecated(lps::detail::multi_action_to_aterm(mult_act)));
   }
   mult_act = multi_action(t);
 }

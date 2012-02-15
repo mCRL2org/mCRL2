@@ -13,11 +13,11 @@
 #define MCRL2_PBES_PBES_GAUSS_ELIMINATION_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {
@@ -79,7 +79,7 @@ struct pbes_traits
     static inline
     std::string print(const equation_type& eq)
     {
-      return core::pp(eq.symbol()) + " " + core::pp(eq.variable()) + " = " + core::pp(eq.formula());
+      return pbes_system::pp(eq.symbol()) + " " + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
     }
 };
 
@@ -125,12 +125,12 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 template <typename Container>
 int gauss_elimination(pbes<Container>& p)
 {
-  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
+  typedef data::data_enumerator<utilities::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef typename core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  data::number_postfix_generator name_generator("x");
+  utilities::number_postfix_generator name_generator("x");
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
 

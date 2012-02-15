@@ -35,6 +35,7 @@
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 typedef input_tool ltsinfo_base;
 class ltsinfo_tool : public ltsinfo_base
@@ -168,7 +169,7 @@ class ltsinfo_tool : public ltsinfo_base
           return provide_information<lts_lts_t>();
         }
         case lts_none:
-          std::cerr << "No input format is specified. Assuming .aut format.\n";
+          mCRL2log(warning) << "No input format is specified. Assuming .aut format.\n";
         case lts_aut:
         {
           return provide_information<lts_aut_t>();

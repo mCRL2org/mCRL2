@@ -156,6 +156,7 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 /// \param text A string of text.
 /// \param max_line_length The maximum line length.
 /// \return The wrapped text.
+static
 std::vector<std::string> word_wrap_line(const std::string& line, unsigned int max_line_length)
 {
   std::vector<std::string> result;

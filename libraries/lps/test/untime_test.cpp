@@ -15,10 +15,10 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/untime.h>
 #include <mcrl2/lps/linearise.h>
+#include <mcrl2/lps/find.h>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;

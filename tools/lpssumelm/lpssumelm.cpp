@@ -10,8 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-//LPS Framework
-#include "mcrl2/lps/sumelm.h"
+#include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -21,6 +20,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 class sumelm_tool: public input_output_tool
 {
@@ -58,16 +58,7 @@ class sumelm_tool: public input_output_tool
     ///applies sum elimination to it and writes the result to output_file.
     bool run()
     {
-      lps::specification lps_specification;
-
-      lps_specification.load(m_input_filename);
-
-      // apply sum elimination to lps_specification and save the output to a binary file
-      lps::sumelm_algorithm(lps_specification, m_decluster).run();
-
-      mCRL2log(debug) << "Sum elimination completed, saving to " <<  m_output_filename << std::endl;
-      lps_specification.save(m_output_filename);
-
+      mcrl2::lps::lpssumelm(m_input_filename, m_output_filename, m_decluster);
       return true;
     }
 

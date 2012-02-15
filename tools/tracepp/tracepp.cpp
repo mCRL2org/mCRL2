@@ -18,13 +18,16 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/data/data_expression.h"
 
 using namespace std;
+using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
@@ -32,18 +35,18 @@ using namespace mcrl2::trace;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
-static void print_state(ostream& os, ATermAppl state)
+static void print_state(ostream& os, const mcrl2::lps::state &s)
 {
-  int arity = ATgetArity(ATgetAFun(state));
+  size_t arity = s.size();
 
   os << "(";
-  for (int i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     if (i > 0)
     {
       os << ",";
     }
-    PrintPart_CXX(os,ATgetArgument(state,i),ppDefault);
+    os << mcrl2::data::pp(s[i]);
   }
   os << ")";
 }
@@ -54,32 +57,24 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;
   os << "nodesep = 0.05;" << endl;
-  ATermAppl act;
+  mcrl2::lps::multi_action act;
   int i = 0;
   os << i << " [label=\"";
-  if (trace.currentState() != NULL)
+  if (trace.current_state_exists())
   {
     print_state(os,trace.currentState());
   }
   os << "\",peripheries=2];" << endl;
-  while ((act = trace.nextAction()) != NULL)
+  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
   {
     os << i+1 << " [label=\"";
-    if (trace.currentState() != NULL)
+    if (trace.current_state_exists())
     {
       print_state(os,trace.currentState());
     }
     os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      PrintPart_CXX(os,(ATerm) act,ppDefault);
-    }
-    else
-    {
-      // needed because trace library cannot parse strings
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(act);
     os << "\"];" << endl;
     i++;
   }
@@ -88,25 +83,17 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
 
 static void trace2statevector(ostream& os, Trace& trace)
 {
-  if (trace.currentState() != NULL)
+  if (trace.current_state_exists())
   {
     print_state(os,trace.currentState());
   }
-  ATermAppl act = trace.nextAction();
-  while (act != NULL)
+  mcrl2::lps::multi_action act = trace.nextAction();
+  while (act != mcrl2::lps::multi_action())
   {
     os << " -";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      PrintPart_CXX(os,(ATerm) act,ppDefault);
-    }
-    else
-    {
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(act);
     os << "-> " << std::endl;
-    ATermAppl CurrentState = trace.currentState();
-    if (CurrentState != NULL)
+    if (trace.current_state_exists())
     {
       print_state(os, trace.currentState());
     }
@@ -117,30 +104,17 @@ static void trace2statevector(ostream& os, Trace& trace)
 
 static void trace2aut(ostream& os, Trace& trace)
 {
-  os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
-  ATermAppl act;
+  os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << endl;
+  mcrl2::lps::multi_action act;
   int i = 0;
-  while ((act = trace.nextAction()) != NULL)
+  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
   {
     os << "(" << i << ",\"";
-    if (mcrl2::core::detail::gsIsMultAct(act))
-    {
-      PrintPart_CXX(os,(ATerm) act,ppDefault);
-    }
-    else
-    {
-      // needed because trace library cannot parse strings
-      os << ATgetName(ATgetAFun(act));
-    }
+    os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
     i++;
     os << "\"," << i << ")" << endl;
   }
 }
-
-/*static void trace2svc(ostream &os, Trace &trace)
-{
-  // SVC library does not accept ostreams
-}*/
 
 inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
 {
@@ -158,10 +132,6 @@ inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
       mCRL2log(verbose) << "writing result in aut format..." << std::endl;
       trace2aut(out,trace);
       break;
-      /*      mCRL2log(verbose) << "writing result in svc format..." << std::endl;
-        case otSvc:
-        trace2svc(*OutStream,trace);
-        break;*/
     case otStates:
       mCRL2log(verbose) << "writing result in plain text with state vectors..." << std::endl;
       trace2statevector(out,trace);

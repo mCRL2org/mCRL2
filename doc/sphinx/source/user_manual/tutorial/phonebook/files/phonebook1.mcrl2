@@ -1,0 +1,27 @@
+% file phonebook1.mcrl2
+% Telephone directory as it is described as PVS example
+
+sort Name;
+     PhoneNumber;
+     PhoneBook = Name -> PhoneNumber;
+
+% Phone number representing the non-existant or undefined phone number,
+% must be different from any "real" phone number.
+map  p0: PhoneNumber; 
+
+% Operations supported by the phone book.
+act  addPhone: Name # PhoneNumber;
+     delPhone: Name;
+     findPhone: Name;
+
+% Process representing the phone book.
+proc PhoneDir(b: PhoneBook) = 
+     sum n: Name, p: PhoneNumber . addPhone(n, p) . PhoneDir(b[n->p])
+   + sum n: Name . findPhone(n) . PhoneDir()
+   + sum n: Name . delPhone(n) . PhoneDir(b[n->p0])
+   ;
+   
+% Initially the phone book is empty.
+init PhoneDir(lambda n: Name . p0);
+
+

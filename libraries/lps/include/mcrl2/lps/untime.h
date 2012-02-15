@@ -13,7 +13,6 @@
 #define MCRL2_LPS_UNTIME_H
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -51,10 +50,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
       // for the elements in the vector is true, it is a candidate time variable.
       std::vector <bool> time_variable_candidates(m_spec.process().process_parameters().size(),true);
       std::vector <bool>::iterator j=time_variable_candidates.begin() ;
-      if (verbose())
-      {
-        std::cerr << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
-      }
+      mCRL2log(log::verbose) << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
 
       for (data::data_expression_list::const_iterator k = m_spec.initial_process().state(m_spec.process().process_parameters()).begin();
            k != m_spec.initial_process().state(m_spec.process().process_parameters()).end(); ++j, ++k)
@@ -102,10 +98,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
         }
       }
       assert(j==time_variable_candidates.end());
-      if (verbose())
-      {
-        std::cerr << "Time invariant " << data::pp(time_invariant) << std::endl;
-      }
+      mCRL2log(log::verbose) << "Time invariant " << data::pp(time_invariant) << std::endl;
       return time_invariant;
     }
 
@@ -160,18 +153,12 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
       if (m_spec.process().has_time())
       {
-        if (verbose())
-        {
-          std::cerr << "Untiming " << m_spec.process().summand_count() << " summands" << std::endl;
-        }
+        mCRL2log(log::verbose) << "Untiming " << m_spec.process().summand_count() << " summands" << std::endl;
 
         // Create extra parameter m_last_action_time and add it to the list of process parameters,
         // m_last_action_time is used later on in the code
         m_last_action_time = data::variable(m_identifier_generator("last_action_time"), data::sort_real::real_());
-        if (verbose())
-        {
-          std::cerr << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
-        }
+        mCRL2log(log::verbose) << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
 
         // Should happen before updating the process
         m_time_invariant = calculate_time_invariant();

@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"
+#include "liblts_fsmparser.h"
 #include "mcrl2/lts/detail/liblts_fsmparser.h"
 
 //using namespace std;

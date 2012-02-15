@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/mucalculus.h
+/// \file mcrl2/modal_formula/action_formula.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_MODAL_ACTION_FORMULA_H
@@ -19,6 +19,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2
@@ -440,12 +442,51 @@ bool is_at(const action_formula& t)
 
 //--- end generated classes ---//
 
+inline
+int precedence(const action_formula& x)
+{
+  if (is_forall(x) || is_exists(x))
+  {
+    return 0;
+  }
+  else if (is_imp(x))
+  {
+    return 2;
+  }
+  else if (is_or(x))
+  {
+    return 3;
+  }
+  else if (is_and(x))
+  {
+    return 4;
+  }
+  else if (is_at(x))
+  {
+    return 5;
+  }
+  else if (is_not(x))
+  {
+    return 6;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const forall& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const exists& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const imp& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const and_& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const or_& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const at& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const not_& x) { return precedence(static_cast<const action_formula&>(x)); }
+
+// template function overloads
+std::string pp(const action_formula& x);
+std::set<data::variable> find_variables(const action_formulas::action_formula& x);
+
 } // namespace action_formulas
 
 } // namespace mcrl2
-
-#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-#include "mcrl2/modal_formula/print.h"
-#endif
 
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

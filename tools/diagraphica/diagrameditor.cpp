@@ -2460,7 +2460,6 @@ void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
   double xCtr, yCtr;
   double xDFC, yDFC;
   double x,    y;
-  bool dragStartedOnNewShape = false;
 
   canvas->getWorldCoords(xMousePrev, yMousePrev, xPrv, yPrv);
   canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
@@ -2469,10 +2468,6 @@ void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
 
   x = xCtr;
   y = yCtr;
-  if (xDrgDist == 0)
-  {
-    dragStartedOnNewShape = true;
-  }
 
   xDrgDist += xCur-xPrv;
   yDrgDist += yCur-yPrv;
@@ -2567,7 +2562,7 @@ void DiagramEditor::handleDragLft(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double xS;      // position after rotating to shape's angle
   double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
   // for movement parallel to shape's x-axis
 
@@ -2584,7 +2579,6 @@ void DiagramEditor::handleDragLft(Shape* s)
   y0 = yCur-yCtr;
   // rotate to 'normal' orientation, find x & y
   xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
   {
@@ -2663,7 +2657,7 @@ void DiagramEditor::handleDragBot(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double yS;      // position after rotating to shape's angle
   double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
   // for movement parallel to shape's y-axis
 
@@ -2679,7 +2673,6 @@ void DiagramEditor::handleDragBot(Shape* s)
   x0 = xCur-xCtr;
   y0 = yCur-yCtr;
   // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
   yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
@@ -2757,7 +2750,7 @@ void DiagramEditor::handleDragRgt(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double xS;      // position after rotating to shape's angle
   double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
   // for movement parallel to shape's x-axis
 
@@ -2775,7 +2768,6 @@ void DiagramEditor::handleDragRgt(Shape* s)
 
   // rotate to 'normal' orientation, find x & y
   xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
   {
@@ -2852,7 +2844,7 @@ void DiagramEditor::handleDragTop(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double yS;      // position after rotating to shape's angle
   double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
   // for movement parallel to shape's y-axis
 
@@ -2868,7 +2860,6 @@ void DiagramEditor::handleDragTop(Shape* s)
   x0 = xCur-xCtr;
   y0 = yCur-yCtr;
   // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
   yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
@@ -3107,7 +3098,7 @@ void DiagramEditor::handleDragDOFWthBeg(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double xS;      // position after rotating to shape's angle
   double hyp;           // hypotenuse, for movement parallel to shape's x-axis
 
   // get shape's geometry
@@ -3124,7 +3115,6 @@ void DiagramEditor::handleDragDOFWthBeg(Shape* s)
 
   // rotate to 'normal' orientation, find x & y
   xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
   {
@@ -3147,7 +3137,7 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double xS;      // position after rotating to shape's angle
   double hyp;           // hypotenuse, for movement parallel to shape's x-axis
 
   // get shape's geometry
@@ -3164,7 +3154,6 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 
   // rotate to 'normal' orientation, find x & y
   xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
   {
@@ -3187,7 +3176,7 @@ void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double yS;      // position after rotating to shape's angle
   double hyp;           // hypotenuse, for movement parallel to shape's y-axis
 
   // get shape's geometry
@@ -3202,7 +3191,6 @@ void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
   x0 = xCur-xCtr;
   y0 = yCur-yCtr;
   // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
   yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)
@@ -3226,7 +3214,7 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
   double xDFC, yDFC;    // deltas of shape
   double xCur, yCur;    // current mouse position
   double x0,   y0;      // position after translating to shape's center
-  double xS,   yS;      // position after rotating to shape's angle
+  double yS;      // position after rotating to shape's angle
   double hyp;           // hypotenuse, for movement parallel to shape's y-axis
 
   // get shape's geometry
@@ -3241,7 +3229,6 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
   x0 = xCur-xCtr;
   y0 = yCur-yCtr;
   // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
   yS = x0*sin(-angl) + y0*cos(-angl);
 
   if (diagram->getSnapGrid() == true)

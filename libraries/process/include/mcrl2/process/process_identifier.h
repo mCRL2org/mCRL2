@@ -13,10 +13,11 @@
 #define MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -52,20 +53,39 @@ class process_identifier: public atermpp::aterm_appl
     /// \return The name of the process identifier
     core::identifier_string name() const
     {
-      using namespace atermpp;
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// \brief Returns the sorts of the process identifier
     /// \return The sorts of the process identifier
     data::sort_expression_list sorts() const
     {
-      using namespace atermpp;
       return data::sort_expression_list(
-               atermpp::term_list_iterator<data::sort_expression>(list_arg2(*this)),
+               atermpp::term_list_iterator<data::sort_expression>(atermpp::list_arg2(*this)),
                atermpp::term_list_iterator<data::sort_expression>());
     }
 };
+
+/// \brief list of process identifierss
+typedef atermpp::term_list<process_identifier> process_identifier_list;
+
+/// \brief vector of process_identifiers
+typedef atermpp::vector<process_identifier>    process_identifier_vector;
+
+/// \brief Test for a process_identifier expression
+/// \param t A term
+/// \return True if it is a process_identifier expression
+inline
+bool is_process_identifier(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsProcVarId(t);
+}
+
+// template function overloads
+std::string pp(const process_identifier& x);
+std::string pp(const process_identifier_list& x);
+std::string pp(const process_identifier_vector& x);
+void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
 
 } // namespace process
 

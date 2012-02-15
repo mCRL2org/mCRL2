@@ -25,7 +25,6 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
@@ -48,13 +47,23 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       std::set<data::variable> result;
       for (action_summand_vector::const_iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {
-        lps::find_variables(i->condition(), std::inserter(result, result.end()));
-        lps::find_variables(i->multi_action(), std::inserter(result, result.end()));
+        std::set<data::variable> tmp;
+
+        tmp = data::find_variables(i->condition());
+        result.insert(tmp.begin(), tmp.end());
+
+        tmp = lps::find_variables(i->multi_action());
+        result.insert(tmp.begin(), tmp.end());
       }
       for (deadlock_summand_vector::const_iterator i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
       {
-        lps::find_variables(i->condition(), std::inserter(result, result.end()));
-        lps::find_variables(i->deadlock(), std::inserter(result, result.end()));
+        std::set<data::variable> tmp;
+
+        tmp = data::find_variables(i->condition());
+        result.insert(tmp.begin(), tmp.end());
+
+        tmp = lps::find_variables(i->deadlock());
+        result.insert(tmp.begin(), tmp.end());
       }
       return result;
     }
@@ -120,7 +129,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       }
       std::set<data::variable> to_be_removed = data::detail::set_difference(process_parameters, significant_variables);
 #ifdef MCRL2_LPS_PARELM_DEBUG
-      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << data::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
@@ -206,7 +215,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         }
       }
 #ifdef MCRL2_LPS_PARELM_DEBUG
-      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << data::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
@@ -236,6 +245,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 /// \brief Removes unused parameters from a linear process specification.
 /// \param spec A linear process specification
+inline
 void parelm(specification& spec, bool variant1 = true)
 {
   parelm_algorithm algorithm(spec);

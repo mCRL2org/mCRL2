@@ -79,6 +79,9 @@ class TokenMid(Parsing.Token):
 # #include
 class TokenInclude(Parsing.Token):
     "%token include"
+# #include
+class TokenSupertypeOf(Parsing.Token):
+    "%token supertypeof"
 # :
 class TokenColon(Parsing.Token):
     "%token colon"
@@ -151,15 +154,20 @@ class TokenID(Parsing.Token):
 # Nonterminals, with associated productions.  In traditional BNF, the following
 # productions would look something like:
 # Result ::= UsingSpec
-# UsingSpec ::= "using UsingList IncludesSpec
+# UsingSpec ::= "using UsingList IncludesSpec 
 #          | IncludesSpec
 # UsingList ::= ID
 #          | UsingSpec ID
-# IncludesSpec ::= Spec
-#          | Includes Spec
+# IncludesSpec ::= SubTypeSpec
+#          | Includes SubTypeSpec
 # Includes ::= Include
 #          | Includes Include
 # Include ::= "#include" ID
+# SubTypeSpec ::= Spec
+#          | SubTypes Spec
+# Subtypes ::= Subtype
+#          | Subtypes Subtype
+# Subtype ::= "#supertypeof" ID
 # Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 # SortSpec ::= "sort" SortDecls        
 # FunctionSpec ::= MapSpec
@@ -227,30 +235,6 @@ class Result(Parsing.Nonterm):
           self.data.merge_specification(context)
           context = self.data
 
-#    def reduceIncludesSpec(self, result):
-#         "%reduce IncludesSpec"
-#         global context
-#         self.data = result.data
-#         self.data.set_namespace()
-#
-#         if context == None:
-#           context = self.data
-#         else:
-#           self.data.merge_specification(context)
-#           context = self.data
-#
-#     def reduceSpec(self, result):
-#         "%reduce Spec"
-#         global context
-#         self.data = result.data
-#         self.data.set_namespace()
-#
-#         if context == None:
-#           context = self.data
-#         else:
-#           self.data.merge_specification(context)
-#           context = self.data
-
 class UsingSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceIncludesSpec(self, result):
@@ -273,17 +257,17 @@ class UsingList(Parsing.Nonterm):
       self.data = usinglist.data
       self.data.push_back(using(result.data))
 
-# IncludesSpec ::= Spec
-#          | Includes Spec
+# IncludesSpec ::= SubtypeSpec
+#          | Includes SubtypeSpec
 class IncludesSpec(Parsing.Nonterm):
     "%nonterm"
-    def reduceSpec(self, spec):
-        "%reduce Spec"
+    def reduceSubtypeSpec(self, spec):
+        "%reduce SubtypeSpec"
         self.data = spec.data
         printVerbose("IncludesSpec", self.data)
 
     def reduceIncludesSpec(self, includes, spec):
-        "%reduce Includes Spec"
+        "%reduce Includes SubtypeSpec"
         self.data = spec.data
         self.data.set_includes(includes.data)
         printVerbose("IncludesSpec", self.data)
@@ -310,6 +294,46 @@ class Include(Parsing.Nonterm):
         "%reduce include id"
         self.data = include(id.data)
         printVerbose("Include", self.data)
+
+# SubtypesSpec ::= SubtypeSpec
+#          | Subtypes SubtypeSpec
+class SubtypeSpec(Parsing.Nonterm):
+    "%nonterm"
+    def reduceSpec(self, spec):
+        "%reduce Spec"
+        self.data = spec.data
+        printVerbose("SubtypesSpec", self.data)
+
+    def reduceSubtypesSpec(self, subtypes, spec):
+        "%reduce Subtypes Spec"
+        self.data = spec.data
+        self.data.set_subtypes(subtypes.data)
+        printVerbose("SubtypesSpec", self.data)
+
+# Subtypes ::= Subtype
+#          | Subtypes Subtype
+class Subtypes(Parsing.Nonterm):
+    "%nonterm"
+    def reduceSubtype(self, subtype):
+        "%reduce Subtype"
+        self.data = subtype_list([subtype.data])
+        printVerbose("Subtypes", self.data)
+
+    def reduceSubtypes(self, subtypes, subtype):
+        "%reduce Subtypes Subtype"
+        self.data = subtypes.data
+        self.data.push_back(subtype.data)
+        printVerbose("Subtypes", self.data)
+
+# Subtype ::= "#sypertypeof" ID
+class Subtype(Parsing.Nonterm):
+    "%nonterm"
+    def reduceSubtype(self, supertypeof, id):
+        "%reduce supertypeof id"
+        self.data = subtype(id.data)
+        printVerbose("Subtype", self.data)
+
+
 
 # Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 class Spec(Parsing.Nonterm):
@@ -714,6 +738,7 @@ class Parser(Parsing.Lr):
                 "|"       : TokenMid,
                 "#include": TokenInclude,
                 "#using"  : TokenUsing,
+                "#supertypeof" : TokenSupertypeOf,
                 "#"       : TokenHash,
                 ":"       : TokenColon,
                 ";"       : TokenSemiColon,
@@ -738,7 +763,7 @@ class Parser(Parsing.Lr):
         # Some parts always need to get extra whitespace
         input = re.sub('(->|[():;,])', r" \1 ", input)
         # # needs to get whitespace if it is not followed by "include"
-        input = re.sub('(#)(?!(include|using))', r" \1 ", input)
+        input = re.sub('(#)(?!(include|using|supertypeof))', r" \1 ", input)
         # < needs to get whitespace if it starts a label
         input = re.sub('(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label

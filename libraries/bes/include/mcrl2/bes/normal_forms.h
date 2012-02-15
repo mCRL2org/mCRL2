@@ -24,10 +24,13 @@ namespace bes
 /// \brief Transforms a BES into standard form.
 /// \param eqn A boolean equation system
 /// \param recursive_form Determines whether or not the result will be in standard recursive normal form
+inline
 void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = false)
 {
   detail::standard_form_traverser t(recursive_form);
   t(eqn);
+  assert(!is_boolean_variable(eqn.initial_state()) || eqn.equations().begin()->variable() == boolean_variable(eqn.initial_state()));
+  assert(!is_boolean_variable(eqn.initial_state()) || t.m_equations.begin()->variable() == boolean_variable(eqn.initial_state()));
   eqn.equations() = t.m_equations;
 }
 

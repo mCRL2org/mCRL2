@@ -33,6 +33,10 @@ namespace detail
 template <typename Container>
 void instantiate_global_variables(pbes<Container>& p)
 {
+  if (p.global_variables().empty())
+  {
+    return;
+  }
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(p.data());
   std::set<data::variable> to_be_removed;

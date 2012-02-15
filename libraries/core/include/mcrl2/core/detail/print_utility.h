@@ -27,21 +27,13 @@ namespace core
 namespace detail
 {
 
-struct stream_printer
+struct default_printer
 {
   template <typename T>
-  std::ostream& operator()(std::ostream& out, const T& t) const
+  std::ostream& operator()(const T& x, std::ostream& out) const
   {
-    return out << t;
-  }
-};
-
-struct pp_printer
-{
-  template <typename T>
-  std::ostream& operator()(std::ostream& out, const T& t) const
-  {
-    return out << core::pp(t);
+    return out << x;
+    return out;
   }
 };
 
@@ -50,7 +42,7 @@ struct pp_printer
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container, typename Printer>
-std::string print_container(const Container& v, std::string begin_marker, std::string end_marker, std::string message = "", bool print_index = false, Printer print = stream_printer())
+std::string print_container(const Container& v, Printer print = default_printer(), std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false)
 {
   std::ostringstream out;
   if (!message.empty())
@@ -64,7 +56,7 @@ std::string print_container(const Container& v, std::string begin_marker, std::s
     if (print_index)
     {
       out << index++ << " ";
-      print(out, *i);
+      print(*i, out);
       out << std::endl;
     }
     else
@@ -73,51 +65,31 @@ std::string print_container(const Container& v, std::string begin_marker, std::s
       {
         out << ", ";
       }
-      print(out, *i);
+      print(*i, out);
     }
   }
   out << " " << end_marker;
   return out.str();
 }
 
-/// \brief Creates a string representation of a container using the core::pp pretty print function.
+/// \brief Creates a string representation of a container.
 /// \param v A container
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_pp_list(const Container& v, std::string message = "", bool print_index = false)
+template <typename Container, typename Printer>
+std::string print_list(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false)
 {
-  return print_container(v, "[", "]", message, print_index, pp_printer());
-}
-
-/// \brief Creates a string representation of a container using the core::pp pretty print function.
-/// \param v A container
-/// \param message A string
-/// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_pp_set(const Container& v, std::string message = "", bool print_index = false)
-{
-  return print_container(v, "{", "}", message, print_index, pp_printer());
+  return print_container(v, print, "[", "]", message, print_index);
 }
 
 /// \brief Creates a string representation of a container.
 /// \param v A container
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_list(const Container& v, std::string message = "", bool print_index = false)
+template <typename Container, typename Printer>
+std::string print_set(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false)
 {
-  return print_container(v, "[", "]", message, print_index, stream_printer());
-}
-
-/// \brief Creates a string representation of a container.
-/// \param v A container
-/// \param message A string
-/// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_set(const Container& v, std::string message = "", bool print_index = false)
-{
-  return print_container(v, "{", "}", message, print_index, stream_printer());
+  return print_container(v, print, "{", "}", message, print_index);
 }
 
 } // namespace detail

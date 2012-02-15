@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdexcept>
+
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/safio.h"
 #include "mcrl2/aterm/byteencoding.h"
 #include "mcrl2/aterm/memory.h"
@@ -1199,7 +1201,7 @@ ATerm ATgetRoot(BinaryReader binaryReader)
 {
   if (binaryReader->isDone <= 0)
   {
-    ATfprintf(stderr, "Can't retrieve the root of the tree while it's still being constructed. Returning NULL.");
+    mCRL2log(mcrl2::log::info) << "Can't retrieve the root of the tree while it's still being constructed. Returning NULL." << std::endl;
     return NULL;
   }
 
@@ -1250,7 +1252,7 @@ bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
   size_t bytesWritten = fwrite("?", sizeof(char), 1, file);
   if (bytesWritten != 1)
   {
-    ATfprintf(stderr, "Unable to write SAF identifier token to file.\n");
+    mCRL2log(mcrl2::log::error) << "Unable to write SAF identifier token to file." << std::endl;
     return false;
   }
 
@@ -1272,7 +1274,7 @@ bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
     bytesWritten = fwrite(sizeBytes, sizeof(char), 2, file);
     if (bytesWritten != 2)
     {
-      ATfprintf(stderr, "Unable to write block size bytes to file.\n");
+      mCRL2log(mcrl2::log::error) << "Unable to write block size bytes to file." << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
       return false;
@@ -1281,7 +1283,7 @@ bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
     bytesWritten = fwrite(byteBuffer->buffer, sizeof(char), byteBuffer->limit, file);
     if (bytesWritten != byteBuffer->limit)
     {
-      ATfprintf(stderr, "Unable to write bytes to file.\n");
+      mCRL2log(mcrl2::log::error) << "Unable to write bytes to file." << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
       return false;
@@ -1294,7 +1296,7 @@ bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
 
   if (fflush(file) != 0)
   {
-    ATfprintf(stderr, "Unable to flush file stream.\n");
+    mCRL2log(mcrl2::log::error) << "Unable to flush file stream." << std::endl;
     return false;
   }
 
@@ -1317,7 +1319,7 @@ bool ATwriteToNamedSAFFile(const ATerm aTerm, const char* filename)
   file = fopen(filename, "wb");
   if (file == NULL)
   {
-    ATfprintf(stderr, "Unable to open file for writing: %s\n", filename);
+    mCRL2log(mcrl2::log::error) << "Unable to open file for writing: " << filename << std::endl;
     return false;
   }
 
@@ -1345,7 +1347,7 @@ ATerm ATreadFromSAFFile(FILE* file)
   size_t bytesRead = fread(buffer, sizeof(char), 1, file); /* Consume the first character in the stream. */
   if (bytesRead <= 0)
   {
-    ATfprintf(stderr, "Unable to read SAF id token from file.\n");
+    mCRL2log(mcrl2::log::error) << "Unable to read SAF id token from file." << std::endl;
     return NULL;
   }
 
@@ -1369,7 +1371,7 @@ ATerm ATreadFromSAFFile(FILE* file)
     }
     else if (bytesRead != 2)
     {
-      ATfprintf(stderr, "Unable to read block size bytes from file: %d.\n", bytesRead);
+      mCRL2log(mcrl2::log::error) << "Unable to read block size bytes from file: " << bytesRead << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
       return NULL;
@@ -1385,7 +1387,7 @@ ATerm ATreadFromSAFFile(FILE* file)
     bytesRead = fread(byteBuffer->buffer, sizeof(char), blockSize, file);
     if (bytesRead != blockSize)
     {
-      ATfprintf(stderr, "Unable to read bytes from file.\n");
+      mCRL2log(mcrl2::log::error) << "Unable to read bytes from file." << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
       return NULL;
@@ -1399,7 +1401,7 @@ ATerm ATreadFromSAFFile(FILE* file)
 
   if (!ATisFinishedReading(binaryReader))
   {
-    ATfprintf(stderr, "Term incomplete, missing data.\n");
+    mCRL2log(mcrl2::log::error) << "Term incomplete, missing data." << std::endl;
     term = NULL;
   }
   else
@@ -1428,7 +1430,7 @@ ATerm ATreadFromNamedSAFFile(const char* filename)
   file = fopen(filename, "rb");
   if (file == NULL)
   {
-    ATfprintf(stderr, "Unable to open file for reading: %s\n", filename);
+    mCRL2log(mcrl2::log::error) << "Unable to open file for reading: " << filename << std::endl;
     return NULL;
   }
 
@@ -1558,7 +1560,7 @@ ATerm ATreadFromSAFString(char* data, size_t length)
 
   if (!ATisFinishedReading(binaryReader))
   {
-    ATfprintf(stderr, "Term incomplete, missing data.\n");
+    mCRL2log(mcrl2::log::error) << "Term incomplete, missing data." << std::endl;
     term = NULL;
   }
   else

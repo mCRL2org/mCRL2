@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_LTSMIN_H
 #define MCRL2_LPS_LTSMIN_H
 
+#include <algorithm>
+#include <cassert>
 #include <functional>
 #include <set>
 #include <stdexcept>
@@ -19,14 +21,23 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+
+// For backwards compatibility
+//using namespace mcrl2::log;
+typedef mcrl2::log::log_level_t mcrl2_log_level_t;
+using mcrl2::log::mcrl2_logger;
 
 namespace mcrl2 {
 
@@ -52,10 +63,38 @@ data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_str
   return data::rewriter::jitty;
 }
 
+/// \brief Generates possible values of the data type (at most max_size).
+inline
+std::vector<std::string> generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
+{
+  std::vector<std::string> result;
+  std::size_t max_internal_variables = 10000;
+
+  data::rewriter rewr(dataspec);
+  data::classic_enumerator<data::rewriter> enumerator(dataspec, rewr);
+  data::variable x("x", s);
+  data::variable_vector v;
+  v.push_back(x);
+  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_internal_variables); i != enumerator.end() ; ++i)
+  {
+    result.push_back((*i)(x).to_string());
+    if (result.size() >= max_size)
+    {
+      break;
+    }
+  }
+  return result;
+}
+
 /// \brief Models a pins data type. A pins data type maintains a mapping between known values
 /// of a data type and integers.
 class pins_data_type
 {
+  protected:
+    atermpp::indexed_set m_indexed_set;
+    lps::next_state_generator& m_generator;
+    bool m_is_bounded;
+
   public:
 
     /// \brief Forward iterator used for iterating over indices.
@@ -99,6 +138,16 @@ class pins_data_type
         std::size_t m_max_index;
     };
 
+    /// \brief Constructor
+    pins_data_type(lps::next_state_generator& generator, bool is_bounded = false)
+      : m_generator(generator),
+        m_is_bounded(is_bounded)
+    {}
+
+    /// \brief Destructor.
+    virtual ~pins_data_type()
+    {}
+
     /// \brief Serializes the i-th value of the data type to a binary string.
     /// It is guaranteed that serialize(deserialize(i)) == i.
     /// \pre i is a valid index
@@ -124,12 +173,21 @@ class pins_data_type
     /// \brief Returns the name of the data type.
     virtual const std::string& name() const = 0;
 
-    /// \brief Returns the number of values that are stored in the map.
-    virtual std::size_t size() const = 0;
+    /// \brief Generates possible values of the data type (at most max_size).
+    virtual std::vector<std::string> generate_values(std::size_t max_size = 1000) const = 0;
 
-    /// \brief Destructor.
-    virtual ~pins_data_type()
-    {}
+    /// \brief Returns true if the number of elements is bounded. If this property can
+    /// not be computed for a data type, false is returned.
+    bool is_bounded() const
+    {
+      return m_is_bounded;
+    }
+
+    /// \brief Returns the number of values that are stored in the map.
+    std::size_t size() const
+    {
+      return m_indexed_set.size();
+    }
 
     /// \brief Returns an iterator to the beginning of the indices
     index_iterator index_begin() const
@@ -142,15 +200,32 @@ class pins_data_type
     {
       return index_iterator(size());
     }
+
+    /// \brief Returns the index of the value x
+    std::size_t operator[](const atermpp::aterm& x)
+    {
+      return m_indexed_set[x];
+    }
+
+    /// \brief Returns the indexed_set holding the values
+    atermpp::indexed_set& indexed_set()
+    {
+      return m_indexed_set;
+    }
+
+    /// \brief Returns the indexed_set holding the values
+    const atermpp::indexed_set& indexed_set() const
+    {
+      return m_indexed_set;
+    }
 };
 
 /// \brief Models the mapping of mCRL2 state values to integers.
 class state_data_type: public pins_data_type
 {
   protected:
-    lps::next_state_generator& m_generator;
     std::string m_name;
-    atermpp::indexed_set m_indexed_set;
+    data::sort_expression m_sort;
 
     std::size_t expression2index(const data::data_expression& x)
     {
@@ -163,10 +238,12 @@ class state_data_type: public pins_data_type
     }
 
   public:
-    state_data_type(lps::next_state_generator& generator)
-      : m_generator(generator),
-        m_name("state")
-    {}
+    state_data_type(lps::next_state_generator& generator, const data::sort_expression& sort)
+      : pins_data_type(generator, generator.get_specification().data().is_certainly_finite(sort)),
+        m_sort(sort)
+    {
+      m_name = data::pp(m_sort);
+    }
 
     std::string serialize(int i) const
     {
@@ -182,7 +259,7 @@ class state_data_type: public pins_data_type
 
     std::string print(int i) const
     {
-      return core::pp(index2expression(i));
+      return data::pp(index2expression(i));
     }
 
     std::size_t parse(const std::string& s)
@@ -196,19 +273,9 @@ class state_data_type: public pins_data_type
       return m_name;
     }
 
-    std::size_t size() const
+    std::vector<std::string> generate_values(std::size_t max_size = 1000) const
     {
-      return m_indexed_set.size();
-    }
-
-    std::size_t operator[](const atermpp::aterm& x)
-    {
-      return m_indexed_set[x];
-    }
-
-    atermpp::indexed_set& indexed_set()
-    {
-      return m_indexed_set;
+      return lps::generate_values(m_generator.get_specification().data(), m_sort, max_size);
     }
 };
 
@@ -216,9 +283,7 @@ class state_data_type: public pins_data_type
 class action_label_data_type: public pins_data_type
 {
   protected:
-    lps::next_state_generator& m_generator;
     std::string m_name;
-    atermpp::indexed_set m_indexed_set;
 
     std::size_t expression2index(const lps::multi_action& x)
     {
@@ -235,9 +300,10 @@ class action_label_data_type: public pins_data_type
 
   public:
     action_label_data_type(lps::next_state_generator& generator)
-      : m_generator(generator),
-        m_name("action_label")
-    {}
+      : pins_data_type(generator, false)
+    {
+      m_name = "action_labels";
+    }
 
     std::string serialize(int i) const
     {
@@ -254,7 +320,7 @@ class action_label_data_type: public pins_data_type
 
     std::string print(int i) const
     {
-      return lps::pp1(index2expression(i));
+      return lps::pp(index2expression(i));
     }
 
     std::size_t parse(const std::string& s)
@@ -268,14 +334,10 @@ class action_label_data_type: public pins_data_type
       return m_name;
     }
 
-    std::size_t size() const
+    // TODO: get rid of this useless function
+    std::vector<std::string> generate_values(std::size_t) const
     {
-      return m_indexed_set.size();
-    }
-
-    std::size_t operator[](const atermpp::aterm& x)
-    {
-      return m_indexed_set[x];
+      return std::vector<std::string>();
     }
 };
 
@@ -293,13 +355,53 @@ class pins
     lps::next_state_generator m_generator;
     atermpp::function_symbol m_state_fun; /**< the function symbol used for 'next states' */
     std::vector<std::string> m_process_parameter_names;
-    state_data_type m_state_data_type; /**< the type mapping for state values */
-    action_label_data_type m_action_label_data_type; /**< the type mapping for action labels */
+
+    // The type mappings
+    // m_data_types[0] ... m_data_types[N-1] contain the state parameter mappings
+    // m_data_types[N] contains the action label values
+    // where N is the number of process parameters
+    std::vector<pins_data_type*> m_data_types;
+
+    /// The unique type mappings (is contained in m_data_types).
+    std::vector<pins_data_type*> m_unique_data_types;
+
+    // maps process parameter index to the corresponding index in m_unique_data_types
+    std::vector<std::size_t> m_unique_data_type_index;
+
+    /// \brief Returns the action data type
+    pins_data_type& action_label_type_map()
+    {
+      return *m_data_types.back();
+    }
+
+    /// \brief Returns the action data type
+    const pins_data_type& action_label_type_map() const
+    {
+      return *m_data_types.back();
+    }
+
+    /// \brief Returns the data type of the i-th state parameter
+    pins_data_type& state_type_map(std::size_t i)
+    {
+      return *m_data_types[i];
+    }
+
+    /// \brief Returns the data type of the i-th state parameter
+    const pins_data_type& state_type_map(std::size_t i) const
+    {
+      return *m_data_types[i];
+    }
 
     /// \brief Returns the process of the LPS specification
-    const linear_process& process()
+    const linear_process& process() const
     {
       return m_generator.get_specification().process();
+    }
+
+    /// \brief Returns the data specification of the LPS specification
+    const data::data_specification& data() const
+    {
+      return m_generator.get_specification().data();
     }
 
     template <typename Iter>
@@ -392,24 +494,36 @@ class pins
     }
 
     /// \brief Converts state component represented as integers into aterms (in the next state format).
-    struct state_component_converter: public std::unary_function<std::size_t, atermpp::aterm>
+    /// It is used in the function initial_state, to avoid creating a temporary aterm_appl object.
+    template <typename DataTypeMapIter>
+    struct state_component_converter: public std::unary_function<int, atermpp::aterm>
     {
-      const atermpp::indexed_set& datatype_map;
+      DataTypeMapIter& iter;
 
-      state_component_converter(const atermpp::indexed_set& datatype_map_)
-        : datatype_map(datatype_map_)
+      state_component_converter(DataTypeMapIter& iter_)
+        : iter(iter_)
       {}
 
-      atermpp::aterm operator()(std::size_t i) const
+      atermpp::aterm operator()(int i) const
       {
-        return datatype_map.get(i);
+        return (*iter++)->indexed_set().get(i);
       }
     };
 
-    /// \brief Returns the index of the aterm x in the first datatype map. If it is not present yet, it will be added.
-    std::size_t aterm2index(const atermpp::aterm& x)
+    template <typename DataTypeMapIter>
+    state_component_converter<DataTypeMapIter> make_state_component_converter(DataTypeMapIter& i) const
     {
-      return m_state_data_type[x];
+      return state_component_converter<DataTypeMapIter>(i);
+    }
+
+    /// \brief Converts an ltsmin_state to the corresponding aterm.
+    atermpp::aterm_appl initial_state(ltsmin_state_type const& src, std::size_t nparams) const
+    {
+      std::vector<pins_data_type*>::const_iterator i = m_data_types.begin();
+      return atermpp::aterm_appl(m_state_fun,
+                                 boost::make_transform_iterator(src, make_state_component_converter(i)),
+                                 boost::make_transform_iterator(src + nparams, make_state_component_converter(i))
+                                );
     }
 
   public:
@@ -431,9 +545,7 @@ class pins
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
-      : m_generator(filename, parse_rewriter_strategy(rewriter_strategy)),
-        m_state_data_type(m_generator),
-        m_action_label_data_type(m_generator)
+      : m_generator(filename, parse_rewriter_strategy(rewriter_strategy))
     {
       initialize_read_write_groups();
 
@@ -446,31 +558,66 @@ class pins
       {
         m_process_parameter_names.push_back(i->name());
       }
+
+      // Each state parameter type gets it's own pins_data_type. State parameters of the same
+      // type share the pins_data_type.
+      std::map<data::sort_expression, pins_data_type*> existing_type_maps;
+      std::vector<data::variable> parameters = atermpp::convert<std::vector<data::variable> >(process().process_parameters());
+      for (std::size_t i = 0; i < params.size(); i++)
+      {
+        data::sort_expression s = parameters[i].sort();
+        std::map<data::sort_expression, pins_data_type*>::const_iterator j = existing_type_maps.find(s);
+        if (j == existing_type_maps.end())
+        {
+          pins_data_type* dt = new state_data_type(m_generator, s);
+          m_data_types.push_back(dt);
+          m_unique_data_types.push_back(dt);
+          existing_type_maps[s] = dt;
+        }
+        else
+        {
+          m_data_types.push_back(j->second);
+        }
+      }
+      pins_data_type* dt = new action_label_data_type(m_generator);
+      m_data_types.push_back(dt);
+      m_unique_data_types.push_back(dt);
+
+      for (std::size_t i = 0; i < m_data_types.size(); i++)
+      {
+      	std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
+        assert(j != m_unique_data_types.end());
+        m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
+      }
     }
 
     ~pins()
     {
+      // make sure the pins data types are not deleted twice
+      std::set<pins_data_type*> deleted;
+      for (std::vector<pins_data_type*>::const_iterator i = m_data_types.begin(); i != m_data_types.end(); ++i)
+      {
+        if (deleted.find(*i) == deleted.end())
+        {
+          delete *i;
+          deleted.insert(*i);
+        }
+      }
     }
 
-    /// \brief Returns the number of datatype maps.
+    /// \brief Returns the number of unique datatype maps. Note that the datatype map for action labels is included,
+    /// so this number equals the number of different process parameter types + 1.
     std::size_t datatype_count() const
     {
-      return 2;
+      return m_unique_data_types.size();
     }
 
     /// \brief Returns a reference to the datatype map with index i.
     /// \pre 0 <= i < datatype_count()
     pins_data_type& data_type(std::size_t i)
     {
-      if (i == 0)
-      {
-        return m_state_data_type;
-      }
-      if (i == 1)
-      {
-        return m_action_label_data_type;
-      }
-      throw std::runtime_error("Error: invalid index in pins::data_type");
+      assert (i < m_data_types.size());
+      return *m_unique_data_types[i];
     }
 
     /// \brief Indices of process parameters that influence event or next state of a summand by being read
@@ -501,7 +648,7 @@ class pins
     /// \pre 0 <= i < process_parameter_count()
     datatype_index process_parameter_type(std::size_t i) const
     {
-        return 0; (void)i;
+      return m_unique_data_type_index[i];
     }
 
     /// \brief Returns the number of labels per edge.
@@ -512,27 +659,40 @@ class pins
 
     /// \brief Returns the datatype map index corresponding to edge label i
     /// \pre 0 <= i < edge_label_count()
-    datatype_index edge_label_type(std::size_t i) const
+    datatype_index edge_label_type(std::size_t) const
     {
-      return 1; (void)i;
+      return m_unique_data_types.size() - 1;
     }
 
     /// \brief Returns the name of the i-th action label (always "action").
     /// \pre 0 <= i < edge_label_count()
-    std::string edge_label_name(std::size_t i) const
+    std::string edge_label_name(std::size_t) const
     {
-      return "action"; (void)i;
+      return action_label_type_map().name();
     }
 
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
       ATerm a = m_generator.initial_state();
-      atermpp::aterm_appl initial_state(reinterpret_cast<ATermAppl>(a));
+      atermpp::aterm_appl init(reinterpret_cast<ATermAppl>(a));
 	    for (size_t i = 0; i < m_state_length; ++i)
 	    {
-	      s[i] = m_state_data_type[initial_state(i)];
+	      s[i] = state_type_map(i)[init(i)];
       }
+    }
+
+    /// \brief Returns the names of the actions that appear in the summand with index i,
+    /// with 0 <= i < group_count().
+    std::set<std::string> summand_action_names(std::size_t i) const
+    {
+      std::set<std::string> result;
+      const action_list& l = process().action_summands()[i].multi_action().actions();
+      for (action_list::const_iterator i = l.begin(); i != l.end(); ++i)
+      {
+        result.insert(std::string(i->label().name()));
+      }
+      return result;
     }
 
     /// \brief Iterates over the 'next states' of state src, and invokes a callback function for each discovered state.
@@ -551,22 +711,19 @@ class pins
     /// - edge_labels is an array of edge labels
     /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
     template <typename StateFunction>
-        void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
+    void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      atermpp::aterm_appl init(m_state_fun,
-                               boost::make_transform_iterator(src, state_component_converter(m_state_data_type.indexed_set())),
-                               boost::make_transform_iterator(src + nparams, state_component_converter(m_state_data_type.indexed_set()))
-                              );
+      atermpp::aterm_appl init = initial_state(src, nparams);
       next_state_generator::iterator i = m_generator.begin(init);
       while (++i)
       {
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          dest[i] = m_state_data_type[s[i]];
+          dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = m_action_label_data_type[s.label()];
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
         f(dest, labels);
       }
     }
@@ -589,22 +746,19 @@ class pins
     /// - edge_labels is an array of edge labels
     /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
     template <typename StateFunction>
-        void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
+    void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      atermpp::aterm_appl init(m_state_fun,
-                               boost::make_transform_iterator(src, state_component_converter(m_state_data_type.indexed_set())),
-                               boost::make_transform_iterator(src + nparams, state_component_converter(m_state_data_type.indexed_set()))
-                              );
+      atermpp::aterm_appl init = initial_state(src, nparams);
       next_state_generator::iterator i = m_generator.begin(init, group);
       while (++i)
       {
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          dest[i] = m_state_data_type[s[i]];
+          dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = m_action_label_data_type[s.label()];
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
         f(dest, labels, group);
       }
     }
@@ -645,6 +799,7 @@ class pins
       ltsmin_state_type init = new int[process_parameter_count()];
       get_initial_state(init);
       out << "initial state = " << print_vector(init, init + process_parameter_count()) << std::endl;
+      delete[] init;
 
       out << "\n--- DATA TYPE MAPS ---\n";
       out << "datatype_count() = " << datatype_count() << std::endl;
@@ -652,10 +807,15 @@ class pins
       {
         const pins_data_type& type = data_type(i);
         out << "\n";
-        out << "datatype " << i
-            << " name = " << type.name()
-            << " size = " << type.size()
-            << std::endl;
+        out << "datatype " << i << "\n"
+            << " name    = " << type.name() << "\n"
+            << " size    = " << type.size() << "\n"
+            << " bounded = " << std::boolalpha << type.is_bounded() << "\n";
+        if (type.is_bounded())
+        {
+          out << " possible values: " << core::detail::print_set(type.generate_values(10), core::detail::default_printer()) << std::endl;
+        }
+        out << std::endl;
       }
 
       return out.str();

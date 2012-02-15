@@ -26,6 +26,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
@@ -215,8 +216,8 @@ void test_quantifier_rename_builder()
       pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
     );
   pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
-  std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
-  std::cout << "q1 = " << mcrl2::core::pp(q1) << std::endl;
+  std::cout << "p1 = " << mcrl2::pbes_system::pp(p1) << std::endl;
+  std::cout << "q1 = " << mcrl2::pbes_system::pp(q1) << std::endl;
 
   pbes_expression p2 =
     z::and_(
@@ -224,8 +225,8 @@ void test_quantifier_rename_builder()
       pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
     );
   pbes_expression q2 = rename_quantifier_variables(p2, make_list(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
-  std::cout << "p2 = " << mcrl2::core::pp(p2) << std::endl;
-  std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
+  std::cout << "p2 = " << mcrl2::pbes_system::pp(p2) << std::endl;
+  std::cout << "q2 = " << mcrl2::pbes_system::pp(q2) << std::endl;
 
   // BOOST_CHECK(false);
   core::garbage_collect();
@@ -241,9 +242,9 @@ void test_complement_method_builder()
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
-  std::cout << "p             = " << mcrl2::core::pp(p) << std::endl;
-  std::cout << "q             = " << mcrl2::core::pp(q) << std::endl;
-  std::cout << "complement(p) = " << mcrl2::core::pp(complement(p)) << std::endl;
+  std::cout << "p             = " << mcrl2::pbes_system::pp(p) << std::endl;
+  std::cout << "q             = " << mcrl2::pbes_system::pp(q) << std::endl;
+  std::cout << "complement(p) = " << mcrl2::pbes_system::pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
   core::garbage_collect();
 }
@@ -286,7 +287,7 @@ void test_instantiate_global_variables()
   state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
+  std::cout << "<before>" << mcrl2::pbes_system::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   pbes_system::detail::instantiate_global_variables(p);
   std::cout << "<after>" << pbes_system::pp(p) << std::endl;
@@ -303,7 +304,7 @@ void test_find_sort_expressions()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
-  std::cout << core::detail::print_pp_set(s) << std::endl;
+  std::cout << core::detail::print_set(s, data::stream_printer()) << std::endl;
   core::garbage_collect();
 }
 

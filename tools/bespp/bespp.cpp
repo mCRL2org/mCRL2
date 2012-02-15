@@ -20,10 +20,13 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -31,10 +34,10 @@ using namespace mcrl2;
 
 //local declarations
 
-class bespp_tool: public input_output_tool
+class bespp_tool: public bes_input_tool<input_output_tool>
 {
   private:
-    typedef input_output_tool super;
+    typedef bes_input_tool<input_output_tool> super;
 
   public:
     bespp_tool()
@@ -43,7 +46,7 @@ class bespp_tool: public input_output_tool
               "Print the BES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      format(print_default)
     {}
 
     bool run()
@@ -53,7 +56,7 @@ class bespp_tool: public input_output_tool
     }
 
   protected:
-    t_pp_format  format;
+    print_format_type  format;
 
     void add_options(interface_description& desc)
     {
@@ -80,27 +83,27 @@ class bespp_tool: public input_output_tool
     void print_specification()
     {
       bes::boolean_equation_system<> bes;
-      bes.load(input_filename());
+      load_bes(bes,input_filename(), bes_input_format());
 
       mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
                         << " in the " << pp_format_to_string(format) << " format";
 
-      if (format != ppDefault)
+      if (format != print_default)
       {
         throw mcrl2::runtime_error("Pretty printing in " + pp_format_to_string(format) + " format is currently not supported");
       }
 
       if (output_filename().empty())
       {
-        if (format == ppDefault)
+        if (format == print_default)
         {
           std::cout << bes::pp(bes);
         }
         else
         {
           atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
-          std::cout << core::pp(b, format);
+          std::cout << core::pp(b);
         }
       }
       else
@@ -108,14 +111,14 @@ class bespp_tool: public input_output_tool
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          if (format == ppDefault)
+          if (format == print_default)
           {
             output_stream << bes::pp(bes);
           }
           else
           {
             atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
-            output_stream << core::pp(b, format);
+            output_stream << core::pp(b);
           }
           output_stream.close();
         }

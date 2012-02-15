@@ -35,7 +35,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& function_update_name()
       {
-        static core::identifier_string function_update_name = data::detail::initialise_static_expression(function_update_name, core::identifier_string("@func_update"));
+        static core::identifier_string function_update_name = core::detail::initialise_static_expression(function_update_name, core::identifier_string("@func_update"));
         return function_update_name;
       }
 

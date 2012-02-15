@@ -28,6 +28,7 @@ namespace lps
 {
 
 /// \brief Return a set with all finite sorts in data specification s.
+inline
 atermpp::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 {
   data::sort_expression_vector sorts = s.sorts();
@@ -97,14 +98,14 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
         try
         {
-          mCRL2log(debug, "suminst") << "enumerating condition: " << data::pp(s.condition()) << std::endl;
+          mCRL2log(log::debug, "suminst") << "enumerating condition: " << data::pp(s.condition()) << std::endl;
 
-          mcrl2_logger::indent();
+          log::mcrl2_logger::indent();
 
           for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition());
                   i != m_enumerator.end(); ++i)
           {
-            mCRL2log(debug, "suminst") << "substitutions: " << data::print_substitution(*i) << std::endl;
+            mCRL2log(log::debug, "suminst") << "substitutions: " << data::print_substitution(*i) << std::endl;
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;
@@ -113,21 +114,21 @@ class suminst_algorithm: public lps::detail::lps_algorithm
             ++nr_summands;
           }
 
-          mcrl2_logger::unindent();
+          log::mcrl2_logger::unindent();
 
           if (nr_summands == 0)
           {
-            mCRL2log(verbose, "suminst") << "all valuations for the variables in the condition of this summand reduce to false; removing this summand" << std::endl;
+            mCRL2log(log::verbose, "suminst") << "all valuations for the variables in the condition of this summand reduce to false; removing this summand" << std::endl;
           }
-          mCRL2log(verbose, "suminst") << "replaced a summand with " << nr_summands << " summand" << (nr_summands == 1?"":"s") << std::endl;
+          mCRL2log(log::verbose, "suminst") << "replaced a summand with " << nr_summands << " summand" << (nr_summands == 1?"":"s") << std::endl;
         }
         catch (mcrl2::runtime_error const& e)
         {
           // If an error occurs in enumerating, remove all summands that
           // have been added to result thus far, and re-add the original.
           // This prevents problems e.g. in case of a sort without constructors.
-          mCRL2log(debug, "suminst") << "An error occurred in enumeration, removing already added summands, and keeping the original" << std::endl;
-          mCRL2log(debug, "suminst") << e.what() << std::endl;
+          mCRL2log(log::debug, "suminst") << "An error occurred in enumeration, removing already added summands, and keeping the original" << std::endl;
+          mCRL2log(log::debug, "suminst") << e.what() << std::endl;
 
           result.resize(result.size() - nr_summands);
           result.push_back(s);
@@ -148,7 +149,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     {
       if(sorts.empty())
       {
-        mCRL2log(info, "suminst") << "an empty set of sorts to be unfolded was provided; defaulting to all finite sorts" << std::endl;
+        mCRL2log(log::info, "suminst") << "an empty set of sorts to be unfolded was provided; defaulting to all finite sorts" << std::endl;
         m_sorts = finite_sorts(spec.data());
       }
     }

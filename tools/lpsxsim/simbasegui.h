@@ -12,7 +12,7 @@
 #define __simbasegui_H__
 
 #include <wx/wx.h>
-#include "simbase.h"
+#include "mcrl2/lps/simbase.h"
 
 class SimulatorInterface;
 

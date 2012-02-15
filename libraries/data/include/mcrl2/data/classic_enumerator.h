@@ -19,7 +19,6 @@
 
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/enum/standard.h"
@@ -30,7 +29,7 @@ namespace data
 {
 
 /// \brief The classic enumerator can enumerate solutions for boolean expressions.
-/// \details The classic enumerator enumerates solutions for variables that 
+/// \details The classic enumerator enumerates solutions for variables that
 ///        make an expression not equal to false, or
 ///        not equal to true. For instance in x<2 with x:Nat, it will yield the
 ///        solutions 0 and 1 for x as these values make x<2 not equal
@@ -38,20 +37,22 @@ namespace data
 ///        find all solutions for x that do not make cond true. If a single
 ///        solution is found that makes cond false, then forall x:Nat.cond(x) can
 ///        be replaced by false. If a finite number of expressions t1,...,tn can be found
-///        that neither makes cond(t_i) false nor true, forall x:Nat.cond(x) can 
+///        that neither makes cond(t_i) false nor true, forall x:Nat.cond(x) can
 ///        be replaced by cond(t1) && cond(t2) && ... && cond(tn).
-///        By default the solutions are represented as substitutions. 
+///        By default the solutions are represented as substitutions.
 ///        The classic enumerator can also work with expressions
-///        in internal rewrite format. In that case solutions are 
+///        in internal rewrite format. In that case solutions are
 ///        aterm_list < aterm_appl >'s of the same length as the
 ///        list of variables.
 template < typename Evaluator = rewriter >
-class classic_enumerator 
+class classic_enumerator
 {
 
   public:
     /// \brief The type of objects that represent substitutions
-    typedef mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, data_expression > >  substitution_type;
+    typedef typename Evaluator::substitution_type  substitution_type;
+    typedef typename Evaluator::internal_substitution_type  internal_substitution_type;
+
     /// \brief The type of objects that represent variables
     typedef typename substitution_type::variable_type                     variable_type;
     /// \brief The type of objects that represent expressions
@@ -60,9 +61,8 @@ class classic_enumerator
     typedef Evaluator                                                     evaluator_type;
 
   protected:
-
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
-    detail::EnumeratorStandard*                                  m_enumerator;    // The real enumeration is done in an EnumeratorStandard
+    detail::EnumeratorStandard                                   m_enumerator;    // The real enumeration is done in an EnumeratorStandard
                                                                                   // class.
 
   public:
@@ -70,8 +70,8 @@ class classic_enumerator
     /// \brief A class to enumerate solutions for terms in internal format.
     /// \details Solutions are presented as aterm lists in internal format of the same length as
     ///          the list of variables for which a solution is sought.
-    class iterator_internal : 
-        public boost::iterator_facade< 
+    class iterator_internal :
+        public boost::iterator_facade<
                  iterator_internal,
                  const atermpp::term_list<atermpp::aterm_appl>,
                  boost::forward_traversal_tag >
@@ -88,11 +88,12 @@ class classic_enumerator
         m_generator_type m_generator;
 
       public:
-        
+
         /// \brief Constructor. Use it via the begin_internal function of the classic enumerator class.
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
                           const atermpp::aterm_appl &condition,
+                          internal_substitution_type &sigma,
                           const bool not_equal_to_false=true,
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
@@ -100,40 +101,41 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition);
-          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false) ||
-              (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true))
-          { 
+          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition,sigma);
+          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
+              (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
+          {
             // no solutions are found.
             m_solution_possible=true;
           }
           else if (variables.empty())
-          { 
+          {
             // in this case we generate exactly one solution.
             m_enumerator_iterator_valid=true;
             m_solution_possible=true;
-            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true) ||
-                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false));
+            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true) ||
+                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false));
           }
-          else 
+          else
           {
             // we must calculate the solutions.
             m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(variables,
                                                               condition,
+                                                              sigma,
                                                               not_equal_to_false,
-                                                              m_enclosing_enumerator->m_enumerator,
+                                                              &(m_enclosing_enumerator->m_enumerator),
                                                               max_internal_variables));
             m_assignments.protect();
             increment();
           }
         }
 
-        /// \brief Constructor representing the end of an internal_iterator. 
+        /// \brief Constructor representing the end of an internal_iterator.
         //  \details It is advisable to avoid its use, and use end_internal instead.
         iterator_internal():
            m_enumerator_iterator_valid(false),
            m_solution_possible(false)
-        { 
+        {
         }
 
         /// \brief Destructor.
@@ -150,16 +152,16 @@ class classic_enumerator
         iterator_internal& operator=(const iterator_internal &other)
         {
           m_enclosing_enumerator=other.m_enclosing_enumerator;
-          m_assignments=other.m_assignments; 
+          m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
           if (m_generator==NULL && other.m_generator!=NULL)
-          { 
+          {
             m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
-          { 
+          {
             m_assignments.unprotect();
           }
           m_generator=other.m_generator;
@@ -170,16 +172,16 @@ class classic_enumerator
         iterator_internal(const iterator_internal &other)
         {
           m_enclosing_enumerator=other.m_enclosing_enumerator;
-          m_assignments=other.m_assignments; 
+          m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
           if (m_generator==NULL && other.m_generator!=NULL)
-          { 
+          {
             m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
-          { 
+          {
             m_assignments.unprotect();
           }
           m_generator=other.m_generator;
@@ -189,7 +191,7 @@ class classic_enumerator
         //         condition exactly true if not_equal_to_false is true, or exactly false if not_equal_to_false
         //         is false.
         bool solution_is_exact() const
-        { 
+        {
           assert(m_enumerator_iterator_valid);
           return m_solution_is_exact;
         }
@@ -200,33 +202,38 @@ class classic_enumerator
         //           Otherwise an exception is thrown. If do_not_throw_exceptions was true, and
         //           this function returns false, then the iterator is equal to end().
         bool solution_is_possible() const
-        { 
+        {
           assert(!m_enumerator_iterator_valid);
           return m_solution_possible;
         }
 
       protected:
-  
+
         friend class boost::iterator_core_access;
-  
+
         void increment()
         {
           if (m_generator==NULL)
-          { 
+          {
             m_enumerator_iterator_valid=false; // There was only one solution.
           }
-          else 
+          else
           {
-            m_enumerator_iterator_valid=m_generator->next(m_solution_is_exact,m_assignments,m_solution_possible);
+            atermpp::aterm_appl instantiated_solution;
+            m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
+            if (m_enumerator_iterator_valid)
+            {
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
+            }
           }
         }
-    
+
         bool equal(iterator_internal const& other) const
         {
           /* Only check whether end of enumerator has been reached */
           return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
         }
-    
+
         const atermpp::term_list<atermpp::aterm_appl> & dereference() const
         {
           assert(m_enumerator_iterator_valid);
@@ -235,13 +242,13 @@ class classic_enumerator
     };
 
     /// \brief An iterator that delivers values for variables to make a condition true.
-    /// \details The condition and the solutions are in internal rewrite format. 
+    /// \details The condition and the solutions are in internal rewrite format.
     ///          Dereferencing a valid iterator yields a list of solutions of the
     ///          same length as variables.
     /// \param[in] variables The variables for which a solution is sought.
     /// \param[in] condition_in_internal_format The condition in internal format.
     /// \param[in] max_internal_variables The maximal number of internally generatable variables.
-    ///            If zero, then there is no bound. If the bound is reached, generating 
+    ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
     /// \param[in] not_equal_to_false Indicates whether solutions are generated that make
     ///            the condition not equal to false, or not equal to true. This last option is
@@ -249,14 +256,15 @@ class classic_enumerator
     /// \param[in] do_not_throw_exceptions A boolean indicating whether an exception can be thrown.
     ///            if not, the function solution_is_possible can be used to indicate whether
     ///            valid solutions are being generated.
-    iterator_internal begin_internal(const variable_list &variables,
-                                     const atermpp::aterm_appl &condition_in_internal_format,
+    iterator_internal begin_internal(const variable_list variables,
+                                     const atermpp::aterm_appl condition_in_internal_format,
+                                     internal_substitution_type &sigma,
                                      const size_t max_internal_variables=0,
                                      const bool not_equal_to_false=true,
                                      const bool do_not_throw_exceptions=false)
 
-    { 
-      return iterator_internal(this, variables, condition_in_internal_format,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
+    {
+      return iterator_internal(this, variables, condition_in_internal_format,sigma,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
     }
 
     /// \brief The standard end iterator to indicate the end of an iteration.
@@ -267,12 +275,12 @@ class classic_enumerator
 
   public:
     /// \brief An iterator class to iterate over values of variables satisfying a condition.
-    /// \details The dereference operator of this iterator class yields a substitution that 
+    /// \details The dereference operator of this iterator class yields a substitution that
     ///          contains a mapping from variables to values representing a solution.
-    class iterator : 
-        public boost::iterator_facade< 
+    class iterator :
+        public boost::iterator_facade<
                  iterator,
-                 const substitution_type, 
+                 const substitution_type,
                  boost::forward_traversal_tag >
     {
       protected:
@@ -285,6 +293,7 @@ class classic_enumerator
         variable_list m_vars;
         bool m_solution_is_exact;
         bool m_solution_possible;
+        internal_substitution_type internal_sigma;
         detail::EnumeratorSolutionsStandard m_generator;
 
       public:
@@ -294,7 +303,7 @@ class classic_enumerator
         iterator(enclosing_classic_enumerator *e,
                  const Container &variables,
                  const expression_type &condition,
-                 const substitution_type &substitution=substitution_type(),   
+                 const substitution_type &sigma=substitution_type(),
                  const bool not_equal_to_false=true,
                  const size_t max_internal_variables=0,
                  const bool do_not_throw_exceptions=false,
@@ -303,20 +312,22 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_vars(atermpp::convert<variable_list,Container>(variables)),
           m_solution_possible(do_not_throw_exceptions),
+          internal_sigma(m_enclosing_enumerator->m_evaluator.convert_to(sigma)),
           m_generator(m_vars,
                       m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                      internal_sigma,
                       not_equal_to_false,
-                      m_enclosing_enumerator->m_enumerator,
+                      &(m_enclosing_enumerator->m_enumerator),
                       max_internal_variables)
-        { 
-          for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
-          { 
+        {
+          /* for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
+          {
             m_enclosing_enumerator->m_evaluator.set_internally_associated_value(i->first,i->second);
-          }
+          } */
           increment();
         }
 
-        /// \brief Constructor representing the end of an internal_iterator. 
+        /// \brief Constructor representing the end of an internal_iterator.
         //  \details It is advisable to avoid its use, and use method end of the classic enumerator instead.
         iterator():
           m_enumerator_iterator_valid(false),
@@ -328,58 +339,63 @@ class classic_enumerator
         //         condition exactly true if not_equal_to_false is true, or exactly false if not_equal_to_false
         //         is false.
         bool solution_is_exact() const
-        { 
+        {
           assert(m_enumerator_iterator_valid);
           return m_solution_is_exact;
         }
-        
+
         /// \brief Indicate whether an solution was attempted to be generated (true) or whether
         //         an error occurred (false).
         //  \details This indicator only works if the variable do_not_throw_exceptions was true.
         //           Otherwise an exception is thrown. If do_not_throw_exceptions was true, and
         //           this function returns false, then the iterator is equal to end().
         bool solution_is_possible() const
-        { 
+        {
           assert(!m_enumerator_iterator_valid);
           return m_solution_possible;
         }
 
       protected:
-  
+
         friend class boost::iterator_core_access;
-  
+
         void increment()
         {
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
-    
-          const bool b=m_solution_possible; 
-          if (m_generator.next(m_solution_is_exact,assignment_list,m_solution_possible) && b==m_solution_possible)
+
+          const bool b=m_solution_possible;
+          atermpp::aterm_appl instantiated_solution;
+          if (m_generator.next(instantiated_solution,assignment_list,m_solution_possible) && b==m_solution_possible)
           {
+            if (m_solution_possible)
+            {
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
+            }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
             for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i,++j)
             {
-              assert(static_cast< variable_type >(*j).sort() == 
+              assert(static_cast< variable_type >(*j).sort() ==
                               m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());
-    
+
               m_substitution[static_cast< variable_type >(*j)] =
                               data_expression(m_enclosing_enumerator->m_evaluator.convert_from(*i));
             }
-          
+
           }
           else
-          { 
+          {
             m_enumerator_iterator_valid=false;
           }
         }
-    
+
         bool equal(iterator const& other) const
         {
-          // Only check whether end of enumerator has been reached 
+          // Only check whether end of enumerator has been reached
           return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
         }
-    
+
         substitution_type const& dereference() const
         {
           assert(m_enumerator_iterator_valid);
@@ -395,9 +411,9 @@ class classic_enumerator
         \param[in] condition The condition which must or must not be satisfied
         \param[in] max_internal_variables The maximum number of internal variables to be generated.
                      If set to 0, there is no limit and enumerator may not terminate. Otherwise
-                     the enumerator will terminate, provided the evaluator that is used terminates 
+                     the enumerator will terminate, provided the evaluator that is used terminates
                      always.
-        \param[in] not_equal_to_false This variable indicates whether it is attempted to make 
+        \param[in] not_equal_to_false This variable indicates whether it is attempted to make
                      the condition not equal to false, or -- if false -- not equal to true. This
                      last option is useful to expand the universal quantifier. The default option
                      is useful for the sum operator or the existential quantifier.
@@ -406,7 +422,7 @@ class classic_enumerator
                         valid solutions are being generated, or whether a problem has occurred.
                         Basically, there are two possible problems, namely, there are no constructor
                         functions or the number of internally generated variables reached the limit.
-            
+
     **/
     template < typename Container >
     iterator begin(const Container &variables,
@@ -416,7 +432,7 @@ class classic_enumerator
                    const bool do_not_throw_exceptions=false,
                    const substitution_type &substitution=substitution_type(),
                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-    { 
+    {
       return iterator(this, variables, condition, substitution, not_equal_to_false, max_internal_variables, do_not_throw_exceptions);
     }
 
@@ -427,17 +443,17 @@ class classic_enumerator
       return iterator();
     }
 
-  public: 
-    /** \brief Constructs a classic enumerator to 
+  public:
+    /** \brief Constructs a classic enumerator to
      * \param[in] specification A data specification containing the definitions of sorts
      * \param[in] evaluator A component that is used for evaluating conditions, generally an ordinary rewriter
      **/
     classic_enumerator(const data_specification &specification,
                        const evaluator_type &evaluator):
       m_evaluator(evaluator),
-      m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
+      m_enumerator(detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
     {
-    } 
+    }
 
     /// \brief Standard destructor
     ~classic_enumerator()
@@ -455,7 +471,7 @@ class classic_enumerator
     /// \brief Assignment operator
     classic_enumerator& operator=(const classic_enumerator & other)
     {
-      m_evaluator=other.m_evaluator; 
+      m_evaluator=other.m_evaluator;
       m_enumerator=other.m_enumerator;
       return *this;
     }

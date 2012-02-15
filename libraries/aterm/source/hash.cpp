@@ -21,6 +21,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/util.h"
@@ -278,6 +279,7 @@ static size_t hashPut(ATermTable s, ATerm key, size_t n)
     }
     c = (c + STEP) & s->sizeMinus1;
   }
+  return c;
 }
 
 /*}}}  */
@@ -308,7 +310,7 @@ static void hashResizeSet(ATermIndexedSet s)
     /* resizing the hashtable failed and s->hashtable still
        points to the old hashtable. We keep this old hashtable */
 #ifndef NDEBUG
-    fprintf(stderr,"No memory to increase the size of the indexed set hash table\n");
+    mCRL2log(mcrl2::log::warning) << "No memory to increase the size of the indexed set hash table" << std::endl;
 #endif
     if (s->nr_entries-s->nr_deletions+2>=s->sizeMinus1)
     {
@@ -394,7 +396,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot creat key index table");
+    std::runtime_error("ATindexedSetCreate: cannot create key index table");
   }
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
@@ -574,7 +576,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
   if (hashtable->values == NULL)
   {
-    std::runtime_error("ATtableCreate: cannot creat value index table");
+    std::runtime_error("ATtableCreate: cannot create value index table");
   }
 
   return hashtable;

@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -23,8 +23,12 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print_format.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -33,88 +37,9 @@ namespace core
 
 using namespace core::detail::precedences;
 
-/// \brief t_pp_format represents the available pretty print formats
-typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
-
-/// \brief Print string representation of pretty print format
-/// \param pp_format a pretty print format
-/// \return string representation of the pretty print format
-/// \throws mcrl2::runtime error if an unknown pretty print format
-///         is passed into the function.
-inline
-std::string pp_format_to_string(const t_pp_format pp_format)
-{
-  switch (pp_format)
-  {
-    case ppDefault:
-      return "default";
-    case ppDebug:
-      return "debug";
-    case ppInternal:
-      return "internal";
-    case ppInternalDebug:
-      return "internal_debug";
-    default:
-      throw mcrl2::runtime_error("Unknown pretty print format");
-  }
-}
-
-
-/** \brief Print a textual description of an ATerm representation of an
- *         mCRL2 specification or expression to an output stream.
- *  \param[in] out_stream A stream to which can be written.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \post A textual representation of part is written to out_stream using
- *        method pp_format.
-**/
-void PrintPart_CXX(std::ostream& out_stream, const ATerm part,
-                   t_pp_format pp_format = ppDefault);
-
-/** \brief Return a textual description of an ATerm representation of an
- *         mCRL2 specification or expression.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \return A textual representation of part according to method pp_format.
-**/
-std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format = ppDefault);
-
-/** \brief Return a textual description of an ATerm representation of an
- *         mCRL2 specification or expression.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \return A textual representation of part according to method pp_format.
-**/
-template <typename Term>
-std::string pp(Term part, t_pp_format pp_format = ppDefault)
-{
-  return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
-}
-
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-
-inline
-void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
-{
-  if (s1 != s2)
-  {
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s3 << std::endl;
-    throw std::runtime_error("not equal");
-  }
-}
-
-#ifdef MCRL2_ENABLE_CHECK_PP
-#define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
-#else
-#define MCRL2_CHECK_PP(s1, s2, s3)
-#endif
 
 template <typename Derived>
 struct printer: public core::traverser<Derived>
@@ -125,7 +50,6 @@ struct printer: public core::traverser<Derived>
   {
     return static_cast<Derived&>(*this);
   }
-
 
   // using super::enter;
   // using super::leave;
@@ -146,6 +70,10 @@ struct printer: public core::traverser<Derived>
   template <typename T>
   void print_expression(const T& x, int prec = 5)
   {
+#ifdef MCRL2_DEBUG_PRECEDENCE
+    std::cout << "<print_expression> precedence = " << prec << std::endl;
+    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
+#endif
     bool print_parens = (precedence(x) < prec);
     if (print_parens)
     {
@@ -168,7 +96,7 @@ struct printer: public core::traverser<Derived>
   template <typename T>
   void print_binary_operation(const T& x, const std::string& op)
   {
-#ifdef MCRL2_DEBUG_BINARY_OPERATION
+#ifdef MCRL2_DEBUG_PRECEDENCE
     std::cout << "<binary>" << std::endl;
     std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
     std::cout << "<left>" << x.left().to_string() << " precedence = " << precedence(x.left()) << std::endl;
@@ -204,15 +132,61 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void operator()(const atermpp::term_list<T>& t)
+  void operator()(const atermpp::term_appl<T>& x)
   {
-    print_list(t, "", "", ", ");
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(x.to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <typename T>
+  void operator()(const atermpp::term_list<T>& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    print_list(x, "", "", ", ");
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <typename T>
+  void operator()(const atermpp::set<T>& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    print_list(x, "", "", ", ");
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const core::identifier_string& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(std::string(x));
+    if (x == core::identifier_string())
+    {
+      static_cast<Derived&>(*this).print("@NoValue");
+    }
+    else
+    {
+      static_cast<Derived&>(*this).print(std::string(x));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATerm x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm(x).to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATermList x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm_list(x).to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATermAppl x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm_appl(x).to_string());
     static_cast<Derived&>(*this).leave(x);
   }
 };
@@ -225,7 +199,7 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
   using super::enter;
   using super::leave;
   using super::operator();
-  
+
   apply_printer(std::ostream& out)
   {
     typedef printer<apply_printer<Traverser> > Super;
@@ -240,24 +214,32 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
 } // namespace detail
 /// \endcond
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  detail::apply_printer<core::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<core::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  print(t, out);
+  stream_printer()(x, out);
   return out.str();
 }
 
-}
-}
+/// \brief Prototypes for aterm overloads
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
 
-#endif //MCRL2_PRINT_H
+} // namespace core
+
+} // namespace mcrl2
+
+#endif // MCRL2_PRINT_H

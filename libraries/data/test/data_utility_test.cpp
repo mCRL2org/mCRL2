@@ -23,62 +23,13 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/core/garbage_collection.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
-
-void test_fresh_variable_generator()
-{
-  variable d("d", basic_sort("D"));
-  variable d0("d0", basic_sort("D"));
-  variable d00("d00", basic_sort("D"));
-  data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
-
-  fresh_variable_generator<> generator("d");
-  generator.add_identifiers(data::find_identifiers(e));
-  variable x = generator(d.sort());
-  BOOST_CHECK(x == variable("d1", basic_sort("D")));
-  x = generator(d.sort());
-  BOOST_CHECK(x == variable("d2", basic_sort("D")));
-
-  variable a = fresh_variable(data::find_identifiers(e), basic_sort("D"), "d");
-  BOOST_CHECK(a == variable("d1", basic_sort("D")));
-
-  std::set<identifier_string> ids = data::find_identifiers(e);
-
-  BOOST_CHECK(ids.size() == 8);
-  BOOST_CHECK(ids.find(identifier_string("d"))    != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("d0"))   != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("d00"))  != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("D"))    != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("Bool")) != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("=="))   != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("!="))   != ids.end());
-  BOOST_CHECK(ids.find(identifier_string("&&"))   != ids.end());
-
-  variable f("f", basic_sort("F"));
-  x = generator(f);
-  BOOST_CHECK(x == variable("f", basic_sort("F")));
-  x = generator(f);
-  // BOOST_CHECK(x == variable("f1", basic_sort("F")));
-
-  atermpp::vector<data_expression> v;
-  variable p("p", basic_sort("P"));
-  variable q("q", basic_sort("P"));
-  v.push_back(p);
-  v.push_back(q);
-  generator.add_identifiers(data::find_identifiers(v));
-  x = generator(p);
-  // BOOST_CHECK(x == variable("p1", basic_sort("P")));
-  x = generator(q);
-  // BOOST_CHECK(x == variable("q1", basic_sort("P")));
-}
 
 void test_fresh_variables()
 {
@@ -95,11 +46,11 @@ void test_fresh_variables()
   context.insert("n0_Sx0");
   context.insert("n_S");
   context.insert("s3_S");
-  std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
+  std::cout << "\n" << core::detail::print_set(context, core::detail::default_printer(), "context") << std::endl;
   variable_list yi = atermpp::make_list(variable("e3_S", basic_sort("A")));
-  std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
+  std::cout << "\nyi " << data::pp(yi) << std::endl;
   variable_list y = fresh_variables(yi, context);
-  std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
+  std::cout << "\ny " << data::pp(y) << std::endl;
   BOOST_CHECK(y.size() == 1);
   BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");
 }
@@ -107,9 +58,6 @@ void test_fresh_variables()
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_fresh_variable_generator();
-  core::garbage_collect();
 
   test_fresh_variables();
   core::garbage_collect();

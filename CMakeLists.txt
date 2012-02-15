@@ -6,8 +6,6 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-# Set Warning
-
 cmake_minimum_required (VERSION 2.6)
 message(STATUS "CMAKE VERSION: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
 project (MCRL2)
@@ -96,50 +94,10 @@ set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" )
 
 include(CheckCXXCompilerFlag)
 
-if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-  set( CXX_ACCEPTS_PROFILE_ARCS true)
-  set( CXX_ACCEPTS_TEST_COVERAGE true)
-else( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-  check_cxx_compiler_flag(-fprofile-arcs CXX_ACCEPTS_PROFILE_ARCS )
-  check_cxx_compiler_flag(-ftest-coverage CXX_ACCEPTS_TEST_COVERAGE )
-endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-
-set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings" CACHE STRING "Flags used by the C++ compiler during maintainer builds.")
-set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W" CACHE STRING "Flags used by the C compiler during maintainer builds.")
-if(CXX_ACCEPTS_PROFILE_ARCS)
-  set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_MAINTAINER} -fprofile-arcs")
-  set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_MAINTAINER} -fprofile-arcs")
-endif(CXX_ACCEPTS_PROFILE_ARCS)
-if(CXX_ACCEPTS_TEST_COVERAGE)
-  set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_MAINTAINER} -ftest-coverage")
-  set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_MAINTAINER} -ftest-coverage")
-endif(CXX_ACCEPTS_TEST_COVERAGE)
-
-set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used for linking binaries during maintainer builds.")
-set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
-mark_as_advanced(
-  CMAKE_CXX_FLAGS_MAINTAINER
-  CMAKE_C_FLAGS_MAINTAINER
-  CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-  CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-)
-
 ##---------------------------------------------------
-## Print compiler information
+## Add "Maintainer" Build type
 ##---------------------------------------------------
-
-if(NOT MSVC)
-execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-    OUTPUT_VARIABLE CXX_COMPILER_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-STRING(REGEX REPLACE "^([^\n]+).*" "\\1" CXX_COMPILER_VERSION "${CXX_COMPILER_VERSION}" )
-else(NOT MSVC)
-   set(CXX_COMPILER_VERSION "MSVC-${MSVC_VERSION}")
-endif(NOT MSVC)
-
-message(STATUS "CXX COMPILER VERSION: ${CXX_COMPILER_VERSION}")
+include(MCRL2AddMaintainerBuildType)
 
 ##---------------------------------------------------
 ## Determine build type
@@ -151,217 +109,27 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 
-if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-
-  ##---------------------------------------------------
-  ## Set global compiler flags (if available)
-  ##---------------------------------------------------
-
-  check_cxx_compiler_flag(-Wall CXX_ACCEPTS_WALL )
-  if( CXX_ACCEPTS_WALL )
-    add_definitions( -Wall )
-  endif( CXX_ACCEPTS_WALL )
-
-  check_cxx_compiler_flag(-Wno-inline CXX_ACCEPTS_WNO-INLINE )
-  if( CXX_ACCEPTS_WNO-INLINE )
-    add_definitions( -Wno-inline )
-  endif( CXX_ACCEPTS_WNO-INLINE )
-
-  if( NOT MINGW )
-    check_cxx_compiler_flag(-pthread CXX_ACCEPTS_PTHREAD )
-    if( CXX_ACCEPTS_PTHREAD )
-      add_definitions( -pthread )
-    endif( CXX_ACCEPTS_PTHREAD )
-  endif( NOT MINGW )
-
-  check_cxx_compiler_flag(-fno-strict-overflow CXX_ACCEPTS_FNO-STRICT-OVERFLOW )
-  if( CXX_ACCEPTS_FNO-STRICT-OVERFLOW )
-    add_definitions( -fno-strict-overflow )
-  endif( CXX_ACCEPTS_FNO-STRICT-OVERFLOW )
-
-  check_cxx_compiler_flag(-pipe CXX_ACCEPTS_PIPE )
-  if( CXX_ACCEPTS_PIPE )
-    add_definitions( -pipe )
-  endif( CXX_ACCEPTS_PIPE )
-
-  # Following flag will cause warning on MacOSX, if enabled:
-  #686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
-  if( NOT APPLE)
-    check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
-    if( CXX_ACCEPTS_AS_NEEDED )
-      add_definitions( -Wl,-as-needed )
-    endif( CXX_ACCEPTS_AS_NEEDED )
-  endif( NOT APPLE )
-
-  # Display include dependencies
-  # check_cxx_compiler_flag(-H CXX_ACCEPTS_H )
-  # if( CXX_ACCEPTS_H )
-  #  add_definitions( -H )
-  # endif( CXX_ACCEPTS_H )
-
-  # check_cxx_compiler_flag(-Wunreachable-code CXX_ACCEPTS_UNREACHABLE-CODE )
-  # if( CXX_ACCEPTS_UNREACHABLE-CODE )
-  #   add_definitions( -Wunreachable-code )
-  # endif( CXX_ACCEPTS_UNREACHABLE-CODE )
-
-endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-
-if(MSVC)
-  set (CMAKE_CXX_FLAGS "/EHs ${CMAKE_CXX_FLAGS}")
-endif(MSVC)
-
-## --------------------------------------------------
-## Detect architecture
-## --------------------------------------------------
-
-if( NOT MCRL2_ARCH )
-if (UNIX AND NOT WIN32)
-  if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-    message (STATUS "Architecture: 64bit Unix" )
-    set(ATERM_FLAGS "-m64 -DAT_64BIT")
-    add_definitions("-DAT_64BIT")
-    # set(ARCHITECTURE "x86_64")
-  endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
-  if (CMAKE_SIZEOF_VOID_P MATCHES "4")
-    message (STATUS "Architecture: 32bit Unix" )
-    set(ATERM_FLAGS "-m32")
-    # set(ARCHITECTURE "i386")
-  endif (CMAKE_SIZEOF_VOID_P MATCHES "4")
-endif (UNIX AND NOT WIN32)
-
-if(MSVC)
-  if(CMAKE_CL_64)
-    message( STATUS "Architecture: 64bit Windows" )
-    set (CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
-  else(CMAKE_CL_64)
-    message( STATUS "Architecture: 32bit Windows" )
-  endif(CMAKE_CL_64)
-endif(MSVC)
-endif( NOT MCRL2_ARCH ) 
-
-if( MCRL2_ARCH STREQUAL "i386" )
-  if( UNIX )
-    message( STATUS "Architecture: 32bit Unix" )
-    set(ATERM_FLAGS "-m32")
-		set(CMAKE_C_FLAGS "-m32 -march=i386") 
-		set(CMAKE_CXX_FLAGS "-m32 -march=i386") 
-  endif( UNIX )
-endif( MCRL2_ARCH STREQUAL "i386" )
-
-##---------------------------------------------------
-## Remove "install_tools"
-## install_tools contains the tools marked for symlink export
-##---------------------------------------------------
-if(APPLE)
-  if(EXISTS "${CMAKE_BINARY_DIR}/install_tools" )
-    FILE(REMOVE ${CMAKE_BINARY_DIR}/install_tools )
-  endif(EXISTS "${CMAKE_BINARY_DIR}/install_tools" )
-endif(APPLE)
-
-
 ##---------------------------------------------------
 ## Print CMake install prefix (if any)
 ##---------------------------------------------------
 
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-
-##---------------------------------------------------
-## Print the way how libraries are built
-##---------------------------------------------------
-
-if(MSVC)
-  option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF)
-else(MSVC)
-  option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
-endif(MSVC)
-
-## SET mCRL2 Library Directory
-# Unix
-if(UNIX)
-  set(MCRL2_LIB_DIR "lib/mcrl2")
-endif(UNIX)
-
-# Override MCRL2_LIB_DIR such that libraries are stored in
-# bin directory, such that they can be found after an install
+##-----------------------------------------------------
+## Set platform specific options 
+##-----------------------------------------------------
 if(WIN32)
-  set(MCRL2_LIB_DIR "bin")
+  include(ConfigureWindows)
 endif(WIN32)
+if(UNIX AND NOT APPLE)
+  include(ConfigureUnix)
+endif(UNIX AND NOT APPLE)
+if(APPLE)
+  include(ConfigureApple)
+endif(APPLE)
+set(MCRL2_LIB_DIR "lib/mcrl2")
 
-if(APPLE AND MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "MacOS")
-else(APPLE AND MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "bin")
-endif(APPLE AND MCRL2_SINGLE_BUNDLE)
-
-
-if(BUILD_SHARED_LIBS)
-  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    if(NOT MINGW)
-      check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
-      if( CXX_ACCEPTS_FPIC )
-        add_definitions( -fPIC )
-        set(BUILD_SHARED_LIBS_OPTION "-fPIC")
-      endif( CXX_ACCEPTS_FPIC )
-    endif(NOT MINGW)
-  endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-
-  if(CMAKE_CXX_COMPILER MATCHES "icpc" OR CMAKE_CXX_COMPILER MATCHES "clang")
-    include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
-    if( CXX_ACCEPTS_FPIC )
-      add_definitions( -fPIC )
-      set(BUILD_SHARED_LIBS_OPTION "-fPIC")
-    endif( CXX_ACCEPTS_FPIC )
-  endif(CMAKE_CXX_COMPILER MATCHES "icpc" OR CMAKE_CXX_COMPILER MATCHES "clang")
-
-  if(WIN32)
-    if(MINGW OR MSYS)
-      get_filename_component( MINGW_LIB_DIR ${CMAKE_CXX_COMPILER} PATH )
-
-      # Install required MINGW DLLs
-      install(
-	FILES
-        ${MINGW_LIB_DIR}/libgcc_s_dw2-1.dll
-	${MINGW_LIB_DIR}/mingwm10.dll
-        DESTINATION ${MCRL2_BIN_DIR}
-      )
-
-      if  (MCRL2_ENABLE_GUI_TOOLS)
-        # Install compiled wxWidgets DLLs
-        # Libraries are searched for in following order:
-        # 1) relative path to wxWidgets_CONFIG_EXECUTABLE
-        # 2) relative path to wxWidgets_wxrc_EXECUTABLE        (not implemented)
-        # 3) to given wxWidgets_LIB_DIR                   (not implemented)
-        # 4) to given wxWidgets_ROOT_DIR                  (not implemented)
-
-        if( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
-          get_filename_component(MINGW_wxWidgets_LIB_DIR ${wxWidgets_CONFIG_EXECUTABLE} PATH )
-          STRING(REPLACE "${MCRL2_BIN_DIR}" "lib" MINGW_wxWidgets_LIB_DIR "${MINGW_wxWidgets_LIB_DIR}" )
-        endif( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
-
-    	# Copy wxWidgets files on install
-	    if(MINGW_wxWidgets_LIB_DIR)
-	      install(
-             DIRECTORY
-                   ${MINGW_wxWidgets_LIB_DIR}/
-	           DESTINATION ${MCRL2_BIN_DIR}
-	           PATTERN "dll"
-             )
-          else(MINGW_wxWidgets_LIB_DIR)
-            message( STATUS "wxWidgets DLLs cannot be deterimed for a shared build." )
-            message( STATUS "Copy DLLs manually." )
-	      endif(MINGW_wxWidgets_LIB_DIR)
-      endif(MCRL2_ENABLE_GUI_TOOLS )
-
-    endif(MINGW OR MSYS)
-  endif(WIN32)
-
-else(BUILD_SHARED_LIBS)
-  set(BUILD_SHARED_LIBS false)
-endif(BUILD_SHARED_LIBS)
 message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
-
 
 ##-----------------------------------------------------
 ## Set runtime path variable RPATH for install targets
@@ -387,28 +155,78 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
+
+##---------------------------------------------------
+## Print compiler information
+##---------------------------------------------------
+include(GetCompilerVersion)
+
+##---------------------------------------------------
+## Print architecture information
+##---------------------------------------------------
+include(GetArchitectureInformation)
+
+##-----------------------------------------------------
+## Set Compiler specific options 
+##-----------------------------------------------------
+if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+  include(ConfigureGCC)
+endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
+  include(ConfigureClang)
+endif( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
+if(MSVC)
+  include(ConfigureMSVC)
+endif(MSVC)
+
+##---------------------------------------------------
+## Configure Boost 
+##---------------------------------------------------
+include(ConfigureBoost)
+
+##---------------------------------------------------
+## Option to enable/disable mcrl2-gui tools 
+##---------------------------------------------------
+option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
+
+##---------------------------------------------------
+## Detect OpenGL 
+##---------------------------------------------------
+
+if( MCRL2_ENABLE_GUI_TOOLS )
+  include(FindOpenGL)
+  message(STATUS "OpenGL: ${OPENGL_FOUND}")
+  
+  if(NOT OPENGL_FOUND)
+    message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
+  else( OPENGL_FOUND )
+    if ( APPLE )
+      include_directories( ${OPENGL_INCLUDE_DIR} )
+      link_directories(${OPENGL_LIBRARIES})
+      set(CMAKE_EXE_LINKER_FLAGS "-framework OpenGL ${CMAKE_EXE_LINKER_FLAGS}")
+      set(CMAKE_SHARED_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
+      set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
+    endif (APPLE)
+  endif(NOT OPENGL_FOUND)
+endif( MCRL2_ENABLE_GUI_TOOLS )
+
+##---------------------------------------------------
+## Configure wxWidgets 
+##---------------------------------------------------
+include(ConfigureWxWidgets)
+
 ##---------------------------------------------------
 ## Determine latest SVN revision
 ##---------------------------------------------------
 
-set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
-if( MCRL2_SVN_LABEL STREQUAL "" )
-  if( MCRL2_ENABLE_SVN )
-  FIND_PACKAGE(Subversion)
-    IF(SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-      Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  	  set(SVN_REV ${Project_WC_REVISION})
-    ELSE(SUBVERSION_FOUND)
-      set(SVN_REV "Unknown")
-    ENDIF(SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-  else( MCRL2_ENABLE_SVN )
-    set( SVN_REV "Unknown" )	
-  endif( MCRL2_ENABLE_SVN )
-else( MCRL2_SVN_LABEL STREQUAL "" )
-  set( SVN_REV ${MCRL2_SVN_LABEL} )	
-endif( MCRL2_SVN_LABEL STREQUAL "" )
+include(MCRL2Version)
+message(STATUS "mCRL2 version: ${MCRL2_VERSION}")
+message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
 
-message(STATUS "SVN revision: ${SVN_REV}")
+##---------------------------------------------------
+## Store copyright information in variable
+##---------------------------------------------------
+file(READ COPYING MCRL2_COPYRIGHT_TEXT)
 
 ##---------------------------------------------------
 ## Find cvc3 
@@ -418,142 +236,6 @@ find_package( cvc3 )
 if( cvc3_FOUND )
   message(STATUS "CVC3 version: ${cvc3_VERSION}")
 endif( cvc3_FOUND )
-
-##---------------------------------------------------
-## Set Boost configuration
-##---------------------------------------------------
-
-
-
-if(MSVC OR MINGW OR MSYS)
-  SET (Boost_USE_STATIC_LIBS ON)
-        
-  find_package(Boost COMPONENTS filesystem signals system serialization REQUIRED)
-     # Disable boost::regex and use sregex instead.
-     # using MSVC 2010, BoostPro 1.44, results in following link error:
-     # mcrl2_utilities.lib(command_line_interface.obj) :
-     # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z)
-     add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
-else(MSVC OR MINGW OR MSYS)
-  find_package(Boost COMPONENTS system serialization signals filesystem regex REQUIRED)
-endif(MSVC OR MINGW OR MSYS)
-
-if(NOT Boost_FOUND)
-  message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
-  message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
-  message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
-endif(NOT Boost_FOUND)
-
-if( Boost_VERSION LESS 103500 )
-  message( STATUS "Boost version v1.35 or higher required." )
-  message( STATUS "Current Boost version: ${Boost_VERSION}.")
-  message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
-  message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
-endif( Boost_VERSION LESS 103500 )
-
-message( STATUS "Boost version: ${Boost_VERSION}" )
-
-if (Boost_FOUND)
-   include_directories(${Boost_INCLUDE_DIRS})
-   link_directories(${Boost_LIBRARY_DIRS})
-endif (Boost_FOUND)
-
-
-##---------------------------------------------------
-## Explicity Set NDebug
-##--------------------------------------------------
-
-option(MCRL2_NDEBUG "Explicity set NDEBUG" OFF)
-message(STATUS "MCRL2_NDEBUG: ${MCRL2_NDEBUG}")
-if(MCRL2_NDEBUG)
-  add_definitions(-DNDEBUG)
-endif(MCRL2_NDEBUG)
-
-##---------------------------------------------------
-## Set wxWidgets configuration
-##---------------------------------------------------
-
-option(MCRL2_WITH_WXSTC "Enable/disable compilation of mcrl2xi with wxStyledTextControl support" OFF)
-message(STATUS "MCRL2_WITH_WXSTC: ${MCRL2_WITH_WXSTC}")
-
-
-option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
-
-if(MCRL2_ENABLE_GUI_TOOLS)
-# Find package for wxWidgets to work
-find_package(wxWidgets)
-endif(MCRL2_ENABLE_GUI_TOOLS)
-
-if(wxWidgets_FOUND)
-
-	if(MCRL2_WITH_WXSTC)			
-    find_package(wxWidgets COMPONENTS base core adv gl xml html aui stc REQUIRED)
-	else(MCRL2_WITH_WXSTC)			
-    find_package(wxWidgets COMPONENTS base core adv gl xml html aui REQUIRED)
-	endif(MCRL2_WITH_WXSTC)			
-
-  INCLUDE(${wxWidgets_USE_FILE})
-
-  IF( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
-    #Find wxWidgets version
-    execute_process(COMMAND ${wxWidgets_CONFIG_EXECUTABLE} --version
-      OUTPUT_VARIABLE wxWidgets_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    if( wxWidgets_VERSION LESS 2.8.0 )
-
-      message( STATUS "Warning: GUI tools are not built" )
-      message( STATUS "The mCRL2 toolset requires wxWidgets version v2.8.0 or higher" )
-      message( STATUS "Current wxWidgets version: ${wxWidgets_VERSION}")
-
-    endif( wxWidgets_VERSION LESS 2.8.0 )
-
-    message(STATUS "wxWidgets version: ${wxWidgets_VERSION}")
-
-    ##---------------------------------------------------
-    ## Detect OpenGL 
-    ##---------------------------------------------------
-    include(FindOpenGL)
-    message(STATUS "OpenGL: ${OPENGL_FOUND}")
-    if(NOT OPENGL_FOUND)
-      set(MCRL2_BUILD_GUI_TOOLS false)
-    endif(NOT OPENGL_FOUND)
-
-  else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
-
-    message( STATUS "Make sure that wxWidgets (version 2.8.0 or higher) is installed and compiled" )
-
-  endif( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
-
-  set(MCRL2_BUILD_GUI_TOOLS true)
-
-  # wxWidgets include directory
-  include_directories(${wxWidgets_INCLUDE_DIRS})
-
-else(wxWidgets_FOUND)
-
-  message( STATUS "Warning: GUI tools are not built" )
-  message( STATUS "The mCRL2 toolset requires the installation of wxWidgets 2.8.0 or higher")
-  set(MCRL2_ENABLE_GUI_TOOLS false)
-
-endif(wxWidgets_FOUND)
-
-if( OPENGL_FOUND AND wxWidgets_FOUND )
-  message(STATUS "MCRL2_ENABLE_GUI_TOOLS: ${MCRL2_ENABLE_GUI_TOOLS}")
-endif( OPENGL_FOUND AND wxWidgets_FOUND )
-
-if(NOT MCRL2_ENABLE_GUI_TOOLS )
-  set(MCRL2_BUILD_GUI_TOOLS false)
-  if(NOT MINGW OR NOT MSYS)
-    if( CXX_ACCEPTS_PTHREAD )
-      set(CMAKE_EXE_LINKER_FLAGS "-pthread ${CMAKE_EXE_LINKER_FLAGS}")
-      set(CMAKE_SHARED_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif( CXX_ACCEPTS_PTHREAD )
-  endif(NOT MINGW OR NOT MSYS)
-
-endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 
 ##---------------------------------------------------
 ## Find gl2ps library, and use if available
@@ -580,150 +262,26 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
-##
+## TODO: Find dparser
 ##---------------------------------------------------
 
-if ( WIN32 )
-  if(MSVC)
-    include_directories( build/workarounds/msvc )
-
-    option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
-    if( MCRL2_ENABLE_MULTICORE_COMPILATION )
-      set(CMAKE_CXX_FLAGS "/MP ${CMAKE_CXX_FLAGS}")
-    endif( MCRL2_ENABLE_MULTICORE_COMPILATION )
-
-  endif(MSVC)
-
-
-
-  #add_definitions(-DWIN32)
-  #add_definitions(-D__WIN32__)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
-  add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-  #add_definitions(-DWIN32_LEAN_AND_MEAN=1 )
-  #add_definitions(-D_WIN32_WINNT=0x0501 )
-  add_definitions(-DBOOST_ALL_NO_LIB=1)
-
-  # The following definition is mCRL2 specific.
-  # It prevents code being compiled for the innermost and jitty compiling rewriters
-  # TODO: Should be prefixed with MCRL2_
-  add_definitions(-DNO_DYNLOAD)
-endif ( WIN32)
-
-if ( APPLE )
-  add_definitions( -D__DARWIN__)
-  add_definitions( -D__WXMAC__)
-
-  set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
-  set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon -single_module ${CMAKE_SHARED_LINKER_FLAGS}")
-  set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-
-  if( OPENGL_FOUND )
-    include_directories( ${OPENGL_INCLUDE_DIR} )
-    link_directories(${OPENGL_LIBRARIES})
-    set(CMAKE_EXE_LINKER_FLAGS "-framework OpenGL ${CMAKE_EXE_LINKER_FLAGS}")
-    set(CMAKE_SHARED_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
-    set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif( OPENGL_FOUND )
-
-endif (APPLE)
-
 ##---------------------------------------------------
-## Toggle man page generation
+## Option to enable/disable CADP support 
 ##---------------------------------------------------
-
-if (UNIX)
-  option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
-else (UNIX)
-  option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" OFF)
-endif (UNIX)
-
-message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
-
-##---------------------------------------------------
-## Toggle profile build
-##---------------------------------------------------
-
-if( UNIX )
-  option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
-  if( MCRL2_ENABLE_PROFILING )
-    add_definitions( -pg )
-    set(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
-    set(CMAKE_SHARED_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
-    set(CMAKE_MODULE_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif(MCRL2_ENABLE_PROFILING)
-  message(STATUS "MCRL2_ENABLE_PROFILING: ${MCRL2_ENABLE_PROFILING}")
-endif( UNIX )
-
-##---------------------------------------------------
-## Set properties for build
-##---------------------------------------------------
-
-set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
+option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable support for CADP" OFF)
 
 ##---------------------------------------------------
 ## Setup dependency to CADP
 ##---------------------------------------------------
 
-option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable CADP support" OFF)
-message(STATUS "MCRL2_ENABLE_CADP_SUPPORT: ${MCRL2_ENABLE_CADP_SUPPORT}" )
-if(MCRL2_ENABLE_CADP_SUPPORT )
-  # Set location to root of CADP install path
-  set(MCRL2_CADP_INSTALL_PATH ""
-      CACHE PATH "Path to CADP install path." )
-  message( STATUS "MCRL2_CADP_INSTALL_PATH: ${MCRL2_CADP_INSTALL_PATH}" )
-
-  # Set location to root of CADP install path
-
-  if( MCRL2_CADP_INSTALL_PATH )
-  execute_process(COMMAND ${MCRL2_CADP_INSTALL_PATH}/com/arch
-    OUTPUT_VARIABLE MCRL2_CADP_ARCHITECTURE
-    OUTPUT_STRIP_TRAILING_WHITESPACE 
-  )
-  endif( MCRL2_CADP_INSTALL_PATH )
-
-  if( MCRL2_CADP_ARCHITECTURE )
-
-    message( STATUS "---------------------------------------------------------------------------")
-    message( STATUS "Make sure that:")
-    message( STATUS " * the build architecture matches the ${MCRL2_CADP_ARCHITECTURE}-architecture detected by CADP")                  
-    message( STATUS " * the variable BUILD_SHARED_LIBS = OFF ")
-    message( STATUS "---------------------------------------------------------------------------")
-
-    set(USE_BCG "")
-    add_definitions( "-DUSE_BCG" )
-
-	  set(MCRL2_CADP_BINARY_DIR  "${MCRL2_CADP_INSTALL_PATH}/bin.${MCRL2_CADP_ARCHITECTURE}" )
-	  set(MCRL2_CADP_INCLUDE_DIR "${MCRL2_CADP_INSTALL_PATH}/incl" )
-
-	  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )	
-		link_directories(${MCRL2_CADP_BINARY_DIR})
-
-		add_library(imp_bcg STATIC IMPORTED)
-		set_property(TARGET imp_bcg PROPERTY
-		            IMPORTED_LOCATION ${MCRL2_CADP_BINARY_DIR}/libBCG.a)
-		add_library(imp_bcg_io STATIC IMPORTED)
-		set_property(TARGET imp_bcg_io PROPERTY
-						    IMPORTED_LOCATION ${MCRL2_CADP_BINARY_DIR}/libBCG_IO.a)
-		message( STATUS "CADP found: ${MCRL2_CADP_BINARY_DIR}")
- 
-  else( MCRL2_CADP_ARCHITECTURE  )
-    message( STATUS "CADP not found")
-    set( USE_BCG "//" )
-endif( MCRL2_CADP_ARCHITECTURE )
-
-else(MCRL2_ENABLE_CADP_SUPPORT)
-  set( USE_BCG "//" )
-endif(MCRL2_ENABLE_CADP_SUPPORT)
+include(MCRL2CADPSupport)
 
 ##---------------------------------------------------
 ## Library and executable staging 
 ##---------------------------------------------------
 
 set(MCRL2_STAGE_ROOTDIR ""
-				CACHE PATH "Path to stage executables and libraries." )
+  CACHE PATH "Path to stage executables and libraries." )
   message( STATUS "MCRL2_STAGE_ROOTDIR: ${MCRL2_STAGE_ROOTDIR}" )
 if( MCRL2_STAGE_ROOTDIR )
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/bin")
@@ -738,10 +296,17 @@ endif( MCRL2_STAGE_ROOTDIR )
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
-  if(NOT ${GL2PS_FOUND})
+  if(NOT GL2PS_FOUND)
     add_subdirectory ( 3rd-party/gl2ps )
-  endif(NOT ${GL2PS_FOUND})
+  endif(NOT GL2PS_FOUND)
 endif(MCRL2_ENABLE_GUI_TOOLS)
+
+##---------------------------------------------------
+## DParser
+##---------------------------------------------------
+
+add_subdirectory ( 3rd-party/dparser )
+add_subdirectory ( tools/mcrl2parse )
 
 ##---------------------------------------------------
 ## Library dependencies
@@ -751,6 +316,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( libraries/data )
   add_subdirectory ( libraries/utilities )
   add_subdirectory ( libraries/core )
+  add_subdirectory ( libraries/pbes )
   add_subdirectory ( libraries/process )
   add_subdirectory ( libraries/lps )
   add_subdirectory ( libraries/lts )
@@ -761,7 +327,6 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 
   add_subdirectory ( tools/besinfo )
   add_subdirectory ( tools/bespp )
-  add_subdirectory ( tools/chi2mcrl2 )
   add_subdirectory ( tools/diagraphica )
   add_subdirectory ( tools/formulacheck )
   add_subdirectory ( tools/grapemcrl2 )
@@ -781,6 +346,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( tools/lpssumelm )
   add_subdirectory ( tools/lpssuminst )
   add_subdirectory ( tools/lpsuntime )
+  add_subdirectory ( tools/lpssim )
   add_subdirectory ( tools/lpsxsim )
   add_subdirectory ( tools/lts2lps )
   add_subdirectory ( tools/lts2pbes )
@@ -789,7 +355,6 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( tools/ltsinfo )
   add_subdirectory ( tools/ltsgraph )
   add_subdirectory ( tools/ltsview )
-  add_subdirectory ( tools/lysa2mcrl2 )
   add_subdirectory ( tools/mcrl22lps )
   add_subdirectory ( tools/mcrl2i )
   add_subdirectory ( tools/mcrl2xi )
@@ -807,6 +372,21 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( tools/txt2pbes )
   add_subdirectory ( tools/txt2lps )
 
+  ## Compile installer tools for mac
+  if(APPLE AND MCRL2_SINGLE_BUNDLE)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
+
+    # Install "install_tools" in share/installer
+    # install_tools contains the tools marked for symlink export
+    install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
+    #Process Info.plist with Copyright Information
+    configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
+    #Install Info.plist for single application bundle
+    install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
+    #Install mcrl2-logo for single application bundle
+    install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
+  endif(APPLE AND MCRL2_SINGLE_BUNDLE)
+
 ##---------------------------------------------------
 ## Experimental tool dependencies
 ##---------------------------------------------------
@@ -820,6 +400,7 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/pbesabstract )
+  add_subdirectory ( tools/pbesabsinthe )
   add_subdirectory ( tools/pbesinst )
   add_subdirectory ( tools/pbespareqelm )
   add_subdirectory ( tools/txt2bes )
@@ -833,86 +414,49 @@ option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF
 message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
 if(MCRL2_ENABLE_DEPRECATED)
+  add_subdirectory ( tools/chi2mcrl2 )
+  add_subdirectory ( tools/lysa2mcrl2 )
   add_subdirectory ( tools/ltsmin )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
-## Create "libraries/utilities/include/mcrl2/setup.h",
-## required for the compiling rewriters
+## Documentation
 ##---------------------------------------------------
 
-IF( UNIX )
-FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include/mcrl2/setup.h)
+# Documentation requires python
+include(ConfigurePython)
+# Documentation requires doxygen 
+include(ConfigureDoxygen)
+# Documentation requires xsltproc
+include(FindXsltproc) 
 
-set(CC  ${CMAKE_C_COMPILER})
-set(CXX ${CMAKE_CXX_COMPILER})
+if(PYTHONINTERP_FOUND)
+  if ( MCRL2_PY_SPHINX )
+    if ( MCRL2_PY_ARGPARSE )
+      if( DOXYGEN_FOUND )
+        if (XSLTPROC )
+          add_subdirectory ( doc/sphinx )
+        else( XSLTPROC )
+          message( STATUS "Documentation cannot be generated: xsltproc is missing." )
+        endif( XSLTPROC)
+      else( DOXYGEN_FOUND )
+        message( STATUS "Documentation cannot be generated: doxygen is missing." )
+      endif( DOXYGEN_FOUND )
+    else ( MCRL2_PY_ARGPARSE )
+      message( STATUS "Documentation cannot be generated: Python argparse-module is missing." )
+    endif( MCRL2_PY_ARGPARSE )
+  else ( MCRL2_PY_SPHINX )
+    message( STATUS "Documentation cannot be generated: Python sphinx-module is missing." )
+  endif( MCRL2_PY_SPHINX )
+elseif(PYTHONINTERP_FOUND)
+  message( STATUS "Documentation cannot be generated: Python is missing." )
+endif(PYTHONINTERP_FOUND)
 
-if( CMAKE_BUILD_TYPE )
-  string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-  if(CMAKE_BUILD_TYPE MATCHES "release")
-    set(R_CFLAGS ${CMAKE_CXX_FLAGS_RELEASE})
-  endif(CMAKE_BUILD_TYPE MATCHES "release")
-  if(CMAKE_BUILD_TYPE MATCHES "debug")
-    set(R_CFLAGS ${CMAKE_CXX_FLAGS_DEBUG})
-  endif(CMAKE_BUILD_TYPE MATCHES "debug")
-  if(CMAKE_BUILD_TYPE MATCHES "relwithdebinfo")
-    set(R_CFLAGS ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
-  endif(CMAKE_BUILD_TYPE MATCHES "relwithdebinfo")
-endif( CMAKE_BUILD_TYPE )
+##---------------------------------------------------
+## Configure compiling rewriters
+##---------------------------------------------------
 
-if(CMAKE_C_COMPILER MATCHES "icc")
-    set(R_CFLAGS "${R_CFLAGS} -Wno-unused -rdynamic")
-else(CMAKE_C_COMPILER MATCHES "icc")
-  check_cxx_compiler_flag(-Wno-unused C_ACCEPTS_WNO-UNUSED )
-  if( C_ACCEPTS_WNO-UNUSED )
-    set(R_CFLAGS "${R_CFLAGS} -Wno-unused")
-  endif( C_ACCEPTS_WNO-UNUSED )
-
-  check_cxx_compiler_flag(-rdynamic C_ACCEPTS_RDYNAMIC )
-  if( C_ACCEPTS_RDYNAMIC )
-    set(R_CFLAGS "${R_CFLAGS} -rdynamic")
-  endif( C_ACCEPTS_RDYNAMIC )
-endif(CMAKE_C_COMPILER MATCHES "icc")
-
-set(R_CXXFLAGS "${R_CFLAGS} -std=c++98")
-set(R_CFLAGS "${R_CFLAGS} -std=c99")
-set(R_CPPFLAGS "-DNDEBUG")
-
-if(NOT BUILD_SHARED_LIBS)
-  set(R_SCFLAGS "-fPIC")
-  set(R_SCXXFLAGS "-fPIC")
-else(NOT BUILD_SHARED_LIBS)
-  set(R_SCFLAGS ${BUILD_SHARED_LIBS_OPTION})
-  set(R_SCXXFLAGS ${BUILD_SHARED_LIBS_OPTION})
-endif(NOT BUILD_SHARED_LIBS)
-
-
-if( NOT APPLE )
-  set(R_SLDFLAGS "-shared")
-else ( NOT APPLE )
-  set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
-endif( NOT APPLE )
-
-set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include\\\"")
-set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lmcrl2_aterm")
-
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
-if( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
-  set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" )
-else( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
-  set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/mcrl2compilerewriter" )
-endif( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" @ONLY )
-add_executable( mcrl2compilerewriter IMPORTED IMPORTED_LOCATION "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" )
-install( 
-  PROGRAMS "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}"
-  DESTINATION bin/
-)
-if (MCRL2_MAN_PAGES)
-  install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/man/mcrl2compilerewriter.1" DESTINATION share/man/man1)
-endif (MCRL2_MAN_PAGES)
-
-ENDIF( UNIX )
+include(MCRL2ConfigureComplingRewriters)
 
 ##---------------------------------------------------
 ## Install headers
@@ -938,6 +482,12 @@ install(
   DESTINATION include
   PATTERN ".svn" EXCLUDE
 )
+FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
+install(
+  FILES
+    ${dparser_headers}
+  DESTINATION include
+)
 endif( MCRL2_INSTALL_HEADERS )
 
 ##---------------------------------------------------
@@ -955,552 +505,58 @@ install(
 )
 endif ( MCRL2_INSTALL_EXAMPLES )
 
-##---------------------------------------------------
-## Make tests
-##---------------------------------------------------
-
-option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
-message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
-
-option(MCRL2_ENABLE_RELEASE_TEST_TARGETS "Enable/disable creation of test targets for toolset release" OFF)
-message(STATUS "MCRL2_ENABLE_RELEASE_TEST_TARGETS: ${MCRL2_ENABLE_RELEASE_TEST_TARGETS}" )
-
-ENABLE_TESTING()
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake" )
-
-  # Define macro for build_and_run_test_targets
-  # This method compiles tests when invoked
-  macro( build_and_run_test_target TARGET )
-    ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
-     --build-and-test
-     "${CMAKE_CURRENT_SOURCE_DIR}"
-     "${CMAKE_CURRENT_BINARY_DIR}"
-     --build-noclean
-     --build-nocmake
-     --build-generator "${CMAKE_GENERATOR}"
-     --build-target "${TARGET}"
-     --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-     --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
-    )
-    set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  endmacro( build_and_run_test_target TARGET )
-
-  add_subdirectory( libraries/lps/test)
-  add_subdirectory( libraries/bes/test)
-  add_subdirectory( libraries/pbes/test)
-  add_subdirectory( libraries/lts/test)
-  add_subdirectory( libraries/data/test)
-  add_subdirectory( libraries/core/test)
-  add_subdirectory( libraries/utilities/test)
-  add_subdirectory( libraries/process/test )
-  add_subdirectory( libraries/atermpp/test )
-  add_subdirectory( libraries/trace/test )
 
 ##---------------------------------------------------
-## Experimental tool dependencies
+## Create test targets
 ##---------------------------------------------------
 
-option(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES "Enable/disable testing of compiled tool examples" OFF)
-message(STATUS "MCRL2_ENABLE_TEST_COMPILED_EXAMPLES: ${MCRL2_ENABLE_TEST_COMPILED_EXAMPLES}" )
-
-  macro( build_and_run_test_example_target TARGET )
-    if(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
-      ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
-       --build-and-test
-       "${CMAKE_CURRENT_SOURCE_DIR}"
-       "${CMAKE_CURRENT_BINARY_DIR}"
-       --build-noclean
-       --build-nocmake
-       --build-generator "${CMAKE_GENERATOR}"
-       --build-target "${TARGET}"
-       --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-       --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
-      )
-      set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    endif(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
-  endmacro( build_and_run_test_example_target TARGET )
-
-   add_subdirectory( libraries/atermpp/example)
-   add_subdirectory( libraries/data/example)
-   add_subdirectory( libraries/lps/example)
-   add_subdirectory( libraries/utilities/example )
-   add_subdirectory( libraries/pbes/example)
-   add_subdirectory( libraries/bes/example)
-
-
-if( MCRL2_ENABLE_TEST_TARGETS )
-   add_subdirectory( tools/lpsparunfold/test )
-endif( MCRL2_ENABLE_TEST_TARGETS )
-
-##---------------------------------------
-## Tool tests
-##---------------------------------------
-
-
-  #-------------
-  # abp.mcrl2
-  #-------------
-
-  # Conversion tools
-  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/mcrl2-testoutput")
-  file( REMOVE_RECURSE ${testdir} )
-  file( MAKE_DIRECTORY ${testdir} )
-  add_test(mcrl22lps_version ${mcrl22lps_BINARY_DIR}/mcrl22lps --version)
-  add_test(mcrl22lps_abp ${mcrl22lps_BINARY_DIR}/mcrl22lps -v -D ${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 ${testdir}/abp.lps)
-  add_test(lpsinfo_abp ${lpsinfo_BINARY_DIR}/lpsinfo ${testdir}/abp.lps)
-  set_tests_properties( lpsinfo_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(lpsconstelm_abp ${lpsconstelm_BINARY_DIR}/lpsconstelm -v ${testdir}/abp.lps ${testdir}/abp_celm.lps)
-  set_tests_properties( lpsconstelm_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(lpsparelm_abp ${lpsparelm_BINARY_DIR}/lpsparelm -v ${testdir}/abp_celm.lps ${testdir}/abp_celm_pelm.lps)
-  set_tests_properties( lpsparelm_abp PROPERTIES DEPENDS lpsconstelm_abp )
-  add_test(lpssuminst_abp ${lpssuminst_BINARY_DIR}/lpssuminst -v ${testdir}/abp_celm_pelm.lps ${testdir}/abp_celm_pelm_sinst.lps)
-  set_tests_properties( lpssuminst_abp PROPERTIES DEPENDS lpsparelm_abp )
-  add_test(lps2lts_abp ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.aut  )
-  set_tests_properties( lps2lts_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_fsm ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
-  set_tests_properties( lps2lts_abp_fsm PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_dot ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
-  set_tests_properties( lps2lts_abp_dot PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_svc ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.svc  )
-  set_tests_properties( lps2lts_abp_svc PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_lts ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
-  set_tests_properties( lps2lts_abp_lts PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(ltsinfo_abp     ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.aut )
-  set_tests_properties( ltsinfo_abp PROPERTIES DEPENDS lps2lts_abp )
-  add_test(ltsinfo_abp_fsm ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.fsm )
-  set_tests_properties( ltsinfo_abp_fsm PROPERTIES DEPENDS lps2lts_abp_fsm )
-  add_test(ltsinfo_abp_dot ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.dot )
-  set_tests_properties( ltsinfo_abp_dot PROPERTIES DEPENDS lps2lts_abp_dot )
-  add_test(ltsinfo_abp_svc ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.svc )
-  set_tests_properties( ltsinfo_abp_svc PROPERTIES DEPENDS lps2lts_abp_svc )
-  add_test(ltsinfo_abp_lts ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
-  set_tests_properties( ltsinfo_abp_lts PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(lps2pbes_abp ${lps2pbes_BINARY_DIR}/lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
-  set_tests_properties( lps2pbes_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(pbes2bool_abp ${pbes2bool_BINARY_DIR}/pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
-  set_tests_properties( pbes2bool_abp PROPERTIES DEPENDS lps2pbes_abp )
-  add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
-  add_test(tracepp_test ${tracepp_BINARY_DIR}/tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
-  add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2)
-  add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
-  set_tests_properties( lts2lps_test PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
-  set_tests_properties( ltsconvert_bisim_test PROPERTIES DEPENDS lps2lts_abp_lts )
-
-	if( MCRL2_ENABLE_EXPERIMENTAL )
-    add_test(pbesinst_abp ${pbesinst_BINARY_DIR}/pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
-    set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
-
-	endif( MCRL2_ENABLE_EXPERIMENTAL )
-
-  # Simulation tools
-  # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpssim_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(lpsxsim_abp ${lpsxsim_BINARY_DIR}/lpsxsim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpsxsim_abp PROPERTIES TIMEOUT 15 )
-
-  # Graphical tools
-  # add_test(diagraphica_abp ${diagraphica_BINARY_DIR}/diagraphica ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(diagraphica_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsview_abp ${ltsview_BINARY_DIR}/ltsview ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsview_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsgraph_abp ${ltsgraph_BINARY_DIR}/ltsgraph ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsgraph_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
-  # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
-
-  # Documentation tests
-  if (MCRL2_MAN_PAGES)
-    add_test(mcrl22lps_generate-man-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-man-page)
-    set_tests_properties(
-      mcrl22lps_generate-man-page
-    PROPERTIES
-      LABELS "${MCRL2_TEST_LABEL}"
-    )
-  endif(MCRL2_MAN_PAGES)
-    add_test(mcrl22lps_generate-wiki-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-wiki-page)
-    add_test(mcrl22lps_mcrl2-gui ${mcrl22lps_BINARY_DIR}/mcrl22lps --mcrl2-gui)
-
-
-  set_tests_properties(
-    mcrl22lps_abp
-    mcrl22lps_generate-wiki-page
-    mcrl22lps_mcrl2-gui
-    lpsinfo_abp
-    lpsconstelm_abp
-    lpsparelm_abp
-    lpssuminst_abp
-    lps2lts_abp
-    ltsinfo_abp
-    pbes2bool_abp
-    lps2pbes_abp
-    lysa2mcrl2_test
-    tracepp_test
-    chi2mcrl2_test
-    lts2lps_test
-    ltsconvert_bisim_test
-  PROPERTIES
-    LABELS "${MCRL2_TEST_LABEL}"
-  )
-
-
-##---------------------------------------
-## Tool release tests
-##---------------------------------------
-include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
-
-# Usage run_release_tests( "/path/to/mcrl2file" "list of tests to disable" )
-run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" "")
-
-	
-if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2"				 "")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2"		 "lpsparunfold") # rinner + lpsconfcheck, lpsinvelm = SEGFAULT
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2"			 "lpsparunfold") #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2"			 "lpsparunfold") #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2"			 "lpsparunfold") #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary")
-
-endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
-
-
-# Random test generation
-option(MCRL2_ENABLE_RANDOM_TEST_TARGETS "Enable/disable random test generation" OFF)
-message(STATUS "MCRL2_ENABLE_RANDOM_TEST_TARGETS: ${MCRL2_ENABLE_RANDOM_TEST_TARGETS}" )
-
-# Random tests require python
-include(FindPythonInterp)
-if( PYTHONINTERP_FOUND )
-execute_process(COMMAND ${PYTHON_EXECUTABLE} --version
-    ERROR_VARIABLE PYTHONINTERP_VERSION
-    ERROR_STRIP_TRAILING_WHITESPACE
-)			
-message( STATUS "${PYTHONINTERP_VERSION}" )
-endif( PYTHONINTERP_FOUND )
-
-if( MCRL2_ENABLE_RANDOM_TEST_TARGETS AND PYTHONINTERP_FOUND )
-  include(${CMAKE_SOURCE_DIR}/scripts/GenerateRandomTests.cmake)
-endif( MCRL2_ENABLE_RANDOM_TEST_TARGETS AND PYTHONINTERP_FOUND )
-
-include(CTest)
+include(MCRL2TestTargets)
 
 ##---------------------------------------------------
-## Header tests
-##---------------------------------------------------
-option(MCRL2_COMPILE_HEADER_TESTS "Enable/disable compile of library headers" OFF)
-message(STATUS "MCRL2_COMPILE_HEADER_TESTS: ${MCRL2_COMPILE_HEADER_TESTS}" )
-if(MCRL2_COMPILE_HEADER_TESTS)
-  add_subdirectory( build/testing )
-endif( MCRL2_COMPILE_HEADER_TESTS)
-
-##---------------------------------------------------
-## Additional make targets
+## Create make targets
 ##---------------------------------------------------
 
-##---------------------------------------------------
-## Target tags (useful editing with Vim)
-##---------------------------------------------------
-
-find_program(CTAGS
-  ctags
-  /usr/local/bin
-  /usr/pkg/bin
-  /usr/bin
-)
-
-if(CTAGS)
-  add_custom_target(tags
-    ${CTAGS} --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes ${CMAKE_SOURCE_DIR}
-  )
-endif(CTAGS)
+# Create make targets requires python, covered by documentation
+include(MCRL2MakeTargets)
 
 ##---------------------------------------------------
-## Target doxy
+## Packaging 
 ##---------------------------------------------------
 
-if(UNIX)
-  add_custom_target(doxy
-     doc/doxy/generate_libref_website.sh
-     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  )
-endif(UNIX)
+## Preprocessing:
+## Setup mCRL2 for creating a single re-locatable bundle for MacOSX
+if(APPLE)
+
+  if(MCRL2_SINGLE_BUNDLE)
+    if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+      message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This creates a non-standard installer when using CPack." )
+    endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+  
+    SET(CMAKE_BUNDLE_NAME "mCRL2")
+  
+    SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
+    # make sure CMAKE_INSTALL_PREFIX ends in /
+    STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
+    MATH(EXPR LEN "${LEN} -1" )
+    STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
+    IF(NOT "${ENDCH}" STREQUAL "/")
+      SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
+    ENDIF(NOT "${ENDCH}" STREQUAL "/")
+    SET(CMAKE_INSTALL_PREFIX
+      "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
+  
+
+  endif(MCRL2_SINGLE_BUNDLE)
+
+ENDIF(APPLE)
+
+## Preprocessing:
+include(MCRL2Packaging)
 
 ##---------------------------------------------------
-## Target latex documentation
+## Add LTSmin as a last target, such that it is 
+## processed after the installation of the libraries 
 ##---------------------------------------------------
-
-if(UNIX)
-  add_custom_target(tex
-     doc/tex/generate_libdocs.py
-     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  )
-endif(UNIX)
-
-##---------------------------------------------------
-## Target quickbook documentation
-##---------------------------------------------------
-
-if(Boost_FOUND)
-find_program(BOOST_BJAM
-             NAMES bjam
-             PATHS "${BOOST_INCLUDEDIR}/bin"
-                     /usr/local/bin
-                     /usr/pkg/bin
-                     /usr/bin
-            )
-    if(BOOST_BJAM)
-	    add_custom_target(quickbook
-            ${BOOST_BJAM} html
-	    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc)
-    endif(BOOST_BJAM)
-endif(Boost_FOUND)
-
-##---------------------------------------------------
-## Target parsers
-##---------------------------------------------------
-
-if( MCRL2_ENABLE_PARSERS  )
-
-find_package(BISON)
-find_package(FLEX)
-
-if(FLEX_FOUND AND BISON_FOUND)
-
-	message( STATUS "Flex version: ${FLEX_VERSION}")
-	message( STATUS "Bison version: ${BISON_VERSION}")
-
-  add_custom_target(mcrl2parser
-    ${FLEX_EXECUTABLE} -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="mcrl2" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/core/source
-  )
-
-  add_custom_target(chiparser
-    ${FLEX_EXECUTABLE} -Pchi -ochilexer.cpp chilexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="chi" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/chi2mcrl2
-  )
-
-  add_custom_target(lysaparser
-    ${FLEX_EXECUTABLE} -Plysa -olysalexer.cpp lysalexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="lysa" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/lysa2mcrl2
-  )
-
-  add_custom_target(liblts_fsmparser
-    ${FLEX_EXECUTABLE} -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="fsm" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
-  )
-
-  add_custom_target(liblts_dotparser
-    ${FLEX_EXECUTABLE} -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="dot" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
-  )
-
-  get_filename_component(FLEX_INCLUDE_DIR ${FLEX_EXECUTABLE} PATH)
-  string(REPLACE "/bin" "/include" FLEX_INCLUDE_DIR ${FLEX_INCLUDE_DIR})
-
-  add_custom_target(parsers
-		 ${CMAKE_COMMAND} -E copy "${FLEX_INCLUDE_DIR}/FlexLexer.h" "${CMAKE_SOURCE_DIR}/build/workarounds"
-  )
-  add_dependencies( parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser )
-
-endif(FLEX_FOUND AND BISON_FOUND)
-
-endif( MCRL2_ENABLE_PARSERS  )
-
-##---------------------------------------------------
-## mCRL2 Sigle Bundle for MacOSX
-##---------------------------------------------------
-
-option(MCRL2_SINGLE_BUNDLE "Enable/disable creation of a single mCRL2.app" OFF)
-IF(APPLE AND MCRL2_SINGLE_BUNDLE)
-  if(BUILD_SHARED_LIBS)
-    message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_SINGLE_BUNDLE set to TRUE" )
-  endif(BUILD_SHARED_LIBS)
-
-  if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This will create an installer, which is non-standard." )
-  endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-
-  SET(CMAKE_BUNDLE_NAME "mCRL2")
-
-  SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
-  # make sure CMAKE_INSTALL_PREFIX ends in /
-  STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
-  MATH(EXPR LEN "${LEN} -1" )
-  STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
-  IF(NOT "${ENDCH}" STREQUAL "/")
-    SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
-  ENDIF(NOT "${ENDCH}" STREQUAL "/")
-  SET(CMAKE_INSTALL_PREFIX
-    "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
-
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
-
-  # Install "install_tools" in share/installer
-  # install_tools contains the tools marked for symlink export
-  install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
-  #Install Info.plist for single application bundle
-  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist DESTINATION . )
-  #Install mcrl2-logo for single application bundle
-  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
-
-ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
-
-##---------------------------------------------------
-## CPack configuration
-##---------------------------------------------------
-
-INCLUDE(InstallRequiredSystemLibraries)
-
-set(CPACK_PACKAGE_NAME "mcrl2")
-if(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "svn${SVN_REV}")
-else(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "${MCRL2_SVN_LABEL}")
-endif(MCRL2_SVN_LABEL STREQUAL "")
-
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
-set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}
-
-SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
-SET(CPACK_PACKAGE_VENDOR "TUe")
-
-if( NOT APPLE )
-  if( NOT MSVC )
-    string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-    if(CMAKE_BUILD_TYPE MATCHES "release")
-      #Strip files for Release packages
-      SET( CPACK_STRIP_FILES true )
-    endif(CMAKE_BUILD_TYPE MATCHES "release")
-  else( NOT MSVC )
-    SET( CPACK_STRIP_FILES true )
-  endif( NOT MSVC )
-endif( NOT APPLE )
-
-# Create Desktop link to mcrl2-gui
-set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
-set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui" "mcrl2xi;mcrl2xi")
-
-IF(APPLE AND MCRL2_SINGLE_BUNDLE)
-  SET(CPACK_SET_DESTDIR TRUE)
-
-  configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-
-  SET(CMAKE_POSTFLIGHT_SCRIPT
-    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-  SET(CPACK_POSTUPGRADE_SCRIPT
-    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-
-  set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
-
-ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
-
-# NSIS VARIABLES
-SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
-SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
-SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\doc\\\\images\\\\mcrl2-install-logo.bmp")
-
-# Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64. 
-if(CMAKE_CL_64)
-  set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-endif(CMAKE_CL_64)
-
-#Extend PATH variable with mCRL2_INSTALL_DIR/bin if CPACK_NSIS_MODIFY_PATH = ON
-SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}/${MCRL2_BIN_DIR}")
-SET(CPACK_NSIS_MODIFY_PATH ON)
-
-# README and COPYING require a .txt extention when be used with MacOSX's PackageMaker
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/COPYING" "${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/README"  "${CMAKE_CURRENT_BINARY_DIR}/README.txt" COPYONLY)
-
-set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt )
-set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
-
-#Variables for RPM packaging
-set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
-set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
-# Following should not exceed 77 chars
-set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language toolset 
- mCRL2 stands for micro Common Representation Language 2.  It is a
- specification language that can be used to specify and analyse the
- behaviour of distributed systems and protocols and is the successor to
- muCRL.  Using its accompanying toolset, systems can be analysed and
- verified automatically.
- 
- This toolset supports a collection of tools for linearisation, simulation,
- state-space exploration and generation and tools to optimise and analyse
- specifications.  Moreover, state spaces can be manipulated, visualised and
- analysed.")
-set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
-
-# Distro versions
-# /etc/debian_version
-# /etc/gentoo-release
-# /etc/knoppix-version
-# /etc/mandrake-release
-# /etc/pardus-release
-# /etc/puppyversion
-# /etc/redhat-release
-# /etc/sabayon-release
-# /etc/slackware-version
-# /etc/SuSE-release
-# /etc/xandros-desktop-version
-# /etc/zenwalk-version
-
-set(MCRL2_BOOST_VER "1.35" ) 
-set(MCRL2_WX_VER    "2.8" ) 
-
-# OpenSuSE RPM dependencies
-if(EXISTS /etc/SuSE-release )
-	message(STATUS "Distribution: OpenSuSE" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, boost-devel >= ${MCRL2_BOOST_VER}")
-endif(EXISTS /etc/SuSE-release )
-
-# Fedora/RedHat RPM dependencies
-if(EXISTS /etc/redhat-release )
-	message(STATUS "Distribution: RedHat/Fedora" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, wxBase >= ${MCRL2_WX_VER}, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
-endif(EXISTS /etc/redhat-release )
-
-# Debian/Ubuntu dependencies
-if(EXISTS /etc/debian_version )
-	message(STATUS "Distribution: Debian/Ubuntu" )
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "gcc, debhelper (>= 5), libboost-dev (>=${MCRL2_BOOST_VER}), libwxgtk2.8-dev, libwxgtk2.8-0, libglu1-mesa-dev (>= 7.0.1)")
-endif(EXISTS /etc/debian_version )
-
-include(CPack)
-
-# Print warnings
-if( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
-  message( STATUS "")
-  message( STATUS "Warning: Ensure that \"${Boost_LIBRARY_DIRS}\" is included in DYLD_LIBRARY_PATH.")
-  message( STATUS "")
-endif( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/scripts/ltsmin)
 

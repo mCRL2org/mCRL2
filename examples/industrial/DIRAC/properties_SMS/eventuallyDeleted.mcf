@@ -1,0 +1,8 @@
+% Each Task in a terminating state ("tFailed" or "tStaged") is
+% eventually removed from the DIRAC system ("tDeleted").
+% - with added fairness to avoid infinite cycles.
+% - the property violation trace (eventuallyDeleted.trc)
+% shows a deadlock situation in which the Task can no longer
+% be updated from tStageSubmitted to tDeleted.
+
+[true* .(state([tStaged]) || state([tFailed])) .(! ( state([tDeleted]) ))*] < (! (state([tDeleted]) )	)* .(state([tDeleted]))> true

@@ -60,9 +60,9 @@ lambda_binder()                   : public data::binder_type    | EIO | Lambda  
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                  : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
-assignment(const variable& lhs, const data_expression& rhs)              : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
-identifier_assignment(const identifier& lhs, const data_expression& rhs) : public data::assignment_expression | EIOU  | IdInit        | Assignment of a data expression to a string
+assignment_expression()                                                               : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
+assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
+identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
@@ -132,15 +132,15 @@ at(const action_formula& operand, const data::data_expression& time_stamp)  : pu
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI | ActId             | An action label
-action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI | Action            | An action
-deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CM | None              | A deadlock
-multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CM | None              | A multi-action
-deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CM | None              | A deadlock summand
-action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CM | None              | An action summand
-process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl |    | LinearProcessInit | A process initializer
-linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | M  | LinearProcess     | A linear process
-specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | M  | LinProcSpec       | A linear process specification
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI  | ActId             | An action label
+action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI  | Action            | An action
+deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS | None              | A deadlock
+multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS | None              | A multi-action
+deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS | None              | A deadlock summand
+action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS | None              | An action summand
+process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | S   | LinearProcessInit | A process initializer
+linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS  | LinearProcess     | A linear process
+specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MS  | LinProcSpec       | A linear process specification
 '''
 
 PROCESS_CLASSES = r'''
@@ -955,6 +955,22 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
 
+    def builder_return_type(self, all_classes, modifiability_map):
+        classname = self.classname(True)
+        # N.B. the order of the statements below is important!
+        if is_modifiable_type(classname, modifiability_map):
+            return 'void'
+        if 'E' in self.modifiers():
+            result = self.superclass(include_namespace = True)
+            c = all_classes[result]
+            if 'E' in c.modifiers():
+                return c.builder_return_type(all_classes, modifiability_map)
+            else:
+                return result
+        if 'X' in self.modifiers():
+            return classname
+        return classname
+
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<RETURN_TYPE> operator()(<CONST><CLASS_NAME>& x)
 {
@@ -965,8 +981,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         classname = self.classname(True)
         visit_text = ''
         dependent = False
+        return_type = self.builder_return_type(all_classes, modifiability_map)
+
         if is_modifiable_type(classname, modifiability_map):
-            return_type = 'void'
             return_statement = ''
 
             updates = []
@@ -988,7 +1005,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 visit_text = '// skip'
         else:
             if 'X' in self.modifiers():
-                return_type = classname
                 classes = [all_classes[name] for name in self.expression_classes()]
                 classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
                 classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
@@ -1015,14 +1031,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     visit_text = '// skip'
                     return_statement = 'return x;'
                 else:
-                    visit_text = '%s result;\n' % classname + '\nelse '.join(updates)
+                    visit_text = '%s result;\n' % return_type + '\nelse '.join(updates)
                     return_statement = 'return result;'
             else:
-                if 'E' in self.modifiers():
-                    return_type = self.superclass(include_namespace = True)
-                else:
-                    return_type = classname
-
                 updates = []
                 f = self.constructor
                 for p in f.parameters():
@@ -1186,8 +1197,8 @@ def make_modifiability_map(all_classes):
         value = (c.aterm == None) or ('M' in c.modifiers())
         result[classname] = value
         if 'C' in c.modifiers():
-            result[classname + '_list'] = value
-            result[classname + '_vector'] = value
+            result[classname + '_list'] = False
+            result[classname + '_vector'] = True
     return result
 
 def is_modifiable_type(type, modifiability_map):
@@ -1245,3 +1256,16 @@ def parse_classnames(text, namespace):
         if not classname in result:
             result.append(classname)
     return result
+
+def mcrl2_class_map():
+    return {
+          'core'             : CORE_CLASSES,
+          'data'             : DATA_EXPRESSION_CLASSES + ASSIGNMENT_EXPRESSION_CLASSES + SORT_EXPRESSION_CLASSES + CONTAINER_TYPES + BINDER_TYPES + ABSTRACTION_EXPRESSION_CLASSES + STRUCTURED_SORT_ELEMENTS + DATA_CLASSES,
+          'state_formulas'   : STATE_FORMULA_CLASSES,
+          'regular_formulas' : REGULAR_FORMULA_CLASSES,
+          'action_formulas'  : ACTION_FORMULA_CLASSES,
+          'lps'              : LPS_CLASSES,
+          'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
+          'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
+          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES
+        }

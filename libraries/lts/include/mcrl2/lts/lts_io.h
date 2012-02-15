@@ -102,7 +102,7 @@ const std::set<lts_type> &supported_lts_formats();
  *                           supported.
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
- *                           except the last is terminated with '\n'. */
+ *                           except the last is terminated with '\\n'. */
 std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type> &supported = supported_lts_formats());
 
 /** \brief Gives a textual list describing supported LTS formats.
@@ -110,7 +110,7 @@ std::string supported_lts_formats_text(lts_type default_format = lts_none, const
  *                           supported.
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
- *                           except the last is terminated with '\n'. */
+ *                           except the last is terminated with '\\n'. */
 std::string supported_lts_formats_text(const std::set<lts_type> &supported);
 
 /** \brief Gives a list of extensions for supported LTS formats.
@@ -150,7 +150,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
       return;
     }
     case lts_none:
-      std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+      mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
     case lts_aut:
     {
       lts_aut_t l1;

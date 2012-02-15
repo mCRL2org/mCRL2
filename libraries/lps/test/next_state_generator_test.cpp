@@ -42,7 +42,7 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
 
   atermpp::set<atermpp::aterm> visited;
   atermpp::set<atermpp::aterm> seen;
-  atermpp::set<atermpp::aterm_appl> transition_labels;
+  atermpp::set<multi_action> transition_labels;
   size_t transitions = 0;
 
   std::queue<atermpp::aterm, atermpp::deque<atermpp::aterm> > q;

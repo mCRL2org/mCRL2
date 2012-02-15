@@ -22,6 +22,12 @@
 #include <functional>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
+#include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/print.h"
+#include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/pbes/file_formats.h"
+#include "mcrl2/pbes/is_bes.h"
+#include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
@@ -51,13 +57,13 @@ std::string bes_expression2cwi(const Expression& p, const VariableMap& variables
   {
     std::string left = bes_expression2cwi(tr::left(p), variables);
     std::string right = bes_expression2cwi(tr::right(p), variables);
-    result = "(" + left + " & " + right + ")";
+    result = "(" + left + "&" + right + ")";
   }
   else if (tr::is_or(p))
   {
     std::string left = bes_expression2cwi(tr::left(p), variables);
     std::string right = bes_expression2cwi(tr::right(p), variables);
-    result = "(" + left + " | " + right + ")";
+    result = "(" + left + "|" + right + ")";
   }
   else if (tr::is_prop_var(p))
   {
@@ -67,7 +73,7 @@ std::string bes_expression2cwi(const Expression& p, const VariableMap& variables
       throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + tr::pp(p));
     }
     std::stringstream out;
-    out << i->second;
+    out << "X" << i->second;
     result = out.str();
   }
   else
@@ -88,7 +94,7 @@ void bes2cwi(Iter first, Iter last, std::ostream& out)
 
   // Number the variables of the equations 0, 1, ... and put them in the map variables.
   std::map<string_type, int> variables;
-  int index = 0;
+  int index = 1;
   for (Iter i = first; i != last; ++i)
   {
     variables[i->variable().name()] = index++;
@@ -98,8 +104,8 @@ void bes2cwi(Iter first, Iter last, std::ostream& out)
   {
     out << (i->symbol().is_mu() ? "min" : "max")
         << " "
-        << variables[i->variable().name()]
-        << " = "
+        << "X" << variables[i->variable().name()]
+        << "="
         << bes_expression2cwi(i->formula(), variables)
         << "\n";
   }
@@ -109,7 +115,7 @@ void bes2cwi(Iter first, Iter last, std::ostream& out)
 template <typename Iter>
 void bes2cwi(Iter first, Iter last, const std::string& outfilename)
 {
-  if (outfilename == "-")
+  if (outfilename == "-" || outfilename.empty())
   {
     bes2cwi(first, last, std::cout);
   }
@@ -185,7 +191,7 @@ std::string bes_expression2pgsolver(const Expression& p, const VariableMap& vari
 
 /// \brief Save a sequence of BES equations in CWI format to a stream.
 template <typename Iter>
-void bes2pgsolver(Iter first, Iter last, std::ostream& out)
+void bes2pgsolver(Iter first, Iter last, std::ostream& out, bool maxpg = true)
 {
   typedef typename std::iterator_traits<Iter>::value_type equation_type;
   typedef typename equation_type::term_type term_type;
@@ -215,6 +221,11 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
     }
     block_to_player[block] = (and_in_block)?1:0;
 
+    if(maxpg && block % 2 == 1)
+    {
+      ++block;
+    }
+
     out << "parity " << index -1 << ";\n";
 
     int priority = 0;
@@ -229,16 +240,17 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
 
       out << variables[i->variable().name()]
           << " "
-          << priority
+          << (maxpg?(block-priority):priority)
           << " "
           << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
           << " "
           << bes_expression2pgsolver(i->formula(), variables)
-// The following is optional, print variable name for traceability.
-//          << " "
-//          << "\""
-//          << tr::pp(i->variable())
-//          << "\""
+#ifdef MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES
+          << " "
+          << "\""
+          << tr::pp(i->variable())
+          << "\""
+#endif
         << ";\n";
   }
 }
@@ -247,7 +259,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
 template <typename Iter>
 void bes2pgsolver(Iter first, Iter last, const std::string& outfilename)
 {
-  if (outfilename == "-")
+  if (outfilename == "-" || outfilename.empty())
   {
     bes2pgsolver(first, last, std::cout);
   }
@@ -265,46 +277,84 @@ void bes2pgsolver(Iter first, Iter last, const std::string& outfilename)
   }
 }
 
-/// \brief Supported BES output formats.
-enum bes_output_format
+// Check that the initial equation has, as a left hand side, the variable that
+// has been designated as initial.
+static
+inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system<>& bes_spec)
 {
-  bes_output_bes,
-  bes_output_cwi,
-  bes_output_pgsolver
-};
+  if(is_boolean_variable(bes_spec.initial_state()))
+  {
+    boolean_variable init(bes_spec.initial_state());
+    if(init == bes_spec.equations().begin()->variable())
+    {
+      return true;
+    }
+  }
+  return false;
+}
 
-/// \brief Save a PBES in the format specified.
+/// \brief File formats for BES and PBES are the same.
+typedef pbes_system::pbes_file_format bes_file_format;
+using pbes_system::pbes_file_bes;
+using pbes_system::pbes_file_cwi;
+using pbes_system::pbes_file_pgsolver;
+using pbes_system::pbes_file_pbes;
+using pbes_system::pbes_file_unknown;
+
+/// \brief Save a BES in the format specified.
+/// \param bes_spec The bes to be stored
+/// \param outfilename The name of the file to which the output is stored.
+/// \param output_format Determines the format in which the result is written.
+/// \param aterm_ascii Determines, if output_format is bes, whether the file
+///        is written is ascii format.
 inline
-void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename, bes_output_format output_format, bool aterm_ascii = false)
+void save_bes(const boolean_equation_system<>& bes_spec,
+              const std::string& outfilename,
+              const bes_file_format output_format,
+              bool aterm_ascii = false)
 {
   switch (output_format)
   {
-    case bes_output_bes:
+    case pbes_file_bes:
     {
       if (aterm_ascii)
       {
-        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
     }
-    case bes_output_cwi:
+    case pbes_file_cwi:
     {
-      mCRL2log(verbose) << "Saving result in CWI format..." << std::endl;
+      mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
+      if(!initial_bes_equation_corresponds_to_initial_state(bes_spec))
+      {
+        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond. Cannot save BES to CWI format.");
+      }
       bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
       break;
     }
-    case bes_output_pgsolver:
+    case pbes_file_pgsolver:
     {
-      mCRL2log(verbose) << "Saving result in PGSolver format..." << std::endl;
+      mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
       boolean_equation_system<> bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
+      if(!initial_bes_equation_corresponds_to_initial_state(bes_spec_standard_form))
+      {
+        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec_standard_form.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec_standard_form.equations().begin()->variable()) + " do not correspond. Cannot save BES to PGSolver format.");
+      }
       bes::bes2pgsolver(bes_spec_standard_form.equations().begin(), bes_spec_standard_form.equations().end(), outfilename);
+      break;
+    }
+    case pbes_file_pbes:
+    {
+      mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
+      bes2pbes(bes_spec).save(outfilename);
       break;
     }
     default:
@@ -312,6 +362,65 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
       throw mcrl2::runtime_error("unknown output format encountered in save_bes");
     }
   }
+}
+
+/// \brief Load bes from file.
+/// \param b The bes to which the result is loaded.
+/// \param infilename The file from which to load the BES.
+/// \param f The format that should be assumed for the file in infilename.
+template <typename Container>
+inline
+void load_bes(boolean_equation_system<Container>& b,
+              const std::string& infilename,
+              const bes_file_format f)
+{
+  switch (f)
+  {
+    case pbes_file_bes:
+    {
+      b.load(infilename);
+      break;
+    }
+    case pbes_file_cwi:
+    {
+      throw mcrl2::runtime_error("Loading a BES from a CWI file is not implemented");
+      break;
+    }
+    case pbes_file_pgsolver:
+    {
+      parse_pgsolver(infilename, b);
+      break;
+    }
+    case pbes_file_pbes:
+    {
+      pbes_system::pbes<> p;
+      p.load(infilename);
+      if(!pbes_system::is_bes(p))
+      {
+        throw mcrl2::runtime_error(infilename + " does not contain a BES");
+      }
+      b = pbes_system::pbesinstconversion(p);
+      break;
+    }
+    default:
+    {
+      throw mcrl2::runtime_error("unknown output format encountered in load_bes");
+    }
+  }
+}
+
+/// \brief Load bes from file.
+/// \param b The bes to which the result is loaded.
+/// \param infilename The file from which to load the BES.
+///
+/// The format of the file in infilename is guessed.
+template <typename Container>
+inline
+void load_bes(boolean_equation_system<Container>& b,
+              const std::string& infilename)
+{
+  bes_file_format f = pbes_system::guess_format(infilename);
+  load_bes(b, infilename, f);
 }
 
 } // namespace bes

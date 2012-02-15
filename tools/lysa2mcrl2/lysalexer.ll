@@ -1,6 +1,7 @@
 %{
 
 #include "lysa.h"
+#include "lysalexer.h"
 #include <string.h>
 #include <math.h>
 #include <iostream>
@@ -10,6 +11,8 @@
 #include <utility>
 #include <sstream>
 
+
+using namespace mcrl2::log;
 
 /*
  * we store the semantic values of all lexical tokens in an object

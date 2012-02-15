@@ -29,11 +29,6 @@
 #include "settings.h"
 #include "settingsdialog.h"
 
-// For compatibility with older wxWidgets versions (pre 2.8)
-#if (wxMINOR_VERSION < 8)
-# define wxFD_OPEN wxOPEN
-#endif
-
 using namespace std;
 using namespace IDs;
 
@@ -74,8 +69,6 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   mediator = owner;
   settings = ss;
   progDialog = NULL;
-  savePicDialog = NULL;
-  saveVecDialog = NULL;
   settingsDialog = NULL;
   infoDialog = new InfoDialog(this);
   simDialog = new SimDialog(this, mediator);
@@ -235,24 +228,16 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/)
 {
-  if (savePicDialog == NULL)
-  {
-    savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
-  }
-  else
-  {
-    savePicDialog->updateAspectRatio();
-  }
+  SavePicDialog* savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
   savePicDialog->ShowModal();
+  savePicDialog->Destroy();
 }
 
 void MainFrame::onSaveVec(wxCommandEvent& /*event*/)
 {
-  if (saveVecDialog == NULL)
-  {
-    saveVecDialog = new SaveVecDialog(this,GetStatusBar(),glCanvas,filename);
-  }
+  SaveVecDialog* saveVecDialog = new SaveVecDialog(this,GetStatusBar(),glCanvas,filename);
   saveVecDialog->ShowModal();
+  saveVecDialog->Destroy();
 }
 
 void MainFrame::onSaveText(wxCommandEvent& /*event*/)
@@ -279,14 +264,6 @@ void MainFrame::onClose(wxCloseEvent& event)
   if (progDialog != NULL)
   {
     progDialog->Destroy();
-  }
-  if (savePicDialog != NULL)
-  {
-    savePicDialog->Destroy();
-  }
-  if (saveVecDialog != NULL)
-  {
-    saveVecDialog->Destroy();
   }
   infoDialog->Destroy();
   simDialog->Destroy();

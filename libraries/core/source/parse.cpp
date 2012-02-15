@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -8,122 +8,95 @@
 //
 /// \file parse.cpp
 
-#include <istream>
+#include "mcrl2/core/detail/dparser_functions.h"
+#include "mcrl2/core/dparser.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/utilities/logger.h"
+#include "d.h"
+#include <iostream>
 #include <string>
 #include <sstream>
-#include <stdlib.h>
-#include "mcrl2/core/detail/mcrl2lexer.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
 
-using namespace std;
-
-namespace mcrl2
+extern "C"
 {
-namespace core
-{
-
-//Global precondition: the ATerm library has been initialised
-
-ATerm parse_tagged_stream(const string& tag, istream& stream);
-/*Pre: stream is opened for reading
-  Post:the content of tag followed by stream is parsed
-  Ret: the parsed content, if everything went ok
-       NULL, otherwise
-*/
-
-ATermAppl parse_identifier(istream& se_stream)
-{
-  return (ATermAppl) parse_tagged_stream("identifier", se_stream);
+  extern D_ParserTables parser_tables_mcrl2;
 }
 
-ATermAppl parse_sort_expr(istream& se_stream)
+namespace mcrl2 {
+
+namespace core {
+
+namespace detail {
+
+/// \brief Function for resolving parser ambiguities.
+struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
-  mCRL2log(debug) << "parsing sort expression..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("sort_expr", se_stream);
+  core::parser_table table(parser_tables_mcrl2);
+  if (n == 2)
+  {
+    // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We
+    // choose to parse it as an ActFrm if this ambiguity occurs, as it is the
+    // most specific. We do this by checking that one of the possible parse
+    // trees is of the form RegFrm("(", x, y), and not choosing that particular
+    // parse tree.
+    core::parse_node vi(v[0]);
+    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
+        vi.child(0).string() == "(")
+    {
+      return v[1];
+    }
+    vi.node = v[1];
+    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
+        vi.child(0).string() == "(")
+    {
+      return v[0];
+    }
+  }
+
+  // If we reach this point, then the ambiguity is unresolved. We print all
+  // ambiguities on the debug output, then throw an exception.
+  for (int i = 0; i < n; ++i)
+  {
+    core::parse_node vi(v[i]);
+    mCRL2log(log::verbose, "parser") << "Ambiguity: " << vi.tree() << std::endl;
+    mCRL2log(log::debug, "parser") << "Ambiguity: " << table.tree(vi) << std::endl;
+  }
+  throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 
-ATermAppl parse_data_expr(istream& de_stream)
+void syntax_error_fn(struct D_Parser *ap)
 {
-  mCRL2log(debug) << "parsing data expression..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("data_expr", de_stream);
+  core::detail::increment_dparser_error_message_count();
+  if (core::detail::get_dparser_error_message_count() > core::detail::get_dparser_max_error_message_count())
+  {
+    return;
+  }
+  Parser *p = (Parser *) ap;
+  std::string filename;
+  if (p->user.loc.pathname)
+  {
+    filename = std::string(p->user.loc.pathname);
+  }
+  std::string after;
+  ZNode *z = p->snode_hash.last_all ? p->snode_hash.last_all->zns.v[0] : 0;
+  while (z && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
+  {
+    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : 0;
+  }
+  if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
+  {
+    after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
+  }
+  mCRL2log(log::error, "parser") << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
+  if (!after.empty())
+  {
+    mCRL2log(log::error, "parser") << " after '" << after << "'";
+  }
+  mCRL2log(log::error, "parser") << std::endl;
 }
 
-ATermAppl parse_data_spec(istream& ps_stream)
-{
-  mCRL2log(debug) << "parsing data specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("data_spec", ps_stream);
-}
+} // namespace detail
 
-ATermAppl parse_mult_act(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing multiaction..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("mult_act", pe_stream);
-}
+} // namespace core
 
-ATermAppl parse_proc_expr(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing process expression..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("proc_expr", pe_stream);
-}
-
-ATermAppl parse_proc_spec(istream& ps_stream)
-{
-  mCRL2log(debug) << "parsing process specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("proc_spec", ps_stream);
-}
-
-ATermAppl parse_state_frm(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing state formula..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("state_frm", pe_stream);
-}
-
-ATermAppl parse_action_rename_spec(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing action rename specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("action_rename", pe_stream);
-}
-
-ATermAppl parse_pbes_spec(istream& pbes_spec_stream)
-{
-  mCRL2log(debug)<< "parsing BPES specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("pbes_spec", pbes_spec_stream);
-}
-
-ATermList parse_data_vars(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing data variables..." << std::endl;
-  return (ATermList) parse_tagged_stream("data_vars", pe_stream);
-}
-
-ATerm parse_tagged_stream(const string& tag, istream& stream)
-{
-  vector<istream*> *streams = new vector<istream*>();
-  istringstream* tag_stream = new istringstream(tag);
-  streams->push_back(tag_stream);
-  streams->push_back(&stream);
-  ATerm result = parse_streams(*streams);
-  delete tag_stream;
-  delete streams;
-  return result;
-}
-
-bool is_user_identifier(std::string const& s)
-{
-  std::istringstream stream(s);
-  // When parsing an identifier, we do not want to
-  // see error messages being printed on the console, if
-  // the identifier is not proper. This should be replaced
-  // by a try/catch block, after the parser has been adapted
-  // to throw an exception, instead of printing an error.
-  mcrl2_log_level_t old_level = mcrl2_logger::get_reporting_level();
-  mcrl2_logger::set_reporting_level(log_quiet);
-  const bool result=parse_identifier(stream) != NULL;
-  mcrl2_logger::set_reporting_level(old_level);
-  return result;
-}
-
-}
-}
-
+} // namespace mcrl2

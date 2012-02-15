@@ -15,8 +15,8 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
-
 
 using namespace mcrl2;
 using lps::specification;
@@ -94,6 +94,33 @@ void test3()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+void test4()
+{
+  const std::string SPEC =
+    "sort D = struct d1 | d2;\n"
+    "     E = D;\n"
+    "\n"
+    "act a : E;\n"
+    "\n"
+    "proc P(d:D) = a(d) . P(d1);\n"
+    "\n"
+    "init P(d2);\n";
+
+  const std::string AR_SPEC =
+    "var e : E;\n"
+    "rename\n"
+    "(e==d1) -> a(e) => tau;\n";
+
+  specification spec = lps::linearise(SPEC);
+  std::istringstream ar_spec_stream(AR_SPEC);
+  action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
+  data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
+  specification new_spec = action_rename(ar_spec,spec);
+  lps::rewrite(new_spec, R);
+  lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(new_spec.process().summand_count()==3);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -102,6 +129,6 @@ int test_main(int argc, char** argv)
   test2();
   core::garbage_collect();
   test3();
-  
+
   return 0;
 }

@@ -1110,18 +1110,18 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
           // Draw transition from root to endState
           if (disp_bp && outTransition->isBackpointer())
           {
+            RGB_Color color, black(0, 0, 0);
             if (mediator->isMarked(outTransition))
             {
-              RGB_Color c = settings->getRGB(MarkedColor);
-              glColor4ub(c.red(),c.green(),c.blue(),255);
+              color = settings->getRGB(MarkedColor);
             }
             else
             {
-              RGB_Color c = settings->getRGB(UpEdgeColor);
-              glColor4ub(c.red(),c.green(),c.blue(),255);
+              color = settings->getRGB(UpEdgeColor);
             }
-            drawBackPointer(s,endState);
-          }
+            drawBackPointer(s,black,endState,color);
+          } 
+          else
           if (disp_fp && !outTransition->isBackpointer())
           {
             if (mediator->isMarked(outTransition))
@@ -1193,17 +1193,16 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
       // Draw transition from beginState to endState
       if (currTrans->isBackpointer() && draw_bp)
       {
+        RGB_Color color, black(0, 0, 0);
         if (mediator->isMarked(currTrans))
         {
-          RGB_Color c = settings->getRGB(MarkedColor);
-          glColor4ub(c.red(), c.green(), c.blue(), 255);
+          color = settings->getRGB(MarkedColor);
         }
         else
         {
-          RGB_Color transColor = settings->getRGB(SimPrevColor);
-          glColor4ub(transColor.red(), transColor.green(), transColor.blue(), 255);
+          color = settings->getRGB(SimPrevColor);
         }
-        drawBackPointer(beginState, endState);
+        drawBackPointer(beginState, black, endState, color);
       }
       if (!currTrans->isBackpointer() && draw_fp)
       {
@@ -1244,25 +1243,25 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
       // Draw transition from beginState to endState
       if (currTrans->isBackpointer() && draw_bp)
       {
+        RGB_Color color, black(0, 0, 0);
+        if (mediator->isMarked(currTrans))
+        {
+          color = settings->getRGB(MarkedColor);
+        }
+        else
         if (currTrans == chosenTrans)
         {
-          RGB_Color c = settings->getRGB(SimSelColor);
-          glColor4ub(c.red(), c.green(), c.blue(), 255);
+          color = settings->getRGB(SimSelColor);
           glLineWidth(2.0);
         }
         else
         {
-          RGB_Color c = settings->getRGB(SimPosColor);
-          glColor4ub(c.red(), c.green(), c.blue(), 255);
+          color = settings->getRGB(SimPosColor);
         }
-        if (mediator->isMarked(currTrans))
-        {
-          RGB_Color c = settings->getRGB(MarkedColor);
-          glColor4ub(c.red(), c.green(), c.blue(), 255);
-        }
-        drawBackPointer(beginState, endState);
+        drawBackPointer(beginState, black, endState, color);
         glLineWidth(1.0);
-      }
+      } 
+      else
       if (!currTrans->isBackpointer() && draw_fp)
       {
         if (currTrans == chosenTrans)
@@ -1308,7 +1307,7 @@ void Visualizer::drawForwardPointer(State* startState, State* endState)
   glEnd();
 }
 
-void Visualizer::drawBackPointer(State* startState, State* endState)
+void Visualizer::drawBackPointer(State* startState, const RGB_Color& startColor, State* endState, const RGB_Color& endColor)
 {
   Vector3D startPoint = startState->getPositionAbs();
   Vector3D startControl = startState->getOutgoingControl();
@@ -1332,16 +1331,26 @@ void Visualizer::drawBackPointer(State* startState, State* endState)
   float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->getInt(Quality);
 
+  float col[3];
+  col[0] = startColor.red();
+  col[1] = startColor.green();
+  col[2] = startColor.blue();
+  float diff[3];
+  int steps = N / 2;
+  diff[0] = (float)(endColor.red() - startColor.red()) / steps;
+  diff[1] = (float)(endColor.green() - startColor.green()) / steps;
+  diff[2] = (float)(endColor.blue() - startColor.blue()) / steps;
+
   glBegin(GL_LINE_STRIP);
 
   for (int k = 0; k < N; ++k)
   {
     t  = (float)k / (N-1);
     it = 1.0f - t;
-    b0 =      t *  t *  t;
-    b1 = 3 *  t *  t * it;
-    b2 = 3 *  t * it * it;
-    b3 =     it * it * it;
+    b3 =      t *  t *  t;
+    b2 = 3 *  t *  t * it;
+    b1 = 3 *  t * it * it;
+    b0 =     it * it * it;
 
     x = b0 * ctrlPts[0][0] +
         b1 * ctrlPts[1][0] +
@@ -1357,7 +1366,14 @@ void Visualizer::drawBackPointer(State* startState, State* endState)
         b1 * ctrlPts[1][2] +
         b2 * ctrlPts[2][2] +
         b3 * ctrlPts[3][2];
+    glColor4ub((GLubyte)col[0], (GLubyte)col[1], (GLubyte)col[2], 255);
     glVertex3f(x, y, z);
+    if (4 * k > N && 4 * k <= 3 * N)
+    {
+      col[0] += diff[0];
+      col[1] += diff[1];
+      col[2] += diff[2];
+    }
   }
 
   glEnd();

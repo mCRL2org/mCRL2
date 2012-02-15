@@ -28,7 +28,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/atermpp/container_utility.h"
 
@@ -188,7 +188,7 @@ class structured_sort: public detail::structured_sort_base
             data_expression operand_left;
             data_expression operand_right;
 
-            number_postfix_generator generator("v");
+            set_identifier_generator generator;
 
             // Create variables for equation
             atermpp::vector< variable > variables;
@@ -202,7 +202,7 @@ class structured_sort: public detail::structured_sort_base
               structured_sort_constructor_argument_list i_arguments = i->arguments();
               for (structured_sort_constructor_argument_list::const_iterator k = i_arguments.begin(); k != i_arguments.end(); ++k)
               {
-                variables.push_back(variable(generator(), k->sort()));
+                variables.push_back(variable(generator("v"), k->sort()));
               }
 
               // create first operand of ==, < or <=
@@ -218,7 +218,7 @@ class structured_sort: public detail::structured_sort_base
               structured_sort_constructor_argument_list j_arguments = j->arguments();
               for (structured_sort_constructor_argument_list::const_iterator k = j_arguments.begin(); k != j_arguments.end(); ++k)
               {
-                variables.push_back(variable(generator(), k->sort()));
+                variables.push_back(variable(generator("v"), k->sort()));
               }
 
               // create second operand of ==, < or <=
@@ -283,14 +283,14 @@ class structured_sort: public detail::structured_sort_base
         {
           structured_sort_constructor_argument_list arguments(i->arguments());
 
-          number_postfix_generator generator("v");
+          set_identifier_generator generator;
 
           atermpp::vector< variable > variables;
 
           // Create variables for equation
           for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
           {
-            variables.push_back(variable(generator(), j->sort()));
+            variables.push_back(variable(generator("v"), j->sort()));
           }
 
           atermpp::vector< variable >::const_iterator v = variables.begin();
@@ -332,7 +332,7 @@ class structured_sort: public detail::structured_sort_base
             else
             {
 
-              number_postfix_generator generator("v");
+              set_identifier_generator generator;
 
               structured_sort_constructor_argument_list arguments(i->arguments());
 
@@ -341,7 +341,7 @@ class structured_sort: public detail::structured_sort_base
 
               for (structured_sort_constructor_argument_list::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
               {
-                variables.push_back(variable(generator(), k->sort()));
+                variables.push_back(variable(generator("v"), k->sort()));
               }
 
               result.push_back(data_equation(variables, j->recogniser_function(s)(

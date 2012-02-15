@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/exception.h"
 
@@ -221,13 +222,20 @@ class data_expression: public atermpp::aterm_appl
       }
       else if (is_application(*this))
       {
-        sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-        if (!is_function_sort(s))
+        data_expression head = atermpp::arg1(*this);
+        sort_expression s(head.sort());
+        if (s == sort_expression())
+        {
+          result = s;
+        }
+        else if (is_function_sort(s))
+        {
+          result = atermpp::arg2(s);
+        }
+        else
         {
           throw mcrl2::runtime_error("Sort " + s.to_string() + " of " + atermpp::arg1(*this).to_string() + " is not a function sort.");
         }
-
-        result = atermpp::arg2(s);
       }
       else if (is_where_clause(*this))
       {
@@ -267,6 +275,24 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 
 //--- start generated class data_expression ---//
 //--- end generated class data_expression ---//
+
+class variable;
+
+// template function overloads
+std::string pp(const data_expression& x);
+std::string pp(const data_expression_list& x);
+std::string pp(const data_expression_vector& x);
+data::data_expression translate_user_notation(const data::data_expression& x);
+std::set<data::sort_expression> find_sort_expressions(const data::data_expression& x);
+std::set<data::variable> find_variables(const data::data_expression& x);
+std::set<data::variable> find_variables(const data::data_expression_list& x);
+std::set<data::variable> find_free_variables(const data::data_expression& x);
+std::set<data::variable> find_free_variables(const data::data_expression_list& x);
+bool search_variable(const data::data_expression& x, const data::variable& v);
+
+// TODO: we have to put it somewhere...
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace data
 

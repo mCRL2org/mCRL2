@@ -24,6 +24,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {
@@ -89,7 +90,7 @@ void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
   }
 }
 
-void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action, size_t idx_to, ATerm to)
+void lps2lts_lts::save_transition(size_t idx_from, ATerm from, const mcrl2::lps::multi_action action, size_t idx_to, ATerm to)
 {
   switch (lts_opts.outformat)
   {
@@ -105,7 +106,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
         idx_to = 0;
       }
       aut << "(" << idx_from << ",\"";
-      PrintPart_CXX(aut,(ATerm) action,ppDefault);
+      aut << pp(action);
       aut << "\"," << idx_to << ")\n";
       break;
     default:
@@ -125,10 +126,10 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
         assert(t==to_state);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }
-      const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
+      const size_t label = ATindexedSetPut(aterm2label,(ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(action),&is_new);
       if (is_new)
       {
-        const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == true);
+        const size_t t = generic_lts.add_action((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(action), action.actions().empty());
         assert(t==label);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }

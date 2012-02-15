@@ -100,7 +100,10 @@ void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 void GLCanvas::render2D()
 {
     SetCurrent();
+
+#if !wxCHECK_VERSION(2, 9, 0)
     wxPaintDC(this);
+#endif
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
@@ -145,7 +148,7 @@ void GLCanvas::render2D()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	  mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
 	}
 
     SwapBuffers();
@@ -154,7 +157,9 @@ void GLCanvas::render2D()
 void GLCanvas::render3D()
 {
 	SetCurrent();
-  wxPaintDC(this);
+#if !wxCHECK_VERSION(2, 9, 0)
+    wxPaintDC(this);
+#endif
 
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
@@ -254,7 +259,7 @@ void GLCanvas::render3D()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	  mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
 	}
 
     SwapBuffers();

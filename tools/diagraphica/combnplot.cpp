@@ -687,9 +687,6 @@ void CombnPlot::displTooltip(const size_t& posIdx)
 {
   if (posIdx < combinations.size())
   {
-    Attribute* attr = NULL;
-    Value* val      = NULL;
-
     msgDgrm.clear();
     /*
     for ( int i = 0; i < numAttrs; ++i )
@@ -758,10 +755,6 @@ void CombnPlot::displTooltip(const size_t& posIdx)
         attrValIdcsDgrm.push_back(combinations[posIdx][i]);
       }
     }
-
-    // reset ptrs
-    attr = NULL;
-    val  = NULL;
   }
 }
 

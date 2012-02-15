@@ -37,15 +37,14 @@ void parser_test()
   BOOST_CHECK(spec.sorts().size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
   std::cerr << "number of functions " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 99);
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 92);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
-  std::cerr << "WASDAD  " << data::parse_data_expression("0") << "\n";
-  std::cerr << "WASDAD2 " << data::sort_nat::nat(0) << "\n";
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
   BOOST_CHECK(data::parse_sort_expression("Nat") == data::sort_nat::nat());
 //  BOOST_CHECK(data::parse_data_expression("-1") == data::sort_int::int_(-1));
 //  BOOST_CHECK(data::parse_data_expression("1/2") == data::sort_real::real_(1, 2));
+  core::garbage_collect();
 }
 
 // This test triggers a sort normalization problem.
@@ -59,13 +58,20 @@ void test_user_defined_sort()
   core::garbage_collect();
 }
 
+void test_whr()
+{
+  using namespace data;
+  data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
+  core::garbage_collect();
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   parser_test();
   test_user_defined_sort();
-  core::garbage_collect();
+  test_whr();
 
   return EXIT_SUCCESS;
 }

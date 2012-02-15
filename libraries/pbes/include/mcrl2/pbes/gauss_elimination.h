@@ -16,7 +16,6 @@
 
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -29,7 +28,7 @@ namespace pbes_system
 /// systems of (P)BES equations.
 
 template <typename ExpressionTraits>
-class gauss_elimination_algorithm : public utilities::algorithm
+class gauss_elimination_algorithm
 {
   public:
     typedef typename ExpressionTraits::expression_type expression_type;
@@ -54,26 +53,6 @@ class gauss_elimination_algorithm : public utilities::algorithm
       return out.str();
     }
 
-    void LOG_EQUATION_VERBOSE(const std::string& msg, const equation_type& eq) const
-    {
-      mCRL2log(verbose) << msg << print_equation(eq) << "\n";
-    }
-
-    /// \brief Prints the sequence of pbes equations [first, last) to clog.
-    /// \param first Start of a range of equations
-    /// \param last End of a range of equations
-    template <typename Iter>
-    void LOG_EQUATIONS_DEBUG(const std::string& msg, Iter first, Iter last) const
-    {
-      mCRL2log(debug) << msg << print_equations(first, last);
-    }
-
-    template <typename Iter>
-    void LOG_EQUATIONS_DEBUG1(const std::string& msg, Iter first, Iter last) const
-    {
-      mCRL2log(debug1) << msg << print_equations(first, last);
-    }
-
   public:
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
@@ -83,7 +62,7 @@ class gauss_elimination_algorithm : public utilities::algorithm
     template <typename Iter, typename FixpointEquationSolver>
     void run(Iter first, Iter last, FixpointEquationSolver solve)
     {
-      LOG_EQUATIONS_DEBUG("equations before solving\n", first, last);
+      mCRL2log(log::debug) << "equations before solving\n" << print_equations(first, last);
       if (first == last)
       {
         return;
@@ -93,16 +72,16 @@ class gauss_elimination_algorithm : public utilities::algorithm
       while (i != first)
       {
         --i;
-        LOG_EQUATION_VERBOSE("solving equation\n  before: ", *i);
+        mCRL2log(log::verbose) << "solving equation\n  before: " << print_equation(*i);
         solve(*i);
-        LOG_EQUATION_VERBOSE("   after: ", *i);
+        mCRL2log(log::verbose) << "   after: " << print_equation(*i);
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());
         }
-        LOG_EQUATIONS_DEBUG1("equations after substitution\n", first, last);
+        mCRL2log(log::debug1) << "equations after substitution\n" << print_equations(first, last);
       }
-      LOG_EQUATIONS_DEBUG("equations after solving\n", first, last);
+      mCRL2log(log::debug) << "equations after solving\n" << print_equations(first, last);
     }
 };
 

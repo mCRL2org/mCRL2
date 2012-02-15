@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
@@ -23,9 +23,10 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
-#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/data/detail/test_rewriters.h"
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/utilities/text_utility.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
@@ -200,19 +201,30 @@ void allocation_test()
   (*R_heap)(parse_data_expression("1 == 2"));
 }
 
+void one_point_rule_preprocessor_test()
+{
+  using namespace data::detail;
+
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(true && false)", "!(true) || !(false)");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!!b", "b");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!!!!b", "b");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 && b2 && b3)", "!b1 || !b2 || !b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 || b2 || b3)", "!b1 && !b2 && !b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 == b2)", "b1 != b2");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 != b2)", "b1 == b2");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 == b2 && b1 == b3)", "b1 != b2 || b1 != b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(b1 != b2 || b1 != b3)", "b1 == b2 && b1 == b3");
+  test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(n1 != n2 || n1 != n2 + 1)", "n1 == n2 && n1 == n2 + 1");
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   test1();
-  core::garbage_collect();
   test2();
-  core::garbage_collect();
-
   test3();
-  core::garbage_collect();
-
   test4();
-  core::garbage_collect();
+  one_point_rule_preprocessor_test();
 
   return 0;
 }

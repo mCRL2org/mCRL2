@@ -26,6 +26,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 ##---------------------------------------------------
 ## Example *.cpp 
@@ -47,6 +48,7 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_lps
      mcrl2_lts
      mcrl2_utilities
+     mcrl2_pbes
   )
 
   build_and_run_test_example_target( ${PROJECT_NAME} )
