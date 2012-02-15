@@ -1,5 +1,7 @@
 .. include:: toplevel.inc
 
+.. title:: Home
+
 .. image:: _static/mcrl2.png
    :align: center
    :class: frontpage-logo

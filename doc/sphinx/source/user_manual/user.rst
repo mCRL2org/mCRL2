@@ -27,7 +27,7 @@ Contents
       :maxdepth: 2
 
       introduction
-      build
+      build_instructions/index
       language_reference/index
       tutorial/tutorial
       tools

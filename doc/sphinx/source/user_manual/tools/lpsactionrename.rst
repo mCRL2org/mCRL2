@@ -13,7 +13,7 @@ on the data parameters they carry.
 Structure of rename files
 -------------------------
 
-.. dparser:: ActionRenameSpec
+.. dparser:: ActionRenameRuleRHS ActionRenameRule ActionRenameRuleSpec ActionRenameSpec
 
 The format of the RENAMEFILE can contain ``sort``, ``cons``, ``map``, ``eqn``
 and ``act`` sections as in a mcrl2 file. This is followed by a ``rename`` 

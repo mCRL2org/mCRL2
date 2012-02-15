@@ -7,7 +7,7 @@ After :doc:`configuring <configuration>` CMake, build files for your build
 system can be generated and used to build the binaries.
  
 .. admonition:: Windows
-   :class: platform-specific win-only
+   :class: platform-specific win
 
    To compile using ``nmake``, execute the following in the Visual Studio/
    Windows SDK command prompt::
@@ -17,7 +17,7 @@ system can be generated and used to build the binaries.
      nmake Makefile all 
 
 .. admonition:: Linux & Mac OS X
-   :class: platform-specific linux-only
+   :class: platform-specific linux mac
 
    The toolset can be compiled using the following command line::
 
@@ -57,5 +57,3 @@ Substitute ``nmake Makefile`` for ``make`` when using the Microsoft compiler.
 Note that you may need administrative rights to install into the default 
 location. You can install into a different location by configuring CMake
 appropriately.
-
-|enable_toggle|
