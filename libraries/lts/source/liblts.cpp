@@ -62,33 +62,33 @@ lts_type guess_format(string const& s)
 
     if (ext == "aut")
     {
-      mCRL2log(verbose) << "Detected Aldebaran extension.\n";
+      mCRL2log(verbose) << "Detected Aldebaran extension (.aut).\n";
       return lts_aut;
     }
     else if (ext == "lts")
     {
-      mCRL2log(verbose) << "Detected mCRL2 extension.\n";
+      mCRL2log(verbose) << "Detected mCRL2 LTS extension (.lts).\n";
       return lts_lts;
     }
     else if (ext == "svc")
     {
-      mCRL2log(verbose) << "Detected SVC extension; assuming mCRL2 format.\n";
-      return lts_lts;
+      mCRL2log(verbose) << "Detected SVC extension (.svc).\n";
+      return lts_svc;
     }
     else if (ext == "fsm")
     {
-      mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
+      mCRL2log(verbose) << "Detected Finite State Machine extension (.fsm).\n";
       return lts_fsm;
     }
     else if (ext == "dot")
     {
-      mCRL2log(verbose) << "Detected GraphViz extension.\n";
+      mCRL2log(verbose) << "Detected GraphViz extension (.dot).\n";
       return lts_dot;
 #ifdef USE_BCG
     }
     else if (ext == "bcg")
     {
-      mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
+      mCRL2log(verbose) << "Detected Binary Coded Graph extension (.bcg).\n";
       return lts_bcg;
 #endif
     }
