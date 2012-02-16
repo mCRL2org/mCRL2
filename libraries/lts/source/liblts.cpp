@@ -73,7 +73,9 @@ lts_type guess_format(string const& s)
     else if (ext == "svc")
     {
       mCRL2log(verbose) << "Detected SVC extension; assuming mCRL2 format.\n";
-      return lts_lts;
+      return lts_lts; /* This is wrong, and must be changed to lts_svc 
+                         However, as a consequence the translations from and to 
+                         .svc format must also be implemented. */
     }
     else if (ext == "fsm")
     {
