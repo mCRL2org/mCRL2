@@ -7,6 +7,38 @@ Previous releases of mCRL2
 
 This page shows a list of historic releases of mCRL2.
 
+Release July 2011.1
+-------------------
+
+.. |bin_w32_200107.1| replace:: Windows Installer (32-bit)
+.. _bin_w32_200107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-win32.exe
+
+.. |bin_w64_200107.1| replace:: Windows Installer (64-bit)
+.. _bin_w64_200107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-win64.exe
+
+.. |bin_osx_200107.1| replace:: Darwin package
+.. _bin_osx_200107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-Darwin.dmg
+
+.. |bin_ppa_200107.1| replace:: PPA release
+.. _bin_ppa_200107.1: https://launchpad.net/~mcrl2/+archive/release-ppa
+
+.. |src_tgz_200107.1| replace:: GZipped Tarball
+.. _src_tgz_200107.1: http://www.mcrl2.org/download/release/mcrl2-201107.1-src.tar.gz
+
+  +------------------------+------------------------------------------+
+  |Operating system        |Release (201007.1)                        |
+  +========================+==========================================+
+  |Windows                 ||bin_w32_201107.1|_                       |
+  |                        +------------------------------------------+
+  |                        ||bin_w64_201107.1|_                       |
+  +------------------------+------------------------------------------+
+  |Linux                   ||ubuntu|_                                 |
+  +------------------------+------------------------------------------+
+  |Mac OS X (Darwin)       ||bin_osx_201107.1|_                       |
+  +------------------------+------------------------------------------+
+  |Source                  ||src_tgz_201107.1|_                       |
+  +------------------------+------------------------------------------+
+
 Release July 2011 (revision 9551)
 ---------------------------------
 

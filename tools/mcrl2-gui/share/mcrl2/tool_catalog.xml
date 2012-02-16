@@ -22,7 +22,6 @@
 <tool name="ltsgraph" 		input_format="lts" 				gui="true"  category="Analysis"/>
 <tool name="ltsinfo" 		input_format="lts"                          category="Analysis"/>
 <tool name="ltsview" 		input_format="lts" 				gui="true"  category="Analysis"/>
-<tool name="lysa2mcrl2"		input_format="lysa" output_format ="mcrl2"  category="Transformation"/>
 <tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"   category="Transformation"/> 
 <tool name="pbes2bool" 		input_format="pbes"                         category="Analysis"/>
 <tool name="pbes2bool" 		input_format="bes"                         category="Analysis"/>
