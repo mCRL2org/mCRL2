@@ -65,6 +65,14 @@ void test_whr()
   core::garbage_collect();
 }
 
+void test_sort()
+{
+  using namespace data;
+  std::string text = "Pos -> Pos # Pos -> Bool";
+  sort_expression s = parse_sort_expression(text);
+  BOOST_CHECK(data::pp(s) == text);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -72,6 +80,7 @@ int test_main(int argc, char** argv)
   parser_test();
   test_user_defined_sort();
   test_whr();
+  test_sort();
 
   return EXIT_SUCCESS;
 }
