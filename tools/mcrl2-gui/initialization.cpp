@@ -94,7 +94,7 @@ Initialization::Initialization()
   /* for each tool */
   for (std::vector<Tool>::iterator i = p_tools.begin(); i != p_tools.end(); ++i)
   {
-    string cmd = (*i).m_location + " --mcrl2-gui";
+    string cmd = "\""+ (*i).m_location + "\" --mcrl2-gui";
 
     wxArrayString tool_output;
     wxArrayString tool_errors;
