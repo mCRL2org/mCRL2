@@ -228,6 +228,37 @@ Windows::
 Upload the installer that has been generated to
 ``http://www.mcrl2.org/download/release``.
 
+Mac OS-X installer for 10.5+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
+``mcrl2-VERSION``.
+
+Then statically build and install wxWidgets 2.8.12 for the i386 architecture to ``$WX-INSTALL``.
+Then statically build and install Boost 1.47 for the i386 architecture to ``$BOOST-INSTALL``.
+
+Then configure cmake::
+
+  $ cmake . -DCMAKE_OSX_ARCHITECTURES=i386 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 \
+            -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
+            -DCMAKE_INSTALL_PREFIX=/  \
+            -DMCRL2_SINGLE_BUNDLE=ON  \
+            -DBOOST_ROOT=$BOOST-INSTALL \
+            -DwxWidgets_wxrc_EXECUTABLE=$WX-INSTALL/bin/wxrc \
+            -DwxWidgets_CONFIG_EXECUTABLE=$WX-INSTALL/bin/wx-config \
+            -DMCRL2_PACKAGE_RELEASE=ON
+
+Build the toolset::
+
+  $ make 
+
+Create the DMG-installer::
+
+  $ cpack -G PackageMaker
+
+Upload the installer that has been generated to
+``http://www.mcrl2.org/download/release``.
+
 Checking the installers
 ^^^^^^^^^^^^^^^^^^^^^^^
 
