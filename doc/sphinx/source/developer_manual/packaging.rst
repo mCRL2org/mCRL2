@@ -23,34 +23,165 @@ the source code *should not* contain hardcoded version numbers.
 Creating an official release
 ----------------------------
 
+This section discusses the steps that need to be taken for creating an official
+mCRL2 release.
+
 Creating release branch
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The tag for an mCRL2 release is always created from the release branch
-`https://svn.win.tue.nl/repos/MCRL2/branches/release`_. This branch can be
-updated from `trunk` by::
+The first step to take is creating a release branch from ``trunk`` once the
+trunk is deemed stable::
 
-  $ svn merge https://svn.win.tue.nl/repos/MCRL2/trunk https://svn.win.tue.nl/repos/MCRL2/branches/release
+  $ svn delete -m"Drop old release branch in preparation of new release" https://svn.win.tue.nl/repos/MCRL2/branches/release
+  $ svn copy -m"Cut release branch from trunk" https://svn.win.tue.nl/repos/MCRL2/trunk https://svn.win.tue.nl/repos/MCRL2/branches/release
+  
+Testing
+^^^^^^^
+
+.. warning::
+
+   Before starting with testing, make sure that there is no other mCRL2
+   installation in your ``PATH``!
+
+For all testing, we assume that the release branch is checked out in ``/tmp``::
+
+  $ cd /tmp
+  $ svn checkout https://svn.win.tue.nl/repos/MCRL2/branches/release mcrl2-release
+
+Before the actual release is tagged, the release branch must be tested on all
+supported platforms::
+
+* Windows 32-bit
+* Windows 64-bit
+* Linux 32-bit
+* Linux 64-bit
+* Mac OS X 32-bit
+* Mac OS X 64-bit
+
+
+Testing is done by running (a platform specific variation of)::
+
+  $ mkdir mcrl2-release-build
+  $ cd mcrl2-release-build
+  $ cmake ../mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-release-build/install" \
+                           -DCMAKE_BUILD_TYPE="Release" \
+                           -DMCRL2_ENABLE_TEST_TARGETS="ON" \
+                           -DMCRL2_ENABLE_EXPERIMENTAL="ON" \
+                           -DMCRL2_ENABLE_DEPRECATED="ON" \
+                           -DMCRL2_ENABLE_RELEASE_TEST_TARGETS="ON" \
+                           -DMCRL2_ENABLE_RANDOM_TEST_TARGETS="ON"
+  $ make install
+  $ ctest
+  $ mkdir mcrl2-maintainer-build
+  $ cd mcrl2-maintainer-build
+  $ cmake ../mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-maintainer-build/install" \
+                           -DCMAKE_BUILD_TYPE="Maintainer" \
+                           -DMCRL2_ENABLE_TEST_TARGETS="ON" \
+                           -DMCRL2_ENABLE_EXPERIMENTAL="ON" \
+                           -DMCRL2_ENABLE_DEPRECATED="ON" \
+                           -DMCRL2_ENABLE_RELEASE_TEST_TARGETS="ON" \
+                           -DMCRL2_ENABLE_RANDOM_TEST_TARGETS="ON"
+  $ make install
+  $ ctest
+  
+
+  
+Furthermore, integration with CADP and LTSmin must be tested on Linux::
+
+*CADP support*
+
+  .. warning::
+  
+    When running the following commands, make sure that the environment variables
+    for CADP have been set properly; assuming that CADP is installed in
+    ``<cadp>`` this can be done using the following commands assuming a 64-bit
+    system ::
+    
+      $ export CADP="<cadp>"
+      $ export PATH=$PATH:$CADP/com:$CADP/bin.x64
+
+  Run the following commands::
+  
+    $ cd /tmp
+    $ mkdir mcrl2-cadp-build
+    $ cd mcrl2-cadp-build
+    $ cmake /tmp/mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-cadp-build/install" \
+                             -DBUILD_SHARED_LIBS=OFF \
+                             -DMCRL2_ENABLE_CADP_SUPPORT=ON \
+                             -DMCRL2_CADP_INSTALL_PATH=$CADP
+    $ make install
+    $ ctest
+    $ install/bin/mcrl22lps ../mcrl2-release/examples/academic/abp/abp.mcrl2 abp.lps
+    $ install/bin/lps2lts abp.lps abp.bcg
+    $ install/bin/ltsinfo abp.bcg
+    $ install/bin/ltsconvert -ebisim abp.bcg abp.bisim.bcg
+    $ install/bin/ltsinfo abp.bisim.bcg
+    $ install/bin/ltsconvert abp.bcg abp.aut
+    $ install/bin/ltsconvert -labp.lps abp.bcg abp.lts
+    $ install/bin/ltsconvert abp.bcg abp.fsm
+    
+*LTSmin support*
+
+  Run the following commands:
+  
+    $ mkdir /tmp/mcrl2-ltsmin-build
+    $ cd /tmp/mcrl2-ltsmin-build
+    $ cmake ../mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-ltsmin-build/install"
+    $ make install
+    $ cd /tmp
+    $ git clone http://fmt.cs.utwente.nl/tools/scm/ltsmin.git ltsmin
+    $ cd ltsmin
+    $ git checkout -b main origin/maint
+    $ git submodule update --init
+    $ ./ltsminreconf
+    $ ./configure --disable-dependency-tracking --with-mcrl2=/tmp/mcrl2-ltsmin-build/install --prefix=/tmp/ltsmin/install
+    $ make install
+    $ /tmp/mcrl2-ltsmin-build/install/bin/mcrl22lps /tmp/mcrl2-release/examples/academic/abp/abp.mcrl2 abp.lps
+    $ export PATH=/tmp/mcrl2-ltsmin-build/install/bin:$PATH
+    $ export LD_LIBRARY_PATH=/tmp/mcrl2-ltsmin-build/install/lib/mcrl2:$LD_LIBRARY_PATH
+    $ /tmp/ltsmin/install/bin/lps-reach abp.lps
+    $ /tmp/ltsmin/install/bin/lps2lts-grey abp.lps
+    $ /tmp/ltsmin/install/bin/lps2lts-gsea abp.lps
+    
+Updating release number and copyright information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* In ``branches/release`` and ``trunk`` update the version number in the file
+  ``scripts/MCRL2Version.cmake`` by updating the value assigned to the CMake
+  variable ``MCRL2_MAJOR_VERSION``.
+  
+* In ``branches/release`` and ``trunk`` update the copyright period in the file
+  ``COPYING``.
+  
+* Commit the changes to both ``branches/release`` and ``trunk``.
   
 Tagging
 ^^^^^^^
 
+Once the above procedure has been carried out, and all test have succeeded,
+it is time to tag the release::
 
+  $ svn copy https://svn.win.tue.nl/repos/MCRL2/branches/release https://svn.win.tue.nl/repos/MCRL2/tags/mcrl2-VERSION
 
 Source release
 ^^^^^^^^^^^^^^
 
-The source package for the mCRL2 release is generated as follows:
+The source package for the mCRL2 release is generated as follows::
 
-#. 
+  $ cd /tmp
+  $ svn checkout https://svn.win.tue.nl/repos/MCRL2/tags/mcrl2-VERSION
+  $ mkdir mcrl2-package
+  $ cd mcrl2-package
+  $ cmake ../mcrl2-VERSION
+  $ make package_source
+  
+  
+.. Debian/Ubuntu packages
+.. ^^^^^^^^^^^^^^^^^^^^^^
 
 
-Debian/Ubuntu packages
-^^^^^^^^^^^^^^^^^^^^^^
-
-
-Windows installer
-^^^^^^^^^^^^^^^^^
+.. Windows installer
+.. ^^^^^^^^^^^^^^^^^
 
 
 Creating a development snapshot
