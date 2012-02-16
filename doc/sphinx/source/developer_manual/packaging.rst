@@ -58,7 +58,6 @@ supported platforms::
 * Mac OS X 32-bit
 * Mac OS X 64-bit
 
-
 Testing is done by running (a platform specific variation of)::
 
   $ mkdir mcrl2-release-build
@@ -84,6 +83,9 @@ Testing is done by running (a platform specific variation of)::
   $ make install
   $ ctest
   
+.. warning::
+
+  Do not forget to manually test all graphical tools!
 
   
 Furthermore, integration with CADP and LTSmin must be tested on Linux::

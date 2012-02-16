@@ -45,7 +45,7 @@ binaries are available.
    +------------------------+-------------------------+
 
 If you are using a Linux distribution that is not listed, you may wish to try
-:doc:`compiling mCRL2 yourself <build>`.
+:ref:`compiling mCRL2 yourself <build>`.
 
 .. ifconfig:: release == version
 
