@@ -16,7 +16,7 @@ set(CPACK_PACKAGE_NAME "mcrl2")
 set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
-set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
+set(CPACK_PACKAGE_CONTACT "mcrl2-users@listserver.tue.nl")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
 
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
