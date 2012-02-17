@@ -10,6 +10,14 @@
 project(mcrl2_data)
 cmake_minimum_required(VERSION 2.6)
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB HEADERS "include/mcrl2/data/*.h")
+FILE(GLOB DETAIL_HEADERS "include/mcrl2/data/detail/*.h")
+FILE(GLOB DETAIL_SUB_HEADERS "include/mcrl2/data/detail/*/*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS} ${DETAIL_HEADERS} ${DETAIL_SUB_HEADERS}
+)
+
 # ######### General setup ##########
 
 #jitty.c requires DL_LIBS

@@ -13,6 +13,13 @@
 project(mcrl2_utilities)
 cmake_minimum_required(VERSION 2.6)
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB HEADERS "include/mcrl2/utilities/*.h")
+FILE(GLOB DETAIL_HEADERS "include/mcrl2/utilities/detail/*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS} ${DETAIL_HEADERS}
+)
+
 set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.cpp

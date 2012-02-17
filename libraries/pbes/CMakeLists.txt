@@ -10,6 +10,13 @@
 project(mcrl2_pbes)
 cmake_minimum_required(VERSION 2.6)
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB HEADERS "include/mcrl2/pbes/*.h")
+FILE(GLOB DETAIL_HEADERS "include/mcrl2/pbes/detail/*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS} ${DETAIL_HEADERS}
+)
+
 # ######### General setup ##########
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
