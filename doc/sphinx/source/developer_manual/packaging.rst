@@ -225,6 +225,12 @@ Windows::
   cmake ..\mcrl2-VERSION -G "NMake Makefiles" -DSVNVERSION:FILEPATH="C:\Program Files\SlikSvn\bin\svnversion" -DwxWidgets_CONFIGURATION="msw" -DwxWidgets_USE_REL_AND_DBG=ON -DSVNCOMMAND:FILEPATH="C:\Program Files\SlikSvn\bin\svn" -DBUILDNAME=MSVC9-Win7-X64-Release -DBOOST_ROOT:PATH="C:\Projects\boost_1_48_0" -DwxWidgets_ROOT_DIR:PATH="C:\Projects\wxmsw_2_8_11" -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_ENABLE_EXPERIMENTAL=ON -DCMAKE_BUILD_TYPE:STRING="Release" -DMCRL2_PACKAGE_RELEASE=ON
   cpack -G NSIS
 
+An alternative way to create a Windows installer, used on a 32bit system::
+
+  cmake . -DBOOST_ROOT=D:/build/boost/boost_1_47 -DwxWidgets_ROOT_DIR=d:/build/wxWidgets-2.8.12 -DMCRL2_WITH_WXSTC=ON -DMCRL2_PACKAGE_RELEASE=ON
+  cmake --build . --config Release --target ALL_BUILD
+  cpack -G NSIS
+
 Upload the installer that has been generated to
 ``http://www.mcrl2.org/download/release``.
 
@@ -247,6 +253,7 @@ Then configure cmake::
             -DwxWidgets_wxrc_EXECUTABLE=$WX-INSTALL/bin/wxrc \
             -DwxWidgets_CONFIG_EXECUTABLE=$WX-INSTALL/bin/wx-config \
             -DMCRL2_PACKAGE_RELEASE=ON
+            -DMCRL2_WITH_WXSTC=ON
 
 Build the toolset::
 
