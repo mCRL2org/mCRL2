@@ -210,7 +210,7 @@ void GLCanvas::render3D()
 	  currentModelviewMatrix[13] = -lookY;
 	  currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
 	  currentModelviewMatrix[15] = 1;
-	  double xl, yl, zl;
+	  float xl, yl, zl;
 	  xl = 0;
 	  yl = 0;
 	  zl = lookZ + 100;
@@ -458,7 +458,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
       {
         if (!usingTool)
         {
-          double invect[] = {newX - oldX, oldY - newY, 0, 1};
+          double invect[] = {static_cast<double>(newX - oldX), static_cast<double>(oldY - newY), 0, 1};
 
           owner->moveObject(invect);
         }

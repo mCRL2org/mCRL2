@@ -24,8 +24,8 @@ namespace libgrape
  */
 struct coordinate
 {
-  float m_x; /**< x-coordinate. */
-  float m_y; /**< y-coordinate. */
+  double m_x; /**< x-coordinate. */
+  double m_y; /**< y-coordinate. */
 
   /** @return True if the given coordinate is the same as the object. */
   bool operator==(const coordinate& p_c);
