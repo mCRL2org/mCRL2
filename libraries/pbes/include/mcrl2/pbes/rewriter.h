@@ -25,7 +25,7 @@
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
-#include "mcrl2/pbes/detail/pfnf_visitor.h"
+#include "mcrl2/pbes/detail/pfnf_traverser.h"
 
 namespace mcrl2
 {
@@ -198,7 +198,7 @@ class pfnf_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      pbes_system::detail::is_pfnf_traverser visitor;
+      pbes_system::detail::pfnf_traverser visitor;
       visitor(x);
       return visitor.evaluate();
     }
