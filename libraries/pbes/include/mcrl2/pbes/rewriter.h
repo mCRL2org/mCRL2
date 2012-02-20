@@ -198,8 +198,8 @@ class pfnf_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      pbes_system::detail::pfnf_visitor visitor;
-      visitor.visit(x);
+      pbes_system::detail::is_pfnf_traverser visitor;
+      visitor(x);
       return visitor.evaluate();
     }
 

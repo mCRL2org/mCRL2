@@ -65,10 +65,10 @@ pbes_system::pbes_expression expr(const std::string& text)
 
 void test_pfnf_expression(std::string s)
 {
-  pbes_system::detail::pfnf_visitor visitor;
+  pbes_system::detail::is_pfnf_traverser visitor;
   pbes_system::pbes_expression t1 = expr(s);
 std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
-  visitor.visit(t1);
+  visitor(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
 std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   data::rewriter datar;
