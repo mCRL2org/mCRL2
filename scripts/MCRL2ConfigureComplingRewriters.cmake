@@ -11,7 +11,6 @@
 ##---------------------------------------------------
 
 IF( UNIX )
-#FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include/mcrl2/setup.h)
 
 set(CC  ${CMAKE_C_COMPILER})
 set(CXX ${CMAKE_CXX_COMPILER})
@@ -58,7 +57,6 @@ else ( NOT APPLE )
   set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
 endif( NOT APPLE )
 
-#configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
 if( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" )
 else( CMAKE_RUNTIME_OUTPUT_DIRECTORY )

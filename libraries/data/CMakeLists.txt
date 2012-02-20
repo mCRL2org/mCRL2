@@ -55,8 +55,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-#The following include directory is required by out-of-source builds for finding setup.h
-include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
 
 add_library(${PROJECT_NAME}
   ${mcrl2_data_src}
