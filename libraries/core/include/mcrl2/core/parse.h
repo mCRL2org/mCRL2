@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -28,6 +28,7 @@
 extern "C"
 {
   extern D_ParserTables parser_tables_mcrl2;
+  extern D_ParserTables parser_tables_fsm;
 }
 
 namespace mcrl2
