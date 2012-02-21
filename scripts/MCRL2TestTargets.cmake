@@ -150,18 +150,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
   endif( MCRL2_ENABLE_EXPERIMENTAL )
 
-  if( MCRL2_ENABLE_DEPRECATED )
-    add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
-    add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2)
-
-    set_tests_properties(
-       chi2mcrl2_test 
-       lysa2mcrl2_test
-     PROPERTIES
-       LABELS "${MCRL2_TEST_LABEL}"
-     )
-  endif( MCRL2_ENABLE_DEPRECATED )
-
   # Simulation tools
   # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
   # set_tests_properties(lpssim_abp PROPERTIES TIMEOUT 15 )

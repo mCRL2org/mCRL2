@@ -89,20 +89,6 @@ if(FLEX_FOUND AND BISON_FOUND)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/core/source
   )
 
-  add_custom_target(chiparser
-    ${FLEX_EXECUTABLE} -Pchi -ochilexer.cpp chilexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="chi" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/chi2mcrl2
-  )
-
-  add_custom_target(lysaparser
-    ${FLEX_EXECUTABLE} -Plysa -olysalexer.cpp lysalexer.ll
-    COMMAND ${BISON_EXECUTABLE} -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
-		COMMAND ${CMAKE_COMMAND} -DPARSER="lysa" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/lysa2mcrl2
-  )
-
   add_custom_target(liblts_fsmparser
     ${FLEX_EXECUTABLE} -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
     COMMAND ${BISON_EXECUTABLE} -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
@@ -123,7 +109,7 @@ if(FLEX_FOUND AND BISON_FOUND)
   add_custom_target(parsers
 		 ${CMAKE_COMMAND} -E copy "${FLEX_INCLUDE_DIR}/FlexLexer.h" "${CMAKE_SOURCE_DIR}/build/workarounds"
   )
-  add_dependencies( parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser )
+  add_dependencies( parsers mcrl2parser liblts_fsmparser liblts_dotparser )
 
 endif(FLEX_FOUND AND BISON_FOUND)
 
