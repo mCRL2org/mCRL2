@@ -40,6 +40,13 @@ if (CXX_ACCEPTS_CPP0X)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif (CXX_ACCEPTS_CPP0X)
 
+if (APPLE)
+  check_cxx_compiler_flag(-stdlib=libc++ CXX_ACCEPTS_LIBCPP)
+  if (CXX_ACCEPTS_LIBCPP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  endif (CXX_ACCEPTS_LIBCPP)
+endif (APPLE)
+
 check_cxx_compiler_flag(-Wall CXX_ACCEPTS_WALL )
 if( CXX_ACCEPTS_WALL )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
