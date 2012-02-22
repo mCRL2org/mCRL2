@@ -1139,7 +1139,7 @@ void command_line_parser::process_default_options(interface_description& d)
   }
   else if (m_options.count("generate-wiki-page"))
   {
-    std::cout << d.wiki_page(std::cout);
+    d.wiki_page(std::cout);
   }
   else if (m_options.count("generate-xml"))
   {
