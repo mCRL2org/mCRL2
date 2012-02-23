@@ -260,13 +260,6 @@ class lts2pbes_tool : public input_output_tool
           convert_to_lts_lts(l, result);
           break;
         }
-        case lts_svc:
-        {
-          lts_svc_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
-        }
       }
     }
 

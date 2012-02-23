@@ -28,7 +28,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace std;
@@ -244,10 +243,6 @@ class ltscompare_tool : public ltscompare_base
         case lts_dot:
         {
           return lts_compare<lts_dot_t>();
-        }
-        case lts_svc:
-        {
-          return lts_compare<lts_svc_t>();
         }
       }
       return true;

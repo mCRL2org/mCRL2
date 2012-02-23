@@ -26,7 +26,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 namespace mcrl2
 {

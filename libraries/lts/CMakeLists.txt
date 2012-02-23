@@ -47,7 +47,7 @@ set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotlexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_lts.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_svc.cpp
+#  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_svc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dot.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts.cpp

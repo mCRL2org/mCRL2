@@ -312,10 +312,6 @@ class lts2lps_tool : public input_output_tool
         {
           return transform_lps2lts<lts_dot_t>();
         }
-        case lts_svc:
-        {
-          return transform_lps2lts<lts_svc_t>();
-        }
       }
       return true;
     }

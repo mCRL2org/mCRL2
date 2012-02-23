@@ -29,7 +29,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 namespace mcrl2
 {
@@ -111,7 +110,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .lts/.svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -192,7 +191,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -231,46 +230,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
-  }
-  lts_convert(lts_in,lts_out);
-}
-
-// ======================  lts -> svc =============================
-
-class lts_svc_convertor
-{
-  public:
-    action_label_svc translate_label(const action_label_lts& l) const
-    {
-      return action_label_svc(l.aterm_without_time());
-    }
-
-    state_label_svc translate_state(const state_label_lts& l) const
-    {
-      return state_label_svc(l);
-    }
-};
-
-inline void lts_convert(
-  const lts_lts_t& lts_in,
-  lts_svc_t& lts_out)
-{
-  lts_svc_convertor c;
-  convert_core_lts(c,lts_in,lts_out);
-}
-
-inline void lts_convert(
-  const lts_lts_t& lts_in,
-  lts_svc_t& lts_out,
-  const data::data_specification&,
-  const lps::action_label_list&,
-  const data::variable_list&,
-  const bool extra_data_is_defined=true)
-{
-  if (extra_data_is_defined)
-  {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -319,7 +279,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -360,7 +320,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts/.svc to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -417,7 +377,7 @@ inline void lts_convert(
   const lts_aut_t&,
   lts_lts_t&)
 {
-  throw mcrl2::runtime_error("Cannot translate .aut into .lts/.svc format without additional information (data, action declarations and process parameters)");
+  throw mcrl2::runtime_error("Cannot translate .aut into .lts format without additional information (data, action declarations and process parameters)");
 }
 
 inline void lts_convert(
@@ -463,109 +423,6 @@ inline void lts_convert(
   if (extra_data_is_defined)
   {
     mCRL2log(log::warning) << "While translating .aut to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
-  }
-  lts_convert(lts_in,lts_out);
-}
-
-// ====================== svc -> svc   =============================
-
-inline void lts_convert(
-  const lts_svc_t& lts_in,
-  lts_svc_t& lts_out)
-{
-  lts_out=lts_in;
-}
-
-inline void lts_convert(
-  const lts_svc_t& lts_in,
-  lts_svc_t& lts_out,
-  const data::data_specification&,
-  const lps::action_label_list&,
-  const data::variable_list&,
-  const bool extra_data_is_defined=true)
-{
-  if (extra_data_is_defined)
-  {
-    mCRL2log(log::warning) << "While translating .svc to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
-  }
-  lts_convert(lts_in,lts_out);
-}
-
-// ====================== aut -> svc   =============================
-
-class aut_svc_convertor
-{
-  public:
-    action_label_svc translate_label(const action_label_string& l) const
-    {
-      return action_label_svc((ATerm)ATmakeAppl0(ATmakeAFun(pp(l).c_str(),0,false)));
-    }
-
-    state_label_svc translate_state(const state_label_empty&) const
-    {
-      return state_label_svc();
-    }
-};
-
-
-inline void lts_convert(
-  const lts_aut_t& lts_in,
-  lts_svc_t& lts_out)
-{
-  aut_svc_convertor c;
-  convert_core_lts(c,lts_in,lts_out);
-}
-
-inline void lts_convert(
-  const lts_aut_t& lts_in,
-  lts_svc_t& lts_out,
-  const data::data_specification&,
-  const lps::action_label_list&,
-  const data::variable_list&,
-  const bool extra_data_is_defined=true)
-{
-  if (extra_data_is_defined)
-  {
-    mCRL2log(log::warning) << "While translating .aut to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
-  }
-  lts_convert(lts_in,lts_out);
-}
-
-// ====================== svc -> aut   =============================
-
-class svc_aut_convertor
-{
-  public:
-    action_label_string translate_label(const action_label_svc& l) const
-    {
-      return pp(l);
-    }
-
-    state_label_empty translate_state(const state_label_svc&) const
-    {
-      return state_label_empty();
-    }
-};
-
-inline void lts_convert(
-  const lts_svc_t& lts_in,
-  lts_aut_t& lts_out)
-{
-  svc_aut_convertor c;
-  convert_core_lts(c,lts_in,lts_out);
-}
-
-inline void lts_convert(
-  const lts_svc_t& lts_in,
-  lts_aut_t& lts_out,
-  const data::data_specification&,
-  const lps::action_label_list&,
-  const data::variable_list&,
-  const bool extra_data_is_defined=true)
-{
-  if (extra_data_is_defined)
-  {
-    mCRL2log(log::warning) << "While translating .svc to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -779,7 +636,7 @@ inline void lts_convert(
   const lts_fsm_t&,
   lts_lts_t&)
 {
-  throw mcrl2::runtime_error("Cannot translate .fsm into .lts/.svc format without additional LPS information (data, action declarations and process parameters).");
+  throw mcrl2::runtime_error("Cannot translate .fsm into .lts format without additional LPS information (data, action declarations and process parameters).");
 }
 
 inline void lts_convert(
@@ -1021,7 +878,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_lts_t& lts_out)
 {
-  throw mcrl2::runtime_error("Cannot translate .bcg into .lts/.svc format without additional information (data, action declarations and process parameters)");
+  throw mcrl2::runtime_error("Cannot translate .bcg into .lts format without additional information (data, action declarations and process parameters)");
 }
 
 inline void lts_convert(
@@ -1261,7 +1118,7 @@ inline void lts_convert(
   const lts_dot_t&,
   lts_lts_t&)
 {
-  throw mcrl2::runtime_error("Cannot translate .dot into .lts/.svc format without additional information (data, action declarations and process parameters)");
+  throw mcrl2::runtime_error("Cannot translate .dot into .lts format without additional information (data, action declarations and process parameters)");
 }
 
 inline void lts_convert(
@@ -1277,7 +1134,7 @@ inline void lts_convert(
     lts_convert(lts_in,lts_out);
   }
 
-  mCRL2log(log::warning) << "State labels are lost in the translation from .dot to .lts/.svc format\n";
+  mCRL2log(log::warning) << "State labels are lost in the translation from .dot to .lts format\n";
   lts_out=lts_lts_t();
   lts_out.set_data(data);
   lts_out.set_action_labels(action_labels);
