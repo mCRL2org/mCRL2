@@ -9,7 +9,6 @@
 /// \file fsm-syntax.g
 /// \brief dparser grammar of the FSM format
 
-${declare tokenize}
 ${declare longest_match}
 
 FSM : ParameterList Separator StateList Separator TransitionList ;
@@ -18,13 +17,13 @@ Separator: '---' EOLN ;
 
 ParameterList : Parameter* ;
 
-Parameter : ParameterName '(' DomainCardinality ')' DomainName DomainValueList EOLN ;
+Parameter : ParameterName DomainCardinality SortExpr? DomainValueList EOLN ;
 
 ParameterName: Id ;
 
-DomainCardinality : Number ;
+DomainCardinality : '(' Number  ')' ;
 
-DomainName: Id ;
+SortExpr: "[a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*" ;
 
 DomainValueList : DomainValue* ;
 
@@ -48,7 +47,7 @@ Label: QuotedString ;
 
 QuotedString: "\"[^\"]*\"" $term -1 ;
 
-Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1 ;
+Id: "[a-zA-Z_][a-zA-Z0-9_'@]*" $term -1 ;
 
 Number: "0|([1-9][0-9]*)" $term -1 ;
 
