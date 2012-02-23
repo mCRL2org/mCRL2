@@ -57,11 +57,6 @@ endif( NOT APPLE )
 ## Set C compile flags 
 ##---------------------------------------------------
 
-check_cxx_compiler_flag(-std=c++0x CXX_ACCEPTS_CPP0X)
-if (CXX_ACCEPTS_CPP0X)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-endif (CXX_ACCEPTS_CPP0X)
-
 check_cxx_compiler_flag(-Wall CXX_ACCEPTS_WALL )
 if( CXX_ACCEPTS_WALL )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
