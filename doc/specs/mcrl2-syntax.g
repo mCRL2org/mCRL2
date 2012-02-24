@@ -147,9 +147,7 @@ MultActIdList: MultActId ( ',' MultActId )* ;
 
 MultActIdSet: '{' MultActIdList? '}' ;
 
-CommExprRhs: '->' (Id | 'tau') ;
-
-CommExpr: Id '|' MultActId CommExprRhs? ;
+CommExpr: Id '|' MultActId '->' Id ;
 
 CommExprList: CommExpr ( ',' CommExpr )* ;
 

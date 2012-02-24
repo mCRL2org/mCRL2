@@ -55,26 +55,12 @@ struct process_actions: public lps::action_actions
     return parse_MultActIdList(node.child(1));
   }
 
-  core::identifier_string parse_CommExprRhs(const core::parse_node& node)
-  {
-    // TODO: get rid of this 'nil'
-    core::identifier_string result = core::detail::gsMakeNil();
-    if (node)
-    {
-      if (symbol_name(node.child(1).child(0)) == "Id")
-      {
-        result = parse_Id(node.child(1).child(0));
-      }
-    }
-    return result;
-  }
-
   process::communication_expression parse_CommExpr(const core::parse_node& node)
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
     action_name_multiset lhs(atermpp::push_front(ids, id));
-    core::identifier_string rhs = parse_CommExprRhs(node.child(3).child(0));
+    core::identifier_string rhs = parse_Id(node.child(4));
     return process::communication_expression(lhs, rhs);
   }
 
