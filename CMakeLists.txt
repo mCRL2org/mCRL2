@@ -486,7 +486,7 @@ FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
   FILES
     ${dparser_headers}
-  DESTINATION include
+  DESTINATION include/dparser
 )
 endif( MCRL2_INSTALL_HEADERS )
 
