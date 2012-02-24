@@ -2,8 +2,12 @@
 Changes between toolset releases 201202.0 and 201207.0:
 ===============================================================================
 
+Libraries:
+   - LTS library: removed support for the SVC format.
+
 The following tools have been removed:
    - chi2mcrl2
+   - ltsmin
    - lysa2mcrl2
 
 ===============================================================================
