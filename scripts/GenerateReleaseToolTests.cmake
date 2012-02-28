@@ -1331,7 +1331,7 @@ endmacro( gen_lpsrealelm_release_tests )
 
 message( STATUS  "Preparing release tool tests" )
 # Set lts different lts output formats
-set(LTS_EXTS "lts;aut;svc;dot;fsm" )
+set(LTS_EXTS "lts;aut;dot;fsm" )
 if(${MCRL2_ENABLE_CADP_SUPPORT})
   set(LTS_EXTS "${LTS_EXTS};bcg}")
 endif(${MCRL2_ENABLE_CADP_SUPPORT})

@@ -121,8 +121,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   set_tests_properties( lps2lts_abp_fsm PROPERTIES DEPENDS lpssuminst_abp )
   add_test(lps2lts_abp_dot ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
   set_tests_properties( lps2lts_abp_dot PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_svc ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.svc  )
-  set_tests_properties( lps2lts_abp_svc PROPERTIES DEPENDS lpssuminst_abp )
   add_test(lps2lts_abp_lts ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
   set_tests_properties( lps2lts_abp_lts PROPERTIES DEPENDS lpssuminst_abp )
   add_test(ltsinfo_abp     ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.aut )
@@ -131,8 +129,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   set_tests_properties( ltsinfo_abp_fsm PROPERTIES DEPENDS lps2lts_abp_fsm )
   add_test(ltsinfo_abp_dot ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.dot )
   set_tests_properties( ltsinfo_abp_dot PROPERTIES DEPENDS lps2lts_abp_dot )
-  add_test(ltsinfo_abp_svc ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.svc )
-  set_tests_properties( ltsinfo_abp_svc PROPERTIES DEPENDS lps2lts_abp_svc )
   add_test(ltsinfo_abp_lts ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
   set_tests_properties( ltsinfo_abp_lts PROPERTIES DEPENDS lps2lts_abp_lts )
   add_test(lps2pbes_abp ${lps2pbes_BINARY_DIR}/lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
@@ -149,26 +145,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     add_test(pbesinst_abp ${pbesinst_BINARY_DIR}/pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
     set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
   endif( MCRL2_ENABLE_EXPERIMENTAL )
-
-  # Simulation tools
-  # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpssim_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(lpsxsim_abp ${lpsxsim_BINARY_DIR}/lpsxsim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpsxsim_abp PROPERTIES TIMEOUT 15 )
-
-  # Graphical tools
-  # add_test(diagraphica_abp ${diagraphica_BINARY_DIR}/diagraphica ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(diagraphica_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsview_abp ${ltsview_BINARY_DIR}/ltsview ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsview_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsgraph_abp ${ltsgraph_BINARY_DIR}/ltsgraph ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsgraph_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
-  # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
 
   # Documentation tests
   if (MCRL2_MAN_PAGES)
@@ -211,7 +187,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
 # Usage run_release_tests( "/path/to/mcrl2file" "list of tests to disable" )
 run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" "")
 
-	
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps;lts2pbes")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
