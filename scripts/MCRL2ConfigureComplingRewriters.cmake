@@ -57,14 +57,20 @@ else ( NOT APPLE )
   set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
 endif( NOT APPLE )
 
+set ( R_STAGE_INCLUDE_DIRS "" )
 if( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" )
+  set( R_STAGE_INCLUDE_DIRS "${R_STAGE_INCLUDE_DIRS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/aterm/include\"" )
+  set( R_STAGE_INCLUDE_DIRS "${R_STAGE_INCLUDE_DIRS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/atermpp/include\"" )
+  set( R_STAGE_INCLUDE_DIRS "${R_STAGE_INCLUDE_DIRS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include\"" )
+  set( R_STAGE_INCLUDE_DIRS "${R_STAGE_INCLUDE_DIRS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/core/include\"" )
+  set( R_STAGE_INCLUDE_DIRS "${R_STAGE_INCLUDE_DIRS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/data/include\"" )
 else( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/mcrl2compilerewriter" )
 endif( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" @ONLY )
 add_executable( mcrl2compilerewriter IMPORTED IMPORTED_LOCATION "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" )
-install( 
+install(
   PROGRAMS "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}"
   DESTINATION bin/
 )

@@ -73,10 +73,10 @@ public:
         // flush script output to the log.
         if (!file_exists(line))
         {
-          mCRL2log(mcrl2::log::error) << "Compile script produced unexpected output:\n";
+          mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
           mcrl2::log::mcrl2_logger::indent();
           mCRL2log(mcrl2::log::error) << line << std::endl;
-          while (fgets(buf, 1024, stream) != NULL) 
+          while (fgets(buf, 1024, stream) != NULL)
           {
             mCRL2log(mcrl2::log::error) << std::string(buf);
           }

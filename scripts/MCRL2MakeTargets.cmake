@@ -50,25 +50,6 @@ if(UNIX)
 endif(UNIX)
 
 ##---------------------------------------------------
-## Target quickbook documentation
-##---------------------------------------------------
-
-if(Boost_FOUND)
-find_program(BOOST_BJAM
-             NAMES bjam
-             PATHS "${BOOST_INCLUDEDIR}/bin"
-                     /usr/local/bin
-                     /usr/pkg/bin
-                     /usr/bin
-            )
-    if(BOOST_BJAM)
-	    add_custom_target(quickbook
-            ${BOOST_BJAM} html
-	    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc)
-    endif(BOOST_BJAM)
-endif(Boost_FOUND)
-
-##---------------------------------------------------
 ## Target parsers
 ##---------------------------------------------------
 
