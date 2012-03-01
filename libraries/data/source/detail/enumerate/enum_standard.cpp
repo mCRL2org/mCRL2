@@ -423,6 +423,7 @@ bool EnumeratorSolutionsStandard::next(
       const sort_expression sort = var.sort();
       variable_list uvars = pop_front(e.vars());
 
+
       if (is_function_sort(sort))
       {
         if (solution_possible)
@@ -523,7 +524,8 @@ bool EnumeratorSolutionsStandard::next(
             {
               if (solution_possible)
               {
-                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used\n";
+                mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
+                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
                 solution_possible=false;
                 return false;
               }
