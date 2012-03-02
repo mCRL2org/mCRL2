@@ -335,30 +335,43 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
       const variable_list vl,
       const atermpp::aterm_appl t1,
-      const bool /* t1_is_normal_formi */,
+      const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
-  // First rename the bound variables to unique
-  // variables, to avoid naming conflicts.
-
   mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
   
   variable_list vl_new;
+
+  const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
+  std::set < variable > free_variables;
+  find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+
+  // Rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
   {
-    const variable v= (*i);
-    const variable v_fresh(generator("ex_"), v.sort());
-    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    vl_new=push_front(vl_new,v_fresh);
+    const variable v= *i;
+    if (free_variables.count(v)>0)
+    {
+      const variable v_fresh(generator("ex_"), v.sort());
+      variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+      vl_new=push_front(vl_new,v_fresh);
+    }
   }
 
-  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+  if (vl_new.empty())
+  {
+    return t2; // No quantified variables are bound.
+  }
+
+  const atermpp::aterm_appl t3=atermpp::replace(t2,variable_renaming);
 
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,true,&ES,100);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,&ES,100,true);
 
   /* Create a list to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -412,30 +425,43 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
       const variable_list vl,
       const atermpp::aterm_appl t1,
-      const bool /* t1_is_normal_formi */,
+      const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
-  // First rename the bound variables to unique
-  // variables, to avoid naming conflicts.
-
   mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
-  
+
   variable_list vl_new;
+
+  const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
+  std::set < variable > free_variables;
+  find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+
+  // Rename the bound variables to unique
+  // variables, to avoid naming conflicts.
+  
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
   {
-    const variable v= (*i);
-    const variable v_fresh(generator("all_"), v.sort());
-    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    vl_new=push_front(vl_new,v_fresh);
+    const variable v= *i;
+    if (free_variables.count(v)>0)
+    {
+      const variable v_fresh(generator("all_"), v.sort());
+      variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+      vl_new=push_front(vl_new,v_fresh);
+    }
   }
 
-  const atermpp::aterm_appl t1_new=atermpp::replace(t1,variable_renaming);
+  if (vl_new.empty())
+  {
+    return t2; // No quantified variables occur in the body.
+  }
+
+  const atermpp::aterm_appl t3=atermpp::replace(t2,variable_renaming);
 
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t1_new, sigma,false,&ES,100);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,&ES,100,true);
 
   /* Create lists to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;

@@ -192,6 +192,10 @@ class EnumeratorSolutionsStandard
     /// \param[in] max_internal_variables Maximal number of internal variables that will be used
     ///                                   when generating solutions. If 0 there is no limit, and
     ///                                   the enumerator may not terminate.
+    //  \param[in] expr_is_normal_form A boolean that indicates whether expr is in normal form. If
+    //                                 not, the first action of the enumerator is to rewrite it in
+    //                                 normal form, but sometimes this is known, and in such 
+    //                                 a case rewriting can be avoided.
 
     EnumeratorSolutionsStandard(
                    const variable_list &vars, 
@@ -199,7 +203,8 @@ class EnumeratorSolutionsStandard
                    internal_substitution_type &sigma,
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
-                   const size_t max_internal_variables=0) :
+                   const size_t max_internal_variables=0,
+                   const bool expr_is_normal_form=false) :
       m_enclosing_enumerator(enclosing_enumerator),
       enum_vars(vars),
       enum_expr(expr),
@@ -210,7 +215,7 @@ class EnumeratorSolutionsStandard
     { 
       enum_vars.protect();
       enum_expr.protect();
-      reset(not_equal_to_false);
+      reset(not_equal_to_false,expr_is_normal_form);
     }
 
     /// Standard destructor.
@@ -265,7 +270,7 @@ class EnumeratorSolutionsStandard
 
 
   private:
-    void reset(const bool not_equal_to_false); 
+    void reset(const bool not_equal_to_false, const bool expr_is_normal_form); 
 
     bool find_equality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 

@@ -618,15 +618,28 @@ bool EnumeratorSolutionsStandard::next(
   return next(dummy_evaluated_condition,solution,solution_possible);
 }
 
-void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false)
+void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool expr_is_normal_form)
 {
-  push_on_fs_stack_and_split_or(fs_stack,
-                                enum_vars,
-                                variable_list(),
-                                atermpp::term_list< atermpp::aterm_appl>(),
-                                enum_expr,
-                                atermpp::term_list< atermpp::aterm_appl>(),
-                                !not_equal_to_false);
+  if (expr_is_normal_form)
+  {
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,
+                                  enum_vars,
+                                  variable_list(),
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  enum_expr,
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  !not_equal_to_false);
+  }
+  else
+  {
+    push_on_fs_stack_and_split_or(fs_stack,
+                                  enum_vars,
+                                  variable_list(),
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  enum_expr,
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  !not_equal_to_false);
+  }
 }
 
 EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r):
