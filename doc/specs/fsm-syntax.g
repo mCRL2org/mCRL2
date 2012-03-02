@@ -11,6 +11,8 @@
 
 ${declare longest_match}
 
+//--- FSM syntax
+
 FSM : ParameterList Separator StateList Separator TransitionList ;
 
 Separator: '---' EOLN ;

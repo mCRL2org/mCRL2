@@ -36,11 +36,11 @@ namespace mcrl2
 namespace core
 {
 
-struct default_parser_actions
+struct parser_actions
 {
   const parser_table& table;
 
-  default_parser_actions(const parser_table& table_)
+  parser_actions(const parser_table& table_)
     : table(table_)
   {}
 
@@ -59,6 +59,37 @@ struct default_parser_actions
         traverse(node.child(i), f);
       }
     }
+  }
+
+  // callback function that applies a function to nodes of a given type
+  template <typename Function>
+  struct visitor
+  {
+    const parser_table& table;
+    const std::string& type;
+    Function f;
+
+    visitor(const parser_table& table_, const std::string& type_, Function f_)
+      : table(table_),
+        type(type_),
+        f(f_)
+    {}
+
+    bool operator()(const parse_node& node) const
+    {
+      if (table.symbol_name(node) == type)
+      {
+        f(node);
+        return true;
+      }
+      return false;
+    }
+  };
+
+  template <typename Function>
+  visitor<Function> make_visitor(const parser_table& table, const std::string& type, Function f)
+  {
+    return visitor<Function>(table, type, f);
   }
 
   // callback function that applies a function to a node, and adds the result to a container
@@ -117,6 +148,13 @@ struct default_parser_actions
     std::cout << "--- unexpected node ---\n" << print_node(node);
     throw mcrl2::runtime_error("unexpected node detected!");
   }
+};
+
+struct default_parser_actions: public parser_actions
+{
+  default_parser_actions(const parser_table& table_)
+    : parser_actions(table_)
+  {}
 
   template <typename T, typename Function>
   atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)

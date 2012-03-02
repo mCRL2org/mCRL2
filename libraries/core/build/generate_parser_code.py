@@ -2,6 +2,10 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+# This script generates code for traversing a DParser parse tree from a DParser grammar.
+# It can only handle a subset of EBNF, so the result is not perfect. The layout of the
+# DParser grammar is expected to be in a specific format.
+
 import re
 import string
 from optparse import OptionParser
@@ -9,7 +13,7 @@ from mcrl2_utility import *
 from parse_mcrl2_syntax import *
 from path import *
 
-PRODUCTION_MAPPING = '''
+MCRL2_MAPPING = '''
   ActDecl lps::action_label_list
   ActFrm action_formulas::action_formula
   ActIdSet core::identifier_string_list
@@ -91,19 +95,34 @@ PRODUCTION_MAPPING = '''
   WhrExprList data::identifier_assignment_list
 '''
 
+FSM_MAPPING = '''
+  FSM
+  Separator
+  ParameterList
+  Parameter
+  ParameterName
+  DomainCardinality
+  DomainValueList
+  DomainValue
+  StateList
+  State
+  TransitionList
+  Transition
+  Source
+  Target
+  Label
+  QuotedString core::identifier_string
+  SortExpr data::sort_expression
+'''
+
 PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
   {
 BODY
   }
 '''
 
+# Global variables
 production_return_types = {}
-for line in PRODUCTION_MAPPING.splitlines():
-    words = line.split()
-    if len(words) == 1:
-        production_return_types[words[0]] = 'UNKNOWN'
-    elif len(words) == 2:
-        production_return_types[words[0]] = words[1]
 
 def make_condition(alternative):
     result = []
@@ -246,6 +265,23 @@ def my_print(sections):
             for (text, comment, annotation) in rhs:
                 print lhs, '->', text
 
+
+def generate_code(filename, production_mapping):
+    global production_return_types
+    production_return_types = {}
+    for line in production_mapping.splitlines():
+        words = line.split()
+        if len(words) == 1:
+            production_return_types[words[0]] = 'UNKNOWN'
+        elif len(words) == 2:
+            production_return_types[words[0]] = words[1]
+
+
+    sections = parse_mcrl2_syntax(filename)
+    sections = post_process_sections(sections)
+    for (title, productions) in sections:
+        print_section(title, productions)
+
 #---------------------------------------------------------------#
 #                          main
 #---------------------------------------------------------------#
@@ -255,10 +291,10 @@ def main():
     (options, args) = parser.parse_args()
 
     filename = '../../../doc/specs/mcrl2-syntax.g'
-    sections = parse_mcrl2_syntax(filename)
-    sections = post_process_sections(sections)
-    for (title, productions) in sections:
-        print_section(title, productions)
+    #generate_code(filename, MCRL2_MAPPING)
+
+    filename = '../../../doc/specs/fsm-syntax.g'
+    generate_code(filename, FSM_MAPPING)
 
 if __name__ == "__main__":
     main()
