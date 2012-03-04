@@ -5,14 +5,17 @@ The __trace_library__ is a simple library to store, load and traverse traces.
 Concepts
 ========
 
-A trace is a sequence of actions [^a1 a2 a3 ... an]. Between the actions there can
-be states and the actions/states can have time tags. In the most extensive form
-a trace is a sequence [^s1 t1 a1 s2 t2 a2 ... sn tn] an [^sn+1 tn+1] where [^si]
-is state [^i], [^ti] is time tag [^i] and [^ai] is action [^i]. Traces can be
-generated using a
+A trace is a sequence of multi actions [^a1 a2 a3 ... an]. Between the multi actions there can
+be states and the multi actions can have time tags. In the most extensive form
+a trace is a sequence [^s1 a1@t1 s2 a2@t2 ... an@tn sn+1] where [^si]
+is a state [^i], [^ti] is a time tag [^i] and [^ai] is a multiaction [^i]. 
+
+Traces can be generated using a
 simulation tool but they can also be the result of an analysis tool. E.g., an
 analysis tool can generate one or more traces to a deadlock. Such a generated
 trace can subsequently be inspected by a tool capable of reading a trace.
+
+THE TEXT BELOW IS OUTDATED.
 
 All states, traces and time tags are of type `ATermAppl`. This is the type of
 a term consisting of a function application to terms in the `ATerm` library. In

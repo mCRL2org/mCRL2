@@ -896,7 +896,8 @@ class bisim_partitioner
               old_counter_trace.resetPosition();
               for (size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
               {
-                new_counter_trace.addAction(old_counter_trace.nextAction());
+                new_counter_trace.addAction(old_counter_trace.currentAction());
+                old_counter_trace.increasePosition();
               }
               resulting_counter_traces.insert(new_counter_trace);
             }

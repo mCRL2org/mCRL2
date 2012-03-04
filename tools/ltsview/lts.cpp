@@ -933,7 +933,8 @@ void LTS::loadTrace(std::string const& path)
 
   while (tr.getPosition() != tr.number_of_actions())
   {
-    std::string action = pp(tr.nextAction());
+    std::string action = pp(tr.currentAction());
+    tr.increasePosition();
 
     std::vector<Transition*> posTrans = sim->getPosTrans();
     int possibilities = 0;
