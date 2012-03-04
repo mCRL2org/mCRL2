@@ -787,12 +787,7 @@ class Trace
         i--;
         if (i<actions.size())
         {
-          assert(actions.size()>i && actions[i]!=mcrl2::lps::multi_action());
-          /* if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
-          {
-            mCRL2log(log::error) << "saving trace that is not in mCRL2 format to a mCRL2 trace format" << std::endl;
-            error_shown = true;
-          } */
+          assert(actions.size()>i);
           trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i]));
         }
         if (states.size()>i)
