@@ -14,6 +14,7 @@
 #include <string>
 #include <cstring>
 #include <limits>
+#include <algorithm>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -37,9 +38,6 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
-using namespace std;
 using namespace mcrl2::log;
 
 namespace mcrl2
@@ -190,17 +188,16 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   size_t count=0;
   atermpp::vector <variable> new_variables(vl.size());
   {
-    // Restrict the scope of identifiers_in_sigma.
-    atermpp::set < core::identifier_string > identifiers_in_sigma(get_identifiers(sigma));
+    atermpp::set < variable > variables_in_sigma(get_free_variables(sigma));
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
       const variable v= *it;
-      if (identifiers_in_sigma.find(v.name()) != identifiers_in_sigma.end())
+      if (variables_in_sigma.find(v) != variables_in_sigma.end())
       {
         number_of_renamed_variables++;
-        new_variables[count]=data::variable(generator("x_"), v.sort());
+        new_variables[count]=data::variable(generator("y_"), v.sort());
       }
       else new_variables[count]=v;
     }
@@ -343,8 +340,9 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   variable_list vl_new;
 
   const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
-  std::set < variable > free_variables;
-  find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+  atermpp::set < variable > free_variables;
+  // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+  get_free_variables(t2,free_variables);
 
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
@@ -433,8 +431,9 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   variable_list vl_new;
 
   const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
-  std::set < variable > free_variables;
-  find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+  atermpp::set < variable > free_variables;
+  // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
+  get_free_variables(t2,free_variables);
 
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
@@ -590,7 +589,7 @@ static void checkPattern(const data_expression p)
   {
     if (is_variable(application(p).head()))
     {
-      throw mcrl2::runtime_error(string("variable ") + data::pp(application(p).head()) +
+      throw mcrl2::runtime_error(std::string("variable ") + data::pp(application(p).head()) +
                " is used as head symbol in an application, which is not supported");
     }
     checkPattern(application(p).head());
@@ -652,7 +651,7 @@ void CheckRewriteRule(const data_equation data_eqn)
   }
   catch (mcrl2::runtime_error &s)
   {
-    throw runtime_error(string(s.what()) + " (in equation: " + pp(data_eqn) + "); equation cannot be used as rewrite rule");
+    throw runtime_error(std::string(s.what()) + " (in equation: " + pp(data_eqn) + "); equation cannot be used as rewrite rule");
   }
 }
 

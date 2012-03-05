@@ -238,19 +238,6 @@ class Rewriter
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma);
 
-/*     core::identifier_string forall_function_symbol()
-    {
-      static core::identifier_string forall_function_symbol = core::detail::initialise_static_expression(forall_function_symbol, core::identifier_string("forall"));
-      return forall_function_symbol;
-    }
-
-    core::identifier_string exists_function_symbol()
-    {
-      static core::identifier_string exists_function_symbol = core::detail::initialise_static_expression(exists_function_symbol, core::identifier_string("exists"));
-      return exists_function_symbol;
-    }
-*/
-
 };
 
 /**
