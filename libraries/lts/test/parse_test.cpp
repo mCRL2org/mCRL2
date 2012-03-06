@@ -9,14 +9,33 @@
 /// \file parse_test.cpp
 /// \brief Add your file description here.
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/minimal.hpp>
+
 #include "mcrl2/lts/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
+void parse_fsm(const std::string& text, lts::lts_fsm_t& result)
+{
+  // TODO: The load function should be fixed, so this is not needed!
+  result = lts::lts_fsm_t();
+
+  std::string temp_filename = "parse_test.tmp";
+  std::ofstream to(temp_filename.c_str());
+  to << text;
+  to.close();
+  result.load(temp_filename);
+  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+}
+
+inline
 std::string print_state_label(const lts::detail::state_label_fsm& label)
 {
   std::ostringstream out;
@@ -27,37 +46,45 @@ std::string print_state_label(const lts::detail::state_label_fsm& label)
   return out.str();
 }
 
-void print_fsm(const lts::lts_fsm_t& l)
+inline
+std::string print_fsm(const lts::lts_fsm_t& l)
 {
-  // Get the number of states, state values, action labels and transitions.
-  std::cout << "#states: "         << l.num_state_labels() << "\n" <<
-               "#action labels: "  << l.num_action_labels() << "\n"<<
-               "#transitions: "    << l.num_transitions() << "\n" <<
-               "#has state labels" << (l.has_state_info() ? " yes\n" : " no\n");
+  std::ostringstream out;
 
-  std::cout << "Initial state is " << l.initial_state() << "\n";
+  out << "#states: "         << l.num_state_labels() << "\n" <<
+         "#action labels: "  << l.num_action_labels() << "\n"<<
+         "#transitions: "    << l.num_transitions() << "\n" <<
+         "#has state labels" << (l.has_state_info() ? " yes\n" : " no\n");
 
-  for(unsigned int i=0; i<l.num_state_labels(); ++i)
+  out << "Initial state is " << l.initial_state() << "\n";
+
+  for(unsigned int i = 0; i < l.num_state_labels(); ++i)
   {
-    std::cout << "State " << i << " has value " << print_state_label(l.state_label(i)) << "\n";
+    out << "State " << i << " has value " << print_state_label(l.state_label(i)) << "\n";
   }
 
   for (unsigned int i = 0; i < l.num_action_labels(); ++i)
   {
-    std::cout << "Action label " << i << " has value " << l.action_label(i) << (l.is_tau(i) ? " (is internal)" : " (is external)") << "\n";
+    out << "Action label " << i << " has value " << l.action_label(i) << (l.is_tau(i) ? " (is internal)" : " (is external)") << "\n";
   }
 
   for(std::vector<lts::transition>::const_iterator i = l.get_transitions().begin(); i != l.get_transitions().end(); ++i)
   {
-    std::cerr << "Transition [" << i->from() << "," << i->label() << "," << i->to() << "]\n";
+    out << "Transition [" << i->from() << "," << i->label() << "," << i->to() << "]\n";
   }
+
+  return out.str();
 }
 
 void test_fsm()
 {
-  lts::lts_fsm_t fsm;
+  lts::lts_fsm_t fsm1;
+  lts::lts_fsm_t fsm2;
+  std::string text1;
+  std::string text2;
+  std::string FSM;
 
-  std::string FSM1 =
+  FSM =
     "b(2) Bool \"F\" \"T\" \n"
     "n(2) Nat \"1\" \"2\"  \n"
     "---                   \n"
@@ -75,10 +102,20 @@ void test_fsm()
     "4 2 \"off\"           \n"
     "4 3 \"decrease\"      \n"
     ;
-  lts::parse_fsm_specification(FSM1, fsm);
-  print_fsm(fsm);
+  lts::parse_fsm_specification(FSM, fsm1);
+  parse_fsm(FSM, fsm2);
+  text1 = print_fsm(fsm1);
+  text2 = print_fsm(fsm2);
+  if (text1 != text2)
+  {
+    std::cout << "--- text1 ---" << std::endl;
+    std::cout << text1 << std::endl;
+    std::cout << "--- text2 ---" << std::endl;
+    std::cout << text2 << std::endl;
+  }
+  BOOST_CHECK(text1 == text2);
 
-  std::string FSM2 =
+  FSM =
     "b(2) Bool # Bool -> Nat \"F\" \"T\" \n"
     "n(2) Nat -> Nat \"1\" \"2\"         \n"
     "---                                 \n"
@@ -96,8 +133,11 @@ void test_fsm()
     "4 2 \"off\"                         \n"
     "4 3 \"decrease\"                    \n"
     ;
-  lts::parse_fsm_specification(FSM2, fsm);
-  print_fsm(fsm);
+  lts::parse_fsm_specification(FSM, fsm1);
+  parse_fsm(FSM, fsm2);
+  text1 = print_fsm(fsm1);
+  text2 = print_fsm(fsm2);
+  BOOST_CHECK(text1 == text2);
 }
 
 int test_main(int argc, char** argv)

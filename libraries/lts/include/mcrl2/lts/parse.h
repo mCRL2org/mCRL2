@@ -98,6 +98,7 @@ class fsm_parameter
     }
 };
 
+// N.B. The source and target are 1-based!
 class fsm_transition
 {
   protected:
@@ -107,14 +108,28 @@ class fsm_transition
 
   public:
     fsm_transition(std::size_t source, std::size_t target, const std::string& label)
-      : m_source(source), m_target(target), m_label(label)
-    {}
-
-    fsm_transition(const std::string& source, const std::string& target, const std::string& label)
-      : m_source(detail::parse_number(source)),
-        m_target(detail::parse_number(target)),
+      : m_source(source - 1),
+        m_target(target - 1),
         m_label(label)
-    {}
+    {
+      if (source == 0 || target == 0)
+      {
+        throw mcrl2::runtime_error("transition has a zero coordinate!");
+      }
+    }
+
+    fsm_transition(const std::string& source_text, const std::string& target_text, const std::string& label)
+      : m_label(label)
+    {
+      std::size_t source = detail::parse_number(source_text);
+      std::size_t target = detail::parse_number(target_text);
+      if (source == 0 || target == 0)
+      {
+        throw mcrl2::runtime_error("transition has a zero coordinate!");
+      }
+      m_source = source - 1;
+      m_target = target - 1;
+    }
 
     std::size_t source() const
     {
@@ -151,21 +166,19 @@ typedef std::vector<std::size_t> fsm_state;
 
 struct fsm_actions: public core::default_parser_actions
 {
-  fsm_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_)
+  fsm_actions(const core::parser_table& table_, lts_fsm_t& fsm_)
+    : core::default_parser_actions(table_),
+      fsm(fsm_)
   {}
 
   // The parameters of the FSM
   std::vector<fsm_parameter> m_parameters;
 
-  // The states of the FSM
-  std::vector<fsm_state> m_states;
-
-  // The transitions of the FSM
-  std::vector<fsm_transition> m_transitions;
-
   // Maps labels of the FSM to numbers
   std::map<std::string, std::size_t> m_labels;
+
+  // Where the parse result is stored
+  lts_fsm_t& fsm;
 
   template <typename T, typename Function>
   std::vector<T> parse_vector(const core::parse_node& node, const std::string& type, Function f)
@@ -256,7 +269,7 @@ struct fsm_actions: public core::default_parser_actions
         result.push_back(detail::parse_number(*i));
       }
     }
-    m_states.push_back(result);
+    fsm.add_state(detail::state_label_fsm(result));
   }
 
   void parse_StateList(const core::parse_node& node)
@@ -264,9 +277,30 @@ struct fsm_actions: public core::default_parser_actions
     traverse(node, make_visitor(table, "State", boost::bind(&fsm_actions::parse_State, this, _1)));
   }
 
+  void add_transition(const fsm_transition& t)
+  {
+    std::size_t max = (std::max)(t.source(), t.target());
+    if (fsm.num_states() <= max)
+    {
+      fsm.set_num_states(max, fsm.has_state_info());
+    }
+    std::map<std::string, std::size_t>::const_iterator i = m_labels.find(t.label());
+    lts_fsm_t::labels_size_type label_index = 0;
+    if (i == m_labels.end())
+    {
+      label_index = fsm.add_action(t.label(), t.label() == "tau");
+      m_labels[t.label()] = label_index;
+    }
+    else
+    {
+      label_index = i->second;
+    }
+    fsm.add_transition(transition(t.source(), label_index, t.target()));
+  }
+
   void parse_Transition(const core::parse_node& node)
   {
-    m_transitions.push_back(fsm_transition(parse_Source(node.child(0)), parse_Target(node.child(1)), parse_Label(node.child(2))));
+    add_transition(fsm_transition(parse_Source(node.child(0)), parse_Target(node.child(1)), parse_Label(node.child(2))));
   }
 
   void parse_TransitionList(const core::parse_node& node)
@@ -289,72 +323,35 @@ struct fsm_actions: public core::default_parser_actions
     return parse_QuotedString(node.child(0));
   }
 
-  // Adds a transition to an FSM.
-  void add_transition(lts_fsm_t& fsm, const fsm_transition& t)
+  void parse_FSM(const core::parse_node& node)
   {
-    std::size_t no_states = fsm.num_states();
-    std::size_t max = (std::max)(t.source(), t.target());
-    if (no_states <= max)
-    {
-      fsm.set_num_states(max + 1, fsm.has_state_info());
-    }
-    std::map<std::string, std::size_t>::const_iterator i = m_labels.find(t.label());
-    lts_fsm_t::labels_size_type label_index = 0;
-    if (i == m_labels.end())
-    {
-      label_index = fsm.add_action(t.label(), t.label() == "tau");
-      m_labels[t.label()] = label_index;
-    }
-    else
-    {
-      label_index = i->second;
-    }
-    fsm.add_transition(transition(t.source(), label_index, t.target()));
-  }
-
-  void parse_FSM(const core::parse_node& node, lts_fsm_t& result)
-  {
-    result = lts_fsm_t(); // TODO: add a proper clear() function to lts_fsm_t
+    fsm = lts_fsm_t(); // TODO: add a proper clear() function to lts_fsm_t
     m_parameters.clear();
-    m_states.clear();
-    m_transitions.clear();
-    parse_ParameterList(node.child(0));
-    parse_StateList(node.child(2));
-    parse_TransitionList(node.child(4));
-    std::size_t index = 0;
+    m_labels.clear();
 
+    // parse parameters
+    parse_ParameterList(node.child(0));
+    std::size_t index = 0;
     for (std::vector<fsm_parameter>::const_iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
     {
-      std::cout << "parameter " << i->name() << " " << i->sort() << " " << i->cardinality() << " " << i->values().size() << std::endl;
       if (i->cardinality() > 0)
       {
-        result.add_process_parameter(i->name(), i->sort());
+        fsm.add_process_parameter(i->name(), i->sort());
         for (std::vector<std::string>::const_iterator j = i->values().begin(); j != i->values().end(); ++j)
         {
-          result.add_state_element_value(index, *j);
+          fsm.add_state_element_value(index, *j);
         }
       }
       index++;
     }
 
-    for (std::vector<fsm_state>::const_iterator j = m_states.begin(); j != m_states.end(); ++j)
-    {
-      result.add_state(detail::state_label_fsm(*j));
-      std::cout << "state ";
-      for (std::vector<std::size_t>::const_iterator p = j->begin(); p != j->end(); ++p)
-      {
-        std::cout << *p << " ";
-      }
-      std::cout << std::endl;
-    }
+    // parse states
+    parse_StateList(node.child(2));
 
-    for (std::vector<fsm_transition>::const_iterator k =  m_transitions.begin(); k != m_transitions.end(); ++k)
-    {
-      add_transition(result, *k);
-      std::cout << "transition " << k->source() << " " << k->target() << " " << k->label() << std::endl;
-    }
+    // parse transitions
+    parse_TransitionList(node.child(4));
 
-    result.set_initial_state(0);
+    fsm.set_initial_state(0);
   }
 };
 
@@ -365,7 +362,7 @@ void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
   unsigned int start_symbol_index = p.start_symbol_index("FSM");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  fsm_actions(parser_tables_fsm).parse_FSM(node, result);
+  fsm_actions(parser_tables_fsm, result).parse_FSM(node);
   p.destroy_parse_node(node);
 }
 
