@@ -41,20 +41,33 @@ namespace mcrl2
         return ATmakeAppl2(afunPair,(ATerm)(ATermList)ma1,(ATerm)(ATermAppl)ma2);
       }
 
+      
       template < class T >
-      static atermpp::term_list <T> gsaATsortList(atermpp::term_list <T> l)
+      static atermpp::multiset <T> to_multiset(const atermpp::term_list <T> l)
       {
         atermpp::multiset <T> s;
         for (typename atermpp::term_list <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
           s.insert(*i);
         }
+        return s;
+      }
+
+      template < class T >
+      static atermpp::term_list <T> to_list(const atermpp::multiset <T> &l)
+      {
         atermpp::term_list <T> r;
-        for (typename atermpp::multiset <T> :: const_iterator i=s.begin(); i!=s.end(); ++i)
+        for (typename atermpp::multiset <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
           r=push_front(r,*i);
         }
         return r;
+      }
+
+      template < class T >
+      static atermpp::term_list <T> gsaATsortList(atermpp::term_list <T> l)
+      {
+        return to_list(to_multiset(l));
       }
 
       template < class T >
@@ -191,15 +204,28 @@ namespace mcrl2
         return reverse(n);
       }
 
-      static atermpp::term_list < core::identifier_string_list > get_allow_list(atermpp::term_list < core::identifier_string_list > V)
+      static std::vector < atermpp::multiset < identifier_string > > 
+                 from_allow_list_to_allow_vector(const atermpp::term_list < core::identifier_string_list > V)
+      {
+        //returns the list of multiactions that are allowed
+        std::vector < atermpp::multiset < identifier_string > > m;
+        for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
+        {
+          m.push_back(detail::to_multiset(*i));
+        }
+        return m;
+      }
+
+      static atermpp::term_list < core::identifier_string_list > 
+                 from_allow_vector_to_allow_list(const std::vector < atermpp::multiset < identifier_string > > &V)
       {
         //returns the list of multiactions that are allowed
         atermpp::term_list < core::identifier_string_list > m;
-        for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
+        for (std::vector < atermpp::multiset < identifier_string > > ::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
-          m=push_front(m,*i);
+          m=push_front(m,detail::to_list(*i));
         }
-        return reverse(m);
+        return m;
       }
 
       static size_t get_max_allowed_length(atermpp::term_list < core::identifier_string_list > V)
@@ -276,45 +302,74 @@ namespace mcrl2
         return reverse(m);
       }
 
-      static bool sub_multiaction(core::identifier_string_list l, core::identifier_string_list m)
+      // returns true if l1 united with l2 is a subset of m
+      static bool sub_multiaction(
+                     const atermpp::multiset < identifier_string > &l1, 
+                     const atermpp::multiset < identifier_string > &l2, 
+                     const atermpp::multiset < identifier_string > &m)
       {
-        // returns true if l is a sub-multiaction of m
-        if (l==m)
+        atermpp::multiset < identifier_string >::const_iterator l1_walker=l1.begin();
+        atermpp::multiset < identifier_string >::const_iterator l2_walker=l2.begin();
+        for(atermpp::multiset < identifier_string >::const_iterator m_walker=m.begin(); m_walker!=m.end(); m_walker++)
         {
-          return true;
-        }
-        for (core::identifier_string_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-        {
-          // Remove element *i once from m
-          // by copying m into new_m;
-          core::identifier_string_list new_m;
-          bool found=false;
-          for(core::identifier_string_list::const_iterator j=m.begin(); j!=m.end(); ++j)
+          if (l1_walker==l1.end())
           { 
-            if (!found && *j==*i)
+            if (l2_walker==l2.end())
             {
-              found=true;
+              return true;;
             }
             else
             {
-              new_m=push_front(new_m,*j);
+              if (*m_walker==*l2_walker)
+              {
+                l2_walker++;  // Match found
+              }
+              else if (*m_walker>*l2_walker)
+              {
+                return false; // l2 contains an element not in m.
+              }
             }
           }
-          if (!found)
+          else
           {
-            return false;
+            // l1 is not empty.
+            if (l2_walker==l2.end() || *l1_walker <= *l2_walker)
+            {
+              if (*m_walker==*l1_walker)
+              {
+                l1_walker++;  // Match found
+              }
+              else if (*m_walker>*l1_walker)
+              {
+                return false; // l1 contains an element not in m.
+              }
+            }
+            else // *l2_walker < *l1_walker
+            {
+              if (*m_walker==*l2_walker)
+              {
+                l2_walker++;  // Match found
+              }
+              else if (*m_walker>*l2_walker)
+              {
+                return false; // l2 contains an element not in m.
+              }
+            }
           }
-          m=new_m;
         }
-        return true;
+        return l1_walker==l1.end() && l2_walker==l2.end(); // l1 union l2 is exactly equal to m.
       }
-
-      static bool sub_multiaction_list(core::identifier_string_list MAct, atermpp::term_list < core::identifier_string_list > MActL)
+      
+      // Return true iff the union of l1 and l2 is a subset of one of the elements of MActL.
+      static bool sub_multiaction_list(
+                     const atermpp::multiset < identifier_string > &l1, 
+                     const atermpp::multiset < identifier_string > &l2, 
+                     const std::vector < atermpp::multiset < identifier_string > > &MActL)
       {
         // true if multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
-        for (atermpp::term_list < core::identifier_string_list >::const_iterator i=MActL.begin(); i!=MActL.end(); ++i)
+        for (std::vector < atermpp::multiset < identifier_string > >::const_iterator i=MActL.begin(); i!=MActL.end(); ++i)
         {
-          if (sub_multiaction(MAct,*i))
+          if (sub_multiaction(l1,l2,*i))
           {
             return true;
           }
@@ -438,21 +493,15 @@ namespace mcrl2
         return gsaATsortList(m);
       }
 
-      static atermpp::term_list < identifier_string_list >  get_comm_ignore_list(communication_expression_list C)
+      atermpp::multiset < core::identifier_string > untypeMA_set(lps::action_label_list MAct)
       {
-        //returns all elements of C that are renamed to tau
-
-        atermpp::term_list < identifier_string_list > r;
-        for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
+        atermpp::multiset < core::identifier_string > result;
+        for(lps::action_label_list::const_iterator i=MAct.begin(); i!=MAct.end(); ++i)
         {
-          identifier_string target=i->name();
-          if (gsIsNil(target))
-          {
-            r=push_front(r,i->action_name().names());
-          }
+          result.insert(i->name());
         }
 
-        return reverse(r);
+        return result;
       }
     } // detail
 
@@ -466,6 +515,8 @@ namespace mcrl2
       }
       return reverse(m);
     }
+
+
 
     core::identifier_string_list alphabet_reduction::untypeMA(lps::action_label_list MAct)
     {
@@ -504,7 +555,7 @@ namespace mcrl2
     }
 
     template <class T>
-    atermpp::term_list < T >  alphabet_reduction::sync_mact(atermpp::term_list < T > a, atermpp::term_list < T > b)
+    atermpp::term_list < T > alphabet_reduction::sync_mact(atermpp::term_list < T > a, atermpp::term_list < T > b)
     {
       return detail::gsaATsortList(a+b);
     }
@@ -605,24 +656,55 @@ namespace mcrl2
       return reverse(m);
     }
 
-    template < class T >
-    alphabet_reduction::action_label_list_list alphabet_reduction::sync_list(
-           atermpp::term_list < T > l, 
-           atermpp::term_list < T > m, 
-           size_t length/*=0*/, 
-           atermpp::term_list < core::identifier_string_list > allowed/* =action_label_list_list()*/)
+    atermpp::term_list < core::identifier_string_list > alphabet_reduction::sync_list(
+           const atermpp::term_list < core::identifier_string_list > l,
+           const atermpp::term_list < core::identifier_string_list > m)
     {
-      atermpp::set < lps::action_label_list > all_set;
-      for (typename atermpp::term_list < T >::const_iterator i=l.begin(); i!=l.end(); ++i)
+      atermpp::set < core::identifier_string_list > all_set;
+      for (atermpp::term_list < core::identifier_string_list >::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        for (typename atermpp::term_list < T >::const_iterator j=m.begin(); j!=m.end(); ++j)
+        for (atermpp::term_list < core::identifier_string_list >::const_iterator j=m.begin(); j!=m.end(); ++j)
         {
-          lps::action_label_list ma=sync_mact(*i,*j);
-          if (length==0 || ma.size()<=length)
+          atermpp::multiset < core::identifier_string > ma;
+          std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
+          all_set.insert(detail::to_list(ma));
+        }
+      }
+      atermpp::term_list < core::identifier_string_list > result;
+      for (atermpp::set <  core::identifier_string_list >::const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
+      {
+        result=push_front(result,*i);
+      }
+      return result;
+    }
+           
+           
+    alphabet_reduction::action_label_list_list alphabet_reduction::sync_list(
+           const action_label_list_list l, 
+           const action_label_list_list m, 
+           size_t length/*=0*/, 
+           const std::vector < atermpp::multiset < identifier_string > > &allowed/* std::vector < atermpp::multiset < identifier_string > >() */)
+    {
+      std::vector < atermpp::multiset < identifier_string > > m_untyped;      
+      for (action_label_list_list::const_iterator j=m.begin(); j!=m.end(); ++j)
+      {
+        m_untyped.push_back(detail::untypeMA_set(*j));
+      }
+      
+      atermpp::set < lps::action_label_list > all_set;
+      for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      {
+        const atermpp::multiset < identifier_string > i_untyped = detail::untypeMA_set(*i);
+        std::vector < atermpp::multiset < identifier_string > >::const_iterator j_untyped=m_untyped.begin();
+        for (action_label_list_list::const_iterator j=m.begin(); j!=m.end(); ++j,++j_untyped)
+        {
+          if (length==0 || i_untyped.size()+j_untyped->size()<=length)
           {
-            if (allowed.empty() || detail::sub_multiaction_list(untypeMA(ma),allowed))
+            if (allowed.empty() || detail::sub_multiaction_list(i_untyped,*j_untyped,allowed))
             {
-              all_set.insert(ma);
+              atermpp::multiset < lps::action_label > ma;
+              std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
+              all_set.insert(detail::to_list(ma));
             }
           }
         }
@@ -1157,7 +1239,7 @@ namespace mcrl2
         if (alphas_process_identifiers.count(pn)==0)
         {
           size_t max_len=detail::get_max_allowed_length(V);
-          l = gsaGetAlpha(a,max_len,detail::get_allow_list(V));
+          l = gsaGetAlpha(a,max_len,detail::from_allow_list_to_allow_vector(V));    // ZZZZZZZ
           full_alpha_know=false;
         }
         else
@@ -1313,17 +1395,7 @@ namespace mcrl2
         action_label_list_list l;
         if (alphas.count(p)==0)
         {
-          // check if C has renamings to tau:
-          atermpp::term_list < identifier_string_list > ignore=detail::get_comm_ignore_list(C);
-          if (ignore.empty())
-          {
-            V1=extend_allow_comm(V,C);
-          }
-          else
-          {
-            l = gsaGetAlpha(p); //XXX may be slow
-            assert(l);
-          }
+          V1=extend_allow_comm(V,C);
         }
         else
         {
@@ -1373,9 +1445,9 @@ namespace mcrl2
 
           {
             size_t max_len=detail::get_max_allowed_length(V);
-            atermpp::term_list < core::identifier_string_list > allowed=detail::get_allow_list(V);
+            const std::vector < atermpp::multiset < identifier_string > > allowed=detail::from_allow_list_to_allow_vector(V);
 
-            action_label_list_list lp=alphas.count(p)==0?gsaGetAlpha(p,max_len,allowed):alphas[p];
+            action_label_list_list lp=alphas.count(p)==0?gsaGetAlpha(p,max_len,allowed):alphas[p];    // ZZZZZ
             action_label_list_list lq=alphas.count(q)==0?gsaGetAlpha(q,max_len,allowed):alphas[q];
 
             atermpp::term_list < core::identifier_string_list > ulp = untypeMAL(lp);
@@ -1622,15 +1694,17 @@ namespace mcrl2
       return process_expression(); //to suppress warnings
     }
 
-    alphabet_reduction::action_label_list_list alphabet_reduction::gsaGetAlpha(process_expression a, size_t length, atermpp::term_list < core::identifier_string_list > allowed) // XYZ
+    alphabet_reduction::action_label_list_list alphabet_reduction::gsaGetAlpha(
+                                    process_expression a, 
+                                    size_t length, 
+                                    const std::vector < atermpp::multiset < identifier_string > > &allowed) 
     {
-      // calculate the alphabet of a up to the length, ignoring the submultiactions from ignore (list of untyped multiactions) IF
-      // they have a common type (if !length, then the length is unlimited and ignore is not used)
-      // updates the global hash table alphas (in case length is 0 and ignore is empty writes the alphabet of a into alphas).
-      // allowed is a list of multiactions (w/o types) only sub-multiactions of which are allowed
-      // this may not be strict, e.g. more multiactions can be returned. This is because this parameter
+      // calculate the alphabet process expression a of a up to the length.
+      // if length==0, then the length is unlimited.
+      // It updates the global hash table alphas (in case length is 0 and ignore is empty writes the alphabet of a into alphas).
+      // The parameter allowed is a list of multiactions (w/o types) of which only sub-multiactions of which are allowed.
+      // This may not be strict, e.g. more multiactions can be returned. This is because this parameter
       // is only needed for the performance purposes.
-
 
       action_label_list_list l; //result
 
@@ -1652,6 +1726,7 @@ namespace mcrl2
           return alphas[a];
         }
 
+/*        // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
         if (length)
         {
           assert(length<(size_t)1 << (sizeof(int)*8-1));
@@ -1661,17 +1736,7 @@ namespace mcrl2
             return alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)ATmakeInt(static_cast<int>(length)),(ATerm)(ATermList)allowed)];
           }
         }
-      }
-
-      if (is_sync(a))
-      {
-        //try to apply a special procedure
-        bool success=true;
-        l = gsaGetSyncAlpha(a,length,allowed,success);
-        if (success)
-        {
-          goto l_ok;
-        }
+*/
       }
 
       if (is_delta(a))
@@ -1733,23 +1798,24 @@ namespace mcrl2
           max_len=length;
         }
 
+/*      // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
         if (length)
         {
-          atermpp::term_list < core::identifier_string_list > V1=detail::get_allow_list(V);
           if (allowed.empty())
           {
-            allowed=V1;
+            allowed=detail::from_allow_list_to_allow_vector(V);
           }
           else
           {
-            atermpp::term_list < core::identifier_string_list > a1=detail::gsaATintersectList(allowed,V1);
+            atermpp::term_list < core::identifier_string_list > a1=detail::gsaATintersectList(allowed,V);
             if (!a1.empty())
             {
-              allowed=a1;
+              allowed=detail::from_allow_list_to_allow_vector(a1);
             }
           }
         }
-        l=gsaGetAlpha(p,max_len,detail::get_allow_list(V));
+*/
+        l=gsaGetAlpha(p,max_len,detail::from_allow_list_to_allow_vector(V));
         l=filter_allow_list(l,V);
       }
       else if (is_comm(a))
@@ -1757,19 +1823,13 @@ namespace mcrl2
         process_expression p = comm(a).operand();
         communication_expression_list C = detail::sort_multiactions_comm(comm(a).comm_set());
 
+        std::vector < atermpp::multiset < identifier_string > > new_allowed;
+        
         if (length && !allowed.empty())
         {
-          if (detail::get_comm_ignore_list(C).empty())
-          {
-            allowed=detail::get_allow_list(extend_allow_comm(allowed,C));
-          }
-          else
-          {
-            allowed=atermpp::term_list < core::identifier_string_list >();
-          }
+          new_allowed=detail::from_allow_list_to_allow_vector(extend_allow_comm(detail::from_allow_vector_to_allow_list(allowed),C));
         }
-
-        l=gsaGetAlpha(p,length*detail::get_max_comm_length(C),allowed);
+        l=gsaGetAlpha(p,length*detail::get_max_comm_length(C),new_allowed);
         l=filter_comm_list(l,C);
       }
       else if (is_sum(a))
@@ -1813,10 +1873,9 @@ namespace mcrl2
       }
       else if (is_merge(a))
       {
-        l = gsaGetAlpha(merge(a).left(),length,allowed);
-        action_label_list_list l2 = gsaGetAlpha(merge(a).right(),length,allowed);
 
-        action_label_list_list l1=l;
+        action_label_list_list l1 = gsaGetAlpha(merge(a).left(),length,allowed);
+        action_label_list_list l2 = gsaGetAlpha(merge(a).right(),length,allowed);
 
         l = detail::merge_list(l1,l2);
 
@@ -1825,10 +1884,9 @@ namespace mcrl2
       }
       else if (is_left_merge(a))
       {
-        l = gsaGetAlpha(left_merge(a).left(),length,allowed);
+        action_label_list_list l1 = gsaGetAlpha(left_merge(a).left(),length,allowed);
         action_label_list_list l2 = gsaGetAlpha(left_merge(a).right(),length,allowed);
 
-        action_label_list_list l1=l;
         l = detail::merge_list(l1,l2);
         action_label_list_list s=sync_list(l1,l2,length,allowed);
         l = detail::merge_list(l,s);
@@ -1842,7 +1900,6 @@ namespace mcrl2
         assert(0);
       }
 
-l_ok:
       assert(l);
 
       if (all_stable)
@@ -1853,86 +1910,16 @@ l_ok:
         }
         else
         {
+/*        // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
           assert(length<(size_t)1 << (sizeof(int)*8-1));
           alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)ATmakeInt((int)length),(ATerm)(ATermList)allowed)]=l;
+ */
         }
       }
 
       return l;
     }
 
-    alphabet_reduction::action_label_list_list 
-      alphabet_reduction::gsaGetSyncAlpha(process_expression a, size_t length, alphabet_reduction::action_label_list_list allowed, bool &success)
-      {
-        // calculate the alphabet only if it is a single multiaction.
-        action_label_list_list l;   // Result
-
-        if (is_delta(a))
-        {
-          // return an empty set of multi-actions.
-          success=true;
-        }
-        else if (is_tau(a))
-        {
-          // return the set with the empty multi-action.
-          l = push_front(action_label_list_list(),lps::action_label_list());
-          success=true;
-        }
-        else if (lps::is_action(a))
-        {
-          l = alphas.count(lps::action(a))>0?alphas[lps::action(a)]:
-                   push_front(action_label_list_list(),push_front(lps::action_label_list(),lps::action(a).label()));
-          success=true;
-        }
-        else if (is_process_instance(a) || is_process_instance_assignment(a))
-        {
-          success=false;
-        }
-        else if (is_block(a) || is_hide(a) || is_rename(a) || is_allow(a) || is_comm(a))
-        {
-          success=false;
-        }
-        else if (is_sum(a) || is_at(a) || is_choice(a) || is_if_then(a) || is_if_then_else(a) || is_bounded_init(a))
-        {
-          success=false;
-        }
-        else if (is_seq(a) || is_merge(a) || is_left_merge(a))
-        {
-          success=false;
-        }
-        else if (is_sync(a))
-        {
-          l = gsaGetSyncAlpha(sync(a).left(),length,action_label_list_list(),success);
-          if (!success)
-          {
-            return action_label_list_list();
-          }
-
-          action_label_list_list l2 = gsaGetSyncAlpha(sync(a).right(),length,action_label_list_list(),success);
-          if (!success)
-          {
-            return action_label_list_list();
-          }
-          l=sync_list(l,l2,length,allowed);
-        }
-        else
-        {
-          mCRL2log(warning) << "a: " << atermpp::aterm(a) << std::endl << std::endl;
-          assert(0);
-        }
-
-        if (!success)
-        {
-          return l;
-        }
-
-        if (!length)
-        {
-          alphas[a]=l;
-        }
-
-        return l;
-      }
 
     process_expression alphabet_reduction::gsApplyAlpha(process_expression a)
     {

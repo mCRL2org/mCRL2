@@ -74,12 +74,14 @@ class alphabet_reduction
             atermpp::term_list < core::identifier_string_list > V, 
             atermpp::term_list < core::identifier_string_list > ulp, 
             atermpp::term_list < core::identifier_string_list > ulq);
-    template < class T >
+    atermpp::term_list < core::identifier_string_list > sync_list(
+           const atermpp::term_list < core::identifier_string_list > l,
+           const atermpp::term_list < core::identifier_string_list > m);
     action_label_list_list sync_list(
-           atermpp::term_list < T > l,                       
-           atermpp::term_list < T > m,     
+            const action_label_list_list l,                       
+            const action_label_list_list m,     
             size_t length=0, 
-            atermpp::term_list < core::identifier_string_list > allowed=atermpp::term_list < core::identifier_string_list >());
+            const std::vector < atermpp::multiset < core::identifier_string > > &allowed=std::vector < atermpp::multiset < core::identifier_string > >());
     action_label_list_list sync_list_ht(action_label_list_list l1, action_label_list_list l2, bool including_products_of_actions=true);
     atermpp::term_list< core::identifier_string_list > apply_unrename(core::identifier_string_list l, rename_expression_list R);
     atermpp::term_list < core::identifier_string_list > gsaMakeMultActNameL(atermpp::term_list< atermpp::term_list < core::identifier_string > > l);
@@ -98,8 +100,12 @@ class alphabet_reduction
     action_label_list_list gsaGetAlpha(
             process_expression a, 
             size_t length=0, 
-            atermpp::term_list < core::identifier_string_list > allowed=atermpp::term_list < core::identifier_string_list >());
-    action_label_list_list gsaGetSyncAlpha(process_expression a, size_t length, action_label_list_list allowed, bool &success);
+            const std::vector < atermpp::multiset < core::identifier_string > > &allowed=std::vector < atermpp::multiset < core::identifier_string > >());
+    action_label_list_list gsaGetSyncAlpha(
+            process_expression a, 
+            size_t length, 
+            const std::vector < atermpp::multiset < core::identifier_string > > &allowed,
+            bool &success);
     process_expression gsApplyAlpha(process_expression a);
     process_identifier_list gsaGetDeps(process_expression a);
     action_label_list_list filter_rename_list(action_label_list_list l, rename_expression_list R);
