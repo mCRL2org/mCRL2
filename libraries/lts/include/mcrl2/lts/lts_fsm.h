@@ -153,6 +153,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
     void clear_process_parameters()
     {
       m_parameters.clear();
+      m_state_element_values.clear();
     }
 
     /** \brief Set the state parameters for this LTS.
