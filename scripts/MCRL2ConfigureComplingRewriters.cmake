@@ -69,7 +69,7 @@ else( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/mcrl2compilerewriter" )
 endif( CMAKE_RUNTIME_OUTPUT_DIRECTORY )
 
-if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" ) 
+if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
   set( R_CMAKE_INSTALL_PREFIX "..")
   set( R_Boost_INCLUDE_DIRS "../Boost" )
   set( R_Boost_LIBRARY_DIRS "../Boost/lib" )
@@ -117,26 +117,26 @@ if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
     boost/smart_ptr
     boost/type_traits
     boost/utility
-  )  
-  
+  )
+
   foreach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
     string(FIND ${hfile} "/" IDX REVERSE)
     string(SUBSTRING ${hfile} 0 ${IDX} DEST)
     install(FILES "${Boost_INCLUDE_DIRS}/${hfile}" DESTINATION "Boost/${DEST}/")
-  endforeach( hfile ${R_MCRL2_BOOST_HEADER_FILES}) 
+  endforeach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
 
   foreach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})
     string(FIND ${hdir} "/" IDX REVERSE)
     string(SUBSTRING ${hdir} 0 ${IDX} DEST)
     install(DIRECTORY "${Boost_INCLUDE_DIRS}/${hdir}" DESTINATION "Boost/${DEST}/")
-  endforeach( hdir ${R_MCRL2_BOOST_HEADER_DIRS}) 
+  endforeach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})
 
 
-else( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" ) 
+else( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
   set( R_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
   set( R_Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIRS}" )
   set( R_Boost_LIBRARY_DIRS "${Boost_LIBRARY_DIRS}" )
-endif( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" ) 
+endif( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
 
 # Set MacOS-X specific compile flags
 if( CMAKE_OSX_ARCHITECTURES )
@@ -156,5 +156,11 @@ install(
   PROGRAMS "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}"
   DESTINATION ${MCRL2_BIN_DIR}/
 )
+
+
+if (MCRL2_MAN_PAGES)
+  add_custom_target(mcrl2compilerewriter_man_page ALL)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc/sphinx/source/user_manual/tools/man/mcrl2compilerewriter.1 DESTINATION share/man/man1)
+endif (MCRL2_MAN_PAGES)
 
 ENDIF( UNIX )
