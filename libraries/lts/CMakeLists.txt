@@ -85,20 +85,31 @@ add_custom_command(
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
 )
 
+add_custom_command(
+  OUTPUT ${CMAKE_SOURCE_DIR}/libraries/lts/source/dot_syntax.c
+  COMMAND make_dparser -A -H1 -idot -o${CMAKE_CURRENT_SOURCE_DIR}/source/dot_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/dot-syntax.g
+  DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/dot-syntax.g
+)
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/3rd-party/dparser
+)
+
+add_library(dot_syntax
+  source/dot_syntax.c
 )
 
 add_library(fsm_syntax
   source/fsm_syntax.c
 )
 
-target_link_libraries(fsm_syntax
+target_link_libraries(dot_syntax
+  fsm_syntax
   dparser
 )
 
 # add install target:
-install(TARGETS fsm_syntax DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR})
 
 # ##### End generate parser tables ######
 
@@ -108,6 +119,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_lps
   mcrl2_syntax
+  dot_syntax
   fsm_syntax
   dparser
 )

@@ -17,6 +17,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_dot.h"
 
 namespace mcrl2 {
 
@@ -363,6 +364,158 @@ void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   fsm_actions(parser_tables_fsm, result).parse_FSM(node);
+  p.destroy_parse_node(node);
+}
+
+struct dot_actions: public core::default_parser_actions
+{
+  dot_actions(const core::parser_table& table_, lts_dot_t& dot_)
+    : core::default_parser_actions(table_),
+      dot(dot_)
+  {}
+
+  lts_dot_t& dot;
+  std::map<std::string, std::size_t> labelTable;
+  std::map<std::string, std::size_t> stateTable;
+  std::vector<std::string> state_sequence;
+
+  std::size_t dot_state(const std::string& id, const std::string& label)
+  {
+    using namespace mcrl2::lts::detail;
+    std::size_t idx;
+
+    std::map<std::string, std::size_t>::const_iterator state_index = stateTable.find(id);
+    if (state_index == stateTable.end())
+    {
+      idx = dot.add_state(state_label_dot(id,label));
+      stateTable[id] = idx;
+    }
+    else
+    {
+      idx = state_index->second;
+      if (label != "")
+      {
+        dot.set_state_label(idx, state_label_dot(id,label));
+      }
+    }
+    return idx;
+  }
+
+  void add_transition(std::size_t from, const std::string &label_string, std::size_t to)
+  {
+    std::map <std::string, size_t>::const_iterator label_index = labelTable.find(label_string);
+    if (label_index == labelTable.end())
+    {
+      const lts_dot_t::labels_size_type n = dot.add_action(label_string, label_string == "tau");
+      labelTable[label_string] = n;
+      dot.add_transition(transition(from, n, to));
+    }
+    else
+    {
+      dot.add_transition(transition(from, label_index->second, to));
+    }
+  }
+
+  void add_transitions(const std::vector<std::string>& state_sequence, const std::string &label)
+  {
+    assert(!state_sequence.empty());
+    std::vector <std::string>::const_iterator i = state_sequence.begin();
+    std::string from_string = *i;
+    for (++i; i!=state_sequence.end(); ++i)
+    {
+      const std::string to_string = *i;
+      add_transition(dot_state(from_string, ""), label, dot_state(to_string, ""));
+      from_string = to_string;
+    }
+  }
+
+  std::string parse_ID(const core::parse_node& node)
+  {
+    return node.string();
+  }
+
+  void parse_graph(const core::parse_node& node)
+  {
+    std::string id = parse_ID(node.child(4));
+    parse_stmt_list(node.child(6));
+  }
+
+  void parse_stmt_list(const core::parse_node& node)
+  {
+    traverse(node, make_visitor(table, "stmt", boost::bind(&dot_actions::parse_stmt, this, _1)));
+  }
+
+  void parse_stmt(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "node_stmt")) { parse_node_stmt(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "edge_stmt")) { parse_edge_stmt(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attr_stmt")) { } // ignore !?!?
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ID") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "ID")) { } // ignore !?!?
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph")) { } // ignore !?!?
+    report_unexpected_node(node);
+  }
+
+  std::string parse_attr_list (const core::parse_node& node)
+  {
+    std::string s1 = node.child(1).string();
+    std::string s3 = node.child(3).string();
+    return s1.empty() ? s3 : s1;
+  }
+
+  // TODO: check if this is the correct way of handling an a_list
+  std::string parse_a_list (const core::parse_node& node)
+  {
+    std::string s0 = parse_ID(node.child(0));
+    std::string s1;
+    if (node.child(1))
+    {
+      s1 = node.child(1).child(1).string();
+    }
+    std::string s3;
+    if (node.child(3))
+    {
+      s3 = parse_a_list(node.child(3));
+    }
+    if (s0 == "label")
+    {
+      return s1;
+    }
+    else
+    {
+      return s0;
+    }
+  }
+
+  // Collect all node_id's, and use the optional attr_list as label.
+  void parse_edge_stmt(const core::parse_node& node)
+  {
+    state_sequence.clear();
+    traverse(node, make_visitor(table, "node_id", boost::bind(&dot_actions::parse_node_id, this, _1)));
+    std::string label = node.child(3).string();
+    add_transitions(state_sequence, label);
+  }
+
+  void parse_node_stmt(const core::parse_node& node)
+  {
+    parse_node_id(node.child(0));
+    std::string label = node.child(1).string();
+    dot_state(state_sequence.back(), label);
+  }
+
+  void parse_node_id(const core::parse_node& node)
+  {
+    state_sequence.push_back(parse_ID(node.child(0)));
+  }
+};
+
+inline
+void parse_dot_specification(const std::string& text, lts_dot_t& result)
+{
+  core::parser p(parser_tables_dot);
+  unsigned int start_symbol_index = p.start_symbol_index("graph");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  dot_actions(parser_tables_dot, result).parse_graph(node);
   p.destroy_parse_node(node);
 }
 

@@ -115,6 +115,27 @@ FSM_MAPPING = '''
   SortExpr data::sort_expression
 '''
 
+DOT_MAPPING = '''
+graph
+stmt_list
+stmt
+attr_stmt
+attr_list
+a_list
+edge_stmt
+edgeRHS
+node_stmt
+node_id
+port
+subgraph
+compass_pt
+edgeop
+ID
+quoted
+name
+number
+'''
+
 PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
   {
 BODY
@@ -294,7 +315,10 @@ def main():
     #generate_code(filename, MCRL2_MAPPING)
 
     filename = '../../../doc/specs/fsm-syntax.g'
-    generate_code(filename, FSM_MAPPING)
+    #generate_code(filename, FSM_MAPPING)
+
+    filename = '../../../doc/specs/dot-syntax.g'
+    generate_code(filename, DOT_MAPPING)
 
 if __name__ == "__main__":
     main()

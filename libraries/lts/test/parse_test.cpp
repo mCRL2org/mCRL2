@@ -76,6 +76,28 @@ std::string print_fsm(const lts::lts_fsm_t& l)
   return out.str();
 }
 
+void parse_dot(const std::string& text, lts::lts_dot_t& result)
+{
+  // TODO: The load function should be fixed, so this is not needed!
+  result = lts::lts_dot_t();
+
+  std::string temp_filename = "parse_test.tmp";
+  std::ofstream to(temp_filename.c_str());
+  to << text;
+  to.close();
+  result.load(temp_filename);
+  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+}
+
+std::string print_dot(const lts::lts_dot_t& dot)
+{
+  std::string temp_filename = "parse_test.tmp";
+  dot.save(temp_filename);
+  std::string result = utilities::read_text(temp_filename);
+  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+  return result;
+}
+
 void test_fsm()
 {
   lts::lts_fsm_t fsm1;
@@ -137,6 +159,49 @@ void test_fsm()
   parse_fsm(FSM, fsm2);
   text1 = print_fsm(fsm1);
   text2 = print_fsm(fsm2);
+  BOOST_CHECK(text1 == text2);
+}
+
+void test_dot()
+{
+  lts::lts_dot_t dot1;
+  lts::lts_dot_t dot2;
+  std::string text1;
+  std::string text2;
+  std::string DOT;
+
+  DOT =
+    "digraph \"aap.dot\" {                         \n"
+    "center = TRUE;                                \n"
+    "mclimit = 10.0;                               \n"
+    "nodesep = 0.05;                               \n"
+    "node [ width=0.25, height=0.25, label=\"\" ]; \n"
+    "s0 [ peripheries=2 ];                         \n"
+    "s0 [ label=\"(F,1)\" ];                       \n"
+    "s1 [ label=\"(F,2)\" ];                       \n"
+    "s2 [ label=\"(T,1)\" ];                       \n"
+    "s3 [ label=\"(T,2)\" ];                       \n"
+    "s0->s1[label=\"increase\"];                   \n"
+    "s0->s2[label=\"on\"];                         \n"
+    "s1->s3[label=\"on\"];                         \n"
+    "s1->s0[label=\"decrease\"];                   \n"
+    "s2->s0[label=\"off\"];                        \n"
+    "s2->s3[label=\"increase\"];                   \n"
+    "s3->s1[label=\"off\"];                        \n"
+    "s3->s2[label=\"decrease\"];                   \n"
+    "}                                             \n"
+    ;
+  lts::parse_dot_specification(DOT, dot1);
+  parse_dot(DOT, dot2);
+  text1 = print_dot(dot1);
+  text2 = print_dot(dot2);
+  if (text1 != text2)
+  {
+    std::cout << "--- text1 ---" << std::endl;
+    std::cout << text1 << std::endl;
+    std::cout << "--- text2 ---" << std::endl;
+    std::cout << text2 << std::endl;
+  }
   BOOST_CHECK(text1 == text2);
 }
 

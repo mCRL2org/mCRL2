@@ -29,6 +29,7 @@ extern "C"
 {
   extern D_ParserTables parser_tables_mcrl2;
   extern D_ParserTables parser_tables_fsm;
+  extern D_ParserTables parser_tables_dot;
 }
 
 namespace mcrl2
