@@ -174,3 +174,8 @@ def run_bessolve(filename, strategy = 'spm', timeout = 10):
         return False
     print 'WARNING: unknown failure on "%s"' % command
     return None
+
+# runs pbesrewr
+def run_pbesrewr(pbesfile1, pbesfile2, timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('pbesrewr',  '%s %s' % (pbesfile1, pbesfile2), timeout)
