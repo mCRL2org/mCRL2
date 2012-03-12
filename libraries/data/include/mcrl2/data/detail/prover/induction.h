@@ -14,7 +14,6 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
