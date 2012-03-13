@@ -59,40 +59,6 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
   }
 }
 
-ATermAppl gsSortMultAct(ATermAppl MultAct)
-{
-  assert(gsIsMultAct(MultAct));
-  ATermList l = ATLgetArgument(MultAct,0);
-  size_t len = ATgetLength(l);
-
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(acts,ATerm,len);
-  for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
-  {
-    acts[i] = ATgetFirst(l);
-  }
-  //l is empty
-
-  for (size_t i=1; i<len; i++)
-  {
-    size_t j = i;
-    // XXX comparison is fast but does not define a unique result (i.e. the
-    // result is dependent on the specific run of a program)
-    while (acts[j] < acts[j-1])
-    {
-      ATerm t = acts[j];
-      acts[j] = acts[j-1];
-      acts[j-1] = t;
-    }
-  }
-
-  //l is empty
-  for (size_t i=0; i<len; i++)
-  {
-    l = ATinsert(l,acts[len-i-1]);
-  }
-  return gsMakeMultAct(l);
-}
-
 } //namespace detail
 }   //namespace core
 }    //namespace mcrl2

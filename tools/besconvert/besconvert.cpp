@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bes_bisimulation.cpp
+/// \file besconvert.cpp
 /// Implements strong bisimulation and oblivious bisimulation reduction on
 /// boolean equation systems.
 
@@ -559,7 +559,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
 typedef bes_input_output_tool<input_output_tool> super;
-class bes_bisimulation_tool: public super
+class besconvert_tool: public super
 {
   protected:
     bes_reduction_algorithm<>::equivalence_t equivalence;
@@ -641,9 +641,9 @@ class bes_bisimulation_tool: public super
 
   public:
 
-    bes_bisimulation_tool()
+    besconvert_tool()
       : super(
-        "bes_bisimulation",
+        "besconvert",
         "Jeroen Keiren",
         "reduce a BES (or PBES) using (variations of) behavioural equivalences",
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
@@ -683,5 +683,5 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return bes_bisimulation_tool().execute(argc, argv);
+  return besconvert_tool().execute(argc, argv);
 }

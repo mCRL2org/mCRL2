@@ -2886,12 +2886,6 @@ bool gsIsFixpoint(ATermAppl Term)
   return gsIsMu(Term) || gsIsNu(Term);
 }
 
-///\pre MultAct is a multiaction
-///\return the sorted variant of the argument
-/// TODO: Should be moved to process or lps library
-ATermAppl gsSortMultAct(ATermAppl MultAct);
-
-
 }
 }
 }
