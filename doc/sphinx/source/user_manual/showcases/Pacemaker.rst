@@ -23,11 +23,9 @@ In this project the firmware design of Vitatron's DA+ pacemaker has been checked
 using both mCRL2 and Uppaal. The analysis did only reveal a known problem
 indicating the high quality of the software in these pacemakers.
 
-Technical details
------------------
-
 Approach
-^^^^^^^^
+--------
+
 To investigate the verification of a pacemaker firmware design by formal model
 checking, several verification approaches were exploited. These approaches
 differ in the composition of the verified formal models and the requirements
@@ -56,64 +54,55 @@ of the software of the pacemaker.
 Technical details
 -----------------
 
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-In mCRL2, most requirements have been verified by explicit state space
-generation using breadth-first search (without actually storing the state
-space). For example, the requirement to the model of the second approach was
-verified by modeling the stub and driver processes such that a deadlock state
-was reached when the requirement was violated. By commanding :ref:`tool-lps2lts' to
-detect deadlock states, the formal model was verified. This verification led to
-the detection of the flaw that is known at Vitatron. After the detection of this
-flaw, the possible consequences of the flaw have been discovered through
-adapting the model of the first approach such that the flaw could also occur in
-this model. Together these verification have led to important conclusions and
-recommendations to Vitatron.
+*Type of verification*
+  In mCRL2, most requirements have been verified by explicit state space
+  generation using breadth-first search (without actually storing the state
+  space). For example, the requirement to the model of the second approach was
+  verified by modeling the stub and driver processes such that a deadlock state
+  was reached when the requirement was violated. By commanding
+  :ref:`tool-lps2lts' to detect deadlock states, the formal model was verified.
+  This verification led to the detection of the flaw that is known at Vitatron.
+  After the detection of this flaw, the possible consequences of the flaw have
+  been discovered through adapting the model of the first approach such that the
+  flaw could also occur in this model. Together these verification have led to
+  important conclusions and recommendations to Vitatron.
 
-One of the requirements to the model of the first approach was validated by
-symbolic model checking using :ref:`tool-pbes2bool`.
+  One of the requirements to the model of the first approach was validated by
+  symbolic model checking using :ref:`tool-pbes2bool`.
 
-Data size
-^^^^^^^^^
-The state space size depends on the configuration of the formal heart model. For
-the first model of the heart model, the state space contains far more than a
-billion states. Verifications have been carried out on models with various
-restrictions with state space sizes that vary from several thousands of states
-till approximately 500 million states.
+*Data size*
+  The state space size depends on the configuration of the formal heart model.
+  For the first model of the heart model, the state space contains far more than
+  a billion states. Verifications have been carried out on models with various
+  restrictions with state space sizes that vary from several thousands of states
+  till approximately 500 million states.
 
-The second model in which we found a known violation of the requirement contained 
-714.464 states. 
+  The second model in which we found a known violation of the requirement
+  contained 714.464 states. 
 
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-All verifications were performed on a 64 bit linux machine with 128GB RAM.
+*Equipment (computers, CPU, RAM)*
+  All verifications were performed on a 64 bit linux machine with 128GB RAM.
 
-Models
-^^^^^^
-The models are confidential.
+*Models*
+  The models are confidential.
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Jan Friso Groote, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    -   * Jaap Wiggelinkhuizen (Student, TU/e, Eindhoven)
-        * Jan Tretmans (Supervisor, Embedded Systems Institute, Eindhoven)
-        * Erik Hendriksen (Supervisor, Medtronic SQDM/Vitatron, Arnhem)
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - Medtronic SQDM/Vitatron, Arnhem, Netherlands
-  * - **Project**
-    - The project was carried out by Jaap Wiggelinkhuizen as a master graduation project at Medtronic SQDM/Vitatron, Arnhem, The Netherlands.
-  * - **Time period**
-    - The project started in April 2007 and was successfully finished in December 2007.
+*Organizational context*
+  :Contact person: Jan Friso Groote, Technische Universiteit Eindhoven, The 
+                   Netherlands.
+  :Other people involved: - Jaap Wiggelinkhuizen (Student, TU/e, Eindhoven)
+                          - Jan Tretmans (Supervisor, Embedded Systems Institute, Eindhoven)
+                          - Erik Hendriksen (Supervisor, Medtronic SQDM/Vitatron, Arnhem)
+  :Institution: Technische Universiteit Eindhoven, The Netherlands.
+  :Industrial partner: Medtronic SQDM/Vitatron, Arnhem, Netherlands
+  :Project: The project was carried out by Jaap Wiggelinkhuizen as a master 
+            graduation project at Medtronic SQDM/Vitatron, Arnhem, The
+            Netherlands.
+  :Time period: The project started in April 2007 and was successfully finished 
+                in December 2007.
 
 Publications
 ------------
+
 .. [Wig07] J.E. Wiggelinkhuizen. Feasibility of formal model checking in the Vitatron environment.
    Master Thesis. Eindhoven University of Technology, 2007
    `(PDF) <http://alexandria.tue.nl/extra2/afstversl/wsk-i/wiggelinkhuizen2007.pdf>`_

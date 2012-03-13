@@ -26,36 +26,30 @@ Technical details
 The communication layer of the controller was modelled in mCRL2 based on 
 C# code after a rigorous abstraction method. 
  
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Deadlock and safety properties violations detection by solving PBES equations.
+*Type of verification*
+  Deadlock and safety properties violations detection by solving PBES equations.
  
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-All the experiments were performed on an Pentium D930 with 2Gb RAM. 
+*Equipment (computers, CPU, RAM)*
+  All the experiments were performed on an Pentium D930 with 2Gb RAM. 
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Frank Stappers, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    -   * Michel Reniers (TU/e Eindhoven)
-        * Marc Vanmaris (NBG)
-        * Tjeu Naus (NBG)
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - `NBG <http://www.nbg-industrial.nl>`_: a mid-size hard and software developer for industrial or medical applications, located in Nederweert, The Netherlands.
-  * - **Project**
-    - The work was supported by ITEA `TWINS <http://www.twins-itea.org>`_ project, project 05004.
-  * - **Time period**
-    - Main project including the modeling and verification took place between 2007-11 -- 2008-12 (One day a week).
+*Organizational context*
+  :Contact person: Frank Stappers, Technische Universiteit Eindhoven, The 
+                   Netherlands.
+  :Other people involved: - Michel Reniers (TU/e Eindhoven)
+                          - Marc Vanmaris (NBG)
+                          - Tjeu Naus (NBG)
+  :Institution: Technische Universiteit Eindhoven, The Netherlands.
+  :Industrial partner: `NBG <http://www.nbg-industrial.nl>`_: a mid-size hard 
+                       and software developer for industrial or medical
+                       applications, located in Nederweert, The Netherlands.
+  :Project: The work was supported by ITEA `TWINS <http://www.twins-itea.org>`_ 
+            project, project 05004.
+  :Time period: Main project including the modeling and verification took place
+                between 2007-11 -- 2008-12 (One day a week).
 
 Publications
 ------------
+
 .. [SR09] "Verification of safety requirements for program code using data abstraction",
    F.P.M. Stappers and M.A.Reniers. Proc. Ninth International Workshop on Automated Verification of Critical Systems (AVoCS 2009),
    Swansea, UK, September 23-25, 2009.

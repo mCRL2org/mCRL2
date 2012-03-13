@@ -21,42 +21,32 @@ understanding of the behaviour the system.
 Technical details
 -----------------
 
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Six safety properties and one liveness property were checked on the state space.
-Four violations of properties were found, of which two indicated errors in the
-system.
+*Type of verification*
+  Six safety properties and one liveness property were checked on the state 
+  space. Four violations of properties were found, of which two indicated errors
+  in the system.
 
-Data size
-^^^^^^^^^
-The original specification resulted in a state space of around 358.000 states.
-The specification that incorporates the solutions to the errors found during
-verification, has a state space of around 79.000 states.
+*Data size*
+  The original specification resulted in a state space of around 358.000 states.
+  The specification that incorporates the solutions to the errors found during
+  verification, has a state space of around 79.000 states.
 
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The state space was generated in about 2 minutes on a Pentium 4, 3 GHz machine
-with 1 GB of RAM. Model checking of the properties was done on the same machine.
+*Equipment (computers, CPU, RAM)*
+  The state space was generated in about 2 minutes on a Pentium 4, 3 GHz machine
+  with 1 GB of RAM. Model checking of the properties was done on the same
+  machine.
 
-Models
-^^^^^^
-The model is available as an appendix to [PS06]_.
+*Models*
+  The model is available as an appendix to [PS06]_.
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Bas Ploeger, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    - Lou Somers, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - Océ Technologies B.V., Venlo, The Netherlands
-  * - **Time period**
-    - May 2005 -- August 2005
+*Organizational context*
+  :Contact person: Bas Ploeger, Technische Universiteit Eindhoven, The 
+                   Netherlands.
+  :Other people involved: Lou Somers, Technische Universiteit Eindhoven, The  
+                          Netherlands.
+  :Institution: Technische Universiteit Eindhoven, The Netherlands.
+  :Industrial partner: Océ Technologies B.V., Venlo, The Netherlands
+  :Time period: May 2005 -- August 2005
 
 Publications
 ------------
