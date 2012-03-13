@@ -262,64 +262,6 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
   return s;
 }
 
-std::ostream& interface_description::option_descriptor::wiki_page_description(std::ostream& s) const
-{
-  s << "; ";
-
-  if (m_short != '\0')
-  {
-    s << "<tt>-" << std::string(1, m_short) << "</tt>";
-
-    if (m_argument.get() != 0)
-    {
-      if (m_argument->is_optional())
-      {
-        s << "[''" << m_argument->get_name() << "'']";
-      }
-      else
-      {
-        s << "''" << m_argument->get_name() << "''";
-      }
-    }
-
-    s << ", ";
-  }
-
-  s << "<tt>--" << m_long << "</tt>";
-
-  std::string description(m_description);
-
-  if (m_argument.get() != 0)
-  {
-    s << ((m_argument->is_optional()) ?
-          "[=''" + m_argument->get_name() + "'']" :
-          "=''" + m_argument->get_name() + "''");
-
-    boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
-  }
-
-  boost::xpressive::mark_tag option(1);
-
-  // Following line:
-  //
-#if defined(MCRL2_DISABLE_BOOST_REGEX)
-  description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~boost::xpressive::_w >> (option= '-' >> -*boost::xpressive::as_xpr('-') >> +boost::xpressive::_w)), std::string("<tt>$1</tt>"));
-#else
-  //
-  // Should be equal to:
-  // -- begin --
-  //
-  //
-  boost::regex e("(--\\w*)|(-\\w*)");
-  description = boost::regex_replace(description, e, "<tt>$&</tt>");
-  // -- end --
-#endif // defined(MCRL2_DISABLE_BOOST_REGEX)
-
-  s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
-
-  return s;
-}
-
 interface_description::option_descriptor const& interface_description::find_option(std::string const& long_identifier) const
 {
   option_map::const_iterator i(m_options.find(long_identifier));
@@ -482,7 +424,7 @@ std::string interface_description::textual_description() const
 
   s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
     << std::endl
-    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
+    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
 
   return s.str();
 }
@@ -607,7 +549,7 @@ std::string interface_description::man_page() const
     "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
     "There is NO WARRANTY, to the extent permitted by law.\n";
   s << ".SH \"SEE ALSO\"" << std::endl
-    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
+    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
 
   return s.str();
 }
@@ -673,68 +615,6 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
   return s;
 }
 
-std::ostream& interface_description::wiki_page(std::ostream& s) const
-{
-  s << "{{Hierarchy header}}" << std::endl
-    << std::endl;
-
-  s << "== Synopsis ==" << std::endl
-    << "<tt>'''" << m_name << "'''"
-    << mark_name_in_usage(m_usage, "''", "''") << "</tt>" << std::endl;
-  s << "== Short Description ==" << std::endl
-    << word_wrap(m_description, 80) << std::endl;
-
-  if (0 < m_options.size())
-  {
-    s << "== Options ==" << std::endl
-      << std::endl
-      << "''OPTION'' can be any of the following:" << std::endl;
-
-    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
-    {
-      option_descriptor const& option(i->second);
-
-      if (option.m_show)
-      {
-        option.wiki_page_description(s);
-      }
-    }
-  }
-
-  if (0 < m_options.size())
-  {
-    s << "Standard options:" << std::endl
-      << std::endl;
-  }
-  else
-  {
-    s << "''OPTION'' can be any of the following standard options:" << std::endl;
-  }
-  m_options.find("quiet")->second.wiki_page_description(s);
-  m_options.find("verbose")->second.wiki_page_description(s);
-  m_options.find("debug")->second.wiki_page_description(s);
-  m_options.find("log-level")->second.wiki_page_description(s);
-  m_options.find("help")->second.wiki_page_description(s);
-  m_options.find("version")->second.wiki_page_description(s);
-
-  if (!m_known_issues.empty())
-  {
-    s << "== Known Issues ==" << std::endl
-      << word_wrap(m_known_issues, 80) << std::endl;
-  }
-
-  s << "== Author ==" << std::endl
-    << std::endl
-    << "Written by " << m_authors << "." << std::endl
-    << std::endl;
-  s << "== Reporting bugs ==" << std::endl
-    << std::endl
-    << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
-    << "{{Hierarchy footer}}" << std::endl;
-
-  return s;
-}
-
 /**
  * The interface description specifies the available options and their
  * possible arguments. This procedure traverses the command-line arguments
@@ -784,7 +664,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
         if (d.m_options.find(option) == d.m_options.end())
         {
-          if (argument == "--generate-man-page" || argument == "--generate-wiki-page" || argument == "--generate-xml")
+          if (argument == "--generate-man-page" || argument == "--generate-xml")
           {
             // Special option
             m_options.insert(std::make_pair(argument.substr(2), ""));
@@ -1136,10 +1016,6 @@ void command_line_parser::process_default_options(interface_description& d)
   else if (m_options.count("generate-man-page"))
   {
     std::cout << d.man_page();
-  }
-  else if (m_options.count("generate-wiki-page"))
-  {
-    d.wiki_page(std::cout);
   }
   else if (m_options.count("generate-xml"))
   {

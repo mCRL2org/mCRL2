@@ -35,7 +35,7 @@ class command_line_parser;
 /** \brief toolset copyright period description */
 inline std::string copyright_period()
 {
-  // We assume that the version number always starts with a four digit year 
+  // We assume that the version number always starts with a four digit year
   // in which the version was released.
   if (get_toolset_version().size() >= 4)
     return get_toolset_version().substr(0, 4);
@@ -141,7 +141,7 @@ struct instance_of< T, false >
 
     Report bugs at <http://www.mcrl2.org/issuetracker>.
 
-    See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/demo-tool>.
+    See also the manual at <http://www.mcrl2.org/release/user_manual/tools/demo-tool.html>.
    \endverbatim
  * Printing version information.
  *
@@ -270,9 +270,6 @@ class interface_description
 
         /// Returns a man page description for the option
         std::string man_page_description() const;
-
-        /// Returns a man page description for the option
-        std::ostream& wiki_page_description(std::ostream& s) const;
 
         /// Returns a man page description for the option
         std::ostream& xml_page_description(std::ostream& s, const bool is_default = false) const;
@@ -630,7 +627,7 @@ class interface_description
      *
      * A hidden option is not advertised as being part of the interface.
      * As a consequence the result of class methods such as textual_description,
-     * man_page and wiki_page will not contain information about these options.
+     * man_page and xml will not contain information about these options.
      *
      * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
      **/
@@ -673,12 +670,6 @@ class interface_description
      * \return string containing a man page description of the interface
      **/
     std::string man_page() const;
-
-    /**
-     * \brief Returns the text of a wiki page
-     * \return string containing a wiki page description of the interface
-     **/
-    std::ostream& wiki_page(std::ostream&) const;
 
     /**
      * \brief Returns the text of an page
