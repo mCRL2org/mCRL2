@@ -2,7 +2,7 @@ Introduction
 ============
 
 The Process library contains classes and algorithms for general processes.
-The code in the Process library is contained in the namespace =process=.
+The code in the Process library is contained in the namespace ``process``.
 
 The following C++ classes are defined for the Process Library:
 
@@ -20,31 +20,32 @@ Process expressions are defined using the following grammar
 .. math::
 
    \begin{array}{lrl}
-   \varphi & ::= &         a(e)
-                \: \mid \: P(e)
-                \: \mid \: P(d:D := e)
+      p & ::= &            a(e_1, \ldots, e_n)
+                \: \mid \: P(e_1, \ldots, e_n)
+                \: \mid \: P(d_1 = e_1, \ldots, d_n = e_n)
                 \: \mid \: \delta
                 \: \mid \: \tau
-                \: \mid \: \sum\limits_{d:D}\varphi
-                \: \mid \: \partial _{B}(\varphi)
-                \: \mid \: \tau _{B}(\varphi)
-                \: \mid \: \rho _{R}(\varphi)
-                \: \mid \: \Gamma _{C}(\varphi)
-                \: \mid \: \bigtriangledown _{V}(\varphi)
+                \: \mid \: \sum\limits_{d_1:D_1, \ldots, d_n:D_n}p
        \\   & ~ &
-                \: \mid \: \varphi\ |\ \varphi
-                \: \mid \: \varphi^{@}t
-                \: \mid \: \varphi\cdot \varphi
-                \: \mid \: c\rightarrow \varphi
-                \: \mid \: c\rightarrow \varphi\diamond \varphi
-                \: \mid \: \varphi << \varphi
-                \: \mid \: \varphi\ ||\ \varphi
-                \: \mid \: \varphi\ ||\_\ \varphi
-                \: \mid \: \varphi + \varphi,
+                \: \mid \: \partial _{B}(p)
+                \: \mid \: \tau _{I}(p)
+                \: \mid \: \rho _{R}(p)
+                \: \mid \: \Gamma _{C}(p)
+                \: \mid \: \bigtriangledown _{V}(p)
+                \: \mid \: p\ |\ p
+                \: \mid \: p^{@}t
+                \: \mid \: p\cdot p
+       \\   & ~ &
+                \: \mid \: c\rightarrow p
+                \: \mid \: c\rightarrow p\diamond p
+                \: \mid \: p << p
+                \: \mid \: p\ ||\ p
+                \: \mid \: p\ ||\_\ p
+                \: \mid \: p + p,
    \end{array}
 
-where :math:`a(e)` is an action, :math:`d` is a variable of sort :math:`D`, :math:`e` is a data expression,
-:math:`B` is a list of strings, :math:`R` is a list of rename expressions, :math:`C` is a list of communication
+where :math:`a(e_1, \ldots, e_n)` is an action, :math:`d_i` is a variable of sort :math:`D_i`, :math:`e_i` is a data expression,
+:math:`B` and :math:`I` are lists of strings, :math:`R` is a list of rename expressions, :math:`C` is a list of communication
 expressions, :math:`V` is a list of action name multi sets, :math:`t` is a data expression of sort Real,
 and :math:`c` is a data expression of sort Bool.
 
@@ -55,32 +56,27 @@ The following C++ classes are defined for process expressions:
    ============================================  ===============================================================================
    Expression                                    C++ class
    ============================================  ===============================================================================
-   :math:`a(e)`                                  :cpp:class:`lps::action                 <mcrl2::lps::action>`
-   :math:`P(e)`                                  :cpp:class:`process_instance            <mcrl2::process::process_instance>`
-   :math:`P(d:D :=e)`                            :cpp:class:`process_instance_assignment <mcrl2::process::process_instance_assignment>`
+   :math:`a(e_1, \ldots, e_n)`                   :cpp:class:`lps::action                 <mcrl2::lps::action>`
+   :math:`P(e_1, \ldots, e_n)`                   :cpp:class:`process_instance            <mcrl2::process::process_instance>`
+   :math:`P(d_1 = e_1, \ldots, d_n = e_n)`       :cpp:class:`process_instance_assignment <mcrl2::process::process_instance_assignment>`
    :math:`\delta`                                :cpp:class:`delta                       <mcrl2::process::delta>`
    :math:`\tau`                                  :cpp:class:`tau                         <mcrl2::process::tau>`
-   :math:`\sum\limits_{d:D}\varphi`              :cpp:class:`sum                         <mcrl2::process::sum>`
-   :math:`\partial _{B}(\varphi)`                :cpp:class:`block                       <mcrl2::process::block>`
-   :math:`\tau _{B}(\varphi)`                    :cpp:class:`hide                        <mcrl2::process::hide>`
-   :math:`\rho _{R}(\varphi)`                    :cpp:class:`rename                      <mcrl2::process::rename>`
-   :math:`\Gamma _{C}(\varphi)`                  :cpp:class:`comm                        <mcrl2::process::comm>`
-   :math:`\bigtriangledown _{V}(\varphi)`        :cpp:class:`allow                       <mcrl2::process::allow>`
-   :math:`\varphi\ |\ \varphi`                   :cpp:class:`sync                        <mcrl2::process::sync>`
-   :math:`\varphi^{@}t`                          :cpp:class:`at                          <mcrl2::process::at>`
-   :math:`\varphi\cdot \varphi`                  :cpp:class:`seq                         <mcrl2::process::seq>`
-   :math:`c\rightarrow \varphi`                  :cpp:class:`if_then                     <mcrl2::process::if_then>`
-   :math:`c\rightarrow \varphi\diamond \varphi`  :cpp:class:`if_then_else                <mcrl2::process::if_then_else>`
-   :math:`\varphi << \varphi`                    :cpp:class:`bounded_init                <mcrl2::process::bounded_init>`
-   :math:`\varphi\ ||\ \varphi`                  :cpp:class:`merge                       <mcrl2::process::merge>`
-   :math:`\varphi\ ||\_\ \varphi`                :cpp:class:`left_merge                  <mcrl2::process::left_merge>`
-   :math:`\varphi + \varphi`                     :cpp:class:`choice                      <mcrl2::process::choice>`
+   :math:`\sum\limits_{d:D}p`                    :cpp:class:`sum                         <mcrl2::process::sum>`
+   :math:`\partial _{B}(p)`                      :cpp:class:`block                       <mcrl2::process::block>`
+   :math:`\tau _{B}(p)`                          :cpp:class:`hide                        <mcrl2::process::hide>`
+   :math:`\rho _{R}(p)`                          :cpp:class:`rename                      <mcrl2::process::rename>`
+   :math:`\Gamma _{C}(p)`                        :cpp:class:`comm                        <mcrl2::process::comm>`
+   :math:`\bigtriangledown _{V}(p)`              :cpp:class:`allow                       <mcrl2::process::allow>`
+   :math:`p\ |\ p`                               :cpp:class:`sync                        <mcrl2::process::sync>`
+   :math:`p^{@}t`                                :cpp:class:`at                          <mcrl2::process::at>`
+   :math:`p\cdot p`                              :cpp:class:`seq                         <mcrl2::process::seq>`
+   :math:`c\rightarrow p`                        :cpp:class:`if_then                     <mcrl2::process::if_then>`
+   :math:`c\rightarrow p\diamond p`              :cpp:class:`if_then_else                <mcrl2::process::if_then_else>`
+   :math:`p << p`                                :cpp:class:`bounded_init                <mcrl2::process::bounded_init>`
+   :math:`p\ ||\ p`                              :cpp:class:`merge                       <mcrl2::process::merge>`
+   :math:`p\ ||\_\ p`                            :cpp:class:`left_merge                  <mcrl2::process::left_merge>`
+   :math:`p + p`                                 :cpp:class:`choice                      <mcrl2::process::choice>`
    ============================================  ===============================================================================
-
-.. note::
-
-   Both :math:`d{:}D` and :math:`e` can be multivariate, meaning they are shorthand for
-   :math:`d_1:D_1, \cdots, d_n:D_n` and :math:`e_1, \cdots, e_n` respectively.
 
 Algorithms on processes
 -----------------------
