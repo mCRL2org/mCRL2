@@ -47,7 +47,7 @@ struct ns_info
   ATermAppl* summands;
   size_t num_prioritised;
   ATermList procvars;
-  NextStateFormat stateformat;
+  int stateformat;
   ATermAppl nil;
   AFun pairAFun;
   size_t statelen;
