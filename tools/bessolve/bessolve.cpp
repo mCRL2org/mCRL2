@@ -53,6 +53,40 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
   }
 }
 
+static
+solution_strategy_t parse_solution_strategy(const std::string& s)
+{
+  if (s == "gauss")
+  {
+    return gauss;
+  }
+  else if (s == "spm")
+  {
+    return spm;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unsupported solution strategy '" + s + "'");
+  }
+}
+
+static
+std::istream& operator>>(std::istream& is, solution_strategy_t& s)
+{
+  try
+  {
+    std::string str;
+    is >> str;
+    s = parse_solution_strategy(str);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+
 //local declarations
 
 class bessolve_tool: public bes_input_tool<input_output_tool>
@@ -106,31 +140,16 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
     void add_options(interface_description& desc)
     {
       input_output_tool::add_options(desc);
-      desc.add_option("strategy", make_mandatory_argument("STRATEGY"),
-                      "solve the BES using the specified STRATEGY:\n"
-                      "  'spm' for Small Progress Measures (default),\n"
-                      "  'gauss' for Gauss elimination\n", 's');
+      desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
+                      .add_value("spm", "for Small Progress Measures", true)
+                      .add_value("gauss", "for Gauss elimination"),
+                      "solve the BES using the specified STRATEGY:", 's');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("strategy"))
-      {
-        std::string str_strategy(parser.option_argument("strategy"));
-        if (str_strategy == "gauss")
-        {
-          strategy = gauss;
-        }
-        else if (str_strategy == "spm")
-        {
-          strategy = spm;
-        }
-        else
-        {
-          parser.error("option -s/--strategy has illegal argument '" + str_strategy + "'");
-        }
-      }
+      parser.option_argument_as<solution_strategy_t>("strategy");
     }
 };
 
@@ -143,8 +162,8 @@ class bessolve_gui_tool: public mcrl2_gui_tool<bessolve_tool>
       std::vector<std::string> values;
 
       values.clear();
-      values.push_back("gauss");
       values.push_back("spm");
+      values.push_back("gauss");
       m_gui_options["strategy"] = create_radiobox_widget(values);
     }
 };

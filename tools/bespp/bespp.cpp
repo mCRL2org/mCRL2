@@ -61,22 +61,15 @@ class bespp_tool: public bes_input_tool<input_output_tool>
     void add_options(interface_description& desc)
     {
       input_output_tool::add_options(desc);
-      desc.add_option("format", make_mandatory_argument("FORMAT"),
-                      "print the PBES in the specified FORMAT:\n"
-                      "  'default' for a PBES specification (default)", 'f');
+      desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
+                      .add_value("default", "for a BES specification", true),
+                      "print the PBES in the specified FORMAT:", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("format"))
-      {
-        std::string str_format(parser.option_argument("format"));
-        if (str_format != "default")
-        {
-          parser.error("option -f/--format has illegal argument '" + str_format + "'");
-        }
-      }
+      format = parser.option_argument_as<print_format_type>("format");
     }
 
   private:
@@ -87,39 +80,18 @@ class bespp_tool: public bes_input_tool<input_output_tool>
 
       mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
-                        << " in the " << pp_format_to_string(format) << " format";
-
-      if (format != print_default)
-      {
-        throw mcrl2::runtime_error("Pretty printing in " + pp_format_to_string(format) + " format is currently not supported");
-      }
+                        << " in the " << format << " format";
 
       if (output_filename().empty())
       {
-        if (format == print_default)
-        {
-          std::cout << bes::pp(bes);
-        }
-        else
-        {
-          atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
-          std::cout << core::pp(b);
-        }
+        std::cout << bes::pp(bes);
       }
       else
       {
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          if (format == print_default)
-          {
-            output_stream << bes::pp(bes);
-          }
-          else
-          {
-            atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
-            output_stream << core::pp(b);
-          }
+          output_stream << bes::pp(bes);
           output_stream.close();
         }
         else
@@ -140,9 +112,6 @@ class bespp_gui_tool: public mcrl2_gui_tool<bespp_tool>
 
       values.clear();
       values.push_back("default");
-      values.push_back("debug");
-      values.push_back("internal");
-      values.push_back("internal-debug");
       m_gui_options["format"] = create_radiobox_widget(values);
     }
 };

@@ -62,6 +62,29 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   throw mcrl2::runtime_error("unknown pbes rewriter option " + type);
 }
 
+/// \brief Prints a pbes rewriter type
+inline
+std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
+{
+  switch (type)
+  {
+    case simplify:
+      return "simplify";
+    case quantifier_all:
+      return "quantifier-all";
+    case quantifier_finite:
+      return "quantifier-finite";
+    case quantifier_one_point:
+      return "quantifier-one-point";
+    case prover:
+      return "prover";
+    case pfnf:
+      return "pfnf";
+    default:
+    return "unknown pbes rewriter";
+  }
+}
+
 /// \brief Returns a description of a pbes rewriter
 inline
 std::string pbes_rewriter_description(pbes_rewriter_type type)
@@ -69,19 +92,19 @@ std::string pbes_rewriter_description(pbes_rewriter_type type)
   switch (type)
   {
     case simplify          :
-      return "  'simplify' for simplification";
+      return "for simplification";
     case quantifier_all    :
-      return "  'quantifier-all' for eliminating all quantifiers";
+      return "for eliminating all quantifiers";
     case quantifier_finite :
-      return "  'quantifier-finite' for eliminating finite quantifier variables";
+      return "for eliminating finite quantifier variables";
     case quantifier_one_point :
-      return "  'quantifier-one-point' for one point rule quantifier elimination";
+      return "for one point rule quantifier elimination";
     case prover            :
-      return "  'prover' for rewriting using a prover";
+      return "for rewriting using a prover";
     case pfnf              :
-      return "  'pfnf' for rewriting into PFNF normal form";
+      return "for rewriting into PFNF normal form";
   }
-  return "  unknown pbes rewriter";
+  return "unknown pbes rewriter";
 }
 
 /// \brief Stream operator for rewriter type
@@ -102,6 +125,13 @@ std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
     is.setstate(std::ios_base::failbit);
   }
   return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, pbes_rewriter_type t)
+{
+  os << print_pbes_rewriter_type(t);
+  return os;
 }
 
 } // namespace pbes_system

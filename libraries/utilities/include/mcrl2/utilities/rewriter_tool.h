@@ -30,7 +30,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    mcrl2::data::rewriter::strategy m_rewrite_strategy;
+    data::rewriter::strategy m_rewrite_strategy;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -40,13 +40,11 @@ class rewriter_tool: public Tool
       Tool::add_options(desc);
 
       desc.add_option(
-        "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
-        "use rewrite strategy NAME:\n"
-        "  'jitty' for jitty rewriting (default),\n"
-#ifdef MCRL2_JITTYC_AVAILABLE
-        "  'jittyc' for compiled jitty rewriting,\n"
-#endif
-        "  'jittyp' for jitty rewriting with prover\n"
+        "rewriter", make_enum_argument<data::rewriter::strategy>("NAME")
+            .add_value("jitty", "for jitty rewriting", true)
+            .add_value("jittyc", "for compiled jitty rewriting")
+            .add_value("jittyp", "for jitty rewriting with prover"),
+        "use rewrite strategy NAME:"
         ,'r'
       );
     }
@@ -76,7 +74,7 @@ class rewriter_tool: public Tool
     /// \return The rewrite strategy
     data::rewriter::strategy rewrite_strategy() const
     {
-      return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
+      return data::rewriter::strategy(m_rewrite_strategy);
     }
 
     /// \brief Creates a data rewriter as specified on the command line.

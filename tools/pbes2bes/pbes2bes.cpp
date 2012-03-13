@@ -90,9 +90,9 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
 
     typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > > super;
 
-    std::string default_rewriter() const
+    pbes_system::pbes_rewriter_type default_rewriter() const
     {
-      return "quantifier-all";
+      return pbes_system::quantifier_all;
     }
 
   public:

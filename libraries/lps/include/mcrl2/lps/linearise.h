@@ -37,6 +37,44 @@ std::string lin_method_to_string(t_lin_method lin_method)
   return method[lin_method];
 }
 
+inline
+t_lin_method string_to_lin_method(const std::string& s)
+{
+  if(s == "stack")
+  {
+    return lmStack;
+  }
+  else if (s == "regular")
+  {
+    return lmRegular;
+  }
+  else if (s == "regular2")
+  {
+    return lmRegular2;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown linearisation strategy " + s);
+  }
+}
+
+inline
+std::istream& operator>>(std::istream& is, t_lin_method& l)
+{
+  std::string s;
+  is >> s;
+
+  try {
+    l = string_to_lin_method(s);
+  }
+  catch (mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+
+  return is;
+}
+
 /// \brief Options for linearisation
 struct t_lin_options
 {

@@ -88,9 +88,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 
     typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<input_tool> > > super;
 
-    std::string default_rewriter() const
+    pbes_system::pbes_rewriter_type default_rewriter() const
     {
-      return "quantifier-all";
+      return pbes_system::quantifier_all;
     }
 
     // Overload synopsis to cope with optional OUTFILE
@@ -230,14 +230,14 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
       load_pbes(p, input_filename(), pbes_input_format());
-      
+
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 
       data::rewriter datar;
-      if (opt_data_elm) 
-      {  
+      if (opt_data_elm)
+      {
         // Create a rewriter with only the necessary data equations.
         using namespace mcrl2::data;
         std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
@@ -246,17 +246,17 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
         set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
                   init_symbol_set.begin(),init_symbol_set.end(),
                   inserter(function_symbol_set,function_symbol_set.begin()));
-        datar=data::rewriter(p.data(), 
-                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()), 
+        datar=data::rewriter(p.data(),
+                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
                              rewrite_strategy());
       }
       else
       {
-        // Create a rewriter with all data equations. This is safer, but increases the time and memory to 
+        // Create a rewriter with all data equations. This is safer, but increases the time and memory to
         // compile the rewrite system.
         data::rewriter(p.data(), rewrite_strategy());
       }
-  
+
 
       timer().start("instantiation");
       ::bes::boolean_equation_system bes_equations=

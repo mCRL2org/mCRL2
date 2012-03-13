@@ -58,14 +58,14 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("lin-method", make_mandatory_argument("NAME"),
-                      "use linearisation method NAME:\n"
-                      "  'regular' for generating an LPS in regular form\n"
-                      "  (specification should be regular, default),\n"
-                      "  'regular2' for a variant of 'regular' that uses more data variables\n"
-                      "  (useful when 'regular' does not work), or\n"
-                      "  'stack' for using stack data types\n"
-                      "  (useful when 'regular' and 'regular2' do not work)"
+      desc.add_option("lin-method",make_enum_argument<t_lin_method>("NAME").
+                      add_value("regular", "for generating an LPS in regular form "
+                                "(specification should be regular)", true).
+                      add_value("regular2", "for a variant of 'regular' that uses "
+                                "more data variables (useful when 'regular'' does not work)").
+                      add_value("stack", "for using stack data types "
+                                "(useful when 'regular' and 'regular2' do not work)"),
+                      "use linearisation method NAME:"
                       , 'l');
       desc.add_option("cluster",
                       "all actions in the final LPS are clustered. "
@@ -87,14 +87,14 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "M×N + M + N summands. Both M and N can be substantially reduced "
                       "by clustering at the cost of introducing new sorts and functions. "
                       "See -c/--cluster, esp. for a short explanation of the clustering "
-                      "process.", 'n');                      
+                      "process.", 'n');
       desc.add_option("no-alpha",
                       "alphabet reductions are not applied."
                       "By default mcrl22lps attempts to distribute communication, hiding "
                       "and allow operators over the parallel composition operator as "
                       "this reduces the size of intermediate linear processes. By using "
                       "this option, this step can be avoided. The name stems from the "
-                      "alphabet axioms in process algebra.", 'z');                      
+                      "alphabet axioms in process algebra.", 'z');
       desc.add_option("newstate",
                       "state variables are encoded using enumerated types instead "
                       "of positive natural numbers (Pos). By using this option new "
@@ -165,32 +165,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.add_delta               = 0 == parser.options.count("timed");
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
-      m_linearisation_options.lin_method = lmRegular;
 
-      if (0 < parser.options.count("lin-method"))
-      {
-        if (1 < parser.options.count("lin-method"))
-        {
-          parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
-        }
-        std::string lin_method_str(parser.option_argument("lin-method"));
-        if (lin_method_str == "stack")
-        {
-          m_linearisation_options.lin_method = lmStack;
-        }
-        else if (lin_method_str == "regular")
-        {
-          m_linearisation_options.lin_method = lmRegular;
-        }
-        else if (lin_method_str == "regular2")
-        {
-          m_linearisation_options.lin_method = lmRegular2;
-        }
-        else
-        {
-          parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
-        }
-      }
+      m_linearisation_options.lin_method = parser.option_argument_as< t_lin_method >("lin-method");
 
       //check for dangerous and illegal option combinations
       if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)

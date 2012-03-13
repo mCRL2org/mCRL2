@@ -181,6 +181,11 @@ std::string interface_description::option_descriptor::textual_description(
   }
 
   s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
+  if (m_argument.get() != 0 && m_argument->has_description())
+  {
+    s << std::string(left_width+2, ' ')
+      << word_wrap(m_argument->get_description(), right_width, std::string(left_width+2, ' ')) << std::endl;
+  }
 
   return s.str();
 }
@@ -295,7 +300,6 @@ make_optional_argument(std::string const& name, std::string const& default_value
 
   return interface_description::optional_argument< std::string >(name, default_value);
 }
-
 
 interface_description& interface_description::get_standard_description()
 {

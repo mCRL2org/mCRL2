@@ -14,7 +14,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/classic_enumerator.h"
-// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/state.h"
@@ -48,14 +47,14 @@ struct ns_info
   ATermAppl* summands;
   size_t num_prioritised;
   ATermList procvars;
-  int stateformat;
+  NextStateFormat stateformat;
   ATermAppl nil;
   AFun pairAFun;
   size_t statelen;
   AFun stateAFun;
   size_t* current_id;
 
-  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c, 
+  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c,
                                               internal_substitution_type &sigma)
   {
     return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c, sigma); // Laatste expressie is intern.
@@ -72,7 +71,7 @@ struct ns_info
 };
 /// \endcond
 
-class NextStateGenerator 
+class NextStateGenerator
 {
   public:
     typedef ns_info::substitution_type substitution_type;
@@ -113,7 +112,7 @@ class NextStateGenerator
     ATermList ListFromFormat(ATermList l);
 };
 
-class NextState 
+class NextState
 {
     friend class NextStateGenerator;
   public:
@@ -176,7 +175,7 @@ NextState* createNextState(
      bool allow_free_vars,
      int state_format = GS_STATE_VECTOR,
      NextStateStrategy strategy = nsStandard
-   ); 
+   );
 
 
 #endif

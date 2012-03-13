@@ -165,7 +165,7 @@ class interface_description
 {
     friend class command_line_parser;
 
-  private:
+  public:
 
     /// \cond INTERNAL
     /**
@@ -200,6 +200,12 @@ class interface_description
           return m_name;
         }
 
+        /// whether the argument has a description or not
+        virtual bool has_description() const = 0;
+
+        /// Gets the description of the argument;
+        virtual std::string const& get_description() const = 0;
+
         /// Gets default value for option argument
         virtual std::string const& get_default() const = 0;
 
@@ -229,6 +235,11 @@ class interface_description
     /// Represents a mandatory argument to an option
     template < typename T = std::string >
     class mandatory_argument;
+
+    template < typename T = std::string >
+    class enum_argument;
+
+  private:
 
     /**
      * \brief Describes a single option
@@ -359,17 +370,6 @@ class interface_description
       }
     };
     /// \endcond
-
-    friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
-    friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
-    friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
-
-    template < typename ArgumentType >
-    friend optional_argument< ArgumentType >  make_optional_argument(std::string const&, std::string const&);
-    template < typename ArgumentType >
-    friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&);
-    template < typename ArgumentType >
-    friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&, std::string const&);
 
     typedef std::map< std::string, option_descriptor > option_map;
 
@@ -1026,6 +1026,13 @@ interface_description::mandatory_argument< std::string >
 make_mandatory_argument(std::string const& name, std::string const& standard_value);
 /// \cond INTERNAL
 
+/// Creates a mandatory option argument specification object
+template < typename ArgumentType >
+interface_description::enum_argument< ArgumentType > make_enum_argument(std::string const& name)
+{
+  return interface_description::enum_argument< ArgumentType >(name);
+}
+
 /**
  * \brief Represents a typed argument
  *
@@ -1066,6 +1073,97 @@ inline bool interface_description::typed_argument< std::string >::validate(std::
   return true;
 }
 
+/**
+ * \brief Represents an argument with a limited number of allowed values.
+ *
+ */
+template < typename T >
+class interface_description::enum_argument : public typed_argument< T >
+{
+  protected:
+
+    std::vector<std::pair< std::string, std::string > > m_enum;
+
+    std::string m_default;
+    bool m_has_default;
+    std::string m_description;
+
+  public:
+
+    enum_argument(std::string const& name)
+    {
+      basic_argument::set_name(name);
+    }
+
+    virtual
+    enum_argument* clone() const
+    {
+      return new enum_argument< T >(*this);
+    }
+
+    virtual
+    bool has_default() const
+    {
+      return m_has_default;
+    }
+
+    virtual
+    const std::string& get_default() const
+    {
+      return m_default;
+    }
+
+    virtual
+    bool is_optional() const
+    {
+      return false;
+    }
+
+    /// Checks whether string is convertible to a value of a specific type
+    inline bool validate(std::string const& s) const
+    {
+      for(std::vector<std::pair < std::string, std::string> >::const_iterator i = m_enum.begin(); i != m_enum.end(); ++i)
+      {
+        if(i->first == s)
+        {
+          std::istringstream test(s);
+          T result;
+          test >> result;
+
+          return !test.fail();
+        }
+      }
+      return false;
+    }
+
+    enum_argument& add_value(const std::string& d, const std::string& description, const bool is_default = false)
+    {
+      m_enum.push_back(std::make_pair(d, description));
+
+      if(is_default)
+      {
+        m_default = d;
+      }
+
+      std::stringstream desc;
+      desc << "'" << d << "' " << description << (is_default?" (default)":"") << std::endl;
+      m_description += desc.str();
+
+      return (*this);
+    }
+
+    virtual bool has_description() const
+    {
+      return true;
+    }
+
+    virtual const std::string& get_description() const
+    {
+      return m_description;
+    }
+
+};
+
 /// Represents an optional argument to an option
 template < typename T >
 class interface_description::optional_argument : public typed_argument< T >
@@ -1078,6 +1176,9 @@ class interface_description::optional_argument : public typed_argument< T >
 
     /// default value
     std::string m_default;
+
+    /// description
+    std::string m_description;
 
   public:
 
@@ -1119,6 +1220,16 @@ class interface_description::optional_argument : public typed_argument< T >
     {
       return true;
     }
+
+    inline bool has_description() const
+    {
+      return false;
+    }
+
+    inline const std::string& get_description() const
+    {
+      return m_description;
+    }
 };
 
 /// Represents a mandatory argument to an option
@@ -1133,6 +1244,9 @@ class interface_description::mandatory_argument : public typed_argument< T >
 
     /// whether a default value has been specified
     bool        m_has_default;
+
+    /// description
+    std::string m_description;
 
   public:
 
@@ -1179,6 +1293,16 @@ class interface_description::mandatory_argument : public typed_argument< T >
     inline bool is_optional() const
     {
       return false;
+    }
+
+    inline bool has_description() const
+    {
+      return false;
+    }
+
+    inline const std::string& get_description() const
+    {
+      return m_description;
     }
 };
 
