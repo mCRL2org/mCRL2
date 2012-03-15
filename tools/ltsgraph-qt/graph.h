@@ -132,6 +132,11 @@ struct LabelNode : public Node
     size_t labelindex;
 };
 
+struct NodeNode : public Node
+{
+    GLfloat color[3];
+};
+
 namespace detail
 {
     class GraphImplBase;
@@ -151,9 +156,10 @@ public:
     Graph();
     ~Graph();
     Edge edge(size_t index) const;
-    Node& node(size_t index) const;
+    NodeNode& node(size_t index) const;
     Node& handle(size_t edge) const;
     LabelNode& label(size_t edge) const;
+    bool isTau(size_t labelindex) const;
     const QString& labelstring(size_t labelindex) const;
     const std::map<size_t, QString*>::iterator labels() const;
     void clip(const Coord3D& min, const Coord3D& max);

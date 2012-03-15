@@ -262,6 +262,7 @@ namespace Graph
             static_cast<WorkerThread*>(m_thread)->stop();
             m_thread->wait();
         }
+        delete m_ui;
     }
 
     void SpringLayoutUi::onAttractionChanged(int value)

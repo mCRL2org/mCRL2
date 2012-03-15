@@ -1,11 +1,12 @@
 #include <QtOpenGL>
 #include <assert.h>
+#include <cstdio>
 #include "glscene.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
 #define RES_NODE_SLICE 16
-#define RES_NODE_STACK  5
+#define RES_NODE_STACK  4
 
 #define SIZE_HANDLE     8
 #define SIZE_NODE      20
@@ -24,23 +25,11 @@ struct GLHitRecord
 struct Color3f
 {
     GLfloat r, g, b;
+    Color3f() {}
     Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
+    Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
     operator const GLfloat*() const { return &r; }
 };
-
-int nearest_gl_texture_size(int v)
-{
-    int n = 0, last = 0;
-    for (int s = 0; s < 32; ++s) {
-        if (((v>>s) & 1) == 1) {
-            ++n;
-            last = s;
-        }
-    }
-    if (n > 1)
-        return 1 << (last+1);
-    return 1 << last;
-}
 
 struct TextureData
 {
@@ -92,21 +81,22 @@ struct TextureData
             p.setPen(QColor(255, 0, 0, 255));
             p.drawText(bounds, g.labelstring(i));
             p.end();
-            label.save("/home/outis/temp.png");
             // Save the original width and height for posterity
-            widths[i] = label.width() + 1;
-            heights[i] = label.height() + 1;
+            widths[i] = label.width();
+            heights[i] = label.height();
             // OpenGL likes its textures to have dimensions that are powers of 2
             int w = 1, h = 1;
             while (w < label.width()) w <<= 1;
-            while (h < label.width()) h <<= 1;
+            while (h < label.height()) h <<= 1;
             // ... and also wants the alpha component to be the 4th component
-            label = QGLWidget::convertToGLFormat(label.scaled(h, w));
+            label = QGLWidget::convertToGLFormat(label.scaled(w, h));
 
             glBindTexture(GL_TEXTURE_2D, textures[i]);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
 
@@ -423,6 +413,38 @@ struct CameraAnimation : public CameraView
 };
 
 //
+// Some auxiliary functions that extend OpenGL
+//
+
+inline
+bool gl2ps()
+{
+    return (gl2psEnable(GL2PS_BLEND) == GL2PS_SUCCESS);
+}
+
+inline
+void glStartName(GLuint objectType, GLuint index=0)
+{
+    glLoadName(objectType);
+    glPushName(index);
+}
+
+inline
+void glEndName()
+{
+    glPopName();
+    glLoadName(GLScene::so_none);
+}
+
+inline
+GLuint glEyeZ(int eyeX, int eyeY)
+{
+    GLuint result;
+    glReadPixels(eyeX, eyeY, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &result);
+    return result;
+}
+
+//
 // Functions that actually draw primitives by combining vertex data, textures and colors.
 //
 
@@ -439,12 +461,14 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill)
 {
     glPushAttrib(GL_LINE_BIT);
     glLineWidth(2.0);
+    gl2psLineWidth(0.25);
     glVertexPointer(3, GL_FLOAT, 0, data.node);
     glColor3fv(fill);   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
     glDepthMask(GL_FALSE);
     glColor3fv(line);   glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
     glDepthMask(GL_TRUE);
     glPopAttrib();
+    gl2psLineWidth(0.25);
 }
 
 inline
@@ -477,39 +501,11 @@ void drawLabel(const VertexData& vertices, const TextureData& textures, size_t i
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textures.textures[index]);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // GL_NEAREST
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // GL_NEAREST
     glVertexPointer(3, GL_FLOAT, 0, &vertices.labels[4 * index]);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
     glDrawArrays(GL_QUADS, 0, 4);
 
     glDisable(GL_TEXTURE_2D);
-}
-
-//
-// Some auxiliary functions that extend OpenGL
-//
-
-inline
-void glStartName(GLuint objectType, GLuint index=0)
-{
-    glLoadName(objectType);
-    glPushName(index);
-}
-
-inline
-void glEndName()
-{
-    glPopName();
-    glLoadName(GLScene::so_none);
-}
-
-inline
-GLuint glEyeZ(int eyeX, int eyeY)
-{
-    GLuint result;
-    glReadPixels(eyeX, eyeY, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &result);
-    return result;
 }
 
 //
@@ -574,12 +570,14 @@ void GLScene::renderEdge(size_t i)
 
 void GLScene::renderNode(size_t i)
 {
-    Graph::Node& node = m_graph.node(i);
-    Color3f line(node.selected, 0.0, 0.0);
-    Color3f fill(1.0, 1.0, 1.0);
+    Graph::NodeNode& node = m_graph.node(i);
+    Color3f fill;
+    Color3f line(node.color);
 
     if (node.locked)
-        fill = Color3f(0.8, 0.8, 0.8);
+        fill = Color3f(1.0 - 0.2 * node.selected, 0.8, 0.8);
+    else
+        fill = Color3f(1.0, 1.0 - 0.2 * node.selected, 1.0 - 0.2 * node.selected);
 
     glStartName(so_node, i);
     glPushMatrix();
@@ -595,15 +593,29 @@ void GLScene::renderLabel(size_t i)
 {
     Graph::LabelNode& label = m_graph.label(i);
 
-    glStartName(so_label, i);
-    glPushMatrix();
+    if (gl2ps())
+    {
+        Coord3D pos = label.pos;
+        pos.x -= m_camera->pixelsize * m_texturedata->widths[label.labelindex] / 2;
+        pos.y -= m_camera->pixelsize * m_texturedata->heights[label.labelindex] / 2;
+        glRasterPos3fv(pos);
+        if (!m_graph.isTau(label.labelindex))
+            gl2psText(m_graph.labelstring(label.labelindex).toUtf8(), "", 10);
+        else
+            gl2psText("t", "Symbol", 10);
+    }
+    else
+    {
+        glStartName(so_label, i);
+        glPushMatrix();
 
-    glColor3f(label.selected, 0.0, 0.0);
-    m_camera->billboard_cylindrical(label.pos);
-    drawLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+        glColor3f(label.selected, 0.0, 0.0);
+        m_camera->billboard_cylindrical(label.pos);
+        drawLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
-    glPopMatrix();
-    glEndName();
+        glPopMatrix();
+        glEndName();
+    }
 }
 
 void GLScene::renderHandle(size_t i)
@@ -634,7 +646,7 @@ void GLScene::renderHandle(size_t i)
 //
 
 GLScene::GLScene(Graph::Graph &g)
-    : m_graph(g)
+    : m_graph(g), m_drawlabels(true)
 {
     m_camera = new CameraAnimation();
     m_texturedata = new TextureData;
@@ -658,7 +670,9 @@ void GLScene::init(const QColor& clear)
     glEnable(GL_POLYGON_SMOOTH);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
+    gl2psEnable(GL2PS_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // Get some fog in. This should probably be made custumizable for people
     // who don't like fog...
     GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 1.0};
@@ -707,7 +721,8 @@ void GLScene::render()
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     for (size_t i = 0; i < m_graph.edgeCount(); ++i)
     {
-        renderLabel(i);
+        if (m_drawlabels)
+            renderLabel(i);
         renderHandle(i);
     }
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -850,4 +865,35 @@ void GLScene::setTranslation(const Graph::Coord3D& translation, size_t animation
 void GLScene::setSize(const Graph::Coord3D& size, size_t animation)
 {
     m_camera->setSize(size, animation);
+}
+
+void GLScene::renderVectorGraphics(const char* filename, GLint format)
+{
+    FILE* outfile = fopen(filename, "wb+");
+    GLint viewport[4];
+    GLint buffersize = 0, state = GL2PS_OVERFLOW;
+
+    while( state == GL2PS_OVERFLOW ){
+      buffersize += 1024*1024;
+      gl2psBeginPage(filename,
+                     "mCRL2 toolset",
+                     viewport,
+                     format,
+                     GL2PS_BSP_SORT,
+                     GL2PS_SILENT |
+                       GL2PS_USE_CURRENT_VIEWPORT |
+                       GL2PS_BEST_ROOT |
+                       GL2PS_COMPRESS,
+                     GL_RGBA,
+                     0,
+                     NULL,
+                     0, 0, 0,
+                     buffersize,
+                     outfile,
+                     filename
+                  );
+      render();
+      state = gl2psEndPage();
+    }
+    fclose(outfile);
 }

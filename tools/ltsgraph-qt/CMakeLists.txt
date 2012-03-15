@@ -21,6 +21,7 @@ include(${QT_USE_FILE})
 set(UI_FILES
   mainwindow.ui
   springlayout.ui
+  glwidget.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
@@ -54,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   svc
   GLU
+  gl2ps
 )
 
 # Don't forget to include output directory, otherwise
@@ -71,6 +73,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
 
 else(QT4_FOUND)
   message(STATUS "Could NOT find Qt4, not building ltsgraph-qt.")

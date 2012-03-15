@@ -12,6 +12,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    // Create open/save dialogs
+    m_savedialog = new QFileDialog(this, tr("Export image"), QString(),
+      tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm);;"
+         "PDF (*.pdf);;"
+         "Postscript (*.ps);;"
+         "Encapsulated Postscript (*.eps);;"
+         "SVG (*.svg);;"
+         "LaTeX (*.tex);;"
+         "PGF (*.pgf);;"
+      ));
+    m_opendialog = new QFileDialog(this, tr("Open file"), QString(),
+      tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)"));
+
     // Add graph area
     m_glwidget = new GLWidget(m_graph, m_ui->frame);
     m_ui->widgetLayout->addWidget(m_glwidget);
@@ -20,13 +33,14 @@ MainWindow::MainWindow(QWidget *parent) :
     m_layout = new Graph::SpringLayout(m_graph);
     Graph::SpringLayoutUi* springlayoutui = m_layout->ui(this);
     addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
+    GLWidgetUi* glwidgetui = m_glwidget->ui(this);
+    addDockWidget(Qt::RightDockWidgetArea, glwidgetui);
 
     // Create timer for rendering (at 25fps)
     m_timer = new QTimer(this);
 
     // Connect signals & slots
     connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
-    connect(m_ui->actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFileClicked()));
     connect(springlayoutui, SIGNAL(runningChanged(bool)), m_ui->actGenerateRandomGraph, SLOT(setDisabled(bool)));
     connect(m_ui->actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
     connect(springlayoutui, SIGNAL(visibilityChanged(bool)), m_ui->actLayoutControl, SLOT(setChecked(bool)));
@@ -34,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
     connect(m_ui->actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
     connect(m_ui->actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
+    connect(m_ui->actOpenFile, SIGNAL(triggered()), m_opendialog, SLOT(exec()));
+    connect(m_opendialog, SIGNAL(fileSelected(QString)), this, SLOT(onOpenFile(const QString&)));
+    connect(m_ui->actExportImage, SIGNAL(triggered()), m_savedialog, SLOT(exec()));
+    connect(m_savedialog, SIGNAL(fileSelected(QString)), this, SLOT(onExportImage(const QString&)));
 
     m_glwidget->setDepth(0.0, 0);
 
@@ -68,15 +86,13 @@ void MainWindow::onTimer()
     m_glwidget->updateGL();
 }
 
-void MainWindow::onOpenFileClicked()
+void MainWindow::onOpenFile(const QString& filename)
 {
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Open LTS"),
-                                                    tr(""),
-                                                    tr("All labelled transition systems (*.aut *.fsm *.dot *.lts)"));
-    if (!filename.isNull())
-    {
-        m_graph.load(filename, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
-        m_glwidget->rebuild();
-    }
+    m_graph.load(filename, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
+    m_glwidget->rebuild();
+}
+
+void MainWindow::onExportImage(const QString& filename)
+{
+    m_glwidget->renderToFile(filename, m_savedialog->selectedNameFilter());
 }

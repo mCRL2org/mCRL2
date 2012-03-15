@@ -24,7 +24,9 @@ namespace Graph
         public:
             virtual std::vector<mcrl2::lts::transition>& transitions() = 0;
             virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
-            std::vector<Node> nodes;
+            virtual bool is_tau(size_t labelindex) const = 0;
+            virtual ~GraphImplBase() {}
+            std::vector<NodeNode> nodes;
             std::vector<LabelNode> labelnodes;
             std::vector<Node> handles;
             std::vector<EdgeExtra> edges;
@@ -45,6 +47,10 @@ namespace Graph
             virtual std::vector<mcrl2::lts::transition>& transitions()
             {
                 return m_graph.get_transitions();
+            }
+            virtual bool is_tau(size_t labelindex) const
+            {
+                return m_graph.is_tau(labelindex);
             }
             virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
             {
@@ -74,6 +80,9 @@ namespace Graph
                     nodes[i].locked = false;
                     nodes[i].anchored = false;
                     nodes[i].selected = 0.0;
+                    nodes[i].color[0] = 0.0;
+                    nodes[i].color[1] = 0.0;
+                    nodes[i].color[2] = 0.0;
                 }
 
                 // Assign and position edge handles, position edge labels
@@ -128,9 +137,15 @@ namespace Graph
         return m_impl->labels.size();
     }
 
+    bool Graph::isTau(size_t labelindex) const
+    {
+        return m_impl->is_tau(labelindex);
+    }
+
     void Graph::load(const QString &filename, const Coord3D& min, const Coord3D& max)
     {
         mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
+        delete m_impl;
         switch (guess)
         {
         case mcrl2::lts::lts_aut:
@@ -157,7 +172,7 @@ namespace Graph
         return Edge(t.from(), t.to(), e.selected);
     }
 
-    Node& Graph::node(size_t index) const
+    NodeNode& Graph::node(size_t index) const
     {
         return m_impl->nodes[index];
     }
@@ -184,7 +199,7 @@ namespace Graph
 
     void Graph::clip(const Coord3D& min, const Coord3D& max)
     {
-        for (std::vector<Node>::iterator it = m_impl->nodes.begin(); it != m_impl->nodes.end(); ++it)
+        for (std::vector<NodeNode>::iterator it = m_impl->nodes.begin(); it != m_impl->nodes.end(); ++it)
             it->pos.clip(min, max);
         for (std::vector<LabelNode>::iterator it = m_impl->labelnodes.begin(); it != m_impl->labelnodes.end(); ++it)
             it->pos.clip(min, max);

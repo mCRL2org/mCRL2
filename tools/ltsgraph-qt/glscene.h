@@ -10,6 +10,7 @@
 #define GLSCENE_H
 
 #include "graph.h"
+#include "gl2ps.h"
 
 struct VertexData;
 struct TextureData;
@@ -23,6 +24,8 @@ private:
     VertexData *m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
     TextureData *m_texturedata; ///< Implementation details storing labels as textures.
     CameraAnimation *m_camera;  ///< Implementation details of the OpenGL camera handling.
+
+    bool m_drawlabels;          ///< Labels are only drawn if this field is true.
 
     /**
      * @brief Renders a single edge.
@@ -212,6 +215,14 @@ public:
      * @returns A record that represents the selected object.
      */
     Selection select(int x, int y);
+
+    /**
+     * @brief Renders the scene to a file using gl2ps.
+     */
+    void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
+
+    bool drawLabels() const { return m_drawlabels; }
+    void setDrawLabels(bool drawLabels) { m_drawlabels = drawLabels; }
 };
 
 #endif // GLSCENE_H
