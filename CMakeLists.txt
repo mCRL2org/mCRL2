@@ -194,20 +194,19 @@ option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
 ##---------------------------------------------------
 
 if( MCRL2_ENABLE_GUI_TOOLS )
+  #Find OpenGL
   include(FindOpenGL)
   message(STATUS "OpenGL: ${OPENGL_FOUND}")
-
   if(NOT OPENGL_FOUND)
     message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
-  else( OPENGL_FOUND )
-    if ( APPLE )
-      include_directories( ${OPENGL_INCLUDE_DIR} )
-      link_directories(${OPENGL_LIBRARIES})
-      set(CMAKE_EXE_LINKER_FLAGS "-framework OpenGL ${CMAKE_EXE_LINKER_FLAGS}")
-      set(CMAKE_SHARED_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif (APPLE)
   endif(NOT OPENGL_FOUND)
+
+  #Find GLUT
+  include(FindGLUT)
+  message(STATUS "GLUT: ${GLUT_FOUND}")
+  if(NOT GLUT_FOUND)
+    message( FATAL_ERROR "GLUT not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
+  endif(NOT GLUT_FOUND)
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------
