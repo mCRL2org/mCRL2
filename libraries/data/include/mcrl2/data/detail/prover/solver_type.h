@@ -25,47 +25,61 @@ namespace detail
 /// \brief The enumaration type smt_solver_type enumerates all available SMT solvers.
 enum smt_solver_type
 {
-  solver_type_cvc,
+  solver_type_cvc
 };
+
+/// \brief standard conversion from string to solver type
+inline
+smt_solver_type parse_solver_type(const std::string& s)
+{
+  if(s == "cvc") return solver_type_cvc;
+  else throw mcrl2::runtime_error("unknown solver type " + s);
+}
 
 /// \brief standard conversion from stream to solver type
 inline
 std::istream& operator>>(std::istream& is, smt_solver_type& s)
 {
-  char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  using namespace mcrl2::data::detail;
-
-  /// no standard conversion available function, so implement on-the-spot
-  is.readsome(solver_type, 10);
-
-  s = solver_type_cvc;
-  if (strncmp(solver_type, "cvc", 3) == 0)
+  try
   {
-    if (solver_type[3] != '\0')
-    {
-      is.setstate(std::ios_base::failbit);
-    }
+    std::string str;
+    is >> str;
+    s = parse_solver_type(str);
   }
-  else
+  catch(mcrl2::runtime_error&)
   {
     is.setstate(std::ios_base::failbit);
   }
-
   return is;
+}
+
+/// \brief standard conversion from solver type to string
+inline
+std::string print_solver_type(const smt_solver_type s)
+{
+  switch(s)
+  {
+    case solver_type_cvc: return "cvc";
+    default: throw mcrl2::runtime_error("unknown solver type");
+  }
 }
 
 /// \brief standard conversion from solvert type to stream
 inline std::ostream& operator<<(std::ostream& os,smt_solver_type s)
 {
-  static char const* solvers[] =
-  {
-    "cvc",
-  };
-
-  os << solvers[s];
-
+  os << print_solver_type(s);
   return os;
+}
+
+/// \brief description of solver type
+inline
+std::string description(const smt_solver_type s)
+{
+  switch(s)
+  {
+    case solver_type_cvc: return "the SMT solver CVC3";
+    default: throw mcrl2::runtime_error("unknown solver type");
+  }
 }
 
 } // namespace detail

@@ -62,7 +62,7 @@ class bespp_tool: public bes_input_tool<input_output_tool>
     {
       input_output_tool::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
-                      .add_value("default", "for a BES specification", true),
+                      .add_value_desc(print_default, "for a BES specification", true),
                       "print the PBES in the specified FORMAT:", 'f');
     }
 

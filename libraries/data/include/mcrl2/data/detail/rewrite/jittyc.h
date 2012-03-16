@@ -38,7 +38,7 @@ class RewriterCompilingJitty: public Rewriter
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
 
-    RewriteStrategy getStrategy();
+    rewrite_strategy getStrategy();
 
     data_expression rewrite(const data_expression term, substitution_type &sigma);
 
@@ -71,7 +71,7 @@ class RewriterCompilingJitty: public Rewriter
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
-    // in the compiled required, these variables can be retrieved from 
+    // in the compiled required, these variables can be retrieved from
     // the array rewriter_bound_variables. variable_indices0 is used
     // to prevent double occurrences in the vector.
     atermpp::vector<variable> rewriter_bound_variables;

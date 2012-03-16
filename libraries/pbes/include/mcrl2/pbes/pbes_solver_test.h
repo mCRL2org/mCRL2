@@ -48,7 +48,7 @@ namespace pbes_system
 ///         pbes2bool uses more advanced features).
 
 template < typename Container >
-bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
+bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::jitty)
 {
   pbes_system::detail::instantiate_global_variables(pbes_spec);
 

@@ -17,15 +17,12 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/state.h"
+#include "mcrl2/lps/nextstate/nextstate_options.h"
 
-/** \brief Internal NextState state storage method **/
-typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
-               , GS_STATE_TREE    /** \brief Store states in a binary tree **/
-             } NextStateFormat;
-
-/** \brief Strategies for exploring the next states. **/
-typedef enum { nsStandard } NextStateStrategy;
-
+namespace mcrl2
+{
+namespace lps
+{
 
 class NextState;
 
@@ -177,5 +174,8 @@ NextState* createNextState(
      NextStateStrategy strategy = nsStandard
    );
 
+
+} // namespace lps
+} // namespace mcrl2
 
 #endif

@@ -269,7 +269,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
-  { 
+  {
     return rewrite_single_lambda(vl, lambda_body, true, sigma);
   }
   assert(vl.size()<arity);
@@ -315,7 +315,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      internal_substitution_type &sigma)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
-  // in data types, i.e. without applying the implement function anymore. 
+  // in data types, i.e. without applying the implement function anymore.
 
   assert(is_abstraction(t) && t(0)==gsMakeExists());
   /* Get Body of Exists */
@@ -336,7 +336,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
       internal_substitution_type &sigma)
 {
   mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
-  
+
   variable_list vl_new;
 
   const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
@@ -437,7 +437,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
-  
+
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
   {
     const variable v= *i;
@@ -522,21 +522,21 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 Rewriter* createRewriter(
             const data_specification& DataSpec,
             const used_data_equation_selector &equations_selector,
-            const RewriteStrategy Strategy)
+            const rewrite_strategy Strategy)
 {
   switch (Strategy)
   {
-    case GS_REWR_JITTY:
+    case jitty:
       return new RewriterJitty(DataSpec,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
-    case GS_REWR_JITTYC:
+    case jitty_compiling:
       return new RewriterCompilingJitty(DataSpec,equations_selector);
 #endif
-    case GS_REWR_JITTY_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,equations_selector);
+    case jitty_prover:
+      return new RewriterProver(DataSpec,jitty,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
-    case GS_REWR_JITTYC_P:
-      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,equations_selector);
+    case jitty_compiling_prover:
+      return new RewriterProver(DataSpec,jitty_compiling,equations_selector);
 #endif
     default:
       return NULL;
@@ -667,75 +667,6 @@ bool isValidRewriteRule(const data_equation data_eqn)
     return false;
   }
   return false; // compiler warning
-}
-
-void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
-{
-  if (strat == GS_REWR_JITTY)
-  {
-    fprintf(stream, "jitty");
-#ifdef MCRL2_JITTYC_AVAILABLE
-  }
-  else if (strat == GS_REWR_JITTYC)
-  {
-    fprintf(stream, "jittyc");
-#endif
-  }
-  else if (strat == GS_REWR_JITTY_P)
-  {
-    fprintf(stream, "jittyp");
-#ifdef MCRL2_JITTYC_AVAILABLE
-  }
-  else if (strat == GS_REWR_JITTYC_P)
-  {
-    fprintf(stream, "jittycp");
-#endif
-  }
-  else
-  {
-    fprintf(stream, "invalid");
-  }
-}
-
-RewriteStrategy RewriteStrategyFromString(char const* s)
-{
-  static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
-#ifdef MCRL2_JITTYC_AVAILABLE
-                                         GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P
-                                         };
-#else
-                                         GS_REWR_JITTY, GS_REWR_INVALID, GS_REWR_JITTY_P, GS_REWR_INVALID
-                                         };
-#endif
-
-  size_t main_strategy = 0; // default invalid
-
-  if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
-  {
-    main_strategy = 1;
-
-    if (s[5] == '\0')   // interpreting
-    {
-      return strategies[main_strategy];
-    }
-    else if (s[6] == '\0')
-    {
-      if (s[5] == 'c')   // compiling
-      {
-        return strategies[main_strategy + 1];
-      }
-      else if (s[5] == 'p')   // with prover
-      {
-        return strategies[main_strategy + 2];
-      }
-    }
-    else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0')   // compiling with prover
-    {
-      return strategies[main_strategy + 3];
-    }
-  }
-
-  return GS_REWR_INVALID;
 }
 
 std::vector <AFun> apples;

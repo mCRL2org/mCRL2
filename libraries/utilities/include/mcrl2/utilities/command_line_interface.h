@@ -1082,49 +1082,87 @@ class interface_description::enum_argument : public typed_argument< T >
 {
   protected:
 
-    std::vector<std::pair< std::string, std::string > > m_enum;
+    struct argument_t
+    {
+      std::string long_arg;
+      std::string short_arg;
+      std::string description;
+
+      argument_t(const std::string& long_arg_, const std::string& short_arg_, const std::string& description_)
+        : long_arg(long_arg_), short_arg(short_arg_), description(description_)
+      {}
+    };
+
+    std::vector< argument_t > m_enum;
 
     std::string m_default;
     bool m_has_default;
     std::string m_description;
 
+    /// \brief Implementation that adds the value of an enum type
+    enum_argument& add_value_with_short(const std::string& long_arg, const std::string& short_arg, const std::string& description, const bool is_default = false)
+    {
+      m_enum.push_back(argument_t(long_arg, short_arg, description));
+
+      if(is_default)
+      {
+        m_default = long_arg;
+      }
+
+      std::stringstream desc;
+      if(short_arg != std::string())
+      {
+        desc << "'" << short_arg << "', ";
+      }
+      desc << "'" << long_arg << "' "
+           << description << (is_default?" (default)":"") << std::endl;
+      m_description += desc.str();
+
+      return (*this);
+    }
+
   public:
 
+    /// Constructor
     enum_argument(std::string const& name)
     {
       basic_argument::set_name(name);
     }
 
+    /// \overload
     virtual
     enum_argument* clone() const
     {
       return new enum_argument< T >(*this);
     }
 
+    /// \overload
     virtual
     bool has_default() const
     {
       return m_has_default;
     }
 
+    /// \overload
     virtual
     const std::string& get_default() const
     {
       return m_default;
     }
 
+    /// \overload
     virtual
     bool is_optional() const
     {
       return false;
     }
 
-    /// Checks whether string is convertible to a value of a specific type
+    /// \overload
     inline bool validate(std::string const& s) const
     {
-      for(std::vector<std::pair < std::string, std::string> >::const_iterator i = m_enum.begin(); i != m_enum.end(); ++i)
+      for(typename std::vector< argument_t >::const_iterator i = m_enum.begin(); i != m_enum.end(); ++i)
       {
-        if(i->first == s)
+        if(i->long_arg == s || i->short_arg == s)
         {
           std::istringstream test(s);
           T result;
@@ -1136,27 +1174,65 @@ class interface_description::enum_argument : public typed_argument< T >
       return false;
     }
 
-    enum_argument& add_value(const std::string& d, const std::string& description, const bool is_default = false)
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value(const T& arg, const bool is_default = false)
     {
-      m_enum.push_back(std::make_pair(d, description));
-
-      if(is_default)
-      {
-        m_default = d;
-      }
-
-      std::stringstream desc;
-      desc << "'" << d << "' " << description << (is_default?" (default)":"") << std::endl;
-      m_description += desc.str();
-
-      return (*this);
+      return add_value_with_short(to_string(arg), std::string(), description(arg), is_default);
     }
 
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] description a description of the value
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value_desc(const T& arg, const std::string& description, const bool is_default = false)
+    {
+      return add_value_with_short(to_string(arg), std::string(), description, is_default);
+    }
+
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] short_argument the short version of the argument
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value_short(const T& arg, const std::string& short_argument, const bool is_default = false)
+    {
+      return add_value_with_short(to_string(arg), short_argument, description(arg), is_default);
+    }
+
+
+
+    /// \overload
     virtual bool has_description() const
     {
       return true;
     }
 
+    /// \overload
     virtual const std::string& get_description() const
     {
       return m_description;

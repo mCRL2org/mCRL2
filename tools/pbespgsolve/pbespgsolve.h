@@ -94,7 +94,7 @@ struct pbespgsolve_options
       use_decycle_solver(false),
       use_deloop_solver(true),
       verify_solution(true),
-      rewrite_strategy(data::rewriter::jitty)
+      rewrite_strategy(data::jitty)
   {
   }
 };

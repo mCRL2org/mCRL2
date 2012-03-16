@@ -14,6 +14,7 @@
 
 #include <string>
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/linearisation_method.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
@@ -23,57 +24,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-/// \brief The available linearisation methods
-typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
-
-/// \brief String representation of a linearisation method
-/// \param[in] lin_method A linerisation method
-/// \return
-inline
-std::string lin_method_to_string(t_lin_method lin_method)
-{
-  std::string method[] = {"stack","regular","regular2"};
-  return method[lin_method];
-}
-
-inline
-t_lin_method string_to_lin_method(const std::string& s)
-{
-  if(s == "stack")
-  {
-    return lmStack;
-  }
-  else if (s == "regular")
-  {
-    return lmRegular;
-  }
-  else if (s == "regular2")
-  {
-    return lmRegular2;
-  }
-  else
-  {
-    throw mcrl2::runtime_error("unknown linearisation strategy " + s);
-  }
-}
-
-inline
-std::istream& operator>>(std::istream& is, t_lin_method& l)
-{
-  std::string s;
-  is >> s;
-
-  try {
-    l = string_to_lin_method(s);
-  }
-  catch (mcrl2::runtime_error&)
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-
-  return is;
-}
 
 /// \brief Options for linearisation
 struct t_lin_options
@@ -107,7 +57,7 @@ struct t_lin_options
       nodeltaelimination(false),
       add_delta(false),
       do_not_apply_constelm(false),
-      rewrite_strategy(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty)
+      rewrite_strategy(mcrl2::data::jitty)
   {}
 };
 

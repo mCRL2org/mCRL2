@@ -87,7 +87,7 @@ std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
 
 /// \brief Returns a description of a pbes rewriter
 inline
-std::string pbes_rewriter_description(pbes_rewriter_type type)
+std::string description(const pbes_rewriter_type type)
 {
   switch (type)
   {
@@ -104,7 +104,7 @@ std::string pbes_rewriter_description(pbes_rewriter_type type)
     case pfnf              :
       return "for rewriting into PFNF normal form";
   }
-  return "unknown pbes rewriter";
+  throw mcrl2::runtime_error("unknown pbes rewriter");
 }
 
 /// \brief Stream operator for rewriter type
@@ -128,7 +128,7 @@ std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
 }
 
 inline
-std::ostream& operator<<(std::ostream& os, pbes_rewriter_type t)
+std::ostream& operator<<(std::ostream& os, const pbes_rewriter_type t)
 {
   os << print_pbes_rewriter_type(t);
   return os;

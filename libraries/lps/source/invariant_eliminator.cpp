@@ -76,7 +76,7 @@ mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
 
 Invariant_Eliminator::Invariant_Eliminator(
   const mcrl2::lps::specification& a_lps,
-  const mcrl2::data::rewriter::strategy a_rewrite_strategy /* = mcrl2::data::rewriter::jitty */,
+  const mcrl2::data::rewriter::strategy a_rewrite_strategy /* = mcrl2::data::jitty */,
   const int a_time_limit /* = 0 */,
   const bool a_path_eliminator /* = false */,
   const mcrl2::data::detail::smt_solver_type a_solver_type /* = mcrl2::data::detail::solver_type_ario */,

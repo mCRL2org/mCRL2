@@ -176,7 +176,7 @@ std::string test17 =
 //    "init X(0);                                                        \n"
 //    ;
 
-void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::rewriter::strategy rewrite_strategy)
+void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::rewrite_strategy rewrite_strategy)
 {
   pbes<> p = txt2pbes(pbes_spec);
   bool result = pbes2_bool_test(p, rewrite_strategy);
@@ -208,9 +208,9 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
-  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies(false);
+  std::vector<data::rewrite_strategy> strategies = utilities::get_test_rewrite_strategies(false);
 
-  for(std::vector<data::basic_rewriter<data::data_expression>::strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
+  for(std::vector<data::rewrite_strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
   {
     test_pbes2bool(pbes_spec, expected_result, *i);
 

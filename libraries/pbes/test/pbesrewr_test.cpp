@@ -39,7 +39,7 @@ void test_pbesrewr1()
     "init X(e1);                                           \n"
     ;
   pbes<> p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::rewriter::jitty);
+  data::rewriter datar(p.data(), data::jitty);
   utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);
@@ -57,7 +57,7 @@ void test_pbesrewr2()
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
-  data::rewriter datar(p.data(), data::rewriter::jitty);
+  data::rewriter datar(p.data(), data::jitty);
   utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);
@@ -79,7 +79,7 @@ void test_pbesrewr3()
     ;
 
   pbes<> p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::rewriter::jitty);
+  data::rewriter datar(p.data(), data::jitty);
   utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
   data::rewriter_with_variables datarv(datar);

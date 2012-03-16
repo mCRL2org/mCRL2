@@ -240,7 +240,7 @@ class Confluence_Checker
     Confluence_Checker
     (
       mcrl2::lps::specification const& a_lps,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,

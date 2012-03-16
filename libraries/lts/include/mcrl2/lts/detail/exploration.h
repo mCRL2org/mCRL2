@@ -19,10 +19,11 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
-// #include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lts/detail/exploration_strategy.h"
 
 #include "workarounds.h"
 
@@ -36,25 +37,14 @@ namespace lts
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
 #define DEFAULT_INIT_TSIZE 10000UL
 
-enum exploration_strategy { es_none,
-                            es_breadth,
-                            es_depth,
-                            es_random,
-                            es_value_prioritized,
-                            es_value_random_prioritized
-                          };
-
-exploration_strategy str_to_expl_strat(const std::string s);
-const std::string expl_strat_to_str(exploration_strategy es);
-
 struct lts_generation_options
 {
   lts_generation_options() :
-    strat(mcrl2::data::rewriter::jitty),
+    strat(data::jitty),
     usedummies(true),
     removeunused(true),
-    stateformat(GS_STATE_TREE),
-    outformat(mcrl2::lts::lts_none),
+    stateformat(lps::GS_STATE_TREE),
+    outformat(lts_none),
     outinfo(true),
     suppress_progress_messages(false),
     max_states(DEFAULT_MAX_STATES),
@@ -85,17 +75,17 @@ struct lts_generation_options
     return basefilename + std::string("_") + info + std::string(".") + extension;
   }
 
-  mcrl2::data::rewriter::strategy strat;
+  data::rewriter::strategy strat;
   bool usedummies;
   bool removeunused;
   int stateformat;
-  mcrl2::lts::lts_type outformat;
+  lts_type outformat;
   bool outinfo;
   bool suppress_progress_messages;
   size_t max_states;
   std::string priority_action;
   bool trace;
-  atermpp::set < mcrl2::core::identifier_string > trace_actions; // strings representing action labels, but without the sorts.
+  atermpp::set < core::identifier_string > trace_actions; // strings representing action labels, but without the sorts.
   size_t max_traces;
   bool detect_deadlock;
   bool detect_divergence;
@@ -106,8 +96,8 @@ struct lts_generation_options
   size_t bithashsize;
   size_t todo_max;
   size_t initial_table_size;
-  std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
-  mcrl2::lps::specification specification;
+  std::auto_ptr< data::rewriter > m_rewriter;
+  lps::specification specification;
   std::string trace_prefix;
   std::string lts;
 };
@@ -124,7 +114,7 @@ class lps2lts_algorithm
     bool completely_generated;
 
     lts_generation_options* lgopts;
-    NextState* nstate;
+    lps::NextState* nstate;
     atermpp::indexed_set states;
     lps2lts_lts lts;
 
@@ -144,7 +134,7 @@ class lps2lts_algorithm
     bool lg_error;
 
     bool apply_confluence_reduction;
-    NextStateGenerator* repr_nsgen;
+    lps::NextStateGenerator* repr_nsgen;
 
   public:
     lps2lts_algorithm() :
@@ -184,7 +174,7 @@ class lps2lts_algorithm
     void abort()
     {
       // Stops the exploration algorithm if it is running by making sure
-      // not a single state can be generated anymore. 
+      // not a single state can be generated anymore.
       if (!must_abort)
       {
         must_abort = true;
@@ -205,13 +195,13 @@ class lps2lts_algorithm
     state_t get_repr(const state_t state);
 
     // trace functions
-    bool occurs_in(const core::identifier_string name, const mcrl2::lps::multi_action ma);
+    bool occurs_in(const core::identifier_string name, const lps::multi_action ma);
     bool savetrace(std::string const& info,
                    const state_t state,
-                   NextState* nstate,
+                   lps::NextState* nstate,
                    const state_t extra_state = state_t(),
                    const lps::multi_action extra_transition = lps::multi_action());
-    void check_actiontrace(const state_t OldState, const mcrl2::lps::multi_action Transition, const state_t NewState);
+    void check_actiontrace(const state_t OldState, const lps::multi_action Transition, const state_t NewState);
     void save_error_trace(const state_t state);
     void check_deadlocktrace(const state_t state);
 
@@ -219,7 +209,7 @@ class lps2lts_algorithm
     size_t state_index(const state_t state);
 
     // Main routine
-    bool add_transition(const state_t from, mcrl2::lps::multi_action action, const state_t to);
+    bool add_transition(const state_t from, lps::multi_action action, const state_t to);
 };
 
 }

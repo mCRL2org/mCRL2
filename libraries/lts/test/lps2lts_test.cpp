@@ -34,6 +34,7 @@
 
 using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
+using namespace mcrl2::lps;
 
 // Get filename based on timestamp
 // Warning: is prone to race conditions
@@ -56,29 +57,16 @@ std::string temporary_filename(std::string const& prefix = "")
   return result.string();
 }
 
-std::string nextstate_format_to_string(const NextStateFormat f)
-{
-  switch (f)
-  {
-    case GS_STATE_VECTOR:
-      return std::string("vector");
-    case GS_STATE_TREE:
-      return std::string("tree");
-    default:
-      return std::string("unknown");
-  }
-}
-
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
-                              mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
+                              mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
                               NextStateFormat format = GS_STATE_VECTOR,
                               std::string priority_action = "")
 {
-  std::clog << "Translating LPS to LTS with exploration strategy " << std::string(expl_strat_to_str(strategy)) << ", rewrite strategy " << pp(rewrite_strategy) << ", and state format " << nextstate_format_to_string(format) << "." << std::endl;
+  std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << ", and state format " << format << "." << std::endl;
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
@@ -107,7 +95,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 }
 
 // Configure rewrite strategies to be used.
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
+typedef mcrl2::data::rewrite_strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 // Configure exploration strategies to be tested;
@@ -451,7 +439,7 @@ BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
 BOOST_AUTO_TEST_CASE(test_plus)
 {
   // This example provides two identical transitions between a state.
-  // There is a discussion on whether this is desirable. Currently, for 
+  // There is a discussion on whether this is desirable. Currently, for
   // efficiency reasons such extra transitions are not removed by lps2lts.
   std::string spec(
     "act a;\n"
@@ -463,7 +451,7 @@ BOOST_AUTO_TEST_CASE(test_plus)
 
 // The example below fails if #[0,1] does not have a decent
 // type. The tricky thing is that the type of the list can be List(Nat),
-// List(Int) or List(Real). Toolset version 10180 resolved this by 
+// List(Int) or List(Real). Toolset version 10180 resolved this by
 // delivering the type List({Nat, Int, Real}), i.e. a set of possible
 // options. But this was not expected and understood by the other tools.
 // This is related to bug report #949.

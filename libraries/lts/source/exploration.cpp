@@ -42,50 +42,6 @@ namespace mcrl2
 namespace lts
 {
 
-exploration_strategy str_to_expl_strat(const string s)
-{
-  if (s=="b" || s=="breadth")
-  {
-    return es_breadth;
-  }
-  if (s=="d" || s=="depth")
-  {
-    return es_depth;
-  }
-  if (s=="r" || s=="random")
-  {
-    return es_random;
-  }
-  if (s=="p" || s=="prioritized")
-  {
-    return es_value_prioritized;
-  }
-  if (s=="q" || s=="rprioritized")
-  {
-    return es_value_random_prioritized;
-  }
-  return es_none;
-}
-
-const string expl_strat_to_str(exploration_strategy es)
-{
-  switch (es)
-  {
-    case es_breadth:
-      return "breadth";
-    case es_depth:
-      return "depth";
-    case es_random:
-      return "random";
-    case es_value_prioritized:
-      return "prioritized";
-    case es_value_random_prioritized:
-      return "rprioritized";
-    default:
-      return "unknown";
-  }
-}
-
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 {
   using namespace mcrl2;
@@ -710,7 +666,7 @@ bool lps2lts_algorithm::generate_lts()
     num_found_same = 0;
     tracecnt = 0;
     mCRL2log(verbose) << "generating state space with '" <<
-                    expl_strat_to_str(lgopts->expl_strat) << "' strategy...\n";
+                    lgopts->expl_strat << "' strategy...\n";
 
     if (lgopts->expl_strat == es_random)
     {
@@ -934,7 +890,7 @@ bool lps2lts_algorithm::generate_lts()
             tmp_states = ATgetNext(tmp_states);
           }
         }
-        
+
         else
         {
           check_deadlocktrace(state);

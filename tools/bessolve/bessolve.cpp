@@ -47,10 +47,15 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
     case spm:
       return "spm";
       break;
-    default:
-      return "unknown";
-      break;
   }
+  throw mcrl2::runtime_error("unknown solution strategy");
+}
+
+static
+std::ostream& operator<<(std::ostream& os, const solution_strategy_t s)
+{
+  os << solution_strategy_to_string(s);
+  return os;
 }
 
 static
@@ -86,6 +91,19 @@ std::istream& operator>>(std::istream& is, solution_strategy_t& s)
   return is;
 }
 
+static
+std::string description(const solution_strategy_t s)
+{
+  switch (s)
+  {
+    case gauss:
+      return "Gauss elimination";
+      break;
+    case spm:
+      return "Small Progress Measures";
+      break;
+  }
+}
 
 //local declarations
 
@@ -141,8 +159,8 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
     {
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
-                      .add_value("spm", "for Small Progress Measures", true)
-                      .add_value("gauss", "for Gauss elimination"),
+                      .add_value(spm, true)
+                      .add_value(gauss),
                       "solve the BES using the specified STRATEGY:", 's');
     }
 

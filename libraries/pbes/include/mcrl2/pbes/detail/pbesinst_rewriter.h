@@ -123,7 +123,7 @@ class pbesinst_rewriter
     /// \param data_spec A data specification
     /// \param rewriter_strategy A rewriter strategy
     /// \param print_rewriter_output If true, rewriter output is printed to standard error
-    pbesinst_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
+    pbesinst_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::jitty, bool print_rewriter_output = false)
       :
       datar(data_spec, rewriter_strategy),
       datarv(data_spec),

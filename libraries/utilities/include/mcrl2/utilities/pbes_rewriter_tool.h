@@ -70,7 +70,7 @@ class pbes_rewriter_tool: public Tool
       std::set<pbes_system::pbes_rewriter_type> types = available_rewriters();
       for (typename std::set<pbes_system::pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
       {
-        arg.add_value(pbes_system::print_pbes_rewriter_type(*i), pbes_system::pbes_rewriter_description(*i), *i==default_rewriter());
+        arg.add_value(*i, *i==default_rewriter());
       }
 
       desc.add_option(

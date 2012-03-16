@@ -59,12 +59,9 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     {
       super::add_options(desc);
       desc.add_option("lin-method",make_enum_argument<t_lin_method>("NAME").
-                      add_value("regular", "for generating an LPS in regular form "
-                                "(specification should be regular)", true).
-                      add_value("regular2", "for a variant of 'regular' that uses "
-                                "more data variables (useful when 'regular'' does not work)").
-                      add_value("stack", "for using stack data types "
-                                "(useful when 'regular' and 'regular2' do not work)"),
+                      add_value(lmRegular, true).
+                      add_value(lmRegular2).
+                      add_value(lmStack),
                       "use linearisation method NAME:"
                       , 'l');
       desc.add_option("cluster",

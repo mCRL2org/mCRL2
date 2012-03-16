@@ -48,19 +48,19 @@ data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_str
 {
   if (rewriter_strategy == "jitty")
   {
-		return data::rewriter::jitty;
+		return data::jitty;
   }
 #ifdef MCRL2_JITTYC_AVAILABLE
   else if (rewriter_strategy == "jittyc")
   {
-		return data::rewriter::jitty_compiling;
+		return data::jitty_compiling;
   }
 #endif
   else
   {
     throw std::runtime_error("Error: unknown rewriter strategy " + rewriter_strategy + "!");
   }
-  return data::rewriter::jitty;
+  return data::jitty;
 }
 
 /// \brief Generates possible values of the data type (at most max_size).

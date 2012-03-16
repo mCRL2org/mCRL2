@@ -172,7 +172,7 @@ class next_state_generator
     /// \brief Constructor
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
-    next_state_generator(const std::string& filename, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
+    next_state_generator(const std::string& filename, data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_rewriter_strategy(rewriter_strategy),
         m_rewriter(data::data_specification()),
         m_NextState(0),
@@ -183,7 +183,7 @@ class next_state_generator
     }
 
     /// \brief Constructor
-    next_state_generator(const specification& lps_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
+    next_state_generator(const specification& lps_spec, data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_specification(lps_spec),
         m_rewriter_strategy(rewriter_strategy),
         m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables()), rewriter_strategy),

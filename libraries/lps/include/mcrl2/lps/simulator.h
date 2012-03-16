@@ -56,7 +56,7 @@ class StandardSimulator : virtual public SimulatorInterface
     virtual mcrl2::lps::state GetState();
     virtual std::vector < mcrl2::lps::state > GetNextStates();
     virtual atermpp::vector < mcrl2::lps::multi_action > GetNextActions();
-    virtual NextState* GetNextState();
+    virtual mcrl2::lps::NextState* GetNextState();
     virtual bool ChooseTransition(size_t index);
     virtual size_t GetTraceLength();
     virtual size_t GetTracePos();
@@ -75,8 +75,8 @@ class StandardSimulator : virtual public SimulatorInterface
     viewlist views;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
     std::set < mcrl2::lps::state > seen_states;
-    NextState* nextstate;
-    NextStateGenerator* nextstategen;
+    mcrl2::lps::NextState* nextstate;
+    mcrl2::lps::NextStateGenerator* nextstategen;
 
     void UpdateTransitions();
     bool match_trace_recursively(const size_t pos,size_t &culprit_pos);

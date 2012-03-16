@@ -45,7 +45,7 @@ namespace detail
  * contained in the LPS passed as parameter a_lps and the rewrite
  * strategy passed as parameter a_rewrite_strategy. The parameter
  * a_rewrite_strategy can be set to either
- * GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
+ * GS_REWR_data::jitty or GS_REWR_data::jittyC. To limit the
  * number of seconds spent on proving a single formula, a time limit
  * can be set. If the time limit is set to 0, no time limit will be
  * enforced. The parameter a_apply_induction indicates whether or
@@ -428,7 +428,7 @@ class BDD_Prover: public Prover
     /// precondition: the argument passed as parameter a_lps is an LPS
     /* BDD_Prover(
       const data_specification &data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
@@ -438,7 +438,7 @@ class BDD_Prover: public Prover
     BDD_Prover(
       mcrl2::data::data_specification const& data_spec,
       const used_data_equation_selector& equations_selector,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       smt_solver_type a_solver_type = solver_type_cvc,

@@ -3191,9 +3191,9 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   return result;
 }
 
-RewriteStrategy RewriterCompilingJitty::getStrategy()
+rewrite_strategy RewriterCompilingJitty::getStrategy()
 {
-  return GS_REWR_JITTYC;
+  return jitty_compiling;
 }
 
 }
