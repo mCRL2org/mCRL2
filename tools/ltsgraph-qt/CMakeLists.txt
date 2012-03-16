@@ -12,6 +12,18 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4)
 
+
+IF(APPLE)
+   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
+   FIND_LIBRARY(GLUT_LIBRARY GLUT )
+   FIND_LIBRARY(OpenGL_LIBRARY OpenGL )
+   MARK_AS_ADVANCED (GLUT_LIBRARY
+                     OpenGL_LIBRARY)
+   SET(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
+ELSE(APPLE)
+   SET(MCRL2gl GLU )
+ENDIF (APPLE)
+
 if (MCRL2_ENABLE_GUI_TOOLS)
 if (QT4_FOUND)
 
@@ -54,8 +66,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_lps
   svc
-  ${OPENGL_LIBRARY}
-  ${GLUT_LIBRARIES}
+  ${MCRL2gl}
   gl2ps
 )
 
