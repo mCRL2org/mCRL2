@@ -41,7 +41,6 @@ using namespace mcrl2::data::detail;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 template <typename Rewriter>
