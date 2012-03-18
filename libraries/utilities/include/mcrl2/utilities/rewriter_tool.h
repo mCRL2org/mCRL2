@@ -31,7 +31,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    data::rewriter::strategy m_rewrite_strategy;
+    data::rewrite_strategy m_rewrite_strategy;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -43,7 +43,9 @@ class rewriter_tool: public Tool
       desc.add_option(
         "rewriter", make_enum_argument<data::rewrite_strategy>("NAME")
             .add_value(data::jitty, true)
+#ifdef MCRL2_JITTYC_AVAILABLE
             .add_value(data::jitty_compiling)
+#endif
             .add_value(data::jitty_prover),
         "use rewrite strategy NAME:"
         ,'r'
