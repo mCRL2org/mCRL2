@@ -44,9 +44,25 @@ pbesinst_strategy parse_pbesinst_strategy(const std::string& s)
   }
 }
 
+inline
+std::istream& operator>>(std::istream& is, pbesinst_strategy& s)
+{
+  try
+  {
+    std::string str;
+    is >> str;
+    s = parse_pbesinst_strategy(str);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
 /// \brief Returns a string representation of a pbesinst transformation strategy.
 inline
-std::string print_pbesinst_strategy(pbesinst_strategy strategy)
+std::string print_pbesinst_strategy(const pbesinst_strategy strategy)
 {
   if (strategy == pbesinst_finite)
   {
@@ -56,7 +72,29 @@ std::string print_pbesinst_strategy(pbesinst_strategy strategy)
   {
     return "lazy";
   }
-  return "unknown";
+  throw mcrl2::runtime_error("unknown pbesinst strategy " + strategy);
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const pbesinst_strategy strategy)
+{
+  os << print_pbesinst_strategy(strategy);
+  return os;
+}
+
+/// \brief Returns a string representation of a pbesinst transformation strategy.
+inline
+std::string description(const pbesinst_strategy strategy)
+{
+  if (strategy == pbesinst_finite)
+  {
+    return "for computing all possible boolean equations";
+  }
+  else if (strategy == pbesinst_lazy)
+  {
+    return "for computing only boolean equations which can be reached from the initial state";
+  }
+  throw mcrl2::runtime_error("unknown pbesinst strategy " + strategy);
 }
 
 } // namespace pbes_system

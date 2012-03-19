@@ -65,7 +65,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("renamefile", make_mandatory_argument("NAME"),
+      desc.add_option("renamefile", make_file_argument("NAME"),
                       "use the rename rules from NAME", 'f');
       desc.add_option("no-rewrite",
                       "do not rewrite data expressions while renaming; use when the rewrite system "

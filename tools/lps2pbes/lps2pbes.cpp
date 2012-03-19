@@ -40,7 +40,7 @@ class lps2pbes_tool : public input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("formula", make_mandatory_argument("FILE"),
+      desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');

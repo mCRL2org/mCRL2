@@ -59,33 +59,15 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 
     pbespgsolve_options m_options;
 
-    pbespg_solver_type parse_solver_type(const std::string& s) const
-    {
-      if (s == "spm")
-      {
-        return spm_solver;
-      }
-      else if (s == "altspm")
-      {
-        return alternative_spm_solver;
-      }
-      else if (s == "recursive")
-      {
-        return recursive_solver;
-      }
-      throw mcrl2::runtime_error("pbespgsolve: unknown solver " + s);
-    }
-
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("solver-type",
-                      make_optional_argument("NAME", "spm"),
-                      "Use the solver type NAME:\n"
-                      "  'spm' (default),\n"
-                      "  'altspm', or\n"
-                      "  'recursive'",
-                      's');
+                      make_enum_argument<pbespg_solver_type>("NAME")
+                      .add_value(spm_solver, true)
+                      .add_value(alternative_spm_solver)
+                      .add_value(recursive_solver),
+                      "Use the solver type NAME:", 's');
       desc.add_option("scc", "Use scc decomposition", 'c');
       desc.add_option("loop", "Eliminate self-loops", 'L');
       desc.add_option("cycle", "Eliminate cycles", 'C');
@@ -160,6 +142,7 @@ class pg_solver_gui_tool: public mcrl2_gui_tool<pg_solver_tool>
 
       values.clear();
       values.push_back("spm");
+      values.push_back("altspm");
       values.push_back("recursive");
       m_gui_options["solver-type"] = create_radiobox_widget(values);
     }

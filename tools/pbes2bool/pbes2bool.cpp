@@ -126,36 +126,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       opt_construct_counter_example = 0 < parser.options.count("counter");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_strategy                  = lazy;
+      opt_strategy                  = parser.option_argument_as<transformation_strategy>("strategy");
 
       if (parser.options.count("output")) // Output format is deprecated.
       {
         std::string format = parser.option_argument("output");
         parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
-      }
-
-
-      if (parser.options.count("strategy"))   // Bes solving strategy (currently only one available)
-      {
-        int strategy = parser.option_argument_as< int >("strategy");
-
-        switch (strategy)
-        {
-          case 0:
-            opt_strategy = lazy;
-            break;
-          case 1:
-            opt_strategy = optimize;
-            break;
-          case 2:
-            opt_strategy = on_the_fly;
-            break;
-          case 3:
-            opt_strategy = on_the_fly_with_fixed_points;
-            break;
-          default:
-            parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
-        }
       }
     }
 
@@ -163,31 +139,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
     {
       super::add_options(desc);
       desc.
-      add_option("strategy", make_mandatory_argument("STRAT"),
-                 "use strategy STRAT (default '0');\n"
-                 " 0) Compute all boolean equations which can be reached"
-                 " from the initial state, without optimization"
-                 " (default). This is is the most data efficient"
-                 " option per generated equation.\n"
-                 " 1) Optimize by immediately substituting the right"
-                 " hand sides for already investigated variables"
-                 " that are true or false when generating an"
-                 " expression. This is as memory efficient as 0.\n"
-                 " 2) In addition to 1, also substitute variables that"
-                 " are true or false into an already generated right"
-                 " hand side. This can mean that certain variables"
-                 " become unreachable (e.g. X0 in X0 and X1, when X1"
-                 " becomes false, assuming X0 does not occur"
-                 " elsewhere. It will be maintained which variables"
-                 " have become unreachable as these do not have to be"
-                 " investigated. Depending on the PBES, this can"
-                 " reduce the size of the generated BES substantially"
-                 " but requires a larger memory footprint.\n"
-                 " 3) In addition to 2, investigate for generated"
-                 " variables whether they occur on a loop, such that"
-                 " they can be set to true or false, depending on the"
-                 " fixed point symbol. This can increase the time"
-                 " needed to generate an equation substantially",
+      add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
+                 .add_value(lazy, true)
+                 .add_value(optimize)
+                 .add_value(on_the_fly)
+                 .add_value(on_the_fly_with_fixed_points),
+                 "use strategy STRAT:",
                  's').
       add_option("counter",
                  "print at the end a tree labelled with instantiations "
@@ -195,10 +152,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
                  "indication of how pbes2bool came to the validity or "
                  "invalidity of the PBES",
                  'c').
-      /* add_option("precompile",
-        "precompile the pbes for faster rewriting; Deprecated. Does not "
-        "work anymore. Only present for compatibility reasons",
-        'p'). */
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
                  "and translate internal expressions to binary decision "

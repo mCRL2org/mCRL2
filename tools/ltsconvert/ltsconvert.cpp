@@ -257,7 +257,7 @@ class ltsconvert_tool : public ltsconvert_base
       desc.add_option("no-state",
                       "leave out state information when saving in dot format", 'n');
       desc.add_option("determinise", "determinise LTS", 'D');
-      desc.add_option("lps", make_mandatory_argument("FILE"),
+      desc.add_option("lps", make_file_argument("FILE"),
                       "use FILE as the LPS from which the input LTS was generated; this might "
                       "be needed to store the correct parameter names of states when saving "
                       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
@@ -265,7 +265,7 @@ class ltsconvert_tool : public ltsconvert_base
                       "use FORMAT as the input format", 'i').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the output format", 'o');
-      desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME)")
+      desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME")
                       .add_value(lts_eq_none, true)
                       .add_value(lts_eq_bisim)
                       .add_value(lts_eq_branching_bisim)

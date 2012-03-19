@@ -183,8 +183,23 @@ std::string interface_description::option_descriptor::textual_description(
   s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
   if (m_argument.get() != 0 && m_argument->has_description())
   {
-    s << std::string(left_width+2, ' ')
-      << word_wrap(m_argument->get_description(), right_width, std::string(left_width+2, ' ')) << std::endl;
+    std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    {
+      std::string arg;
+      if(i->get_short() != std::string())
+      {
+        arg += "'" + i->get_short() + "', ";
+      }
+      arg += "'" + i->get_long() + "' " + i->get_description();
+      bool is_default = m_argument->get_default() == i->get_long();
+      if(is_default)
+      {
+        arg += " (default)";
+      }
+      s << std::string(left_width+2, ' ')
+        << word_wrap(arg, right_width, std::string(left_width+4, ' ')) << std::endl;
+    }
   }
 
   return s.str();
@@ -233,36 +248,84 @@ std::string interface_description::option_descriptor::man_page_description() con
        )
     << std::endl;
 
+  if (m_argument.get() != 0 && m_argument->has_description())
+  {
+    std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    {
+      std::string arg;
+      if(i->get_short() != std::string())
+      {
+        arg += "'" + i->get_short() + "', ";
+      }
+      arg += "'" + i->get_long() + "' " + i->get_description();
+      bool is_default = m_argument->get_default() == i->get_long();
+      if(is_default)
+      {
+        arg += " (default)";
+      }
+
+      s << boost::xpressive::regex_replace(
+            boost::xpressive::regex_replace(word_wrap(arg, 80),
+                                                  boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")),
+            boost::xpressive::sregex(boost::xpressive::as_xpr('.')), std::string("\\&.")
+          )
+       << std::endl;
+    }
+  }
+
   return s.str();
 }
 
-std::ostream& interface_description::option_descriptor::xml_page_description(std::ostream& s, const bool is_standard) const
+std::ostream& interface_description::option_descriptor::xml_page_description(std::ostream& s, const bool is_standard, unsigned int indentation) const
 {
-  s << "<option standard=\"" << (is_standard?"yes":"no") << "\">";
+  s << std::string(indentation++, ' ') << "<option standard=\"" << (is_standard?"yes":"no") << "\">" << std::endl;
 
   if (m_short != '\0')
   {
-    s << "<short>" << m_short << "</short>" << std::endl;
+    s << std::string(indentation, ' ') << "<short>" << m_short << "</short>" << std::endl;
   }
 
-  s << "<long>" << m_long << "</long>" << std::endl;
+  s << std::string(indentation, ' ') << "<long>" << m_long << "</long>" << std::endl;
 
-  if (m_argument.get() != 0)
-  {
-    s << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") << "\">"
-      << m_argument->get_name() << "</option_argument>" << std::endl;
-  }
-
-  s << "<description>";
+  s << std::string(indentation++, ' ') << "<description>";
   // Produce output line by line, such that indentation provided in the description
   // can be preserved.
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
   for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
   {
-    s << *i << "<br/>";
+    s << *i << "<br/>" << std::endl;
   }
-  s << "</description>" << std::endl;
-  s << "</option>" << std::endl;
+  s << std::string(--indentation, ' ') << "</description>" << std::endl;
+
+  if (m_argument.get() != 0)
+  {
+    s << std::string(indentation++, ' ') << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") <<"\" type=\"" << (m_argument->get_type()) << "\">" << std::endl;
+    s << std::string(indentation, ' ') << "<name>" << m_argument->get_name() << "</name>" << std::endl;
+
+    if(m_argument->has_description())
+    {
+      s << std::string(indentation++, ' ') << "<values>" << std::endl;
+      std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+      for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+      {
+        bool is_default = m_argument->get_default() == i->get_long();
+        s << std::string(indentation++, ' ') << "<value default=\"" << (is_default?"yes":"no") << "\">" << std::endl;
+        if(i->get_short() != std::string())
+        {
+          s << std::string(indentation, ' ') << "<short>" << i->get_short() << "</short>" << std::endl;
+        }
+        s << std::string(indentation, ' ') << "<long>" << i->get_long() << "</long>" << std::endl;
+        s << std::string(indentation, ' ') << "<description>" << i->get_description() << "</description>" << std::endl;
+        s << std::string(--indentation, ' ') << "</value>" << std::endl;
+      }
+      s << std::string(--indentation, ' ') << "</values>" << std::endl;
+    }
+
+    s << std::string(--indentation, ' ') << "</option_argument>" << std::endl;
+  }
+
+  s << std::string(--indentation, ' ') << "</option>" << std::endl;
 
   return s;
 }
@@ -573,21 +636,23 @@ std::map<std::string, std::string> interface_description::get_long_argument_with
 
 std::ostream& interface_description::xml_page(std::ostream& s) const
 {
-  s << "<tool>" << std::endl;
-  s << "  <name>" << m_name << "</name>" << std::endl;
-  s << "  <usage>" << m_usage << "</usage>" << std::endl;
-  s << "  <description>" << std::endl;
+  unsigned int indentation = 0;
+
+  s << std::string(indentation++, ' ') << "<tool>" << std::endl;
+  s << std::string(indentation, ' ')   << "<name>" << m_name << "</name>" << std::endl;
+  s << std::string(indentation, ' ')   << "<usage>" << m_usage << "</usage>" << std::endl;
+  s << std::string(indentation++, ' ') << "<description>" << std::endl;
 
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
   for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
   {
-    s << *i << "<br/>";
+    s << *i << "<br/>" << std::endl;
   }
-  s << "  </description>" << std::endl;
+  s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
   if (0 < m_options.size())
   {
-    s << "  <options>" << std::endl;
+    s << std::string(indentation++, ' ') << "<options>" << std::endl;
 
     for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
     {
@@ -595,26 +660,28 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
 
       if (option.m_show)
       {
-        option.xml_page_description(s);
+        option.xml_page_description(s, false, indentation);
       }
     }
   }
 
-  m_options.find("quiet")->second.xml_page_description(s);
-  m_options.find("verbose")->second.xml_page_description(s);
-  m_options.find("debug")->second.xml_page_description(s);
-  m_options.find("log-level")->second.xml_page_description(s);
-  m_options.find("help")->second.xml_page_description(s);
-  m_options.find("version")->second.xml_page_description(s);
+  m_options.find("quiet")->second.xml_page_description(s, true, indentation);
+  m_options.find("verbose")->second.xml_page_description(s, true, indentation);
+  m_options.find("debug")->second.xml_page_description(s, true, indentation);
+  m_options.find("log-level")->second.xml_page_description(s, true, indentation);
+  m_options.find("help")->second.xml_page_description(s, true, indentation);
+  m_options.find("version")->second.xml_page_description(s, true, indentation);
 
-  s << "  </options>" << std::endl;
+  s << std::string(--indentation, ' ') << "</options>" << std::endl;
 
   if (0 < m_known_issues.size())
   {
-    s << "  <known_issues>" << m_known_issues << "</known_issues>" << std::endl;
+    s << std::string(indentation, ' ') << "<known_issues>" << m_known_issues << "</known_issues>" << std::endl;
   }
-  s << "  <author>" << m_authors << "</author>" << std::endl;
-  s << "</tool>" << std::endl;
+  s << std::string(indentation, ' ') << "<author>" << m_authors << "</author>" << std::endl;
+  s << std::string(--indentation, ' ') << "</tool>" << std::endl;
+
+  assert(indentation == 0);
 
   return s;
 }

@@ -145,7 +145,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       super::add_options(desc);
 
       desc.
-      add_option("invariant", make_mandatory_argument("INVFILE"),
+      add_option("invariant", make_file_argument("INVFILE"),
                  "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
       add_option("summand", make_mandatory_argument("NUM"),
                  "eliminate or simplify the summand with number NUM only", 's').

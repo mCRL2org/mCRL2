@@ -577,7 +577,7 @@ class besconvert_tool: public super
                       "generate an equivalent BES, preserving equivalence NAME:"
                       "  'bisim' for strong bisimulation,\n"
                       "  'stuttering' for stuttering equivalence (default)", 'e');
-      desc.add_option("intermediate", make_mandatory_argument("FILE"),
+      desc.add_option("intermediate", make_file_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
                       "translate to intermediate LTS using TRANSLATION:\n"
