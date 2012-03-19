@@ -60,15 +60,15 @@ static
 bool parse_data_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
 {
   log_level_t old_level = mcrl2_logger::get_reporting_level();
+  std::streambuf *old = std::cerr.rdbuf();
   try
   {
     mcrl2_logger::set_reporting_level(quiet);
 
     // Dirty hack: redirect cerr such that is becomes silent and parse errors are ignored.
-    std::streambuf *old = std::cerr.rdbuf();
+
     std::stringstream ss;
     std::cerr.rdbuf (ss.rdbuf());
-
     data_spec = mcrl2::data::parse_data_specification(s);
 
     //Restore cerr such that parse errors become visible.
@@ -77,6 +77,7 @@ bool parse_data_specification_with_variables(const std::string s, mcrl2::data::d
   }
   catch(mcrl2::runtime_error& )
   {
+    std::cerr.rdbuf (old);
     mcrl2_logger::set_reporting_level(old_level);
     mcrl2::process::process_specification spec;
     try

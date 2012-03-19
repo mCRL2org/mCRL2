@@ -17,59 +17,9 @@
 #include <dmalloc.h>
 #endif
 
-/*}}}  */
-
 namespace aterm
 {
 
-/*{{{  defines */
-
-/* static const size_t INITIAL_TERM_TABLE_CLASS = 17;
-
-inline
-void CHECK_HEADER(const header_type h)
-{
-  assert(GET_AGE(h)==0 && !IS_MARKED(h));
-}
-
-inline
-void CHECK_ARGUMENT(const ATermAppl t, const size_t n)
-{
-  assert((GET_AGE(t->header) <= GET_AGE(ATgetArgument(t,n)->header)));
-  assert((GET_AGE(t->header) <= GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header)));
-}
-
-inline
-void CHECK_ARITY(const size_t ari1, const size_t ari2)
-{
-  assert((ari1) == (ari2));
-}
-
-inline
-size_t START(const MachineWord w)
-{
-  return FOLD(HIDE_AGE_MARK(w));
-}
-
-inline
-size_t COMBINE(const HashNumber hnr, const MachineWord w)
-{
-  return ((hnr)<<1 ^(hnr)>>1 ^ HN(FOLD(w)));
-}
-
-inline
-HashNumber FINISH(const HashNumber hnr)
-{
-  return hnr;
-}
-
-inline
-void CHECK_TERM(const ATerm t)
-{
-  assert((t) != NULL && (AT_isValidTerm(t)));
-} */
-
-/*}}}  */
 /*{{{  globals */
 
 char memory_id[] = "$Id$";
@@ -86,7 +36,7 @@ size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
-// static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
+HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
 /*
  * For GC tuning

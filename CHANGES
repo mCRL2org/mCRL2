@@ -1,4 +1,21 @@
 ===============================================================================
+Changes between toolset releases 201102.0 and 201202.1:
+===============================================================================
+
+Bugs fixed:
+   - #1000: unused quantified variables are removed; improving the treatment
+     of expressions like forall x: Set(Bool) . true in the rewriters.
+   - #993: be less agressive in renaming bound variables. This reduces the
+     number of cases in which the jitty and jittyc rewriters give different
+     results. In general this improves state space generation in the presence
+     of lambda abstractions and quantifications.
+   - #994: install man page for mcrl2compilerewriter.
+   - #1001: fix crash bug in mcrl2xi.
+   - Fix possible null pointer dereference on error path in jittyc rewriter.
+   - Fix generation of different ATerms for the same term. Sometimes, the number
+     of states generated was too large due to this issue.
+
+===============================================================================
 Changes between toolset releases 201107.1 and 201202.0:
 ===============================================================================
 

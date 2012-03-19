@@ -242,9 +242,7 @@ void CHECK_TERM(const ATerm t)
 /*}}}  */
 
 extern ATerm* hashtable;
-// static size_t table_class = INITIAL_TERM_TABLE_CLASS;
-// static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
-static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
+extern HashNumber table_mask;
 
 /*{{{  ATermAppl ATmakeAppl(AFun sym, ...) */
 

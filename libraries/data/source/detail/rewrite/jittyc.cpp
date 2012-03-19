@@ -2396,7 +2396,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   ar = (ATermAppl*) malloc(ar_size*sizeof(ATermAppl));
   if (ar == NULL)
   {
-    mCRL2log(error) << "cannot allocate enough memory (" << ar_size*sizeof(ATermAppl) << "bytes)" << std::endl;
+    throw mcrl2::runtime_error("cannot allocate enough memory (" + utilities::to_string(ar_size*sizeof(ATermAppl)) + "bytes)");
   }
   for (size_t i=0; i<ar_size; i++)
   {
