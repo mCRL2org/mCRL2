@@ -28,7 +28,9 @@ enum pbes_rewriter_type
   quantifier_finite,
   quantifier_one_point,
   prover,
-  pfnf
+  pfnf,
+  ppg,
+  bqnf_quantifier
 };
 
 /// \brief Parses a pbes rewriter type
@@ -58,6 +60,14 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   if (type == "pfnf")
   {
     return pfnf             ;
+  }
+  if (type == "ppg")
+  {
+    return ppg              ;
+  }
+  if (type == "bqnf-quantifier")
+  {
+    return bqnf_quantifier  ;
   }
   throw mcrl2::runtime_error("unknown pbes rewriter option " + type);
 }
@@ -103,6 +113,10 @@ std::string description(const pbes_rewriter_type type)
       return "for rewriting using a prover";
     case pfnf              :
       return "for rewriting into PFNF normal form";
+    case ppg               :
+      return "  'ppg' for rewriting into Parameterised Parity Game form";
+    case bqnf_quantifier   :
+      return "  'bqnf-quantifier' for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }
   throw mcrl2::runtime_error("unknown pbes rewriter");
 }

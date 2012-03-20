@@ -26,6 +26,8 @@
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
+#include "mcrl2/pbes/detail/bqnf_visitor.h"
+#include "mcrl2/pbes/detail/bqnf_quantifier_rewriter.h"
 
 namespace mcrl2
 {
@@ -209,6 +211,56 @@ class pfnf_rewriter
     /// \return The rewrite result.
     template <typename SubstitutionFunction>
     pbes_expression operator()(const pbes_expression& x, SubstitutionFunction sigma) const
+    {
+      return sigma(this->operator()(x));
+    }
+};
+
+/// \brief A rewriter that rewrites universal quantifiers over conjuncts
+/// in BQNF expressions to conjuncts over universal quantifiers.
+class bqnf_rewriter
+{
+  public:
+    /// \brief The equation type
+    typedef pbes_equation equation_type;
+    /// \brief The term type
+    typedef pbes_expression term_type;
+
+    pbes_system::detail::bqnf_visitor* bqnf_checker;
+    pbes_system::detail::bqnf_quantifier_rewriter* bqnf_quantifier_rewriter;
+
+    /// \brief Constructor
+    bqnf_rewriter() {
+      this->bqnf_checker = new pbes_system::detail::bqnf_visitor();
+      this->bqnf_quantifier_rewriter = new pbes_system::detail::bqnf_quantifier_rewriter();
+    }
+
+    /// \brief Rewrites a PBES expression in BQNF such that universal quantifier over conjuncts
+    /// are replaced by conjuncts over universal quantifiers.
+    /// \param t A term.
+    /// \return The expression resulting from the transformation.
+    term_type operator()(const term_type& t) const
+    {
+      bool is_bqnf = false;
+      try {
+        is_bqnf = this->bqnf_checker->visit_bqnf_expression(t);
+      } catch(std::runtime_error& e) {
+        std::clog << e.what() << std::endl;
+      }
+      if (!is_bqnf)
+      {
+        throw(std::runtime_error("Input expression not in BQNF."));
+      }
+      term_type result = this->bqnf_quantifier_rewriter->rewrite_bqnf_expression(t);
+      return result;
+    }
+
+    /// \brief Rewrites a pbes expression.
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The rewrite result.
+    template <typename SubstitutionFunction>
+    term_type operator()(const term_type& x, SubstitutionFunction sigma) const
     {
       return sigma(this->operator()(x));
     }
