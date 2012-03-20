@@ -101,6 +101,8 @@ class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter>
       values.push_back("quantifier-finite");
       values.push_back("quantifier-one-point");
       values.push_back("pfnf");
+      values.push_back("ppg");
+      values.push_back("bqnf-quantifier");
       m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
 
       add_rewriter_widget();

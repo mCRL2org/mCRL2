@@ -32,6 +32,9 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/detail/bqnf_traverser.h"
+#include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
@@ -305,6 +308,35 @@ void pbesrewr(const std::string& input_filename,
     case pfnf:
     {
       pfnf_rewriter pbesr;
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case ppg:
+    {
+      //bool bqnf = detail::is_bqnf(p);
+      //std::clog << "bqnf_traverser says: p is " << (bqnf ? "" : "NOT ") << "in BQNF." << std::endl;
+      bool ppg = detail::is_ppg(p);
+      if (ppg)
+      {
+        mCRL2log(log::verbose) << "PBES is already a PPG." << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "Rewriting..." << std::endl;
+        pbes<> q = detail::to_ppg(p);
+        mCRL2log(log::verbose) << "Rewriting done." << std::endl;
+        ppg = detail::is_ppg(q);
+        if (!ppg)
+        {
+          throw(std::runtime_error("The result PBES if not a PPG!"));
+        }
+        p = q;
+      }
+      break;
+    }
+    case bqnf_quantifier:
+    {
+      bqnf_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;
     }
