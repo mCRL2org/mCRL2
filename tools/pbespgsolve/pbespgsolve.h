@@ -133,6 +133,7 @@ struct pbespgsolve_options
   bool use_decycle_solver;
   bool use_deloop_solver;
   bool verify_solution;
+  bool only_generate;
   data::rewriter::strategy rewrite_strategy;
 
   pbespgsolve_options()
@@ -141,6 +142,7 @@ struct pbespgsolve_options
       use_decycle_solver(false),
       use_deloop_solver(true),
       verify_solution(true),
+      only_generate(false),
       rewrite_strategy(data::jitty)
   {
   }
@@ -215,31 +217,37 @@ class pbespgsolve_algorithm
 
       pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
 
-      mCRL2log(log::verbose) << "Solving..." << std::endl;
+      mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
 
-      // Create a solver:
-      std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-      m_timer.finish("initialization");
-
-      // Solve the game:
-      m_timer.start("solving");
-      ParityGame::Strategy solution = solver->solve();
-      m_timer.finish("solving");
-
-      if (solution.empty())
+      if (!m_options.only_generate)
       {
-        throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
+        mCRL2log(log::verbose) << "Solving..." << std::endl;
+
+        // Create a solver:
+        std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
+        m_timer.finish("initialization");
+
+        // Solve the game:
+        m_timer.start("solving");
+        ParityGame::Strategy solution = solver->solve();
+        m_timer.finish("solving");
+
+        if (solution.empty())
+        {
+          throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
+        }
+
+        verti error_vertex;
+
+        // Optional: verify the solution
+        if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
+        {
+          throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
+        }
+
+        return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
       }
-
-      verti error_vertex;
-
-      // Optional: verify the solution
-      if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
-      {
-        throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
-      }
-
-      return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
+      return true;
     }
 };
 

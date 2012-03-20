@@ -69,7 +69,7 @@ namespace detail {
     /// \return the equation for variable s.
     pbes_equation get_pbes_equation(const core::identifier_string& s)
     {
-      const pbes_equation& e = m_pbes_equation_index[s];
+      const pbes_equation& e = *m_pbes_equation_index[s];
       return e;
     }
 
@@ -146,7 +146,7 @@ namespace detail {
       // expand the right hand side if needed
       if (tr::is_prop_var(psi))
       {
-        const pbes_equation& pbes_eqn = m_pbes_equation_index[tr::name(psi)];
+        const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << print(psi) << std::endl << "  rhs: " << print(expr) << " into ";
 

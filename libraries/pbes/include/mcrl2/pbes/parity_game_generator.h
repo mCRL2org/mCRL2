@@ -154,7 +154,7 @@ class parity_game_generator
     /// \brief Generates a substitution function for the pbesinst rewriter.
     /// \param v A sequence of data variables
     /// \param e A sequence of data expressions
-    /// \return A sugstitution function.
+    /// \return A substitution function.
     virtual
     substitution_function make_substitution(data::variable_list v, data::data_expression_list e)
     {
@@ -177,7 +177,7 @@ class parity_game_generator
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
+        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into " << std::flush;
         pbes_expression result(R(pbes_eqn.formula(), sigma));
         mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
@@ -293,7 +293,7 @@ class parity_game_generator
         compute_priorities(m_pbes.equations());
 
         // Add a BES equation for the initial state.
-        propositional_variable_instantiation phi = R(m_pbes.initial_state());
+        propositional_variable_instantiation phi = get_initial_state();
         add_bes_equation(phi, m_priorities[phi.name()]);
 
         m_initialized = true;
@@ -321,6 +321,14 @@ class parity_game_generator
       m_is_min_parity(is_min_parity)
     {}
 
+    /// \brief Returns the (rewritten) initial state.
+    /// \return the initial state rewritten by R
+    virtual propositional_variable_instantiation get_initial_state()
+    {
+      propositional_variable_instantiation phi = R(m_pbes.initial_state());
+      return phi;
+    }
+
     /// \brief Returns the vertex type.
     /// \param index A positive integer
     /// \return PGAME_AND if the corresponding BES equation is a conjunction,
@@ -332,6 +340,16 @@ class parity_game_generator
 
       assert(index < m_bes.size());
       const pbes_expression& phi = m_bes[index].first;
+      return get_expression_operation(phi);
+    }
+
+    /// \brief Returns the vertex type.
+    /// \param phi A PBES expression
+    /// \return PGAME_AND if the expression is a conjunction,
+    /// PGAME_OR if it is a disjunction.
+    virtual
+    operation_type get_expression_operation(const pbes_expression& phi)
+    {
       if (tr::is_and(phi))
       {
         return PGAME_AND;
@@ -349,6 +367,14 @@ class parity_game_generator
         return PGAME_AND;
       }
       else if (tr::is_false(phi))
+      {
+        return PGAME_OR;
+      }
+      else if (tr::is_forall(phi))
+      {
+        return PGAME_AND;
+      }
+      else if (tr::is_exists(phi))
       {
         return PGAME_OR;
       }
