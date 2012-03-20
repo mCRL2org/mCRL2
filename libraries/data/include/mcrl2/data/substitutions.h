@@ -917,7 +917,7 @@ std::string print_substitution(const Substitution& sigma)
 template <typename Substitution>
 std::string print_substitution(const mutable_substitution_composer<Substitution>& sigma)
 {
-  return to_string(sigma.substitution());
+  return print_substitution(sigma.substitution());
 }
 
 } // namespace data
