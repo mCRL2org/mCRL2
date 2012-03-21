@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdexcept>
+#include <set>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/util.h"
@@ -35,9 +36,6 @@ size_t SYM_SET_NEXT_FREE(const AFun next)
 }
 //#define SYM_SET_NEXT_FREE(next)   (1 | ((next) << SHIFT_INDEX))
 
-static const size_t INITIAL_PROTECTED_SYMBOLS = 1024;
-static const size_t SYM_PROTECT_EXPAND_SIZE = 1024;
-
 static const size_t MAGIC_PRIME = 7;
 
 /*}}}  */
@@ -53,9 +51,7 @@ static SymEntry* hash_table     = NULL;
 
 static AFun first_free = (size_t)(-1);
 
-static AFun* protected_symbols = NULL;
-static size_t nr_protected_symbols  = 0;
-static size_t max_protected_symbols  = 0;
+static std::multiset < AFun > protected_symbols;
 
 /* Efficiency hack: was static */
 SymEntry* at_lookup_table = NULL;
@@ -164,13 +160,6 @@ void AT_initAFun(int, char**)
     at_lookup_table[sym] = (SymEntry) SYM_SET_NEXT_FREE(sym+1);
   }
   at_lookup_table[afun_table_size-1] = (SymEntry) SYM_SET_NEXT_FREE((MachineWord)(-1));    /* Sentinel */
-
-  protected_symbols = (AFun*)AT_calloc(INITIAL_PROTECTED_SYMBOLS,
-                                       sizeof(AFun));
-  if (!protected_symbols)
-  {
-    throw std::runtime_error("AT_initAFun: cannot allocate initial protection buffer.");
-  }
 
   sym = ATmakeAFun("<int>", 0, false);
   assert(sym == AS_INT);
@@ -445,19 +434,7 @@ void AT_freeAFun(SymEntry sym)
 
 void ATprotectAFun(const AFun sym)
 {
-
-  if (nr_protected_symbols >= max_protected_symbols)
-  {
-    max_protected_symbols += SYM_PROTECT_EXPAND_SIZE;
-    protected_symbols = (AFun*)AT_realloc(protected_symbols,
-                                          max_protected_symbols * sizeof(AFun));
-    if (!protected_symbols)
-    {
-      throw std::runtime_error("ATprotectAFun: no space to hold " + to_string(max_protected_symbols) + " protected symbols.");
-    }
-  }
-
-  protected_symbols[nr_protected_symbols++] = sym;
+  protected_symbols.insert(sym);
 }
 
 /*}}}  */
@@ -469,25 +446,10 @@ void ATprotectAFun(const AFun sym)
 
 void ATunprotectAFun(const AFun sym)
 {
-  /* It is essential for performance that in this file
-   * the protected_symbols array is traversed from back
-   * to front. This function is only invoked by
-   * ATdestroyBinaryReader, which stacks symbols at the
-   * end of protected symbols, and removes them in
-   * reverse order. */
-
-  size_t lcv;
-
-  for (lcv = nr_protected_symbols; lcv >0 ;)
-  {
-    --lcv;
-    if (protected_symbols[lcv] == sym)
-    {
-      protected_symbols[lcv] = protected_symbols[--nr_protected_symbols];
-      protected_symbols[nr_protected_symbols] = (AFun)-1; // Reset
-      break;
-    }
-  }
+  // Remove only one occurrence of sym: erase cannot be used.
+  const std::multiset < AFun >::const_iterator i=protected_symbols.find(sym);
+  assert(i!=protected_symbols.end());
+  protected_symbols.erase(i);
 }
 
 /*}}}  */
@@ -499,23 +461,20 @@ void ATunprotectAFun(const AFun sym)
 
 void AT_markProtectedAFuns()
 {
-  size_t lcv;
-  for (lcv = 0; lcv < nr_protected_symbols; lcv++)
+  for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
-    SET_MARK(((ATerm)at_lookup_table[protected_symbols[lcv]])->header);
+    SET_MARK(((ATerm)at_lookup_table[*i])->header);
   }
 }
 
 /* TODO: Optimisation (Old+Mark in one step)*/
 void AT_markProtectedAFuns_young()
 {
-  size_t lcv;
-
-  for (lcv = 0; lcv < nr_protected_symbols; lcv++)
+  for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
-    if (!IS_OLD(((ATerm)at_lookup_table[protected_symbols[lcv]])->header))
+    if (!IS_OLD(((ATerm)at_lookup_table[*i])->header))
     {
-      SET_MARK(((ATerm)at_lookup_table[protected_symbols[lcv]])->header);
+      SET_MARK(((ATerm)at_lookup_table[*i])->header);
     }
   }
 }
