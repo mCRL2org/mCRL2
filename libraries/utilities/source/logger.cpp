@@ -18,6 +18,22 @@
 namespace mcrl2 {
   namespace log {
 
+  std::string format_time(const time_t* t)
+  {
+    struct tm* r;
+    r = localtime(t);
+
+    char buffer[11];
+    size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
+    if(res == 0)
+    {
+      std::clog << "Could not write time to buffer" << std::endl;
+      return std::string();
+    }
+    return buffer;
+  }
+
+#if 0
 // Implementation of now_time; platform specific.
 // used to print timestamps in front of debug messages.
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
@@ -64,13 +80,7 @@ std::string now_time()
     return result;
 }
 #endif //WIN32
-
-custom_message_handler_t& mcrl2_custom_message_handler_func()
-{
-  static custom_message_handler_t mcrl2_custom_message_handler = 0; //< Do not access directly
-  return mcrl2_custom_message_handler;
-}
-
+#endif
 
   }
 }

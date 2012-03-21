@@ -225,7 +225,7 @@ class tool
       }
       catch (std::exception& e)
       {
-        mCRL2log(mcrl2::log::error) << "Standard exception: " << e.what() << std::endl;
+        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
       }
       return EXIT_FAILURE;
     }

@@ -21,7 +21,7 @@ using namespace grape::grapeapp;
 
 class message_relay;
 
-static void relay_message(const mcrl2::log::message_t t, const char* data);
+static void relay_message(const mcrl2::log::function_pointer_output<mcrl2::log::formatter>::message_t t, const char* data);
 
 class text_control_buf : public std::streambuf
 {
@@ -59,12 +59,13 @@ std::auto_ptr < message_relay > communicator;
 
 class message_relay
 {
-    friend void relay_message(const mcrl2::log::message_t, const char* data);
+    friend void relay_message(const mcrl2::log::function_pointer_output<mcrl2::log::formatter>::message_t, const char* data);
 
   private:
 
     wxTextCtrl&      m_control;
     std::streambuf*  m_error_stream;
+    mcrl2::log::function_pointer_output<mcrl2::log::formatter> m_output_policy;
 
   private:
 
@@ -78,8 +79,9 @@ class message_relay
     message_relay(wxTextCtrl& control) : m_control(control)
     {
       m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
+      m_output_policy = mcrl2::log::function_pointer_output<mcrl2::log::formatter>(relay_message);
 
-      mcrl2::log::mcrl2_logger::set_custom_message_handler(relay_message);
+      mcrl2::log::mcrl2_logger::register_output_policy(m_output_policy);
     }
 
     void message(const char* data)
@@ -98,22 +100,22 @@ class message_relay
 
     ~message_relay()
     {
-      mcrl2::log::mcrl2_logger::set_custom_message_handler(0);
+      mcrl2::log::mcrl2_logger::unregister_output_policy(m_output_policy);
 
       delete std::cerr.rdbuf(m_error_stream);
     }
 };
 
-static void relay_message(const mcrl2::log::message_t t, const char* data)
+static void relay_message(const mcrl2::log::function_pointer_output<mcrl2::log::formatter>::message_t t, const char* data)
 {
   using namespace mcrl2::log;
   switch (t)
   {
-    case msg_notice:
+    case function_pointer_output<mcrl2::log::formatter>::msg_notice:
       break;
-    case msg_warning:
+    case function_pointer_output<mcrl2::log::formatter>::msg_warning:
       break;
-    case msg_error:
+    case function_pointer_output<mcrl2::log::formatter>::msg_error:
     default:
       communicator->message(data);
       break;

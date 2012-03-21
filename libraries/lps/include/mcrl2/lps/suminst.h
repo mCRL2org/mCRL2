@@ -100,8 +100,6 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         {
           mCRL2log(log::debug, "suminst") << "enumerating condition: " << data::pp(s.condition()) << std::endl;
 
-          log::mcrl2_logger::indent();
-
           for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition());
                   i != m_enumerator.end(); ++i)
           {
@@ -113,8 +111,6 @@ class suminst_algorithm: public lps::detail::lps_algorithm
             result.push_back(t);
             ++nr_summands;
           }
-
-          log::mcrl2_logger::unindent();
 
           if (nr_summands == 0)
           {

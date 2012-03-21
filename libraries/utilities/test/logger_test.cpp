@@ -59,15 +59,11 @@ BOOST_AUTO_TEST_CASE(test_indentation)
   mCRL2log(info) << "A loop with " << count << " iterations" << std::endl;
   for (int i = 0; i < count; ++i)
   {
-    mcrl2_logger::indent();
     mCRL2log(debug) << "the counter i = " << i << std::endl;
     if(i >= 2)
     {
-      mcrl2_logger::indent();
       mCRL2log(debug) << "the counter is greater then 2" << std::endl;
-      mcrl2_logger::unindent();
     }
-    mcrl2_logger::unindent();
   }
 }
 
@@ -96,9 +92,9 @@ BOOST_AUTO_TEST_CASE(test_file_logging)
   pFile = fopen ("logger_test_file.txt" , "w");
   BOOST_REQUIRE(pFile != NULL);
 
-  mcrl2_logger::output_policy_t::set_stream(pFile);
+  file_output::set_stream(pFile);
   mCRL2log(info) << "This line is written to logger_test_file.txt" << std::endl;
-  mcrl2_logger::output_policy_t::set_stream(stderr);
+  file_output::set_stream(stderr);
   fclose(pFile);
   mCRL2log(info) << "This line is written to stderr" << std::endl;
 }

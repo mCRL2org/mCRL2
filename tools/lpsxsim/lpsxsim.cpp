@@ -37,7 +37,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-void xsim_message_handler(mcrl2::log::message_t msg_type, const char* msg);
+void xsim_message_handler(mcrl2::log::function_pointer_output<mcrl2::log::formatter>::message_t msg_type, const char* msg);
 
 //------------------------------------------------------------------------------
 // XSim
@@ -96,7 +96,7 @@ class XSim: public wx::tool< XSim, rewriter_tool< input_tool > >
 
 XSim* XSim::instance = NULL;
 
-void xsim_message_handler(mcrl2::log::message_t msg_type, const char* msg)
+void xsim_message_handler(mcrl2::log::function_pointer_output<mcrl2::log::formatter>::message_t msg_type, const char* msg)
 {
   using namespace ::mcrl2::utilities;
   using namespace mcrl2::core;
@@ -115,17 +115,17 @@ void xsim_message_handler(mcrl2::log::message_t msg_type, const char* msg)
     wxString wx_msg(msg,wxConvLocal, msg_end - msg);
     switch (msg_type)
     {
-      case mcrl2::log::msg_warning:
+      case mcrl2::log::function_pointer_output<mcrl2::log::formatter>::msg_warning:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION).ShowModal();
       }
       break;
-      case mcrl2::log::msg_error:
+      case mcrl2::log::function_pointer_output<mcrl2::log::formatter>::msg_error:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR).ShowModal();
       }
       break;
-      case mcrl2::log::msg_notice:
+      case mcrl2::log::function_pointer_output<mcrl2::log::formatter>::msg_notice:
       default:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION).ShowModal();
