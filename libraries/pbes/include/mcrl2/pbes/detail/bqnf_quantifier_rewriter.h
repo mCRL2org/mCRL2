@@ -14,6 +14,7 @@
 #ifndef BQNF_QUANTIFIER_REWRITER_H_
 #define BQNF_QUANTIFIER_REWRITER_H_
 
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "bqnf_visitor.h"
 
 namespace mcrl2 {
@@ -51,7 +52,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       {
         atermpp::vector<data::variable> intersection;
         data::variable_list free_vars = tr::free_variables(e);
-        for (typename data::variable_list::iterator v = free_vars.begin(); v != free_vars.end(); ++v)
+        for (data::variable_list::iterator v = free_vars.begin(); v != free_vars.end(); ++v)
         {
           data::variable var = *v;
           if (d.find(var) != d.end())
@@ -131,12 +132,12 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       data::variable_list free_g = tr::free_variables(g);
       data::variable_list free_phi_i_list = tr::free_variables(phi_i);
       atermpp::set<data::variable> free_phi_i;
-      for (typename data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
+      for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
       {
         free_phi_i.insert(*v);
       }
       atermpp::set<data::variable> free_g_minus_free_phi_i;
-      for (typename data::variable_list::iterator v = free_g.begin(); v != free_g.end(); ++v)
+      for (data::variable_list::iterator v = free_g.begin(); v != free_g.end(); ++v)
       {
         data::variable var = *v;
         if (free_phi_i.find(var)==free_phi_i.end()) { // !free_phi_i.contains(v)
@@ -146,7 +147,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       atermpp::vector<data::variable> d_intersects_free_g_minus_free_phi_i;
       atermpp::set<data::variable> d_minus_free_phi_i;
       atermpp::set<data::variable> d_intersects_free_phi_i;
-      for (typename data::variable_list::iterator v = d.begin(); v != d.end(); ++v)
+      for (data::variable_list::iterator v = d.begin(); v != d.end(); ++v)
       {
         data::variable var = *v;
         if (free_g_minus_free_phi_i.find(var) != free_g_minus_free_phi_i.end()) // free_g_minus_free_phi_i.contains(v)
@@ -241,7 +242,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
             conjuncts.push_back(psi);
           }
           term_type conjunction = tr::true_();
-          for (typename atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+          for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
             term_type phi_i = *c;
             term_type r = rewrite_bqnf_expression(phi_i);
             if (tr::is_or(qexpr)) {
@@ -258,11 +259,11 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
             atermpp::vector<data::variable> qvars_i;
             data::variable_list free_phi_i_list = tr::free_variables(phi_i);
             atermpp::set<data::variable> free_phi_i;
-            for (typename data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
+            for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
             {
               free_phi_i.insert(*v);
             }
-            for (typename data::variable_list::iterator v = qvars.begin(); v != qvars.end(); ++v)
+            for (data::variable_list::iterator v = qvars.begin(); v != qvars.end(); ++v)
             {
               data::variable var = *v;
               if (free_phi_i.find(var) != free_phi_i.end()) // free_phi_i.contains(v)
@@ -322,7 +323,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       term_type conjunction = tr::true_();
       atermpp::vector<equation_type> new_eqns;
       atermpp::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
-      for (typename atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+      for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         term_type r = rewrite_bqnf_expression(expr);
         if (tr::is_true(conjunction)) {
@@ -345,7 +346,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       term_type disjunction = tr::false_();
       atermpp::vector<term_type> new_exprs;
       atermpp::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
-      for (typename atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
+      for (atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         term_type r = rewrite_bqnf_expression(expr);
         if (tr::is_false(disjunction)) {

@@ -1163,7 +1163,11 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
     }
     dst[0] = varindex;
     //std::clog << "  to_state_vector: DEBUG: varname = " << varname << " index = " << varindex << (same_var ? " SAME VAR": "") << std::endl;
-    data_expression values[state_length];
+
+
+    // data_expression values[state_length]; N.B. This is not portable C++
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+
     if (this->info->get_reset_option() || src == 0) {
         int type_no;
         for (int i = 1; i < state_length; i++) {
@@ -1280,7 +1284,10 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
     //std::clog << "from_state_vector: varname = " << varname << std::endl;
 
     bool error = false;
-    data_expression values[state_length];
+
+    // data_expression values[state_length]; N.B. This is not portable C++
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+
     int type_no;
     for (int i = 1; i < state_length; i++) {
         //std::clog << "from_state_vector: values: " << i << " (" << src[i] << "): " << std::endl;
