@@ -448,8 +448,11 @@ void ATunprotectAFun(const AFun sym)
 {
   // Remove only one occurrence of sym: erase cannot be used.
   const std::multiset < AFun >::const_iterator i=protected_symbols.find(sym);
-  assert(i!=protected_symbols.end());
-  protected_symbols.erase(i);
+  if (i!=protected_symbols.end())
+  {
+    protected_symbols.erase(i);
+  }
+  else assert(0); // A non protected symbol is being unprotected.
 }
 
 /*}}}  */
