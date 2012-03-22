@@ -44,7 +44,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param p The PBES of which the equation is part. Used to avoid name clashes when introducing new variables.
     bqnf2ppg_rewriter(const pbes<>& p)
     {
-      for (typename atermpp::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
+      for (atermpp::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
         equation_type e = (*eqn);
         propositional_variable var = e.variable();
         variable_names.insert(core::pp(var.name()));
@@ -381,7 +381,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type conjunction = tr::true_();
       atermpp::vector<equation_type> new_eqns;
       atermpp::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
-      for (typename atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+      for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_forall(sigma, var, expr, dummy);
         if (tr::is_true(conjunction)) {
@@ -396,7 +396,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add conjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, conjunction);
       equations.push_back(eqn);
-      for (typename atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
         // Rewrite new equation.
         visit_bqnf_equation(*new_eqn);
       }
@@ -485,7 +485,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type disjunction = tr::false_();
       atermpp::vector<equation_type> new_eqns;
       atermpp::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
-      for (typename atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
+      for (atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_exists(sigma, var, expr, dummy);
         if (tr::is_false(disjunction)) {
@@ -500,7 +500,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add disjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, disjunction);
       equations.push_back(eqn);
-      for (typename atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
         // Rewrite new equation.
         visit_bqnf_equation(*new_eqn);
       }
