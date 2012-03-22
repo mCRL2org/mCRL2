@@ -1,8 +1,10 @@
 #ifndef AFUN_H
 #define AFUN_H
 
+#include <assert.h>
 #include <string>
 #include <cstdio>
+#include <vector>
 #include "mcrl2/aterm/atypes.h"
 #include "mcrl2/aterm/encoding.h"
 
@@ -33,9 +35,8 @@ typedef struct _SymEntry
 static const size_t TERM_SIZE_SYMBOL = sizeof(struct _SymEntry)/sizeof(size_t);
 
 union _ATerm;
-extern SymEntry* at_lookup_table;
+extern std::vector < SymEntry > at_lookup_table;
 
-MachineWord AT_symbolTableSize();
 void AT_initAFun(int argc, char** argv);
 size_t AT_printAFun(const AFun sym, FILE* f);
 
@@ -48,12 +49,14 @@ bool SYM_IS_FREE(const SymEntry sym)
 inline
 void AT_markAFun(const AFun s)
 {
+  assert(s<at_lookup_table.size());
   at_lookup_table[s]->header |= MASK_AGE_MARK;
 }
 
 inline
 void AT_markAFun_young(const AFun s)
 {
+  assert(s<at_lookup_table.size());
   if (!IS_OLD(at_lookup_table[s]->header))
   {
     AT_markAFun(s);
@@ -63,14 +66,16 @@ void AT_markAFun_young(const AFun s)
 inline
 void AT_unmarkAFun(const AFun s)
 {
+  assert(s<at_lookup_table.size());
   at_lookup_table[s]->header &= ~MASK_MARK;
 }
 
 inline
 bool AT_isValidAFun(const AFun sym)
 {
-  return (sym != (AFun)(-1) && (MachineWord)sym < AT_symbolTableSize()
-          && !SYM_IS_FREE(at_lookup_table[sym]));
+  return (sym != (AFun)(-1) && 
+          (MachineWord)sym < at_lookup_table.size() && 
+          !SYM_IS_FREE(at_lookup_table[sym]));
 }
 
 // XXX Remove
@@ -83,6 +88,7 @@ bool AT_isValidAFun(const ATerm sym)
 inline
 bool AT_isMarkedAFun(const AFun sym)
 {
+  assert(sym<at_lookup_table.size());
   return IS_MARKED(at_lookup_table[sym]->header);
 }
 

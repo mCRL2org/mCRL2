@@ -976,7 +976,7 @@ static bool
 write_baf(const ATerm t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
-  size_t nr_symbols = AT_symbolTableSize();
+  size_t nr_symbols = at_lookup_table.size();
   AFun lcv;
   size_t cur;
 
