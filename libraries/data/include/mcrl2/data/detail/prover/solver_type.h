@@ -13,7 +13,8 @@
 #define MCRL2_DATA_DETAIL_PROVER_SOLVER_TYPE_H
 
 #include <iostream>
-#include <cstring>
+#include <string>
+#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
