@@ -55,7 +55,6 @@ static std::multiset < AFun > protected_symbols;
 
 /* Efficiency hack: was static */
 SymEntry* at_lookup_table = NULL;
-ATerm*    at_lookup_table_alias = NULL;
 
 /*}}}  */
 
@@ -90,7 +89,6 @@ static void resize_table()
   size_t new_mask  = AT_TABLE_MASK(new_class);
 
   at_lookup_table = (SymEntry*)AT_realloc(at_lookup_table, new_size*sizeof(SymEntry));
-  at_lookup_table_alias = (ATerm*)at_lookup_table;
   if (!at_lookup_table)
   {
     throw std::runtime_error("afun.c:resize_table - could not allocate space for lookup table of " + to_string(new_size) + " afuns");
@@ -148,7 +146,6 @@ void AT_initAFun(int, char**)
   }
 
   at_lookup_table = (SymEntry*) AT_calloc(afun_table_size, sizeof(SymEntry));
-  at_lookup_table_alias = (ATerm*)at_lookup_table;
   if (at_lookup_table == NULL)
   {
     throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(afun_table_size) + " lookup-entries.");

@@ -33,7 +33,6 @@ typedef struct _SymEntry
 static const size_t TERM_SIZE_SYMBOL = sizeof(struct _SymEntry)/sizeof(size_t);
 
 union _ATerm;
-extern union _ATerm** at_lookup_table_alias;
 extern SymEntry* at_lookup_table;
 
 MachineWord AT_symbolTableSize();
