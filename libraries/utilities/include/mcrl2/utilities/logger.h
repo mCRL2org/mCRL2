@@ -12,6 +12,7 @@
 #define MCRL2_UTILITIES_LOGGER_H
 
 #include <cstdio>
+#include <ctime>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -287,7 +288,7 @@ class logger
     {
       m_level = l;
       m_hint = hint;
-      time(&m_timestamp);
+      std::time(&m_timestamp);
       return m_os;
     }
 };
