@@ -1335,7 +1335,7 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
 }
 
 
-atermpp::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state)
+std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state)
 {
     //std::cout << "get_successors: " << state->to_string() << std::endl;
     atermpp::vector<ltsmin_state*> result;
@@ -1379,7 +1379,7 @@ atermpp::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& stat
 }
 
 
-atermpp::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
+std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
                                                      int group)
 {
     //std::clog << "get_successors: " << state->to_string() << ", group=" << group << std::endl;

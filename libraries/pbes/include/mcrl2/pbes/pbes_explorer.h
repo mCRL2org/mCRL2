@@ -448,10 +448,10 @@ protected:
     /// \return the value at position <tt>index</tt> in local store <tt>type_no</tt>.
     const data_expression& get_data_value(int type_no, int index);
 
-public:
     /// \brief the PBES greybox interface
     pbes_greybox_interface* pgg;
 
+public:
     /// \brief Constructor.
     /// \param filename the name of a PBES file.
     explorer(const std::string& filename, data::rewrite_strategy rewrite_strategy, bool reset);
@@ -529,7 +529,7 @@ public:
     /// function of the pbes_greybox_interface.
     /// \param state the source state.
     /// \return a list of successor states.
-    atermpp::vector<ltsmin_state*> get_successors(const ltsmin_state& state);
+    std::vector<ltsmin_state*> get_successors(const ltsmin_state& state);
 
     /// \brief Iterates over the successors of a state and invokes a callback
     /// function for each successor state.
@@ -548,8 +548,8 @@ public:
         int state_length = this->info->get_lts_type().get_state_length();
         ltsmin_state* state = this->from_state_vector(src);
         //std::clog << "next_state_all: " << state->to_string() << std::endl;
-        atermpp::vector<ltsmin_state*> successors = this->get_successors(*state);
-        for (atermpp::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
+        std::vector<ltsmin_state*> successors = this->get_successors(*state);
+        for (std::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
             int dst[state_length];
             this->to_state_vector(*succ, dst, state, src);
@@ -565,7 +565,7 @@ public:
     /// \param state the source state.
     /// \param group the group for which the successor states are computed.
     /// \return a list of successor states.
-    atermpp::vector<ltsmin_state*> get_successors(const ltsmin_state& state, int group);
+    std::vector<ltsmin_state*> get_successors(const ltsmin_state& state, int group);
 
     /// \brief Iterates over the successors of a state for a certain transition group
     /// and invokes a callback function for each successor state.
@@ -584,7 +584,7 @@ public:
     {
         int state_length = this->info->get_lts_type().get_state_length();
         ltsmin_state* state = this->from_state_vector(src);
-        atermpp::vector<ltsmin_state*> successors = this->get_successors(*state, group);
+        std::vector<ltsmin_state*> successors = this->get_successors(*state, group);
         for (atermpp::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
             int dst[state_length];
