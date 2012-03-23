@@ -8,6 +8,7 @@
 //
 /// \file mcrl2/pbes/pbes_explorer.cpp
 /// \brief
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
 
@@ -1005,7 +1006,7 @@ std::string ltsmin_state::to_string() const
 
 /// explorer
 
-explorer::explorer(const std::string& filename, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset_flag = false)
+explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false)
 {
     p.load(filename);
     pbes_system::normalize(p);
@@ -1015,7 +1016,7 @@ explorer::explorer(const std::string& filename, data::rewrite_strategy rewrite_s
         p = detail::to_ppg(p);
         mCRL2log(log::verbose) << "Rewriting done." << std::endl;
     }
-    this->pgg = new pbes_greybox_interface(p, false, true, rewrite_strategy);
+    this->pgg = new pbes_greybox_interface(p, false, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
@@ -1028,10 +1029,10 @@ explorer::explorer(const std::string& filename, data::rewrite_strategy rewrite_s
 }
 
 
-explorer::explorer(const pbes<>& p_, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset_flag = false)
+explorer::explorer(const pbes<>& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false)
 {
     p = p_;
-    this->pgg = new pbes_greybox_interface(p, false, true, rewrite_strategy);
+    this->pgg = new pbes_greybox_interface(p, false, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {

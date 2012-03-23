@@ -29,9 +29,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-
-
-
 /// \brief
 class lts_type {
 	int state_length;
@@ -454,11 +451,11 @@ protected:
 public:
     /// \brief Constructor.
     /// \param filename the name of a PBES file.
-    explorer(const std::string& filename, data::rewrite_strategy rewrite_strategy, bool reset);
+    explorer(const std::string& filename, const std::string& rewrite_strategy, bool reset);
 
     /// \brief Constructor.
     /// \param p a PBES.
-    explorer(const pbes<>& p, data::rewrite_strategy rewrite_strategy, bool reset);
+    explorer(const pbes<>& p, const std::string& rewrite_strategy, bool reset);
 
     /// \brief Destructor.
     ~explorer();

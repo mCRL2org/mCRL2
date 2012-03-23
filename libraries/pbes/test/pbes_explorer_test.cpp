@@ -36,7 +36,7 @@ private:
     size_t transition_count;
 
 public:
-    explorer(const pbes<>& p, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset = false) :
+    explorer(const pbes<>& p, const std::string& rewrite_strategy = "jittyc", bool reset = false) :
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset),
         transition_count(0)
     {}
@@ -196,7 +196,7 @@ void explorer::bfs()
 
 
 void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
-    data::rewriter::strategy rewrite_strategy = data::jitty)
+    const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
   pbes<> p = txt2pbes(pbes_text);
@@ -248,9 +248,9 @@ void test_pbes_explorer1()
   int num_groups = 3; // each of the conjuncts
   int num_states = 7;
   int num_transitions = 12;
-  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, data::jitty);
+  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
-  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, data::jitty_compiling);
+  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
 }
 
@@ -273,9 +273,9 @@ void test_pbes_explorer2()
   int num_groups = 9; // each of the conjuncts of every equation
   int num_states = 213;
   int num_transitions = 414;
-  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, data::jitty);
+  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
-  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, data::jitty_compiling);
+  run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
 }
 
