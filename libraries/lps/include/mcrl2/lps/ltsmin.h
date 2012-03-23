@@ -29,6 +29,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -42,26 +43,6 @@ using mcrl2::log::mcrl2_logger;
 namespace mcrl2 {
 
 namespace lps {
-
-inline
-data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_strategy)
-{
-  if (rewriter_strategy == "jitty")
-  {
-		return data::jitty;
-  }
-#ifdef MCRL2_JITTYC_AVAILABLE
-  else if (rewriter_strategy == "jittyc")
-  {
-		return data::jitty_compiling;
-  }
-#endif
-  else
-  {
-    throw std::runtime_error("Error: unknown rewriter strategy " + rewriter_strategy + "!");
-  }
-  return data::jitty;
-}
 
 /// \brief Generates possible values of the data type (at most max_size).
 inline
@@ -545,7 +526,7 @@ class pins
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
-      : m_generator(filename, parse_rewriter_strategy(rewriter_strategy))
+      : m_generator(filename, data::parse_rewrite_strategy(rewriter_strategy))
     {
       initialize_read_write_groups();
 
