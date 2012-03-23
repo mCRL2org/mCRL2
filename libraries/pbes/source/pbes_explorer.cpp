@@ -367,7 +367,7 @@ const std::map<int, std::string>& lts_info::get_transition_variable_names() cons
 }
 
 
-const atermpp::map<int, lts_info::operation_type>& lts_info::get_transition_types() const
+const std::map<int, lts_info::operation_type>& lts_info::get_transition_types() const
 {
     return transition_type;
 }
@@ -379,7 +379,7 @@ const atermpp::map<std::string, propositional_variable>& lts_info::get_variables
 }
 
 
-const atermpp::map<std::string, lts_info::operation_type>& lts_info::get_variable_types() const
+const std::map<std::string, lts_info::operation_type>& lts_info::get_variable_types() const
 {
     return variable_type;
 }

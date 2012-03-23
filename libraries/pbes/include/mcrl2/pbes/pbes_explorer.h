@@ -196,9 +196,9 @@ private:
     int number_of_groups;
     atermpp::map<int,pbes_expression> transition_expression;
     std::map<int,std::string> transition_variable_name;
-    atermpp::map<int,operation_type> transition_type;
+    std::map<int,operation_type> transition_type;
     atermpp::map<std::string, propositional_variable> variables;
-    atermpp::map<std::string, operation_type> variable_type;
+    std::map<std::string, operation_type> variable_type;
     atermpp::map<std::string, fixpoint_symbol> variable_symbol;
     std::map<std::string, int> variable_priority;
     atermpp::map<std::string, data::variable_list> variable_parameters;
@@ -240,14 +240,14 @@ public:
 
     /// \brief Returns the map from transition group number to the type of the right hand side of the
     /// equation to which the transition group belongs.
-    const atermpp::map<int, operation_type>& get_transition_types() const;
+    const std::map<int, operation_type>& get_transition_types() const;
 
     /// \brief Returns the map from variable names to the variable object for the variable.
     const atermpp::map<std::string, propositional_variable>& get_variables() const;
 
     /// \brief Returns the map from variable names to the type of the right hand side of the equation for
     /// the variable.
-    const atermpp::map<std::string, operation_type>& get_variable_types() const;
+    const std::map<std::string, operation_type>& get_variable_types() const;
 
     /// \brief Returns the map from variable names to the fixpoint operator of the equation for the variable.
     const atermpp::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
