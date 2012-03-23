@@ -108,8 +108,14 @@ public:
 
 /// \brief
 class ltsmin_state {
-public:
+
+friend class lts_info;
+friend class explorer;
+
+protected:
     typedef core::term_traits<pbes_expression> tr;
+
+public:
     typedef parity_game_generator::operation_type operation_type;
 
 private:
@@ -118,14 +124,7 @@ private:
     operation_type type; // player or type (And/Or, Abelard/Eloise, Odd/Even)
     atermpp::vector<data_expression> param_values; // List of parameter values
 
-public:
-    /// \brief Constructor.
-    /// \param priority the priority corresponding to the variable name.
-    /// \param v the name of the propositional variable of the state.
-    /// \param type the type or player of the state.
-    /// \param e a propositional variable instantiation.
-    ltsmin_state(int priority, const std::string& varname, operation_type type);
-
+protected:
     /// \brief Constructor.
     /// \param priority the priority corresponding to the variable name.
     /// \param v the propositional variable of the state.
@@ -138,6 +137,23 @@ public:
     /// \param type the type or player of the state.
     /// \param e a propositional variable instantiation.
     ltsmin_state(int priority, const propositional_variable& v, operation_type type, const pbes_expression& e);
+
+    /// \brief Returns the list of parameter values.
+    const atermpp::vector<data_expression>& get_parameter_values() const;
+
+    /// \brief Adds a parameter value to the list of parameter values.
+    void add_parameter_value(const data_expression&);
+
+    /// \brief Returns a PBES expression representing the state.
+    pbes_expression to_pbes_expression() const;
+
+public:
+    /// \brief Constructor.
+    /// \param priority the priority corresponding to the variable name.
+    /// \param v the name of the propositional variable of the state.
+    /// \param type the type or player of the state.
+    /// \param e a propositional variable instantiation.
+    ltsmin_state(int priority, const std::string& varname, operation_type type);
 
     /// \brief Compares two PBES_State objects. Uses lexicographical ordering on priority, type, variable and parameter values.
     /// \param other an other PBES_State object.
@@ -161,15 +177,6 @@ public:
     /// \brief Returns the player or type of the state (And/Or, Abelard/Eloise, Odd/Even).
     operation_type get_type() const;
 
-    /// \brief Returns the list of parameter values.
-    const atermpp::vector<data_expression>& get_parameter_values() const;
-
-    /// \brief Adds a parameter value to the list of parameter values.
-    void add_parameter_value(const data_expression&);
-
-    /// \brief Returns a PBES expression representing the state.
-    pbes_expression to_pbes_expression() const;
-
     /// \brief Returns a string representation of the state.
     std::string to_string() const;
 };
@@ -179,8 +186,13 @@ public:
 
 /// \brief
 class lts_info {
-public:
+
+friend class ltsmin_state;
+friend class explorer;
+
+protected:
     typedef core::term_traits<pbes_expression> tr;
+public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
 private:
@@ -215,24 +227,90 @@ private:
     /// \brief Computes dependency matrix from PBES.
     void compute_dependency_matrix();
 
-public:
+protected:
+
+    /// \brief Returns the map from transition group number to the expression of the transition group.
+    const atermpp::map<int, pbes_expression>& get_transition_expressions() const;
+
+    /// \brief Returns the map from variable names to the variable object for the variable.
+    const atermpp::map<std::string, propositional_variable>& get_variables() const;
+
+    /// \brief Returns the map from variable names to the fixpoint operator of the equation for the variable.
+    const atermpp::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
+
+    /// \brief Returns the map from variable names to the sequence of parameters for the variable.
+    const atermpp::map<std::string, data::variable_list>& get_variable_parameters() const;
+
+    /// \brief Determines if the term phi contains a branch that directly results in
+    /// <tt>true</tt> or <tt>false</tt> (not a variable).
+    /// \param phi a PBES expression
+    static bool tf(const pbes_expression& phi);
+
+    /// \brief Computes the propositional variables used in an expression.
+    /// \param expr
+    static std::set<std::string> occ(const pbes_expression& expr);
+
+    /// \brief Computes the free variables read in an expression.
+    /// \param expr
+    static std::set<std::string> free(const pbes_expression& expr);
+
+    /// \brief Computes the free variables actually used, not only passed through, in an expression.
+    /// \param expr
+    /// \param L
+    std::set<std::string> used(const pbes_expression& expr);
+    std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
+
+    /// \brief Computes the set of parameters changed in the expression.
+    /// \param phi
+    /// \param L
+    std::set<std::string> changed(const pbes_expression& phi, const std::set<std::string>& L);
+
+    /// \brief Computes the set of parameters reset in the expression.
+    /// \param phi
+    /// \param d
+    std::set<std::string> reset(const pbes_expression& phi, const std::set<std::string>& d);
+
+    /// \brief Converts a variable_sequence_type into a set of parameter signatures.
+    /// \param params a sequence of variables.
+    static std::set<std::string> get_param_set(const data::variable_list& params);
+
+    /// \brief Converts a variable_sequence_type into a sequence of parameter signatures.
+    /// \param params a sequence of variables.
+    static std::vector<std::string> get_param_sequence(const data::variable_list& params);
+
+    /// \brief Converts a variable_sequence_type into a sequence of indices of parameter signatures
+    /// in the list of parameter signatures for the system.
+    /// \param params a sequence of variables.
+    std::vector<int> get_param_indices(const data::variable_list& params);
+
+    /// \brief Converts a variable_sequence_type into a map from indices of parameter signatures
+    /// (in the list of parameter signatures for the system) to the index of the type of the parameter
+    /// (in the list of types for the system).
+    /// \param params a sequence of variables.
+    std::map<int,int> get_param_index_positions(const data::variable_list& params);
+
+    /// \brief Returns a signature for parameter <tt>param</tt>.
+    /// \param param a parameter.
+    static std::string get_param_signature(const variable& param);
+
+    /// \brief Returns a default value for the sort of a parameter signature.
+    /// \param index the index of the parameter signature.
+    /// \return a default value for the sort of the parameter.
+    const data_expression& get_default_value(int index);
+
     /// \brief Constructor
     /// \param p
     /// \param pgg
     /// \param reset
     lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset);
 
-    /// \brief Destructor
-    ~lts_info();
+public:
 
     /// \brief Returns if the reset option is set.
     bool get_reset_option() const;
 
     /// \brief Returns the number of transition groups.
     int get_number_of_groups() const;
-
-    /// \brief Returns the map from transition group number to the expression of the transition group.
-    const atermpp::map<int, pbes_expression>& get_transition_expressions() const;
 
     /// \brief Returns the map from transition group number to the variable name of the equation to which
     /// the transition group belongs.
@@ -242,21 +320,12 @@ public:
     /// equation to which the transition group belongs.
     const std::map<int, operation_type>& get_transition_types() const;
 
-    /// \brief Returns the map from variable names to the variable object for the variable.
-    const atermpp::map<std::string, propositional_variable>& get_variables() const;
-
     /// \brief Returns the map from variable names to the type of the right hand side of the equation for
     /// the variable.
     const std::map<std::string, operation_type>& get_variable_types() const;
 
-    /// \brief Returns the map from variable names to the fixpoint operator of the equation for the variable.
-    const atermpp::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
-
     /// \brief Returns the map from variable names to the priority of the equation for the variable.
     const std::map<std::string, int>& get_variable_priorities() const;
-
-    /// \brief Returns the map from variable names to the sequence of parameters for the variable.
-    const atermpp::map<std::string, data::variable_list>& get_variable_parameters() const;
 
     /// \brief Returns the map from variable names to the list of parameters signatures for the variable.
     const std::map<std::string, std::vector<std::string> >& get_variable_parameter_signatures() const;
@@ -286,11 +355,6 @@ public:
     /// for the system.
     /// \param signature the parameter signature.
     int get_index(const std::string& signaturePBES_State);
-
-    /// \brief Returns a default value for the sort of a parameter signature.
-    /// \param index the index of the parameter signature.
-    /// \return a default value for the sort of the parameter.
-    const data_expression& get_default_value(int index);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
     /// Returns true, because the propositional variable is needed to determine if the group belongs
@@ -322,61 +386,9 @@ public:
     /// \return true if param_part in changed(expr(group)).
     bool is_write_dependent_parameter(int group, int part);
 
-    /// \brief Computes the set of parameters changed in the expression.
-    /// \param phi
-    /// \param L
-    std::set<std::string> changed(const pbes_expression& phi, const std::set<std::string>& L);
-
-    /// \brief Computes the set of parameters reset in the expression.
-    /// \param phi
-    /// \param d
-    std::set<std::string> reset(const pbes_expression& phi, const std::set<std::string>& d);
-
-    /// \brief Determines if the term phi contains a branch that directly results in
-    /// <tt>true</tt> or <tt>false</tt> (not a variable).
-    /// \param phi a PBES expression
-    static bool tf(const pbes_expression& phi);
-
-    /// \brief Computes the propositional variables used in an expression.
-    /// \param expr
-    static std::set<std::string> occ(const pbes_expression& expr);
-
-    /// \brief Computes the free variables read in an expression.
-    /// \param expr
-    static std::set<std::string> free(const pbes_expression& expr);
-
-    /// \brief Computes the free variables actually used, not only passed through, in an expression.
-    /// \param expr
-    /// \param L
-    std::set<std::string> used(const pbes_expression& expr);
-    std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
-
     /// \brief Returns a string representation for state <tt>state</tt>.
     /// \param state
     std::string to_string(const ltsmin_state& state);
-
-    /// \brief Converts a variable_sequence_type into a set of parameter signatures.
-    /// \param params a sequence of variables.
-    static std::set<std::string> get_param_set(const data::variable_list& params);
-
-    /// \brief Converts a variable_sequence_type into a sequence of parameter signatures.
-    /// \param params a sequence of variables.
-    static std::vector<std::string> get_param_sequence(const data::variable_list& params);
-
-    /// \brief Converts a variable_sequence_type into a sequence of indices of parameter signatures
-    /// in the list of parameter signatures for the system.
-    /// \param params a sequence of variables.
-    std::vector<int> get_param_indices(const data::variable_list& params);
-
-    /// \brief Converts a variable_sequence_type into a map from indices of parameter signatures
-    /// (in the list of parameter signatures for the system) to the index of the type of the parameter
-    /// (in the list of types for the system).
-    /// \param params a sequence of variables.
-    std::map<int,int> get_param_index_positions(const data::variable_list& params);
-
-    /// \brief Returns a signature for parameter <tt>param</tt>.
-    /// \param param a parameter.
-    static std::string get_param_signature(const variable& param);
 
     /// \brief Returns a signature using name and type of a parameter.
     /// \param paramname the parameter name.
@@ -389,9 +401,12 @@ public:
 
 /// \brief
 class explorer {
+
+protected:
+    typedef core::term_traits<pbes_expression> tr;
+
 public:
     /// \brief The expression type of the equation.
-    typedef core::term_traits<pbes_expression> tr;
     typedef parity_game_generator::operation_type operation_type;
 
 private:
@@ -401,6 +416,37 @@ private:
     std::vector<std::string> localmap_int2string;
     atermpp::vector<atermpp::map<data_expression,int> > localmaps_data2int;
     atermpp::vector<atermpp::vector<data_expression> > localmaps_int2data;
+
+protected:
+    /// \brief Returns a PBES_State object for <tt>expr</tt>.
+    /// \param expr a propositional variable instantiation expression.
+    ltsmin_state* get_state(const propositional_variable_instantiation& expr) const;
+
+    /// \brief Returns a string representation for the data expression <tt>e</tt>.
+    /// \param e a PBES expression that may be in internal format.
+    /// \return a string representation without internal rewriter quirks.
+    std::string data_to_string(const data::data_expression& e);
+
+    /// \brief Returns a data expression for the string representation <tt>s</tt>.
+    /// \param s a string representation of a data expression.
+    /// \return the data expression (possibly in internal format) that s represents.
+    data::data_expression string_to_data(const std::string& s);
+
+    /// \brief Returns the index of <tt>value</tt> in the local store for the data type
+    /// with number <tt>type_no</tt>.
+    /// The value is added to the store if it is not already present.
+    /// \param type_no the number of the value type.
+    /// \param value the data value.
+    /// \return the index of <tt>value</tt> in local store <tt>type_no</tt>.
+    int get_value_index(int type_no, const data_expression& value);
+
+    /// \brief Returns the value at position <tt>index</tt> in the local store for the data type
+    /// with number <tt>type_no</tt>.
+    /// An exception is thrown if the index does not exist in the store.
+    /// \param type_no the number of the value type.
+    /// \param index an index.
+    /// \return the value at position <tt>index</tt> in local store <tt>type_no</tt>.
+    const data_expression& get_data_value(int type_no, int index);
 
 public:
     /// \brief the PBES greybox interface
@@ -425,25 +471,11 @@ public:
 
     void initial_state(int* state);
 
-    /// \brief Returns a PBES_State object for <tt>expr</tt>.
-    /// \param expr a propositional variable instantiation expression.
-    ltsmin_state* get_state(const propositional_variable_instantiation& expr) const;
-
     /// \brief Returns the state representing <tt>true</tt>.
     static inline ltsmin_state* true_state();
 
     /// \brief Returns the state representing <tt>false</tt>.
     static inline ltsmin_state* false_state();
-
-    /// \brief Returns a string representation for the data expression <tt>e</tt>.
-    /// \param e a PBES expression that may be in internal format.
-    /// \return a string representation without internal rewriter quirks.
-    std::string data_to_string(const data::data_expression& e);
-
-    /// \brief Returns a data expression for the string representation <tt>s</tt>.
-    /// \param s a string representation of a data expression.
-    /// \return the data expression (possibly in internal format) that s represents.
-    data::data_expression string_to_data(const std::string& s);
 
     /// \brief Returns the index of <tt>value</tt> in the local store for the data type
     /// with number <tt>type_no</tt>. Type 0 is reserved for the string representations
@@ -461,14 +493,6 @@ public:
     /// \param value the data value.
     /// \return the index of <tt>s</tt> in the local store for string values.
     int get_string_index(const std::string& s);
-
-    /// \brief Returns the index of <tt>value</tt> in the local store for the data type
-    /// with number <tt>type_no</tt>.
-    /// The value is added to the store if it is not already present.
-    /// \param type_no the number of the value type.
-    /// \param value the data value.
-    /// \return the index of <tt>value</tt> in local store <tt>type_no</tt>.
-    int get_value_index(int type_no, const data_expression& value);
 
     /// \brief Transforms a PBES state to a state vector, represented by an array of integers.
     /// \param dst_state the new PBES state object
@@ -492,14 +516,6 @@ public:
     /// \param index an index.
     /// \return the string value at position <tt>index</tt> in the local store for string values.
     const std::string& get_string_value(int index);
-
-    /// \brief Returns the value at position <tt>index</tt> in the local store for the data type
-    /// with number <tt>type_no</tt>.
-    /// An exception is thrown if the index does not exist in the store.
-    /// \param type_no the number of the value type.
-    /// \param index an index.
-    /// \return the value at position <tt>index</tt> in local store <tt>type_no</tt>.
-    const data_expression& get_data_value(int type_no, int index);
 
     /// \brief Transforms a state vector <tt>src</tt> into a PBES_State object
     /// object containing the variable and parameter values that are represented

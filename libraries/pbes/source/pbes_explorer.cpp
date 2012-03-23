@@ -162,10 +162,6 @@ lts_info::lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset = false):
 }
 
 
-lts_info::~lts_info()
-{}
-
-
 void lts_info::compute_lts_type()
 {
     //std::clog << "pbes_type:" << std::endl;
