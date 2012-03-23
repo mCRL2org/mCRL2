@@ -36,8 +36,8 @@ private:
     size_t transition_count;
 
 public:
-    explorer(pbes<>* p, lts_info* info, pbes_greybox_interface* pgg) :
-        mcrl2::pbes_system::explorer(p, info, pgg),
+    explorer(const pbes<>& p, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset = false) :
+        mcrl2::pbes_system::explorer(p, rewrite_strategy, reset),
         transition_count(0)
     {}
 
@@ -207,12 +207,8 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
     p = to_ppg(p);
     std::clog << "done." << std::endl;
   }
-  bool true_false_dependencies = false;
-  pbes_greybox_interface* pgg = new pbes_greybox_interface(p, true_false_dependencies, true, rewrite_strategy);
-  int reset = 0;
-  lts_info* info = new lts_info(&p, pgg, reset);
-  //lts_type* type = info->get_lts_type();
-  ltsmin::test::explorer pbes_explorer(&p, info, pgg);
+  ltsmin::test::explorer pbes_explorer(p, rewrite_strategy);
+  lts_info* info = pbes_explorer.get_info();
   int state_length = info->get_lts_type().get_state_length();
   BOOST_CHECK(num_parts==state_length);
   //std::clog << state_length << " parts" << std::endl;
@@ -232,9 +228,6 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
   // check number of states and transitions:
   BOOST_CHECK(num_states==(int)pbes_explorer.get_state_count());
   BOOST_CHECK(num_transitions==(int)pbes_explorer.get_transition_count());
-
-  // clear memory:
-  delete info;
 }
 
 

@@ -13,6 +13,7 @@
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 
@@ -186,7 +187,7 @@ public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
 private:
-    pbes<>* p;
+    pbes<>& p;
     pbes_greybox_interface* pgg;
     bool reset_option;
     lts_type type;
@@ -222,7 +223,7 @@ public:
     /// \param p
     /// \param pgg
     /// \param reset
-    lts_info(pbes<>* p, pbes_greybox_interface* pgg, int reset);
+    lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset);
 
     /// \brief Destructor
     ~lts_info();
@@ -397,7 +398,7 @@ public:
     typedef parity_game_generator::operation_type operation_type;
 
 private:
-    pbes<>* p;
+    pbes<> p;
     lts_info* info;
     std::map<std::string,int> localmap_string2int;
     std::vector<std::string> localmap_int2string;
@@ -409,11 +410,12 @@ public:
     pbes_greybox_interface* pgg;
 
     /// \brief Constructor.
+    /// \param filename the name of a PBES file.
+    explorer(const std::string& filename, data::rewrite_strategy rewrite_strategy, bool reset);
+
+    /// \brief Constructor.
     /// \param p a PBES.
-    /// \param info a PBES_Info object instantiated with PBES <tt>p</tt> and
-    /// pbes_greybox_interface <tt>pgg</tt>.
-    /// \param pgg a pbes_greybox_interface object instantiated with PBES <tt>p</tt>.
-    explorer(pbes<>* p, lts_info* info, pbes_greybox_interface* pgg);
+    explorer(const pbes<>& p, data::rewrite_strategy rewrite_strategy, bool reset);
 
     /// \brief Destructor.
     ~explorer();

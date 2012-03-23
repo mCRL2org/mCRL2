@@ -145,14 +145,13 @@ void lts_type::add_edge_label(const std::string& name,
 
 /// lts_info
 
-lts_info::lts_info(pbes<>* p, pbes_greybox_interface* pgg, int reset = 0):
+lts_info::lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset = false):
+    p(p),
+    pgg(pgg),
+    reset_option(reset),
     type(0)
 {
-    this->p = p;
-    this->pgg = pgg;
-    this->reset_option = (reset == 1);
-    pbes<> s = *p;
-    if (!is_ppg(s))
+    if (!is_ppg(p))
     {
         throw std::runtime_error("PBES is not a PPG! Please rewrite with pbesrewr -pppg.");
     }
@@ -173,8 +172,8 @@ void lts_info::compute_lts_type()
     std::vector<std::string> params;
     std::map<std::string,std::string> paramtypes;
     //this->param_default_values = new atermpp::vector<data_expression>();
-    for (atermpp::vector<pbes_equation>::iterator eqn = p->equations().begin(); eqn
-            != p->equations().end(); ++eqn) {
+    for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
+            != p.equations().end(); ++eqn) {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
 
@@ -195,13 +194,13 @@ void lts_info::compute_lts_type()
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
-                atermpp::vector< function_symbol > c = p->data().constructors(varparam.sort());
+                atermpp::vector< function_symbol > c = p.data().constructors(varparam.sort());
                 if (c.size() == 0) {
                     throw(std::runtime_error("Error in info: no constructor for parameter sort " + signature + "."));
                 } else {
                     assert(c.size() > 0);
                     function_symbol fs = c[0];
-                    pbes_expression e = this->pgg->rewrite_and_simplify_expression(fs);
+                    pbes_expression e = pgg->rewrite_and_simplify_expression(fs);
                     data_expression v = data_expression(e);
                     //std::clog << "pbes_type: " << signature << "(" << this->param_default_values.size() << ") value = " << v.to_string()
                     //        << " (" << pgg->data_to_string(v) << ")"<< std::endl;
@@ -267,8 +266,8 @@ void lts_info::compute_transition_groups()
 
     symbol = fixpoint_symbol::nu();
 
-    for (atermpp::vector<pbes_equation>::iterator eqn = p->equations().begin(); eqn
-            != p->equations().end(); ++eqn) {
+    for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
+            != p.equations().end(); ++eqn) {
         pbes_expression expr = pgg->from_rewrite_format(pgg->get_pbes_equation((*eqn).variable().name()).formula());
         std::string variable_name = (*eqn).variable().name();
         this->variables.insert(
@@ -1018,9 +1017,34 @@ std::string ltsmin_state::to_string() const
 
 /// explorer
 
-explorer::explorer(pbes<>* p, lts_info* info, pbes_greybox_interface* pgg) :
-    p(p), info(info), pgg(pgg)
+explorer::explorer(const std::string& filename, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset_flag = false)
 {
+    p.load(filename);
+    pbes_system::normalize(p);
+    if (!is_ppg(p))
+    {
+        mCRL2log(log::verbose) << "Rewriting to PPG..." << std::endl;
+        p = detail::to_ppg(p);
+        mCRL2log(log::verbose) << "Rewriting done." << std::endl;
+    }
+    this->pgg = new pbes_greybox_interface(p, false, true, rewrite_strategy);
+    this->info = new lts_info(p, pgg, reset_flag);
+    //std::clog << "explorer" << std::endl;
+    for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
+        atermpp::map<data_expression,int> data2int_map;
+        this->localmaps_data2int.push_back(data2int_map);
+        atermpp::vector<data_expression> int2data_map;
+        this->localmaps_int2data.push_back(int2data_map);
+    }
+    //std::clog << "-- end of explorer." << std::endl;
+}
+
+
+explorer::explorer(const pbes<>& p_, data::rewrite_strategy rewrite_strategy = jitty_compiling, bool reset_flag = false)
+{
+    p = p_;
+    this->pgg = new pbes_greybox_interface(p, false, true, rewrite_strategy);
+    this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
         atermpp::map<data_expression,int> data2int_map;
@@ -1033,7 +1057,10 @@ explorer::explorer(pbes<>* p, lts_info* info, pbes_greybox_interface* pgg) :
 
 
 explorer::~explorer()
-{}
+{
+    delete info;
+    delete pgg;
+}
 
 
 lts_info* explorer::get_info() const
@@ -1061,9 +1088,9 @@ ltsmin_state* explorer::get_state(const propositional_variable_instantiation& ex
     propositional_variable_instantiation novalue;
     assert(tr::is_prop_var(expr) && expr != novalue);
     std::string varname = tr::name(expr);
-    int priority = this->info->get_variable_priorities().at(varname);
-    propositional_variable var = this->info->get_variables().at(varname);
-    operation_type type = this->info->get_variable_types().at(varname);
+    int priority = info->get_variable_priorities().at(varname);
+    propositional_variable var = info->get_variables().at(varname);
+    operation_type type = info->get_variable_types().at(varname);
     ltsmin_state* s = new ltsmin_state(priority, var, type, expr);
     return s;
 }
@@ -1127,7 +1154,7 @@ int explorer::get_string_index(const std::string& s)
 
 int explorer::get_value_index(int type_no, const data_expression& value)
 {
-    //std::clog << "get_value_index type_no=" << type_no << " (" << this->info->get_lts_type().get_number_of_state_types() << ")" << std::endl;
+    //std::clog << "get_value_index type_no=" << type_no << " (" << info->get_lts_type().get_number_of_state_types() << ")" << std::endl;
     atermpp::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
     atermpp::map<data_expression,int>::iterator it = data2int_map.find(value);
     int index;
@@ -1146,7 +1173,7 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
 {
     data_expression novalue;
     //std::clog << "-- to_state_vector -- " << std::endl;
-    int state_length = this->info->get_lts_type().get_state_length();
+    int state_length = info->get_lts_type().get_state_length();
 
     std::string varname = dst_state->get_variable();
     std::string src_varname;
@@ -1168,12 +1195,12 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
     // data_expression values[state_length]; N.B. This is not portable C++
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
 
-    if (this->info->get_reset_option() || src == 0) {
+    if (info->get_reset_option() || src == 0) {
         int type_no;
         for (int i = 1; i < state_length; i++) {
-            data_expression default_value = this->info->get_default_value(i-1);
+            data_expression default_value = info->get_default_value(i-1);
             values[i] = default_value;
-            type_no = this->info->get_lts_type().get_state_type_no(i);
+            type_no = info->get_lts_type().get_state_type_no(i);
             dst[i] = this->get_value_index(type_no, values[i]);
         }
     } else {
@@ -1183,15 +1210,15 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
     }
     bool error = false;
     std::vector<int> parameter_indices =
-                        this->info->get_variable_parameter_indices().at(varname);
+                        info->get_variable_parameter_indices().at(varname);
     std::vector<std::string> parameter_signatures =
-                    this->info->get_variable_parameter_signatures().at(varname);
+                    info->get_variable_parameter_signatures().at(varname);
     std::vector<std::string>::const_iterator param_signature = parameter_signatures.begin();
     for(std::vector<int>::const_iterator param_index = parameter_indices.begin();
             param_index != parameter_indices.end(); ++param_index)
     {
         int i = *param_index + 1;
-        int type_no = this->info->get_lts_type().get_state_type_no(i);
+        int type_no = info->get_lts_type().get_state_type_no(i);
         values[i] = dst_state->get_parameter_values()->at(*param_index);
         if (values[i]==novalue)
         {
@@ -1206,7 +1233,7 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
             {
                 // lookup src parameter value
                 // FIXME: this could be computed statically: a map from src_var, dst_var and part to boolean
-                std::map<int,int> src_param_index_positions = this->info->get_variable_parameter_index_positions().at(src_state->get_variable());
+                std::map<int,int> src_param_index_positions = info->get_variable_parameter_index_positions().at(src_state->get_variable());
                 std::map<int,int>::iterator src_param_index_position_it = src_param_index_positions.find(*param_index);
                 if ( src_param_index_position_it != src_param_index_positions.end()
                         && src_state->get_parameter_values()->at(src_param_index_position_it->second) == values[i])
@@ -1278,7 +1305,7 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
 {
     //std::clog << "-- from_state_vector(model, src) --" << std::endl;
     data_expression novalue;
-    int state_length = this->info->get_lts_type().get_state_length();
+    int state_length = info->get_lts_type().get_state_length();
 
     std::string varname = this->get_string_value(src[0]);
     //std::clog << "from_state_vector: varname = " << varname << std::endl;
@@ -1291,14 +1318,14 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
     int type_no;
     for (int i = 1; i < state_length; i++) {
         //std::clog << "from_state_vector: values: " << i << " (" << src[i] << "): " << std::endl;
-        type_no = this->info->get_lts_type().get_state_type_no(i);
+        type_no = info->get_lts_type().get_state_type_no(i);
         values[i] = this->get_data_value(type_no, src[i]);
         //std::clog << "from_state_vector:   " << values[i].to_string() << std::endl;
     }
     //std::clog << "from_state_vector: values done." << std::endl;
     data_expression_list parameters;
     std::vector<int> parameter_indices =
-            this->info->get_variable_parameter_indices().at(varname);
+            info->get_variable_parameter_indices().at(varname);
     for (std::vector<int>::iterator param_index = parameter_indices.begin(); param_index
             != parameter_indices.end(); ++param_index) {
         if (values[*param_index+1]==novalue)
