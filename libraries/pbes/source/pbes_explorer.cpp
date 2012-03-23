@@ -772,14 +772,14 @@ std::string lts_info::to_string(const ltsmin_state& state)
     ss << (state.get_type()==parity_game_generator::PGAME_AND ? "AND" : "OR");
     ss << ":" << state.get_variable();
     ss << "(";
-    atermpp::vector<data_expression>* param_values = state.get_parameter_values();
+    const atermpp::vector<data_expression>& param_values = state.get_parameter_values();
     std::vector<std::string> param_signatures =
                 this->variable_parameter_signatures.at(state.get_variable());
     std::vector<std::string>::const_iterator param_signature =
             param_signatures.begin();
     for (atermpp::vector<data_expression>::const_iterator param_value =
-            param_values->begin(); param_value != param_values->end(); ++param_value) {
-        if (param_value != param_values->begin())
+            param_values.begin(); param_value != param_values.end(); ++param_value) {
+        if (param_value != param_values.begin())
             ss << ", ";
         ss << *param_signature << " = ";
         ss << pgg->print(*param_value);
@@ -871,7 +871,6 @@ ltsmin_state::ltsmin_state(int priority, const std::string& varname,
     this->priority = priority;
     this->var = varname;
     this->type = type;
-    this->param_values = new atermpp::vector<data_expression>();
 }
 
 
@@ -890,7 +889,6 @@ ltsmin_state::ltsmin_state(int priority, const propositional_variable& v,
     this->priority = priority;
     this->var = (std::string)v.name();
     this->type = type;
-    this->param_values = new atermpp::vector<data_expression>();
     if (tr::is_prop_var(e)) {
         assert(tr::name(e) == v.name());
         data::data_expression_list values = tr::param(e);
@@ -908,12 +906,6 @@ ltsmin_state::ltsmin_state(int priority, const propositional_variable& v,
     }
 }
 
-
-ltsmin_state::~ltsmin_state()
-{
-    delete param_values;
-}
-
 bool ltsmin_state::operator<( const ltsmin_state& other ) const
 {
   if (this->priority < other.priority) return true;
@@ -925,10 +917,10 @@ bool ltsmin_state::operator<( const ltsmin_state& other ) const
       if (this->var < other.var) return true;
       else if (this->var == other.var)
       {
-        if (this->param_values->size() < other.param_values->size()) return true;
-        else if (this->param_values->size() == other.param_values->size())
+        if (param_values.size() < other.param_values.size()) return true;
+        else if (param_values.size() == other.param_values.size())
         {
-          if (*(this->param_values) < *(other.param_values)) return true;
+          if (param_values < other.param_values) return true;
         }
       }
     }
@@ -942,8 +934,8 @@ bool ltsmin_state::operator==( const ltsmin_state& other ) const
   return this->priority==other.priority
       && this->type==other.type
       && this->var==other.var
-      && this->param_values->size()==other.param_values->size()
-      && *(this->param_values)==*(other.param_values);
+      && param_values.size()==other.param_values.size()
+      && param_values == other.param_values;
 }
 
 
@@ -965,7 +957,7 @@ ltsmin_state::operation_type ltsmin_state::get_type() const
 }
 
 
-atermpp::vector<data_expression>* ltsmin_state::get_parameter_values() const
+const atermpp::vector<data_expression>& ltsmin_state::get_parameter_values() const
 {
     return param_values;
 }
@@ -973,7 +965,7 @@ atermpp::vector<data_expression>* ltsmin_state::get_parameter_values() const
 
 void ltsmin_state::add_parameter_value(const data_expression& value)
 {
-    this->param_values->push_back(value);
+    param_values.push_back(value);
 }
 
 
@@ -982,7 +974,7 @@ pbes_expression ltsmin_state::to_pbes_expression() const
     //std::clog << "to_pbes_expression (this = " << this->to_string() << ")" << std::endl;
     data::data_expression_list parameter_values = data::data_expression_list();
     for (atermpp::vector<data_expression>::const_iterator param_value =
-            param_values->begin(); param_value != param_values->end(); ++param_value) {
+            param_values.begin(); param_value != param_values.end(); ++param_value) {
         parameter_values = parameter_values + *param_value;
     }
     // Create propositional variable instantiation.
@@ -1001,9 +993,9 @@ std::string ltsmin_state::to_string() const
     ss << (type==parity_game_generator::PGAME_AND ? "AND" : "OR");
     ss << ":" << var;
     ss << "(";
-    for (atermpp::vector<data_expression>::iterator entry =
-            this->param_values->begin(); entry != this->param_values->end(); ++entry) {
-        if (entry != this->param_values->begin())
+    for (atermpp::vector<data_expression>::const_iterator entry =
+            param_values.begin(); entry != param_values.end(); ++entry) {
+        if (entry != param_values.begin())
             ss << ", ";
         ss << (*entry).to_string();
     }
@@ -1219,7 +1211,7 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
     {
         int i = *param_index + 1;
         int type_no = info->get_lts_type().get_state_type_no(i);
-        values[i] = dst_state->get_parameter_values()->at(*param_index);
+        values[i] = dst_state->get_parameter_values()[*param_index];
         if (values[i]==novalue)
         {
             error = true;
@@ -1236,7 +1228,7 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
                 std::map<int,int> src_param_index_positions = info->get_variable_parameter_index_positions().at(src_state->get_variable());
                 std::map<int,int>::iterator src_param_index_position_it = src_param_index_positions.find(*param_index);
                 if ( src_param_index_position_it != src_param_index_positions.end()
-                        && src_state->get_parameter_values()->at(src_param_index_position_it->second) == values[i])
+                        && src_state->get_parameter_values()[src_param_index_position_it->second] == values[i])
                 {
                     // src value exists and is equal to the dst value.
                     // save to copy index from src_state

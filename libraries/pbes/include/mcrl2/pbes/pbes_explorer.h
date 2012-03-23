@@ -116,7 +116,7 @@ private:
     int priority; // Priority (depends on fixpoint operator and equation order)
     std::string var; // Propositional variable name
     operation_type type; // player or type (And/Or, Abelard/Eloise, Odd/Even)
-    atermpp::vector<data_expression>* param_values; // List of parameter values
+    atermpp::vector<data_expression> param_values; // List of parameter values
 
 public:
     /// \brief Constructor.
@@ -138,9 +138,6 @@ public:
     /// \param type the type or player of the state.
     /// \param e a propositional variable instantiation.
     ltsmin_state(int priority, const propositional_variable& v, operation_type type, const pbes_expression& e);
-
-    /// \brief Destructor.
-    ~ltsmin_state();
 
     /// \brief Compares two PBES_State objects. Uses lexicographical ordering on priority, type, variable and parameter values.
     /// \param other an other PBES_State object.
@@ -165,7 +162,7 @@ public:
     operation_type get_type() const;
 
     /// \brief Returns the list of parameter values.
-    atermpp::vector<data_expression>* get_parameter_values() const;
+    const atermpp::vector<data_expression>& get_parameter_values() const;
 
     /// \brief Adds a parameter value to the list of parameter values.
     void add_parameter_value(const data_expression&);
