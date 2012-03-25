@@ -46,8 +46,7 @@ size_t min_nb_minor_since_last_major;
 size_t good_gc_ratio;
 size_t small_allocation_rate_ratio;
 size_t old_increase_rate_ratio;
-
-bool at_mark_young;
+static bool at_mark_young = false;
 
 /*}}}  */
 
@@ -62,7 +61,7 @@ bool at_mark_young;
 void major_sweep_phase_old();
 void major_sweep_phase_young();
 void minor_sweep_phase_young();
-void check_unmarked_block(size_t blocks);
+static void check_unmarked_block(size_t blocks);
 
 /*}}}  */
 
@@ -111,7 +110,7 @@ ATerm* stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_term) /* CHANGED BY JFG */
+static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_term, const bool only_mark_young) /* CHANGED BY JFG */
 {
   const ATerm* cur;
   /* Traverse the stack */
@@ -128,13 +127,13 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
           if (!IS_MARKED((real_term)->header))
           {
             assert(AT_isValidTerm(real_term));
-            AT_markTerm(real_term);
+            AT_markTerm(real_term,only_mark_young);
           }
         }
       }
       else if (AT_isValidAFun((AFun)*cur))
       {
-        AT_markAFun((AFun)*cur);
+        AT_markAFun((AFun)*cur,only_mark_young);
       }
     }
   }
@@ -145,50 +144,7 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
       if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
       {
         assert(AT_isValidTerm(*cur));
-        AT_markTerm(*cur);
-      }
-    }
-  }
-}
-
-/*}}}  */
-/*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
-
-static void mark_memory_young(const ATerm* start, const ATerm* stop, const bool check_term) /* CHANGED BY JFG  */
-{
-  const ATerm* cur;
-
-  if (check_term)
-  {
-    ATerm real_term;
-    for (cur=start; cur<stop; cur++)
-    {
-      if (AT_isPotentialTerm(*cur))
-      {
-        real_term = AT_isInsideValidTerm(*cur);
-        if (real_term != NULL)
-        {
-          if (!IS_MARKED(real_term->header))
-          {
-            assert(AT_isValidTerm(real_term));
-            AT_markTerm_young(real_term);
-          }
-        }
-      }
-      else if (AT_isValidAFun(*cur))
-      {
-        AT_markAFun_young((AFun)*cur);
-      }
-    }
-  }
-  else
-  {
-    for (cur=start; cur<stop; cur++)
-    {
-      if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
-      {
-        assert(AT_isValidTerm(*cur));
-        AT_markTerm_young(*cur);
+        AT_markTerm(*cur,only_mark_young);
       }
     }
   }
@@ -198,25 +154,13 @@ static void mark_memory_young(const ATerm* start, const ATerm* stop, const bool 
 
 void ATmarkTerm(const ATerm t)
 {
-  ATmarkArray(&t,1);
+  const ATerm* start=&t;
+  mark_memory(start,start+1,false,at_mark_young); // Note that at_mark_young is a global variable.
 }
-
-void ATmarkArray(const ATerm* start, const size_t size)
-{
-  if (at_mark_young == true)
-  {
-    mark_memory_young(start,start+size,false);
-  }
-  else
-  {
-    mark_memory(start,start+size,false);
-  }
-}
-
 
 /*{{{  VOIDCDECL mark_phase() */
 
-VOIDCDECL mark_phase()
+VOIDCDECL mark_phase(const bool only_mark_young)
 {
   size_t i,j;
   ATerm* stackTop;
@@ -235,7 +179,7 @@ VOIDCDECL mark_phase()
   jmp_buf env; /* Buffer for registers */
   setjmp(env); /* Save registers to buffer */
   /* Now check buffer for ATerms and mark them */
-  mark_memory((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, true);
+  mark_memory((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, true,only_mark_young);
 #elif defined(_MSC_VER) && defined(WIN32)
   size_t r_eax, r_ebx, r_ecx, r_edx, \
   r_esi, r_edi, r_esp, r_ebp;
@@ -299,7 +243,7 @@ VOIDCDECL mark_phase()
 
   start = (ATerm*)((char*)env);
   stop  = ((ATerm*)(((char*)env) + sizeof(jmp_buf)));
-  mark_memory(start, stop,true);
+  mark_memory(start, stop,true,only_mark_young);
 #endif
 
   stackTop = stack_top();
@@ -307,7 +251,7 @@ VOIDCDECL mark_phase()
   start = MIN(stackTop, stackBot);
   stop  = MAX(stackTop, stackBot);
 
-  mark_memory(start, stop,true);
+  mark_memory(start, stop,true,only_mark_young);
 
   /* Traverse protected terms */
   for (i=0; i<at_prot_table_size; i++)
@@ -320,7 +264,7 @@ VOIDCDECL mark_phase()
         if (cur->start[j])
         {
           assert(AT_isValidTerm(cur->start[j]));
-          AT_markTerm(cur->start[j]);
+          AT_markTerm(cur->start[j],only_mark_young);
         }
       }
       cur = cur->next;
@@ -329,178 +273,33 @@ VOIDCDECL mark_phase()
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next)
   {
-    mark_memory((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),false);
+    mark_memory((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),false,only_mark_young);
   }
 
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next)
   {
     if (pblock->protsize>0)
     {
-      mark_memory(pblock->term, &pblock->term[pblock->protsize],false);
+      mark_memory(pblock->term, &pblock->term[pblock->protsize],false,only_mark_young);
     }
   }
 
-  at_mark_young = false;
+  at_mark_young = only_mark_young; // Set this global variable to be used inside at_prot_functions.
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
 
-  AT_markProtectedAFuns();
+  AT_markProtectedAFuns(only_mark_young);
 
   /* Mark 'parked' symbol */
   if (AT_isValidAFun(at_parked_symbol))
   {
-    AT_markAFun(at_parked_symbol);
+    AT_markAFun(at_parked_symbol,only_mark_young);
   }
 }
 
 /*}}}  */
-/*{{{  VOIDCDECL mark_phase_young()  */
-
-VOIDCDECL mark_phase_young()
-{
-  size_t i,j;
-  ATerm* stackTop;
-  ATerm* start, *stop;
-  ProtEntry* prot;
-  ATprotected_block pblock;
-
-  size_t count=0;
-#if defined(_MSC_VER) && defined(_M_X64)
-  /* Traverse possible register variables. For a more detailed
-     explanation, see mark_phase(). */
-  jmp_buf env;
-  setjmp(env);
-  mark_memory_young((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, true);
-#elif defined(_MSC_VER) && defined(WIN32)
-
-  size_t r_eax, r_ebx, r_ecx, r_edx, \
-  r_esi, r_edi, r_esp, r_ebp;
-  ATerm reg[8], real_term;
-
-  __asm
-  {
-    /* Get the registers into local variables to check them
-       for aterms later. */
-    mov r_eax, eax
-    mov r_ebx, ebx
-    mov r_ecx, ecx
-    mov r_edx, edx
-    mov r_esi, esi
-    mov r_edi, edi
-    mov r_esp, esp
-    mov r_ebp, ebp
-  }
-  /* Put the register-values into an array */
-  reg[0] = (ATerm) r_eax;
-  reg[1] = (ATerm) r_ebx;
-  reg[2] = (ATerm) r_ecx;
-  reg[3] = (ATerm) r_edx;
-  reg[4] = (ATerm) r_esi;
-  reg[5] = (ATerm) r_edi;
-  reg[6] = (ATerm) r_esp;
-  reg[7] = (ATerm) r_ebp;
-
-  for (i=0; i<8; i++)
-  {
-    real_term = AT_isInsideValidTerm(reg[i]);
-    if (real_term != NULL)
-    {
-      AT_markTerm_young(real_term);
-    }
-    if (AT_isValidAFun((AFun)reg[i]))
-    {
-      AT_markAFun_young((AFun)reg[i]);
-    }
-  }
-
-  /* The register variables are on the stack aswell
-     I set them to zero so they won't be processed again when
-     the stack is traversed. The reg-array is also in the stack
-     but that will be adjusted later */
-  r_eax = 0;
-  r_ebx = 0;
-  r_ecx = 0;
-  r_edx = 0;
-  r_esi = 0;
-  r_edi = 0;
-  r_esp = 0;
-  r_ebp = 0;
-
-#else
-  jmp_buf env;
-
-  /* Traverse possible register variables */
-  setjmp(env);
-
-  start = (ATerm*)((char*)env);
-  stop  = ((ATerm*)(((char*)env) + sizeof(jmp_buf)));
-  mark_memory_young(start, stop, true);
-#endif
-
-  stackTop = stack_top();
-  start = MIN(stackTop, stackBot);
-  stop  = MAX(stackTop, stackBot);
-
-  mark_memory_young(start, stop, true);
-
-  /* Traverse protected terms */
-  for (i=0; i<at_prot_table_size; i++)
-  {
-    ProtEntry* cur = at_prot_table[i];
-    while (cur)
-    {
-      for (j=0; j<cur->size; j++)
-      {
-        if (cur->start[j])
-        {
-          AT_markTerm_young(cur->start[j]);
-        }
-      }
-      cur = cur->next;
-    }
-  }
-
-  for (prot=at_prot_memory; prot != NULL; prot=prot->next)
-  {
-    mark_memory_young((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),false);
-  }
-
-  for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next)
-  {
-    {
-      if (pblock->protsize>0)
-      {
-        mark_memory_young(pblock->term, &pblock->term[pblock->protsize], false);
-      }
-      ++count;
-    }
-
-  }
-
-  at_mark_young = true;
-  for (i=0; i<at_prot_functions_count; i++)
-  {
-    at_prot_functions[i]();
-  }
-
-  AT_markProtectedAFuns_young();
-
-  /* Mark 'parked' symbol */
-  if (AT_isValidAFun(at_parked_symbol))
-  {
-    AT_markAFun_young(at_parked_symbol);
-  }
-}
-
-/*}}}  */
-
-#ifdef NDEBUG
-#define MCRL2_CHECK_UNMARKED_BLOCK(blocks)
-#else
-#define MCRL2_CHECK_UNMARKED_BLOCK(blocks) check_unmarked_block(blocks)
-#endif
 
 /*{{{  void sweep_phase()  */
 
@@ -520,8 +319,8 @@ void sweep_phase()
   /* Warning: do not sweep fresh promoted block*/
   major_sweep_phase_old();
   major_sweep_phase_young();
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_BLOCK);
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
+  check_unmarked_block(AT_BLOCK);
+  check_unmarked_block(AT_OLD_BLOCK);
 }
 
 /*}}}  */
@@ -686,8 +485,9 @@ static void promote_block_to_young(size_t size, Block* block, Block* prev_block)
 
 /*{{{  void check_unmarked_block(Block **blocks)  */
 
-void check_unmarked_block(size_t blocks)
+static void check_unmarked_block(size_t blocks)
 {
+#ifndef NDEBUG
   size_t size;
 
   for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
@@ -712,9 +512,7 @@ void check_unmarked_block(size_t blocks)
       header_type* cur;
       for (cur=block->data ; cur<end ; cur+=size)
       {
-#ifndef NDEBUG
         ATerm t = (ATerm)cur;
-#endif
         if (blocks==AT_OLD_BLOCK)
         {
           assert(GET_TYPE(t->header)==AT_FREE || IS_OLD(t->header));
@@ -728,6 +526,7 @@ void check_unmarked_block(size_t blocks)
       }
     }
   }
+#endif // NDEBUG
 }
 
 /*}}}  */
@@ -1128,59 +927,9 @@ void minor_sweep_phase_young()
 
 /*}}}  */
 
-/* The timing/STATS parts haven't been tested yet (on NT)
- * but without the info things seem to work fine
- */
-#ifdef WIN32
 /*{{{  void AT_collect() */
 
-void AT_collect()
-{
-
-  size_t size;
-
-  /* snapshop*/
-  for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
-  {
-    TermInfo* ti = &terminfo[size];
-    ti->nb_live_blocks_before_last_gc = ti->at_nrblocks;
-    ti->nb_reclaimed_blocks_during_last_gc=0;
-    ti->nb_reclaimed_cells_during_last_gc=0;
-  }
-
-  mark_phase();
-
-  sweep_phase();
-}
-
-/*}}}  */
-/*{{{  void AT_collect_minor() */
-
-void AT_collect_minor()
-{
-  size_t size;
-
-  /* snapshop*/
-  for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
-  {
-    TermInfo* ti = &terminfo[size];
-    ti->nb_live_blocks_before_last_gc = ti->at_nrblocks;
-    ti->nb_reclaimed_blocks_during_last_gc=0;
-    ti->nb_reclaimed_cells_during_last_gc=0;
-  }
-
-  /* was minor_mark_phase_young(); this should be verified! */
-  mark_phase_young();
-
-  minor_sweep_phase_young();
-
-}
-
-/*}}}  */
-#else
-/*{{{  void AT_collect() */
-
-void AT_collect()
+void AT_collect(const bool only_collect_young)
 {
   size_t size;
 
@@ -1193,42 +942,21 @@ void AT_collect()
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
 
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_BLOCK);
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-  mark_phase();
-
-  sweep_phase();
-
-}
-
-/*}}}  */
-/*{{{  void AT_collect_minor() */
-
-void AT_collect_minor()
-{
-  size_t size;
-
-  /* snapshop*/
-  for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
-  {
-    TermInfo* ti = &terminfo[size];
-    ti->nb_live_blocks_before_last_gc = ti->at_nrblocks;
-    ti->nb_reclaimed_blocks_during_last_gc=0;
-    ti->nb_reclaimed_cells_during_last_gc=0;
+  check_unmarked_block(AT_BLOCK);
+  check_unmarked_block(AT_OLD_BLOCK);
+  mark_phase(only_collect_young);
+  if (only_collect_young)
+  { 
+    minor_sweep_phase_young();
   }
-
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_BLOCK);
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-  /*nb_cell_in_stack=0;*/
-  mark_phase_young();
-
-  minor_sweep_phase_young();
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_BLOCK);
-  MCRL2_CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-
+  else
+  {
+    sweep_phase();
+  }
+  check_unmarked_block(AT_BLOCK);
+  check_unmarked_block(AT_OLD_BLOCK);
 }
 
 /*}}}  */
-#endif
 
 } // namespace aterm

@@ -19,7 +19,7 @@ extern size_t good_gc_ratio;
 extern size_t small_allocation_rate_ratio;
 extern size_t old_increase_rate_ratio;
 
-void AT_collect();
+void AT_collect(const bool only_collect_young);
 
 extern AFun at_parked_symbol;
 

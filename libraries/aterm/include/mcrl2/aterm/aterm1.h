@@ -240,15 +240,6 @@ void ATaddProtectFunction(const ATermProtFunc f);
  */
 void ATmarkTerm(const ATerm t);
 
-
-/**
- * Mark an array to prevent it from being garbage collected. CAVEAT EMPTOR.
- * This function should only be called from a function previously registered
- * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
- * core dumps.
- */
-void ATmarkArray(const ATerm* start, const size_t size);
-
 /**
  * Initialize the ATerm library. It is essential to call this function in the
  * main frame of your application. It is needed to boot the administration

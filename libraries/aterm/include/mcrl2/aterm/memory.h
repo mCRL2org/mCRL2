@@ -9,10 +9,10 @@
  * is constructed. This can be used to find subtle garbage collection problems.
  * Note that this is very time consuming... The first line below expresses that
  * no agressive checking is done, which is the default. */
-/* #define DO_AGGRESSIVE_GARBAGE_COLLECT   */
+// #define DO_AGGRESSIVE_GARBAGE_COLLECT  
 
 #ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect()
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect(true)
 #else
 #define AGGRESSIVE_GARBAGE_COLLECT_CHECK
 #endif

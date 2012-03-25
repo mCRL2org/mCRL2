@@ -6,6 +6,7 @@
 #include <string>
 #include <assert.h>
 #include <stdexcept>
+#include <stack>
 
 #ifdef WIN32
 #include <fcntl.h>
@@ -33,8 +34,6 @@ namespace aterm
 static const size_t DEFAULT_BUFFER_SIZE = 4096;
 
 static const int ERROR_SIZE = 32;
-static const size_t INITIAL_MARK_STACK_SIZE = 16384;
-static const size_t MARK_STACK_MARGE = AT_getMaxTermSize();
 
 /* Initial number of terms that can be protected */
 /* In the current implementation this means that
@@ -56,21 +55,7 @@ char            aterm_id[] = "$Id$";
 static bool initialized = false;
 
 /* We need a buffer for printing and parsing */
-static size_t buffer_size = 0;
-static char*         buffer = NULL;
-
-// prototype
-static void resize_buffer(const size_t n);
-
-inline
-void RESIZE_BUFFER(const size_t n)
-{
-  if (n > buffer_size)
-  {
-    resize_buffer(n);
-  }
-}
-//#define RESIZE_BUFFER(n) if(n > buffer_size) resize_buffer(n)
+static std::string string_buffer;
 
 /* Parse error description */
 static int      line = 0;
@@ -85,9 +70,6 @@ ProtEntry*       at_prot_memory = NULL;
 ATermProtFunc*   at_prot_functions = NULL;
 size_t    at_prot_functions_size = 0;
 size_t    at_prot_functions_count = 0;
-
-static ATerm*   mark_stack = NULL;
-static size_t mark_stack_size = 0;
 
 /*}}}  */
 /*{{{  function declarations */
@@ -145,16 +127,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   assert(sizeof(header_type) >= 4);
 
   /*}}}  */
-  /*{{{  Initialize buffer */
-
-  buffer_size = DEFAULT_BUFFER_SIZE;
-  buffer = (char*) AT_malloc(DEFAULT_BUFFER_SIZE);
-  if (!buffer)
-  {
-    throw std::runtime_error("ATinit: cannot allocate string buffer of size " + to_string(DEFAULT_BUFFER_SIZE));
-  }
-
-  /*}}}  */
   /*{{{  Initialize protected terms */
 
   at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
@@ -163,17 +135,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   {
     throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
   }
-
-  /*}}}  */
-  /*{{{  Initialize mark stack */
-
-  /* Allocate initial mark stack */
-  mark_stack = (ATerm*) AT_malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
-  if (!mark_stack)
-  {
-    throw std::runtime_error("cannot allocate marks stack of " + to_string(INITIAL_MARK_STACK_SIZE) + " entries.");
-  }
-  mark_stack_size = INITIAL_MARK_STACK_SIZE;
 
   /*}}}  */
   /*{{{  Initialize other components */
@@ -521,25 +482,6 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
 
 /*}}}  */
 
-/*{{{  static void resize_buffer(int n) */
-
-/**
- * Resize the resident string buffer
- */
-
-static void
-resize_buffer(const size_t n)
-{
-  buffer_size = n;
-  buffer = (char*) AT_realloc(buffer, buffer_size);
-  if (!buffer)
-  {
-    throw std::runtime_error("resize_buffer(aterm.c): cannot allocate string buffer of size " + to_string(buffer_size));
-  }
-}
-
-/*}}}  */
-
 /*{{{  ATbool ATwriteToTextFile(ATerm t, FILE *f) */
 
 /**
@@ -677,46 +619,6 @@ bool ATwriteToNamedTextFile(const ATerm t, const char* name)
   return result;
 }
 
-/*{{{  static int symbolTextSize(AFun sym) */
-
-/**
- * Calculate the size of a symbol in text format.
- */
-
-static size_t
-symbolTextSize(const AFun sym)
-{
-  char*           id = ATgetName(sym);
-
-  if (ATisQuoted(sym))
-  {
-    int             len = 2;
-    while (*id)
-    {
-      /* We need to escape special characters */
-      switch (*id)
-      {
-        case '\\':
-        case '"':
-        case '\n':
-        case '\t':
-        case '\r':
-          len += 2;
-          break;
-        default:
-          len++;
-          break;
-      }
-      id++;
-    }
-    return len;
-  }
-  else
-  {
-    return strlen(id);
-  }
-}
-
 /*}}}  */
 
 /*{{{  static char *writeToStream(ATerm t, std::ostream& os) */
@@ -792,99 +694,6 @@ topWriteToStream(const ATerm t, std::ostream& os)
 }
 
 /*}}}  */
-/**
- * Calculate the size of a term in text format
- */
-
-static size_t  topTextSize(const ATerm t);
-
-/*{{{  static size_t textSize(ATerm t) */
-
-static size_t textSize(const ATerm t)
-{
-  char numbuf[32];
-  /* ATerm trm; */
-  ATermList list;
-  ATermAppl appl;
-  AFun sym;
-  size_t size;
-  size_t i, arity;
-  char* name;
-
-  switch (ATgetType(t))
-  {
-    case AT_INT:
-      sprintf(numbuf, "%d", ATgetInt((ATermInt) t));
-      size = strlen(numbuf);
-      break;
-
-    case AT_APPL:
-      appl = (ATermAppl) t;
-      sym = ATgetAFun(appl);
-      arity = ATgetArity(sym);
-      name = ATgetName(sym);
-      size = symbolTextSize(sym);
-      for (i = 0; i < arity; i++)
-      {
-        size += topTextSize(ATgetArgument(appl, i));
-      }
-      if (arity > 0 || (!ATisQuoted(sym) && *name == '\0'))
-      {
-        /* Add space for the ',' characters */
-        if (arity > 1)
-        {
-          size += arity - 1;
-        }
-        /* and for the '(' and ')' characters */
-        size += 2;
-      }
-      break;
-
-    case AT_LIST:
-      list = (ATermList) t;
-      if (ATisEmpty(list))
-      {
-        size = 0;
-      }
-      else
-      {
-        size = ATgetLength(list) - 1; /* Space for the ','
-           * characters */
-        while (!ATisEmpty(list))
-        {
-          size += topTextSize(ATgetFirst(list));
-          list = ATgetNext(list);
-        }
-      }
-      break;
-
-    default:
-      throw std::runtime_error("textSize: Illegal type " + to_string(ATgetType(t)));
-      return (size_t)-1; // error path
-  }
-  return size;
-}
-
-/*}}}  */
-
-static size_t
-topTextSize(const ATerm t)
-{
-  size_t size = textSize(t);
-
-  if (ATgetType(t) == AT_LIST)
-  {
-    size += 2; /* For markers on both sides of the term */
-  }
-
-  return size;
-}
-
-/* size_t
-AT_calcTextSize(ATerm t)
-{
-  return topTextSize(t);
-} */
 
 /**
  * Write a term into its text representation.
@@ -896,26 +705,6 @@ ATwriteToString(const ATerm t)
   std::ostringstream oss;
   topWriteToStream(t, oss);
   return oss.str();
-}
-
-
-/*}}}  */
-
-/*{{{  static void store_char(int char) */
-
-/**
- * Store a single character in the buffer
- */
-
-static void
-store_char(const int c, const size_t pos)
-{
-  if (pos >= buffer_size)
-  {
-    resize_buffer(buffer_size * 2);  /* Double the space */
-  }
-
-  buffer[pos] = c;
 }
 
 /*}}}  */
@@ -1023,7 +812,7 @@ fparse_terms(int* c, FILE* f)
 static ATerm
 fparse_quoted_appl(int* c, FILE* f)
 {
-  int             len = 0;
+  assert(string_buffer.empty());
   ATermList       args = ATempty;
   AFun          sym;
   char*           name;
@@ -1046,29 +835,28 @@ fparse_quoted_appl(int* c, FILE* f)
         switch (*c)
         {
           case 'n':
-            store_char('\n', len++);
+            string_buffer+='\n';
             break;
           case 'r':
-            store_char('\r', len++);
+            string_buffer+='\r';
             break;
           case 't':
-            store_char('\t', len++);
+            string_buffer+= '\t';
             break;
           default:
-            store_char(*c, len++);
+            string_buffer+= *c;
             break;
         }
         break;
       default:
-        store_char(*c, len++);
+        string_buffer+= *c;
         break;
     }
     fnext_char(c, f);
   }
 
-  store_char('\0', len);
-
-  name = _strdup(buffer);
+  name = _strdup(string_buffer.c_str());
+  string_buffer.clear();
   if (!name)
   {
     throw std::runtime_error("fparse_quoted_appl: symbol too long.");
@@ -1111,7 +899,7 @@ fparse_quoted_appl(int* c, FILE* f)
 static ATermAppl
 fparse_unquoted_appl(int* c, FILE* f)
 {
-  int len = 0;
+  assert(string_buffer.empty());
   AFun sym;
   ATermList args = ATempty;
   char* name = NULL;
@@ -1122,11 +910,11 @@ fparse_unquoted_appl(int* c, FILE* f)
     while (isalnum(*c)
            || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$')
     {
-      store_char(*c, len++);
+      string_buffer+= *c;
       fnext_char(c, f);
     }
-    store_char('\0', len++);
-    name = _strdup(buffer);
+    name = _strdup(string_buffer.c_str());
+    string_buffer.clear();
     if (!name)
     {
       throw std::runtime_error("fparse_unquoted_appl: symbol too long.");
@@ -1457,7 +1245,7 @@ sparse_terms(int* c, char** s)
 static ATerm
 sparse_quoted_appl(int* c, char** s)
 {
-  int             len = 0;
+  assert(string_buffer.empty());
   ATermList       args = ATempty;
   AFun          sym;
   char*           name;
@@ -1484,29 +1272,29 @@ sparse_quoted_appl(int* c, char** s)
         switch (*c)
         {
           case 'n':
-            store_char('\n', len++);
+            string_buffer+= '\n';
             break;
           case 'r':
-            store_char('\r', len++);
+            string_buffer+= '\r';
             break;
           case 't':
-            store_char('\t', len++);
+            string_buffer+= '\t';
             break;
           default:
-            store_char(*c, len++);
+            string_buffer+= *c;
             break;
         }
         break;
       default:
-        store_char(*c, len++);
+        string_buffer+= *c;
         break;
     }
     snext_char(c, s);
   }
 
-  store_char('\0', len);
+  name = _strdup(string_buffer.c_str());
+  string_buffer.clear();
 
-  name = _strdup(buffer);
   if (!name)
   {
     throw std::runtime_error("fparse_quoted_appl: symbol too long.");
@@ -1549,7 +1337,7 @@ sparse_quoted_appl(int* c, char** s)
 static ATermAppl
 sparse_unquoted_appl(int* c, char** s)
 {
-  int len = 0;
+  assert(string_buffer.empty());
   AFun sym;
   ATermList args = ATempty;
   char* name = NULL;
@@ -1560,11 +1348,11 @@ sparse_unquoted_appl(int* c, char** s)
     while (isalnum(*c)
            || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$')
     {
-      store_char(*c, len++);
+      string_buffer+= *c;
       snext_char(c, s);
     }
-    store_char('\0', len);
-    name = _strdup(buffer);
+    name = _strdup(string_buffer.c_str());
+    string_buffer.clear();
     if (!name)
     {
       throw std::runtime_error("sparse_unquoted_appl: symbol too long.");
@@ -1744,186 +1532,67 @@ ATreadFromString(const char* string)
 /**
  * Mark a term and all of its children.
  */
-void AT_markTerm(ATerm t)
+void AT_markTerm(const ATerm t1, const bool only_mark_young)
 {
-  size_t    i, arity;
-  AFun          sym;
-  ATerm*          current = mark_stack + 1;
-  ATerm*          limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
 
-  mark_stack[0] = NULL;
-  *current++ = t;
-
-  while (true)
-  {
-    if (current >= limit)
-    {
-      ptrdiff_t current_index;
-      current_index = current - mark_stack;
-
-      /* We need to resize the mark stack */
-      mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm*) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
-      if (!mark_stack)
-      {
-        throw std::runtime_error("cannot realloc mark stack to " + to_string(mark_stack_size) + "entries.");
-      }
-      limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-
-      current = mark_stack + current_index;
-    }
-
-    t = *--current;
-
-    if (!t)
-    {
-      if (current != mark_stack)
-      {
-        std::runtime_error("AT_markTerm: premature end of mark_stack.");
-      }
-      break;
-    }
-
-    if (IS_MARKED(t->header))
-    {
-      continue;
-    }
-
-    SET_MARK(t->header);
-
-    switch (GET_TYPE(t->header))
-    {
-      case AT_INT:
-        break;
-
-      case AT_APPL:
-        sym = ATgetAFun((ATermAppl) t);
-
-        if (AT_isValidAFun(sym))
-        {
-          AT_markAFun(sym);
-        }
-        else
-        {
-          continue;
-        }
-        arity = GET_ARITY(t->header);
-        if (arity > MAX_INLINE_ARITY)
-        {
-          arity = ATgetArity(sym);
-        }
-        for (i = 0; i < arity; i++)
-        {
-          ATerm arg = ATgetArgument((ATermAppl) t, i);
-          *current++ = arg;
-        }
-        break;
-
-      case AT_LIST:
-        if (!ATisEmpty((ATermList) t))
-        {
-          *current++ = (ATerm) ATgetNext((ATermList) t);
-          *current++ = ATgetFirst((ATermList) t);
-        }
-        break;
-
-    }
-  }
-}
-
-void AT_markTerm_young(ATerm t)
-{
-  size_t    i, arity;
-  AFun          sym;
-  ATerm*          current = mark_stack + 1;
-  ATerm*          limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-
-  if (IS_MARKED(t->header) || IS_OLD(t->header))
+  if (IS_MARKED(t1->header) || (only_mark_young && IS_OLD(t1->header)))
   {
     return;
   }
 
-  mark_stack[0] = NULL;
-  *current++ = t;
+  std::stack < ATerm > mark_stack;
+  mark_stack.push(t1);
 
-  while (true)
+  while (!mark_stack.empty())
   {
-    if (current >= limit)
-    {
-      size_t current_index;
+    const ATerm t=mark_stack.top();
+    mark_stack.pop();
 
-      current_index = current - mark_stack;
-      /* We need to resize the mark stack */
-      mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm*) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
-      if (!mark_stack)
+    if (!(IS_MARKED(t->header) || (only_mark_young && IS_OLD(t->header))))
+    {
+      SET_MARK(t->header);
+
+      switch (GET_TYPE(t->header))
       {
-        throw std::runtime_error("cannot realloc mark stack to " + to_string(mark_stack_size) + " entries.");
+        case AT_INT:
+          break;
+
+        case AT_APPL:
+          {
+            const AFun sym = ATgetAFun((ATermAppl) t);
+
+            if (AT_isValidAFun(sym))
+            {
+              AT_markAFun(sym,only_mark_young);
+            }
+            else
+            {
+              continue;
+            }
+            size_t arity = GET_ARITY(t->header);
+            if (arity > MAX_INLINE_ARITY)
+            {
+              arity = ATgetArity(sym);
+            }
+            for (size_t i = 0; i < arity; i++)
+            {
+              mark_stack.push((ATerm)ATgetArgument((ATermAppl) t, i));
+            }
+            break;
+          }
+        case AT_LIST:
+          if (!ATisEmpty((ATermList) t))
+          {
+            mark_stack.push((ATerm) ATgetNext((ATermList) t));
+            mark_stack.push(ATgetFirst((ATermList) t));
+          }
+          break;
+
       }
-      limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-      fflush(stderr);
-
-      current = mark_stack + current_index;
-    }
-
-    t = *--current;
-
-    if (!t)
-    {
-      if (current != mark_stack)
-      {
-        std::runtime_error("AT_markTerm: premature end of mark_stack.");
-      }
-      break;
-    }
-    /* TODO: optimize*/
-    if (IS_MARKED(t->header) || IS_OLD(t->header))
-    {
-      continue;
-    }
-
-    SET_MARK(t->header);
-
-    switch (GET_TYPE(t->header))
-    {
-      case AT_INT:
-        break;
-
-      case AT_APPL:
-        sym = ATgetAFun((ATermAppl) t);
-        if (AT_isValidAFun(sym))
-        {
-          AT_markAFun_young(sym);
-        }
-        else
-        {
-          continue;
-        }
-
-        arity = GET_ARITY(t->header);
-        if (arity > MAX_INLINE_ARITY)
-        {
-          arity = ATgetArity(sym);
-        }
-        for (i = 0; i < arity; i++)
-        {
-          ATerm arg = ATgetArgument((ATermAppl) t, i);
-          *current++ = arg;
-        }
-
-        break;
-
-      case AT_LIST:
-        if (!ATisEmpty((ATermList) t))
-        {
-          *current++ = (ATerm) ATgetNext((ATermList) t);
-          *current++ = ATgetFirst((ATermList) t);
-        }
-        break;
-
     }
   }
 }
+
 
 /*}}}  */
 /*{{{  void AT_unmarkIfAllMarked(ATerm t) */
@@ -2011,7 +1680,7 @@ static size_t calcUniqueAFuns(ATerm t)
       nr_unique = AT_isMarkedAFun(sym) ? 0 : 1;
       assert(at_lookup_table[sym]);
       at_lookup_table[sym]->count++;
-      AT_markAFun(sym);
+      AT_markAFun(sym,false); // Consider all terms, not only young ones.
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++)
       {

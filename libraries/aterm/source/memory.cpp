@@ -359,21 +359,6 @@ static void allocate_block(size_t size)
 /*{{{  statistics macros */
 
 #define MCRL2_ALLOCATE_BLOCK_TEXT\
-  allocate_block(size);\
-  if((total_nodes/maxload)*100 > table_size) {\
-    resize_hashtable();\
-  }\
-  assert(ti->at_blocks[AT_BLOCK] != NULL);\
-  at = (ATerm)ti->top_at_blocks;\
-  ti->top_at_blocks += size;
-
-#define MCRL2_GC_MINOR_TEXT\
-  nb_minor_since_last_major++;\
-  AT_collect_minor();
-
-#define MCRL2_GC_MAJOR_TEXT\
-  nb_minor_since_last_major = 0;\
-  AT_collect();
 
 /*}}}  */
 
@@ -462,7 +447,14 @@ ATerm AT_allocate(const size_t size)
       /* there is no more memory: run the GC or allocate a block */
       if (ti->at_nrblocks <= gc_min_number_of_blocks)
       {
-        MCRL2_ALLOCATE_BLOCK_TEXT;
+        allocate_block(size);
+        if ((total_nodes/maxload)*100 > table_size) 
+        {
+          resize_hashtable();
+        }
+        assert(ti->at_blocks[AT_BLOCK] != NULL);
+        at = (ATerm)ti->top_at_blocks;
+        ti->top_at_blocks += size;
       }
       else
       {
@@ -476,11 +468,13 @@ ATerm AT_allocate(const size_t size)
         {
           if (nb_minor_since_last_major < min_nb_minor_since_last_major)
           {
-            MCRL2_GC_MINOR_TEXT;
+            nb_minor_since_last_major++;
+            AT_collect(true);
           }
           else
           {
-            MCRL2_GC_MAJOR_TEXT;
+            nb_minor_since_last_major = 0;
+            AT_collect(false);
           }
 
         }
@@ -493,7 +487,14 @@ ATerm AT_allocate(const size_t size)
 
           if (allocation_rate < small_allocation_rate_ratio)
           {
-            MCRL2_ALLOCATE_BLOCK_TEXT;
+            allocate_block(size);
+            if ((total_nodes/maxload)*100 > table_size) 
+            {
+              resize_hashtable();
+            }
+            assert(ti->at_blocks[AT_BLOCK] != NULL);
+            at = (ATerm)ti->top_at_blocks;
+            ti->top_at_blocks += size;
           }
           else
           {
@@ -504,11 +505,13 @@ ATerm AT_allocate(const size_t size)
 
             if (old_increase_rate < old_increase_rate_ratio)
             {
-              MCRL2_GC_MINOR_TEXT;
+              nb_minor_since_last_major++;
+              AT_collect(true);
             }
             else
             {
-              MCRL2_GC_MAJOR_TEXT;
+              nb_minor_since_last_major = 0;
+              AT_collect(false);
             }
           }
         }

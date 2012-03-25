@@ -429,20 +429,12 @@ void ATunprotectAFun(const AFun sym)
  * Mark all symbols that were protected previously using ATprotectAFun.
  */
 
-void AT_markProtectedAFuns()
+void AT_markProtectedAFuns(const bool only_mark_young)
 {
   for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
-    SET_MARK(((ATerm)at_lookup_table[*i])->header);
-  }
-}
-
-/* TODO: Optimisation (Old+Mark in one step)*/
-void AT_markProtectedAFuns_young()
-{
-  for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
-  {
-    if (!IS_OLD(((ATerm)at_lookup_table[*i])->header))
+    assert(at_lookup_table.size()> *i);
+    if (!(only_mark_young && IS_OLD(((ATerm)at_lookup_table[*i])->header)))
     {
       SET_MARK(((ATerm)at_lookup_table[*i])->header);
     }

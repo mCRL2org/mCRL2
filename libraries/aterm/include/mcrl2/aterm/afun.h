@@ -47,19 +47,12 @@ bool SYM_IS_FREE(const SymEntry sym)
 }
 
 inline
-void AT_markAFun(const AFun s)
+void AT_markAFun(const AFun s, const bool only_mark_young)
 {
   assert(s<at_lookup_table.size());
-  at_lookup_table[s]->header |= MASK_AGE_MARK;
-}
-
-inline
-void AT_markAFun_young(const AFun s)
-{
-  assert(s<at_lookup_table.size());
-  if (!IS_OLD(at_lookup_table[s]->header))
+  if (!(only_mark_young && IS_OLD(at_lookup_table[s]->header)))
   {
-    AT_markAFun(s);
+    at_lookup_table[s]->header |= MASK_AGE_MARK;
   }
 }
 
@@ -78,13 +71,6 @@ bool AT_isValidAFun(const AFun sym)
           !SYM_IS_FREE(at_lookup_table[sym]));
 }
 
-// XXX Remove
-inline
-bool AT_isValidAFun(const ATerm sym)
-{
-  return AT_isValidAFun((AFun)sym);
-}
-
 inline
 bool AT_isMarkedAFun(const AFun sym)
 {
@@ -93,8 +79,7 @@ bool AT_isMarkedAFun(const AFun sym)
 }
 
 void  AT_freeAFun(SymEntry sym);
-void AT_markProtectedAFuns();
-void AT_markProtectedAFuns_young();
+void AT_markProtectedAFuns(const bool only_mark_young);
 
 size_t AT_hashAFun(const char* name, const size_t arity);
 bool AT_findAFun(const char* name, const size_t arity, const bool quoted);
