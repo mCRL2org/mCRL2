@@ -14,6 +14,7 @@
 #define MCRL2_PBES_DETAIL_PPG_REWRITER_H
 
 #include <stack>
+#include "mcrl2/atermpp/stack.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
@@ -87,7 +88,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   std::stack<fixpoint_symbol> symbol_stack;
   std::stack<propositional_variable> variable_stack;
   std::stack<data::variable_list> quantifier_variable_stack;
-  std::stack<pbes_expression> expression_stack;
+  atermpp::stack<pbes_expression> expression_stack;
   fresh_variable_name_generator name_generator;
 
   template <typename Container>
