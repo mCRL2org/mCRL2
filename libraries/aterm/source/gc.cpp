@@ -214,11 +214,11 @@ VOIDCDECL mark_phase(const bool only_mark_young)
     if (real_term != NULL)
     {
       assert(AT_isValidTerm(real_term));
-      AT_markTerm(real_term);
+      AT_markTerm(real_term,only_mark_young);
     }
     if (AT_isValidAFun((AFun)reg[i]))
     {
-      AT_markAFun((AFun)reg[i]);
+      AT_markAFun((AFun)reg[i],only_mark_young);
     }
   }
 
