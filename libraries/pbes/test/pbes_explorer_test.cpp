@@ -143,7 +143,8 @@ void explorer::bfs()
 {
     int state_length = get_info()->get_lts_type().get_state_length();
     int num_rows = get_info()->get_number_of_groups();
-    int initial_state[state_length];
+    // int initial_state[state_length]; N.B. This is not portable C++
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(initial_state, int, state_length);
     this->initial_state(initial_state);
     std::vector<int> initial_state_vector = this->to_int_vector(state_length, initial_state);
     visited.insert(initial_state_vector);
@@ -151,7 +152,8 @@ void explorer::bfs()
     while (!fresh.empty()) {
         std::vector<int> state_vector = fresh.front();
         fresh.pop_front();
-        int state[state_length];
+        // int state[state_length]; N.B. This is not portable C++
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(state, int, state_length);
         from_int_vector(state_length, state_vector, state);
         ltsmin::test::pbes_state_cb f(this);
         this->next_state_all(state, f);

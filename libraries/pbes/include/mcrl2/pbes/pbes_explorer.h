@@ -548,7 +548,9 @@ public:
         std::vector<ltsmin_state*> successors = this->get_successors(*state);
         for (std::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
-            int dst[state_length];
+            // int dst[state_length]; N.B. This is not portable C++
+            MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
+
             this->to_state_vector(*succ, dst, state, src);
             cb(dst);
             //std::clog << "  succ: " << (*succ)->to_string() << std::endl;
@@ -584,7 +586,8 @@ public:
         std::vector<ltsmin_state*> successors = this->get_successors(*state, group);
         for (atermpp::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
-            int dst[state_length];
+            // int dst[state_length]; N.B. This is not portable C++
+            MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
             this->to_state_vector(*succ, dst, state, src);
             cb(dst, group);
             delete *succ;
