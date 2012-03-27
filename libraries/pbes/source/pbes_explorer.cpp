@@ -24,8 +24,19 @@ namespace mcrl2
 namespace pbes_system
 {
 
-
-
+namespace detail
+{
+  template <typename MapContainer>
+  typename MapContainer::mapped_type map_at(const MapContainer& m, typename MapContainer::key_type key)
+  {
+    typename MapContainer::const_iterator i = m.find(key);
+    if (i == m.end())
+    {
+      throw mcrl2::runtime_error("map_at: key is not present in the map");
+    }
+    return i->second;
+  }
+}
 
 /// lts_type
 
@@ -443,7 +454,7 @@ const std::map<int,std::vector<bool> >& lts_info::get_write_matrix() const
 
 int lts_info::get_index(const std::string& signature)
 {
-    return param_index.at(signature);
+    return param_index[signature];
 }
 
 
@@ -461,15 +472,15 @@ bool lts_info::is_read_dependent_propvar(int /* group */)
 
 bool lts_info::is_read_dependent_parameter(int group, int part)
 {
-    std::string p = type.get_state_names().at(part);
-    pbes_expression phi = pgg->from_rewrite_format(transition_expression.at(group));
+    std::string p = type.get_state_names()[part];
+    pbes_expression phi = pgg->from_rewrite_format(transition_expression[group]);
     std::set<std::string> usedSet = used(phi);
     std::string X = transition_variable_name.at(group);
     if (usedSet.find(p) == usedSet.end())
     {
         return false; // Parameter is not in used(phi).
     }
-    std::set<std::string> params = lts_info::get_param_set(variable_parameters.at(X));
+    std::set<std::string> params = lts_info::get_param_set(variable_parameters[X]);
     if (params.find(p) != params.end())
     {
         return true; // Parameter is both in used(phi) and in params(X).
@@ -480,8 +491,8 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
 
 bool lts_info::is_write_dependent_propvar(int group)
 {
-    pbes_expression phi = pgg->from_rewrite_format(transition_expression.at(group));
-    std::string X = transition_variable_name.at(group);
+    pbes_expression phi = pgg->from_rewrite_format(transition_expression[group]);
+    std::string X = transition_variable_name[group];
     if (lts_info::tf(phi))
     {
         return true;
@@ -506,15 +517,15 @@ bool lts_info::is_write_dependent_propvar(int group)
 bool lts_info::is_write_dependent_parameter(int group , int part)
 {
     std::string p = type.get_state_names().at(part);
-    pbes_expression phi = pgg->from_rewrite_format(transition_expression.at(group));
-    std::string X = transition_variable_name.at(group);
+    pbes_expression phi = pgg->from_rewrite_format(transition_expression[group]);
+    std::string X = transition_variable_name[group];
     if (this->reset_option) {
         if (lts_info::tf(phi))
         {
             // phi may have boolean result (not only propositional variable instantiations)
             return true;
         }
-        std::set<std::string> params = lts_info::get_param_set(variable_parameters.at(X));
+        std::set<std::string> params = lts_info::get_param_set(variable_parameters[X]);
         std::set<std::string> resetSet = reset(phi, params);
         if (resetSet.find(p) != resetSet.end())
         {
@@ -558,7 +569,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
     else if (tr::is_prop_var(phi))
     {
         std::vector<std::string> var_param_signatures =
-                    variable_parameter_signatures.at(tr::name(phi));
+                    variable_parameter_signatures[tr::name(phi)];
         data::data_expression_list values = tr::param(phi);
         assert(var_param_signatures.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
@@ -609,7 +620,7 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
     {
         std::set<std::string> params;
         std::vector<std::string> var_params =
-                    variable_parameter_signatures.at(tr::name(phi));
+                    variable_parameter_signatures[tr::name(phi)];
         for (std::vector<std::string>::const_iterator param =
                 var_params.begin(); param != var_params.end(); ++param) {
             std::string signature = *param;
@@ -703,7 +714,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
     if (tr::is_prop_var(expr))
     {
         data::variable_list var_params =
-                    variable_parameters.at(tr::name(expr));
+                    variable_parameters[tr::name(expr)];
         data::data_expression_list values = tr::param(expr);
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
@@ -771,7 +782,7 @@ std::string lts_info::to_string(const ltsmin_state& state)
     ss << "(";
     const atermpp::vector<data_expression>& param_values = state.get_parameter_values();
     std::vector<std::string> param_signatures =
-                this->variable_parameter_signatures.at(state.get_variable());
+                this->variable_parameter_signatures[state.get_variable()];
     std::vector<std::string>::const_iterator param_signature =
             param_signatures.begin();
     for (atermpp::vector<data_expression>::const_iterator param_value =
@@ -1077,9 +1088,9 @@ ltsmin_state* explorer::get_state(const propositional_variable_instantiation& ex
     propositional_variable_instantiation novalue;
     assert(tr::is_prop_var(expr) && expr != novalue);
     std::string varname = tr::name(expr);
-    int priority = info->get_variable_priorities().at(varname);
-    propositional_variable var = info->get_variables().at(varname);
-    operation_type type = info->get_variable_types().at(varname);
+    int priority = detail::map_at(info->get_variable_priorities(), varname);
+    propositional_variable var = detail::map_at(info->get_variables(), varname);
+    operation_type type = detail::map_at(info->get_variable_types(), varname);
     ltsmin_state* s = new ltsmin_state(priority, var, type, expr);
     return s;
 }
@@ -1199,9 +1210,9 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
     }
     bool error = false;
     std::vector<int> parameter_indices =
-                        info->get_variable_parameter_indices().at(varname);
+                        detail::map_at(info->get_variable_parameter_indices(), varname);
     std::vector<std::string> parameter_signatures =
-                    info->get_variable_parameter_signatures().at(varname);
+                    detail::map_at(info->get_variable_parameter_signatures(), varname);
     std::vector<std::string>::const_iterator param_signature = parameter_signatures.begin();
     for(std::vector<int>::const_iterator param_index = parameter_indices.begin();
             param_index != parameter_indices.end(); ++param_index)
@@ -1222,7 +1233,7 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
             {
                 // lookup src parameter value
                 // FIXME: this could be computed statically: a map from src_var, dst_var and part to boolean
-                std::map<int,int> src_param_index_positions = info->get_variable_parameter_index_positions().at(src_state->get_variable());
+                std::map<int,int> src_param_index_positions = detail::map_at(info->get_variable_parameter_index_positions(), src_state->get_variable());
                 std::map<int,int>::iterator src_param_index_position_it = src_param_index_positions.find(*param_index);
                 if ( src_param_index_position_it != src_param_index_positions.end()
                         && src_state->get_parameter_values()[src_param_index_position_it->second] == values[i])
@@ -1314,7 +1325,7 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
     //std::clog << "from_state_vector: values done." << std::endl;
     data_expression_list parameters;
     std::vector<int> parameter_indices =
-            info->get_variable_parameter_indices().at(varname);
+            detail::map_at(info->get_variable_parameter_indices(), varname);
     for (std::vector<int>::iterator param_index = parameter_indices.begin(); param_index
             != parameter_indices.end(); ++param_index) {
         if (values[*param_index+1]==novalue)
@@ -1402,8 +1413,8 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
     else
     {
         atermpp::set<pbes_expression> successors
-                = pgg->get_successors(e, info->get_transition_variable_names().at(group),
-                                         info->get_transition_expressions().at(group));
+                = pgg->get_successors(e, detail::map_at(info->get_transition_variable_names(), group),
+                                         detail::map_at(info->get_transition_expressions(), group));
         for (atermpp::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             //std::clog << "* Successor: " << pgg->print(*expr) << std::endl;
