@@ -50,7 +50,7 @@ struct fresh_variable_name_generator
     int suffix = 1;
     while (variable_names.find(name)!=variable_names.end()) {
       if (variable_name_suffix.find(base) != variable_name_suffix.end()) {
-        suffix = variable_name_suffix.at(base) + 1;
+        suffix = variable_name_suffix[base] + 1;
       }
       variable_name_suffix[base] = suffix;
       std::stringstream ss;
