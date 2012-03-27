@@ -175,6 +175,13 @@ struct parser_table
   // Returns the name of the i-th symbol
   std::string symbol_name(unsigned int i) const
   {
+    if (i < 0 || i >= m_table.nsymbols)
+    {
+      print();
+      std::ostringstream out;
+      out << "parser_table::symbol_name: index " << i << " out of bounds!";
+      throw std::runtime_error(out.str());
+    }
     const char* name = m_table.symbols[i].name;
     if (!name)
     {

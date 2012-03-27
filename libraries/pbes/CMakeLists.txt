@@ -54,6 +54,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_core
   mcrl2_data
   mcrl2_lps
+  mcrl2_bes
 )
 
 # add install target:

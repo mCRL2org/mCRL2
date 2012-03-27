@@ -126,6 +126,39 @@ struct parser_actions
     return collector<Container, Function>(table, type, container, f);
   }
 
+  // callback function that applies a function to a node, and adds the result to a set container
+  template <typename SetContainer, typename Function>
+  struct set_collector
+  {
+    const parser_table& table;
+    const std::string& type;
+    SetContainer& container;
+    Function f;
+
+    set_collector(const parser_table& table_, const std::string& type_, SetContainer& container_, Function f_)
+      : table(table_),
+        type(type_),
+        container(container_),
+        f(f_)
+    {}
+
+    bool operator()(const parse_node& node) const
+    {
+      if (table.symbol_name(node) == type)
+      {
+        container.insert(f(node));
+        return true;
+      }
+      return false;
+    }
+  };
+
+  template <typename SetContainer, typename Function>
+  set_collector<SetContainer, Function> make_set_collector(const parser_table& table, const std::string& type, SetContainer& container, Function f)
+  {
+    return set_collector<SetContainer, Function>(table, type, container, f);
+  }
+
   std::string symbol_name(const parse_node& node) const
   {
     return table.symbol_name(node.symbol());
