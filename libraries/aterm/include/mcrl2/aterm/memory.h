@@ -12,7 +12,7 @@
 // #define DO_AGGRESSIVE_GARBAGE_COLLECT  
 
 #ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect(false)
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect()
 #else
 #define AGGRESSIVE_GARBAGE_COLLECT_CHECK
 #endif
@@ -24,22 +24,22 @@ namespace aterm
 static const size_t MAX_BLOCKS_PER_SIZE = 1024;
 
 static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
-//#define MAX_INLINE_ARITY    ((1 << ARITY_BITS)-2)
+
 
 /* To change the block size, modify BLOCK_SHIFT only! */
 static const size_t BLOCK_SHIFT = 13;
 
 static const size_t BLOCK_SIZE = 1<<BLOCK_SHIFT;
-//#define BLOCK_SIZE       (1<<BLOCK_SHIFT)
+
 static const size_t BLOCK_TABLE_SIZE = 4099; /* nextprime(4096) */
-//#define BLOCK_TABLE_SIZE 4099     /* nextprime(4096) */
+
 
 template <typename T>
 inline HashNumber HN(const T i)
 {
   return (HashNumber)(i);
 }
-//#define HN(i)          ((HashNumber)(i))
+
 
 #ifdef AT_64BIT
 inline
@@ -47,9 +47,9 @@ size_t FOLD(const MachineWord w)
 {
   return HN(w)^(HN(w) >> 32);
 }
-//#define FOLD(w)         ((HN(w)) ^ (HN(w) >> 32))
+
 static const size_t PTR_ALIGN_SHIFT = 4;
-//#define PTR_ALIGN_SHIFT 4
+
 #endif // AT_64BIT
 
 #ifdef AT_32BIT
@@ -58,19 +58,15 @@ size_t FOLD(const MachineWord w)
 {
   return HN(w);
 }
-//#define FOLD(w)         (HN(w))
+
 static const size_t PTR_ALIGN_SHIFT = 2;
-//#define PTR_ALIGN_SHIFT 2
+
 #endif // AT_32BIT
 
 inline size_t ADDR_TO_BLOCK_IDX(const void* a)
 {
   return (((HashNumber)(a))>>(BLOCK_SHIFT+PTR_ALIGN_SHIFT)) % BLOCK_TABLE_SIZE;
 }
-/*
-#define ADDR_TO_BLOCK_IDX(a) \
-  ((((HashNumber)(a))>>(BLOCK_SHIFT+PTR_ALIGN_SHIFT)) % BLOCK_TABLE_SIZE)
-*/
 
 typedef struct Block
 {
@@ -90,8 +86,6 @@ typedef struct BlockBucket
   struct Block* first_before;
   struct Block* first_after;
 } BlockBucket;
-
-// static const size_t AT_BLOCK = 0;
 
 typedef struct TermInfo
 {
@@ -161,16 +155,12 @@ static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 inline
 void CHECK_HEADER(const header_type h)
 {
-  assert(GET_AGE(h)==0);
   assert(!IS_MARKED(h));
 }
 
 inline
 void CHECK_ARGUMENT(const ATermAppl t, const size_t n)
 {
-  assert(GET_AGE(t->header)==0);
-  assert(GET_AGE(ATgetArgument(t,n)->header)==0);
-  assert(GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header)==0);
 }
 
 inline
@@ -182,7 +172,7 @@ void CHECK_ARITY(const size_t ari1, const size_t ari2)
 inline
 size_t START(const MachineWord w)
 {
-  return FOLD(HIDE_AGE_MARK(w));
+  return FOLD(w);
 }
 
 inline

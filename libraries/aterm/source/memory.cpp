@@ -84,7 +84,7 @@ static HashNumber hash_number(const ATerm t, const size_t size)
 {
   HashNumber hnr;
 
-  hnr = START(HIDE_AGE_MARK(t->word[0]));
+  hnr = START(t->word[0]);
 
   for (size_t i=ARG_OFFSET; i<size; i++)
   {
@@ -659,7 +659,6 @@ ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
         cur->aterm.next = (ATerm) *hashspot;
         *hashspot = cur;
       }
-      CHECK_ARGUMENT(cur, 0);
       return cur;
     }
     prev = cur;
@@ -672,7 +671,6 @@ ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
   cur->header = header;
   CHECK_HEADER(cur->header);
   ATgetArgument(cur, 0) = arg0;
-  CHECK_ARGUMENT(cur, 0);
   cur->aterm.next = hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
@@ -721,8 +719,6 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
         cur->aterm.next = (ATerm) *hashspot;
         *hashspot = cur;
       }
-      CHECK_ARGUMENT(cur, 0);
-      CHECK_ARGUMENT(cur, 1);
       return cur;
     }
     prev = cur;
@@ -736,8 +732,6 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
   CHECK_HEADER(cur->header);
   ATgetArgument(cur, 0) = arg0;
   ATgetArgument(cur, 1) = arg1;
-  CHECK_ARGUMENT(cur, 0);
-  CHECK_ARGUMENT(cur, 1);
 
   cur->aterm.next = hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
@@ -791,9 +785,6 @@ ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 0) = arg0;
     ATgetArgument(cur, 1) = arg1;
     ATgetArgument(cur, 2) = arg2;
-    CHECK_ARGUMENT(cur, 0);
-    CHECK_ARGUMENT(cur, 1);
-    CHECK_ARGUMENT(cur, 2);
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
@@ -854,10 +845,6 @@ ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 1) = arg1;
     ATgetArgument(cur, 2) = arg2;
     ATgetArgument(cur, 3) = arg3;
-    CHECK_ARGUMENT(cur, 0);
-    CHECK_ARGUMENT(cur, 1);
-    CHECK_ARGUMENT(cur, 2);
-    CHECK_ARGUMENT(cur, 3);
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
@@ -922,11 +909,6 @@ const ATerm arg3, const ATerm arg4)
     ATgetArgument(cur, 2) = arg2;
     ATgetArgument(cur, 3) = arg3;
     ATgetArgument(cur, 4) = arg4;
-    CHECK_ARGUMENT(cur, 0);
-    CHECK_ARGUMENT(cur, 1);
-    CHECK_ARGUMENT(cur, 2);
-    CHECK_ARGUMENT(cur, 3);
-    CHECK_ARGUMENT(cur, 4);
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
@@ -994,12 +976,6 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
     ATgetArgument(cur, 3) = arg3;
     ATgetArgument(cur, 4) = arg4;
     ATgetArgument(cur, 5) = arg5;
-    CHECK_ARGUMENT(cur, 0);
-    CHECK_ARGUMENT(cur, 1);
-    CHECK_ARGUMENT(cur, 2);
-    CHECK_ARGUMENT(cur, 3);
-    CHECK_ARGUMENT(cur, 4);
-    CHECK_ARGUMENT(cur, 5);
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
@@ -1078,7 +1054,6 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
     for (size_t i=0; i<arity; i++)
     {
       ATgetArgument(cur, i) = ATgetFirst(argptr);
-      CHECK_ARGUMENT(cur, i);
       argptr = ATgetNext(argptr);
     }
     cur->aterm.next = hashtable[hnr];
@@ -1149,7 +1124,6 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
     for (size_t i=0; i<arity; i++)
     {
       ATgetArgument(cur, i) = args[i];
-      CHECK_ARGUMENT(cur, i);
     }
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
@@ -1398,7 +1372,7 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
     cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
-    cur->header = HIDE_AGE_MARK(appl->header);
+    cur->header = appl->header;
     CHECK_HEADER(cur->header);
     for (size_t i=0; i<arity; i++)
     {

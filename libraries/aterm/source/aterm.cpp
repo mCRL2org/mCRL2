@@ -112,8 +112,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
     return;
   }
 
-  AT_init_gc_parameters();
-
   /* Protect novice users that simply pass NULL as bottomOfStack */
   if (bottomOfStack == NULL)
   {

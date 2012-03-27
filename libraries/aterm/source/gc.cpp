@@ -32,13 +32,9 @@ char gc_id[] = "$Id$";
 
 static ATerm* stackBot = NULL;
 
-
 extern ATprotected_block protected_blocks;
 
 AFun at_parked_symbol = (size_t)-1; // Init
-
-size_t max_freeblocklist_size;
-const size_t good_gc_factor=2;
 
 /*}}}  */
 
@@ -47,13 +43,6 @@ const size_t good_gc_factor=2;
 #else
 #define VOIDCDECL static void
 #endif
-
-/*{{{  local functions */
-
-static void sweep_phase();
-static void check_unmarked_block();
-
-/*}}}  */
 
 /*{{{  void AT_initGC(int argc, char *argv[], ATerm *bottomOfStack) */
 
@@ -100,7 +89,7 @@ ATerm* stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_term) /* CHANGED BY JFG */
+static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_term) 
 {
   const ATerm* cur;
   /* Traverse the stack */
@@ -286,15 +275,6 @@ VOIDCDECL mark_phase()
   {
     AT_markAFun(at_parked_symbol);
   }
-}
-
-/*}}}  */
-
-/*{{{  void AT_init_gc_parameters()  */
-
-void AT_init_gc_parameters()
-{
-  max_freeblocklist_size  = 100;
 }
 
 /*}}}  */
@@ -528,7 +508,6 @@ static void sweep_phase()
 #endif
 
   }
-  check_unmarked_block();
 }
 
 /*}}}  */
@@ -537,13 +516,9 @@ static void sweep_phase()
 
 void AT_collect()
 {
-// fprintf(stderr,"Garbage collect\n");
   check_unmarked_block();
-// fprintf(stderr,"Start mark\n");
   mark_phase();
-// fprintf(stderr,"Start sweep\n");
   sweep_phase();
-// fprintf(stderr,"End\n");
   check_unmarked_block();
 }
 

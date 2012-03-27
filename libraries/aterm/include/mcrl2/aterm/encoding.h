@@ -83,73 +83,34 @@ static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
 static const header_type SHIFT_TYPE = MCRL2_HT(4);
 //#define SHIFT_TYPE 4ll
 static const header_type SHIFT_ARITY = MCRL2_HT(7);
-static const header_type SHIFT_AGE = MCRL2_HT(0);
+// static const header_type SHIFT_AGE = MCRL2_HT(0);
 
-static const header_type MASK_AGE = (MCRL2_HT(1)<<MCRL2_HT(0)) | (MCRL2_HT(1)<<MCRL2_HT(1));
+// static const header_type MASK_AGE = (MCRL2_HT(1)<<MCRL2_HT(0)) | (MCRL2_HT(1)<<MCRL2_HT(1));
 static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
 static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
 static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
 static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
-static const header_type MASK_AGE_MARK = MASK_AGE|MASK_MARK;
+// static const header_type MASK_AGE_MARK = MASK_AGE|MASK_MARK;
 
 static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
 
-inline
+/* inline
 size_t GET_AGE(const header_type h)
 {
   return (h & MASK_AGE) >> SHIFT_AGE;
-}
-
-/* inline
-void SET_AGE(header_type& h, const header_type a)
-{
-  do
-  {
-    h = ((h) & ~MASK_AGE) | (((a) << SHIFT_AGE) & MASK_AGE);
-  }
-  while (0);
 } */
 
-/* static const size_t YOUNG_AGE = 0;
-static const size_t OLD_AGE = 3; */
-
 /* inline
-bool IS_OLD(const header_type h)
-{
-  return GET_AGE(h) == OLD_AGE;
-}
-
-inline
-bool IS_YOUNG(const header_type h)
-{
-  return !IS_OLD(h);
-}
-
-/ * TODO: Optimize * /
-inline
-void INCREMENT_AGE(header_type& h)
-{
-  do
-  {
-    size_t age = GET_AGE(h);
-    if (age<OLD_AGE)
-    {
-      SET_AGE((h), age+1);
-    }
-  }
-  while (0);
-} */
-
-inline
 header_type HIDE_AGE_MARK(const header_type h)
 {
-  return h & ~MASK_AGE_MARK; // Vreemd waarom ook hide mark ???????????????????????????????
-}
+  // return h & ~MASK_AGE_MARK; // Vreemd waarom ook hide mark ???????????????????????????????
+  return h;
+} */
 
 inline
 bool EQUAL_HEADER(const header_type h1, const header_type h2)
 {
-  return HIDE_AGE_MARK(h1^h2) == 0;
+  return h1==h2;
 }
 
 static const size_t SHIFT_SYMBOL = SHIFT_LENGTH;
@@ -173,10 +134,7 @@ size_t GET_ARITY(const header_type h)
   return (h & MASK_ARITY) >> SHIFT_ARITY;
 }
 
-inline
-// XXX FIXME
-//AFun GET_SYMBOL(const header_type h)
-size_t GET_SYMBOL(const header_type h)
+inline size_t GET_SYMBOL(const header_type h)
 {
   return h >> SHIFT_SYMBOL;
 }
