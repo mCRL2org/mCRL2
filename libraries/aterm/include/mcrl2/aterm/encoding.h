@@ -14,14 +14,14 @@ namespace aterm
  32-bit:
 
  |---------------------------------|
- | info|arity| type|quoted|mark|age|
+ | info|arity| type|quoted|mark|age|   NOTE: AGE SHOULD FROM NOW ON ALWAYS BE 00 (25/3/2012).
  |---------------------------------|
   31 10 9 8 7 6 5 4   3     2   1 0
 
  64-bit:
 
  |------------------------------------|
- | info|  |arity| type|quoted|mark|age|
+ | info|  |arity| type|quoted|mark|age|   NOTE: AGE SHOULD FROM NOW ON ALWAYS BE 00 (25/3/2012).
  |------------------------------------|
   63 34 15 14  7 6 5 4   3     2   1 0
 
@@ -63,10 +63,7 @@ typedef void (*ATermProtFunc)();
 static const size_t AT_FREE = 0;
 static const size_t AT_APPL = 1;
 static const size_t AT_INT = 2;
-// static const size_t AT_REAL = 3;
 static const size_t AT_LIST = 4;
-// static const size_t AT_PLACEHOLDER = 5;
-// static const size_t AT_BLOB = 6;
 static const size_t AT_SYMBOL = 7;
 
 static const size_t HEADER_BITS = sizeof(size_t)*8;
@@ -103,7 +100,7 @@ size_t GET_AGE(const header_type h)
   return (h & MASK_AGE) >> SHIFT_AGE;
 }
 
-inline
+/* inline
 void SET_AGE(header_type& h, const header_type a)
 {
   do
@@ -111,12 +108,12 @@ void SET_AGE(header_type& h, const header_type a)
     h = ((h) & ~MASK_AGE) | (((a) << SHIFT_AGE) & MASK_AGE);
   }
   while (0);
-}
+} */
 
-static const size_t YOUNG_AGE = 0;
-static const size_t OLD_AGE = 3;
+/* static const size_t YOUNG_AGE = 0;
+static const size_t OLD_AGE = 3; */
 
-inline
+/* inline
 bool IS_OLD(const header_type h)
 {
   return GET_AGE(h) == OLD_AGE;
@@ -128,7 +125,7 @@ bool IS_YOUNG(const header_type h)
   return !IS_OLD(h);
 }
 
-/* TODO: Optimize */
+/ * TODO: Optimize * /
 inline
 void INCREMENT_AGE(header_type& h)
 {
@@ -141,12 +138,12 @@ void INCREMENT_AGE(header_type& h)
     }
   }
   while (0);
-}
+} */
 
 inline
 header_type HIDE_AGE_MARK(const header_type h)
 {
-  return h & ~MASK_AGE_MARK;
+  return h & ~MASK_AGE_MARK; // Vreemd waarom ook hide mark ???????????????????????????????
 }
 
 inline

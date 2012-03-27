@@ -358,7 +358,7 @@ void AT_freeAFun(SymEntry sym)
 {
   ShortHashNumber hnr;
 
-  terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
+  // terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
 
   assert(sym->name);
 
@@ -429,15 +429,12 @@ void ATunprotectAFun(const AFun sym)
  * Mark all symbols that were protected previously using ATprotectAFun.
  */
 
-void AT_markProtectedAFuns(const bool only_mark_young)
+void AT_markProtectedAFuns()
 {
   for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
     assert(at_lookup_table.size()> *i);
-    if (!(only_mark_young && IS_OLD(((ATerm)at_lookup_table[*i])->header)))
-    {
-      SET_MARK(((ATerm)at_lookup_table[*i])->header);
-    }
+    SET_MARK(((ATerm)at_lookup_table[*i])->header);
   }
 }
 

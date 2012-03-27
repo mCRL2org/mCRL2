@@ -32,21 +32,13 @@ Block* at_freeblocklist = NULL;
 size_t at_freeblocklist_size = 0;
 BlockBucket block_table[BLOCK_TABLE_SIZE] = { { NULL, NULL } };
 
-size_t total_nodes = 0;
+static size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
-/*
- * For GC tuning
- */
-size_t nb_minor_since_last_major = 0;
-size_t old_bytes_in_young_blocks_after_last_major = 0; /* only live old cells in young blocks */
-size_t old_bytes_in_old_blocks_after_last_major = 0; /* only live old cells in old blocks */
-size_t old_bytes_in_young_blocks_since_last_major = 0; /* only live cells */
-
-static int maxload = 80;
+static const int maxload = 80;
 ATerm* hashtable;
 
 extern void AT_initMemmgnt();
@@ -321,16 +313,15 @@ static void allocate_block(size_t size)
   assert(size >= MIN_TERM_SIZE && size < maxTermSize);
 
   ti = &terminfo[size];
-  ti->at_nrblocks++;
 
   newblock->end = (newblock->data) + (BLOCK_SIZE - (BLOCK_SIZE % size));
 
-  CLEAR_FROZEN(newblock);
+  // newblock->frozen=false;
   newblock->size = size;
-  newblock->next_by_size = ti->at_blocks[AT_BLOCK];
-  ti->at_blocks[AT_BLOCK] = newblock;
+  newblock->next_by_size = ti->at_block;
+  ti->at_block = newblock;
   ti->top_at_blocks = newblock->data;
-  assert(ti->at_blocks[AT_BLOCK] != NULL);
+  assert(ti->at_block != NULL);
   assert(((size_t)ti->top_at_blocks % MAX(sizeof(double), sizeof(void*))) == 0);
 
   /* [pem: Feb 14 02] TODO: fast allocation */
@@ -362,19 +353,9 @@ static void allocate_block(size_t size)
 
 /*}}}  */
 
-static size_t nb_at_allocate=0;
+// static size_t nb_at_allocate=0;
 
-/*{{{  size_t AT_getAllocatedCount() */
-
-size_t AT_getAllocatedCount()
-{
-  return nb_at_allocate;
-}
-
-/*}}}  */
-
-static
-void AT_growMaxTermSize(size_t neededsize)
+static void AT_growMaxTermSize(size_t neededsize)
 {
   TermInfo* newterminfo;
   size_t newsize;
@@ -410,119 +391,57 @@ void AT_growMaxTermSize(size_t neededsize)
 
 ATerm AT_allocate(const size_t size)
 {
-  ATerm at;
-  TermInfo* ti;
-
-  nb_at_allocate++;
+  static size_t nr_of_nodes_for_the_next_hash_table_resize=(maxload*table_size)/100;
+  static bool must_garbage_collect_next_time=true;
 
   if (size+1 > maxTermSize)
   {
     AT_growMaxTermSize(size+1);
   }
 
-  ti = &terminfo[size];
-
-  while (1)
+  if (total_nodes == nr_of_nodes_for_the_next_hash_table_resize)
   {
-    if (ti->at_blocks[AT_BLOCK] && ti->top_at_blocks < ti->at_blocks[AT_BLOCK]->end)
+    if (must_garbage_collect_next_time)
     {
-      /* the first block is not full: allocate a cell */
-      at = (ATerm)ti->top_at_blocks;
-      ti->top_at_blocks += size;
-      break;
-
+      AT_collect();
+      must_garbage_collect_next_time=2*(nr_of_nodes_for_the_next_hash_table_resize-total_nodes)>table_size;
     }
-    else if (ti->at_freelist)
+    else 
     {
-      /* the freelist is not empty: allocate a cell */
-      at = ti->at_freelist;
-      ti->at_freelist = ti->at_freelist->aterm.next;
-      assert(ti->at_blocks[AT_BLOCK] != NULL);
-      assert(ti->top_at_blocks == ti->at_blocks[AT_BLOCK]->end);
-      break;
-
-    }
-    else
-    {
-      /* there is no more memory: run the GC or allocate a block */
-      if (ti->at_nrblocks <= gc_min_number_of_blocks)
-      {
-        allocate_block(size);
-        if ((total_nodes/maxload)*100 > table_size) 
-        {
-          resize_hashtable();
-        }
-        assert(ti->at_blocks[AT_BLOCK] != NULL);
-        at = (ATerm)ti->top_at_blocks;
-        ti->top_at_blocks += size;
-      }
-      else
-      {
-        size_t reclaimed_memory_during_last_gc =
-        /*(ti->nb_reclaimed_blocks_during_last_gc*sizeof(Block)) +*/
-        (ti->nb_reclaimed_cells_during_last_gc*SIZE_TO_BYTES(size));
-        /* +1 to avoid division by zero */
-        size_t reclaimed_memory_ratio_during_last_gc =
-        (100*reclaimed_memory_during_last_gc) / (1+ti->nb_live_blocks_before_last_gc*sizeof(Block));
-        if (reclaimed_memory_ratio_during_last_gc > good_gc_ratio)
-        {
-          if (nb_minor_since_last_major < min_nb_minor_since_last_major)
-          {
-            nb_minor_since_last_major++;
-            AT_collect(true);
-          }
-          else
-          {
-            nb_minor_since_last_major = 0;
-            AT_collect(false);
-          }
-
-        }
-        else
-        {
-          size_t nb_allocated_blocks_since_last_gc = ti->at_nrblocks-ti->nb_live_blocks_before_last_gc;
-          /* +1 to avoid division by zero */
-          size_t allocation_rate =
-          (100*nb_allocated_blocks_since_last_gc)/(1+ti->nb_live_blocks_before_last_gc);
-
-          if (allocation_rate < small_allocation_rate_ratio)
-          {
-            allocate_block(size);
-            if ((total_nodes/maxload)*100 > table_size) 
-            {
-              resize_hashtable();
-            }
-            assert(ti->at_blocks[AT_BLOCK] != NULL);
-            at = (ATerm)ti->top_at_blocks;
-            ti->top_at_blocks += size;
-          }
-          else
-          {
-            /* +1 to avoid division by zero */
-            size_t old_increase_rate =
-            (100*(old_bytes_in_young_blocks_since_last_major-old_bytes_in_young_blocks_after_last_major)) /
-            (1+old_bytes_in_young_blocks_after_last_major+old_bytes_in_old_blocks_after_last_major);
-
-            if (old_increase_rate < old_increase_rate_ratio)
-            {
-              nb_minor_since_last_major++;
-              AT_collect(true);
-            }
-            else
-            {
-              nb_minor_since_last_major = 0;
-              AT_collect(false);
-            }
-          }
-        }
-      }
+      resize_hashtable();
+      nr_of_nodes_for_the_next_hash_table_resize=(maxload*table_size)/100;
+      must_garbage_collect_next_time=true;
     }
   }
 
-  total_nodes++;
+  ATerm at;
+  TermInfo *ti = &terminfo[size];
+  if (ti->at_block && ti->top_at_blocks < ti->at_block->end)
+  {
+    /* the first block is not full: allocate a cell */
+    at = (ATerm)ti->top_at_blocks;
+    ti->top_at_blocks += size;
+  }
+  else if (ti->at_freelist)
+  {
+    /* the freelist is not empty: allocate a cell */
+    at = ti->at_freelist;
+    ti->at_freelist = ti->at_freelist->aterm.next;
+    assert(ti->at_block != NULL);
+    assert(ti->top_at_blocks == ti->at_block->end);
+  }
+  else
+  {
+    /* there is no more memory of the current size allocate a block */
+    allocate_block(size);
+    assert(ti->at_block != NULL);
+    at = (ATerm)ti->top_at_blocks;
+    ti->top_at_blocks += size;
+  }
 
+  total_nodes++;
   return at;
-}
+} 
 
 /*}}}  */
 
@@ -537,7 +456,7 @@ void AT_freeTerm(const size_t size, const ATerm t)
   HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
 
-  terminfo[size].nb_reclaimed_cells_during_last_gc++;
+  // terminfo[size].nb_reclaimed_cells_during_last_gc++;
 
   /* Remove the node from the hashtable */
   hnr &= table_mask;
@@ -1598,13 +1517,13 @@ ATerm AT_isInsideValidTerm(ATerm term)
       assert(cur->next_before == cur->next_after);
       ti = &terminfo[cur->size];
 
-      if (cur != ti->at_blocks[AT_BLOCK])
+      if (cur != ti->at_block)
       {
         end = cur->end;
       }
       else
       {
-        assert(ti->at_blocks[AT_BLOCK] != NULL);
+        assert(ti->at_block != NULL);
         end = ti->top_at_blocks;
       }
 
@@ -1626,13 +1545,13 @@ ATerm AT_isInsideValidTerm(ATerm term)
         ti = &terminfo[cur->size];
         assert(cur->next_before == cur->next_after);
 
-        if (cur != ti->at_blocks[AT_BLOCK])
+        if (cur != ti->at_block)
         {
           end = cur->end;
         }
         else
         {
-          assert(ti->at_blocks[AT_BLOCK] != NULL);
+          assert(ti->at_block != NULL);
           end = ti->top_at_blocks;
         }
 

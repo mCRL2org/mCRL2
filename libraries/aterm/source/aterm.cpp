@@ -1532,10 +1532,10 @@ ATreadFromString(const char* string)
 /**
  * Mark a term and all of its children.
  */
-void AT_markTerm(const ATerm t1, const bool only_mark_young)
+void AT_markTerm(const ATerm t1)
 {
 
-  if (IS_MARKED(t1->header) || (only_mark_young && IS_OLD(t1->header)))
+  if (IS_MARKED(t1->header))
   {
     return;
   }
@@ -1548,7 +1548,7 @@ void AT_markTerm(const ATerm t1, const bool only_mark_young)
     const ATerm t=mark_stack.top();
     mark_stack.pop();
 
-    if (!(IS_MARKED(t->header) || (only_mark_young && IS_OLD(t->header))))
+    if (!(IS_MARKED(t->header)))
     {
       SET_MARK(t->header);
 
@@ -1563,7 +1563,7 @@ void AT_markTerm(const ATerm t1, const bool only_mark_young)
 
             if (AT_isValidAFun(sym))
             {
-              AT_markAFun(sym,only_mark_young);
+              AT_markAFun(sym);
             }
             else
             {
@@ -1680,7 +1680,7 @@ static size_t calcUniqueAFuns(ATerm t)
       nr_unique = AT_isMarkedAFun(sym) ? 0 : 1;
       assert(at_lookup_table[sym]);
       at_lookup_table[sym]->count++;
-      AT_markAFun(sym,false); // Consider all terms, not only young ones.
+      AT_markAFun(sym); 
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++)
       {

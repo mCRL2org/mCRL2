@@ -12,7 +12,7 @@
 // #define DO_AGGRESSIVE_GARBAGE_COLLECT  
 
 #ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect(true)
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect(false)
 #else
 #define AGGRESSIVE_GARBAGE_COLLECT_CHECK
 #endif
@@ -78,7 +78,6 @@ typedef struct Block
   header_type data[BLOCK_SIZE];
 
   size_t size;
-  int frozen; /* this int is used as a boolean */
   struct Block* next_by_size;
   struct Block* next_before;
   struct Block* next_after;
@@ -92,20 +91,13 @@ typedef struct BlockBucket
   struct Block* first_after;
 } BlockBucket;
 
-static const size_t AT_BLOCK = 0;
-static const size_t AT_OLD_BLOCK = 1;
-//#define AT_BLOCK      0
-//#define AT_OLD_BLOCK  1
+// static const size_t AT_BLOCK = 0;
 
 typedef struct TermInfo
 {
-  Block*       at_blocks[2];
+  Block*       at_block;
   header_type* top_at_blocks;
-  size_t       at_nrblocks;
   ATerm        at_freelist;
-  size_t       nb_live_blocks_before_last_gc;
-  size_t       nb_reclaimed_blocks_during_last_gc;
-  size_t       nb_reclaimed_cells_during_last_gc;
 } TermInfo;
 
 extern TermInfo* terminfo;
@@ -117,35 +109,8 @@ inline size_t SIZE_TO_BYTES(const size_t size)
 {
   return size*sizeof(header_type);
 }
-//#define SIZE_TO_BYTES(size) ((size)*sizeof(header_type))
-
-inline
-void SET_FROZEN(Block* block)
-{
-  block->frozen=1;
-}
-//#define SET_FROZEN(block) ((block)->frozen=1)
-
-inline
-bool IS_FROZEN(const Block* block)
-{
-  return block->frozen==1;
-}
-//#define IS_FROZEN(block) ((block)->frozen==1)
-
-inline
-void CLEAR_FROZEN(Block* block)
-{
-  block->frozen=0;
-}
-//#define CLEAR_FROZEN(block) ((block)->frozen=0)
 
 extern BlockBucket block_table[BLOCK_TABLE_SIZE];
-
-extern size_t nb_minor_since_last_major;
-extern size_t old_bytes_in_young_blocks_after_last_major;
-extern size_t old_bytes_in_old_blocks_after_last_major;
-extern size_t old_bytes_in_young_blocks_since_last_major;
 
 extern size_t maxTermSize;
 
@@ -157,7 +122,7 @@ bool AT_isPotentialTerm(const ATerm term)
 {
   return min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address;
 }
-//#define AT_isPotentialTerm(term) (min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address)
+
 
 void AT_initMemory(int argc, char** argv);
 void AT_initMemmgnt();
@@ -168,9 +133,6 @@ void  AT_freeTerm(const size_t size, const ATerm t);
 bool AT_isValidTerm(const ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
 size_t AT_inAnyFreeList(const ATerm t);
-void AT_printAllTerms(FILE* file);
-void AT_printAllAFunCounts(FILE* file);
-size_t AT_getAllocatedCount();
 
 struct _ATprotected_block
 {
@@ -199,14 +161,16 @@ static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 inline
 void CHECK_HEADER(const header_type h)
 {
-  assert(GET_AGE(h)==0 && !IS_MARKED(h));
+  assert(GET_AGE(h)==0);
+  assert(!IS_MARKED(h));
 }
 
 inline
 void CHECK_ARGUMENT(const ATermAppl t, const size_t n)
 {
-  assert((GET_AGE(t->header) <= GET_AGE(ATgetArgument(t,n)->header)));
-  assert((GET_AGE(t->header) <= GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header)));
+  assert(GET_AGE(t->header)==0);
+  assert(GET_AGE(ATgetArgument(t,n)->header)==0);
+  assert(GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header)==0);
 }
 
 inline
