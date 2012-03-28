@@ -475,7 +475,7 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
     std::string p = type.get_state_names()[part];
     pbes_expression phi = pgg->from_rewrite_format(transition_expression[group]);
     std::set<std::string> usedSet = used(phi);
-    std::string X = transition_variable_name.at(group);
+    std::string X = detail::map_at(transition_variable_name, group);
     if (usedSet.find(p) == usedSet.end())
     {
         return false; // Parameter is not in used(phi).
