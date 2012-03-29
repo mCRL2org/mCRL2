@@ -140,7 +140,7 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.equivalence != lts_eq_none)
       {
-        mCRL2log(verbose) << "reducing LTS (modulo " <<  tool_options.equivalence << ")..." << std::endl;
+        mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
         mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
         reduce(l,tool_options.equivalence);
         mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
@@ -268,8 +268,11 @@ class ltsconvert_tool : public ltsconvert_base
       desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME")
                       .add_value(lts_eq_none, true)
                       .add_value(lts_eq_bisim)
+                      .add_value(lts_eq_bisim_sigref)
                       .add_value(lts_eq_branching_bisim)
+                      .add_value(lts_eq_branching_bisim_sigref)
                       .add_value(lts_eq_divergence_preserving_branching_bisim)
+                      .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
                       .add_value(lts_eq_sim)
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)
@@ -295,6 +298,8 @@ class ltsconvert_tool : public ltsconvert_base
 
     void parse_options(const command_line_parser& parser)
     {
+      ltsconvert_base::parse_options(parser);
+
       if (parser.options.count("lps"))
       {
         if (1 < parser.options.count("lps"))

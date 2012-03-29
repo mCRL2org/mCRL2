@@ -33,9 +33,13 @@ enum lts_equivalence
 {
   lts_eq_none,             /**< Unknown or no equivalence */
   lts_eq_bisim,            /**< Strong bisimulation equivalence */
+  lts_eq_bisim_sigref,            /**< Strong bisimulation equivalence, using signature refinement */
   lts_eq_branching_bisim,  /**< Branching bisimulation equivalence */
+  lts_eq_branching_bisim_sigref, /**< Branching bisimulation equivalence, using signature refinement */
   lts_eq_divergence_preserving_branching_bisim,
   /**< Divergence preserving branching bisimulation equivalence */
+  lts_eq_divergence_preserving_branching_bisim_sigref,
+  /**< Divergence preserving branching bisimulation equivalence, using signature refinement */
   lts_eq_sim,              /**< Strong simulation equivalence */
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
@@ -67,13 +71,25 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_bisim;
   }
+  else if (s == "bisim-sig")
+  {
+    return lts_eq_bisim_sigref;
+  }
   else if (s == "branching-bisim")
   {
     return lts_eq_branching_bisim;
   }
+  else if (s == "branching-bisim-sig")
+  {
+    return lts_eq_branching_bisim_sigref;
+  }
   else if (s == "dpbranching-bisim")
   {
     return lts_eq_divergence_preserving_branching_bisim;
+  }
+  else if (s == "dpbranching-bisim-sig")
+  {
+    return lts_eq_divergence_preserving_branching_bisim_sigref;
   }
   else if (s == "sim")
   {
@@ -131,10 +147,16 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "none";
     case lts_eq_bisim:
       return "bisim";
+    case lts_eq_bisim_sigref:
+      return "bisim-sig";
     case lts_eq_branching_bisim:
       return "branching-bisim";
+    case lts_eq_branching_bisim_sigref:
+      return "branching-bisim-sig";
     case lts_eq_divergence_preserving_branching_bisim:
       return "dpbranching-bisim";
+    case lts_eq_divergence_preserving_branching_bisim_sigref:
+      return "dpbranching-bisim-sig";
     case lts_eq_sim:
       return "sim";
     case lts_eq_trace:
@@ -170,10 +192,16 @@ inline std::string description(const lts_equivalence eq)
       return "identity equivalence";
     case lts_eq_bisim:
       return "strong bisimilarity";
+    case lts_eq_bisim_sigref:
+      return "strong bisimilarity using signature refinement";
     case lts_eq_branching_bisim:
       return "branching bisimilarity";
+    case lts_eq_branching_bisim_sigref:
+      return "branching bisimilarity using signature refinement";
     case lts_eq_divergence_preserving_branching_bisim:
       return "divergence preserving branching bisimilarity";
+    case lts_eq_divergence_preserving_branching_bisim_sigref:
+      return "divergence preserving branching bisimilarity using signature refinement";
     case lts_eq_sim:
       return "strong simulation equivalence";
     case lts_eq_trace:

@@ -42,6 +42,7 @@
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
+#include "mcrl2/lts/sigref.h"
 
 namespace mcrl2
 {
@@ -364,14 +365,32 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,false,false);
       return;
     }
+    case lts_eq_bisim_sigref:
+    {
+      sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
+      s.run();
+      return;
+    }
     case lts_eq_branching_bisim:
     {
       detail::bisimulation_reduce(l,true,false);
       return;
     }
+    case lts_eq_branching_bisim_sigref:
+    {
+      sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s(l);
+      s.run();
+      return;
+    }
     case lts_eq_divergence_preserving_branching_bisim:
     {
       detail::bisimulation_reduce(l,true,true);
+      return;
+    }
+    case lts_eq_divergence_preserving_branching_bisim_sigref:
+    {
+      sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
+      s.run();
       return;
     }
     case lts_eq_sim:
