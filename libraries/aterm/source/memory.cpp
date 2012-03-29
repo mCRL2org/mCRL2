@@ -38,7 +38,8 @@ static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
-static const int maxload = 80;
+static const size_t maxload = 80;
+static const size_t garbage_collect_factor = 4;
 ATerm* hashtable;
 
 extern void AT_initMemmgnt();
@@ -404,7 +405,7 @@ ATerm AT_allocate(const size_t size)
     if (must_garbage_collect_next_time)
     {
       AT_collect();
-      must_garbage_collect_next_time=2*(nr_of_nodes_for_the_next_hash_table_resize-total_nodes)>table_size;
+      must_garbage_collect_next_time=garbage_collect_factor*(nr_of_nodes_for_the_next_hash_table_resize-total_nodes)>table_size;
     }
     else 
     {

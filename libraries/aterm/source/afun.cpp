@@ -47,7 +47,7 @@ static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry* hash_table     = NULL;
 
-static AFun first_free = 0;
+static AFun first_free = (AFun)-1;
 
 static std::multiset < AFun > protected_symbols;
 
@@ -123,7 +123,7 @@ void AT_initAFun(int, char**)
     throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(afun_table_size) + " hash-entries.");
   }
 
-  first_free = 0;
+  first_free = AFun(-1); // Indication that there are no free AFun's available.
 
   sym = ATmakeAFun("<int>", 0, false);
   assert(sym == AS_INT);
@@ -313,20 +313,22 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
 
-    assert(free_entry<=at_lookup_table.size());
-    if (free_entry<at_lookup_table.size())
+    if (free_entry!=(AFun)-1) // There is a free place in at_lookup_table to store an AFun.
     { 
+      assert(free_entry<at_lookup_table.size());
       first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
+      assert(first_free==-1 || first_free<at_lookup_table.size());
+      assert(free_entry<at_lookup_table.size());
       at_lookup_table[free_entry] = cur;
+      cur->id = free_entry;
     }
     else 
     { 
+      cur->id = at_lookup_table.size();
       at_lookup_table.push_back(cur);
-      first_free=at_lookup_table.size();
     }
 
     cur->header = header;
-    cur->id = free_entry;
     cur->count = 0;
     cur->index = -1;
 
@@ -389,6 +391,7 @@ void AT_freeAFun(SymEntry sym)
   assert(sym->id<at_lookup_table.size());
   at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
   first_free = sym->id;
+  assert(first_free==-1 || first_free<at_lookup_table.size());
 }
 
 /*}}}  */
