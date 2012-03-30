@@ -232,7 +232,7 @@ protected:
 
 				  for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
 				  {
-            if ((low[to(t)] == 0) and (scc[to(t)] == 0) && (m_lts.is_tau(label(t))))
+            if ((low[to(t)] == 0) && (scc[to(t)] == 0) && (m_lts.is_tau(label(t))))
 					  {
 						  stack.push(to(t));
 						}
