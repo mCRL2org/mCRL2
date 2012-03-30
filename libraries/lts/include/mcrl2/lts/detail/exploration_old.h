@@ -30,6 +30,8 @@ namespace mcrl2
 {
 namespace lts
 {
+namespace old
+{
 
 #define DEFAULT_MAX_STATES ULONG_MAX
 #define DEFAULT_MAX_TRACES ULONG_MAX
@@ -222,6 +224,7 @@ class lps2lts_algorithm
     bool add_transition(const state_t from, mcrl2::lps::multi_action action, const state_t to);
 };
 
+}
 }
 }
 

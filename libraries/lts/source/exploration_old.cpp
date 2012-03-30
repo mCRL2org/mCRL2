@@ -41,6 +41,8 @@ namespace mcrl2
 {
 namespace lts
 {
+namespace old
+{
 
 exploration_strategy str_to_expl_strat(const string s)
 {
@@ -1379,5 +1381,6 @@ bool lps2lts_algorithm::generate_lts()
   return !lg_error;
 }
 
+} // namespace old
 } // namespace lts
 } // namespace mcrl2
