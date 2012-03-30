@@ -24,7 +24,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/exploration_old.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"

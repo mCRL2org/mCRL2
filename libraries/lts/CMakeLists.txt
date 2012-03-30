@@ -47,7 +47,7 @@ set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bcg.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tree_set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsm.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/exploration.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/exploration_old.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/lps2lts_lts.cpp
 )
 set(mcrl2_lts_src ${mcrl2_lts_src} PARENT_SCOPE)

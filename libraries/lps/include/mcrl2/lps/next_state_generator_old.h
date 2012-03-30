@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/next_state_generator.h
+/// \file mcrl2/lps/next_state_generator_old.h
 /// \brief Iterator interface for generating next states of a linear process specification.
 
 #ifndef MCRL2_LPS_NEXT_STATE_GENERATOR_H

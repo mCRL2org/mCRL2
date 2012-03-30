@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file exploration.cpp
+/// \file exploration_old.cpp
 
 #include "mcrl2/aterm/aterm2.h"
 #include <time.h>
@@ -26,7 +26,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/exploration_old.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 
 

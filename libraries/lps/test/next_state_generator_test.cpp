@@ -14,7 +14,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/next_state_generator_old.h"
 #include "mcrl2/lps/parse.h"
 
 using namespace mcrl2;

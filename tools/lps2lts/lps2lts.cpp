@@ -31,7 +31,7 @@
 #include "mcrl2/lps/action_label.h"
 
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/exploration_old.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)

@@ -31,7 +31,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/next_state_generator_old.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 // For backwards compatibility
