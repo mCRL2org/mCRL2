@@ -124,21 +124,6 @@ static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 /*}}}  */
 
-/*{{{  void AT_initBafIO(int argc, char *argv[]) */
-
-/**
-  * Initialize BafIO code.
-  */
-
-void AT_initBafIO(int argc, char* argv[])
-{
-  /* Suppress unused arguments warning */
-  (void) argc;
-  (void) argv;
-}
-
-/*}}}  */
-
 /*{{{  void AT_getBafVersion(int *major, int *minor) */
 
 void

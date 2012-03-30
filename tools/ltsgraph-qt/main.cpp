@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
     aterm::ATerm stack;
-    aterm::ATinit(argc, argv, &stack);
+    aterm::ATinit(&stack);
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

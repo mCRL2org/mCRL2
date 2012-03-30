@@ -19,7 +19,7 @@
 #include "mcrl2/aterm/afun.h"
 #include "mcrl2/aterm/gc.h"
 #include "mcrl2/aterm/util.h"
-#include "mcrl2/aterm/bafio.h"
+// #include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/atypes.h"
 #include "mcrl2/aterm/safio.h"
 #include "mcrl2/aterm/afun.h"
@@ -98,14 +98,14 @@ AT_cleanup(void)
 
 /*}}}  */
 
-/*{{{  void ATinit(int argc, char *argv[], ATerm *bottomOfStack) */
+/*{{{  void ATinit(ATerm *bottomOfStack) */
 
 /**
  * Initialize the ATerm library.
  */
 
 void
-ATinit(int argc, char* argv[], ATerm* bottomOfStack)
+ATinit(ATerm* bottomOfStack)
 {
   if (initialized)
   {
@@ -138,10 +138,9 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   /*{{{  Initialize other components */
 
   /* Initialize other components */
-  AT_initMemory(argc, argv);
-  AT_initAFun(argc, argv);
-  AT_initGC(argc, argv, bottomOfStack);
-  AT_initBafIO(argc, argv);
+  AT_initMemory();
+  AT_initAFun();
+  AT_initGC(bottomOfStack);
 
   /*}}}  */
 

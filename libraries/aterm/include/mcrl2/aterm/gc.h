@@ -6,7 +6,7 @@
 namespace aterm
 {
 
-void AT_initGC(int argc, char* argv[], ATerm* bottomOfStack);
+void AT_initGC(ATerm* bottomOfStack);
 void AT_setBottomOfStack(ATerm* bottomOfStack);
 void AT_cleanupGC();
 

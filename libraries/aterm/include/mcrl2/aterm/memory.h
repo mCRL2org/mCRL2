@@ -118,7 +118,7 @@ bool AT_isPotentialTerm(const ATerm term)
 }
 
 
-void AT_initMemory(int argc, char** argv);
+void AT_initMemory();
 void AT_initMemmgnt();
 void AT_cleanupMemory();
 HashNumber AT_hashnumber(const ATerm t);

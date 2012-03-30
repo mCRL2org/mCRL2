@@ -37,7 +37,7 @@ static const size_t TERM_SIZE_SYMBOL = sizeof(struct _SymEntry)/sizeof(size_t);
 union _ATerm;
 extern std::vector < SymEntry > at_lookup_table;
 
-void AT_initAFun(int argc, char** argv);
+void AT_initAFun();
 size_t AT_printAFun(const AFun sym, FILE* f);
 
 inline

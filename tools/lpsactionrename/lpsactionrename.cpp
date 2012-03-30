@@ -213,7 +213,7 @@ class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc,argv)
 
   return action_rename_gui_tool().execute(argc, argv);
 }

@@ -46,12 +46,8 @@ AFun at_parked_symbol = (size_t)-1; // Init
 
 /*{{{  void AT_initGC(int argc, char *argv[], ATerm *bottomOfStack) */
 
-void AT_initGC(int argc, char* argv[], ATerm* bottomOfStack)
+void AT_initGC(ATerm* bottomOfStack)
 {
-  /* Suppress unused variable warning */
-  (void)argc;
-  (void)argv;
-
   stackBot = bottomOfStack;
 }
 

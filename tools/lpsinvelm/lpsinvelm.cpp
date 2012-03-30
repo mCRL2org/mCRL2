@@ -15,6 +15,7 @@
 #include <fstream>
 
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
@@ -239,6 +240,6 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsinvelm_giu_tool().execute(argc, argv);
 }

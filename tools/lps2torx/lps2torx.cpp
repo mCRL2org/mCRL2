@@ -255,7 +255,7 @@ class torx_tool : public rewriter_tool< input_tool >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc,argv)
 
   return torx_tool().execute(argc, argv);
 }

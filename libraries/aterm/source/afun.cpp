@@ -113,7 +113,7 @@ static void resize_table()
 /*}}}  */
 
 /*{{{  void AT_initAFun(int argc, char *argv[]) */
-void AT_initAFun(int, char**)
+void AT_initAFun()
 {
   AFun sym;
 
@@ -317,7 +317,7 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
     { 
       assert(free_entry<at_lookup_table.size());
       first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
-      assert(first_free==-1 || first_free<at_lookup_table.size());
+      assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
       assert(free_entry<at_lookup_table.size());
       at_lookup_table[free_entry] = cur;
       cur->id = free_entry;
@@ -391,7 +391,7 @@ void AT_freeAFun(SymEntry sym)
   assert(sym->id<at_lookup_table.size());
   at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
   first_free = sym->id;
-  assert(first_free==-1 || first_free<at_lookup_table.size());
+  assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
 }
 
 /*}}}  */

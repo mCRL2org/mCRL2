@@ -210,12 +210,12 @@ void resize_hashtable()
 
 /*}}}  */
 
-/*{{{  void AT_initMemory(unsigned int argc, char *argv[]) */
+/*{{{  void AT_initMemory() */
 /**
  * Initialize memory allocation datastructures
  */
 
-void AT_initMemory(int, char**)
+void AT_initMemory()
 {
   HashNumber hnr;
 
@@ -287,7 +287,7 @@ static void allocate_block(size_t size)
 {
   size_t idx;
   Block* newblock;
-  int init = 0;
+  bool init = false;
   TermInfo* ti;
 
   if (at_freeblocklist != NULL)
@@ -303,7 +303,7 @@ static void allocate_block(size_t size)
     {
       std::runtime_error("allocate_block: out of memory!");
     }
-    init = 1;
+    init = true;
 
     min_heap_address = MIN(min_heap_address,(newblock->data));
     max_heap_address = MAX(max_heap_address,(newblock->data+BLOCK_SIZE));
