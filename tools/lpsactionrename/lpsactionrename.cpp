@@ -86,8 +86,8 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     {
       super::parse_options(parser);
 
-      m_rewrite = (parser.options.count("rewrite")==0);
-      m_sumelm  = (parser.options.count("sumelm")==0);
+      m_rewrite = (parser.options.count("no-rewrite")==0);
+      m_sumelm  = (parser.options.count("no-sumelm")==0);
       m_pretty = (parser.options.count("pretty")!=0);
 
       if (parser.options.count("end-phase")>0)
@@ -164,6 +164,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
         datar = create_rewriter(lps_new_spec.data());
         lps::rewrite(lps_new_spec, datar);
+        lps::remove_trivial_summands(lps_new_spec);
       }
       if (m_sumelm)
       {
@@ -171,8 +172,9 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         sumelm_algorithm(lps_new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
-          mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
+          mCRL2log(verbose) << "rewriting data expressions in LPS again..." << std::endl;
           lps::rewrite(lps_new_spec, datar);
+          lps::remove_trivial_summands(lps_new_spec);
         }
       }
       //save the result

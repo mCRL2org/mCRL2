@@ -1108,8 +1108,13 @@ inline data_specification operator +(data_specification spec1, const data_specif
   {
     spec1.add_sort(*i);
   }
-// void declare_data_specification_to_be_type_checked()
 
+  const atermpp::set<sort_expression>& cs2=spec2.context_sorts();
+  for(atermpp::set<sort_expression>::const_iterator i=cs2.begin(); i!=cs2.end(); ++i)
+  {
+    spec1.add_context_sort(*i);
+  }
+ 
   const alias_vector av=spec2.user_defined_aliases();
   for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
   {
