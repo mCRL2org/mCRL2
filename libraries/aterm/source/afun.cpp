@@ -290,9 +290,8 @@ ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 
 AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 {
-  header_type header = SYMBOL_HEADER(arity, quoted);
-  ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
-  SymEntry cur;
+  const header_type header = SYMBOL_HEADER(arity, quoted);
+  const ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
   if (arity >= MAX_ARITY)
   {
@@ -300,7 +299,7 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
   }
 
   /* Find symbol in table */
-  cur = hash_table[hnr];
+  SymEntry cur = hash_table[hnr];
   while (cur && (!EQUAL_HEADER(cur->header,header) || !streq(cur->name, name)))
   {
     cur = cur->next;
@@ -308,14 +307,16 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
   if (cur == NULL)
   {
-    AFun free_entry = first_free;
-    assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
+    cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL); // Note that this statement changes first_free,
+                                                    // if garbage collection is done. 
 
-    cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
+    const AFun free_entry = first_free;
+    assert(at_lookup_table.size()<afun_table_size);
+    assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
 
     if (free_entry!=(AFun)-1) // There is a free place in at_lookup_table to store an AFun.
     { 
-      assert(free_entry<at_lookup_table.size());
+      assert(first_free<at_lookup_table.size());
       first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
       assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
       assert(free_entry<at_lookup_table.size());
@@ -358,15 +359,11 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
 void AT_freeAFun(SymEntry sym)
 {
-  ShortHashNumber hnr;
-
-  // terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
 
   assert(sym->name);
 
   /* Calculate hashnumber */
-  hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header));
-  hnr &= afun_table_mask;
+  const ShortHashNumber hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header)) & afun_table_mask;
 
   /* Update hashtable */
   if (hash_table[hnr] == sym)
