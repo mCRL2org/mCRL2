@@ -39,7 +39,7 @@ static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
 static const size_t maxload = 80;
-static const size_t garbage_collect_factor = 4;
+static const size_t garbage_collect_factor = 8;
 ATerm* hashtable;
 
 extern void AT_initMemmgnt();
