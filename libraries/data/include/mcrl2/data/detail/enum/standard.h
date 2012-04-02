@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 
 
 #define MAX_VARS_INIT   1000
