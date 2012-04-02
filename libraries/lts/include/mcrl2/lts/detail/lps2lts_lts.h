@@ -27,7 +27,7 @@ struct lps2lts_lts_options
 {
   mcrl2::lts::lts_type outformat;
   bool outinfo;
-  NextState* nstate;
+  lps::NextState* nstate;
   std::auto_ptr< mcrl2::lps::specification > spec;
 };
 

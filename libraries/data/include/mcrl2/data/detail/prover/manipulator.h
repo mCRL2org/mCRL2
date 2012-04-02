@@ -65,9 +65,9 @@ class InternalFormatManipulator
       bool v_is_equality;
 
       v_is_equality = f_info.is_equality(a_guard);
-      if (v_is_equality && ATgetArgument(a_guard, 2) == a_formula)
+      if (v_is_equality && a_guard(2) == a_formula)
       {
-        return ATgetArgument(a_guard, 1);
+        return a_guard(1);
       }
       if (f_info.is_variable(a_formula))
       {

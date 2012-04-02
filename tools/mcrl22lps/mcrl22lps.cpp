@@ -58,32 +58,56 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("lin-method", make_mandatory_argument("NAME"),
-                      "use linearisation method NAME:\n"
-                      "  'regular' for generating an LPS in regular form\n"
-                      "  (specification should be regular, default),\n"
-                      "  'regular2' for a variant of 'regular' that uses more data variables\n"
-                      "  (useful when 'regular' does not work), or\n"
-                      "  'stack' for using stack data types\n"
-                      "  (useful when 'regular' and 'regular2' do not work)"
+      desc.add_option("lin-method",make_enum_argument<t_lin_method>("NAME").
+                      add_value(lmRegular, true).
+                      add_value(lmRegular2).
+                      add_value(lmStack),
+                      "use linearisation method NAME:"
                       , 'l');
       desc.add_option("cluster",
-                      "all actions in the final LPS are clustered", 'c');
+                      "all actions in the final LPS are clustered. "
+                      "Clustering means that summands with the same action labels are "
+                      "grouped together. For instance, a(f1) . P(g1) + a(f2) . P(g2) "
+                      "is replaced by sum b: Bool . a(if(b, f1, f2)) . P(if(b, f2, g2)). "
+                      "The advantage is that the number of summands can be reduced "
+                      "subtantially in this way. The disadvantage is that sum operators "
+                      "are introduced and new data sorts with auxiliary functions are generated. "
+                      "In order to avoid the generation of new sorts, the option -b/--binary "
+                      "can be used.", 'c');
       desc.add_option("no-cluster",
-                      "the actions in intermediate LPSs are not clustered "
-                      "(default behaviour is that intermediate LPSs are "
-                      "clustered and the final LPS is not clustered)", 'n');
+                      "the actions in intermediate LPSs are not clustered before "
+                      "they are put in parallel. By default these processes are "
+                      "clustered to avoid a blow-up in the number of summands when "
+                      "transforming two parallel linear processes into a single linear "
+                      "process. If a linear process with M summands is put in parallel "
+                      "with a linear process with N summands the resulting process has "
+                      "M×N + M + N summands. Both M and N can be substantially reduced "
+                      "by clustering at the cost of introducing new sorts and functions. "
+                      "See -c/--cluster, esp. for a short explanation of the clustering "
+                      "process.", 'n');
       desc.add_option("no-alpha",
-                      "alphabet reductions are not applied", 'z');
+                      "alphabet reductions are not applied."
+                      "By default mcrl22lps attempts to distribute communication, hiding "
+                      "and allow operators over the parallel composition operator as "
+                      "this reduces the size of intermediate linear processes. By using "
+                      "this option, this step can be avoided. The name stems from the "
+                      "alphabet axioms in process algebra.", 'z');
       desc.add_option("newstate",
-                      "state variables are encoded using enumerated types "
-                      "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
+                      "state variables are encoded using enumerated types instead "
+                      "of positive natural numbers (Pos). By using this option new "
+                      "finite sorts named Enumk are generated where k is the size of "
+                      "the domain. Also, auxiliary case functions and equalities are "
+                      "defined. In combination with the option --binary the finite "
+                      "sorts are encoded by booleans. "
+                      "(requires linearisation method 'regular' or 'regular2').", 'w');
       desc.add_option("binary",
                       "when clustering use binary case functions instead of "
                       "n-ary; in the presence of -w/--newstate, state variables are "
                       "encoded by a vector of boolean variables", 'b');
       desc.add_option("statenames",
-                      "the names of state variables are derived from the specification", 'a');
+                      "the names of generated data parameters are extended with the "
+                      "name of the process in which they occur. This makes it "
+                      "easier to determine where the parameter comes from.", 'a');
       desc.add_option("no-rewrite",
                       "do not rewrite data terms while linearising; useful when the rewrite "
                       "system does not terminate. This option also switches off the application of "
@@ -91,11 +115,18 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       desc.add_option("no-globvars",
                       "instantiate don't care values with arbitrary constants, "
                       "instead of modelling them by global variables. This has no effect"
-                      "on global variable that are declared in the specification.", 'f');
+                      "on global variables that are declared in the specification.", 'f');
       desc.add_option("no-sumelm",
                       "avoid applying sum elimination in parallel composition", 'm');
       desc.add_option("no-deltaelm",
-                      "avoid removing spurious delta summands", 'g');
+                      "avoid removing spurious delta summands. "
+                      "Due to the existence of time, delta summands cannot be omitted. "
+                      "Due to the presence of multi-actions the number of summands can "
+                      "be huge. The algorithm for removing delta summands simply works "
+                      "by comparing each delta summand with each other summand to see "
+                      "whether the condition of the one implies the condition of the "
+                      "other. Clearly, this has quadratic complexity, and can take a "
+                      "long time.", 'g');
       desc.add_option("delta",
                       "add a true->delta summands to each state in each process; "
                       "these delta's subsume all other conditional timed delta's, "
@@ -131,32 +162,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.add_delta               = 0 == parser.options.count("timed");
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
-      m_linearisation_options.lin_method = lmRegular;
 
-      if (0 < parser.options.count("lin-method"))
-      {
-        if (1 < parser.options.count("lin-method"))
-        {
-          parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
-        }
-        std::string lin_method_str(parser.option_argument("lin-method"));
-        if (lin_method_str == "stack")
-        {
-          m_linearisation_options.lin_method = lmStack;
-        }
-        else if (lin_method_str == "regular")
-        {
-          m_linearisation_options.lin_method = lmRegular;
-        }
-        else if (lin_method_str == "regular2")
-        {
-          m_linearisation_options.lin_method = lmRegular2;
-        }
-        else
-        {
-          parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
-        }
-      }
+      m_linearisation_options.lin_method = parser.option_argument_as< t_lin_method >("lin-method");
 
       //check for dangerous and illegal option combinations
       if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)
@@ -239,7 +246,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
       m_gui_options["statenames"] = create_checkbox_widget();
       m_gui_options["binary"] = create_checkbox_widget();
       m_gui_options["cluster"] = create_checkbox_widget();
-      m_gui_options["delta"] = create_checkbox_widget(true);
+      m_gui_options["delta"] = create_checkbox_widget();
       m_gui_options["check-only"] = create_checkbox_widget();
       m_gui_options["no-globvars"] = create_checkbox_widget();
       m_gui_options["no-deltaelm"] = create_checkbox_widget();

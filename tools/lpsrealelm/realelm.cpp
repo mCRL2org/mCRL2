@@ -14,7 +14,7 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
 
@@ -101,40 +101,6 @@ static data::function_symbol& negate_function_symbol(const sort_expression s)
   static data::function_symbol f = core::detail::initialise_static_expression(f,data::function_symbol("negate",data::make_function_sort(s,s)));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
-}
-
-/// \brief Returns a list of all real expressions in l
-/// \param l a list of data expressions
-/// \ret The list of all e in l such that e.sort() == real()
-static inline
-data_expression_list get_real_expressions(const data_expression_list& l)
-{
-  data_expression_list r;
-  for (data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    if (i->sort() == sort_real::real_())
-    {
-      r = push_front(r, *i);
-    }
-  }
-  return r;
-}
-
-/// \brief Returns a list of all nonreal expressions in l
-/// \param l a list of data expressions
-/// \ret The list of all e in l such that e.sort() != real()
-static inline
-data_expression_list get_nonreal_expressions(const data_expression_list& l)
-{
-  data_expression_list r;
-  for (data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    if (i->sort() != sort_real::real_())
-    {
-      r = push_front(r, *i);
-    }
-  }
-  return r;
 }
 
 /// \brief Returns a list of all real assignments in l
@@ -454,30 +420,6 @@ static void normalize_specification(
   //return s;
 }
 
-/// \brief Determine the inequalities ranging over real numbers in a data expression.
-/// \param e A data expression
-/// \param inequalities A list of inequalities
-/// \post inequalities contains all inequalities ranging over real numbers in e.
-static
-void determine_real_inequalities(
-  const data_expression& e,
-  std::vector < linear_inequality > &inequalities,
-  const rewriter& r)
-{
-  // mCRL2log(debug) << "Real inequalities in" << data::pp(e) << "\n";
-  if (sort_bool::is_and_application(e))
-  {
-    determine_real_inequalities(application(e).left(), inequalities,r);
-    determine_real_inequalities(application(e).right(), inequalities,r);
-  }
-  else if (is_inequality(e) && (application(e).right().sort() == sort_real::real_()))
-  {
-    inequalities.push_back(linear_inequality(e,r));
-  }
-  // mCRL2log(debug) << "Real inequalities out" << pp_vector(inequalities) << "\n";
-  //else Do nothing, as it is not an expression on reals
-}
-
 /// \brief Add postponed inequalities to variable context
 /// \param inequalities_to_add The pairs of inequalities to be added.
 /// \param context A variable context
@@ -627,7 +569,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
     data_expression substituted_lowerbound=
        data::replace_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
-       data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
+       data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
     // mCRL2log(debug) << "Lower Upper " << data::pp(substituted_lowerbound) << "  " << data::pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
     // mCRL2log(debug) << "INequality: " << string(e) << "\n";
@@ -820,7 +762,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
                     v));
 
   s.data() = ds;
-  postfix_identifier_generator variable_generator("");
+  set_identifier_generator variable_generator;
   variable_generator.add_identifiers(lps::find_identifiers((s)));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());

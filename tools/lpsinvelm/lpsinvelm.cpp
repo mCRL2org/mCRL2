@@ -15,6 +15,7 @@
 #include <fstream>
 
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
@@ -145,7 +146,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       super::add_options(desc);
 
       desc.
-      add_option("invariant", make_mandatory_argument("INVFILE"),
+      add_option("invariant", make_file_argument("INVFILE"),
                  "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
       add_option("summand", make_mandatory_argument("NUM"),
                  "eliminate or simplify the summand with number NUM only", 's').
@@ -239,6 +240,6 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsinvelm_giu_tool().execute(argc, argv);
 }

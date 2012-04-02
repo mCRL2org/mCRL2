@@ -19,22 +19,6 @@ if( "${PARSER}" STREQUAL mcrl2 )
 	file(WRITE "mcrl2lexer.cpp" "${MCRL2LEXER}")
 endif( "${PARSER}" STREQUAL mcrl2 )
 
-# Replacements for chi parser
-if( "${PARSER}" STREQUAL chi )
-	message(STATUS "Post-processing Chi-lexer")
-  file(READ "chilexer.cpp" CHILEXER)
-	string(REGEX REPLACE "\n[^\n]*isatty[^\n]*\n" "" CHILEXER "${CHILEXER}")
-	file(WRITE "chilexer.cpp" "${CHILEXER}")
-endif( "${PARSER}" STREQUAL chi )
-
-# Replacements for lysa parser
-if( "${PARSER}" STREQUAL lysa )
-	message(STATUS "Post-processing Lysa-lexer")
-  file(READ "lysalexer.cpp" CHILEXER)
-	string(REGEX REPLACE "\n[^\n]*isatty[^\n]*\n" "" LYSALEXER "${LYSALEXER}")
-	file(WRITE "lysalexer.cpp" "${CHILEXER}")
-endif( "${PARSER}" STREQUAL lysa )
-
 # Replacements for fsm parser
 if( "${PARSER}" STREQUAL fsm )
 	message(STATUS "Post-processing FSM-parser")

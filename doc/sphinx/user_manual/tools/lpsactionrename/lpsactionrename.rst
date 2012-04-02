@@ -1,4 +1,0 @@
-lpsactionrename
-===========================================
-
-.. include:: manual.rst

@@ -134,8 +134,8 @@ static ATermAppl gstcRewrActProc(ATermTable, ATermAppl, bool is_pbes=false);
 static inline ATermAppl gstcMakeActionOrProc(bool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
-static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl*, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, bool warn_upcasting=false);
-static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, bool warn_upcasting=false);
+static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl*, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
+static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, const bool warn_upcasting=false, const bool print_cast_error=true);
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -178,7 +178,6 @@ static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
 static bool gstcMActIn(ATermList MAct, ATermList MActs);
 static bool gstcMActEq(ATermList MAct1, ATermList MAct2);
-static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
 static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type);
@@ -195,6 +194,7 @@ static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
 static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+static ATermAppl replace_possible_sorts(ATermAppl Type);
 
 
 static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
@@ -1898,7 +1898,7 @@ static bool gstcReadInActs(ATermList Acts)
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
-    mCRL2log(debug) << "Read-in Act Name " << core::pp_deprecated(ActName) << ", Types " << core::pp_deprecated(atermpp::aterm_list(Types)) << std::endl;
+    mCRL2log(debug) << "Read-in Act Name " << core::pp_deprecated(ActName) << ", Types " << pp(atermpp::term_list < sort_expression_list >(Types)) << std::endl;
   }
 
   return Result;
@@ -2023,7 +2023,6 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     //ATtablePut(body.proc_freevars,(ATerm)Index,(ATerm)PBFreeVars);
     ATtablePut(body.proc_pars,(ATerm)Index,(ATerm)PBVars);
     ATtablePut(body.proc_bodies,(ATerm)Index,(ATerm)ATAgetArgument(PBEqn,2));
-    mCRL2log(debug) << "Read-in Proc Name " << core::pp_deprecated(PBName) << ", Types " << core::pp_deprecated(atermpp::aterm_list(Types)) << std::endl;
   }
   //ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)PBFreeVars);
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
@@ -2907,7 +2906,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       {
         mCRL2log(error) << "Double assignment to variable " << core::pp_deprecated(ATAgetArgument(a,0))
                         << " (detected assigned values are " << core::pp_deprecated(existing_rhs)
-                        << " and " << ATAgetArgument(a,1) << ")" << std::endl;
+                        << " and " << core::pp_deprecated(ATAgetArgument(a,1)) << ")" << std::endl;
         return NULL;
       }
     }
@@ -3439,7 +3438,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
   ATermAppl PosType,
   ATermTable FreeVars,
   const bool strict_ambiguous,
-  const bool warn_upcasting)
+  const bool warn_upcasting,
+  const bool print_cast_error)
 {
   //Type checks and transforms *DataTerm replacing Unknown datatype with other ones.
   //Returns the type of the term
@@ -3503,7 +3503,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
-      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting);
+      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
 
@@ -3574,7 +3574,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
-      ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting);
+      ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
 
@@ -3624,7 +3624,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
-      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
+      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
       mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
@@ -3652,7 +3652,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermAppl WhereElem=ATAgetFirst(WhereList);
       ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
-      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting);
+      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
       if (!WhereType)
       {
         return NULL;
@@ -3697,7 +3697,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     }
 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars,strict_ambiguous,warn_upcasting);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
     ATtableDestroy(CopyAllowedVars);
     ATtableDestroy(CopyDeclaredVars);
 
@@ -3738,18 +3738,22 @@ static ATermAppl gstcTraverseVarConsTypeD(
         //First time to determine the common type only!
         ATermList NewArguments=ATmakeList0();
         bool Type_is_stable=true;
-        bool first_time=true;
         for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,false);
           if (!Type0)
           {
-            return NULL;
+            // Try again, but now without Type as the suggestion. 
+            // If this does not work, it will be caught in the second pass below.
+            Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+            if (!Type0)
+            { 
+              return NULL;
+            }
           }
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
-          Type_is_stable=first_time||(Type==Type0);
-          first_time=false;
+          Type_is_stable=Type_is_stable && (Type==Type0);
           Type=Type0;
         }
         Arguments=OldArguments;
@@ -3761,7 +3765,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
           {
             ATermAppl Argument=ATAgetFirst(Arguments);
-            ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
+            ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
             if (!Type0)
             {
               return NULL;
@@ -3792,7 +3796,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0)
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
@@ -3826,7 +3830,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0)
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
@@ -3858,14 +3862,14 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0)
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return NULL;
           }
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
-          if (!Type1)
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          if ((!Type1) && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
@@ -3896,14 +3900,14 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
-          if (!Type0)
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          if ((!Type0) && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return NULL;
           }
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
-          if (!Type1)
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          if ((!Type1) && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
@@ -3918,14 +3922,13 @@ static ATermAppl gstcTraverseVarConsTypeD(
         return Type;
       }
     }
-
     ATermList NewArgumentTypes=ATmakeList0();
     ATermList NewArguments=ATmakeList0();
 
     for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
     {
       ATermAppl Arg=ATAgetFirst(Arguments);
-      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting);
+      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting,print_cast_error);
       if (!Type)
       {
         return NULL;
@@ -3939,8 +3942,9 @@ static ATermAppl gstcTraverseVarConsTypeD(
     //function
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                      &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
-                      FreeVars,false,nArguments,warn_upcasting);
+                      &Data,
+                      data::unknown_sort() /* gsMakeSortArrow(ArgumentTypes,PosType) */,
+                      FreeVars,false,nArguments,warn_upcasting,print_cast_error);
     mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
     if (!NewType)
@@ -3961,6 +3965,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     //1) a cast has happened
     //2) some parameter Types became sharper.
     //we do the arguments again with the types.
+
 
     if (gsIsSortArrow(gstcUnwindType(NewType)))
     {
@@ -3997,7 +4002,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on (1) " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4007,7 +4012,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           {
             NewArgType=NeededType;
           }
-          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
+          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           mCRL2log(debug) << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Arg) << "" << std::endl;
           if (!NewArgType)
           {
@@ -4026,7 +4031,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
     //the function again
     NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                                      &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting);
+                                      &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting,print_cast_error);
 
     mCRL2log(debug) << "Result of gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
@@ -4071,7 +4076,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on (2) " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4081,7 +4086,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           {
             NewArgType=NeededType;
           }
-          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
+          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!NewArgType)
           {
             mCRL2log(error) << "needed type " << core::pp_deprecated(NeededType) << " does not match possible type "
@@ -4167,7 +4172,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         //upcasting
         ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
-        if (!CastedNewType)
+        if ((!CastedNewType) && print_cast_error)
         {
           mCRL2log(error) << "cannot (up)cast variable " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
           return NULL;
@@ -4274,7 +4279,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     }
     else
     {
-      return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, ATERM_NON_EXISTING_POSITION, warn_upcasting);
+      return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, ATERM_NON_EXISTING_POSITION, warn_upcasting,print_cast_error);
     }
   }
 
@@ -4293,7 +4298,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
   ATermTable FreeVars,
   const bool strict_ambiguous,
   const size_t nFactPars,
-  const bool warn_upcasting)
+  const bool warn_upcasting,
+  const bool print_cast_error)
 {
   // ATERM_NON_EXISTING_POSITION for nFactPars means the number of arguments is not known.
   mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(*DataTerm)
@@ -4474,7 +4480,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is (1) " << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4498,7 +4504,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is (2)" << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4535,7 +4541,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
     if (ATgetLength(ParList)==1)
     {
+      // replace PossibleSorts by a single possibility.
       ATermAppl Type=ATAgetFirst(ParList);
+
       ATermAppl OldType=Type;
       if (gstcHasUnknown(Type))
       {
@@ -4745,6 +4753,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
 
 
+      Type=replace_possible_sorts(Type); // Set the type to one option in possible sorts, if there are more options.
       *DataTerm=gsMakeOpId(Name,Type);
       if (variable)
       {
@@ -4780,7 +4789,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
   }
   else
   {
-    return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strict_ambiguous,warn_upcasting);
+    return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
   }
 }
 
@@ -4852,6 +4861,20 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
   if (gstcEqTypesA(NeededType,Type))
   {
     return Type;
+  }
+
+  if (data::is_multiple_possible_sorts(data::sort_expression(NeededType)))
+  {
+    sort_expression_list l=ATLgetArgument(NeededType,0);
+    for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    {
+      ATermAppl r=gstcUpCastNumericType(*i,Type,Par,warn_upcasting);
+      if (r!=NULL)
+      {
+        return r;
+      }
+    }
+    return NULL;
   }
 
   if (warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(ATAgetArgument(*Par,0))))
@@ -5206,7 +5229,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
         return NULL;
       }
       Type=gsMakeSortArrow(ArgTypes,ResType);
-      mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
+      // mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
       return Type;
     }
   }
@@ -5480,6 +5503,47 @@ static ATermList gstcGetVarTypes(ATermList VarDecls)
   return ATreverse(Result);
 }
 
+// Replace occurrences of multiple_possible_sorts([s1,...,sn]) by selecting
+// one of the possible sorts from s1,...,sn. Currently, the first is chosen.
+static ATermAppl replace_possible_sorts(ATermAppl Type)
+{
+  if (gsIsSortsPossible(data::sort_expression(Type)))
+  {
+    return ATAgetFirst(ATLgetArgument(Type,0)); // get the first element of the possible sorts.
+  }
+  if (data::is_unknown_sort(data::sort_expression(Type)))
+  {
+    return data::unknown_sort();
+  }
+  if (gsIsSortId(Type))
+  {
+    return Type;
+  }
+  if (gsIsSortCons(Type)) 
+  {
+    return ATsetArgument(Type,(ATerm)replace_possible_sorts(ATAgetArgument(Type,1)),1);
+  }
+
+  if (gsIsSortStruct(Type))
+  {
+    return Type;  // I assume that there are no possible sorts in sort constructors. JFG.
+  }
+
+  if (gsIsSortArrow(Type))
+  {
+    ATermList NewTypeList=ATmakeList0();
+    for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+    {
+      NewTypeList=ATinsert(NewTypeList,(ATerm)replace_possible_sorts(ATAgetFirst(TypeList)));
+    }
+    ATermAppl ResultType=ATAgetArgument(Type,1);
+    return gsMakeSortArrow(ATreverse(NewTypeList),replace_possible_sorts(ResultType));
+  }
+  assert(0); // All cases are dealt with above.
+  return Type; // Avoid compiler warnings.
+}
+
+
 static bool gstcHasUnknown(ATermAppl Type)
 {
   if (data::is_unknown_sort(data::sort_expression(Type)))
@@ -5744,38 +5808,6 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
     {
       MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
       return gstcMActEq(MAct1,MAct2);
-    }
-    else
-    {
-      NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
-    }
-  }
-  return false;
-}
-
-static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
-{
-  //returns true if MAct1 is a submultiaction of MAct2.
-  if (ATgetLength(MAct1)>ATgetLength(MAct2))
-  {
-    return false;
-  }
-  if (ATisEmpty(MAct1))
-  {
-    return true;
-  }
-  ATermAppl Act1=ATAgetFirst(MAct1);
-  MAct1=ATgetNext(MAct1);
-
-  //remove Act1 once from MAct2. if not there -- return ATfalse.
-  ATermList NewMAct2=ATmakeList0();
-  for (; !ATisEmpty(MAct2); MAct2=ATgetNext(MAct2))
-  {
-    ATermAppl Act2=ATAgetFirst(MAct2);
-    if (ATisEqual(Act1,Act2))
-    {
-      MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
-      return gstcMActSubEq(MAct1,MAct2);
     }
     else
     {

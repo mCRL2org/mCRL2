@@ -29,6 +29,11 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::log;
 
+namespace mcrl2
+{
+namespace lps
+{
+
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
@@ -219,13 +224,13 @@ ATermAppl NextState::getStateArgument(ATerm state, size_t index)
   }
 }
 
-mcrl2::lps::state NextState::make_new_state_vector(ATerm s) 
+mcrl2::lps::state NextState::make_new_state_vector(ATerm s)
 {
   mcrl2::lps::state new_state;
   for (size_t i=0; i<info.statelen; i++)
-  { 
+  {
     new_state.push_back(data_expression(getStateArgument(s,i)));
-  } 
+  }
   return new_state;
 }
 
@@ -1228,3 +1233,7 @@ NextState* createNextState(
 
   return NULL;
 }
+
+
+} // namespace lps
+} // namespace mcrl2

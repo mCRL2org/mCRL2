@@ -1,1 +1,0 @@
-EXCLUDE_PATTERNS  += */aterm_make.h */aterm_match.h */aterm_appl_constructor.h

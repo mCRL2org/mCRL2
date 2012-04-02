@@ -75,7 +75,7 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
 {
 
   size_t max_arity = 0;
-  for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l) 
+  for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l)
   {
     const size_t current_arity=rewriter->toRewriteFormat(l->lhs()).size();
     if (current_arity > max_arity + 1)
@@ -87,11 +87,11 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
 
   ATermList rules=ATempty;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
-  { 
+  {
     rules = ATinsert(rules,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
                                          (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->condition()),
                                          (ATerm) (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
-                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->rhs()))); 
+                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->rhs())));
   }
   rules = ATreverse(rules);
 
@@ -266,7 +266,7 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const size_t i)
 }
 
 RewriterJitty::RewriterJitty(
-           const data_specification& data_spec, 
+           const data_specification& data_spec,
            const mcrl2::data::used_data_equation_selector& equation_selector):
         Rewriter()
 {
@@ -784,7 +784,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
         ; opids != jitty_eqns.end()
         ; ++opids )
     {
-      const size_t j=opids->first.value(); 
+      const size_t j=opids->first.value();
       make_jitty_strat_sufficiently_larger(j);
       if (jitty_strat[j] == NULL)
       {
@@ -798,9 +798,9 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
   return a;
 }
 
-RewriteStrategy RewriterJitty::getStrategy()
+rewrite_strategy RewriterJitty::getStrategy()
 {
-  return GS_REWR_JITTY;
+  return jitty;
 }
 }
 }

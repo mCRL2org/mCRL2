@@ -219,9 +219,13 @@ class tool
 
         return EXIT_SUCCESS;
       }
+      catch (mcrl2::runtime_error& e)
+      {
+        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
+      }
       catch (std::exception& e)
       {
-        std::cerr << e.what() << std::endl;
+        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
       }
       return EXIT_FAILURE;
     }

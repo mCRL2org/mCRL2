@@ -1,0 +1,2 @@
+% There is no path shorter than 2^N - 1 steps to a deadlock
+nu X(n:Nat = 0) . val(n >= exp(2,N)-1) || ([true] X(n+1) && <true>true)

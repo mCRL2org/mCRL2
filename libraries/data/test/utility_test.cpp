@@ -124,7 +124,7 @@ void list_construction_test()
 
   data_specification specification;
 
-  mcrl2::data::rewriter R(specification, rewriter::jitty);
+  mcrl2::data::rewriter R(specification, jitty);
 
   representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],

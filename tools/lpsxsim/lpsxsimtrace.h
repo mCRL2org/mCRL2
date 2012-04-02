@@ -36,11 +36,11 @@ class XSimTrace: public wxFrame, public SimulatorViewInterface
     virtual void Initialise(const mcrl2::data::variable_list Pars);
     virtual void StateChanged(
                      mcrl2::lps::multi_action,
-                     mcrl2::lps::state,
+                     const mcrl2::lps::state,
                      atermpp::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
      virtual void StateChanged(
-                     mcrl2::lps::state,
+                     const mcrl2::lps::state,
                      atermpp::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
     virtual void Reset(mcrl2::lps::state State);

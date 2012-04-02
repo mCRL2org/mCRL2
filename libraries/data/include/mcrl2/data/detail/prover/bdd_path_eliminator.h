@@ -108,7 +108,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
                 v_set = push_front(v_set, v_guard_from_path);
-                a_path = ATremoveElement((ATermList)a_path, (ATerm)(ATermAppl) v_guard_from_path);
+                a_path = remove_one_element(a_path, v_guard_from_path);
               }
             }
           }

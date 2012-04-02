@@ -35,8 +35,6 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-
-
 template <typename T>
 void test_term(const std::string& s, const T& x)
 {
@@ -70,6 +68,8 @@ void test_term(const std::string& s)
 
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Pos\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Pos\"))],SortCons(SortSet,SortId(\"Pos\")))),[OpId(\"@false_\",SortArrow([SortId(\"Pos\")],SortId(\"Bool\"))),DataAppl(OpId(\"@fset_cons\",SortArrow([SortId(\"Pos\"),SortCons(SortFSet,SortId(\"Pos\"))],SortCons(SortFSet,SortId(\"Pos\")))),[OpId(\"@c1\",SortId(\"Pos\")),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Pos\")))])])");
+
   test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"ActionLabel\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"ActionLabel\"))],SortCons(SortBag,SortId(\"ActionLabel\")))),[OpId(\"@zero_\",SortArrow([SortId(\"ActionLabel\")],SortId(\"Nat\"))),DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"ActionLabel\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"ActionLabel\"))],SortCons(SortFBag,SortId(\"ActionLabel\")))),[OpId(\"a1\",SortId(\"ActionLabel\")),OpId(\"@c1\",SortId(\"Pos\")),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"ActionLabel\")))])])");
 
   test_term("DataEqn([DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\"))),DataVarId(\"X1\",SortCons(SortSet,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"LiftGenerated_not\",SortArrow([SortCons(SortSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\")))]),DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataAppl(OpId(\"lambda@1\",SortArrow([SortCons(SortSet,SortId(\"Bool\"))],SortArrow([SortId(\"Bool\")],SortId(\"Bool\")))),[DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\")))]),OpId(\"@sort_fset::empty\",SortCons(SortFSet,SortId(\"Bool\")))]))");
@@ -473,6 +473,61 @@ BOOST_AUTO_TEST_CASE(test_sort_expressions)
   std::cout << "ytext    = " << ytext << std::endl;
   BOOST_CHECK(x == y);
   BOOST_CHECK(xtext == ytext);
+}
+
+BOOST_AUTO_TEST_CASE(test_set_print2)
+{
+  using namespace sort_bool;
+
+  data_expression one = parse_data_expression("1");
+  data_expression x = sort_fset::insert(sort_nat::nat(), one, sort_fset::empty(sort_nat::nat()));
+  sort_expression s = sort_nat::nat();
+
+  data_expression true_  = sort_set::false_function(s);
+  data_expression false_ = sort_set::true_function(s);
+  data_expression f      = parse_function_symbol("f: Pos -> Bool");
+
+  data_expression x1 = sort_set::constructor(s, true_, x);
+  data_expression x2 = sort_set::constructor(s, false_, x);
+  data_expression x3 = sort_set::constructor(s, f, x);
+
+  BOOST_CHECK_EQUAL(data::pp(x1), "{1}");
+  BOOST_CHECK_EQUAL(data::pp(x2), "!{1}");
+  BOOST_CHECK_EQUAL(data::pp(x3), "{ x: Pos | f(x) != x in {1} }");
+}
+
+BOOST_AUTO_TEST_CASE(test_fset_print)
+{
+  using namespace sort_bool;
+
+  data_expression one = parse_data_expression("1");
+  data_expression x = parse_data_expression("{1, 2}");
+  data_expression y = parse_data_expression("{3}");
+  sort_expression s = sort_pos::pos();
+  data_expression f = parse_function_symbol("f: Pos -> Bool");
+  data_expression g = parse_function_symbol("g: Pos -> Bool");
+  data_expression false_ = sort_set::false_function(s);
+  data_expression true_ = sort_set::true_function(s);
+
+  data_expression xy_union = sort_fset::union_(s, false_, false_, x, y);
+  data_expression xy_intersection = sort_fset::intersection(s, false_, false_, x, y);
+  data_expression xy_difference = sort_fset::difference(s, x, y);
+  data_expression xy_in = sort_fset::in(s, one, x);
+
+  BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{1, 2} + {3}");
+  BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{1, 2} * {3}");
+  BOOST_CHECK_EQUAL(data::pp(xy_difference)  , "{1, 2} - {3}");
+  BOOST_CHECK_EQUAL(data::pp(xy_in)          , "1 in {1, 2}");
+
+  xy_union = sort_fset::union_(s, f, false_, x, y);
+  xy_intersection = sort_fset::intersection(s, f, false_, x, y);
+  BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{1, 2} + { x: Pos | !f(x) && x in {3} }");
+  BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{1, 2} * { x: Pos | !f(x) && x in {3} }");
+
+  xy_union = sort_fset::union_(s, f, g, x, y);
+  xy_intersection = sort_fset::intersection(s, f, g, x, y);
+  BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{ x: Pos | !g(x) && x in {1, 2} } + { x: Pos | !f(x) && x in {3} }");
+  BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{ x: Pos | !g(x) && x in {1, 2} } * { x: Pos | !f(x) && x in {3} }");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

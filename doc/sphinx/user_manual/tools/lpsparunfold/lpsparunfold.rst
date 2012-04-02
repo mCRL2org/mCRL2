@@ -1,4 +1,0 @@
-lpsparunfold
-===========================================
-
-.. include:: manual.rst

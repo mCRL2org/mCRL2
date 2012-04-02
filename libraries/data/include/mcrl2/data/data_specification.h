@@ -371,27 +371,6 @@ class data_specification
       m_non_typed_checked_data_spec=t;
     }
 
-    ///\brief Constructor
-    template < typename SortsRange, typename AliasesRange, typename ConstructorsRange,
-             typename MappingsRange, typename EquationsRange >
-    data_specification(const SortsRange& sorts,
-                       const AliasesRange& aliases,
-                       const ConstructorsRange& constructors,
-                       const MappingsRange& mappings,
-                       const EquationsRange& equations)
-      : m_data_specification_is_type_checked(true),
-        m_normalised_data_is_up_to_date(false)
-    {
-      std::for_each(sorts.begin(), sorts.end(),
-                    boost::bind(&data_specification::add_sort, this, _1));
-      std::for_each(constructors.begin(), constructors.end(),
-                    boost::bind(&data_specification::add_constructor, this, _1));
-      std::for_each(mappings.begin(), mappings.end(),
-                    boost::bind(&data_specification::add_mapping, this, _1));
-      std::for_each(equations.begin(), equations.end(),
-                    boost::bind(&data_specification::add_equation, this, _1));
-    }
-
     /// \brief Indicates that the data specification is type checked.
     /// \details This builds up internal data structures and allows
     ///  access to the data specification using all the utility functions.
@@ -1129,8 +1108,13 @@ inline data_specification operator +(data_specification spec1, const data_specif
   {
     spec1.add_sort(*i);
   }
-// void declare_data_specification_to_be_type_checked()
 
+  const atermpp::set<sort_expression>& cs2=spec2.context_sorts();
+  for(atermpp::set<sort_expression>::const_iterator i=cs2.begin(); i!=cs2.end(); ++i)
+  {
+    spec1.add_context_sort(*i);
+  }
+ 
   const alias_vector av=spec2.user_defined_aliases();
   for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
   {
@@ -1146,7 +1130,7 @@ inline data_specification operator +(data_specification spec1, const data_specif
   const function_symbol_vector mv=spec2.user_defined_mappings();
   for(function_symbol_vector::const_iterator i=mv.begin(); i!=mv.end(); ++i)
   {
-    spec1.add_constructor(*i);
+    spec1.add_mapping(*i);
   }
 
   const data_equation_vector ev=spec2.user_defined_equations();

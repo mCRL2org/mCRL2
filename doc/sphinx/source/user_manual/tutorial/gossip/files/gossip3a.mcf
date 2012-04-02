@@ -1,0 +1,11 @@
+% There is a path of length 7 leading to the situation where all
+% girls know all gossips (true)
+
+% This formula has bogus fixed points to make sure lps2pbes does
+% not have to look ahead through the conditions of the entire
+% state space.
+
+mu X1 . <!all_done><!all_done>
+mu X2 . <!all_done><!all_done>
+mu X3 . <!all_done><!all_done>
+mu X4 . <!all_done><all_done>true

@@ -423,6 +423,7 @@ bool EnumeratorSolutionsStandard::next(
       const sort_expression sort = var.sort();
       variable_list uvars = pop_front(e.vars());
 
+
       if (is_function_sort(sort))
       {
         if (solution_possible)
@@ -513,7 +514,7 @@ bool EnumeratorSolutionsStandard::next(
           var_array[0]=OpId2Int(*it);
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
-            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@enum@"),*i);
+            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
             var_list = push_front(var_list,fv);
             var_array[j]=fv;
 
@@ -523,7 +524,8 @@ bool EnumeratorSolutionsStandard::next(
             {
               if (solution_possible)
               {
-                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used\n";
+                mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
+                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
                 solution_possible=false;
                 return false;
               }
@@ -616,15 +618,28 @@ bool EnumeratorSolutionsStandard::next(
   return next(dummy_evaluated_condition,solution,solution_possible);
 }
 
-void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false)
+void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool expr_is_normal_form)
 {
-  push_on_fs_stack_and_split_or(fs_stack,
-                                enum_vars,
-                                variable_list(),
-                                atermpp::term_list< atermpp::aterm_appl>(),
-                                enum_expr,
-                                atermpp::term_list< atermpp::aterm_appl>(),
-                                !not_equal_to_false);
+  if (expr_is_normal_form)
+  {
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,
+                                  enum_vars,
+                                  variable_list(),
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  enum_expr,
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  !not_equal_to_false);
+  }
+  else
+  {
+    push_on_fs_stack_and_split_or(fs_stack,
+                                  enum_vars,
+                                  variable_list(),
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  enum_expr,
+                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  !not_equal_to_false);
+  }
 }
 
 EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r):

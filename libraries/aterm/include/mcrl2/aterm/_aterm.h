@@ -20,7 +20,6 @@ extern ATermProtFunc* at_prot_functions;
 extern size_t at_prot_functions_count;
 
 void AT_markTerm(ATerm t);
-void AT_markTerm_young(ATerm t);
 
 void AT_unmarkIfAllMarked(ATerm t);
 size_t  AT_calcUniqueAFuns(ATerm t);

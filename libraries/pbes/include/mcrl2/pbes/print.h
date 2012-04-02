@@ -144,7 +144,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     derived()(x.name());
-    print_variables(x.parameters(), false);
+    print_list(x.parameters(), "(", ")", ", ", false);
     derived().leave(x);
   }
 

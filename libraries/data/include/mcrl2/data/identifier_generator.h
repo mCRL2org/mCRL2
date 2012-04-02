@@ -51,11 +51,11 @@ class identifier_generator
 
     /// \brief Adds the identifier s to the context.
     /// \param s An identifier.
-    virtual void add_identifier(core::identifier_string s) = 0;
+    virtual void add_identifier(const core::identifier_string& s) = 0;
 
     /// \brief Removes the identifier s from the context.
     /// \param s An identifier.
-    virtual void remove_identifier(core::identifier_string s) = 0;
+    virtual void remove_identifier(const core::identifier_string& s) = 0;
 
     /// \brief Add a set of identifiers to the context.
     void add_identifiers(const std::set<core::identifier_string>& ids)
@@ -78,20 +78,23 @@ class identifier_generator
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
-    virtual bool has_identifier(core::identifier_string s) const = 0;
+    virtual bool has_identifier(const core::identifier_string& s) const = 0;
 
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     /// \param hint A string
     /// \return A fresh identifier.
-    virtual core::identifier_string operator()(const std::string& hint)
+    virtual core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {
-      core::identifier_string id(hint);
+      core::identifier_string id(add_to_context?hint:m_generator(hint));
       while (has_identifier(id))
       {
         id = core::identifier_string(m_generator(hint));
       }
-      add_identifier(id);
+      if (add_to_context)
+      {
+        add_identifier(id);
+      }
       return id;
     }
 };

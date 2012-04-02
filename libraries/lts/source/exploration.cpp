@@ -28,29 +28,6 @@ using namespace mcrl2::lts;
  * - clean up options struct
  */
 
-exploration_strategy mcrl2::lts::str_to_expl_strat(std::string s)
-{
-  if (s=="b" || s=="breadth") return es_breadth;
-  if (s=="d" || s=="depth") return es_depth;
-  if (s=="r" || s=="random") return es_random;
-  if (s=="p" || s=="prioritized") return es_value_prioritized;
-  if (s=="q" || s=="rprioritized") return es_value_random_prioritized;
-  return es_none;
-}
-
-std::string mcrl2::lts::expl_strat_to_str(exploration_strategy es)
-{
-  switch (es)
-  {
-    case es_breadth: return "breadth";
-    case es_depth: return "depth";
-    case es_random: return "random";
-    case es_value_prioritized: return "prioritized";
-    case es_value_random_prioritized: return "rprioritized";
-    default: return "unknown";
-  }
-}
-
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* options)
 {
   m_options = *options;
@@ -202,7 +179,7 @@ bool lps2lts_algorithm::generate_lts()
   }
   m_num_states = 1;
 
-  mCRL2log(verbose) << "generating state space with '" << expl_strat_to_str(m_options.expl_strat) << "' strategy...\n";
+  mCRL2log(verbose) << "generating state space with '" << m_options.expl_strat << "' strategy...\n";
 
   if (m_options.max_states == 0)
   {
@@ -296,13 +273,6 @@ bool lps2lts_algorithm::finalise_lts_generation()
         lts_dot_t dot;
         detail::lts_convert(m_output_lts, dot);
         dot.save(m_options.lts);
-        break;
-      }
-      case lts_svc:
-      {
-        lts_svc_t svc;
-        detail::lts_convert(m_output_lts, svc);
-        svc.save(m_options.lts);
         break;
       }
       default:

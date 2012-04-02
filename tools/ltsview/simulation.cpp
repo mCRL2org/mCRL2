@@ -145,10 +145,24 @@ void Simulation::traceBack(State* initState)
   State* currPos = stateHis.back();
   while (currPos != initState)
   {
-    transHis.push_back(currPos->getInTransition(0));
-    currPos = currPos->getInTransition(0)->getBeginState();
-    currPos->setSimulated(true);
-    stateHis.push_back(currPos);
+    // Loop through the incoming transitions of currPos.
+    // Because of the way the LTS is structured, we know that there is at least
+    // one incoming transition that is not a selfloop and not a backpointer.
+    // We take the first such transition, because that guarantees that the
+    // source state of that transition is in the previous level.
+    // Just taking the first incoming transition may lead to infinite loops.
+	  for(int i = 0; i < currPos->getNumInTransitions(); ++i)
+	  {
+	    Transition* trans = currPos->getInTransition(i);
+      if (!trans->isBackpointer() && !trans->isSelfLoop())
+      {
+        transHis.push_back(trans);
+        currPos = trans->getBeginState();
+        currPos->setSimulated(true);
+        stateHis.push_back(currPos);
+        break;
+      }	
+    }
   }
   // Undo reversion
   reverse(transHis.begin(), transHis.end());
@@ -199,9 +213,20 @@ void Simulation::followTrans()
 
 void Simulation::chooseTrans(int i)
 {
-  chosenTrans = i;
-  // Fire signal
-  selChangeSignal();
+  // Prevent infinite looping behaviour through signals and slots:
+  // Updating the selection in the selector in the simulation dialog triggers
+  // an update of the transition that was chosen, leading to a chooseTrans call.
+  // This chooseTrans call triggers a selChangeSignal, which may again lead to
+  // an update of the selection in the simulation dialog, leading to an infinite
+  // recursion.
+  // This is prevented by only updating the chosen transition if it is really changed.
+  // See also mCRL2 bug #932 (https://svn.win.tue.nl/trac/MCRL2/ticket/932)
+  if(chosenTrans != i)
+  {
+    chosenTrans = i;
+    // Fire signal
+    selChangeSignal();
+  }
 }
 
 void Simulation::undoStep()

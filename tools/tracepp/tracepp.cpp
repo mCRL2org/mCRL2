@@ -35,6 +35,71 @@ using namespace mcrl2::trace;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
+static inline
+std::string print_output_type(const output_type t)
+{
+  switch(t)
+  {
+    case otPlain: return "plain";
+    case otMcrl2: return "mcrl2";
+    case otDot: return "dot";
+    case otAut: return "aut";
+    case otNone: return "none";
+    case otStates: return "states";
+  }
+  throw mcrl2::runtime_error("unknown trace format");
+}
+
+static inline
+std::string description(const output_type t)
+{
+  switch(t)
+  {
+    case otPlain: return "plain text";
+    case otMcrl2: return "the mCRL2 format";
+    case otDot: return "the GraphViz format";
+    case otAut: return "the Aldebaran format";
+    case otNone: return "no output";
+    case otStates: return "plain text with state vectors";
+  }
+  throw mcrl2::runtime_error("unknown trace format");
+}
+
+static inline
+output_type parse_output_type(const std::string& s)
+{
+  if(s == "plain") return otPlain;
+  else if(s == "mcrl2") return otMcrl2;
+  else if(s == "dot") return otDot;
+  else if(s == "aut") return otAut;
+  else if(s == "none") return otNone;
+  else if(s == "states") return otStates;
+  else throw mcrl2::runtime_error("unknown trace format " + s);
+}
+
+static inline
+std::istream& operator>>(std::istream& is, output_type& t)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    t = parse_output_type(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+static inline
+std::ostream& operator<<(std::ostream& os, const output_type t)
+{
+  os << print_output_type(t);
+  return os;
+}
+
 static void print_state(ostream& os, const mcrl2::lps::state &s)
 {
   size_t arity = s.size();
@@ -51,53 +116,56 @@ static void print_state(ostream& os, const mcrl2::lps::state &s)
   os << ")";
 }
 
-static void trace2dot(ostream& os, Trace& trace, char const* name)
+static void trace2dot(ostream& os, Trace& trace, const std::string& name)
 {
   os << "digraph \"" << name << "\" {" << endl;
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;
   os << "nodesep = 0.05;" << endl;
-  mcrl2::lps::multi_action act;
-  int i = 0;
-  os << i << " [label=\"";
+
+  trace.resetPosition();
+
+  os << 0 << " [label=\"";
   if (trace.current_state_exists())
   {
     print_state(os,trace.currentState());
   }
   os << "\",peripheries=2];" << endl;
-  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
+
+  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     os << i+1 << " [label=\"";
+    trace.increasePosition();
     if (trace.current_state_exists())
     {
       print_state(os,trace.currentState());
     }
+    trace.decreasePosition();
     os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
-    os << mcrl2::lps::pp(act);
+    os << mcrl2::lps::pp(trace.currentAction());
     os << "\"];" << endl;
-    i++;
   }
   os << "}" << endl;
 }
 
 static void trace2statevector(ostream& os, Trace& trace)
 {
-  if (trace.current_state_exists())
+  trace.resetPosition();
+
+  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
-    print_state(os,trace.currentState());
-  }
-  mcrl2::lps::multi_action act = trace.nextAction();
-  while (act != mcrl2::lps::multi_action())
-  {
-    os << " -";
-    os << mcrl2::lps::pp(act);
-    os << "-> " << std::endl;
     if (trace.current_state_exists())
     {
-      print_state(os, trace.currentState());
+      print_state(os,trace.currentState());
     }
-    act = trace.nextAction();
+    os << " -";
+    os << mcrl2::lps::pp(trace.currentAction());
+    os << "-> " << std::endl;
+  }
+  if (trace.current_state_exists())
+  {
+    print_state(os, trace.currentState());
   }
   os << std::endl;
 }
@@ -105,37 +173,35 @@ static void trace2statevector(ostream& os, Trace& trace)
 static void trace2aut(ostream& os, Trace& trace)
 {
   os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << endl;
-  mcrl2::lps::multi_action act;
-  int i = 0;
-  while ((act = trace.nextAction()) != mcrl2::lps::multi_action())
+  trace.resetPosition();
+
+  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     os << "(" << i << ",\"";
-    os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
-    i++;
-    os << "\"," << i << ")" << endl;
+    os << mcrl2::lps::pp(trace.currentAction());
+    os << "\"," << i+1 << ")" << endl;
   }
 }
 
-inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
+inline void save_trace(Trace& trace, output_type outtype, std::ostream& out, const std::string& name)
 {
+  mCRL2log(verbose) << "writing result in " << description(outtype) << "..." << std::endl;
   switch (outtype)
   {
     case otPlain:
-      mCRL2log(verbose) << "writing result in plain text..." << std::endl;
       trace.save(out,tfPlain);
       break;
     case otMcrl2:
-      mCRL2log(verbose) << "writing result in mCRL2 trace format..." << std::endl;
       trace.save(out,tfMcrl2);
       break;
     case otAut:
-      mCRL2log(verbose) << "writing result in aut format..." << std::endl;
       trace2aut(out,trace);
       break;
     case otStates:
-      mCRL2log(verbose) << "writing result in plain text with state vectors..." << std::endl;
       trace2statevector(out,trace);
       break;
+    case otDot:
+      trace2dot(out, trace, name);
     default:
       break;
   }
@@ -190,17 +256,7 @@ class tracepp_tool: public input_output_tool
       if (output_filename().empty())
       {
         mCRL2log(verbose) << "writing result to stdout..." << std::endl;
-
-        if (format_for_output == otDot)
-        {
-          mCRL2log(verbose) << "writing result in dot format..." << std::endl;
-
-          trace2dot(std::cout,trace,"stdin");
-        }
-        else
-        {
-          save_trace(trace, format_for_output, std::cout);
-        }
+        save_trace(trace, format_for_output, std::cout,"stdin");
       }
       else
       {
@@ -210,17 +266,7 @@ class tracepp_tool: public input_output_tool
 
         if (out.good())
         {
-          if (format_for_output == otDot)
-          {
-            mCRL2log(verbose) << "writing result in dot format..." << std::endl;
-
-            trace2dot(out,trace,
-                      input_filename().substr(input_filename().find_last_of('.')).c_str());
-          }
-          else
-          {
-            save_trace(trace, format_for_output, out);
-          }
+          save_trace(trace, format_for_output, out, input_filename().substr(input_filename().find_last_of('.')));
         }
         else
         {
@@ -237,49 +283,20 @@ class tracepp_tool: public input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("format", make_mandatory_argument("FORMAT"),
-                      "print the trace in the specified FORMAT:\n"
-                      "  'plain' for plain text (default),\n"
-                      "  'states' for plain text with state vectors,\n"
-                      "  'mcrl2' for the mCRL2 format,\n"
-                      "  'aut' for the Aldebaran format, or\n"
-                      "  'dot' for the GraphViz format"
-                      , 'f');
+      desc.add_option("format", make_enum_argument<output_type>("FORMAT")
+                      .add_value(otPlain, true)
+                      .add_value(otStates)
+                      .add_value(otMcrl2)
+                      .add_value(otAut)
+                      .add_value(otDot),
+                      "print the trace in the specified FORMAT:", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("format"))
-      {
-        std::string eq_name(parser.option_argument("format"));
-        if (eq_name == "plain")
-        {
-          format_for_output = otPlain;
-        }
-        else if (eq_name == "states")
-        {
-          format_for_output = otStates;
-        }
-        else if (eq_name == "mcrl2")
-        {
-          format_for_output = otMcrl2;
-        }
-        else if (eq_name == "dot")
-        {
-          format_for_output = otDot;
-        }
-        else if (eq_name == "aut")
-        {
-          format_for_output = otAut;
-        }
-        else
-        {
-          parser.error("option -f/--format has illegal argument '" + eq_name + "'");
-        }
-      }
+      parser.option_argument_as<output_type>("format");
     }
-
 };
 
 class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool>

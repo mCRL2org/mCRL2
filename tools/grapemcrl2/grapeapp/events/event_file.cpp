@@ -24,6 +24,7 @@
 #include "event_file.h"
 #include "mcrl2gen/mcrl2gen.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/exception.h"
 
 using namespace grape::libgrape;
 using namespace grape::grapeapp;
@@ -102,10 +103,20 @@ bool grape_event_open::Do(void)
   // Create new grapespecification and load filecontent
   grape_specification* new_spec = new grape_specification;
   long max_id = 0;
-  if (!xml_open(new_spec, m_filename.GetFullPath(), max_id))
-  {
-    wxMessageBox(m_filename.GetName() + _T(".gra is not loaded."), _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
 
+  try
+  {
+    if( !xml_open(new_spec, m_filename.GetFullPath(), max_id) )
+    {
+      wxMessageBox(m_filename.GetName() + _T(".gra is not loaded.\n") + _T( "Unkown error." ) , _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
+      // opening was unsuccessful
+      return false;
+    }
+
+  } catch( mcrl2::runtime_error &e ) 
+  { 
+    wxMessageBox(m_filename.GetName() + _T(".gra is not loaded.\n") +
+                  wxString( e.what(), wxConvUTF8 ) , _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
     // opening was unsuccessful
     return false;
   }

@@ -10,9 +10,13 @@
 project(mac_installer)
 cmake_minimum_required(VERSION 2.6)
 
-# ######### General setup ##########
 
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
+# overrule default MACOSX_BUNDLE_ICON_FILE location
 SET(MACOSX_BUNDLE_ICON_FILE mcrl2-logo.icns)
+
+# ######### General setup ##########
 
 if ( MCRL2_ENABLE_GUI_TOOLS )
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE

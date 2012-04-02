@@ -1,0 +1,488 @@
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fullpage}
+\usepackage{amsfonts}
+
+%TCIDATA{OutputFilter=Latex.dll}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{LastRevised=Friday, August 21, 2009 13:26:27}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\input{include/tcilatex}
+\begin{document}
+
+
+\section{ The LPS-library}
+
+This document describes data types and algorithms of the LPS-library.
+
+\subsection{Terms}
+
+For an arbitrary term $t$ we define $\mathcal{V}ar(t)$ as the set of data
+variables that occur in $t$. The result of substituting $d^{\prime }$ for $d$
+in a term $t$ is denoted as $t[d:=d^{\prime }]$. With $d\in Sub(t)$ we
+denote that data variable $d$ is a subterm of data expression $t$.
+
+\subsection{Timed Linear processes}
+
+Let $\mathcal{D}$ be the set of all data expressions, with $\simeq $ an
+equivalence relation on $\mathcal{D}$. All data expressions have implicitly
+defined an associated sort. Let $\mathcal{V\subset D}$ be the set of all
+data variables. Furthermore, let $\mathcal{A}$ be the set of action labels.
+A timed linear process $X$ is a process equation of the following form:%
+\begin{equation}
+\begin{array}{l}
+X(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(f_{i}(d,e)) \mbox{\aap ,} t_{i}(d,e)X(g_{i}(d,e))+\sum\limits_{i\in
+J}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow \delta \mbox{\aap ,} t_{i}(d,e),%
+\end{array}
+\label{eq:lps_timed}
+\end{equation}%
+and $I$ and $J$ are disjoint and finite index sets, and for $i\in I\cup J$:
+
+\begin{itemize}
+\item $c_{i}:D\times E_{i}\rightarrow \mathbb{B}$ is the condition function,
+
+\item $a_{i}(d,e)$ is a multi-action $a_{i}^{1}(f_{i}^{1}(d,e))|\cdots
+|a_{i}^{n_{i}}(f_{i}^{n_{i}}(d,e))$, where $f_{i}:D\times E_{i}\rightarrow 
+\mathcal{D}$ is the action parameter function,
+
+\item $t_{i}:D\times E_{i}\rightarrow \mathbb{R}$ is the time stamp function,
+
+\item $g_{i}:D\times E_{i}\rightarrow D$ is the next state function.
+\end{itemize}
+
+The components $d_{i}$ $\in \mathcal{V}$ of vector $d=[d_{1},\cdots ,d_{m}]$
+are called the \emph{process parameters} of $X$.
+
+\subsection{Untimed Linear processes}
+
+Similarly, an untimed linear process $X$ is a process equation of the
+following form:%
+\begin{equation}
+\begin{array}{l}
+X(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(f_{i}(d,e))X(g_{i}(d,e))+\sum\limits_{i\in
+J}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow \delta%
+\end{array}%
+,  \label{eq:lps_untimed}
+\end{equation}%
+with $c_{i}$, $a_{i}$ and $g_{i}$ defined as above.
+
+\subsubsection{State Space}
+
+An untimed linear process \ref{eq:lps_untimed} with initial value $\overline{%
+d}\in D$ defines a labeled transition system $M=(S,\Sigma ,\rightarrow
+,s_{0})$, where
+
+\begin{itemize}
+\item $S=D$ is the (possibly infinite) set of states
+
+\item $\Sigma =\{a_{i}(f_{i}(d,e))|i\in I\wedge e:E_{i}\}$ is the (possibly
+infinite) set of labels
+
+\item $\rightarrow $ $=\{(d,a_{i}(f_{i}(d,e)),g_{i}(d,e))|i\in I\wedge
+e:E_{i}\wedge c_{i}(d,e)\}$
+
+\item $s${}$_{0}=\overline{d}$ is the initial state
+\end{itemize}
+
+For $R\subset S$ we define $next\_states(R)$ as $\{s\in S|\exists r\in
+R:r\rightarrow s\}$.
+
+\subsection{Don't care variables}
+
+\bigskip In the mCRL2 tool set a linear process is parameterized with a
+finite set $DC$ of so called \emph{don't care} variables (also called free
+variables). This means that the expressions $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, and $t_{i}(d,e)$ may contain unbound variables from the set $DC$%
+. Don't care variables have the special property that any two processes
+obtained by assigning values to them are strongly bisimulation equivalent.
+In many algorithms we will simply ignore don't care variables. In some
+cases, algorithms may assign values to some of the don't care variables.
+
+\subsection{Notations}
+
+Let $p$ be an untimed linear process as defined in \ref{eq:lps_untimed}.
+
+\begin{itemize}
+\item A \emph{constant parameter} of $p$ is a parameter $d_{i}$ that has a
+constant value for all reachable states of the corresponding state space,
+given an initial state $\overline{d}:D$.
+
+\item An \emph{insignificant parameter} of $p$ is a process parameter $d_{i}$
+such that for any two initial states that differ only at the value of $d_{i}$%
+, the corresponding state spaces are isomorphic.
+
+\item Let $p$ be a linear process, $x$ a data variable and $y$ a data
+expression. Then $p[x:=y]$ is the linear process obtained from $p$ by
+applying the substitution $x:=y$ to all terms $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.\newpage
+\end{itemize}
+
+\subsection{Processes}
+
+Process expressions in mCRL2 are expressions built according to the
+following syntax:%
+\[
+\begin{array}{ccc}
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\ 
+P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
+P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
+ProcessAssignment} \\ 
+\delta & \text{delta()} & \text{Delta} \\ 
+\tau & \text{tau()} & \text{Tau} \\ 
+\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
+\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
+\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
+\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\ 
+\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\ 
+\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\ 
+x\ |\ y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\ 
+x\mbox{\aap ,}t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\ 
+x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\ 
+c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\ 
+c\rightarrow x\diamond y & \text{if\_then\_else(}c\text{,}x\text{,}y\text{)}
+& \text{IfThenElse} \\ 
+x<<y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\ 
+x\ ||\ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\ 
+x\ ||\_\ y & \text{lmerge(}x\text{,}y\text{)} & \text{LMerge} \\ 
+x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
+\end{array}%
+\]
+
+where the types of the symbols are as follows:%
+\[
+\begin{array}{cl}
+a,b & \text{strings (action names)} \\ 
+P & \text{a process identifier} \\ 
+e & \text{a sequence of data expressions} \\ 
+d & \text{a sequence of data variables} \\ 
+B & \text{a set of strings (action names) } \\ 
+R & \text{a sequence of rename expressions} \\ 
+C & \text{a sequence of communication expressions} \\ 
+V & \text{a sequence of multi actions} \\ 
+t & \text{a data expression of type real} \\ 
+x,y & \text{process expressions} \\ 
+c & \text{ a data expression of type bool}%
+\end{array}%
+\]%
+A rename expression is of the form $a\rightarrow b$, with $a$ and $b$ action
+names. A multi action is of the form $a_{1}\ |\ \cdots \ |\ a_{n}$, with $%
+a_{i}$ actions. A communication expression is of the form $b_{1}\ |\ \cdots
+\ |\ b_{n}\rightarrow b$, with $b$ and $b_{i}$ action names.
+
+\subsubsection{Restrictions}
+
+A multi action is a multi set of actions. The left hand sides of the
+communication expressions in $C$ must be unique. Also the left hand sides of
+the rename expressions in $R$ must be unique.\pagebreak
+
+\subsubsection{Linear process expressions}
+
+Linear process expressions are a subset of process expresions satisfying the
+following grammar:
+\begin{verbatim}
+<linear process expression> ::= choice(<linear process expression>, <linear process expression>)
+                              | <summand>
+ 
+<summand>                   ::= sum(<variables>, <alternative>)
+                              | <conditional action prefix>
+                              | <conditional deadlock>
+ 
+<conditional action prefix> ::= if_then(<condition>, <action prefix>)
+                              | <action prefix>
+ 
+<action prefix>             ::= seq(<timed multiaction>, <process reference>)
+                              | <timed multiaction>
+ 
+<timed multiaction>         ::= at_time(<multiaction>, <time stamp>)
+                              | <multiaction>
+ 
+<multiaction>               ::= tau()
+                              | <action>
+                              | sync(<multiaction>, <multiaction>)
+ 
+<conditional deadlock>      ::= if_then(<condition>, <timed deadlock>)
+                              | <timed deadlock>
+ 
+<timed deadlock>            ::= delta()
+                              | at_time(delta(), <time stamp>)
+ 
+<process reference>         ::= process(<process identifier>, <data expressions>)
+                              | process_assignment(<process identifier>, <data assignments>)
+\end{verbatim}
+
+\pagebreak
+
+\subsection{Linear processes}
+
+Linear process expressions in mCRL2 are expressions built according to the
+following syntax:
+
+\[
+\begin{array}{ccc}
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+b(e) & \text{action(}b\text{,}e\text{)} & \text{Action} \\ 
+\sum\limits_{v}c\rightarrow a\mbox{\aap ,}t\ P(g) & \text{summand(}v,c,a,g%
+\text{)} & \text{LinearProcessSummand} \\ 
+\sum\limits_{v}c\rightarrow \delta \mbox{\aap ,}t & \text{summand(}%
+v,c,\delta \text{)} & \text{LinearProcessSummand} \\ 
+P(d:=e) & \text{process\_initializer(}f,d:=e\text{)\QQfnmark{%
+Here $f$ is a superset of the free variables appearing in $e$.}} & \text{%
+LinearProcessInit} \\ 
+\sum\limits_{i\in I}s_{i} & \text{linear\_process(}f,v,s\text{)\QQfnmark{%
+Here $s=[s_{1},\cdots ,s_{n}]$ is a sequence of summands, $v$ is the
+sequence of process parameters of the corresponding process, and $f$ is a
+sequence of free variables appearing in $s$.}} & \text{LinearProcess}%
+\end{array}%
+\QQfntext{-1}{
+Here $f$ is a superset of the free variables appearing in $e$.}
+\QQfntext{1}{
+Here $s=[s_{1},\cdots ,s_{n}]$ is a sequence of summands, $v$ is the
+sequence of process parameters of the corresponding process, and $f$ is a
+sequence of free variables appearing in $s$.}
+\]%
+where the types of the symbols are as follows:%
+\[
+\begin{array}{cl}
+a & \text{a (timed) multi-action} \\ 
+b & \text{a string (action name)} \\ 
+\delta & \text{a (timed) deadlock} \\ 
+P & \text{a process identifier} \\ 
+e,f,g & \text{a sequence of data expressions} \\ 
+d,v & \text{a sequence of data variables} \\ 
+t & \text{a data expression of type real} \\ 
+s & \text{a sequence of summands} \\ 
+c & \text{ a data expression of type bool}%
+\end{array}%
+\]
+
+\subsubsection{Conversion to linear process}
+
+The function $lin$ converts a process expression to linear process format,
+if it is linear.
+
+\begin{eqnarray*}
+lin(\text{if\_then}(c,\delta )) &=&\text{summand}([],c,\delta ) \\
+lin(\text{if\_then}(c,\text{seq}(x,P(g))) &=&\text{summand}([],c,lin(x),g) \\
+\text{add\_summand\_variables}(\text{summand}(v,c,\overrightarrow{a},g),w)
+&=&\text{summand}(v+w,c,\overrightarrow{a},g) \\
+\text{add\_summand\_variables}(\text{summand}(v,c,\delta ),w) &=&\text{%
+summand}(v+w,c,\delta ) \\
+lin(\text{sum}(v,x) &=&\text{add\_summand\_variables}(lin(x),w) \\
+lin(\text{seq}(x,P)) &=&lin(x) \\
+\text{set\_multi\_action\_time}(\text{multi\_action}([a_{1},\cdots
+,a_{n}]),t) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}],t) \\
+lin(\text{at\_time}(x,t)) &=&\text{set\_multi\_action\_time}(lin(x),t) \\
+\text{multi\_action}([a_{1},\cdots ,a_{m}])+\text{multi\_action}%
+([a_{m+1},\cdots ,a_{n}]) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}]) \\
+lin(\text{sync}(x,y)) &=&lin(x)+lin(y) \\
+lin(a) &=&\text{multi\_action}([a]) \\
+lin(\tau ) &=&\text{multi\_action}([]) \\
+lin(\text{choice}(\text{choice}(x,y),z)) &=&lin(\text{choice}(x,y))+[lin(z)]
+\\
+lin(\text{choice}(x,\text{choice}(y,z))) &=&[lin(x)]+lin(\text{choice}(y,z))
+\\
+lin(\text{choice}(x,y)) &=&[lin(x),lin(y)]
+\end{eqnarray*}
+
+\pagebreak
+
+\subsection{Operations on linear processes}
+
+We now define two operations on linear processes: removing (insignificant)
+parameters and removing constant parameters.
+
+Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
+insignificant parameters of $X$. Then we define \textsc{RemoveParameters(}$%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} as a linear process obtained
+from $X(d:D)$ by removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process
+parameters of $X$, and by replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, or $t_{i}(d,e)$ that appears in the definition of $X$, and that
+has one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm by a
+term $c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$,
+or $t_{i}^{\prime }(d,e)$ that does not have one of the variables $%
+d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm, and such that the remaining
+process is strongly bisimulation equivalent to $X(d:D)$\footnote{%
+A more formal definition of this is welcome.}.
+
+Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
+constant parameters of $X$, given the state $\overline{d}:D$. Then we define 
+\textsc{RemoveConstantParameters}($p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},%
+\overline{d}$) as a linear process obtained from $X(d:D)$ by removing $%
+\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process parameters of $X$, and by
+replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $g_{i}(d,e)$, or $t_{i}(d,e)$
+that appears in the definition of $X$ by a term $c_{i}^{\prime }(d,e)$, $%
+f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$, or $t_{i}^{\prime }(d,e)$
+that does not have one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a
+subterm, and such that the remaining process is strongly bisimulation
+equivalent to $X(d:D)$\footnote{%
+Or should this be restricted to the result of substituting all the constant
+values, and possibly applying the rewriter to it?}.
+
+\section{Parelm}
+
+Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns 
+\textsc{RemoveParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} for
+some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of 
+$p$.
+
+\subsection{Parelm implementations}
+
+We define the following implementations of parelm:
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Parelm1(}$p$\textsc{)} \\ 
+$G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}%
+ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$
+\\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in G}\ \exists
+_{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
+$\qquad G:=G\cup \Delta G$ \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
+,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
+\end{tabular}%
+\]%
+where $\{j_{1},\cdots ,j_{m}\}=G$.\bigskip\ Note that $g_{i}(d,e)_{l}$ is
+the $l$-th component of the vector of terms $g_{i}(d,e)$.%
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Parelm2(}$p$\textsc{)} \\ 
+$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}ar(c_{i}(d,e))\cup 
+\mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$ \\ 
+$V:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$E:=\{(d_{j},d_{k})\ |\ \exists _{i\in I}:d_{j}\in \mathcal{V}%
+ar(g_{i}(d,e)_{k}\}$ \\ 
+$R:=\{d_{k}\ |\ $graph $G=(V,E)$ contains a directed path $w,\cdots ,d_{k}$
+for some $w\in W\}$ \\ 
+$\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\ 
+\hline
+\end{tabular}%
+\]
+
+\section{Constelm}
+
+Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed}, and let $\overline{d}:D$ be its initial value. A \emph{%
+constelm} algorithm is an algorithm that returns \textsc{%
+RemoveConstantParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}$%
+\textsc{)} for some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of constant
+parameters of $p$.
+
+\subsection{Constelm implementations}
+
+We assume that $R:\mathcal{D\rightarrow D}$ is a (rewriter) function on data
+expressions with the following properties:%
+\begin{eqnarray*}
+R(false) &=&false \\
+(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{.}
+\end{eqnarray*}%
+Then we define the following implementations of constelm:
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Constelm1(}$p(d),\widehat{d},V,R$\textsc{)} \\ 
+$e:=R(\widehat{d})$ \\ 
+$G:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$\sigma :=\widehat{\sigma }$ \\ 
+\textbf{for} $j:=1$ \textbf{to} $n$ \textbf{do} \\ 
+$\qquad \sigma \lbrack d_{j}]:=e_{j}$ \\ 
+$\qquad undo[j]:=\emptyset $ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta G:=\emptyset $ \\ 
+$\qquad $\textbf{for} $i\in I$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if }$R(\sigma (c_{i}))\neq false$ \\ 
+$\qquad \qquad \qquad $\textbf{for }$d_{j}\in G\setminus \Delta G$ \textbf{do%
+} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if }$R(\sigma (g_{ij}))\neq R(\sigma
+(d_{j}))$ \\ 
+$\qquad \qquad \qquad \qquad \qquad W:=$\textsc{solve}$%
+(V,c_{i},g_{ij},d_{j},e_{j},R,\sigma )$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{if }$W\neq \emptyset $ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$(w_{0},w_{1})\in W$
+\textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack
+w_{0}]:=w_{1}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=undo[j]\cup
+\{w_{0}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \Delta G:=\Delta G\cup \{d_{j}\}$
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack d_{j}]:=d_{j}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$w\in undo[j]$ 
+\textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w]:=w$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=\emptyset $ \\ 
+$\qquad G:=G\setminus \Delta G$ \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}p,\overline{d}%
+,\sigma \text{\textsc{)}},$ \\ \hline
+\end{tabular}%
+\]%
+where $V$ is the set of global variables of the linear process $p$, and
+where $\sigma $ is a substitution function and $\widehat{\sigma }$ is the
+identity function. The notation $\sigma \lbrack v]:=w$ means $\sigma =\sigma
+^{\prime }$ with%
+\[
+\left\{ 
+\begin{array}{l}
+\sigma ^{\prime }(x)=\sigma ^{\prime }(x)\text{ if }x\neq v \\ 
+\sigma ^{\prime }(x)=w\text{ if }x\neq v%
+\end{array}%
+\right. 
+\]%
+The function \textsc{solve} is defined as%
+\[
+\begin{tabular}{|l|}
+\hline
+$\text{\textsc{solve}}(V,c,g,d,\overline{d},R,\sigma )$ \\ 
+\textbf{if }$R(\sigma (g))\in V$ \\ 
+$\qquad \text{\textbf{return} }\{(R(\sigma (g)),\overline{d})\}$ \\ 
+\textbf{else} \\ 
+$\qquad \text{\textbf{return} }\emptyset $ \\ \hline
+\end{tabular}%
+\]%
+In general, \textsc{solve} is a function that returns an assignment to
+variables in $V$ that makes the expression $R(\sigma (c))=false\vee R(\sigma
+(g))=R(\overline{d})$ true, or returns the empty set if it can't find such
+an assignment.
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\ 
+$R:=\overline{\{d\}}$ \\ 
+$G:=\{1,\ldots ,n\}$ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\ 
+$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in G}.\exists
+_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\ 
+$\qquad \qquad G:=G\backslash \{j\}$ \\ 
+$\qquad \text{\textbf{fi}}$ \\ 
+$\qquad R:=R\cup \Delta R$ \\ 
+$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
+\end{tabular}%
+\]%
+where $\{j_{1},\cdots ,j_{m}\}=G$.
+
+\end{document}

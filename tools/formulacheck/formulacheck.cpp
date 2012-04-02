@@ -105,7 +105,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       super::add_options(desc);
 
       desc.
-      add_option("spec", make_mandatory_argument("SPECFILE"),
+      add_option("spec", make_file_argument("SPECFILE"),
                  "check the formula against the data types from the LPS or PBES in SPECFILE", 's').
       add_option("counter-example",
                  "display a valuation for which the formula does not hold, in case it is neither a "
@@ -227,6 +227,6 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc,argv)
   return formulacheck_tool().execute(argc, argv);
 }

@@ -1,0 +1,419 @@
+/**
+ * Sphinx stylesheet -- default theme
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+@import url("basic.css");
+
+/* -- non-standard classes -------------------------------------------------- */
+table.docutils { margin: 0 auto; }
+table.docutils td { padding: 0.3em 0; }
+table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
+
+table.docutils.field-list { margin: 0; }
+table.docutils.citation { margin: 0; border: 0; }
+table.docutils.citation td.label { padding-right: 1em; }
+
+dl.function, dl.type, dl.member, dl.class  { border: solid 1px #80B090; } /* For reference manual */
+dl.function dt, dl.type dt, dl.member dt, dl.class dt {
+  background-color: #A0E0C0;
+  padding: 2px;
+  padding-left: 4px;
+}
+dl.function dd, dl.type dd, dl.member dd, dl.class dd {
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+div.admonition.collapse .admonition-title:hover { color: {{ theme_relbarbgcolor }}; }
+div.admonition.collapse .admonition-title:after { content: ''; }
+div.admonition.collapse .admonition-title.collapsed:before { content: '▾ '; }
+div.admonition.collapse .admonition-title:before { content: '▴ '; }
+div.admonition.collapse .collapsed { display: none; }
+div.admonition.collapse.collapsed { display: block; }
+div.admonition.collapse .admonition-title { display: block; }
+div.admonition.collapse { border: 1px solid #e0e0e0; }
+
+div.tool-docs li { float: left; display: inline; width: 20%; }
+
+div.dparser .admonition-title {
+  font-family: monospace;
+}
+div.mainmenu {
+  background-color: white; 
+}
+div.mainmenu ul {
+  display: table;
+  width: 100%;
+  margin: 0 6px;
+  padding: 0;
+  font-family: sans-serif;
+}
+div.mainmenu ul li {
+  float: left;
+  display: inline;
+  padding: 4px;
+  padding-right: 8px;
+}
+div.mainmenu ul li a {
+  color: #104020;
+}
+
+div.mainmenu ul li.search {
+  float: right;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.admonition.platform-specific {
+  background-position: top left;
+  background-repeat: no-repeat;
+  margin-top: 0px;
+  border: 1px solid #e0e0e0;
+  border-top: 0px;
+}
+div.platform-buttons {
+  border: 1px solid #e0e0e0; 
+  border-bottom: 0px; 
+  margin-bottom:0px;
+  padding:5px;
+  padding-bottom:0px;
+}
+.platform-button {
+  padding: 19px;
+  margin: 0px;
+  height: 0px;
+  width: 0px;
+  opacity: 0.3;
+  filter: alpha(opacity=30); /* For IE8 and earlier */
+}
+.platform-button.platform-selected, .platform-button:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.platform-button.win {
+  background-image: url('win-only.png');
+}
+.platform-button.mac {
+  background-image: url('mac-only.jpg');
+}
+.platform-button.linux {
+  background-image: url('linux-only.jpg');
+}
+.admonition.platform-specific .admonition-title {
+  display: none;
+}
+
+.admonition.admonition-release .admonition-title { display: none; }
+.admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; }
+
+.admonition.tip {
+    border: 1px solid #3030ff;
+    background-color: #d0d0ff;
+}
+
+.invisible {
+    display: none;
+}
+
+.smallcaps {
+    font-variant: small-caps;
+}
+
+table.libdoc strong {
+    display: block;
+    background-color: #f0f0f0;
+    padding: 4px;
+    font-family: Trebuchet MS, sans-serif;
+    font-size: x-large;
+    font-weight: normal;
+    border-bottom: 1px solid #406756;
+}
+
+table.libdoc td {
+    border: none;
+}
+
+table.libdoc td p {
+    margin: 0px;
+    margin-bottom: -10px;
+}
+
+table.libdoc td p em {
+    padding-left: 20px;
+}
+
+/* -- page layout ----------------------------------------------------------- */
+
+body {
+    font-family: serif;
+    font-size: 100%;
+    background-color: white;
+    color: #000;
+    margin: 0;
+    padding: 0;
+}
+
+div.document {
+    margin-top: 4em;
+    background-color: white;
+}
+
+div.documentwrapper {
+    float: left;
+    width: 100%;
+}
+
+div.bodywrapper {
+    margin: 0 0 0 230px;
+}
+
+div.body {
+    background-color: #ffffff;
+    color: #000000;
+    padding: 0 40px 40px 40px;
+}
+
+div.footer {
+    color: #ffffff;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    font-size: 75%;
+    background-color: #406756;
+    font-family: sans-serif;
+}
+
+div.footer a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+div.related {
+    width: 100%;
+    background-color: {{ theme_relbarbgcolor }};
+    line-height: 30px;
+    color: #ffffff;
+}
+
+div.header {
+    padding-bottom: 30px;
+    background-image: url('gradient.png');
+    background-repeat: repeat-x;
+    background-position: bottom;
+    /* background-color: none; */
+    position: fixed;
+    z-index: 50;
+    width: 100%;
+    left: 0%;
+    top: 0%;
+}
+
+div.related a {
+    font-family: sans-serif;
+    color: #ffffff;
+}
+
+div.sphinxsidebar {
+    font-family: sans-serif;
+}
+
+div.sphinxsidebar img {
+  width: 200px;
+  margin-bottom: 20px;
+}
+
+div.sphinxsidebar h3 {
+    font-family: 'Trebuchet MS', sans-serif;
+    color: #000000;
+    /*font-size: 1.4em;*/
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+
+div.sphinxsidebar h3 a {
+    color: #000000;
+}
+
+div.sphinxsidebar h4 {
+    font-family: 'Trebuchet MS', sans-serif;
+    color: #000000;
+    /* font-size: 1.3em; */
+    font-size: small;
+    font-weight: normal;
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+div.sphinxsidebar #searchbox h3 {
+    color: #000000;
+    margin-bottom: 0;
+}
+/*
+div.sphinxsidebar ul.this-page-menu {
+    display: none;
+}
+*/
+div.sphinxsidebar p {
+    color: #ffffff;
+}
+
+div.sphinxsidebar p.topless {
+    margin: 5px 10px 10px 10px;
+}
+
+div.sphinxsidebar ul {
+    margin: 10px;
+    padding: 0;
+    color: #ffffff;
+}
+div.sphinxsidebar a {
+    color: #006746;
+}
+div.sphinxsidebar a:hover {
+    color: #c1272d;
+    text-decoration: none;
+}
+
+div.sphinxsidebar input { border: default; }
+div.sphinxsidebar input:first-child {
+    border: 1px solid #006746;
+    font-family: sans-serif;
+    font-size: 1em;
+}
+
+/* -- body styles ----------------------------------------------------------- */
+
+a {
+    color: #006746;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #c1272d;
+}
+
+div.body p, div.body dd, div.body li {
+    text-align: justify;
+    line-height: 130%;
+}
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-family: 'Trebuchet MS', sans-serif;
+    /* background-color: #f2f2f2; */
+    font-weight: normal;
+    /* color: #006746; */
+    padding-top: 0.5em;
+    margin-left: -0.4em;
+    /* border-bottom: 1px solid #ccc; 
+    margin: 20px -20px 10px -20px; 
+    padding: 3px 0 3px 10px; */
+}
+
+div.body h1 { margin-top: 0; font-size: 200%; }
+div.body h2 { font-size: 160%; }
+div.body h3 { font-size: 140%; }
+div.body h4 { font-size: 120%; }
+div.body h5 { font-size: 110%; }
+div.body h6 { font-size: 100%; }
+
+a.headerlink {
+    color: #c1272d;
+    font-size: 0.8em;
+    padding: 0 4px 0 4px;
+    margin-left: 0.5em;
+    text-decoration: none;
+}
+
+a.headerlink:hover {
+    background-color: #c60f0f;
+    color: white;
+}
+
+div.body p, div.body dd, div.body li {
+    text-align: justify;
+    line-height: 130%;
+}
+
+div.admonition p.admonition-title + p {
+    display: inline;
+}
+
+div.admonition p {
+    margin-bottom: 5px;
+}
+
+div.admonition pre {
+    margin-bottom: 5px;
+}
+
+div.admonition ul, div.admonition ol {
+    margin-bottom: 5px;
+}
+
+div.note {
+    background-color: #eee;
+    border: 1px solid #ccc;
+}
+
+div.seealso {
+    background-color: #ffc;
+    border: 1px solid #ff6;
+}
+
+div.topic {
+    background-color: #eee;
+}
+
+div.warning {
+    background-color: #ffe4e4;
+    border: 1px solid #f66;
+}
+
+p.admonition-title {
+    display: inline;
+}
+
+p.admonition-title:after {
+    content: ":";
+}
+
+pre {
+    padding: 5px;
+    background-color: #eeffcc;
+    color: #333333;
+    line-height: 120%;
+    border: 1px solid #ac9;
+    border-left: none;
+    border-right: none;
+}
+
+tt {
+    background-color: #ecf0f3;
+    padding: 0 1px 0 1px;
+    font-size: 0.95em;
+}
+
+.warning tt {
+    background: #efc2c2;
+}
+
+.note tt {
+    background: #d6d6d6;
+}
+
+@media print {
+    div.header,
+    div.admonition.collapse.collapsed {
+        display: none;
+    }
+}

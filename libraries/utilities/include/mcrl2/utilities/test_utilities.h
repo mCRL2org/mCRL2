@@ -12,9 +12,9 @@
 #ifndef MCRL2_UTILITIES_TEST_UTILITIES_H
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
+#include <vector>
 #include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
 {
@@ -34,20 +34,20 @@ struct collect_after_test_case
 
 /// \brief Static initialisation of rewrite strategies used for testing.
 static inline
-std::vector<data::basic_rewriter<data::data_expression>::strategy> initialise_test_rewrite_strategies(const bool with_prover)
+std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const bool with_prover)
 {
-  std::vector<data::basic_rewriter<data::data_expression>::strategy> result;
-  result.push_back(data::basic_rewriter<data::data_expression>::jitty);
+  std::vector<data::rewrite_strategy> result;
+  result.push_back(data::jitty);
   if (with_prover)
   {
-    result.push_back(data::basic_rewriter<data::data_expression>::jitty_prover);
+    result.push_back(data::jitty_prover);
   }
 #ifdef MCRL2_TEST_COMPILERS
 #ifdef MCRL2_JITTYC_AVAILABLE
-  result.push_back(data::basic_rewriter<data::data_expression>::jitty_compiling);
+  result.push_back(data::jitty_compiling);
   if (with_prover)
   {
-    result.push_back(data::basic_rewriter<data::data_expression>::jitty_compiling_prover);
+    result.push_back(data::jitty_compiling_prover);
   }
 #endif // MCRL2_JITTYC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
@@ -56,10 +56,10 @@ std::vector<data::basic_rewriter<data::data_expression>::strategy> initialise_te
 }
 
 /// \brief Rewrite strategies that should be tested.
-static inline
-const std::vector<data::basic_rewriter<data::data_expression>::strategy>& get_test_rewrite_strategies(const bool with_prover)
+inline
+const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const bool with_prover)
 {
-  static std::vector<data::basic_rewriter<data::data_expression>::strategy> rewrite_strategies = initialise_test_rewrite_strategies(with_prover);
+  static std::vector<data::rewrite_strategy> rewrite_strategies = initialise_test_rewrite_strategies(with_prover);
   return rewrite_strategies;
 }
 

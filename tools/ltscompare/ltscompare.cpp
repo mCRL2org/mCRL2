@@ -28,7 +28,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace std;
@@ -73,24 +72,6 @@ static const char* preorder_string(lts_preorder pre)
     default:
       return "included in";
   }
-}
-
-static const std::set<lts_equivalence> &initialise_allowed_eqs()
-{
-  static std::set<lts_equivalence> s;
-  s.insert(lts_eq_bisim);
-  s.insert(lts_eq_branching_bisim);
-  s.insert(lts_eq_divergence_preserving_branching_bisim);
-  s.insert(lts_eq_sim);
-  s.insert(lts_eq_trace);
-  s.insert(lts_eq_weak_trace);
-  s.insert(lts_eq_none);
-  return s;
-}
-static const std::set<lts_equivalence> &allowed_eqs()
-{
-  static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
-  return s;
 }
 
 struct t_tool_options
@@ -174,7 +155,7 @@ class ltscompare_tool : public ltscompare_base
       if (tool_options.equivalence != lts_eq_none)
       {
         mCRL2log(verbose) << "comparing LTSs using " <<
-                     name_of_equivalence(tool_options.equivalence) << "..." << std::endl;
+                     tool_options.equivalence << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
@@ -185,7 +166,7 @@ class ltscompare_tool : public ltscompare_base
       if (tool_options.preorder != lts_pre_none)
       {
         mCRL2log(verbose) << "comparing LTSs using " <<
-                     name_of_preorder(tool_options.preorder) << "..." << std::endl;
+                     tool_options.preorder << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.preorder);
 
@@ -245,10 +226,6 @@ class ltscompare_tool : public ltscompare_base
         {
           return lts_compare<lts_dot_t>();
         }
-        case lts_svc:
-        {
-          return lts_compare<lts_svc_t>();
-        }
       }
       return true;
     }
@@ -287,16 +264,21 @@ class ltscompare_tool : public ltscompare_base
                  "use FORMAT as the format for INFILE1 (or stdin)", 'i').
       add_option("in2", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the format for INFILE2", 'j').
-      add_option("equivalence", make_mandatory_argument("NAME"),
-                 "use equivalence NAME:\n"
-                 +supported_lts_equivalences_text(allowed_eqs())+"\n"
-                 "(not allowed in combination with -p/--preorder)"
-                 , 'e').
-      add_option("preorder", make_mandatory_argument("NAME"),
-                 "use preorder NAME:\n"
-                 +supported_lts_preorders_text()+"\n"
-                 "(not allowed in combination with -e/--equivalence)"
-                 , 'p').
+      add_option("equivalence", make_enum_argument<lts_equivalence>("NAME)")
+                 .add_value(lts_eq_none, true)
+                 .add_value(lts_eq_bisim)
+                 .add_value(lts_eq_branching_bisim)
+                 .add_value(lts_eq_divergence_preserving_branching_bisim)
+                 .add_value(lts_eq_sim)
+                 .add_value(lts_eq_trace)
+                 .add_value(lts_eq_weak_trace),
+                 "use equivalence NAME (not allowed in combination with -p/--preorder):", 'e').
+      add_option("preorder", make_enum_argument<lts_preorder>("NAME")
+                 .add_value(lts_pre_none, true)
+                 .add_value(lts_pre_sim)
+                 .add_value(lts_pre_trace)
+                 .add_value(lts_pre_weak_trace),
+                 "use preorder NAME (not allowed in combination with -e/--equivalence):", 'p').
       add_option("tau", make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to "
                  "be internal (tau) actions in addition to those defined as such by "
@@ -324,35 +306,8 @@ class ltscompare_tool : public ltscompare_base
         parser.error("counter examples can only be used in combination with an equivalence");
       }
 
-      tool_options.equivalence = lts_eq_none;
-
-      if (parser.options.count("equivalence"))
-      {
-
-        tool_options.equivalence = parse_equivalence(
-                                     parser.option_argument("equivalence"));
-
-        if (allowed_eqs().count(tool_options.equivalence) == 0 && parser.option_argument("equivalence").compare("none") != 0 )
-        {
-          parser.error("option -e/--equivalence has illegal argument '" + 
-                       parser.option_argument("equivalence") + "'");
-        }
-      }
-
-      tool_options.preorder = lts_pre_none;
-
-      if (parser.options.count("preorder"))
-      {
-
-        tool_options.preorder = parse_preorder(
-                                  parser.option_argument("preorder"));
-
-        if (tool_options.preorder == lts_pre_none && parser.option_argument("preorder").compare("none") != 0 ) 
-        {
-          parser.error("option -p/--preorder has illegal argument '" +
-                       parser.option_argument("preorder") + "'");
-        }
-      }
+      tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
+      tool_options.preorder = parser.option_argument_as<lts_preorder>("preorder");
 
       if (parser.options.count("tau"))
       {

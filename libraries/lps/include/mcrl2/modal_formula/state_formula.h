@@ -143,6 +143,7 @@ class not_: public state_formula
     not_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
+ATfprintf(stderr,"Apply not\n");
       assert(core::detail::check_term_StateNot(m_term));
     }
 

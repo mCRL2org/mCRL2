@@ -31,7 +31,13 @@ class CustomDialog : public wxDialog
 
   public:
     CustomDialog(const wxString& title, wxString ext, wxString cmd, MimeManager* mm)
-      : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(490, 140))
+      : wxDialog(NULL, -1, title, wxDefaultPosition, 
+#ifdef __WIN32__
+	  wxSize(490, 160)
+#else
+	  wxSize(490, 140)
+#endif
+	  )
     {
 
       m_mm = mm;
@@ -73,10 +79,12 @@ class CustomDialog : public wxDialog
       hbox->Add(closeButton, 1, wxLEFT, 5);
 
       vbox->Add(panel, 1);
-      vbox->Add(hbox, 1, wxALIGN_CENTER);
+#ifdef __WIN32__
+	  vbox->AddSpacer(10);
+#endif
+      vbox->Add(hbox, 0, wxALIGN_CENTER,5);
 
       SetSizer(vbox);
-
       Centre();
       ShowModal();
 

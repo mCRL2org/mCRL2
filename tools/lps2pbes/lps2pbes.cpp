@@ -40,7 +40,7 @@ class lps2pbes_tool : public input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("formula", make_mandatory_argument("FILE"),
+      desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');
@@ -66,9 +66,7 @@ class lps2pbes_tool : public input_output_tool
         "generate a PBES from an LPS and a state formula",
         "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
         "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
-        "present, stdout is used. If INFILE is not present, stdin is used.\n"
-        "\n"
-        "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/mu-calculus_syntax>."
+        "present, stdout is used. If INFILE is not present, stdin is used."
       )
     {}
 

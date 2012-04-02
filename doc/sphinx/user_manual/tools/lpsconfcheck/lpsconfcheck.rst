@@ -1,4 +1,0 @@
-lpsconfcheck
-===========================================
-
-.. include:: manual.rst

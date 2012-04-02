@@ -41,7 +41,7 @@ void test_print()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc,argv)
 
   test_print();
 

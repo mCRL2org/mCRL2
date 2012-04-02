@@ -55,26 +55,12 @@ struct process_actions: public lps::action_actions
     return parse_MultActIdList(node.child(1));
   }
 
-  core::identifier_string parse_CommExprRhs(const core::parse_node& node)
-  {
-    // TODO: get rid of this 'nil'
-    core::identifier_string result = core::detail::gsMakeNil();
-    if (node)
-    {
-      if (symbol_name(node.child(1).child(0)) == "Id")
-      {
-        result = parse_Id(node.child(1).child(0));
-      }
-    }
-    return result;
-  }
-
   process::communication_expression parse_CommExpr(const core::parse_node& node)
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
     action_name_multiset lhs(atermpp::push_front(ids, id));
-    core::identifier_string rhs = parse_CommExprRhs(node.child(3).child(0));
+    core::identifier_string rhs = parse_Id(node.child(4));
     return process::communication_expression(lhs, rhs);
   }
 
@@ -116,13 +102,13 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ProcExpr") && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "->") && (symbol_name(node.child(2)) == "ProcExpr")) { return if_then(parse_DataExprUnit(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "IfThen") && (symbol_name(node.child(2)) == "ProcExpr")) { return if_then_else(parse_DataExprUnit(node.child(0)), parse_ProcExprNoIf(node.child(1).child(1)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3))); }
@@ -143,13 +129,13 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ProcExpr") && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return choice(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return merge(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "||_") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return left_merge(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return seq(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return bounded_init(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExprNoIf(node.child(0)), parse_DataExprUnit(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return sync(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return choice(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return merge(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "||_") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return left_merge(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return seq(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "<<") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return bounded_init(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExprNoIf(node.child(0)), parse_DataExprUnit(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "|") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return sync(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "IfThen") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return if_then_else(parse_DataExprUnit(node.child(0)), parse_ProcExprNoIf(node.child(1).child(1)), parse_ProcExprNoIf(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExprNoIf")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExprNoIf(node.child(3))); }
     report_unexpected_node(node);

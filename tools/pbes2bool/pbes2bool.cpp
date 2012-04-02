@@ -88,9 +88,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 
     typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<input_tool> > > super;
 
-    std::string default_rewriter() const
+    pbes_system::pbes_rewriter_type default_rewriter() const
     {
-      return "quantifier-all";
+      return pbes_system::quantifier_all;
     }
 
     // Overload synopsis to cope with optional OUTFILE
@@ -126,36 +126,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       opt_construct_counter_example = 0 < parser.options.count("counter");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_strategy                  = lazy;
+      opt_strategy                  = parser.option_argument_as<transformation_strategy>("strategy");
 
       if (parser.options.count("output")) // Output format is deprecated.
       {
         std::string format = parser.option_argument("output");
         parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
-      }
-
-
-      if (parser.options.count("strategy"))   // Bes solving strategy (currently only one available)
-      {
-        int strategy = parser.option_argument_as< int >("strategy");
-
-        switch (strategy)
-        {
-          case 0:
-            opt_strategy = lazy;
-            break;
-          case 1:
-            opt_strategy = optimize;
-            break;
-          case 2:
-            opt_strategy = on_the_fly;
-            break;
-          case 3:
-            opt_strategy = on_the_fly_with_fixed_points;
-            break;
-          default:
-            parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
-        }
       }
     }
 
@@ -163,31 +139,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
     {
       super::add_options(desc);
       desc.
-      add_option("strategy", make_mandatory_argument("STRAT"),
-                 "use strategy STRAT (default '0');\n"
-                 " 0) Compute all boolean equations which can be reached"
-                 " from the initial state, without optimization"
-                 " (default). This is is the most data efficient"
-                 " option per generated equation.\n"
-                 " 1) Optimize by immediately substituting the right"
-                 " hand sides for already investigated variables"
-                 " that are true or false when generating an"
-                 " expression. This is as memory efficient as 0.\n"
-                 " 2) In addition to 1, also substitute variables that"
-                 " are true or false into an already generated right"
-                 " hand side. This can mean that certain variables"
-                 " become unreachable (e.g. X0 in X0 and X1, when X1"
-                 " becomes false, assuming X0 does not occur"
-                 " elsewhere. It will be maintained which variables"
-                 " have become unreachable as these do not have to be"
-                 " investigated. Depending on the PBES, this can"
-                 " reduce the size of the generated BES substantially"
-                 " but requires a larger memory footprint.\n"
-                 " 3) In addition to 2, investigate for generated"
-                 " variables whether they occur on a loop, such that"
-                 " they can be set to true or false, depending on the"
-                 " fixed point symbol. This can increase the time"
-                 " needed to generate an equation substantially",
+      add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
+                 .add_value(lazy, true)
+                 .add_value(optimize)
+                 .add_value(on_the_fly)
+                 .add_value(on_the_fly_with_fixed_points),
+                 "use strategy STRAT:",
                  's').
       add_option("counter",
                  "print at the end a tree labelled with instantiations "
@@ -195,10 +152,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
                  "indication of how pbes2bool came to the validity or "
                  "invalidity of the PBES",
                  'c').
-      /* add_option("precompile",
-        "precompile the pbes for faster rewriting; Deprecated. Does not "
-        "work anymore. Only present for compatibility reasons",
-        'p'). */
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
                  "and translate internal expressions to binary decision "
@@ -230,14 +183,14 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
       load_pbes(p, input_filename(), pbes_input_format());
-      
+
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 
       data::rewriter datar;
-      if (opt_data_elm) 
-      {  
+      if (opt_data_elm)
+      {
         // Create a rewriter with only the necessary data equations.
         using namespace mcrl2::data;
         std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
@@ -246,17 +199,17 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
         set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
                   init_symbol_set.begin(),init_symbol_set.end(),
                   inserter(function_symbol_set,function_symbol_set.begin()));
-        datar=data::rewriter(p.data(), 
-                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()), 
+        datar=data::rewriter(p.data(),
+                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
                              rewrite_strategy());
       }
       else
       {
-        // Create a rewriter with all data equations. This is safer, but increases the time and memory to 
+        // Create a rewriter with all data equations. This is safer, but increases the time and memory to
         // compile the rewrite system.
         data::rewriter(p.data(), rewrite_strategy());
       }
-  
+
 
       timer().start("instantiation");
       ::bes::boolean_equation_system bes_equations=

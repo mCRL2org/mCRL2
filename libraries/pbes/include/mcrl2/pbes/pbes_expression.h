@@ -353,6 +353,7 @@ class exists: public pbes_expression
 //--- end generated classes ---//
 
 // template function overloads
+std::string pp(const core::identifier_string& x);
 std::string pp(const pbes_expression& x);
 std::string pp(const pbes_expression_list& x);
 std::string pp(const pbes_expression_vector& x);
@@ -362,6 +363,10 @@ std::string pp(const propositional_variable_instantiation_vector& x);
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x);
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
+
+// TODO: These should be removed when the ATerm code has been replaced.
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
 
 /// \brief Returns true if the term t is equal to true
 /// \param t A PBES expression

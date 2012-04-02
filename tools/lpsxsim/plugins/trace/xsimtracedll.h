@@ -11,7 +11,7 @@
 #ifndef __xsimtracedll_H__
 #define __xsimtracedll_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma interface "xsimtracedll.h"
 #endif
 
@@ -77,5 +77,9 @@ class XSimTraceDLL: public wxFrame, public SimulatorViewDLLInterface
   private:
     DECLARE_EVENT_TABLE()
 };
+
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface* Simulator);
+extern "C" __attribute__((constructor)) void SimulatorViewDLLInit();
+extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp();
 
 #endif

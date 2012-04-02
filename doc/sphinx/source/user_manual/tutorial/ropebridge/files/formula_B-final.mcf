@@ -1,0 +1,6 @@
+% Express property B as a formula in the modal mu-calculus.
+%
+% It is not possible for all adventurers to reach the `finish' side in
+% less than 17 minutes.
+
+forall x:Nat . val(x < 17) => [true* . report(x)] false

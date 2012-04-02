@@ -52,14 +52,15 @@ Initialization::Initialization()
 #endif
   m_extention_tool_mapping.insert(pair<string, string> ("pbes", "pbes"));
   m_extention_tool_mapping.insert(pair<string, string> ("txt", "txt"));
-  m_extention_tool_mapping.insert(pair<string, string> ("chi", "chi"));
-  m_extention_tool_mapping.insert(pair<string, string> ("lysa", "lysa"));
   m_extention_tool_mapping.insert(pair<string, string> ("tbf", "tbf"));
   m_extention_tool_mapping.insert(pair<string, string> ("gra", "gra"));
   m_extention_tool_mapping.insert(pair<string, string> ("bes", "bes"));
 
   m_extention_tool_mapping.insert(pair<string, string> ("mcf", "mcf"));
   m_extention_tool_mapping.insert(pair<string, string> ("trc", "trc"));
+  m_extention_tool_mapping.insert(pair<string, string> ("gm", "bes"));
+  m_extention_tool_mapping.insert(pair<string, string> ("cwi", "bes"));
+  m_extention_tool_mapping.insert(pair<string, string> ("pbes", "bes"));
 
   mcrl2::utilities::basename basename;
   m_executable_basename = basename.get_executable_basename();
@@ -91,7 +92,7 @@ Initialization::Initialization()
   /* for each tool */
   for (std::vector<Tool>::iterator i = p_tools.begin(); i != p_tools.end(); ++i)
   {
-    string cmd = (*i).m_location + " --mcrl2-gui";
+    string cmd = "\""+ (*i).m_location + "\" --mcrl2-gui";
 
     wxArrayString tool_output;
     wxArrayString tool_errors;

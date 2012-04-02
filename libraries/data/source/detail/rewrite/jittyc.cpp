@@ -30,7 +30,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"
-// #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -2396,7 +2395,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   ar = (ATermAppl*) malloc(ar_size*sizeof(ATermAppl));
   if (ar == NULL)
   {
-    mCRL2log(error) << "cannot allocate enough memory (" << ar_size*sizeof(ATermAppl) << "bytes)" << std::endl;
+    throw mcrl2::runtime_error("cannot allocate enough memory (" + utilities::to_string(ar_size*sizeof(ATermAppl)) + "bytes)");
   }
   for (size_t i=0; i<ar_size; i++)
   {
@@ -3192,9 +3191,9 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   return result;
 }
 
-RewriteStrategy RewriterCompilingJitty::getStrategy()
+rewrite_strategy RewriterCompilingJitty::getStrategy()
 {
-  return GS_REWR_JITTYC;
+  return jitty_compiling;
 }
 
 }

@@ -58,12 +58,12 @@ data::rewriter::strategy data_rewriter_strategy(int i)
 {
   switch (i)
   {
-    case 0: return data::rewriter::innermost       ;
-    case 1: return data::rewriter::innermost_prover;
-    case 2: return data::rewriter::jitty           ;
-    case 3: return data::rewriter::jitty_prover    ;
+    case 0: return data::innermost       ;
+    case 1: return data::innermost_prover;
+    case 2: return data::jitty           ;
+    case 3: return data::jitty_prover    ;
   }
-  return data::rewriter::jitty_prover;
+  return data::jitty_prover;
 }
 
 std::string data_rewriter_name(int i)

@@ -20,7 +20,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
@@ -29,9 +28,6 @@
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
 #endif
-
-#undef ATAgetFirst
-#undef ATAgetArgument
 
 namespace mcrl2
 {
@@ -58,8 +54,8 @@ class SMT_LIB_Solver: public SMT_Solver
     std::string f_variables_extrafuns;
     std::string f_extrapreds;
     std::string f_formula;
-    ATermIndexedSet f_sorts;
-    ATermIndexedSet f_operators;
+    atermpp::map < sort_expression, size_t > f_sorts;
+    atermpp::map < function_symbol, size_t > f_operators;
     atermpp::set < variable > f_variables;
     atermpp::set < variable > f_nat_variables;
     atermpp::set < variable > f_pos_variables;
@@ -68,23 +64,19 @@ class SMT_LIB_Solver: public SMT_Solver
     void declare_sorts()
     {
       f_extrasorts = "";
-      variable_list v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts))
+      if (!f_sorts.empty())
       {
         f_extrasorts = "  :extrasorts (";
         sort_expression v_sort;
-        while (!ATisEmpty(v_sorts))
+        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
           if (v_sort != sort_expression())
           {
             f_extrasorts = f_extrasorts + " ";
           }
-          v_sort = v_sorts.front();
-          v_sorts = ATgetNext(v_sorts);
-          size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl) v_sort);
-          assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
+          v_sort = i->first;
           std::stringstream v_sort_string;
-          v_sort_string << "sort" << v_sort_number;
+          v_sort_string << "sort" << i->second;
           f_extrasorts = f_extrasorts + v_sort_string.str();
         }
         f_extrasorts = f_extrasorts + ")\n";
@@ -94,20 +86,15 @@ class SMT_LIB_Solver: public SMT_Solver
     void declare_operators()
     {
       f_operators_extrafuns = "";
-      function_symbol_list v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators))
+      if (!f_operators.empty())
       {
         f_operators_extrafuns = "  :extrafuns (";
-        while (!ATisEmpty(v_operators))
+        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
-          function_symbol v_operator = v_operators.front();
-          v_operators = pop_front(v_operators);
-          size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm)(ATermAppl) v_operator);
-          assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
           std::stringstream v_operator_string;
-          v_operator_string << "op" << v_operator_number;
+          v_operator_string << "op" << i->second;
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string.str();
-          sort_expression v_sort = data_expression(v_operator).sort();
+          sort_expression v_sort = data_expression(i->first).sort();
           do
           {
             sort_expression_list v_sort_domain_list;
@@ -127,7 +114,7 @@ class SMT_LIB_Solver: public SMT_Solver
               sort_expression v_sort_domain_elt(*l);
               if (is_function_sort(v_sort_domain_elt))
               {
-                throw mcrl2::runtime_error("Function " + data::pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + data::pp(i->first) +
                                            " cannot be translated to the SMT-LIB format.");
               }
               if (sort_int::is_int(v_sort_domain_elt))
@@ -148,7 +135,16 @@ class SMT_LIB_Solver: public SMT_Solver
               }
               else
               {
-                size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort_domain_elt, 0);
+                atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
+                size_t v_sort_number=f_sorts.size();
+                if (j==f_sorts.end())  // not found
+                {
+                  f_sorts[v_sort_domain_elt]=v_sort_number; // Assign a new number to v_sort_domain_elt.
+                }
+                else
+                {
+                  v_sort_number=j->second; // get the previously assigned number.
+                }
                 std::stringstream v_sort_string;
                 v_sort_string << "sort" << v_sort_number;
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string.str();
@@ -173,8 +169,7 @@ class SMT_LIB_Solver: public SMT_Solver
       for(atermpp::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
       {
         const variable v_variable = *i;
-        char* v_variable_string;
-        v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
+        std::string v_variable_string = v_variable.name();
         sort_expression v_sort = data_expression(v_variable).sort();
         if (sort_real::is_real(v_sort))
         {
@@ -194,7 +189,17 @@ class SMT_LIB_Solver: public SMT_Solver
         }
         else
         {
-          size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort, 0);
+          atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort);
+          size_t v_sort_number=f_sorts.size();
+          if (j==f_sorts.end())  // not found
+          {
+            f_sorts[v_sort]=v_sort_number; // Assign a new number to v_sort.
+          }
+          else
+          {
+            v_sort_number=j->second; // get the previously assigned number.
+          }
+
           std::stringstream v_sort_string;
           v_sort_string << "sort" << v_sort_number;
           f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string.str() +")";
@@ -211,8 +216,8 @@ class SMT_LIB_Solver: public SMT_Solver
       f_extrapreds = "";
       if (f_bool2pred)
       {
-        size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl)sort_bool::bool_());
-        assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
+        assert(f_sorts.count(sort_bool::bool_())>0);
+        size_t v_sort_number = f_sorts[sort_bool::bool_()];
         std::stringstream v_sort_string;
         v_sort_string << "sort" << v_sort_number;
         f_extrapreds = "  :extrapreds ((bool2pred ";
@@ -224,19 +229,14 @@ class SMT_LIB_Solver: public SMT_Solver
     void produce_notes_for_sorts()
     {
       f_sorts_notes = "";
-      sort_expression_list v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts))
+      if (!f_sorts.empty())
       {
         f_sorts_notes = "  :notes \"";
-        while (!ATisEmpty(v_sorts))
+        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
-          sort_expression v_sort(ATAgetFirst(v_sorts));
-          v_sorts = ATgetNext(v_sorts);
-          size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm)(ATermAppl)v_sort);
-          assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
           std::stringstream v_sort_string;
-          v_sort_string << "sort" << v_sort_number;
-          std::string v_sort_original_id = basic_sort(v_sort).name();
+          v_sort_string << "sort" << i->second;
+          std::string v_sort_original_id = pp(i->first);
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string.str() + " = " + v_sort_original_id + ")";
         }
         f_sorts_notes = f_sorts_notes + "\"\n";
@@ -246,19 +246,14 @@ class SMT_LIB_Solver: public SMT_Solver
     void produce_notes_for_operators()
     {
       f_operators_notes = "";
-      function_symbol_list v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators))
+      if (!f_operators.empty())
       {
         f_operators_notes = "  :notes \"";
-        while (!ATisEmpty(v_operators))
+        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
-          const function_symbol v_operator = v_operators.front();
-          v_operators = pop_front(v_operators);
-          size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm)(ATermAppl) v_operator);
-          assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
           std::stringstream v_operator_string;
-          v_operator_string << "op" << v_operator_number;
-          std::string v_operator_original_id = v_operator.name();
+          v_operator_string << "op" << i->second;
+          std::string v_operator_original_id = i->first.name();
           f_operators_notes = f_operators_notes + "(" + v_operator_string.str() + " = " + v_operator_original_id + ")";
         }
         f_operators_notes = f_operators_notes + "\"\n";
@@ -631,8 +626,17 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_unknown_operator(const data_expression a_clause)
     {
       const data_expression v_operator = application(a_clause).head();
-      size_t v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
+      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
+      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      if (i==f_operators.end()) // not found.
+      {
+        f_operators[v_operator]=v_operator_number;
+      }
+      else
+      {
+        v_operator_number=i->second; // this is the number already assigned to v_operator.
+      }
       std::stringstream v_operator_string;
       v_operator_string << "op" << v_operator_number;
       f_formula = f_formula + "(" + v_operator_string.str();
@@ -651,9 +655,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
       f_variables.insert(a_clause);
@@ -661,9 +663,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_nat_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
       f_variables.insert(a_clause);
@@ -672,9 +672,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_pos_variable(const variable a_clause)
     {
-      char* v_string;
-
-      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      std::string v_string = a_clause.name();
       f_formula = f_formula + v_string;
 
       f_variables.insert(a_clause);
@@ -720,7 +718,17 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_constant(const data_expression a_clause)
     {
       const data_expression v_operator = application(a_clause).head();
-      size_t v_operator_number = ATindexedSetPut(f_operators, (ATerm)(ATermAppl) v_operator, 0);
+      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+
+      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      if (i==f_operators.end()) // not found.
+      {
+        f_operators[v_operator]=v_operator_number;
+      }
+      else
+      {
+        v_operator_number=i->second; // this is the number already assigned to v_operator.
+      }
 
       std::stringstream v_operator_string;
       v_operator_string << "op" << v_operator_number;
@@ -731,7 +739,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       for(atermpp::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
       {
-        char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
+        std::string v_variable_string = i->name();
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
     }
@@ -740,7 +748,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
       {
-        char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
+        std::string v_variable_string = i->name();
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";
       }
     }
@@ -755,8 +763,6 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       data_expression v_clause;
 
-      ATindexedSetReset(f_sorts);
-      ATindexedSetReset(f_operators);
       f_variables.clear();
       f_nat_variables.clear();
       f_pos_variables.clear();
@@ -792,14 +798,10 @@ class SMT_LIB_Solver: public SMT_Solver
   public:
     SMT_LIB_Solver()
     {
-      f_sorts = ATindexedSetCreate(100, 75);
-      f_operators = ATindexedSetCreate(100, 75);
     }
 
     virtual ~SMT_LIB_Solver()
     {
-      ATindexedSetDestroy(f_sorts);
-      ATindexedSetDestroy(f_operators);
     }
 };
 

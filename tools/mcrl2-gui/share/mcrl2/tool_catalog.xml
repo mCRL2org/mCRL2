@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
-<tool name="chi2mcrl2" 		input_format="chi" output_format="mcrl2"    category="Transformation"/>
 <tool name="diagraphica" 	input_format="lts" 				gui="true"  category="Analysis" />
 <tool name="lps2lts" 		input_format="lps" output_format ="lts"     category="Transformation"/>
 <tool name="lps2pbes" 		input_format="lps" output_format ="pbes"    category="Transformation" />
@@ -23,7 +22,6 @@
 <tool name="ltsgraph" 		input_format="lts" 				gui="true"  category="Analysis"/>
 <tool name="ltsinfo" 		input_format="lts"                          category="Analysis"/>
 <tool name="ltsview" 		input_format="lts" 				gui="true"  category="Analysis"/>
-<tool name="lysa2mcrl2"		input_format="lysa" output_format ="mcrl2"  category="Transformation"/>
 <tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"   category="Transformation"/> 
 <tool name="pbes2bool" 		input_format="pbes"                         category="Analysis"/>
 <tool name="pbes2bool" 		input_format="bes"                         category="Analysis"/>

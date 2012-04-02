@@ -29,7 +29,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace mcrl2::utilities::tools;
@@ -187,10 +186,6 @@ class ltsinfo_tool : public ltsinfo_base
         case lts_dot:
         {
           return provide_information<lts_dot_t>();
-        }
-        case lts_svc:
-        {
-          return provide_information<lts_svc_t>();
         }
       }
       return true;

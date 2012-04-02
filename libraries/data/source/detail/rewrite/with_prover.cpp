@@ -54,7 +54,7 @@ bool RewriterProver::removeRewriteRule(const data_equation Rule)
 }
 
 data_expression RewriterProver::rewrite(
-            const data_expression Term, 
+            const data_expression Term,
             substitution_type &sigma)
 {
   if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
@@ -70,7 +70,7 @@ data_expression RewriterProver::rewrite(
 }
 
 atermpp::aterm_appl RewriterProver::rewrite_internal(
-            const atermpp::aterm_appl Term, 
+            const atermpp::aterm_appl Term,
             internal_substitution_type &sigma)
 {
   // Code below is not very efficient, due to the translation to and from internal
@@ -84,7 +84,7 @@ atermpp::aterm_appl RewriterProver::rewrite_internal(
   }
   else
   {
-    return rewr_obj->rewrite_internal(Term,sigma); 
+    return rewr_obj->rewrite_internal(Term,sigma);
   }
 }
 
@@ -98,18 +98,18 @@ atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
   return rewr_obj->fromRewriteFormat(Term);
 } */
 
-RewriteStrategy RewriterProver::getStrategy()
+rewrite_strategy RewriterProver::getStrategy()
 {
   switch (rewr_obj->getStrategy())
   {
-    case GS_REWR_JITTY:
-      return GS_REWR_JITTY_P;
+    case jitty:
+      return jitty_prover;
 #ifdef MCRL2_JITTYC_AVAILABLE
-    case GS_REWR_JITTYC:
-      return GS_REWR_JITTYC_P;
+    case jitty_compiling:
+      return jitty_compiling_prover;
 #endif
     default:
-      return GS_REWR_INVALID;
+      throw mcrl2::runtime_error("invalid rewrite strategy");
   }
 }
 

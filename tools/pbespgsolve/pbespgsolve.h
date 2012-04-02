@@ -39,8 +39,75 @@ enum pbespg_solver_type
   recursive_solver
 };
 
-/// \return A string representation of the edge direction.
+inline
+pbespg_solver_type parse_solver_type(const std::string& s)
+{
+  if (s == "spm")
+  {
+    return spm_solver;
+  }
+  else if (s == "altspm")
+  {
+    return alternative_spm_solver;
+  }
+  else if (s == "recursive")
+  {
+    return recursive_solver;
+  }
+  throw mcrl2::runtime_error("unknown solver " + s);
+}
 
+/// \return A string representation of the solver type.
+inline
+std::string print(const pbespg_solver_type solver_type)
+{
+  switch(solver_type)
+  {
+    case spm_solver: return "spm";
+    case alternative_spm_solver: return "altspm";
+    case recursive_solver: return "recursive";
+  }
+  throw mcrl2::runtime_error("unknown solver");
+}
+
+// \return A string representation of the solver type.
+inline
+std::string description(const pbespg_solver_type solver_type)
+{
+  switch(solver_type)
+  {
+    case spm_solver: return "Small progress measures";
+    case alternative_spm_solver: return "Alternative implementation of small progress measures";
+    case recursive_solver: return "Recursive algorithm";
+  }
+  throw mcrl2::runtime_error("unknown solver");
+}
+
+inline
+std::istream& operator>>(std::istream& is, pbespg_solver_type& t)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    t = parse_solver_type(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const pbespg_solver_type t)
+{
+  os << print(t);
+  return os;
+}
+
+
+/// \return A string representation of the edge direction.
 inline
 std::string print(StaticGraph::EdgeDirection edge_direction)
 {
@@ -59,26 +126,6 @@ std::string print(StaticGraph::EdgeDirection edge_direction)
   return "unknown edge direction";
 }
 
-/// \return A string representation of the solver type.
-
-inline
-std::string print(pbespg_solver_type solver_type)
-{
-  if (solver_type == spm_solver)
-  {
-    return "spm_solver";
-  }
-  else if (solver_type == alternative_spm_solver)
-  {
-    return "alternative_spm_solver";
-  }
-  else if (solver_type == recursive_solver)
-  {
-    return "recursive_solver";
-  }
-  return "unknown solver";
-}
-
 struct pbespgsolve_options
 {
   pbespg_solver_type solver_type;
@@ -86,6 +133,7 @@ struct pbespgsolve_options
   bool use_decycle_solver;
   bool use_deloop_solver;
   bool verify_solution;
+  bool only_generate;
   data::rewriter::strategy rewrite_strategy;
 
   pbespgsolve_options()
@@ -94,7 +142,8 @@ struct pbespgsolve_options
       use_decycle_solver(false),
       use_deloop_solver(true),
       verify_solution(true),
-      rewrite_strategy(data::rewriter::jitty)
+      only_generate(false),
+      rewrite_strategy(data::jitty)
   {
   }
 };
@@ -168,31 +217,37 @@ class pbespgsolve_algorithm
 
       pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
 
-      mCRL2log(log::verbose) << "Solving..." << std::endl;
+      mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
 
-      // Create a solver:
-      std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-      m_timer.finish("initialization");
-
-      // Solve the game:
-      m_timer.start("solving");
-      ParityGame::Strategy solution = solver->solve();
-      m_timer.finish("solving");
-
-      if (solution.empty())
+      if (!m_options.only_generate)
       {
-        throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
+        mCRL2log(log::verbose) << "Solving..." << std::endl;
+
+        // Create a solver:
+        std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
+        m_timer.finish("initialization");
+
+        // Solve the game:
+        m_timer.start("solving");
+        ParityGame::Strategy solution = solver->solve();
+        m_timer.finish("solving");
+
+        if (solution.empty())
+        {
+          throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
+        }
+
+        verti error_vertex;
+
+        // Optional: verify the solution
+        if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
+        {
+          throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
+        }
+
+        return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
       }
-
-      verti error_vertex;
-
-      // Optional: verify the solution
-      if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
-      {
-        throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
-      }
-
-      return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
+      return true;
     }
 };
 

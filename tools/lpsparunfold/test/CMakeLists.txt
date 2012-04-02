@@ -40,7 +40,7 @@ foreach( OBJ ${TERM_OBJS} )
     mcrl2_utilities
   )
 
-  add_test("${PREFIX}_${result}" "${lpsparunfold_test_container_BINARY_DIR}/${PREFIX}_${result}" )
+  add_test(NAME "${PREFIX}_${result}" COMMAND "${PREFIX}_${result}" )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 
 endforeach( OBJ )

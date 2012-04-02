@@ -1,4 +1,0 @@
-formulacheck
-===========================================
-
-.. include:: manual.rst

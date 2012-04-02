@@ -14,8 +14,8 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
@@ -31,7 +31,8 @@ class Induction
 {
   private:
     /// \brief The smallest number x for which no variable named "dummyx" exists.
-    size_t f_fresh_dummy_number;
+    // size_t f_fresh_dummy_number;
+    set_identifier_generator fresh_identifier_generator;
 
     /// \brief The number of variables used during the last application of induction.
     size_t f_count;
@@ -125,16 +126,7 @@ class Induction
     /// \brief
     variable get_fresh_dummy(const sort_expression a_sort)
     {
-      variable v_result;
-      do
-      {
-        std::stringstream v_dummy_string;
-        v_dummy_string << "dummy" << f_fresh_dummy_number;
-        v_result = variable(v_dummy_string.str(), a_sort);
-        f_fresh_dummy_number++;
-      }
-      while (gsOccurs((ATerm)(ATermAppl) v_result, (ATerm)(ATermAppl) f_formula));
-      return v_result;
+      return variable(fresh_identifier_generator("dummy$"),a_sort);
     }
 
 
@@ -280,7 +272,7 @@ class Induction
     {
       atermpp::aterm_appl v_result;
 
-      f_fresh_dummy_number = 0;
+      // f_fresh_dummy_number = 0;
       if (f_count == 1)
       {
         mCRL2log(log::verbose) << "Induction on one variable." << std::endl;

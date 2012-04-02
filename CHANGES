@@ -1,4 +1,71 @@
 ===============================================================================
+Changes between toolset releases 201202.0 and 201207.0:
+===============================================================================
+
+Libraries:
+   - LTS library: removed support for the SVC format.
+
+The following tools have been removed:
+   - chi2mcrl2
+   - ltsmin
+   - lysa2mcrl2
+
+===============================================================================
+Changes between toolset releases 201107.1 and 201202.0:
+===============================================================================
+
+Libraries:
+   - Core library: re-implemented parser on top of DParser. As input this uses
+     an EBNF grammar with associativities and priorities.
+   - Core library: re-implemented pretty printer on top of C++ libraries,
+     instead of the C libraries.
+   - Data library: improve treatment of quantification in enumerators. This
+     vastly improves the user experience when using quantifiers as well as sets
+     and bags.
+   - Data library: refactored the rewriters to carry substitutions as an
+     argument, instead of as a global value.
+   - Data library: clean up identifier generators and improve their performance.
+   - BES library: extend support for parity games in PGSolver format (max parity
+     games).
+   - BES library: removed the translation to VASY format.
+   - LPS library: extend support for LTSmin.
+   - LPS library: improve performance of the next state iterator interface.
+   - Cleaned up direct uses of ATerms in all libraries.
+
+Build:
+   - Support for MSVC9 has been dropped; MSVC10 is freely available as part of
+     the Windows SDK, and bugs in MSVC9 caused obscure compile errors.
+   - Use system provided gl2ps if available.
+
+Tool changes:
+   - lps2lts: the default state format has changed from "vector" to "tree".
+   - lpspp: add -n/--print-summand_numbers option. This prints an identifier
+     for each summand that is printed.
+   - ltsview: fix non-termination of backtrace generation.
+   - mcrl22lps: assume untimed semantics by default (the behaviour of the
+     -D/--delta flag), for linearising timed specifications, the -T/--timed
+     flag must be used.
+   - mcrl22lps: remove support for n-parallel processes. This will be
+     reinstated more thoroughly in a future release (see bug #977).
+   - mcrl2xi: find and replace functionality has been implemented.
+   - pbes and bes tools: use uniform I/O handling.
+   - pbes2bool, pbes2pbes, lps2lts: make tool behave line a GNU tool: output on
+     stdout, additional information on stderr.
+   - pbesrewr: add rewrite strategy that eliminates quantifiers using the
+     one-point rule.
+   - gui tools: improve wxWidgets 2.9 support; the tools are alright in release
+     builds, but may still raise some assertion failures in debug builds due to
+     massive internal changes in wxWidgets.
+
+New experimental tools:
+   - mcrl2parse: parsing of expressions adhering to the mCRL2 syntax.
+   - pbesabsinthe: abstract interpretation of PBESes.
+   
+The following tools have become deprecated as of this release:
+   - chi2mcrl2
+   - lysa2mcrl2
+   
+===============================================================================
 Changes between toolset releases March 2011 and July 2011:
 ===============================================================================
 

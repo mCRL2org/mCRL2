@@ -12,9 +12,10 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_ENABLE_GUI_TOOLS )
 
-# ######### General setup ##########
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
-set(MACOSX_BUNDLE_ICON_FILE grapemcrl2.icns )
+# ######### General setup ##########
 
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)

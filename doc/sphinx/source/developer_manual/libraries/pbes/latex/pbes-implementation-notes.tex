@@ -1,0 +1,1818 @@
+%--- From tcilatex.tex ---%
+%\def\dsum{\mathop{\displaystyle \sum }}%
+%\def\dprod{\mathop{\displaystyle \prod }}%
+%\def\dbigcap{\mathop{\displaystyle \bigcap }}%
+%\def\dbigwedge{\mathop{\displaystyle \bigwedge }}%
+%\def\dbigoplus{\mathop{\displaystyle \bigoplus }}%
+%\def\dbigodot{\mathop{\displaystyle \bigodot }}%
+%\def\dbigsqcup{\mathop{\displaystyle \bigsqcup }}%
+%\def\dcoprod{\mathop{\displaystyle \coprod }}%
+%\def\dbigcup{\mathop{\displaystyle \bigcup }}%
+%\def\dbigvee{\mathop{\displaystyle \bigvee }}%
+%\def\dbigotimes{\mathop{\displaystyle \bigotimes }}%
+%\def\dbiguplus{\mathop{\displaystyle \biguplus }}%
+%\def\QQfnmark#1{\footnotemark}
+%\def\QQfntext#1#2{\addtocounter{footnote}{#1}\footnotetext{#2}}
+%--------------------------%
+
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
+%TCIDATA{LastRevised=Friday, December 23, 2011 09:18:04}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\ap}{{:}}
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{include/tcilatex}
+\begin{document}
+
+\title{PBES Implementation Notes}
+\author{Wieger Wesselink}
+\maketitle
+
+This document contains details about data structures and algorithms of the
+PBES Library of the mCRL2 toolset.
+
+\section{Definitions}
+
+Parameterised Boolean Equation Systems (PBESs) are empty (denoted $\epsilon $%
+) or finite sequences of fixed point equations, where each equation is of
+the form $(\mu X(d{:}D)=\phi $ or $(\nu X(d{:}D)=\phi $. The left-hand side
+of each equation consists of a \emph{fixed point symbol}, where $\mu $
+indicates a least and $\nu $ a greatest fixed point, and a sorted predicate
+variable $X$ of sort $D\rightarrow B$, taken from some countable domain of
+sorted predicate variables $\mathcal{X}$. The right-hand side of each
+equation is a predicate formula as defined below.
+
+\begin{definition}
+\emph{Predicate formulae} $\phi $ are defined by the following grammar: 
+\begin{equation*}
+\phi ::=b~|~X(e)~|~\lnot \phi ~|~\phi \oplus \phi ~|~\mathsf{Q}d:D.~\phi
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $b$ is a data term of sort $\mathsf{B}$, $X$ is a predicate
+variable, $d$ is a data variable of sort $D$ and $e$ is a vector of data
+terms.
+\end{definition}
+
+The set of predicate variables that occur in a predicate formula $\phi $,
+denoted by $\mathsf{occ}$, is defined recursively as follows, for any
+formulae $\phi _{1},\phi _{2}$: 
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{occ(}{b)} & =_{def}\emptyset & \mathsf{occ(}{X(e))} & =_{def}\{X\}
+\\ 
+\mathsf{occ(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{occ(}{\phi _{1})}%
+\cup \mathsf{occ(}{\phi _{2})}\qquad & \mathsf{occ}(\mathsf{Q}d:D{.~\phi
+_{1})} & =_{def}\mathsf{occ(}{\phi _{1})}.%
+\end{array}%
+\end{equation*}%
+Extended to equation systems, $\mathsf{occ}{(}\mathcal{E}{)}$ is the union
+of all variables occurring at the right-hand side of equations in $\mathcal{E%
+}$. Likewise, the set of predicate variable instantiations that occur in a
+predicate formula $\phi $ is denoted by $\mathsf{iocc}$, and is defined
+recursively as follows%
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{iocc(}{b)} & =_{def}\emptyset & \mathsf{iocc(}{X(e))} & 
+=_{def}\{X(e)\} \\ 
+\mathsf{iocc(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{iocc(}{\phi _{1})%
+}\cup \mathsf{iocc(}{\phi _{2})}\qquad & \mathsf{iocc}(\mathsf{Q}d:D{.~\phi
+_{1})} & =_{def}\mathsf{iocc(}{\phi _{1})}.%
+\end{array}%
+\end{equation*}
+
+For any equation system $\mathcal{E}$, the set of \emph{binding predicate
+variables}, $\mathsf{bnd(}\mathcal{E})$, is the set of variables occurring
+at the left-hand side of some equation in $\mathcal{E}$. Formally, we
+define: 
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{bnd(}{\epsilon )} & =_{def}\emptyset \qquad & \mathsf{bnd(}{(\sigma
+X(d{:}D)=\phi )~\mathcal{E)}} & =_{def}\mathsf{bnd(}{\mathcal{E)}}\cup \{X\}
+\\ 
+\mathsf{occ(}{\epsilon )} & =_{def}\emptyset \qquad & \mathsf{occ(}{(\sigma
+X(d{:}D)=\phi )~\mathcal{E)}} & =_{def}\mathsf{occ(}{\mathcal{E)}}\cup 
+\mathsf{occ(}{\phi )}.%
+\end{array}%
+\end{equation*}%
+Let $\mathsf{dvar}(d)$ be the set of \emph{free data variables} occurring in
+a data term $d$. The function $\mathsf{dvar}$ is extended to predicate
+formulae using%
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{dvar(}{X(e))} & =_{def}\mathsf{dvar}(e) & \mathsf{dvar}(\mathsf{Q}d:D%
+{.~\phi _{1})} & =_{def}\mathsf{dvar(}{\phi _{1})}\setminus \mathsf{dvar(}d{)%
+}. \\ 
+\mathsf{dvar(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{dvar(}{\phi _{1})%
+}\cup \mathsf{iocc(}{\phi _{2}).}\qquad &  & 
+\end{array}%
+\end{equation*}
+
+The set of freely occurring predicate variables in $\mathcal{E}$, denoted $%
+\mathsf{pvar}(\mathcal{E})$ is defined as $\mathsf{occ(}{\mathcal{E)}}%
+\setminus \mathsf{bnd(}{\mathcal{E)}}$. An equation system $\mathcal{E}$ is
+said to be \emph{well-formed} iff every binding predicate variable occurs at
+the left-hand side of precisely one equation of $\mathcal{E}$. We only
+consider well-formed equation systems in this paper.
+
+An equation system $\mathcal{E}$ is called \emph{closed} if $\mathsf{pvar}(%
+\mathcal{E})=\emptyset $ and \emph{open} otherwise. An equation $(\sigma
+X(d:D)=\phi )$, where $\sigma $ denotes either the fixed point sign $\mu $
+or $\nu $, is called \emph{data-closed} if the set of data variables that
+occur freely in $\phi $ is contained in the set of variables induced by the
+vector of variables $d$. An equation system is called \emph{data-closed} iff
+each of its equations is data-closed.\newline
+
+\begin{definition}
+\emph{Action formulae} $\alpha $ are defined by the following grammar:%
+\begin{equation*}
+\alpha ::=b~|~\lnot \alpha ~|~\alpha \oplus \alpha ~|~\mathsf{Q}d:D.\alpha
+~|~a(d)~|~\alpha \mbox{\aap ,}t
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $b$ is a data term of sort $\mathsf{B}$, $X$ is a predicate
+variable, $d$ is a data variable of sort $D$ and $a$ is an action label.
+\end{definition}
+
+\begin{definition}
+\emph{State formulae} $\phi $ are defined by the following grammar:%
+\begin{equation*}
+\phi ::=b~|~X(e)~|~\lnot \phi ~|~\phi \oplus \phi ~|~\mathsf{Q}d:D.~\phi
+~|~\langle \alpha \rangle \phi ~|~[\alpha ]\phi ~|~\Delta ~|~\Delta
+(t)~|~\nabla ~|~\nabla (t)~|~\sigma X(d{:}D:=e)
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $\sigma \in \{\mu ,\nu \}$, $b$ is a data term of sort $%
+\mathsf{B}$, $X$ is a predicate variable, $d$ is a data variable of sort $D$
+and $e$ is a vector of data terms and $\alpha $ is an action formula.
+\end{definition}
+
+\newpage
+
+\subsection{Monotonicity}
+
+\begin{definition}
+A state formula is called \emph{monotonous} if it can be rewritten such that
+propositional variables are not inside the scope of a negation or an
+implication. More formally, a state formula $\varphi $ is monotonous if $%
+m(\varphi )=true$, where $m$ is defined as follows. This definition applies
+to predicate formulae as well.
+\end{definition}
+
+\begin{equation*}
+\begin{array}{lll}
+m(\lnot b) & =_{def} & \mathsf{true} \\ 
+m(\lnot \lnot \varphi ) & =_{def} & m(\varphi ) \\ 
+m(\lnot (\varphi \wedge \psi )) & =_{def} & m(\lnot \varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot (\varphi \vee \psi )) & =_{def} & m(\lnot \varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot (\varphi \Rightarrow \psi )) & =_{def} & m(\varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot \forall d{{:}D}.\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \exists d{{:}D}.\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \lbrack \alpha ]\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \langle \alpha \rangle \varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \nabla ) & =_{def} & \mathsf{true} \\ 
+m(\lnot \nabla (t)) & =_{def} & \mathsf{true} \\ 
+m(\lnot \Delta ) & =_{def} & \mathsf{true} \\ 
+m(\lnot \Delta (t)) & =_{def} & \mathsf{true} \\ 
+m(\lnot X(e)) & =_{def} & \mathsf{false} \\ 
+m(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\lnot \varphi \lbrack
+X:=\lnot X]) \\ 
+m(\lnot \nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\lnot \varphi \lbrack
+X:=\lnot X]) \\ 
+m(b) & =_{def} & \mathsf{true} \\ 
+m(\varphi \wedge \psi ) & =_{def} & m(\varphi )\wedge m(\psi ) \\ 
+m(\varphi \vee \psi ) & =_{def} & m(\varphi )\wedge m(\psi ) \\ 
+m(\varphi \Rightarrow \psi ) & =_{def} & m(\lnot \varphi )\wedge m(\psi ) \\ 
+m(\forall d{{:}D}.\varphi ) & =_{def} & m(\varphi ) \\ 
+m(\exists d{{:}D}.\varphi ) & =_{def} & m(\varphi ) \\ 
+m([\alpha ]\varphi ) & =_{def} & m(\varphi ) \\ 
+m(\langle \alpha \rangle \varphi ) & =_{def} & m(\varphi ) \\ 
+m(\nabla ) & =_{def} & \mathsf{true} \\ 
+m(\nabla (t)) & =_{def} & \mathsf{true} \\ 
+m(\Delta ) & =_{def} & \mathsf{true} \\ 
+m(\Delta (t)) & =_{def} & \mathsf{true} \\ 
+m(X(e)) & =_{def} & \mathsf{true} \\ 
+m(\mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\varphi ) \\ 
+m(\nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\varphi )%
+\end{array}%
+\end{equation*}
+
+\newpage
+
+\subsection{Normalization}
+
+The normalization function $h$ is a function that eliminates implications
+from a state formula $\varphi $, and that 'pushes' negations inwards to the
+level of data expressions. A precondition of $h$ is that $\varphi $ is
+monotonous. If this is not the case, during the computation a term $\lnot
+X(e)$ will be encountered.%
+\begin{equation*}
+\begin{array}{lll}
+h(\lnot b) & =_{def} & \lnot b \\ 
+h(\lnot \lnot \varphi ) & =_{def} & h(\varphi ) \\ 
+h(\lnot (\varphi \wedge \psi )) & =_{def} & h(\lnot \varphi )\vee h(\lnot
+\psi ) \\ 
+h(\lnot (\varphi \vee \psi )) & =_{def} & h(\lnot \varphi )\wedge h(\lnot
+\psi ) \\ 
+h(\lnot (\varphi \Rightarrow \psi )) & =_{def} & h(\varphi )\wedge h(\lnot
+\psi ) \\ 
+h(\lnot \forall d{{:}D}.\varphi ) & =_{def} & \exists d{{:}D}.h(\lnot
+\varphi ) \\ 
+h(\lnot \exists d{{:}D}.\varphi ) & =_{def} & \forall d{{:}D}.h(\lnot
+\varphi ) \\ 
+h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & [\alpha ]h(\lnot \varphi ) \\ 
+h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
+h(\lnot \varphi ) \\ 
+h(\lnot \nabla ) & =_{def} & \Delta \\ 
+h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
+h(\lnot \Delta ) & =_{def} & \nabla \\ 
+h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
+h(\lnot X(e)) & =_{def} & undefined \\ 
+h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
+D:=e).~h(\lnot \varphi \lbrack X:=\lnot X]) \\ 
+h(\lnot \nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \mu X(d{:}%
+D:=e).~h(\lnot \varphi \lbrack X:=\lnot X]) \\ 
+h(b) & =_{def} & b \\ 
+h(\varphi \wedge \psi ) & =_{def} & h(\varphi )\wedge h(\psi ) \\ 
+h(\varphi \vee \psi ) & =_{def} & h(\varphi )\vee h(\psi ) \\ 
+h(\varphi \Rightarrow \psi ) & =_{def} & h(\lnot \varphi )\vee h(\psi ) \\ 
+h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\ 
+h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
+h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
+h(\varphi ) \\ 
+h(\nabla ) & =_{def} & \nabla \\ 
+h(\nabla (t)) & =_{def} & \nabla (t) \\ 
+h(\Delta ) & =_{def} & \Delta \\ 
+h(\Delta (t)) & =_{def} & \Delta (t) \\ 
+h(X(d)) & =_{def} & X(d) \\ 
+h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
+D:=e).~h(\varphi )%
+\end{array}%
+\end{equation*}%
+\pagebreak
+
+\subsection{The predicate formula normal form (PFNF)}
+
+\begin{definition}
+A predicate formula is said to be in \emph{Predicate Formula Normal Form}
+(PFNF) if it has the following form: 
+\begin{equation*}
+\mathsf{Q}_{1}v_{1}{:}V_{1}.\cdots \mathsf{Q}_{n}v_{n}{:}V_{n}.~h\wedge
+\bigwedge\limits_{i\in I}\left( g_{i}\implies \bigvee\limits_{j\in
+J_{i}}~X^{j}(e^{j})\right)
+\end{equation*}%
+where $X^{j}\in \chi $ ($\chi $ is a countable of sorted predicate
+variables), $\mathsf{Q}_{i}\in \{\forall ,\exists \}$, $I$ is a (possibly
+empty) finite index set, each $J_{i}$ is a non-empty finite index set, and $%
+h $ and every $g_{i}$ are simple formulae.
+\end{definition}
+
+Note that here $J_{i}$ is used to index a set of occurrences of not
+necessarily different variables. For instance, $(n>0\implies X(3)\vee
+X(5)\vee Y(6))$ is a formula complying to the definition of PFNF. So long as
+it does not lead to confusion, we stick to the convention to drop the typing
+of the quantified variables $v_{i}$. An algorithm to compute a PFNF is:
+
+\begin{equation*}
+\begin{array}{lll}
+p(c) & =_{def} & c \\ 
+p(X(d)) & =_{def} & X(d) \\ 
+p(\forall {x{:}D}.\varphi ) & =_{def} & \forall {x{:}D}.p(\varphi ) \\ 
+p(\exists {x{:}D}.\varphi ) & =_{def} & \exists {x{:}D}.p(\varphi ) \\ 
+&  &  \\ 
+p(\varphi \wedge \psi ) & =_{def} & 
+\begin{array}{l}
+\mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi }}^{\varphi }\mathsf{Q%
+}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi }.~~\left( h^{\varphi
+}\wedge h^{\psi }\right) \\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi }\cup I^{\psi }}\left(
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)%
+\end{array}
+\\ 
+&  &  \\ 
+p(\varphi \vee \psi ) & =_{def} & 
+\begin{array}{l}
+\mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi }}^{\varphi }\mathsf{Q%
+}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi }.\left( h^{\varphi }\vee
+h^{\psi }\right) \\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi }}\left( \left( \lnot h^{\psi
+}\wedge g_{i}\right) \implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)
+\\ 
+\wedge \bigwedge\limits_{i\in I^{\psi }}\left( \left( \lnot h^{\varphi
+}\wedge g_{i}\right) \implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)
+\\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi },k\in I^{\psi }}\left( \left(
+g_{i}\wedge g_{k}\right) \implies \bigvee\limits_{j\in J_{i},m\in
+J_{k}}~X^{j}(e^{j})\vee X^{m}(e^{m})\right)%
+\end{array}%
+\end{array}%
+\end{equation*}%
+where
+
+\begin{equation*}
+\begin{array}{lll}
+p(\varphi ) & = & \mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi
+}}^{\varphi }.~h^{\varphi }\wedge \bigwedge\limits_{i\in I^{\varphi }}\left(
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) \\ 
+p(\psi ) & = & \mathsf{Q}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi
+}.~h^{\psi }\wedge \bigwedge\limits_{i\in I^{\psi }}\left( g_{i}\implies
+\bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) ,%
+\end{array}%
+\end{equation*}%
+under the assumption that $I^{\varphi }$ and $I^{\psi }$ are disjoint, and $%
+v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\pagebreak
+
+\section{Transforming an LPS to a PBES}
+
+In this section we define the algorithm \textsc{lps2pbes} that generates a
+PBES from a state formula and an LPS. Let $\langle {D_{p},d_{0},P}\rangle $
+be the LPS given by
+
+\begin{equation*}
+\begin{array}{lrl}
+\mathbf{proc}~P(x{:}D_{p}) & = & \sum_{i\in
+I}\sum_{y:E_{i}}c_{i}(x,y)\rightarrow a_{i}(f_{i}(x,y))\mbox{\aap ,}%
+t_{i}(x,y)\cdot P(g_{i}(x,y)) \\ 
+& + & \sum_{j\in J}\sum_{y:E_{j}}c_{j}(x,y)\rightarrow \delta \mbox{\aap ,}%
+t_{j}(x,y);%
+\end{array}%
+\end{equation*}%
+where $a_{i}(f_{i}(x,y))$ is a multiset of actions. Then we define 
+\begin{equation*}
+\text{\textsc{lps2pbes}}(\sigma X(x_{f}:D_{f}:=d).~\varphi ,\langle {%
+D_{p},d_{0},P}\rangle )=\mathbf{E}(\varphi ),
+\end{equation*}%
+where the function $\mathbf{E}$ is inductively defined using the tables
+below. The function $\varphi $ has to be in positive normal form, i.e. it
+may not contain any $\lnot $ or $\Rightarrow $ symbols. This is done using
+the function $h$, as given below. There is also an untimed variant of the
+algorithm, which can be obtained by removing all time references. A formula $%
+\varphi $ not of the form $\sigma X(x_{f}:D_{f}:=d).~\varphi $ is first
+translated into $\nu X().~\varphi $. We assume that $T:\mathbb{R}$ is a
+unique fresh time variable that is generated by the algorithm.
+
+\vspace{1cm}
+
+%-------------------------------------%
+%           function Sat
+%-------------------------------------%
+Let $a=\{a_{1},\ldots ,a_{n}\}$ and $b=\{b_{1},\ldots ,b_{n}\}$ be two multi
+actions. Let $A$ be the set of all permutations $[i_{1},\ldots ,i_{n}]$ of $%
+[1,\ldots n]$ such that $name(a_{k})=name(b_{i_{k}})$ for $k=1\ldots n$.
+Then we define the function $\mathbf{Sat}$ as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+\mathbf{Sat}(a \mbox{\aap ,} t, b) & =_{def} & \left\{ 
+\begin{array}{cc}
+\dbigvee\limits_{\lbrack i_{1},\ldots ,i_{n}]\in
+A}\dbigwedge\limits_{k=1\ldots n}(a_{k}=b_{i_{k}}) & \text{if }A\neq
+\emptyset \\ 
+false & \text{otherwise}%
+\end{array}%
+\right. \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, c) & =_{def} & c \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \alpha \mbox{\aap ,} u) & =_{def} & \mathbf{%
+Sat}(a \mbox{\aap ,} t, \alpha) \wedge t \approx u \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \neg \alpha) & =_{def} & \neg \mathbf{Sat}(a %
+\mbox{\aap ,} t, \alpha) \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \alpha \wedge \beta) & =_{def} & \mathbf{Sat}%
+(a \mbox{\aap ,} t, \alpha) \wedge \mathbf{Sat}(a \mbox{\aap ,} t, \beta) \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \alpha \vee \beta) & =_{def} & \mathbf{Sat}%
+(a \mbox{\aap ,} t, \alpha) \vee \mathbf{Sat}(a \mbox{\aap ,} t, \beta) \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \alpha \Rightarrow \beta) & =_{def} & 
+\mathbf{Sat}(a \mbox{\aap ,} t, \alpha) \Rightarrow \mathbf{Sat}(a %
+\mbox{\aap ,} t, \beta) \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \forall{x {:} D}. \alpha) & =_{def} & \forall%
+{y {:} D}. (\mathbf{Sat}(a \mbox{\aap ,} t, \alpha[x := y]) \\ 
+\mathbf{Sat}(a \mbox{\aap ,} t, \exists{x {:} D}. \alpha) & =_{def} & \exists%
+{y {:} D}. (\mathbf{Sat}(a \mbox{\aap ,} t, \alpha[x := y]) \\ 
+&  & 
+\end{array}%
+\end{equation*}
+
+%-------------------------------------%
+%           function Par
+%-------------------------------------%
+
+\begin{equation*}
+\begin{array}{lll}
+\mathbf{Par}_{X,l}(c) & =_{def} & [] \\ 
+\mathbf{Par}_{X,l}(\lnot \varphi ) & =_{def} & \mathbf{Par}_{X,l}(\varphi )
+\\ 
+\mathbf{Par}_{X,l}(\varphi \wedge \psi ) & =_{def} & \mathbf{Par}%
+_{X,l}(\varphi )++\mathbf{Par}_{X,l}(\psi ) \\ 
+\mathbf{Par}_{X,l}(\varphi \vee \psi ) & =_{def} & \mathbf{Par}%
+_{X,l}(\varphi )++\mathbf{Par}_{X,l}(\psi ) \\ 
+\mathbf{Par}_{X,l}(\varphi \Rightarrow \psi ) & =_{def} & \mathbf{Par}%
+_{X,l}(\varphi )++\mathbf{Par}_{X,l}(\psi ) \\ 
+\mathbf{Par}_{X,l}([\alpha ]\varphi ) & =_{def} & \mathbf{Par}_{X,l}(\varphi
+) \\ 
+\mathbf{Par}_{X,l}(\langle \alpha \rangle \varphi ) & =_{def} & \mathbf{Par}%
+_{X,l}(\varphi ) \\ 
+\mathbf{Par}_{X,l}(\forall {x{:}D}.\varphi ) & =_{def} & \mathbf{Par}%
+_{X,l++[x{:}D]}(\varphi ) \\ 
+\mathbf{Par}_{X,l}(\exists {x{:}D}.\varphi ) & =_{def} & \mathbf{Par}%
+_{X,l++[x{:}D]}(\varphi ) \\ 
+\mathbf{Par}_{X,l}(Y(d_{f})) & =_{def} & [] \\ 
+\mathbf{Par}_{X,l}(\sigma Y(x_{f}{:}D_{f}:=d).\varphi ) & =_{def} & \left\{ 
+\begin{array}{cc}
+l & \mathsf{if\ }Y=X \\ 
+\mathbf{Par}_{X,l++[x_{f}{:}D_{f}]}(\varphi ) & \mathsf{if\ }Y\neq X%
+\end{array}%
+\right. \\ 
+\mathbf{Par}_{X,l}(\nabla (t)) & =_{def} & [] \\ 
+\mathbf{Par}_{X,l}(\Delta (t)) & =_{def} & [] \\ 
+&  & 
+\end{array}%
+\end{equation*}
+
+\pagebreak
+
+%-------------------------------------%
+%           function RHS
+%-------------------------------------%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}(c) & =_{def} & c \\ 
+{\mathbf{RHS}}(\varphi \wedge \psi ) & =_{def} & {\mathbf{RHS}}(\varphi
+)\wedge {\mathbf{RHS}}(\psi ) \\ 
+{\mathbf{RHS}}(\varphi \vee \psi ) & =_{def} & {\mathbf{RHS}}(\varphi )\vee {%
+\mathbf{RHS}}(\psi ) \\ 
+{\mathbf{RHS}}(\varphi \Rightarrow \psi ) & =_{def} & {\mathbf{RHS}}(\lnot
+\varphi )\vee {\mathbf{RHS}}(\psi ) \\ 
+{\mathbf{RHS}}(\forall {x{:}D}.\varphi ) & =_{def} & \forall {x{:}D}.{%
+\mathbf{RHS}}(\varphi ) \\ 
+{\mathbf{RHS}}(\exists {x{:}D}.\varphi ) & =_{def} & \exists {x{:}D}.{%
+\mathbf{RHS}}(\varphi ) \\ 
+{\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
+{:}E_{i}}((\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
+t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+&  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
+\wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\ 
+&  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
+(\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
+{\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
+I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))%
+\mbox{\aap
+,}t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+&  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
+t_{i}(x_{p},y)>T\ \wedge \\ 
+&  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(} {\mathbf{RHS}}%
+(\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
+{\mathbf{RHS}}(X(d)) & =_{def} & \tilde{X}(T,d,x_{p},\mathbf{Par}%
+_{X,[]}(\varphi _{0})) \\ 
+{\mathbf{RHS}}(\sigma X(x_{f}{:}D_{f}:=d).~\varphi ) & =_{def}~~~ & \tilde{X}%
+(T,d,x_{p},\mathbf{Par}_{X,[]}(\varphi _{0})) \\ 
+{\mathbf{RHS}}(\nabla (t)) & =_{def} & \left( \bigwedge_{i{\in }I\cup
+J}\forall _{y{:}E_{i}}((\lnot c_{i}(x_{p},y)\vee t>t_{k}(x_{p},y))\right)
+\wedge t>T \\ 
+{\mathbf{RHS}}(\Delta (t)) & =_{def} & \left( \bigvee_{i{\in }I\cup
+J}\exists _{y{:}E_{i}}((c_{i}(x_{p},y)\wedge t\leq t_{k}(x_{p},y))\right)
+\vee t\leq T \\ 
+{\mathbf{RHS}}(\lnot c) & =_{def} & \lnot {\mathbf{RHS}}(\lnot c)=\lnot c \\ 
+{\mathbf{RHS}}(\lnot \lnot \varphi ) & =_{def} & \mathbf{RHS}(\varphi ) \\ 
+{\mathbf{RHS}}(\lnot (\varphi \wedge \psi )) & =_{def} & {\mathbf{RHS}}%
+(\lnot \varphi )\vee {\mathbf{RHS}}(\lnot \psi ) \\ 
+{\mathbf{RHS}}(\lnot (\varphi \vee \psi )) & =_{def} & {\mathbf{RHS}}(\lnot
+\varphi )\wedge {\mathbf{RHS}}(\lnot \psi ) \\ 
+{\mathbf{RHS}}(\lnot (\varphi \Rightarrow \psi )) & =_{def} & {\mathbf{RHS}}%
+(\varphi )\wedge {\mathbf{RHS}}(\lnot \psi ) \\ 
+{\mathbf{RHS}}(\lnot (\forall {x{:}D}.\varphi )) & =_{def} & \exists {x{:}D}.%
+{\mathbf{RHS}}(\lnot \varphi ) \\ 
+{\mathbf{RHS}}(\lnot (\exists {x{:}D}.\varphi )) & =_{def} & \forall {x{:}D}.%
+{\mathbf{RHS}}(\lnot \varphi ) \\ 
+{\mathbf{RHS}}(\lnot ([\alpha ]\varphi )) & =_{def} & {\mathbf{RHS}}(\langle
+\alpha \rangle (\lnot \varphi )) \\ 
+{\mathbf{RHS}}(\lnot (\langle \alpha \rangle \varphi )) & =_{def} & {\mathbf{%
+RHS}}([\alpha ](\lnot \varphi )) \\ 
+{\mathbf{RHS}}(\lnot X(d)) & =_{def} & \lnot {\mathbf{RHS}}(X(d)) \\ 
+{\mathbf{RHS}}(\lnot (\sigma X(x_{f}{:}D_{f}:=d).~\varphi )) & =_{def}~~~ & {%
+\mathbf{RHS}}(\widetilde{\sigma }X(x_{f}{:}D_{f}:=d).~(\lnot \varphi \lbrack
+X:=\lnot X]))={\mathbf{RHS}}((\sigma X(x_{f}{:}D_{f}:=d).~\lnot \varphi ))
+\\ 
+{\mathbf{RHS}}(\lnot \nabla (t)) & =_{def} & {\mathbf{RHS}}(\Delta (t)) \\ 
+{\mathbf{RHS}}(\lnot \Delta (t)) & =_{def} & {\mathbf{RHS}}(\nabla (t))%
+\end{array}%
+\end{equation*}
+
+\pagebreak
+
+%-------------------------------------%
+%           function E
+%-------------------------------------%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{E}}(c) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\varphi \wedge \psi ) & =_{def} & {\mathbf{E}}(\varphi ){%
+\mathbf{E}}(\psi ) \\ 
+{\mathbf{E}}(\varphi \vee \psi ) & =_{def} & {\mathbf{E}}(\varphi ){\mathbf{E%
+}}(\psi ) \\ 
+{\mathbf{E}}(\varphi \Rightarrow \psi ) & =_{def} & {\mathbf{E}}(\lnot
+\varphi ){\mathbf{E}}(\psi ) \\ 
+{\mathbf{E}}(\forall {x{:}D}.\varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
+{\mathbf{E}}(\exists {x{:}D}.\varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
+{\mathbf{E}}([\alpha ]\varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
+{\mathbf{E}}(\langle \alpha \rangle \varphi ) & =_{def} & {\mathbf{E}}%
+(\varphi ) \\ 
+{\mathbf{E}}(\nabla ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\nabla (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(X(d)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\sigma X(x_{f}{:}D_{f}:=d).~\varphi )~~~ & =_{def}~~~ & (\sigma 
+\tilde{X}(T:\mathbb{R},x_{f}{:}D_{f},x_{p}{:}D_{p},\mathbf{Par}%
+_{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\varphi )~)~{\mathbf{E}}(\varphi ) \\ 
+{\mathbf{E}}(\lnot c) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \lnot \varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
+{\mathbf{E}}(\lnot (\varphi \wedge \psi )) & =_{def} & {\mathbf{E}}(\lnot
+\varphi ){\mathbf{E}}(\lnot \psi ) \\ 
+{\mathbf{E}}(\lnot (\varphi \vee \psi )) & =_{def} & {\mathbf{E}}(\lnot
+\varphi ){\mathbf{E}}(\lnot \psi ) \\ 
+{\mathbf{E}}(\lnot (\varphi \Rightarrow \psi )) & =_{def} & {\mathbf{E}}%
+(\varphi ){\mathbf{E}}(\lnot \psi ) \\ 
+{\mathbf{E}}(\lnot (\forall {x{:}D}.\varphi )) & =_{def} & {\mathbf{E}}%
+(\lnot \varphi ) \\ 
+{\mathbf{E}}(\lnot (\exists {x{:}D}.\varphi )) & =_{def} & {\mathbf{E}}%
+(\lnot \varphi ) \\ 
+{\mathbf{E}}(\lnot ([\alpha ]\varphi )) & =_{def} & {\mathbf{E}}(\lnot
+\varphi ) \\ 
+{\mathbf{E}}(\lnot (\langle \alpha \rangle \varphi )) & =_{def} & {\mathbf{E}%
+}(\lnot \varphi ) \\ 
+{\mathbf{E}}(\lnot \nabla ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \nabla (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \Delta ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \Delta (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot X(d)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \sigma X(x_{f}{:}D_{f}:=d).~\varphi )~~~ & =_{def}~~~ & (%
+\widetilde{\sigma }\tilde{X}(T:\mathbb{R},x_{f}{:}D_{f},x_{p}{:}D_{p},%
+\mathbf{Par}_{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\lnot \varphi ~[X:=\lnot
+X]))~{\mathbf{E}}((\lnot \varphi )[X:=\lnot X]),%
+\end{array}%
+\end{equation*}%
+\pagebreak where $\widetilde{\sigma }=\mu $ if $\sigma =\nu $ and $%
+\widetilde{\sigma }=\nu $ if $\sigma =\mu $ and $\tilde{X}$ is a fresh
+predicate variable.
+
+\newpage
+
+\section{Transforming an LTS to a PBES}
+
+In this section we define the algorithm \textsc{lts2pbes} that generates a
+PBES from a state formula $\sigma X(d:D:=e).~\varphi $ and an LTS $\langle {%
+S,Act,\rightarrow ,s}_{0}\rangle $ : 
+\begin{equation*}
+\text{\textsc{lts2pbes}}(\sigma X(d:D:=e).~\varphi ,\langle {%
+S,Act,\rightarrow ,s}_{0}\rangle )=\left\langle \mathbf{E}_{\sigma
+X(d:D:=e).~\varphi }(\varphi ),X_{s_{0}}(e)\right\rangle
+\end{equation*}%
+where the function $\mathbf{E}$ is inductively defined using the tables
+below. The function $\varphi $ has to be in positive normal form, i.e. it
+may not contain any $\lnot $ or $\Rightarrow $ symbols. A formula $\psi $
+not of the form $\sigma X(d:D:=e).~\varphi $ is translated into $\nu
+X().~\psi $.
+
+N.B. The functions $\mathbf{Sat}$ and $\mathbf{Par}$ are defined in the
+section about \textsc{lps2pbes}.
+
+$\bigskip$
+
+$%
+\begin{array}{lll}
+{\mathbf{E}}_{\varphi _{0}}(c) & =_{def} & \epsilon \\ 
+{\mathbf{E}}_{\varphi _{0}}(\varphi \wedge \psi ) & =_{def} & {\mathbf{E}}%
+_{\varphi _{0}}(\varphi ){\mathbf{E}}_{\varphi _{0}}(\psi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}(\varphi \vee \psi ) & =_{def} & {\mathbf{E}}%
+_{\varphi _{0}}(\varphi ){\mathbf{E}}_{\varphi _{0}}(\psi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}(\forall {x{:}D}.\varphi ) & =_{def} & {\mathbf{E}%
+}_{\varphi _{0}}(\varphi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}(\exists {x{:}D}.\varphi ) & =_{def} & {\mathbf{E}%
+}_{\varphi _{0}}(\varphi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}([\alpha ]\varphi ) & =_{def} & {\mathbf{E}}%
+_{\varphi }(\varphi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}(\langle \alpha \rangle \varphi ) & =_{def} & {%
+\mathbf{E}}_{\varphi _{0}}(\varphi ) \\ 
+{\mathbf{E}}_{\varphi _{0}}(X(d)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}_{\varphi _{0}}(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & 
+(\sigma \{X_{s}(d:D,\mathbf{Par}_{X,[]}(\varphi _{0}))={\mathbf{RHS}}%
+_{\varphi }(\varphi ,s)\ |\ s\in S\})~{\mathbf{E}}_{\varphi _{0}}(\varphi )%
+\end{array}%
+$
+
+$\bigskip $
+
+$%
+\begin{array}{lll}
+{\mathbf{RHS}}_{\varphi _{0}}(c,s) & =_{def} & c \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\varphi \wedge \psi ,s) & =_{def} & {\mathbf{%
+RHS}}_{\varphi _{0}}(\varphi ,s)\wedge {\mathbf{RHS}}_{\varphi _{0}}(\psi ,s)
+\\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\varphi \vee \psi ,s) & =_{def} & {\mathbf{RHS}%
+}_{\varphi _{0}}(\varphi ,s)\vee {\mathbf{RHS}}_{\varphi _{0}}(\psi ,s) \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\forall d{{:}D}.\varphi ,s) & =_{def} & 
+\forall d{{:}D}.{\mathbf{RHS}}_{\varphi _{0}}(\varphi ,s) \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\exists d{{:}D}.\varphi ,s) & =_{def} & 
+\exists d{{:}D}.{\mathbf{RHS}}_{\varphi _{0}}(\varphi ,s) \\ 
+{\mathbf{RHS}}_{\varphi _{0}}([\alpha ]\varphi ,s) & =_{def} & \bigwedge
+\left\{ \mathbf{Sat}(a,\alpha )\Rightarrow {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a}{\rightarrow }t\right\} \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\langle \alpha \rangle \varphi ,s) & =_{def} & 
+\bigvee \left\{ \mathbf{Sat}(a,\alpha )\wedge {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a}{\rightarrow }t\right\} \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(X(d),s) & =_{def} & X_{s}(d,\mathbf{Par}%
+_{X,[]}(\varphi _{0})) \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\sigma X(d{:}D:=e).~\varphi ,s) & =_{def}~~~ & 
+X_{s}(e,\mathbf{Par}_{X,[]}(\varphi _{0}))%
+\end{array}%
+$\pagebreak
+
+\section{Bisimulation algorithms}
+
+Let%
+\begin{eqnarray*}
+M(d) &=&\sum\limits_{i\in I_{M}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e)) \\
+S(d) &=&\sum\limits_{i\in I_{S}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e))
+\end{eqnarray*}%
+be two linear processes, such that $I_{M}\cap I_{S}=\emptyset $. $M$ is
+called the model and $S$ the specification. The expression $a_{i}(d,e)$ can
+be a multi-action, or have the special value $\tau $. We assume that there
+are no $\delta $ summands. We define four pbes equation systems that express
+some kind of bisimulation equivalence between $M$ and $S$.
+
+\paragraph{Branching Bisimulation}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{i}^{p,q}(d,d^{\prime },e)) \\
+close_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau
+\}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+Y_{i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }),e)) \\
+&&\vee (X^{p,q}(d,d^{\prime })\wedge step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{ 
+\begin{array}{cl}
+a_{i}=\tau : & X^{p,q}(g_{i}(d,e),d^{\prime })\vee \bigvee\limits_{\{j\in
+I_{q}|a_{j}=\tau \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime
+},e^{\prime })\wedge X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime })) \\ 
+a_{i}\neq \tau : & \bigvee\limits_{\{j\in I_{q}|a_{j}=a_{i}\}}\exists
+_{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
+\end{array}%
+\right.
+\end{eqnarray*}
+
+\paragraph{Strong Bisimulation}
+
+\emph{sbisim}$(M,S)=\nu E$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{j\in I_{q}}\exists
+_{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))
+\end{eqnarray*}
+
+\paragraph{Weak Bisimulation}
+
+\emph{wbisim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{3} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{2} & := & \{Y_{1,i}^{M,S}(d,d^{\prime },e)=close_{1,i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{2,i}^{M,S}(d,d^{\prime })=close_{2,i}^{M,S}(d,d^{\prime })|i\in
+I_{M}, \\ 
+&  & Y_{1,i}^{S,M}(d^{\prime },d,e)=close_{1,i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}, \\ 
+&  & Y_{2,i}^{S,M}(d^{\prime },d)=close_{2,i}^{S,M}(d^{\prime },d)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{1,i}^{p,q}(d,d^{\prime },e)) \\
+close_{1,i}^{p,q}(d,d^{\prime },e) &=&\left( \bigvee\limits_{\{j\in
+I_{q}|a_{j}=\tau \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime
+},e^{\prime })\wedge Y_{1,i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime
+}),e))\right) \vee step_{i}^{p,q}(d,d^{\prime },e) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{ 
+\begin{array}{cl}
+a_{i}=\tau : & close_{2,i}^{p,q}(g_{i}(d,e),d^{\prime }) \\ 
+a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
+}:E_{j}}.\left( c_{j}(d^{\prime },e^{\prime })\wedge
+a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime })\wedge
+close_{2,i}^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))\right)%
+\end{array}%
+\right. \\
+close_{2,i}^{p,q}(d,d^{\prime }) &=&X^{p,q}(d,d^{\prime })\vee
+\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau \}}\left( \exists _{e^{\prime
+}:E_{j}}c_{j}(d^{\prime },e^{\prime })\wedge Y_{2,i}^{p,q}(d,g_{j}(d^{\prime
+},e^{\prime }))\right)
+\end{eqnarray*}
+
+\paragraph{Branching Simulation Equivalence}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{M,S}(d,d^{\prime })=X^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with $match$, $close$, and $step$ defined exactly the same as in branching
+bisimulation.\newpage
+
+\section{PBES rewriters}
+
+In this section we describe two PBES rewriters. We assume that a data
+rewriter $r$ is given that rewrites data terms.
+
+\subsection{Simplifying rewriter}
+
+We define a simplifying PBES rewriter $R$ recursively as follows. We assume
+that $D$ is a non-empty data type, and we denote the free variables
+appearing in $\varphi $ as $\mathsf{free}(\varphi )$. We assume that a data
+rewriter $r$ is given that rewrites data terms.%
+\begin{equation*}
+\begin{array}{lcl}
+b & \rightarrow & r(b) \\ 
+\lnot \lnot \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge true & \rightarrow & \varphi \\ 
+true\wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge false & \rightarrow & false \\ 
+false\wedge \varphi & \rightarrow & false \\ 
+\varphi \wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \vee true & \rightarrow & true \\ 
+true\vee \varphi & \rightarrow & true \\ 
+\varphi \vee false & \rightarrow & \varphi \\ 
+false\vee \varphi & \rightarrow & \varphi \\ 
+\varphi \vee \varphi & \rightarrow & \varphi \\ 
+\varphi \Rightarrow \psi & \rightarrow & \lnot \varphi \vee \psi \\ 
+\forall _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
+free}(\varphi ) \\ 
+\forall _{d:D}.\lnot \varphi & \rightarrow & \lnot \exists _{d:D}.\varphi \\ 
+\forall _{d:D}.\varphi \wedge \psi & \rightarrow & \forall _{d:D}.\varphi
+\wedge \forall _{d:D}.\psi \\ 
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & (\forall _{d:D}.\varphi
+)\vee \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & \varphi \vee (\forall
+_{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
+\exists _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
+free}(\varphi ) \\ 
+\exists _{d:D}.\lnot \varphi & \rightarrow & \lnot \forall _{d:D}.\varphi \\ 
+\exists _{d:D}.\varphi \vee \psi & \rightarrow & \exists _{d:D}.\varphi \vee
+\exists _{d:D}.\psi \\ 
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & (\exists _{d:D}.\varphi
+)\wedge \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & \varphi \wedge (\exists
+_{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
+X(e) & \rightarrow & X(r(e))%
+\end{array}%
+\end{equation*}%
+where $\varphi $ and $\psi $ are arbitrary pbes expressions, $b$ is a data
+term of data sort $\mathbb{B}$, $true$ and $false$ are elements of data sort 
+$\mathbb{B}$, $X$ is a predicate variable, $e$ consists of zero or more data
+sorts and $d$ is a data variable of sort $D$.
+
+\paragraph{\newpage Simplify}
+
+The pbes expression rewrite system \textsc{Simplify} [Luc Engelen, 2007]
+consists of the following rules\footnote{%
+Todo: reformulate this rewrite system.}:%
+\begin{eqnarray*}
+false\wedge x &\rightarrow &false \\
+x\wedge false &\rightarrow &false \\
+true\wedge x &\rightarrow &x \\
+x\wedge true &\rightarrow &x \\
+\lnot true &\rightarrow &false \\
+\lnot false &\rightarrow &true \\
+ITE(true,x,y) &\rightarrow &x \\
+ITE(false,x,y) &\rightarrow &y \\
+x &=&x\rightarrow true \\
+y &=&x\rightarrow x=y,\text{ provided }y\succ x
+\end{eqnarray*}
+
+\subsection{Quantifier Elimination Rewriter}
+
+This section describes a rewriter on predicate formulae that eliminates
+quantifiers. It is based on the following property%
+\begin{equation*}
+\begin{array}{cc}
+\forall _{x:X}.\varphi \equiv \dbigwedge\limits_{y:X}\varphi \lbrack
+x:=y]\quad & \exists _{x:X}.\varphi \equiv \dbigvee\limits_{y:X}\varphi
+\lbrack x:=y],%
+\end{array}%
+\end{equation*}
+
+where the conjunction and disjunction on the right hand sides may be
+infinite. Because of this, the rewriter we describe here is not guaranteed
+to terminate. However, in many practical cases the rewriter can compute a
+finite expression even if the quantifier variables are of infinite sort. An
+example of this is the formula $\forall _{n:\mathbb{N}}.(n>2)\vee X(n)$ that
+can be rewritten into $X(0)\wedge X(1)\wedge X(2)$.
+
+We assume that the sorts of quantifier variables can be enumerated. By this
+we mean the existence of a function $enum$ that maps an arbitrary term $d:D$
+to a finite set of terms $\{d_{1},\cdots ,d_{k}\}$, such that $%
+range(d)=\dbigcup\limits_{i=1\cdots k}range(d_{i})$, where $range(d)$ is the
+set of closed terms obtained from $d$ by substituting values for the free
+variables of $d$. For example, if natural numbers are represented by $%
+S^{n}(0)$, with $S$ a function that expresses the successor of a number,
+then possible enumerations of the term $n$ are $\{0,S(n^{\prime })\}$ and $%
+\{0,S(0),S(S(n^{\prime \prime }))\}$. Let $id$ be the identity function and
+let $\sigma \lbrack d_{1}:=e_{1},\cdots ,d_{n}:=e_{n}]$ be the function $%
+\sigma ^{\prime }$ with $\sigma ^{\prime }(x)=e_{i}$ if $x=d_{i}$ and $%
+\sigma ^{\prime }(x)=\sigma (x)$ otherwise.
+
+A parameter of the \textsc{EliminateQuantifiers }algorithm is a rewriter $R$
+on quantifier free predicate formulae, that is expected to have the
+following properties:%
+\begin{eqnarray*}
+R(\bot ) &=&\bot \\
+(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{,}
+\end{eqnarray*}%
+where $t\simeq t^{\prime }$ indicates that $t$ and $t^{\prime }$ are
+equivalent. 
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{EliminateQuantifiers(}$Q_{d_{1}:D_{1},\ldots ,d_{n}:D_{n}}.\varphi
+,R $\textsc{)} \\ 
+$\text{\textbf{if }}freevars(R(\varphi ))\cap \{d_{1},\cdots
+,d_{n}\}=\emptyset $ $\text{\textbf{then return }}R(\varphi )$ \\ 
+$V:=\emptyset $ \\ 
+$\text{\textbf{for }}i\in \{1,\ldots ,n\}\text{ \textbf{do }}%
+E_{i}:=\{d_{i}\} $ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \text{\textbf{choose }}e_{k}\in E_{k}$, such that $\mathsf{dvar}%
+(e_{k})\neq \emptyset $ \\ 
+$\qquad E_{k}:=E_{k}\backslash \{e_{k}\}$ \\ 
+$\qquad \text{\textbf{for }}e\in enum(e_{k}):$ \\ 
+$\qquad \qquad W:=\emptyset $ \\ 
+$\qquad \qquad \text{\textbf{for }}\sigma \in \{id[d_{1}:=f_{1},\cdots
+,d_{k-1}:=f_{k-1},d_{k}:=e,d_{k+1}:=f_{k+1},\cdots ,d_{n}:=f_{n}]$ \\ 
+$\qquad \qquad \qquad \wedge f_{i}\in E_{i}\quad (i=1,\cdots ,n)\}:$ \\ 
+$\qquad \qquad \qquad W:=W\cup \{R(\sigma (\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}stop_{Q}\in W\text{ \textbf{then return }}%
+stop_{Q}$ \\ 
+$\qquad \qquad V:=V\cup \{w\in W\ |\ \mathsf{dvar}(w)\subset \mathsf{dvar}%
+(\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\{w\in W\ |\ \mathsf{dvar}(w)\varsubsetneq 
+\mathsf{dvar}(\varphi )\}\neq \emptyset $ $\text{\textbf{then }}%
+E_{k}:=E_{k}\cup \{e\}$ \\ 
+$\qquad $\textbf{rof} \\ 
+$\text{\textbf{while }}\forall _{i\in \{1,\ldots ,n\}}.E_{i}\neq \emptyset $
+\\ 
+$\text{\textbf{return} }\dbigoplus\limits_{v\in V}v,$%
+\end{tabular}%
+\end{equation*}%
+where $stop_{Q}=\bot $ and $\dbigoplus =\dbigwedge $ in case $Q=\forall $,
+and where $stop_{Q}=\top $ and $\dbigoplus =\dbigvee $ in case $Q=\exists $
+
+\subsection{OnePointRule Quantifier Elimination}
+
+The OnePointRule Quantifier Elimination rewriter rewrites certain patterns
+of PBES quantifier expressions as follows:%
+\begin{equation*}
+\begin{array}{lll}
+\exists _{x:X}.(x=e)\wedge \varphi  & \rightarrow  & \varphi \lbrack x:=e]
+\\ 
+\exists _{x:\mathbb{B}}.x\wedge \varphi  & \rightarrow  & \varphi \lbrack
+x:=true] \\ 
+\exists _{x:\mathbb{B}}.\lnot x\wedge \varphi  & \rightarrow  & \varphi
+\lbrack x:=false] \\ 
+\forall _{x:X}.(x\neq e)\vee \varphi  & \rightarrow  & \varphi \lbrack x:=e]
+\\ 
+\forall _{x:\mathbb{B}}.x\vee \varphi  & \rightarrow  & \varphi \lbrack
+x:=false] \\ 
+\forall _{x:\mathbb{B}}.\lnot x\vee \varphi  & \rightarrow  & \varphi
+\lbrack x:=true]%
+\end{array}%
+\end{equation*}%
+Note that it is straightforward to generalize these patterns to quantifier
+expressions as they occur in the mCRL2 toolset ($\exists
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $ and $\forall
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $).
+
+\subsubsection{Preprocessing}
+
+It turns out that the data rewriters in the mCRL2 toolset do not rewrite $%
+\lnot (\varphi =\psi )$ into $\varphi \neq \psi $. Therefore it is useful to
+apply the following as a preprocessing step to data expressions:%
+\begin{equation*}
+\begin{array}{lll}
+\lnot (\varphi _{1}\wedge \cdots \wedge \varphi _{n}) & \rightarrow  & \lnot
+\varphi _{1}\vee \cdots \vee \lnot \varphi _{n} \\ 
+\lnot (\varphi _{1}\vee \cdots \vee \varphi _{n}) & \rightarrow  & \lnot
+\varphi _{1}\wedge \cdots \wedge \lnot \varphi _{n} \\ 
+\lnot (\varphi =\psi ) & \rightarrow  & \varphi \neq \psi  \\ 
+\lnot (\varphi \neq \psi ) & \rightarrow  & \varphi =\psi  \\ 
+\lnot \lnot \varphi  & \rightarrow  & \varphi 
+\end{array}%
+\end{equation*}
+
+\section{PBES instantiation}
+
+In this section we describe two instantiation algorithms for PBESs.
+
+\subsection{\protect\bigskip Lazy algorithm}
+
+In this section we describe an implementation of the lazy instantiation
+algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
+takes two extra parameters, an injective function $\rho $ that renames
+proposition variables to predicate variables, and a rewriter $R$ that
+eliminates quantifiers from predicate formulae. Let $\mathcal{E=(\sigma }%
+_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{(\sigma }%
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $X_{init}(e_{init})$ an
+initial state.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{, }\rho \text{\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
+\\ 
+todo:=\{R(X_{init}(e_{init}))\} \\ 
+done:=\emptyset \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad done:=done\cup \{X_{k}(e)\} \\ 
+\qquad X^{e}:=\rho (X_{k}(e)) \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \mathcal{E}_{k}:=\mathcal{E}_{k}(\mathcal{\sigma }_{k}X^{e}=\rho
+(\psi ^{e})) \\ 
+\qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
+\\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+where $\rho $ is extended from predicate variables to quantifier free
+predicate formulae using%
+\begin{equation*}
+\begin{array}{cc}
+\rho (b)=_{def}b & \quad \rho (\varphi \oplus \psi )=_{def}\rho (\varphi
+)\oplus \rho (\psi )%
+\end{array}%
+\end{equation*}%
+\pagebreak
+
+\subsection{Finite algorithm}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi
+_{1})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi
+_{n})$ be a PBES. We assume that all data sorts $D_{i}$ are finite and all
+data sorts $E_{i}$ are infinite. Let $r$ be a data rewriter, and let $\rho $
+be an injective function that creates a unique predicate variable from a
+predicate variable name and a data value according to $\rho
+(X(d:D,e:E),d_{0})\rightarrow Y(e:E)$, where $D$ is finite and $E$ is
+infinite and $d_{0}\in D$. Note that $D$ and $D_{i}$ may be
+multi-dimensional sorts.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
+\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
+\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+with $R$ a rewriter on pbes expressions that is defined as follows:%
+\begin{eqnarray*}
+R(b) &=&b \\
+R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
+R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
+R(X_{i}(d,e)) &=&\left\{ 
+\begin{array}{cc}
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
+\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
+\text{if }FV(d)\neq \emptyset%
+\end{array}%
+\right. \\
+R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
+R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
+\end{eqnarray*}%
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
+$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
+variables appearing in $d$.\newpage
+
+\subsection{Parity game generator}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES with initial state $%
+X_{init}(e_{init})$, and let $R:PbesTerm\rightarrow PbesTerm$ be a rewriter.
+The PBES must be in normal form, i.e. it may not contain negations or
+implications. The following algorithm computes a BES. The generated
+equations are in a restricted format, such that the BES can be taken as
+input for a parity game solver.
+
+{\small 
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{GenerateBES(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{\textsc{)}} \\ 
+\text{result}:=\{(\nu Y_{\top }=Y_{\top }),(\mu Y_{\bot }=Y_{\bot })\} \\ 
+\text{visited}:=\{R(X_{init}(e_{init}))\} \\ 
+\text{explored}:=\{\top ,\bot \} \\ 
+\text{\textbf{while }}\text{visited}\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}\psi \in \text{visited}\setminus \text{explored%
+} \\ 
+\qquad \text{visited}:=\text{visited}\ \backslash \ \{\psi \} \\ 
+\qquad \text{explored}:=\text{explored}\cup \{\psi \} \\ 
+\qquad \text{\textbf{if} }\{\psi =X_{k}(e)\}\text{ \textbf{then}} \\ 
+\qquad \qquad \xi :=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \text{\textbf{else}} \\ 
+\qquad \qquad \xi :=\psi \\ 
+\qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\xi }) \\ 
+\qquad \qquad \sigma _{\xi }:=\sigma _{k} \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\xi \} \\ 
+\qquad \text{\textbf{else if} }\{\xi =\dbigwedge_{j\in J}\phi _{j}\}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=\dbigwedge_{j\in J}Y_{\phi _{j}}) \\ 
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do}} \\ 
+\qquad \qquad \qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}
+}\sigma _{\phi _{j}}:=\sigma _{k}\text{ \textbf{else} }\sigma _{\phi
+_{j}}:=\sigma _{\psi } \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\phi _{j}\}_{j\in J} \\ 
+\qquad \text{\textbf{else if} }\{\xi =\dbigvee_{j\in J}\phi _{j}\}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=\dbigvee_{j\in J}Y_{\phi _{j}}) \\ 
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do}} \\ 
+\qquad \qquad \qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}
+}\sigma _{\phi _{j}}:=\sigma _{k}\text{ \textbf{else} }\sigma _{\phi
+_{j}}:=\sigma _{\psi } \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\phi _{j}\}_{j\in J} \\ 
+\qquad \text{\textbf{else if} }\{\xi =\top \}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\top }) \\ 
+\qquad \text{\textbf{else if} }\{\xi =\bot \}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\bot }) \\ 
+\text{\textbf{return }result}%
+\end{array}%
+\end{equation*}%
+}
+
+In every step of the while loop the equation for $Y_{\psi }$ is computed. If
+the right hand side of the equation for $Y_{\psi }$ is a propositional
+variable instantiation, it is expanded into the right hand side of the
+corresponding PBES equation. Otherwise it is converted into a disjunction or
+conjunction by introducing new BES variables. The rewriter $R$ is expected
+to eliminate all quantifiers, so the while loop does not contain cases for
+handling them. The order of the equations in the BES is significant.
+Therefore in the implementation instead of fixpoint symbols $\sigma _{\psi }$
+priority values are used. The BES variables $Y_{\psi }$ are represented by
+integers.
+
+An alternative for inserting the equations $(\nu Y_{\top }=Y_{\top })$ and $%
+(\mu Y_{\bot }=Y_{\bot })$ at the beginning of the resulting BES is to
+replace $\mu Y_{\psi }=\top $ and $\nu Y_{\psi }=\top $ by $\nu Y_{\psi
+}=Y_{\psi }$, and to replace $\mu Y_{\psi }=\bot $ and $\nu Y_{\psi }=\bot $
+by $\mu Y_{\psi }=Y_{\psi }$. This eliminates the need to introduce special
+equations for true and false.
+
+This algorithm is implemented in the class \texttt{parity\_game\_generator}.
+The choice for $\psi$ in the while loop is left to the user of the class.
+
+\pagebreak
+
+\section{Constant Parameter Detection and Elimination}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and $\kappa $ an initial state and let $\mathsf{eval}$
+be an evaluator function on data expressions. We denote the $i$-th element
+of a vector $x$ as $x[i]$. Then we define the algorithm \textsc{PbesConstelm}
+as follows:$\qquad \qquad $%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
+}\text{\textsc{)}} \\ 
+\text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
+c_{X}:=\emptyset \\ 
+\text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
+do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
+todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X\} \\ 
+\qquad \text{\textbf{for }}Y(e)\in \mathsf{iocc}(\varphi _{X}\mathcal{)}%
+\text{ \textbf{do}} \\ 
+\qquad \qquad \text{\textbf{if }}\mathsf{eval}(needs\_update(Y(e),\varphi
+_{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\ 
+\qquad \qquad \qquad c_{Y}^{\prime }:=update(c_{Y},\mathsf{eval}%
+(e[d_{X}:=c_{X}])) \\ 
+\qquad \qquad \qquad \text{\textbf{if }}c_{Y}^{\prime }\neq c_{Y}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
+\qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
+\qquad \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\varphi
+_{X_{i}}:=\varphi _{X_{i}}[d_{X_{i}}:=c_{X_{i}}] \\ 
+constant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
+\text{\textbf{return }}constant\_parameters%
+\end{array}%
+\end{equation*}
+
+where $update_{X}$ is defined as follows:%
+\begin{equation*}
+update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
+\begin{array}{ll}
+e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\ 
+c[i] & \text{if }e[i]=c[i] \\ 
+d_{X}[i] & \text{otherwise}%
+\end{array}%
+\right.
+\end{equation*}
+
+and where $needs\_update$ is a boolean function that determines whether an
+update should be performed. A safe choice for this function is the constant
+function $true$. In [Simon Janssen, 2008] the following alternative is
+proposed.
+
+Let $c_{T}$ and $c_{F}$ be defined as
+
+\begin{equation*}
+\begin{array}{lll}
+c_{T}(c) & = & c \\ 
+c_{F}(c) & = & \lnot c \\ 
+c_{T}(\lnot \varphi ) & = & c_{F}(\varphi ) \\ 
+c_{F}(\lnot \varphi ) & = & c_{T}(\varphi ) \\ 
+c_{\Gamma }(X(e)) & = & false \\ 
+c_{\Gamma }(\mathsf{Q}d:{D}.\varphi ) & = & \mathsf{Q}d:{D}.c_{\Gamma
+}(\varphi ) \\ 
+c_{T}(\varphi \wedge \psi ) & = & c_{T}(\varphi )\wedge c_{T}(\psi ) \\ 
+c_{T}(\varphi \vee \psi ) & = & c_{T}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{T}(\varphi \Rightarrow \psi ) & = & c_{F}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{F}(\varphi \wedge \psi ) & = & c_{F}(\varphi )\vee c_{F}(\psi ) \\ 
+c_{F}(\varphi \vee \psi ) & = & c_{F}(\varphi )\wedge c_{F}(\psi ) \\ 
+c_{F}(\varphi \Rightarrow \psi ) & = & c_{T}(\varphi )\wedge c_{F}(\psi )%
+\end{array}%
+\end{equation*}%
+and let the multi sets $cond_{T}$ and $cond_{F}$ be defined as%
+\begin{equation*}
+\begin{array}{lll}
+cond_{\Gamma }(X(e),c) & = & \emptyset \\ 
+cond_{\Gamma }(X(e),Y(f)) & = & \emptyset \\ 
+cond_{\Gamma }(X(e),\lnot \varphi ) & = & cond_{\Gamma }(X(e),\varphi ) \\ 
+cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\varphi ) & 
+\text{if }X(e)\in \mathsf{iocc}(\varphi ) \\ 
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\psi ) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{T}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\ \theta
+\ \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
+(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{\forall }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\forall }d:{D}.\varphi )\}\cup \{\mathsf{\exists }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{\exists }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\exists }d:{D}.\varphi )\}\cup \{\mathsf{\forall }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+with $\Gamma \in \{T,F\}$. Then we define%
+\begin{equation*}
+needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
+)\cup cond_{F}(X(e),\varphi )}\lnot c
+\end{equation*}
+
+\begin{remark}
+Note that a direct implementation of this function is extremely inefficient.
+It is expected that a more suitable representation can be found.
+\end{remark}
+
+\section{\newpage ReachableVariables}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and let $X_{init}(e_{init})$ be the initial state. The
+algorithm \textsc{ReachableVariables} computes the reachable predicate
+variables.
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{ReachableVariables(}}\mathcal{E},X_{init}\text{\textsc{)}} \\ 
+\text{visited }:=\{X_{init}\};\text{ explored }:=\emptyset \\ 
+\text{\textbf{while} visited}\neq \emptyset \\ 
+\qquad \text{\textbf{choose} }X_{i}\in \text{visited} \\ 
+\qquad \text{visited}:=\text{visited}\setminus \{X_{i}\} \\ 
+\qquad \text{explored }:=\text{ explored}\cup \{X_{i}\} \\ 
+\qquad \text{\textbf{for each} }X_{j}(e)\text{ }\in \mathsf{iocc(}\varphi
+_{X_{i}}{)} \\ 
+\qquad \qquad \text{\textbf{if} }X_{j}\notin \text{ explored} \\ 
+\qquad \qquad \qquad \text{visited }:=\text{ visited}\cup \{X_{j}\} \\ 
+\text{\textbf{return} explored}%
+\end{array}%
+\end{equation*}%
+\pagebreak
+
+\section{PBES abstraction}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and let $V_{i}$ be a subset of the parameters in $%
+d_{X_{i}}$ for $i=1\cdots n$. Let $e\in \{true,false\}$ be a data
+expression. Then we define the algorithm $\mathsf{abstract}$ as follows:%
+\begin{equation*}
+\begin{array}{lll}
+\mathsf{abstract}(d,V,e) & = & \left\{ 
+\begin{array}{ll}
+d & \text{\textsf{if}\ }\mathsf{freevar}(d)\cap V=\emptyset \\ 
+e & \text{\textsf{otherwise}}%
+\end{array}%
+\right. \\ 
+\mathsf{abstract}(\varphi \oplus \psi ,V,e) & = & \mathsf{abstract}(\varphi
+,V,e)\oplus \mathsf{abstract}(\varphi ,V,e) \\ 
+\mathsf{abstract}(\mathsf{Q}_{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}}.\varphi
+,V,e) & = & \mathsf{Q}_{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}}.\mathsf{abstract}%
+(\varphi ,V\setminus \{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}\},e) \\ 
+\mathsf{abstract}(\mathcal{\sigma }X(d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m})=\varphi ,V,e) & = & \mathcal{\sigma }X(d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m})=\mathsf{abstract}(\varphi ,V,e) \\ 
+\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],e) & = & 
+\begin{array}{c}
+\mathcal{(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\mathsf{abstract(}\varphi
+_{X_{1}},V_{1},e)) \\ 
+\cdots \\ 
+\mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\mathsf{abstract(}\varphi
+_{X_{n}},V_{n},e)%
+\end{array}%
+\end{array}%
+\end{equation*}%
+with $d$ a data expression, $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, and 
+$\mathsf{Q\in \{\forall ,\exists \}}$ and $V\subset \{d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m}\}$.
+
+\subsection{Motivation}
+
+The motivation for this algorithm is that if the solution of $\mathsf{%
+abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],false)$ is $true$, this implies
+that the solution of $\mathcal{E}$ is $true$ as well, and if the solution of 
+$\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],true)$ is $false$, this
+implies that the solution of $\mathcal{E}$ is $false$.
+
+\newpage
+
+\section{Absinthe}
+
+The Absinthe algorithm takes as input a PBES $p$, a substitution on function
+symbols $\sigma _{F}:\mathcal{F}\rightarrow \mathcal{F}$, and a substitution
+on sorts $\sigma _{S}:\mathcal{S}\rightarrow \mathcal{S}$, where $\mathcal{F}
+$ is the set of function symbols and $\mathcal{S}$ is the set of sorts. For
+each $s\in domain(\sigma _{S}\mathcal{)}$ there is a corresponding \emph{%
+abstraction function} $h_{s}$.
+
+\subsection{Definitions}
+
+We define $FunctionSymbols(p)$ as the set of function symbols that occur in
+the PBES $p$. For a sort $s$ we define $ContainerConstructors(s)$ as the set
+of constructor functions of the sorts $List(s)$, $Set(s)$ and $Bag(s)$. This
+includes for example the functions $[]:List(s)$ and $\rhd :s\times
+List(s)\rightarrow List(s)$.
+
+\subsection{Algorithm}
+
+The algorithm first extends and modifies the substitution $\sigma _{F}$.
+Then a transformation to $p$ is applied.
+
+\subsubsection{Step 1}
+
+The algorithm first extends the substitution $\sigma _{F}$. Let
+
+\begin{equation*}
+A=\left( FunctionSymbols(p)\cup \dbigcup\limits_{s\in domain(\sigma
+_{S})}ContainerConstructors(s)\right) \setminus domain(\sigma _{F}\mathcal{)}%
+.
+\end{equation*}
+
+For each function symbol $f_{1}\in A$ the substitution $\sigma _{F}$ is
+extended with $\sigma _{F}(f_{1}):=f_{2}$, where $f_{2}$ is obtained from $%
+f_{1}$ using%
+\begin{equation*}
+\begin{array}{lcl}
+f_{1}:s_{b} & \mapsto & f_{2}:s_{b}^{\sigma _{S}} \\ 
+f_{1}:C(s) & \mapsto & f_{2}:C(s)^{\sigma _{S}} \\ 
+f_{1}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto & 
+f_{2}:s_{1}^{\sigma _{S}}\times \cdots s_{n}^{\sigma _{S}}\rightarrow
+Set(s^{\sigma _{S}}),%
+\end{array}%
+\end{equation*}%
+where $s_{b}$ is a basic sort, $s_{1}\times \cdots \times s_{n}\rightarrow s$
+is a function sort, and $C(s)$ is a container sort, and where $f_{2}$ is a
+fresh identifier.
+
+\begin{remark}
+The sort of $f_{1}$ may not contain any element of $domain(\sigma _{S}%
+\mathcal{)}$ as a subsort.
+\end{remark}
+
+\begin{remark}
+If $f_{1}$ is a function update, then the domain of the updated function may
+not contain any element of $domain(\sigma _{S}\mathcal{)}$ as a subsort.
+\end{remark}
+
+For each of the function symbols $f\in FunctionSymbols(p)$ $\setminus
+domain(\sigma _{F}\mathcal{)}$ a corresponding equation is introduced:%
+\begin{equation*}
+\begin{array}{lcl}
+f_{2} & = & \left\{ 
+\begin{array}{ll}
+h_{s_{b}}(f_{1})\text{ } & \text{if }s_{b}\in domain(\sigma _{S}\mathcal{)}
+\\ 
+f^{\sigma _{S}} & \text{otherwise}%
+\end{array}%
+\right. \\ 
+&  &  \\ 
+f_{2} & = & f_{1}^{\sigma _{S}} \\ 
+&  &  \\ 
+f_{2}(x) & = & \left\{ 
+\begin{array}{ll}
+\{h_{s}(f_{1}(x))\}\text{ } & \text{if }TargetSort(s)\in domain(\sigma _{S}%
+\mathcal{)} \\ 
+\{f_{1}(x)\} & \text{otherwise,}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+where $x:s_{1}^{\sigma _{S}}\times \cdots \times s_{n}^{\sigma
+_{S}}\rightarrow s^{\sigma _{S}}$, and where $TargetSort$ is recursively
+defined as%
+\begin{equation*}
+\begin{array}{lcl}
+TargetSort(s_{b}) & = & s_{b} \\ 
+TargetSort(C(s)) & = & C(s) \\ 
+TargetSort(s_{1}\times \cdots \times s_{n}\rightarrow s) & = & TargetSort(s).%
+\end{array}%
+\end{equation*}
+
+\subsubsection{Step 2}
+
+After this the substitution $\sigma _{F}$ is transformed. Each $%
+(f_{1},f_{2})\in \sigma _{F}$ is replaced by $(f_{1},f_{3})$, where $f_{3}$
+is obtained from $f_{2}$ as follows:%
+\begin{equation*}
+\begin{array}{lcl}
+f_{2}:s_{b} & \mapsto & f_{3}:Set(s_{b}) \\ 
+f_{2}:C(s) & \mapsto & f_{3}:Set(C(s)) \\ 
+f_{2}:s_{1}\times \cdots \times s_{n}\rightarrow s & \mapsto & 
+f_{3}:Set(s_{1})\times \cdots \times Set(s_{n})\rightarrow s,%
+\end{array}%
+\end{equation*}%
+where $f3$ is a fresh name.
+
+For each pair $(f_{2},f_{3})$ a corresponding equation is generated:%
+\begin{equation*}
+\begin{array}{lcl}
+f_{3} & = & \{f_{2}\} \\ 
+&  &  \\ 
+f_{3} & = & \{f_{2}\} \\ 
+&  &  \\ 
+f_{3}(X) & = & \left\{ y:s\ |\ \exists _{x:s_{1}\times \cdots \times
+s_{n}\rightarrow s}\ .\ x\in X\wedge y\in f_{2}(x)\right\} ,%
+\end{array}%
+\end{equation*}%
+where $X:Set(s_{1})\times \cdots \times Set(s_{n})\rightarrow s$.
+
+\subsubsection{Step 3}
+
+The PBES $p$ is transformed using the transformations $T$ and $U$, that is
+defined recursively as:%
+\begin{eqnarray*}
+T(\mathcal{(\sigma }_{1}X_{1}(d_{1} &:&D_{1})=\varphi _{1})\ldots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n}))=\mathcal{(\sigma }_{1}%
+\widehat{X_{1}}(d_{1}:D_{1}^{\sigma _{S}})=T(\varphi _{1}))\ldots \mathcal{%
+(\sigma }_{n}\widehat{X_{n}}(d_{n}:D_{n}^{\sigma _{S}})=T(\varphi _{n})) \\
+T(\lnot \varphi ) &=&\lnot T(\varphi ) \\
+T(\varphi \oplus \psi ) &=&T(\varphi )\oplus T(\psi ) \\
+T(X_{i}(e)) &=&\left\{ 
+\begin{array}{cc}
+\dbigvee\limits_{d\in T(e)}\widehat{X_{i}}(d) & \text{if it is an
+under-approximation} \\ 
+\dbigwedge\limits_{d\in T(e)}\widehat{X_{i}}(d) & \text{if it is an
+over-approximation}%
+\end{array}%
+\right. \\
+T(\forall _{d:D}.\varphi ) &=&\forall _{d:D^{\sigma _{S}}}.T(\varphi ) \\
+T(\exists _{d:D}.\varphi ) &=&\exists _{d:D^{\sigma _{S}}}.T(\varphi ) \\
+T(b) &=&\left\{ 
+\begin{array}{cc}
+false\in U(b) & \text{if it is an under-approximation} \\ 
+true\in U(b) & \text{if it is an over-approximation,}%
+\end{array}%
+\right. \\
+U(v) &=&\{v^{\sigma _{S}}\} \\
+U(f) &=&\mathcal{\sigma }_{F}(f) \\
+U(c) &=&\{h_{s}(c)\}\text{ if }c:s\text{ is a ground term and }s\in
+domain(\sigma _{S}) \\
+U(f(x)) &=&U(f)(U(x))\text{ N.B. The general case }U(y(x))\text{ is not
+supported!} \\
+U(\lambda _{d:D}.x) &=&\{v:s^{\sigma _{S}}\ |\ v=U(x)\}\text{, where }x:s \\
+U(\forall _{d:D}.x) &=&? \\
+U(\exists _{d:D}.x) &=&? \\
+U(x\text{ whr }y &:&=z)=?
+\end{eqnarray*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$. Note that $T$ operates on
+PBES expressions, and $U$ operates on data expressions. \newpage
+
+\section{ Gau\ss\ Elimination}
+
+A predicate formula $\varphi $ is defined by the following grammar:%
+\begin{equation*}
+\varphi ::=b|X(e)|\lnot \varphi |\varphi \wedge \varphi |\varphi \vee
+\varphi |\varphi \rightarrow \varphi |\forall d:D.\varphi |\exists
+d:D.\varphi |true |false
+\end{equation*}%
+where $b$ is a data term of sort $\mathbb{B}$, $X$ is a predicate variable, $%
+d$ is a data variable of sort $D$, $e$ is a data term, $true $ represents $%
+true$, and $false $ represents $false$.
+
+\begin{definition}
+(Predicate Variable Substitution) Let $\varphi ,\psi $ be predicate formulae
+and $X$ a predicate variable. Then we define $\psi \lbrack \varphi /X]$ as
+the result of applying the substitution $X:=\varphi $ to the formula $\psi $%
+. To make this more precise: suppose $X$ is declared as $X(d:D)$, then any
+occurrence $X(\overline{d})$ in $\psi $ is replaced by $\varphi \lbrack d:=%
+\overline{d}]$.
+\end{definition}
+
+\begin{lemma}
+(Substitution) Let $\mathcal{E}$ be an equation system for which $X,Y\notin
+bnd(\mathcal{E})$, then:%
+\begin{equation*}
+(\sigma X(d:D)=\varphi )\mathcal{E}(\sigma ^{\prime }Y(e:E)=\psi )\equiv
+(\sigma X(d:D)=\varphi )[\psi /Y]\mathcal{E}(\sigma ^{\prime }Y(e:E)=\psi )
+\end{equation*}
+\end{lemma}
+
+\begin{definition}
+(Approximation) Let $\varphi ,\psi $ be predicate formulae and $X$ a
+predicate variable. We inductively define $\psi \lbrack \varphi /X]^{k}$ as
+follows:%
+\begin{eqnarray*}
+&&\psi \lbrack \varphi /X]^{0}\overset{def}{=}\varphi \\
+&&\psi \lbrack \varphi /X]^{k+1}\overset{def}{=}\psi \lbrack \varphi /X]^{k}
+\end{eqnarray*}
+\end{definition}
+
+Thus, $\psi \lbrack \varphi /X]^{k}$ represents the result of recursively
+substituting $\varphi $ for $X$ in $\psi $.
+
+\begin{lemma}
+(Approximants as Solutions) Let $\varphi $ be a predicate formula and $k\in 
+\mathbb{N}$ be a natural number. Then%
+\begin{eqnarray*}
+(\mu X(d &:&D)=\varphi \lbrack false /X]^{k})\Rrightarrow (\mu
+X(d:D)=\varphi ) \\
+(\nu X(d &:&D)=\varphi )\Rrightarrow (\nu X(d:D)=\varphi \lbrack true
+/X]^{k})
+\end{eqnarray*}
+\end{lemma}
+
+\begin{lemma}
+(Stable Approximants as Solutions) Let $\varphi $ be a predicate formula and 
+$k\in \mathbb{N}$ be a natural number. Then%
+\begin{eqnarray*}
+\text{if }\varphi \lbrack false/X]^{k} &\longleftrightarrow &\varphi \lbrack
+false/X]^{k+1}\text{ then }(\mu X(d:D)=\varphi \lbrack false/X]^{k})\equiv
+(\mu X(d:D)=\varphi ) \\
+\text{if }\varphi \lbrack true/X]^{k} &\longleftrightarrow &\varphi \lbrack
+true/X]^{k+1}\text{ then }(\nu X(d:D)=\varphi \lbrack true/X]^{k})\equiv
+(\nu X(d:D)=\varphi )
+\end{eqnarray*}
+\end{lemma}
+
+\subsection{Gau\ss\ Elimination Algorithm}
+
+Let $\mathcal{E}$ be an equation system of the form%
+\begin{equation*}
+\mathcal{E=(}\sigma _{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots (\sigma
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n}),
+\end{equation*}%
+and let $r$ be a rewrite function that maps a pbes expression $\varphi $ to
+an equivalent expression $\varphi ^{\prime }$.
+
+Then we define%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r,\text{\textsc{%
+solve)}} \\ 
+\mathcal{E}^{\prime }:=\varepsilon \\ 
+i:=n \\ 
+\text{\textbf{while} \textbf{not} }i=0 \\ 
+\text{\textbf{do}} \\ 
+\qquad \varphi _{i}:=\text{\textsc{solve(}}\sigma _{i}X_{i}=\varphi _{i}%
+\text{\textsc{)}} \\ 
+\qquad \mathcal{E}^{\prime }:=\mathcal{E}^{\prime }(\sigma _{i}X_{i}=\varphi
+_{i}) \\ 
+\qquad \text{\textbf{for }}k=1\text{ \textbf{to }}i-1\text{ \textbf{do }}%
+\varphi _{k}:=r(\varphi _{k}[\varphi _{i}/X_{i}])\text{ \textbf{od}} \\ 
+\qquad i:=i-1 \\ 
+\text{\textbf{od}} \\ 
+\text{\textbf{return }}\mathcal{E}^{^{\prime }}%
+\end{array}%
+\end{equation*}%
+Here \textsc{SolveEquation} is an algorithm that solves a pbes equation,
+such that the resulting equation has no reference to the predicate variable
+in its right hand side. An example of such a solve equation algorithm is 
+\textsc{Approximate}.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate(}}\sigma X=\varphi ,\text{\textsc{compare)}} \\ 
+j:=0 \\ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true\text{ 
+\textbf{else} }\psi _{0}:=false \\ 
+\text{\textbf{repeat}} \\ 
+\qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\ 
+\qquad j:=j+1 \\ 
+\text{\textbf{until }\textsc{compare}}(\psi _{j},\psi _{j+1}) \\ 
+\text{\textbf{return }}\sigma X=\psi _{j}%
+\end{array}%
+\end{equation*}
+
+Also pattern matching algorithms exist for this. The \textsc{Gau\textsc{\ss\ 
+}Elimination} algorithm solves the equation system $\mathcal{E}$ for the
+predicate variable $X_{1}$. To solve the system $\mathcal{E}$ for all
+variables, the algorithm has to be applied repeatedly.
+
+\subsection{Solving a BES}
+
+If the equation system $\mathcal{E}$ is a BES (i.e. the predicate variables
+have no parameters), then the following simple approximate function can be
+used to solve it:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate-BES(}}\sigma X=\varphi \text{\textsc{)}} \\ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true \text{ 
+\textbf{else} }\psi _{0}:=false \\ 
+\text{\textbf{return} \textsc{Simplify}(}\sigma X=\varphi \lbrack \psi
+_{0}/X]\text{)}%
+\end{array}%
+\end{equation*}
+
+\newpage
+
+\section{Small progress measures}
+
+Let $\mathcal{E}=(\sigma _{1}X_{1}=\varphi _{1})\ \cdots \ (\sigma
+_{n}X_{n}=\varphi _{n})$ be a BES in standard recursive form. Let $d$ be the
+number of $\mu $-blocks appearing in $\mathcal{E}$. For each variable $X_{i}$
+we define a corresponding attribute $\alpha _{i}\in \mathbb{N}^{d}$, which
+is called the 'progress measure' of $X_{i}$. We define the algorithm \textsc{%
+SmallProgressMeasures} as follows:
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{SmallProgressMeasures(}}\mathcal{E}\text{\textsc{)}} \\ 
+V:=\{X_{i}\ |\ 1\leq i\leq n\} \\ 
+V_{Even}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is a disjunction}\}
+\\ 
+V_{Odd}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is not a disjunction}\}
+\\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{\alpha }%
+_{i}:=[0,\cdots ,0] \\ 
+\text{\textbf{while }}\mathsf{liftable\_variables}(V)\neq \emptyset \text{ 
+\textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X_{i}\in \mathsf{liftable\_variables}(V) \\ 
+\qquad \mathcal{\alpha }_{i}:=\left\{ 
+\begin{array}{ll}
+\mathsf{min}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Even} \\ 
+\mathsf{max}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Odd}%
+\end{array}%
+\right. \\ 
+\text{\textbf{return} }(W_{Even},W_{Odd})%
+\end{array}%
+\end{equation*}%
+where $\mathsf{min/max}$ is the minimum/maximum with respect to the
+lexicographical order on $\mathbb{N}^{d}$, and $\beta \in \mathbb{N}^{d}$ is
+defined as%
+\begin{equation*}
+\beta _{i}=\left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ i\text{ \textsf{is even}} \\ 
+|\{X_{j}\in V\ |\ \mathsf{rank}(X_{j})=i\}| & \mathsf{if}\ i\text{ \textsf{%
+is odd}}%
+\end{array}%
+\right.
+\end{equation*}%
+and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{Z}\rightarrow 
+\mathbb{N}^{d}$ is defined inductively as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{inc}(\alpha ,-1) & = & \top \\ 
+&  &  \\ 
+\mathsf{inc}(\alpha ,i) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{inc}([\alpha _{0},\cdots ,\alpha _{i-1},0,\alpha _{i+1},\cdots
+,\alpha _{d}],i-1) & \text{\textsf{if}}\ \alpha _{i}=\beta _{i} \\ 
+\lbrack \alpha _{0},\cdots ,\alpha _{i-1},\alpha _{i}+1,\alpha _{i+1},\cdots
+,\alpha _{d}] & \text{\textsf{otherwise}}%
+\end{array}%
+\right.%
+\end{array}%
+\right.
+\end{equation*}%
+and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}%
+^{d} $ is defined as:%
+\begin{equation*}
+f(X_{j},m)=\left\{ 
+\begin{array}{ll}
+\lbrack (\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ m\text{ is even} \\ 
+\mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ m\text{ is odd}%
+\end{array}%
+\right.
+\end{equation*}%
+and%
+\begin{equation*}
+\mathsf{liftable\_variables}(V)=\{X_{i}\in V\ |\ \mathsf{min}\{\alpha \ |\
+w\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge \alpha =f(w)\}\mathsf{<}%
+\mathcal{\alpha }_{i}\}.
+\end{equation*}%
+and $W_{Even}$ and $W_{Odd}$ are defined as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+W_{Even} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}<\top \} \\ 
+W_{Odd} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}=\top \}%
+\end{array}%
+\right.
+\end{equation*}%
+and the function $\mathsf{rank}$ is defined inductively as follows:%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{rank}(X_{1}) & = & \left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ \sigma _{1}=\nu \\ 
+1 & \mathsf{if}\ \sigma _{1}=\mu%
+\end{array}%
+\right. \\ 
+\mathsf{rank}(X_{i+1}) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{rank}(X_{i}) & \mathsf{if}\ \sigma _{i+1}=\sigma _{i} \\ 
+\mathsf{rank}(X_{i})+1 & \mathsf{if}\ \sigma _{i+1}\neq \sigma _{i}%
+\end{array}%
+\right.%
+\end{array}%
+\right.
+\end{equation*}
+
+\newpage
+
+\appendix
+
+\paragraph{ATerm format}
+
+\begin{equation*}
+\begin{array}{ll}
+\mathtt{<DataExpr>} & c \\ 
+\mathtt{StateTrue} & true \\ 
+\mathtt{StateFalse} & false \\ 
+\mathtt{StateNot(<StateFrm>)} & \lnot \varphi \\ 
+\mathtt{StateAnd(<StateFrm>,<StateFrm>)} & \varphi \wedge \varphi \\ 
+\mathtt{StateOr(<StateFrm>,<StateFrm>)} & \varphi \vee \varphi \\ 
+\mathtt{StateImp(<StateFrm>,<StateFrm>)} & \varphi \Rightarrow \varphi \\ 
+\mathtt{StateForall(<DataVarId>+,<StateFrm>)} & \forall x{:}D.\varphi \\ 
+\mathtt{StateExists(<DataVarId>+,<StateFrm>)} & \exists x{:}D.\varphi \\ 
+\mathtt{StateMust(<RegFrm>,<StateFrm>)} & \langle \alpha \rangle \varphi \\ 
+\mathtt{StateMay(<RegFrm>,<StateFrm>)} & [\alpha ]\varphi \\ 
+\mathtt{StateYaled} & \nabla \\ 
+\mathtt{StateYaledTimed(<DataExpr>)} & \nabla (t) \\ 
+\mathtt{StateDelay} & \Delta \\ 
+\mathtt{StateDelayTimed(<DataExpr>)} & \Delta (t) \\ 
+\mathtt{StateVar(<String>,<DataExpr>\ast )} & X(d) \\ 
+\mathtt{StateNu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \nu X(x{:}%
+D:=d).~\varphi \\ 
+\mathtt{StateMu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \mu X(x{:}%
+D:=d).~\varphi%
+\end{array}%
+\end{equation*}
+
+\paragraph{Naming conventions}
+
+\begin{equation*}
+\begin{array}{lcl}
+\mathsf{left}(\varphi \otimes \psi ) & = & \varphi \\ 
+\mathsf{right}(\varphi \otimes \psi ) & = & \psi \\ 
+\arg (\lnot \varphi ) & = & \varphi \\ 
+\arg (\forall d:D.\varphi )=\arg (\exists d:D.\varphi ) & = & \varphi \\ 
+\mathsf{var}(\forall d:D.\varphi )=\mathsf{var}(\exists d:D.\varphi ) & = & 
+d:D \\ 
+\arg (\left\langle \alpha \right\rangle \varphi )=\arg ([\alpha ]\varphi ) & 
+= & \varphi \\ 
+\mathsf{act}(\left\langle \alpha \right\rangle \varphi )=\mathsf{act}%
+([\alpha ]\varphi ) & = & \alpha \\ 
+\mathsf{time}(\nabla (t))=\mathsf{time}(\Delta (t)) & = & t \\ 
+\mathsf{var}(X(d:D)) & = & d:D \\ 
+\mathsf{\arg }(\sigma X(d:D:=e).\varphi ) & = & \varphi \\ 
+\mathsf{name}(\sigma X(d:D:=e).\varphi ) & = & X \\ 
+\mathsf{var}(\sigma X(d:D:=e).\varphi ) & = & d:D \\ 
+\mathsf{val}(\sigma X(d:D:=e).\varphi ) & = & e%
+\end{array}%
+\end{equation*}%
+where $\sigma $ is either $\mu $ or $\nu $, and $\otimes $ is either $\wedge 
+$, $\vee $, or $\Rightarrow $.
+
+\end{document}

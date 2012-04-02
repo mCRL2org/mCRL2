@@ -41,7 +41,7 @@ namespace lts
  *   type of labelled transition system that is supported by the system.
  *   \details Every type has an associated labelled transition format. E.g.
  *   for lts_lts the type of the lts is lts_lts_t. Similarly, lts_aut_t,
- *   lts_svc_t, etc. are available. Files in which the lts's are stored have
+ *   etc. are available. Files in which the lts's are stored have
  *   the name file.lts, file.aut, etc.
  */
 enum lts_type
@@ -51,15 +51,13 @@ enum lts_type
   lts_aut,  /**< Ald&eacute;baran format (CADP) */
   lts_fsm,  /**< FSM format */
   lts_dot, /**< GraphViz format */
-  lts_svc,  /**< SVC format
-                  * \note The svc format is outdated. */
 #ifdef USE_BCG
   lts_bcg,  /**< BCG format
                   * \note Only available if the LTS library is built with BCG
                   * support.*/
   lts_type_max = lts_bcg,
 #else
-  lts_type_max = lts_svc,
+  lts_type_max = lts_dot,
 #endif
   lts_type_min = lts_none
 };

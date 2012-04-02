@@ -41,10 +41,10 @@ class prover_tool: public Tool
     {
       Tool::add_options(desc);
 
-      desc.add_option("smt-solver", make_mandatory_argument< smt_solver_type >("SOLVER"),
+      desc.add_option("smt-solver", make_enum_argument< smt_solver_type >("SOLVER")
+                      .add_value(data::detail::solver_type_cvc),
                       "use SOLVER to remove inconsistent paths from the internally used "
-                      "BDDs (by default, no path elimination is applied):\n"
-                      "  'cvc' for the SMT solver CVC3",
+                      "BDDs (by default, no path elimination is applied):",
                       'z');
     }
 

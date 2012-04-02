@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: huffman.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
+   $Id$ */
 
 #include <assert.h>
 #include <limits.h>
@@ -98,10 +98,6 @@ int HFinit(HFtree* tree, HTable* terms)
 
 void HFfree(HFtree* tree)
 {
-  /*
-  fprintf(stderr,"Code table dump:\n");
-  HFdumpCodes(tree->codes);
-  */
   BLfree(&tree->blockList);
 
   HFfreeLoop(tree->codes);
@@ -180,30 +176,6 @@ void HFdump(struct HFnode* tree, int d)
   }
 
 }
-
-static
-void HFdumpCodes(struct HFnode* tree)
-{
-
-  if (tree!=NULL)
-  {
-
-    if (tree->low==NULL && tree->high==NULL)
-    {
-
-      ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)));
-      HFdumpCode(stderr, tree);
-      fprintf(stderr, "\n");
-
-    }
-    else
-    {
-      HFdumpCodes(tree->low);
-      HFdumpCodes(tree->high);
-    }
-  }
-}
-
 
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */

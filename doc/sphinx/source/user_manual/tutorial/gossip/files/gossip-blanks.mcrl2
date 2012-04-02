@@ -1,0 +1,24 @@
+map N: Pos;
+    Gossips: *1*;
+eqn N = 5;
+    Gossips = { k:Pos | 1 <= k  && k <= *2* };
+
+act done, all_done;
+    call, answer, exchange: Pos # Pos # Set(Pos) # Set(Pos);
+
+proc Girl(myid:Pos,mygs:Set(Pos)) =
+     sum herid:Pos, hergs:Set(Pos) . (
+         ( myid != herid ) -> (
+             ( call(myid,herid,mygs,hergs)
+               + answer(herid,myid,hergs,mygs) ) .
+             Girl(myid,mygs + hergs) ) ) +
+     ( mygs == Gossips ) -> done . delta;
+
+proc Girl_init(id:Pos) = Girl(id,{id});
+
+init allow({exchange,all_done},
+     comm({call|answer -> exchange,
+     done|done|done|done|done-> *3* },
+       Girl_init(1) || Girl_init(2) || Girl_init(3) || 
+       Girl_init(4) || Girl_init(5)
+     ));

@@ -1,3 +1,0 @@
-
-
-The textual description should adhere to the following [[Language reference/PBES syntax|BNF syntax description]].

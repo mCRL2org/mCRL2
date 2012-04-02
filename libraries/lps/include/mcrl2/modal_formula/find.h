@@ -439,7 +439,7 @@ struct nil_traverser: public state_formulas::regular_formula_traverser<nil_trave
     : result(false)
   {}
 
-  void operator()(const regular_formulas::nil& x)
+  void operator()(const regular_formulas::nil&)
   {
     result = true;
   }

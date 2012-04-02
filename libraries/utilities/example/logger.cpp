@@ -13,19 +13,15 @@ std::string my_algorithm()
   mCRL2log(debug, "my_algorithm") << "Starting my_algorithm" << std::endl;
   int iterations = 3;
   mCRL2log(debug1, "my_algorithm") << "A loop with " << iterations << " iterations" << std::endl;
-  mcrl2_logger::indent();
   for(int i = 0; i < iterations; ++i)
   {
     mCRL2log(debug2, "my_algorithm") << "Iteration " << i << std::endl;
     if(i >= 2)
     {
-      mcrl2_logger::indent();
       mCRL2log(debug3, "my_algorithm") << "iteration number >= 2, treating specially" << std::endl;
       do_something_special();
-      mcrl2_logger::unindent();
     }
   }
-  mcrl2_logger::unindent();
   return "my_algorithm";
 }
 

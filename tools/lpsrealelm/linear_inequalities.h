@@ -712,7 +712,8 @@ bool is_inconsistent(
 
 
 // Count the occurrences of variables that occur in inequalities.
-static void count_occurrences(
+inline
+void count_occurrences(
   const std::vector < linear_inequality > &inequalities,
   std::map < variable, size_t> &nr_positive_occurrences,
   std::map < variable, size_t> &nr_negative_occurrences,

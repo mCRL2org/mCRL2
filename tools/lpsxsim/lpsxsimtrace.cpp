@@ -10,7 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "lpsxsimtrace.h"
 #endif
 
@@ -228,7 +228,8 @@ void XSimTrace::TraceChanged(mcrl2::trace::Trace tr, size_t From)
     }
     else
     {
-      _add_state(tr.nextAction(),tr.currentState(),current_pos >= From);
+      _add_state(tr.currentAction(),tr.nextState(),current_pos >= From);
+      tr.increasePosition();
     }
     From++;
   }

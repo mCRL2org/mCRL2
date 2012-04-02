@@ -70,11 +70,6 @@ lts_type guess_format(string const& s)
       mCRL2log(verbose) << "Detected mCRL2 extension.\n";
       return lts_lts;
     }
-    else if (ext == "svc")
-    {
-      mCRL2log(verbose) << "Detected SVC extension; assuming mCRL2 format.\n";
-      return lts_lts;
-    }
     else if (ext == "fsm")
     {
       mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
@@ -97,9 +92,9 @@ lts_type guess_format(string const& s)
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "svc", "bcg" };
+static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "bcg" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "svc", "bcg" };
+static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "bcg" };
 
 static std::string type_desc_strings[] = { "unknown LTS format",
     "mCRL2 LTS format",
@@ -117,7 +112,6 @@ static std::string mime_type_strings[] = { "",
     "text/fsm",
     "application/bcg",
     "text/dot",
-    "application/svc"
                                          };
 
 lts_type parse_format(std::string const& s)
@@ -144,11 +138,6 @@ lts_type parse_format(std::string const& s)
   {
     return lts_dot;
   }
-  else if (s == "svc")
-  {
-    return lts_svc;
-  }
-
   return lts_none;
 }
 

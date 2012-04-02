@@ -1556,6 +1556,24 @@ BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
   test_data_expression("((lambda x:Nat.x)(1,2)>0)",false);
 }
 
+/* The example below has the nasty feature that the sort of
+   # in the expression below can be #:List(Nat)->Nat,
+      List(Int)->Nat and List(Real)->Nat. In version 10169 of
+      the toolset the type of # became List(PossibleTypes([Nat, Int, Real]) 
+      causing confusion in the other tools */
+BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "#[0, 1] == -1",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bool"
+  );
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

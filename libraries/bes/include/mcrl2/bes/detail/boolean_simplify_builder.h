@@ -269,7 +269,7 @@ struct boolean_expr_builder<Term, void>
   /// \brief Visit not node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
+  virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */)
   {
     return term_type();
   }

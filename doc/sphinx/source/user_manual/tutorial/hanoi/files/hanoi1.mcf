@@ -1,0 +1,4 @@
+% There is a path of 2^N - 1 steps to a deadlock (i.e. peg 3 has all
+% discs)
+mu X(n:Nat = 0) . (val(n == exp(2,N)-1) && [true]false) ||
+                  (val(n <  exp(2,N)-1) && <true> X(n+1))

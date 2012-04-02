@@ -13,6 +13,7 @@
 #define INFO_H
 
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 
@@ -91,6 +92,28 @@ class InternalFormatInfo
       return (compare_address(v_operator_1, v_operator_2) == compare_result_bigger) && majo1(a_term1, a_term2, 0);
     }
 
+    class equals // A simple class containing an equality predicate.
+    {
+      private:
+        const atermpp::aterm_appl m_t; 
+
+      public:
+        // constructor
+        equals(const atermpp::aterm_appl t1):
+          m_t(t1)
+        {}
+
+        bool operator()(const atermpp::aterm_appl t) const
+        {
+          return (t==m_t);
+        }
+    };
+
+    static bool occurs(const atermpp::aterm_appl t1, const atermpp::aterm_appl t2)
+    {
+      return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
+    }
+
     bool gamma1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
       const atermpp::aterm v_operator_1 = get_operator(a_term1);
@@ -98,10 +121,10 @@ class InternalFormatInfo
       return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
     }
 
-    bool delta1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    /* bool delta1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      return gsOccurs((ATerm)(ATermAppl)a_term2, (ATerm)(ATermAppl)a_term1);
-    }
+      return occurs(a_term2, a_term1);
+    } */
 
     bool majo1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
     {
@@ -213,11 +236,11 @@ class InternalFormatInfo
     /// \brief Compares terms by checking whether one is a part of the other.
     Compare_Result compare_term_occurs(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      if (gsOccurs((ATerm)(ATermAppl)a_term1, (ATerm)(ATermAppl)a_term2))
+      if (occurs(a_term1, a_term2))
       {
         return compare_result_smaller;
       }
-      if (gsOccurs((ATerm)(ATermAppl)a_term2, (ATerm)(ATermAppl)a_term1))
+      if (occurs(a_term2, a_term1))
       {
         return compare_result_bigger;
       }
@@ -285,7 +308,7 @@ class InternalFormatInfo
       }
       else if (is_variable(a_term2))
       {
-        return delta1(a_term1, a_term2);
+        return occurs(a_term2, a_term1);
       }
       else
       {
@@ -313,7 +336,7 @@ class InternalFormatInfo
     {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term))
       {
-        return ATgetArity(ATgetAFun(a_term)) - 1;
+        return a_term.size() - 1;
       }
       else
       {
@@ -356,8 +379,8 @@ class InternalFormatInfo
     /// \brief Indicates whether or not a term is a single variable.
     virtual bool is_variable(const atermpp::aterm_appl a_term)
     {
-      return core::detail::gsIsDataVarId((ATermAppl) a_term);
-    }
+      return mcrl2::data::is_variable(a_term);
+    } 
 
     /// \brief Indicates whether or not a term is an equality.
     virtual bool is_equality(atermpp::aterm_appl a_term)

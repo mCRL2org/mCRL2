@@ -356,43 +356,6 @@ class specification_basic_type:public boost::noncopyable
       fresh_identifier_generator.add_identifier(str);
     }
 
-    void insertsort(const sort_expression sortterm)
-    {
-      data.add_sort(sortterm);
-
-      if (is_basic_sort(sortterm))
-      {
-        size_t n=0;
-        const basic_sort sort(sortterm);
-        bool isnew=false;
-        // const std::string str=sort.name();
-        addString(sort.name());
-
-        n=addObject(sort,isnew);
-
-        if (isnew == 0)
-        {
-          mCRL2log(mcrl2::log::warning) << "sort " << data::pp(sort) << "is added twice" << std::endl;
-          return;
-        }
-
-        objectdata[n].objectname=sortterm;
-        objectdata[n].object=sorttype;
-        objectdata[n].constructor=0;
-        return;
-      }
-      if (is_function_sort(sortterm))
-      {
-        return;
-      }
-      throw mcrl2::runtime_error("expected a sortterm (2): " + data::pp(sortterm));
-    }
-
-    void insert_equation(const data_equation eqn)
-    {
-      data.add_equation(eqn);
-    }
-
     process_expression action_list_to_process(const action_list ma)
     {
       if (ma.size()==0)
@@ -3084,9 +3047,9 @@ class specification_basic_type:public boost::noncopyable
       if (objectdata[n].processstatus==mCRL)
       {
         objectdata[n].processstatus=mCRLbusy;
-        const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,todo,
+        procstorealGNFbody(objectdata[n].processbody,first,todo,
                                    regular,mCRL,objectdata[n].parameters);
-        /* if t is not equal to NULL,
+        /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
         objectdata[n].processstatus=mCRLdone;
@@ -4197,27 +4160,6 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      /* in this case we have two possibilities: the process
-         can or cannot terminate after the action. So, we must
-         generate two conditions. For regular processes, we assume
-         that processes do not terminate.  */
-      /* first we generate the non terminating summands.  */
-      /* With the introduction of terminate actions to indicate termination,
-         it has become impossible that a process will ever terminate. Therefore,
-         no distinction needs to be made between terminating and non terminating
-         summands. JFG 8/12/2009 */
-
-      /* data_expression emptypops;
-      data_expression condition2;
-      if (canterminate)
-      { emptypops=application(stack.opns->empty,
-                       application(stack.opns->pop,stack.stackvar));
-        const data_expression notemptypops=lazy::not_(emptypops);
-        condition2=lazy::and_(notemptypops,condition1);
-      }
-      else condition2=condition1;
-      */
-
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
       procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
@@ -4225,27 +4167,12 @@ class specification_basic_type:public boost::noncopyable
                 sumlist,
                 parameters,
                 sumvars,
-                // RewriteTerm(condition2),
                 RewriteTerm(condition1),
                 multiAction,
                 atTime,
                 procargs,
                 has_time,
                 is_delta_summand);
-
-      /* if (canterminate)
-      { condition2=lazy::and_(emptypops,condition1);
-        sumlist=insert_summand(
-                      sumlist,
-                      parameters,
-                      sumvars,
-                      RewriteTerm(condition2),
-                      multiAction,
-                      atTime,
-                      assignment_list(),
-                      has_time,
-                      is_delta_summand);
-      } */
 
       return;
     }
@@ -4257,7 +4184,6 @@ class specification_basic_type:public boost::noncopyable
       const process_expression body,
       const variable_list pars,
       const stacklisttype& stack,
-      //const bool canterminate,
       const bool regular,
       const bool singlestate,
       const atermpp::vector < process_identifier> &pCRLprocs)
@@ -4268,15 +4194,15 @@ class specification_basic_type:public boost::noncopyable
         const process_expression t2=choice(body).right();
 
         collectsumlistterm(procId,sumlist,t1,pars,stack,
-                           /*canterminate,*/regular,singlestate,pCRLprocs);
+                           regular,singlestate,pCRLprocs);
         collectsumlistterm(procId,sumlist,t2,pars,stack,
-                           /*canterminate,*/regular,singlestate,pCRLprocs);
+                           regular,singlestate,pCRLprocs);
         return;
       }
       else
       {
         add_summands(procId,sumlist,body,pCRLprocs,pars,stack,
-                     /*canterminate,*/regular,singlestate);
+                     regular,singlestate);
       }
     }
 
@@ -4284,7 +4210,6 @@ class specification_basic_type:public boost::noncopyable
       const atermpp::vector < process_identifier> &pCRLprocs,
       const variable_list pars,
       const stacklisttype& stack,
-      /*bool canterminate,*/
       bool regular,
       bool singlestate)
     {
@@ -4299,7 +4224,6 @@ class specification_basic_type:public boost::noncopyable
           objectdata[objectIndex(procId)].processbody,
           pars,
           stack,
-          /*(canterminate&&objectdata[objectIndex(procId)].canterminate),*/
           regular,
           singlestate,
           pCRLprocs);
@@ -4444,7 +4368,7 @@ class specification_basic_type:public boost::noncopyable
          C(e,x,x,x,...x)=x for a variable x. */
       const sort_expression s=enumeratedtypes[index].sortId;
       const variable v=get_fresh_variable("e",s);
-      insert_equation(
+      data.add_equation(
         data_equation(
           push_front(push_front(variable_list(),v),v1),
           application(functionname,push_front(xxxterm,data_expression(v))),
@@ -4457,7 +4381,7 @@ class specification_basic_type:public boost::noncopyable
            w!=elementnames.end() ; ++w)
       {
         assert(auxvars.size()>0);
-        insert_equation(data_equation(
+        data.add_equation(data_equation(
                           vars,
                           application(functionname,push_front(args,*w)),
                           auxvars.front()));
@@ -7530,11 +7454,11 @@ class specification_basic_type:public boost::noncopyable
         // otherwise into c->p<>delta@0. In this last case the process
         // contains time.
         contains_if_then=true;
-        if (options.add_delta)     
-        { 
+        if (options.add_delta)
+        {
           return containstimebody(if_then(t).then_case(),stable,visited,allowrecursion,contains_if_then);
         }
-        else 
+        else
         {
           return true;
         }
@@ -8090,7 +8014,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
+  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << " ' method.\n";
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
   process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));

@@ -44,50 +44,6 @@ namespace lts
 namespace old
 {
 
-exploration_strategy str_to_expl_strat(const string s)
-{
-  if (s=="b" || s=="breadth")
-  {
-    return es_breadth;
-  }
-  if (s=="d" || s=="depth")
-  {
-    return es_depth;
-  }
-  if (s=="r" || s=="random")
-  {
-    return es_random;
-  }
-  if (s=="p" || s=="prioritized")
-  {
-    return es_value_prioritized;
-  }
-  if (s=="q" || s=="rprioritized")
-  {
-    return es_value_random_prioritized;
-  }
-  return es_none;
-}
-
-const string expl_strat_to_str(exploration_strategy es)
-{
-  switch (es)
-  {
-    case es_breadth:
-      return "breadth";
-    case es_depth:
-      return "depth";
-    case es_random:
-      return "random";
-    case es_value_prioritized:
-      return "prioritized";
-    case es_value_random_prioritized:
-      return "rprioritized";
-    default:
-      return "unknown";
-  }
-}
-
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 {
   using namespace mcrl2;
@@ -215,38 +171,28 @@ bool lps2lts_algorithm::finalise_lts_generation()
   {
     if (lgopts->expl_strat == es_random)
     {
-      mCRL2log(verbose) << "done with random walk of "
-                        << trans << " transition" << ((trans==1)?"":"s")
-                        << " (visited " << num_states
-                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
+      mCRL2log(verbose) << "done with random walk. " << std::endl;
     }
     else if (lgopts->expl_strat == es_value_prioritized)
     {
-      mCRL2log(verbose) << "done with value prioritized walk of "
-                        << trans << " transition" << ((trans==1)?"":"s")
-                        << " (visited " << num_states
-                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
+      mCRL2log(verbose) << "done with value prioritized walk." << std::endl;
     }
     else if (lgopts->expl_strat == es_value_random_prioritized)
     {
-      mCRL2log(verbose) << "done with random value prioritized walk of "
-                        << trans << " transition" << ((trans==1)?"":"s")
-                        << " (visited " << num_states
-                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
+      mCRL2log(verbose) << "done with random value prioritized walk " << std::endl;
     }
     else if (lgopts->expl_strat == es_breadth)
     {
       mCRL2log(verbose) << "done with state space generation ("
-                        << level-1 << " level" << ((level==2)?"":"s") << ", "
-                        << num_states << " state" << ((num_states == 1)?"":"s")
-                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
+                     << level-1 << " level" << ((level==2)?"":"s") << ")." << std::endl;
     }
     else if (lgopts->expl_strat == es_depth)
     {
-      mCRL2log(verbose) << "done with state space generation ("
-                        << num_states << " state" << ((num_states == 1)?"":"s")
-                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
+      mCRL2log(verbose) << "done with state space generation." << std::endl;
     }
+
+    std::cout << num_states << " state" << ((num_states == 1)?"":"s")
+                << " and " << trans << " transition" << ((trans==1)?"":"s") << "." << std::endl;
   }
 
   states = atermpp::indexed_set(0,0);
@@ -722,7 +668,7 @@ bool lps2lts_algorithm::generate_lts()
     num_found_same = 0;
     tracecnt = 0;
     mCRL2log(verbose) << "generating state space with '" <<
-                    expl_strat_to_str(lgopts->expl_strat) << "' strategy...\n";
+                    lgopts->expl_strat << "' strategy...\n";
 
     if (lgopts->expl_strat == es_random)
     {
@@ -946,7 +892,7 @@ bool lps2lts_algorithm::generate_lts()
             tmp_states = ATgetNext(tmp_states);
           }
         }
-        
+
         else
         {
           check_deadlocktrace(state);
@@ -1381,6 +1327,6 @@ bool lps2lts_algorithm::generate_lts()
   return !lg_error;
 }
 
-} // namespace old
+} //namespace old
 } // namespace lts
 } // namespace mcrl2

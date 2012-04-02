@@ -17,10 +17,13 @@
 #include "boost/function.hpp"
 
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/nextstate/nextstate_options.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
+#include "mcrl2/lts/detail/exploration_strategy.h"
 #include "mcrl2/atermpp/list.h"
 
 #include "workarounds.h"
@@ -36,24 +39,10 @@ namespace lts
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
 #define DEFAULT_INIT_TSIZE 10000UL
 
-#define GS_STATE_TREE 1
-#define GS_STATE_VECTOR 2
-
-enum exploration_strategy { es_none,
-                            es_breadth,
-                            es_depth,
-                            es_random,
-                            es_value_prioritized,
-                            es_value_random_prioritized
-                          };
-
-exploration_strategy str_to_expl_strat(std::string s);
-std::string expl_strat_to_str(exploration_strategy es);
-
 struct lts_generation_options
 {
   lts_generation_options() :
-    strat(mcrl2::data::rewriter::jitty),
+    strat(mcrl2::data::jitty),
     expl_strat(es_breadth),
     todo_max((std::numeric_limits< size_t >::max)()),
     max_states(DEFAULT_MAX_STATES),

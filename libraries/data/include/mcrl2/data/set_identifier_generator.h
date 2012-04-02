@@ -41,18 +41,19 @@ class set_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
+      m_generator = utilities::number_postfix_generator();
     }
 
     /// \brief Adds the identifier s to the context.
     /// \param s A
-    void add_identifier(core::identifier_string s)
+    void add_identifier(const core::identifier_string& s)
     {
       m_identifiers.insert(s);
     }
 
     /// \brief Removes one occurrence of the identifier s from the context.
     /// \param s A
-    void remove_identifier(core::identifier_string s)
+    void remove_identifier(const core::identifier_string& s)
     {
       m_identifiers.erase(s);
     }
@@ -60,7 +61,7 @@ class set_identifier_generator: public identifier_generator<>
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
     /// \return True if the identifier s appears in the context.
-    bool has_identifier(core::identifier_string s) const
+    bool has_identifier(const core::identifier_string& s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
@@ -96,18 +97,19 @@ class multiset_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
+      m_generator = utilities::number_postfix_generator();
     }
 
     /// \brief Adds the identifier s to the context.
     /// \param s A
-    void add_identifier(core::identifier_string s)
+    void add_identifier(const core::identifier_string& s)
     {
       m_identifiers.insert(s);
     }
 
     /// \brief Removes one occurrence of the identifier s from the context.
     /// \param s A
-    void remove_identifier(core::identifier_string s)
+    void remove_identifier(const core::identifier_string& s)
     {
       atermpp::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
       if (i != m_identifiers.end())
@@ -119,7 +121,7 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
     /// \return True if the identifier s appears in the context.
-    bool has_identifier(core::identifier_string s) const
+    bool has_identifier(const core::identifier_string& s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }

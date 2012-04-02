@@ -109,6 +109,7 @@ void LTSGraph::openFile(std::string const& path)
       // Assume we have an LTS file, so create an LTS importer
       imp.reset(new LTSImporter());
     }
+    Graph* graph_old = graph;
 
     graph = imp->importFile(path);
 
@@ -117,7 +118,18 @@ void LTSGraph::openFile(std::string const& path)
     size_t nt = graph->getNumTrans();
     size_t nl = graph->getNumLabels();
 
+    if( graph->getNumStates() > 1000 )
+    {
+      wxMessageDialog* warning = new wxMessageDialog(NULL,
+          wxString("The LTS contains more than 1000 states.\nThis may affect the performance of the tool.\n Are you sure you want to display the LTS?", wxConvUTF8), wxT("Warning"), wxYES_NO | wxICON_WARNING);
+      if(warning->ShowModal() == wxID_NO)
+      {
+        graph = graph_old;
+        return;
+      }
+    }
     mainFrame->setLTSInfo(is, ns, nt, nl);
+
 
   }
   catch (const std::exception& e)

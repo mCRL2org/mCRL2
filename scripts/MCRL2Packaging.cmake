@@ -7,28 +7,31 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 ##---------------------------------------------------
-## File for packaging
-##---------------------------------------------------
-
-##---------------------------------------------------
 ## CPack configuration
 ##---------------------------------------------------
 
 INCLUDE(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "mcrl2")
-if(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "svn${SVN_REV}")
-else(MCRL2_SVN_LABEL STREQUAL "")
-  set(CPACK_PACKAGE_VERSION "${MCRL2_SVN_LABEL}")
-endif(MCRL2_SVN_LABEL STREQUAL "")
+set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
-set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}
+set(CPACK_PACKAGE_CONTACT "mcrl2-users@listserver.tue.nl")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
 
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")
+
+# Stuff for source packages
+if(WIN32)
+  set(CPACK_SOURCE_GENERATOR "ZIP")
+elseif(APPLE OR UNIX)
+  set(CPACK_SOURCE_GENERATOR "TGZ")
+endif()
+set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG})
+
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY )
 
 if( NOT APPLE )
   if( NOT MSVC )
@@ -63,7 +66,7 @@ ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
-SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\doc\\\\images\\\\mcrl2-install-logo.bmp")
+SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
 
 # Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64. 
 if(CMAKE_CL_64)

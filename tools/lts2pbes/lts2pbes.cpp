@@ -58,18 +58,18 @@ class lts2pbes_tool : public input_output_tool
     {
       super::add_options(desc);
 
-      desc.add_option("formula", make_mandatory_argument("FILE"),
+      desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
 
-      desc.add_option("data", make_mandatory_argument("FILE"),
+      desc.add_option("data", make_file_argument("FILE"),
                       "use FILE as the data and action specification. "
                       "FILE must be a .mcrl2 file which does not contain an init clause. ", 'D');
 
-      desc.add_option("lps", make_mandatory_argument("FILE"),
+      desc.add_option("lps", make_file_argument("FILE"),
                       "use FILE for the data and action specification. "
                       "FILE must be a .lps file. ", 'l');
 
-      desc.add_option("mcrl2", make_mandatory_argument("FILE"),
+      desc.add_option("mcrl2", make_file_argument("FILE"),
                       "use FILE as the data and action specification for the LTS. "
                       "FILE must be a .mcrl2 file. ", 'm');
     }
@@ -260,13 +260,6 @@ class lts2pbes_tool : public input_output_tool
           convert_to_lts_lts(l, result);
           break;
         }
-        case lts_svc:
-        {
-          lts_svc_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
-        }
       }
     }
 
@@ -282,7 +275,7 @@ class lts2pbes_tool : public input_output_tool
       const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
       const process_initializer initial_process(push_back(assignment_list(), assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       return lps::specification(l.data(),l.action_labels(),global_variables,lps,initial_process);
-    }  
+    }
 
   public:
     bool run()
@@ -291,7 +284,7 @@ class lts2pbes_tool : public input_output_tool
       {
         input_type = mcrl2::lts::detail::guess_format(infilename);
       }
-      
+
       lts_lts_t l;
       load_lts(l, input_type);
 
@@ -304,7 +297,7 @@ class lts2pbes_tool : public input_output_tool
       }
       state_formulas::state_formula formula = state_formulas::parse_state_formula(from, spec);
       from.close();
-      
+
       pbes_system::pbes<> result = pbes_system::lts2pbes(l, formula);
       //save the result
       if (output_filename().empty())

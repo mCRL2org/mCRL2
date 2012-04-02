@@ -1,1 +1,0 @@
-EXCLUDE_PATTERNS      += */source/* */mcrl2parser.cpp */mcrl2lexer.cpp

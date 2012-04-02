@@ -37,6 +37,7 @@ evalDataExpr::evalDataExpr(wxWindow* parent, wxWindowID id):
   sizer->Add(new wxButton(this, OPTION_EVAL, wxT("Rewrite")), 0, wxLEFT | wxALL, 5);
   sizer->SetSizeHints(this);
   SetSizer(sizer);
+  this->Layout();
 }
 
 wxString evalDataExpr::getDataExprVal()
@@ -75,6 +76,7 @@ solveDataExpr::solveDataExpr(wxWindow* parent, wxWindowID id):
   sizer->Add(p_solutions, 0, wxEXPAND|wxALL, 5);
   sizer->SetSizeHints(this);
   SetSizer(sizer);
+  this->Layout();
 }
 
 myTextControl* solveDataExpr::getSolutionWindow()
@@ -115,9 +117,11 @@ typeCheckSpec::typeCheckSpec(wxWindow* parent, wxWindowID id):
   p_parent = parent;
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Parse and type check specification")), 0, wxLEFT|wxALL, 5);
-  sizer->Add(new wxButton(this, OPTION_TC, wxT("Parse and type check")), 0, wxLEFT | wxALL, 5);
+  sizer->Add(new wxButton(this, OPTION_TC, wxT("Run")), 0, wxLEFT | wxALL, 5);
   sizer->SetSizeHints(this);
   SetSizer(sizer);
+  this->Layout();
+
 }
 
 void typeCheckSpec::OnTypeCheck(wxCommandEvent& e)

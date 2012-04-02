@@ -1,4 +1,0 @@
-pbesconstelm
-===========================================
-
-.. include:: manual.rst

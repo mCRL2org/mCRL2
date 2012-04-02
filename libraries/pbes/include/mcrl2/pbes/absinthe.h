@@ -113,24 +113,6 @@ namespace detail {
   {}
 #endif
 
-  // parse a string like 'tail: List(D) -> List(D)'
-  //
-  // TODO: replace this by a proper parse function once the current parser has been replaced
-  inline
-  data::function_symbol parse_function_symbol(std::string text, const std::string& dataspec_text)
-  {
-    const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
-    boost::algorithm::trim(text);
-    std::string::size_type pos = text.find_first_of(':');
-    std::string name = boost::algorithm::trim_copy(text.substr(0, pos));
-    std::string type = prefix + text.substr(pos);
-    std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
-    data::data_specification dataspec = data::parse_data_specification(spec_text);
-    data::function_symbol f = dataspec.user_defined_mappings().back();
-    data::function_symbol result = data::function_symbol(name, f.sort());
-    return result;
-  }
-
   // Returns true if f appears as a structured sort constructor in dataspec.
   inline
   bool is_structured_sort_constructor(const data::data_specification& dataspec, const data::function_symbol& f)
@@ -432,7 +414,6 @@ struct absinthe_algorithm
       }
       else
       {
-        pbes_expression y = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
         result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
       }
       return result;
@@ -496,7 +477,7 @@ struct absinthe_algorithm
       std::vector<std::string> words = utilities::regex_split(*i, ":=");
       if (words.size() == 2)
       {
-        data::function_symbol f = pbes_system::detail::parse_function_symbol(words[1], dataspec_text);
+        data::function_symbol f = data::parse_function_symbol(words[1], dataspec_text);
         if (!pbes_system::detail::is_structured_sort_constructor(dataspec, f))
         {
           dataspec.add_mapping(f);
@@ -516,8 +497,8 @@ struct absinthe_algorithm
       std::vector<std::string> words = utilities::regex_split(*i, ":=");
       if (words.size() == 2)
       {
-        data::function_symbol lhs = detail::parse_function_symbol(words[0], dataspec_text);
-        data::function_symbol rhs = detail::parse_function_symbol(words[1], dataspec_text);
+        data::function_symbol lhs = data::parse_function_symbol(words[0], dataspec_text);
+        data::function_symbol rhs = data::parse_function_symbol(words[1], dataspec_text);
         result[lhs] = rhs;
       }
     }
@@ -979,7 +960,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
 
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
-      data::function_symbol f1 = i->first;
+      // data::function_symbol f1 = i->first;
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 

@@ -948,6 +948,10 @@ std::string pp(const left_merge& x);
 std::string pp(const choice& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
+// TODO: These should be removed when the ATerm code has been replaced.
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
+
 } // namespace process
 
 } // namespace mcrl2

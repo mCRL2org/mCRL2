@@ -70,7 +70,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::process_identifier& x)
   {
     derived().enter(x);
-    derived()(x.sorts());
+    derived()(x.name());
     derived().leave(x);
   }
 

@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 ##---------------------------------------------------
-## File for generating test targets 
+## File for generating test targets
 ##---------------------------------------------------
 
 ##---------------------------------------------------
@@ -15,7 +15,7 @@
 ##---------------------------------------------------
 
 ## Set properties for testing
-set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
+set(MCRL2_TEST_LABEL "rev.${MCRL2_VERSION}-${CMAKE_BUILD_TYPE}")
 
 
 option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
@@ -30,17 +30,18 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
   # Define macro for build_and_run_test_targets
   # This method compiles tests when invoked
   macro( build_and_run_test_target TARGET )
-    ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
+    ADD_TEST(NAME "${TARGET}" COMMAND ${CMAKE_CTEST_COMMAND}
      --build-and-test
      "${CMAKE_CURRENT_SOURCE_DIR}"
      "${CMAKE_CURRENT_BINARY_DIR}"
      --build-noclean
      --build-nocmake
      --build-generator "${CMAKE_GENERATOR}"
-     --build-target "${TARGET}"
      --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+     --build-exe-dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+     --build-target "${TARGET}"
      --build-project "${PROJECT_NAME}"
-     --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
+     --test-command "${TARGET}"
     )
     set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   endmacro( build_and_run_test_target TARGET )
@@ -65,7 +66,7 @@ message(STATUS "MCRL2_ENABLE_TEST_COMPILED_EXAMPLES: ${MCRL2_ENABLE_TEST_COMPILE
 
   macro( build_and_run_test_example_target TARGET )
     if(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
-      ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
+      ADD_TEST(NAME "${TARGET}" COMMAND ${CMAKE_CTEST_COMMAND}
        --build-and-test
        "${CMAKE_CURRENT_SOURCE_DIR}"
        "${CMAKE_CURRENT_BINARY_DIR}"
@@ -105,90 +106,63 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   set(testdir "${CMAKE_CURRENT_BINARY_DIR}/mcrl2-testoutput")
   file( REMOVE_RECURSE ${testdir} )
   file( MAKE_DIRECTORY ${testdir} )
-  add_test(mcrl22lps_version ${mcrl22lps_BINARY_DIR}/mcrl22lps --version)
-  add_test(mcrl22lps_abp ${mcrl22lps_BINARY_DIR}/mcrl22lps -v -D ${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 ${testdir}/abp.lps)
-  add_test(lpsinfo_abp ${lpsinfo_BINARY_DIR}/lpsinfo ${testdir}/abp.lps)
+  add_test(NAME mcrl22lps_version COMMAND mcrl22lps --version)
+  add_test(NAME mcrl22lps_abp COMMAND mcrl22lps -v -D ${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 ${testdir}/abp.lps)
+  add_test(NAME lpsinfo_abp COMMAND lpsinfo ${testdir}/abp.lps)
   set_tests_properties( lpsinfo_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(lpsconstelm_abp ${lpsconstelm_BINARY_DIR}/lpsconstelm -v ${testdir}/abp.lps ${testdir}/abp_celm.lps)
+  add_test(NAME lpsconstelm_abp COMMAND lpsconstelm -v ${testdir}/abp.lps ${testdir}/abp_celm.lps)
   set_tests_properties( lpsconstelm_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(lpsparelm_abp ${lpsparelm_BINARY_DIR}/lpsparelm -v ${testdir}/abp_celm.lps ${testdir}/abp_celm_pelm.lps)
+  add_test(NAME lpsparelm_abp COMMAND lpsparelm -v ${testdir}/abp_celm.lps ${testdir}/abp_celm_pelm.lps)
   set_tests_properties( lpsparelm_abp PROPERTIES DEPENDS lpsconstelm_abp )
-  add_test(lpssuminst_abp ${lpssuminst_BINARY_DIR}/lpssuminst -v ${testdir}/abp_celm_pelm.lps ${testdir}/abp_celm_pelm_sinst.lps)
+  add_test(NAME lpssuminst_abp COMMAND lpssuminst -v ${testdir}/abp_celm_pelm.lps ${testdir}/abp_celm_pelm_sinst.lps)
   set_tests_properties( lpssuminst_abp PROPERTIES DEPENDS lpsparelm_abp )
-  add_test(lps2lts_abp ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.aut  )
+  add_test(NAME lps2lts_abp COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.aut  )
   set_tests_properties( lps2lts_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_fsm ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
+  add_test(NAME lps2lts_abp_fsm COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
   set_tests_properties( lps2lts_abp_fsm PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_dot ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
+  add_test(NAME lps2lts_abp_dot COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
   set_tests_properties( lps2lts_abp_dot PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_svc ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.svc  )
-  set_tests_properties( lps2lts_abp_svc PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(lps2lts_abp_lts ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
+  add_test(NAME lps2lts_abp_lts COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
   set_tests_properties( lps2lts_abp_lts PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(ltsinfo_abp     ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.aut )
+  add_test(NAME ltsinfo_abp COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.aut )
   set_tests_properties( ltsinfo_abp PROPERTIES DEPENDS lps2lts_abp )
-  add_test(ltsinfo_abp_fsm ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.fsm )
+  add_test(NAME ltsinfo_abp_fsm COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.fsm )
   set_tests_properties( ltsinfo_abp_fsm PROPERTIES DEPENDS lps2lts_abp_fsm )
-  add_test(ltsinfo_abp_dot ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.dot )
+  add_test(NAME ltsinfo_abp_dot COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.dot )
   set_tests_properties( ltsinfo_abp_dot PROPERTIES DEPENDS lps2lts_abp_dot )
-  add_test(ltsinfo_abp_svc ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.svc )
-  set_tests_properties( ltsinfo_abp_svc PROPERTIES DEPENDS lps2lts_abp_svc )
-  add_test(ltsinfo_abp_lts ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
+  add_test(NAME ltsinfo_abp_lts COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
   set_tests_properties( ltsinfo_abp_lts PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(lps2pbes_abp ${lps2pbes_BINARY_DIR}/lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
+  add_test(NAME lps2pbes_abp COMMAND lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
   set_tests_properties( lps2pbes_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(pbes2bool_abp ${pbes2bool_BINARY_DIR}/pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
+  add_test(NAME pbes2bool_abp COMMAND pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
   set_tests_properties( pbes2bool_abp PROPERTIES DEPENDS lps2pbes_abp )
-  add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
-  add_test(tracepp_test ${tracepp_BINARY_DIR}/tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
-  add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2)
-  add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
+  add_test(NAME tracepp_test COMMAND tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
+  add_test(NAME lts2lps_test COMMAND lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
   set_tests_properties( lts2lps_test PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
+  add_test(NAME ltsconvert_bisim_test COMMAND ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
   set_tests_properties( ltsconvert_bisim_test PROPERTIES DEPENDS lps2lts_abp_lts )
 
-	if( MCRL2_ENABLE_EXPERIMENTAL )
-    add_test(pbesinst_abp ${pbesinst_BINARY_DIR}/pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
+  if( MCRL2_ENABLE_EXPERIMENTAL )
+    add_test(NAME pbesinst_abp COMMAND pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
     set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
-
-	endif( MCRL2_ENABLE_EXPERIMENTAL )
-
-  # Simulation tools
-  # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpssim_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(lpsxsim_abp ${lpsxsim_BINARY_DIR}/lpsxsim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(lpsxsim_abp PROPERTIES TIMEOUT 15 )
-
-  # Graphical tools
-  # add_test(diagraphica_abp ${diagraphica_BINARY_DIR}/diagraphica ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(diagraphica_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsview_abp ${ltsview_BINARY_DIR}/ltsview ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsview_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(ltsgraph_abp ${ltsgraph_BINARY_DIR}/ltsgraph ${testdir}/abp_celm_pelm_sinst.aut )
-  # set_tests_properties(ltsgraph_abp PROPERTIES TIMEOUT 15 )
-
-  # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
-  # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
+  endif( MCRL2_ENABLE_EXPERIMENTAL )
 
   # Documentation tests
   if (MCRL2_MAN_PAGES)
-    add_test(mcrl22lps_generate-man-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-man-page)
+    add_test(NAME mcrl22lps_generate-man-page COMMAND mcrl22lps --generate-man-page)
     set_tests_properties(
       mcrl22lps_generate-man-page
     PROPERTIES
       LABELS "${MCRL2_TEST_LABEL}"
     )
   endif(MCRL2_MAN_PAGES)
-    add_test(mcrl22lps_generate-wiki-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-wiki-page)
-    add_test(mcrl22lps_mcrl2-gui ${mcrl22lps_BINARY_DIR}/mcrl22lps --mcrl2-gui)
+  add_test(NAME mcrl22lps_generate-xml COMMAND mcrl22lps --generate-xml)
+  add_test(NAME mcrl22lps_mcrl2-gui COMMAND mcrl22lps --mcrl2-gui)
 
 
   set_tests_properties(
     mcrl22lps_abp
-    mcrl22lps_generate-wiki-page
+    mcrl22lps_generate-xml
     mcrl22lps_mcrl2-gui
     lpsinfo_abp
     lpsconstelm_abp
@@ -198,9 +172,7 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     ltsinfo_abp
     pbes2bool_abp
     lps2pbes_abp
-    lysa2mcrl2_test
     tracepp_test
-    chi2mcrl2_test
     lts2lps_test
     ltsconvert_bisim_test
   PROPERTIES
@@ -216,7 +188,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
 # Usage run_release_tests( "/path/to/mcrl2file" "list of tests to disable" )
 run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" "")
 
-	
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps;lts2pbes")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
@@ -232,7 +203,7 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps;lts2pbes")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary;lpsrealelm")
 
@@ -242,16 +213,6 @@ endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 # Random test generation
 option(MCRL2_ENABLE_RANDOM_TEST_TARGETS "Enable/disable random test generation" OFF)
 message(STATUS "MCRL2_ENABLE_RANDOM_TEST_TARGETS: ${MCRL2_ENABLE_RANDOM_TEST_TARGETS}" )
-
-# Random tests require python
-include(FindPythonInterp)
-if( PYTHONINTERP_FOUND )
-execute_process(COMMAND ${PYTHON_EXECUTABLE} --version
-    ERROR_VARIABLE PYTHONINTERP_VERSION
-    ERROR_STRIP_TRAILING_WHITESPACE
-)			
-message( STATUS "${PYTHONINTERP_VERSION}" )
-endif( PYTHONINTERP_FOUND )
 
 if( MCRL2_ENABLE_RANDOM_TEST_TARGETS AND PYTHONINTERP_FOUND )
   include(${CMAKE_SOURCE_DIR}/scripts/GenerateRandomTests.cmake)

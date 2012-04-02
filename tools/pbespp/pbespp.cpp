@@ -62,27 +62,16 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     void add_options(interface_description& desc)
     {
       input_output_tool::add_options(desc);
-      desc.add_option("format", make_mandatory_argument("FORMAT"),
-                      "print the PBES in the specified FORMAT:\n"
-                      "  'default' for a PBES specification (default),\n"
-                      "  'internal' for a textual ATerm representation of the internal format", 'f');
+      desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
+                      .add_value_desc(core::print_default, "a PBES specification", true)
+                      .add_value_desc(core::print_internal, "a textual ATerm representation of the internal format"),
+                      "print the PBES in the specified FORMAT:", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("format"))
-      {
-        std::string str_format(parser.option_argument("format"));
-        if (str_format == "internal")
-        {
-          format = core::print_internal;
-        }
-        else if (str_format != "default")
-        {
-          parser.error("option -f/--format has illegal argument '" + str_format + "'");
-        }
-      }
+      format = parser.option_argument_as<core::print_format_type>("format");
     }
 };
 
@@ -96,8 +85,6 @@ class pbespp_gui_tool: public mcrl2_gui_tool<pbespp_tool>
 
       values.clear();
       values.push_back("default");
-      values.push_back("debug");
-      values.push_back("internal");
       values.push_back("internal-debug");
       m_gui_options["format"] = create_radiobox_widget(values);
     }

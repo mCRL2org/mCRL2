@@ -24,46 +24,12 @@ namespace mcrl2 {
 namespace utilities {
 
 /// \brief Identifier generator that generates names consisting of a prefix followed by a number.
-/// After each call to operator() the number is incremented.
-class simple_number_postfix_generator
-{
-  protected:
-    /// \brief A prefix.
-    std::string m_prefix;
-
-    /// \brief An index.
-    unsigned int m_index;
-
-  public:
-    /// \brief Constructor.
-    simple_number_postfix_generator()
-      : m_prefix("x"), m_index(0)
-    {}
-
-    /// \brief Constructor.
-    /// \param prefix A string
-    /// \param index A positive integer
-    simple_number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-      : m_prefix(prefix), m_index(index)
-    {}
-
-    /// \brief Generates a fresh identifier that doesn't appear in the context.
-    /// \return A fresh identifier.
-    std::string operator()()
-    {
-      std::ostringstream out;
-      out << m_prefix << m_index++;
-      return out.str();
-    }
-};
-
-/// \brief Identifier generator that generates names consisting of a prefix followed by a number.
 /// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
 class number_postfix_generator
 {
   protected:
     /// \brief A map that maintains the highest index for each prefix.
-    std::map<std::string, int> m_index;
+    std::map<std::string, std::size_t> m_index;
 
     /// \brief The default hint.
     std::string m_hint;
@@ -80,7 +46,7 @@ class number_postfix_generator
     void add_identifier(const std::string& id)
     {
       std::string::size_type i = id.find_last_not_of("0123456789");
-      int new_index = -1;
+      std::size_t new_index = 0;
       std::string name;
       if (i == std::string::npos || id.size() == i + 1) // string does not end with a number
       {
@@ -92,7 +58,7 @@ class number_postfix_generator
         std::string num = id.substr(i + 1);
         new_index = boost::lexical_cast<int>(num);
       }
-      int old_index = m_index.find(name) == m_index.end() ? -1 : m_index[name];
+      std::size_t old_index = m_index.find(name) == m_index.end() ? 0 : m_index[name];
     	m_index[name] = (std::max)(old_index, new_index);
     }
 

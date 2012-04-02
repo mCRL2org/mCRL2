@@ -1,0 +1,202 @@
+// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file identifier_string_test.cpp
+/// \brief Add your file description here.
+
+#include <boost/test/included/unit_test_framework.hpp>
+#include <type_traits>
+
+#include <algorithm>
+#include <list>
+#include <set>
+#include <vector>
+
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/list.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list_iterator.h"
+
+// Condition for recognising types that represent containers
+template < typename T >
+struct is_container_impl
+    : public std::integral_constant<bool, false>
+{};
+
+template < typename T >
+struct is_container_impl<std::list<T> >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< std::set< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< std::multiset< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< atermpp::set< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< atermpp::multiset< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< atermpp::vector< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< std::vector< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< atermpp::list< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_container_impl< atermpp::term_list< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+/*
+template < typename T >
+struct is_container_impl< boost::iterator_range< T > >
+    : public std::integral_constant<bool, true>
+{};
+*/
+
+template < bool C, typename Container, typename Value >
+struct lazy_check_value_type
+{
+  typedef std::false_type type;
+};
+
+template < typename Container, typename ValueType >
+struct lazy_check_value_type< true, Container, ValueType >
+{
+  typedef typename std::is_convertible< typename Container::value_type, ValueType >::type type;
+};
+
+/// type condition for use with boost::enable_if
+/// T the type to be tested
+/// \pre V is void or T::value_type convertible to V
+template < typename T, typename V = void >
+struct is_container;
+
+/// type condition for use with boost::enable_if
+/// T is the container type
+template < typename T >
+struct is_container< T, void > : public
+    is_container_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
+  { };
+
+template < typename T, typename V >
+struct is_container
+{
+  typedef typename lazy_check_value_type< is_container< T, void >::value, T, V >::type type;
+};
+
+/// type condition for use with boost::enable_if
+/// T the type to be tested
+/// \pre V is void or T::value_type convertible to V
+template < typename T, typename V = void >
+struct enable_if_container : public
+    std::enable_if< is_container< T, V >::value, V >
+  {};
+
+/// type condition for use with boost::enable_if
+/// T the type to be tested
+/// \pre V is void or T::value_type convertible to V
+template < typename T, typename V = void >
+struct disable_if_container : public
+    std::enable_if< !is_container< T, V >::value, V >
+  {};
+
+template < typename T >
+struct is_set_impl
+    : public std::integral_constant<bool, false>
+{};
+
+template < typename T >
+struct is_set_impl< std::set< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_set_impl< std::multiset< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_set_impl< atermpp::set< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+template < typename T >
+struct is_set_impl< atermpp::multiset< T > >
+    : public std::integral_constant<bool, true>
+{};
+
+// type condition for use with boost::enable_if
+template < typename T >
+struct is_set : public is_set_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
+  { };
+
+BOOST_AUTO_TEST_CASE(test_is_container_impl)
+{
+  BOOST_CHECK(!is_container_impl<bool>::value);
+  BOOST_CHECK(is_container_impl<std::list<bool> >::value);
+  BOOST_CHECK(is_container_impl<std::vector<bool> >::value);
+  BOOST_CHECK(is_container_impl<std::set<bool> >::value);
+  BOOST_CHECK(is_container_impl<std::multiset<bool> >::value);
+  BOOST_CHECK(is_container_impl<atermpp::list<bool> >::value);
+  BOOST_CHECK(is_container_impl<atermpp::vector<bool> >::value);
+  BOOST_CHECK(is_container_impl<atermpp::set<bool> >::value);
+  BOOST_CHECK(is_container_impl<atermpp::multiset<bool> >::value);
+  BOOST_CHECK(is_container_impl<atermpp::aterm_list>::value);
+}
+
+BOOST_AUTO_TEST_CASE(test_is_set_impl)
+{
+  BOOST_CHECK(!is_set_impl<bool>::value);
+  BOOST_CHECK(is_set_impl<std::set<bool> >::value);
+  BOOST_CHECK(is_set_impl<std::multiset<bool> >::value);
+  BOOST_CHECK(is_set_impl<atermpp::set<bool> >::value);
+  BOOST_CHECK(is_set_impl<atermpp::multiset<bool> >::value);
+}
+
+template< typename T >
+void test_enable_if_container(const T& t, typename std::enable_if<is_container_impl<T>::value>::type* dummy = 0)
+{
+  BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_CASE(enable_if_container_test)
+{
+  std::vector<bool> b(true, 5);
+  test_enable_if_container(b);
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
+
+  return 0;
+}

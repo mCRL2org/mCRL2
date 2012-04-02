@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/nat.h"
@@ -23,8 +24,8 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -246,6 +247,13 @@ void test6()
   {
     std::cout << data::pp(*i) << std::endl;
   }
+}
+
+void test_enumerator_variable_limit()
+{
+  BOOST_CHECK(data::detail::get_enumerator_variable_limit() == 1000);
+  data::detail::set_enumerator_variable_limit(100);
+  BOOST_CHECK(data::detail::get_enumerator_variable_limit() == 100);
 }
 
 int test_main(int argc, char* argv[])

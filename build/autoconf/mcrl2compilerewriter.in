@@ -7,15 +7,15 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 #
-# This script is the default script to compile rewriter 
-# libraries. It is generated, so to change compiling 
+# This script is the default script to compile rewriter
+# libraries. It is generated, so to change compiling
 # behaviour, follow the following steps:
 #
 # - Create a new script (perhaps based on this one)
 # - Let the MCRL2_COMPILEREWRITER environment variable
 #   point to the new script.
 #
-# Requirements for a compile script: the output (both 
+# Requirements for a compile script: the output (both
 # stdout and stderr!) must consist solely of a newline-
 # separated list of files. The last file in the list is
 # treated as the compiler library, and must be a valid
@@ -23,9 +23,9 @@
 # once the rewriter library is no longer needed.
 
 (echo $1 &&
-@CXX@ -c @R_CXXFLAGS@ @R_SCXXFLAGS@ @R_CPPFLAGS@ @ATERM_FLAGS@ -I"@CMAKE_INSTALL_PREFIX@/include" -I"@Boost_INCLUDE_DIRS@" -o $1.o $1 > $1.log 2>&1 &&
+@CXX@ -c @R_CXXFLAGS@ @R_SCXXFLAGS@ @R_CPPFLAGS@ @ATERM_FLAGS@ @R_MCRL2_OSX_ARCH@ -I"@R_CMAKE_INSTALL_PREFIX@/include" @R_STAGE_INCLUDE_DIRS@ -I"@R_Boost_INCLUDE_DIRS@" -o $1.o $1 > $1.log 2>&1 &&
 echo $1.o &&
-@CXX@ @R_LDFLAGS@ @R_SLDFLAGS@ -L"@Boost_LIBRARY_DIRS@" -o $1.bin $1.o >> $1.log 2>&1 &&
+@CXX@ @R_LDFLAGS@ @R_SLDFLAGS@ @R_MCRL2_OSX_ARCH@ -L"@R_Boost_LIBRARY_DIRS@" -o $1.bin $1.o >> $1.log 2>&1 &&
 echo $1.log &&
 echo $1.bin) || (
 echo "Compile script was:" &&

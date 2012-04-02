@@ -1,0 +1,25 @@
+act
+
+  empty, fill, done;
+  lose, gain, pour: Nat;
+
+proc
+
+  BigCan(m:Nat) =
+    ( m != 4 ) -> (
+      % some code for the big can
+    ) <> done ;
+
+  SmallCan(m:Nat) =
+    ( m != 4 ) -> (
+      % some code for the small can
+    ) <> done ;
+
+init
+
+  allow(
+    { empty, fill, pour },
+  comm(
+    { lose|gain -> pour },
+  BigCan(0) || SmallCan(0)
+    ));

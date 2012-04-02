@@ -317,7 +317,7 @@ class pbesinst_finite_algorithm
     /// \brief Constructor.
     /// \param print_equations If true, the generated equations are printed
     /// \param print_rewriter_output If true, invocations of the rewriter are printed
-    pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
+    pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_rewriter_strategy(rewriter_strategy)
     {}
 

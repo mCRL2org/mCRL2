@@ -14,19 +14,15 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/classic_enumerator.h"
-// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/state.h"
+#include "mcrl2/lps/nextstate/nextstate_options.h"
 
-/** \brief Internal NextState state storage method **/
-typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
-               , GS_STATE_TREE    /** \brief Store states in a binary tree **/
-             } NextStateFormat;
-
-/** \brief Strategies for exploring the next states. **/
-typedef enum { nsStandard } NextStateStrategy;
-
+namespace mcrl2
+{
+namespace lps
+{
 
 class NextState;
 
@@ -55,7 +51,7 @@ struct ns_info
   AFun stateAFun;
   size_t* current_id;
 
-  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c, 
+  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c,
                                               internal_substitution_type &sigma)
   {
     return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c, sigma); // Laatste expressie is intern.
@@ -72,7 +68,7 @@ struct ns_info
 };
 /// \endcond
 
-class NextStateGenerator 
+class NextStateGenerator
 {
   public:
     typedef ns_info::substitution_type substitution_type;
@@ -113,7 +109,7 @@ class NextStateGenerator
     ATermList ListFromFormat(ATermList l);
 };
 
-class NextState 
+class NextState
 {
     friend class NextStateGenerator;
   public:
@@ -176,7 +172,10 @@ NextState* createNextState(
      bool allow_free_vars,
      int state_format = GS_STATE_VECTOR,
      NextStateStrategy strategy = nsStandard
-   ); 
+   );
 
+
+} // namespace lps
+} // namespace mcrl2
 
 #endif

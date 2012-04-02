@@ -44,6 +44,7 @@ void parser_test()
   BOOST_CHECK(data::parse_sort_expression("Nat") == data::sort_nat::nat());
 //  BOOST_CHECK(data::parse_data_expression("-1") == data::sort_int::int_(-1));
 //  BOOST_CHECK(data::parse_data_expression("1/2") == data::sort_real::real_(1, 2));
+  core::garbage_collect();
 }
 
 // This test triggers a sort normalization problem.
@@ -57,13 +58,29 @@ void test_user_defined_sort()
   core::garbage_collect();
 }
 
+void test_whr()
+{
+  using namespace data;
+  data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
+  core::garbage_collect();
+}
+
+void test_sort()
+{
+  using namespace data;
+  std::string text = "Pos -> Pos # Pos -> Bool";
+  sort_expression s = parse_sort_expression(text);
+  BOOST_CHECK(data::pp(s) == text);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   parser_test();
   test_user_defined_sort();
-  core::garbage_collect();
+  test_whr();
+  test_sort();
 
   return EXIT_SUCCESS;
 }

@@ -53,7 +53,7 @@ std::string pp(const process::merge& x) { return process::pp< process::merge >(x
 std::string pp(const process::left_merge& x) { return process::pp< process::left_merge >(x); }
 std::string pp(const process::choice& x) { return process::pp< process::choice >(x); }
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
-void normalize_sorts(process::process_specification& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_specification >(x, x.data()); }
+void normalize_sorts(process::process_specification& x, const data::data_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x) { return process::find_sort_expressions< process::process_expression >(x); }

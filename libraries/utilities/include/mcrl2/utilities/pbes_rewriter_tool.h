@@ -46,15 +46,17 @@ class pbes_rewriter_tool: public Tool
       result.insert(pbes_system::quantifier_all);
       result.insert(pbes_system::quantifier_finite);
       result.insert(pbes_system::pfnf);
+      result.insert(pbes_system::ppg);
+      result.insert(pbes_system::bqnf_quantifier);
       return result;
     }
 
     /// \brief Returns the default pbes rewriter.
     /// Override this method to change the standard behavior.
     /// \return The string "simplify"
-    virtual std::string default_rewriter() const
+    virtual pbes_system::pbes_rewriter_type default_rewriter() const
     {
-      return "simplify";
+      return pbes_system::simplify;
     }
 
     /// \brief Add options to an interface description. Also includes
@@ -63,16 +65,20 @@ class pbes_rewriter_tool: public Tool
     void add_options(interface_description& desc)
     {
       Tool::add_options(desc);
-      std::string text = "use pbes rewrite strategy NAME:\n";
+
+      interface_description::enum_argument<pbes_system::pbes_rewriter_type> arg(make_enum_argument<pbes_system::pbes_rewriter_type>("NAME"));
+
+      // Compute the available rewriters, and add the approriate arguments
       std::set<pbes_system::pbes_rewriter_type> types = available_rewriters();
       for (typename std::set<pbes_system::pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
       {
-        text = text + (i == types.begin() ? "" : "\n") + pbes_system::pbes_rewriter_description(*i);
+        arg.add_value(*i, *i==default_rewriter());
       }
+
       desc.add_option(
         "pbes-rewriter",
-        make_optional_argument("NAME", default_rewriter()),
-        text,
+        arg,
+        "use pbes rewrite strategy NAME:",
         'p'
       );
     }
@@ -82,10 +88,7 @@ class pbes_rewriter_tool: public Tool
     void parse_options(const command_line_parser& parser)
     {
       Tool::parse_options(parser);
-      m_pbes_rewriter_type = pbes_system::parse_pbes_rewriter_type(parser.option_argument("pbes-rewriter"));
-
-      // The following alternative doesn't work, it is not clear why.
-      // m_pbes_rewriter_type = parser.option_argument_as<pbes_rewriter_tool<Tool>::pbes_rewriter_type>("pbes-rewriter");
+      m_pbes_rewriter_type = parser.option_argument_as<pbes_system::pbes_rewriter_type>("pbes-rewriter");
     }
 
 

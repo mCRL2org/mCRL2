@@ -17,7 +17,9 @@ IF(WIN32)
   SET(SRCS ${SRCS} ltsgraph.rc)
 ENDIF(WIN32)
 
-set(MACOSX_BUNDLE_ICON_FILE ltsgraph.icns )
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
+
 # ######### General setup ##########
 
 # actual target:

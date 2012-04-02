@@ -11,7 +11,12 @@
 #define ERROR_RECOVERY_QUEUE_SIZE		10000
 
 #define LATEST(_p, _pn) do { \
-  while ((_pn)->latest != (_pn)->latest->latest) {PNode *t = (_pn)->latest->latest; ref_pn(t); unref_pn((_p),(_pn)->latest); (_pn)->latest = t;}\
+  while ((_pn)->latest != (_pn)->latest->latest) { \
+    PNode *t = (_pn)->latest->latest; \
+    ref_pn(t); \
+    unref_pn((_p), (_pn)->latest); \
+    (_pn)->latest = t; \
+  }\
   (_pn) = (_pn)->latest; \
 } while (0)
 
@@ -605,12 +610,11 @@ static int
 check_child(int ppri, AssocKind passoc, int cpri, AssocKind cassoc,
 	    int left, int right)
 {
-  int p, c, r;
-  p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) :
+  int p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) :
       (passoc == ASSOC_UNARY_LEFT ? 2 : 3);
-  c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 :
+  int c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 :
       (cassoc == ASSOC_UNARY_LEFT ? 1 : 2);
-  r =
+  int r =
     cpri > ppri ? 0 : (
       cpri < ppri ? 1 : ( 2 + (
 	(IS_RIGHT_ASSOC(cassoc) ? 2 : 0) +
@@ -733,22 +737,17 @@ compare_priorities(int xpri[], int xn, int ypri[], int yn) {
 }
 
 static void
-intsort(int *xp, int n) {
-  int again = 1, i, t;
-  while (again) {
-    again = 0;
-    for (i = 0; i < n - 1; i++) {
-      if (xp[i] > xp[i+1]) {
-	t = xp[i];
-	xp[i] = xp[i + 1];
-	xp[i + 1] = t;
-	again = 1;
+intreverse(int *xp, int n) {
+  int *a = xp, *b = xp + n -1;
+  while (a < b) {
+    int t = *a;
+    *a = *b;
+    *b = t;
+    a++; b--;
       }
     }
-  }
-}
 
-/* sort by deepest, then by address */
+/* sort by deepest, then by location */
 static void
 priority_insert(StackPNode *psx, PNode *x) {
   PNode *t, **start, **cur;
@@ -759,7 +758,8 @@ priority_insert(StackPNode *psx, PNode *x) {
   for (;cur > start + 1;cur--) {
     if (cur[-1]->height > cur[-2]->height)
       continue;
-    if (cur[-1]->height == cur[-2]->height && cur[-1] > cur[-2])
+    if (cur[-1]->height == cur[-2]->height &&
+        cur[-1]->parse_node.start_loc.s > cur[-2]->parse_node.start_loc.s)
       continue;
     t = cur[-1];
     cur[-1] = cur[-2];
@@ -865,8 +865,8 @@ cmp_priorities(Parser *p, PNode *x, PNode *y) {
   get_exp_one(p, x, &psx, &isx);
   get_exp_one(p, y, &psy, &isy);
   get_unshared_priorities(p, &psx, &psy, &isx, &isy);
-  intsort(isx.start, stack_depth(&isx));
-  intsort(isy.start, stack_depth(&isy));
+  intreverse(isx.start, stack_depth(&isx));
+  intreverse(isy.start, stack_depth(&isy));
   r = compare_priorities(isx.start, stack_depth(&isx),
 		     isy.start, stack_depth(&isy));
   stack_free(&psx); stack_free(&psy); stack_free(&isx); stack_free(&isy);
@@ -928,14 +928,13 @@ greedycmp(const void *ax, const void *ay) {
 
 static int
 cmp_greediness(Parser *p, PNode *x, PNode *y) {
-  int ix, iy, ret;
   VecPNode pvx, pvy;
+  int ix = 0, iy = 0, ret = 0;
   vec_clear(&pvx); vec_clear(&pvy);
   get_unshared_pnodes(p, x, y, &pvx, &pvy);
   /* set_to_vec(&pvx); set_to_vec(&pvy); */
   qsort(pvx.v, pvx.n, sizeof(PNode *), greedycmp);
   qsort(pvy.v, pvy.n, sizeof(PNode *), greedycmp);
-  ix = 0, iy = 0, ret = 0;
   while (1) {
     if (pvx.n <= ix || pvy.n <= iy)
       RET(0);
@@ -982,19 +981,12 @@ resolve_amb_greedy(D_Parser *dp, int n, D_ParseNode **v) {
   return selected_node;
 }
 
+/* return -1 for x, 1 for y and 0 if they are ambiguous */
 static int
 cmp_pnodes(Parser *p, PNode *x, PNode *y) {
   int r = 0;
   if (x->assoc && y->assoc) {
-    /* simple case */
-    if (!IS_NARY_ASSOC(x->assoc) && !IS_NARY_ASSOC(y->assoc)) {
-      if (x->priority > y->priority)
-	return -1;
-      if (x->priority < y->priority)
-	return 1;
-    }
-    r = cmp_priorities(p, x, y);
-    if (r)
+    if ((r = cmp_priorities(p, x, y)))
       return r;
   }
   if (!p->user.dont_use_greediness_for_disambiguation)
@@ -1203,10 +1195,9 @@ set_find_znode(VecZNode *v, PNode *pn) {
 
 static void
 set_add_znode_hash(VecZNode *v, ZNode *z) {
-  int i, j, n;
+  int i, j, n = v->n;
   VecZNode vv;
   vec_clear(&vv);
-  n = v->n;
   if (n) {
     uint h = ((uintptr_t)z->pn) % n;
     for (i = h, j = 0;
@@ -1239,10 +1230,9 @@ set_add_znode_hash(VecZNode *v, ZNode *z) {
 
 static void
 set_add_znode(VecZNode *v, ZNode *z) {
-  int i, n;
+  int i, n = v->n;
   VecZNode vv;
   vec_clear(&vv);
-  n = v->n;
   if (n < INTEGRAL_VEC_SIZE) {
     vec_add(v, z);
     return;
@@ -1963,7 +1953,11 @@ error_recovery(Parser *p) {
     rr->symbol = best_er->symbol;
     update_line(best_loc.s, best_s, &best_loc.line);
     best_loc.s = (char*)best_s;
-    best_pn = best_sn->zns.v[0]->pn;
+    for (i = 0; i < best_sn->zns.n; i++)
+      if (best_sn->zns.v[i]) {
+        best_pn = best_sn->zns.v[i]->pn;
+        break;
+      }
     best_pn->parse_node.white_space(
       (D_Parser*)p, &best_loc, (void**)&best_pn->parse_node.globals);
     new_pn = add_PNode(p, 0, &p->user.loc,  best_loc.s, best_pn, 0, 0, 0);
@@ -2376,4 +2370,3 @@ dparse(D_Parser *ap, char *buf, int buf_len) {
   free_whitespace_parser(p);
   return res;
 }
-

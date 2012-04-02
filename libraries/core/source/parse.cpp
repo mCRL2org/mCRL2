@@ -9,6 +9,7 @@
 /// \file parse.cpp
 
 #include "mcrl2/core/detail/dparser_functions.h"
+#include "mcrl2/core/dparser.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "d.h"
@@ -65,11 +66,16 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseN
 
 void syntax_error_fn(struct D_Parser *ap)
 {
+  core::detail::increment_dparser_error_message_count();
+  if (core::detail::get_dparser_error_message_count() > core::detail::get_dparser_max_error_message_count())
+  {
+    return;
+  }
   Parser *p = (Parser *) ap;
-  std::string fn;
+  std::string filename;
   if (p->user.loc.pathname)
   {
-    fn = std::string(p->user.loc.pathname);
+    filename = std::string(p->user.loc.pathname);
   }
   std::string after;
   ZNode *z = p->snode_hash.last_all ? p->snode_hash.last_all->zns.v[0] : 0;
@@ -81,12 +87,12 @@ void syntax_error_fn(struct D_Parser *ap)
   {
     after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
   }
-  std::cerr << fn << ":" << p->user.loc.line << ":" << p->user.loc.col << " syntax error";
+  mCRL2log(log::error, "parser") << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
   if (!after.empty())
   {
-    std::cerr << " after '" << after << "'";
+    mCRL2log(log::error, "parser") << " after '" << after << "'";
   }
-  std::cerr << std::endl;
+  mCRL2log(log::error, "parser") << std::endl;
 }
 
 } // namespace detail

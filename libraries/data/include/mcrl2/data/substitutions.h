@@ -468,6 +468,8 @@ public:
   /// \brief Friend function to get all identifiers in the substitution
   template<typename VariableType1, typename ExpressionSequence1>
   friend atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
+  template<typename VariableType1, typename ExpressionSequence1>
+  friend atermpp::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma);
 
   /// \brief Friend function that applies a function to all right hand sides of the substitution.
   template<typename VariableType1, typename ExpressionSequence1, typename UnaryOperator>
@@ -640,9 +642,88 @@ public:
 
 };
 
-/// \brief Function to get all identifiers in the substitution
+
+
+namespace detail
+{
+// The function below gets all free variables of the term t, which has
+// the shape of an expression in internal format. The variables are added to result.
+// This routine should be removed after internal and external format have merged.
+inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < variable > &result)
+{
+  if (is_variable(t))
+  {
+    result.insert(t);
+  }
+  else if (is_where_clause(t))
+  {
+    atermpp::set < variable > free_variables_in_body;
+    get_free_variables(t(0),free_variables_in_body);
+    
+    variable_list bound_vars;
+    const assignment_expression_list lv=t(1);
+    for(assignment_expression_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
+    {
+      bound_vars=push_front(bound_vars,it->lhs());
+      get_free_variables(it->rhs(),result); 
+    } 
+    for(atermpp::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    {
+      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
+      {
+        result.insert(*i);
+      }
+    }
+  }
+  else if (is_abstraction(t))
+  {
+    atermpp::set < variable > free_variables_in_body;
+    get_free_variables(t(2),free_variables_in_body);
+    const variable_list bound_vars=t(1);
+
+    for(atermpp::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    {
+      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
+      {
+        result.insert(*i);
+      }
+    }
+  }
+  else // Term has the shape #REWR#(t1,...,tn);
+  {
+    for(size_t i=0 ; i<t.size(); ++i)
+    {
+      if (t(i).type()!=AT_INT)
+      { 
+        get_free_variables(t(i),result);
+      }
+    }
+  }
+}
+} // end namespace detail
+
+/// \brief Function to get all free variables in the substitution
+///        The rhs' have the shape of an expression in internal rewriter format. 
 /// \deprecated
 template<typename VariableType, typename ExpressionSequence>
+atermpp::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
+{
+  atermpp::set < variable > result;
+  typedef typename ExpressionSequence::value_type expression_type;
+
+  for(size_t i = 0; i < sigma.size(); ++i)
+  {
+    if(sigma.get(i) != expression_type())
+    {
+      detail::get_free_variables(sigma.get(i),result);
+    }
+  }
+  return result;
+}
+
+/// \brief Function to get all identifiers in the substitution
+/// \deprecated
+/* template<typename VariableType, typename ExpressionSequence>
 atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
 {
   typedef typename ExpressionSequence::value_type expression_type;
@@ -657,11 +738,11 @@ atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_subs
     }
   }
   return result;
-}
+} */
 
 /// \deprecated
 /// Provided for use with the rewriters in internal format
-template<typename AssociativeContainer>
+/* template<typename AssociativeContainer>
 atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer >& sigma)
 {
   atermpp::set<core::identifier_string> result;
@@ -671,7 +752,7 @@ atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitu
     find_all_if(i->second,core::is_identifier_string,std::inserter(result,result.begin()));
   }
   return result;
-}
+} */
 
 /// \deprecated
 /// Provided for use with the rewriters in internal format
@@ -836,7 +917,7 @@ std::string print_substitution(const Substitution& sigma)
 template <typename Substitution>
 std::string print_substitution(const mutable_substitution_composer<Substitution>& sigma)
 {
-  return to_string(sigma.substitution());
+  return print_substitution(sigma.substitution());
 }
 
 } // namespace data

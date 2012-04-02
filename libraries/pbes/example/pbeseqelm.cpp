@@ -18,13 +18,13 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

@@ -12,10 +12,13 @@
 #define MCRL2_UTILITIES_LOGGER_H
 
 #include <cstdio>
+#include <ctime>
 #include <stdexcept>
 #include <string>
 #include <sstream>
+#include <memory>
 #include <map>
+#include <set>
 
 #include "mcrl2/utilities/text_utility.h"
 
@@ -103,29 +106,31 @@ log_level_t log_level_from_string(const std::string& s)
   }
 }
 
-/// \brief Type for message distinction (by purpose).
-/// Should only be used for custom message handlers.
-enum message_t
+
+/// \prototype
+//std::string now_time();
+std::string format_time(const time_t* timestamp);
+
+/// \brief Interface class for output policy.
+///
+/// Separates the exact way of doing output from the logger class.
+class output_policy
 {
-  msg_notice,
-  msg_warning,
-  msg_error
+  public:
+    /// \brief Constructor.
+    output_policy()
+    {};
+
+    /// \brief Output message.
+    /// \param[in] msg Message that is written to output.
+    /// \param[in] hint Hint for the stream to which the output is written.
+    ///  \details Any implementation must assure that output is written using an atomic action, to prevent
+    /// mixing of different lines into one line in the output.
+    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg) = 0;
 };
 
 /// \prototype
-std::string now_time();
-
-/// \brief Type for function pointer for a custom message printing routine
-/// \deprecated
-/// provided for backward compatibility with gs*Msg
-typedef void (*custom_message_handler_t)(message_t, const char*);
-custom_message_handler_t& mcrl2_custom_message_handler_func(); // prototype
-
-static
-inline custom_message_handler_t& mcrl2_custom_message_handler()
-{
-  return mcrl2_custom_message_handler_func();
-}
+std::set<output_policy*> initialise_output_policies();
 
 /// \brief Class for logging messages
 ///
@@ -133,36 +138,39 @@ inline custom_message_handler_t& mcrl2_custom_message_handler()
 /// Dr. Dobb's Journal, September 5, 2007
 /// (url: http://drdobbs.com/cpp/201804215)
 /// Requires that OutputPolicy is a class which as a static member output(const std::string&)
-template <typename OutputPolicy>
 class logger
 {
   public:
-    typedef OutputPolicy output_policy_t;
-
   // Prevent copying loggers
   private:
     logger(const logger&)
-    {};
+    {}
 
     logger& operator =(const logger&)
-    { return *this; };
+    {
+      return *this;
+    }
 
   protected:
     /// \brief Stream that is printed to internally
     /// Collects the full debug message that we are currently printing.
     std::ostringstream m_os;
-    
+
     /// \brief The loglevel of the current message
     log_level_t m_level;
 
     /// \brief The message hint of the current message
     std::string m_hint;
 
+    /// \brief Timestamp of the current message
+    time_t m_timestamp;
+
+    /// \brief Output policies
     static
-    bool& last_message_ended_with_newline()
+    std::set<output_policy*>& output_policies()
     {
-      static bool m_last_message_ended_with_newline = true;
-      return m_last_message_ended_with_newline;
+      static std::set<output_policy*> m_output_policies = initialise_output_policies();
+      return m_output_policies;
     }
 
     /// \brief Mapping of message hint to loglevel. This allows a finegrained
@@ -176,36 +184,12 @@ class logger
       return m_hint_to_level;
     }
 
-    /// \brief The amount of indentation that has to be added to a line.
-    static
-    unsigned int& indentation()
-    {
-      static unsigned int indentation = 0;
-      return indentation;
-    }
-
-    message_t to_message_type(const log_level_t level) const
-    {
-      if (level <= error)
-      {
-        return msg_error;
-      }
-      else if (level <= warning)
-      {
-        return msg_warning;
-      }
-      else
-      {
-        return msg_notice;
-      }
-    }
-
     /// \brief The default log level that is used if no specific log level has
     /// been set.
     static
     log_level_t default_reporting_level()
     {
-      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(OutputPolicy::default_hint());
+      std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(default_hint());
       if(i != hint_to_level().end())
       {
         return i->second;
@@ -214,49 +198,6 @@ class logger
       {
         return info;
       }
-    }
-
-    /// \brief Prefix each line in s with some extra information.
-    /// The things that are added are:
-    /// - current time
-    /// - hint
-    /// - log level
-    /// - indentation
-    std::string process(const std::string& s)
-    {
-      std::string start_of_line =
-        "["
-      + now_time()
-      + " " + m_hint + (m_hint == std::string()?"":"::") + log_level_to_string(m_level)
-      + "]"
-      + std::string(8 - log_level_to_string(m_level).size(), ' ')
-      + std::string(2*indentation(), ' ');
-
-      bool s_ends_with_newline = (s[s.size()-1] == '\n');
-
-      std::string result = s;
-      // Avoid adding spurious start of line after the last line in the log.
-      if(s_ends_with_newline)
-      {
-        result.erase(result.end()-1);
-      }
-
-      // Prepend if a newline was added
-      if (last_message_ended_with_newline())
-      {
-        result = start_of_line + result;
-      }
-
-      result = mcrl2::utilities::regex_replace("\n", "\n" + start_of_line, result);
-
-      if(s_ends_with_newline)
-      {
-        result += "\n";
-      }
-
-      last_message_ended_with_newline() = s_ends_with_newline;
-
-      return result;
     }
 
   public:
@@ -269,22 +210,49 @@ class logger
     /// logging mechanism. Requires that output performs output in an atomic way.
     ~logger()
     {
-      // With custom message handler, still log to the default location
-      const std::string msg(process(m_os.str()));
-
-      if(mcrl2_custom_message_handler() != 0)
+      for(std::set<output_policy*>::iterator i = output_policies().begin(); i != output_policies().end(); ++i)
       {
-        (*(mcrl2_custom_message_handler()))(to_message_type(m_level), msg.c_str());
+        (*i)->output(m_level, m_hint, m_timestamp, m_os.str());
       }
+    }
 
-      OutputPolicy::output(msg, m_hint);
+    /// \brief Default hint (empty)
+    static std::string default_hint()
+    {
+      static std::string default_hint;
+      return default_hint;
+    }
+
+    /// \brief Register output policy
+    static
+    void register_output_policy(output_policy& policy)
+    {
+      output_policies().insert(&policy);
+    }
+
+    /// \brief Unregister output policy
+    static
+    void unregister_output_policy(output_policy& policy)
+    {
+      std::set<output_policy*>::iterator i = output_policies().find(&policy);
+      if(i != output_policies().end())
+      {
+        output_policies().erase(i);
+      }
+    }
+
+    /// \brief Clear all output policies
+    static
+    void clear_output_policies()
+    {
+      output_policies().clear();
     }
 
     /// \brief Set reporting level
     /// \param[in] level Log level
     /// \param[in] hint The hint for which to set log level
     static
-    void set_reporting_level(const log_level_t level, const std::string& hint = OutputPolicy::default_hint())
+    void set_reporting_level(const log_level_t level, const std::string& hint = default_hint())
     {
       hint_to_level()[hint] = level;
     }
@@ -292,7 +260,7 @@ class logger
     /// \brief Get reporting level
     /// \param[in] hint The hint for which to get log level
     static
-    log_level_t get_reporting_level(const std::string& hint = OutputPolicy::default_hint())
+    log_level_t get_reporting_level(const std::string& hint = default_hint())
     {
       std::map<std::string, log_level_t>::const_iterator i = hint_to_level().find(hint);
       if(i != hint_to_level().end())
@@ -313,61 +281,99 @@ class logger
       hint_to_level().erase(hint);
     }
 
-    /// \brief Increase the indentation level
-    static
-    void indent()
-    {
-      ++indentation();
-    }
-
-    /// \brief Decrease the indentation level
-    static
-    void unindent()
-    {
-      if(indentation() > 0)
-      {
-        --indentation();
-      }
-    }
-
     /// Get access to the stream provided by the logger.
     /// \param[in] l Log level for the stream
     /// \param[in] hint The hint for which the stream has to be provided.
-    std::ostringstream& get(const log_level_t l, const std::string& hint = OutputPolicy::default_hint())
+    std::ostringstream& get(const log_level_t l, const std::string& hint = default_hint())
     {
       m_level = l;
       m_hint = hint;
+      std::time(&m_timestamp);
       return m_os;
-    }
-
-    static
-    void set_custom_message_handler(custom_message_handler_t handler)
-    {
-      mcrl2_custom_message_handler() = handler;
     }
 };
 
-/// \brief Interface class for output policy.
-///
-/// Separates the exact way of doing output from the logger class.
-class output_policy_interface
+class formatter_interface
 {
-  public:
-    /// \brief Output message.
-    /// \param[in] msg Message that is written to output.
-    /// \param[in] hint Hint for the stream to which the output is written.
-    ///  \details Any implementation must assure that output is written using an atomic action, to prevent
-    /// mixing of different lines into one line in the output.
-    static void output(const std::string& msg, const std::string& hint);
+public:
+  /// \brief Format msg,
+  /// \param[in] level The log level of the message
+  /// \param[in] hint The hint provided for the message
+  /// \param[in] timestamp The timestamp of the log message
+  /// \param[in] msg The message to be formatted
+  /// \return The formatted message (\a msg)
+  static std::string format(const log_level_t /*level*/, const std::string& /*hint*/, const time_t /*timestamp*/, const std::string& msg)
+  {
+    return msg;
+  }
+};
 
-    /// \brief Hint for the default stream.
-    static std::string default_hint();
+/// \brief Mixin that takes care of formatting of a message.
+///
+/// In this case, the formatter
+class formatter: public formatter_interface
+{
+protected:
+  /// \brief Records whether the last message that was printed ended with
+  ///        a new line.
+  static
+  bool& last_message_ended_with_newline()
+  {
+    static bool m_last_message_ended_with_newline = true;
+    return m_last_message_ended_with_newline;
+  }
+
+public:
+  /// \brief Prefix each line in s with some extra information.
+  /// The things that are added are:
+  /// - current time
+  /// - hint
+  /// - log level
+  /// - indentation
+  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  {
+    std::stringstream start_of_line;
+    start_of_line << "[" << format_time(&timestamp) << " " << hint
+                  << (hint == std::string()?"":"::")
+                  << log_level_to_string(level) << "]"
+                  << std::string(8 - log_level_to_string(level).size(), ' ');
+
+    bool msg_ends_with_newline = false;
+    if (msg.size() > 0)
+    {
+      msg_ends_with_newline = (msg[msg.size()-1] == '\n');
+    }
+
+    std::string result = msg;
+    // Avoid adding spurious start of line after the last line in the log.
+    if(msg_ends_with_newline)
+    {
+      result.erase(result.end()-1);
+    }
+
+    // Prepend if a newline was added
+    if (last_message_ended_with_newline())
+    {
+      result = start_of_line.str() + result;
+    }
+
+    result = mcrl2::utilities::regex_replace("\n", std::string("\n") + start_of_line.str(), result);
+
+    if(msg_ends_with_newline)
+    {
+      result += "\n";
+    }
+
+    last_message_ended_with_newline() = msg_ends_with_newline;
+
+    return result;
+  }
 };
 
 /// \brief File output class.
 ///
 /// Provides facilities to output to a file. By default output is sent to stderr.
-class file_output: output_policy_interface
+class file_output: public output_policy
 {
   protected:
     /// \brief Map hints to streams
@@ -382,13 +388,12 @@ class file_output: output_policy_interface
 
     /// \brief Gets a stream handle for hint
     /// \param[in] hint Hint for which to provide a stream handle.
-    static
     FILE* get_stream(const std::string& hint)
     {
       std::map<std::string, FILE*>::iterator i = hint_to_stream().find(hint);
       if(i == hint_to_stream().end())
       {
-        i = hint_to_stream().find(default_hint());
+        i = hint_to_stream().find(logger::default_hint());
       }
       if (i == hint_to_stream().end())
       {
@@ -401,18 +406,14 @@ class file_output: output_policy_interface
     }
 
   public:
-    /// \brief Default hint (empty)
-    static std::string default_hint()
-    {
-      static std::string default_hint;
-      return default_hint;
-    }
+    file_output()
+    {}
 
     /// \brief Set stream handle for a hint
     /// \param[in] stream A file handle
     /// \param[in] hint The hint for which to set the handle to stream.
     static
-    void set_stream(FILE* stream, const std::string& hint = default_hint())
+    void set_stream(FILE* stream, const std::string& hint = logger::default_hint())
     {
       hint_to_stream()[hint] = stream;
     }
@@ -423,8 +424,7 @@ class file_output: output_policy_interface
     /// \param[in] hint The hint of the stream to which we print.
     /// This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
-    static
-    void output(const std::string& msg, const std::string& hint = default_hint())
+    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
     {
       FILE* p_stream = get_stream(hint);
       if (!p_stream)
@@ -432,13 +432,99 @@ class file_output: output_policy_interface
         return;
       }
 
-      fprintf(p_stream, "%s", msg.c_str());
+      fprintf(p_stream, "%s", formatter::format(level, hint, timestamp, msg).c_str());
       fflush(p_stream);
     }
 };
 
+/// \brief Output policy that wraps a function pointer to do the actual output
+///
+/// \deprecated Instead of using this output policy, use a custom class
+/// inheriting from output_policy.
+template<typename Formatter>
+class function_pointer_output: public output_policy
+{
+
+public:
+  /// \brief Type for message distinction (by purpose).
+  /// Should only be used for custom message handlers.
+  enum message_t
+  {
+    msg_notice,
+    msg_warning,
+    msg_error
+  };
+
+  /// \brief Type for function pointer for a custom message printing routine
+  /// \deprecated
+  /// provided for backward compatibility with gs*Msg
+  typedef void (*custom_message_handler_t)(message_t, const char*);
+
+  /// \brief Pointer that contains a custom message handler.
+  custom_message_handler_t m_handler;
+
+  /// \brief Formatting
+  formatter_interface m_formatter;
+
+protected:
+  /// \brief Conversion of log level to message type
+  message_t to_message_type(const log_level_t level) const
+  {
+    if (level <= error)
+    {
+      return msg_error;
+    }
+    else if (level <= warning)
+    {
+      return msg_warning;
+    }
+    else
+    {
+      return msg_notice;
+    }
+  }
+
+public:
+
+  function_pointer_output()
+    : m_handler(NULL)
+  {}
+
+  function_pointer_output(custom_message_handler_t handler)
+    : m_handler(handler)
+  {}
+
+  void set_custom_message_handler(custom_message_handler_t handler)
+  {
+    m_handler = handler;
+  }
+
+  virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  {
+    m_handler(to_message_type(level), Formatter::format(level, hint, timestamp, msg).c_str());
+  }
+};
+
+/// \brief The default output policy used by the logger
+inline
+output_policy& default_output_policy()
+{
+  static file_output m_default = file_output();
+  return m_default;
+}
+
+/// \brief Initialise the output policies. This returns the singleton set
+///        containing the default output policy.
+inline
+std::set<output_policy*> initialise_output_policies()
+{
+  std::set<output_policy*> result;
+  result.insert(&default_output_policy());
+  return result;
+}
+
 /// \brief Default logger that we use
-typedef logger<file_output> mcrl2_logger;
+typedef logger mcrl2_logger;
 
 /// Unless otherwise specified, we compile away all debug messages that have
 /// a log level greater than MCRL2_MAX_LOG_LEVEL.

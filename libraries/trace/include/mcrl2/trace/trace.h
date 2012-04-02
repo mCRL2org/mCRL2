@@ -370,26 +370,6 @@ class Trace
       return actions[pos];
     }
     
-    /// \brief Get the outgoing action from the current position in the trace and
-    ///  move to the next position.
-    /// \details This routine returns the action at the current position of the
-    /// trace and moves to the next position in the trace. When the current position
-    /// is at the end of the trace, nothing happens and the default mcrl2::lps::multi_action() is returned.
-    /// \return An action_list representing the action at the current position of the
-    /// trace. This is the default multi_action when at the end of the trace.
-    mcrl2::lps::multi_action nextAction()
-    {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-
-      if (pos < actions.size())
-      {
-        pos++;
-        return actions[pos-1];
-      }
-      return mcrl2::lps::multi_action();
-    } 
-
-
     /// \brief Get the time of the current state in the trace.
     /// \details This is the time at which
     /// the last action occurred (if any).
@@ -590,7 +570,7 @@ class Trace
 
     bool isTimedMAct(ATermAppl t)
     {
-      return ATisEqualAFun(ATgetAFun(t),trace_pair);
+      return ATgetType(t)==AT_APPL && ATgetAFun(t)==trace_pair;
     }
 
     ATermAppl makeTimedMAct(const mcrl2::lps::multi_action &ma)
@@ -712,7 +692,6 @@ class Trace
         }
         else if (isTimedMAct(e))
         {
-
           if (core::detail::gsIsNil(ATAgetArgument(e,1)))
           {
             addAction(multi_action(action_list(ATgetArgument(e,0))));
@@ -788,12 +767,7 @@ class Trace
         i--;
         if (i<actions.size())
         {
-          assert(actions.size()>i && actions[i]!=mcrl2::lps::multi_action());
-          /* if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
-          {
-            mCRL2log(log::error) << "saving trace that is not in mCRL2 format to a mCRL2 trace format" << std::endl;
-            error_shown = true;
-          } */
+          assert(actions.size()>i);
           trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i]));
         }
         if (states.size()>i)

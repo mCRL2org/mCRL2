@@ -91,6 +91,10 @@ std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
 std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
 
+// TODO: These should be removed when the ATerm code has been replaced.
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
+
 } // namespace lps
 
 } // namespace mcrl2

@@ -10,7 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "lpsxsimmain.h"
 #endif
 
@@ -400,7 +400,7 @@ void XSimMain::Initialise(const variable_list Pars)
 {
   state_varnames = Pars;
   stateview->DeleteAllItems();
-  size_t count=0;
+  int count=0;
   for (variable_list::const_iterator i=Pars.begin(); i!=Pars.end(); ++i, ++count)
   {
     wxString s(pp(*i).c_str()
@@ -428,7 +428,7 @@ void XSimMain::StateChanged(
       transview->Focus(0);
     }
   }
-  catch (mcrl2::runtime_error e)
+  catch (mcrl2::runtime_error& e)
   {
     wxString mystring(e.what(), wxConvUTF8);
     wxMessageDialog msg(this,

@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_algorithm.h"
@@ -30,23 +31,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-static const std::set<lts_equivalence> &initialise_allowed_eqs()
-{
-  static std::set<lts_equivalence> s;
-  s.insert(lts_eq_bisim);
-  s.insert(lts_eq_branching_bisim);
-  s.insert(lts_eq_divergence_preserving_branching_bisim);
-  s.insert(lts_eq_sim);
-  s.insert(lts_eq_trace);
-  s.insert(lts_eq_weak_trace);
-  s.insert(lts_red_tau_star);
-  return s;
-}
-static const std::set<lts_equivalence> &allowed_eqs()
-{
-  static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
-  return s;
-} 
 
 static inline std::string get_base(std::string const& s)
 {
@@ -156,7 +140,7 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.equivalence != lts_eq_none)
       {
-        mCRL2log(verbose) << "reducing LTS (modulo " <<  name_of_equivalence(tool_options.equivalence) << ")..." << std::endl;
+        mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
         mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
         reduce(l,tool_options.equivalence);
         mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
@@ -220,13 +204,6 @@ class ltsconvert_tool : public ltsconvert_base
           l_out.save(tool_options.outfilename);
           return true;
         }
-        case lts_svc:
-        {
-          lts_svc_t l_out;
-          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
-          l_out.save(tool_options.outfilename);
-          return true;
-        }
       }
       return true;
     }
@@ -266,10 +243,6 @@ class ltsconvert_tool : public ltsconvert_base
         {
           return load_convert_and_save<lts_dot_t>();
         }
-        case lts_svc:
-        {
-          return load_convert_and_save<lts_svc_t>();
-        }
       }
       return true;
     }
@@ -284,17 +257,27 @@ class ltsconvert_tool : public ltsconvert_base
       desc.add_option("no-state",
                       "leave out state information when saving in dot format", 'n');
       desc.add_option("determinise", "determinise LTS", 'D');
-      desc.add_option("lps", make_mandatory_argument("FILE"),
-                      "use FILE as the LPS from which the input LTS was generated; this might"
+      desc.add_option("lps", make_file_argument("FILE"),
+                      "use FILE as the LPS from which the input LTS was generated; this might "
                       "be needed to store the correct parameter names of states when saving "
                       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
       desc.add_option("in", make_mandatory_argument("FORMAT"),
                       "use FORMAT as the input format", 'i').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the output format", 'o');
-      desc.add_option("equivalence", make_mandatory_argument("NAME"),
-                      "generate an equivalent LTS, preserving equivalence NAME:\n"
-                      +supported_lts_equivalences_text(allowed_eqs())
+      desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME")
+                      .add_value(lts_eq_none, true)
+                      .add_value(lts_eq_bisim)
+                      .add_value(lts_eq_bisim_sigref)
+                      .add_value(lts_eq_branching_bisim)
+                      .add_value(lts_eq_branching_bisim_sigref)
+                      .add_value(lts_eq_divergence_preserving_branching_bisim)
+                      .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
+                      .add_value(lts_eq_sim)
+                      .add_value(lts_eq_trace)
+                      .add_value(lts_eq_weak_trace)
+                      .add_value(lts_red_tau_star),
+                      "generate an equivalent LTS, preserving equivalence NAME:"
                       , 'e');
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
                       "consider actions with a name in the comma separated list ACTNAMES to "
@@ -315,6 +298,8 @@ class ltsconvert_tool : public ltsconvert_base
 
     void parse_options(const command_line_parser& parser)
     {
+      ltsconvert_base::parse_options(parser);
+
       if (parser.options.count("lps"))
       {
         if (1 < parser.options.count("lps"))
@@ -355,18 +340,7 @@ class ltsconvert_tool : public ltsconvert_base
         }
       }
 
-      if (parser.options.count("equivalence"))
-      {
-
-        tool_options.equivalence = parse_equivalence(
-                                     parser.option_argument("equivalence"));
-
-        if (allowed_eqs().count(tool_options.equivalence) == 0)
-        {
-          parser.error("option -e/--equivalence has illegal argument '" +
-                       parser.option_argument("equivalence") + "'");
-        }
-      }
+      tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
 
       if (parser.options.count("tau"))
       {
@@ -436,6 +410,7 @@ class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
       m_gui_options["determinise"] = create_checkbox_widget();
 
       values.clear();
+      values.push_back("none");
       values.push_back("bisim");
       values.push_back("branching-bisim");
       values.push_back("dpbranching-bisim");

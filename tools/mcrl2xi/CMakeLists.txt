@@ -16,11 +16,10 @@ if(MCRL2_WITH_WXSTC)
  add_definitions( -DMCRL2_WITH_WXSTC )
 endif(MCRL2_WITH_WXSTC)
 
-# ######### General setup ##########
-IF(APPLE)
-  set(MACOSX_BUNDLE_ICON_FILE mcrl2xi.icns)
-ENDIF(APPLE)
+# ########## Create MacOSX Bundle Information ######### 
+include(MCRL2MacOSXBundleInformation)
 
+# ######### General setup ##########
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
   SET(SRCS ${SRCS} mcrl2xi.rc)

@@ -17,6 +17,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "mcrl2/pbes/file_formats.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2
 {

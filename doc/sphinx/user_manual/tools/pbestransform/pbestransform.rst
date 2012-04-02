@@ -1,4 +1,0 @@
-pbestransform
-===========================================
-
-.. include:: manual.rst

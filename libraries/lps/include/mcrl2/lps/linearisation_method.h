@@ -1,0 +1,92 @@
+#ifndef MCRL2_LPS_LINEARISATION_METHOD_H
+#define MCRL2_LPS_LINEARISATION_METHOD_H
+
+namespace mcrl2
+{
+
+namespace lps
+{
+
+/// \brief The available linearisation methods
+typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
+
+/// \brief String representation of a linearisation method
+/// \param[in] lin_method A linerisation method
+/// \return String representation of \a lin_method
+inline
+std::string print_lin_method(const t_lin_method lin_method)
+{
+  switch(lin_method)
+  {
+    case lmStack: return "stack";
+    case lmRegular: return "regular";
+    case lmRegular2: return "regular2";
+    default: throw mcrl2::runtime_error("unknown linearisation method");
+  }
+}
+
+inline
+std::string description(const t_lin_method lin_method)
+{
+  switch(lin_method)
+  {
+    case lmStack: return "for using stack data types (useful when 'regular' and 'regular2' do not work)";
+    case lmRegular: return "for generating an LPS in regular form (specification should be regular)";
+    case lmRegular2: return "for a variant of 'regular' that uses more data variables (useful when 'regular' does not work)";
+    default: throw mcrl2::runtime_error("unknown linearisation method");
+  }
+}
+
+/// \brief Parse a linearisation method
+/// \param[in] s A string
+/// \return The linearisation method represented by \a s
+inline
+t_lin_method parse_lin_method(const std::string& s)
+{
+  if(s == "stack")
+  {
+    return lmStack;
+  }
+  else if (s == "regular")
+  {
+    return lmRegular;
+  }
+  else if (s == "regular2")
+  {
+    return lmRegular2;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown linearisation strategy " + s);
+  }
+}
+
+// \overload
+inline
+std::istream& operator>>(std::istream& is, t_lin_method& l)
+{
+  try {
+    std::string s;
+    is >> s;
+    l = parse_lin_method(s);
+  }
+  catch (mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+
+  return is;
+}
+
+// \overload
+inline
+std::ostream& operator<<(std::ostream& os, const t_lin_method l)
+{
+  os << print_lin_method(l);
+  return os;
+}
+
+} // namespace lps
+} // namespace mcrl2
+
+#endif // MCRL2_LPS_LINEARISATION_METHOD_H

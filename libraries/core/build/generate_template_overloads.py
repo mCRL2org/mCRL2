@@ -245,6 +245,7 @@ def generate_normalize_sorts_overloads(classnames, result):
             text = '%s normalize_sorts(const %s& x, const data::data_specification& dataspec) { return %s::normalize_sorts< %s >(x, dataspec); }\n' % (classname, classname, namespace, classname)
         if has_specification(classname):
             text = re.sub('x, dataspec', 'x, x.data()', text)
+            text = re.sub('& dataspec', '& /* dataspec */', text)
         result[namespace].append(text)
 
 result = {}

@@ -28,10 +28,10 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
 
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
-void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
+static
+void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 {
   data_specification specification;
   specification = parse_data_specification(
@@ -214,6 +214,25 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
        "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
   data_expression t18d2 = parse_data_expression("true");
   BOOST_CHECK(r(t18d1) == r(t18d2));
+
+  /* Test 19. Test that exists and forall over a non enumerable sort (situation winter 2012) 
+              with a trivial predicate can still be reduced, by removing the variable. */
+ 
+  spec_1 = parse_data_specification( "sort A = Set(Bool);");
+  data_expression t19true = parse_data_expression("true");
+  data_expression t19a = parse_data_expression(
+       "exists x:Set(Bool). x==x", spec_1);
+  BOOST_CHECK(r(t19a) == r(t19true));
+  data_expression t19b = parse_data_expression(
+       "forall x:Set(Bool). x==x", spec_1);
+  BOOST_CHECK(r(t19b) == r(t19true));
+  data_expression t19false = parse_data_expression("false");
+  data_expression t19c = parse_data_expression(
+       "exists x:Set(Bool). x!=x", spec_1);
+  BOOST_CHECK(r(t19c) == r(t19false));
+  data_expression t19d = parse_data_expression(
+       "forall x:Set(Bool). x!=x", spec_1);
+  BOOST_CHECK(r(t19d) == r(t19false));
 }
 
 int test_main(int argc, char** argv)

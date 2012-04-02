@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/postfix_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
 
@@ -452,7 +452,7 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
 
   for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
   {
-    mcrl2::core::identifier_string new_name = generator(i->name());
+    mcrl2::core::identifier_string new_name = generator(std::string(i->name()));
 
     if (new_name != i->name())
     {
@@ -538,7 +538,7 @@ lps::specification action_rename(
   deadlock_summand_vector lps_deadlock_summands = lps_old_spec.process().deadlock_summands();
   action_list lps_new_actions;
 
-  data::postfix_identifier_generator generator("");
+  data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(lps_old_spec));
 
   //go through the rename rules of the rename file
@@ -711,7 +711,7 @@ lps::specification action_rename(
                    i=lps_new_actions.begin() ;
                    i!=lps_new_actions.end() ; ++i,++i_is_delta)
               {
-                *i=action_list(); /* the action becomes delta */
+                *i=action_list(); // the action becomes delta 
                 *i_is_delta=true;
               }
             }
@@ -724,7 +724,6 @@ lps::specification action_rename(
                 if (!*i_is_delta) // the action is not delta
                 {
                   *i=push_front(*i,renamed_rule_new_action);
-                  *i_is_delta=false;
                 }
               }
             }
@@ -738,18 +737,16 @@ lps::specification action_rename(
               if (!*i_is_delta) // The action does not equal delta.
               {
                 *i=push_front(*i,lps_old_action);
-                *i_is_delta=false;
               }
             }
 
           }
-          else
+          else 
           {
             /* Duplicate summands, one where the renaming is applied, and one where it is not
                applied. */
 
             atermpp::vector < action_list > lps_new_actions_temp(lps_new_actions);
-            std::vector < bool > lps_new_actions_is_delta_temp(lps_new_actions_is_delta);
 
             if (!to_tau) // if the new element is tau, we do not insert it in the multi-action.
             {
@@ -771,25 +768,18 @@ lps::specification action_rename(
               }
             }
 
-            std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta_temp.begin();
             for (atermpp::vector < action_list > :: iterator
                  i=lps_new_actions_temp.begin() ;
-                 i!=lps_new_actions_temp.end() ; ++i,++i_is_delta)
+                 i!=lps_new_actions_temp.end() ; ++i)
             {
-              if (!*i_is_delta) // The element is not equal to delta
-              {
-                *i=push_front(*i,lps_old_action);
-                *i_is_delta=false;
-              }
+              lps_new_actions_is_delta.push_back(false); // An non renamed action is not delta;
+              *i=push_front(*i,lps_old_action);
             }
 
             lps_new_actions.insert(lps_new_actions.end(),
                                    lps_new_actions_temp.begin(),
                                    lps_new_actions_temp.end());
-            lps_new_actions_is_delta.insert(lps_new_actions_is_delta.end(),
-                                            lps_new_actions_is_delta_temp.begin(),
-                                            lps_new_actions_is_delta_temp.end());
-
+            assert(lps_new_actions_is_delta.size()==lps_new_actions.size());
 
             /* lps_new_condition_temp will contain the conditions in conjunction with
                the negated new_condition. It will be concatenated to lps_new_condition,
@@ -818,13 +808,11 @@ lps::specification action_rename(
                                     lps_new_sum_vars_temp.begin(),
                                     lps_new_sum_vars_temp.end());
           }
-
         }//end if(equal_signatures(...))
         else
         {
-          std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
           for (atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
-               i!=lps_new_actions.end() ; ++i,++i_is_delta)
+               i!=lps_new_actions.end() ; ++i)
           {
             *i = push_front(*i, lps_old_action);
           }
@@ -839,7 +827,7 @@ lps::specification action_rename(
       std::vector < bool > :: iterator i_act_is_delta=lps_new_actions_is_delta.begin();
       atermpp::vector < variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
       for (atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
-           i_cond!=lps_new_condition.end() ; i_cond++)
+           i_cond!=lps_new_condition.end() ; ++i_cond, ++i_act_is_delta)
       {
         //create a summand for the new lps
         if (*i_act_is_delta)

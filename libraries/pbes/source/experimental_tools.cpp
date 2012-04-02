@@ -12,7 +12,6 @@
 #include <cassert>
 #include <sstream>
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/absinthe.h"
@@ -35,6 +34,7 @@
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {

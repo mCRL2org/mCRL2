@@ -27,7 +27,8 @@ static bool read_trace(Trace& t, const char* s)
 
 void test_next_action(Trace& t, const char* s)
 {
-  mcrl2::lps::multi_action a = t.nextAction();
+  mcrl2::lps::multi_action a = t.currentAction();
+  t.increasePosition();
   BOOST_CHECK(a != mcrl2::lps::multi_action());
   if (a != mcrl2::lps::multi_action())
   {

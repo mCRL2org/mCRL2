@@ -124,21 +124,6 @@ static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 /*}}}  */
 
-/*{{{  void AT_initBafIO(int argc, char *argv[]) */
-
-/**
-  * Initialize BafIO code.
-  */
-
-void AT_initBafIO(int argc, char* argv[])
-{
-  /* Suppress unused arguments warning */
-  (void) argc;
-  (void) argv;
-}
-
-/*}}}  */
-
 /*{{{  void AT_getBafVersion(int *major, int *minor) */
 
 void
@@ -976,7 +961,7 @@ static bool
 write_baf(const ATerm t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
-  size_t nr_symbols = AT_symbolTableSize();
+  size_t nr_symbols = at_lookup_table.size();
   AFun lcv;
   size_t cur;
 

@@ -8,7 +8,7 @@
 //
 /// \file simbase.cpp
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__clang__)
 #pragma implementation "simbase.h"
 #endif
 
@@ -77,7 +77,6 @@ void SimViewsDLL::Remove(SimulatorViewDLLInterface* View, bool Unregister)
   list<SimulatorViewDLLInterface*>::iterator i = views.begin();
   for (; i != views.end(); i++, j++)
   {
-    *i;
     if ((*i) == View)
     {
       if (Unregister && ((*j) != NULL))

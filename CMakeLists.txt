@@ -83,12 +83,12 @@ IF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
   message(STATUS "for development purposes." )
   message(STATUS "=========================================" )
 
-	set( MCRL2_ENABLE_SVN false )
-	set( MCRL2_ENABLE_PARSERS false )
+  set( MCRL2_ENABLE_SVN false )
+  set( MCRL2_ENABLE_PARSERS false )
 ENDIF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
 
 # Set path where additional modules can be found
-set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" ) 
+set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" )
 
 # Variables required for an additional build type "Maintainer"
 
@@ -116,7 +116,7 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 ##-----------------------------------------------------
-## Set platform specific options 
+## Set platform specific options
 ##-----------------------------------------------------
 if(WIN32)
   include(ConfigureWindows)
@@ -167,36 +167,37 @@ include(GetCompilerVersion)
 include(GetArchitectureInformation)
 
 ##-----------------------------------------------------
-## Set Compiler specific options 
+## Set Compiler specific options
 ##-----------------------------------------------------
-if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-  include(ConfigureGCC)
-endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
   include(ConfigureClang)
+else( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
+  if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+    include(ConfigureGCC)
+  endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 endif( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
 if(MSVC)
   include(ConfigureMSVC)
 endif(MSVC)
 
 ##---------------------------------------------------
-## Configure Boost 
+## Configure Boost
 ##---------------------------------------------------
 include(ConfigureBoost)
 
 ##---------------------------------------------------
-## Option to enable/disable mcrl2-gui tools 
+## Option to enable/disable mcrl2-gui tools
 ##---------------------------------------------------
 option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
 
 ##---------------------------------------------------
-## Detect OpenGL 
+## Detect OpenGL
 ##---------------------------------------------------
 
 if( MCRL2_ENABLE_GUI_TOOLS )
   include(FindOpenGL)
   message(STATUS "OpenGL: ${OPENGL_FOUND}")
-  
+
   if(NOT OPENGL_FOUND)
     message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
   else( OPENGL_FOUND )
@@ -211,7 +212,7 @@ if( MCRL2_ENABLE_GUI_TOOLS )
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------
-## Configure wxWidgets 
+## Configure wxWidgets
 ##---------------------------------------------------
 include(ConfigureWxWidgets)
 
@@ -219,27 +220,17 @@ include(ConfigureWxWidgets)
 ## Determine latest SVN revision
 ##---------------------------------------------------
 
-set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
-if( MCRL2_SVN_LABEL STREQUAL "" )
-  if( MCRL2_ENABLE_SVN )
-  FIND_PACKAGE(Subversion)
-    IF(SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-      Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  	  set(SVN_REV ${Project_WC_REVISION})
-    ELSE(SUBVERSION_FOUND)
-      set(SVN_REV "Unknown")
-    ENDIF(SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-  else( MCRL2_ENABLE_SVN )
-    set( SVN_REV "Unknown" )	
-  endif( MCRL2_ENABLE_SVN )
-else( MCRL2_SVN_LABEL STREQUAL "" )
-  set( SVN_REV ${MCRL2_SVN_LABEL} )	
-endif( MCRL2_SVN_LABEL STREQUAL "" )
-
-message(STATUS "SVN revision: ${SVN_REV}")
+include(MCRL2Version)
+message(STATUS "mCRL2 version: ${MCRL2_VERSION}")
+message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
 
 ##---------------------------------------------------
-## Find cvc3 
+## Store copyright information in variable
+##---------------------------------------------------
+file(READ COPYING MCRL2_COPYRIGHT_TEXT)
+
+##---------------------------------------------------
+## Find cvc3
 ##---------------------------------------------------
 
 find_package( cvc3 )
@@ -276,7 +267,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 ##---------------------------------------------------
 
 ##---------------------------------------------------
-## Option to enable/disable CADP support 
+## Option to enable/disable CADP support
 ##---------------------------------------------------
 option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable support for CADP" OFF)
 
@@ -287,7 +278,7 @@ option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable support for CADP" OFF)
 include(MCRL2CADPSupport)
 
 ##---------------------------------------------------
-## Library and executable staging 
+## Library and executable staging
 ##---------------------------------------------------
 
 set(MCRL2_STAGE_ROOTDIR ""
@@ -322,80 +313,84 @@ add_subdirectory ( tools/mcrl2parse )
 ## Library dependencies
 ##---------------------------------------------------
 
-  add_subdirectory ( libraries/aterm )
-  add_subdirectory ( libraries/data )
-  add_subdirectory ( libraries/utilities )
-  add_subdirectory ( libraries/core )
-  add_subdirectory ( libraries/pbes )
-  add_subdirectory ( libraries/process )
-  add_subdirectory ( libraries/lps )
-  add_subdirectory ( libraries/lts )
+add_subdirectory ( libraries/aterm )
+add_subdirectory ( libraries/atermpp )
+add_subdirectory ( libraries/bes )
+add_subdirectory ( libraries/core )
+add_subdirectory ( libraries/data )
+add_subdirectory ( libraries/lps )
+add_subdirectory ( libraries/lts )
+add_subdirectory ( libraries/pbes )
+add_subdirectory ( libraries/process )
+add_subdirectory ( libraries/trace )
+add_subdirectory ( libraries/utilities )
 
 ##---------------------------------------------------
 ## Tool dependencies
 ##---------------------------------------------------
 
-  add_subdirectory ( tools/besinfo )
-  add_subdirectory ( tools/bespp )
-  add_subdirectory ( tools/chi2mcrl2 )
-  add_subdirectory ( tools/diagraphica )
-  add_subdirectory ( tools/formulacheck )
-  add_subdirectory ( tools/grapemcrl2 )
-  add_subdirectory ( tools/lps2lts )
-  add_subdirectory ( tools/lps2pbes )
-  add_subdirectory ( tools/lps2torx )
-  add_subdirectory ( tools/lpsactionrename )
-  add_subdirectory ( tools/lpsbinary )
-  add_subdirectory ( tools/lpsconfcheck )
-  add_subdirectory ( tools/lpsconstelm )
-  add_subdirectory ( tools/lpsinfo )
-  add_subdirectory ( tools/lpsinvelm )
-  add_subdirectory ( tools/lpsparelm )
-  add_subdirectory ( tools/lpsparunfold )
-  add_subdirectory ( tools/lpspp )
-  add_subdirectory ( tools/lpsrewr )
-  add_subdirectory ( tools/lpssumelm )
-  add_subdirectory ( tools/lpssuminst )
-  add_subdirectory ( tools/lpsuntime )
-  add_subdirectory ( tools/lpssim )
-  add_subdirectory ( tools/lpsxsim )
-  add_subdirectory ( tools/lts2lps )
-  add_subdirectory ( tools/lts2pbes )
-  add_subdirectory ( tools/ltsconvert )
-  add_subdirectory ( tools/ltscompare )
-  add_subdirectory ( tools/ltsinfo )
-  add_subdirectory ( tools/ltsgraph )
-  add_subdirectory ( tools/ltsview )
-  add_subdirectory ( tools/lysa2mcrl2 )
-  add_subdirectory ( tools/mcrl22lps )
-  add_subdirectory ( tools/mcrl2i )
-  add_subdirectory ( tools/mcrl2xi )
-  add_subdirectory ( tools/mcrl2-gui )
-  add_subdirectory ( tools/pbes2bool )
-  add_subdirectory ( tools/pbes2bes )
-  add_subdirectory ( tools/pbesconstelm )
-  add_subdirectory ( tools/pbesinfo )
-  add_subdirectory ( tools/pbesparelm )
-  add_subdirectory ( tools/pbespgsolve )
-  add_subdirectory ( tools/pbespp )
-  add_subdirectory ( tools/pbesrewr )
-  add_subdirectory ( tools/tbf2lps )
-  add_subdirectory ( tools/tracepp )
-  add_subdirectory ( tools/txt2pbes )
-  add_subdirectory ( tools/txt2lps )
+add_subdirectory ( tools/besinfo )
+add_subdirectory ( tools/bespp )
+add_subdirectory ( tools/diagraphica )
+add_subdirectory ( tools/formulacheck )
+add_subdirectory ( tools/grapemcrl2 )
+add_subdirectory ( tools/lps2lts )
+add_subdirectory ( tools/lps2pbes )
+add_subdirectory ( tools/lps2torx )
+add_subdirectory ( tools/lpsactionrename )
+add_subdirectory ( tools/lpsbinary )
+add_subdirectory ( tools/lpsconfcheck )
+add_subdirectory ( tools/lpsconstelm )
+add_subdirectory ( tools/lpsinfo )
+add_subdirectory ( tools/lpsinvelm )
+add_subdirectory ( tools/lpsparelm )
+add_subdirectory ( tools/lpsparunfold )
+add_subdirectory ( tools/lpspp )
+add_subdirectory ( tools/lpsrewr )
+add_subdirectory ( tools/lpssumelm )
+add_subdirectory ( tools/lpssuminst )
+add_subdirectory ( tools/lpsuntime )
+add_subdirectory ( tools/lpssim )
+add_subdirectory ( tools/lpsxsim )
+add_subdirectory ( tools/lts2lps )
+add_subdirectory ( tools/lts2pbes )
+add_subdirectory ( tools/ltsconvert )
+add_subdirectory ( tools/ltscompare )
+add_subdirectory ( tools/ltsinfo )
+add_subdirectory ( tools/ltsgraph )
+add_subdirectory ( tools/ltsgraph-qt )
+add_subdirectory ( tools/ltsview )
+add_subdirectory ( tools/mcrl22lps )
+add_subdirectory ( tools/mcrl2i )
+add_subdirectory ( tools/mcrl2xi )
+add_subdirectory ( tools/mcrl2-gui )
+add_subdirectory ( tools/pbes2bool )
+add_subdirectory ( tools/pbes2bes )
+add_subdirectory ( tools/pbesconstelm )
+add_subdirectory ( tools/pbesinfo )
+add_subdirectory ( tools/pbesparelm )
+add_subdirectory ( tools/pbespgsolve )
+add_subdirectory ( tools/pbespp )
+add_subdirectory ( tools/pbesrewr )
+add_subdirectory ( tools/tbf2lps )
+add_subdirectory ( tools/tracepp )
+add_subdirectory ( tools/txt2pbes )
+add_subdirectory ( tools/txt2lps )
 
-  ## Compile installer tools for mac
-  if(APPLE AND MCRL2_SINGLE_BUNDLE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
+## Compile installer tools for mac
+if(APPLE AND MCRL2_SINGLE_BUNDLE)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
 
-    # Install "install_tools" in share/installer
-    # install_tools contains the tools marked for symlink export
-    install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
-    #Install Info.plist for single application bundle
-    install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist DESTINATION . )
-    #Install mcrl2-logo for single application bundle
-    install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
-  endif(APPLE AND MCRL2_SINGLE_BUNDLE)
+  # Install "install_tools" in share/installer
+  # install_tools contains the tools marked for symlink export
+  install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
+  #Process Info.plist with Copyright Information
+  configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
+  #Install Info.plist for single application bundle
+  install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
+  #Install mcrl2-logo for single application bundle
+  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
+endif(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
@@ -419,13 +414,45 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 ## Deprecated tool dependencies
 ##---------------------------------------------------
- 
+
 option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
 message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
 if(MCRL2_ENABLE_DEPRECATED)
-  add_subdirectory ( tools/ltsmin )
 endif(MCRL2_ENABLE_DEPRECATED)
+
+##---------------------------------------------------
+## Documentation
+##---------------------------------------------------
+
+# Documentation requires python
+include(ConfigurePython)
+# Documentation requires doxygen
+include(ConfigureDoxygen)
+# Documentation requires xsltproc
+include(FindXsltproc)
+
+if(PYTHONINTERP_FOUND)
+  if ( MCRL2_PY_SPHINX )
+    if ( MCRL2_PY_ARGPARSE )
+      if( DOXYGEN_FOUND )
+        if (XSLTPROC )
+          add_subdirectory ( doc/sphinx )
+        else( XSLTPROC )
+          message( STATUS "Documentation cannot be generated: xsltproc is missing." )
+        endif( XSLTPROC)
+      else( DOXYGEN_FOUND )
+        message( STATUS "Documentation cannot be generated: doxygen is missing." )
+      endif( DOXYGEN_FOUND )
+    else ( MCRL2_PY_ARGPARSE )
+      message( STATUS "Documentation cannot be generated: Python argparse-module is missing." )
+    endif( MCRL2_PY_ARGPARSE )
+  else ( MCRL2_PY_SPHINX )
+    message( STATUS "Documentation cannot be generated: Python sphinx-module is missing." )
+  endif( MCRL2_PY_SPHINX )
+elseif(PYTHONINTERP_FOUND)
+  message( STATUS "Documentation cannot be generated: Python is missing." )
+endif(PYTHONINTERP_FOUND)
 
 ##---------------------------------------------------
 ## Configure compiling rewriters
@@ -461,7 +488,7 @@ FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
   FILES
     ${dparser_headers}
-  DESTINATION include
+  DESTINATION include/dparser
 )
 endif( MCRL2_INSTALL_HEADERS )
 
@@ -491,10 +518,11 @@ include(MCRL2TestTargets)
 ## Create make targets
 ##---------------------------------------------------
 
+# Create make targets requires python, covered by documentation
 include(MCRL2MakeTargets)
 
 ##---------------------------------------------------
-## Packaging 
+## Packaging
 ##---------------------------------------------------
 
 ## Preprocessing:
@@ -505,9 +533,9 @@ if(APPLE)
     if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
       message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This creates a non-standard installer when using CPack." )
     endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-  
+
     SET(CMAKE_BUNDLE_NAME "mCRL2")
-  
+
     SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
     # make sure CMAKE_INSTALL_PREFIX ends in /
     STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
@@ -518,7 +546,7 @@ if(APPLE)
     ENDIF(NOT "${ENDCH}" STREQUAL "/")
     SET(CMAKE_INSTALL_PREFIX
       "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
-  
+
 
   endif(MCRL2_SINGLE_BUNDLE)
 
@@ -528,8 +556,8 @@ ENDIF(APPLE)
 include(MCRL2Packaging)
 
 ##---------------------------------------------------
-## Add LTSmin as a last target, such that it is 
-## processed after the installation of the libraries 
+## Add LTSmin as a last target, such that it is
+## processed after the installation of the libraries
 ##---------------------------------------------------
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/scripts/ltsmin)

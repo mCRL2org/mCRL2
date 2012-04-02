@@ -77,20 +77,8 @@ class basic_rewriter
     /// \brief The type for expressions manipulated by the rewriter.
     typedef Term expression_type;
 
-    /// \brief The strategy of the rewriter.
-    enum strategy
-    {
-      jitty                      = detail::GS_REWR_JITTY   ,  /** \brief JITty */
-#ifdef MCRL2_JITTYC_AVAILABLE
-      jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
-#endif
-#ifdef MCRL2_JITTYC_AVAILABLE
-      jitty_prover               = detail::GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
-      jitty_compiling_prover     = detail::GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
-#else
-      jitty_prover               = detail::GS_REWR_JITTY_P    /** \brief JITty + Prover */
-#endif
-    };
+    /// \brief The rewrite strategies of the rewriter.
+    typedef rewrite_strategy strategy;
 
   protected:
 
@@ -107,7 +95,7 @@ class basic_rewriter
 
     /// \brief Constructor.
     basic_rewriter(const data_specification & d, const used_data_equation_selector &equation_selector, const strategy s = jitty) :
-      m_rewriter(detail::createRewriter(d, equation_selector, static_cast< detail::RewriteStrategy >(s)))
+      m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 
   public:
@@ -373,76 +361,6 @@ struct rewriter_adapter
     return R_(t, sigma_);
   }
 };
-
-/// \brief standard conversion from stream to rewrite strategy
-inline std::istream& operator>>(std::istream& is, data::rewriter::strategy& s)
-{
-  char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  using namespace mcrl2::data::detail;
-
-  is.readsome(strategy, 9);
-
-  size_t new_s = static_cast< size_t >(RewriteStrategyFromString(strategy));
-
-  s = static_cast< data::rewriter::strategy >(new_s);
-
-  if (static_cast< size_t >(new_s) == static_cast< size_t >(GS_REWR_INVALID))
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-
-  return is;
-}
-
-/// \brief standard conversion from rewrite strategy to stream
-inline std::ostream& operator<<(std::ostream& os, data::rewriter::strategy& s)
-{
-  static char const* strategies[] =
-  {
-    "jitty",
-#ifdef MCRL2_JITTYC_AVAILABLE
-    "jittyc",
-#endif
-#ifdef MCRL2_JITTYC_AVAILABLE
-    "jittyp"
-#else
-    "jittyp",
-    "jittypc"
-#endif
-  };
-
-  os << strategies[s];
-
-  return os;
-}
-
-/// \brief Pretty prints a rewrite strategy
-/// \param[in] s A rewrite strategy.
-inline std::string pp(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
-{
-  switch (s)
-  {
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
-      return "jitty";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
-      return "jittyc";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
-      return "jittyp";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:
-      return "jittycp";
-      break;
-#endif
-    default:
-      return "unknown";
-  }
-}
 
 } // namespace data
 

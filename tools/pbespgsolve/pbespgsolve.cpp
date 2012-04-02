@@ -59,37 +59,20 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 
     pbespgsolve_options m_options;
 
-    pbespg_solver_type parse_solver_type(const std::string& s) const
-    {
-      if (s == "spm")
-      {
-        return spm_solver;
-      }
-      else if (s == "altspm")
-      {
-        return alternative_spm_solver;
-      }
-      else if (s == "recursive")
-      {
-        return recursive_solver;
-      }
-      throw mcrl2::runtime_error("pbespgsolve: unknown solver " + s);
-    }
-
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("solver-type",
-                      make_optional_argument("NAME", "spm"),
-                      "Use the solver type NAME:\n"
-                      "  'spm' (default),\n"
-                      "  'altspm', or\n"
-                      "  'recursive'",
-                      's');
+                      make_enum_argument<pbespg_solver_type>("NAME")
+                      .add_value(spm_solver, true)
+                      .add_value(alternative_spm_solver)
+                      .add_value(recursive_solver),
+                      "Use the solver type NAME:", 's');
       desc.add_option("scc", "Use scc decomposition", 'c');
       desc.add_option("loop", "Eliminate self-loops", 'L');
       desc.add_option("cycle", "Eliminate cycles", 'C');
       desc.add_option("verify", "Verify the solution", 'e');
+      desc.add_option("onlygenerate", "Only generate the BES without solving", 'g');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
                              "Set a limit to the number of generated BES equations",
@@ -104,6 +87,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       m_options.use_deloop_solver = (parser.options.count("loop") > 0);
       m_options.use_decycle_solver = (parser.options.count("cycle") > 0);
       m_options.verify_solution = (parser.options.count("verify") > 0);
+      m_options.only_generate = (parser.options.count("onlygenerate") > 0);
       if (parser.options.count("equation_limit") > 0)
       {
         int limit = parser.option_argument_as<int>("equation_limit");
@@ -136,6 +120,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
       mCRL2log(verbose) << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
       mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
+      mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
       pbes<> p;
       load_pbes(p, input_filename(), pbes_input_format());
@@ -160,6 +145,7 @@ class pg_solver_gui_tool: public mcrl2_gui_tool<pg_solver_tool>
 
       values.clear();
       values.push_back("spm");
+      values.push_back("altspm");
       values.push_back("recursive");
       m_gui_options["solver-type"] = create_radiobox_widget(values);
     }

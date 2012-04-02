@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pfnf_visitor.h"
+#include "mcrl2/pbes/detail/pfnf_traverser.h"
 
 #define MCRL2_USE_PBESPGSOLVE
 // N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
@@ -65,13 +65,12 @@ pbes_system::pbes_expression expr(const std::string& text)
 
 void test_pfnf_expression(std::string s)
 {
-  pbes_system::detail::pfnf_visitor visitor;
+  pbes_system::detail::pfnf_traverser visitor;
   pbes_system::pbes_expression t1 = expr(s);
 std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
-  visitor.visit(t1);
+  visitor(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
 std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
-  visitor.visit(t1);
   data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))
@@ -89,7 +88,7 @@ std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
 void test_pfnf_visitor()
 {
   test_pfnf_expression("forall m:Nat. false");
-  test_pfnf_expression("X && Y(3) || X");
+  test_pfnf_expression("X && (Y(3) || X)");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
   core::garbage_collect();

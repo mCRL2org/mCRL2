@@ -14,6 +14,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/info.h"
@@ -95,8 +96,8 @@ class Prover:protected mcrl2::data::rewriter
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(const data_specification& a_data_spec,
            const used_data_equation_selector& equations_selector,
-           mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-           int a_time_limit = 0): 
+           mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
+           int a_time_limit = 0):
                        mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
                        f_manipulator(m_rewriter, f_info),
                        f_info(m_rewriter)
@@ -106,17 +107,17 @@ class Prover:protected mcrl2::data::rewriter
 
       switch (a_rewrite_strategy)
       {
-        case(mcrl2::data::rewriter::jitty):
+        case(jitty):
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case(mcrl2::data::rewriter::jitty_compiling):
+        case(jitty_compiling):
 #endif
         {
           /* These provers are ok */
           break;
         }
-        case(mcrl2::data::rewriter::jitty_prover):
+        case(jitty_prover):
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case(mcrl2::data::rewriter::jitty_compiling_prover):
+        case(jitty_compiling_prover):
 #endif
         {
           throw mcrl2::runtime_error("The proving rewriters are not supported by the prover (only jitty and jittyc are supported).");

@@ -678,21 +678,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fset_true(data_expression x)
   {
-    derived().print("!{");
-    // TODO: compute the complement of the set
+    derived().print("!");
     derived()(sort_set::right(x));
-    derived().print("}");
   }
 
   void print_fset_false(data_expression x)
   {
-    derived().print("{");
-    // TODO: check if this is correct (it is just a hack to fix a test)
-    if (!sort_fset::is_empty_function_symbol(sort_set::right(x)))
+    if (sort_fset::is_empty_function_symbol(sort_set::right(x)))
+    {
+      derived().print("{}");
+    }
+    else
     {
       derived()(sort_set::right(x));
     }
-    derived().print("}");
   }
 
   void print_fset_lambda(data_expression x)
@@ -703,6 +702,61 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(" | ");
     derived()(left.body());
     derived().print(" }");
+  }
+
+  void print_fset_set_operation(const data_expression& x, const std::string& op)
+  {
+    data_expression f = sort_fset::arg1(x);
+    data_expression g = sort_fset::arg2(x);
+
+    // print lhs
+    if (sort_set::is_false_function_function_symbol(g))
+    {
+      derived()(sort_fset::arg3(x));
+    }
+    else if (sort_set::is_true_function_function_symbol(g))
+    {
+      derived().print("!");
+      derived()(sort_fset::arg3(x));
+    }
+    else
+    {
+      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body = sort_bool::and_(sort_bool::not_(g(var)), sort_set::in(s, var, sort_fset::arg3(x)));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
+
+    // print operator
+    derived().print(op);
+
+    // print rhs
+    if (sort_set::is_false_function_function_symbol(f))
+    {
+      derived()(sort_fset::arg4(x));
+    }
+    else if (sort_set::is_true_function_function_symbol(f))
+    {
+      derived().print("!");
+      derived()(sort_fset::arg4(x));
+    }
+    else
+    {
+      sort_expression s = function_sort(sort_fset::arg1(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body = sort_bool::and_(sort_bool::not_(f(var)), sort_set::in(s, var, sort_fset::arg4(x)));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
   }
 
   void print_fset_default(data_expression x)
@@ -1131,6 +1185,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_binary_operation(x, " . ");
       }
+      else if (sort_fset::is_in_application(x))
+      {
+        print_binary_operation(x, " in ");
+      }
+      else if (sort_fbag::is_in_application(x))
+      {
+        print_binary_operation(x, " in ");
+      }
       else
       {
         print_function_application(x);
@@ -1441,6 +1503,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_fset_cons_list(x);
       }
+      else if (sort_fset::is_union_application(x))
+      {
+        print_fset_set_operation(x, " + ");
+      }
+      else if (sort_fset::is_intersection_application(x))
+      {
+        print_fset_set_operation(x, " * ");
+      }
+      else if (sort_fset::is_difference_application(x))
+      {
+        derived()(sort_fset::arg1(x));
+        derived().print(" - ");
+        derived()(sort_fset::arg2(x));
+      }
       else
       {
         print_function_application(x);
@@ -1525,6 +1601,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_fbag::is_fbag(x.sort()))
     {
+      // cons / insert / cinsert
       if (is_fbag_cons_list(x))
       {
         print_fbag_cons_list(x);

@@ -162,6 +162,23 @@ void test_ltsmin(const std::string& rewriter_strategy)
 
   std::cout << p.info() << std::endl;
 
+  // test summand_action_names()
+  std::cout << "--- summand action names ---" << std::endl;
+  for (std::size_t i = 0; i < p.group_count(); i++)
+  {
+    std::cout << i << " {";
+    std::set<std::string> s = p.summand_action_names(i);
+    for (std::set<std::string>::iterator j = s.begin(); j != s.end(); ++j)
+    {
+      if (j != s.begin())
+      {
+        std::cout << ", ";
+      }
+      std::cout << *j;
+    }
+    std::cout << "}" << std::endl;
+  }
+
 #ifdef MCRL2_FORCE_LTSMIN_TEST_FAILURE
   BOOST_CHECK(false);
 #endif
