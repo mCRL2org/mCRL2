@@ -32,14 +32,18 @@ Block* at_freeblocklist = NULL;
 size_t at_freeblocklist_size = 0;
 BlockBucket block_table[BLOCK_TABLE_SIZE] = { { NULL, NULL } };
 
-static size_t total_nodes = 0;
+size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
-static const size_t maxload = 80;
-static const size_t garbage_collect_factor = 8;
+static const size_t garbage_collect_factor = 75; // percentage. If the hashtable is empty for more than
+                                                 // garbage_collect_factor% after a garbage collect, it
+                                                 // will not be resized. Otherwise it is resized immediately.
+                                                 // Memory requirement is 1/(1-garbage_collect_factor/100).
+                                                 // Amortized time on insertions in the hashtable is
+                                                 // 100/garbage_collect_factor.
 ATerm* hashtable;
 
 extern void AT_initMemmgnt();
@@ -148,6 +152,7 @@ void resize_hashtable()
   /*{{{  Rehash all old elements */
 
   newhalf = hashtable + oldsize;
+size_t term_count=0;
   for (p=hashtable; p < newhalf; p++)
   {
     ATerm marked = *p;
@@ -183,6 +188,7 @@ void resize_hashtable()
 
       while (unmarked)
       {
+term_count++;
         ATerm next = unmarked->aterm.next;
         HashNumber hnr;
 
@@ -205,7 +211,7 @@ void resize_hashtable()
   }
 
   /*}}}  */
-
+fprintf(stderr,"TERM COUNT AFTER HASH %ld   %ld \n",table_class,term_count);
 }
 
 /*}}}  */
@@ -304,11 +310,9 @@ static void allocate_block(size_t size)
       std::runtime_error("allocate_block: out of memory!");
     }
     init = true;
-
     min_heap_address = MIN(min_heap_address,(newblock->data));
     max_heap_address = MAX(max_heap_address,(newblock->data+BLOCK_SIZE));
     assert(min_heap_address < max_heap_address);
-
   }
 
   assert(size >= MIN_TERM_SIZE && size < maxTermSize);
@@ -317,7 +321,6 @@ static void allocate_block(size_t size)
 
   newblock->end = (newblock->data) + (BLOCK_SIZE - (BLOCK_SIZE % size));
 
-  // newblock->frozen=false;
   newblock->size = size;
   newblock->next_by_size = ti->at_block;
   ti->at_block = newblock;
@@ -392,27 +395,29 @@ static void AT_growMaxTermSize(size_t neededsize)
 
 ATerm AT_allocate(const size_t size)
 {
-  static size_t nr_of_nodes_for_the_next_hash_table_resize=(maxload*table_size)/100;
-  static bool must_garbage_collect_next_time=true;
+  static size_t nr_of_nodes_for_the_next_garbage_collect=table_size*garbage_collect_factor/100;
 
   if (size+1 > maxTermSize)
   {
     AT_growMaxTermSize(size+1);
   }
 
-  if (total_nodes == nr_of_nodes_for_the_next_hash_table_resize)
+  if (total_nodes >= nr_of_nodes_for_the_next_garbage_collect)
   {
-    if (must_garbage_collect_next_time)
+fprintf(stderr,"Start garbage collect %ld\n",total_nodes);
+    AT_collect();
+    // Do a collect again if table_size/garbage_collect_factor new terms have been 
+    // allocated. This guarantees that the garbage collection is constant in terms of 
+    // each allocation.
+    nr_of_nodes_for_the_next_garbage_collect=total_nodes+table_size*garbage_collect_factor/100;
+    if (nr_of_nodes_for_the_next_garbage_collect>table_size)
     {
-      AT_collect();
-      must_garbage_collect_next_time=garbage_collect_factor*(nr_of_nodes_for_the_next_hash_table_resize-total_nodes)>table_size;
-    }
-    else 
-    {
+      // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
+      // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
+      // an arbitrary number of element, at some performance penalty.
       resize_hashtable();
-      nr_of_nodes_for_the_next_hash_table_resize=(maxload*table_size)/100;
-      must_garbage_collect_next_time=true;
     }
+fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_of_nodes_for_the_next_garbage_collect,table_size);
   }
 
   ATerm at;
@@ -454,13 +459,12 @@ ATerm AT_allocate(const size_t size)
 
 void AT_freeTerm(const size_t size, const ATerm t)
 {
-  HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
 
   // terminfo[size].nb_reclaimed_cells_during_last_gc++;
 
   /* Remove the node from the hashtable */
-  hnr &= table_mask;
+  const HashNumber hnr = hash_number(t, size) & table_mask;
   cur = hashtable[hnr];
 
   do
@@ -485,6 +489,7 @@ void AT_freeTerm(const size_t size, const ATerm t)
     }
   }
   while (((prev=cur), (cur=cur->aterm.next)));
+  assert(0);
 }
 
 /*}}}  */
@@ -1460,7 +1465,7 @@ bool AT_isValidTerm(const ATerm term)
   type = GET_TYPE(header);
 
   /* The only possibility left for an invalid term is AT_FREE */
-  return (((type == AT_FREE) || (type == AT_SYMBOL)) ? false : true);
+  return (type != AT_FREE) && (type != AT_SYMBOL);
 }
 
 /*}}}  */
@@ -1481,8 +1486,6 @@ ATerm AT_isInsideValidTerm(ATerm term)
   size_t type;
 
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
-
-  /* Warning: symboles*/
 
   for (cur=block_table[idx].first_after; cur; cur=cur->next_after)
   {
