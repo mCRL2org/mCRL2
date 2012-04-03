@@ -38,7 +38,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
     : result(true)
   {}
 
-  void enter(const propositional_variable_instantiation& x)
+  void enter(const propositional_variable_instantiation& /*x*/)
   {
     result = false;
   }

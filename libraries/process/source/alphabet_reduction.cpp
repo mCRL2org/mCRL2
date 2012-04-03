@@ -493,7 +493,7 @@ namespace mcrl2
         return gsaATsortList(m);
       }
 
-      atermpp::multiset < core::identifier_string > untypeMA_set(lps::action_label_list MAct)
+      static atermpp::multiset < core::identifier_string > untypeMA_set(lps::action_label_list MAct)
       {
         atermpp::multiset < core::identifier_string > result;
         for(lps::action_label_list::const_iterator i=MAct.begin(); i!=MAct.end(); ++i)

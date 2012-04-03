@@ -102,7 +102,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     throw std::runtime_error("operation not should not occur");
   }
 
-  void enter(const imp& x)
+  void enter(const imp& /*x*/)
   {
     throw std::runtime_error("operation imp should not occur");
   }
