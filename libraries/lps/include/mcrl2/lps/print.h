@@ -17,7 +17,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/lps/traverser.h"
-#include "mcrl2/lps/state.h"
 
 namespace mcrl2
 {
@@ -319,24 +318,6 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().print("\n");
     derived()(x.initial_process());
     derived().print("\n");
-    derived().leave(x);
-  }
-
-  void operator()(const lps::state &x)
-  {
-    derived().enter(x);
-    derived().print("state(");
-    bool first = true;
-    for (lps::state::const_iterator i = x.begin(); i != x.end(); i++)
-    {
-      if (!first)
-      {
-        derived().print(", ");
-      }
-      first = false;
-      print_expression(*i);
-    }
-    derived().print(")");
     derived().leave(x);
   }
 };

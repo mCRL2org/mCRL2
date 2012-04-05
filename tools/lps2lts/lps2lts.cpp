@@ -31,10 +31,7 @@
 #include "mcrl2/lps/action_label.h"
 
 #include "mcrl2/lts/lts_io.h"
-
-// Support both the old and the new implementation of state space exploration
 #include "mcrl2/lts/detail/exploration.h"
-#include "mcrl2/lts/detail/exploration_old.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
@@ -102,14 +99,13 @@ static void check_whether_actions_on_commandline_exist(
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
-  protected:
-    lps2lts_algorithm_base* m_lps2lts;
-    lts_generation_options m_options;
+  private:
+    lps2lts_algorithm lps2lts;
+    lts_generation_options options;
     std::string m_filename;
 
   public:
-    ~lps2lts_tool() { m_options.m_rewriter.reset();
-                      delete m_lps2lts; }
+    ~lps2lts_tool() { options.m_rewriter.reset(); }
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -139,39 +135,38 @@ class lps2lts_tool : public lps2lts_base
                    "label between any pair of states. If this is not desired, such "
                    "transitions can be removed by applying a strong bisimulation reducton "
                    "using for instance the tool ltsconvert."
-                  ),
-      m_lps2lts(NULL)
+                  )
     {
     }
 
     void abort()
     {
-      m_lps2lts->abort();
+      lps2lts.abort();
     }
 
     bool run()
     {
-      m_options.specification.load(m_filename);
-      m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
+      options.specification.load(m_filename);
+      options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
 
-      check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
-      if (!m_lps2lts->initialise_lts_generation(&m_options))
+      check_whether_actions_on_commandline_exist(options.trace_actions, options.specification.action_labels());
+      if (!lps2lts.initialise_lts_generation(&options))
       {
         return false;
       }
 
       try
       {
-        m_lps2lts->generate_lts();
+        lps2lts.generate_lts();
       }
       catch (mcrl2::runtime_error& e)
       {
         mCRL2log(error) << e.what() << std::endl;
-        m_lps2lts->finalise_lts_generation();
+        lps2lts.finalise_lts_generation();
         return false;
       }
 
-      m_lps2lts->finalise_lts_generation();
+      lps2lts.finalise_lts_generation();
 
       return true;
     }
@@ -182,9 +177,6 @@ class lps2lts_tool : public lps2lts_base
       lps2lts_base::add_options(desc);
 
       desc.
-      add_option("cached",
-                 "use caching techniques to speed up state space generation."
-                 "This option will be removed and become the default in the near future.").
       add_option("dummy", make_mandatory_argument("BOOL"),
                  "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
       add_option("unused-data",
@@ -267,21 +259,12 @@ class lps2lts_tool : public lps2lts_base
     void parse_options(const command_line_parser& parser)
     {
       lps2lts_base::parse_options(parser);
-      m_options.removeunused    = parser.options.count("unused-data") == 0;
-      m_options.detect_deadlock = parser.options.count("deadlock") != 0;
-      m_options.detect_divergence = parser.options.count("divergence") != 0;
-      m_options.outinfo         = parser.options.count("no-info") == 0;
-      m_options.suppress_progress_messages = parser.options.count("suppress") !=0;
-      m_options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
-
-      if(parser.options.count("cached"))
-      {
-        m_lps2lts = new mcrl2::lts::lps2lts_algorithm();
-      }
-      else
-      {
-        m_lps2lts = new mcrl2::lts::old::lps2lts_algorithm();
-      }
+      options.removeunused    = parser.options.count("unused-data") == 0;
+      options.detect_deadlock = parser.options.count("deadlock") != 0;
+      options.detect_divergence = parser.options.count("divergence") != 0;
+      options.outinfo         = parser.options.count("no-info") == 0;
+      options.suppress_progress_messages = parser.options.count("suppress") !=0;
+      options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
       if (parser.options.count("dummy"))
       {
@@ -292,11 +275,11 @@ class lps2lts_tool : public lps2lts_base
         std::string dummy_str(parser.option_argument("dummy"));
         if (dummy_str == "yes")
         {
-          m_options.usedummies = true;
+          options.usedummies = true;
         }
         else if (dummy_str == "no")
         {
-          m_options.usedummies = false;
+          options.usedummies = false;
         }
         else
         {
@@ -304,54 +287,54 @@ class lps2lts_tool : public lps2lts_base
         }
       }
 
-      m_options.stateformat = parser.option_argument_as<NextStateFormat>("state-format");
+      options.stateformat = parser.option_argument_as<NextStateFormat>("state-format");
 
       if (parser.options.count("bit-hash"))
       {
-        m_options.bithashing  = true;
-        m_options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
+        options.bithashing  = true;
+        options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
       }
       if (parser.options.count("max"))
       {
-        m_options.max_states = parser.option_argument_as< unsigned long > ("max");
+        options.max_states = parser.option_argument_as< unsigned long > ("max");
       }
       if (parser.options.count("action"))
       {
-        m_options.detect_action = true;
-        m_options.trace_actions = parse_action_list(parser.option_argument("action").c_str());
+        options.detect_action = true;
+        options.trace_actions = parse_action_list(parser.option_argument("action").c_str());
       }
       if (parser.options.count("trace"))
       {
-        m_options.trace      = true;
-        m_options.max_traces = parser.option_argument_as< unsigned long > ("trace");
+        options.trace      = true;
+        options.max_traces = parser.option_argument_as< unsigned long > ("trace");
       }
       if (parser.options.count("confluence"))
       {
-        m_options.priority_action = parser.option_argument("confluence");
+        options.priority_action = parser.option_argument("confluence");
       }
 
-      m_options.expl_strat = parser.option_argument_as<exploration_strategy>("strategy");
+      options.expl_strat = parser.option_argument_as<exploration_strategy>("strategy");
 
       if (parser.options.count("out"))
       {
-        m_options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
+        options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
-        if (m_options.outformat == lts_none)
+        if (options.outformat == lts_none)
         {
           parser.error("format '" + parser.option_argument("out") + "' is not recognised");
         }
       }
       if (parser.options.count("init-tsize"))
       {
-        m_options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
+        options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
       }
       if (parser.options.count("todo-max"))
       {
-        m_options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
+        options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
       }
       if (parser.options.count("error-trace"))
       {
-        m_options.save_error_trace = true;
+        options.save_error_trace = true;
       }
 
       if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
@@ -369,17 +352,17 @@ class lps2lts_tool : public lps2lts_base
       }
       if (1 < parser.arguments.size())
       {
-        m_options.lts = parser.arguments[1];
+        options.lts = parser.arguments[1];
       }
 
-      if (!m_options.lts.empty() && m_options.outformat == lts_none)
+      if (!options.lts.empty() && options.outformat == lts_none)
       {
-        m_options.outformat = mcrl2::lts::detail::guess_format(m_options.lts);
+        options.outformat = mcrl2::lts::detail::guess_format(options.lts);
 
-        if (m_options.outformat == lts_none)
+        if (options.outformat == lts_none)
         {
           mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
-          m_options.outformat = lts_lts;
+          options.outformat = lts_lts;
         }
       }
     }

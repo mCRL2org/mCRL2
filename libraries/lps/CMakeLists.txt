@@ -38,7 +38,6 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/next_state_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp

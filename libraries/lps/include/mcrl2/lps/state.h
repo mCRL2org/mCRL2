@@ -26,15 +26,6 @@ namespace lps
 //         The length is determined at runtime. 
 class state: public atermpp::vector < mcrl2::data::data_expression > 
 {
-  public:
-    state()
-    {
-    }
-
-    state(data::data_expression_list arguments):
-      atermpp::vector<mcrl2::data::data_expression>(arguments.begin(), arguments.end())
-    {
-    }
 };
 
 } // namespace lps
