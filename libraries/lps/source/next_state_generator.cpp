@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <set>
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
@@ -213,7 +214,8 @@ void next_state_generator::declare_constructors()
 
 next_state_generator::internal_state_t next_state_generator::get_internal_state(state s) const
 {
-  rewriter_term_t arguments[s.size()];
+  //rewriter_term_t arguments[s.size()];
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, rewriter_term_t, s.size());
   for (size_t i = 0; i < s.size(); i++)
   {
     arguments[i] = m_rewriter.convert_to(s[i]);
@@ -348,7 +350,9 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      rewriter_term_t condition_arguments[m_summand->condition_parameters.size()];
+      //rewriter_term_t condition_arguments[m_summand->condition_parameters.size()];
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(condition_arguments, rewriter_term_t, m_summand->condition_parameters.size());
+
       for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
       {
         condition_arguments[i] = m_state(m_summand->condition_parameters[i]);
@@ -407,17 +411,20 @@ void next_state_generator::iterator::increment()
     (*m_substitution)[*i] = *v;
   }
 
-  rewriter_term_t state_arguments[m_summand->result_state.size()];
+  //rewriter_term_t state_arguments[m_summand->result_state.size()];
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, rewriter_term_t, m_summand->result_state.size());
   for (size_t i = 0; i < m_summand->result_state.size(); i++)
   {
     state_arguments[i] = m_generator->m_rewriter.rewrite_internal(m_summand->result_state(i), *m_substitution);
   }
   m_transition.m_state = internal_state_t(m_generator->m_state_function, state_arguments, state_arguments + m_summand->result_state.size());
 
-  action actions[m_summand->action_label.size()];
+  //action actions[m_summand->action_label.size()];
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(actions, action, m_summand->action_label.size());
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
   {
-    data_expression arguments[m_summand->action_label[i].arguments.size()];
+    //data_expression arguments[m_summand->action_label[i].arguments.size()];
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, data_expression, m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
       arguments[j] = m_generator->m_rewriter.convert_from(m_generator->m_rewriter.rewrite_internal(m_summand->action_label[i].arguments[j], *m_substitution));

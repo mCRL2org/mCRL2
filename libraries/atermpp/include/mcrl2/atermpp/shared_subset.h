@@ -165,7 +165,8 @@ class shared_subset
 
         void find_next_index()
         {
-          bdd_node path_stack[m_subset->m_bits];
+          //bdd_node path_stack[m_subset->m_bits];
+          MCRL2_SYSTEM_SPECIFIC_ALLOCA(path_stack, bdd_node, m_subset->m_bits);
           size_t path_stack_index = 0;
           bdd_node node = m_subset->m_bdd_root;
 
@@ -251,7 +252,8 @@ class shared_subset
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
-      bdd_node trees[m_bits + 1];
+      //bdd_node trees[m_bits + 1];
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(trees, bdd_node, m_bits + 1);
       size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)
       {
