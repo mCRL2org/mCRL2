@@ -1174,7 +1174,7 @@ grape_direction grape::grapeapp::is_on_border_reference(const coordinate& p_cent
       }
     }
   }
-  if (is_inside_line(points[0], points[36], p_coord))
+  if (is_inside_line(points[0], points[35], p_coord))
   {
     return GRAPE_DIR_EAST;
   }

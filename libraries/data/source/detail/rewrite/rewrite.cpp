@@ -369,7 +369,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,&ES,100,true);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,&ES,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create a list to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -460,7 +460,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,&ES,100,true);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,&ES,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create lists to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;

@@ -359,7 +359,7 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
 void AT_freeAFun(SymEntry sym)
 {
-
+  /* The code of this function resembles that of AT_freeTerm very much */
   assert(sym->name);
 
   /* Calculate hashnumber */
@@ -389,6 +389,7 @@ void AT_freeAFun(SymEntry sym)
   at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
   first_free = sym->id;
   assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
+  total_nodes--;
 }
 
 /*}}}  */

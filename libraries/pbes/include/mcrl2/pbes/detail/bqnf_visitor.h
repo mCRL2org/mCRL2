@@ -186,7 +186,7 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e PBES expression
   /// \return true if the expression is a propositional variable or a simple expression.
-  virtual bool visit_propositional_variable(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_propositional_variable(const fixpoint_symbol& /*sigma*/, const propositional_variable& /*var*/, const term_type& e)
   {
     inc_indent();
     bool result = true;

@@ -21,8 +21,6 @@
 namespace aterm
 {
 
-static const size_t MAX_BLOCKS_PER_SIZE = 1024;
-
 static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
 
 

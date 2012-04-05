@@ -103,6 +103,7 @@ std::string description(const solution_strategy_t s)
       return "Small Progress Measures";
       break;
   }
+  throw mcrl2::runtime_error("unknown solution strategy");
 }
 
 //local declarations

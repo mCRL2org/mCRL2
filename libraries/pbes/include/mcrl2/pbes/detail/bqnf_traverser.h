@@ -80,7 +80,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     mode_stack.push(mode);
   }
 
-  void leave(const pbes_system::forall& x)
+  void leave(const pbes_system::forall& /*x*/)
   {
     mode_stack.pop();
   }
@@ -111,7 +111,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     mode_stack.push(mode);
   }
 
-  void leave(const pbes_system::exists& x)
+  void leave(const pbes_system::exists& /*x*/)
   {
     mode_stack.pop();
   }
@@ -173,7 +173,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     mode_stack.push(mode);
   }
 
-  void leave(const pbes_system::and_& x)
+  void leave(const pbes_system::and_& /*x*/)
   {
     mode_stack.pop();
   }
@@ -221,17 +221,17 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     mode_stack.push(mode);
   }
 
-  void leave(const pbes_system::or_& x)
+  void leave(const pbes_system::or_& /*x*/)
   {
     mode_stack.pop();
   }
 
-  void enter(const pbes_equation& x)
+  void enter(const pbes_equation& /*x*/)
   {
     mode_stack.push(UNDETERMINED);
   }
 
-  void leave(const pbes_equation& x)
+  void leave(const pbes_equation& /*x*/)
   {
     mode_stack.pop();
   }

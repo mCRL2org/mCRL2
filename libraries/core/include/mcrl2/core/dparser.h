@@ -175,7 +175,7 @@ struct parser_table
   // Returns the name of the i-th symbol
   std::string symbol_name(unsigned int i) const
   {
-    if (i < 0 || i >= m_table.nsymbols)
+    if (i >= m_table.nsymbols)
     {
       print();
       std::ostringstream out;

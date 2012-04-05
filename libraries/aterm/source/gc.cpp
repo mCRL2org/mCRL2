@@ -281,8 +281,6 @@ static void reclaim_empty_block(size_t size, Block* removed_block, Block* prev_b
 {
   TermInfo* ti = &terminfo[size];
 
-  // ti->nb_reclaimed_blocks_during_last_gc++;
-
   /*
    * Step 1:
    *
@@ -305,25 +303,16 @@ static void reclaim_empty_block(size_t size, Block* removed_block, Block* prev_b
     prev_block->next_by_size = removed_block->next_by_size;
   }
 
-  /*
-   * Step 2:
-   *
-   * put the block into at_freeblocklist
-   *
-   */
-  removed_block->next_by_size = at_freeblocklist;
-  at_freeblocklist = removed_block;
-  at_freeblocklist_size++;
-
-  /*
-   * Step 3:
-   *
-   * remove the block from block_table
-   * free the memory
-   *
-   */
   if (at_freeblocklist_size > max_freeblocklist_size)
+  { 
+    // put the block into at_freeblocklist
+    removed_block->next_by_size = at_freeblocklist;
+    at_freeblocklist = removed_block;
+    at_freeblocklist_size++;
+  }
+  else
   {
+    // free the memory
     size_t idx, next_idx;
     Block* cur;
     Block* prev = NULL;
@@ -355,8 +344,6 @@ static void reclaim_empty_block(size_t size, Block* removed_block, Block* prev_b
       prev->next_before = removed_block->next_before;
     }
 
-    at_freeblocklist_size--;
-    at_freeblocklist = at_freeblocklist->next_by_size;
     AT_free(removed_block);
   }
 }
@@ -400,6 +387,10 @@ static void check_unmarked_block()
 
 static void sweep_phase()
 {
+size_t total_nr_terms=0;
+size_t total_nr_free_terms=0;
+size_t total_aterm_memory=0;
+
   for (size_t size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
@@ -425,12 +416,15 @@ static void sweep_phase()
         ATerm t = (ATerm)cur;
         if (IS_MARKED(t->header))
         {
+++total_nr_terms;
+total_aterm_memory +=size*8;
           CLR_MARK(t->header);
           empty = false;
           assert(!IS_MARKED(t->header));
         }
         else
         {
+++total_nr_free_terms;
           switch (ATgetType(t))
           {
             case AT_FREE:
@@ -504,6 +498,7 @@ static void sweep_phase()
 #endif
 
   }
+fprintf(stderr,"Total memory aterms: %ld free %ld memory   %ld\n",total_nr_terms,total_nr_free_terms,total_aterm_memory);
 }
 
 /*}}}  */

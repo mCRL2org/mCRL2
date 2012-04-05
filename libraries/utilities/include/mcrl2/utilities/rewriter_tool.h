@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 
 namespace mcrl2
 {
@@ -50,6 +51,13 @@ class rewriter_tool: public Tool
         "use rewrite strategy NAME:"
         ,'r'
       );
+
+      desc.add_option(
+        "qlimit", make_mandatory_argument("NUM"),
+        "limit enumeration of quantifiers to NUM variables. (Default NUM=1000, NUM=0 for unlimited).",
+        'Q'
+      );
+
     }
 
     /// \brief Parse non-standard options
@@ -58,6 +66,12 @@ class rewriter_tool: public Tool
     {
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
+
+      if(parser.options.count("qlimit"))
+      {
+        //Set enumerator limit for quantifier enumeration
+        data::detail::set_enumerator_variable_limit(parser.option_argument_as< size_t >("qlimit"));
+      }
     }
 
   public:

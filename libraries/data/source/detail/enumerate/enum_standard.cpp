@@ -522,7 +522,7 @@ bool EnumeratorSolutionsStandard::next(
             used_vars++;
             if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
             {
-              if (solution_possible)
+              if (solution_possible && max_vars != 0)
               {
                 mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
                 mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";

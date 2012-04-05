@@ -43,43 +43,6 @@ inline std::string copyright_period()
   return "Today";
 }
 
-// \cond INTERNAL
-namespace detail
-{
-
-/// Helper class to prevent uninitialised variable warnings
-template < typename T, bool = boost::is_pod< T >::value >
-struct instance_of;
-
-template < typename T >
-struct instance_of< T, true >
-{
-  T m_wrapped;
-
-  instance_of()
-  {
-    m_wrapped = static_cast< T >(0);
-  }
-
-  T& wrapped()
-  {
-    return m_wrapped;
-  }
-};
-
-template < typename T >
-struct instance_of< T, false >
-{
-  T m_wrapped;
-
-  T& wrapped()
-  {
-    return m_wrapped;
-  }
-};
-}
-// \endcond
-
 /**
  * \brief Command line interface description component.
  *
@@ -808,7 +771,7 @@ class command_line_parser
 {
   public:
 
-    /// Used to maps options to arguments
+    /// Used to map options to arguments
     typedef std::multimap< std::string, std::string >  option_map;
 
     /// Used to store command line arguments that were not recognised as option or arguments to options
@@ -921,6 +884,21 @@ class command_line_parser
     void error(std::string const& message) const;
 
     /**
+     *  \brief Checks that all arguments are passed at most once
+     */
+    void check_no_duplicate_arguments() const
+    {
+      for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+      {
+        if (1 < m_options.count(i->first))
+        {
+          error("option -" + (m_interface.long_to_short(i->first) != '\0' ?
+                              std::string(1, m_interface.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+        }
+      }
+    }
+
+    /**
      * \brief Returns the argument of the first option matching a name
      * \param[in] long_identifier the long identifier for the option
      * Finds and returns the argument of an option with long identifier
@@ -959,9 +937,9 @@ class command_line_parser
     {
       std::istringstream in(option_argument(long_identifier));
 
-      detail::instance_of< T > result;
+      T result;
 
-      in >> result.wrapped();
+      in >> result;
 
       if (in.fail())
       {
@@ -971,7 +949,7 @@ class command_line_parser
               ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
       }
 
-      return result.wrapped();
+      return result;
     }
 };
 

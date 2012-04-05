@@ -512,7 +512,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     expression_stack.push_back(pfnf_traverser_expression(h, q, g));
   }
 
-  void enter(const imp& x)
+  void enter(const imp& /*x*/)
   {
     throw std::runtime_error("operation imp should not occur");
   }
