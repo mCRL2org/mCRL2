@@ -95,7 +95,7 @@ class next_state_generator
     class transition_t
     {
       friend struct atermpp::aterm_traits<transition_t>;
-      friend struct next_state_generator::iterator;
+      friend class next_state_generator::iterator;
       private:
         next_state_generator *m_generator;
         internal_state_t m_state;

@@ -32,6 +32,9 @@ namespace mcrl2
 namespace lps
 {
 
+namespace old
+{
+
 /// \brief Class for generating a state space corresponding to a linear process specification.
 class next_state_generator
 {
@@ -299,6 +302,7 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
       return m_specification;
     }
 };
+} // namespace old
 
 } // namespace lps
 

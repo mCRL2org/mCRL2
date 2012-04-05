@@ -23,7 +23,7 @@
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue_old.h"
-#include "mcrl2/lts/detail/exploration_strategy.h"
+#include "mcrl2/lts/detail/lts_generation_options.h"
 
 #include "workarounds.h"
 
@@ -34,77 +34,7 @@ namespace lts
 namespace old
 {
 
-#define DEFAULT_MAX_STATES ULONG_MAX
-#define DEFAULT_MAX_TRACES ULONG_MAX
-#define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
-#define DEFAULT_INIT_TSIZE 10000UL
-
-struct lts_generation_options
-{
-  lts_generation_options() :
-    strat(data::jitty),
-    usedummies(true),
-    removeunused(true),
-    stateformat(lps::GS_STATE_TREE),
-    outformat(lts_none),
-    outinfo(true),
-    suppress_progress_messages(false),
-    max_states(DEFAULT_MAX_STATES),
-    trace(false),
-    max_traces(DEFAULT_MAX_TRACES),
-    detect_deadlock(false),
-    detect_divergence(false),
-    detect_action(false),
-    save_error_trace(false),
-    expl_strat(es_breadth),
-    bithashing(false),
-    bithashsize(DEFAULT_BITHASHSIZE),
-    todo_max((std::numeric_limits< size_t >::max)()),
-    initial_table_size(DEFAULT_INIT_TSIZE)
-  {
-    generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
-  }
-
-
-
-  /* Method that takes an info string and an extension to produce a unique filename */
-  boost::function< std::string(std::string const&, std::string const&, std::string const&) >
-  generate_filename_for_trace;
-
-  /* Default function for generate_filename_for_trace */
-  std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension)
-  {
-    return basefilename + std::string("_") + info + std::string(".") + extension;
-  }
-
-  data::rewriter::strategy strat;
-  bool usedummies;
-  bool removeunused;
-  int stateformat;
-  lts_type outformat;
-  bool outinfo;
-  bool suppress_progress_messages;
-  size_t max_states;
-  std::string priority_action;
-  bool trace;
-  atermpp::set < core::identifier_string > trace_actions; // strings representing action labels, but without the sorts.
-  size_t max_traces;
-  bool detect_deadlock;
-  bool detect_divergence;
-  bool detect_action;
-  bool save_error_trace;
-  exploration_strategy expl_strat;
-  bool bithashing;
-  size_t bithashsize;
-  size_t todo_max;
-  size_t initial_table_size;
-  std::auto_ptr< data::rewriter > m_rewriter;
-  lps::specification specification;
-  std::string trace_prefix;
-  std::string lts;
-};
-
-class lps2lts_algorithm
+class lps2lts_algorithm: public lps2lts_algorithm_base
 {
     typedef atermpp::aterm state_t; // Type of a state.
 
@@ -161,7 +91,7 @@ class lps2lts_algorithm
     {
     }
 
-    ~lps2lts_algorithm()
+    virtual ~lps2lts_algorithm()
     {
       if (initialised && !finalised)
       {
@@ -169,11 +99,11 @@ class lps2lts_algorithm
       }
     }
 
-    bool initialise_lts_generation(lts_generation_options* opts);
-    bool generate_lts();
-    bool finalise_lts_generation();
+    virtual bool initialise_lts_generation(lts_generation_options* opts);
+    virtual bool generate_lts();
+    virtual bool finalise_lts_generation();
 
-    void abort()
+    virtual void abort()
     {
       // Stops the exploration algorithm if it is running by making sure
       // not a single state can be generated anymore.
