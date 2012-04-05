@@ -2,7 +2,7 @@
 #include <queue>
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/next_state_generator_old.h"
 
 using namespace mcrl2;
 
