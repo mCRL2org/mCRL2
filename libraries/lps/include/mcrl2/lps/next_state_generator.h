@@ -89,7 +89,6 @@ class next_state_generator
     rewriter_term_t m_false;
 
   public:
-substitution_t *m_sigma;
     typedef atermpp::term_appl<rewriter_term_t> internal_state_t;
 
     class iterator;

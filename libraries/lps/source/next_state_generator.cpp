@@ -276,14 +276,6 @@ next_state_generator::iterator::iterator(next_state_generator *generator, next_s
     m_summand(0),
     m_caching(false)
 {
-#if 1
-  for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
-  {
-    (*m_substitution)[generator->m_process_parameters[i]] = state(i);
-  }
-  m_generator->m_sigma = m_substitution;
-#endif
-
   if (m_use_summand_pruning)
   {
     m_summand_subset_iterator = generator->summand_subset(state);

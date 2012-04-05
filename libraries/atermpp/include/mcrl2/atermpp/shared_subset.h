@@ -109,7 +109,6 @@ class shared_subset
     };
 
   protected:
-  public:
     std::vector<T> *m_set;
     size_t m_bits;
     bdd_node m_bdd_root;
@@ -123,26 +122,27 @@ class shared_subset
         size_t m_index;
 
       public:
-      iterator()
-        : m_index(-1)
-      {}
+        iterator()
+          : m_index(-1)
+        {
+        }
 
-      iterator(const shared_subset &subset)
-        : m_subset(&subset),
-          m_index(0)
-      {
-        find_next_index();
-      }
+        iterator(const shared_subset &subset)
+          : m_subset(&subset),
+            m_index(0)
+        {
+          find_next_index();
+        }
 
-      size_t index() const
-      {
-        return m_index;
-      }
+        size_t index() const
+        {
+          return m_index;
+        }
 
-      operator bool() const
-      {
-        return m_index != (size_t)(-1);
-      }
+        operator bool() const
+        {
+          return m_index != (size_t)(-1);
+        }
 
       private:
         friend class boost::iterator_core_access;
@@ -165,32 +165,22 @@ class shared_subset
 
         void find_next_index()
         {
+          bdd_node path_stack[m_subset->m_bits];
+          size_t path_stack_index = 0;
           bdd_node node = m_subset->m_bdd_root;
 
+          while (true)
+          {
             if (m_index >= m_subset->m_set->size())
             {
               m_index = -1;
               return;
             }
 
-          while (true)
-          {
-            bdd_node next(false);
-
             while (node.is_node())
             {
-              if (m_index & (1UL << node.bit()))
-              {
-                node = node.true_node();
-              }
-              else
-              {
-                if (!node.true_node().is_false())
-                {
-                  next = node;
-                }
-                node = node.false_node();
-              }
+              path_stack[path_stack_index++] = node;
+              node = (m_index & (1UL << node.bit())) ? node.true_node() : node.false_node();
             }
 
             if (node.is_true())
@@ -198,16 +188,42 @@ class shared_subset
               return;
             }
 
-            if (next.is_false())
+            while (true)
             {
-              m_index = -1;
-              return;
-            }
+              if (path_stack_index == 0)
+              {
+                m_index = -1;
+                return;
+              }
 
-            int bit = next.bit();
-            m_index |= (1UL << bit);
-            m_index &= ~((1UL << bit) - 1);
-            node = next.true_node();
+              size_t bit = path_stack[path_stack_index - 1].bit();
+              if (!node.is_false())
+              {
+                bool found = false;
+                for (size_t i = node.bit() + 1; i < bit; i++)
+                {
+                  if (!(m_index & (1UL << i)))
+                  {
+                    m_index |= (1UL << i);
+                    m_index &= ~((1UL << i) - 1);
+                    found = true;
+                    break;
+                  }
+                }
+                if (found)
+                {
+                  break;
+                }
+              }
+
+              node = path_stack[--path_stack_index];
+              if (!(m_index & (1UL << bit)) && !node.true_node().is_false())
+              {
+                m_index |= (1UL << bit);
+                m_index &= ~((1UL << bit) - 1);
+                break;
+              }
+            }
           }
         }
     };
