@@ -194,8 +194,8 @@ atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 /// \param first Start of a sequence of arrays
 /// \param last End of a sequence of arrays
 /// \param f A function
-template <typename Iter, typename Function>
-void forall_permutations(Iter first, Iter last, Function f)
+template <typename Iter, typename Function, typename Compare>
+void forall_permutations(Iter first, Iter last, Function f,Compare comp)
 {
   if (first == last)
   {
@@ -204,10 +204,10 @@ void forall_permutations(Iter first, Iter last, Function f)
   }
   Iter next = first;
   ++next;
-  forall_permutations(next, last, f);
-  while (std::next_permutation(first->first, first->second))
+  forall_permutations(next, last, f,comp);
+  while (std::next_permutation(first->first, first->second,comp))
   {
-    forall_permutations(next, last, f);
+    forall_permutations(next, last, f,comp);
   }
 }
 
@@ -242,7 +242,8 @@ struct compare_actions
   /// \return The function result
   bool operator()(const action& a, const action& b) const
   {
-    return a.label() < b.label();
+    return (a.label() < b.label()) ||
+           (a.label() ==b.label() && a.arguments() < b.arguments());
   }
 };
 
@@ -388,10 +389,9 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
-
   atermpp::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
-  detail::forall_permutations(intervals.begin(), intervals.end(), f);
+  detail::forall_permutations(intervals.begin(), intervals.end(), f, detail::compare_actions());
   data::data_expression result = data::lazy::join_or(z.begin(), z.end());
   return result;
 }
@@ -428,7 +428,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   }
   atermpp::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
-  detail::forall_permutations(intervals.begin(), intervals.end(), f);
+  detail::forall_permutations(intervals.begin(), intervals.end(), f,detail::compare_actions());
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
 }

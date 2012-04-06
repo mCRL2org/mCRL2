@@ -19,10 +19,10 @@ using namespace mcrl2::data::detail;
 extern "C" {
   DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
   DLLEXPORT void rewrite_cleanup();
-  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t);
+  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl &t);
 }
 
-static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl t);
+static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
 
 static inline atermpp::aterm_appl makeAppl0(AFun a, atermpp::aterm h) 
               { return ATmakeAppl1(a,(ATerm)h); }

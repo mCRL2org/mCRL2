@@ -393,11 +393,11 @@ int svcWriteHeader(ltsFile* file,  struct ltsHeader* header)
 
   if (file->indexFlag)
   {
-    CSwriteIndex(file->csStates, NULL);
+    CSwriteIndex(file->csStates, ATerm());
   }
   else
   {
-    CSwriteATerm(file->csStates, NULL);
+    CSwriteATerm(file->csStates, ATerm());
   }
 
   CSflush(file->csStates);

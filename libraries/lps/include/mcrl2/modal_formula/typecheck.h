@@ -34,7 +34,7 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
 {
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t = core::type_check_state_frm(formula, specification_to_aterm(lps_spec));
-  if (!t)
+  if (t==ATermAppl())
   {
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(formula));
   }

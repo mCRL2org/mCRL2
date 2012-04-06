@@ -341,7 +341,7 @@ class BDD_Prover: public Prover
       for (s = 0; s < v_length; s++)
       {
         v_small = smallest(f_info.get_argument(a_formula, s));
-        if (v_small)
+        if (v_small!=atermpp::aterm_appl())
         {
           if (v_result!=atermpp::aterm_appl())
           {

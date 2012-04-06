@@ -55,7 +55,7 @@ class aterm_base
   public:
     /// \brief Constructor.
     aterm_base()
-      : m_term(0)
+      : m_term()
     {}
 
     /// \brief Constructor.
@@ -63,32 +63,32 @@ class aterm_base
     aterm_base(ATerm term)
       : m_term(term)
     {
-      assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
+      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
 
     /// \brief Constructor.
     /// \param term A sequence of terms
     aterm_base(ATermList term)
-      : m_term(reinterpret_cast<ATerm>(term))
+      : m_term(static_cast_ATerm(term))
     {
-      assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
+      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
 
     /// \brief Constructor.
     /// \param term An integer term
     aterm_base(ATermInt term)
-      : m_term(reinterpret_cast<ATerm>(term))
+      : m_term(static_cast_ATerm(term))
     {
-      assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
+      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
 
     /// \brief Constructor.
     /// \param term A term
     aterm_base(ATermAppl term)
-      : m_term(reinterpret_cast<ATerm>(term))
+      : m_term(static_cast_ATerm(term))
     {
-      assert((term == NULL) || (ATgetType(term)!= AT_FREE));
-      assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
+      assert((term == ATermAppl()) || (ATgetType(term)!= AT_FREE));
+      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
 
     /// \brief Protect the aterm.
@@ -127,6 +127,11 @@ class aterm_base
     {
       return ATwriteToString(m_term);
     }
+
+    bool operator <(const aterm_base &t) const
+    {
+      return m_term<t.m_term;
+    }
 };
 
 /// \cond INTERNAL_DOCS
@@ -159,7 +164,8 @@ struct aterm_traits<aterm_base>
 inline
 bool operator!(const aterm_base& x)
 {
-  return ATisEqual(aterm_traits<aterm_base>::term(x), false);
+  // return ATisEqual(aterm_traits<aterm_base>::term(x), false);
+  return &*(aterm_traits<aterm_base>::term(x))==NULL;
 }
 
 /// \brief Writes a string representation of the aterm t to the stream out.
@@ -386,27 +392,27 @@ inline
 bool operator==(const aterm& x, const aterm& y)
 {
   return ATisEqual(x, y) == true;
-}
+} 
 
 /// \brief Equality operator.
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are equal.
-inline
-bool operator==(const aterm& x, ATerm y)
+/* inline
+bool operator==(const aterm& x, const ATerm &y)
 {
   return ATisEqual(x, y) == true;
-}
+} */
 
 /// \brief Equality operator.
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are equal.
-inline
-bool operator==(const ATerm& x, aterm y)
+/* inline
+bool operator==(const ATerm& x, const aterm &y)
 {
   return ATisEqual(x, y) == true;
-}
+} */
 
 /// \brief Inequality operator.
 /// \param x A term.
@@ -416,27 +422,27 @@ inline
 bool operator!=(const aterm& x, const aterm& y)
 {
   return ATisEqual(x, y) == false;
-}
+} 
 
 /// \brief Inequality operator.
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are not equal.
-inline
+/* inline
 bool operator!=(const aterm& x, ATerm y)
 {
   return ATisEqual(x, y) == false;
-}
+} */
 
 /// \brief Inequality operator.
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are not equal.
-inline
+/* inline
 bool operator!=(const ATerm& x, aterm y)
 {
   return ATisEqual(x, y) == false;
-}
+} */
 
 } // namespace atermpp
 

@@ -1881,19 +1881,19 @@ bool gsIsWhr(atermpp::aterm_appl Term)
 inline
 ATermAppl gsMakeActAnd(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(function_symbol_ActAnd(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActAnd(), static_cast_ATerm(ActFrm_0), static_cast_ATerm(ActFrm_1));
 }
 
 inline
 ATermAppl gsMakeActAt(ATermAppl ActFrm_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_ActAt(), (ATerm) ActFrm_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_ActAt(), static_cast_ATerm(ActFrm_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeActExists(ATermList DataVarId_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(function_symbol_ActExists(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActExists(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(ActFrm_1));
 }
 
 inline
@@ -1905,37 +1905,37 @@ ATermAppl gsMakeActFalse()
 inline
 ATermAppl gsMakeActForall(ATermList DataVarId_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(function_symbol_ActForall(), (ATerm) DataVarId_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActForall(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(ActFrm_1));
 }
 
 inline
 ATermAppl gsMakeActId(ATermAppl String_0, ATermList SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_ActId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_ActId(), static_cast_ATerm(String_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
 ATermAppl gsMakeActImp(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(function_symbol_ActImp(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActImp(), static_cast_ATerm(ActFrm_0), static_cast_ATerm(ActFrm_1));
 }
 
 inline
 ATermAppl gsMakeActNot(ATermAppl ActFrm_0)
 {
-  return ATmakeAppl1(function_symbol_ActNot(), (ATerm) ActFrm_0);
+  return ATmakeAppl1(function_symbol_ActNot(), static_cast_ATerm(ActFrm_0));
 }
 
 inline
 ATermAppl gsMakeActOr(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
-  return ATmakeAppl2(function_symbol_ActOr(), (ATerm) ActFrm_0, (ATerm) ActFrm_1);
+  return ATmakeAppl2(function_symbol_ActOr(), static_cast_ATerm(ActFrm_0), static_cast_ATerm(ActFrm_1));
 }
 
 inline
 ATermAppl gsMakeActSpec(ATermList ActId_0)
 {
-  return ATmakeAppl1(function_symbol_ActSpec(), (ATerm) ActId_0);
+  return ATmakeAppl1(function_symbol_ActSpec(), static_cast_ATerm(ActId_0));
 }
 
 inline
@@ -1947,50 +1947,50 @@ ATermAppl gsMakeActTrue()
 inline
 ATermAppl gsMakeAction(ATermAppl ActId_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Action(), (ATerm) ActId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_Action(), static_cast_ATerm(ActId_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl ParamIdOrAction_2, ATermAppl ActionRenameRuleRHS_3)
 {
-  return ATmakeAppl4(function_symbol_ActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
+  return ATmakeAppl4(function_symbol_ActionRenameRule(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(DataExpr_1), static_cast_ATerm(ParamIdOrAction_2), static_cast_ATerm(ActionRenameRuleRHS_3));
 }
 
 inline
 ATermAppl gsMakeActionRenameRules(ATermList ActionRenameRule_0)
 {
-  return ATmakeAppl1(function_symbol_ActionRenameRules(), (ATerm) ActionRenameRule_0);
+  return ATmakeAppl1(function_symbol_ActionRenameRules(), static_cast_ATerm(ActionRenameRule_0));
 }
 
 inline
 ATermAppl gsMakeActionRenameSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ActionRenameRules_2)
 {
-  return ATmakeAppl3(function_symbol_ActionRenameSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ActionRenameRules_2);
+  return ATmakeAppl3(function_symbol_ActionRenameSpec(), static_cast_ATerm(DataSpec_0), static_cast_ATerm(ActSpec_1), static_cast_ATerm(ActionRenameRules_2));
 }
 
 inline
 ATermAppl gsMakeAllow(ATermList MultActName_0, ATermAppl ProcExpr_1)
 {
   assert(!ATisEmpty(MultActName_0));
-  return ATmakeAppl2(function_symbol_Allow(), (ATerm) MultActName_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Allow(), static_cast_ATerm(MultActName_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeAtTime(ATermAppl ProcExpr_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_AtTime(), (ATerm) ProcExpr_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_AtTime(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeBES(ATermList BooleanEquation_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(function_symbol_BES(), (ATerm) BooleanEquation_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BES(), static_cast_ATerm(BooleanEquation_0), static_cast_ATerm(BooleanExpression_1));
 }
 
 inline
 ATermAppl gsMakeBInit(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_BInit(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_BInit(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
@@ -2002,25 +2002,25 @@ ATermAppl gsMakeBagComp()
 inline
 ATermAppl gsMakeBinder(ATermAppl BindingOperator_0, ATermList DataVarId_1, ATermAppl DataExpr_2)
 {
-  return ATmakeAppl3(function_symbol_Binder(), (ATerm) BindingOperator_0, (ATerm) DataVarId_1, (ATerm) DataExpr_2);
+  return ATmakeAppl3(function_symbol_Binder(), static_cast_ATerm(BindingOperator_0), static_cast_ATerm(DataVarId_1), static_cast_ATerm(DataExpr_2));
 }
 
 inline
 ATermAppl gsMakeBlock(ATermList String_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Block(), (ATerm) String_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Block(), static_cast_ATerm(String_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeBooleanAnd(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(function_symbol_BooleanAnd(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanAnd(), static_cast_ATerm(BooleanExpression_0), static_cast_ATerm(BooleanExpression_1));
 }
 
 inline
 ATermAppl gsMakeBooleanEquation(ATermAppl FixPoint_0, ATermAppl BooleanVariable_1, ATermAppl BooleanExpression_2)
 {
-  return ATmakeAppl3(function_symbol_BooleanEquation(), (ATerm) FixPoint_0, (ATerm) BooleanVariable_1, (ATerm) BooleanExpression_2);
+  return ATmakeAppl3(function_symbol_BooleanEquation(), static_cast_ATerm(FixPoint_0), static_cast_ATerm(BooleanVariable_1), static_cast_ATerm(BooleanExpression_2));
 }
 
 inline
@@ -2032,19 +2032,19 @@ ATermAppl gsMakeBooleanFalse()
 inline
 ATermAppl gsMakeBooleanImp(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(function_symbol_BooleanImp(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanImp(), static_cast_ATerm(BooleanExpression_0), static_cast_ATerm(BooleanExpression_1));
 }
 
 inline
 ATermAppl gsMakeBooleanNot(ATermAppl BooleanExpression_0)
 {
-  return ATmakeAppl1(function_symbol_BooleanNot(), (ATerm) BooleanExpression_0);
+  return ATmakeAppl1(function_symbol_BooleanNot(), static_cast_ATerm(BooleanExpression_0));
 }
 
 inline
 ATermAppl gsMakeBooleanOr(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
 {
-  return ATmakeAppl2(function_symbol_BooleanOr(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+  return ATmakeAppl2(function_symbol_BooleanOr(), static_cast_ATerm(BooleanExpression_0), static_cast_ATerm(BooleanExpression_1));
 }
 
 inline
@@ -2056,67 +2056,67 @@ ATermAppl gsMakeBooleanTrue()
 inline
 ATermAppl gsMakeBooleanVariable(ATermAppl String_0)
 {
-  return ATmakeAppl1(function_symbol_BooleanVariable(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_BooleanVariable(), static_cast_ATerm(String_0));
 }
 
 inline
 ATermAppl gsMakeChoice(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Choice(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Choice(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeComm(ATermList CommExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Comm(), (ATerm) CommExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Comm(), static_cast_ATerm(CommExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeCommExpr(ATermAppl MultActName_0, ATermAppl StringOrNil_1)
 {
-  return ATmakeAppl2(function_symbol_CommExpr(), (ATerm) MultActName_0, (ATerm) StringOrNil_1);
+  return ATmakeAppl2(function_symbol_CommExpr(), static_cast_ATerm(MultActName_0), static_cast_ATerm(StringOrNil_1));
 }
 
 inline
 ATermAppl gsMakeConsSpec(ATermList OpId_0)
 {
-  return ATmakeAppl1(function_symbol_ConsSpec(), (ATerm) OpId_0);
+  return ATmakeAppl1(function_symbol_ConsSpec(), static_cast_ATerm(OpId_0));
 }
 
 inline
 ATermAppl gsMakeDataAppl(ATermAppl DataExpr_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_DataAppl(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_DataAppl(), static_cast_ATerm(DataExpr_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeDataEqn(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl DataExpr_2, ATermAppl DataExpr_3)
 {
-  return ATmakeAppl4(function_symbol_DataEqn(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) DataExpr_2, (ATerm) DataExpr_3);
+  return ATmakeAppl4(function_symbol_DataEqn(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(DataExpr_1), static_cast_ATerm(DataExpr_2), static_cast_ATerm(DataExpr_3));
 }
 
 inline
 ATermAppl gsMakeDataEqnSpec(ATermList DataEqn_0)
 {
-  return ATmakeAppl1(function_symbol_DataEqnSpec(), (ATerm) DataEqn_0);
+  return ATmakeAppl1(function_symbol_DataEqnSpec(), static_cast_ATerm(DataEqn_0));
 }
 
 inline
 ATermAppl gsMakeDataSpec(ATermAppl SortSpec_0, ATermAppl ConsSpec_1, ATermAppl MapSpec_2, ATermAppl DataEqnSpec_3)
 {
-  return ATmakeAppl4(function_symbol_DataSpec(), (ATerm) SortSpec_0, (ATerm) ConsSpec_1, (ATerm) MapSpec_2, (ATerm) DataEqnSpec_3);
+  return ATmakeAppl4(function_symbol_DataSpec(), static_cast_ATerm(SortSpec_0), static_cast_ATerm(ConsSpec_1), static_cast_ATerm(MapSpec_2), static_cast_ATerm(DataEqnSpec_3));
 }
 
 inline
 ATermAppl gsMakeDataVarId(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_DataVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_DataVarId(), static_cast_ATerm(String_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
 ATermAppl gsMakeDataVarIdInit(ATermAppl DataVarId_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_DataVarIdInit(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_DataVarIdInit(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
@@ -2140,49 +2140,49 @@ ATermAppl gsMakeForall()
 inline
 ATermAppl gsMakeGlobVarSpec(ATermList DataVarId_0)
 {
-  return ATmakeAppl1(function_symbol_GlobVarSpec(), (ATerm) DataVarId_0);
+  return ATmakeAppl1(function_symbol_GlobVarSpec(), static_cast_ATerm(DataVarId_0));
 }
 
 inline
 ATermAppl gsMakeHide(ATermList String_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Hide(), (ATerm) String_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Hide(), static_cast_ATerm(String_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeId(ATermAppl String_0)
 {
-  return ATmakeAppl1(function_symbol_Id(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_Id(), static_cast_ATerm(String_0));
 }
 
 inline
 ATermAppl gsMakeIdAssignment(ATermAppl String_0, ATermList IdInit_1)
 {
-  return ATmakeAppl2(function_symbol_IdAssignment(), (ATerm) String_0, (ATerm) IdInit_1);
+  return ATmakeAppl2(function_symbol_IdAssignment(), static_cast_ATerm(String_0), static_cast_ATerm(IdInit_1));
 }
 
 inline
 ATermAppl gsMakeIdInit(ATermAppl String_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_IdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_IdInit(), static_cast_ATerm(String_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeIfThen(ATermAppl DataExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_IfThen(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_IfThen(), static_cast_ATerm(DataExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeIfThenElse(ATermAppl DataExpr_0, ATermAppl ProcExpr_1, ATermAppl ProcExpr_2)
 {
-  return ATmakeAppl3(function_symbol_IfThenElse(), (ATerm) DataExpr_0, (ATerm) ProcExpr_1, (ATerm) ProcExpr_2);
+  return ATmakeAppl3(function_symbol_IfThenElse(), static_cast_ATerm(DataExpr_0), static_cast_ATerm(ProcExpr_1), static_cast_ATerm(ProcExpr_2));
 }
 
 inline
 ATermAppl gsMakeLMerge(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_LMerge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_LMerge(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
@@ -2194,37 +2194,37 @@ ATermAppl gsMakeLambda()
 inline
 ATermAppl gsMakeLinProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl LinearProcess_3, ATermAppl LinearProcessInit_4)
 {
-  return ATmakeAppl5(function_symbol_LinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) LinearProcess_3, (ATerm) LinearProcessInit_4);
+  return ATmakeAppl5(function_symbol_LinProcSpec(), static_cast_ATerm(DataSpec_0), static_cast_ATerm(ActSpec_1), static_cast_ATerm(GlobVarSpec_2), static_cast_ATerm(LinearProcess_3), static_cast_ATerm(LinearProcessInit_4));
 }
 
 inline
 ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList LinearProcessSummand_1)
 {
-  return ATmakeAppl2(function_symbol_LinearProcess(), (ATerm) DataVarId_0, (ATerm) LinearProcessSummand_1);
+  return ATmakeAppl2(function_symbol_LinearProcess(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(LinearProcessSummand_1));
 }
 
 inline
 ATermAppl gsMakeLinearProcessInit(ATermList DataVarIdInit_0)
 {
-  return ATmakeAppl1(function_symbol_LinearProcessInit(), (ATerm) DataVarIdInit_0);
+  return ATmakeAppl1(function_symbol_LinearProcessInit(), static_cast_ATerm(DataVarIdInit_0));
 }
 
 inline
 ATermAppl gsMakeLinearProcessSummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList DataVarIdInit_4)
 {
-  return ATmakeAppl5(function_symbol_LinearProcessSummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
+  return ATmakeAppl5(function_symbol_LinearProcessSummand(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(DataExpr_1), static_cast_ATerm(MultActOrDelta_2), static_cast_ATerm(DataExprOrNil_3), static_cast_ATerm(DataVarIdInit_4));
 }
 
 inline
 ATermAppl gsMakeMapSpec(ATermList OpId_0)
 {
-  return ATmakeAppl1(function_symbol_MapSpec(), (ATerm) OpId_0);
+  return ATmakeAppl1(function_symbol_MapSpec(), static_cast_ATerm(OpId_0));
 }
 
 inline
 ATermAppl gsMakeMerge(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Merge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Merge(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
@@ -2236,13 +2236,13 @@ ATermAppl gsMakeMu()
 inline
 ATermAppl gsMakeMultAct(ATermList ParamIdOrAction_0)
 {
-  return ATmakeAppl1(function_symbol_MultAct(), (ATerm) ParamIdOrAction_0);
+  return ATmakeAppl1(function_symbol_MultAct(), static_cast_ATerm(ParamIdOrAction_0));
 }
 
 inline
 ATermAppl gsMakeMultActName(ATermList String_0)
 {
-  return ATmakeAppl1(function_symbol_MultActName(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_MultActName(), static_cast_ATerm(String_0));
 }
 
 inline
@@ -2260,25 +2260,25 @@ ATermAppl gsMakeNu()
 inline
 ATermAppl gsMakeOpId(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_OpId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_OpId(), static_cast_ATerm(String_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
 ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermAppl GlobVarSpec_1, ATermAppl PBEqnSpec_2, ATermAppl PBInit_3)
 {
-  return ATmakeAppl4(function_symbol_PBES(), (ATerm) DataSpec_0, (ATerm) GlobVarSpec_1, (ATerm) PBEqnSpec_2, (ATerm) PBInit_3);
+  return ATmakeAppl4(function_symbol_PBES(), static_cast_ATerm(DataSpec_0), static_cast_ATerm(GlobVarSpec_1), static_cast_ATerm(PBEqnSpec_2), static_cast_ATerm(PBInit_3));
 }
 
 inline
 ATermAppl gsMakePBESAnd(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PBESAnd(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESAnd(), static_cast_ATerm(PBExpr_0), static_cast_ATerm(PBExpr_1));
 }
 
 inline
 ATermAppl gsMakePBESExists(ATermList DataVarId_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PBESExists(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESExists(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(PBExpr_1));
 }
 
 inline
@@ -2290,25 +2290,25 @@ ATermAppl gsMakePBESFalse()
 inline
 ATermAppl gsMakePBESForall(ATermList DataVarId_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PBESForall(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESForall(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(PBExpr_1));
 }
 
 inline
 ATermAppl gsMakePBESImp(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PBESImp(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESImp(), static_cast_ATerm(PBExpr_0), static_cast_ATerm(PBExpr_1));
 }
 
 inline
 ATermAppl gsMakePBESNot(ATermAppl PBExpr_0)
 {
-  return ATmakeAppl1(function_symbol_PBESNot(), (ATerm) PBExpr_0);
+  return ATmakeAppl1(function_symbol_PBESNot(), static_cast_ATerm(PBExpr_0));
 }
 
 inline
 ATermAppl gsMakePBESOr(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PBESOr(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+  return ATmakeAppl2(function_symbol_PBESOr(), static_cast_ATerm(PBExpr_0), static_cast_ATerm(PBExpr_1));
 }
 
 inline
@@ -2320,85 +2320,85 @@ ATermAppl gsMakePBESTrue()
 inline
 ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl PBExpr_2)
 {
-  return ATmakeAppl3(function_symbol_PBEqn(), (ATerm) FixPoint_0, (ATerm) PropVarDecl_1, (ATerm) PBExpr_2);
+  return ATmakeAppl3(function_symbol_PBEqn(), static_cast_ATerm(FixPoint_0), static_cast_ATerm(PropVarDecl_1), static_cast_ATerm(PBExpr_2));
 }
 
 inline
 ATermAppl gsMakePBEqnSpec(ATermList PBEqn_0)
 {
-  return ATmakeAppl1(function_symbol_PBEqnSpec(), (ATerm) PBEqn_0);
+  return ATmakeAppl1(function_symbol_PBEqnSpec(), static_cast_ATerm(PBEqn_0));
 }
 
 inline
 ATermAppl gsMakePBInit(ATermAppl PropVarInst_0)
 {
-  return ATmakeAppl1(function_symbol_PBInit(), (ATerm) PropVarInst_0);
+  return ATmakeAppl1(function_symbol_PBInit(), static_cast_ATerm(PropVarInst_0));
 }
 
 inline
 ATermAppl gsMakeParamId(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_ParamId(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_ParamId(), static_cast_ATerm(String_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeProcEqn(ATermAppl ProcVarId_0, ATermList DataVarId_1, ATermAppl ProcExpr_2)
 {
-  return ATmakeAppl3(function_symbol_ProcEqn(), (ATerm) ProcVarId_0, (ATerm) DataVarId_1, (ATerm) ProcExpr_2);
+  return ATmakeAppl3(function_symbol_ProcEqn(), static_cast_ATerm(ProcVarId_0), static_cast_ATerm(DataVarId_1), static_cast_ATerm(ProcExpr_2));
 }
 
 inline
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqn_0)
 {
-  return ATmakeAppl1(function_symbol_ProcEqnSpec(), (ATerm) ProcEqn_0);
+  return ATmakeAppl1(function_symbol_ProcEqnSpec(), static_cast_ATerm(ProcEqn_0));
 }
 
 inline
 ATermAppl gsMakeProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl ProcEqnSpec_3, ATermAppl ProcInit_4)
 {
-  return ATmakeAppl5(function_symbol_ProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) ProcEqnSpec_3, (ATerm) ProcInit_4);
+  return ATmakeAppl5(function_symbol_ProcSpec(), static_cast_ATerm(DataSpec_0), static_cast_ATerm(ActSpec_1), static_cast_ATerm(GlobVarSpec_2), static_cast_ATerm(ProcEqnSpec_3), static_cast_ATerm(ProcInit_4));
 }
 
 inline
 ATermAppl gsMakeProcVarId(ATermAppl String_0, ATermList SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_ProcVarId(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_ProcVarId(), static_cast_ATerm(String_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Process(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_Process(), static_cast_ATerm(ProcVarId_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeProcessAssignment(ATermAppl ProcVarId_0, ATermList DataVarIdInit_1)
 {
-  return ATmakeAppl2(function_symbol_ProcessAssignment(), (ATerm) ProcVarId_0, (ATerm) DataVarIdInit_1);
+  return ATmakeAppl2(function_symbol_ProcessAssignment(), static_cast_ATerm(ProcVarId_0), static_cast_ATerm(DataVarIdInit_1));
 }
 
 inline
 ATermAppl gsMakeProcessInit(ATermAppl ProcExpr_0)
 {
-  return ATmakeAppl1(function_symbol_ProcessInit(), (ATerm) ProcExpr_0);
+  return ATmakeAppl1(function_symbol_ProcessInit(), static_cast_ATerm(ProcExpr_0));
 }
 
 inline
 ATermAppl gsMakePropVarDecl(ATermAppl String_0, ATermList DataVarId_1)
 {
-  return ATmakeAppl2(function_symbol_PropVarDecl(), (ATerm) String_0, (ATerm) DataVarId_1);
+  return ATmakeAppl2(function_symbol_PropVarDecl(), static_cast_ATerm(String_0), static_cast_ATerm(DataVarId_1));
 }
 
 inline
 ATermAppl gsMakePropVarInst(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_PropVarInst(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_PropVarInst(), static_cast_ATerm(String_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
 ATermAppl gsMakeRegAlt(ATermAppl RegFrm_0, ATermAppl RegFrm_1)
 {
-  return ATmakeAppl2(function_symbol_RegAlt(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
+  return ATmakeAppl2(function_symbol_RegAlt(), static_cast_ATerm(RegFrm_0), static_cast_ATerm(RegFrm_1));
 }
 
 inline
@@ -2410,37 +2410,37 @@ ATermAppl gsMakeRegNil()
 inline
 ATermAppl gsMakeRegSeq(ATermAppl RegFrm_0, ATermAppl RegFrm_1)
 {
-  return ATmakeAppl2(function_symbol_RegSeq(), (ATerm) RegFrm_0, (ATerm) RegFrm_1);
+  return ATmakeAppl2(function_symbol_RegSeq(), static_cast_ATerm(RegFrm_0), static_cast_ATerm(RegFrm_1));
 }
 
 inline
 ATermAppl gsMakeRegTrans(ATermAppl RegFrm_0)
 {
-  return ATmakeAppl1(function_symbol_RegTrans(), (ATerm) RegFrm_0);
+  return ATmakeAppl1(function_symbol_RegTrans(), static_cast_ATerm(RegFrm_0));
 }
 
 inline
 ATermAppl gsMakeRegTransOrNil(ATermAppl RegFrm_0)
 {
-  return ATmakeAppl1(function_symbol_RegTransOrNil(), (ATerm) RegFrm_0);
+  return ATmakeAppl1(function_symbol_RegTransOrNil(), static_cast_ATerm(RegFrm_0));
 }
 
 inline
 ATermAppl gsMakeRename(ATermList RenameExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Rename(), (ATerm) RenameExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Rename(), static_cast_ATerm(RenameExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeRenameExpr(ATermAppl String_0, ATermAppl String_1)
 {
-  return ATmakeAppl2(function_symbol_RenameExpr(), (ATerm) String_0, (ATerm) String_1);
+  return ATmakeAppl2(function_symbol_RenameExpr(), static_cast_ATerm(String_0), static_cast_ATerm(String_1));
 }
 
 inline
 ATermAppl gsMakeSeq(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Seq(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Seq(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
@@ -2458,7 +2458,7 @@ ATermAppl gsMakeSetComp()
 inline
 ATermAppl gsMakeSortArrow(ATermList SortExpr_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_SortArrow(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortArrow(), static_cast_ATerm(SortExpr_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
@@ -2470,7 +2470,7 @@ ATermAppl gsMakeSortBag()
 inline
 ATermAppl gsMakeSortCons(ATermAppl SortConsType_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_SortCons(), (ATerm) SortConsType_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortCons(), static_cast_ATerm(SortConsType_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
@@ -2488,7 +2488,7 @@ ATermAppl gsMakeSortFSet()
 inline
 ATermAppl gsMakeSortId(ATermAppl String_0)
 {
-  return ATmakeAppl1(function_symbol_SortId(), (ATerm) String_0);
+  return ATmakeAppl1(function_symbol_SortId(), static_cast_ATerm(String_0));
 }
 
 inline
@@ -2500,7 +2500,7 @@ ATermAppl gsMakeSortList()
 inline
 ATermAppl gsMakeSortRef(ATermAppl String_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_SortRef(), (ATerm) String_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_SortRef(), static_cast_ATerm(String_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
@@ -2512,13 +2512,13 @@ ATermAppl gsMakeSortSet()
 inline
 ATermAppl gsMakeSortSpec(ATermList SortDecl_0)
 {
-  return ATmakeAppl1(function_symbol_SortSpec(), (ATerm) SortDecl_0);
+  return ATmakeAppl1(function_symbol_SortSpec(), static_cast_ATerm(SortDecl_0));
 }
 
 inline
 ATermAppl gsMakeSortStruct(ATermList StructCons_0)
 {
-  return ATmakeAppl1(function_symbol_SortStruct(), (ATerm) StructCons_0);
+  return ATmakeAppl1(function_symbol_SortStruct(), static_cast_ATerm(StructCons_0));
 }
 
 inline
@@ -2530,13 +2530,13 @@ ATermAppl gsMakeSortUnknown()
 inline
 ATermAppl gsMakeSortsPossible(ATermList SortExpr_0)
 {
-  return ATmakeAppl1(function_symbol_SortsPossible(), (ATerm) SortExpr_0);
+  return ATmakeAppl1(function_symbol_SortsPossible(), static_cast_ATerm(SortExpr_0));
 }
 
 inline
 ATermAppl gsMakeStateAnd(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateAnd(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateAnd(), static_cast_ATerm(StateFrm_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
@@ -2548,13 +2548,13 @@ ATermAppl gsMakeStateDelay()
 inline
 ATermAppl gsMakeStateDelayTimed(ATermAppl DataExpr_0)
 {
-  return ATmakeAppl1(function_symbol_StateDelayTimed(), (ATerm) DataExpr_0);
+  return ATmakeAppl1(function_symbol_StateDelayTimed(), static_cast_ATerm(DataExpr_0));
 }
 
 inline
 ATermAppl gsMakeStateExists(ATermList DataVarId_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateExists(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateExists(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
@@ -2566,49 +2566,49 @@ ATermAppl gsMakeStateFalse()
 inline
 ATermAppl gsMakeStateForall(ATermList DataVarId_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateForall(), (ATerm) DataVarId_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateForall(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
 ATermAppl gsMakeStateImp(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateImp(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateImp(), static_cast_ATerm(StateFrm_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
 ATermAppl gsMakeStateMay(ATermAppl RegFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateMay(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateMay(), static_cast_ATerm(RegFrm_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
 ATermAppl gsMakeStateMu(ATermAppl String_0, ATermList DataVarIdInit_1, ATermAppl StateFrm_2)
 {
-  return ATmakeAppl3(function_symbol_StateMu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
+  return ATmakeAppl3(function_symbol_StateMu(), static_cast_ATerm(String_0), static_cast_ATerm(DataVarIdInit_1), static_cast_ATerm(StateFrm_2));
 }
 
 inline
 ATermAppl gsMakeStateMust(ATermAppl RegFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateMust(), (ATerm) RegFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateMust(), static_cast_ATerm(RegFrm_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
 ATermAppl gsMakeStateNot(ATermAppl StateFrm_0)
 {
-  return ATmakeAppl1(function_symbol_StateNot(), (ATerm) StateFrm_0);
+  return ATmakeAppl1(function_symbol_StateNot(), static_cast_ATerm(StateFrm_0));
 }
 
 inline
 ATermAppl gsMakeStateNu(ATermAppl String_0, ATermList DataVarIdInit_1, ATermAppl StateFrm_2)
 {
-  return ATmakeAppl3(function_symbol_StateNu(), (ATerm) String_0, (ATerm) DataVarIdInit_1, (ATerm) StateFrm_2);
+  return ATmakeAppl3(function_symbol_StateNu(), static_cast_ATerm(String_0), static_cast_ATerm(DataVarIdInit_1), static_cast_ATerm(StateFrm_2));
 }
 
 inline
 ATermAppl gsMakeStateOr(ATermAppl StateFrm_0, ATermAppl StateFrm_1)
 {
-  return ATmakeAppl2(function_symbol_StateOr(), (ATerm) StateFrm_0, (ATerm) StateFrm_1);
+  return ATmakeAppl2(function_symbol_StateOr(), static_cast_ATerm(StateFrm_0), static_cast_ATerm(StateFrm_1));
 }
 
 inline
@@ -2620,7 +2620,7 @@ ATermAppl gsMakeStateTrue()
 inline
 ATermAppl gsMakeStateVar(ATermAppl String_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(function_symbol_StateVar(), (ATerm) String_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(function_symbol_StateVar(), static_cast_ATerm(String_0), static_cast_ATerm(DataExpr_1));
 }
 
 inline
@@ -2632,31 +2632,31 @@ ATermAppl gsMakeStateYaled()
 inline
 ATermAppl gsMakeStateYaledTimed(ATermAppl DataExpr_0)
 {
-  return ATmakeAppl1(function_symbol_StateYaledTimed(), (ATerm) DataExpr_0);
+  return ATmakeAppl1(function_symbol_StateYaledTimed(), static_cast_ATerm(DataExpr_0));
 }
 
 inline
 ATermAppl gsMakeStructCons(ATermAppl String_0, ATermList StructProj_1, ATermAppl StringOrNil_2)
 {
-  return ATmakeAppl3(function_symbol_StructCons(), (ATerm) String_0, (ATerm) StructProj_1, (ATerm) StringOrNil_2);
+  return ATmakeAppl3(function_symbol_StructCons(), static_cast_ATerm(String_0), static_cast_ATerm(StructProj_1), static_cast_ATerm(StringOrNil_2));
 }
 
 inline
 ATermAppl gsMakeStructProj(ATermAppl StringOrNil_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(function_symbol_StructProj(), (ATerm) StringOrNil_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(function_symbol_StructProj(), static_cast_ATerm(StringOrNil_0), static_cast_ATerm(SortExpr_1));
 }
 
 inline
 ATermAppl gsMakeSum(ATermList DataVarId_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Sum(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Sum(), static_cast_ATerm(DataVarId_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
 ATermAppl gsMakeSync(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
-  return ATmakeAppl2(function_symbol_Sync(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl2(function_symbol_Sync(), static_cast_ATerm(ProcExpr_0), static_cast_ATerm(ProcExpr_1));
 }
 
 inline
@@ -2668,7 +2668,7 @@ ATermAppl gsMakeTau()
 inline
 ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
-  return ATmakeAppl2(function_symbol_Whr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
+  return ATmakeAppl2(function_symbol_Whr(), static_cast_ATerm(DataExpr_0), static_cast_ATerm(WhrDecl_1));
 }
 //--- end generated code ---//
 

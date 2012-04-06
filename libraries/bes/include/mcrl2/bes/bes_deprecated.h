@@ -197,7 +197,7 @@ inline ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
 static
 inline bool is_pair(ATerm t)
 {
-  return ATgetAFun(t)==PAIR();
+  return ATgetAFun((ATermAppl)t)==PAIR();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -223,8 +223,8 @@ void assign_variables_in_tree(
 {
   if (is_pair(t))
   {
-    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
-    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(ATgetArgument((ATermAppl)t,0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(ATgetArgument((ATermAppl)t,1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
   }
   else
   {
@@ -709,17 +709,17 @@ inline bool is_dummy(const bes_expression& b)
 
 inline bool is_and(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESAnd();
+  return ATgetAFun((ATermAppl)b)==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESOr();
+  return ATgetAFun((ATermAppl)b)==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESIf();
+  return ATgetAFun((ATermAppl)b)==AFunBESIf();
 }
 
 inline bes_expression lhs(const bes_expression& b)
@@ -777,7 +777,7 @@ inline bes_expression substitute_true_false_rec(
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result==bes_expression())
     {
       return result;
     }
@@ -994,7 +994,7 @@ inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expres
     {
       b1b2b3=if_(b1,b2,b3);
       bes_expression b(hashtable.get(b1b2b3));
-      if (b!=NULL)
+      if (b!=bes_expression())
       {
         return b;
       }
@@ -1025,7 +1025,7 @@ inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expres
     /* hence not is_false(b3) */
     b1b2b3=if_(b1,b2,b3);
     bes_expression b(hashtable.get(b1b2b3));
-    if (b!=NULL)
+    if (b!=bes_expression())
     {
       return b;
     }
@@ -1156,7 +1156,7 @@ static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
 
   bes_expression result;
   bes_expression b(hashtable.get(b1));
-  if (b!=NULL)
+  if (b!=bes_expression())
   {
     return b;
   }
@@ -2328,10 +2328,10 @@ class boolean_equation_system
             else
             {
               // t is a pair, with a name as its left hand side.
-              current_pbeq = pbes_equation(pbes_equations.get(ATgetArgument(t,0)));
+              current_pbeq = pbes_equation(pbes_equations.get(ATgetArgument((ATermAppl)t,0)));
               // the right hand side of t are the parameters, in a tree structure.
 
-              t=ATgetArgument(t,1);
+              t=ATgetArgument((ATermAppl)t,1);
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
               assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes,sigma,sigma_internal);
             }
@@ -2575,8 +2575,8 @@ class boolean_equation_system
       using namespace mcrl2::data;
       if (is_pair(t))
       {
-        print_tree_rec(c,ATgetArgument(t,0),f);
-        print_tree_rec(',',ATgetArgument(t,1),f);
+        print_tree_rec(c,ATgetArgument((ATermAppl)t,0),f);
+        print_tree_rec(',',ATgetArgument((ATermAppl)t,1),f);
       }
       else
       {
@@ -2606,12 +2606,12 @@ class boolean_equation_system
         ATerm t=variable_index.get(current_var);
         if (!is_pair(t))
         {
-          f << ATgetName(ATgetAFun(t));
+          f << ATgetName(ATgetAFun((ATermAppl)t));
         }
         else
         {
-          f << ATgetName(ATgetAFun(ATgetArgument(t,0)));
-          print_tree_rec('(',ATgetArgument(t,1),f);
+          f << ATgetName(ATgetAFun((ATermAppl)ATgetArgument((ATermAppl)t,0)));
+          print_tree_rec('(',ATgetArgument((ATermAppl)t,1),f);
           f << ")";
         }
       }
@@ -2829,7 +2829,7 @@ static bes_expression substitute_rank(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }
@@ -3020,7 +3020,7 @@ static bes_expression evaluate_bex(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }

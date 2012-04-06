@@ -133,7 +133,7 @@ ATermList ATconcat(ATermList list1, const ATermList list2)
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
   ATermList result = list2;
 
-  if (ATisEqual((ATerm)list2, (ATerm)ATempty))
+  if (list2==ATempty)
   {
     return list1;
   }
@@ -213,7 +213,7 @@ ATerm ATelementAt(ATermList list, size_t index)
 
   if (ATisEmpty(list))
   {
-    return NULL;
+    return ATerm();
   }
 
   return ATgetFirst(list);
@@ -229,7 +229,7 @@ ATerm ATelementAt(ATermList list, size_t index)
 ATermList ATremoveElement(ATermList list, const ATerm t)
 {
   size_t i = 0;
-  ATerm el = NULL;
+  ATerm el;
   ATermList l = list;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list));
 

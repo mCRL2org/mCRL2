@@ -283,7 +283,7 @@ class term_balanced_tree: public aterm_base
     /// \return True if the list is empty.
     bool empty() const
     {
-      return ATisEmpty(term()) == true;
+      return ATisEmpty((ATermList)term()) == true;
     }
 
     /// \brief Conversion to ATermList.

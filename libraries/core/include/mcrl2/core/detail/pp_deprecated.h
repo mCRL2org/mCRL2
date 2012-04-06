@@ -1070,7 +1070,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     mCRL2log(log::error)
         << "the term "
-        << ATwriteToString((ATerm) Part)
+        << ATwriteToString(static_cast_ATerm(Part))
         << " is not part of the internal format" << std::endl;
     assert(false);
   }
@@ -1191,9 +1191,9 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           {
             ATermAppl VarDecl = ATAelementAt(VarDecls, j);
             ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
-            if (ATtableGet(VarDeclTable, (ATerm) VarDeclName) == NULL)
+            if (ATtableGet(VarDeclTable, static_cast_ATerm(VarDeclName)) == ATerm())
             {
-              ATtablePut(VarDeclTable, (ATerm) VarDeclName, (ATerm) VarDecl);
+              ATtablePut(VarDeclTable, static_cast_ATerm(VarDeclName), static_cast_ATerm(VarDecl));
             }
           }
           i++;
@@ -1667,7 +1667,7 @@ reconstruct_container_expression(ATermAppl Part)
       ATermAppl se_func = sort_set::left(expr).sort();
       ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
       ATermAppl var = gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                      (ATerm) static_cast<ATermAppl>(expr), true), se_func_dom);
+                                      static_cast_ATerm(static_cast<ATermAppl>(expr)), true), se_func_dom);
       ATermAppl body;
       if (data::sort_fset::is_empty_function_symbol(sort_set::right(expr)))
       {
@@ -1690,7 +1690,7 @@ reconstruct_container_expression(ATermAppl Part)
         data_expression rhs(sort_set::in(element_sort, data_expression(var), sort_set::set_fset(element_sort, sort_set::right(expr))));
         body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
       }
-      Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1((ATerm) var), body);
+      Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1(static_cast_ATerm(var)), body);
     }
   }
   else if (sort_set::is_set_fset_application(expr))
@@ -1746,7 +1746,7 @@ reconstruct_container_expression(ATermAppl Part)
          i != domain_of_body_sort.end(); ++i)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                    (ATerm) static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+                                    static_cast_ATerm(static_cast<ATermList>(context)), true), static_cast<ATermAppl>(*i)));
       context = atermpp::push_front(context, data_expression(var));
       variables.push_back(var);
     }
@@ -1769,7 +1769,7 @@ reconstruct_container_expression(ATermAppl Part)
       ATermAppl se_func = sort_bag::left(expr).sort();
       ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
       data_expression var(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                          (ATerm) static_cast<ATermAppl>(expr), true), se_func_dom));
+                                          static_cast_ATerm(static_cast<ATermAppl>(expr)), true), se_func_dom));
       data_expression body;
 
       if (sort_bag::is_one_function_function_symbol(sort_bag::left(expr)))
@@ -1859,7 +1859,7 @@ reconstruct_container_expression(ATermAppl Part)
          i != domain_of_body_sort.end(); ++i)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                    (ATerm) static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+                                    static_cast_ATerm(static_cast<ATermList>(context)), true), static_cast<ATermAppl>(*i)));
       context = atermpp::push_front(context, data_expression(var));
       variables.push_back(var);
     }
@@ -2978,11 +2978,11 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     {
       ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
-      ATermList CorDecls = ATLtableGet(SortDeclsTable, (ATerm) DeclSort);
-      ATtablePut(SortDeclsTable, (ATerm) DeclSort,
-                 (CorDecls == NULL)
-                 ?(ATerm) ATmakeList1((ATerm) Decl)
-                 :(ATerm) ATinsert(CorDecls, (ATerm) Decl)
+      ATermList CorDecls = ATLtableGet(SortDeclsTable, static_cast_ATerm(DeclSort));
+      ATtablePut(SortDeclsTable, static_cast_ATerm(DeclSort),
+                 (CorDecls == ATerm())
+                 ?static_cast_ATerm(ATmakeList1(static_cast_ATerm(Decl)))
+                 :static_cast_ATerm(ATinsert(CorDecls, static_cast_ATerm(Decl)))
                 );
       Decls = ATgetNext(Decls);
     }
@@ -3021,7 +3021,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
       ATermAppl VarDecl = ATAelementAt(VarDecls, i);
       ATermAppl CorVarDecl =
         ATAtableGet(DataVarDecls, ATgetArgument(VarDecl, 0));
-      if (CorVarDecl != NULL)
+      if (CorVarDecl != ATerm())
       {
         //check consistency of VarDecl with CorVarDecl
         Result = (ATisEqual(VarDecl, CorVarDecl) == true);
@@ -3032,7 +3032,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
-    Result = (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == NULL);
+    Result = (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == ATerm());
   }
   //check consistency in the arguments of Part
   if (Result)

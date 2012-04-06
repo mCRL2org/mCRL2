@@ -71,14 +71,14 @@ class term_list: public aterm_base
     /// \return The wrapped ATermList.
     ATermList list() const
     {
-      return reinterpret_cast<ATermList>(m_term);
+      return (ATermList)m_term;
     }
 
     /// \brief Returns the wrapped ATermList.
     /// \return The wrapped ATermList.
     ATermList list()
     {
-      return reinterpret_cast<ATermList>(m_term);
+      return (ATermList)m_term;
     }
 
   public:
@@ -130,7 +130,7 @@ class term_list: public aterm_base
       : aterm_base(t)
     {
       assert(type() == AT_LIST);
-    }
+    } 
 
     /// Creates an term_list with a copy of a range.
     /// \param first The start of a range of elements.
@@ -177,8 +177,8 @@ class term_list: public aterm_base
     /// \param t A term containing a list.
     term_list<Term>& operator=(ATermList t)
     {
-      assert(ATgetType((ATerm)t) == AT_LIST);
-      m_term = reinterpret_cast<ATerm>(t);
+      assert(ATgetType(static_cast_ATerm(t)) == AT_LIST);
+      m_term = static_cast_ATerm(t);
       return *this;
     }
 
@@ -245,7 +245,8 @@ class term_list: public aterm_base
     /// \return The wrapped ATermList pointer.
     operator ATermList() const
     {
-      return detail::void2list(m_term);
+      // return detail::void2list(m_term);
+      return (ATermList)m_term;
     }
 
     /// \brief Applies a low level substitution function to this term and returns the result.

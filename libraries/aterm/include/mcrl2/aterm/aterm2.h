@@ -30,7 +30,7 @@ namespace aterm
 struct __ATermInt
 {
   header_type header;
-  ATerm       next;
+  _ATerm      *next;
   union
   {
     int value;
@@ -45,45 +45,143 @@ struct __ATermInt
 
 static const size_t TERM_SIZE_INT = sizeof(struct __ATermInt)/sizeof(size_t);
 
-typedef union _ATermInt
+union _ATermInt
 {
   header_type        header;
   struct __ATermInt  aterm;
-}* ATermInt;
+}; 
+
+class ATermInt:public ATerm
+{
+  private:
+
+  public:
+
+    // Constructors
+    ATermInt():ATerm()
+    {}
+
+    ATermInt(_ATermInt *t):ATerm(reinterpret_cast<_ATerm*>(t))
+    {}
+
+    explicit ATermInt(const ATerm t):ATerm(t) 
+    {}
+
+    _ATermInt & operator *() const
+    {
+      return *reinterpret_cast<_ATermInt*>(m_aterm); // Mooier is om _ATermInt af te leiden van _ATerm
+    }
+
+    _ATermInt *operator ->() const
+    {
+      return reinterpret_cast<_ATermInt*>(m_aterm);
+    }
+};
+
+// Function below should be removed as it does not do anything.
+inline
+ATerm static_cast_ATerm(const ATermInt t)
+{
+  return t;
+}
 
 struct __ATermAppl
 {
   header_type header;
-  ATerm       next;
-  ATerm       arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+  _ATerm      *next;
+  _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
                               (therefore it is excessive). Using mallocs an array of the
                               appropriate length is declared, where it is possible that
                               the array has size 0, i.e. is absent. If the value is small
                               (it was 1), the clang compiler provides warnings. */
-
 };
 
-typedef union _ATermAppl
+union _ATermAppl
 {
   header_type         header;
   struct __ATermAppl  aterm;
-}* ATermAppl;
+};
+
+class ATermAppl:public ATerm
+{
+  public:
+
+    ATermAppl():ATerm()
+    {}
+
+    ATermAppl (_ATermAppl *t):ATerm(reinterpret_cast<_ATerm*>(t))
+    {}
+
+    explicit ATermAppl (const ATerm &t):ATerm(t)
+    {}
+
+    _ATermAppl & operator *() const
+    {
+      return *reinterpret_cast<_ATermAppl*>(m_aterm); // Mooier is om _ATermAppl af te leiden van _ATerm
+    }
+
+    _ATermAppl *operator ->() const
+    {
+      return reinterpret_cast<_ATermAppl*>(m_aterm);
+    }
+};
+
+
+// Function below must be removed from the code.
+inline
+ATerm static_cast_ATerm(const ATermAppl t)
+{
+  return t;
+}
+
 
 struct __ATermList
 {
   header_type       header;
-  ATerm             next;
-  ATerm             head;
+  _ATerm            *next;
+  _ATerm            *head;
   union _ATermList* tail;
 };
 
 static const size_t TERM_SIZE_LIST = sizeof(struct __ATermList)/sizeof(size_t);
 
-typedef union _ATermList
+union _ATermList
 {
   header_type         header;
   struct __ATermList  aterm;
-}* ATermList;
+};
+
+class ATermList:public ATerm
+{
+  public:
+
+    ATermList ():ATerm()
+    {}
+
+    ATermList(_ATermList *t):ATerm(reinterpret_cast<_ATerm *>(t))
+    {}
+
+    explicit ATermList(const ATerm t):ATerm(t)
+    {}
+
+    _ATermList & operator *() const
+    {
+      return *reinterpret_cast<_ATermList*>(m_aterm); // Mooier is om _ATermInt af te leiden van _ATerm
+    }
+
+    _ATermList *operator ->() const
+    {
+      return reinterpret_cast<_ATermList*>(m_aterm);
+    }
+};
+
+// Function below must be removed from the code.
+inline
+ATerm static_cast_ATerm(const ATermList t)
+{
+  return t;
+}
+
 
 struct _ATermTable;
 
@@ -149,13 +247,6 @@ void ATunprotectInt(const ATermInt* p)
   * datatype.
   */
 
-template <typename TermType1, typename TermType2>
-inline
-bool ATisEqual(const TermType1 t1, const TermType2 t2)
-{
-  return ATisEqual((ATerm) t1, (ATerm) t2);
-}
-
 /* The ATermInt type */
 ATermInt ATmakeInt(const int value);
 
@@ -184,34 +275,16 @@ ATermAppl ATmakeAppl6(const AFun sym, const ATerm arg0, const ATerm arg1, const 
                       const ATerm arg4, const ATerm arg5, const ATerm arg6);
 
 
-
-
-/*AFun    ATgetAFun(ATermAppl appl);*/
 inline
 AFun ATgetAFun(const ATermAppl appl)
 {
   return GET_SYMBOL(appl->header);
 }
 
-// TODO: Remove
 inline
-AFun ATgetAFun(const ATerm t)
+ATerm &ATgetArgument(const ATermAppl appl, const size_t idx)
 {
-  return ATgetAFun((ATermAppl)t);
-}
-
-/* ATerm     ATgetArgument(ATermAppl appl, size_t arg); */
-inline
-ATerm& ATgetArgument(const ATermAppl appl, const size_t idx)
-{
-  return appl->aterm.arg[idx];
-}
-
-// TODO: Remove
-inline
-ATerm& ATgetArgument(const ATerm t, const size_t idx)
-{
-  return ATgetArgument((ATermAppl)t, idx);
+  return (ATerm &)appl->aterm.arg[idx];
 }
 
 ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n);
@@ -224,30 +297,21 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[]);
 size_t ATgetLength(ATermList list);
 
 inline
-ATerm& ATgetFirst(const ATermList l)
+ATerm &ATgetFirst(const ATermList l)
 {
-  return l->aterm.head;
+  return (ATerm &)l->aterm.head;
 }
 
-/* ATermList ATgetNext(ATermList list);*/
 inline
-ATermList& ATgetNext(const ATermList l)
+ATermList &ATgetNext(const ATermList l)
 {
-  return l->aterm.tail;
+  return (ATermList &)l->aterm.tail;
 }
 
-/*ATbool ATisEmpty(ATermList list);*/
 inline
 bool ATisEmpty(const ATermList l)
 {
   return l->aterm.head == NULL && l->aterm.tail == NULL;
-}
-
-// XXX Remove
-inline
-bool ATisEmpty(const ATerm l)
-{
-  return ATisEmpty((ATermList)l);
 }
 
 ATermList ATgetTail(ATermList list, const int start);
@@ -346,30 +410,6 @@ bool ATisQuoted(const AFun sym)
 
 void    ATprotectAFun(const AFun sym);
 void    ATunprotectAFun(const AFun sym);
-
-/* Compare two ATerms. This is a complete stable ordering on ATerms.
- * They are compared 'lexicographically', function names before the
- * arguments. Function names are compared
- * using strcmp, integers and reals are compared
- * using integer and double comparison, blobs are compared using memcmp.
- * If the types of the terms are different the integer value of ATgetType
- * is used.
- */
-int ATcompare(const ATerm t1, const ATerm t2);
-
-extern size_t at_gc_count;
-
-inline
-size_t ATgetGCCount()
-{
-  return at_gc_count;
-}
-
-inline
-size_t ATgetAFunId(const AFun afun)
-{
-  return afun;
-}
 
 } // namespace aterm
 

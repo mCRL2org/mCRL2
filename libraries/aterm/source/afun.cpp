@@ -307,7 +307,7 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
   if (cur == NULL)
   {
-    cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL); // Note that this statement changes first_free,
+    cur = (SymEntry) &*AT_allocate(TERM_SIZE_SYMBOL); // Note that this statement changes first_free,
                                                     // if garbage collection is done. 
 
     const AFun free_entry = first_free;
@@ -435,7 +435,7 @@ void AT_markProtectedAFuns()
   for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
     assert(at_lookup_table.size()> *i);
-    SET_MARK(((ATerm)at_lookup_table[*i])->header);
+    SET_MARK(at_lookup_table[*i]->header);
   }
 }
 

@@ -71,7 +71,8 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
   {
     bool term_changed = false;
 
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
+    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,aterm,n);
 
     for (unsigned int i = 0; i < n; i++)
     {
@@ -84,7 +85,7 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
     }
     if (term_changed)
     {
-      a = ATmakeApplArray(a.function(), t);
+      a = ATmakeApplArray(a.function(), (ATerm *)t);
     }
   }
   return a;

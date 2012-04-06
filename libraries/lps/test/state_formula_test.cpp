@@ -406,7 +406,7 @@ void test_type_checking()
 
   std::cerr << "Hier\n";
   BOOST_CHECK(is_may(formula));
-  BOOST_CHECK(act(formula));
+  BOOST_CHECK(act(formula)!=action());
   core::garbage_collect();
 }
 

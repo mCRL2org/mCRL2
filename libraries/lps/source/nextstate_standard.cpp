@@ -444,7 +444,7 @@ ATerm NextState::SetVars(ATerm a, ATermList free_vars)
   {
     if (ATindexOf(free_vars,a,0) != ATERM_NON_EXISTING_POSITION)
     {
-      return reinterpret_cast< ATerm >(static_cast< ATermAppl >(
+      return static_cast< ATerm >(static_cast< ATermAppl >(
                                          generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));
     }
     else
@@ -934,15 +934,15 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
   }
   switch (info.stateformat)
   {
-      ATerm r;
     case GS_STATE_VECTOR:
-      r = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
-
+    {
+      ATerm r = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
       return r;
+    }
     case GS_STATE_TREE:
       return info.parent->buildTree(stateargs);
     default:
-      return NULL;
+      return ATerm();
   }
 }
 

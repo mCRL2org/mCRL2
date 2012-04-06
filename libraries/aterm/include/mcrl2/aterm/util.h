@@ -15,6 +15,14 @@ std::string to_string(const T& t)
   return oss.str();
 }
 
+inline
+std::string to_string(const ATerm t)
+{
+  std::ostringstream oss;
+  oss << &*t;
+  return oss.str();
+} 
+
 #ifndef streq
 #  define streq(s,t)  (!(strcmp(s,t)))
 #endif

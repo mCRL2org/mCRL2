@@ -324,7 +324,8 @@ namespace mcrl2
               {
                 l2_walker++;  // Match found
               }
-              else if (*m_walker>*l2_walker)
+              // else if (*m_walker>*l2_walker)  ???? XXXX Why is > not available...
+              else if (*l2_walker<*m_walker)
               {
                 return false; // l2 contains an element not in m.
               }
@@ -333,13 +334,15 @@ namespace mcrl2
           else
           {
             // l1 is not empty.
-            if (l2_walker==l2.end() || *l1_walker <= *l2_walker)
+            // if (l2_walker==l2.end() || *l1_walker <= *l2_walker)
+            if (l2_walker==l2.end() || !(*l2_walker < *l1_walker))
             {
               if (*m_walker==*l1_walker)
               {
                 l1_walker++;  // Match found
               }
-              else if (*m_walker>*l1_walker)
+              // else if (*m_walker>*l1_walker)
+              else if (*l1_walker<*m_walker)
               {
                 return false; // l1 contains an element not in m.
               }
@@ -350,7 +353,8 @@ namespace mcrl2
               {
                 l2_walker++;  // Match found
               }
-              else if (*m_walker>*l2_walker)
+              // else if (*m_walker>*l2_walker)
+              else if (*l2_walker<*m_walker)
               {
                 return false; // l2 contains an element not in m.
               }
@@ -2203,7 +2207,7 @@ namespace mcrl2
         return gsaGetDeps(bounded_init(a).left());
       }
       assert(0);
-      return NULL; //to suppress warnings
+      return process_identifier_list(); //to suppress warnings
     }
 
     // Delivers true if this is a pCRL term, and false if this is an mCRL term.
@@ -2540,7 +2544,7 @@ namespace mcrl2
         process_equation p= *pr;
         process_identifier pn=p.identifier();
         process_expression res=procs[pn];
-        if (res)
+        if (res!=process_expression())
         {
           new_pr=push_front(new_pr,process_equation(p.identifier(),p.formal_parameters(),res));
           procs.erase(pn);

@@ -212,7 +212,7 @@ void ATprotectArray(const ATerm* start, const size_t size)
 #ifndef NDEBUG
   for (i=0; i<size; i++)
   {
-    assert(start[i] == NULL || AT_isValidTerm(start[i])); /* Check the precondition */
+    assert(start[i] == ATerm() || AT_isValidTerm(start[i])); /* Check the precondition */
   }
 #endif
 
@@ -415,10 +415,10 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
          * ATerm node
          */
       case 't':
-        ATwriteToTextFile(va_arg(args, ATerm), stream);
+        ATwriteToTextFile(va_arg(args, _ATerm*), stream);
         break;
       case 'l':
-        l = va_arg(args, ATermList);
+        l = va_arg(args, _ATermList*);
         fmt[strlen(fmt) - 1] = '\0';  /* Remove 'l' */
         while (!ATisEmpty(l))
         {
@@ -439,7 +439,7 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
         AT_printAFun(va_arg(args, AFun), stream);
         break;
       case 'n':
-        t = va_arg(args, ATerm);
+        t = va_arg(args, _ATerm*);
         switch (ATgetType(t))
         {
           case AT_INT:
@@ -556,7 +556,8 @@ writeToTextFile(const ATerm t, FILE* f)
       return false;
 
     case AT_SYMBOL:
-      throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));
+      // throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));
+      throw std::runtime_error("ATwriteToTextFile: not a term but an afun: ");
       return false;
   }
 
@@ -778,9 +779,9 @@ fparse_terms(int* c, FILE* f)
   ATermList list;
   ATerm el = fparse_term(c, f);
 
-  if (el == NULL)
+  if (el == ATerm())
   {
-    return NULL;
+    return ATermList();
   }
 
   list = ATinsert(ATempty, el);
@@ -789,9 +790,9 @@ fparse_terms(int* c, FILE* f)
   {
     fnext_skip_layout(c, f);
     el = fparse_term(c, f);
-    if (el == NULL)
+    if (el == ATerm())
     {
-      return NULL;
+      return ATermList();
     }
     list = ATinsert(list, el);
   }
@@ -822,12 +823,12 @@ fparse_quoted_appl(int* c, FILE* f)
     switch (*c)
     {
       case EOF:
-        return NULL;
+        return ATerm();
       case '\\':
         fnext_char(c, f);
         if (*c == EOF)
         {
-          return NULL;
+          return ATerm();
         }
         switch (*c)
         {
@@ -873,9 +874,9 @@ fparse_quoted_appl(int* c, FILE* f)
     {
       args = ATempty;
     }
-    if (args == NULL || *c != ')')
+    if (args == ATerm() || *c != ')')
     {
-      return NULL;
+      return ATerm();
     }
     fnext_skip_layout(c, f);
   }
@@ -883,7 +884,7 @@ fparse_quoted_appl(int* c, FILE* f)
   /* Wrap up this function application */
   sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
-  return (ATerm)ATmakeApplList(sym, args);
+  return static_cast_ATerm(ATmakeApplList(sym, args));
 }
 
 /*}}}  */
@@ -932,7 +933,7 @@ fparse_unquoted_appl(int* c, FILE* f)
     {
       args = ATempty;
     }
-    if (args == NULL || *c != ')')
+    if (args == ATerm() || *c != ')')
     {
       return NULL;
     }
@@ -977,7 +978,7 @@ fparse_num(int* c, FILE* f)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return (ATerm) ATmakeInt(atoi(num));
+    return static_cast_ATerm(ATmakeInt(atoi(num)));
 
     /*}}}  */
   }
@@ -994,7 +995,7 @@ static ATerm
 fparse_term(int* c, FILE* f)
 {
   /* ATerm t, result = NULL; */
-  ATerm result = NULL;
+  ATerm result;
 
   switch (*c)
   {
@@ -1005,14 +1006,14 @@ fparse_term(int* c, FILE* f)
       fnext_skip_layout(c, f);
       if (*c == ']')
       {
-        result = (ATerm) ATempty;
+        result = static_cast_ATerm(ATempty);
       }
       else
       {
-        result = (ATerm) fparse_terms(c, f);
-        if (result == NULL || *c != ']')
+        result = static_cast_ATerm(fparse_terms(c, f));
+        if (result == ATerm() || *c != ']')
         {
-          return NULL;
+          return ATerm();
         }
       }
       fnext_skip_layout(c, f);
@@ -1020,7 +1021,7 @@ fparse_term(int* c, FILE* f)
     default:
       if (isalpha(*c) || *c == '(')
       {
-        result = (ATerm) fparse_unquoted_appl(c, f);
+        result = static_cast_ATerm(fparse_unquoted_appl(c, f));
       }
       else if (isdigit(*c))
       {
@@ -1032,7 +1033,7 @@ fparse_term(int* c, FILE* f)
       }
       else
       {
-        result = NULL;
+        result = ATerm();
       }
       break;
   }
@@ -1056,7 +1057,7 @@ readFromTextFile(int* c, FILE* file)
 
   term = fparse_term(c, file);
 
-  if (term)
+  if (&*term)
   {
     ungetc(*c, file);
   }
@@ -1161,7 +1162,7 @@ ATerm ATreadFromNamedFile(const char* name)
 
   if (!(f = fopen(name, "rb")))
   {
-    return NULL;
+    return ATerm();
   }
 
   t = ATreadFromFile(f);
@@ -1212,9 +1213,9 @@ sparse_terms(int* c, char** s)
   ATermList list;
   ATerm el = sparse_term(c, s);
 
-  if (el == NULL)
+  if (el == ATerm())
   {
-    return NULL;
+    return ATermList();
   }
 
   list = ATinsert(ATempty, el);
@@ -1223,9 +1224,9 @@ sparse_terms(int* c, char** s)
   {
     snext_skip_layout(c, s);
     el = sparse_term(c, s);
-    if (el == NULL)
+    if (el == ATerm())
     {
-      return NULL;
+      return ATermList();
     }
     list = ATinsert(list, el);
   }
@@ -1259,12 +1260,12 @@ sparse_quoted_appl(int* c, char** s)
           case '\r':
           case '\t':
           */
-        return NULL;
+        return ATerm();
       case '\\':
         snext_char(c, s);
         if (*c == EOF)
         {
-          return NULL;
+          return ATerm();
         }
         switch (*c)
         {
@@ -1311,9 +1312,9 @@ sparse_quoted_appl(int* c, char** s)
     {
       args = ATempty;
     }
-    if (args == NULL || *c != ')')
+    if (args == ATermList() || *c != ')')
     {
-      return NULL;
+      return ATerm();
     }
     snext_skip_layout(c, s);
   }
@@ -1321,7 +1322,7 @@ sparse_quoted_appl(int* c, char** s)
   /* Wrap up this function application */
   sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
-  return (ATerm)ATmakeApplList(sym, args);
+  return static_cast_ATerm(ATmakeApplList(sym, args));
 }
 
 /*}}}  */
@@ -1370,7 +1371,7 @@ sparse_unquoted_appl(int* c, char** s)
     {
       args = ATempty;
     }
-    if (args == NULL || *c != ')')
+    if (args == ATerm() || *c != ')')
     {
       return NULL;
     }
@@ -1414,7 +1415,7 @@ sparse_num(int* c, char** s)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return (ATerm) ATmakeInt(atoi(num));
+    return static_cast_ATerm(ATmakeInt(atoi(num)));
 
     /*}}}  */
   }
@@ -1432,25 +1433,25 @@ static ATerm
 sparse_term(int* c, char** s)
 {
   /* ATerm t, result = NULL; */
-  ATerm result = NULL;
+  ATerm result;
 
   switch (*c)
   {
     case '"':
-      result = (ATerm) sparse_quoted_appl(c, s);
+      result = sparse_quoted_appl(c, s);
       break;
     case '[':
       snext_skip_layout(c, s);
       if (*c == ']')
       {
-        result = (ATerm) ATempty;
+        result = static_cast_ATerm(ATempty);
       }
       else
       {
-        result = (ATerm) sparse_terms(c, s);
-        if (result == NULL || *c != ']')
+        result = static_cast_ATerm(sparse_terms(c, s));
+        if (result == ATerm() || *c != ']')
         {
-          return NULL;
+          return ATerm();
         }
       }
       snext_skip_layout(c, s);
@@ -1458,7 +1459,7 @@ sparse_term(int* c, char** s)
     default:
       if (isalpha(*c) || *c == '(')
       {
-        result = (ATerm) sparse_unquoted_appl(c, s);
+        result = static_cast_ATerm(sparse_unquoted_appl(c, s));
       }
       else if (isdigit(*c))
       {
@@ -1470,12 +1471,12 @@ sparse_term(int* c, char** s)
       }
       else
       {
-        result = NULL;
+        result = ATerm();
       }
       break;
   }
 
-  if (result != NULL)
+  if (result != ATerm())
   {
     sskip_layout(c, s);
 
@@ -1503,7 +1504,7 @@ ATreadFromString(const char* string)
 
   term = sparse_term(&c, (char**) &string);
 
-  if (term == NULL)
+  if (term == ATerm())
   {
     int i;
     mCRL2log(mcrl2::log::error) << "ATreadFromString: parse error at or near:" << std::endl
@@ -1580,7 +1581,7 @@ void AT_markTerm(const ATerm t1)
         case AT_LIST:
           if (!ATisEmpty((ATermList) t))
           {
-            mark_stack.push((ATerm) ATgetNext((ATermList) t));
+            mark_stack.push(static_cast_ATerm(ATgetNext((ATermList) t)));
             mark_stack.push(ATgetFirst((ATermList) t));
           }
           break;
@@ -1732,7 +1733,7 @@ size_t AT_calcUniqueAFuns(ATerm t)
 
 /*{{{  static int AT_compareArguments(ATermAppl t1, ATermAppl t2)  */
 
-static int AT_compareArguments(ATermAppl t1, ATermAppl t2)
+/* static int AT_compareArguments(ATermAppl t1, ATermAppl t2)
 {
   size_t arity1;
   size_t arity2;
@@ -1763,12 +1764,12 @@ static int AT_compareArguments(ATermAppl t1, ATermAppl t2)
 
   return result;
 
-}
+} */
 
 /*}}}  */
 /*{{{  static int AT_compareAppls(ATermAppl t0, ATermAppl t2) */
 
-static int AT_compareAppls(ATermAppl t1, ATermAppl t2)
+/* static int AT_compareAppls(ATermAppl t1, ATermAppl t2)
 {
   AFun fun1;
   AFun fun2;
@@ -1790,12 +1791,12 @@ static int AT_compareAppls(ATermAppl t1, ATermAppl t2)
 
   return AT_compareArguments(t1,t2);
 
-}
+} */
 
 /*}}}  */
 /*{{{  static int AT_compareInts(ATermInt t1, ATermInt t2)  */
 
-static int AT_compareInts(ATermInt t1, ATermInt t2)
+/* static int AT_compareInts(ATermInt t1, ATermInt t2)
 {
   int i1;
   int i2;
@@ -1810,12 +1811,12 @@ static int AT_compareInts(ATermInt t1, ATermInt t2)
     return 1;
   }
   return 0;
-}
+} */
 
 /*}}}  */
 /*{{{  static int AT_compareLists(ATermList t1, ATermList t2)  */
 
-static int AT_compareLists(ATermList t1, ATermList t2)
+/* static int AT_compareLists(ATermList t1, ATermList t2)
 {
   size_t length1;
   size_t length2;
@@ -1851,12 +1852,12 @@ static int AT_compareLists(ATermList t1, ATermList t2)
     return 1;
   }
   return 0;
-}
+} */
 
 /*}}}  */
 /*{{{  int ATcompare(ATerm t1, ATerm t2) */
 
-int ATcompare(const ATerm t1, const ATerm t2)
+/* int ATcompare(const ATerm t1, const ATerm t2)
 {
   size_t type1;
   size_t type2;
@@ -1896,7 +1897,7 @@ int ATcompare(const ATerm t1, const ATerm t2)
   }
 
   return result;
-}
+} */
 
 /*}}}  */
 

@@ -34,7 +34,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
   if (TryNoSuffix)
   {
     //try "s"
-    found = !gsOccurs((ATerm) NewTerm, Term);
+    found = !gsOccurs(static_cast_ATerm(NewTerm), Term);
   }
   if (!found)
   {
@@ -44,7 +44,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
       std::stringstream Name;
       Name << s << i;
       NewTerm = gsString2ATermAppl(Name.str().c_str());
-      found = !gsOccurs((ATerm) NewTerm, Term);
+      found = !gsOccurs(static_cast_ATerm(NewTerm), Term);
     }
   }
   if (found)

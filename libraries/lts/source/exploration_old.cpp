@@ -234,7 +234,7 @@ bool lps2lts_algorithm::savetrace(
   ATermList tr = ATmakeList0();
   NextStateGenerator* nsgen = NULL;
 
-  if (extra_state != NULL)
+  if (extra_state != state_t())
   {
     tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
   }
@@ -776,7 +776,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
               if (ATgetLength(action_arguments)>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
@@ -821,7 +821,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
               if (ATgetLength(action_arguments)>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
@@ -954,7 +954,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
               if (ATgetLength(action_arguments)>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
@@ -1001,7 +1001,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
               if (ATgetLength(action_arguments)>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
@@ -1113,7 +1113,7 @@ bool lps2lts_algorithm::generate_lts()
         if (lgopts->bithashing)
         {
           state = state_queue.get_from_queue();
-          assert(state != NULL);
+          assert(state != ATermAppl());
         }
         else
         {
@@ -1140,7 +1140,7 @@ bool lps2lts_algorithm::generate_lts()
               if (lgopts->bithashing && b)
               {
                 const state_t removed_state = state_queue.add_to_queue(NewState);
-                if (removed_state != NULL)
+                if (removed_state != state_t())
                 {
                   bithash_table.remove_state_from_bithash(removed_state);
                   num_states--;

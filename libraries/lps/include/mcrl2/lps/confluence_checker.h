@@ -151,7 +151,7 @@ inline action_label make_ctau_act_id()
 {
   static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, true)), ATmakeList0()));
 
-  assert(ctau_act_id);
+  assert(&*ctau_act_id);
 
   return action_label(ctau_act_id);
 }
@@ -163,7 +163,7 @@ inline action make_ctau_action()
 {
   static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
 
-  assert(ctau_action);
+  assert(&*ctau_action);
 
   return action(ctau_action);
 }

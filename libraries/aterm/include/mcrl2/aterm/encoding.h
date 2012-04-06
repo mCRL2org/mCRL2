@@ -45,15 +45,85 @@ size_t TERM_SIZE_APPL(const size_t arity)
   return (sizeof(struct __ATerm)/sizeof(size_t))+arity;
 }
 
-typedef union _ATerm
+/* typedef union _ATerm
 {
   header_type     header;
   struct __ATerm  aterm;
   union _ATerm*   subaterm[1];
   MachineWord     word[1];
-}* ATerm;
+}* ATerm; */
 
-//_I(x) ((size_t)(x))
+
+union _ATerm
+{
+  header_type     header;
+  struct __ATerm  aterm;
+  union _ATerm*   subaterm[1];
+  MachineWord     word[1];
+};
+
+class ATerm
+{
+  protected:
+    _ATerm *m_aterm;
+
+  public:
+    
+    ATerm ():m_aterm(NULL)
+    {}
+
+    ATerm (const ATerm &t):m_aterm(t.m_aterm)
+    {}
+    
+    ATerm (_ATerm *t):m_aterm(t)
+    {}
+    
+    _ATerm & operator *() const
+    {
+      return *m_aterm;
+    }
+
+    _ATerm * operator ->() const
+    {
+      return m_aterm;
+    }
+
+    bool operator ==(const ATerm &t) const
+    {
+      return t.m_aterm==m_aterm;
+    }
+
+    bool operator !=(const ATerm &t) const
+    {
+      return t.m_aterm!=m_aterm;
+    }
+
+    bool operator <(const ATerm &t) const
+    {
+      return t.m_aterm<m_aterm;
+    }
+
+    bool operator >(const ATerm &t) const
+    {
+      return t.m_aterm>m_aterm;
+    }
+
+    bool operator <=(const ATerm &t) const
+    {
+      return t.m_aterm<=m_aterm;
+    }
+
+    bool operator >=(const ATerm &t) const
+    {
+      return t.m_aterm>=m_aterm;
+    }
+
+    ~ATerm ()
+    {
+    }
+};
+
+
 
 typedef void (*ATermProtFunc)();
 
@@ -81,31 +151,15 @@ static const header_type TYPE_BITS = MCRL2_HT(3);
 static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
 
 static const header_type SHIFT_TYPE = MCRL2_HT(4);
-//#define SHIFT_TYPE 4ll
-static const header_type SHIFT_ARITY = MCRL2_HT(7);
-// static const header_type SHIFT_AGE = MCRL2_HT(0);
 
-// static const header_type MASK_AGE = (MCRL2_HT(1)<<MCRL2_HT(0)) | (MCRL2_HT(1)<<MCRL2_HT(1));
+static const header_type SHIFT_ARITY = MCRL2_HT(7);
+
 static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
 static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
 static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
 static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
-// static const header_type MASK_AGE_MARK = MASK_AGE|MASK_MARK;
 
 static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
-
-/* inline
-size_t GET_AGE(const header_type h)
-{
-  return (h & MASK_AGE) >> SHIFT_AGE;
-} */
-
-/* inline
-header_type HIDE_AGE_MARK(const header_type h)
-{
-  // return h & ~MASK_AGE_MARK; // Vreemd waarom ook hide mark ???????????????????????????????
-  return h;
-} */
 
 inline
 bool EQUAL_HEADER(const header_type h1, const header_type h2)

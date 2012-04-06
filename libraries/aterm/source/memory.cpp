@@ -156,9 +156,9 @@ size_t term_count=0;
   for (p=hashtable; p < newhalf; p++)
   {
     ATerm marked = *p;
-    ATerm prev = NULL;
+    ATerm prev;
     /*{{{  Loop over marked part */
-    while (marked && IS_MARKED(marked->header))
+    while (&*marked && IS_MARKED(marked->header))
     {
       CLR_MARK(marked->header);
       prev = marked;
@@ -168,7 +168,7 @@ size_t term_count=0;
 
     /*{{{  Loop over unmarked part */
 
-    if (marked)
+    if (&*marked)
     {
       ATerm unmarked;
       ATerm* hashspot;
@@ -177,7 +177,7 @@ size_t term_count=0;
       {
         /* No marked terms */
         unmarked = marked;
-        *p = NULL;
+        *p = ATerm();
       }
       else
       {
@@ -186,7 +186,7 @@ size_t term_count=0;
         prev->aterm.next = NULL;
       }
 
-      while (unmarked)
+      while (&*unmarked)
       {
 term_count++;
         ATerm next = unmarked->aterm.next;
@@ -195,7 +195,7 @@ term_count++;
         hnr = hash_number(unmarked, term_size(unmarked));
         hnr &= table_mask;
         hashspot = hashtable+hnr;
-        unmarked->aterm.next = *hashspot;
+        unmarked->aterm.next = &**hashspot;
         *hashspot = unmarked;
 
         if (hashspot > p && hashspot < newhalf)
@@ -254,8 +254,8 @@ void AT_initMemory()
   ATempty->aterm.head = NULL;
   ATempty->aterm.tail = NULL;
 
-  hnr = hash_number((ATerm)ATempty, TERM_SIZE_LIST);
-  hashtable[hnr& table_mask] = (ATerm)ATempty;
+  hnr = hash_number(static_cast_ATerm(ATempty), TERM_SIZE_LIST);
+  hashtable[hnr& table_mask] = static_cast_ATerm(ATempty);
 
   ATprotectList(&ATempty);
 
@@ -420,12 +420,12 @@ fprintf(stderr,"Start garbage collect %ld\n",total_nodes);
 fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_of_nodes_for_the_next_garbage_collect,table_size);
   }
 
-  ATerm at;
+  _ATerm *at;
   TermInfo *ti = &terminfo[size];
   if (ti->at_block && ti->top_at_blocks < ti->at_block->end)
   {
     /* the first block is not full: allocate a cell */
-    at = (ATerm)ti->top_at_blocks;
+    at = (_ATerm *)ti->top_at_blocks;
     ti->top_at_blocks += size;
   }
   else if (ti->at_freelist)
@@ -441,7 +441,7 @@ fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_o
     /* there is no more memory of the current size allocate a block */
     allocate_block(size);
     assert(ti->at_block != NULL);
-    at = (ATerm)ti->top_at_blocks;
+    at = (_ATerm *)ti->top_at_blocks;
     ti->top_at_blocks += size;
   }
 
@@ -459,13 +459,13 @@ fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_o
 
 void AT_freeTerm(const size_t size, const ATerm t)
 {
-  ATerm prev = NULL, cur;
+  _ATerm *prev=NULL, *cur;
 
   // terminfo[size].nb_reclaimed_cells_during_last_gc++;
 
   /* Remove the node from the hashtable */
   const HashNumber hnr = hash_number(t, size) & table_mask;
-  cur = hashtable[hnr];
+  cur = &*hashtable[hnr];
 
   do
   {
@@ -473,7 +473,7 @@ void AT_freeTerm(const size_t size, const ATerm t)
     {
       std::runtime_error("AT_freeTerm: cannot find term " + ATwriteToString(t) + " at " + to_string(t) + " in hashtable at pos " + to_string(hnr) + " header=" + to_string(t->header));
     }
-    if (cur == t)
+    if (cur == &*t)
     {
       if (prev)
       {
@@ -521,16 +521,16 @@ ATermAppl ATmakeAppl(const AFun sym, ...)
   va_start(args, sym);
   for (size_t i=0; i<arity; i++)
   {
-    arg = va_arg(args, ATerm);
+    arg = va_arg(args, _ATerm *);
     CHECK_TERM(arg);
-    hnr = COMBINE(hnr, HN(arg));
+    hnr = COMBINE(hnr, HN(&*arg));
     buffer[i] = arg;
   }
   va_end(args);
   hnr = FINISH(hnr);
 
-  cur = (ATermAppl)hashtable[hnr & table_mask];
-  while (cur)
+  cur = (_ATermAppl *)&*hashtable[hnr & table_mask];
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(cur->header,header))
     {
@@ -548,12 +548,12 @@ ATermAppl ATmakeAppl(const AFun sym, ...)
         break;
       }
     }
-    cur = (ATermAppl)cur->aterm.next;
+    cur = (_ATermAppl *)cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
+    cur = (_ATermAppl *) &*AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -562,7 +562,7 @@ ATermAppl ATmakeAppl(const AFun sym, ...)
     {
       ATgetArgument(cur, i) = buffer[i];
     }
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -591,40 +591,34 @@ ATermAppl ATmakeAppl0(const AFun sym)
   hashspot = (ATermAppl*) &(hashtable[hnr & table_mask]);
 
   cur = *hashspot;
-  while (cur)
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(cur->header,header))
     {
       /* Promote current entry to front of hashtable */
-      if (prev != NULL)
+      if (prev!=NULL)
       {
         prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (ATerm) *hashspot;
+        cur->aterm.next = (_ATerm*) &**hashspot;
         *hashspot = cur;
       }
 
       return cur;
     }
     prev = cur;
-    cur = (ATermAppl)cur->aterm.next;
+    cur = (_ATermAppl *)&*cur->aterm.next;
   }
 
-  cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(0));
+  cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(0));
   /* Delay masking until after AT_allocate */
   hnr &= table_mask;
   cur->header = header;
   CHECK_HEADER(cur->header);
-  cur->aterm.next = hashtable[hnr];
+  cur->aterm.next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
 }
-
-
-
-/**
- * Create an ATermAppl with zero arguments.
- */
 
 /*}}}  */
 /*{{{  ATermAppl ATmakeAppl1(AFun sym, ATerm arg0) */
@@ -646,38 +640,38 @@ ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
   CHECK_ARITY(ATgetArity(sym), 1);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
+  hnr = COMBINE(hnr, HN(arg0));
   hnr = FINISH(hnr);
 
   prev = NULL;
   hashspot = (ATermAppl*) &(hashtable[hnr & table_mask]);
 
   cur = *hashspot;
-  while (cur)
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(header,cur->header)
     && ATgetArgument(cur, 0) == arg0)
     {
       /* Promote current entry to front of hashtable */
-      if (prev != NULL)
+      if (prev!=NULL)
       {
         prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (ATerm) *hashspot;
+        cur->aterm.next = (_ATerm *) &**hashspot;
         *hashspot = cur;
       }
       return cur;
     }
     prev = cur;
-    cur = (ATermAppl)cur->aterm.next;
+    cur = (_ATermAppl *)cur->aterm.next;
   }
 
-  cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(1));
+  cur = (_ATermAppl *) &*AT_allocate(TERM_SIZE_APPL(1));
   /* Delay masking until after AT_allocate */
   hnr &= table_mask;
   cur->header = header;
   CHECK_HEADER(cur->header);
   ATgetArgument(cur, 0) = arg0;
-  cur->aterm.next = hashtable[hnr];
+  cur->aterm.next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
@@ -704,34 +698,34 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
   CHECK_ARITY(ATgetArity(sym), 2);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
-  hnr = COMBINE(hnr, HN((char*)arg1));
+  hnr = COMBINE(hnr, HN(arg0));
+  hnr = COMBINE(hnr, HN(arg1));
   hnr = FINISH(hnr);
 
   prev = NULL;
   hashspot = (ATermAppl*) &(hashtable[hnr & table_mask]);
 
   cur = *hashspot;
-  while (cur)
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(cur->header,header)
     && ATgetArgument(cur, 0) == arg0
     && ATgetArgument(cur, 1) == arg1)
     {
       /* Promote current entry to front of hashtable */
-      if (prev != NULL)
+      if (prev!=NULL)
       {
         prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (ATerm) *hashspot;
+        cur->aterm.next = (_ATerm *) &**hashspot;
         *hashspot = cur;
       }
       return cur;
     }
     prev = cur;
-    cur = (ATermAppl)cur->aterm.next;
+    cur = (_ATermAppl*)cur->aterm.next;
   }
 
-  cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(2));
+  cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(2));
   /* Delay masking until after AT_allocate */
   hnr &= table_mask;
   cur->header = header;
@@ -739,7 +733,7 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
   ATgetArgument(cur, 0) = arg0;
   ATgetArgument(cur, 1) = arg1;
 
-  cur->aterm.next = hashtable[hnr];
+  cur->aterm.next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
@@ -767,23 +761,23 @@ ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const 
   CHECK_ARITY(ATgetArity(sym), 3);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
-  hnr = COMBINE(hnr, HN((char*)arg1));
-  hnr = COMBINE(hnr, HN((char*)arg2));
+  hnr = COMBINE(hnr, HN(arg0));
+  hnr = COMBINE(hnr, HN(arg1));
+  hnr = COMBINE(hnr, HN(arg2));
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) ||
+  while (cur!=ATermAppl() && (!EQUAL_HEADER(cur->header,header) ||
   ATgetArgument(cur, 0) != arg0 ||
   ATgetArgument(cur, 1) != arg1 ||
   ATgetArgument(cur, 2) != arg2))
   {
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(3));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(3));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -792,7 +786,7 @@ ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 1) = arg1;
     ATgetArgument(cur, 2) = arg2;
 
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -824,25 +818,25 @@ ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const 
   CHECK_ARITY(ATgetArity(sym), 4);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
-  hnr = COMBINE(hnr, HN((char*)arg1));
-  hnr = COMBINE(hnr, HN((char*)arg2));
-  hnr = COMBINE(hnr, HN((char*)arg3));
+  hnr = COMBINE(hnr, HN(arg0));
+  hnr = COMBINE(hnr, HN(arg1));
+  hnr = COMBINE(hnr, HN(arg2));
+  hnr = COMBINE(hnr, HN(arg3));
   hnr = FINISH(hnr);
 
   cur = (ATermAppl)hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) ||
+  while (cur!=ATermAppl() && (!EQUAL_HEADER(cur->header,header) ||
   ATgetArgument(cur, 0) != arg0 ||
   ATgetArgument(cur, 1) != arg1 ||
   ATgetArgument(cur, 2) != arg2 ||
   ATgetArgument(cur, 3) != arg3))
   {
-    cur = (ATermAppl)cur->aterm.next;
+    cur = (_ATermAppl*)cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(4));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(4));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -852,7 +846,7 @@ ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 2) = arg2;
     ATgetArgument(cur, 3) = arg3;
 
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -885,27 +879,27 @@ const ATerm arg3, const ATerm arg4)
   CHECK_ARITY(ATgetArity(sym), 5);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
-  hnr = COMBINE(hnr, HN((char*)arg1));
-  hnr = COMBINE(hnr, HN((char*)arg2));
-  hnr = COMBINE(hnr, HN((char*)arg3));
-  hnr = COMBINE(hnr, HN((char*)arg4));
+  hnr = COMBINE(hnr, HN(arg0));
+  hnr = COMBINE(hnr, HN(arg1));
+  hnr = COMBINE(hnr, HN(arg2));
+  hnr = COMBINE(hnr, HN(arg3));
+  hnr = COMBINE(hnr, HN(arg4));
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) ||
+  while (cur!=ATermAppl() && (!EQUAL_HEADER(cur->header,header) ||
   ATgetArgument(cur, 0) != arg0 ||
   ATgetArgument(cur, 1) != arg1 ||
   ATgetArgument(cur, 2) != arg2 ||
   ATgetArgument(cur, 3) != arg3 ||
   ATgetArgument(cur, 4) != arg4))
   {
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(5));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(5));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -916,7 +910,7 @@ const ATerm arg3, const ATerm arg4)
     ATgetArgument(cur, 3) = arg3;
     ATgetArgument(cur, 4) = arg4;
 
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -949,16 +943,16 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
   CHECK_ARITY(ATgetArity(sym), 6);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)arg0));
-  hnr = COMBINE(hnr, HN((char*)arg1));
-  hnr = COMBINE(hnr, HN((char*)arg2));
-  hnr = COMBINE(hnr, HN((char*)arg3));
-  hnr = COMBINE(hnr, HN((char*)arg4));
-  hnr = COMBINE(hnr, HN((char*)arg5));
+  hnr = COMBINE(hnr, HN(arg0));
+  hnr = COMBINE(hnr, HN(arg1));
+  hnr = COMBINE(hnr, HN(arg2));
+  hnr = COMBINE(hnr, HN(arg3));
+  hnr = COMBINE(hnr, HN(arg4));
+  hnr = COMBINE(hnr, HN(arg5));
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) ||
+  while (cur!=ATermAppl() && (!EQUAL_HEADER(cur->header,header) ||
   ATgetArgument(cur, 0) != arg0 ||
   ATgetArgument(cur, 1) != arg1 ||
   ATgetArgument(cur, 2) != arg2 ||
@@ -966,10 +960,10 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
   ATgetArgument(cur, 4) != arg4 ||
   ATgetArgument(cur, 5) != arg5))
   {
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl *) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
     cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(6));
     /* Delay masking until after AT_allocate */
@@ -983,7 +977,7 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
     ATgetArgument(cur, 4) = arg4;
     ATgetArgument(cur, 5) = arg5;
 
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next =&*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1010,20 +1004,20 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
-  CHECK_TERM((ATerm)args);
+  CHECK_TERM(static_cast_ATerm(args));
   assert(arity == ATgetLength(args));
 
   argptr = args;
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
-    hnr = COMBINE(hnr, HN((char*)ATgetFirst(argptr)));
+    hnr = COMBINE(hnr, HN(ATgetFirst(argptr)));
     argptr = ATgetNext(argptr);
   }
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur)
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(cur->header,header))
     {
@@ -1043,13 +1037,13 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
         break;
       }
     }
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
     ATprotectList(&args);
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(arity));
     ATunprotect((ATerm*)(void*)&args);
 
     /* Delay masking until after AT_allocate */
@@ -1062,7 +1056,7 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
       ATgetArgument(cur, i) = ATgetFirst(argptr);
       argptr = ATgetNext(argptr);
     }
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1091,12 +1085,12 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
-    hnr = COMBINE(hnr, (HashNumber)(char*)args[i]);
+    hnr = COMBINE(hnr, (HashNumber)&*args[i]);
   }
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur)
+  while (cur!=ATermAppl())
   {
     if (EQUAL_HEADER(cur->header,header))
     {
@@ -1114,13 +1108,13 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
         break;
       }
     }
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermAppl())
   {
     ATprotectArray(args, arity);
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(arity));
     ATunprotectArray(args);
 
     /* Delay masking until after AT_allocate */
@@ -1131,7 +1125,7 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
     {
       ATgetArgument(cur, i) = args[i];
     }
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1169,15 +1163,15 @@ ATermInt ATmakeInt(const int val)
   hnr = COMBINE(hnr, HN(_val.reserved));
   hnr = FINISH(hnr);
 
-  cur = (ATermInt) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != _val.value)))
+  cur = (ATermInt)hashtable[hnr & table_mask];
+  while (cur!=ATermInt() && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != _val.value)))
   {
-    cur = (ATermInt) cur->aterm.next;
+    cur = (_ATermInt *) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermInt())
   {
-    cur = (ATermInt)AT_allocate(TERM_SIZE_INT);
+    cur = (_ATermInt*)&*AT_allocate(TERM_SIZE_INT);
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -1185,7 +1179,7 @@ ATermInt ATmakeInt(const int val)
     cur->aterm.reserved = _val.reserved;
     cur->aterm.value = _val.value;
 
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1212,28 +1206,28 @@ ATermList ATmakeList1(const ATerm el)
   CHECK_TERM(el);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)el));
-  hnr = COMBINE(hnr, HN((char*)ATempty));
+  hnr = COMBINE(hnr, HN(el));
+  hnr = COMBINE(hnr, HN(ATempty));
   hnr = FINISH(hnr);
 
   cur = (ATermList)hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header)
+  while (cur!=ATermList() && (!EQUAL_HEADER(cur->header,header)
   || ATgetFirst(cur) != el
   || ATgetNext(cur) != ATempty))
   {
-    cur = (ATermList) cur->aterm.next;
+    cur = (_ATermList*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermList())
   {
-    cur = (ATermList) AT_allocate(TERM_SIZE_LIST);
+    cur = (_ATermList*) &*AT_allocate(TERM_SIZE_LIST);
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
     ATgetFirst(cur) = el;
     ATgetNext(cur) = ATempty;
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1270,34 +1264,34 @@ ATermList ATinsert(const ATermList tail, const ATerm el)
 
   header = LIST_HEADER(newLength);
 
-  CHECK_TERM((ATerm)tail);
+  CHECK_TERM(static_cast_ATerm(tail));
   CHECK_TERM(el);
 
-  assert(ATgetType((ATerm)tail) == AT_LIST);
+  assert(ATgetType(static_cast_ATerm(tail)) == AT_LIST);
 
   hnr = START(header);
-  hnr = COMBINE(hnr, HN((char*)el));
-  hnr = COMBINE(hnr, HN((char*)tail));
+  hnr = COMBINE(hnr, HN(el));
+  hnr = COMBINE(hnr, HN(tail));
   hnr = FINISH(hnr);
 
-  cur = (ATermList) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header)
+  cur = (_ATermList*) &*hashtable[hnr & table_mask];
+  while (cur!=ATermList() && (!EQUAL_HEADER(cur->header,header)
   || ATgetFirst(cur) != el
   || ATgetNext(cur) != tail))
   {
-    cur = (ATermList) cur->aterm.next;
+    cur = (_ATermList*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermList())
   {
-    cur = (ATermList) AT_allocate(TERM_SIZE_LIST);
+    cur = (_ATermList*) &*AT_allocate(TERM_SIZE_LIST);
     /* Hashtable might be resized, so delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
     ATgetFirst(cur) = el;
     ATgetNext(cur) = tail;
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1330,18 +1324,18 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
   {
     if (i!=n)
     {
-      hnr = COMBINE(hnr, (HashNumber)(char*)ATgetArgument(appl, i));
+      hnr = COMBINE(hnr, (HashNumber)&*ATgetArgument(appl, i));
     }
     else
     {
-      hnr = COMBINE(hnr, (HashNumber)(char*)arg);
+      hnr = COMBINE(hnr, (HashNumber)&*arg);
     }
   }
 
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
-  while (cur)
+  while (cur!=ATermList())
   {
     if (EQUAL_HEADER(cur->header,appl->header))
     {
@@ -1370,12 +1364,12 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
         break;
       }
     }
-    cur = (ATermAppl) cur->aterm.next;
+    cur = (_ATermAppl*) cur->aterm.next;
   }
 
-  if (!cur)
+  if (cur==ATermList())
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
+    cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = appl->header;
@@ -1391,7 +1385,7 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
         ATgetArgument(cur, i) = arg;
       }
     }
-    cur->aterm.next = hashtable[hnr];
+    cur->aterm.next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1411,7 +1405,7 @@ bool AT_isValidTerm(const ATerm term)
   Block* cur;
   header_type header;
   bool inblock = false;
-  size_t idx = ADDR_TO_BLOCK_IDX(term);
+  size_t idx = ADDR_TO_BLOCK_IDX(&*term);
   size_t type;
   ptrdiff_t offset = 0;
 
@@ -1422,7 +1416,7 @@ bool AT_isValidTerm(const ATerm term)
     if (cur->size)
     {
       assert(cur->next_before == cur->next_after);
-      offset  = ((char*)term) - ((char*)&cur->data);
+      offset  = ((char*)&*term) - (char*)(&cur->data);
       if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type)))
       {
         inblock = true;
@@ -1438,7 +1432,7 @@ bool AT_isValidTerm(const ATerm term)
       if (cur->size)
       {
         assert(cur->next_before == cur->next_after);
-        offset  = ((char*)term) - ((char*)&cur->data);
+        offset  = ((char*)&*term) - ((char*)&cur->data);
         if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type)))
         {
           inblock = true;
@@ -1456,12 +1450,14 @@ bool AT_isValidTerm(const ATerm term)
   /* Check if we point to the start of a term. Pointers inside terms
      are not allowed.
      */
+
   if (offset % (cur->size*sizeof(header)))
   {
     return false;
   }
 
   header = term->header;
+
   type = GET_TYPE(header);
 
   /* The only possibility left for an invalid term is AT_FREE */
@@ -1482,7 +1478,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
   Block* cur;
   TermInfo* ti;
   bool inblock = false;
-  size_t idx = ADDR_TO_BLOCK_IDX(term);
+  size_t idx = ADDR_TO_BLOCK_IDX(&*term);
   size_t type;
 
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
@@ -1505,7 +1501,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
         end = ti->top_at_blocks;
       }
 
-      if (cur->data <= (header_type*)term && (header_type*)term < end)
+      if (cur->data <= (header_type*)&*term && (header_type*)&*term < end)
       {
         inblock = true;
         break;
@@ -1533,7 +1529,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
           end = ti->top_at_blocks;
         }
 
-        if (cur->data <= (header_type*)term && (header_type*)term < end)
+        if (cur->data <= (header_type*)&*term && (header_type*)&*term < end)
         {
           inblock = true;
           break;
@@ -1544,16 +1540,16 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
   if (!inblock)
   {
-    return NULL;
+    return ATerm();
   }
 
 
-  term = (ATerm)(((char*)term)-(((char*)term-((char*)cur->data))%(cur->size*sizeof(header_type))));
+  term = (_ATerm*)(((char*)&*term)-(((char*)&*term-((char*)cur->data))%(cur->size*sizeof(header_type))));
 
   type = GET_TYPE(term->header);
 
   /* The only possibility left for an invalid term is AT_FREE */
-  return (((type == AT_FREE) || (type == AT_SYMBOL)) ? NULL : term);
+  return (((type == AT_FREE) || (type == AT_SYMBOL)) ? ATerm() : term);
 }
 
 /*}}}  */
@@ -1568,11 +1564,11 @@ size_t AT_inAnyFreeList(const ATerm t)
 {
   for (size_t i=MIN_TERM_SIZE; i<maxTermSize; i++)
   {
-    ATerm cur = terminfo[i].at_freelist;
+    _ATerm* cur = terminfo[i].at_freelist;
 
     while (cur)
     {
-      if (cur == t)
+      if (cur == &*t)
       {
         return i;
       }

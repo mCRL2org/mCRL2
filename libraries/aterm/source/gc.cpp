@@ -97,7 +97,7 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
       if (AT_isPotentialTerm(*cur))
       {
         real_term = AT_isInsideValidTerm(*cur);
-        if (real_term != NULL)
+        if (&*real_term != NULL)
         {
           if (!IS_MARKED((real_term)->header))
           {
@@ -106,9 +106,9 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
           }
         }
       }
-      else if (AT_isValidAFun((AFun)*cur))
+      else if (AT_isValidAFun((AFun)&**cur))
       {
-        AT_markAFun((AFun)*cur);
+        AT_markAFun((AFun)&**cur);
       }
     }
   }
@@ -116,7 +116,7 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
   {
     for (cur=start; cur<stop; cur++)
     {
-      if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      if ((&**cur!=NULL) && (!IS_MARKED((*cur)->header)))
       {
         assert(AT_isValidTerm(*cur));
         AT_markTerm(*cur);
@@ -236,7 +236,7 @@ VOIDCDECL mark_phase()
     {
       for (j=0; j<cur->size; j++)
       {
-        if (cur->start[j])
+        if (&*(cur->start[j]))
         {
           assert(AT_isValidTerm(cur->start[j]));
           AT_markTerm(cur->start[j]);
@@ -369,7 +369,7 @@ static void check_unmarked_block()
       header_type* cur;
       for (cur=block->data ; cur<end ; cur+=size)
       {
-        ATerm t = (ATerm)cur;
+        ATerm t = (_ATerm*)cur;
         assert(!IS_MARKED(t->header));
       }
       block = block->next_by_size;
@@ -413,7 +413,7 @@ size_t total_aterm_memory=0;
       const ATerm old_freelist = ti->at_freelist;
       for (cur=block->data ; cur<end ; cur+=size)
       {
-        ATerm t = (ATerm)cur;
+        ATerm t = (_ATerm*)cur;
         if (IS_MARKED(t->header))
         {
 ++total_nr_terms;
@@ -429,7 +429,7 @@ total_aterm_memory +=size*8;
           {
             case AT_FREE:
               t->aterm.next = ti->at_freelist;
-              ti->at_freelist = t;
+              ti->at_freelist = &*t;
               break;
             case AT_INT:
             case AT_APPL:
@@ -437,13 +437,13 @@ total_aterm_memory +=size*8;
               AT_freeTerm(size, t);
               t->header = FREE_HEADER;
               t->aterm.next  = ti->at_freelist;
-              ti->at_freelist = t;
+              ti->at_freelist = &*t;
               break;
             case AT_SYMBOL:
-              AT_freeAFun((SymEntry)t);
+              AT_freeAFun((SymEntry)&*t);
               t->header = FREE_HEADER;
               t->aterm.next = ti->at_freelist;
-              ti->at_freelist = t;
+              ti->at_freelist = &*t;
 
               break;
             default:
@@ -460,14 +460,14 @@ total_aterm_memory +=size*8;
       {
         for (cur=block->data; cur<end; cur+=size)
         {
-          assert(ATgetType((ATerm)cur) == AT_FREE);
+          assert(ATgetType((_ATerm*)cur) == AT_FREE);
         }
       }
 #endif
 
       if (end==block->end && empty)
       {
-        ti->at_freelist = old_freelist;
+        ti->at_freelist = &*old_freelist;
         reclaim_empty_block(size, block, prev_block);
       }
       else
@@ -484,7 +484,7 @@ total_aterm_memory +=size*8;
 
 
 #ifndef NDEBUG
-    ATerm data;
+    _ATerm* data;
     for (data = ti->at_freelist ; data ; data=data->aterm.next)
     {
       if (!EQUAL_HEADER(data->header,FREE_HEADER))

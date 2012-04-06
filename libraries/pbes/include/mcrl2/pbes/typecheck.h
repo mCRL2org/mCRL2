@@ -34,7 +34,7 @@ void type_check(pbes<Container>& pbes_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t1 = pbes_to_aterm(pbes_spec);
   ATermAppl t2 = core::type_check_pbes_spec(t1);
-  if (!t2)
+  if (t2==ATermAppl())
   {
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(pbes_spec));
   }

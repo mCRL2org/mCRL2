@@ -90,7 +90,7 @@ class term_appl: public aterm_base
     /// \return The wrapped ATerm.
     ATermAppl appl() const
     {
-      return reinterpret_cast<ATermAppl>(m_term);
+      return (ATermAppl)m_term;
     }
 
   public:
@@ -156,7 +156,7 @@ class term_appl: public aterm_base
     template <typename Iter>
     term_appl(function_symbol sym, Iter first, Iter last)
     {
-      m_term = reinterpret_cast<ATerm>(detail::at_make_appl(sym, first, last));
+      m_term = static_cast<ATerm>(detail::at_make_appl(sym, first, last));
     }
 
     /// \brief Constructor.
@@ -172,7 +172,7 @@ class term_appl: public aterm_base
     /// \return The wrapped ATermAppl pointer
     operator ATermAppl() const
     {
-      return reinterpret_cast<ATermAppl>(m_term);
+      return (ATermAppl)m_term;
     }
 
     /// \brief Assignment operator.
@@ -190,8 +190,8 @@ class term_appl: public aterm_base
     /// \return The result of the assignment.
     term_appl<Term>& operator=(ATermAppl t)
     {
-      assert(t==NULL || ATgetType((ATerm)t) != AT_FREE);
-      m_term = reinterpret_cast<ATerm>(t);
+      assert(t==ATermAppl() || ATgetType(static_cast_ATerm(t)) != AT_FREE);
+      m_term = static_cast_ATerm(t);
       return *this;
     }
 
@@ -206,14 +206,14 @@ class term_appl: public aterm_base
     /// \return An iterator pointing to the beginning of the list.
     const_iterator begin() const
     {
-      return const_iterator(((ATerm*)(m_term) + ARG_OFFSET));
+      return const_iterator(((ATerm*)(&*m_term) + ARG_OFFSET));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the list.
     /// \return A const_iterator pointing to the beginning of the list.
     const_iterator end() const
     {
-      return const_iterator(((ATerm*)(m_term) + ARG_OFFSET + size()));
+      return const_iterator(((ATerm*)(&*m_term) + ARG_OFFSET + size()));
     }
 
     /// \brief Returns the largest possible size of the list.
@@ -362,7 +362,8 @@ bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator==(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
+  // return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
+  return (ATermAppl)aterm_traits<term_appl<Term> >::term(x)==y;
 }
 
 /// \brief Equality operator.
@@ -372,7 +373,7 @@ bool operator==(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator==(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, (ATermAppl)aterm_traits<term_appl<Term> >::term(y)) == true;
+  return x==(ATermAppl)aterm_traits<term_appl<Term> >::term(y);
 }
 
 /// \brief Inequality operator.
@@ -382,7 +383,7 @@ bool operator==(ATermAppl x, const term_appl<Term>& y)
 template <typename Term>
 bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == false;
+  return aterm_traits<term_appl<Term> >::term(x)!=aterm_traits<term_appl<Term> >::term(y);
 }
 
 /// \brief Inequality operator.

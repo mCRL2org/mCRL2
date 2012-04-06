@@ -87,7 +87,7 @@ void label::set_actions_text(const wxString& p_actions)
     // skip
   }
 
-  if (a_parsed_multi_action)
+  if (a_parsed_multi_action!=atermpp::aterm_appl())
   {
     // get list of ParamId's from MultAct
     atermpp::aterm_list al(a_parsed_multi_action.argument(0));

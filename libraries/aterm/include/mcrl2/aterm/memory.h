@@ -38,6 +38,26 @@ inline HashNumber HN(const T i)
   return (HashNumber)(i);
 }
 
+inline HashNumber HN(const ATerm i)
+{
+  return (HashNumber)(&*i);
+}
+
+inline HashNumber HN(const ATermList i)
+{
+  return (HashNumber)(&*i);
+}
+
+inline HashNumber HN(const ATermInt i)
+{
+  return (HashNumber)(&*i);
+}
+
+inline HashNumber HN(const ATermAppl i)
+{
+  return (HashNumber)(&*i);
+}
+
 
 #ifdef AT_64BIT
 inline
@@ -89,7 +109,7 @@ typedef struct TermInfo
 {
   Block*       at_block;
   header_type* top_at_blocks;
-  ATerm        at_freelist;
+  _ATerm*       at_freelist;
 } TermInfo;
 
 extern TermInfo* terminfo;
@@ -112,7 +132,7 @@ extern header_type* max_heap_address;
 inline
 bool AT_isPotentialTerm(const ATerm term)
 {
-  return min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address;
+  return min_heap_address <= (header_type*)(&*term) && (header_type*)(&*term) <= max_heap_address;
 }
 
 
@@ -188,7 +208,7 @@ HashNumber FINISH(const HashNumber hnr)
 inline
 void CHECK_TERM(const ATerm t)
 {
-  assert((t) != NULL && (AT_isValidTerm(t)));
+  assert(&*t != NULL && (AT_isValidTerm(t)));
 }
 
 /*}}}  */
@@ -203,7 +223,7 @@ struct default_aterm_converter
   template <typename T>
   ATerm operator()(const T& x) const
   {
-    return reinterpret_cast<ATerm>(x);
+    return static_cast<ATerm>(x);
   }
 };
 
@@ -234,7 +254,7 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
   hnr = FINISH(hnr);
 
   cur = (ATermAppl)hashtable[hnr & table_mask];
-  while (cur)
+  while (&*cur)
   {
     if (EQUAL_HEADER(cur->header,header))
     {
@@ -257,7 +277,7 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
     cur = (ATermAppl)cur->aterm.next;
   }
 
-  if (!cur)
+  if (!&*cur)
   {
     cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
@@ -270,8 +290,8 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
       assert(j<arity);
       ATgetArgument(cur, j) = convert_to_aterm(*i);
     }
-    cur->aterm.next = hashtable[hnr];
-    hashtable[hnr] = (ATerm) cur;
+    cur->aterm.next = &*hashtable[hnr];
+    hashtable[hnr] = static_cast_ATerm(cur);
   }
 
   return cur;

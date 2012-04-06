@@ -110,7 +110,7 @@ class propositional_variable_instantiation: public pbes_expression
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
       data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters));
+      m_term = static_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters));
     }
 //--- end user section propositional_variable_instantiation ---//
 };

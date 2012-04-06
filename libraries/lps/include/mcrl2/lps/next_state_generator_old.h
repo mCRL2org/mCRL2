@@ -72,7 +72,7 @@ class next_state_generator
       /// \deprecated
       atermpp::aterm operator[](std::size_t i) const
       {
-        return atermpp::aterm_appl(reinterpret_cast<ATermAppl>(state))(i);
+        return atermpp::aterm_appl(static_cast<ATermAppl>(state))(i);
       }
 
       /// \brief Returns the label of the transition.
@@ -84,7 +84,7 @@ class next_state_generator
       /// \brief Returns the number of components of the state.
       std::size_t size() const
       {
-        return atermpp::term_appl<atermpp::aterm_appl>(reinterpret_cast<ATermAppl>(state)).size();
+        return atermpp::term_appl<atermpp::aterm_appl>(static_cast<ATermAppl>(state)).size();
       }
     };
 
