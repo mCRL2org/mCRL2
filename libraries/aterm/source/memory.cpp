@@ -89,11 +89,13 @@ static HashNumber hash_number(const ATerm t, const size_t size)
 {
   HashNumber hnr;
 
-  hnr = START(t->word[0]);
+  // hnr = START(t->word[0]);
+  hnr = START(t->header);
 
   for (size_t i=ARG_OFFSET; i<size; i++)
   {
-    hnr = COMBINE(hnr, t->word[i]);
+    // hnr = COMBINE(hnr, t->word[i]);
+    hnr = COMBINE(hnr, *(reinterpret_cast<MachineWord *>(&*t) + i));
   }
 
   return FINISH(hnr);
@@ -162,7 +164,8 @@ size_t term_count=0;
     {
       CLR_MARK(marked->header);
       prev = marked;
-      marked = marked->aterm.next;
+      // marked = marked->aterm.next;
+      marked = marked->next;
     }
     /*}}}  */
 
@@ -183,19 +186,22 @@ size_t term_count=0;
       {
         /* disconnect unmarked terms from rest */
         unmarked = marked;
-        prev->aterm.next = NULL;
+        // prev->aterm.next = NULL;
+        prev->next = NULL;
       }
 
       while (&*unmarked)
       {
 term_count++;
-        ATerm next = unmarked->aterm.next;
+        // ATerm next = unmarked->aterm.next;
+        ATerm next = unmarked->next;
         HashNumber hnr;
 
         hnr = hash_number(unmarked, term_size(unmarked));
         hnr &= table_mask;
         hashspot = hashtable+hnr;
-        unmarked->aterm.next = &**hashspot;
+        // unmarked->aterm.next = &**hashspot;
+        unmarked->next = &**hashspot;
         *hashspot = unmarked;
 
         if (hashspot > p && hashspot < newhalf)
@@ -432,7 +438,8 @@ fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_o
   {
     /* the freelist is not empty: allocate a cell */
     at = ti->at_freelist;
-    ti->at_freelist = ti->at_freelist->aterm.next;
+    // ti->at_freelist = ti->at_freelist->aterm.next;
+    ti->at_freelist = ti->at_freelist->next;
     assert(ti->at_block != NULL);
     assert(ti->top_at_blocks == ti->at_block->end);
   }
@@ -477,18 +484,20 @@ void AT_freeTerm(const size_t size, const ATerm t)
     {
       if (prev)
       {
-        prev->aterm.next = cur->aterm.next;
+        // prev->aterm.next = cur->aterm.next;
+        prev->next = cur->next;
       }
       else
       {
-        hashtable[hnr] = cur->aterm.next;
+        hashtable[hnr] = cur->next;
       }
       /* Put the node in the appropriate free list */
       total_nodes--;
       return;
     }
   }
-  while (((prev=cur), (cur=cur->aterm.next)));
+  // while (((prev=cur), (cur=cur->aterm.next)));
+  while (((prev=cur), (cur=cur->next)));
   assert(0);
 }
 
@@ -1572,7 +1581,8 @@ size_t AT_inAnyFreeList(const ATerm t)
       {
         return i;
       }
-      cur = cur->aterm.next;
+      // cur = cur->aterm.next;
+      cur = cur->next;
     }
   }
   return 0;

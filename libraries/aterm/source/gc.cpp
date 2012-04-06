@@ -428,7 +428,8 @@ total_aterm_memory +=size*8;
           switch (ATgetType(t))
           {
             case AT_FREE:
-              t->aterm.next = ti->at_freelist;
+              // t->aterm.next = ti->at_freelist;
+              t->next = ti->at_freelist;
               ti->at_freelist = &*t;
               break;
             case AT_INT:
@@ -436,13 +437,15 @@ total_aterm_memory +=size*8;
             case AT_LIST:
               AT_freeTerm(size, t);
               t->header = FREE_HEADER;
-              t->aterm.next  = ti->at_freelist;
+              // t->aterm.next  = ti->at_freelist;
+              t->next  = ti->at_freelist;
               ti->at_freelist = &*t;
               break;
             case AT_SYMBOL:
               AT_freeAFun((SymEntry)&*t);
               t->header = FREE_HEADER;
-              t->aterm.next = ti->at_freelist;
+              // t->aterm.next = ti->at_freelist;
+              t->next = ti->at_freelist;
               ti->at_freelist = &*t;
 
               break;
@@ -485,7 +488,8 @@ total_aterm_memory +=size*8;
 
 #ifndef NDEBUG
     _ATerm* data;
-    for (data = ti->at_freelist ; data ; data=data->aterm.next)
+    // for (data = ti->at_freelist ; data ; data=data->aterm.next)
+    for (data = ti->at_freelist ; data ; data=data->next)
     {
       if (!EQUAL_HEADER(data->header,FREE_HEADER))
       {

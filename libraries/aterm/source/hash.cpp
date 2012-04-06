@@ -93,11 +93,13 @@ struct _ATermTable
   size_t max_entries;
   size_t* hashtable;
   size_t nr_tables;
-  union _ATerm** * keys;
+  // union _ATerm** * keys;
+  _ATerm** * keys;
   size_t nr_free_tables;
   size_t first_free_position;
   size_t** free_table;
-  union _ATerm** * values;
+  // union _ATerm** * values;
+  _ATerm** * values;
 };
 
 /*}}}  */
