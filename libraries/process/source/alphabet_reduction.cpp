@@ -1904,7 +1904,8 @@ namespace mcrl2
         assert(0);
       }
 
-      assert(l!=action_label_list_list());
+      assert((ATermList)l!=ATermList());  // This cannot be done comparing to action_label_list_list, as in this case
+                                          // the default constructor is empty;
 
       if (all_stable)
       {

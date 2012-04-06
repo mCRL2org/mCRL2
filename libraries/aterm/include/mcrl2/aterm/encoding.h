@@ -78,6 +78,10 @@ class ATerm
     ATerm (_ATerm *t):m_aterm(t)
     {}
     
+    ~ATerm ()
+    {
+    }
+
     _ATerm & operator *() const
     {
       return *m_aterm;
@@ -118,8 +122,10 @@ class ATerm
       return t.m_aterm>=m_aterm;
     }
 
-    ~ATerm ()
+    /// \brief Test on whether an the ATerm is not equal to NULL.
+    bool is_defined(const ATerm &t) const
     {
+      return m_aterm!=NULL;
     }
 };
 
