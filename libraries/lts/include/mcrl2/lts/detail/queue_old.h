@@ -13,6 +13,7 @@
 
 #include <limits.h>
 #include <cassert>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -21,18 +22,17 @@ namespace mcrl2
 namespace lts
 {
 
-template <class T>
 class queue
 {
   private:
-    atermpp::deque <T> queue_get;
-    atermpp::deque <T> queue_put;
+    atermpp::deque <ATerm> queue_get;
+    atermpp::deque <ATerm> queue_put;
     size_t queue_size_max;        // This is the maximal allowed size of a queue
     size_t queue_put_count_extra; // This represents the number of elements that
     // did not fit in the queue.
     bool queue_size_fixed;
 
-    T add_to_full_queue(T state)
+    ATerm add_to_full_queue(ATerm state)
     {
       /* We wish that every state has equal chance of being in the queue.
        * Let N be the size of the queue and M the number of states from which
@@ -65,12 +65,12 @@ class queue
        * i = queue_put_count + queue_put_count_extra.
        */
 
-      assert(queue_size_max == queue_put.size());
+      assert(queue_size_max==queue_put.size());
       queue_put_count_extra++;
       if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
       {
         size_t pos = rand() % queue_put.size();
-        T old_state = queue_put[pos];
+        ATerm old_state = queue_put[pos];
         queue_put[pos] = state;
         return old_state;
       }
@@ -79,11 +79,14 @@ class queue
 
   public:
     queue() :
-      queue_get(),
-      queue_put(),
+      queue_get(), queue_put(),
       queue_size_max(UINT_MAX),
       queue_put_count_extra(0),
       queue_size_fixed(false)
+    {
+    }
+
+    ~queue()
     {
     }
 
@@ -95,7 +98,7 @@ class queue
     void set_max_size(size_t max_size)
     {
       queue_size_max = max_size;
-      queue_size_fixed = true;
+      queue_size_fixed=true;
       if (queue_put.size() > queue_size_max)
       {
         queue_put.resize(queue_size_max);
@@ -108,39 +111,36 @@ class queue
       }
     }
 
-    T add_to_queue(T state)
+    // Queue
+    ATerm add_to_queue(ATerm state)
     {
-      if ((queue_size_fixed) && queue_put.size() >= queue_size_max)
+      if ((queue_size_fixed) && queue_put.size()>=queue_size_max)
       {
-        assert(queue_put.size() == queue_size_max);
+        assert(queue_put.size()==queue_size_max);
         return add_to_full_queue(state);
       }
 
       queue_put.push_back(state);
 
-      return T();
+      return NULL;
     }
 
-    T get_from_queue()
+    ATerm get_from_queue()
     {
-      if (remaining() == 0)
+      if (queue_get.size()==0)
       {
-        return T();
+        return NULL;
       }
       else
       {
-        T result = queue_get.front();
+        ATerm result=queue_get.front();
         queue_get.pop_front();
         return result;
       }
     }
 
-    size_t remaining()
-    {
-      return queue_get.size();
-    }
-
-    void swap_queues()
+    void
+    swap_queues()
     {
       queue_get.swap(queue_put);
       queue_put_count_extra = 0;

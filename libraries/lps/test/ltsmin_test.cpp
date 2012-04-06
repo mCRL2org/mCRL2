@@ -62,7 +62,7 @@ struct state_callback_function
   }
 };
 
-void test_data_type(lps::pins_data_type& type)
+static void test_data_type(lps::pins_data_type& type)
 {
   std::cout << "test_data_type(" << type.name() << ")" << std::endl;
 
@@ -92,7 +92,7 @@ void test_data_type(lps::pins_data_type& type)
   }
 }
 
-void test_ltsmin(const std::string& rewriter_strategy)
+static void test_ltsmin(const std::string& rewriter_strategy)
 {
   // create an input file
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());

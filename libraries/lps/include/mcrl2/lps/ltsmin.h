@@ -32,7 +32,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/next_state_generator_old.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 // For backwards compatibility
@@ -73,7 +73,7 @@ class pins_data_type
 {
   protected:
     atermpp::indexed_set m_indexed_set;
-    lps::next_state_generator& m_generator;
+    lps::old::next_state_generator& m_generator;
     bool m_is_bounded;
 
   public:
@@ -120,7 +120,7 @@ class pins_data_type
     };
 
     /// \brief Constructor
-    pins_data_type(lps::next_state_generator& generator, bool is_bounded = false)
+    pins_data_type(lps::old::next_state_generator& generator, bool is_bounded = false)
       : m_generator(generator),
         m_is_bounded(is_bounded)
     {}
@@ -219,7 +219,7 @@ class state_data_type: public pins_data_type
     }
 
   public:
-    state_data_type(lps::next_state_generator& generator, const data::sort_expression& sort)
+    state_data_type(lps::old::next_state_generator& generator, const data::sort_expression& sort)
       : pins_data_type(generator, generator.get_specification().data().is_certainly_finite(sort)),
         m_sort(sort)
     {
@@ -280,7 +280,7 @@ class action_label_data_type: public pins_data_type
     }
 
   public:
-    action_label_data_type(lps::next_state_generator& generator)
+    action_label_data_type(lps::old::next_state_generator& generator)
       : pins_data_type(generator, false)
     {
       m_name = "action_labels";
@@ -326,14 +326,14 @@ class pins
 {
   public:
     typedef int* ltsmin_state_type; /**< the state type used by LTSMin */
-    typedef lps::next_state_generator::state_type next_state_type; /**< the state type used by the next state generator */
+    typedef lps::old::next_state_generator::state_type next_state_type; /**< the state type used by the next state generator */
 
   protected:
     size_t m_group_count;
     size_t m_state_length; /**< the number of process parameters */
     std::vector<std::vector<size_t> > m_read_group;
     std::vector<std::vector<size_t> > m_write_group;
-    lps::next_state_generator m_generator;
+    lps::old::next_state_generator m_generator;
     atermpp::function_symbol m_state_fun; /**< the function symbol used for 'next states' */
     std::vector<std::string> m_process_parameter_names;
 
@@ -696,10 +696,10 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       atermpp::aterm_appl init = initial_state(src, nparams);
-      next_state_generator::iterator i = m_generator.begin(init);
+      old::next_state_generator::iterator i = m_generator.begin(init);
       while (++i)
       {
-        const lps::next_state_generator::state_type& s = *i;
+        const lps::old::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
           dest[i] = state_type_map(i)[s[i]];
@@ -731,10 +731,10 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       atermpp::aterm_appl init = initial_state(src, nparams);
-      next_state_generator::iterator i = m_generator.begin(init, group);
+      old::next_state_generator::iterator i = m_generator.begin(init, group);
       while (++i)
       {
-        const lps::next_state_generator::state_type& s = *i;
+        const lps::old::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
           dest[i] = state_type_map(i)[s[i]];

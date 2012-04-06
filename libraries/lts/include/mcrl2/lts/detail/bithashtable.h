@@ -150,12 +150,24 @@ class bit_hash_table
       m_bit_hash_table[i] = false;
     }
 
+    void remove_state_from_bithash(atermpp::aterm state)
+    {
+      remove_state_from_bithash((const ATerm)state);
+    }
+
     size_t add_state(ATerm state, bool& is_new)
     {
       size_t i = calc_hash(state);
       is_new = !m_bit_hash_table[i];
       m_bit_hash_table[i] = true;
       return i;
+    }
+
+    std::pair<size_t, bool> add_state(atermpp::aterm state)
+    {
+      std::pair<size_t, bool> output;
+      output.first = add_state(state, output.second);
+      return output;
     }
 
     size_t state_index(ATerm state)

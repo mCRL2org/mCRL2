@@ -171,6 +171,11 @@ class action_label_lts:public mcrl2::lps::multi_action
     {
     }
 
+    /** \brief Constructor. */
+    action_label_lts(const mcrl2::lps::multi_action a):mcrl2::lps::multi_action(a)
+    {
+    }
+
     /** \brief Returns this multi_action as an aterm without the time tag.
     */
     ATerm aterm_without_time() const

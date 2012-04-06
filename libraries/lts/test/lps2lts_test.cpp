@@ -24,7 +24,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/exploration_old.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -38,7 +38,7 @@ using namespace mcrl2::lps;
 
 // Get filename based on timestamp
 // Warning: is prone to race conditions
-std::string temporary_filename(std::string const& prefix = "")
+static std::string temporary_filename(std::string const& prefix = "")
 {
   time_t now = time(NULL);
   std::stringstream now_s;
@@ -79,7 +79,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 
   LTS_TYPE result;
   options.outformat = result.type();
-  lts::lps2lts_algorithm lps2lts;
+  lts::old::lps2lts_algorithm lps2lts;
   core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
   core::garbage_collect();
@@ -137,7 +137,7 @@ nextstate_format_vector nextstate_formats()
   return nextstate_formats;
 }
 
-void check_lps2lts_specification(std::string const& specification,
+static void check_lps2lts_specification(std::string const& specification,
                                  const size_t expected_states,
                                  const size_t expected_transitions,
                                  const size_t expected_labels,
