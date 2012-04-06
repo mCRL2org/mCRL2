@@ -71,7 +71,7 @@ int CSreadIndex(CompressedStream* cs, ATerm* term)
   if (HFdecodeIndex(cs->bs, &cs->tree, &index))
   {
     uncalcDelta(cs,&index);
-    *term=static_cast_ATerm(ATmakeInt(index));
+    *term=ATmakeInt(index);
     HTinsert(cs->indices,*term,NULL); /* IZAK */
     return 1;
   }
@@ -227,7 +227,7 @@ int CSuwriteATerm(CompressedStream* cs, ATerm term)
 int CSwriteString(CompressedStream* cs, const char* str)
 {
 
-  return HFencodeATerm(cs->bs, &cs->tree, static_cast_ATerm(ATmakeAppl(ATmakeAFun(str,0,false))));
+  return HFencodeATerm(cs->bs, &cs->tree, ATmakeAppl(ATmakeAFun(str,0,false)));
 }
 
 int CSuwriteString(CompressedStream* cs, const char* str)
@@ -242,7 +242,7 @@ int CSwriteInt(CompressedStream* cs, long n)
   ATfprintf(stderr,"Write int %d\n", n);
   */
 
-  return HFencodeATerm(cs->bs, &cs->tree, static_cast_ATerm(ATmakeInt(n)));
+  return HFencodeATerm(cs->bs, &cs->tree, ATmakeInt(n));
 }
 int CSuwriteInt(CompressedStream* cs, long n)
 {

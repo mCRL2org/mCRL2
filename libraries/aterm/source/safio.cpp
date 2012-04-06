@@ -461,7 +461,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
     size_t id = IMgetID(sharedAFuns, symEntry, funHash);
 
-    size_t header = getHeader(static_cast_ATerm(arg));
+    size_t header = getHeader(arg);
 
     if (id != ATERM_NON_EXISTING_POSITION)
     {
@@ -539,7 +539,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
  */
 static void visitInt(ATermInt arg, ByteBuffer byteBuffer)
 {
-  *(byteBuffer->currentPos) = (char) getHeader(static_cast_ATerm(arg));
+  *(byteBuffer->currentPos) = (char) getHeader(arg);
   byteBuffer->currentPos++;
 
   writeInt(ATgetInt(arg), byteBuffer);
@@ -551,7 +551,7 @@ static void visitInt(ATermInt arg, ByteBuffer byteBuffer)
 static void visitList(ATermList arg, ByteBuffer byteBuffer)
 {
   const size_t n=ATgetLength(arg);
-  *(byteBuffer->currentPos) = (char) getHeader(static_cast_ATerm(arg));
+  *(byteBuffer->currentPos) = (char) getHeader(arg);
   byteBuffer->currentPos++;
 
   assert(n< (((size_t)1)<<(8*sizeof(int)-1))); /* n must fit in an int */
@@ -806,13 +806,13 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
     /* Use the appropriate way of constructing the appl, depending on if it has arguments or not. */
     if (nrOfSubTerms > 0)
     {
-      constructedTerm = static_cast_ATerm(ATmakeApplArray(fun, subTerms));
+      constructedTerm = ATmakeApplArray(fun, subTerms);
 
       releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
     else
     {
-      constructedTerm = static_cast_ATerm(ATmakeAppl0(fun));
+      constructedTerm = ATmakeAppl0(fun);
     }
 
   }
@@ -835,7 +835,7 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
       releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
 
-    constructedTerm = static_cast_ATerm(list);
+    constructedTerm = list;
 
   }
   else
@@ -930,7 +930,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       }
       else
       {
-        ATerm term = static_cast_ATerm(ATmakeAppl0(fun));
+        ATerm term = ATmakeAppl0(fun);
 
         shareTerm(binaryReader, ac, term);
 
@@ -975,7 +975,7 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
     }
     else
     {
-      ATerm term = static_cast_ATerm(ATmakeAppl0(fun));
+      ATerm term = ATmakeAppl0(fun);
 
       shareTerm(binaryReader, ac, term);
 
@@ -1035,7 +1035,7 @@ static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer)
   }
   else
   {
-    ATerm term = static_cast_ATerm(ATmakeList0());
+    ATerm term = ATmakeList0();
 
     shareTerm(binaryReader, ac, term);
 
@@ -1049,7 +1049,7 @@ static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer)
 static void touchInt(BinaryReader binaryReader, ByteBuffer byteBuffer)
 {
   int value = readInt(byteBuffer);
-  ATerm term = static_cast_ATerm(ATmakeInt(value));
+  ATerm term = ATmakeInt(value);
 
   ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
 

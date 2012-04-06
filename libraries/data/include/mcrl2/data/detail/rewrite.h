@@ -297,7 +297,7 @@ inline atermpp::aterm_appl Apply1(
          const atermpp::aterm head,
          const atermpp::aterm_appl arg1)
 {
- return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,static_cast_ATerm((ATermAppl)arg1));
+ return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATermAppl)arg1);
 }
 
 
@@ -307,7 +307,7 @@ inline atermpp::aterm_appl Apply2(
          const atermpp::aterm_appl arg1,
          const atermpp::aterm_appl arg2)
 {
- return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,static_cast_ATerm((ATermAppl)arg1),static_cast_ATerm((ATermAppl)arg2));
+ return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATermAppl)arg1,(ATermAppl)arg2);
 }
 
 /** \brief See Apply. */
@@ -317,8 +317,8 @@ inline atermpp::aterm_appl Apply3(
          const atermpp::aterm_appl arg2,
          const atermpp::aterm_appl arg3)
 {
- return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,static_cast_ATerm((ATermAppl)arg1),
-                static_cast_ATerm((ATermAppl)arg2),static_cast_ATerm((ATermAppl)arg3));
+ return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATermAppl)arg1,
+                (ATermAppl)arg2,(ATermAppl)arg3);
 }
 
 /** The functions below are used for fromInner and toInner(c). */

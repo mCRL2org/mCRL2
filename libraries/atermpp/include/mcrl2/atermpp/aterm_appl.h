@@ -190,8 +190,8 @@ class term_appl: public aterm_base
     /// \return The result of the assignment.
     term_appl<Term>& operator=(ATermAppl t)
     {
-      assert(t==ATermAppl() || ATgetType(static_cast_ATerm(t)) != AT_FREE);
-      m_term = static_cast_ATerm(t);
+      assert(t==ATermAppl() || ATgetType(t) != AT_FREE);
+      m_term = t;
       return *this;
     }
 

@@ -33,36 +33,18 @@ typedef MachineWord header_type;
 
 #define MCRL2_HT(t) (static_cast<MachineWord>(t))
 
-struct _ATerm
+class _ATerm
 {
-  header_type   header;
-  // union _ATerm* next;
-  struct _ATerm* next;
+  public:
+    header_type   header;
+    _ATerm* next;
 };
 
 inline
 size_t TERM_SIZE_APPL(const size_t arity)
 {
-  return (sizeof(struct _ATerm)/sizeof(size_t))+arity;
-  // return (sizeof(struct __ATerm)/sizeof(size_t))+arity;
+  return (sizeof(_ATerm)/sizeof(size_t))+arity;
 }
-
-/* typedef union _ATerm
-{
-  header_type     header;
-  struct __ATerm  aterm;
-  union _ATerm*   subaterm[1];
-  MachineWord     word[1];
-}* ATerm; */
-
-
-/* union _ATerm
-{
-  header_type     header;
-  struct __ATerm  aterm;
-  // union _ATerm*   subaterm[1];
-  // MachineWord     word[1];
-}; */
 
 class ATerm
 {

@@ -88,10 +88,10 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
   ATermList rules=ATempty;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = ATinsert(rules,static_cast_ATerm(ATmakeList4(static_cast_ATerm(static_cast<ATermList>(j->variables())),
-                                         static_cast_ATerm((ATermAppl)rewriter->toRewriteFormat(j->condition())),
-                                         static_cast_ATerm((ATermAppl)rewriter->toRewriteFormat(j->lhs())),
-                                         static_cast_ATerm((ATermAppl)rewriter->toRewriteFormat(j->rhs())))));
+    rules = ATinsert(rules,ATmakeList4(static_cast<ATermList>(j->variables()),
+                                         (ATermAppl)rewriter->toRewriteFormat(j->condition()),
+                                         (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
+                                         (ATermAppl)rewriter->toRewriteFormat(j->rhs())));
   }
   rules = ATreverse(rules);
 
@@ -181,13 +181,13 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = ATinsert(deps,static_cast_ATerm(ATmakeInt((int)i)));
+            deps = ATinsert(deps,ATmakeInt((int)i));
             args[i] += 1;
           }
         }
         deps = ATreverse(deps);
 
-        m = ATinsert(m,static_cast_ATerm(ATmakeList2(static_cast_ATerm(deps),ATgetFirst(rules))));
+        m = ATinsert(m,ATmakeList2(deps,ATgetFirst(rules)));
       }
       else
       {
@@ -235,11 +235,11 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
         used[maxidx] = true;
 
         ATermInt k = ATmakeInt(maxidx);
-        strat = ATinsert(strat,static_cast_ATerm(k));
+        strat = ATinsert(strat,k);
         m2 = ATmakeList0();
         for (; !ATisEmpty(m); m=ATgetNext(m))
         {
-          m2 = ATinsert(m2,static_cast_ATerm(ATinsert(ATgetNext(ATLgetFirst(m)),static_cast_ATerm(ATremoveElement(ATLgetFirst(ATLgetFirst(m)),static_cast_ATerm(k))))));
+          m2 = ATinsert(m2,ATinsert(ATgetNext(ATLgetFirst(m)),ATremoveElement(ATLgetFirst(ATLgetFirst(m)),k)));
         }
         m = ATreverse(m2);
       }

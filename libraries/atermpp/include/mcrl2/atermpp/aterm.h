@@ -69,7 +69,7 @@ class aterm_base
     /// \brief Constructor.
     /// \param term A sequence of terms
     aterm_base(ATermList term)
-      : m_term(static_cast_ATerm(term))
+      : m_term(term)
     {
       assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
@@ -77,7 +77,7 @@ class aterm_base
     /// \brief Constructor.
     /// \param term An integer term
     aterm_base(ATermInt term)
-      : m_term(static_cast_ATerm(term))
+      : m_term(term)
     {
       assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
     }
@@ -85,7 +85,7 @@ class aterm_base
     /// \brief Constructor.
     /// \param term A term
     aterm_base(ATermAppl term)
-      : m_term(static_cast_ATerm(term))
+      : m_term(term)
     {
       assert((term == ATermAppl()) || (ATgetType(term)!= AT_FREE));
       assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));

@@ -164,7 +164,6 @@ size_t term_count=0;
     {
       CLR_MARK(marked->header);
       prev = marked;
-      // marked = marked->aterm.next;
       marked = marked->next;
     }
     /*}}}  */
@@ -186,21 +185,18 @@ size_t term_count=0;
       {
         /* disconnect unmarked terms from rest */
         unmarked = marked;
-        // prev->aterm.next = NULL;
         prev->next = NULL;
       }
 
       while (&*unmarked)
       {
 term_count++;
-        // ATerm next = unmarked->aterm.next;
         ATerm next = unmarked->next;
         HashNumber hnr;
 
         hnr = hash_number(unmarked, term_size(unmarked));
         hnr &= table_mask;
         hashspot = hashtable+hnr;
-        // unmarked->aterm.next = &**hashspot;
         unmarked->next = &**hashspot;
         *hashspot = unmarked;
 
@@ -256,12 +252,12 @@ void AT_initMemory()
   ATempty = (ATermList)AT_allocate(TERM_SIZE_LIST);
   ATempty->header = EMPTY_HEADER;
   CHECK_HEADER(ATempty->header);
-  ATempty->aterm.next = NULL;
-  ATempty->aterm.head = NULL;
-  ATempty->aterm.tail = NULL;
+  ATempty->next = NULL;
+  ATempty->head = NULL;
+  ATempty->tail = NULL;
 
-  hnr = hash_number(static_cast_ATerm(ATempty), TERM_SIZE_LIST);
-  hashtable[hnr& table_mask] = static_cast_ATerm(ATempty);
+  hnr = hash_number(ATempty, TERM_SIZE_LIST);
+  hashtable[hnr& table_mask] = ATempty;
 
   ATprotectList(&ATempty);
 
@@ -438,7 +434,6 @@ fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_o
   {
     /* the freelist is not empty: allocate a cell */
     at = ti->at_freelist;
-    // ti->at_freelist = ti->at_freelist->aterm.next;
     ti->at_freelist = ti->at_freelist->next;
     assert(ti->at_block != NULL);
     assert(ti->top_at_blocks == ti->at_block->end);
@@ -484,7 +479,6 @@ void AT_freeTerm(const size_t size, const ATerm t)
     {
       if (prev)
       {
-        // prev->aterm.next = cur->aterm.next;
         prev->next = cur->next;
       }
       else
@@ -496,7 +490,6 @@ void AT_freeTerm(const size_t size, const ATerm t)
       return;
     }
   }
-  // while (((prev=cur), (cur=cur->aterm.next)));
   while (((prev=cur), (cur=cur->next)));
   assert(0);
 }
@@ -557,7 +550,7 @@ ATermAppl ATmakeAppl(const AFun sym, ...)
         break;
       }
     }
-    cur = (_ATermAppl *)cur->aterm.next;
+    cur = (_ATermAppl *)cur->next;
   }
 
   if (cur==ATermAppl())
@@ -571,7 +564,7 @@ ATermAppl ATmakeAppl(const AFun sym, ...)
     {
       ATgetArgument(cur, i) = buffer[i];
     }
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -607,15 +600,15 @@ ATermAppl ATmakeAppl0(const AFun sym)
       /* Promote current entry to front of hashtable */
       if (prev!=NULL)
       {
-        prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (_ATerm*) &**hashspot;
+        prev->next = cur->next;
+        cur->next = (_ATerm*) &**hashspot;
         *hashspot = cur;
       }
 
       return cur;
     }
     prev = cur;
-    cur = (_ATermAppl *)&*cur->aterm.next;
+    cur = (_ATermAppl *)&*cur->next;
   }
 
   cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(0));
@@ -623,7 +616,7 @@ ATermAppl ATmakeAppl0(const AFun sym)
   hnr &= table_mask;
   cur->header = header;
   CHECK_HEADER(cur->header);
-  cur->aterm.next = &*hashtable[hnr];
+  cur->next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
@@ -664,14 +657,14 @@ ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
       /* Promote current entry to front of hashtable */
       if (prev!=NULL)
       {
-        prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (_ATerm *) &**hashspot;
+        prev->next = cur->next;
+        cur->next = (_ATerm *) &**hashspot;
         *hashspot = cur;
       }
       return cur;
     }
     prev = cur;
-    cur = (_ATermAppl *)cur->aterm.next;
+    cur = (_ATermAppl *)cur->next;
   }
 
   cur = (_ATermAppl *) &*AT_allocate(TERM_SIZE_APPL(1));
@@ -680,7 +673,7 @@ ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
   cur->header = header;
   CHECK_HEADER(cur->header);
   ATgetArgument(cur, 0) = arg0;
-  cur->aterm.next = &*hashtable[hnr];
+  cur->next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
@@ -724,14 +717,14 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
       /* Promote current entry to front of hashtable */
       if (prev!=NULL)
       {
-        prev->aterm.next = cur->aterm.next;
-        cur->aterm.next = (_ATerm *) &**hashspot;
+        prev->next = cur->next;
+        cur->next = (_ATerm *) &**hashspot;
         *hashspot = cur;
       }
       return cur;
     }
     prev = cur;
-    cur = (_ATermAppl*)cur->aterm.next;
+    cur = (_ATermAppl*)cur->next;
   }
 
   cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(2));
@@ -742,7 +735,7 @@ ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
   ATgetArgument(cur, 0) = arg0;
   ATgetArgument(cur, 1) = arg1;
 
-  cur->aterm.next = &*hashtable[hnr];
+  cur->next = &*hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
   return cur;
@@ -781,7 +774,7 @@ ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const 
   ATgetArgument(cur, 1) != arg1 ||
   ATgetArgument(cur, 2) != arg2))
   {
-    cur = (_ATermAppl*) cur->aterm.next;
+    cur = (_ATermAppl*) cur->next;
   }
 
   if (cur==ATermAppl())
@@ -795,7 +788,7 @@ ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 1) = arg1;
     ATgetArgument(cur, 2) = arg2;
 
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -840,7 +833,7 @@ ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const 
   ATgetArgument(cur, 2) != arg2 ||
   ATgetArgument(cur, 3) != arg3))
   {
-    cur = (_ATermAppl*)cur->aterm.next;
+    cur = (_ATermAppl*)cur->next;
   }
 
   if (cur==ATermAppl())
@@ -855,7 +848,7 @@ ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const 
     ATgetArgument(cur, 2) = arg2;
     ATgetArgument(cur, 3) = arg3;
 
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -903,7 +896,7 @@ const ATerm arg3, const ATerm arg4)
   ATgetArgument(cur, 3) != arg3 ||
   ATgetArgument(cur, 4) != arg4))
   {
-    cur = (_ATermAppl*) cur->aterm.next;
+    cur = (_ATermAppl*) cur->next;
   }
 
   if (cur==ATermAppl())
@@ -919,7 +912,7 @@ const ATerm arg3, const ATerm arg4)
     ATgetArgument(cur, 3) = arg3;
     ATgetArgument(cur, 4) = arg4;
 
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -969,7 +962,7 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
   ATgetArgument(cur, 4) != arg4 ||
   ATgetArgument(cur, 5) != arg5))
   {
-    cur = (_ATermAppl *) cur->aterm.next;
+    cur = (_ATermAppl *) cur->next;
   }
 
   if (cur==ATermAppl())
@@ -986,7 +979,7 @@ const ATerm arg3, const ATerm arg4, const ATerm arg5)
     ATgetArgument(cur, 4) = arg4;
     ATgetArgument(cur, 5) = arg5;
 
-    cur->aterm.next =&*hashtable[hnr];
+    cur->next =&*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1013,7 +1006,7 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
-  CHECK_TERM(static_cast_ATerm(args));
+  CHECK_TERM(args);
   assert(arity == ATgetLength(args));
 
   argptr = args;
@@ -1046,7 +1039,7 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
         break;
       }
     }
-    cur = (_ATermAppl*) cur->aterm.next;
+    cur = (_ATermAppl*) cur->next;
   }
 
   if (cur==ATermAppl())
@@ -1065,7 +1058,7 @@ ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
       ATgetArgument(cur, i) = ATgetFirst(argptr);
       argptr = ATgetNext(argptr);
     }
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1117,7 +1110,7 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
         break;
       }
     }
-    cur = (_ATermAppl*) cur->aterm.next;
+    cur = (_ATermAppl*) cur->next;
   }
 
   if (cur==ATermAppl())
@@ -1134,7 +1127,7 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
     {
       ATgetArgument(cur, i) = args[i];
     }
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1173,9 +1166,10 @@ ATermInt ATmakeInt(const int val)
   hnr = FINISH(hnr);
 
   cur = (ATermInt)hashtable[hnr & table_mask];
-  while (cur!=ATermInt() && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != _val.value)))
+  // while (cur!=ATermInt() && (!EQUAL_HEADER(cur->header,header) || (cur->value != _val.value)))
+  while (cur!=ATermInt() && (!EQUAL_HEADER(cur->header,header) || (cur->value != _val.value)))
   {
-    cur = (_ATermInt *) cur->aterm.next;
+    cur = (_ATermInt *) cur->next;
   }
 
   if (cur==ATermInt())
@@ -1185,10 +1179,10 @@ ATermInt ATmakeInt(const int val)
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
-    cur->aterm.reserved = _val.reserved;
-    cur->aterm.value = _val.value;
+    cur->reserved = _val.reserved;
+    cur->value = _val.value;
 
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1224,7 +1218,7 @@ ATermList ATmakeList1(const ATerm el)
   || ATgetFirst(cur) != el
   || ATgetNext(cur) != ATempty))
   {
-    cur = (_ATermList*) cur->aterm.next;
+    cur = (_ATermList*) cur->next;
   }
 
   if (cur==ATermList())
@@ -1236,7 +1230,7 @@ ATermList ATmakeList1(const ATerm el)
     CHECK_HEADER(cur->header);
     ATgetFirst(cur) = el;
     ATgetNext(cur) = ATempty;
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1273,10 +1267,10 @@ ATermList ATinsert(const ATermList tail, const ATerm el)
 
   header = LIST_HEADER(newLength);
 
-  CHECK_TERM(static_cast_ATerm(tail));
+  CHECK_TERM(tail);
   CHECK_TERM(el);
 
-  assert(ATgetType(static_cast_ATerm(tail)) == AT_LIST);
+  assert(ATgetType(tail) == AT_LIST);
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(el));
@@ -1288,7 +1282,7 @@ ATermList ATinsert(const ATermList tail, const ATerm el)
   || ATgetFirst(cur) != el
   || ATgetNext(cur) != tail))
   {
-    cur = (_ATermList*) cur->aterm.next;
+    cur = (_ATermList*) cur->next;
   }
 
   if (cur==ATermList())
@@ -1300,7 +1294,7 @@ ATermList ATinsert(const ATermList tail, const ATerm el)
     CHECK_HEADER(cur->header);
     ATgetFirst(cur) = el;
     ATgetNext(cur) = tail;
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1373,7 +1367,7 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
         break;
       }
     }
-    cur = (_ATermAppl*) cur->aterm.next;
+    cur = (_ATermAppl*) cur->next;
   }
 
   if (cur==ATermList())
@@ -1394,7 +1388,7 @@ ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
         ATgetArgument(cur, i) = arg;
       }
     }
-    cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
 
@@ -1581,7 +1575,6 @@ size_t AT_inAnyFreeList(const ATerm t)
       {
         return i;
       }
-      // cur = cur->aterm.next;
       cur = cur->next;
     }
   }

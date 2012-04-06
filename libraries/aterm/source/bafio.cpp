@@ -599,7 +599,7 @@ static void build_arg_tables()
             }
             else
             {
-              arg = static_cast_ATerm(ATgetNext(list));
+              arg = ATgetNext(list);
             }
           }
           break;
@@ -669,7 +669,7 @@ static void collect_terms(const ATerm t)
         {
           sym = AS_LIST;
           collect_terms(ATgetFirst(list));
-          collect_terms(static_cast_ATerm(ATgetNext(list)));
+          collect_terms(ATgetNext(list));
         }
       }
       break;
@@ -867,7 +867,7 @@ static bool write_term(const ATerm t, byte_writer* writer)
           {
             return false;
           }
-          if (!write_arg(trm_sym, static_cast_ATerm(ATgetNext(list)), 1, writer))
+          if (!write_arg(trm_sym, ATgetNext(list), 1, writer))
           {
             return false;
           }
@@ -1384,19 +1384,19 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
         return ATerm();
       }
 
-      result = static_cast_ATerm(ATmakeInt((int)val));
+      result = ATmakeInt((int)val);
 
       /*}}}  */
       break;
     case AS_LIST:
-      result = static_cast_ATerm(ATinsert((ATermList)args[1], args[0]));
+      result = ATinsert((ATermList)args[1], args[0]);
       break;
     case AS_EMPTY_LIST:
-      result = static_cast_ATerm(ATempty);
+      result = ATempty;
       break;
     default:
       /* Must be a function application */
-      result = static_cast_ATerm(ATmakeApplArray(sym->sym, args));
+      result = ATmakeApplArray(sym->sym, args);
       break;
 
   }

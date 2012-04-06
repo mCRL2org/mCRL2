@@ -155,9 +155,9 @@ class InternalFormatManipulator
     atermpp::aterm_appl make_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
     {
       return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, 
-                                         static_cast_ATerm((ATermAppl)a_expr), 
-                                         static_cast_ATerm((ATermAppl)a_high), 
-                                         static_cast_ATerm((ATermAppl)a_low));
+                                         (ATermAppl)a_expr, 
+                                         (ATermAppl)a_high, 
+                                         (ATermAppl)a_low);
     }
 
   public:
@@ -227,7 +227,7 @@ class InternalFormatManipulator
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
           v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, 
-                    static_cast_ATerm((ATermAppl)v_term2), static_cast_ATerm((ATermAppl)v_term1)));
+                    (ATermAppl)v_term2, (ATermAppl)v_term1));
         }
       }
       f_orient[a_term]=v_result;

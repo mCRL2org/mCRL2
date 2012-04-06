@@ -274,7 +274,8 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
         break;
       }
     }
-    cur = (ATermAppl)cur->aterm.next;
+    // cur = (ATermAppl)cur->aterm.next;
+    cur = (ATermAppl)cur->next;
   }
 
   if (!&*cur)
@@ -290,8 +291,9 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
       assert(j<arity);
       ATgetArgument(cur, j) = convert_to_aterm(*i);
     }
-    cur->aterm.next = &*hashtable[hnr];
-    hashtable[hnr] = static_cast_ATerm(cur);
+    // cur->aterm.next = &*hashtable[hnr];
+    cur->next = &*hashtable[hnr];
+    hashtable[hnr] = cur;
   }
 
   return cur;

@@ -50,8 +50,8 @@ int HFinit(HFtree* tree, HTable* terms)
   NO_ATERM=ATerm();
   ATprotect(&ESCAPE_SEQUENCE);
   ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=static_cast_ATerm(ATmakeAppl1(ATmakeAFun("ESC",1,true),static_cast_ATerm(ATmakeAppl0(ATmakeAFun("NEW",0,false)))));
-  NO_ATERM       =static_cast_ATerm(ATmakeAppl1(ATmakeAFun("ESC",1,true),static_cast_ATerm(ATmakeAppl0(ATmakeAFun("NIL",0,false)))));
+  ESCAPE_SEQUENCE=ATmakeAppl1(ATmakeAFun("ESC",1,true),ATmakeAppl0(ATmakeAFun("NEW",0,false)));
+  NO_ATERM       =ATmakeAppl1(ATmakeAFun("ESC",1,true),ATmakeAppl0(ATmakeAFun("NIL",0,false)));
 
   /* Init LZ buffer */
 
@@ -405,7 +405,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
         */
         if (LZreadInt(fp,&tree->buffer,index))
         {
-          term=static_cast_ATerm(ATmakeInt(*index));
+          term=ATmakeInt(*index);
           current=HFadd(tree,term);
           HFupdate(tree,current);
           return *index!=NO_INT;
@@ -494,7 +494,7 @@ int HFencodeIndex(BitStream* bs, HFtree* tree, long index)
   long n;
 
 
-  term=static_cast_ATerm(ATmakeInt(index));
+  term=ATmakeInt(index);
 
   if (HTmember(tree->terms,term,&n)&&HTgetPtr(tree->terms,n))
   {

@@ -884,7 +884,7 @@ fparse_quoted_appl(int* c, FILE* f)
   /* Wrap up this function application */
   sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
-  return static_cast_ATerm(ATmakeApplList(sym, args));
+  return ATmakeApplList(sym, args);
 }
 
 /*}}}  */
@@ -978,7 +978,7 @@ fparse_num(int* c, FILE* f)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return static_cast_ATerm(ATmakeInt(atoi(num)));
+    return ATmakeInt(atoi(num));
 
     /*}}}  */
   }
@@ -1006,11 +1006,11 @@ fparse_term(int* c, FILE* f)
       fnext_skip_layout(c, f);
       if (*c == ']')
       {
-        result = static_cast_ATerm(ATempty);
+        result = ATempty;
       }
       else
       {
-        result = static_cast_ATerm(fparse_terms(c, f));
+        result = fparse_terms(c, f);
         if (result == ATerm() || *c != ']')
         {
           return ATerm();
@@ -1021,7 +1021,7 @@ fparse_term(int* c, FILE* f)
     default:
       if (isalpha(*c) || *c == '(')
       {
-        result = static_cast_ATerm(fparse_unquoted_appl(c, f));
+        result = fparse_unquoted_appl(c, f);
       }
       else if (isdigit(*c))
       {
@@ -1322,7 +1322,7 @@ sparse_quoted_appl(int* c, char** s)
   /* Wrap up this function application */
   sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
-  return static_cast_ATerm(ATmakeApplList(sym, args));
+  return ATmakeApplList(sym, args);
 }
 
 /*}}}  */
@@ -1415,7 +1415,7 @@ sparse_num(int* c, char** s)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return static_cast_ATerm(ATmakeInt(atoi(num)));
+    return ATmakeInt(atoi(num));
 
     /*}}}  */
   }
@@ -1444,11 +1444,11 @@ sparse_term(int* c, char** s)
       snext_skip_layout(c, s);
       if (*c == ']')
       {
-        result = static_cast_ATerm(ATempty);
+        result = ATempty;
       }
       else
       {
-        result = static_cast_ATerm(sparse_terms(c, s));
+        result = sparse_terms(c, s);
         if (result == ATerm() || *c != ']')
         {
           return ATerm();
@@ -1459,7 +1459,7 @@ sparse_term(int* c, char** s)
     default:
       if (isalpha(*c) || *c == '(')
       {
-        result = static_cast_ATerm(sparse_unquoted_appl(c, s));
+        result = sparse_unquoted_appl(c, s);
       }
       else if (isdigit(*c))
       {
@@ -1581,7 +1581,7 @@ void AT_markTerm(const ATerm t1)
         case AT_LIST:
           if (!ATisEmpty((ATermList) t))
           {
-            mark_stack.push(static_cast_ATerm(ATgetNext((ATermList) t)));
+            mark_stack.push(ATgetNext((ATermList) t));
             mark_stack.push(ATgetFirst((ATermList) t));
           }
           break;

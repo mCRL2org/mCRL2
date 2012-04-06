@@ -23,33 +23,21 @@
 namespace aterm
 {
 
-/**
-  * We define some new datatypes.
-  */
-
-struct __ATermInt
+class _ATermInt:public _ATerm
 {
-  header_type header;
-  _ATerm      *next;
-  union
-  {
-    int value;
-    MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
-                             as integer and as MachineWord. For all cases using bitwise
-                             operations, the MachineWord version must be used,
-                             as failing to do so may lead to improper initialisation
-                             of the last 32 bits during casting. */
-  };
-
+  public:
+    union
+    {
+      int value;
+      MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
+                               as integer and as MachineWord. For all cases using bitwise
+                               operations, the MachineWord version must be used,
+                               as failing to do so may lead to improper initialisation
+                               of the last 32 bits during casting. */
+    };
 };
 
-static const size_t TERM_SIZE_INT = sizeof(struct __ATermInt)/sizeof(size_t);
-
-union _ATermInt
-{
-  header_type        header;
-  struct __ATermInt  aterm;
-}; 
+static const size_t TERM_SIZE_INT = sizeof(_ATermInt)/sizeof(size_t);
 
 class ATermInt:public ATerm
 {
@@ -78,28 +66,14 @@ class ATermInt:public ATerm
     }
 };
 
-// Function below should be removed as it does not do anything.
-inline
-ATerm static_cast_ATerm(const ATermInt t)
+class _ATermAppl:public _ATerm
 {
-  return t;
-}
-
-struct __ATermAppl
-{
-  header_type header;
-  _ATerm      *next;
-  _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
-                              (therefore it is excessive). Using mallocs an array of the
-                              appropriate length is declared, where it is possible that
-                              the array has size 0, i.e. is absent. If the value is small
-                              (it was 1), the clang compiler provides warnings. */
-};
-
-union _ATermAppl
-{
-  header_type         header;
-  struct __ATermAppl  aterm;
+  public:
+    _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+                                (therefore it is excessive). Using mallocs an array of the
+                                appropriate length is declared, where it is possible that
+                                the array has size 0, i.e. is absent. If the value is small
+                                (it was 1), the clang compiler provides warnings. */
 };
 
 class ATermAppl:public ATerm
@@ -126,30 +100,15 @@ class ATermAppl:public ATerm
     }
 };
 
-
-// Function below must be removed from the code.
-inline
-ATerm static_cast_ATerm(const ATermAppl t)
+class _ATermList:public _ATerm
 {
-  return t;
-}
-
-
-struct __ATermList
-{
-  header_type       header;
-  _ATerm            *next;
-  _ATerm            *head;
-  union _ATermList* tail;
+  public:
+    _ATerm            *head;
+    _ATermList* tail;
 };
 
-static const size_t TERM_SIZE_LIST = sizeof(struct __ATermList)/sizeof(size_t);
+static const size_t TERM_SIZE_LIST = sizeof(_ATermList)/sizeof(size_t);
 
-union _ATermList
-{
-  header_type         header;
-  struct __ATermList  aterm;
-};
 
 class ATermList:public ATerm
 {
@@ -174,14 +133,6 @@ class ATermList:public ATerm
       return reinterpret_cast<_ATermList*>(m_aterm);
     }
 };
-
-// Function below must be removed from the code.
-inline
-ATerm static_cast_ATerm(const ATermList t)
-{
-  return t;
-}
-
 
 struct _ATermTable;
 
@@ -253,7 +204,8 @@ ATermInt ATmakeInt(const int value);
 inline
 int ATgetInt(const ATermInt t)
 {
-  return t->aterm.value;
+  // return t->aterm.value;
+  return t->value;
 }
 
 /* The ATermAppl type */
@@ -284,7 +236,7 @@ AFun ATgetAFun(const ATermAppl appl)
 inline
 ATerm &ATgetArgument(const ATermAppl appl, const size_t idx)
 {
-  return (ATerm &)appl->aterm.arg[idx];
+  return (ATerm &)appl->arg[idx];
 }
 
 ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n);
@@ -299,19 +251,19 @@ size_t ATgetLength(ATermList list);
 inline
 ATerm &ATgetFirst(const ATermList l)
 {
-  return (ATerm &)l->aterm.head;
+  return (ATerm &)l->head;
 }
 
 inline
 ATermList &ATgetNext(const ATermList l)
 {
-  return (ATermList &)l->aterm.tail;
+  return (ATermList &)l->tail;
 }
 
 inline
 bool ATisEmpty(const ATermList l)
 {
-  return l->aterm.head == NULL && l->aterm.tail == NULL;
+  return l->head == NULL && l->tail == NULL;
 }
 
 ATermList ATgetTail(ATermList list, const int start);
