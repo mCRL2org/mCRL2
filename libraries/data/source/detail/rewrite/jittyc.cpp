@@ -1598,7 +1598,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       if (is_abstraction(ATgetFirst((ATermList) t)))
       {
         atermpp::aterm_appl lambda_term=ATgetFirst((ATermList) t);
-        assert(lambda_term(0)=gsMakeLambda());
+        assert(lambda_term(0)==gsMakeLambda());
 
         b = rewr;
         nfs_array args_nfs(arity);

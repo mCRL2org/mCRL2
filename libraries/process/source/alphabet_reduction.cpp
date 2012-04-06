@@ -1288,7 +1288,7 @@ namespace mcrl2
 
             mCRL2log(verbose) << "- created process " << pp(new_pn) << "\n";
             process_expression p=procs[pn];
-            assert(p);
+            assert(p!=process_expression());
             p=PushAllow(V,p);
 
             procs[new_pn]=p;
@@ -1904,7 +1904,7 @@ namespace mcrl2
         assert(0);
       }
 
-      assert(l);
+      assert(l!=action_label_list_list());
 
       if (all_stable)
       {
