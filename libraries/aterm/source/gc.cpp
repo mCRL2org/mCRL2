@@ -158,7 +158,7 @@ VOIDCDECL mark_phase()
 #elif defined(_MSC_VER) && defined(WIN32)
   size_t r_eax, r_ebx, r_ecx, r_edx, \
   r_esi, r_edi, r_esp, r_ebp;
-  ATerm reg[8], real_term;
+  _ATerm *reg[8], *real_term;
 
   __asm
   {
@@ -174,18 +174,18 @@ VOIDCDECL mark_phase()
     mov r_ebp, ebp
   }
   /* Put the register-values into an array */
-  reg[0] = (ATerm) r_eax;
-  reg[1] = (ATerm) r_ebx;
-  reg[2] = (ATerm) r_ecx;
-  reg[3] = (ATerm) r_edx;
-  reg[4] = (ATerm) r_esi;
-  reg[5] = (ATerm) r_edi;
-  reg[6] = (ATerm) r_esp;
-  reg[7] = (ATerm) r_ebp;
+  reg[0] = (_ATerm*) r_eax;
+  reg[1] = (_ATerm*) r_ebx;
+  reg[2] = (_ATerm*) r_ecx;
+  reg[3] = (_ATerm*) r_edx;
+  reg[4] = (_ATerm*) r_esi;
+  reg[5] = (_ATerm*) r_edi;
+  reg[6] = (_ATerm*) r_esp;
+  reg[7] = (_ATerm*) r_ebp;
 
   for (i=0; i<8; i++)
   {
-    real_term = AT_isInsideValidTerm(reg[i]);
+    real_term = &*AT_isInsideValidTerm(reg[i]);
     if (real_term != NULL)
     {
       assert(AT_isValidTerm(real_term));
