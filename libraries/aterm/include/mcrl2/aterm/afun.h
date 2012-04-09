@@ -26,7 +26,6 @@ typedef struct _SymEntry
 {
   header_type header;
   struct _SymEntry* next;
-  size_t reference_count;
   AFun  id;
   char*   name;
   size_t count;  /* used in bafio.c */
