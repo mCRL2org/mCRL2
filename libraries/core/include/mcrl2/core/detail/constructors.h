@@ -229,7 +229,7 @@ ATermAppl constructHide()
 inline
 ATermAppl constructSortArrow()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortArrow(), (constructList()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortArrow(), constructList(), constructSortExpr())));
   return t;
 }
 
@@ -237,7 +237,7 @@ ATermAppl constructSortArrow()
 inline
 ATermAppl constructProcessAssignment()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcessAssignment(), (constructProcVarId()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcessAssignment(), constructProcVarId(), constructList())));
   return t;
 }
 
@@ -253,7 +253,7 @@ ATermAppl constructForall()
 inline
 ATermAppl constructCommExpr()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_CommExpr(), (constructMultActName()), (constructStringOrNil()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_CommExpr(), constructMultActName(), constructStringOrNil())));
   return t;
 }
 
@@ -261,7 +261,7 @@ ATermAppl constructCommExpr()
 inline
 ATermAppl constructStateNot()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateNot(), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateNot(), constructStateFrm())));
   return t;
 }
 
@@ -285,7 +285,7 @@ ATermAppl constructSortFSet()
 inline
 ATermAppl constructStateImp()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateImp(), (constructStateFrm()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateImp(), constructStateFrm(), constructStateFrm())));
   return t;
 }
 
@@ -293,7 +293,7 @@ ATermAppl constructStateImp()
 inline
 ATermAppl constructPBESExists()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESExists(), (constructList()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESExists(), constructList(), constructPBExpr())));
   return t;
 }
 
@@ -301,7 +301,7 @@ ATermAppl constructPBESExists()
 inline
 ATermAppl constructPBESImp()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESImp(), (constructPBExpr()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESImp(), constructPBExpr(), constructPBExpr())));
   return t;
 }
 
@@ -309,7 +309,7 @@ ATermAppl constructPBESImp()
 inline
 ATermAppl constructBinder()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_Binder(), (constructBindingOperator()), (constructList()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_Binder(), constructBindingOperator(), constructList(), constructDataExpr())));
   return t;
 }
 
@@ -317,7 +317,7 @@ ATermAppl constructBinder()
 inline
 ATermAppl constructSortsPossible()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortsPossible(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortsPossible(), constructList())));
   return t;
 }
 
@@ -325,7 +325,7 @@ ATermAppl constructSortsPossible()
 inline
 ATermAppl constructSortRef()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortRef(), (constructString()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortRef(), constructString(), constructSortExpr())));
   return t;
 }
 
@@ -333,7 +333,7 @@ ATermAppl constructSortRef()
 inline
 ATermAppl constructProcEqnSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcEqnSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcEqnSpec(), constructList())));
   return t;
 }
 
@@ -341,7 +341,7 @@ ATermAppl constructProcEqnSpec()
 inline
 ATermAppl constructStateForall()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateForall(), (constructList()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateForall(), constructList(), constructStateFrm())));
   return t;
 }
 
@@ -349,7 +349,7 @@ ATermAppl constructStateForall()
 inline
 ATermAppl constructBooleanImp()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanImp(), (constructBooleanExpression()), (constructBooleanExpression()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanImp(), constructBooleanExpression(), constructBooleanExpression())));
   return t;
 }
 
@@ -357,7 +357,7 @@ ATermAppl constructBooleanImp()
 inline
 ATermAppl constructSortId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortId(), (constructString()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortId(), constructString())));
   return t;
 }
 
@@ -365,7 +365,7 @@ ATermAppl constructSortId()
 inline
 ATermAppl constructStateNu()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateNu(), (constructString()), (constructList()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateNu(), constructString(), constructList(), constructStateFrm())));
   return t;
 }
 
@@ -381,7 +381,7 @@ ATermAppl constructRegNil()
 inline
 ATermAppl constructDataSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataSpec(), (constructSortSpec()), (constructConsSpec()), (constructMapSpec()), (constructDataEqnSpec()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataSpec(), constructSortSpec(), constructConsSpec(), constructMapSpec(), constructDataEqnSpec())));
   return t;
 }
 
@@ -397,7 +397,7 @@ ATermAppl constructTau()
 inline
 ATermAppl constructStateYaledTimed()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateYaledTimed(), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateYaledTimed(), constructDataExpr())));
   return t;
 }
 
@@ -405,7 +405,7 @@ ATermAppl constructStateYaledTimed()
 inline
 ATermAppl constructSortCons()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortCons(), (constructSortConsType()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_SortCons(), constructSortConsType(), constructSortExpr())));
   return t;
 }
 
@@ -413,7 +413,7 @@ ATermAppl constructSortCons()
 inline
 ATermAppl constructDataEqnSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_DataEqnSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_DataEqnSpec(), constructList())));
   return t;
 }
 
@@ -421,7 +421,7 @@ ATermAppl constructDataEqnSpec()
 inline
 ATermAppl constructLinearProcessSummand()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinearProcessSummand(), (constructList()), (constructDataExpr()), (constructMultActOrDelta()), (constructDataExprOrNil()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinearProcessSummand(), constructList(), constructDataExpr(), constructMultActOrDelta(), constructDataExprOrNil(), constructList())));
   return t;
 }
 
@@ -429,7 +429,7 @@ ATermAppl constructLinearProcessSummand()
 inline
 ATermAppl constructSortSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortSpec(), constructList())));
   return t;
 }
 
@@ -437,7 +437,7 @@ ATermAppl constructSortSpec()
 inline
 ATermAppl constructActionRenameRules()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActionRenameRules(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActionRenameRules(), constructList())));
   return t;
 }
 
@@ -445,7 +445,7 @@ ATermAppl constructActionRenameRules()
 inline
 ATermAppl constructBooleanEquation()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_BooleanEquation(), (constructFixPoint()), (constructBooleanVariable()), (constructBooleanExpression()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_BooleanEquation(), constructFixPoint(), constructBooleanVariable(), constructBooleanExpression())));
   return t;
 }
 
@@ -453,7 +453,7 @@ ATermAppl constructBooleanEquation()
 inline
 ATermAppl constructConsSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ConsSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ConsSpec(), constructList())));
   return t;
 }
 
@@ -469,7 +469,7 @@ ATermAppl constructSortList()
 inline
 ATermAppl constructSum()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sum(), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sum(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -477,7 +477,7 @@ ATermAppl constructSum()
 inline
 ATermAppl constructDataVarId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarId(), (constructString()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarId(), constructString(), constructSortExpr())));
   return t;
 }
 
@@ -485,7 +485,7 @@ ATermAppl constructDataVarId()
 inline
 ATermAppl constructProcVarId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcVarId(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ProcVarId(), constructString(), constructList())));
   return t;
 }
 
@@ -493,7 +493,7 @@ ATermAppl constructProcVarId()
 inline
 ATermAppl constructProcessInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcessInit(), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ProcessInit(), constructProcExpr())));
   return t;
 }
 
@@ -501,7 +501,7 @@ ATermAppl constructProcessInit()
 inline
 ATermAppl constructBES()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BES(), (constructList()), (constructBooleanExpression()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BES(), constructList(), constructBooleanExpression())));
   return t;
 }
 
@@ -509,7 +509,7 @@ ATermAppl constructBES()
 inline
 ATermAppl constructMapSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MapSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MapSpec(), constructList())));
   return t;
 }
 
@@ -525,7 +525,7 @@ ATermAppl constructStateYaled()
 inline
 ATermAppl constructBooleanAnd()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanAnd(), (constructBooleanExpression()), (constructBooleanExpression()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BooleanAnd(), constructBooleanExpression(), constructBooleanExpression())));
   return t;
 }
 
@@ -533,7 +533,7 @@ ATermAppl constructBooleanAnd()
 inline
 ATermAppl constructLinProcSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinProcSpec(), (constructDataSpec()), (constructActSpec()), (constructGlobVarSpec()), (constructLinearProcess()), (constructLinearProcessInit()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_LinProcSpec(), constructDataSpec(), constructActSpec(), constructGlobVarSpec(), constructLinearProcess(), constructLinearProcessInit())));
   return t;
 }
 
@@ -549,7 +549,7 @@ ATermAppl constructSetBagComp()
 inline
 ATermAppl constructChoice()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Choice(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Choice(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -557,7 +557,7 @@ ATermAppl constructChoice()
 inline
 ATermAppl constructLinearProcessInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_LinearProcessInit(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_LinearProcessInit(), constructList())));
   return t;
 }
 
@@ -565,7 +565,7 @@ ATermAppl constructLinearProcessInit()
 inline
 ATermAppl constructMultAct()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultAct(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultAct(), constructList())));
   return t;
 }
 
@@ -573,7 +573,7 @@ ATermAppl constructMultAct()
 inline
 ATermAppl constructPropVarInst()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarInst(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarInst(), constructString(), constructList())));
   return t;
 }
 
@@ -597,7 +597,7 @@ ATermAppl constructStateDelay()
 inline
 ATermAppl constructIdAssignment()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdAssignment(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdAssignment(), constructString(), constructList())));
   return t;
 }
 
@@ -605,7 +605,7 @@ ATermAppl constructIdAssignment()
 inline
 ATermAppl constructRegAlt()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegAlt(), (constructRegFrm()), (constructRegFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegAlt(), constructRegFrm(), constructRegFrm())));
   return t;
 }
 
@@ -613,7 +613,7 @@ ATermAppl constructRegAlt()
 inline
 ATermAppl constructStructCons()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StructCons(), (constructString()), (constructList()), (constructStringOrNil()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StructCons(), constructString(), constructList(), constructStringOrNil())));
   return t;
 }
 
@@ -621,7 +621,7 @@ ATermAppl constructStructCons()
 inline
 ATermAppl constructIdInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdInit(), (constructString()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IdInit(), constructString(), constructDataExpr())));
   return t;
 }
 
@@ -637,7 +637,7 @@ ATermAppl constructMu()
 inline
 ATermAppl constructPBEqnSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBEqnSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBEqnSpec(), constructList())));
   return t;
 }
 
@@ -645,7 +645,7 @@ ATermAppl constructPBEqnSpec()
 inline
 ATermAppl constructActNot()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActNot(), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActNot(), constructActFrm())));
   return t;
 }
 
@@ -661,7 +661,7 @@ ATermAppl constructBooleanTrue()
 inline
 ATermAppl constructBlock()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Block(), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Block(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -669,7 +669,7 @@ ATermAppl constructBlock()
 inline
 ATermAppl constructRename()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Rename(), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Rename(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -685,7 +685,7 @@ ATermAppl constructExists()
 inline
 ATermAppl constructSync()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sync(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Sync(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -693,7 +693,7 @@ ATermAppl constructSync()
 inline
 ATermAppl constructActExists()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActExists(), (constructList()), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActExists(), constructList(), constructActFrm())));
   return t;
 }
 
@@ -701,7 +701,7 @@ ATermAppl constructActExists()
 inline
 ATermAppl constructProcSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_ProcSpec(), (constructDataSpec()), (constructActSpec()), (constructGlobVarSpec()), (constructProcEqnSpec()), (constructProcInit()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl5(function_symbol_ProcSpec(), constructDataSpec(), constructActSpec(), constructGlobVarSpec(), constructProcEqnSpec(), constructProcInit())));
   return t;
 }
 
@@ -709,7 +709,7 @@ ATermAppl constructProcSpec()
 inline
 ATermAppl constructStateMu()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateMu(), (constructString()), (constructList()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_StateMu(), constructString(), constructList(), constructStateFrm())));
   return t;
 }
 
@@ -725,7 +725,7 @@ ATermAppl constructStateFalse()
 inline
 ATermAppl constructPBESForall()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESForall(), (constructList()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESForall(), constructList(), constructPBExpr())));
   return t;
 }
 
@@ -741,7 +741,7 @@ ATermAppl constructStateTrue()
 inline
 ATermAppl constructBInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BInit(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_BInit(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -757,7 +757,7 @@ ATermAppl constructPBESFalse()
 inline
 ATermAppl constructDataAppl()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataAppl(), (constructDataExpr()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataAppl(), constructDataExpr(), constructList())));
   return t;
 }
 
@@ -765,7 +765,7 @@ ATermAppl constructDataAppl()
 inline
 ATermAppl constructRegTrans()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTrans(), (constructRegFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTrans(), constructRegFrm())));
   return t;
 }
 
@@ -773,7 +773,7 @@ ATermAppl constructRegTrans()
 inline
 ATermAppl constructStateDelayTimed()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateDelayTimed(), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_StateDelayTimed(), constructDataExpr())));
   return t;
 }
 
@@ -789,7 +789,7 @@ ATermAppl constructNu()
 inline
 ATermAppl constructSortStruct()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortStruct(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_SortStruct(), constructList())));
   return t;
 }
 
@@ -797,7 +797,7 @@ ATermAppl constructSortStruct()
 inline
 ATermAppl constructAtTime()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_AtTime(), (constructProcExpr()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_AtTime(), constructProcExpr(), constructDataExpr())));
   return t;
 }
 
@@ -805,7 +805,7 @@ ATermAppl constructAtTime()
 inline
 ATermAppl constructActOr()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActOr(), (constructActFrm()), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActOr(), constructActFrm(), constructActFrm())));
   return t;
 }
 
@@ -813,7 +813,7 @@ ATermAppl constructActOr()
 inline
 ATermAppl constructComm()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Comm(), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Comm(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -821,7 +821,7 @@ ATermAppl constructComm()
 inline
 ATermAppl constructBooleanNot()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanNot(), (constructBooleanExpression()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanNot(), constructBooleanExpression())));
   return t;
 }
 
@@ -837,7 +837,7 @@ ATermAppl constructDelta()
 inline
 ATermAppl constructStateAnd()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateAnd(), (constructStateFrm()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateAnd(), constructStateFrm(), constructStateFrm())));
   return t;
 }
 
@@ -845,7 +845,7 @@ ATermAppl constructStateAnd()
 inline
 ATermAppl constructLMerge()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LMerge(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LMerge(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -861,7 +861,7 @@ ATermAppl constructSetComp()
 inline
 ATermAppl constructActForall()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActForall(), (constructList()), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActForall(), constructList(), constructActFrm())));
   return t;
 }
 
@@ -869,7 +869,7 @@ ATermAppl constructActForall()
 inline
 ATermAppl constructRenameExpr()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RenameExpr(), (constructString()), (constructString()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RenameExpr(), constructString(), constructString())));
   return t;
 }
 
@@ -877,7 +877,7 @@ ATermAppl constructRenameExpr()
 inline
 ATermAppl constructMerge()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Merge(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Merge(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -885,7 +885,7 @@ ATermAppl constructMerge()
 inline
 ATermAppl constructIfThen()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IfThen(), (constructDataExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_IfThen(), constructDataExpr(), constructProcExpr())));
   return t;
 }
 
@@ -893,7 +893,7 @@ ATermAppl constructIfThen()
 inline
 ATermAppl constructBooleanVariable()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanVariable(), (constructString()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_BooleanVariable(), constructString())));
   return t;
 }
 
@@ -901,7 +901,7 @@ ATermAppl constructBooleanVariable()
 inline
 ATermAppl constructAction()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Action(), (constructActId()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Action(), constructActId(), constructList())));
   return t;
 }
 
@@ -909,7 +909,7 @@ ATermAppl constructAction()
 inline
 ATermAppl constructPBESAnd()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESAnd(), (constructPBExpr()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESAnd(), constructPBExpr(), constructPBExpr())));
   return t;
 }
 
@@ -925,7 +925,7 @@ ATermAppl constructLambda()
 inline
 ATermAppl constructStateMust()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMust(), (constructRegFrm()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMust(), constructRegFrm(), constructStateFrm())));
   return t;
 }
 
@@ -933,7 +933,7 @@ ATermAppl constructStateMust()
 inline
 ATermAppl constructSeq()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Seq(), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Seq(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -941,7 +941,7 @@ ATermAppl constructSeq()
 inline
 ATermAppl constructDataVarIdInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarIdInit(), (constructDataVarId()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_DataVarIdInit(), constructDataVarId(), constructDataExpr())));
   return t;
 }
 
@@ -949,7 +949,7 @@ ATermAppl constructDataVarIdInit()
 inline
 ATermAppl constructProcess()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Process(), (constructProcVarId()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Process(), constructProcVarId(), constructList())));
   return t;
 }
 
@@ -957,7 +957,7 @@ ATermAppl constructProcess()
 inline
 ATermAppl constructActAnd()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAnd(), (constructActFrm()), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAnd(), constructActFrm(), constructActFrm())));
   return t;
 }
 
@@ -965,7 +965,7 @@ ATermAppl constructActAnd()
 inline
 ATermAppl constructActionRenameSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ActionRenameSpec(), (constructDataSpec()), (constructActSpec()), (constructActionRenameRules()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ActionRenameSpec(), constructDataSpec(), constructActSpec(), constructActionRenameRules())));
   return t;
 }
 
@@ -973,7 +973,7 @@ ATermAppl constructActionRenameSpec()
 inline
 ATermAppl constructPBES()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_PBES(), (constructDataSpec()), (constructGlobVarSpec()), (constructPBEqnSpec()), (constructPBInit()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_PBES(), constructDataSpec(), constructGlobVarSpec(), constructPBEqnSpec(), constructPBInit())));
   return t;
 }
 
@@ -981,7 +981,7 @@ ATermAppl constructPBES()
 inline
 ATermAppl constructStateVar()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateVar(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateVar(), constructString(), constructList())));
   return t;
 }
 
@@ -989,7 +989,7 @@ ATermAppl constructStateVar()
 inline
 ATermAppl constructActionRenameRule()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_ActionRenameRule(), (constructList()), (constructDataExpr()), (constructParamIdOrAction()), (constructActionRenameRuleRHS()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_ActionRenameRule(), constructList(), constructDataExpr(), constructParamIdOrAction(), constructActionRenameRuleRHS())));
   return t;
 }
 
@@ -997,7 +997,7 @@ ATermAppl constructActionRenameRule()
 inline
 ATermAppl constructLinearProcess()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LinearProcess(), (constructList()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_LinearProcess(), constructList(), constructList())));
   return t;
 }
 
@@ -1005,7 +1005,7 @@ ATermAppl constructLinearProcess()
 inline
 ATermAppl constructActAt()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAt(), (constructActFrm()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActAt(), constructActFrm(), constructDataExpr())));
   return t;
 }
 
@@ -1013,7 +1013,7 @@ ATermAppl constructActAt()
 inline
 ATermAppl constructDataEqn()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataEqn(), (constructList()), (constructDataExpr()), (constructDataExpr()), (constructDataExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl4(function_symbol_DataEqn(), constructList(), constructDataExpr(), constructDataExpr(), constructDataExpr())));
   return t;
 }
 
@@ -1021,7 +1021,7 @@ ATermAppl constructDataEqn()
 inline
 ATermAppl constructPBESNot()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBESNot(), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBESNot(), constructPBExpr())));
   return t;
 }
 
@@ -1029,7 +1029,7 @@ ATermAppl constructPBESNot()
 inline
 ATermAppl constructStateExists()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateExists(), (constructList()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateExists(), constructList(), constructStateFrm())));
   return t;
 }
 
@@ -1037,7 +1037,7 @@ ATermAppl constructStateExists()
 inline
 ATermAppl constructStateMay()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMay(), (constructRegFrm()), (constructStateFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StateMay(), constructRegFrm(), constructStateFrm())));
   return t;
 }
 
@@ -1045,7 +1045,7 @@ ATermAppl constructStateMay()
 inline
 ATermAppl constructParamId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ParamId(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ParamId(), constructString(), constructList())));
   return t;
 }
 
@@ -1061,7 +1061,7 @@ ATermAppl constructPBESTrue()
 inline
 ATermAppl constructMultActName()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultActName(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_MultActName(), constructList())));
   return t;
 }
 
@@ -1069,7 +1069,7 @@ ATermAppl constructMultActName()
 inline
 ATermAppl constructIfThenElse()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_IfThenElse(), (constructDataExpr()), (constructProcExpr()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_IfThenElse(), constructDataExpr(), constructProcExpr(), constructProcExpr())));
   return t;
 }
 
@@ -1085,7 +1085,7 @@ ATermAppl constructNil()
 inline
 ATermAppl constructProcEqn()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ProcEqn(), (constructProcVarId()), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_ProcEqn(), constructProcVarId(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -1093,7 +1093,7 @@ ATermAppl constructProcEqn()
 inline
 ATermAppl constructStructProj()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StructProj(), (constructStringOrNil()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_StructProj(), constructStringOrNil(), constructSortExpr())));
   return t;
 }
 
@@ -1101,7 +1101,7 @@ ATermAppl constructStructProj()
 inline
 ATermAppl constructPBEqn()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_PBEqn(), (constructFixPoint()), (constructPropVarDecl()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl3(function_symbol_PBEqn(), constructFixPoint(), constructPropVarDecl(), constructPBExpr())));
   return t;
 }
 
@@ -1109,7 +1109,7 @@ ATermAppl constructPBEqn()
 inline
 ATermAppl constructWhr()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Whr(), (constructDataExpr()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Whr(), constructDataExpr(), constructList())));
   return t;
 }
 
@@ -1117,7 +1117,7 @@ ATermAppl constructWhr()
 inline
 ATermAppl constructOpId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_OpId(), (constructString()), (constructSortExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_OpId(), constructString(), constructSortExpr())));
   return t;
 }
 
@@ -1141,7 +1141,7 @@ ATermAppl constructActFalse()
 inline
 ATermAppl constructActId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActId(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActId(), constructString(), constructList())));
   return t;
 }
 
@@ -1157,7 +1157,7 @@ ATermAppl constructSortUnknown()
 inline
 ATermAppl constructPBESOr()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESOr(), (constructPBExpr()), (constructPBExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PBESOr(), constructPBExpr(), constructPBExpr())));
   return t;
 }
 
@@ -1165,7 +1165,7 @@ ATermAppl constructPBESOr()
 inline
 ATermAppl constructRegSeq()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegSeq(), (constructRegFrm()), (constructRegFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_RegSeq(), constructRegFrm(), constructRegFrm())));
   return t;
 }
 
@@ -1181,7 +1181,7 @@ ATermAppl constructSortFBag()
 inline
 ATermAppl constructAllow()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Allow(), (constructList()), (constructProcExpr()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_Allow(), constructList(), constructProcExpr())));
   return t;
 }
 
@@ -1189,7 +1189,7 @@ ATermAppl constructAllow()
 inline
 ATermAppl constructPropVarDecl()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarDecl(), (constructString()), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_PropVarDecl(), constructString(), constructList())));
   return t;
 }
 
@@ -1197,7 +1197,7 @@ ATermAppl constructPropVarDecl()
 inline
 ATermAppl constructActImp()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActImp(), (constructActFrm()), (constructActFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl2(function_symbol_ActImp(), constructActFrm(), constructActFrm())));
   return t;
 }
 
@@ -1213,7 +1213,7 @@ ATermAppl constructSortBag()
 inline
 ATermAppl constructPBInit()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBInit(), (constructPropVarInst()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_PBInit(), constructPropVarInst())));
   return t;
 }
 
@@ -1229,7 +1229,7 @@ ATermAppl constructActTrue()
 inline
 ATermAppl constructRegTransOrNil()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTransOrNil(), (constructRegFrm()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_RegTransOrNil(), constructRegFrm())));
   return t;
 }
 
@@ -1237,7 +1237,7 @@ ATermAppl constructRegTransOrNil()
 inline
 ATermAppl constructGlobVarSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_GlobVarSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_GlobVarSpec(), constructList())));
   return t;
 }
 
@@ -1245,7 +1245,7 @@ ATermAppl constructGlobVarSpec()
 inline
 ATermAppl constructActSpec()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActSpec(), (constructList()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_ActSpec(), constructList())));
   return t;
 }
 
@@ -1253,7 +1253,7 @@ ATermAppl constructActSpec()
 inline
 ATermAppl constructId()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_Id(), (constructString()))));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl1(function_symbol_Id(), constructString())));
   return t;
 }
 

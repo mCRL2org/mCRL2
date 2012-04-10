@@ -10,14 +10,14 @@ from path import *
 
 LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
-atermpp::function_symbol function_symbol_%(name)s()
+const atermpp::function_symbol& function_symbol_%(name)s()
 {
   static atermpp::function_symbol function_symbol_%(name)s = core::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
   return function_symbol_%(name)s;
 }
 
 inline
-bool gsIs%(name)s(atermpp::aterm_appl Term)
+bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 {
   return ATgetAFun(Term) == function_symbol_%(name)s();
 }
@@ -225,9 +225,9 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
         args = []
         for x in f.arguments:
             if x.repetitions == '':
-                args.append('reinterpret_cast<ATerm>(construct%s())' % x.name())
+                args.append('construct%s()' % x.name())
             else:
-                args.append('reinterpret_cast<ATerm>(constructList())')
+                args.append('constructList()')
 
 #        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
         if len(args) > 0:
