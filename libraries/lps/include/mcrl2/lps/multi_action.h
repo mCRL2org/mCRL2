@@ -194,8 +194,8 @@ atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 /// \param first Start of a sequence of arrays
 /// \param last End of a sequence of arrays
 /// \param f A function
-template <typename Iter, typename Function, typename Compare>
-void forall_permutations(Iter first, Iter last, Function f,Compare comp)
+template <typename Iter, typename Function>
+void forall_permutations(Iter first, Iter last, Function f)
 {
   if (first == last)
   {
@@ -204,10 +204,10 @@ void forall_permutations(Iter first, Iter last, Function f,Compare comp)
   }
   Iter next = first;
   ++next;
-  forall_permutations(next, last, f,comp);
-  while (std::next_permutation(first->first, first->second,comp))
+  forall_permutations(next, last, f);
+  while (std::next_permutation(first->first, first->second))
   {
-    forall_permutations(next, last, f,comp);
+    forall_permutations(next, last, f);
   }
 }
 
@@ -233,22 +233,8 @@ inline bool equal_action_signatures(const std::vector<action>& a, const std::vec
   return true;
 }
 
-/// \brief Compares names and sorts of two actions
-struct compare_actions
-{
-  /// \brief Function call operator
-  /// \param a An action
-  /// \param b An action
-  /// \return The function result
-  bool operator()(const action& a, const action& b) const
-  {
-    return (a.label() < b.label()) ||
-           (a.label() ==b.label() && a.arguments() < b.arguments());
-  }
-};
-
-/// \brief Compares names and sorts of two actions
-struct compare_actions2
+/// \brief Compares action labels
+struct compare_action_labels
 {
   /// \brief Function call operator
   /// \param a An action
@@ -257,11 +243,23 @@ struct compare_actions2
   bool operator()(const action& a, const action& b) const
   {
     return a.label() < b.label();
-    if (a.label().name() != b.label().name())
+  }
+};
+
+/// \brief Compares action labels and arguments
+struct compare_action_label_arguments
+{
+  /// \brief Function call operator
+  /// \param a An action
+  /// \param b An action
+  /// \return The function result
+  bool operator()(const action& a, const action& b) const
+  {
+    if (a.label() != b.label())
     {
-      return a.label().name() ==  b.label().name();
+      return a.label() < b.label();
     }
-    return a.label().sorts() < b.label().sorts();
+    return a < b;
   }
 };
 
@@ -366,8 +364,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   // make copies of a and b and sort them
   std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
   std::vector<action> vb(b.actions().begin(), b.actions().end()); // protection not needed
-  std::sort(va.begin(), va.end(), detail::compare_actions());
-  std::sort(vb.begin(), vb.end(), detail::compare_actions());
+  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
+  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -385,13 +383,14 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   action_iterator first = va.begin();
   while (first != va.end())
   {
-    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
+    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
+
   atermpp::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
-  detail::forall_permutations(intervals.begin(), intervals.end(), f, detail::compare_actions());
+  detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_or(z.begin(), z.end());
   return result;
 }
@@ -408,8 +407,8 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   // make copies of a and b and sort them
   std::vector<action> va(a.actions().begin(), a.actions().end());
   std::vector<action> vb(b.actions().begin(), b.actions().end());
-  std::sort(va.begin(), va.end(), detail::compare_actions());
-  std::sort(vb.begin(), vb.end(), detail::compare_actions());
+  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
+  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -422,13 +421,13 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   action_iterator first = va.begin();
   while (first != va.end())
   {
-    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
+    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
   atermpp::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
-  detail::forall_permutations(intervals.begin(), intervals.end(), f,detail::compare_actions());
+  detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
 }

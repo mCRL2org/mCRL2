@@ -62,17 +62,18 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 
   data_expression operator()(const application& x)
   {
-    if (sort_bool::is_and_application(x))
+    data_expression y = super::operator()(x);
+    if (sort_bool::is_and_application(y))
     {
-      atermpp::multiset<data_expression> s = split_and(x);
+      atermpp::multiset<data_expression> s = split_and(y);
       return data::join_and(s.begin(), s.end());
     }
-    else if (sort_bool::is_or_application(x))
+    else if (sort_bool::is_or_application(y))
     {
-      atermpp::multiset<data_expression> s = split_or(x);
+      atermpp::multiset<data_expression> s = split_or(y);
       return data::join_or(s.begin(), s.end());
     }
-    return x;
+    return y;
   }
 };
 
@@ -90,6 +91,64 @@ void normalize_and_or(T& x,
                      )
 {
   core::make_apply_builder<normalize_and_or_builder>()(x);
+}
+
+// Normalizes equalities.
+template <typename Derived>
+struct normalize_equality_builder: public data_expression_builder<Derived>
+{
+  typedef data_expression_builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  data_expression operator()(const application& x)
+  {
+    data_expression y = super::operator()(x);
+    if (data::is_equal_to_application(y))
+    {
+      data_expression left = application(y).left();
+      data_expression right = application(y).right();
+      if (left < right)
+      {
+        return data::equal_to(left, right);
+      }
+      else
+      {
+        return data::equal_to(right, left);
+      }
+    }
+    else if (data::is_not_equal_to_application(y))
+    {
+      data_expression left = application(y).left();
+      data_expression right = application(y).right();
+      if (left < right)
+      {
+        return data::not_equal_to(left, right);
+      }
+      else
+      {
+        return data::not_equal_to(right, left);
+      }
+    }
+    return y;
+  }
+};
+
+template <typename T>
+T normalize_equality(const T& x,
+                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    )
+{
+  return core::make_apply_builder<normalize_equality_builder>()(x);
+}
+
+template <typename T>
+void normalize_equality(T& x,
+                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                       )
+{
+  core::make_apply_builder<normalize_equality_builder>()(x);
 }
 
 // normalize operator
@@ -116,7 +175,7 @@ normalizer<Function> N(const Function& f)
 }
 
 template <typename Term>
-std::string printer(const Term& x)
+std::string data_printer(const Term& x)
 {
   std::ostringstream out;
   out << data::pp(x);
@@ -170,7 +229,7 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    printer<data_expression>,
+    data_printer<data_expression>,
     std::equal_to<data_expression>(),
     R1,
     "R1",
