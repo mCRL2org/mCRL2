@@ -254,12 +254,12 @@ static _ATerm* get_int2aterm_value(ATermInt i)
 
 static _ATermAppl* get_rewrappl_value(const size_t i)
 {
-  static atermpp::vector <_ATermAppl*> rewr_appls;
+  static atermpp::vector <ATermAppl> rewr_appls;
   while (rewr_appls.size()<i+1)
   {
-    rewr_appls.push_back(&*(ATermAppl)Apply0(atermpp::aterm_int(rewr_appls.size())));
+    rewr_appls.push_back(Apply0(atermpp::aterm_int(rewr_appls.size())));
   }
-  return rewr_appls[i];
+  return &*rewr_appls[i];
 }
 
 static _ATermAppl* get_rewrappl_value(const atermpp::aterm_int i)
