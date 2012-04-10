@@ -137,18 +137,15 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
   trans = 0;
   level = 1;
 
-  if (lgopts->lts != "")
+  lps2lts_lts_options lts_opts;
+  lts_opts.outformat = lgopts->outformat;
+  lts_opts.outinfo = lgopts->outinfo;
+  lts_opts.nstate = nstate;
+  lts_opts.spec.reset(new mcrl2::lps::specification(lgopts->specification));
+  lts.open_lts(lgopts->lts.c_str(),lts_opts);
+
+  if(lgopts->outformat == mcrl2::lts::lts_none)
   {
-    lps2lts_lts_options lts_opts;
-    lts_opts.outformat = lgopts->outformat;
-    lts_opts.outinfo = lgopts->outinfo;
-    lts_opts.nstate = nstate;
-    lts_opts.spec.reset(new mcrl2::lps::specification(lgopts->specification));
-    lts.open_lts(lgopts->lts.c_str(),lts_opts);
-  }
-  else
-  {
-    lgopts->outformat = mcrl2::lts::lts_none;
     mCRL2log(verbose) << "not saving state space." << std::endl;
   }
 
