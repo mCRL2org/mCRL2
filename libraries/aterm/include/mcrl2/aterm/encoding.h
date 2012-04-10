@@ -52,13 +52,13 @@ class ATerm
     _ATerm *m_aterm;
 
   public:
-    
+
     ATerm ():m_aterm(NULL)
     {}
 
     ATerm (const ATerm &t):m_aterm(t.m_aterm)
     {}
-    
+
     ATerm (_ATerm *t):m_aterm(t)
     {}
 
@@ -67,7 +67,7 @@ class ATerm
       m_aterm=t.m_aterm;
       return *this;
     }
-    
+
     ~ATerm ()
     {
     }
@@ -113,7 +113,7 @@ class ATerm
     }
 
     /// \brief Test on whether an the ATerm is not equal to NULL.
-    bool is_defined(const ATerm &t) const
+    bool is_defined() const
     {
       return m_aterm!=NULL;
     }
