@@ -136,6 +136,18 @@ name
 number
 '''
 
+PG_MAPPING = '''
+ParityGame
+NodeSpecList
+NodeSpec
+Id
+Owner : '[01]' ;
+Successors : Id (',' Id)* ;
+Name : '"[\"]*"' ;
+Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1 ;
+Number: "0|([1-9][0-9]*)" $term -1 ;
+'''
+
 PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
   {
 BODY
@@ -318,7 +330,10 @@ def main():
     #generate_code(filename, FSM_MAPPING)
 
     filename = '../../../doc/specs/dot-syntax.g'
-    generate_code(filename, DOT_MAPPING)
+    #generate_code(filename, DOT_MAPPING)
+
+    filename = '../../../doc/specs/pg-syntax.g'
+    generate_code(filename, PG_MAPPING)
 
 if __name__ == "__main__":
     main()

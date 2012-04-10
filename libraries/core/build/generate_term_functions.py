@@ -189,7 +189,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
-ATermAppl construct%(name)s()
+const atermpp::aterm_appl& construct%(name)s()
 {
   static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s)));
   return t;
@@ -199,7 +199,7 @@ ATermAppl construct%(name)s()
 
 CONSTRUCTOR_RULE = '''// %(name)s
 inline
-ATermAppl construct%(name)s()
+const atermpp::aterm_appl& construct%(name)s()
 {
   return construct%(fname)s();
 }
@@ -218,7 +218,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
     functions = find_functions(rules, ignored_phases)
 
     for f in functions:
-        ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
+        ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
 #        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
@@ -252,7 +252,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
                 if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
                     fname = f.name()
                     break
-            ptext = ptext + 'ATermAppl construct%s();\n' % name
+            ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % name
             text = text + CONSTRUCTOR_RULE % {
                 'name'       : name,
                 'name'       : name,
