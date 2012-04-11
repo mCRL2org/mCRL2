@@ -150,11 +150,11 @@ class Induction
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
       v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
-      v_substitution_list = ATmakeList1(v_substitution);
+      v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_base_case = data_expression(gsSubstValues_Appl(v_substitution_list, f_formula, true));
 
       v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
-      v_substitution_list = ATmakeList1(v_substitution);
+      v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_induction_step = data_expression(gsSubstValues_Appl(v_substitution_list, f_formula, true));
       v_induction_step = sort_bool::implies(data_expression(f_formula), data_expression(v_induction_step));
 
@@ -184,7 +184,7 @@ class Induction
             data_expression v_dummy(a_list_of_dummies.front());
             a_list_of_dummies = pop_front(a_list_of_dummies);
             ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
-            ATermList v_substitution_list = ATmakeList1(v_substitution);
+            ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
             v_clause = sort_bool::and_(v_clause, data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true)));
           }
         }
@@ -208,10 +208,10 @@ class Induction
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
       const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
       ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
-      ATermList v_substitution_list = ATmakeList1(v_substitution);
+      ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
       data_expression v_formula_1 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
       v_substitution = gsMakeSubst_Appl(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
-      v_substitution_list = ATmakeList1(v_substitution);
+      v_substitution_list = ATmakeList1((ATerm) v_substitution);
       data_expression v_formula_2 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
       data_expression v_hypothesis = data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true));
 

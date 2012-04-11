@@ -113,7 +113,7 @@ char bafio_id[] = "$Id$";
 
 static size_t nr_unique_symbols = 0;
 static sym_read_entry* read_symbols;
-static sym_entry* sym_entries;
+static sym_entry* sym_entries = NULL;
 static sym_entry* first_topsym = NULL;
 
 static char* text_buffer = NULL;
@@ -585,7 +585,7 @@ static void build_arg_tables()
       for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
       {
         ATerm term = cur_entry->terms[cur_trm].t;
-        ATerm arg;
+        ATerm arg = NULL;
         switch (ATgetType(term))
         {
           case AT_LIST:
@@ -599,7 +599,7 @@ static void build_arg_tables()
             }
             else
             {
-              arg = ATgetNext(list);
+              arg = (ATerm)ATgetNext(list);
             }
           }
           break;
@@ -669,7 +669,7 @@ static void collect_terms(const ATerm t)
         {
           sym = AS_LIST;
           collect_terms(ATgetFirst(list));
-          collect_terms(ATgetNext(list));
+          collect_terms((ATerm)ATgetNext(list));
         }
       }
       break;
@@ -867,7 +867,7 @@ static bool write_term(const ATerm t, byte_writer* writer)
           {
             return false;
           }
-          if (!write_arg(trm_sym, ATgetNext(list), 1, writer))
+          if (!write_arg(trm_sym, (ATerm)ATgetNext(list), 1, writer))
           {
             return false;
           }
@@ -1345,29 +1345,29 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
   {
     if (readBits(&val, sym->sym_width[i], reader) < 0)
     {
-      return ATerm();
+      return NULL;
     }
     if (val >= sym->nr_topsyms[i])
     {
-      return ATerm();
+      return NULL;
     }
     arg_sym = &read_symbols[sym->topsyms[i][val]];
 
     if (readBits(&val, arg_sym->term_width, reader) < 0)
     {
-      return ATerm();
+      return NULL;
     }
 
     if (val >= arg_sym->nr_terms)
     {
-      return ATerm();
+      return NULL;
     }
-    if (!&*arg_sym->terms[val])
+    if (!arg_sym->terms[val])
     {
       arg_sym->terms[val] = read_term(arg_sym, reader);
-      if (!&*arg_sym->terms[val])
+      if (!arg_sym->terms[val])
       {
-        return ATerm();
+        return NULL;
       }
     }
 
@@ -1381,22 +1381,22 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
 
       if (readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
       {
-        return ATerm();
+        return NULL;
       }
 
-      result = ATmakeInt((int)val);
+      result = (ATerm)ATmakeInt((int)val);
 
       /*}}}  */
       break;
     case AS_LIST:
-      result = ATinsert((ATermList)args[1], args[0]);
+      result = (ATerm)ATinsert((ATermList)args[1], args[0]);
       break;
     case AS_EMPTY_LIST:
-      result = ATempty;
+      result = (ATerm)ATempty;
       break;
     default:
       /* Must be a function application */
-      result = ATmakeApplArray(sym->sym, args);
+      result = (ATerm)ATmakeApplArray(sym->sym, args);
       break;
 
   }
@@ -1464,7 +1464,7 @@ static
 ATerm read_baf(byte_reader* reader)
 {
   size_t val, nr_unique_terms;
-  ATerm result;
+  ATerm result = NULL;
 
   /* Initialize bit buffer */
   bit_buffer     = '\0';
@@ -1474,43 +1474,43 @@ ATerm read_baf(byte_reader* reader)
 
   if (readInt(&val, reader) < 0)
   {
-    return ATerm();
+    return NULL;
   }
 
   if (val == 0)
   {
     if (readInt(&val, reader) < 0)
     {
-      return ATerm();
+      return NULL;
     }
   }
 
   if (val != BAF_MAGIC)
   {
     mCRL2log(mcrl2::log::error) << "read_baf: input is not in BAF!" << std::endl;
-    return ATerm();
+    return NULL;
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return ATerm();
+    return NULL;
   }
 
   if (val != BAF_VERSION)
   {
     mCRL2log(mcrl2::log::error) << "read_baf: wrong BAF version, giving up!" << std::endl;
-    return ATerm();
+    return NULL;
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return ATerm();
+    return NULL;
   }
   nr_unique_symbols = val;
 
   if (readInt(&nr_unique_terms, reader) < 0)
   {
-    return ATerm();
+    return NULL;
   }
 
   /*}}}  */
@@ -1527,12 +1527,12 @@ ATerm read_baf(byte_reader* reader)
 
   if (!read_all_symbols(reader))
   {
-    return ATerm();
+    return NULL;
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return ATerm();
+    return NULL;
   }
 
   result = read_term(&read_symbols[val], reader);

@@ -34,7 +34,7 @@ typedef struct _SymEntry
 
 static const size_t TERM_SIZE_SYMBOL = sizeof(struct _SymEntry)/sizeof(size_t);
 
-// union _ATerm;
+union _ATerm;
 extern std::vector < SymEntry > at_lookup_table;
 
 void AT_initAFun();

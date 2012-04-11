@@ -58,7 +58,7 @@ class propositional_variable: public atermpp::aterm_appl
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
       m_parameters = atermpp::convert< data::variable_list >(p.second);
-      m_term = static_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
+      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
     /// \brief Constructor.

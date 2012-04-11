@@ -32,7 +32,7 @@ void type_check(process_expression& proc_expr, const process_specification& proc
 {
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t = core::type_check_proc_expr(proc_expr, process_specification_to_aterm(proc_spec));
-  if (t==ATermAppl())
+  if (!t)
   {
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(proc_expr));
   }
@@ -51,7 +51,7 @@ void type_check(process_specification& proc_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t = process_specification_to_aterm(proc_spec);
   t = core::type_check_proc_spec(t);
-  if (t==ATermAppl())
+  if (!t)
   {
     throw mcrl2::runtime_error("could not type check process specification");
   }

@@ -97,7 +97,7 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
       if (AT_isPotentialTerm(*cur))
       {
         real_term = AT_isInsideValidTerm(*cur);
-        if (&*real_term != NULL)
+        if (real_term != NULL)
         {
           if (!IS_MARKED((real_term)->header))
           {
@@ -106,9 +106,9 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
           }
         }
       }
-      else if (AT_isValidAFun((AFun)&**cur))
+      else if (AT_isValidAFun((AFun)*cur))
       {
-        AT_markAFun((AFun)&**cur);
+        AT_markAFun((AFun)*cur);
       }
     }
   }
@@ -116,7 +116,7 @@ static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_
   {
     for (cur=start; cur<stop; cur++)
     {
-      if ((&**cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
       {
         assert(AT_isValidTerm(*cur));
         AT_markTerm(*cur);
@@ -158,7 +158,7 @@ VOIDCDECL mark_phase()
 #elif defined(_MSC_VER) && defined(WIN32)
   size_t r_eax, r_ebx, r_ecx, r_edx, \
   r_esi, r_edi, r_esp, r_ebp;
-  _ATerm *reg[8], *real_term;
+  ATerm reg[8], real_term;
 
   __asm
   {
@@ -174,18 +174,18 @@ VOIDCDECL mark_phase()
     mov r_ebp, ebp
   }
   /* Put the register-values into an array */
-  reg[0] = (_ATerm*) r_eax;
-  reg[1] = (_ATerm*) r_ebx;
-  reg[2] = (_ATerm*) r_ecx;
-  reg[3] = (_ATerm*) r_edx;
-  reg[4] = (_ATerm*) r_esi;
-  reg[5] = (_ATerm*) r_edi;
-  reg[6] = (_ATerm*) r_esp;
-  reg[7] = (_ATerm*) r_ebp;
+  reg[0] = (ATerm) r_eax;
+  reg[1] = (ATerm) r_ebx;
+  reg[2] = (ATerm) r_ecx;
+  reg[3] = (ATerm) r_edx;
+  reg[4] = (ATerm) r_esi;
+  reg[5] = (ATerm) r_edi;
+  reg[6] = (ATerm) r_esp;
+  reg[7] = (ATerm) r_ebp;
 
   for (i=0; i<8; i++)
   {
-    real_term = &*AT_isInsideValidTerm(reg[i]);
+    real_term = AT_isInsideValidTerm(reg[i]);
     if (real_term != NULL)
     {
       assert(AT_isValidTerm(real_term));
@@ -236,7 +236,7 @@ VOIDCDECL mark_phase()
     {
       for (j=0; j<cur->size; j++)
       {
-        if (&*(cur->start[j]))
+        if (cur->start[j])
         {
           assert(AT_isValidTerm(cur->start[j]));
           AT_markTerm(cur->start[j]);
@@ -369,7 +369,7 @@ static void check_unmarked_block()
       header_type* cur;
       for (cur=block->data ; cur<end ; cur+=size)
       {
-        ATerm t = (_ATerm*)cur;
+        ATerm t = (ATerm)cur;
         assert(!IS_MARKED(t->header));
       }
       block = block->next_by_size;
@@ -387,6 +387,10 @@ static void check_unmarked_block()
 
 static void sweep_phase()
 {
+size_t total_nr_terms=0;
+size_t total_nr_free_terms=0;
+size_t total_aterm_memory=0;
+
   for (size_t size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
@@ -409,37 +413,37 @@ static void sweep_phase()
       const ATerm old_freelist = ti->at_freelist;
       for (cur=block->data ; cur<end ; cur+=size)
       {
-        ATerm t = (_ATerm*)cur;
+        ATerm t = (ATerm)cur;
         if (IS_MARKED(t->header))
         {
+++total_nr_terms;
+total_aterm_memory +=size*8;
           CLR_MARK(t->header);
           empty = false;
           assert(!IS_MARKED(t->header));
         }
         else
         {
+++total_nr_free_terms;
           switch (ATgetType(t))
           {
             case AT_FREE:
-              // t->aterm.next = ti->at_freelist;
-              t->next = ti->at_freelist;
-              ti->at_freelist = &*t;
+              t->aterm.next = ti->at_freelist;
+              ti->at_freelist = t;
               break;
             case AT_INT:
             case AT_APPL:
             case AT_LIST:
               AT_freeTerm(size, t);
               t->header = FREE_HEADER;
-              // t->aterm.next  = ti->at_freelist;
-              t->next  = ti->at_freelist;
-              ti->at_freelist = &*t;
+              t->aterm.next  = ti->at_freelist;
+              ti->at_freelist = t;
               break;
             case AT_SYMBOL:
-              AT_freeAFun((SymEntry)&*t);
+              AT_freeAFun((SymEntry)t);
               t->header = FREE_HEADER;
-              // t->aterm.next = ti->at_freelist;
-              t->next = ti->at_freelist;
-              ti->at_freelist = &*t;
+              t->aterm.next = ti->at_freelist;
+              ti->at_freelist = t;
 
               break;
             default:
@@ -456,14 +460,14 @@ static void sweep_phase()
       {
         for (cur=block->data; cur<end; cur+=size)
         {
-          assert(ATgetType((_ATerm*)cur) == AT_FREE);
+          assert(ATgetType((ATerm)cur) == AT_FREE);
         }
       }
 #endif
 
       if (end==block->end && empty)
       {
-        ti->at_freelist = &*old_freelist;
+        ti->at_freelist = old_freelist;
         reclaim_empty_block(size, block, prev_block);
       }
       else
@@ -480,9 +484,8 @@ static void sweep_phase()
 
 
 #ifndef NDEBUG
-    _ATerm* data;
-    // for (data = ti->at_freelist ; data ; data=data->aterm.next)
-    for (data = ti->at_freelist ; data ; data=data->next)
+    ATerm data;
+    for (data = ti->at_freelist ; data ; data=data->aterm.next)
     {
       if (!EQUAL_HEADER(data->header,FREE_HEADER))
       {
@@ -495,6 +498,7 @@ static void sweep_phase()
 #endif
 
   }
+fprintf(stderr,"Total memory aterms: %ld free %ld memory   %ld\n",total_nr_terms,total_nr_free_terms,total_aterm_memory);
 }
 
 /*}}}  */

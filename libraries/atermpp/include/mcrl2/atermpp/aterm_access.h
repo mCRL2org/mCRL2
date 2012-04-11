@@ -33,7 +33,7 @@ aterm_appl arg1(ATermAppl t)
 inline
 aterm_appl arg2(ATermAppl t)
 {
-  assert((t == ATerm()) || (ATgetType(t)!= AT_FREE));
+  assert((t == NULL) || (ATgetType(t)!= AT_FREE));
   return aterm_appl(t)(1);
 }
 

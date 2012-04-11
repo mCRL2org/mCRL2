@@ -23,116 +23,67 @@
 namespace aterm
 {
 
-class _ATermInt:public _ATerm
+/**
+  * We define some new datatypes.
+  */
+
+struct __ATermInt
 {
-  public:
-    union
-    {
-      int value;
-      MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
-                               as integer and as MachineWord. For all cases using bitwise
-                               operations, the MachineWord version must be used,
-                               as failing to do so may lead to improper initialisation
-                               of the last 32 bits during casting. */
-    };
+  header_type header;
+  ATerm       next;
+  union
+  {
+    int value;
+    MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
+                             as integer and as MachineWord. For all cases using bitwise
+                             operations, the MachineWord version must be used,
+                             as failing to do so may lead to improper initialisation
+                             of the last 32 bits during casting. */
+  };
+
 };
 
-static const size_t TERM_SIZE_INT = sizeof(_ATermInt)/sizeof(size_t);
+static const size_t TERM_SIZE_INT = sizeof(struct __ATermInt)/sizeof(size_t);
 
-class ATermInt:public ATerm
+typedef union _ATermInt
 {
-  private:
+  header_type        header;
+  struct __ATermInt  aterm;
+}* ATermInt;
 
-  public:
+struct __ATermAppl
+{
+  header_type header;
+  ATerm       next;
+  ATerm       arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+                              (therefore it is excessive). Using mallocs an array of the
+                              appropriate length is declared, where it is possible that
+                              the array has size 0, i.e. is absent. If the value is small
+                              (it was 1), the clang compiler provides warnings. */
 
-    // Constructors
-    ATermInt():ATerm()
-    {}
-
-    ATermInt(_ATermInt *t):ATerm(reinterpret_cast<_ATerm*>(t))
-    {}
-
-    explicit ATermInt(const ATerm t):ATerm(t) 
-    {}
-
-    _ATermInt & operator *() const
-    {
-      return *reinterpret_cast<_ATermInt*>(m_aterm); // Mooier is om _ATermInt af te leiden van _ATerm
-    }
-
-    _ATermInt *operator ->() const
-    {
-      return reinterpret_cast<_ATermInt*>(m_aterm);
-    }
 };
 
-class _ATermAppl:public _ATerm
+typedef union _ATermAppl
 {
-  public:
-    _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
-                                (therefore it is excessive). Using mallocs an array of the
-                                appropriate length is declared, where it is possible that
-                                the array has size 0, i.e. is absent. If the value is small
-                                (it was 1), the clang compiler provides warnings. */
+  header_type         header;
+  struct __ATermAppl  aterm;
+}* ATermAppl;
+
+struct __ATermList
+{
+  header_type       header;
+  ATerm             next;
+  ATerm             head;
+  union _ATermList* tail;
 };
 
-class ATermAppl:public ATerm
+static const size_t TERM_SIZE_LIST = sizeof(struct __ATermList)/sizeof(size_t);
+
+typedef union _ATermList
 {
-  public:
-
-    ATermAppl():ATerm()
-    {}
-
-    ATermAppl (_ATermAppl *t):ATerm(reinterpret_cast<_ATerm*>(t))
-    {}
-
-    explicit ATermAppl (const ATerm &t):ATerm(t)
-    {}
-
-    _ATermAppl & operator *() const
-    {
-      return *reinterpret_cast<_ATermAppl*>(m_aterm); // Mooier is om _ATermAppl af te leiden van _ATerm
-    }
-
-    _ATermAppl *operator ->() const
-    {
-      return reinterpret_cast<_ATermAppl*>(m_aterm);
-    }
-};
-
-class _ATermList:public _ATerm
-{
-  public:
-    _ATerm            *head;
-    _ATermList* tail;
-};
-
-static const size_t TERM_SIZE_LIST = sizeof(_ATermList)/sizeof(size_t);
-
-
-class ATermList:public ATerm
-{
-  public:
-
-    ATermList ():ATerm()
-    {}
-
-    ATermList(_ATermList *t):ATerm(reinterpret_cast<_ATerm *>(t))
-    {}
-
-    explicit ATermList(const ATerm t):ATerm(t)
-    {}
-
-    _ATermList & operator *() const
-    {
-      return *reinterpret_cast<_ATermList*>(m_aterm); // Mooier is om _ATermInt af te leiden van _ATerm
-    }
-
-    _ATermList *operator ->() const
-    {
-      return reinterpret_cast<_ATermList*>(m_aterm);
-    }
-};
+  header_type         header;
+  struct __ATermList  aterm;
+}* ATermList;
 
 struct _ATermTable;
 
@@ -198,14 +149,20 @@ void ATunprotectInt(const ATermInt* p)
   * datatype.
   */
 
+template <typename TermType1, typename TermType2>
+inline
+bool ATisEqual(const TermType1 t1, const TermType2 t2)
+{
+  return ATisEqual((ATerm) t1, (ATerm) t2);
+}
+
 /* The ATermInt type */
 ATermInt ATmakeInt(const int value);
 
 inline
 int ATgetInt(const ATermInt t)
 {
-  // return t->aterm.value;
-  return t->value;
+  return t->aterm.value;
 }
 
 /* The ATermAppl type */
@@ -227,16 +184,34 @@ ATermAppl ATmakeAppl6(const AFun sym, const ATerm arg0, const ATerm arg1, const 
                       const ATerm arg4, const ATerm arg5, const ATerm arg6);
 
 
+
+
+/*AFun    ATgetAFun(ATermAppl appl);*/
 inline
 AFun ATgetAFun(const ATermAppl appl)
 {
   return GET_SYMBOL(appl->header);
 }
 
+// TODO: Remove
 inline
-ATerm &ATgetArgument(const ATermAppl appl, const size_t idx)
+AFun ATgetAFun(const ATerm t)
 {
-  return (ATerm &)appl->arg[idx];
+  return ATgetAFun((ATermAppl)t);
+}
+
+/* ATerm     ATgetArgument(ATermAppl appl, size_t arg); */
+inline
+ATerm& ATgetArgument(const ATermAppl appl, const size_t idx)
+{
+  return appl->aterm.arg[idx];
+}
+
+// TODO: Remove
+inline
+ATerm& ATgetArgument(const ATerm t, const size_t idx)
+{
+  return ATgetArgument((ATermAppl)t, idx);
 }
 
 ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n);
@@ -249,21 +224,30 @@ ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[]);
 size_t ATgetLength(ATermList list);
 
 inline
-ATerm &ATgetFirst(const ATermList l)
+ATerm& ATgetFirst(const ATermList l)
 {
-  return (ATerm &)l->head;
+  return l->aterm.head;
 }
 
+/* ATermList ATgetNext(ATermList list);*/
 inline
-ATermList &ATgetNext(const ATermList l)
+ATermList& ATgetNext(const ATermList l)
 {
-  return (ATermList &)l->tail;
+  return l->aterm.tail;
 }
 
+/*ATbool ATisEmpty(ATermList list);*/
 inline
 bool ATisEmpty(const ATermList l)
 {
-  return l->head == NULL && l->tail == NULL;
+  return l->aterm.head == NULL && l->aterm.tail == NULL;
+}
+
+// XXX Remove
+inline
+bool ATisEmpty(const ATerm l)
+{
+  return ATisEmpty((ATermList)l);
 }
 
 ATermList ATgetTail(ATermList list, const int start);
@@ -362,6 +346,30 @@ bool ATisQuoted(const AFun sym)
 
 void    ATprotectAFun(const AFun sym);
 void    ATunprotectAFun(const AFun sym);
+
+/* Compare two ATerms. This is a complete stable ordering on ATerms.
+ * They are compared 'lexicographically', function names before the
+ * arguments. Function names are compared
+ * using strcmp, integers and reals are compared
+ * using integer and double comparison, blobs are compared using memcmp.
+ * If the types of the terms are different the integer value of ATgetType
+ * is used.
+ */
+int ATcompare(const ATerm t1, const ATerm t2);
+
+extern size_t at_gc_count;
+
+inline
+size_t ATgetGCCount()
+{
+  return at_gc_count;
+}
+
+inline
+size_t ATgetAFunId(const AFun afun)
+{
+  return afun;
+}
 
 } // namespace aterm
 

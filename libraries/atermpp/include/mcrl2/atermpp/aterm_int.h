@@ -48,7 +48,7 @@ class aterm_int: public aterm_base
     /// \return The wrapped ATermInt pointer
     operator ATermInt() const
     {
-      return reinterpret_cast<_ATermInt*>(&*m_term);
+      return reinterpret_cast<ATermInt>(m_term);
     }
 
     /// \brief Assignment operator.
@@ -64,7 +64,7 @@ class aterm_int: public aterm_base
     /// \return The value of the term.
     int value() const
     {
-      return ATgetInt(reinterpret_cast<_ATermInt*>(&*m_term));
+      return ATgetInt(reinterpret_cast<ATermInt>(m_term));
     }
 };
 

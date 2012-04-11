@@ -112,7 +112,7 @@ template <typename Term, typename ReplaceFunction>
 Term replace(Term t, ReplaceFunction r)
 {
   ATerm x = detail::replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
-  return Term(static_cast<ATermAppl>(x));
+  return Term(reinterpret_cast<ATermAppl>(x));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -141,7 +141,7 @@ template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r)
 {
   ATerm x = detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
-  return Term(static_cast<ATermAppl>(x));
+  return Term(reinterpret_cast<ATermAppl>(x));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -172,7 +172,7 @@ template <typename Term, typename ReplaceFunction>
 Term partial_replace(Term t, ReplaceFunction r)
 {
   ATerm x = detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
-  return Term(static_cast<ATermAppl>(x));
+  return Term(reinterpret_cast<ATermAppl>(x));
 }
 
 } // namespace atermpp

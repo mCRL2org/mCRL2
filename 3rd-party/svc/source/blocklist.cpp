@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-   $Id$ */
+   $Id: blocklist.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -312,7 +312,7 @@ void Bdump(FILE* fp, tBlock* block)
   for (tmp=block->first; tmp!=NULL; tmp=tmp->next)
   {
     ATfprintf(stderr, "    %t %6d(%p<%p<%p)\n",
-              tmp->term!=ATerm()?&*tmp->term:&*ATmakeAppl0(ATmakeAFun("nil",0,false)),
+              tmp->term?tmp->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)),
               tmp->frequency, tmp->previous, tmp, tmp->next);
     if (tmp==block->last)
     {

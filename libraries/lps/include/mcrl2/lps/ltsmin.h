@@ -234,7 +234,7 @@ class state_data_type: public pins_data_type
     std::size_t deserialize(const std::string& s)
     {
       ATerm t = atermpp::read_from_string(s);
-      data::data_expression d = atermpp::aterm_appl(static_cast<ATermAppl>(t));
+      data::data_expression d = atermpp::aterm_appl(reinterpret_cast<ATermAppl>(t));
       return expression2index(d);
     }
 
@@ -275,7 +275,7 @@ class action_label_data_type: public pins_data_type
     lps::multi_action index2expression(std::size_t i) const
     {
       ATerm a = m_indexed_set.get(i);
-      atermpp::aterm_appl t = static_cast<ATermAppl>(a);
+      atermpp::aterm_appl t = reinterpret_cast<ATermAppl>(a);
       return t;
     }
 
@@ -295,7 +295,7 @@ class action_label_data_type: public pins_data_type
     std::size_t deserialize(const std::string& s)
     {
       ATerm a = atermpp::read_from_string(s);
-      atermpp::aterm_appl t = static_cast<ATermAppl>(a);
+      atermpp::aterm_appl t = reinterpret_cast<ATermAppl>(a);
       return expression2index(t);
     }
 
@@ -656,7 +656,7 @@ class pins
     void get_initial_state(ltsmin_state_type& s)
     {
       ATerm a = m_generator.initial_state();
-      atermpp::aterm_appl init(static_cast<ATermAppl>(a));
+      atermpp::aterm_appl init(reinterpret_cast<ATermAppl>(a));
 	    for (size_t i = 0; i < m_state_length; ++i)
 	    {
 	      s[i] = state_type_map(i)[init(i)];

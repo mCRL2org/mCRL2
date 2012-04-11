@@ -28,7 +28,7 @@ using namespace aterm;
 inline
 ATerm void2term(void* t)
 {
-  return reinterpret_cast<_ATerm *>(t);
+  return reinterpret_cast<ATerm>(t);
 }
 
 /// \brief Conversion function
@@ -37,7 +37,7 @@ ATerm void2term(void* t)
 inline
 ATerm void2term(const void* t)
 {
-  return reinterpret_cast<_ATerm *>(const_cast<void*>(t));
+  return reinterpret_cast<ATerm>(const_cast<void*>(t));
 }
 
 /// \brief Conversion function
@@ -46,7 +46,7 @@ ATerm void2term(const void* t)
 inline
 void* term2void(ATerm t)
 {
-  return reinterpret_cast<void*>(&*t);
+  return reinterpret_cast<void*>(t);
 }
 
 // --- list ---
@@ -56,7 +56,7 @@ void* term2void(ATerm t)
 inline
 ATermList void2list(void* t)
 {
-  return reinterpret_cast<_ATermList*>(t);
+  return reinterpret_cast<ATermList>(t);
 }
 
 /// \brief Conversion function
@@ -65,7 +65,7 @@ ATermList void2list(void* t)
 inline
 ATermList void2list(const void* t)
 {
-  return reinterpret_cast<_ATermList*>(const_cast<void*>(t));
+  return reinterpret_cast<ATermList>(const_cast<void*>(t));
 }
 
 /// \brief Conversion function
@@ -74,7 +74,7 @@ ATermList void2list(const void* t)
 inline
 void* list2void(ATermList l)
 {
-  return reinterpret_cast<void*>(&*l);
+  return reinterpret_cast<void*>(l);
 }
 
 // --- appl ---
@@ -84,7 +84,7 @@ void* list2void(ATermList l)
 inline
 ATermAppl void2appl(void* t)
 {
-  return reinterpret_cast<_ATermAppl*>(t);
+  return reinterpret_cast<ATermAppl>(t);
 }
 
 /// \brief Conversion function
@@ -93,7 +93,7 @@ ATermAppl void2appl(void* t)
 inline
 ATermAppl void2appl(const void* t)
 {
-  return reinterpret_cast<_ATermAppl*>(const_cast<void*>(t));
+  return reinterpret_cast<ATermAppl>(const_cast<void*>(t));
 }
 
 /// \brief Conversion function
@@ -102,7 +102,7 @@ ATermAppl void2appl(const void* t)
 inline
 void* appl2void(ATermAppl l)
 {
-  return reinterpret_cast<void*>(&*l);
+  return reinterpret_cast<void*>(l);
 }
 
 // --- int  ---
@@ -112,7 +112,7 @@ void* appl2void(ATermAppl l)
 inline
 ATermInt void2int(void* t)
 {
-  return reinterpret_cast<_ATermInt*>(t);
+  return reinterpret_cast<ATermInt>(t);
 }
 
 /// \brief Conversion function
@@ -121,7 +121,7 @@ ATermInt void2int(void* t)
 inline
 ATermInt void2int(const void* t)
 {
-  return reinterpret_cast<_ATermInt*>(const_cast<void*>(t));
+  return reinterpret_cast<ATermInt>(const_cast<void*>(t));
 }
 
 /// \brief Conversion function
@@ -130,7 +130,7 @@ ATermInt void2int(const void* t)
 inline
 void* int2void(ATermInt l)
 {
-  return reinterpret_cast<void*>(&*l);
+  return reinterpret_cast<void*>(l);
 }
 
 } // namespace detail

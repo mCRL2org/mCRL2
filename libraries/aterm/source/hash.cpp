@@ -93,13 +93,11 @@ struct _ATermTable
   size_t max_entries;
   size_t* hashtable;
   size_t nr_tables;
-  // union _ATerm** * keys;
-  _ATerm** * keys;
+  union _ATerm** * keys;
   size_t nr_free_tables;
   size_t first_free_position;
   size_t** free_table;
-  // union _ATerm** * values;
-  _ATerm** * values;
+  union _ATerm** * values;
 };
 
 /*}}}  */
@@ -179,7 +177,7 @@ static size_t calculateNewSize
 /*}}}  */
 /*{{{  static ATerm tableGet(ATerm **tableindex, size_t n) */
 
-static ATerm tableGet(_ATerm*** tableindex, size_t n)
+static ATerm tableGet(ATerm** tableindex, size_t n)
 {
   return tableindex[divELEMENTS_PER_TABLE(n)][modELEMENTS_PER_TABLE(n)];
 }
@@ -191,7 +189,7 @@ static void insertKeyValue(ATermIndexedSet s,
                            size_t n, ATerm t, ATerm v)
 {
   size_t x,y;
-  _ATerm** keytable, **valuetable;
+  ATerm* keytable, *valuetable;
   size_t nr_tables = s->nr_tables;
 
   x = divELEMENTS_PER_TABLE(n);
@@ -199,7 +197,8 @@ static void insertKeyValue(ATermIndexedSet s,
 
   if (x>=nr_tables)
   {
-    s->keys = (_ATerm***)AT_realloc(s->keys, sizeof(ATerm*)*nr_tables*2);
+    s->keys = (ATerm**)AT_realloc(s->keys,
+                                  sizeof(ATerm*)*nr_tables*2);
     if (s->keys==NULL)
     {
       std::runtime_error("insertKeyValue: Cannot extend key table");
@@ -208,7 +207,7 @@ static void insertKeyValue(ATermIndexedSet s,
 
     if (s->values!=NULL)
     {
-      s->values = (_ATerm***)AT_realloc(s->values,
+      s->values = (ATerm**)AT_realloc(s->values,
                                       sizeof(ATerm*)*nr_tables*2);
       if (s->values == NULL)
       {
@@ -224,7 +223,7 @@ static void insertKeyValue(ATermIndexedSet s,
   if (keytable == NULL)
   {
     /* create a new key table */
-    keytable = (_ATerm**)AT_alloc_protected(ELEMENTS_PER_TABLE);
+    keytable = AT_alloc_protected(ELEMENTS_PER_TABLE);
     s->keys[x] = keytable;
     if (keytable == NULL)
     {
@@ -233,7 +232,7 @@ static void insertKeyValue(ATermIndexedSet s,
 
     if (s->values != NULL)
     {
-      valuetable = (_ATerm**)AT_alloc_protected(ELEMENTS_PER_TABLE);
+      valuetable = AT_alloc_protected(ELEMENTS_PER_TABLE);
       s->values[x] = valuetable;
       if (valuetable == NULL)
       {
@@ -244,10 +243,10 @@ static void insertKeyValue(ATermIndexedSet s,
 
   assert(keytable != NULL);
 
-  keytable[y] = &*t;
+  keytable[y] = t;
   if (s->values != NULL)
   {
-    s->values[x][y] = &*v;
+    s->values[x][y] = v;
   }
 }
 
@@ -261,7 +260,7 @@ static size_t hashPut(ATermTable s, ATerm key, size_t n)
   /* Find a place to insert key,
      and find whether key already exists */
 
-  c = hashcode(&*key, s->sizeMinus1);
+  c = hashcode(key, s->sizeMinus1);
 
   while (1)
   {
@@ -333,7 +332,7 @@ static void hashResizeSet(ATermIndexedSet s)
   for (i=0; i<s->nr_entries; i++)
   {
     t = tableGet(s->keys, i);
-    if (t != ATerm())
+    if (t != NULL)
     {
       hashPut(s, t, i);
     }
@@ -344,7 +343,7 @@ static void hashResizeSet(ATermIndexedSet s)
 /*}}}  */
 /*{{{  static ATermList tableContent(ATerm **tableidx, entries) */
 
-static ATermList tableContent(_ATerm*** tableindex,size_t nr_entries)
+static ATermList tableContent(ATerm** tableindex,size_t nr_entries)
 {
   size_t i;
   ATerm t;
@@ -353,7 +352,7 @@ static ATermList tableContent(_ATerm*** tableindex,size_t nr_entries)
   for (i=nr_entries; i>0; i--)
   {
     t = tableGet(tableindex, i-1);
-    if (t != ATerm())
+    if (t != NULL)
     {
       result = ATinsert(result, t);
     }
@@ -393,7 +392,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   }
 
   hashset->nr_tables = INITIAL_NR_OF_TABLES;
-  hashset->keys = (_ATerm***)AT_calloc(hashset->nr_tables,
+  hashset->keys = (ATerm**)AT_calloc(hashset->nr_tables,
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
   {
@@ -448,11 +447,11 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
       {
         *isnew = false;
       }
-      if (value != ATerm())
+      if (value != NULL)
       {
         assert(hashset->values!=NULL);
         hashset->values[ divELEMENTS_PER_TABLE(n)]
-        [ modELEMENTS_PER_TABLE(n)] = &*value;
+        [ modELEMENTS_PER_TABLE(n)] = value;
       }
       return n;
     }
@@ -470,11 +469,11 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
       {
         *isnew = false;
       }
-      if (value != ATerm())
+      if (value != NULL)
       {
         assert(hashset->values != NULL);
         hashset->values[ divELEMENTS_PER_TABLE(n)]
-        [ modELEMENTS_PER_TABLE(n)] = &*value;
+        [ modELEMENTS_PER_TABLE(n)] = value;
       }
       return n;
     }
@@ -504,7 +503,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
 
 size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, bool* isnew)
 {
-  return keyPut(hashset, elem, ATerm(), isnew);
+  return keyPut(hashset, elem, NULL, isnew);
 }
 
 /*}}}  */
@@ -514,7 +513,7 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 {
   size_t c,start,v;
 
-  start = hashcode(&*elem, hashset->sizeMinus1);
+  start = hashcode(elem, hashset->sizeMinus1);
   c = start;
   do
   {
@@ -572,7 +571,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
   hashtable = (ATermTable)ATindexedSetCreate(initial_size,
               max_load_pct);
 
-  hashtable->values = (_ATerm***)AT_calloc(hashtable->nr_tables,
+  hashtable->values = (ATerm**)AT_calloc(hashtable->nr_tables,
                                          sizeof(ATerm*));
 
   if (hashtable->values == NULL)
@@ -593,7 +592,7 @@ void ATtableDestroy(ATermTable table)
   AT_free(table->hashtable);
   for (i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++)
   {
-    AT_free_protected((ATerm*)table->keys[i]);
+    AT_free_protected(table->keys[i]);
   }
 
   AT_free(table->keys);
@@ -603,7 +602,7 @@ void ATtableDestroy(ATermTable table)
     for (i=0; ((i<table->nr_tables) &&
                (table->values[i]!=NULL)); i++)
     {
-      AT_free_protected((ATerm*)table->values[i]);
+      AT_free_protected(table->values[i]);
     }
 
     AT_free(table->values);
@@ -637,11 +636,11 @@ void ATtableReset(ATermTable table)
 
   for (i=0; (i<table->nr_tables) && (table->keys[i]!=NULL); i++)
   {
-    AT_free_protected((ATerm*)table->keys[i]);
+    AT_free_protected(table->keys[i]);
     table->keys[i]=NULL;
     if (table->values!=NULL)
     {
-      AT_free_protected((ATerm*)table->values[i]);
+      AT_free_protected(table->values[i]);
       table->values[i]=NULL;
     }
   }
@@ -672,7 +671,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
   v = ATindexedSetGetIndex(table, key);
   if (v==ATERM_NON_EXISTING_POSITION)
   {
-    return ATerm();
+    return NULL;
   }
   return tableGet(table->values, v);
 }
@@ -685,7 +684,7 @@ bool ATtableRemove(ATermTable table, ATerm key)
   size_t start,c,v,x,y;
   size_t* ltable;
 
-  start = hashcode(&*key,table->sizeMinus1);
+  start = hashcode(key,table->sizeMinus1);
   c = start;
   while (1)
   {
@@ -708,7 +707,7 @@ bool ATtableRemove(ATermTable table, ATerm key)
 
   table->hashtable[c] = DELETED;
 
-  insertKeyValue(table, v, ATerm(), ATerm());
+  insertKeyValue(table, v, NULL, NULL);
 
   x=divELEMENTS_PER_TABLE(table->first_free_position);
   if (x>=table->nr_free_tables)

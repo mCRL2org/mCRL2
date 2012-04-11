@@ -79,7 +79,7 @@ size_t ATgetType(const TermType t)
 }
 
 inline
-bool ATisEqual(const ATerm &t1, const ATerm &t2)
+bool ATisEqual(const ATerm t1, const ATerm t2)
 {
   return t1 == t2;
 }

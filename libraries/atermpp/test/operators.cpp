@@ -56,8 +56,8 @@ int test_main(int argc, char* argv[])
 
   // equality
   t == t;
-  // t == T; Disabled this test, as ATerms should not be compared with aterms.
-  // T == t;
+  t == T;
+  T == t;
 
   a == a;
   a == A;
@@ -73,8 +73,8 @@ int test_main(int argc, char* argv[])
 
   // inequality
   t != t;
-  // t != T; Disabled this test as ATerms should not be compared to aterms.
-  // T != t;
+  t != T;
+  T != t;
 
   a != a;
   a != A;

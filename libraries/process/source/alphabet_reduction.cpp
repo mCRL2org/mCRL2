@@ -324,8 +324,7 @@ namespace mcrl2
               {
                 l2_walker++;  // Match found
               }
-              // else if (*m_walker>*l2_walker)  ???? XXXX Why is > not available...
-              else if (*l2_walker<*m_walker)
+              else if (*m_walker>*l2_walker)
               {
                 return false; // l2 contains an element not in m.
               }
@@ -334,15 +333,13 @@ namespace mcrl2
           else
           {
             // l1 is not empty.
-            // if (l2_walker==l2.end() || *l1_walker <= *l2_walker)
-            if (l2_walker==l2.end() || !(*l2_walker < *l1_walker))
+            if (l2_walker==l2.end() || *l1_walker <= *l2_walker)
             {
               if (*m_walker==*l1_walker)
               {
                 l1_walker++;  // Match found
               }
-              // else if (*m_walker>*l1_walker)
-              else if (*l1_walker<*m_walker)
+              else if (*m_walker>*l1_walker)
               {
                 return false; // l1 contains an element not in m.
               }
@@ -353,8 +350,7 @@ namespace mcrl2
               {
                 l2_walker++;  // Match found
               }
-              // else if (*m_walker>*l2_walker)
-              else if (*l2_walker<*m_walker)
+              else if (*m_walker>*l2_walker)
               {
                 return false; // l2 contains an element not in m.
               }
@@ -1288,7 +1284,7 @@ namespace mcrl2
 
             mCRL2log(verbose) << "- created process " << pp(new_pn) << "\n";
             process_expression p=procs[pn];
-            assert(p!=process_expression());
+            assert(p);
             p=PushAllow(V,p);
 
             procs[new_pn]=p;
@@ -1904,8 +1900,7 @@ namespace mcrl2
         assert(0);
       }
 
-      assert((ATermList)l!=ATermList());  // This cannot be done comparing to action_label_list_list, as in this case
-                                          // the default constructor is empty;
+      assert(l);
 
       if (all_stable)
       {
@@ -2208,7 +2203,7 @@ namespace mcrl2
         return gsaGetDeps(bounded_init(a).left());
       }
       assert(0);
-      return process_identifier_list(); //to suppress warnings
+      return NULL; //to suppress warnings
     }
 
     // Delivers true if this is a pCRL term, and false if this is an mCRL term.
@@ -2545,7 +2540,7 @@ namespace mcrl2
         process_equation p= *pr;
         process_identifier pn=p.identifier();
         process_expression res=procs[pn];
-        if (res!=process_expression())
+        if (res)
         {
           new_pr=push_front(new_pr,process_equation(p.identifier(),p.formal_parameters(),res));
           procs.erase(pn);

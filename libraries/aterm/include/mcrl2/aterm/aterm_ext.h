@@ -108,7 +108,7 @@ inline bool ATisInt(const ATerm t)
  **/
 inline bool ATisApplOrNull(const ATerm t)
 {
-  return (t == ATerm()) || ATisAppl(t);
+  return (t == 0) || ATisAppl(t);
 }
 
 /**
@@ -118,7 +118,7 @@ inline bool ATisApplOrNull(const ATerm t)
  **/
 inline bool ATisListOrNull(const ATerm t)
 {
-  return (t == ATerm()) || ATisList(t);
+  return (t == 0) || ATisList(t);
 }
 
 /**
@@ -204,7 +204,7 @@ inline ATermList ATLtableGet(const ATermTable Table, const ATerm Key)
 inline
 ATermList ATinsertA(const ATermList l, const ATermAppl t)
 {
-  return ATinsert(l, t);
+  return ATinsert(l, (ATerm)t);
 }
 
 //Substitutions on ATerm's
@@ -231,7 +231,7 @@ ATermAppl gsMakeSubst(const ATerm old_value, const ATerm new_value);
  **/
 inline ATermAppl gsMakeSubst_Appl(const ATermAppl old_value, const ATermAppl new_value)
 {
-  return gsMakeSubst(old_value, new_value);
+  return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
 /**
@@ -245,7 +245,7 @@ inline ATermAppl gsMakeSubst_Appl(const ATermAppl old_value, const ATermAppl new
  **/
 inline ATermAppl gsMakeSubst_List(const ATermList old_value, const ATermList new_value)
 {
-  return gsMakeSubst(old_value, new_value);
+  return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
 /**
@@ -279,7 +279,7 @@ ATerm gsSubstValues(const ATermList substs, ATerm term, const bool recursive);
  **/
 inline ATermAppl gsSubstValues_Appl(const ATermList substs, ATermAppl appl, bool recursive)
 {
-  return (ATermAppl) gsSubstValues(substs, appl, recursive);
+  return (ATermAppl) gsSubstValues(substs, (ATerm) appl, recursive);
 }
 
 /**
@@ -298,7 +298,7 @@ inline ATermAppl gsSubstValues_Appl(const ATermList substs, ATermAppl appl, bool
  **/
 inline ATermList gsSubstValues_List(const ATermList substs, ATermList list, const bool recursive)
 {
-  return (ATermList) gsSubstValues(substs, list, recursive);
+  return (ATermList) gsSubstValues(substs, (ATerm) list, recursive);
 }
 
 /**

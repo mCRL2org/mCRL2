@@ -379,7 +379,7 @@ static void ensureWriteStackCapacity(BinaryWriter binaryWriter)
  */
 static ATerm getNextTerm(BinaryWriter binaryWriter)
 {
-  ATerm next;
+  ATerm next = NULL;
 
   /* Make sure the stack remains large enough */
   ensureWriteStackCapacity(binaryWriter);
@@ -396,7 +396,7 @@ static ATerm getNextTerm(BinaryWriter binaryWriter)
 
       if (binaryWriter->stackPosition-- == 0)
       {
-        return ATerm();
+        return NULL;
       }
 
       current = &(binaryWriter->stack[binaryWriter->stackPosition]);
@@ -461,7 +461,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
     size_t id = IMgetID(sharedAFuns, symEntry, funHash);
 
-    size_t header = getHeader(arg);
+    size_t header = getHeader((ATerm) arg);
 
     if (id != ATERM_NON_EXISTING_POSITION)
     {
@@ -539,7 +539,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
  */
 static void visitInt(ATermInt arg, ByteBuffer byteBuffer)
 {
-  *(byteBuffer->currentPos) = (char) getHeader(arg);
+  *(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
   byteBuffer->currentPos++;
 
   writeInt(ATgetInt(arg), byteBuffer);
@@ -551,7 +551,7 @@ static void visitInt(ATermInt arg, ByteBuffer byteBuffer)
 static void visitList(ATermList arg, ByteBuffer byteBuffer)
 {
   const size_t n=ATgetLength(arg);
-  *(byteBuffer->currentPos) = (char) getHeader(arg);
+  *(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
   byteBuffer->currentPos++;
 
   assert(n< (((size_t)1)<<(8*sizeof(int)-1))); /* n must fit in an int */
@@ -605,7 +605,7 @@ BinaryWriter ATcreateBinaryWriter(const ATerm term)
 int ATisFinishedWriting(BinaryWriter binaryWriter)
 {
   int finished = 0;
-  if (binaryWriter->currentTerm == ATerm())
+  if (binaryWriter->currentTerm == NULL)
   {
     finished = 1;
   }
@@ -635,10 +635,10 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
 {
   ATerm currentTerm = binaryWriter->currentTerm;
 
-  while (currentTerm != ATerm() && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE)
+  while (currentTerm != NULL && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE)
   {
-    size_t termHash = (size_t)(&*currentTerm);
-    size_t id = IMgetID(binaryWriter->sharedTerms, &*currentTerm, termHash);
+    size_t termHash = (size_t)(currentTerm);
+    size_t id = IMgetID(binaryWriter->sharedTerms, currentTerm, termHash);
     if (id != ATERM_NON_EXISTING_POSITION)
     {
       *(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
@@ -671,7 +671,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
       if (binaryWriter->indexInTerm == 0)
       {
         id = binaryWriter->currentSharedTermKey++;
-        IMmakeIDMapping(binaryWriter->sharedTerms, &*currentTerm, termHash, id);
+        IMmakeIDMapping(binaryWriter->sharedTerms, currentTerm, termHash, id);
       }
       else
       {
@@ -800,19 +800,19 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
     size_t nrOfSubTerms = parent->nrOfSubTerms;
     ATerm* subTerms = parent->subTerms;
 
-    SymEntry symEntry = (SymEntry) &*(parent->tempTerm);
+    SymEntry symEntry = (SymEntry) parent->tempTerm;
     AFun fun = symEntry->id;
 
     /* Use the appropriate way of constructing the appl, depending on if it has arguments or not. */
     if (nrOfSubTerms > 0)
     {
-      constructedTerm = ATmakeApplArray(fun, subTerms);
+      constructedTerm = (ATerm) ATmakeApplArray(fun, subTerms);
 
       releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
     else
     {
-      constructedTerm = ATmakeAppl0(fun);
+      constructedTerm = (ATerm) ATmakeAppl0(fun);
     }
 
   }
@@ -835,12 +835,12 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
       releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
 
-    constructedTerm = list;
+    constructedTerm = (ATerm) list;
 
   }
   else
   {
-    constructedTerm = ATerm(); /* This line is purely for shutting up the compiler. */
+    constructedTerm = NULL; /* This line is purely for shutting up the compiler. */
     std::runtime_error("Unable to construct term.");
   }
 
@@ -924,13 +924,13 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
 
       if (arity > 0)
       {
-        ac->tempTerm = (_ATerm*)symEntry;
+        ac->tempTerm = (ATerm) symEntry;
 
         ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
       }
       else
       {
-        ATerm term = ATmakeAppl0(fun);
+        ATerm term = (ATerm) ATmakeAppl0(fun);
 
         shareTerm(binaryReader, ac, term);
 
@@ -968,14 +968,14 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
 
     if (arity > 0)
     {
-      ac->tempTerm = (_ATerm*) symEntry;
+      ac->tempTerm = (ATerm) symEntry;
 
       ac->nrOfSubTerms = arity;
       ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
     }
     else
     {
-      ATerm term = ATmakeAppl0(fun);
+      ATerm term = (ATerm) ATmakeAppl0(fun);
 
       shareTerm(binaryReader, ac, term);
 
@@ -1035,7 +1035,7 @@ static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer)
   }
   else
   {
-    ATerm term = ATmakeList0();
+    ATerm term = (ATerm) ATmakeList0();
 
     shareTerm(binaryReader, ac, term);
 
@@ -1049,7 +1049,7 @@ static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer)
 static void touchInt(BinaryReader binaryReader, ByteBuffer byteBuffer)
 {
   int value = readInt(byteBuffer);
-  ATerm term = ATmakeInt(value);
+  ATerm term = (ATerm) ATmakeInt(value);
 
   ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
 
@@ -1202,7 +1202,7 @@ ATerm ATgetRoot(BinaryReader binaryReader)
   if (binaryReader->isDone <= 0)
   {
     mCRL2log(mcrl2::log::info) << "Can't retrieve the root of the tree while it's still being constructed. Returning NULL." << std::endl;
-    return ATerm();
+    return NULL;
   }
 
   return binaryReader->sharedTerms[0]; /* Return the value of the first element (the root of the tree). */
@@ -1348,7 +1348,7 @@ ATerm ATreadFromSAFFile(FILE* file)
   if (bytesRead <= 0)
   {
     mCRL2log(mcrl2::log::error) << "Unable to read SAF id token from file." << std::endl;
-    return ATerm();
+    return NULL;
   }
 
   if (buffer[0] != SAF_IDENTIFICATION_TOKEN)
@@ -1374,7 +1374,7 @@ ATerm ATreadFromSAFFile(FILE* file)
       mCRL2log(mcrl2::log::error) << "Unable to read block size bytes from file: " << bytesRead << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
-      return ATerm();
+      return NULL;
     }
     blockSize = ((unsigned char) sizeBytes[0]) + (((unsigned char) sizeBytes[1]) << 8);
     if (blockSize == 0)
@@ -1390,7 +1390,7 @@ ATerm ATreadFromSAFFile(FILE* file)
       mCRL2log(mcrl2::log::error) << "Unable to read bytes from file." << std::endl;
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
-      return ATerm();
+      return NULL;
     }
 
     ATdeserialize(binaryReader, byteBuffer);
@@ -1402,7 +1402,7 @@ ATerm ATreadFromSAFFile(FILE* file)
   if (!ATisFinishedReading(binaryReader))
   {
     mCRL2log(mcrl2::log::error) << "Term incomplete, missing data." << std::endl;
-    term = ATerm();
+    term = NULL;
   }
   else
   {
@@ -1431,14 +1431,14 @@ ATerm ATreadFromNamedSAFFile(const char* filename)
   if (file == NULL)
   {
     mCRL2log(mcrl2::log::error) << "Unable to open file for reading: " << filename << std::endl;
-    return ATerm();
+    return NULL;
   }
 
   result = ATreadFromSAFFile(file);
 
   if (fclose(file) != 0)
   {
-    return ATerm();
+    return NULL;
   }
 
   return result;
@@ -1561,7 +1561,7 @@ ATerm ATreadFromSAFString(char* data, size_t length)
   if (!ATisFinishedReading(binaryReader))
   {
     mCRL2log(mcrl2::log::error) << "Term incomplete, missing data." << std::endl;
-    term = ATerm();
+    term = NULL;
   }
   else
   {

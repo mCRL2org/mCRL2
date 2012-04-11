@@ -97,11 +97,11 @@ struct aterm_traits<ATermList>
   }
   static void mark(ATermList t)
   {
-    aterm_traits<ATerm>::mark(t);
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
   }
   static ATerm term(ATermList t)
   {
-    return t;
+    return reinterpret_cast<ATerm>(t);
   }
 };
 
@@ -118,11 +118,11 @@ struct aterm_traits<ATermAppl>
   }
   static void mark(ATermAppl t)
   {
-    aterm_traits<ATerm>::mark(t);
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
   }
   static ATerm term(ATermAppl t)
   {
-    return t;
+    return reinterpret_cast<ATerm>(t);
   }
 };
 
@@ -139,11 +139,11 @@ struct aterm_traits<ATermInt>
   }
   static void mark(ATermInt t)
   {
-    aterm_traits<ATerm>::mark(t);
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
   }
   static ATerm term(ATermInt t)
   {
-    return t;
+    return reinterpret_cast<ATerm>(t);
   }
 };
 

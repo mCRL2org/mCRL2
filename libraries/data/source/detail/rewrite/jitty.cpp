@@ -88,10 +88,10 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
   ATermList rules=ATempty;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = ATinsert(rules,ATmakeList4(static_cast<ATermList>(j->variables()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->condition()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->rhs())));
+    rules = ATinsert(rules,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
+                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->condition()),
+                                         (ATerm) (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
+                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->rhs())));
   }
   rules = ATreverse(rules);
 
@@ -181,13 +181,13 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = ATinsert(deps,ATmakeInt((int)i));
+            deps = ATinsert(deps,(ATerm) ATmakeInt((int)i));
             args[i] += 1;
           }
         }
         deps = ATreverse(deps);
 
-        m = ATinsert(m,ATmakeList2(deps,ATgetFirst(rules)));
+        m = ATinsert(m,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
       }
       else
       {
@@ -235,11 +235,11 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
         used[maxidx] = true;
 
         ATermInt k = ATmakeInt(maxidx);
-        strat = ATinsert(strat,k);
+        strat = ATinsert(strat,(ATerm) k);
         m2 = ATmakeList0();
         for (; !ATisEmpty(m); m=ATgetNext(m))
         {
-          m2 = ATinsert(m2,ATinsert(ATgetNext(ATLgetFirst(m)),ATremoveElement(ATLgetFirst(ATLgetFirst(m)),k)));
+          m2 = ATinsert(m2,(ATerm) ATinsert(ATgetNext(ATLgetFirst(m)),(ATerm) ATremoveElement(ATLgetFirst(ATLgetFirst(m)),(ATerm) k)));
         }
         m = ATreverse(m2);
       }
@@ -677,7 +677,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   }
 
   make_jitty_strat_sufficiently_larger(op.value());
-  if ((strat = jitty_strat[op.value()])!=NULL)
+  if ((strat = jitty_strat[op.value()]) != NULL)
   {
     for (; !ATisEmpty(strat); strat=ATgetNext(strat))
     {
@@ -768,14 +768,14 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
   return toInner(term,true);
 }
 
-data_expression RewriterJitty::rewrite(const data_expression &term, substitution_type &sigma)
+data_expression RewriterJitty::rewrite(const data_expression term, substitution_type &sigma)
 {
   internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterJitty::toRewriteFormat, this, _1));
   return fromRewriteFormat(rewrite_internal(toRewriteFormat(term), internal_sigma));
 }
 
 atermpp::aterm_appl RewriterJitty::rewrite_internal(
-     const atermpp::aterm_appl &term,
+     const atermpp::aterm_appl term,
      internal_substitution_type &sigma)
 {
   if (need_rebuild)
@@ -786,7 +786,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
     {
       const size_t j=opids->first.value();
       make_jitty_strat_sufficiently_larger(j);
-      if (jitty_strat[j]==NULL)
+      if (jitty_strat[j] == NULL)
       {
         jitty_strat[j] = create_strategy(opids->second, this);
       }

@@ -54,7 +54,7 @@ bool RewriterProver::removeRewriteRule(const data_equation Rule)
 }
 
 data_expression RewriterProver::rewrite(
-            const data_expression &Term,
+            const data_expression Term,
             substitution_type &sigma)
 {
   if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
@@ -70,7 +70,7 @@ data_expression RewriterProver::rewrite(
 }
 
 atermpp::aterm_appl RewriterProver::rewrite_internal(
-            const atermpp::aterm_appl &Term,
+            const atermpp::aterm_appl Term,
             internal_substitution_type &sigma)
 {
   // Code below is not very efficient, due to the translation to and from internal

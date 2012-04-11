@@ -108,7 +108,7 @@ data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl t)
 }
 
 atermpp::aterm_appl Rewriter::rewrite_internal(
-     const atermpp::aterm_appl &/*Term*/,
+     const atermpp::aterm_appl /*Term*/,
      internal_substitution_type & /*sigma*/)
 {
   assert(0);

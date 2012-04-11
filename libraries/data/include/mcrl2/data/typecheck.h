@@ -36,7 +36,7 @@ void type_check(sort_expression& sort_expr, const data_specification& data_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t = sort_expr;
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
-  if (!&*t)
+  if (!t)
   {
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(sort_expr));
   }
@@ -111,7 +111,7 @@ void type_check(data_specification& data_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   ATermAppl t = detail::data_specification_to_aterm_data_spec(data_spec);
   t = core::type_check_data_spec(t);
-  if (!&*t)
+  if (!t)
   {
     throw mcrl2::runtime_error("could not type check data specification " + core::pp_deprecated(data::detail::data_specification_to_aterm_data_spec(data_spec)));
   }

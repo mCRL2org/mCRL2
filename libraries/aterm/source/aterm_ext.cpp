@@ -65,7 +65,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
         {
           Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeApplArray(Head, Args);
+        ATerm a = (ATerm) ATmakeApplArray(Head, Args);
         return a;
       }
       else
@@ -81,9 +81,9 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
       {
         Result = ATinsert(Result,
                           gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
-        Term = ATgetNext((ATermList) Term);
+        Term = (ATerm) ATgetNext((ATermList) Term);
       }
-      return ATreverse(Result);
+      return (ATerm) ATreverse(Result);
     }
     else
     {
@@ -95,7 +95,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
 ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursive)
 {
   ATerm Result = ATtableGet(Substs, Term);
-  if (&*Result != NULL)
+  if ((Result) != NULL)
   {
     return Result;
   }
@@ -118,7 +118,7 @@ ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursi
         {
           Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeApplArray(Head, Args);
+        ATerm a = (ATerm) ATmakeApplArray(Head, Args);
         return a;
       }
       else
@@ -134,9 +134,9 @@ ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursi
       {
         Result = ATinsert(Result,
                           gsSubstValuesTable(Substs, ATgetFirst((ATermList) Term), Recursive));
-        Term = ATgetNext((ATermList) Term);
+        Term = (ATerm) ATgetNext((ATermList) Term);
       }
-      return ATreverse(Result);
+      return (ATerm) ATreverse(Result);
     }
     else
     {
@@ -172,7 +172,7 @@ bool gsOccurs(const ATerm Elt, ATerm Term)
       while (!ATisEmpty((ATermList) Term) && !Result)
       {
         Result = gsOccurs(Elt, ATgetFirst((ATermList) Term));
-        Term = ATgetNext((ATermList) Term);
+        Term = (ATerm) ATgetNext((ATermList) Term);
       }
     }
   }

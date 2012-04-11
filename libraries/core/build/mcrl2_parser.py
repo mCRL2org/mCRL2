@@ -122,7 +122,7 @@ class Function:
         params = self.parameters()
         t = []
         for i in range(len(params)):
-            t.append('%s' % (params[i]))
+            t.append('(ATerm) %s' % (params[i]))
         return string.join(t, ', ')
 
     def default_declaration(self):
@@ -130,7 +130,7 @@ class Function:
         types  = self.types()
         t = []
         for i in range(len(params)):
-            t.append('const %s& %s' % (types[i], params[i]))
+            t.append('%s %s' % (types[i], params[i]))
         return string.join(t, ', ')
 
 #---------------------------------------------------------------#

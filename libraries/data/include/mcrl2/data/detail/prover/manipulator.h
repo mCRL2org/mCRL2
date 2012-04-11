@@ -154,10 +154,7 @@ class InternalFormatManipulator
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
     atermpp::aterm_appl make_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
     {
-      return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, 
-                                         (ATermAppl)a_expr, 
-                                         (ATermAppl)a_high, 
-                                         (ATermAppl)a_low);
+      return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, (ATerm)(ATermAppl)a_expr, (ATerm)(ATermAppl)a_high, (ATerm)(ATermAppl)a_low);
     }
 
   public:
@@ -226,8 +223,7 @@ class InternalFormatManipulator
         v_term2 = v_result(2);
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
-          v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, 
-                    (ATermAppl)v_term2, (ATermAppl)v_term1));
+          v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, (ATerm)(ATermAppl)v_term2, (ATerm)(ATermAppl)v_term1));
         }
       }
       f_orient[a_term]=v_result;

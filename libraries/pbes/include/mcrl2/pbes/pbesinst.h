@@ -148,7 +148,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 
   for (data::data_expression_list::iterator p = propvarinst.parameters().begin(); p != propvarinst.parameters().end(); p++)
   {
-    if (enumerated_sorts->get(p->sort()) != atermpp::aterm())
+    if (enumerated_sorts->get(p->sort()) != NULL)
     {
       //sort is finite
       if (is_function_symbol(*p))
@@ -313,7 +313,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
     for (data::variable_list::const_iterator p = parameters.begin(); p != parameters.end(); p++)
     {
       data::sort_expression current_sort = p->sort();
-      if (sort_enumerations.get(current_sort) == atermpp::aterm())
+      if (sort_enumerations.get(current_sort) == NULL)
       {
         // if (check_finite(data.constructors(), current_sort))
         if (data.is_certainly_finite(current_sort))
@@ -360,7 +360,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
     for (data::variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
     {
       atermpp::vector< t_instantiations > intermediate_instantiation_list;
-      if (sort_enumerations.get(p->sort()) == atermpp::aterm())
+      if (sort_enumerations.get(p->sort()) == NULL)
       {
         // The sort is infinite
         for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)

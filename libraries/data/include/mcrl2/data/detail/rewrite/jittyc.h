@@ -40,10 +40,10 @@ class RewriterCompilingJitty: public Rewriter
 
     rewrite_strategy getStrategy();
 
-    data_expression rewrite(const data_expression &term, substitution_type &sigma);
+    data_expression rewrite(const data_expression term, substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_internal(
-         const atermpp::aterm_appl &term,
+         const atermpp::aterm_appl term,
          internal_substitution_type &sigma);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression term);
@@ -108,8 +108,7 @@ class RewriterCompilingJitty: public Rewriter
 
     void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
-    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl &);
-    // atermpp::aterm_appl(*so_rewr)(const _ATermAppl *);
+    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl);
 
     void add_base_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);
     void extend_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);

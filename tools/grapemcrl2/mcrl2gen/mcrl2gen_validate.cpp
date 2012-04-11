@@ -107,7 +107,7 @@ ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
 bool grape::mcrl2gen::is_identifier(wxString p_identifier)
 {
   ATermAppl a_parsed_identifier = parse_identifier(p_identifier);
-  return (a_parsed_identifier!=ATermAppl() && wxString(core::pp(a_parsed_identifier).c_str(), wxConvLocal) == p_identifier);
+  return (a_parsed_identifier && wxString(core::pp(a_parsed_identifier).c_str(), wxConvLocal) == p_identifier);
 }
 
 wxXmlNode* grape::mcrl2gen::get_child(wxXmlNode* p_parent, wxString p_child_name)

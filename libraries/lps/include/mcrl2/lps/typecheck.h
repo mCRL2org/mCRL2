@@ -39,7 +39,7 @@ void type_check(
                   core::detail::gsMakeMultAct(mult_act.actions()),
                   data::detail::data_specification_to_aterm_data_spec(data_spec),
                   (ATermList)action_decls);
-  if (t==ATermAppl())
+  if (!t)
   {
     throw mcrl2::runtime_error("could not type check multi action " + core::pp_deprecated(lps::detail::multi_action_to_aterm(mult_act)));
   }
