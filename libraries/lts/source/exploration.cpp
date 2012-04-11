@@ -79,13 +79,15 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   lps::specification specification(m_options.specification);
 
-  atermpp::set<data::function_symbol> extra_function_symbols;
+  mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
+  std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
+
   if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
   {
     extra_function_symbols.insert(data::greater(data::sort_nat::nat()));
     extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
   }
-  data::rewriter rewriter(specification.data(), /*data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), */m_options.strat);
+  data::rewriter rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
 
   if (m_options.priority_action != "")
   {
