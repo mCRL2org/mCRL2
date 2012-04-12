@@ -145,7 +145,8 @@ next_state_generator::next_state_generator(
 
   if (use_summand_pruning)
   {
-    parameter_score parameters[m_process_parameters.size()];
+    //parameter_score parameters[m_process_parameters.size()];
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(parameters, parameter_score, m_process_parameters.size());
     for (size_t i = 0; i < m_process_parameters.size(); i++)
     {
       parameters[i].parameter_id = i;
