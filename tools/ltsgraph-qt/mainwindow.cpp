@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add graph area
     m_glwidget = new GLWidget(m_graph, m_ui->frame);
+    m_glwidget->setDepth(0.0, 0);
     m_ui->widgetLayout->addWidget(m_glwidget);
 
     // Create springlayout algorithm + UI
@@ -52,8 +53,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_opendialog, SIGNAL(fileSelected(QString)), this, SLOT(onOpenFile(const QString&)));
     connect(m_ui->actExportImage, SIGNAL(triggered()), m_savedialog, SLOT(exec()));
     connect(m_savedialog, SIGNAL(fileSelected(QString)), this, SLOT(onExportImage(const QString&)));
-
-    m_glwidget->setDepth(0.0, 0);
 
     m_anim = 0;
     m_timer->start(40);

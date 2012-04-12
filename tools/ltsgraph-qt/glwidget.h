@@ -11,6 +11,8 @@ class GLWidgetImpl;
 
 class GLWidgetUi;
 
+class MoveRecord;
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -29,7 +31,7 @@ private:
     Graph::Graph& m_graph;
     GLScene::Selection m_hover;
     DragMode m_dragmode;
-    Graph::Node* m_dragnode;
+    MoveRecord* m_dragnode;
     QPoint m_dragstart;
     QColor m_paintcolor;
     bool m_painting;

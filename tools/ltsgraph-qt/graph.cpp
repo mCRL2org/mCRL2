@@ -7,6 +7,16 @@
 namespace Graph
 {
 
+    class MyOutputPolicy
+    {
+    public:
+        static std::string default_hint() { return "Blaat"; }
+        static void output(const std::string& msg, const std::string& hint)
+        {
+            qDebug() << "[" << hint.c_str() << "] " << msg.c_str();
+        }
+    };
+
     namespace detail
     {
 

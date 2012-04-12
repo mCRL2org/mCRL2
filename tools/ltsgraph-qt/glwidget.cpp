@@ -5,10 +5,107 @@
 #include <QtOpenGL>
 #include <map>
 
+struct MoveRecord
+{
+    Graph::Node* node;
+    virtual void move(const Graph::Coord3D& pos)
+    {
+        node->pos = pos;
+    }
+    virtual void grab(Graph::Graph& graph, size_t index) = 0;
+    virtual void release(bool toggleLocked)
+    {
+        if (toggleLocked)
+            node->locked = !node->locked;
+        node->anchored = node->locked;
+    }
+    const Graph::Coord3D& pos()
+    {
+        return node->pos;
+    }
+};
+
+struct LabelMoveRecord : public MoveRecord {
+    void grab(Graph::Graph &graph, size_t index)
+    {
+        node = &graph.label(index);
+        node->anchored = true;
+    }
+};
+
+struct HandleMoveRecord : public MoveRecord
+{
+    LabelMoveRecord label;
+    void grab(Graph::Graph& graph, size_t index)
+    {
+        node = &graph.handle(index);
+        node->anchored = true;
+        label.grab(graph, index);
+    }
+    void release(bool toggleLocked) {
+        MoveRecord::release(toggleLocked);
+        label.release(toggleLocked);
+    }
+    void move(const Graph::Coord3D &pos)
+    {
+        MoveRecord::move(pos);
+        label.move(pos);
+    }
+};
+
+struct NodeMoveRecord : public MoveRecord
+{
+    std::vector<HandleMoveRecord> edges;
+    std::vector<Graph::Node*> endpoints;
+    void grab(Graph::Graph& graph, size_t index)
+    {
+        node = &graph.node(index);
+        node->anchored = true;
+        size_t nlabels = 0;
+        for (size_t i = 0; i < graph.edgeCount(); ++i)
+        {
+            Graph::Edge e = graph.edge(i);
+            if (e.from != index)
+            {
+                size_t temp = e.from;
+                e.from = e.to;
+                e.to = temp;
+            }
+            if (e.from == index)
+            {
+                edges.resize(nlabels + 1);
+                endpoints.resize(nlabels + 1);
+                endpoints[nlabels] = &graph.node(e.to);
+                edges[nlabels++].grab(graph, i);
+            }
+        }
+    }
+    void release(bool toggleLocked)
+    {
+        MoveRecord::release(toggleLocked);
+        for (size_t i = 0; i < edges.size(); ++i)
+        {
+            edges[i].release(toggleLocked);
+        }
+    }
+    void move(const Graph::Coord3D &pos)
+    {
+        MoveRecord::move(pos);
+        for (size_t i = 0; i < edges.size(); ++i)
+        {
+            edges[i].move((pos + endpoints[i]->pos) / 2.0);
+        }
+    }
+};
+
+
 GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
     : QGLWidget(parent), m_ui(NULL), m_graph(graph)
 {
-    m_scene = new GLScene(m_graph);    
+    m_scene = new GLScene(m_graph);
+    QGLFormat fmt;
+    fmt.setAlpha(true);
+    qDebug() << format().alpha();
 }
 
 GLWidget::~GLWidget()
@@ -120,8 +217,24 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
         else
         {
             m_dragmode = dm_dragnode;
-            m_dragnode = select_object(m_hover, m_graph);
-            m_dragnode->anchored = true;
+            switch (m_hover.selectionType)
+            {
+            case GLScene::so_node:
+                m_dragnode = new NodeMoveRecord;
+                break;
+            case GLScene::so_handle:
+                m_dragnode = new HandleMoveRecord;
+                break;
+            case GLScene::so_label:
+                m_dragnode = new LabelMoveRecord;
+                break;
+            default:
+                m_dragnode = NULL;
+                m_dragmode = dm_none;
+                break;
+            }
+            if (m_dragnode)
+                m_dragnode->grab(m_graph, m_hover.index);
         }
     }
 }
@@ -130,11 +243,9 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e)
 {
     if (m_dragmode == dm_dragnode)
     {
-        if (e->button() == Qt::RightButton)
-        {
-            m_dragnode->locked = !m_dragnode->locked;
-        }
-        m_dragnode->anchored = m_dragnode->locked;
+        m_dragnode->release(e->button() == Qt::RightButton);
+        delete m_dragnode;
+        m_dragnode = NULL;
     }
     m_dragmode = dm_none;
 }
@@ -173,7 +284,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
             m_scene->translate(vec3);
             break;
         case dm_dragnode:
-            m_dragnode->pos = m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos).z);
+            m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
             break;
         case dm_zoom:
             m_scene->zoom(pow(1.0005, (float)vec.y()));
@@ -261,7 +372,40 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter)
     }
     else
     {
-        renderPixmap(1024, 768).save(filename);
+        unsigned char buffer[1024 * 768 * 4];
+
+        glClearColor(0, 0, 0, 0);
+
+        QGLFramebufferObject fb(1024, 768, QGLFramebufferObject::Depth);
+        fb.bind();
+
+        m_scene->resize(1024, 768);
+        m_scene->render();
+        //swapBuffers();
+        glReadPixels(0, 0, 1024, 768, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
+        fb.release();
+        QImage img = fb.toImage();
+        QRgb* data = (QRgb*)(img.bits());
+        for (size_t i = 0; i < 1024 * 768; ++i)
+        {
+            unsigned char alpha = qAlpha(data[i]);
+            if (alpha)
+            {
+#define min(a,b) ((a)>(b)?(b):(a))
+                data[i] = qRgba(
+                            min(255, qRed(data[i]) * 255 / alpha),
+                            min(255, qGreen(data[i]) * 255 / alpha),
+                            min(255, qBlue(data[i]) * 255 / alpha),
+                            alpha
+                );
+#undef min
+            }
+        }
+        img.save(filename);
+
+        //grabFrameBuffer(true).save(filename);
+
+        //renderPixmap(1024, 768).save(filename);
         m_scene->resize(width(), height());
     }
 }

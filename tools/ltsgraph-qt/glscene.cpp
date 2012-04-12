@@ -667,7 +667,7 @@ GLScene::~GLScene()
 void GLScene::init(const QColor& clear)
 {
     // Set clear color to desired color
-    glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0);
+    glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 0.0);
     // Enable anti-aliasing for all primitives
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POINT_SMOOTH);
@@ -679,7 +679,7 @@ void GLScene::init(const QColor& clear)
     gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // Get some fog in. This should probably be made custumizable for people
     // who don't like fog...
-    GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 1.0};
+    GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 0.0};
     glFogf(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_DENSITY, 1);
     glFogf(GL_FOG_START, 1000.0);
