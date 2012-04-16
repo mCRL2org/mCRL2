@@ -28,7 +28,7 @@ void parse_fsm(const std::string& text, lts::lts_fsm_t& result)
   std::ofstream to(temp_filename.c_str());
   to << text;
   to.close();
-  result.load(temp_filename);
+  result.loadnew(temp_filename);
   boost::filesystem::remove(boost::filesystem::path(temp_filename));
 }
 
@@ -79,7 +79,7 @@ void parse_dot(const std::string& text, lts::lts_dot_t& result)
   std::ofstream to(temp_filename.c_str());
   to << text;
   to.close();
-  result.load(temp_filename);
+  result.loadnew(temp_filename);
   boost::filesystem::remove(boost::filesystem::path(temp_filename));
 }
 
