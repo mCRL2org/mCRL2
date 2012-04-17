@@ -202,15 +202,20 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
 {
   std::clog << "run_pbes_explorer" << std::endl;
   pbes<> p = txt2pbes(pbes_text);
+  core::garbage_collect();
   normalize(p);
+  core::garbage_collect();
   if (!is_ppg(p))
   {
     std::clog << "Rewriting to PPG..." << std::endl;
     p = to_ppg(p);
     std::clog << "done." << std::endl;
   }
-  ltsmin::test::explorer pbes_explorer(p, rewrite_strategy);
-  lts_info* info = pbes_explorer.get_info();
+  core::garbage_collect();
+  ltsmin::test::explorer* pbes_explorer = new ltsmin::test::explorer(p, rewrite_strategy);
+  core::garbage_collect();
+  lts_info* info = pbes_explorer->get_info();
+  core::garbage_collect();
   int state_length = info->get_lts_type().get_state_length();
   BOOST_CHECK(num_parts==state_length);
   //std::clog << state_length << " parts" << std::endl;
@@ -225,11 +230,14 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
   (void)write_matrix;
   // TODO: check matrices ...
 
-  pbes_explorer.bfs();
-
+  pbes_explorer->bfs();
+  core::garbage_collect();
   // check number of states and transitions:
-  BOOST_CHECK(num_states==(int)pbes_explorer.get_state_count());
-  BOOST_CHECK(num_transitions==(int)pbes_explorer.get_transition_count());
+  BOOST_CHECK(num_states==(int)pbes_explorer->get_state_count());
+  BOOST_CHECK(num_transitions==(int)pbes_explorer->get_transition_count());
+  core::garbage_collect();
+  delete pbes_explorer;
+  core::garbage_collect();
 }
 
 
