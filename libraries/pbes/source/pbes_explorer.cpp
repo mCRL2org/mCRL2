@@ -180,8 +180,10 @@ void lts_info::compute_lts_type()
     std::vector<std::string> params;
     std::map<std::string,std::string> paramtypes;
     //this->param_default_values = new atermpp::vector<data_expression>();
-    for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-            != p.equations().end(); ++eqn) {
+    const atermpp::vector<pbes_equation> eqns(p.equations());
+    data::representative_generator default_expression_generator(p.data());
+    for (atermpp::vector<pbes_equation>::const_iterator eqn = eqns.begin(); eqn
+            != eqns.end(); ++eqn) {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
 
@@ -202,18 +204,8 @@ void lts_info::compute_lts_type()
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
-                atermpp::vector< function_symbol > c = p.data().constructors(varparam.sort());
-                if (c.size() == 0) {
-                    throw(std::runtime_error("Error in info: no constructor for parameter sort " + signature + "."));
-                } else {
-                    assert(c.size() > 0);
-                    function_symbol fs = c[0];
-                    pbes_expression e = pgg->rewrite_and_simplify_expression(fs);
-                    data_expression v = data_expression(e);
-                    //std::clog << "pbes_type: " << signature << "(" << this->param_default_values.size() << ") value = " << v.to_string()
-                    //        << " (" << pgg->data_to_string(v) << ")"<< std::endl;
-                    this->param_default_values.push_back(v);
-                }
+
+                this->param_default_values.push_back(default_expression_generator(varparam.sort()));
             }
         }
         //params.sort();
@@ -286,7 +278,9 @@ void lts_info::compute_transition_groups()
                                                      (*eqn).symbol()));
         if ((*eqn).symbol() != symbol) {
             priority++;
+            symbol = (*eqn).symbol();
         }
+        //std::clog << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
         this->variable_priority.insert(std::make_pair(variable_name, priority));
         std::pair<std::string,data::variable_list> var_params_entry = std::make_pair(variable_name, (*eqn).variable().parameters());
         this->variable_parameters.insert(var_params_entry);
@@ -1019,6 +1013,7 @@ std::string ltsmin_state::to_string() const
 
 explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false)
 {
+    p.protect();
     p.load(filename);
     pbes_system::normalize(p);
     if (!is_ppg(p))
@@ -1027,7 +1022,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
         p = detail::to_ppg(p);
         mCRL2log(log::verbose) << "Rewriting done." << std::endl;
     }
-    this->pgg = new pbes_greybox_interface(p, false, true, data::parse_rewrite_strategy(rewrite_strategy));
+    this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
@@ -1042,8 +1037,9 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
 
 explorer::explorer(const pbes<>& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false)
 {
+    p.protect();
     p = p_;
-    this->pgg = new pbes_greybox_interface(p, false, true, data::parse_rewrite_strategy(rewrite_strategy));
+    this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
@@ -1060,6 +1056,7 @@ explorer::~explorer()
 {
     delete info;
     delete pgg;
+    p.unprotect();
 }
 
 
@@ -1358,11 +1355,11 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state)
     operation_type type = state.get_type();
     if (state.get_variable()=="true")
     {
-        //result.push_back(true_state());
+        result.push_back(true_state());
     }
     else if (state.get_variable()=="false")
     {
-        //result.push_back(false_state());
+        result.push_back(false_state());
     }
     else
     {
@@ -1404,11 +1401,11 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
     operation_type type = state.get_type();
     if (state.get_variable()=="true")
     {
-        //result.push_back(true_state());
+        result.push_back(true_state());
     }
     else if (state.get_variable()=="false")
     {
-        //result.push_back(false_state());
+        result.push_back(false_state());
     }
     else
     {
