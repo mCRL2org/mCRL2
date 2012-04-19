@@ -192,6 +192,12 @@ class InternalFormatManipulator
     atermpp::aterm_appl orient(atermpp::aterm_appl a_term)
     {
       // v_result is NULL if not found; Therefore type ATerm.
+      if (is_variable(a_term))
+      { 
+        return a_term;
+      }
+
+
       atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
       if (it!=f_orient.end())   // found
       {
@@ -206,7 +212,7 @@ class InternalFormatManipulator
       v_function = a_term(0);
       v_arity = ATgetArity(v_symbol);
 
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity + 1);
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {

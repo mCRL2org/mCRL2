@@ -152,7 +152,6 @@ void resize_hashtable()
   /*{{{  Rehash all old elements */
 
   newhalf = hashtable + oldsize;
-size_t term_count=0;
   for (p=hashtable; p < newhalf; p++)
   {
     ATerm marked = *p;
@@ -188,7 +187,6 @@ size_t term_count=0;
 
       while (unmarked)
       {
-term_count++;
         ATerm next = unmarked->aterm.next;
         HashNumber hnr;
 
@@ -211,7 +209,6 @@ term_count++;
   }
 
   /*}}}  */
-fprintf(stderr,"TERM COUNT AFTER HASH %ld   %ld \n",table_class,term_count);
 }
 
 /*}}}  */
@@ -404,7 +401,6 @@ ATerm AT_allocate(const size_t size)
 
   if (total_nodes >= nr_of_nodes_for_the_next_garbage_collect)
   {
-fprintf(stderr,"Start garbage collect %ld\n",total_nodes);
     AT_collect();
     // Do a collect again if table_size/garbage_collect_factor new terms have been 
     // allocated. This guarantees that the garbage collection is constant in terms of 
@@ -417,7 +413,6 @@ fprintf(stderr,"Start garbage collect %ld\n",total_nodes);
       // an arbitrary number of element, at some performance penalty.
       resize_hashtable();
     }
-fprintf(stderr,"Number for garbage collection %ld   %ld  %ld\n",total_nodes,nr_of_nodes_for_the_next_garbage_collect,table_size);
   }
 
   ATerm at;

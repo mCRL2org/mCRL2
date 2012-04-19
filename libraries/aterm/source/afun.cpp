@@ -310,6 +310,8 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL); // Note that this statement changes first_free,
                                                     // if garbage collection is done. 
 
+    total_nodes--; // AT_allocate counts a function symbol as a node, but this is not correct, as it 
+                   // is not stored in the ATerm hashtable. This is to correct this.
     const AFun free_entry = first_free;
     assert(at_lookup_table.size()<afun_table_size);
     assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
@@ -389,7 +391,6 @@ void AT_freeAFun(SymEntry sym)
   at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
   first_free = sym->id;
   assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
-  total_nodes--;
 }
 
 /*}}}  */

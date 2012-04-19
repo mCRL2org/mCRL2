@@ -3479,7 +3479,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
-      if (ATAgetFirst(VarDecls) != NULL)
+      if (VarDecls != ATempty)
       {
         mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
         return NULL;
