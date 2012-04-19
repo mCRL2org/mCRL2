@@ -50,7 +50,7 @@ namespace detail
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_a_variable
 {
-  bool operator()(atermpp::aterm t) const
+  bool operator()(const atermpp::aterm &t) const
   {
     return is_variable(t);
   }
@@ -58,7 +58,7 @@ struct is_a_variable
 
 #ifndef NDEBUG
 static
-bool occur_check(const variable v, const atermpp::aterm_appl e)
+bool occur_check(const variable &v, const atermpp::aterm_appl &e)
 {
   if (v==e)
   {
@@ -77,10 +77,11 @@ bool occur_check(const variable v, const atermpp::aterm_appl e)
 
 
 data_expression_list Rewriter::rewrite_list(
-     const data_expression_list terms,
+     const data_expression_list &terms,
      substitution_type &sigma)
 {
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
+  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
+  std::vector < data_expression> term_array(terms.size());
   size_t position=0;
   for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
   {
@@ -93,16 +94,20 @@ data_expression_list Rewriter::rewrite_list(
     --position;
     l = push_front(l,term_array[position]);
   }
+  /* for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
+  {
+    term_array[position].~data_expression();
+  } */
   return l;
 }
 
-atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression /*Term*/)
+atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression &/*Term*/)
 {
   assert(0);
   return atermpp::aterm_appl();
 }
 
-data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl t)
+data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl &t)
 {
   return fromInner(t);
 }
@@ -116,10 +121,11 @@ atermpp::aterm_appl Rewriter::rewrite_internal(
 }
 
 atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
-    const atermpp::term_list<atermpp::aterm_appl> terms,
+    const atermpp::term_list<atermpp::aterm_appl> &terms,
     internal_substitution_type &sigma)
 {
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, atermpp::aterm_appl, terms.size());
+  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, atermpp::aterm_appl, terms.size());
+  std::vector <atermpp::aterm_appl> term_array(terms.size());
   size_t position=0;
   for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
   {
@@ -131,23 +137,28 @@ atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
     --position;
     l = push_front(l,term_array[position]);
   }
+  /* for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
+  {
+    using namespace atermpp;
+    term_array[position].~aterm_appl();
+  } */
   return l;
 }
 
-bool Rewriter::addRewriteRule(const data_equation /*Rule*/)
+bool Rewriter::addRewriteRule(const data_equation &/*Rule*/)
 {
   assert(0);
   return false;
 }
 
-bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
+bool Rewriter::removeRewriteRule(const data_equation &/*Rule*/)
 {
   assert(0);
   return false;
 }
 
 atermpp::aterm_appl Rewriter::rewrite_where(
-                      const atermpp::aterm_appl term,
+                      const atermpp::aterm_appl &term,
                       internal_substitution_type &sigma)
 {
   const atermpp::term_list < atermpp::aterm_appl > assignment_list(term(1));
@@ -173,8 +184,8 @@ atermpp::aterm_appl Rewriter::rewrite_where(
 }
 
 atermpp::aterm_appl Rewriter::rewrite_single_lambda(
-                      const variable_list vl,
-                      const atermpp::aterm_appl body,
+                      const variable_list &vl,
+                      const atermpp::aterm_appl &body,
                       const bool body_in_normal_form,
                       internal_substitution_type &sigma)
 {
@@ -259,8 +270,8 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 // Note that we assume that neither L, nor t is in normal form.
 
 atermpp::aterm_appl Rewriter::rewrite_lambda_application(
-                      const atermpp::aterm_appl lambda_term,
-                      const atermpp::aterm_appl t,
+                      const atermpp::aterm_appl &lambda_term,
+                      const atermpp::aterm_appl &t,
                       internal_substitution_type &sigma)
 {
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
@@ -298,7 +309,8 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   }
 
   // There are more arguments than bound variables.
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+  std::vector < atermpp::aterm > args(arity-vl.size());
   args[0]=result;
   for(size_t i=1; i<arity-vl.size(); ++i)
   {
@@ -306,12 +318,17 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     args[i]=t(vl.size()+i);
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),args),sigma);
+  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),args.begin(),args.end()),sigma);
+  /* for(size_t i=1; i<arity-vl.size(); ++i)
+  {
+    using namespace atermpp;
+    args[i].~aterm();
+  } */
   return result1;
 }
 
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
-     const atermpp::aterm_appl t,
+     const atermpp::aterm_appl &t,
      internal_substitution_type &sigma)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
@@ -330,8 +347,8 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
-      const variable_list vl,
-      const atermpp::aterm_appl t1,
+      const variable_list &vl,
+      const atermpp::aterm_appl &t1,
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
@@ -407,7 +424,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 
 
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
-     const atermpp::aterm_appl t,
+     const atermpp::aterm_appl &t,
      internal_substitution_type &sigma)
 {
   assert(is_abstraction(t) && t(0)==gsMakeForall());
@@ -421,8 +438,8 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
-      const variable_list vl,
-      const atermpp::aterm_appl t1,
+      const variable_list &vl,
+      const atermpp::aterm_appl &t1,
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
@@ -544,9 +561,9 @@ Rewriter* createRewriter(
 }
 
 //Prototype
-static void check_vars(const data_expression expr, const std::set <variable> &vars, std::set <variable> &used_vars);
+static void check_vars(const data_expression &expr, const std::set <variable> &vars, std::set <variable> &used_vars);
 
-static void check_vars(const data_expression_list exprs, const std::set <variable> &vars, std::set <variable> &used_vars)
+static void check_vars(const data_expression_list &exprs, const std::set <variable> &vars, std::set <variable> &used_vars)
 {
   for (data_expression_list::const_iterator i=exprs.begin(); i!=exprs.end(); ++i)
   {
@@ -554,7 +571,7 @@ static void check_vars(const data_expression_list exprs, const std::set <variabl
   }
 }
 
-static void check_vars(const data_expression expr, const std::set <variable> &vars, std::set <variable> &used_vars)
+static void check_vars(const data_expression &expr, const std::set <variable> &vars, std::set <variable> &used_vars)
 {
   if (is_application(expr))
   {
@@ -573,9 +590,9 @@ static void check_vars(const data_expression expr, const std::set <variable> &va
 }
 
 //Prototype
-static void checkPattern(const data_expression p);
+static void checkPattern(const data_expression &p);
 
-static void checkPattern(const data_expression_list l)
+static void checkPattern(const data_expression_list &l)
 {
   for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
@@ -583,7 +600,7 @@ static void checkPattern(const data_expression_list l)
   }
 }
 
-static void checkPattern(const data_expression p)
+static void checkPattern(const data_expression &p)
 {
   if (is_application(p))
   {
@@ -597,7 +614,7 @@ static void checkPattern(const data_expression p)
   }
 }
 
-void CheckRewriteRule(const data_equation data_eqn)
+void CheckRewriteRule(const data_equation &data_eqn)
 {
   const variable_list rule_var_list = data_eqn.variables();
   const atermpp::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
@@ -655,7 +672,7 @@ void CheckRewriteRule(const data_equation data_eqn)
   }
 }
 
-bool isValidRewriteRule(const data_equation data_eqn)
+bool isValidRewriteRule(const data_equation &data_eqn)
 {
   try
   {
@@ -708,7 +725,7 @@ function_symbol get_int2term(const size_t n)
   return int2term()[n];
 }
 
-atermpp::aterm_int OpId2Int(const function_symbol term)
+atermpp::aterm_int OpId2Int(const function_symbol &term)
 {
   atermpp::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
@@ -725,7 +742,7 @@ atermpp::aterm_int OpId2Int(const function_symbol term)
   return f->second;
 }
 
-atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
+atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 {
   if (is_variable(term))
   {
@@ -781,7 +798,7 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
   return atermpp::aterm_appl();
 }
 
-data_expression fromInner(atermpp::aterm_appl term)
+data_expression fromInner(const atermpp::aterm_appl &term)
 {
   if (is_variable(term))
   {

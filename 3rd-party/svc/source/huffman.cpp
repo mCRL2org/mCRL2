@@ -63,7 +63,8 @@ int HFinit(HFtree* tree, HTable* terms)
 
   /* Create the root node */
 
-  tree->codes=(struct HFnode*)malloc(sizeof(struct HFnode));
+  // tree->codes=(struct HFnode*)malloc(sizeof(struct HFnode));
+  tree->codes=new struct HFnode;
   tree->codes->high=NULL;
   tree->codes->parent=NULL;
   tree->codes->frequency=0L;
@@ -72,7 +73,8 @@ int HFinit(HFtree* tree, HTable* terms)
 
   /* Create the leaf for the escape code */
 
-  tree->codes->low=(struct HFnode*)malloc(sizeof(struct HFnode));
+  // tree->codes->low=(struct HFnode*)malloc(sizeof(struct HFnode));
+  tree->codes->low=new struct HFnode;
   tree->codes->low->high=NULL;
   tree->codes->low->low=NULL;
   tree->codes->low->parent=tree->codes;
@@ -112,7 +114,7 @@ void HFfreeLoop(struct HFnode* node)
     HFfreeLoop(node->low);
     HFfreeLoop(node->high);
     ATunprotect(&node->term);
-    free(node);
+    delete node;
   }
 }
 
@@ -580,7 +582,8 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create a new sibling */
 
-    newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode=new struct HFnode;
     newNode->high=NULL;
     newNode->low=NULL;
     newNode->parent=tmp->parent;
@@ -608,7 +611,8 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create new interior node */
 
-    newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode=new struct HFnode;
     newNode->parent=tmp->parent;
     newNode->frequency=tmp->frequency;
     newNode->term=ATerm();
@@ -629,7 +633,8 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create new leaf that is high child of new interior node */
 
-    newNode->high=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode->high=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode->high=new struct HFnode;
     newNode->high->high=NULL;
     newNode->high->low=NULL;
     newNode->high->parent=newNode;

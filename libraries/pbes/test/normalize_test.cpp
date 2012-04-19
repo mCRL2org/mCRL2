@@ -217,7 +217,7 @@ void test_normalize_and_or()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_normalize1();
   test_normalize2();

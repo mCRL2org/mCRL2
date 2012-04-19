@@ -30,7 +30,7 @@ typedef struct _IDMappings
 
   unsigned int load;
   size_t threshold;
-}* IDMappings;
+} *IDMappings;
 
 IDMappings IMcreateIDMappings(unsigned int loadPercentage);
 

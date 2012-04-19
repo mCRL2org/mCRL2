@@ -36,7 +36,7 @@ std::string t1 =
   "                                        \n"
   " init X(0, 0);                          \n"
   ;
-std::string x1 = "binding_variables = X(n: Nat)";
+std::string x1 = "binding_variables = X(m: Nat)";
 
 // Example provided by Tim Willemse.
 // The parameters n and m are not equivalent, and thus should not
@@ -124,7 +124,7 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   bool compute_conditions = false;
   bool remove_equations = true;

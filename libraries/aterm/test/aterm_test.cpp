@@ -27,7 +27,7 @@ void test_plain_aterm_construction()
   BOOST_CHECK(ATisQuoted(f0));
 
   const ATermAppl a0=ATmakeAppl0(f0);
-  BOOST_CHECK(ATgetAFun(a0)==f0);
+  BOOST_CHECK(ATgetAFun(a0)==f0.number());
 
   const char *s1="f1";
   const AFun f1=ATmakeAFun(s1,1,false);
@@ -36,7 +36,7 @@ void test_plain_aterm_construction()
   BOOST_CHECK(!ATisQuoted(f1));
 
   const ATermAppl a1=ATmakeAppl1(f1,a0);
-  BOOST_CHECK(ATgetAFun(a1)==f1);
+  BOOST_CHECK(ATgetAFun(a1)==f1.number());
   BOOST_CHECK(ATgetArgument(a1,0)==a0);
 
   const char *s2="f0"; // Intentionally reuse string "f0".
@@ -47,7 +47,7 @@ void test_plain_aterm_construction()
   BOOST_CHECK(ATisQuoted(f2));
 
   const ATermAppl a2=ATmakeAppl2(f2,a0,a1);
-  BOOST_CHECK(ATgetAFun(a2)==f2);
+  BOOST_CHECK(ATgetAFun(a2)==f2.number());
   BOOST_CHECK(ATgetArgument(a2,0)==a0);
   BOOST_CHECK(ATgetArgument(a2,1)==a1);
 
@@ -55,8 +55,7 @@ void test_plain_aterm_construction()
 
 int test_main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(&bottom_of_stack);
+  ATinit();
 
   test_plain_aterm_construction(); // Run test twice. In the first run the elements are not constructed.
   test_plain_aterm_construction(); // In the second, they already exist.

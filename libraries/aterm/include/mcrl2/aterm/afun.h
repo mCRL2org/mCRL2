@@ -12,78 +12,206 @@
 namespace aterm
 {
 
-typedef size_t AFun;
-
-const size_t AS_INT = 0;
-// const size_t AS_REAL = 1;
-// const size_t AS_BLOB = 2;
-// const size_t AS_PLACEHOLDER = 3;
-const size_t AS_LIST = 4;
-const size_t AS_EMPTY_LIST = 5;
-
 /* The AFun type */
-typedef struct _SymEntry
+class _SymEntry
 {
-  header_type header;
-  struct _SymEntry* next;
-  AFun  id;
-  char*   name;
-  size_t count;  /* used in bafio.c */
-  size_t index;  /* used in bafio.c */
-}* SymEntry;
+  public:
+    size_t header;
+    size_t next;
+    size_t reference_count;
+    size_t id;
+    char*  name;
+    size_t count;  /* used in bafio.c */
+    size_t index;  /* used in bafio.c */
 
-static const size_t TERM_SIZE_SYMBOL = sizeof(struct _SymEntry)/sizeof(size_t);
+    _SymEntry(const size_t h,const size_t i,size_t c,size_t in):
+        header(h),
+        next(size_t(-1)),
+        reference_count(0),
+        id(i),
+        name(NULL),
+        count(c),
+        index(in)
+    {}
+};
 
-// union _ATerm;
-extern std::vector < SymEntry > at_lookup_table;
-
-void AT_initAFun();
-size_t AT_printAFun(const AFun sym, FILE* f);
+void at_free_afun(const size_t n);
 
 inline
-bool SYM_IS_FREE(const SymEntry sym)
+bool AT_isValidAFun(const size_t sym);
+
+class AFun
 {
-  return ((MachineWord)sym & 1) == 1;
+  protected:
+    size_t m_number;
+
+  public:
+    static size_t first_free;
+    static std::vector < _SymEntry* > at_lookup_table; // As safio uses stable pointers to _SymEntries,
+                                                       // we cannot use a vector of _SymEntry, as these
+                                                       // are relocated. 
+
+    template <bool CHECK>
+    static void increase_reference_count(const size_t n)
+    {
+      if (n!=size_t(-1))
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
+#endif
+        assert(n<at_lookup_table.size());
+        if (CHECK) assert(at_lookup_table[n]->reference_count>0);
+        at_lookup_table[n]->reference_count++;
+      }
+    }
+
+    static void decrease_reference_count(const size_t n)
+    { 
+      if (n!=size_t(-1))
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
+#endif
+        assert(n<at_lookup_table.size());
+        assert(at_lookup_table[n]->reference_count>0);
+
+        if (--at_lookup_table[n]->reference_count==0)
+        {
+          at_free_afun(n);
+        }
+      }
+    }
+
+  public:
+    AFun():m_number(size_t(-1))
+    {
+    }
+
+    AFun(const size_t n):m_number(n)
+    {
+      increase_reference_count<false>(m_number);
+    }
+
+    AFun(const AFun &f):m_number(f.m_number)
+    {
+      increase_reference_count<true>(m_number);
+    }
+
+    AFun &operator=(const AFun &f)
+    {
+      increase_reference_count<true>(f.m_number);
+      decrease_reference_count(m_number); // Decrease after increasing the number, as otherwise this goes wrong when 
+                                          // carrying out x=x;
+      m_number=f.m_number;
+      return *this;
+    }
+
+    ~AFun()
+    {
+      decrease_reference_count(m_number);
+    }
+
+    size_t number() const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      return m_number;
+    }
+
+    bool operator ==(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number==f.m_number;
+    }
+
+    bool operator !=(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number!=f.m_number;
+    }
+
+    bool operator <(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number<f.m_number;
+    }
+
+    bool operator >(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number>f.m_number;
+    }
+
+    bool operator <=(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number<=f.m_number;
+    }
+
+    bool operator >=(const AFun &f) const
+    {
+      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      return m_number>=f.m_number;
+    }
+};
+
+
+AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted);
+
+// The following afuns are used in bafio.
+
+extern const AFun AS_INT;
+extern const AFun AS_LIST;
+extern const AFun AS_EMPTY_LIST;
+
+
+inline
+bool AT_isValidAFun(const size_t sym)
+{
+  return (sym != size_t(-1) && 
+          sym < AFun::at_lookup_table.size() && 
+          AFun::at_lookup_table[sym]->reference_count>0);
+}
+
+
+// void AT_initAFun();
+size_t AT_printAFun(const size_t sym, FILE* f);
+
+inline
+void AT_markAFun(const AFun &s)
+{
+  assert(s.number()<AFun::at_lookup_table.size());
+  AFun::at_lookup_table[s.number()]->header |= MASK_MARK;
 }
 
 inline
-void AT_markAFun(const AFun s)
+void AT_unmarkAFun(const AFun &s)
 {
-  assert(s<at_lookup_table.size());
-  // at_lookup_table[s]->header |= MASK_AGE_MARK;
-  at_lookup_table[s]->header |= MASK_MARK;
-}
+  assert(s.number()<AFun::at_lookup_table.size());
+  AFun::at_lookup_table[s.number()]->header &= ~MASK_MARK;
+} 
 
-inline
-void AT_unmarkAFun(const AFun s)
+/* inline
+bool AT_isMarkedAFun(const AFun &sym)
 {
-  assert(s<at_lookup_table.size());
-  at_lookup_table[s]->header &= ~MASK_MARK;
-}
+  assert(sym<AFun::at_lookup_table.size());
+  return IS_MARKED(AFun::at_lookup_table[sym.number()]->header);
+} */
 
-inline
-bool AT_isValidAFun(const AFun sym)
-{
-  return (sym != (AFun)(-1) && 
-          (MachineWord)sym < at_lookup_table.size() && 
-          !SYM_IS_FREE(at_lookup_table[sym]));
-}
-
-inline
-bool AT_isMarkedAFun(const AFun sym)
-{
-  assert(sym<at_lookup_table.size());
-  return IS_MARKED(at_lookup_table[sym]->header);
-}
-
-void  AT_freeAFun(SymEntry sym);
+/* void  AT_freeAFun(SymEntry sym);
 void AT_markProtectedAFuns();
+*/
 
 size_t AT_hashAFun(const char* name, const size_t arity);
 bool AT_findAFun(const char* name, const size_t arity, const bool quoted);
-void AT_unmarkAllAFuns();
+// void AT_unmarkAllAFuns();
 
-std::string ATwriteAFunToString(const AFun t);
+std::string ATwriteAFunToString(const AFun &t);
 
 }
 

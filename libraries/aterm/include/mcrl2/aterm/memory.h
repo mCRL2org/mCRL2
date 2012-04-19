@@ -1,6 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+
 #include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/gc.h"
@@ -38,24 +39,24 @@ inline HashNumber HN(const T i)
   return (HashNumber)(i);
 }
 
-inline HashNumber HN(const ATerm i)
+inline HashNumber HN(const _ATerm *i)
 {
   return (HashNumber)(&*i);
 }
 
-inline HashNumber HN(const ATermList i)
+inline HashNumber HN(const _ATermList *i)
 {
-  return (HashNumber)(&*i);
+  return (HashNumber)(i);
 }
 
-inline HashNumber HN(const ATermInt i)
+inline HashNumber HN(const _ATermInt *i)
 {
-  return (HashNumber)(&*i);
+  return (HashNumber)(i);
 }
 
-inline HashNumber HN(const ATermAppl i)
+inline HashNumber HN(const _ATermAppl *i)
 {
-  return (HashNumber)(&*i);
+  return (HashNumber)(i);
 }
 
 
@@ -130,7 +131,7 @@ extern header_type* min_heap_address;
 extern header_type* max_heap_address;
 
 inline
-bool AT_isPotentialTerm(const ATerm term)
+bool AT_isPotentialTerm(const _ATerm *term)
 {
   return min_heap_address <= (header_type*)(&*term) && (header_type*)(&*term) <= max_heap_address;
 }
@@ -139,30 +140,31 @@ bool AT_isPotentialTerm(const ATerm term)
 void AT_initMemory();
 void AT_initMemmgnt();
 void AT_cleanupMemory();
-HashNumber AT_hashnumber(const ATerm t);
-ATerm AT_allocate(const size_t size);
-void  AT_freeTerm(const size_t size, const ATerm t);
-bool AT_isValidTerm(const ATerm term);
-ATerm AT_isInsideValidTerm(ATerm term);
-size_t AT_inAnyFreeList(const ATerm t);
+HashNumber AT_hashnumber(const _ATerm* t);
+_ATerm* AT_allocate(const size_t size);
+void  AT_freeTerm(const size_t size, const _ATerm *t);
+bool AT_isValidTerm(const _ATerm *term);
+// _ATerm *AT_isInsideValidTerm(const _ATerm *term);
+size_t AT_inAnyFreeList(const _ATerm *t);
 
-struct _ATprotected_block
+/* struct _ATprotected_block
 {
-  ATerm* term;                     /* Pointer to the allocated block */
-  size_t size;                     /* Size of the allocated block, in bytes */
-  size_t protsize;                 /* Protected size (the actual size that is in use) */
-  struct _ATprotected_block* next, *prev; /* Chain */
+  ATerm* term;                     / * Pointer to the allocated block * /
+  size_t size;                     / * Size of the allocated block, in bytes * /
+  size_t protsize;                 / * Protected size (the actual size that is in use) * /
+  struct _ATprotected_block* next, *prev; / * Chain * /
 };
 typedef struct _ATprotected_block* ATprotected_block;
+*/
 
 /* Protected Memory management functions */
 void* AT_malloc(const size_t size);
 void* AT_calloc(const size_t nmemb, const size_t size);
 void* AT_realloc(void* ptr, const size_t size);
-void AT_free(void* ptr);
-ATerm* AT_alloc_protected(const size_t nelem);
+void AT_free(void* ptr); 
+/* ATerm* AT_alloc_protected(const size_t nelem);
 void AT_free_protected(ATerm* term);
-void AT_free_protected_blocks();
+void AT_free_protected_blocks(); */
 
 size_t AT_getMaxTermSize();
 
@@ -176,10 +178,10 @@ void CHECK_HEADER(const header_type h)
   assert(!IS_MARKED(h));
 }
 
-inline
-void CHECK_ARGUMENT(const ATermAppl /*t*/, const size_t /*n*/)
+/* inline
+void CHECK_ARGUMENT(const ATermAppl / *t* /, const size_t / *n* /)
 {
-}
+} */
 
 inline
 void CHECK_ARITY(const size_t ari1, const size_t ari2)
@@ -206,14 +208,14 @@ HashNumber FINISH(const HashNumber hnr)
 }
 
 inline
-void CHECK_TERM(const ATerm t)
+void CHECK_TERM(const _ATerm *t)
 {
   assert(&*t != NULL && (AT_isValidTerm(t)));
+  assert(t->reference_count>0);
 }
 
 /*}}}  */
 
-extern ATerm* hashtable;
 extern HashNumber table_mask;
 
 /*{{{  ATermAppl ATmakeAppl(AFun sym, ...) */
@@ -232,29 +234,30 @@ struct default_aterm_converter
  */
 
 template <class ForwardIterator, class ATermConverter>
-ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardIterator end, ATermConverter convert_to_aterm = default_aterm_converter())
+ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const ForwardIterator end, ATermConverter convert_to_aterm = default_aterm_converter())
 {
-  ATermAppl cur;
+  /* TODO: THE FORWARD ITERATOR IS HERE USED A NUMBER OF TIMES CONSECUTIVELY, WHICH IS NOT ALLOWED FOR A FORWARD ITERATOR */
+  _ATerm* cur;
   size_t arity = ATgetArity(sym);
   bool found;
   header_type header;
   HashNumber hnr;
-  ATerm arg;
+  _ATerm* arg;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-  header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym);
-
+  header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym.number());
+ 
   hnr = START(header);
   for (ForwardIterator i=begin; i!=end; i++)
   {
-    arg = convert_to_aterm(*i);
+    arg = &*convert_to_aterm(*i);
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
   }
   hnr = FINISH(hnr);
 
-  cur = (ATermAppl)hashtable[hnr & table_mask];
-  while (&*cur)
+  cur = ATerm::hashtable[hnr & table_mask];
+  while (cur)
   {
     if (EQUAL_HEADER(cur->header,header))
     {
@@ -263,7 +266,7 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
       for (ForwardIterator i=begin; i!=end; i++,j++)
       {
         assert(j<arity);
-        if (!ATisEqual(ATgetArgument(cur, j), convert_to_aterm(*i)))
+        if (reinterpret_cast<_ATermAppl*>(cur)->arg[j] != &*convert_to_aterm(*i))
         {
           found = false;
           break;
@@ -274,29 +277,38 @@ ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardI
         break;
       }
     }
-    // cur = (ATermAppl)cur->aterm.next;
-    cur = (ATermAppl)cur->next;
+    cur = cur->next;
   }
 
-  if (!&*cur)
+  if (!cur)
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
+    cur = (_ATermAppl*) AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
+    AFun::increase_reference_count<true>(sym.number());
     CHECK_HEADER(cur->header);
+    
     size_t j=0;
     for (ForwardIterator i=begin; i!=end; i++,j++)
     {
       assert(j<arity);
-      ATgetArgument(cur, j) = convert_to_aterm(*i);
+      arg = &*convert_to_aterm(*i);
+      arg->reference_count++;
+      reinterpret_cast<_ATermAppl*>(cur)->arg[j] = arg;
     }
     // cur->aterm.next = &*hashtable[hnr];
-    cur->next = &*hashtable[hnr];
-    hashtable[hnr] = cur;
+    cur->next = &*ATerm::hashtable[hnr];
+    ATerm::hashtable[hnr] = cur;
   }
 
-  return cur;
+  return (_ATermAppl*)cur;
+}
+
+template <class ForwardIterator>
+ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const ForwardIterator end)
+{
+   return ATmakeAppl(sym, begin, end, default_aterm_converter());
 }
 
 } // namespace aterm

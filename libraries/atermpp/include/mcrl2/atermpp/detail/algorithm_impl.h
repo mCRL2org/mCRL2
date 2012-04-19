@@ -66,27 +66,31 @@ aterm_list list_apply(term_list<Term> l, const Function f)
 template <typename Term, typename Function>
 aterm_appl appl_apply(term_appl<Term> a, const Function f)
 {
+  // TODO: This function can be more efficiently implemented, by using the feature
+  // that ATmakeAppl can have the function f as last argument. This avoids the use
+  // the explicit vector below.
+
   size_t n = a.size();
   if (n > 0)
   {
     bool term_changed = false;
 
-    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,aterm,n);
+    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,_ATerm*,n);
+    std::vector <ATerm> t(n);
 
     for (unsigned int i = 0; i < n; i++)
     {
-      t[i] = f(a(i));
+      t[i] = (ATerm)f(a(i));
 
-      if (t[i] != a(i))
+      if (t[i] != &*(ATerm)(a(i)))
       {
         term_changed = true;
       }
     }
     if (term_changed)
     {
-      a = ATmakeApplArray(a.function(), (ATerm *)t);
-    }
+      a = ATmakeAppl(a.function(), t.begin(),t.end());
+    } 
   }
   return a;
 }

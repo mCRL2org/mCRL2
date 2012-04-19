@@ -42,17 +42,14 @@ struct aterm_converter
 template <class InputIterator>
 inline ATermAppl at_make_appl(const function_symbol& sym, InputIterator first, InputIterator last, std::input_iterator_tag)
 {
-   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,ATerm,sym.arity());
-  // std::vector<ATerm> arguments;
+   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,_ATerm*,sym.arity());
   size_t c=0;
   for (InputIterator i = first; i != last; ++i, ++c)
   {
-    arguments[c]=aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i);
-    // arguments.push_back(aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i));
+    arguments[c]=&*aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i);
   }
   assert(c==sym.arity());
-  // return ATmakeApplArray(sym, &(arguments.front()));
-  return ATmakeApplArray(sym, arguments);
+  return ATmakeApplArray(sym, reinterpret_cast<ATerm*>(arguments));
 }
 
 template <class ForwardIterator>

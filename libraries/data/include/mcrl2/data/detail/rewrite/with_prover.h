@@ -46,10 +46,10 @@ class RewriterProver: public Rewriter
          const atermpp::aterm_appl &term,
          internal_substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
 
-    bool addRewriteRule(const data_equation rule);
-    bool removeRewriteRule(const data_equation rule);
+    bool addRewriteRule(const data_equation &rule);
+    bool removeRewriteRule(const data_equation &rule);
 
 };
 

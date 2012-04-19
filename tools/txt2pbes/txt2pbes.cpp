@@ -64,6 +64,6 @@ class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  atermpp::aterm_init();
   return txt2pbes_gui_tool().execute(argc, argv);
 }

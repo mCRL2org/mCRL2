@@ -11,11 +11,11 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/afun.h"
+#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/util.h"
 #include "mcrl2/aterm/byteio.h"
 
@@ -28,17 +28,12 @@ namespace aterm
 
 static const size_t BAF_MAGIC = 0xbaf;
 static const size_t BAF_VERSION = 0x0300;      /* version 3.0 */
-//#define BAF_MAGIC 0xbaf
-//#define BAF_VERSION 0x0300      /* version 3.0 */
 
 static const size_t BAF_DEFAULT_TABLE_SIZE = 1024;
 
 static const size_t BAF_LIST_BATCH_SIZE = 64;
 
 static const size_t SYMBOL_OFFSET = 10;
-
-//#define SYM_INDEX(n)      (((n)-SYMBOL_OFFSET)/2)
-//#define SYM_COMMAND(n)    ((n)*2 + SYMBOL_OFFSET)
 
 /* Maximum # of arguments to reserve space for on the stack in read_term */
 static const size_t MAX_STACK_ARGS = 4;
@@ -67,7 +62,7 @@ typedef struct _top_symbol
 typedef struct
 {
   size_t         nr_symbols;
-  top_symbol* symbols;
+  std::vector <top_symbol> symbols;
 
   size_t toptable_size;
   top_symbol** toptable;
@@ -79,9 +74,9 @@ typedef struct _sym_entry
   size_t arity;
 
   size_t nr_terms;
-  trm_bucket* terms;
+  std::vector <trm_bucket> terms;
 
-  top_symbols_t* top_symbols; /* top symbols occuring in this symbol */
+  std::vector<top_symbols_t>top_symbols; /* top symbols occuring in this symbol */
 
   size_t termtable_size;
   trm_bucket** termtable;
@@ -100,7 +95,7 @@ typedef struct
   size_t arity;
   size_t nr_terms;
   size_t    term_width;
-  ATerm* terms;
+  std::vector <ATerm> terms;
   size_t*   nr_topsyms;
   size_t*   sym_width;
   size_t**  topsyms;
@@ -112,8 +107,8 @@ typedef struct
 char bafio_id[] = "$Id$";
 
 static size_t nr_unique_symbols = 0;
-static sym_read_entry* read_symbols;
-static sym_entry* sym_entries;
+static std::vector <sym_read_entry> read_symbols;
+static std::vector<sym_entry> sym_entries;
 static sym_entry* first_topsym = NULL;
 
 static char* text_buffer = NULL;
@@ -464,7 +459,7 @@ static sym_entry* get_top_symbol(const ATerm t)
       sym = (ATisEmpty((ATermList)t) ? AS_EMPTY_LIST : AS_LIST);
       break;
     case AT_APPL:
-      sym = ATgetAFun((ATermAppl)t);
+      sym = ATgetAFun(static_cast<ATermAppl>(t));
       break;
     default:
       throw std::runtime_error("get_top_symbol: illegal term (" + ATwriteToString(t) + ")");
@@ -472,7 +467,7 @@ static sym_entry* get_top_symbol(const ATerm t)
       break;
   }
 
-  return &sym_entries[at_lookup_table[sym]->index];
+  return &sym_entries[AFun::at_lookup_table[sym.number()]->index];
 }
 
 /*}}}  */
@@ -516,15 +511,14 @@ static void gather_top_symbols(sym_entry* cur_entry,
 
   tss = &cur_entry->top_symbols[cur_arg];
   tss->nr_symbols = total_top_symbols;
-  tss->symbols = (top_symbol*) AT_calloc(total_top_symbols,
-                                         sizeof(top_symbol));
-  if (!tss->symbols)
+  // tss->symbols = (top_symbol*) AT_calloc(total_top_symbols, sizeof(top_symbol));
+  tss->symbols = std::vector <top_symbol> (total_top_symbols);
+  /* if (!tss->symbols)
   {
     throw std::runtime_error("build_arg_tables: out of memory (top_symbols: " + to_string(total_top_symbols) + ")");
-  }
+  } */
   tss->toptable_size = (total_top_symbols*5)/4;
-  tss->toptable = (top_symbol**) AT_calloc(tss->toptable_size,
-                  sizeof(top_symbol*));
+  tss->toptable = (top_symbol**) AT_calloc(tss->toptable_size, sizeof(top_symbol*));
   if (!tss->toptable)
   {
     throw std::runtime_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
@@ -535,13 +529,13 @@ static void gather_top_symbols(sym_entry* cur_entry,
   {
     top_symbol* ts;
     ts = &cur_entry->top_symbols[cur_arg].symbols[index];
-    ts->index = top_entry-sym_entries;
+    ts->index = top_entry-&sym_entries[0];
     ts->count = top_entry->nr_times_top;
     ts->code_width = bit_width(total_top_symbols);
     ts->code = index;
     ts->s = top_entry->id;
 
-    hnr = ts->s % tss->toptable_size;
+    hnr = ts->s.number() % tss->toptable_size;
     ts->next = tss->toptable[hnr];
     tss->toptable[hnr] = ts;
 
@@ -552,7 +546,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
 
 static void build_arg_tables()
 {
-  AFun cur_sym;
+  size_t cur_sym;
   size_t cur_trm;
   size_t cur_arg;
   sym_entry* topsym;
@@ -566,16 +560,15 @@ static void build_arg_tables()
 
     if (arity == 0)
     {
-      cur_entry->top_symbols = NULL;
+      cur_entry->top_symbols = std::vector<top_symbols_t>();
     }
     else
     {
-      cur_entry->top_symbols = (top_symbols_t*)AT_calloc(arity,
-                               sizeof(top_symbols_t));
-      if (!cur_entry->top_symbols)
+      cur_entry->top_symbols = std::vector<top_symbols_t>(arity); 
+      /* if (!cur_entry->top_symbols)
       {
         throw std::runtime_error("build_arg_tables: out of memory (arity: " + to_string(arity) + ")");
-      }
+      } */
     }
 
     for (cur_arg=0; cur_arg<arity; cur_arg++)
@@ -632,7 +625,7 @@ static void build_arg_tables()
   */
 static void add_term(sym_entry* entry, const ATerm t)
 {
-  size_t hnr = AT_hashnumber(t) % entry->termtable_size;
+  size_t hnr = AT_hashnumber(&*t) % entry->termtable_size;
   entry->terms[entry->cur_index].t = t;
   entry->terms[entry->cur_index].next = entry->termtable[hnr];
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
@@ -691,7 +684,7 @@ static void collect_terms(const ATerm t)
         sym = (AFun)(-1); // Kill compiler warnings
         break;
     }
-    entry = &sym_entries[at_lookup_table[sym]->index];
+    entry = &sym_entries[AFun::at_lookup_table[sym.number()]->index];
 
     assert(entry->id == sym);
     add_term(entry, t);
@@ -753,7 +746,7 @@ static bool write_symbols(byte_writer* writer)
 
 static size_t find_term(sym_entry* entry, const ATerm t)
 {
-  size_t hnr = AT_hashnumber(t) % entry->termtable_size;
+  size_t hnr = AT_hashnumber(&*t) % entry->termtable_size;
   trm_bucket* cur = entry->termtable[hnr];
 
   assert(cur);
@@ -763,7 +756,7 @@ static size_t find_term(sym_entry* entry, const ATerm t)
     assert(cur);
   }
 
-  return cur - entry->terms;
+  return cur - &entry->terms[0];
 }
 
 /*}}}  */
@@ -775,7 +768,7 @@ static size_t find_term(sym_entry* entry, const ATerm t)
 
 static top_symbol* find_top_symbol(top_symbols_t* syms, const AFun sym)
 {
-  size_t hnr = sym % syms->toptable_size;
+  size_t hnr = sym.number() % syms->toptable_size;
   top_symbol* cur = syms->toptable[hnr];
 
   assert(cur);
@@ -798,7 +791,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const AFun sym)
 /* forward declaration */
 static bool write_term(const ATerm, byte_writer*);
 
-static bool write_arg(sym_entry* trm_sym, const ATerm arg, const size_t arg_idx,
+static bool write_arg(sym_entry* trm_sym, const ATerm &arg, const size_t arg_idx,
                       byte_writer* writer)
 {
   top_symbol* ts;
@@ -851,18 +844,18 @@ static bool write_term(const ATerm t, byte_writer* writer)
         {
           return false;
         }
-        trm_sym = &sym_entries[at_lookup_table[AS_INT]->index];
+        trm_sym = &sym_entries[AFun::at_lookup_table[AS_INT.number()]->index];
         break;
       case AT_LIST:
       {
         ATermList list = (ATermList)t;
         if (ATisEmpty(list))
         {
-          trm_sym = &sym_entries[at_lookup_table[AS_EMPTY_LIST]->index];
+          trm_sym = &sym_entries[AFun::at_lookup_table[AS_EMPTY_LIST.number()]->index];
         }
         else
         {
-          trm_sym = &sym_entries[at_lookup_table[AS_LIST]->index];
+          trm_sym = &sym_entries[AFun::at_lookup_table[AS_LIST.number()]->index];
           if (!write_arg(trm_sym, ATgetFirst(list), 0, writer))
           {
             return false;
@@ -878,7 +871,7 @@ static bool write_term(const ATerm t, byte_writer* writer)
       {
         size_t arity;
         AFun sym = ATgetAFun((ATermAppl)(t));
-        trm_sym = &sym_entries[at_lookup_table[sym]->index];
+        trm_sym = &sym_entries[AFun::at_lookup_table[sym.number()]->index];
         assert(sym == trm_sym->id);
         arity = ATgetArity(sym);
         for (arg_idx=0; arg_idx<arity; arg_idx++)
@@ -922,19 +915,19 @@ static void free_write_space()
   {
     sym_entry* entry = &sym_entries[i];
 
-    AT_free(entry->terms);
-    entry->terms = NULL;
+    // AT_free(entry->terms);
+    // entry->terms = NULL;
     AT_free(entry->termtable);
     entry->termtable = NULL;
 
     for (j=0; j<entry->arity; j++)
     {
       top_symbols_t* topsyms = &entry->top_symbols[j];
-      if (topsyms->symbols)
+      /* if (topsyms->symbols)
       {
         AT_free(topsyms->symbols);
         topsyms->symbols = NULL;
-      }
+      } */
       if (topsyms->toptable)
       {
         AT_free(topsyms->toptable);
@@ -943,15 +936,15 @@ static void free_write_space()
       /*AT_free(topsyms);*/
     }
 
-    if (entry->top_symbols)
+    /* if (entry->top_symbols)
     {
       AT_free(entry->top_symbols);
       entry->top_symbols = NULL;
-    }
+     } */
   }
-  AT_free(sym_entries);
+  /* AT_free(sym_entries); */
 
-  sym_entries = NULL;
+  // sym_entries = NULL;
 }
 
 /*}}}  */
@@ -961,8 +954,8 @@ static bool
 write_baf(const ATerm t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
-  size_t nr_symbols = at_lookup_table.size();
-  AFun lcv;
+  size_t nr_symbols = AFun::at_lookup_table.size();
+  size_t lcv;
   size_t cur;
 
   /* Initialize bit buffer */
@@ -971,25 +964,25 @@ write_baf(const ATerm t, byte_writer* writer)
 
   for (lcv=0; lcv<nr_symbols; lcv++)
   {
-    if (!SYM_IS_FREE(at_lookup_table[lcv]))
+    if (AFun::at_lookup_table[lcv]->reference_count>0)
     {
-      at_lookup_table[lcv]->count = 0;
+      AFun::at_lookup_table[lcv]->count = 0;
     }
   }
   nr_unique_symbols = AT_calcUniqueAFuns(t);
 
-  sym_entries = (sym_entry*) AT_calloc(nr_unique_symbols, sizeof(sym_entry));
-  if (!sym_entries)
+  sym_entries = std::vector<sym_entry>(nr_unique_symbols);
+  /* if (!sym_entries)
   {
     std::runtime_error("write_baf: out of memory (" + to_string(nr_unique_symbols) + " unique symbols!");
-  }
+  } */
 
   /*{{{  Collect all unique symbols in the input term */
 
   for (lcv=cur=0; lcv<nr_symbols; lcv++)
   {
-    SymEntry entry = at_lookup_table[lcv];
-    if (!SYM_IS_FREE(entry) && entry->count>0)
+    _SymEntry* entry = AFun::at_lookup_table[lcv];
+    if (entry->reference_count>0 && entry->count>0)
     {
       assert(lcv == entry->id);
       nr_unique_terms += entry->count;
@@ -998,16 +991,14 @@ write_baf(const ATerm t, byte_writer* writer)
       sym_entries[cur].id = lcv;
       sym_entries[cur].arity = ATgetArity(lcv);
       sym_entries[cur].nr_terms = entry->count;
-      sym_entries[cur].terms = (trm_bucket*) AT_calloc(entry->count,
-                               sizeof(trm_bucket));
-      if (!sym_entries[cur].terms)
+      // sym_entries[cur].terms = (trm_bucket*) AT_calloc(entry->count, sizeof(trm_bucket));
+      sym_entries[cur].terms = std::vector<trm_bucket>(entry->count);
+      /* if (!sym_entries[cur].terms)
       {
         std::runtime_error("write_baf: out of memory (sym: " + ATwriteAFunToString(lcv) + ", terms: " + to_string(entry->count) + ")");
-      }
+      } */
       sym_entries[cur].termtable_size = (entry->count*5)/4;
-      sym_entries[cur].termtable =
-        (trm_bucket**) AT_calloc(sym_entries[cur].termtable_size,
-                                 sizeof(trm_bucket*));
+      sym_entries[cur].termtable = (trm_bucket**) AT_calloc(sym_entries[cur].termtable_size, sizeof(trm_bucket*));
       if (!sym_entries[cur].termtable)
       {
         std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
@@ -1071,7 +1062,7 @@ write_baf(const ATerm t, byte_writer* writer)
   }
 
   /* Write the top symbol */
-  if (!writeInt(get_top_symbol(t)-sym_entries, writer))
+  if (!writeInt(get_top_symbol(t)-&sym_entries[0], writer))
   {
     return false;
   }
@@ -1095,7 +1086,7 @@ write_baf(const ATerm t, byte_writer* writer)
 
 /*{{{  char *ATwriteToBinaryString(ATerm t, int *len) */
 
-unsigned char* ATwriteToBinaryString(const ATerm t, size_t* len)
+unsigned char* ATwriteToBinaryString(const ATerm &t, size_t* len)
 {
   static byte_writer writer;
   static bool initialized = false;
@@ -1125,7 +1116,7 @@ unsigned char* ATwriteToBinaryString(const ATerm t, size_t* len)
 /*}}}  */
 /*{{{  ATbool ATwriteToBinaryFile(ATerm t, FILE *file) */
 
-bool ATwriteToBinaryFile(ATerm t, FILE* file)
+bool ATwriteToBinaryFile(const ATerm &t, FILE* file)
 {
   static byte_writer writer;
   static bool initialized = false;
@@ -1246,18 +1237,19 @@ static bool read_all_symbols(byte_reader* reader)
     }
     read_symbols[i].nr_terms = val;
     read_symbols[i].term_width = bit_width(val);
-    if (val == 0)
+    /* if (val == 0)
     {
       read_symbols[i].terms = NULL;
     }
     else
-    {
-      read_symbols[i].terms = (ATerm*)AT_alloc_protected(val);
-    }
-    if (!read_symbols[i].terms)
+    { */
+      // read_symbols[i].terms = (ATerm*)AT_alloc_protected(val);
+      read_symbols[i].terms = std::vector<ATerm>(val);
+    // }
+    /* if (!read_symbols[i].terms)
     {
       std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " terms.");
-    }
+    } */
 
     /*}}}  */
 
@@ -1327,19 +1319,20 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
   size_t val;
   size_t i, arity = sym->arity;
   sym_read_entry* arg_sym;
-  ATerm stack_args[MAX_STACK_ARGS];
-  ATerm* args = stack_args;
+  // ATerm stack_args[MAX_STACK_ARGS];
+  std::vector<ATerm> args(arity > MAX_STACK_ARGS>arity?arity:MAX_STACK_ARGS); // = stack_args;
   ATerm result;
 
-  if (arity > MAX_STACK_ARGS)
+  /* if (arity > MAX_STACK_ARGS)
   {
     args = AT_alloc_protected(arity);
     if (!args)
     {
       std::runtime_error("could not allocate space for " + to_string(arity) + " arguments.");
     }
-    /* !!! leaks memory on the "return NULL" paths */
+    / * !!! leaks memory on the "return NULL" paths * /
   }
+  */ 
 
   for (i=0; i<arity; i++)
   {
@@ -1374,37 +1367,33 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
     args[i] = arg_sym->terms[val];
   }
 
-  switch (sym->sym)
+  if (sym->sym==AS_INT)
+  {    /*{{{  Read an integer */
+    if (readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
+    {
+      return ATerm();
+    }
+
+    result = ATmakeInt((int)val);
+  }
+  else if (sym->sym==AS_EMPTY_LIST)
   {
-    case AS_INT:
-      /*{{{  Read an integer */
-
-      if (readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
-      {
-        return ATerm();
-      }
-
-      result = ATmakeInt((int)val);
-
-      /*}}}  */
-      break;
-    case AS_LIST:
-      result = ATinsert((ATermList)args[1], args[0]);
-      break;
-    case AS_EMPTY_LIST:
-      result = ATempty;
-      break;
-    default:
-      /* Must be a function application */
-      result = ATmakeApplArray(sym->sym, args);
-      break;
-
+    result = ATempty;
+  }
+  else if (sym->sym==AS_LIST)
+  { 
+    result = ATinsert((ATermList)args[1], args[0]);
+  }
+  else
+  {
+    /* Must be a function application */
+    result = ATmakeAppl(sym->sym, args.begin(),args.begin()+arity);
   }
 
-  if (arity > MAX_STACK_ARGS)
+  /* if (arity > MAX_STACK_ARGS)
   {
     AT_free_protected(args);
-  }
+  } */
 
   return result;
 }
@@ -1425,10 +1414,10 @@ static void free_read_space()
   {
     sym_read_entry* entry = &read_symbols[i];
 
-    if (entry->terms)
+    /* if (entry->terms)
     {
       AT_free_protected(entry->terms);
-    }
+    } */
     if (entry->nr_topsyms)
     {
       AT_free(entry->nr_topsyms);
@@ -1449,7 +1438,7 @@ static void free_read_space()
 
     ATunprotectAFun(entry->sym);
   }
-  AT_free(read_symbols);
+  // AT_free(read_symbols);
 }
 
 /*}}}  */
@@ -1516,12 +1505,12 @@ ATerm read_baf(byte_reader* reader)
   /*}}}  */
   /*{{{  Allocate symbol space */
 
-  read_symbols = (sym_read_entry*)AT_calloc(nr_unique_symbols,
-                 sizeof(sym_read_entry));
-  if (!read_symbols)
+  // read_symbols = (sym_read_entry*)AT_calloc(nr_unique_symbols, sizeof(sym_read_entry));
+  read_symbols = std::vector<sym_read_entry>(nr_unique_symbols);
+  /* if (!read_symbols)
   {
     std::runtime_error("read_baf: out of memory when allocating " + to_string(nr_unique_symbols) + " syms.");
-  }
+  } */
 
   /*}}}  */
 

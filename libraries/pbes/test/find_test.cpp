@@ -129,7 +129,7 @@ void test_find_free_variables()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_find();
   test_free_variables();

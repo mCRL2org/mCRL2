@@ -43,12 +43,12 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(const data_equation Rule)
+bool RewriterProver::addRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->addRewriteRule(Rule);
 }
 
-bool RewriterProver::removeRewriteRule(const data_equation Rule)
+bool RewriterProver::removeRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->removeRewriteRule(Rule);
 }
@@ -88,7 +88,7 @@ atermpp::aterm_appl RewriterProver::rewrite_internal(
   }
 }
 
-atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
+atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression &Term)
 {
   return rewr_obj->toRewriteFormat(Term);
 }

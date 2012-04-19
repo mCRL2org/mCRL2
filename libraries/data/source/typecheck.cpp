@@ -55,6 +55,7 @@ typedef struct
   ATermTable constants;   //name -> Set(sort expression)
   ATermTable functions;   //name -> Set(sort expression)
 } gsSystem;
+
 static gsSystem gssystem;
 
 static ATermList list_minus(ATermList l, ATermList m)
@@ -82,6 +83,7 @@ typedef struct
   ATermTable glob_vars;   //name -> Type: global variables (for proc, pbes and init)
   ATermTable PBs;
 } Context;
+
 static Context context;
 
 // the body may be transformed
@@ -2748,7 +2750,6 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   size_t nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
   const char* msg=(is_pbes)?"propositional variable":((action)?"action":"process");
 
-
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   {
     ATermList NewParList=ATmakeList0();
@@ -3018,7 +3019,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
   if (gsIsParamId(ProcTerm))
   {
-    return gstcRewrActProc(Vars,ProcTerm);
+    ATermAppl a= gstcRewrActProc(Vars,ProcTerm);
+    return a;
   }
 
   if (gsIsBlock(ProcTerm) || gsIsHide(ProcTerm) ||
@@ -3261,7 +3263,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     {
       return NULL;
     }
-    return ATsetArgument(ATsetArgument(ProcTerm,NewLeft,0),NewRight,1);
+    ATermAppl a=ATsetArgument(ATsetArgument(ProcTerm,NewLeft,0),NewRight,1);
+    return a;
   }
 
   if (gsIsAtTime(ProcTerm))
@@ -3478,7 +3481,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
-      if (ATAgetFirst(VarDecls) != ATermAppl())
+      if (VarDecls != ATempty)
       {
         mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
         return NULL;
@@ -4806,11 +4809,11 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
 
   ATermList Result=ATmakeList0();
   size_t nFormPars=ATgetLength((ATermList)ATgetFirst(TypeListList));
-  ATermList* Pars = NULL;
-  if (nFormPars > 0)
+  std::vector<ATermList> Pars(nFormPars);
+  /* if (nFormPars > 0)
   {
     Pars = (ATermList*) malloc(nFormPars*sizeof(ATermList));
-  }
+  } */
   //DECLA(ATermList,Pars,nFormPars);
   for (size_t i=0; i<nFormPars; i++)
   {
@@ -4839,7 +4842,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
     }
     Result=ATinsert(Result,Sort);
   }
-  free(Pars);
+  // free(Pars);
   return Result;
 }
 

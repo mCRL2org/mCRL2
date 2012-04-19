@@ -258,7 +258,7 @@ void test_enumerator_variable_limit()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_data_enumerator();
   test_data_enumerator2();

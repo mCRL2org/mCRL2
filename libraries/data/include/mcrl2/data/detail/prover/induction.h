@@ -56,7 +56,7 @@ class Induction
     BDD_Info f_bdd_info;
 
     /// \brief
-    void recurse_expression_for_lists(const data_expression a_expression)
+    void recurse_expression_for_lists(const data_expression &a_expression)
     {
       if (is_variable(a_expression))
       {
@@ -91,7 +91,7 @@ class Induction
     }
 
     /// \brief
-    sort_expression get_sort_of_list_elements(const variable a_list_variable)
+    sort_expression get_sort_of_list_elements(const variable &a_list_variable)
     {
       function_symbol_list v_constructors;
       function_symbol v_constructor;
@@ -124,7 +124,7 @@ class Induction
     }
 
     /// \brief
-    variable get_fresh_dummy(const sort_expression a_sort)
+    variable get_fresh_dummy(const sort_expression &a_sort)
     {
       return variable(fresh_identifier_generator("dummy$"),a_sort);
     }
@@ -164,7 +164,7 @@ class Induction
 
     /// \brief
     data_expression create_hypotheses(
-                        const data_expression a_hypothesis,
+                        const data_expression &a_hypothesis,
                         variable_list a_list_of_variables,
                         data_expression_list a_list_of_dummies)
     {
@@ -194,12 +194,12 @@ class Induction
     }
 
     /// \brief
-    data_expression_list create_clauses(const atermpp::aterm_appl a_formula,
-                             const atermpp::aterm_appl a_hypothesis,
+    data_expression_list create_clauses(const atermpp::aterm_appl &a_formula,
+                             const atermpp::aterm_appl &a_hypothesis,
                              const size_t a_variable_number,
                              const size_t a_number_of_variables,
-                             const variable_list a_list_of_variables,
-                             const variable_list a_list_of_dummies)
+                             const variable_list &a_list_of_variables,
+                             const variable_list &a_list_of_dummies)
     {
       const variable v_variable = f_list_variables[a_variable_number];
       const sort_expression v_variable_sort = data_expression(v_variable).sort();
@@ -244,7 +244,7 @@ class Induction
     }
 
     /// \brief
-    void initialize(const data_expression a_formula)
+    void initialize(const data_expression &a_formula)
     {
       f_formula = a_formula;
       f_list_variables.clear();

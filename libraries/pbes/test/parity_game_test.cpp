@@ -208,7 +208,7 @@ void test_lps(const std::string& lps_spec, const std::string& formula = lps::det
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_pbes(BES1);
   test_pbes(BES2);

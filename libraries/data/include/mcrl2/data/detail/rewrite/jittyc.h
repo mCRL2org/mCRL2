@@ -46,17 +46,17 @@ class RewriterCompilingJitty: public Rewriter
          const atermpp::aterm_appl &term,
          internal_substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
     // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
-    bool addRewriteRule(const data_equation rule);
-    bool removeRewriteRule(const data_equation rule);
+    bool addRewriteRule(const data_equation &rule);
+    bool removeRewriteRule(const data_equation &rule);
     internal_substitution_type *global_sigma;
 
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
     atermpp::vector<variable_list> rewriter_binding_variable_lists;
     atermpp::map <variable_list, size_t> variable_list_indices1;
-    size_t binding_variable_list_index(const variable_list v);
+    size_t binding_variable_list_index(const variable_list &v);
     inline variable_list binding_variable_list_get(const size_t i)
     {
       return (rewriter_binding_variable_lists[i]);
@@ -76,7 +76,7 @@ class RewriterCompilingJitty: public Rewriter
     // to prevent double occurrences in the vector.
     atermpp::vector<variable> rewriter_bound_variables;
     atermpp::map <variable, size_t> variable_indices0;
-    size_t bound_variable_index(const variable v);
+    size_t bound_variable_index(const variable &v);
     variable bound_variable_get(const size_t i)
     {
       return (rewriter_bound_variables[i]);
@@ -95,12 +95,12 @@ class RewriterCompilingJitty: public Rewriter
 
     std::map <int,int> int2ar_idx;
     size_t ar_size;
-    ATermAppl* ar;
+    std::vector<ATermAppl> ar;
     ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
-    ATermAppl build_ar_expr_aux(const data_equation eqn, const size_t arg, const size_t arity);
-    ATermAppl build_ar_expr(const data_equation_list eqns, const size_t arg, const size_t arity);
-    bool always_rewrite_argument(const atermpp::aterm_int opid, const size_t arity, const size_t arg);
-    bool calc_ar(ATermAppl expr);
+    ATermAppl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
+    ATermAppl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
+    bool always_rewrite_argument(const atermpp::aterm_int &opid, const size_t arity, const size_t arg);
+    bool calc_ar(const ATermAppl &expr);
     void fill_always_rewrite_array();
 
     std::string rewriter_source;
@@ -111,9 +111,9 @@ class RewriterCompilingJitty: public Rewriter
     atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl &);
     // atermpp::aterm_appl(*so_rewr)(const _ATermAppl *);
 
-    void add_base_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);
-    void extend_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);
-    bool opid_is_nf(const atermpp::aterm_int opid, size_t num_args);
+    void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
+    void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
+    bool opid_is_nf(const atermpp::aterm_int &opid, size_t num_args);
     void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
     bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);

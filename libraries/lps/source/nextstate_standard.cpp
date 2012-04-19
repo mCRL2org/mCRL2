@@ -16,6 +16,7 @@
 #include <memory>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/memory.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
@@ -126,7 +127,7 @@ static void fill_tree_init(bool* init, size_t n, size_t l)
     init[1] = true;
   }
 }
-ATerm NextState::buildTree(ATerm* args)
+ATerm NextState::buildTree(std::vector<ATerm> &args)
 {
   size_t n,m;
 
@@ -248,7 +249,7 @@ ATermAppl NextState::makeStateVector(ATerm state)
   {
     stateargs[i] = (ATerm) getStateArgument(state,i);
   }
-  return ATmakeApplArray(info.stateAFun,stateargs);
+  return ATmakeAppl(info.stateAFun,stateargs.begin(),stateargs.end());
 }
 
 //Prototype
@@ -358,7 +359,7 @@ ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state m
     switch (info.stateformat)
     {
       case GS_STATE_VECTOR:
-        return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+        return (ATerm) ATmakeAppl(info.stateAFun,stateargs.begin(),stateargs.end());
         break;
       case GS_STATE_TREE:
         return (ATerm) buildTree(stateargs);
@@ -407,7 +408,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
       switch (info.stateformat)
       {
         case GS_STATE_VECTOR:
-          return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+          return (ATerm) ATmakeAppl(info.stateAFun,stateargs.begin(),stateargs.end());
           break;
         case GS_STATE_TREE:
           return (ATerm) buildTree(stateargs);
@@ -533,6 +534,7 @@ ATermList NextState::AssignsToRewriteFormat(ATermList assigns, ATermList free_va
   {
     bool set = false;
 
+    assert(stateargs.size() == ATgetLength(pars));
     for (ATermList m=assigns; !ATisEmpty(m); m=ATgetNext(m))
     {
       if (ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)))
@@ -640,12 +642,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   ATprotectList(&info.procvars);
   info.procvars = spec.process().process_parameters();
 
-  stateargs = (ATerm*) malloc(info.statelen*sizeof(ATerm));
-  for (size_t i=0; i<info.statelen; i++)
-  {
-    stateargs[i] = NULL;
-  }
-  ATprotectArray(stateargs,info.statelen);
+  stateargs = std::vector<ATerm>(info.statelen); 
 
   smndAFun = ATmakeAFun("@SMND@",4,false);
   ATprotectAFun(smndAFun);
@@ -664,14 +661,10 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     }
   }
   sums = ATreverse(l);
-  info.num_summands = ATgetLength(sums);
+  // info.num_summands = ATgetLength(sums);
   info.num_prioritised = 0;
-  info.summands = (ATermAppl*) malloc(info.num_summands*sizeof(ATermAppl));
-  for (size_t i=0; i<info.num_summands; i++)
-  {
-    info.summands[i] = NULL;
-  }
-  ATprotectArray((ATerm*) info.summands,info.num_summands);
+  info.summands = std::vector < ATermAppl> (ATgetLength(sums));
+  
   for (size_t i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
   {
     info.summands[i] =
@@ -723,7 +716,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   switch (info.stateformat)
   {
     case GS_STATE_VECTOR:
-      initial_state = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+      initial_state = (ATerm) ATmakeAppl(info.stateAFun,stateargs.begin(),stateargs.end());
       break;
     case GS_STATE_TREE:
       initial_state = (ATerm) buildTree(stateargs);
@@ -740,8 +733,6 @@ NextState::~NextState()
 #endif
   ATunprotect(&initial_state);
 
-  ATunprotectArray(stateargs);
-
   ATunprotectAppl(&info.nil);
 
   ATunprotectAFun(info.pairAFun);
@@ -755,8 +746,6 @@ NextState::~NextState()
   ATunprotectList(&info.procvars);
 
   ATunprotectAFun(smndAFun);
-  ATunprotectArray((ATerm*) info.summands);
-  free(info.summands);
 
   free(tree_init);
 }
@@ -793,7 +782,7 @@ void NextState::prioritise(const char* action)
   size_t pos = 0;
   size_t rest = 0;
 
-  while (pos < info.num_summands)
+  while (pos < info.summands.size())
   {
     ATermAppl s = info.summands[pos];
     ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
@@ -855,7 +844,7 @@ class NextStateGeneratorSummand : public NextStateGenerator
                 "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl <<
                 "  identifier = " << identifier << std::endl;
 #endif
-      assert(summand < info.num_summands);
+      assert(summand < info.summands.size());
     }
 };
 
@@ -868,7 +857,7 @@ NextStateGenerator* NextState::getNextStates(ATerm state, size_t index, NextStat
             "  index = " << index << std::endl <<
             "  old = " << old << std::endl;
 #endif
-  assert(index < info.num_summands);
+  assert(index < info.summands.size());
   if (old != 0)
   {
     static_cast< NextStateGeneratorSummand* >(old)->reset(state, index);
@@ -910,13 +899,10 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
           stateargs[i] = ATgetArgument((ATermAppl) old,i);
           break;
         case GS_STATE_TREE:
-//                                      stateargs[i] = getTreeElement(old,i);
-          // stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
           stateargs[i] = (ATerm)(ATermAppl)current_substitution(variable((ATermAppl)ATgetFirst(l)));
           if (ATisEqual(stateargs[i], ATgetFirst(l)))   // Make sure substitutions were not reset by enumerator
           {
             set_substitutions();
-            // stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
             stateargs[i] = (ATerm)(ATermAppl)current_substitution(variable(ATgetFirst(l)));
           }
           break;
@@ -936,7 +922,7 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
   {
     case GS_STATE_VECTOR:
     {
-      ATerm r = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+      ATerm r = (ATerm) ATmakeAppl(info.stateAFun,stateargs.begin(),stateargs.end());
       return r;
     }
     case GS_STATE_TREE:
@@ -1005,7 +991,6 @@ NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identi
             "  SingleSummandIndex = " << SingleSummandIndex << std::endl;
 #endif
   id = identifier;
-  // error = false;
   single_summand = SingleSummand;
 
   cur_state = NULL;
@@ -1015,14 +1000,7 @@ NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identi
   ATprotect(&cur_act);
   ATprotectList(&cur_nextstate);
 
-  stateargs = (ATerm*) malloc(info.statelen*sizeof(ATerm));
-  for (size_t i=0; i<info.statelen; i++)
-  {
-    stateargs[i] = NULL;
-  }
-  ATprotectArray(stateargs,info.statelen);
-
-  //current_substitution.reserve(info.statelen);
+  stateargs = std::vector <ATerm>(info.statelen);
 
   reset(State, SingleSummandIndex);
 }
@@ -1032,9 +1010,6 @@ NextStateGenerator::~NextStateGenerator()
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::~NextStateGenerator called" << std::endl;
 #endif
-  ATunprotectArray(stateargs);
-  free(stateargs);
-
   ATunprotectList(&cur_nextstate);
   ATunprotect(&cur_act);
   ATunprotect(&cur_state);
@@ -1087,14 +1062,14 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
 
   set_substitutions();
 
-  if (info.num_summands == 0)
+  if (info.summands.size() == 0)
   {
     enumerated_variables=variable_list();
     valuations = info.get_sols(ATmakeList0(),(ATerm)(ATermAppl)info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
   }
   else
   {
-    assert(SummandIndex < info.num_summands);
+    assert(SummandIndex < info.summands.size());
 #ifdef MCRL2_NEXTSTATE_DEBUG
     std::clog << "Getting solutions for this summand" << std::endl <<
               "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0)) << std::endl <<
@@ -1120,7 +1095,7 @@ bool NextStateGenerator::next(mcrl2::lps::multi_action &Transition, ATerm* State
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::next(Transition, State, prioritised) called" << std::endl;
 #endif
-  while (valuations == ns_info::enumerator_type::iterator_internal() && (sum_idx < info.num_summands))   // valuations is empty.
+  while (valuations == ns_info::enumerator_type::iterator_internal() && (sum_idx < info.summands.size()))   // valuations is empty.
   {
     if (single_summand)
     {

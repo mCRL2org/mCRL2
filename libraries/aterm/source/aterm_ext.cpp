@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/aterm/memory.h"
 
 namespace aterm
 {
@@ -60,12 +61,13 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,_ATerm*,NrArgs);
+        std::vector<ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
           Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeApplArray(Head, Args);
+        ATerm a = ATmakeAppl(Head, Args.begin(),Args.end());
         return a;
       }
       else
@@ -113,12 +115,13 @@ ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursi
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,_ATerm*,NrArgs);
+        std::vector <ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
           Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeApplArray(Head, Args);
+        ATerm a = ATmakeAppl(Head, Args.begin(),Args.end());
         return a;
       }
       else

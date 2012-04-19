@@ -29,7 +29,7 @@ using namespace mcrl2::pbes_system;
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   if (argc < 4)
   {

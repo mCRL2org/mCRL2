@@ -73,7 +73,7 @@ namespace aterm
 //#define ATgetType(t) GET_TYPE((t)->header)
 template <typename TermType>
 inline
-size_t ATgetType(const TermType t)
+size_t ATgetType(const TermType &t)
 {
   return GET_TYPE(t->header);
 }
@@ -85,7 +85,7 @@ bool ATisEqual(const ATerm &t1, const ATerm &t2)
 }
 
 inline
-bool ATisEqualAFun(const AFun f1, const AFun f2)
+bool ATisEqualAFun(const AFun &f1, const AFun &f2)
 {
   return f1 == f2;
 }
@@ -94,29 +94,29 @@ bool ATisEqualAFun(const AFun f1, const AFun f2)
  * Serialize a term to file, in readable ATerm format. No sharing is applied
  * in the serialized format.
  */
-bool ATwriteToTextFile(const ATerm t, FILE* file);
+bool ATwriteToTextFile(const ATerm &t, FILE* file);
 
-bool ATwriteToBinaryFile(const ATerm t, FILE* file);
+bool ATwriteToBinaryFile(const ATerm &t, FILE* file);
 
 /**
  * Call ATwriteToTextFile() after opening a file.
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
  */
-bool ATwriteToNamedTextFile(const ATerm t, const char* name);
+bool ATwriteToNamedTextFile(const ATerm &t, const char* name);
 
 /**
  * Call ATwriteToBinaryFile() after opening a file.
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
  */
-bool ATwriteToNamedBinaryFile(const ATerm t, const char* name);
+bool ATwriteToNamedBinaryFile(const ATerm &t, const char* name);
 
 /**
  * Serialize an ATerm to a string.
  * \arg t term to write
  */
-std::string ATwriteToString(const ATerm t);
+std::string ATwriteToString(const ATerm &t);
 
 /**
  * Serialize an ATerm to a static buffer in binary format. Note that
@@ -125,7 +125,7 @@ std::string ATwriteToString(const ATerm t);
  * \arg t term to write
  * \arg len result variable that will hold the length of the string
  */
-unsigned char* ATwriteToBinaryString(const ATerm t, size_t* len);
+unsigned char* ATwriteToBinaryString(const ATerm &t, size_t* len);
 
 /**
  * Read a textual ATerm from a file.
@@ -168,15 +168,15 @@ ATerm ATreadFromBinaryString(const unsigned char* s, size_t size);
 
 
 /* SAF I/O stuff */
-bool ATwriteToSAFFile(const ATerm aTerm, FILE* file);
+bool ATwriteToSAFFile(const ATerm &aTerm, FILE* file);
 
 ATerm ATreadFromSAFFile(FILE* file);
 
-bool ATwriteToNamedSAFFile(const ATerm aTerm, const char* filename);
+bool ATwriteToNamedSAFFile(const ATerm &aTerm, const char* filename);
 
 ATerm ATreadFromNamedSAFFile(const char* filename);
 
-char* ATwriteToSAFString(const ATerm aTerm, size_t* length);
+char* ATwriteToSAFString(const ATerm &aTerm, size_t* length);
 
 ATerm ATreadFromSAFString(char* data, size_t length);
 
@@ -238,7 +238,7 @@ void ATaddProtectFunction(const ATermProtFunc f);
  * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
  * core dumps.
  */
-void ATmarkTerm(const ATerm t);
+void ATmarkTerm(const ATerm &t);
 
 /**
  * Initialize the ATerm library. It is essential to call this function in the
@@ -247,9 +247,10 @@ void ATmarkTerm(const ATerm t);
  *
  * \arg bottomOfStack a reference to a variable of type ATerm that is in the
  *                    main stack frame. This should be the FIRST ATerm variable
- *                    declared.
+ *                    declared. Not needed anymore in reference_count garbage 
+ *                    collection.
  */
-void ATinit(ATerm* bottomOfStack);
+void ATinit();
 
 /**
  * Check whether the ATerm library has been initialized.

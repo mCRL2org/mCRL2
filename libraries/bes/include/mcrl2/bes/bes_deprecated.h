@@ -175,16 +175,9 @@ std::string description(const transformation_strategy s)
 
 
 /* Declare a protected PAIR symbol */
-inline AFun initAFunPair(AFun& f)
-{
-  f = ATmakeAFun("PAIR", 2, false);
-  ATprotectAFun(f);
-  return f;
-}
-
 inline AFun PAIR()
 {
-  static AFun PAIR = initAFunPair(PAIR);
+  static AFun PAIR = ATmakeAFun("PAIR", 2, false);
   return PAIR;
 }
 
@@ -197,7 +190,7 @@ inline ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
 static
 inline bool is_pair(ATerm t)
 {
-  return ATgetAFun((ATermAppl)t)==PAIR();
+  return ATgetAFun((ATermAppl)t)==PAIR().number();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -453,109 +446,64 @@ void use_hashtables(void)
   bes_global_variables<size_t>::opt_use_hashtables=true;
 }
 
-inline AFun initAFunBESAnd(AFun& f)
-{
-  f = ATmakeAFun("BESAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
-}
-
 inline AFun AFunBESAnd()
 {
-  static AFun BESAnd = initAFunBESAnd(BESAnd);
+  static AFun BESAnd = ATmakeAFun("BESAnd", 2, false);
   return BESAnd;
-}
-
-inline AFun initAFunBESOr(AFun& f)
-{
-  f = ATmakeAFun("BESOr", 2, false);
-  ATprotectAFun(f);
-  return f;
 }
 
 inline AFun AFunBESOr()
 {
-  static AFun BESOr = initAFunBESOr(BESOr);
+  static AFun BESOr = ATmakeAFun("BESOr", 2, false);
   return BESOr;
-}
-
-inline AFun initAFunBESIf(AFun& f)
-{
-  f = ATmakeAFun("BESIf", 3, false);
-  ATprotectAFun(f);
-  return f;
 }
 
 inline AFun AFunBESIf()
 {
-  static AFun BESIf = initAFunBESIf(BESIf);
+  static AFun BESIf = ATmakeAFun("BESIf", 3, false);
   return BESIf;
 }
 
 // BESFalse
 inline
-AFun initAFunBESFalse(AFun& f)
-{
-  f = ATmakeAFun("BESFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
 AFun gsAFunBESFalse()
 {
-  static AFun AFunBESFalse = initAFunBESFalse(AFunBESFalse);
+  static AFun AFunBESFalse = ATmakeAFun("BESFalse", 0, false);
   return AFunBESFalse;
 }
 
 inline
 bool gsIsBESFalse(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESFalse();
+  return ATgetAFun(Term) == gsAFunBESFalse().number();
 }
 
 // BESTrue
 inline
-AFun initAFunBESTrue(AFun& f)
-{
-  f = ATmakeAFun("BESTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
 AFun gsAFunBESTrue()
 {
-  static AFun AFunBESTrue = initAFunBESTrue(AFunBESTrue);
+  static AFun AFunBESTrue = ATmakeAFun("BESTrue", 0, false);
   return AFunBESTrue;
 }
 
 inline
 bool gsIsBESTrue(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESTrue();
+  return ATgetAFun(Term) == gsAFunBESTrue().number();
 }
 
 // BESDummy
 inline
-AFun initAFunBESDummy(AFun& f)
-{
-  f = ATmakeAFun("BESDummy", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
 AFun gsAFunBESDummy()
 {
-  static AFun AFunBESDummy = initAFunBESDummy(AFunBESDummy);
+  static AFun AFunBESDummy = ATmakeAFun("BESDummy", 0, false);
   return AFunBESDummy;
 }
 
 inline
 bool gsIsBESDummy(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESDummy();
+  return ATgetAFun(Term) == gsAFunBESDummy().number();
 }
 
 inline
@@ -709,17 +657,17 @@ inline bool is_dummy(const bes_expression& b)
 
 inline bool is_and(const bes_expression& b)
 {
-  return ATgetAFun((ATermAppl)b)==AFunBESAnd();
+  return ATgetAFun((ATermAppl)b)==AFunBESAnd().number();
 }
 
 inline bool is_or(const bes_expression& b)
 {
-  return ATgetAFun((ATermAppl)b)==AFunBESOr();
+  return ATgetAFun((ATermAppl)b)==AFunBESOr().number();
 }
 
 inline bool is_if(const bes_expression& b)
 {
-  return ATgetAFun((ATermAppl)b)==AFunBESIf();
+  return ATgetAFun((ATermAppl)b)==AFunBESIf().number();
 }
 
 inline bes_expression lhs(const bes_expression& b)

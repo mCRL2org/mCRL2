@@ -50,7 +50,7 @@ static ATermList typelist = NULL;
 
 bool is_mCRL_spec(ATermAppl spec)
 {
-  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false);
+  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false).number();
 }
 
 

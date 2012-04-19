@@ -442,7 +442,7 @@ namespace detail
 
     size_t operator()(const data::variable& v) const
     {
-      size_t result = v.name().function();
+      size_t result = AFun(v.name().function()).number();
       return result;
     }
   };

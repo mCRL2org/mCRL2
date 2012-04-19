@@ -40,8 +40,8 @@ struct ns_info
   const mcrl2::data::detail::legacy_rewriter m_rewriter; // only for translation to/from rewrite format
   enumerator_type m_enumerator;
 
-  size_t num_summands;
-  ATermAppl* summands;
+  // size_t num_summands;
+  std::vector<ATermAppl> summands;
   size_t num_prioritised;
   ATermList procvars;
   int stateformat;
@@ -96,7 +96,7 @@ class NextStateGenerator
     ATerm cur_act;
     ATermList cur_nextstate;
 
-    ATerm* stateargs;
+    std::vector <ATerm> stateargs;
 
     mcrl2::data::variable_list enumerated_variables;
     ns_info::enumerator_type::iterator_internal valuations;
@@ -150,12 +150,12 @@ class NextState
 
     AFun smndAFun;
     bool* tree_init;
-    ATerm* stateargs;
+    std::vector <ATerm> stateargs;
 
     ATermList pars;
     ATerm initial_state;
 
-    ATerm buildTree(ATerm* args);
+    ATerm buildTree(std::vector<ATerm> &args);
     ATerm getTreeElement(ATerm tree, size_t index);
 
     ATerm SetVars(ATerm a, ATermList free_vars);

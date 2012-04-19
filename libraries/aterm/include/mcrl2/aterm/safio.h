@@ -1,6 +1,7 @@
 #ifndef SAFIO_H
 #define SAFIO_H
 
+#include <stack>
 #include "mcrl2/aterm/aterm1.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/idmappings.h"
@@ -11,7 +12,7 @@ namespace aterm
 static const char SAF_IDENTIFICATION_TOKEN = '?';
 
 /* Stores */
-typedef struct _ProtectedMemoryStack
+/* typedef struct _ProtectedMemoryStack
 {
   ATerm** blocks;
   size_t* freeBlockSpaces;
@@ -20,7 +21,7 @@ typedef struct _ProtectedMemoryStack
   size_t currentBlockNr;
   ATerm* currentIndex;
   size_t spaceLeft;
-}* ProtectedMemoryStack;
+}* ProtectedMemoryStack; */
 
 /* Buffer */
 typedef struct _ByteBuffer
@@ -56,9 +57,10 @@ typedef struct _ATermMapping
 
 typedef struct _BinaryWriter
 {
-  ATermMapping* stack;
+  std::stack <ATermMapping> stack;
+  /* ATermMapping* stack;
   size_t stackSize;
-  size_t stackPosition;
+  size_t stackPosition; */
 
   IDMappings sharedTerms;
   int currentSharedTermKey;
@@ -85,28 +87,31 @@ typedef struct _ATermConstruct
 {
   size_t type;
 
-  ATerm tempTerm;
+  _SymEntry* tempTerm;
   size_t termKey;
 
   size_t nrOfSubTerms;
   size_t subTermIndex;
-  ATerm* subTerms;
+  std::vector <ATerm> subTerms;
 
 } ATermConstruct;
 
 typedef struct _BinaryReader
 {
-  ProtectedMemoryStack protectedMemoryStack;
+//   ProtectedMemoryStack protectedMemoryStack;
 
-  ATermConstruct* stack;
-  size_t stackSize;
-  size_t stackPosition;
+  std::stack <ATermConstruct> stack;
+/*   size_t stackSize;
+  size_t stackPosition; */
 
-  ATerm* sharedTerms;
+  /* ATerm* sharedTerms;
   size_t sharedTermsSize;
-  size_t sharedTermsIndex;
+  size_t sharedTermsIndex; */
 
-  SymEntry* sharedAFuns;
+  std::vector<ATerm> sharedTerms;
+  std::set<AFun> protected_afuns;
+
+  _SymEntry** sharedAFuns;
   size_t sharedAFunsSize;
   size_t sharedAFunsIndex;
 

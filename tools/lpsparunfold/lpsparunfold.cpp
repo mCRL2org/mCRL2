@@ -239,7 +239,7 @@ class lps_parunfold_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<parunfold_
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  atermpp::aterm_init();
 
   return lps_parunfold_gui_tool().execute(argc, argv);
 }

@@ -1193,7 +1193,8 @@ void explorer::to_state_vector(ltsmin_state* dst_state, int* dst, ltsmin_state* 
 
 
     // data_expression values[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+    std::vector < data_expression > values(state_length);
 
     if (info->get_reset_option() || src == 0) {
         int type_no;
@@ -1313,7 +1314,8 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
     bool error = false;
 
     // data_expression values[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(values, data_expression, state_length);
+    std::vector <data_expression> values(state_length);
 
     int type_no;
     for (int i = 1; i < state_length; i++) {

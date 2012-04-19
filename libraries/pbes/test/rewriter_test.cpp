@@ -612,7 +612,7 @@ void test_one_point_rule_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();

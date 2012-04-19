@@ -26,7 +26,7 @@ class SMT_Solver
 {
   public:
     virtual ~SMT_Solver() {};
-    virtual bool is_satisfiable(const data_expression_list a_formula) = 0;
+    virtual bool is_satisfiable(const data_expression_list &a_formula) = 0;
 };
 }
 }

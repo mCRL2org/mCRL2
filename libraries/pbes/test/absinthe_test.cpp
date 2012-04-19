@@ -93,7 +93,7 @@ void test2()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_separate_keyword_section();
   test2();

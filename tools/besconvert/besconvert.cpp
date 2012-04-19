@@ -681,7 +681,7 @@ class besconvert_tool: public super
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  aterm_init();
 
   return besconvert_tool().execute(argc, argv);
 }

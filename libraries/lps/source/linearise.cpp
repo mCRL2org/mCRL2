@@ -103,6 +103,7 @@ class objectdatatype
 {
   public:
     identifier_string objectname;
+    action_label_list multi_action_names;
     bool constructor;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
@@ -117,6 +118,7 @@ class objectdatatype
     objectdatatype()
     {
       objectname.protect();
+      multi_action_names.protect();
       constructor=false;
       representedprocess.protect();
       process_representing_action.protect();
@@ -131,7 +133,9 @@ class objectdatatype
     objectdatatype(const objectdatatype& o)
     {
       objectname=o.objectname;
+      multi_action_names=o.multi_action_names;
       objectname.protect();
+      multi_action_names.protect();
       constructor=o.constructor;
       representedprocess=o.representedprocess;
       representedprocess.protect();
@@ -150,7 +154,9 @@ class objectdatatype
     const objectdatatype& operator=(const objectdatatype& o)
     {
       objectname=o.objectname;
+      multi_action_names=o.multi_action_names;
       objectname.protect();
+      multi_action_names.protect();
       constructor=o.constructor;
       representedprocess=o.representedprocess;
       representedprocess.protect();
@@ -170,6 +176,7 @@ class objectdatatype
     ~objectdatatype()
     {
       objectname.unprotect();
+      multi_action_names.unprotect();
       representedprocess.unprotect();
       process_representing_action.unprotect();
       processbody.unprotect();
@@ -487,7 +494,8 @@ class specification_basic_type:public boost::noncopyable
         // of getparameters.
         const data_expression_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
-        objectdata[n].objectname=identifier_string((ATermAppl)(ATermList)actionnames);
+        // objectdata[n].objectname=identifier_string((ATermAppl)(ATermList)actionnames);
+        objectdata[n].multi_action_names=actionnames;
         objectdata[n].object=multiact;
         // must separate assignment below as
         // objectdata may change as a side effect of make

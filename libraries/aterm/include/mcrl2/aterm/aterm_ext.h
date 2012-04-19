@@ -19,31 +19,6 @@
 namespace aterm
 {
 
-//Workarounds for the initialisation of the ATerm library
-//-------------------------------------------------------
-
-//To initialise the ATerm library either call MCRL2_ATERM_INIT or
-//MCRL2_ATERM_INIT_DEBUG from the body of the main program as the first
-//statement. Failing to do so may lead to crashes when the garbage collector
-//is started.
-
-// \cond INTERNAL_DOCS
-#if defined(_MSC_VER) || defined(__MINGW32__)
-# define MCRL2_ATERM_INIT_(bottom) \
-  ATinit(reinterpret_cast< ATerm* >(&bottom));
-#else
-# define MCRL2_ATERM_INIT_(bottom) \
-  ATinit(reinterpret_cast< ATerm* >(bottom));
-#endif
-// \endcond
-
-/// MCRL2_ATERM_INIT(argv) initialises the ATerm library using
-/// one of the parameters as the bottom of the stack. The parameter that is
-/// actually depends on the platform:
-/// - &argv on Windows platforms
-/// - argv on non-Windows platforms
-# define MCRL2_ATERM_INIT(argv) MCRL2_ATERM_INIT_(argv);
-
 //-------------------------------------------------------------------------
 //For all functions below we use the precondition the ATerm library has been
 //initialised.
@@ -62,9 +37,9 @@ namespace aterm
  * \param[in] el the aterm to prepend
  * \return el ++ list if not el in list, list if el in list
  **/
-inline ATermList ATinsertUnique(const ATermList list, const ATerm el)
+inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
 {
-  if (ATindexOf(list, el, 0) == (size_t)(-1))
+  if (ATindexOf(list, el, 0) == size_t(-1))
   {
     return ATinsert(list, el);
   }
@@ -76,7 +51,7 @@ inline ATermList ATinsertUnique(const ATermList list, const ATerm el)
  * \param[in] t an ATerm
  * \return t is an ATermAppl
  */
-inline bool ATisAppl(const ATerm t)
+inline bool ATisAppl(const ATerm &t)
 {
   return ATgetType(t) == AT_APPL;
 }
@@ -86,7 +61,7 @@ inline bool ATisAppl(const ATerm t)
  * \param[in] t an ATerm
  * \return t is an ATermList
  */
-inline bool ATisList(const ATerm t)
+inline bool ATisList(const ATerm &t)
 {
   return ATgetType(t) == AT_LIST;
 }
@@ -96,7 +71,7 @@ inline bool ATisList(const ATerm t)
  * \param[in] t an ATerm
  * \return t is an ATermInt
  */
-inline bool ATisInt(const ATerm t)
+inline bool ATisInt(const ATerm &t)
 {
   return ATgetType(t) == AT_INT;
 }
@@ -106,7 +81,7 @@ inline bool ATisInt(const ATerm t)
  * \param[in] t an ATerm
  * \return t is NULL or an ATermAppl
  **/
-inline bool ATisApplOrNull(const ATerm t)
+inline bool ATisApplOrNull(const ATerm &t)
 {
   return (t == ATerm()) || ATisAppl(t);
 }
@@ -116,7 +91,7 @@ inline bool ATisApplOrNull(const ATerm t)
  * \param[in] t an ATerm
  * \return t is NULL or an ATermList
  **/
-inline bool ATisListOrNull(const ATerm t)
+inline bool ATisListOrNull(const ATerm &t)
 {
   return (t == ATerm()) || ATisList(t);
 }
@@ -124,11 +99,11 @@ inline bool ATisListOrNull(const ATerm t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline ATermAppl ATAelementAt(const ATermList List, const size_t Index)
+inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 {
-  ATerm Result = ATelementAt(List, Index);
+  const ATerm &Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
+  return static_cast<const ATermAppl &>(Result);
 }
 
 /**

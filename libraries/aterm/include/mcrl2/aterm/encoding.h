@@ -1,9 +1,12 @@
+#define PRINT_GC_INFO
 /**
   * encoding.h: Low level encoding of ATerm datatype.
   */
 
 #ifndef ENCODING_H
 #define ENCODING_H
+#include <vector>
+#include <assert.h>
 #include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/atypes.h"
 
@@ -37,6 +40,7 @@ class _ATerm
 {
   public:
     header_type   header;
+    size_t reference_count;
     _ATerm* next;
 };
 
@@ -46,10 +50,52 @@ size_t TERM_SIZE_APPL(const size_t arity)
   return (sizeof(_ATerm)/sizeof(size_t))+arity;
 }
 
+extern void at_free_term(_ATerm* t);
+
 class ATerm
 {
+  public:
+    static std::vector <_ATerm*> hashtable;
+
   protected:
     _ATerm *m_aterm;
+
+    void decrease_reference_count()
+    {
+      if (m_aterm!=NULL)
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"decrease reference count %ld  %p\n",m_aterm->reference_count,m_aterm);
+#endif
+        assert(m_aterm->reference_count>0);
+        if (0== --m_aterm->reference_count)
+        {
+          at_free_term(m_aterm);
+          return;
+        }
+      }
+    }
+
+    template <bool CHECK>
+    static void increase_reference_count(_ATerm* t)
+    {
+      if (t!=NULL)
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
+#endif
+        if (CHECK) assert(t->reference_count>0);
+        t->reference_count++;
+      }
+
+    }
+
+    void copy_term(_ATerm* t)
+    {
+      increase_reference_count<true>(t);
+      decrease_reference_count();
+      m_aterm=t;
+    }
 
   public:
 
@@ -57,64 +103,86 @@ class ATerm
     {}
 
     ATerm (const ATerm &t):m_aterm(t.m_aterm)
-    {}
+    {
+      increase_reference_count<true>(m_aterm);
+    }
 
     ATerm (_ATerm *t):m_aterm(t)
-    {}
+    {
+      // Note that reference_count can be 0, as this term can just be constructed,
+      // and is now handed over to become a real ATerm.
+      increase_reference_count<false>(m_aterm);
+    }
 
     ATerm &operator=(const ATerm &t)
     {
-      m_aterm=t.m_aterm;
+      copy_term(t.m_aterm);
       return *this;
     }
 
     ~ATerm ()
     {
+      decrease_reference_count();
     }
 
     _ATerm & operator *() const
     {
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
       return *m_aterm;
     }
 
     _ATerm * operator ->() const
     {
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
       return m_aterm;
     }
 
     bool operator ==(const ATerm &t) const
     {
-      return t.m_aterm==m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm==t.m_aterm;
     }
 
     bool operator !=(const ATerm &t) const
     {
-      return t.m_aterm!=m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm!=t.m_aterm;
     }
 
     bool operator <(const ATerm &t) const
     {
-      return t.m_aterm<m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm<t.m_aterm;
     }
 
     bool operator >(const ATerm &t) const
     {
-      return t.m_aterm>m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm>t.m_aterm;
     }
 
     bool operator <=(const ATerm &t) const
     {
-      return t.m_aterm<=m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm<=t.m_aterm;
     }
 
     bool operator >=(const ATerm &t) const
     {
-      return t.m_aterm>=m_aterm;
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
+      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
+      return m_aterm>=t.m_aterm;
     }
 
     /// \brief Test on whether an the ATerm is not equal to NULL.
     bool is_defined() const
     {
+      assert(m_aterm==NULL || m_aterm->reference_count>0);
       return m_aterm!=NULL;
     }
 };

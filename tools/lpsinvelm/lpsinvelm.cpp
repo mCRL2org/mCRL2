@@ -240,6 +240,6 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  atermpp::aterm_init();
   return lpsinvelm_giu_tool().execute(argc, argv);
 }

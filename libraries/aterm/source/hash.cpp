@@ -16,6 +16,7 @@
 /*}}}  */
 /*{{{  includes */
 #include <stdexcept>
+#include <stack>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,29 +38,21 @@ namespace aterm
 
 /* ======================================================= */
 
-static const size_t STEP = 1;
-//#define STEP 1   /* The position on which the next hash entry
-//searched */
+static const size_t STEP = 1; /* The position on which the next hash entry //searched */
 
-static const size_t INITIAL_NR_OF_TABLES = 8;
-//#define INITIAL_NR_OF_TABLES 8
 static const size_t TABLE_SHIFT = 14;
-//#define TABLE_SHIFT 14
 static const size_t ELEMENTS_PER_TABLE = 1L<<TABLE_SHIFT;
-//#define ELEMENTS_PER_TABLE (1L<<TABLE_SHIFT)
 inline
 size_t modELEMENTS_PER_TABLE(const size_t n)
 {
   return (n & (ELEMENTS_PER_TABLE-1));
 }
-//#define modELEMENTS_PER_TABLE(n) ((n) & (ELEMENTS_PER_TABLE-1))
 
 inline
 size_t divELEMENTS_PER_TABLE(const size_t n)
 {
   return n >> TABLE_SHIFT;
 }
-//#define divELEMENTS_PER_TABLE(n) ((n) >> TABLE_SHIFT)
 
 /*-----------------------------------------------------------*/
 
@@ -77,7 +70,6 @@ size_t hashcode(void* a, const size_t sizeMinus1)
 {
   return ((((size_t)(a) >> 2) * a_prime_number) & sizeMinus1);
 }
-//#define hashcode(a,sizeMinus1) (((((size_t) a) >> 2) * a_prime_number ) & sizeMinus1)
 
 /*}}}  */
 /*{{{  types */
@@ -92,15 +84,11 @@ struct _ATermTable
   unsigned int max_load;
   size_t max_entries;
   size_t* hashtable;
-  size_t nr_tables;
-  // union _ATerm** * keys;
-  _ATerm** * keys;
-  size_t nr_free_tables;
-  size_t first_free_position;
-  size_t** free_table;
-  // union _ATerm** * values;
-  _ATerm** * values;
-};
+  std::vector < std::vector <ATerm > > keys;
+  std::stack < size_t > free_positions;
+  bool contains_values;
+  std::vector < std::vector < ATerm > > values;
+}; 
 
 /*}}}  */
 
@@ -179,7 +167,7 @@ static size_t calculateNewSize
 /*}}}  */
 /*{{{  static ATerm tableGet(ATerm **tableindex, size_t n) */
 
-static ATerm tableGet(_ATerm*** tableindex, size_t n)
+static ATerm tableGet(const std::vector< std::vector<ATerm> > &tableindex, size_t n)
 {
   return tableindex[divELEMENTS_PER_TABLE(n)][modELEMENTS_PER_TABLE(n)];
 }
@@ -188,18 +176,23 @@ static ATerm tableGet(_ATerm*** tableindex, size_t n)
 /*{{{  static void insertKeyvalue(set, size_t n, ATerm t, ATerm v) */
 
 static void insertKeyValue(ATermIndexedSet s,
-                           size_t n, ATerm t, ATerm v)
+                           size_t n, const ATerm &t, const ATerm &v)
 {
-  size_t x,y;
-  _ATerm** keytable, **valuetable;
-  size_t nr_tables = s->nr_tables;
+  assert(s->keys.size()==s->values.size() || (!s->contains_values));
 
-  x = divELEMENTS_PER_TABLE(n);
-  y = modELEMENTS_PER_TABLE(n);
+  const size_t x = divELEMENTS_PER_TABLE(n);
+  const size_t y = modELEMENTS_PER_TABLE(n);
 
-  if (x>=nr_tables)
+  
+  if (x>=s->keys.size())
   {
-    s->keys = (_ATerm***)AT_realloc(s->keys, sizeof(ATerm*)*nr_tables*2);
+    s->keys.push_back(std::vector<ATerm>(ELEMENTS_PER_TABLE));
+    if (s->contains_values) 
+    {
+      s->values.push_back(std::vector<ATerm>(ELEMENTS_PER_TABLE));
+    }
+
+    /* s->keys = (_ATerm***)AT_realloc(s->keys, sizeof(ATerm*)*nr_tables*2);
     if (s->keys==NULL)
     {
       std::runtime_error("insertKeyValue: Cannot extend key table");
@@ -217,13 +210,12 @@ static void insertKeyValue(ATermIndexedSet s,
       memset((void*)&s->values[nr_tables], 0, sizeof(ATerm*)*nr_tables);
     }
 
-    s->nr_tables = nr_tables*2;
+    s->nr_tables = nr_tables*2; */
   }
 
-  keytable = s->keys[x];
-  if (keytable == NULL)
+  /* if (keytable == NULL)
   {
-    /* create a new key table */
+    / * create a new key table * /
     keytable = (_ATerm**)AT_alloc_protected(ELEMENTS_PER_TABLE);
     s->keys[x] = keytable;
     if (keytable == NULL)
@@ -240,21 +232,19 @@ static void insertKeyValue(ATermIndexedSet s,
         std::runtime_error("insertKeyValue: Cannot create new value table");
       }
     }
-  }
+  } */
 
-  assert(keytable != NULL);
-
-  keytable[y] = &*t;
-  if (s->values != NULL)
+  s->keys[x][y] = t;
+  if (s->contains_values)
   {
-    s->values[x][y] = &*v;
+    s->values[x][y] = v;
   }
 }
 
 /*}}}  */
 /*{{{  static size_t hashPut(ATermTable s, ATerm key, size_t n) */
 
-static size_t hashPut(ATermTable s, ATerm key, size_t n)
+static size_t hashPut(ATermTable s, const ATerm &key, size_t n)
 {
   size_t c,v;
 
@@ -344,7 +334,7 @@ static void hashResizeSet(ATermIndexedSet s)
 /*}}}  */
 /*{{{  static ATermList tableContent(ATerm **tableidx, entries) */
 
-static ATermList tableContent(_ATerm*** tableindex,size_t nr_entries)
+static ATermList tableContent(const std::vector< std::vector<ATerm> > &tableindex,size_t nr_entries)
 {
   size_t i;
   ATerm t;
@@ -367,14 +357,13 @@ static ATermList tableContent(_ATerm*** tableindex,size_t nr_entries)
 
 ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct)
 {
-  size_t i;
-  ATermIndexedSet hashset;
+  ATermIndexedSet hashset=new _ATermTable;
 
-  hashset = (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
-  if (hashset==NULL)
+  // hashset = new _ATermTable; // (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
+  /* if (hashset==NULL)
   {
     std::runtime_error("ATindexedSetCreate: cannot allocate new ATermIndexedSet");
-  }
+  } */
   hashset->sizeMinus1 = approximatepowerof2(initial_size);
   hashset->nr_entries = 0;
   hashset->nr_deletions = 0;
@@ -387,12 +376,13 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
     std::runtime_error("ATindexedSetCreate: cannot allocate ATermIndexedSet "
                        "of " + to_string(initial_size) + " entries");
   }
-  for (i=0 ; i<=hashset->sizeMinus1 ; i++)
+  for (size_t i=0 ; i<=hashset->sizeMinus1 ; i++)
   {
     hashset->hashtable[i] = EMPTY;
   }
 
-  hashset->nr_tables = INITIAL_NR_OF_TABLES;
+  hashset->contains_values=false;
+  /* hashset->nr_tables = INITIAL_NR_OF_TABLES;
   hashset->keys = (_ATerm***)AT_calloc(hashset->nr_tables,
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
@@ -400,16 +390,16 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
     std::runtime_error("ATindexedSetCreate: cannot create key index table");
   }
 
-  hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
-  hashset->first_free_position = 0;
-  hashset->free_table=(size_t**)AT_calloc(sizeof(size_t*),
+  hashset->nr_free_tables = INITIAL_NR_OF_TABLES; */
+  // hashset->first_free_position = 0;
+  /* hashset->free_table=(size_t**)AT_calloc(sizeof(size_t*),
                                           hashset->nr_free_tables);
   if (hashset->free_table == NULL)
   {
     std::runtime_error("ATindexedSetCreate: cannot allocate table to store deleted elements");
   }
 
-  hashset->values = NULL;
+  hashset->values = NULL; */
 
   return hashset;
 }
@@ -433,14 +423,13 @@ void ATindexedSetReset(ATermIndexedSet hashset)
 /*}}}  */
 /*{{{  static size_t keyPut(ATermIndexedSet hashset, key, value, ATbool *isnew)*/
 
-static size_t keyPut(ATermIndexedSet hashset, ATerm key,
-                     ATerm value, bool* isnew)
+static size_t keyPut(ATermIndexedSet hashset, const ATerm &key,
+                     const ATerm &value, bool* isnew)
 {
-  size_t n,m;
-
-  if (hashset->first_free_position == 0)
+  size_t n;
+  if (hashset->free_positions.size() == 0)
   {
-    m = hashset->nr_entries;
+    const size_t m = hashset->nr_entries;
     n = hashPut(hashset,key,m);
     if (n != m)
     {
@@ -450,7 +439,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
       }
       if (value != ATerm())
       {
-        assert(hashset->values!=NULL);
+        assert(hashset->contains_values);
         hashset->values[ divELEMENTS_PER_TABLE(n)]
         [ modELEMENTS_PER_TABLE(n)] = &*value;
       }
@@ -460,9 +449,11 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
   }
   else
   {
-    m = hashset->free_table
+    const size_t m = hashset->free_positions.top();
+    hashset->free_positions.pop();
+    /* m = hashset->free_table
         [divELEMENTS_PER_TABLE(hashset->first_free_position-1)]
-        [modELEMENTS_PER_TABLE(hashset->first_free_position-1)];
+        [modELEMENTS_PER_TABLE(hashset->first_free_position-1)]; */
     n = hashPut(hashset, key, m);
     if (n != m)
     {
@@ -472,13 +463,13 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
       }
       if (value != ATerm())
       {
-        assert(hashset->values != NULL);
+        assert(hashset->contains_values);
         hashset->values[ divELEMENTS_PER_TABLE(n)]
         [ modELEMENTS_PER_TABLE(n)] = &*value;
       }
       return n;
     }
-    hashset->first_free_position--;
+    // hashset->first_free_position--;
   }
 
   if (isnew != NULL)
@@ -488,7 +479,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
   insertKeyValue(hashset, n, key, value);
   if (hashset->nr_entries >= hashset->max_entries)
   {
-    hashResizeSet(hashset); /* repaired by Jan Friso Groote, 25/7/00 */
+    hashResizeSet(hashset); 
   }
 
   return n;
@@ -502,7 +493,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
  * an index. If elem is already in the set, deliver 0
  */
 
-size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, bool* isnew)
+size_t ATindexedSetPut(ATermIndexedSet hashset, const ATerm &elem, bool* isnew)
 {
   return keyPut(hashset, elem, ATerm(), isnew);
 }
@@ -510,7 +501,7 @@ size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, bool* isnew)
 /*}}}  */
 /*{{{  size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm key) */
 
-ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
+ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, const ATerm &elem)
 {
   size_t c,start,v;
 
@@ -539,7 +530,7 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 /*}}}  */
 /*{{{  void ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem) */
 
-bool ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem)
+bool ATindexedSetRemove(ATermIndexedSet hashset, const ATerm &elem)
 {
   return ATtableRemove(hashset, elem);
 }
@@ -567,18 +558,18 @@ ATerm ATindexedSetGetElem(ATermIndexedSet hashset, size_t index)
 
 ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_pct)
 {
-  ATermTable hashtable;
+  ATermTable hashtable = (ATermTable)ATindexedSetCreate(initial_size, max_load_pct);
 
-  hashtable = (ATermTable)ATindexedSetCreate(initial_size,
-              max_load_pct);
+  hashtable->contains_values=true;
 
-  hashtable->values = (_ATerm***)AT_calloc(hashtable->nr_tables,
+  /* hashtable->values = (_ATerm***)AT_calloc(hashtable->nr_tables,
                                          sizeof(ATerm*));
+  
 
   if (hashtable->values == NULL)
   {
     std::runtime_error("ATtableCreate: cannot create value index table");
-  }
+  } */
 
   return hashtable;
 }
@@ -588,10 +579,13 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
 void ATtableDestroy(ATermTable table)
 {
-  size_t i;
+  // size_t i;
 
   AT_free(table->hashtable);
-  for (i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++)
+  delete table;
+
+  
+  /* for (i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++)
   {
     AT_free_protected((ATerm*)table->keys[i]);
   }
@@ -615,9 +609,14 @@ void ATtableDestroy(ATermTable table)
     AT_free(table->free_table[i]);
   }
 
-  AT_free(table->free_table);
+  AT_free(table->free_table); */
 
-  AT_free(table);
+  /* using namespace std;
+  table->values.~vector<vector<ATerm> >();
+  table->keys.~vector<vector<ATerm> >();
+  table->free_positions.~stack<size_t>();
+
+  AT_free(table); */
 }
 
 /*}}}  */
@@ -625,34 +624,37 @@ void ATtableDestroy(ATermTable table)
 
 void ATtableReset(ATermTable table)
 {
-  size_t i;
-
   table->nr_entries = 0;
   table->nr_deletions = 0;
 
-  for (i=0; i<=table->sizeMinus1 ; i++)
+  for (size_t i=0; i<=table->sizeMinus1 ; i++)
   {
     table->hashtable[i] = EMPTY;
   }
 
-  for (i=0; (i<table->nr_tables) && (table->keys[i]!=NULL); i++)
+  table->keys.clear();
+  if (table->contains_values)
+  {
+    table->values.clear();
+  }
+  /* for (size_t i=0; i<table->keys->size() ; i++)
   {
     AT_free_protected((ATerm*)table->keys[i]);
     table->keys[i]=NULL;
-    if (table->values!=NULL)
+    if (table->contains_values)
     {
       AT_free_protected((ATerm*)table->values[i]);
       table->values[i]=NULL;
     }
-  }
+  } */
 
-  table->first_free_position = 0;
+  table->free_positions=std::stack<size_t>();
 }
 
 /*}}}  */
 /*{{{  void ATtablePut(ATermTable table, ATerm key, ATerm value) */
 
-void ATtablePut(ATermTable table, ATerm key, ATerm value)
+void ATtablePut(ATermTable table, const ATerm &key, const ATerm &value)
 {
   /* insert entry key into the hashtable, and deliver
      an index. If key is already in the set, deliver 0 */
@@ -665,11 +667,9 @@ void ATtablePut(ATermTable table, ATerm key, ATerm value)
 /*}}}  */
 /*{{{  ATerm ATtableGet(ATermTable table, ATerm key) */
 
-ATerm ATtableGet(ATermTable table, ATerm key)
+ATerm ATtableGet(ATermTable table, const ATerm &key)
 {
-  size_t v;
-
-  v = ATindexedSetGetIndex(table, key);
+  const size_t v = ATindexedSetGetIndex(table, key);
   if (v==ATERM_NON_EXISTING_POSITION)
   {
     return ATerm();
@@ -680,10 +680,10 @@ ATerm ATtableGet(ATermTable table, ATerm key)
 /*}}}  */
 /*{{{  void ATtableRemove(ATermTable table, ATerm key) */
 
-bool ATtableRemove(ATermTable table, ATerm key)
+bool ATtableRemove(ATermTable table, const ATerm &key)
 {
-  size_t start,c,v,x,y;
-  size_t* ltable;
+  size_t start,c,v;
+  // size_t* ltable;
 
   start = hashcode(&*key,table->sizeMinus1);
   c = start;
@@ -710,7 +710,7 @@ bool ATtableRemove(ATermTable table, ATerm key)
 
   insertKeyValue(table, v, ATerm(), ATerm());
 
-  x=divELEMENTS_PER_TABLE(table->first_free_position);
+  /* x=divELEMENTS_PER_TABLE(table->first_free_position);
   if (x>=table->nr_free_tables)
   {
     table->free_table = (size_t**)AT_realloc(table->free_table,
@@ -728,18 +728,19 @@ bool ATtableRemove(ATermTable table, ATerm key)
   ltable = table->free_table[x];
   if (ltable == NULL)
   {
-    /* create a new key table */
+    / * create a new key table * /
     ltable = (size_t*)AT_malloc(sizeof(size_t)*ELEMENTS_PER_TABLE);
     table->free_table[x] = ltable;
     if (ltable == NULL)
     {
       std::runtime_error("ATtableRemove: Cannot create new free table");
     }
-  }
+  } */
 
-  y = modELEMENTS_PER_TABLE(table->first_free_position);
+  /* y = modELEMENTS_PER_TABLE(table->first_free_position);
   ltable[y] = v;
-  table->first_free_position++;
+  table->first_free_position++; */
+  table->free_positions.push(v);
   table->nr_deletions++;
   return true;
 }

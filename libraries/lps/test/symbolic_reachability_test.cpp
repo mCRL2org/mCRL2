@@ -202,7 +202,7 @@ void check_info(mcrl2::lps::specification const& model)
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
+  ATinit();
 
   using namespace mcrl2;
   using namespace mcrl2::lps;

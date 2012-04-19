@@ -43,22 +43,15 @@ class term_balanced_tree: public aterm_base
 
   protected:
 
-    static function_symbol create_and_protect(function_symbol& target, function_symbol const& f)
-    {
-      target = f;
-      target.protect();
-      return target;
-    }
-
     static function_symbol const& tree_empty()
     {
-      static function_symbol empty = create_and_protect(empty, function_symbol("@empty@", 0));
+      static function_symbol empty = function_symbol("@empty@", 0);
       return empty;
     }
 
     static function_symbol const& tree_node()
     {
-      static function_symbol node = create_and_protect(node, function_symbol("@node@", 2));
+      static function_symbol node = function_symbol("@node@", 2);
       return node;
     }
 

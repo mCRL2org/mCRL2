@@ -19,10 +19,10 @@ extern ProtEntry* at_prot_memory;
 extern ATermProtFunc* at_prot_functions;
 extern size_t at_prot_functions_count;
 
-void AT_markTerm(ATerm t);
+// void AT_markTerm(ATerm t);
 
-void AT_unmarkIfAllMarked(ATerm t);
-size_t  AT_calcUniqueAFuns(ATerm t);
+void AT_unmarkIfAllMarked(const ATerm &t);
+size_t  AT_calcUniqueAFuns(const ATerm &t);
 void AT_cleanup(void);
 
 } // namespace aterm

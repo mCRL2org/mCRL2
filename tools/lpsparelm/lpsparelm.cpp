@@ -54,8 +54,7 @@ class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
+  atermpp::aterm_init();
   return lps_parelm_gui_tool().execute(argc, argv);
 }
 

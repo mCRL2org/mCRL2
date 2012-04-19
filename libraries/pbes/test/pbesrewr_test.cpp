@@ -99,7 +99,7 @@ void test_pbesrewr3()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_pbesrewr1();
   test_pbesrewr2();

@@ -68,7 +68,7 @@ void test_pbesabstract()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_pbesabstract();
 

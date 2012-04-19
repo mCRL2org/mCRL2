@@ -34,7 +34,8 @@ namespace detail
 inline
 const atermpp::function_symbol& function_symbol_ActAnd()
 {
-  static atermpp::function_symbol function_symbol_ActAnd = core::detail::initialise_static_expression(function_symbol_ActAnd, atermpp::function_symbol("ActAnd", 2));
+//  static atermpp::function_symbol function_symbol_ActAnd = core::detail::initialise_static_expression(function_symbol_ActAnd, atermpp::function_symbol("ActAnd", 2));
+  static atermpp::function_symbol function_symbol_ActAnd = atermpp::function_symbol("ActAnd", 2);
   return function_symbol_ActAnd;
 }
 
@@ -48,7 +49,8 @@ bool gsIsActAnd(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActAt()
 {
-  static atermpp::function_symbol function_symbol_ActAt = core::detail::initialise_static_expression(function_symbol_ActAt, atermpp::function_symbol("ActAt", 2));
+//  static atermpp::function_symbol function_symbol_ActAt = core::detail::initialise_static_expression(function_symbol_ActAt, atermpp::function_symbol("ActAt", 2));
+  static atermpp::function_symbol function_symbol_ActAt = atermpp::function_symbol("ActAt", 2);
   return function_symbol_ActAt;
 }
 
@@ -62,7 +64,8 @@ bool gsIsActAt(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActExists()
 {
-  static atermpp::function_symbol function_symbol_ActExists = core::detail::initialise_static_expression(function_symbol_ActExists, atermpp::function_symbol("ActExists", 2));
+//  static atermpp::function_symbol function_symbol_ActExists = core::detail::initialise_static_expression(function_symbol_ActExists, atermpp::function_symbol("ActExists", 2));
+  static atermpp::function_symbol function_symbol_ActExists = atermpp::function_symbol("ActExists", 2);
   return function_symbol_ActExists;
 }
 
@@ -76,7 +79,8 @@ bool gsIsActExists(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActFalse()
 {
-  static atermpp::function_symbol function_symbol_ActFalse = core::detail::initialise_static_expression(function_symbol_ActFalse, atermpp::function_symbol("ActFalse", 0));
+//  static atermpp::function_symbol function_symbol_ActFalse = core::detail::initialise_static_expression(function_symbol_ActFalse, atermpp::function_symbol("ActFalse", 0));
+  static atermpp::function_symbol function_symbol_ActFalse = atermpp::function_symbol("ActFalse", 0);
   return function_symbol_ActFalse;
 }
 
@@ -90,7 +94,8 @@ bool gsIsActFalse(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActForall()
 {
-  static atermpp::function_symbol function_symbol_ActForall = core::detail::initialise_static_expression(function_symbol_ActForall, atermpp::function_symbol("ActForall", 2));
+//  static atermpp::function_symbol function_symbol_ActForall = core::detail::initialise_static_expression(function_symbol_ActForall, atermpp::function_symbol("ActForall", 2));
+  static atermpp::function_symbol function_symbol_ActForall = atermpp::function_symbol("ActForall", 2);
   return function_symbol_ActForall;
 }
 
@@ -104,7 +109,8 @@ bool gsIsActForall(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActId()
 {
-  static atermpp::function_symbol function_symbol_ActId = core::detail::initialise_static_expression(function_symbol_ActId, atermpp::function_symbol("ActId", 2));
+//  static atermpp::function_symbol function_symbol_ActId = core::detail::initialise_static_expression(function_symbol_ActId, atermpp::function_symbol("ActId", 2));
+  static atermpp::function_symbol function_symbol_ActId = atermpp::function_symbol("ActId", 2);
   return function_symbol_ActId;
 }
 
@@ -118,7 +124,8 @@ bool gsIsActId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActImp()
 {
-  static atermpp::function_symbol function_symbol_ActImp = core::detail::initialise_static_expression(function_symbol_ActImp, atermpp::function_symbol("ActImp", 2));
+//  static atermpp::function_symbol function_symbol_ActImp = core::detail::initialise_static_expression(function_symbol_ActImp, atermpp::function_symbol("ActImp", 2));
+  static atermpp::function_symbol function_symbol_ActImp = atermpp::function_symbol("ActImp", 2);
   return function_symbol_ActImp;
 }
 
@@ -132,7 +139,8 @@ bool gsIsActImp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActNot()
 {
-  static atermpp::function_symbol function_symbol_ActNot = core::detail::initialise_static_expression(function_symbol_ActNot, atermpp::function_symbol("ActNot", 1));
+//  static atermpp::function_symbol function_symbol_ActNot = core::detail::initialise_static_expression(function_symbol_ActNot, atermpp::function_symbol("ActNot", 1));
+  static atermpp::function_symbol function_symbol_ActNot = atermpp::function_symbol("ActNot", 1);
   return function_symbol_ActNot;
 }
 
@@ -146,7 +154,8 @@ bool gsIsActNot(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActOr()
 {
-  static atermpp::function_symbol function_symbol_ActOr = core::detail::initialise_static_expression(function_symbol_ActOr, atermpp::function_symbol("ActOr", 2));
+//  static atermpp::function_symbol function_symbol_ActOr = core::detail::initialise_static_expression(function_symbol_ActOr, atermpp::function_symbol("ActOr", 2));
+  static atermpp::function_symbol function_symbol_ActOr = atermpp::function_symbol("ActOr", 2);
   return function_symbol_ActOr;
 }
 
@@ -160,7 +169,8 @@ bool gsIsActOr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActSpec()
 {
-  static atermpp::function_symbol function_symbol_ActSpec = core::detail::initialise_static_expression(function_symbol_ActSpec, atermpp::function_symbol("ActSpec", 1));
+//  static atermpp::function_symbol function_symbol_ActSpec = core::detail::initialise_static_expression(function_symbol_ActSpec, atermpp::function_symbol("ActSpec", 1));
+  static atermpp::function_symbol function_symbol_ActSpec = atermpp::function_symbol("ActSpec", 1);
   return function_symbol_ActSpec;
 }
 
@@ -174,7 +184,8 @@ bool gsIsActSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActTrue()
 {
-  static atermpp::function_symbol function_symbol_ActTrue = core::detail::initialise_static_expression(function_symbol_ActTrue, atermpp::function_symbol("ActTrue", 0));
+//  static atermpp::function_symbol function_symbol_ActTrue = core::detail::initialise_static_expression(function_symbol_ActTrue, atermpp::function_symbol("ActTrue", 0));
+  static atermpp::function_symbol function_symbol_ActTrue = atermpp::function_symbol("ActTrue", 0);
   return function_symbol_ActTrue;
 }
 
@@ -188,7 +199,8 @@ bool gsIsActTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Action()
 {
-  static atermpp::function_symbol function_symbol_Action = core::detail::initialise_static_expression(function_symbol_Action, atermpp::function_symbol("Action", 2));
+//  static atermpp::function_symbol function_symbol_Action = core::detail::initialise_static_expression(function_symbol_Action, atermpp::function_symbol("Action", 2));
+  static atermpp::function_symbol function_symbol_Action = atermpp::function_symbol("Action", 2);
   return function_symbol_Action;
 }
 
@@ -202,7 +214,8 @@ bool gsIsAction(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActionRenameRule()
 {
-  static atermpp::function_symbol function_symbol_ActionRenameRule = core::detail::initialise_static_expression(function_symbol_ActionRenameRule, atermpp::function_symbol("ActionRenameRule", 4));
+//  static atermpp::function_symbol function_symbol_ActionRenameRule = core::detail::initialise_static_expression(function_symbol_ActionRenameRule, atermpp::function_symbol("ActionRenameRule", 4));
+  static atermpp::function_symbol function_symbol_ActionRenameRule = atermpp::function_symbol("ActionRenameRule", 4);
   return function_symbol_ActionRenameRule;
 }
 
@@ -216,7 +229,8 @@ bool gsIsActionRenameRule(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActionRenameRules()
 {
-  static atermpp::function_symbol function_symbol_ActionRenameRules = core::detail::initialise_static_expression(function_symbol_ActionRenameRules, atermpp::function_symbol("ActionRenameRules", 1));
+//  static atermpp::function_symbol function_symbol_ActionRenameRules = core::detail::initialise_static_expression(function_symbol_ActionRenameRules, atermpp::function_symbol("ActionRenameRules", 1));
+  static atermpp::function_symbol function_symbol_ActionRenameRules = atermpp::function_symbol("ActionRenameRules", 1);
   return function_symbol_ActionRenameRules;
 }
 
@@ -230,7 +244,8 @@ bool gsIsActionRenameRules(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ActionRenameSpec()
 {
-  static atermpp::function_symbol function_symbol_ActionRenameSpec = core::detail::initialise_static_expression(function_symbol_ActionRenameSpec, atermpp::function_symbol("ActionRenameSpec", 3));
+//  static atermpp::function_symbol function_symbol_ActionRenameSpec = core::detail::initialise_static_expression(function_symbol_ActionRenameSpec, atermpp::function_symbol("ActionRenameSpec", 3));
+  static atermpp::function_symbol function_symbol_ActionRenameSpec = atermpp::function_symbol("ActionRenameSpec", 3);
   return function_symbol_ActionRenameSpec;
 }
 
@@ -244,7 +259,8 @@ bool gsIsActionRenameSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Allow()
 {
-  static atermpp::function_symbol function_symbol_Allow = core::detail::initialise_static_expression(function_symbol_Allow, atermpp::function_symbol("Allow", 2));
+//  static atermpp::function_symbol function_symbol_Allow = core::detail::initialise_static_expression(function_symbol_Allow, atermpp::function_symbol("Allow", 2));
+  static atermpp::function_symbol function_symbol_Allow = atermpp::function_symbol("Allow", 2);
   return function_symbol_Allow;
 }
 
@@ -258,7 +274,8 @@ bool gsIsAllow(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_AtTime()
 {
-  static atermpp::function_symbol function_symbol_AtTime = core::detail::initialise_static_expression(function_symbol_AtTime, atermpp::function_symbol("AtTime", 2));
+//  static atermpp::function_symbol function_symbol_AtTime = core::detail::initialise_static_expression(function_symbol_AtTime, atermpp::function_symbol("AtTime", 2));
+  static atermpp::function_symbol function_symbol_AtTime = atermpp::function_symbol("AtTime", 2);
   return function_symbol_AtTime;
 }
 
@@ -272,7 +289,8 @@ bool gsIsAtTime(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BES()
 {
-  static atermpp::function_symbol function_symbol_BES = core::detail::initialise_static_expression(function_symbol_BES, atermpp::function_symbol("BES", 2));
+//  static atermpp::function_symbol function_symbol_BES = core::detail::initialise_static_expression(function_symbol_BES, atermpp::function_symbol("BES", 2));
+  static atermpp::function_symbol function_symbol_BES = atermpp::function_symbol("BES", 2);
   return function_symbol_BES;
 }
 
@@ -286,7 +304,8 @@ bool gsIsBES(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BInit()
 {
-  static atermpp::function_symbol function_symbol_BInit = core::detail::initialise_static_expression(function_symbol_BInit, atermpp::function_symbol("BInit", 2));
+//  static atermpp::function_symbol function_symbol_BInit = core::detail::initialise_static_expression(function_symbol_BInit, atermpp::function_symbol("BInit", 2));
+  static atermpp::function_symbol function_symbol_BInit = atermpp::function_symbol("BInit", 2);
   return function_symbol_BInit;
 }
 
@@ -300,7 +319,8 @@ bool gsIsBInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BagComp()
 {
-  static atermpp::function_symbol function_symbol_BagComp = core::detail::initialise_static_expression(function_symbol_BagComp, atermpp::function_symbol("BagComp", 0));
+//  static atermpp::function_symbol function_symbol_BagComp = core::detail::initialise_static_expression(function_symbol_BagComp, atermpp::function_symbol("BagComp", 0));
+  static atermpp::function_symbol function_symbol_BagComp = atermpp::function_symbol("BagComp", 0);
   return function_symbol_BagComp;
 }
 
@@ -314,7 +334,8 @@ bool gsIsBagComp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Binder()
 {
-  static atermpp::function_symbol function_symbol_Binder = core::detail::initialise_static_expression(function_symbol_Binder, atermpp::function_symbol("Binder", 3));
+//  static atermpp::function_symbol function_symbol_Binder = core::detail::initialise_static_expression(function_symbol_Binder, atermpp::function_symbol("Binder", 3));
+  static atermpp::function_symbol function_symbol_Binder = atermpp::function_symbol("Binder", 3);
   return function_symbol_Binder;
 }
 
@@ -328,7 +349,8 @@ bool gsIsBinder(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Block()
 {
-  static atermpp::function_symbol function_symbol_Block = core::detail::initialise_static_expression(function_symbol_Block, atermpp::function_symbol("Block", 2));
+//  static atermpp::function_symbol function_symbol_Block = core::detail::initialise_static_expression(function_symbol_Block, atermpp::function_symbol("Block", 2));
+  static atermpp::function_symbol function_symbol_Block = atermpp::function_symbol("Block", 2);
   return function_symbol_Block;
 }
 
@@ -342,7 +364,8 @@ bool gsIsBlock(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanAnd()
 {
-  static atermpp::function_symbol function_symbol_BooleanAnd = core::detail::initialise_static_expression(function_symbol_BooleanAnd, atermpp::function_symbol("BooleanAnd", 2));
+//  static atermpp::function_symbol function_symbol_BooleanAnd = core::detail::initialise_static_expression(function_symbol_BooleanAnd, atermpp::function_symbol("BooleanAnd", 2));
+  static atermpp::function_symbol function_symbol_BooleanAnd = atermpp::function_symbol("BooleanAnd", 2);
   return function_symbol_BooleanAnd;
 }
 
@@ -356,7 +379,8 @@ bool gsIsBooleanAnd(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanEquation()
 {
-  static atermpp::function_symbol function_symbol_BooleanEquation = core::detail::initialise_static_expression(function_symbol_BooleanEquation, atermpp::function_symbol("BooleanEquation", 3));
+//  static atermpp::function_symbol function_symbol_BooleanEquation = core::detail::initialise_static_expression(function_symbol_BooleanEquation, atermpp::function_symbol("BooleanEquation", 3));
+  static atermpp::function_symbol function_symbol_BooleanEquation = atermpp::function_symbol("BooleanEquation", 3);
   return function_symbol_BooleanEquation;
 }
 
@@ -370,7 +394,8 @@ bool gsIsBooleanEquation(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanFalse()
 {
-  static atermpp::function_symbol function_symbol_BooleanFalse = core::detail::initialise_static_expression(function_symbol_BooleanFalse, atermpp::function_symbol("BooleanFalse", 0));
+//  static atermpp::function_symbol function_symbol_BooleanFalse = core::detail::initialise_static_expression(function_symbol_BooleanFalse, atermpp::function_symbol("BooleanFalse", 0));
+  static atermpp::function_symbol function_symbol_BooleanFalse = atermpp::function_symbol("BooleanFalse", 0);
   return function_symbol_BooleanFalse;
 }
 
@@ -384,7 +409,8 @@ bool gsIsBooleanFalse(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanImp()
 {
-  static atermpp::function_symbol function_symbol_BooleanImp = core::detail::initialise_static_expression(function_symbol_BooleanImp, atermpp::function_symbol("BooleanImp", 2));
+//  static atermpp::function_symbol function_symbol_BooleanImp = core::detail::initialise_static_expression(function_symbol_BooleanImp, atermpp::function_symbol("BooleanImp", 2));
+  static atermpp::function_symbol function_symbol_BooleanImp = atermpp::function_symbol("BooleanImp", 2);
   return function_symbol_BooleanImp;
 }
 
@@ -398,7 +424,8 @@ bool gsIsBooleanImp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanNot()
 {
-  static atermpp::function_symbol function_symbol_BooleanNot = core::detail::initialise_static_expression(function_symbol_BooleanNot, atermpp::function_symbol("BooleanNot", 1));
+//  static atermpp::function_symbol function_symbol_BooleanNot = core::detail::initialise_static_expression(function_symbol_BooleanNot, atermpp::function_symbol("BooleanNot", 1));
+  static atermpp::function_symbol function_symbol_BooleanNot = atermpp::function_symbol("BooleanNot", 1);
   return function_symbol_BooleanNot;
 }
 
@@ -412,7 +439,8 @@ bool gsIsBooleanNot(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanOr()
 {
-  static atermpp::function_symbol function_symbol_BooleanOr = core::detail::initialise_static_expression(function_symbol_BooleanOr, atermpp::function_symbol("BooleanOr", 2));
+//  static atermpp::function_symbol function_symbol_BooleanOr = core::detail::initialise_static_expression(function_symbol_BooleanOr, atermpp::function_symbol("BooleanOr", 2));
+  static atermpp::function_symbol function_symbol_BooleanOr = atermpp::function_symbol("BooleanOr", 2);
   return function_symbol_BooleanOr;
 }
 
@@ -426,7 +454,8 @@ bool gsIsBooleanOr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanTrue()
 {
-  static atermpp::function_symbol function_symbol_BooleanTrue = core::detail::initialise_static_expression(function_symbol_BooleanTrue, atermpp::function_symbol("BooleanTrue", 0));
+//  static atermpp::function_symbol function_symbol_BooleanTrue = core::detail::initialise_static_expression(function_symbol_BooleanTrue, atermpp::function_symbol("BooleanTrue", 0));
+  static atermpp::function_symbol function_symbol_BooleanTrue = atermpp::function_symbol("BooleanTrue", 0);
   return function_symbol_BooleanTrue;
 }
 
@@ -440,7 +469,8 @@ bool gsIsBooleanTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanVariable()
 {
-  static atermpp::function_symbol function_symbol_BooleanVariable = core::detail::initialise_static_expression(function_symbol_BooleanVariable, atermpp::function_symbol("BooleanVariable", 1));
+//  static atermpp::function_symbol function_symbol_BooleanVariable = core::detail::initialise_static_expression(function_symbol_BooleanVariable, atermpp::function_symbol("BooleanVariable", 1));
+  static atermpp::function_symbol function_symbol_BooleanVariable = atermpp::function_symbol("BooleanVariable", 1);
   return function_symbol_BooleanVariable;
 }
 
@@ -454,7 +484,8 @@ bool gsIsBooleanVariable(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Choice()
 {
-  static atermpp::function_symbol function_symbol_Choice = core::detail::initialise_static_expression(function_symbol_Choice, atermpp::function_symbol("Choice", 2));
+//  static atermpp::function_symbol function_symbol_Choice = core::detail::initialise_static_expression(function_symbol_Choice, atermpp::function_symbol("Choice", 2));
+  static atermpp::function_symbol function_symbol_Choice = atermpp::function_symbol("Choice", 2);
   return function_symbol_Choice;
 }
 
@@ -468,7 +499,8 @@ bool gsIsChoice(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Comm()
 {
-  static atermpp::function_symbol function_symbol_Comm = core::detail::initialise_static_expression(function_symbol_Comm, atermpp::function_symbol("Comm", 2));
+//  static atermpp::function_symbol function_symbol_Comm = core::detail::initialise_static_expression(function_symbol_Comm, atermpp::function_symbol("Comm", 2));
+  static atermpp::function_symbol function_symbol_Comm = atermpp::function_symbol("Comm", 2);
   return function_symbol_Comm;
 }
 
@@ -482,7 +514,8 @@ bool gsIsComm(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_CommExpr()
 {
-  static atermpp::function_symbol function_symbol_CommExpr = core::detail::initialise_static_expression(function_symbol_CommExpr, atermpp::function_symbol("CommExpr", 2));
+//  static atermpp::function_symbol function_symbol_CommExpr = core::detail::initialise_static_expression(function_symbol_CommExpr, atermpp::function_symbol("CommExpr", 2));
+  static atermpp::function_symbol function_symbol_CommExpr = atermpp::function_symbol("CommExpr", 2);
   return function_symbol_CommExpr;
 }
 
@@ -496,7 +529,8 @@ bool gsIsCommExpr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ConsSpec()
 {
-  static atermpp::function_symbol function_symbol_ConsSpec = core::detail::initialise_static_expression(function_symbol_ConsSpec, atermpp::function_symbol("ConsSpec", 1));
+//  static atermpp::function_symbol function_symbol_ConsSpec = core::detail::initialise_static_expression(function_symbol_ConsSpec, atermpp::function_symbol("ConsSpec", 1));
+  static atermpp::function_symbol function_symbol_ConsSpec = atermpp::function_symbol("ConsSpec", 1);
   return function_symbol_ConsSpec;
 }
 
@@ -510,7 +544,8 @@ bool gsIsConsSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataAppl()
 {
-  static atermpp::function_symbol function_symbol_DataAppl = core::detail::initialise_static_expression(function_symbol_DataAppl, atermpp::function_symbol("DataAppl", 2));
+//  static atermpp::function_symbol function_symbol_DataAppl = core::detail::initialise_static_expression(function_symbol_DataAppl, atermpp::function_symbol("DataAppl", 2));
+  static atermpp::function_symbol function_symbol_DataAppl = atermpp::function_symbol("DataAppl", 2);
   return function_symbol_DataAppl;
 }
 
@@ -524,7 +559,8 @@ bool gsIsDataAppl(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataEqn()
 {
-  static atermpp::function_symbol function_symbol_DataEqn = core::detail::initialise_static_expression(function_symbol_DataEqn, atermpp::function_symbol("DataEqn", 4));
+//  static atermpp::function_symbol function_symbol_DataEqn = core::detail::initialise_static_expression(function_symbol_DataEqn, atermpp::function_symbol("DataEqn", 4));
+  static atermpp::function_symbol function_symbol_DataEqn = atermpp::function_symbol("DataEqn", 4);
   return function_symbol_DataEqn;
 }
 
@@ -538,7 +574,8 @@ bool gsIsDataEqn(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataEqnSpec()
 {
-  static atermpp::function_symbol function_symbol_DataEqnSpec = core::detail::initialise_static_expression(function_symbol_DataEqnSpec, atermpp::function_symbol("DataEqnSpec", 1));
+//  static atermpp::function_symbol function_symbol_DataEqnSpec = core::detail::initialise_static_expression(function_symbol_DataEqnSpec, atermpp::function_symbol("DataEqnSpec", 1));
+  static atermpp::function_symbol function_symbol_DataEqnSpec = atermpp::function_symbol("DataEqnSpec", 1);
   return function_symbol_DataEqnSpec;
 }
 
@@ -552,7 +589,8 @@ bool gsIsDataEqnSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataSpec()
 {
-  static atermpp::function_symbol function_symbol_DataSpec = core::detail::initialise_static_expression(function_symbol_DataSpec, atermpp::function_symbol("DataSpec", 4));
+//  static atermpp::function_symbol function_symbol_DataSpec = core::detail::initialise_static_expression(function_symbol_DataSpec, atermpp::function_symbol("DataSpec", 4));
+  static atermpp::function_symbol function_symbol_DataSpec = atermpp::function_symbol("DataSpec", 4);
   return function_symbol_DataSpec;
 }
 
@@ -566,7 +604,8 @@ bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  static atermpp::function_symbol function_symbol_DataVarId = core::detail::initialise_static_expression(function_symbol_DataVarId, atermpp::function_symbol("DataVarId", 2));
+//  static atermpp::function_symbol function_symbol_DataVarId = core::detail::initialise_static_expression(function_symbol_DataVarId, atermpp::function_symbol("DataVarId", 2));
+  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 2);
   return function_symbol_DataVarId;
 }
 
@@ -580,7 +619,8 @@ bool gsIsDataVarId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataVarIdInit()
 {
-  static atermpp::function_symbol function_symbol_DataVarIdInit = core::detail::initialise_static_expression(function_symbol_DataVarIdInit, atermpp::function_symbol("DataVarIdInit", 2));
+//  static atermpp::function_symbol function_symbol_DataVarIdInit = core::detail::initialise_static_expression(function_symbol_DataVarIdInit, atermpp::function_symbol("DataVarIdInit", 2));
+  static atermpp::function_symbol function_symbol_DataVarIdInit = atermpp::function_symbol("DataVarIdInit", 2);
   return function_symbol_DataVarIdInit;
 }
 
@@ -594,7 +634,8 @@ bool gsIsDataVarIdInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Delta()
 {
-  static atermpp::function_symbol function_symbol_Delta = core::detail::initialise_static_expression(function_symbol_Delta, atermpp::function_symbol("Delta", 0));
+//  static atermpp::function_symbol function_symbol_Delta = core::detail::initialise_static_expression(function_symbol_Delta, atermpp::function_symbol("Delta", 0));
+  static atermpp::function_symbol function_symbol_Delta = atermpp::function_symbol("Delta", 0);
   return function_symbol_Delta;
 }
 
@@ -608,7 +649,8 @@ bool gsIsDelta(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Exists()
 {
-  static atermpp::function_symbol function_symbol_Exists = core::detail::initialise_static_expression(function_symbol_Exists, atermpp::function_symbol("Exists", 0));
+//  static atermpp::function_symbol function_symbol_Exists = core::detail::initialise_static_expression(function_symbol_Exists, atermpp::function_symbol("Exists", 0));
+  static atermpp::function_symbol function_symbol_Exists = atermpp::function_symbol("Exists", 0);
   return function_symbol_Exists;
 }
 
@@ -622,7 +664,8 @@ bool gsIsExists(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Forall()
 {
-  static atermpp::function_symbol function_symbol_Forall = core::detail::initialise_static_expression(function_symbol_Forall, atermpp::function_symbol("Forall", 0));
+//  static atermpp::function_symbol function_symbol_Forall = core::detail::initialise_static_expression(function_symbol_Forall, atermpp::function_symbol("Forall", 0));
+  static atermpp::function_symbol function_symbol_Forall = atermpp::function_symbol("Forall", 0);
   return function_symbol_Forall;
 }
 
@@ -636,7 +679,8 @@ bool gsIsForall(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_GlobVarSpec()
 {
-  static atermpp::function_symbol function_symbol_GlobVarSpec = core::detail::initialise_static_expression(function_symbol_GlobVarSpec, atermpp::function_symbol("GlobVarSpec", 1));
+//  static atermpp::function_symbol function_symbol_GlobVarSpec = core::detail::initialise_static_expression(function_symbol_GlobVarSpec, atermpp::function_symbol("GlobVarSpec", 1));
+  static atermpp::function_symbol function_symbol_GlobVarSpec = atermpp::function_symbol("GlobVarSpec", 1);
   return function_symbol_GlobVarSpec;
 }
 
@@ -650,7 +694,8 @@ bool gsIsGlobVarSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Hide()
 {
-  static atermpp::function_symbol function_symbol_Hide = core::detail::initialise_static_expression(function_symbol_Hide, atermpp::function_symbol("Hide", 2));
+//  static atermpp::function_symbol function_symbol_Hide = core::detail::initialise_static_expression(function_symbol_Hide, atermpp::function_symbol("Hide", 2));
+  static atermpp::function_symbol function_symbol_Hide = atermpp::function_symbol("Hide", 2);
   return function_symbol_Hide;
 }
 
@@ -664,7 +709,8 @@ bool gsIsHide(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Id()
 {
-  static atermpp::function_symbol function_symbol_Id = core::detail::initialise_static_expression(function_symbol_Id, atermpp::function_symbol("Id", 1));
+//  static atermpp::function_symbol function_symbol_Id = core::detail::initialise_static_expression(function_symbol_Id, atermpp::function_symbol("Id", 1));
+  static atermpp::function_symbol function_symbol_Id = atermpp::function_symbol("Id", 1);
   return function_symbol_Id;
 }
 
@@ -678,7 +724,8 @@ bool gsIsId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_IdAssignment()
 {
-  static atermpp::function_symbol function_symbol_IdAssignment = core::detail::initialise_static_expression(function_symbol_IdAssignment, atermpp::function_symbol("IdAssignment", 2));
+//  static atermpp::function_symbol function_symbol_IdAssignment = core::detail::initialise_static_expression(function_symbol_IdAssignment, atermpp::function_symbol("IdAssignment", 2));
+  static atermpp::function_symbol function_symbol_IdAssignment = atermpp::function_symbol("IdAssignment", 2);
   return function_symbol_IdAssignment;
 }
 
@@ -692,7 +739,8 @@ bool gsIsIdAssignment(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_IdInit()
 {
-  static atermpp::function_symbol function_symbol_IdInit = core::detail::initialise_static_expression(function_symbol_IdInit, atermpp::function_symbol("IdInit", 2));
+//  static atermpp::function_symbol function_symbol_IdInit = core::detail::initialise_static_expression(function_symbol_IdInit, atermpp::function_symbol("IdInit", 2));
+  static atermpp::function_symbol function_symbol_IdInit = atermpp::function_symbol("IdInit", 2);
   return function_symbol_IdInit;
 }
 
@@ -706,7 +754,8 @@ bool gsIsIdInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_IfThen()
 {
-  static atermpp::function_symbol function_symbol_IfThen = core::detail::initialise_static_expression(function_symbol_IfThen, atermpp::function_symbol("IfThen", 2));
+//  static atermpp::function_symbol function_symbol_IfThen = core::detail::initialise_static_expression(function_symbol_IfThen, atermpp::function_symbol("IfThen", 2));
+  static atermpp::function_symbol function_symbol_IfThen = atermpp::function_symbol("IfThen", 2);
   return function_symbol_IfThen;
 }
 
@@ -720,7 +769,8 @@ bool gsIsIfThen(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_IfThenElse()
 {
-  static atermpp::function_symbol function_symbol_IfThenElse = core::detail::initialise_static_expression(function_symbol_IfThenElse, atermpp::function_symbol("IfThenElse", 3));
+//  static atermpp::function_symbol function_symbol_IfThenElse = core::detail::initialise_static_expression(function_symbol_IfThenElse, atermpp::function_symbol("IfThenElse", 3));
+  static atermpp::function_symbol function_symbol_IfThenElse = atermpp::function_symbol("IfThenElse", 3);
   return function_symbol_IfThenElse;
 }
 
@@ -734,7 +784,8 @@ bool gsIsIfThenElse(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_LMerge()
 {
-  static atermpp::function_symbol function_symbol_LMerge = core::detail::initialise_static_expression(function_symbol_LMerge, atermpp::function_symbol("LMerge", 2));
+//  static atermpp::function_symbol function_symbol_LMerge = core::detail::initialise_static_expression(function_symbol_LMerge, atermpp::function_symbol("LMerge", 2));
+  static atermpp::function_symbol function_symbol_LMerge = atermpp::function_symbol("LMerge", 2);
   return function_symbol_LMerge;
 }
 
@@ -748,7 +799,8 @@ bool gsIsLMerge(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Lambda()
 {
-  static atermpp::function_symbol function_symbol_Lambda = core::detail::initialise_static_expression(function_symbol_Lambda, atermpp::function_symbol("Lambda", 0));
+//  static atermpp::function_symbol function_symbol_Lambda = core::detail::initialise_static_expression(function_symbol_Lambda, atermpp::function_symbol("Lambda", 0));
+  static atermpp::function_symbol function_symbol_Lambda = atermpp::function_symbol("Lambda", 0);
   return function_symbol_Lambda;
 }
 
@@ -762,7 +814,8 @@ bool gsIsLambda(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_LinProcSpec()
 {
-  static atermpp::function_symbol function_symbol_LinProcSpec = core::detail::initialise_static_expression(function_symbol_LinProcSpec, atermpp::function_symbol("LinProcSpec", 5));
+//  static atermpp::function_symbol function_symbol_LinProcSpec = core::detail::initialise_static_expression(function_symbol_LinProcSpec, atermpp::function_symbol("LinProcSpec", 5));
+  static atermpp::function_symbol function_symbol_LinProcSpec = atermpp::function_symbol("LinProcSpec", 5);
   return function_symbol_LinProcSpec;
 }
 
@@ -776,7 +829,8 @@ bool gsIsLinProcSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_LinearProcess()
 {
-  static atermpp::function_symbol function_symbol_LinearProcess = core::detail::initialise_static_expression(function_symbol_LinearProcess, atermpp::function_symbol("LinearProcess", 2));
+//  static atermpp::function_symbol function_symbol_LinearProcess = core::detail::initialise_static_expression(function_symbol_LinearProcess, atermpp::function_symbol("LinearProcess", 2));
+  static atermpp::function_symbol function_symbol_LinearProcess = atermpp::function_symbol("LinearProcess", 2);
   return function_symbol_LinearProcess;
 }
 
@@ -790,7 +844,8 @@ bool gsIsLinearProcess(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessInit()
 {
-  static atermpp::function_symbol function_symbol_LinearProcessInit = core::detail::initialise_static_expression(function_symbol_LinearProcessInit, atermpp::function_symbol("LinearProcessInit", 1));
+//  static atermpp::function_symbol function_symbol_LinearProcessInit = core::detail::initialise_static_expression(function_symbol_LinearProcessInit, atermpp::function_symbol("LinearProcessInit", 1));
+  static atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 1);
   return function_symbol_LinearProcessInit;
 }
 
@@ -804,7 +859,8 @@ bool gsIsLinearProcessInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessSummand()
 {
-  static atermpp::function_symbol function_symbol_LinearProcessSummand = core::detail::initialise_static_expression(function_symbol_LinearProcessSummand, atermpp::function_symbol("LinearProcessSummand", 5));
+//  static atermpp::function_symbol function_symbol_LinearProcessSummand = core::detail::initialise_static_expression(function_symbol_LinearProcessSummand, atermpp::function_symbol("LinearProcessSummand", 5));
+  static atermpp::function_symbol function_symbol_LinearProcessSummand = atermpp::function_symbol("LinearProcessSummand", 5);
   return function_symbol_LinearProcessSummand;
 }
 
@@ -818,7 +874,8 @@ bool gsIsLinearProcessSummand(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_MapSpec()
 {
-  static atermpp::function_symbol function_symbol_MapSpec = core::detail::initialise_static_expression(function_symbol_MapSpec, atermpp::function_symbol("MapSpec", 1));
+//  static atermpp::function_symbol function_symbol_MapSpec = core::detail::initialise_static_expression(function_symbol_MapSpec, atermpp::function_symbol("MapSpec", 1));
+  static atermpp::function_symbol function_symbol_MapSpec = atermpp::function_symbol("MapSpec", 1);
   return function_symbol_MapSpec;
 }
 
@@ -832,7 +889,8 @@ bool gsIsMapSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Merge()
 {
-  static atermpp::function_symbol function_symbol_Merge = core::detail::initialise_static_expression(function_symbol_Merge, atermpp::function_symbol("Merge", 2));
+//  static atermpp::function_symbol function_symbol_Merge = core::detail::initialise_static_expression(function_symbol_Merge, atermpp::function_symbol("Merge", 2));
+  static atermpp::function_symbol function_symbol_Merge = atermpp::function_symbol("Merge", 2);
   return function_symbol_Merge;
 }
 
@@ -846,7 +904,8 @@ bool gsIsMerge(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Mu()
 {
-  static atermpp::function_symbol function_symbol_Mu = core::detail::initialise_static_expression(function_symbol_Mu, atermpp::function_symbol("Mu", 0));
+//  static atermpp::function_symbol function_symbol_Mu = core::detail::initialise_static_expression(function_symbol_Mu, atermpp::function_symbol("Mu", 0));
+  static atermpp::function_symbol function_symbol_Mu = atermpp::function_symbol("Mu", 0);
   return function_symbol_Mu;
 }
 
@@ -860,7 +919,8 @@ bool gsIsMu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_MultAct()
 {
-  static atermpp::function_symbol function_symbol_MultAct = core::detail::initialise_static_expression(function_symbol_MultAct, atermpp::function_symbol("MultAct", 1));
+//  static atermpp::function_symbol function_symbol_MultAct = core::detail::initialise_static_expression(function_symbol_MultAct, atermpp::function_symbol("MultAct", 1));
+  static atermpp::function_symbol function_symbol_MultAct = atermpp::function_symbol("MultAct", 1);
   return function_symbol_MultAct;
 }
 
@@ -874,7 +934,8 @@ bool gsIsMultAct(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_MultActName()
 {
-  static atermpp::function_symbol function_symbol_MultActName = core::detail::initialise_static_expression(function_symbol_MultActName, atermpp::function_symbol("MultActName", 1));
+//  static atermpp::function_symbol function_symbol_MultActName = core::detail::initialise_static_expression(function_symbol_MultActName, atermpp::function_symbol("MultActName", 1));
+  static atermpp::function_symbol function_symbol_MultActName = atermpp::function_symbol("MultActName", 1);
   return function_symbol_MultActName;
 }
 
@@ -888,7 +949,8 @@ bool gsIsMultActName(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Nil()
 {
-  static atermpp::function_symbol function_symbol_Nil = core::detail::initialise_static_expression(function_symbol_Nil, atermpp::function_symbol("Nil", 0));
+//  static atermpp::function_symbol function_symbol_Nil = core::detail::initialise_static_expression(function_symbol_Nil, atermpp::function_symbol("Nil", 0));
+  static atermpp::function_symbol function_symbol_Nil = atermpp::function_symbol("Nil", 0);
   return function_symbol_Nil;
 }
 
@@ -902,7 +964,8 @@ bool gsIsNil(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Nu()
 {
-  static atermpp::function_symbol function_symbol_Nu = core::detail::initialise_static_expression(function_symbol_Nu, atermpp::function_symbol("Nu", 0));
+//  static atermpp::function_symbol function_symbol_Nu = core::detail::initialise_static_expression(function_symbol_Nu, atermpp::function_symbol("Nu", 0));
+  static atermpp::function_symbol function_symbol_Nu = atermpp::function_symbol("Nu", 0);
   return function_symbol_Nu;
 }
 
@@ -916,7 +979,8 @@ bool gsIsNu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_OpId()
 {
-  static atermpp::function_symbol function_symbol_OpId = core::detail::initialise_static_expression(function_symbol_OpId, atermpp::function_symbol("OpId", 2));
+//  static atermpp::function_symbol function_symbol_OpId = core::detail::initialise_static_expression(function_symbol_OpId, atermpp::function_symbol("OpId", 2));
+  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 2);
   return function_symbol_OpId;
 }
 
@@ -930,7 +994,8 @@ bool gsIsOpId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBES()
 {
-  static atermpp::function_symbol function_symbol_PBES = core::detail::initialise_static_expression(function_symbol_PBES, atermpp::function_symbol("PBES", 4));
+//  static atermpp::function_symbol function_symbol_PBES = core::detail::initialise_static_expression(function_symbol_PBES, atermpp::function_symbol("PBES", 4));
+  static atermpp::function_symbol function_symbol_PBES = atermpp::function_symbol("PBES", 4);
   return function_symbol_PBES;
 }
 
@@ -944,7 +1009,8 @@ bool gsIsPBES(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESAnd()
 {
-  static atermpp::function_symbol function_symbol_PBESAnd = core::detail::initialise_static_expression(function_symbol_PBESAnd, atermpp::function_symbol("PBESAnd", 2));
+//  static atermpp::function_symbol function_symbol_PBESAnd = core::detail::initialise_static_expression(function_symbol_PBESAnd, atermpp::function_symbol("PBESAnd", 2));
+  static atermpp::function_symbol function_symbol_PBESAnd = atermpp::function_symbol("PBESAnd", 2);
   return function_symbol_PBESAnd;
 }
 
@@ -958,7 +1024,8 @@ bool gsIsPBESAnd(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESExists()
 {
-  static atermpp::function_symbol function_symbol_PBESExists = core::detail::initialise_static_expression(function_symbol_PBESExists, atermpp::function_symbol("PBESExists", 2));
+//  static atermpp::function_symbol function_symbol_PBESExists = core::detail::initialise_static_expression(function_symbol_PBESExists, atermpp::function_symbol("PBESExists", 2));
+  static atermpp::function_symbol function_symbol_PBESExists = atermpp::function_symbol("PBESExists", 2);
   return function_symbol_PBESExists;
 }
 
@@ -972,7 +1039,8 @@ bool gsIsPBESExists(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESFalse()
 {
-  static atermpp::function_symbol function_symbol_PBESFalse = core::detail::initialise_static_expression(function_symbol_PBESFalse, atermpp::function_symbol("PBESFalse", 0));
+//  static atermpp::function_symbol function_symbol_PBESFalse = core::detail::initialise_static_expression(function_symbol_PBESFalse, atermpp::function_symbol("PBESFalse", 0));
+  static atermpp::function_symbol function_symbol_PBESFalse = atermpp::function_symbol("PBESFalse", 0);
   return function_symbol_PBESFalse;
 }
 
@@ -986,7 +1054,8 @@ bool gsIsPBESFalse(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESForall()
 {
-  static atermpp::function_symbol function_symbol_PBESForall = core::detail::initialise_static_expression(function_symbol_PBESForall, atermpp::function_symbol("PBESForall", 2));
+//  static atermpp::function_symbol function_symbol_PBESForall = core::detail::initialise_static_expression(function_symbol_PBESForall, atermpp::function_symbol("PBESForall", 2));
+  static atermpp::function_symbol function_symbol_PBESForall = atermpp::function_symbol("PBESForall", 2);
   return function_symbol_PBESForall;
 }
 
@@ -1000,7 +1069,8 @@ bool gsIsPBESForall(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESImp()
 {
-  static atermpp::function_symbol function_symbol_PBESImp = core::detail::initialise_static_expression(function_symbol_PBESImp, atermpp::function_symbol("PBESImp", 2));
+//  static atermpp::function_symbol function_symbol_PBESImp = core::detail::initialise_static_expression(function_symbol_PBESImp, atermpp::function_symbol("PBESImp", 2));
+  static atermpp::function_symbol function_symbol_PBESImp = atermpp::function_symbol("PBESImp", 2);
   return function_symbol_PBESImp;
 }
 
@@ -1014,7 +1084,8 @@ bool gsIsPBESImp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESNot()
 {
-  static atermpp::function_symbol function_symbol_PBESNot = core::detail::initialise_static_expression(function_symbol_PBESNot, atermpp::function_symbol("PBESNot", 1));
+//  static atermpp::function_symbol function_symbol_PBESNot = core::detail::initialise_static_expression(function_symbol_PBESNot, atermpp::function_symbol("PBESNot", 1));
+  static atermpp::function_symbol function_symbol_PBESNot = atermpp::function_symbol("PBESNot", 1);
   return function_symbol_PBESNot;
 }
 
@@ -1028,7 +1099,8 @@ bool gsIsPBESNot(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESOr()
 {
-  static atermpp::function_symbol function_symbol_PBESOr = core::detail::initialise_static_expression(function_symbol_PBESOr, atermpp::function_symbol("PBESOr", 2));
+//  static atermpp::function_symbol function_symbol_PBESOr = core::detail::initialise_static_expression(function_symbol_PBESOr, atermpp::function_symbol("PBESOr", 2));
+  static atermpp::function_symbol function_symbol_PBESOr = atermpp::function_symbol("PBESOr", 2);
   return function_symbol_PBESOr;
 }
 
@@ -1042,7 +1114,8 @@ bool gsIsPBESOr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBESTrue()
 {
-  static atermpp::function_symbol function_symbol_PBESTrue = core::detail::initialise_static_expression(function_symbol_PBESTrue, atermpp::function_symbol("PBESTrue", 0));
+//  static atermpp::function_symbol function_symbol_PBESTrue = core::detail::initialise_static_expression(function_symbol_PBESTrue, atermpp::function_symbol("PBESTrue", 0));
+  static atermpp::function_symbol function_symbol_PBESTrue = atermpp::function_symbol("PBESTrue", 0);
   return function_symbol_PBESTrue;
 }
 
@@ -1056,7 +1129,8 @@ bool gsIsPBESTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBEqn()
 {
-  static atermpp::function_symbol function_symbol_PBEqn = core::detail::initialise_static_expression(function_symbol_PBEqn, atermpp::function_symbol("PBEqn", 3));
+//  static atermpp::function_symbol function_symbol_PBEqn = core::detail::initialise_static_expression(function_symbol_PBEqn, atermpp::function_symbol("PBEqn", 3));
+  static atermpp::function_symbol function_symbol_PBEqn = atermpp::function_symbol("PBEqn", 3);
   return function_symbol_PBEqn;
 }
 
@@ -1070,7 +1144,8 @@ bool gsIsPBEqn(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBEqnSpec()
 {
-  static atermpp::function_symbol function_symbol_PBEqnSpec = core::detail::initialise_static_expression(function_symbol_PBEqnSpec, atermpp::function_symbol("PBEqnSpec", 1));
+//  static atermpp::function_symbol function_symbol_PBEqnSpec = core::detail::initialise_static_expression(function_symbol_PBEqnSpec, atermpp::function_symbol("PBEqnSpec", 1));
+  static atermpp::function_symbol function_symbol_PBEqnSpec = atermpp::function_symbol("PBEqnSpec", 1);
   return function_symbol_PBEqnSpec;
 }
 
@@ -1084,7 +1159,8 @@ bool gsIsPBEqnSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PBInit()
 {
-  static atermpp::function_symbol function_symbol_PBInit = core::detail::initialise_static_expression(function_symbol_PBInit, atermpp::function_symbol("PBInit", 1));
+//  static atermpp::function_symbol function_symbol_PBInit = core::detail::initialise_static_expression(function_symbol_PBInit, atermpp::function_symbol("PBInit", 1));
+  static atermpp::function_symbol function_symbol_PBInit = atermpp::function_symbol("PBInit", 1);
   return function_symbol_PBInit;
 }
 
@@ -1098,7 +1174,8 @@ bool gsIsPBInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ParamId()
 {
-  static atermpp::function_symbol function_symbol_ParamId = core::detail::initialise_static_expression(function_symbol_ParamId, atermpp::function_symbol("ParamId", 2));
+//  static atermpp::function_symbol function_symbol_ParamId = core::detail::initialise_static_expression(function_symbol_ParamId, atermpp::function_symbol("ParamId", 2));
+  static atermpp::function_symbol function_symbol_ParamId = atermpp::function_symbol("ParamId", 2);
   return function_symbol_ParamId;
 }
 
@@ -1112,7 +1189,8 @@ bool gsIsParamId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcEqn()
 {
-  static atermpp::function_symbol function_symbol_ProcEqn = core::detail::initialise_static_expression(function_symbol_ProcEqn, atermpp::function_symbol("ProcEqn", 3));
+//  static atermpp::function_symbol function_symbol_ProcEqn = core::detail::initialise_static_expression(function_symbol_ProcEqn, atermpp::function_symbol("ProcEqn", 3));
+  static atermpp::function_symbol function_symbol_ProcEqn = atermpp::function_symbol("ProcEqn", 3);
   return function_symbol_ProcEqn;
 }
 
@@ -1126,7 +1204,8 @@ bool gsIsProcEqn(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcEqnSpec()
 {
-  static atermpp::function_symbol function_symbol_ProcEqnSpec = core::detail::initialise_static_expression(function_symbol_ProcEqnSpec, atermpp::function_symbol("ProcEqnSpec", 1));
+//  static atermpp::function_symbol function_symbol_ProcEqnSpec = core::detail::initialise_static_expression(function_symbol_ProcEqnSpec, atermpp::function_symbol("ProcEqnSpec", 1));
+  static atermpp::function_symbol function_symbol_ProcEqnSpec = atermpp::function_symbol("ProcEqnSpec", 1);
   return function_symbol_ProcEqnSpec;
 }
 
@@ -1140,7 +1219,8 @@ bool gsIsProcEqnSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcSpec()
 {
-  static atermpp::function_symbol function_symbol_ProcSpec = core::detail::initialise_static_expression(function_symbol_ProcSpec, atermpp::function_symbol("ProcSpec", 5));
+//  static atermpp::function_symbol function_symbol_ProcSpec = core::detail::initialise_static_expression(function_symbol_ProcSpec, atermpp::function_symbol("ProcSpec", 5));
+  static atermpp::function_symbol function_symbol_ProcSpec = atermpp::function_symbol("ProcSpec", 5);
   return function_symbol_ProcSpec;
 }
 
@@ -1154,7 +1234,8 @@ bool gsIsProcSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcVarId()
 {
-  static atermpp::function_symbol function_symbol_ProcVarId = core::detail::initialise_static_expression(function_symbol_ProcVarId, atermpp::function_symbol("ProcVarId", 2));
+//  static atermpp::function_symbol function_symbol_ProcVarId = core::detail::initialise_static_expression(function_symbol_ProcVarId, atermpp::function_symbol("ProcVarId", 2));
+  static atermpp::function_symbol function_symbol_ProcVarId = atermpp::function_symbol("ProcVarId", 2);
   return function_symbol_ProcVarId;
 }
 
@@ -1168,7 +1249,8 @@ bool gsIsProcVarId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Process()
 {
-  static atermpp::function_symbol function_symbol_Process = core::detail::initialise_static_expression(function_symbol_Process, atermpp::function_symbol("Process", 2));
+//  static atermpp::function_symbol function_symbol_Process = core::detail::initialise_static_expression(function_symbol_Process, atermpp::function_symbol("Process", 2));
+  static atermpp::function_symbol function_symbol_Process = atermpp::function_symbol("Process", 2);
   return function_symbol_Process;
 }
 
@@ -1182,7 +1264,8 @@ bool gsIsProcess(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcessAssignment()
 {
-  static atermpp::function_symbol function_symbol_ProcessAssignment = core::detail::initialise_static_expression(function_symbol_ProcessAssignment, atermpp::function_symbol("ProcessAssignment", 2));
+//  static atermpp::function_symbol function_symbol_ProcessAssignment = core::detail::initialise_static_expression(function_symbol_ProcessAssignment, atermpp::function_symbol("ProcessAssignment", 2));
+  static atermpp::function_symbol function_symbol_ProcessAssignment = atermpp::function_symbol("ProcessAssignment", 2);
   return function_symbol_ProcessAssignment;
 }
 
@@ -1196,7 +1279,8 @@ bool gsIsProcessAssignment(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcessInit()
 {
-  static atermpp::function_symbol function_symbol_ProcessInit = core::detail::initialise_static_expression(function_symbol_ProcessInit, atermpp::function_symbol("ProcessInit", 1));
+//  static atermpp::function_symbol function_symbol_ProcessInit = core::detail::initialise_static_expression(function_symbol_ProcessInit, atermpp::function_symbol("ProcessInit", 1));
+  static atermpp::function_symbol function_symbol_ProcessInit = atermpp::function_symbol("ProcessInit", 1);
   return function_symbol_ProcessInit;
 }
 
@@ -1210,7 +1294,8 @@ bool gsIsProcessInit(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PropVarDecl()
 {
-  static atermpp::function_symbol function_symbol_PropVarDecl = core::detail::initialise_static_expression(function_symbol_PropVarDecl, atermpp::function_symbol("PropVarDecl", 2));
+//  static atermpp::function_symbol function_symbol_PropVarDecl = core::detail::initialise_static_expression(function_symbol_PropVarDecl, atermpp::function_symbol("PropVarDecl", 2));
+  static atermpp::function_symbol function_symbol_PropVarDecl = atermpp::function_symbol("PropVarDecl", 2);
   return function_symbol_PropVarDecl;
 }
 
@@ -1224,7 +1309,8 @@ bool gsIsPropVarDecl(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PropVarInst()
 {
-  static atermpp::function_symbol function_symbol_PropVarInst = core::detail::initialise_static_expression(function_symbol_PropVarInst, atermpp::function_symbol("PropVarInst", 2));
+//  static atermpp::function_symbol function_symbol_PropVarInst = core::detail::initialise_static_expression(function_symbol_PropVarInst, atermpp::function_symbol("PropVarInst", 2));
+  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 2);
   return function_symbol_PropVarInst;
 }
 
@@ -1238,7 +1324,8 @@ bool gsIsPropVarInst(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RegAlt()
 {
-  static atermpp::function_symbol function_symbol_RegAlt = core::detail::initialise_static_expression(function_symbol_RegAlt, atermpp::function_symbol("RegAlt", 2));
+//  static atermpp::function_symbol function_symbol_RegAlt = core::detail::initialise_static_expression(function_symbol_RegAlt, atermpp::function_symbol("RegAlt", 2));
+  static atermpp::function_symbol function_symbol_RegAlt = atermpp::function_symbol("RegAlt", 2);
   return function_symbol_RegAlt;
 }
 
@@ -1252,7 +1339,8 @@ bool gsIsRegAlt(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RegNil()
 {
-  static atermpp::function_symbol function_symbol_RegNil = core::detail::initialise_static_expression(function_symbol_RegNil, atermpp::function_symbol("RegNil", 0));
+//  static atermpp::function_symbol function_symbol_RegNil = core::detail::initialise_static_expression(function_symbol_RegNil, atermpp::function_symbol("RegNil", 0));
+  static atermpp::function_symbol function_symbol_RegNil = atermpp::function_symbol("RegNil", 0);
   return function_symbol_RegNil;
 }
 
@@ -1266,7 +1354,8 @@ bool gsIsRegNil(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RegSeq()
 {
-  static atermpp::function_symbol function_symbol_RegSeq = core::detail::initialise_static_expression(function_symbol_RegSeq, atermpp::function_symbol("RegSeq", 2));
+//  static atermpp::function_symbol function_symbol_RegSeq = core::detail::initialise_static_expression(function_symbol_RegSeq, atermpp::function_symbol("RegSeq", 2));
+  static atermpp::function_symbol function_symbol_RegSeq = atermpp::function_symbol("RegSeq", 2);
   return function_symbol_RegSeq;
 }
 
@@ -1280,7 +1369,8 @@ bool gsIsRegSeq(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RegTrans()
 {
-  static atermpp::function_symbol function_symbol_RegTrans = core::detail::initialise_static_expression(function_symbol_RegTrans, atermpp::function_symbol("RegTrans", 1));
+//  static atermpp::function_symbol function_symbol_RegTrans = core::detail::initialise_static_expression(function_symbol_RegTrans, atermpp::function_symbol("RegTrans", 1));
+  static atermpp::function_symbol function_symbol_RegTrans = atermpp::function_symbol("RegTrans", 1);
   return function_symbol_RegTrans;
 }
 
@@ -1294,7 +1384,8 @@ bool gsIsRegTrans(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RegTransOrNil()
 {
-  static atermpp::function_symbol function_symbol_RegTransOrNil = core::detail::initialise_static_expression(function_symbol_RegTransOrNil, atermpp::function_symbol("RegTransOrNil", 1));
+//  static atermpp::function_symbol function_symbol_RegTransOrNil = core::detail::initialise_static_expression(function_symbol_RegTransOrNil, atermpp::function_symbol("RegTransOrNil", 1));
+  static atermpp::function_symbol function_symbol_RegTransOrNil = atermpp::function_symbol("RegTransOrNil", 1);
   return function_symbol_RegTransOrNil;
 }
 
@@ -1308,7 +1399,8 @@ bool gsIsRegTransOrNil(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Rename()
 {
-  static atermpp::function_symbol function_symbol_Rename = core::detail::initialise_static_expression(function_symbol_Rename, atermpp::function_symbol("Rename", 2));
+//  static atermpp::function_symbol function_symbol_Rename = core::detail::initialise_static_expression(function_symbol_Rename, atermpp::function_symbol("Rename", 2));
+  static atermpp::function_symbol function_symbol_Rename = atermpp::function_symbol("Rename", 2);
   return function_symbol_Rename;
 }
 
@@ -1322,7 +1414,8 @@ bool gsIsRename(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_RenameExpr()
 {
-  static atermpp::function_symbol function_symbol_RenameExpr = core::detail::initialise_static_expression(function_symbol_RenameExpr, atermpp::function_symbol("RenameExpr", 2));
+//  static atermpp::function_symbol function_symbol_RenameExpr = core::detail::initialise_static_expression(function_symbol_RenameExpr, atermpp::function_symbol("RenameExpr", 2));
+  static atermpp::function_symbol function_symbol_RenameExpr = atermpp::function_symbol("RenameExpr", 2);
   return function_symbol_RenameExpr;
 }
 
@@ -1336,7 +1429,8 @@ bool gsIsRenameExpr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Seq()
 {
-  static atermpp::function_symbol function_symbol_Seq = core::detail::initialise_static_expression(function_symbol_Seq, atermpp::function_symbol("Seq", 2));
+//  static atermpp::function_symbol function_symbol_Seq = core::detail::initialise_static_expression(function_symbol_Seq, atermpp::function_symbol("Seq", 2));
+  static atermpp::function_symbol function_symbol_Seq = atermpp::function_symbol("Seq", 2);
   return function_symbol_Seq;
 }
 
@@ -1350,7 +1444,8 @@ bool gsIsSeq(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SetBagComp()
 {
-  static atermpp::function_symbol function_symbol_SetBagComp = core::detail::initialise_static_expression(function_symbol_SetBagComp, atermpp::function_symbol("SetBagComp", 0));
+//  static atermpp::function_symbol function_symbol_SetBagComp = core::detail::initialise_static_expression(function_symbol_SetBagComp, atermpp::function_symbol("SetBagComp", 0));
+  static atermpp::function_symbol function_symbol_SetBagComp = atermpp::function_symbol("SetBagComp", 0);
   return function_symbol_SetBagComp;
 }
 
@@ -1364,7 +1459,8 @@ bool gsIsSetBagComp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SetComp()
 {
-  static atermpp::function_symbol function_symbol_SetComp = core::detail::initialise_static_expression(function_symbol_SetComp, atermpp::function_symbol("SetComp", 0));
+//  static atermpp::function_symbol function_symbol_SetComp = core::detail::initialise_static_expression(function_symbol_SetComp, atermpp::function_symbol("SetComp", 0));
+  static atermpp::function_symbol function_symbol_SetComp = atermpp::function_symbol("SetComp", 0);
   return function_symbol_SetComp;
 }
 
@@ -1378,7 +1474,8 @@ bool gsIsSetComp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortArrow()
 {
-  static atermpp::function_symbol function_symbol_SortArrow = core::detail::initialise_static_expression(function_symbol_SortArrow, atermpp::function_symbol("SortArrow", 2));
+//  static atermpp::function_symbol function_symbol_SortArrow = core::detail::initialise_static_expression(function_symbol_SortArrow, atermpp::function_symbol("SortArrow", 2));
+  static atermpp::function_symbol function_symbol_SortArrow = atermpp::function_symbol("SortArrow", 2);
   return function_symbol_SortArrow;
 }
 
@@ -1392,7 +1489,8 @@ bool gsIsSortArrow(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortBag()
 {
-  static atermpp::function_symbol function_symbol_SortBag = core::detail::initialise_static_expression(function_symbol_SortBag, atermpp::function_symbol("SortBag", 0));
+//  static atermpp::function_symbol function_symbol_SortBag = core::detail::initialise_static_expression(function_symbol_SortBag, atermpp::function_symbol("SortBag", 0));
+  static atermpp::function_symbol function_symbol_SortBag = atermpp::function_symbol("SortBag", 0);
   return function_symbol_SortBag;
 }
 
@@ -1406,7 +1504,8 @@ bool gsIsSortBag(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortCons()
 {
-  static atermpp::function_symbol function_symbol_SortCons = core::detail::initialise_static_expression(function_symbol_SortCons, atermpp::function_symbol("SortCons", 2));
+//  static atermpp::function_symbol function_symbol_SortCons = core::detail::initialise_static_expression(function_symbol_SortCons, atermpp::function_symbol("SortCons", 2));
+  static atermpp::function_symbol function_symbol_SortCons = atermpp::function_symbol("SortCons", 2);
   return function_symbol_SortCons;
 }
 
@@ -1420,7 +1519,8 @@ bool gsIsSortCons(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortFBag()
 {
-  static atermpp::function_symbol function_symbol_SortFBag = core::detail::initialise_static_expression(function_symbol_SortFBag, atermpp::function_symbol("SortFBag", 0));
+//  static atermpp::function_symbol function_symbol_SortFBag = core::detail::initialise_static_expression(function_symbol_SortFBag, atermpp::function_symbol("SortFBag", 0));
+  static atermpp::function_symbol function_symbol_SortFBag = atermpp::function_symbol("SortFBag", 0);
   return function_symbol_SortFBag;
 }
 
@@ -1434,7 +1534,8 @@ bool gsIsSortFBag(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortFSet()
 {
-  static atermpp::function_symbol function_symbol_SortFSet = core::detail::initialise_static_expression(function_symbol_SortFSet, atermpp::function_symbol("SortFSet", 0));
+//  static atermpp::function_symbol function_symbol_SortFSet = core::detail::initialise_static_expression(function_symbol_SortFSet, atermpp::function_symbol("SortFSet", 0));
+  static atermpp::function_symbol function_symbol_SortFSet = atermpp::function_symbol("SortFSet", 0);
   return function_symbol_SortFSet;
 }
 
@@ -1448,7 +1549,8 @@ bool gsIsSortFSet(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortId()
 {
-  static atermpp::function_symbol function_symbol_SortId = core::detail::initialise_static_expression(function_symbol_SortId, atermpp::function_symbol("SortId", 1));
+//  static atermpp::function_symbol function_symbol_SortId = core::detail::initialise_static_expression(function_symbol_SortId, atermpp::function_symbol("SortId", 1));
+  static atermpp::function_symbol function_symbol_SortId = atermpp::function_symbol("SortId", 1);
   return function_symbol_SortId;
 }
 
@@ -1462,7 +1564,8 @@ bool gsIsSortId(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortList()
 {
-  static atermpp::function_symbol function_symbol_SortList = core::detail::initialise_static_expression(function_symbol_SortList, atermpp::function_symbol("SortList", 0));
+//  static atermpp::function_symbol function_symbol_SortList = core::detail::initialise_static_expression(function_symbol_SortList, atermpp::function_symbol("SortList", 0));
+  static atermpp::function_symbol function_symbol_SortList = atermpp::function_symbol("SortList", 0);
   return function_symbol_SortList;
 }
 
@@ -1476,7 +1579,8 @@ bool gsIsSortList(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortRef()
 {
-  static atermpp::function_symbol function_symbol_SortRef = core::detail::initialise_static_expression(function_symbol_SortRef, atermpp::function_symbol("SortRef", 2));
+//  static atermpp::function_symbol function_symbol_SortRef = core::detail::initialise_static_expression(function_symbol_SortRef, atermpp::function_symbol("SortRef", 2));
+  static atermpp::function_symbol function_symbol_SortRef = atermpp::function_symbol("SortRef", 2);
   return function_symbol_SortRef;
 }
 
@@ -1490,7 +1594,8 @@ bool gsIsSortRef(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortSet()
 {
-  static atermpp::function_symbol function_symbol_SortSet = core::detail::initialise_static_expression(function_symbol_SortSet, atermpp::function_symbol("SortSet", 0));
+//  static atermpp::function_symbol function_symbol_SortSet = core::detail::initialise_static_expression(function_symbol_SortSet, atermpp::function_symbol("SortSet", 0));
+  static atermpp::function_symbol function_symbol_SortSet = atermpp::function_symbol("SortSet", 0);
   return function_symbol_SortSet;
 }
 
@@ -1504,7 +1609,8 @@ bool gsIsSortSet(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortSpec()
 {
-  static atermpp::function_symbol function_symbol_SortSpec = core::detail::initialise_static_expression(function_symbol_SortSpec, atermpp::function_symbol("SortSpec", 1));
+//  static atermpp::function_symbol function_symbol_SortSpec = core::detail::initialise_static_expression(function_symbol_SortSpec, atermpp::function_symbol("SortSpec", 1));
+  static atermpp::function_symbol function_symbol_SortSpec = atermpp::function_symbol("SortSpec", 1);
   return function_symbol_SortSpec;
 }
 
@@ -1518,7 +1624,8 @@ bool gsIsSortSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortStruct()
 {
-  static atermpp::function_symbol function_symbol_SortStruct = core::detail::initialise_static_expression(function_symbol_SortStruct, atermpp::function_symbol("SortStruct", 1));
+//  static atermpp::function_symbol function_symbol_SortStruct = core::detail::initialise_static_expression(function_symbol_SortStruct, atermpp::function_symbol("SortStruct", 1));
+  static atermpp::function_symbol function_symbol_SortStruct = atermpp::function_symbol("SortStruct", 1);
   return function_symbol_SortStruct;
 }
 
@@ -1532,7 +1639,8 @@ bool gsIsSortStruct(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortUnknown()
 {
-  static atermpp::function_symbol function_symbol_SortUnknown = core::detail::initialise_static_expression(function_symbol_SortUnknown, atermpp::function_symbol("SortUnknown", 0));
+//  static atermpp::function_symbol function_symbol_SortUnknown = core::detail::initialise_static_expression(function_symbol_SortUnknown, atermpp::function_symbol("SortUnknown", 0));
+  static atermpp::function_symbol function_symbol_SortUnknown = atermpp::function_symbol("SortUnknown", 0);
   return function_symbol_SortUnknown;
 }
 
@@ -1546,7 +1654,8 @@ bool gsIsSortUnknown(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_SortsPossible()
 {
-  static atermpp::function_symbol function_symbol_SortsPossible = core::detail::initialise_static_expression(function_symbol_SortsPossible, atermpp::function_symbol("SortsPossible", 1));
+//  static atermpp::function_symbol function_symbol_SortsPossible = core::detail::initialise_static_expression(function_symbol_SortsPossible, atermpp::function_symbol("SortsPossible", 1));
+  static atermpp::function_symbol function_symbol_SortsPossible = atermpp::function_symbol("SortsPossible", 1);
   return function_symbol_SortsPossible;
 }
 
@@ -1560,7 +1669,8 @@ bool gsIsSortsPossible(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateAnd()
 {
-  static atermpp::function_symbol function_symbol_StateAnd = core::detail::initialise_static_expression(function_symbol_StateAnd, atermpp::function_symbol("StateAnd", 2));
+//  static atermpp::function_symbol function_symbol_StateAnd = core::detail::initialise_static_expression(function_symbol_StateAnd, atermpp::function_symbol("StateAnd", 2));
+  static atermpp::function_symbol function_symbol_StateAnd = atermpp::function_symbol("StateAnd", 2);
   return function_symbol_StateAnd;
 }
 
@@ -1574,7 +1684,8 @@ bool gsIsStateAnd(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateDelay()
 {
-  static atermpp::function_symbol function_symbol_StateDelay = core::detail::initialise_static_expression(function_symbol_StateDelay, atermpp::function_symbol("StateDelay", 0));
+//  static atermpp::function_symbol function_symbol_StateDelay = core::detail::initialise_static_expression(function_symbol_StateDelay, atermpp::function_symbol("StateDelay", 0));
+  static atermpp::function_symbol function_symbol_StateDelay = atermpp::function_symbol("StateDelay", 0);
   return function_symbol_StateDelay;
 }
 
@@ -1588,7 +1699,8 @@ bool gsIsStateDelay(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateDelayTimed()
 {
-  static atermpp::function_symbol function_symbol_StateDelayTimed = core::detail::initialise_static_expression(function_symbol_StateDelayTimed, atermpp::function_symbol("StateDelayTimed", 1));
+//  static atermpp::function_symbol function_symbol_StateDelayTimed = core::detail::initialise_static_expression(function_symbol_StateDelayTimed, atermpp::function_symbol("StateDelayTimed", 1));
+  static atermpp::function_symbol function_symbol_StateDelayTimed = atermpp::function_symbol("StateDelayTimed", 1);
   return function_symbol_StateDelayTimed;
 }
 
@@ -1602,7 +1714,8 @@ bool gsIsStateDelayTimed(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateExists()
 {
-  static atermpp::function_symbol function_symbol_StateExists = core::detail::initialise_static_expression(function_symbol_StateExists, atermpp::function_symbol("StateExists", 2));
+//  static atermpp::function_symbol function_symbol_StateExists = core::detail::initialise_static_expression(function_symbol_StateExists, atermpp::function_symbol("StateExists", 2));
+  static atermpp::function_symbol function_symbol_StateExists = atermpp::function_symbol("StateExists", 2);
   return function_symbol_StateExists;
 }
 
@@ -1616,7 +1729,8 @@ bool gsIsStateExists(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateFalse()
 {
-  static atermpp::function_symbol function_symbol_StateFalse = core::detail::initialise_static_expression(function_symbol_StateFalse, atermpp::function_symbol("StateFalse", 0));
+//  static atermpp::function_symbol function_symbol_StateFalse = core::detail::initialise_static_expression(function_symbol_StateFalse, atermpp::function_symbol("StateFalse", 0));
+  static atermpp::function_symbol function_symbol_StateFalse = atermpp::function_symbol("StateFalse", 0);
   return function_symbol_StateFalse;
 }
 
@@ -1630,7 +1744,8 @@ bool gsIsStateFalse(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateForall()
 {
-  static atermpp::function_symbol function_symbol_StateForall = core::detail::initialise_static_expression(function_symbol_StateForall, atermpp::function_symbol("StateForall", 2));
+//  static atermpp::function_symbol function_symbol_StateForall = core::detail::initialise_static_expression(function_symbol_StateForall, atermpp::function_symbol("StateForall", 2));
+  static atermpp::function_symbol function_symbol_StateForall = atermpp::function_symbol("StateForall", 2);
   return function_symbol_StateForall;
 }
 
@@ -1644,7 +1759,8 @@ bool gsIsStateForall(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateImp()
 {
-  static atermpp::function_symbol function_symbol_StateImp = core::detail::initialise_static_expression(function_symbol_StateImp, atermpp::function_symbol("StateImp", 2));
+//  static atermpp::function_symbol function_symbol_StateImp = core::detail::initialise_static_expression(function_symbol_StateImp, atermpp::function_symbol("StateImp", 2));
+  static atermpp::function_symbol function_symbol_StateImp = atermpp::function_symbol("StateImp", 2);
   return function_symbol_StateImp;
 }
 
@@ -1658,7 +1774,8 @@ bool gsIsStateImp(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateMay()
 {
-  static atermpp::function_symbol function_symbol_StateMay = core::detail::initialise_static_expression(function_symbol_StateMay, atermpp::function_symbol("StateMay", 2));
+//  static atermpp::function_symbol function_symbol_StateMay = core::detail::initialise_static_expression(function_symbol_StateMay, atermpp::function_symbol("StateMay", 2));
+  static atermpp::function_symbol function_symbol_StateMay = atermpp::function_symbol("StateMay", 2);
   return function_symbol_StateMay;
 }
 
@@ -1672,7 +1789,8 @@ bool gsIsStateMay(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateMu()
 {
-  static atermpp::function_symbol function_symbol_StateMu = core::detail::initialise_static_expression(function_symbol_StateMu, atermpp::function_symbol("StateMu", 3));
+//  static atermpp::function_symbol function_symbol_StateMu = core::detail::initialise_static_expression(function_symbol_StateMu, atermpp::function_symbol("StateMu", 3));
+  static atermpp::function_symbol function_symbol_StateMu = atermpp::function_symbol("StateMu", 3);
   return function_symbol_StateMu;
 }
 
@@ -1686,7 +1804,8 @@ bool gsIsStateMu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateMust()
 {
-  static atermpp::function_symbol function_symbol_StateMust = core::detail::initialise_static_expression(function_symbol_StateMust, atermpp::function_symbol("StateMust", 2));
+//  static atermpp::function_symbol function_symbol_StateMust = core::detail::initialise_static_expression(function_symbol_StateMust, atermpp::function_symbol("StateMust", 2));
+  static atermpp::function_symbol function_symbol_StateMust = atermpp::function_symbol("StateMust", 2);
   return function_symbol_StateMust;
 }
 
@@ -1700,7 +1819,8 @@ bool gsIsStateMust(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateNot()
 {
-  static atermpp::function_symbol function_symbol_StateNot = core::detail::initialise_static_expression(function_symbol_StateNot, atermpp::function_symbol("StateNot", 1));
+//  static atermpp::function_symbol function_symbol_StateNot = core::detail::initialise_static_expression(function_symbol_StateNot, atermpp::function_symbol("StateNot", 1));
+  static atermpp::function_symbol function_symbol_StateNot = atermpp::function_symbol("StateNot", 1);
   return function_symbol_StateNot;
 }
 
@@ -1714,7 +1834,8 @@ bool gsIsStateNot(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateNu()
 {
-  static atermpp::function_symbol function_symbol_StateNu = core::detail::initialise_static_expression(function_symbol_StateNu, atermpp::function_symbol("StateNu", 3));
+//  static atermpp::function_symbol function_symbol_StateNu = core::detail::initialise_static_expression(function_symbol_StateNu, atermpp::function_symbol("StateNu", 3));
+  static atermpp::function_symbol function_symbol_StateNu = atermpp::function_symbol("StateNu", 3);
   return function_symbol_StateNu;
 }
 
@@ -1728,7 +1849,8 @@ bool gsIsStateNu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateOr()
 {
-  static atermpp::function_symbol function_symbol_StateOr = core::detail::initialise_static_expression(function_symbol_StateOr, atermpp::function_symbol("StateOr", 2));
+//  static atermpp::function_symbol function_symbol_StateOr = core::detail::initialise_static_expression(function_symbol_StateOr, atermpp::function_symbol("StateOr", 2));
+  static atermpp::function_symbol function_symbol_StateOr = atermpp::function_symbol("StateOr", 2);
   return function_symbol_StateOr;
 }
 
@@ -1742,7 +1864,8 @@ bool gsIsStateOr(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateTrue()
 {
-  static atermpp::function_symbol function_symbol_StateTrue = core::detail::initialise_static_expression(function_symbol_StateTrue, atermpp::function_symbol("StateTrue", 0));
+//  static atermpp::function_symbol function_symbol_StateTrue = core::detail::initialise_static_expression(function_symbol_StateTrue, atermpp::function_symbol("StateTrue", 0));
+  static atermpp::function_symbol function_symbol_StateTrue = atermpp::function_symbol("StateTrue", 0);
   return function_symbol_StateTrue;
 }
 
@@ -1756,7 +1879,8 @@ bool gsIsStateTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateVar()
 {
-  static atermpp::function_symbol function_symbol_StateVar = core::detail::initialise_static_expression(function_symbol_StateVar, atermpp::function_symbol("StateVar", 2));
+//  static atermpp::function_symbol function_symbol_StateVar = core::detail::initialise_static_expression(function_symbol_StateVar, atermpp::function_symbol("StateVar", 2));
+  static atermpp::function_symbol function_symbol_StateVar = atermpp::function_symbol("StateVar", 2);
   return function_symbol_StateVar;
 }
 
@@ -1770,7 +1894,8 @@ bool gsIsStateVar(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateYaled()
 {
-  static atermpp::function_symbol function_symbol_StateYaled = core::detail::initialise_static_expression(function_symbol_StateYaled, atermpp::function_symbol("StateYaled", 0));
+//  static atermpp::function_symbol function_symbol_StateYaled = core::detail::initialise_static_expression(function_symbol_StateYaled, atermpp::function_symbol("StateYaled", 0));
+  static atermpp::function_symbol function_symbol_StateYaled = atermpp::function_symbol("StateYaled", 0);
   return function_symbol_StateYaled;
 }
 
@@ -1784,7 +1909,8 @@ bool gsIsStateYaled(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StateYaledTimed()
 {
-  static atermpp::function_symbol function_symbol_StateYaledTimed = core::detail::initialise_static_expression(function_symbol_StateYaledTimed, atermpp::function_symbol("StateYaledTimed", 1));
+//  static atermpp::function_symbol function_symbol_StateYaledTimed = core::detail::initialise_static_expression(function_symbol_StateYaledTimed, atermpp::function_symbol("StateYaledTimed", 1));
+  static atermpp::function_symbol function_symbol_StateYaledTimed = atermpp::function_symbol("StateYaledTimed", 1);
   return function_symbol_StateYaledTimed;
 }
 
@@ -1798,7 +1924,8 @@ bool gsIsStateYaledTimed(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StructCons()
 {
-  static atermpp::function_symbol function_symbol_StructCons = core::detail::initialise_static_expression(function_symbol_StructCons, atermpp::function_symbol("StructCons", 3));
+//  static atermpp::function_symbol function_symbol_StructCons = core::detail::initialise_static_expression(function_symbol_StructCons, atermpp::function_symbol("StructCons", 3));
+  static atermpp::function_symbol function_symbol_StructCons = atermpp::function_symbol("StructCons", 3);
   return function_symbol_StructCons;
 }
 
@@ -1812,7 +1939,8 @@ bool gsIsStructCons(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_StructProj()
 {
-  static atermpp::function_symbol function_symbol_StructProj = core::detail::initialise_static_expression(function_symbol_StructProj, atermpp::function_symbol("StructProj", 2));
+//  static atermpp::function_symbol function_symbol_StructProj = core::detail::initialise_static_expression(function_symbol_StructProj, atermpp::function_symbol("StructProj", 2));
+  static atermpp::function_symbol function_symbol_StructProj = atermpp::function_symbol("StructProj", 2);
   return function_symbol_StructProj;
 }
 
@@ -1826,7 +1954,8 @@ bool gsIsStructProj(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Sum()
 {
-  static atermpp::function_symbol function_symbol_Sum = core::detail::initialise_static_expression(function_symbol_Sum, atermpp::function_symbol("Sum", 2));
+//  static atermpp::function_symbol function_symbol_Sum = core::detail::initialise_static_expression(function_symbol_Sum, atermpp::function_symbol("Sum", 2));
+  static atermpp::function_symbol function_symbol_Sum = atermpp::function_symbol("Sum", 2);
   return function_symbol_Sum;
 }
 
@@ -1840,7 +1969,8 @@ bool gsIsSum(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Sync()
 {
-  static atermpp::function_symbol function_symbol_Sync = core::detail::initialise_static_expression(function_symbol_Sync, atermpp::function_symbol("Sync", 2));
+//  static atermpp::function_symbol function_symbol_Sync = core::detail::initialise_static_expression(function_symbol_Sync, atermpp::function_symbol("Sync", 2));
+  static atermpp::function_symbol function_symbol_Sync = atermpp::function_symbol("Sync", 2);
   return function_symbol_Sync;
 }
 
@@ -1854,7 +1984,8 @@ bool gsIsSync(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Tau()
 {
-  static atermpp::function_symbol function_symbol_Tau = core::detail::initialise_static_expression(function_symbol_Tau, atermpp::function_symbol("Tau", 0));
+//  static atermpp::function_symbol function_symbol_Tau = core::detail::initialise_static_expression(function_symbol_Tau, atermpp::function_symbol("Tau", 0));
+  static atermpp::function_symbol function_symbol_Tau = atermpp::function_symbol("Tau", 0);
   return function_symbol_Tau;
 }
 
@@ -1868,7 +1999,8 @@ bool gsIsTau(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_Whr()
 {
-  static atermpp::function_symbol function_symbol_Whr = core::detail::initialise_static_expression(function_symbol_Whr, atermpp::function_symbol("Whr", 2));
+//  static atermpp::function_symbol function_symbol_Whr = core::detail::initialise_static_expression(function_symbol_Whr, atermpp::function_symbol("Whr", 2));
+  static atermpp::function_symbol function_symbol_Whr = atermpp::function_symbol("Whr", 2);
   return function_symbol_Whr;
 }
 

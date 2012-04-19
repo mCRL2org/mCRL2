@@ -63,13 +63,13 @@ static int      col = 0;
 static char     error_buf[ERROR_SIZE];
 static int      error_idx = 0;
 
-ProtEntry*       free_prot_entries = NULL;
-ProtEntry**       at_prot_table = NULL;
-size_t    at_prot_table_size = 0;
-ProtEntry*       at_prot_memory = NULL;
-ATermProtFunc*   at_prot_functions = NULL;
-size_t    at_prot_functions_size = 0;
-size_t    at_prot_functions_count = 0;
+// ProtEntry*       free_prot_entries = NULL;
+// ProtEntry**       at_prot_table = NULL;
+// size_t    at_prot_table_size = 0;
+// ProtEntry*       at_prot_memory = NULL;
+// ATermProtFunc*   at_prot_functions = NULL;
+// size_t    at_prot_functions_size = 0;
+// size_t    at_prot_functions_count = 0;
 
 /*}}}  */
 /*{{{  function declarations */
@@ -105,7 +105,8 @@ AT_cleanup(void)
  */
 
 void
-ATinit(ATerm* bottomOfStack)
+// ATinit(ATerm* bottomOfStack)
+ATinit()
 {
   if (initialized)
   {
@@ -113,10 +114,10 @@ ATinit(ATerm* bottomOfStack)
   }
 
   /* Protect novice users that simply pass NULL as bottomOfStack */
-  if (bottomOfStack == NULL)
+  /* if (bottomOfStack == NULL)
   {
     throw std::runtime_error("ATinit: illegal bottomOfStack (arg 3) passed.");
-  }
+  } */
 
   /* Check for reasonably sized ATerm (32 bits, 4 bytes)     */
   /* This check might break on perfectly valid architectures */
@@ -127,20 +128,27 @@ ATinit(ATerm* bottomOfStack)
   /*}}}  */
   /*{{{  Initialize protected terms */
 
-  at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
+  /* at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
   at_prot_table = (ProtEntry**)AT_calloc(at_prot_table_size, sizeof(ProtEntry*));
   if (!at_prot_table)
   {
     throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
-  }
+  } */
 
   /*}}}  */
   /*{{{  Initialize other components */
 
   /* Initialize other components */
   AT_initMemory();
-  AT_initAFun();
-  AT_initGC(bottomOfStack);
+  // AT_initAFun();
+  // AT_initGC(bottomOfStack);
+  
+  // Check that AS_INT, AS_LIST and AS_EMPTY_LIST have indices 0,1 and 2. Bafio files have been saved with
+  // these numbers to represent these notions.
+  assert(AS_INT.number()==0);
+  assert(AS_LIST.number()==1);
+  assert(AS_EMPTY_LIST.number()==2);
+
 
   /*}}}  */
 
@@ -178,9 +186,9 @@ bool ATisInitialized()
  */
 
 void
-ATprotect(const ATerm* term)
+ATprotect(const ATerm* )
 {
-  ATprotectArray(term, 1);
+  // ATprotectArray(term, 1);
 }
 
 /*}}}  */
@@ -191,9 +199,9 @@ ATprotect(const ATerm* term)
  */
 
 void
-ATunprotect(const ATerm* term)
+ATunprotect(const ATerm* )
 {
-  ATunprotectArray(term);
+  // ATunprotectArray(term);
 }
 
 /*}}}  */
@@ -203,8 +211,11 @@ ATunprotect(const ATerm* term)
  * Protect an array
  */
 
-void ATprotectArray(const ATerm* start, const size_t size)
+void ATprotectArray(const ATerm*, const size_t )
 {
+  return;
+
+/*
   ProtEntry* entry;
   ShortHashNumber hnr;
   size_t i;
@@ -212,7 +223,7 @@ void ATprotectArray(const ATerm* start, const size_t size)
 #ifndef NDEBUG
   for (i=0; i<size; i++)
   {
-    assert(start[i] == ATerm() || AT_isValidTerm(start[i])); /* Check the precondition */
+    assert(start[i] == ATerm() || AT_isValidTerm(&*(start[i]))); / * Check the precondition * /
   }
 #endif
 
@@ -238,8 +249,8 @@ void ATprotectArray(const ATerm* start, const size_t size)
   entry->next = at_prot_table[hnr];
   at_prot_table[hnr] = entry;
   entry->start = start;
-  entry->size  = size;
-}
+  entry->size  = size; */
+} 
 
 /*}}}  */
 /*{{{  void ATunprotectArrray(ATerm *start) */
@@ -248,8 +259,10 @@ void ATprotectArray(const ATerm* start, const size_t size)
  * Unprotect an array of terms.
  */
 
-void ATunprotectArray(const ATerm* start)
+void ATunprotectArray(const ATerm* )
 {
+  return;
+/*
   ShortHashNumber hnr;
   ProtEntry* entry, *prev;
 
@@ -275,13 +288,16 @@ void ATunprotectArray(const ATerm* start)
   }
 
   entry->next = free_prot_entries;
-  free_prot_entries = entry;
-}
+  free_prot_entries = entry; */
+} 
 
 /*}}}  */
 
-void ATaddProtectFunction(const ATermProtFunc f)
+void ATaddProtectFunction(const ATermProtFunc )
 {
+  return;
+  /*
+ 
   ATermProtFunc* new_at_prot_functions;
 
   if (at_prot_functions_count == at_prot_functions_size)
@@ -309,8 +325,8 @@ void ATaddProtectFunction(const ATermProtFunc f)
     }
   }
 
-  at_prot_functions[at_prot_functions_count++] = f;
-}
+  at_prot_functions[at_prot_functions_count++] = f;*/
+} 
 
 /*}}}  */
 
@@ -362,8 +378,6 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
   char*           s;
   char            fmt[16];
   int             result = 0;
-  ATerm           t;
-  ATermList       l;
 
   for (p = format; *p; p++)
   {
@@ -418,57 +432,56 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
         ATwriteToTextFile(va_arg(args, _ATerm*), stream);
         break;
       case 'l':
-        l = va_arg(args, _ATermList*);
-        fmt[strlen(fmt) - 1] = '\0';  /* Remove 'l' */
-        while (!ATisEmpty(l))
         {
-          ATwriteToTextFile(ATgetFirst(l), stream);
-          /*
-           * ATfprintf(stream, "\nlist node: %n\n", l);
-           * ATfprintf(stream, "\nlist element: %n\n", ATgetFirst(l));
-           */
-          l = ATgetNext(l);
-          if (!ATisEmpty(l))
+          _ATermList* l = va_arg(args, _ATermList*);
+          fmt[strlen(fmt) - 1] = '\0';  /* Remove 'l' */
+          while (!ATisEmpty(l))
           {
-            fputs(fmt + 1, stream);
+            ATwriteToTextFile(ATgetFirst(l), stream);
+            l = l->tail;
+            if (!ATisEmpty(l))
+            {
+              fputs(fmt + 1, stream);
+            }
           }
+          break;
         }
-        break;
       case 'a':
       case 'y':
-        AT_printAFun(va_arg(args, AFun), stream);
+        AT_printAFun(va_arg(args, size_t), stream);
         break;
       case 'n':
-        t = va_arg(args, _ATerm*);
-        switch (ATgetType(t))
         {
-          case AT_INT:
-          case AT_LIST:
-            fprintf(stream, "[...(%zu)]", ATgetLength((ATermList) t));
-            break;
+          _ATerm* t = va_arg(args, _ATerm*);
+          switch (ATgetType(t))
+          {
+            case AT_INT:
+            case AT_LIST:
+              fprintf(stream, "[...(%zu)]", ATgetLength((ATermList) t));
+              break;
 
-          case AT_APPL:
-            if (AT_isValidAFun(ATgetAFun((ATermAppl)t)))
-            {
-              AT_printAFun(ATgetAFun((ATermAppl)t), stream);
-              fprintf(stream, "(...(%zu))",
-                      GET_ARITY(t->header));
-            }
-            else
-            {
-              fprintf(stream, "<sym>(...(%zu))",
-                      GET_ARITY(t->header));
-            }
-            break;
-          case AT_FREE:
-            fprintf(stream, "@");
-            break;
-          default:
-            fprintf(stream, "#");
-            break;
+            case AT_APPL:
+              if (AT_isValidAFun(ATgetAFun((ATermAppl)t)))
+              {
+                AT_printAFun(ATgetAFun((ATermAppl)t), stream);
+                fprintf(stream, "(...(%zu))",
+                        GET_ARITY(t->header));
+              }
+              else
+              {
+                fprintf(stream, "<sym>(...(%zu))",
+                        GET_ARITY(t->header));
+              }
+              break;
+            case AT_FREE:
+              fprintf(stream, "@");
+              break;
+            default:
+              fprintf(stream, "#");
+              break;
+          }
+          break;
         }
-        break;
-
       default:
         fputc(*p, stream);
         break;
@@ -486,7 +499,7 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
  */
 
 static bool
-writeToTextFile(const ATerm t, FILE* f)
+writeToTextFile(const ATerm &t, FILE* f)
 {
   AFun          sym;
   ATerm           arg;
@@ -506,7 +519,7 @@ writeToTextFile(const ATerm t, FILE* f)
       appl = (ATermAppl) t;
 
       sym = ATgetAFun(appl);
-      AT_printAFun(sym, f);
+      AT_printAFun(sym.number(), f);
       arity = ATgetArity(sym);
       name = ATgetName(sym);
       if (arity > 0 || (!ATisQuoted(sym) && *name == '\0'))
@@ -545,7 +558,7 @@ writeToTextFile(const ATerm t, FILE* f)
       /*}}}  */
       break;
     case AT_FREE:
-      if (AT_inAnyFreeList(t))
+      if (AT_inAnyFreeList(&*t))
       {
         throw std::runtime_error("ATwriteToTextFile: printing free term at " + to_string(t));
       }
@@ -565,7 +578,7 @@ writeToTextFile(const ATerm t, FILE* f)
 }
 
 bool
-ATwriteToTextFile(const ATerm t, FILE* f)
+ATwriteToTextFile(const ATerm &t, FILE* f)
 {
   bool result = true;
 
@@ -596,7 +609,7 @@ ATwriteToTextFile(const ATerm t, FILE* f)
  * Write an ATerm to a named plaintext file
  */
 
-bool ATwriteToNamedTextFile(const ATerm t, const char* name)
+bool ATwriteToNamedTextFile(const ATerm &t, const char* name)
 {
   FILE*  f;
   bool result;
@@ -621,10 +634,10 @@ bool ATwriteToNamedTextFile(const ATerm t, const char* name)
 
 /*{{{  static char *writeToStream(ATerm t, std::ostream& os) */
 
-static void topWriteToStream(const ATerm t, std::ostream& os);
+static void topWriteToStream(const ATerm &t, std::ostream& os);
 
 static void
-writeToStream(const ATerm t, std::ostream& os)
+writeToStream(const ATerm &t, std::ostream& os)
 {
   ATermList list;
   ATermAppl appl;
@@ -677,7 +690,7 @@ writeToStream(const ATerm t, std::ostream& os)
 }
 
 static void
-topWriteToStream(const ATerm t, std::ostream& os)
+topWriteToStream(const ATerm &t, std::ostream& os)
 {
   if (ATgetType(t) == AT_LIST)
   {
@@ -698,7 +711,7 @@ topWriteToStream(const ATerm t, std::ostream& os)
  */
 
 std::string
-ATwriteToString(const ATerm t)
+ATwriteToString(const ATerm &t)
 {
   std::ostringstream oss;
   topWriteToStream(t, oss);
@@ -1210,15 +1223,13 @@ void snext_skip_layout(int* c, char** s)
 static ATermList
 sparse_terms(int* c, char** s)
 {
-  ATermList list;
   ATerm el = sparse_term(c, s);
-
   if (el == ATerm())
   {
     return ATermList();
   }
 
-  list = ATinsert(ATempty, el);
+  ATermList list = ATinsert(ATempty, el);
 
   while (*c == ',')
   {
@@ -1479,10 +1490,7 @@ sparse_term(int* c, char** s)
   if (result != ATerm())
   {
     sskip_layout(c, s);
-
-    /*}}}  */
   }
-
   return result;
 }
 
@@ -1498,11 +1506,10 @@ ATreadFromString(const char* string)
 {
   int             c;
   const char*     orig = string;
-  ATerm           term;
 
   snext_skip_layout(&c, (char**) &string);
 
-  term = sparse_term(&c, (char**) &string);
+  ATerm term = sparse_term(&c, (char**) &string);
 
   if (term == ATerm())
   {
@@ -1530,8 +1537,9 @@ ATreadFromString(const char* string)
 /**
  * Mark a term and all of its children.
  */
-void AT_markTerm(const ATerm t1)
+/* void AT_markTerm(const ATerm t1)
 {
+  return 0;
 
   if (IS_MARKED(t1->header))
   {
@@ -1559,7 +1567,7 @@ void AT_markTerm(const ATerm t1)
           {
             const AFun sym = ATgetAFun((ATermAppl) t);
 
-            if (AT_isValidAFun(sym))
+            if (AT_isValidAFun(sym.number()))
             {
               AT_markAFun(sym);
             }
@@ -1588,14 +1596,14 @@ void AT_markTerm(const ATerm t1)
 
       }
     }
-  }
-}
+  } 
+} */
 
 
 /*}}}  */
 /*{{{  void AT_unmarkIfAllMarked(ATerm t) */
 
-void AT_unmarkIfAllMarked(ATerm t)
+void AT_unmarkIfAllMarked(const ATerm &t)
 {
   if (IS_MARKED(t->header))
   {
@@ -1642,7 +1650,7 @@ void AT_unmarkIfAllMarked(ATerm t)
     }
 
   }
-}
+} 
 
 /*}}}  */
 
@@ -1652,7 +1660,7 @@ void AT_unmarkIfAllMarked(ATerm t)
 
 /*{{{  static size_t calcUniqueAFuns(ATerm t) */
 
-static size_t calcUniqueAFuns(ATerm t)
+static size_t calcUniqueAFuns(const ATerm &t)
 {
   size_t nr_unique = 0;
   size_t  i, arity;
@@ -1667,7 +1675,7 @@ static size_t calcUniqueAFuns(ATerm t)
   switch (ATgetType(t))
   {
     case AT_INT:
-      if (!at_lookup_table[AS_INT]->count++)
+      if (!AFun::at_lookup_table[AS_INT.number()]->count++)
       {
         nr_unique = 1;
       }
@@ -1675,10 +1683,10 @@ static size_t calcUniqueAFuns(ATerm t)
 
     case AT_APPL:
       sym = ATgetAFun((ATermAppl) t);
-      nr_unique = AT_isMarkedAFun(sym) ? 0 : 1;
-      assert(at_lookup_table[sym]);
-      at_lookup_table[sym]->count++;
-      AT_markAFun(sym); 
+      assert(AFun::at_lookup_table.size()>sym.number());
+      nr_unique = AFun::at_lookup_table[sym.number()]->count>0 ? 0 : 1;
+      AFun::at_lookup_table[sym.number()]->count++;
+      AT_markAFun(sym);
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++)
       {
@@ -1691,7 +1699,7 @@ static size_t calcUniqueAFuns(ATerm t)
       while (!ATisEmpty(list) && !IS_MARKED(list->header))
       {
         SET_MARK(list->header);
-        if (!at_lookup_table[AS_LIST]->count++)
+        if (!AFun::at_lookup_table[AS_LIST.number()]->count++)
         {
           nr_unique++;
         }
@@ -1701,7 +1709,7 @@ static size_t calcUniqueAFuns(ATerm t)
       if (ATisEmpty(list) && !IS_MARKED(list->header))
       {
         SET_MARK(list->header);
-        if (!at_lookup_table[AS_EMPTY_LIST]->count++)
+        if (!AFun::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
         {
           nr_unique++;
         }
@@ -1714,14 +1722,7 @@ static size_t calcUniqueAFuns(ATerm t)
   return nr_unique;
 }
 
-/*}}}  */
-/**
- * Calculate the number of unique symbols
- */
-
-/*{{{  size_t AT_calcUniqueAFuns(ATerm t) */
-
-size_t AT_calcUniqueAFuns(ATerm t)
+size_t AT_calcUniqueAFuns(const ATerm &t)
 {
   size_t result = calcUniqueAFuns(t);
   AT_unmarkIfAllMarked(t);
@@ -1729,176 +1730,6 @@ size_t AT_calcUniqueAFuns(ATerm t)
   return result;
 }
 
-/*}}}  */
 
-/*{{{  static int AT_compareArguments(ATermAppl t1, ATermAppl t2)  */
-
-/* static int AT_compareArguments(ATermAppl t1, ATermAppl t2)
-{
-  size_t arity1;
-  size_t arity2;
-  size_t i;
-  ATerm arg1;
-  ATerm arg2;
-  int result = 0;
-
-  arity1 = ATgetArity(ATgetAFun(t1));
-  arity2 = ATgetArity(ATgetAFun(t2));
-
-
-  for (i = 0; result == 0 && i < arity1 && i < arity2; i++)
-  {
-    arg1 = ATgetArgument(t1, i);
-    arg2 = ATgetArgument(t2, i);
-    result = ATcompare(arg1,arg2);
-  }
-
-  if (arity1 < arity2)
-  {
-    return -1;
-  }
-  else if (arity1 > arity2)
-  {
-    return 1;
-  }
-
-  return result;
-
-} */
-
-/*}}}  */
-/*{{{  static int AT_compareAppls(ATermAppl t0, ATermAppl t2) */
-
-/* static int AT_compareAppls(ATermAppl t1, ATermAppl t2)
-{
-  AFun fun1;
-  AFun fun2;
-  char* name1;
-  char* name2;
-  int result;
-
-  fun1 = ATgetAFun(t1);
-  fun2 = ATgetAFun(t2);
-
-  name1 = ATgetName(fun1);
-  name2 = ATgetName(fun2);
-
-  result = strcmp(name1,name2);
-  if (result != 0)
-  {
-    return result;
-  }
-
-  return AT_compareArguments(t1,t2);
-
-} */
-
-/*}}}  */
-/*{{{  static int AT_compareInts(ATermInt t1, ATermInt t2)  */
-
-/* static int AT_compareInts(ATermInt t1, ATermInt t2)
-{
-  int i1;
-  int i2;
-  i1 = ATgetInt(t1);
-  i2 = ATgetInt(t2);
-  if (i1 < i2)
-  {
-    return -1;
-  }
-  else if (i1 > i2)
-  {
-    return 1;
-  }
-  return 0;
-} */
-
-/*}}}  */
-/*{{{  static int AT_compareLists(ATermList t1, ATermList t2)  */
-
-/* static int AT_compareLists(ATermList t1, ATermList t2)
-{
-  size_t length1;
-  size_t length2;
-  ATerm elt1;
-  ATerm elt2;
-  int result = 0;
-
-  while (result == 0 && !ATisEmpty(t1) && !ATisEmpty(t2))
-  {
-    elt1 = ATgetFirst(t1);
-    elt2 = ATgetFirst(t2);
-
-    result = ATcompare(elt1,elt2);
-
-    t1 = ATgetNext(t1);
-    t2 = ATgetNext(t2);
-  }
-
-  if (result != 0)
-  {
-    return result;
-  }
-
-  length1 = ATgetLength(t1);
-  length2 = ATgetLength(t2);
-
-  if (length1 < length2)
-  {
-    return -1;
-  }
-  else if (length1 > length2)
-  {
-    return 1;
-  }
-  return 0;
-} */
-
-/*}}}  */
-/*{{{  int ATcompare(ATerm t1, ATerm t2) */
-
-/* int ATcompare(const ATerm t1, const ATerm t2)
-{
-  size_t type1;
-  size_t type2;
-  int result = 0;
-
-  if (ATisEqual(t1, t2))
-  {
-    return 0;
-  }
-
-  type1 = ATgetType(t1);
-  type2 = ATgetType(t2);
-
-  if (type1 < type2)
-  {
-    return -1;
-  }
-  else if (type1 > type2)
-  {
-    return 1;
-  }
-
-  switch (type1)
-  {
-    case AT_APPL:
-      result = AT_compareAppls((ATermAppl) t1, (ATermAppl) t2);
-      break;
-    case AT_INT:
-      result = AT_compareInts((ATermInt) t1, (ATermInt) t2);
-      break;
-    case AT_LIST:
-      result = AT_compareLists((ATermList) t1, (ATermList) t2);
-      break;
-    default:
-      throw std::runtime_error("Unknown ATerm type " + to_string(type1));
-      break;
-  }
-
-  return result;
-} */
-
-/*}}}  */
 
 } // namespace aterm

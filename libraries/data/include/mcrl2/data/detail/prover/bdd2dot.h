@@ -51,7 +51,7 @@ class BDD2Dot
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of Bool as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    void aux_output_bdd(const data_expression a_bdd)
+    void aux_output_bdd(const data_expression &a_bdd)
     {
       if (f_visited.count(a_bdd)>0)  // a_bdd has already been visited.
       {
@@ -95,7 +95,7 @@ class BDD2Dot
     /// restrictions
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
-    void output_bdd(const data_expression a_bdd, char const* a_file_name)
+    void output_bdd(const data_expression &a_bdd, char const* a_file_name)
     {
       f_node_number = 0;
       f_dot_file.open(a_file_name);

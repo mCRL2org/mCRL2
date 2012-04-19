@@ -50,7 +50,7 @@ void test_txt2pbes()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_txt2pbes();
   core::garbage_collect();

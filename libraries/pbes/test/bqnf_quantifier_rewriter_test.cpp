@@ -58,7 +58,7 @@ void test_bqnf_quantifier_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   //log::log_level_t log_level = log::debug2;
   //log::mcrl2_logger::set_reporting_level(log_level);

@@ -19,10 +19,10 @@ namespace aterm
 static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
 static const size_t SYMBOL_HASH_SIZE = 65353; /* nextprime(65335) */
 
-static const size_t SHIFT_INDEX = 1;
+// static const size_t SHIFT_INDEX = 1;
 /* Keep the sign of sym below; Therefore ptrdiff_t is used, instead of size_t. This goes wrong when
  * the number of symbols approaches the size of the machineword/4, but this is unlikely.  */
-inline
+/* inline
 ptrdiff_t SYM_GET_NEXT_FREE(const SymEntry sym)
 {
   return (ptrdiff_t)(sym) >> SHIFT_INDEX;
@@ -33,6 +33,7 @@ size_t SYM_SET_NEXT_FREE(const AFun next)
 {
   return 1 | ((next) << SHIFT_INDEX);
 }
+*/
 
 static const size_t MAGIC_PRIME = 7;
 
@@ -45,14 +46,19 @@ static size_t afun_table_class = INITIAL_AFUN_TABLE_CLASS;
 static MachineWord afun_table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
 static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
-static SymEntry* hash_table     = NULL;
+static std::vector < size_t > afun_hashtable(afun_table_size,size_t(-1));
 
-static AFun first_free = (AFun)-1;
+size_t AFun::first_free = size_t(-1);
 
-static std::multiset < AFun > protected_symbols;
+std::vector < _SymEntry* > AFun::at_lookup_table;
 
-// SymEntry* at_lookup_table = NULL;
-std::vector < SymEntry > at_lookup_table;
+const AFun AS_INT=ATmakeAFun("<int>", 0, false);
+const AFun AS_LIST=ATmakeAFun("[_,_]", 2, false);
+const AFun AS_EMPTY_LIST=ATmakeAFun("[]", 0, false);
+
+
+// static std::multiset < AFun > protected_symbols;
+
 
 /*}}}  */
 
@@ -68,91 +74,46 @@ extern char* _strdup(const char* s);
 
 static void resize_table()
 {
-  MachineWord i;
-  size_t new_class = afun_table_class+1;
+  afun_table_class = afun_table_class+1;
+fprintf(stderr,"resize_afun_hashtable to class %ld\n",afun_table_class);
 #ifdef AT_32BIT
-  if (new_class>=23) // In 32 bit mode only 22 bits are reserved for function symbols.
+  if (afun_table_class>=23) // In 32 bit mode only 22 bits are reserved for function symbols.
   {
     throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^22 (= 4.194.304) different afuns on a 32 bit machine.");
   }
 #endif
 #ifdef AT_64BIT
-  if (new_class>=31)
+  if (afun_table_class>=31)
   {
     throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^30 (= 1.073.741.824) different afuns on a 64 bit machine.");
   }
 #endif
 
-  MachineWord new_size  = AT_TABLE_SIZE(new_class);
-  size_t new_mask  = AT_TABLE_MASK(new_class);
+  afun_table_size  = AT_TABLE_SIZE(afun_table_class);
+  afun_table_mask  = AT_TABLE_MASK(afun_table_class);
 
-  hash_table = (SymEntry*)AT_realloc(hash_table, new_size*sizeof(SymEntry));
-  if (!hash_table)
+  afun_hashtable.clear();
+  afun_hashtable.resize(afun_table_size,size_t(-1));
+  // afun_hashtable = (_SymEntry**)AT_realloc(afun_hashtable, new_size*sizeof(_SymEntry*));
+  /* if (!afun_hashtable)
   {
     throw std::runtime_error("afun.c:resize_table - could not allocate space for hashtable of " + to_string(new_size) + " afuns");
   }
-  memset(hash_table, 0, new_size*sizeof(SymEntry));
+  memset(afun_hashtable, 0, new_size*sizeof(_SymEntry*)); */
 
-  for (i=0; i<at_lookup_table.size(); i++)
+  for (size_t i=0; i<AFun::at_lookup_table.size(); i++)
   {
-    SymEntry entry = at_lookup_table[i];
-    if (!SYM_IS_FREE(entry))
+    _SymEntry* entry = AFun::at_lookup_table[i];
+    if (entry->reference_count>0)
     {
       ShortHashNumber hnr = AT_hashAFun(entry->name, GET_LENGTH(entry->header));
-      hnr &= new_mask;
-      entry->next = hash_table[hnr];
-      hash_table[hnr] = entry;
+      hnr &= afun_table_mask;
+      entry->next = afun_hashtable[hnr];
+      afun_hashtable[hnr] = i;
     }
   }
-
-  afun_table_class = new_class;
-  afun_table_size  = new_size;
-  afun_table_mask  = new_mask;
 }
 
-/*}}}  */
-
-/*{{{  void AT_initAFun(int argc, char *argv[]) */
-void AT_initAFun()
-{
-  AFun sym;
-
-  hash_table = (SymEntry*) AT_calloc(afun_table_size, sizeof(SymEntry));
-  if (hash_table == NULL)
-  {
-    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(afun_table_size) + " hash-entries.");
-  }
-
-  first_free = AFun(-1); // Indication that there are no free AFun's available.
-
-  sym = ATmakeAFun("<int>", 0, false);
-  assert(sym == AS_INT);
-  ATprotectAFun(sym);
-
-  /* Can't remove real and blob below, as the symbols
-     for PLACE_HOLDERS have predetermined values.... They are not
-     used anymore. */
-  sym = ATmakeAFun("<real>", 0, false);
-  ATprotectAFun(sym);
-
-  sym = ATmakeAFun("<blob>", 0, false);
-  ATprotectAFun(sym);
-
-  sym = ATmakeAFun("<_>", 1, false);
-
-  ATprotectAFun(sym);
-
-  sym = ATmakeAFun("[_,_]", 2, false);
-  assert(sym == AS_LIST);
-  ATprotectAFun(sym);
-
-  sym = ATmakeAFun("[]", 0, false);
-  assert(sym == AS_EMPTY_LIST);
-  ATprotectAFun(sym);
-
-  sym = ATmakeAFun("{_}", 2, false);
-  ATprotectAFun(sym);
-}
 /*}}}  */
 
 /*{{{  int AT_printAFun(AFun sym, FILE *f) */
@@ -161,10 +122,10 @@ void AT_initAFun()
   * Print an afun.
   */
 
-size_t AT_printAFun(const AFun fun, FILE* f)
+size_t AT_printAFun(const size_t fun, FILE* f)
 {
-  assert(fun<at_lookup_table.size());
-  SymEntry entry = at_lookup_table[fun];
+  assert(fun<AFun::at_lookup_table.size());
+  _SymEntry* entry = AFun::at_lookup_table[fun];
   char* id = entry->name;
   size_t size = 0;
 
@@ -219,11 +180,11 @@ size_t AT_printAFun(const AFun fun, FILE* f)
 
 /*}}}  */
 
-std::string ATwriteAFunToString(const AFun fun)
+std::string ATwriteAFunToString(const AFun &fun)
 {
   std::ostringstream oss;
-  assert(fun<at_lookup_table.size());
-  SymEntry entry = at_lookup_table[fun];
+  assert(fun.number()<AFun::at_lookup_table.size());
+  _SymEntry* entry = AFun::at_lookup_table[fun.number()];
   char* id = entry->name;
 
   if (IS_QUOTED(entry->header))
@@ -299,55 +260,54 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
   }
 
   /* Find symbol in table */
-  SymEntry cur = hash_table[hnr];
-  while (cur && (!EQUAL_HEADER(cur->header,header) || !streq(cur->name, name)))
+  size_t cur = afun_hashtable[hnr];
+  while (cur!=size_t(-1) && (!EQUAL_HEADER(AFun::at_lookup_table[cur]->header,header) || !streq(AFun::at_lookup_table[cur]->name, name)))
   {
-    cur = cur->next;
+    cur = AFun::at_lookup_table[cur]->next;
   }
 
-  if (cur == NULL)
+  if (cur == size_t(-1))
   {
-    cur = (SymEntry) &*AT_allocate(TERM_SIZE_SYMBOL); // Note that this statement changes first_free,
-                                                    // if garbage collection is done. 
+    const size_t free_entry = AFun::first_free;
+    assert(AFun::at_lookup_table.size()<afun_table_size);
+    assert(AFun::at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
 
-    const AFun free_entry = first_free;
-    assert(at_lookup_table.size()<afun_table_size);
-    assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
-
-    if (free_entry!=(AFun)-1) // There is a free place in at_lookup_table to store an AFun.
+    if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table to store an AFun.
     { 
-      assert(first_free<at_lookup_table.size());
-      first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
-      assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
-      assert(free_entry<at_lookup_table.size());
-      at_lookup_table[free_entry] = cur;
-      cur->id = free_entry;
+      assert(AFun::first_free<AFun::at_lookup_table.size());
+      cur=AFun::first_free;
+      AFun::first_free = (size_t)AFun::at_lookup_table[AFun::first_free]->id;
+      assert(AFun::first_free==size_t(-1) || AFun::first_free<AFun::at_lookup_table.size());
+      assert(free_entry<AFun::at_lookup_table.size());
+      AFun::at_lookup_table[cur]->id = cur;
+      assert(AFun::at_lookup_table[cur]->reference_count==0);
+      AFun::at_lookup_table[cur]->reference_count=0;
+      AFun::at_lookup_table[cur]->header = header;
+      AFun::at_lookup_table[cur]->count = 0;
+      AFun::at_lookup_table[cur]->index = -1;
     }
     else 
     { 
-      cur->id = at_lookup_table.size();
-      at_lookup_table.push_back(cur);
+      cur = AFun::at_lookup_table.size();
+      AFun::at_lookup_table.push_back(new _SymEntry(header,cur,0,size_t(-1)));
     }
 
-    cur->header = header;
-    cur->count = 0;
-    cur->index = -1;
 
-    cur->name = _strdup(name);
-    if (cur->name == NULL)
+    AFun::at_lookup_table[cur]->name = _strdup(name);
+    if (AFun::at_lookup_table[cur]->name == NULL)
     {
       throw std::runtime_error("ATmakeAFun: no room for name of length " + to_string(strlen(name)));
     }
 
-    cur->next = hash_table[hnr];
-    hash_table[hnr] = cur;
+    AFun::at_lookup_table[cur]->next = afun_hashtable[hnr];
+    afun_hashtable[hnr] = cur;
   }
 
-  if (at_lookup_table.size()>=afun_table_size*0.7) // Resize when more than 70% of the spots in the hash table are filled.
+  if (AFun::at_lookup_table.size()>=afun_table_size) 
   {
     resize_table();
   }
-  return cur->id;
+  return cur;
 }
 
 /*}}}  */
@@ -357,39 +317,39 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
  * Free a symbol
  */
 
-void AT_freeAFun(SymEntry sym)
+void at_free_afun(const size_t n)
 {
-  /* The code of this function resembles that of AT_freeTerm very much */
+  _SymEntry* sym=AFun::at_lookup_table[n];
+  
   assert(sym->name);
+  assert(sym->id==n);
 
   /* Calculate hashnumber */
   const ShortHashNumber hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header)) & afun_table_mask;
 
   /* Update hashtable */
-  if (hash_table[hnr] == sym)
+  if (afun_hashtable[hnr] == n)
   {
-    hash_table[hnr] = sym->next;
+    afun_hashtable[hnr] = sym->next;
   }
   else
   {
-    SymEntry cur, prev;
-    prev = hash_table[hnr];
-    for (cur = prev->next; cur != sym; prev = cur, cur = cur->next)
+    size_t cur;
+    size_t prev = afun_hashtable[hnr];
+    for (cur = AFun::at_lookup_table[prev]->next; cur != n; prev = cur, cur = AFun::at_lookup_table[cur]->next)
     {
-      assert(cur != NULL);
+      assert(cur != size_t(-1));
     }
-    prev->next = cur->next;
+    AFun::at_lookup_table[prev]->next = AFun::at_lookup_table[cur]->next;
   }
 
   /* Free symbol name */
   AT_free(sym->name);
   sym->name = NULL;
 
-  assert(sym->id<at_lookup_table.size());
-  at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
-  first_free = sym->id;
-  assert(first_free==(AFun)-1 || first_free<at_lookup_table.size());
-  total_nodes--;
+  assert(n<AFun::at_lookup_table.size());
+  AFun::at_lookup_table[n]->id = AFun::first_free;
+  AFun::first_free = n;
 }
 
 /*}}}  */
@@ -400,9 +360,9 @@ void AT_freeAFun(SymEntry sym)
   * Protect a symbol.
   */
 
-void ATprotectAFun(const AFun sym)
+void ATprotectAFun(const AFun &)
 {
-  protected_symbols.insert(sym);
+  // protected_symbols.insert(sym);
 }
 
 /*}}}  */
@@ -412,15 +372,16 @@ void ATprotectAFun(const AFun sym)
   * Unprotect a symbol.
   */
 
-void ATunprotectAFun(const AFun sym)
+void ATunprotectAFun(const AFun &)
 {
   // Remove only one occurrence of sym: erase cannot be used.
-  const std::multiset < AFun >::const_iterator i=protected_symbols.find(sym);
+/*  const std::multiset < AFun >::const_iterator i=protected_symbols.find(sym);
   if (i!=protected_symbols.end())
   {
     protected_symbols.erase(i);
   }
   else assert(0); // A non protected symbol is being unprotected.
+*/
 }
 
 /*}}}  */
@@ -432,11 +393,13 @@ void ATunprotectAFun(const AFun sym)
 
 void AT_markProtectedAFuns()
 {
-  for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
+  fprintf(stderr,"NO PROTECTED AFUNS ARE EXPLLICITLY MARKED ANYMORE\n");
+
+  /* for(std::multiset < AFun >::const_iterator i=protected_symbols.begin(); i!=protected_symbols.end(); ++i)
   {
-    assert(at_lookup_table.size()> *i);
+    assert(at_lookup_table.size()> i->number());
     SET_MARK(at_lookup_table[*i]->header);
-  }
+  } */
 }
 
 /*}}}  */

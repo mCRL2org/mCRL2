@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdexcept>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/aterm2.h"
@@ -26,9 +27,10 @@ char list_id[] = "$Id$";
 
 /*{{{  ATermList ATgetTail(ATermList list, int start) */
 
-ATermList ATgetTail(ATermList list, const int start0)
+ATermList ATgetTail(const ATermList &list_in, const int start0)
 {
   size_t start;
+  ATermList list=list_in;
   if (start0 < 0)
   {
     start = ATgetLength(list) + start0;
@@ -57,11 +59,11 @@ ATermList ATgetTail(ATermList list, const int start0)
  * The last element is the element at end-1.
  */
 
-ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
+ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t end)
 {
   size_t i, size;
   ATermList result = ATmakeList0();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,(end<=start?0:end-start));
 
   if (end<=start)
   {
@@ -70,6 +72,7 @@ ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
 
   size = end-start;
 
+  ATermList list=list_in;
   for (i=0; i<start; i++)
   {
     list = ATgetNext(list);
@@ -77,7 +80,7 @@ ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
 
   for (i=0; i<size; i++)
   {
-    buffer[i] = ATgetFirst(list);
+    buffer[i] = &*ATgetFirst(list);
     list = ATgetNext(list);
   }
 
@@ -90,22 +93,23 @@ ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
 }
 
 /*}}}  */
-/*{{{  ATermlist ATappend(ATermList list, ATerm el) */
+/*{{{  ATermlist ATappend(const ATermList &list, const ATerm &el) */
 
 /**
  * Append 'el' to the end of 'list'
  */
 
-ATermList ATappend(ATermList list, const ATerm el)
+ATermList ATappend(const ATermList &list_in, const ATerm &el)
 {
+  ATermList list=list_in;
   size_t i, len = ATgetLength(list);
   ATermList result;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
 
   /* Collect all elements of list in buffer */
   for (i=0; i<len; i++)
   {
-    buffer[i] = ATgetFirst(list);
+    buffer[i] = &*ATgetFirst(list);
     list = ATgetNext(list);
   }
 
@@ -127,10 +131,11 @@ ATermList ATappend(ATermList list, const ATerm el)
  * Concatenate list2 to the end of list1.
  */
 
-ATermList ATconcat(ATermList list1, const ATermList list2)
+ATermList ATconcat(const ATermList &list1_in, const ATermList &list2)
 {
+  ATermList list1=list1_in;
   size_t i, len = ATgetLength(list1);
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
   ATermList result = list2;
 
   if (list2==ATempty)
@@ -146,7 +151,7 @@ ATermList ATconcat(ATermList list1, const ATermList list2)
   /* Collect the elements of list1 in buffer */
   for (i=0; i<len; i++)
   {
-    buffer[i] = ATgetFirst(list1);
+    buffer[i] = &*ATgetFirst(list1);
     list1 = ATgetNext(list1);
   }
 
@@ -160,7 +165,7 @@ ATermList ATconcat(ATermList list1, const ATermList list2)
 }
 
 /*}}}  */
-/*{{{  int ATindexOf(ATermList list, ATerm el, int start) */
+/*{{{  int ATindexOf(ATermList list, const ATerm &el, int start) */
 
 /**
  * Return the index of the first occurence of 'el' in 'list',
@@ -169,8 +174,9 @@ ATermList ATconcat(ATermList list1, const ATermList list2)
  * Note that 'start' must indicate a valid position in 'list'.
  */
 
-size_t ATindexOf(ATermList list, const ATerm el, const int startpos)
+size_t ATindexOf(const ATermList &list_in, const ATerm &el, const int startpos)
 {
+  ATermList list=list_in;
   size_t i, start;
 
   if (startpos < 0)
@@ -204,8 +210,9 @@ size_t ATindexOf(ATermList list, const ATerm el, const int startpos)
  * Return NULL when index not in list.
  */
 
-ATerm ATelementAt(ATermList list, size_t index)
+const ATerm &ATelementAt(const ATermList &list_in, size_t index)
 {
+  ATermList list=list_in;
   for (; index > 0 && !ATisEmpty(list); --index)
   {
     list = ATgetNext(list);
@@ -213,7 +220,7 @@ ATerm ATelementAt(ATermList list, size_t index)
 
   if (ATisEmpty(list))
   {
-    return ATerm();
+    throw std::range_error("Taking non existing element from list: " + index );
   }
 
   return ATgetFirst(list);
@@ -226,18 +233,19 @@ ATerm ATelementAt(ATermList list, size_t index)
  * Remove one occurence of an element from a list.
  */
 
-ATermList ATremoveElement(ATermList list, const ATerm t)
+ATermList ATremoveElement(const ATermList &list_in, const ATerm &t)
 {
+  ATermList list=list_in;
   size_t i = 0;
   ATerm el;
   ATermList l = list;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,ATgetLength(list));
 
   while (!ATisEmpty(l))
   {
     el = ATgetFirst(l);
     l = ATgetNext(l);
-    buffer[i++] = el;
+    buffer[i++] = &*el;
     if (ATisEqual(el, t))
     {
       break;
@@ -262,20 +270,21 @@ ATermList ATremoveElement(ATermList list, const ATerm t)
 }
 
 /*}}}  */
-/*{{{  ATermList ATremoveElementAt(ATermList list, int idx) */
+/*{{{  ATermList ATremoveElementAt(const ATermList &list, int idx) */
 
 /**
  * Remove an element from a specific position in a list.
  */
 
-ATermList ATremoveElementAt(ATermList list, const size_t idx)
+ATermList ATremoveElementAt(const ATermList &list_in, const size_t idx)
 {
+  ATermList list=list_in;
   size_t i;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,idx);
 
   for (i=0; i<idx; i++)
   {
-    buffer[i] = ATgetFirst(list);
+    buffer[i] = &*ATgetFirst(list);
     list = ATgetNext(list);
   }
 
@@ -289,20 +298,21 @@ ATermList ATremoveElementAt(ATermList list, const size_t idx)
 }
 
 /*}}}  */
-/*{{{  ATermList ATreplace(ATermList list, ATerm el, int idx) */
+/*{{{  ATermList ATreplace(const ATermList &list, ATerm el, int idx) */
 
 /**
  * Replace one element of a list.
  */
 
-ATermList ATreplace(ATermList list, const ATerm el, const size_t idx)
+ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx)
 {
+  ATermList list=list_in;
   size_t i;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,idx);
 
   for (i=0; i<idx; i++)
   {
-    buffer[i] = ATgetFirst(list);
+    buffer[i] = &*ATgetFirst(list);
     list = ATgetNext(list);
   }
   /* Skip the old element */
@@ -325,14 +335,15 @@ ATermList ATreplace(ATermList list, const ATerm el, const size_t idx)
  * Reverse a list
  */
 
-ATermList ATreverse(ATermList list)
+ATermList ATreverse(const ATermList &list_in)
 {
+  _ATermList* list =&*list_in;
   ATermList result = ATempty;
 
   while (!ATisEmpty(list))
   {
     result = ATinsert(result, ATgetFirst(list));
-    list = ATgetNext(list);
+    list = &*ATgetNext(list);
   }
 
   return result;
@@ -340,29 +351,30 @@ ATermList ATreverse(ATermList list)
 
 /*}}}  */
 
-/*{{{  ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2)) */
+/*{{{  ATermList ATsort(const ATermList &list, int (*compare)(const ATerm t1, const ATerm t2)) */
 
-static int (*compare_func)(const ATerm t1, const ATerm t2);
+static int (*compare_func)(const ATerm &t1, const ATerm &t2);
 
 static int compare_terms(const ATerm* t1, const ATerm* t2)
 {
   return compare_func(*t1, *t2);
 }
 
-ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
+ATermList ATsort(const ATermList &list_in, int (*compare)(const ATerm &t1, const ATerm &t2))
 {
+  ATermList list=list_in;
   size_t idx, len = ATgetLength(list);
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
 
   idx = 0;
   while (!ATisEmpty(list))
   {
-    buffer[idx++] = ATgetFirst(list);
+    buffer[idx++] = &*ATgetFirst(list);
     list = ATgetNext(list);
   }
 
   compare_func = compare;
-  qsort(buffer, len, sizeof(ATerm),
+  qsort(buffer, len, sizeof(_ATerm*),
         (int (*)(const void*, const void*))compare_terms);
 
   list = ATempty;
@@ -376,23 +388,23 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 
 /*}}}  */
 
-/*{{{  ATermList ATgetArguments(ATermAppl appl) */
+/*{{{  ATermList ATgetArguments(const ATermAppl &appl) */
 
 /**
  * Retrieve the list of arguments of a function application.
  * This function facilitates porting of old aterm-lib or ToolBus code.
  */
 
-ATermList ATgetArguments(const ATermAppl appl)
+ATermList ATgetArguments(const ATermAppl &appl)
 {
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
 
   for (i=0; i<len; i++)
   {
-    buffer[i] = ATgetArgument(appl, i);
+    buffer[i] = &*ATgetArgument(appl, i);
   }
 
   for (i=len; i>0; i--)
@@ -407,9 +419,9 @@ ATermList ATgetArguments(const ATermAppl appl)
 
 /*{{{  size_t ATgetLength(ATermList list) */
 
-size_t ATgetLength(ATermList list)
+size_t ATgetLength(const ATermList &list_in)
 {
-  size_t length = ((size_t)GET_LENGTH((list)->header));
+  size_t length = ((size_t)GET_LENGTH((list_in)->header));
 
   if (length < MAX_LENGTH-1)
   {
@@ -420,6 +432,7 @@ size_t ATgetLength(ATermList list)
      Count the length of the list.
   */
 
+  ATermList list=list_in;
   while (1)
   {
     list = ATgetNext(list);

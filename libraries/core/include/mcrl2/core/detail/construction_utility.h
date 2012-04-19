@@ -23,14 +23,16 @@ namespace detail
 {
 
 /// Function for initialisation of static variables, takes care of protection
+/// \deprecated
 /// \param[in,out] target a reference to the static variable
 /// \param[in] original the expression that is used to initialise the variable
 /// \ return a reference to original
 template < typename Expression >
 Expression const& initialise_static_expression(Expression& target, Expression const& original)
 {
-  target = original;
-  target.protect();
+  // TODO: This function is deprecated and should be removed from all the generated code.
+  // target = original;
+  // target.protect();
 
   return original;
 }

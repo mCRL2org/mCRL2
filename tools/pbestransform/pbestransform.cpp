@@ -75,7 +75,7 @@ class pbes_transform_gui_tool: public mcrl2_gui_tool<pbes_transform_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  aterm_init();
 
   pbes_transform_gui_tool tool;
   return tool.execute(argc, argv);

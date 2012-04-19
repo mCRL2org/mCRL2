@@ -63,7 +63,7 @@ void test_boolean_operators()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_boolean_operators();
   core::garbage_collect();

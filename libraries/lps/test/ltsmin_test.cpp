@@ -186,7 +186,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_ltsmin("jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE

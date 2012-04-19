@@ -53,7 +53,7 @@ static const size_t PROTECTEDMEMORYSTACKBLOCKSIZE = 1024;
  * Because all memory is pre-allocated, so we only need to increment and decrement a pointer for allocating and freeing memory,
  * which is WAY faster then calling malloc + free and ATprotect + ATunprotect for every few term pointers we need.
  */
-static ProtectedMemoryStack createProtectedMemoryStack()
+/* static ProtectedMemoryStack createProtectedMemoryStack()
 {
   ATerm* block;
 
@@ -90,14 +90,14 @@ static ProtectedMemoryStack createProtectedMemoryStack()
   }
 
   return protectedMemoryStack;
-}
+} */
 
 /**
  * Frees the memory associated with the given protected memory stack.
  * Additionally the protection of the memory blocks that are present in the store will be removed.
  * All references that point to data in this store will be invalid after invoking this method.
  */
-static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
+/* static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
 {
   size_t i = protectedMemoryStack->nrOfBlocks;
   ATerm** blocks = protectedMemoryStack->blocks;
@@ -113,14 +113,14 @@ static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStac
   AT_free(protectedMemoryStack->freeBlockSpaces);
 
   AT_free(protectedMemoryStack);
-}
+} */
 
 /**
  * Adds an additional block of memory to the given protected memory stack.
  * A previously allocated block will be reused if possible;
  * otherwise a new block of memory is allocated.
  */
-static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
+/* static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
 {
   ATerm* block;
 
@@ -161,15 +161,16 @@ static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack
 
   protectedMemoryStack->currentIndex = block;
   protectedMemoryStack->spaceLeft = PROTECTEDMEMORYSTACKBLOCKSIZE;
-}
+} */
 
 /**
  * Returns an array of ATerms from the given protected memory stack.
  * NOTE: If we request a ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, fall back to using malloc.
  */
-static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, size_t size)
+static std::vector<ATerm> getProtectedMemoryBlock(/* ProtectedMemoryStack protectedMemoryStack,*/ size_t size)
 {
-  ATerm* memoryBlock;
+  return std::vector<ATerm>(size);
+  /* ATerm* memoryBlock;
 
   if (size <= PROTECTEDMEMORYSTACKBLOCKSIZE)
   {
@@ -191,7 +192,7 @@ static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack,
     }
   }
 
-  return memoryBlock;
+  return memoryBlock; */
 }
 
 /**
@@ -201,7 +202,7 @@ static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack,
  * This is intended by design and will never cause a problem.
  * NOTE2: If we want to release an ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, it was allocated using malloc and WILL be freed.
  */
-static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, ATerm* ptr, size_t size)
+/* static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, ATerm* ptr, size_t size)
 {
   if (size <= PROTECTEDMEMORYSTACKBLOCKSIZE)
   {
@@ -222,7 +223,7 @@ static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStac
   {
     AT_free_protected(ptr);
   }
-}
+} */
 
 
 /* BYTE BUFFER */
@@ -362,7 +363,7 @@ inline static size_t getNrOfSubTerms(ATerm term)
 /**
  * Ensures that there is enough space left on the stack of the binary writer after the invocation of this function.
  */
-static void ensureWriteStackCapacity(BinaryWriter binaryWriter)
+/* static void ensureWriteStackCapacity(BinaryWriter binaryWriter)
 {
   if ((binaryWriter->stackPosition + 1) >= binaryWriter->stackSize)
   {
@@ -372,7 +373,7 @@ static void ensureWriteStackCapacity(BinaryWriter binaryWriter)
       std::runtime_error("The binary writer was unable to enlarge the stack.");
     }
   }
-}
+} */
 
 /**
  * Returns a reference to the next ATerm that needs to be serialized to the stream the binary writer is working on.
@@ -382,7 +383,7 @@ static ATerm getNextTerm(BinaryWriter binaryWriter)
   ATerm next;
 
   /* Make sure the stack remains large enough */
-  ensureWriteStackCapacity(binaryWriter);
+  // ensureWriteStackCapacity(binaryWriter);
 
   /* if(binaryWriter->stackPosition >= 0) */
   {
@@ -390,22 +391,29 @@ static ATerm getNextTerm(BinaryWriter binaryWriter)
     ATerm term;
     ATermMapping* child;
 
-    ATermMapping* current = &(binaryWriter->stack[binaryWriter->stackPosition]);
+    // ATermMapping* current = &(binaryWriter->stack[binaryWriter->stackPosition]);
+    ATermMapping* current = &(binaryWriter->stack.top());
     while (current->subTermIndex == current->nrOfSubTerms)
     {
-
-      if (binaryWriter->stackPosition-- == 0)
+      binaryWriter->stack.pop();
+      /* if (binaryWriter->stackPosition-- == 0)
+      {
+        return ATerm();
+      } */
+      if (binaryWriter->stack.empty())
       {
         return ATerm();
       }
-
-      current = &(binaryWriter->stack[binaryWriter->stackPosition]);
+      // current = &(binaryWriter->stack[binaryWriter->stackPosition]);
+      current = &(binaryWriter->stack.top());
     }
 
     term = current->term;
     type = ATgetType(term);
 
-    child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
+    // child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
+    binaryWriter->stack.push(ATermMapping());
+    child = &(binaryWriter->stack.top());
 
     if (type == AT_APPL)
     {
@@ -455,7 +463,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 
   if (binaryWriter->indexInTerm == 0)
   {
-    SymEntry symEntry = at_lookup_table[fun];
+    _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
     size_t funHash = (size_t)((unsigned long) symEntry);
 
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
@@ -563,23 +571,23 @@ static void visitList(ATermList arg, ByteBuffer byteBuffer)
  */
 BinaryWriter ATcreateBinaryWriter(const ATerm term)
 {
-  ATermMapping* stack;
+  // ATermMapping* stack;
   ATermMapping* tm;
 
-  BinaryWriter binaryWriter = (BinaryWriter) AT_malloc(sizeof(struct _BinaryWriter));
-  if (binaryWriter == NULL)
+  BinaryWriter binaryWriter = new _BinaryWriter; // (BinaryWriter) AT_malloc(sizeof(struct _BinaryWriter));
+  /* if (binaryWriter == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binary writer.");
-  }
+  } */
 
-  stack = (ATermMapping*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermMapping));
-  if (stack == NULL)
+  // stack = new _ATermMapping; // (ATermMapping*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermMapping));
+  /* if (stack == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryWriter's stack.");
-  }
-  binaryWriter->stack = stack;
+  } */
+  /* binaryWriter->stack = stack;
   binaryWriter->stackSize = DEFAULTSTACKSIZE;
-  binaryWriter->stackPosition = 0;
+  binaryWriter->stackPosition = 0; */
 
   binaryWriter->sharedTerms = IMcreateIDMappings(75);
   binaryWriter->currentSharedTermKey = 0;
@@ -590,7 +598,8 @@ BinaryWriter ATcreateBinaryWriter(const ATerm term)
   binaryWriter->currentTerm = term;
   binaryWriter->indexInTerm = 0;
 
-  tm = &(binaryWriter->stack[0]);
+  binaryWriter->stack.push(ATermMapping());
+  tm = &(binaryWriter->stack.top());
   tm->term = term;
   tm->nrOfSubTerms = getNrOfSubTerms(term);
   tm->subTermIndex = 0; /* Default value */
@@ -618,13 +627,14 @@ int ATisFinishedWriting(BinaryWriter binaryWriter)
  */
 void ATdestroyBinaryWriter(BinaryWriter binaryWriter)
 {
-  AT_free(binaryWriter->stack);
+  // AT_free(binaryWriter->stack);
+  // delete binaryWriter->stack;
 
   IMdestroyIDMappings(binaryWriter->sharedTerms);
 
   IMdestroyIDMappings(binaryWriter->sharedAFuns);
 
-  AT_free(binaryWriter);
+  delete binaryWriter;
 }
 
 /**
@@ -646,7 +656,8 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
       assert(id< (((size_t)1)<<(8*sizeof(int)-1))); /* id must fit in an int */
       writeInt((int)id, byteBuffer);
 
-      binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
+      // binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
+      binaryWriter->stack.pop();
     }
     else
     {
@@ -661,7 +672,8 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
           break;
         case AT_LIST:
           visitList((ATermList) currentTerm, byteBuffer);
-          binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
+          // binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
+          binaryWriter->stack.top().nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
           break;
         default:
           std::runtime_error(to_string(type) + " is not a valid term type.");
@@ -717,7 +729,7 @@ inline static int readInt(ByteBuffer byteBuffer)
 /**
  * Ensures that there is enough space left on the stack of the binary reader after the invocation of this function.
  */
-static void ensureReadStackCapacity(BinaryReader binaryReader)
+/* static void ensureReadStackCapacity(BinaryReader binaryReader)
 {
   if ((binaryReader->stackPosition + 1) >= binaryReader->stackSize)
   {
@@ -727,12 +739,12 @@ static void ensureReadStackCapacity(BinaryReader binaryReader)
       std::runtime_error("Unable to allocate memory for expanding the binaryReader's stack.");
     }
   }
-}
+} */
 
 /**
  * Ensures that there is enough space left in the shared terms array of the binary reader after the invocation of this function.
  */
-static void ensureReadSharedTermCapacity(BinaryReader binaryReader)
+/*static void ensureReadSharedTermCapacity(BinaryReader binaryReader)
 {
   if ((binaryReader->sharedTermsIndex + 1) >= binaryReader->sharedTermsSize)
   {
@@ -742,7 +754,7 @@ static void ensureReadSharedTermCapacity(BinaryReader binaryReader)
       std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared terms array.");
     }
   }
-}
+} */
 
 /**
  * Ensures that there is enough space left in the shared signatures array of the binary reader after teh invocation of this function.
@@ -751,7 +763,7 @@ static void ensureReadSharedAFunCapacity(BinaryReader binaryReader)
 {
   if ((binaryReader->sharedAFunsIndex + 1) >= binaryReader->sharedAFunsSize)
   {
-    binaryReader->sharedAFuns = (SymEntry*) AT_realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(SymEntry));
+    binaryReader->sharedAFuns = (_SymEntry**) AT_realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(_SymEntry*));
     if (binaryReader->sharedAFuns == NULL)
     {
       std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared signatures array.");
@@ -790,7 +802,7 @@ inline static void shareTerm(BinaryReader binaryReader, ATermConstruct* ac, ATer
 /**
  * Constructs the term associated with the given ATerm construct.
  */
-static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
+static ATerm buildTerm(BinaryReader /* binaryReader*/, ATermConstruct* parent)
 {
   ATerm constructedTerm;
   size_t type = parent->type;
@@ -798,17 +810,17 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
   if (type == AT_APPL)
   {
     size_t nrOfSubTerms = parent->nrOfSubTerms;
-    ATerm* subTerms = parent->subTerms;
+    std::vector<ATerm> subTerms = parent->subTerms;
 
-    SymEntry symEntry = (SymEntry) &*(parent->tempTerm);
+    _SymEntry* symEntry = parent->tempTerm;
     AFun fun = symEntry->id;
 
     /* Use the appropriate way of constructing the appl, depending on if it has arguments or not. */
     if (nrOfSubTerms > 0)
     {
-      constructedTerm = ATmakeApplArray(fun, subTerms);
+      constructedTerm = ATmakeAppl(fun, subTerms.begin(),subTerms.end());
 
-      releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
+      // releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
     else
     {
@@ -819,7 +831,7 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
   else  if (type == AT_LIST)
   {
     size_t nrOfSubTerms = parent->nrOfSubTerms;
-    ATerm* subTerms = parent->subTerms;
+    std::vector<ATerm> subTerms = parent->subTerms;
 
     ATermList list = ATmakeList0();
 
@@ -832,7 +844,7 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
       }
       while (i > 0);
 
-      releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
+      // releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
 
     constructedTerm = list;
@@ -854,9 +866,12 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm)
 {
   ATerm term = aTerm;
 
-  while (binaryReader->stackPosition != 0)
+  // while (binaryReader->stackPosition != 0)
+  while (binaryReader->stack.size()>1)
   {
-    ATermConstruct* parent = &(binaryReader->stack[--(binaryReader->stackPosition)]);
+    // ATermConstruct* parent = &(binaryReader->stack[--(binaryReader->stackPosition)]);
+    binaryReader->stack.pop(); 
+    ATermConstruct *parent = &(binaryReader->stack.top());
 
     size_t nrOfSubTerms = parent->nrOfSubTerms;
     if (nrOfSubTerms > parent->subTermIndex)
@@ -872,20 +887,23 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm)
     {
       std::runtime_error("Encountered a term that didn't fit anywhere. Type: " + to_string(ATgetType(term)));
     }
-
     term = buildTerm(binaryReader, parent);
 
     shareTerm(binaryReader, parent, term);
   }
 
-  if (binaryReader->stackPosition == 0)
+  /* if (binaryReader->.stackPosition == 0)
   {
-    /* Protect the root of the tree, once we're done de-serializing. */
+    / * Protect the root of the tree, once we're done de-serializing. * /
     ATerm* term_ptr = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
     *term_ptr = term;
 
     binaryReader->isDone = 1;
-  }
+  } */
+  if (binaryReader->stack.size()==1)
+  {
+    binaryReader->isDone = 1;
+  } 
 }
 
 /**
@@ -909,24 +927,26 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
   {
     if (binaryReader->tempType == AT_APPL)
     {
-      ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+      // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+      ATermConstruct* ac = &(binaryReader->stack.top());
 
       size_t arity = binaryReader->tempArity;
       bool isQuoted = binaryReader->tempIsQuoted;
       char* name = binaryReader->tempBytes;
 
       AFun fun = ATmakeAFun(name, arity, isQuoted);
-      SymEntry symEntry = at_lookup_table[fun];
-      ATprotectAFun(fun);
+      _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
+      binaryReader->protected_afuns.insert(fun);
+      // ATprotectAFun(fun);
 
       ensureReadSharedAFunCapacity(binaryReader); /* Make sure we have enough space in the array */
       binaryReader->sharedAFuns[binaryReader->sharedAFunsIndex++] = symEntry;
 
       if (arity > 0)
       {
-        ac->tempTerm = (_ATerm*)symEntry;
+        ac->tempTerm = symEntry;
 
-        ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
+        ac->subTerms = getProtectedMemoryBlock(/* binaryReader->protectedMemoryStack, */ arity);
       }
       else
       {
@@ -960,18 +980,19 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
   {
     size_t key = readInt(byteBuffer);
 
-    SymEntry symEntry = binaryReader->sharedAFuns[key];
-    ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+    _SymEntry* symEntry = binaryReader->sharedAFuns[key];
+    // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+    ATermConstruct* ac = &(binaryReader->stack.top());
 
     AFun fun = symEntry->id;
     size_t arity = ATgetArity(fun);
 
     if (arity > 0)
     {
-      ac->tempTerm = (_ATerm*) symEntry;
+      ac->tempTerm = symEntry;
 
       ac->nrOfSubTerms = arity;
-      ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
+      ac->subTerms = getProtectedMemoryBlock(/* binaryReader->protectedMemoryStack, */ arity);
     }
     else
     {
@@ -990,7 +1011,8 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
     /* Read name length */
     size_t nameLength = readInt(byteBuffer);
 
-    ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+    // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+    ATermConstruct* ac = &(binaryReader->stack.top());
     ac->nrOfSubTerms = arity;
 
     binaryReader->tempArity = arity;
@@ -1026,12 +1048,13 @@ static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer)
 {
   size_t size = readInt(byteBuffer);
 
-  ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+  // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+  ATermConstruct* ac = &(binaryReader->stack.top());
 
   if (size > 0)
   {
     ac->nrOfSubTerms = size;
-    ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, size);
+    ac->subTerms = getProtectedMemoryBlock(/* binaryReader->protectedMemoryStack,*/ size);
   }
   else
   {
@@ -1051,7 +1074,8 @@ static void touchInt(BinaryReader binaryReader, ByteBuffer byteBuffer)
   int value = readInt(byteBuffer);
   ATerm term = ATmakeInt(value);
 
-  ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+  // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
+  ATermConstruct* ac = &(binaryReader->stack.top());
 
   shareTerm(binaryReader, ac, term);
 
@@ -1082,7 +1106,8 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer)
 
       ATerm term = binaryReader->sharedTerms[termKey];
 
-      binaryReader->stackPosition++;
+      // binaryReader->stackPosition++;
+      binaryReader->stack.push(ATermConstruct());
 
       linkTerm(binaryReader, term);
     }
@@ -1090,11 +1115,15 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer)
     {
       size_t type = (header & TYPEMASK);
 
-      ATermConstruct* ac = &(binaryReader->stack[++(binaryReader->stackPosition)]);
+      // ATermConstruct* ac = &(binaryReader->stack[++(binaryReader->stackPosition)]);
+      binaryReader->stack.push(ATermConstruct());
+      ATermConstruct* ac = &(binaryReader->stack.top());
 
-      ensureReadSharedTermCapacity(binaryReader); /* Make sure the shared terms array remains large enough. */
+      // ensureReadSharedTermCapacity(binaryReader); /* Make sure the shared terms array remains large enough. */
 
-      ac->termKey = binaryReader->sharedTermsIndex++;
+      // ac->termKey = binaryReader->sharedTermsIndex++;
+      ac->termKey=binaryReader->sharedTerms.size();
+      binaryReader->sharedTerms.push_back(ATerm());
 
       ac->type = type;
 
@@ -1118,7 +1147,7 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer)
     }
 
     /* Make sure the stack remains large enough. */
-    ensureReadStackCapacity(binaryReader);
+    /* ensureReadStackCapacity(binaryReader); */
   }
 }
 
@@ -1127,37 +1156,38 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer)
  */
 BinaryReader ATcreateBinaryReader()
 {
-  ATermConstruct* stack;
-  ATerm* sharedTerms;
-  SymEntry* sharedAFuns;
+  // ATermConstruct* stack;
+  // ATerm* sharedTerms;
+  _SymEntry** sharedAFuns;
 
-  BinaryReader binaryReader = (BinaryReader) AT_malloc(sizeof(struct _BinaryReader));
-  if (binaryReader == NULL)
+  BinaryReader binaryReader = new _BinaryReader; // (BinaryReader) AT_malloc(sizeof(struct _BinaryReader));
+  /* if (binaryReader == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binary reader.");
-  }
+  } */
 
-  binaryReader->protectedMemoryStack = createProtectedMemoryStack();
+  // binaryReader->protectedMemoryStack = createProtectedMemoryStack();
 
-  stack = (ATermConstruct*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermConstruct));
-  if (stack == NULL)
+  // stack = (ATermConstruct*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermConstruct));
+  /* if (stack == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's stack.");
-  }
-  binaryReader->stack = stack;
+  } */
+  /* binaryReader->stack = stack;
   binaryReader->stackSize = DEFAULTSTACKSIZE;
   binaryReader->stackPosition = (size_t)-1; // Initialise
+  */
 
-  sharedTerms = (ATerm*) AT_malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
+  /* sharedTerms = (ATerm*) AT_malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
   if (sharedTerms == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's shared terms array.");
   }
   binaryReader->sharedTerms = sharedTerms;
   binaryReader->sharedTermsSize = DEFAULTSHAREDTERMARRAYSIZE;
-  binaryReader->sharedTermsIndex = 0;
+  binaryReader->sharedTermsIndex = 0; */
 
-  sharedAFuns = (SymEntry*) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(SymEntry));
+  sharedAFuns = (_SymEntry**) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(_SymEntry*));
   if (sharedAFuns == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's shared symbols array.");
@@ -1214,15 +1244,15 @@ ATerm ATgetRoot(BinaryReader binaryReader)
  */
 void ATdestroyBinaryReader(BinaryReader binaryReader)
 {
-  SymEntry* sharedAFuns = binaryReader->sharedAFuns;
+  _SymEntry** sharedAFuns = binaryReader->sharedAFuns;
   ptrdiff_t sharedAFunsIndex = binaryReader->sharedAFunsIndex;
 
-  destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
+  // destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
 
   /* We can just free the shared terms, shared signatures and the stack, since they're all present in the memory block store. */
-  AT_free(binaryReader->sharedTerms);
+  // AT_free(binaryReader->sharedTerms);
 
-  AT_free(binaryReader->stack);
+  // AT_free(binaryReader->stack);
 
   while (--sharedAFunsIndex >= 0)
   {
@@ -1234,7 +1264,7 @@ void ATdestroyBinaryReader(BinaryReader binaryReader)
 
   resetTempReaderData(binaryReader);
 
-  AT_free(binaryReader);
+  delete binaryReader;
 }
 
 
@@ -1244,7 +1274,7 @@ void ATdestroyBinaryReader(BinaryReader binaryReader)
  * Writes the given ATerm in SAF format to the given file.
  * NOTE: The given file must be opened in binary mode (at least on Win32 this is required).
  */
-bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
+bool ATwriteToSAFFile(const ATerm &aTerm, FILE* file)
 {
   BinaryWriter binaryWriter;
   ByteBuffer byteBuffer;

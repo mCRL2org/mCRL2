@@ -344,7 +344,7 @@ void test_is_bes()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  ATinit();
 
   test_trivial();
   test_pbes();

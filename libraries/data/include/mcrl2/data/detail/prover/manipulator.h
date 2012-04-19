@@ -49,8 +49,8 @@ class InternalFormatManipulator
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
     /// \brief on the lefthand side.
     atermpp::aterm_appl set_true_auxiliary(
-                const atermpp::aterm_appl a_formula, 
-                const atermpp::aterm_appl a_guard,
+                const atermpp::aterm_appl &a_formula, 
+                const atermpp::aterm_appl &a_guard,
                 atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_true)
     {
       if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
@@ -104,8 +104,8 @@ class InternalFormatManipulator
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c false.
     atermpp::aterm_appl set_false_auxiliary(
-              const atermpp::aterm_appl a_formula, 
-              const atermpp::aterm_appl a_guard,
+              const atermpp::aterm_appl &a_formula, 
+              const atermpp::aterm_appl &a_guard,
               atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_false)
     {
       if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
@@ -152,7 +152,10 @@ class InternalFormatManipulator
     /// \brief Returns an expression in the internal format of the rewriter with the Jitty strategy.
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
-    atermpp::aterm_appl make_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
+    atermpp::aterm_appl make_if_then_else(
+               const atermpp::aterm_appl &a_expr, 
+               const atermpp::aterm_appl &a_high, 
+               const atermpp::aterm_appl &a_low)
     {
       return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, 
                                          (ATermAppl)a_expr, 
@@ -178,7 +181,9 @@ class InternalFormatManipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low. If \c a_high equals \c a_low, the
     /// \brief method returns \c a_high instead.
-    atermpp::aterm_appl make_reduced_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
+    atermpp::aterm_appl make_reduced_if_then_else(const atermpp::aterm_appl &a_expr, 
+                                                  const atermpp::aterm_appl &a_high, 
+                                                  const atermpp::aterm_appl &a_low)
     {
       if (a_high == a_low)
       {
@@ -192,8 +197,13 @@ class InternalFormatManipulator
 
     /// \brief Orients the term \c a_term such that all equations of the form t1 == t2 are
     /// \brief replaced by t2 == t1 if t1 > t2.
-    atermpp::aterm_appl orient(atermpp::aterm_appl a_term)
+    atermpp::aterm_appl orient(const atermpp::aterm_appl &a_term)
     {
+      if (is_variable(a_term))
+      {
+        return a_term;
+      } 
+
       // v_result is NULL if not found; Therefore type ATerm.
       atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
       if (it!=f_orient.end())   // found
@@ -209,13 +219,14 @@ class InternalFormatManipulator
       v_function = a_term(0);
       v_arity = ATgetArity(v_symbol);
 
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity + 1);
+      // MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity);
+      std::vector < atermpp::aterm > v_parts(v_arity);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = orient(a_term(i));
       }
-      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeAppl(v_symbol, v_parts.begin(),v_parts.end()));
 
       if (f_info.is_equality(v_result))
       {
@@ -237,7 +248,9 @@ class InternalFormatManipulator
 
     /// \brief Initializes the table InternalFormatManipulator::f_set_true and calls the method
     /// \brief AM_Jitty::f_set_true_auxiliary.
-    atermpp::aterm_appl set_true(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
+    atermpp::aterm_appl set_true(
+                 const atermpp::aterm_appl &a_formula, 
+                 const atermpp::aterm_appl &a_guard)
     {
       atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_true;
       return set_true_auxiliary(a_formula, a_guard, f_set_true);
@@ -245,7 +258,9 @@ class InternalFormatManipulator
 
     /// \brief Initializes the table InternalFormatManipulator::f_set_false and calls the method
     /// \brief AM_Jitty::f_set_false_auxiliary.
-    atermpp::aterm_appl set_false(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
+    atermpp::aterm_appl set_false(
+                 const atermpp::aterm_appl &a_formula, 
+                 const atermpp::aterm_appl &a_guard)
     {
       atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);
