@@ -10,7 +10,8 @@
 /// \brief Test for the PBES_Explorer interface.
 
 #include <iostream>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -22,6 +23,8 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
+using mcrl2::utilities::collect_after_test_case;
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 namespace ltsmin
 {
@@ -39,6 +42,11 @@ public:
     explorer(const pbes<>& p, const std::string& rewrite_strategy = "jittyc", bool reset = false) :
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset),
         transition_count(0)
+    {}
+
+    explorer(const std::string& f, const std::string& rewrite_strategy = "jittyc", bool reset = false) :
+      mcrl2::pbes_system::explorer(f, rewrite_strategy, reset),
+      transition_count(0)
     {}
 
     size_t get_state_count() const
@@ -202,20 +210,15 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
 {
   std::clog << "run_pbes_explorer" << std::endl;
   pbes<> p = txt2pbes(pbes_text);
-  core::garbage_collect();
   normalize(p);
-  core::garbage_collect();
   if (!is_ppg(p))
   {
     std::clog << "Rewriting to PPG..." << std::endl;
     p = to_ppg(p);
     std::clog << "done." << std::endl;
   }
-  core::garbage_collect();
   ltsmin::test::explorer* pbes_explorer = new ltsmin::test::explorer(p, rewrite_strategy);
-  core::garbage_collect();
   lts_info* info = pbes_explorer->get_info();
-  core::garbage_collect();
   int state_length = info->get_lts_type().get_state_length();
   BOOST_CHECK(num_parts==state_length);
   //std::clog << state_length << " parts" << std::endl;
@@ -231,17 +234,41 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
   // TODO: check matrices ...
 
   pbes_explorer->bfs();
-  core::garbage_collect();
   // check number of states and transitions:
   BOOST_CHECK(num_states==(int)pbes_explorer->get_state_count());
   BOOST_CHECK(num_transitions==(int)pbes_explorer->get_transition_count());
-  core::garbage_collect();
   delete pbes_explorer;
-  core::garbage_collect();
+}
+
+void run_pbes_explorer_file(std::string filename, int num_parts, int num_groups, int num_states, int num_transitions,
+    const std::string& rewrite_strategy = "jitty")
+{
+  std::clog << "run_pbes_explorer_file" << std::endl;
+  ltsmin::test::explorer* pbes_explorer = new ltsmin::test::explorer(filename, rewrite_strategy);
+  lts_info* info = pbes_explorer->get_info();
+  int state_length = info->get_lts_type().get_state_length();
+  BOOST_CHECK(num_parts==state_length);
+  //std::clog << state_length << " parts" << std::endl;
+  int num_rows = info->get_number_of_groups();
+  //std::clog << num_rows << " groups" << std::endl;
+  BOOST_CHECK(num_groups==num_rows);
+  std::map<int,std::vector<bool> > matrix = info->get_dependency_matrix();
+  std::map<int,std::vector<bool> > read_matrix = info->get_read_matrix();
+  std::map<int,std::vector<bool> > write_matrix = info->get_write_matrix();
+  (void)matrix;
+  (void)read_matrix;
+  (void)write_matrix;
+  // TODO: check matrices ...
+
+  pbes_explorer->bfs();
+  // check number of states and transitions:
+  BOOST_CHECK(num_states==(int)pbes_explorer->get_state_count());
+  BOOST_CHECK(num_transitions==(int)pbes_explorer->get_transition_count());
+  delete pbes_explorer;
 }
 
 
-void test_pbes_explorer1()
+BOOST_AUTO_TEST_CASE(buffer)
 {
   // buffer.nodeadlock.pbesparelm
   std::string pbes_text =
@@ -263,10 +290,8 @@ void test_pbes_explorer1()
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
 }
-
-void test_pbes_explorer2()
+BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 {
-  // buffer.2.read_then_eventually_send.pbesparelm.simple
   std::string pbes_text =
       "sort D = struct d1 | d2;\n"
       "map  M: Pos;\n"
@@ -283,22 +308,23 @@ void test_pbes_explorer2()
   int num_groups = 9; // each of the conjuncts of every equation
   int num_states = 213;
   int num_transitions = 414;
+
+  std::string pbes_filename = utilities::temporary_filename("pbes_explorer_test");
+  txt2pbes(pbes_text).save(pbes_filename);
+
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
+  run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
+  run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
+  // clean up
+  boost::filesystem::remove(pbes_filename);
 }
 
-
-int test_main(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
-  //log::log_level_t log_level = log::debug2;
-  //log::mcrl2_logger::set_reporting_level(log_level);
-
-  test_pbes_explorer1();
-  test_pbes_explorer2();
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;
 }
