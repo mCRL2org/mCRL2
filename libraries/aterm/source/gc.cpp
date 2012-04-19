@@ -387,10 +387,6 @@ static void check_unmarked_block()
 
 static void sweep_phase()
 {
-size_t total_nr_terms=0;
-size_t total_nr_free_terms=0;
-size_t total_aterm_memory=0;
-
   for (size_t size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
@@ -416,15 +412,12 @@ size_t total_aterm_memory=0;
         ATerm t = (ATerm)cur;
         if (IS_MARKED(t->header))
         {
-++total_nr_terms;
-total_aterm_memory +=size*8;
           CLR_MARK(t->header);
           empty = false;
           assert(!IS_MARKED(t->header));
         }
         else
         {
-++total_nr_free_terms;
           switch (ATgetType(t))
           {
             case AT_FREE:
@@ -498,7 +491,6 @@ total_aterm_memory +=size*8;
 #endif
 
   }
-fprintf(stderr,"Total memory aterms: %ld free %ld memory   %ld\n",total_nr_terms,total_nr_free_terms,total_aterm_memory);
 }
 
 /*}}}  */
