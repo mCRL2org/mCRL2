@@ -1,4 +1,4 @@
-#define PRINT_GC_INFO
+// #define PRINT_GC_INFO
 /**
   * encoding.h: Low level encoding of ATerm datatype.
   */
