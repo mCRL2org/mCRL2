@@ -43,13 +43,13 @@ class simulation
     };
 
     /// Constructor.
-    simulation(const specification& specification, data::rewrite_strategy strategy);
+    simulation(const specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
 
     /// Returns the current annotated state vector.
-    const atermpp::deque<state_t> &trace() const { return m_tau_prioritization ? m_full_trace : m_prioritized_trace; }
+    const atermpp::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
 
     /// Remove states from the end of the simulation, making \a state_number the last state.
-    void reset(size_t state_number);
+    void truncate(size_t state_number);
 
     /// Choose outgoing transition \a transition_number and add its state to the state vector.
     void select(size_t transition_number);
@@ -57,11 +57,18 @@ class simulation
     /// If enabled, tau prioritization is applied to all outgoing transitions, and in-between states are hidden from the state vector.
     void enable_tau_prioritization(bool enable, std::string action = "ctau");
 
+    /// Save the trace to a file.
+    void save(const std::string &filename);
+
+    /// Load a trace from a file.
+    void load(const std::string &filename);
+
   private:
     atermpp::vector<transition_t> transitions(state source_state);
     atermpp::vector<transition_t> prioritize(const atermpp::vector<transition_t> &transitions);
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
+    atermpp::deque<state_t> match_trace(atermpp::deque<state_t> trace, const atermpp::vector<transition_t> &transitions, size_t transition_number);
 
   private:
     specification m_specification;

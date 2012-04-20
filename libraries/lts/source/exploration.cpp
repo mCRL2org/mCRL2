@@ -447,7 +447,7 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::state_t state, std::string
     {
       if (get_prioritised_representative(j->internal_state()) == *i)
       {
-        trace.addAction(lps::detail::multi_action_to_aterm(j->action()));
+        trace.addAction(j->action());
         found = true;
         break;
       }
