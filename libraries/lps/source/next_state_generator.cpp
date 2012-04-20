@@ -13,18 +13,11 @@
 #include <algorithm>
 #include <set>
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-
-static specification do_instantiate_global_variables(specification spec)
-{
-  instantiate_global_variables(spec);
-  return spec;
-}
 
 static float condition_selectivity(data_expression e, variable v)
 {
@@ -95,7 +88,7 @@ next_state_generator::next_state_generator(
   const data::rewriter &rewriter,
   bool use_enumeration_caching,
   bool use_summand_pruning)
-  : m_specification(do_instantiate_global_variables(spec)),
+  : m_specification(spec),
     m_rewriter(rewriter),
     m_enumerator(m_specification.data(), m_rewriter),
     m_use_enumeration_caching(use_enumeration_caching),

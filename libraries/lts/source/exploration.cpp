@@ -22,7 +22,6 @@ using namespace mcrl2::lts;
  * TODO:
  * - make enumeration caching and summand pruning user-configurable
  * - add state tree-storage option
- * - debug and enable used equation selection
  * - optimize action-detect by computing for each summand whether it should be detected or not
  * - optimize divergence-detect by keeping a separate next state generator
  * - clean up options struct
@@ -79,15 +78,30 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   lps::specification specification(m_options.specification);
 
-  mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
-  std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
-
-  if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
+  if (m_options.usedummies)
   {
-    extra_function_symbols.insert(data::greater(data::sort_nat::nat()));
-    extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
+    mCRL2log(verbose) << "replacing free variables with dummy values." << std::endl;
+    lps::detail::instantiate_global_variables(specification);
   }
-  data::rewriter rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
+
+  data::rewriter rewriter;
+  if (m_options.removeunused)
+  {
+    mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
+    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
+
+    if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
+    {
+      extra_function_symbols.insert(data::greater(data::sort_nat::nat()));
+      extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
+    }
+
+    rewriter = data::rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
+  }
+  else
+  {
+    rewriter = data::rewriter(specification.data(), m_options.strat);
+  }
 
   if (m_options.priority_action != "")
   {

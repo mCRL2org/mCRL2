@@ -48,9 +48,9 @@ struct lts_generation_options
     detect_deadlock(false),
     detect_divergence(false),
     detect_action(false),
-    usedummies(true), /// REMOVE, used by exploration_old.h
-    removeunused(true), /// REMOVE, used by exploration_old.h
-    stateformat(lps::GS_STATE_TREE) /// REMOVE, used by exploration_old.h
+    usedummies(true),
+    removeunused(true),
+    stateformat(lps::GS_STATE_TREE)
   {
     generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
   }
@@ -66,6 +66,8 @@ struct lts_generation_options
   }
 
   mcrl2::lps::specification specification;
+  bool usedummies;
+  bool removeunused;
 
   mcrl2::data::rewriter::strategy strat;
   exploration_strategy expl_strat;
@@ -75,6 +77,7 @@ struct lts_generation_options
   size_t initial_table_size;
   bool suppress_progress_messages;
 
+  int stateformat;
   bool bithashing;
   size_t bithashsize;
 
@@ -91,9 +94,6 @@ struct lts_generation_options
   bool detect_action;
   atermpp::set < mcrl2::core::identifier_string > trace_actions;
 
-  bool usedummies; /// REMOVE
-  bool removeunused; /// REMOVE
-  int stateformat; /// REMOVE
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter; /// REMOVE
 };
 
