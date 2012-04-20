@@ -32,12 +32,15 @@ namespace lts
 struct lts_generation_options
 {
   lts_generation_options() :
+    usedummies(true),
+    removeunused(true),
     strat(mcrl2::data::jitty),
     expl_strat(es_breadth),
     todo_max((std::numeric_limits< size_t >::max)()),
     max_states(DEFAULT_MAX_STATES),
     initial_table_size(DEFAULT_INIT_TSIZE),
     suppress_progress_messages(false),
+    stateformat(lps::GS_STATE_TREE),
     bithashing(false),
     bithashsize(DEFAULT_BITHASHSIZE),
     outformat(mcrl2::lts::lts_none),
@@ -47,10 +50,7 @@ struct lts_generation_options
     save_error_trace(false),
     detect_deadlock(false),
     detect_divergence(false),
-    detect_action(false),
-    usedummies(true),
-    removeunused(true),
-    stateformat(lps::GS_STATE_TREE)
+    detect_action(false)
   {
     generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
   }
