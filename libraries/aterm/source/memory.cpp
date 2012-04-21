@@ -207,7 +207,6 @@ void AT_initMemory()
   address_of_ATempty=&*ATempty;
   
   ATempty->header = EMPTY_HEADER;
-  CHECK_HEADER(ATempty->header);
   ATempty->next = NULL;
 
   hnr = hash_number(&*ATempty, TERM_SIZE_LIST);
@@ -248,13 +247,13 @@ static bool check_that_all_objects_are_free()
     }
   }
 
-  for(size_t i=0; i<AFun::at_lookup_table.size(); ++i)
+  for(size_t i=0; i<AFun::at_lookup_table().size(); ++i)
   {
-    if (i!=AS_EMPTY_LIST.number() && AFun::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=AS_EMPTY_LIST.number() && AFun::at_lookup_table()[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                AFun::at_lookup_table[i]->name,AFun::at_lookup_table[i]->id,AFun::at_lookup_table[i]->reference_count);
+                AFun::at_lookup_table()[i]->name,AFun::at_lookup_table()[i]->id,AFun::at_lookup_table()[i]->reference_count);
     }
 
   }
@@ -562,7 +561,6 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
   for (size_t i=0; i<arity; i++)
   {
     arg = va_arg(args, _ATerm *);
-    CHECK_TERM(&*arg);
     hnr = COMBINE(hnr, HN(&*arg));
     buffer[i] = arg;
   }
@@ -598,7 +596,6 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     for (size_t i=0; i<arity; i++)
     {
       buffer[i]->reference_count++;
@@ -655,7 +652,6 @@ ATermAppl ATmakeAppl0(const AFun &sym)
   hnr &= table_mask;
   cur->header = header;
   AFun::increase_reference_count<true>(sym.number());
-  CHECK_HEADER(cur->header);
   cur->next = &*ATerm::hashtable[hnr];
   ATerm::hashtable[hnr] = cur;
 
@@ -677,7 +673,6 @@ ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*arg0);
   CHECK_ARITY(ATgetArity(sym), 1);
 
   hnr = START(header);
@@ -711,7 +706,6 @@ ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
   hnr &= table_mask;
   cur->header = header;
   AFun::increase_reference_count<true>(sym.number());
-  CHECK_HEADER(cur->header);
   arg0->reference_count++;
   reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
   cur->next = ATerm::hashtable[hnr];
@@ -735,8 +729,6 @@ ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
   CHECK_ARITY(ATgetArity(sym), 2);
 
   hnr = START(header);
@@ -772,7 +764,6 @@ ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
   hnr &= table_mask;
   cur->header = header;
   AFun::increase_reference_count<true>(sym.number());
-  CHECK_HEADER(cur->header);
   arg0->reference_count++;
   reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
   arg1->reference_count++;
@@ -799,9 +790,6 @@ ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
   CHECK_ARITY(ATgetArity(sym), 3);
 
   hnr = START(header);
@@ -826,7 +814,6 @@ ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     arg0->reference_count++;
     reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
     arg1->reference_count++;
@@ -858,10 +845,6 @@ ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   header = APPL_HEADER(4, sym.number());
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
   CHECK_ARITY(ATgetArity(sym), 4);
 
   hnr = START(header);
@@ -888,7 +871,6 @@ ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     arg0->reference_count++;
     reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
     arg1->reference_count++;
@@ -921,12 +903,6 @@ ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-  CHECK_TERM(&*arg4);
-
   CHECK_ARITY(ATgetArity(sym), 5);
 
   hnr = START(header);
@@ -955,7 +931,6 @@ ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     arg0->reference_count++;
     reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
     arg1->reference_count++;
@@ -990,12 +965,6 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-  CHECK_TERM(&*arg4);
-  CHECK_TERM(&*arg5);
   CHECK_ARITY(ATgetArity(sym), 6);
 
   hnr = START(header);
@@ -1026,7 +995,6 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     arg0->reference_count++;
     reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
     arg1->reference_count++;
@@ -1064,7 +1032,6 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
-  CHECK_TERM(&*args);
   assert(arity == ATgetLength(args));
 
   _ATermList* argptr = &*args;
@@ -1110,7 +1077,6 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     argptr = &*args;
     for (size_t i=0; i<arity; i++)
     {
@@ -1145,7 +1111,6 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
-    CHECK_TERM(&*args[i]);
     hnr = COMBINE(hnr, (HashNumber)&*args[i]);
   }
   hnr = FINISH(hnr);
@@ -1182,7 +1147,6 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     for (size_t i=0; i<arity; i++)
     {
       args[i]->reference_count++;
@@ -1238,7 +1202,6 @@ ATermInt ATmakeInt(const int val)
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
-    CHECK_HEADER(cur->header);
     reinterpret_cast<_ATermInt*>(cur)->reserved = _val.reserved;
     reinterpret_cast<_ATermInt*>(cur)->value = _val.value;
 
@@ -1266,7 +1229,6 @@ ATermList ATmakeList1(const ATerm &el)
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-  CHECK_TERM(&*el);
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*el));
@@ -1287,7 +1249,6 @@ ATermList ATmakeList1(const ATerm &el)
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
-    CHECK_HEADER(cur->header);
     el->reference_count++;
     reinterpret_cast<_ATermList*>(cur)->head = &*el;
     ATempty->reference_count++;
@@ -1329,8 +1290,6 @@ ATermList ATinsert(const ATermList &tail, const ATerm &el)
 
   header = LIST_HEADER(newLength);
 
-  CHECK_TERM(&*tail);
-  CHECK_TERM(&*el);
 
   assert(ATgetType(tail) == AT_LIST);
 
@@ -1353,7 +1312,6 @@ ATermList ATinsert(const ATermList &tail, const ATerm &el)
     /* Hashtable might be resized, so delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
-    CHECK_HEADER(cur->header);
     el->reference_count++;
     reinterpret_cast<_ATermList*>(cur)->head = &*el;
     tail->reference_count++;
@@ -1378,8 +1336,6 @@ ATermAppl ATsetArgument(const ATermAppl &appl, const ATerm &arg, const size_t n)
   const size_t sym_number = ATgetAFun(appl);
   
   bool found;
-
-  CHECK_TERM(&*arg);
 
   size_t arity = ATgetArity(sym_number);
   assert(n < arity);
@@ -1439,7 +1395,6 @@ ATermAppl ATsetArgument(const ATermAppl &appl, const ATerm &arg, const size_t n)
     hnr &= table_mask;
     cur->header = appl->header;
     AFun::increase_reference_count<true>(sym_number);
-    CHECK_HEADER(cur->header);
     for (size_t i=0; i<arity; i++)
     {
       if (i!=n)

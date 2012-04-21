@@ -1,7 +1,7 @@
 #ifndef BAFIO_H
 #define BAFIO_H
 
-#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace aterm
 {

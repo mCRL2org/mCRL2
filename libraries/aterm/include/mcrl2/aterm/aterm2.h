@@ -392,25 +392,25 @@ AFun  ATmakeAFun(const char* name, const size_t arity, const bool quoted);
 inline
 char* ATgetName(const AFun &sym)
 {
-  return AFun::at_lookup_table[sym.number()]->name;
+  return AFun::at_lookup_table()[sym.number()]->name;
 }
 
 inline
 size_t ATgetArity(const size_t n)
 {
-  return GET_LENGTH(AFun::at_lookup_table[n]->header);
+  return GET_LENGTH(AFun::at_lookup_table()[n]->header);
 }
 
 inline
 size_t ATgetArity(const AFun &sym)
 {
-  return GET_LENGTH(AFun::at_lookup_table[sym.number()]->header);
+  return GET_LENGTH(AFun::at_lookup_table()[sym.number()]->header);
 }
 
 inline
 bool ATisQuoted(const AFun &sym)
 {
-  return IS_QUOTED(AFun::at_lookup_table[sym.number()]->header);
+  return IS_QUOTED(AFun::at_lookup_table()[sym.number()]->header);
 }
 
 void    ATprotectAFun(const AFun &sym);

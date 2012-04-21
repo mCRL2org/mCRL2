@@ -9,6 +9,7 @@
 #include <assert.h>
 #include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/atypes.h"
+#include "mcrl2/aterm/afun.h"
 
 namespace aterm
 {
@@ -218,7 +219,7 @@ static const header_type SHIFT_TYPE = MCRL2_HT(4);
 
 static const header_type SHIFT_ARITY = MCRL2_HT(7);
 
-static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
+// static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
 static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
 static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
 static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
@@ -234,11 +235,11 @@ bool EQUAL_HEADER(const header_type h1, const header_type h2)
 static const size_t SHIFT_SYMBOL = SHIFT_LENGTH;
 static const size_t SHIFT_SYM_ARITY = SHIFT_LENGTH;
 
-inline
+/* inline
 bool IS_MARKED(const header_type h)
 {
   return (h & MASK_MARK) != (header_type)(0);
-}
+} */
 
 inline
 size_t GET_TYPE(const header_type h)
@@ -269,7 +270,7 @@ bool IS_QUOTED(const header_type h)
   return (h & MASK_QUOTED) != (header_type)(0);
 }
 
-inline
+/* inline
 void SET_MARK(header_type& h)
 {
   do
@@ -277,7 +278,7 @@ void SET_MARK(header_type& h)
     (h) |= MASK_MARK;
   }
   while (0);
-}
+} */
 
 inline
 void SET_QUOTED(header_type& h)
@@ -289,7 +290,7 @@ void SET_QUOTED(header_type& h)
   while (0);
 }
 
-inline
+/* inline
 void CLR_MARK(header_type& h)
 {
   do
@@ -297,7 +298,7 @@ void CLR_MARK(header_type& h)
     (h) &= ~MASK_MARK;
   }
   while (0);
-}
+} */
 
 inline
 void CLR_QUOTED(header_type& h)

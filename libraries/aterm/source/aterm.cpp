@@ -1603,7 +1603,7 @@ ATreadFromString(const char* string)
 /*}}}  */
 /*{{{  void AT_unmarkIfAllMarked(ATerm t) */
 
-void AT_unmarkIfAllMarked(const ATerm &t)
+/* void AT_unmarkIfAllMarked(const ATerm &t)
 {
   if (IS_MARKED(t->header))
   {
@@ -1650,7 +1650,7 @@ void AT_unmarkIfAllMarked(const ATerm &t)
     }
 
   }
-} 
+}  */
 
 /*}}}  */
 
@@ -1660,14 +1660,15 @@ void AT_unmarkIfAllMarked(const ATerm &t)
 
 /*{{{  static size_t calcUniqueAFuns(ATerm t) */
 
-static size_t calcUniqueAFuns(const ATerm &t)
+static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
 {
   size_t nr_unique = 0;
   size_t  i, arity;
   AFun sym;
   ATermList list;
 
-  if (IS_MARKED(t->header))
+  // if (IS_MARKED(t->header))
+  if (visited.count(t)>0)
   {
     return 0;
   }
@@ -1675,7 +1676,7 @@ static size_t calcUniqueAFuns(const ATerm &t)
   switch (ATgetType(t))
   {
     case AT_INT:
-      if (!AFun::at_lookup_table[AS_INT.number()]->count++)
+      if (!AFun::at_lookup_table()[AS_INT.number()]->count++)
       {
         nr_unique = 1;
       }
@@ -1683,33 +1684,35 @@ static size_t calcUniqueAFuns(const ATerm &t)
 
     case AT_APPL:
       sym = ATgetAFun((ATermAppl) t);
-      assert(AFun::at_lookup_table.size()>sym.number());
-      nr_unique = AFun::at_lookup_table[sym.number()]->count>0 ? 0 : 1;
-      AFun::at_lookup_table[sym.number()]->count++;
-      AT_markAFun(sym);
+      assert(AFun::at_lookup_table().size()>sym.number());
+      nr_unique = AFun::at_lookup_table()[sym.number()]->count>0 ? 0 : 1;
+      AFun::at_lookup_table()[sym.number()]->count++;
+      // AT_markAFun(sym);
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++)
       {
-        nr_unique += calcUniqueAFuns(ATgetArgument((ATermAppl)t, i));
+        nr_unique += calcUniqueAFuns(ATgetArgument((ATermAppl)t, i),visited);
       }
       break;
 
     case AT_LIST:
       list = (ATermList)t;
-      while (!ATisEmpty(list) && !IS_MARKED(list->header))
+      while (!ATisEmpty(list) && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
       {
-        SET_MARK(list->header);
-        if (!AFun::at_lookup_table[AS_LIST.number()]->count++)
+        // SET_MARK(list->header);
+        visited.insert(list);
+        if (!AFun::at_lookup_table()[AS_LIST.number()]->count++)
         {
           nr_unique++;
         }
-        nr_unique += calcUniqueAFuns(ATgetFirst(list));
+        nr_unique += calcUniqueAFuns(ATgetFirst(list),visited);
         list = ATgetNext(list);
       }
-      if (ATisEmpty(list) && !IS_MARKED(list->header))
+      if (ATisEmpty(list) && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
       {
-        SET_MARK(list->header);
-        if (!AFun::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
+        // SET_MARK(list->header);
+        visited.insert(list);
+        if (!AFun::at_lookup_table()[AS_EMPTY_LIST.number()]->count++)
         {
           nr_unique++;
         }
@@ -1717,15 +1720,17 @@ static size_t calcUniqueAFuns(const ATerm &t)
       break;
   }
 
-  SET_MARK(t->header);
+  visited.insert(t);
+  // SET_MARK(t->header);
 
   return nr_unique;
 }
 
 size_t AT_calcUniqueAFuns(const ATerm &t)
 {
-  size_t result = calcUniqueAFuns(t);
-  AT_unmarkIfAllMarked(t);
+  std::set<ATerm> visited;
+  size_t result = calcUniqueAFuns(t,visited);
+  // AT_unmarkIfAllMarked(t);
 
   return result;
 }

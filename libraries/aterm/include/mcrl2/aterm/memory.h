@@ -172,12 +172,6 @@ size_t AT_getMaxTermSize();
 
 static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 
-inline
-void CHECK_HEADER(const header_type h)
-{
-  assert(!IS_MARKED(h));
-}
-
 /* inline
 void CHECK_ARGUMENT(const ATermAppl / *t* /, const size_t / *n* /)
 {
@@ -287,7 +281,6 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
     hnr &= table_mask;
     cur->header = header;
     AFun::increase_reference_count<true>(sym.number());
-    CHECK_HEADER(cur->header);
     
     size_t j=0;
     for (ForwardIterator i=begin; i!=end; i++,j++)
