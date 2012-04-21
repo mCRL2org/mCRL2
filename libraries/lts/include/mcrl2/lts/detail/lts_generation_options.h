@@ -50,7 +50,9 @@ struct lts_generation_options
     save_error_trace(false),
     detect_deadlock(false),
     detect_divergence(false),
-    detect_action(false)
+    detect_action(false),
+    use_enumeration_caching(false),
+    use_summand_pruning(false)
   {
     generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
   }
@@ -95,6 +97,9 @@ struct lts_generation_options
   atermpp::set < mcrl2::core::identifier_string > trace_actions;
 
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter; /// REMOVE
+
+  bool use_enumeration_caching;
+  bool use_summand_pruning;
 };
 
 class lps2lts_algorithm_base

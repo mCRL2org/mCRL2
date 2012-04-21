@@ -33,9 +33,6 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   assert(!(m_options.bithashing && m_options.outformat != lts_aut && m_options.outformat != lts_none));
 
-  bool use_enumeration_caching = true;
-  bool use_summand_pruning = true;
-
   if (m_options.bithashing)
   {
     m_bit_hash_table = bit_hash_table(m_options.bithashsize);
@@ -128,7 +125,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     prioritised_specification.process().action_summands() = prioritised_summands;
     specification.process().action_summands() = nonprioritised_summands;
 
-    m_confluence_generator = new next_state_generator(prioritised_specification, rewriter, use_enumeration_caching, use_summand_pruning);
+    m_confluence_generator = new next_state_generator(prioritised_specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
   }
   else
   {
@@ -156,7 +153,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     }
   }
 
-  m_generator = new next_state_generator(specification, rewriter, use_enumeration_caching, use_summand_pruning);
+  m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
   if (m_options.detect_deadlock)
   {
