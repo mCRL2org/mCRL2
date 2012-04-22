@@ -33,16 +33,10 @@ namespace lts
 
 class lps2lts_algorithm: public lps2lts_algorithm_base
 {
+  private:
   typedef lps::next_state_generator next_state_generator;
-  typedef next_state_generator::internal_state_t state_t;
-  typedef lps::multi_action action_label_t;
-
-  struct state_info
-  {
-    state_t state;
-    atermpp::list<next_state_generator::transition_t> transitions;
-  };
-  friend struct atermpp::aterm_traits<state_info>;
+  typedef next_state_generator::internal_state_t generator_state_t;
+  typedef atermpp::aterm storage_state_t;
 
   private:
     lts_generation_options m_options;
@@ -62,7 +56,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
 
     std::vector<size_t> m_tau_summands;
 
-    atermpp::map<state_t, state_t> m_backpointers;
+    atermpp::map<storage_state_t, storage_state_t> m_backpointers;
     size_t m_traces_saved;
 
     size_t m_num_states;
@@ -101,35 +95,27 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     }
 
   private:
-    state_t get_prioritised_representative(state_t state);
+    generator_state_t generator_state(const storage_state_t storage_state);
+    storage_state_t storage_state(const generator_state_t generator_state);
+    generator_state_t get_prioritised_representative(generator_state_t state);
     void value_prioritize(atermpp::list<next_state_generator::transition_t> &transitions);
-    bool save_trace(state_t state, std::string filename);
-    bool search_divergence(state_t state, std::set<state_t> &current_path, atermpp::set<state_t> &visited);
-    void check_divergence(state_t state);
-    void check_action(state_t state, next_state_generator::transition_t &transition);
-    void save_deadlock(state_t state);
-    void save_error(state_t state);
-    bool add_transition(state_t state, next_state_generator::transition_t &transition);
-    atermpp::list<next_state_generator::transition_t> get_transitions(state_t state);
+    bool save_trace(generator_state_t state, std::string filename);
+    bool search_divergence(generator_state_t state, std::set<generator_state_t> &current_path, atermpp::set<generator_state_t> &visited);
+    void check_divergence(generator_state_t state);
+    void check_action(generator_state_t state, next_state_generator::transition_t &transition);
+    void save_deadlock(generator_state_t state);
+    void save_error(generator_state_t state);
+    bool add_transition(generator_state_t state, next_state_generator::transition_t &transition);
+    atermpp::list<next_state_generator::transition_t> get_transitions(generator_state_t state);
 
-    void generate_lts_breadth(state_t initial_state);
-    void generate_lts_breadth_bithashing(state_t initial_state);
-    void generate_lts_depth(state_t initial_state);
-    void generate_lts_random(state_t initial_state);
+    void generate_lts_breadth();
+    void generate_lts_breadth_bithashing(generator_state_t initial_state);
+    void generate_lts_depth(generator_state_t initial_state);
+    void generate_lts_random(generator_state_t initial_state);
 };
 
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-  template<> struct aterm_traits<mcrl2::lts::lps2lts_algorithm::state_info>
-  {
-    static void protect(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.protect(); }
-    static void unprotect(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.unprotect(); }
-    static void mark(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.mark(); }
-  };
-}
 
 #endif // MCRL2_LTS_DETAIL_EXPLORATION_H

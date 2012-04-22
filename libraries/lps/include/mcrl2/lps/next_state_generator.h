@@ -228,8 +228,17 @@ class next_state_generator
       return m_rewriter;
     }
 
+    /// \brief Converts states to internal states.
     internal_state_t get_internal_state(state s) const;
+
+    /// \brief Converts internal states to states.
     state get_state(internal_state_t internal_state) const;
+
+    /// \brief Returns the function symbol used to construct internal states.
+    atermpp::function_symbol internal_state_function() const
+    {
+      return m_state_function;
+    }
 
   private:
     void declare_constructors();
