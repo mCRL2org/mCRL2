@@ -53,6 +53,7 @@ class next_state_generator
 
     struct summand_t
     {
+      action_summand *summand;
       data::variable_list variables;
       rewriter_term_t condition;
       atermpp::aterm_appl result_state;
@@ -72,24 +73,38 @@ class next_state_generator
     };
     friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
-    specification m_specification;
-    rewriter_t m_rewriter;
-    enumerator_t m_enumerator;
-
-    bool m_use_enumeration_caching;
-    bool m_use_summand_pruning;
-
-    data::variable_vector m_process_parameters;
-    atermpp::function_symbol m_state_function;
-    atermpp::vector<summand_t> m_summands;
-
-    pruning_tree_node_t m_pruning_tree;
-    std::vector<size_t> m_pruning_tree_parameters;
-    substitution_t m_pruning_tree_substitution;
-    rewriter_term_t m_false;
-
   public:
     typedef atermpp::term_appl<rewriter_term_t> internal_state_t;
+
+    class summand_subset_t
+    {
+      friend class next_state_generator;
+      public:
+        /// \brief Trivial constructor. Constructs an invalid command subset.
+        summand_subset_t() {}
+
+        /// \brief Constructs the full summand subset for the given generator.
+        summand_subset_t(next_state_generator *generator, bool use_summand_pruning);
+
+        /// \brief Constructs the summand subset containing the given commands.
+        summand_subset_t(next_state_generator *generator, const action_summand_vector &summands, bool use_summand_pruning);
+
+      private:
+        next_state_generator *m_generator;
+        bool m_use_summand_pruning;
+
+        std::vector<size_t> m_summands;
+
+        pruning_tree_node_t m_pruning_tree;
+        std::vector<size_t> m_pruning_parameters;
+        substitution_t m_pruning_substitution;
+        rewriter_term_t m_false;
+
+        static bool summand_set_contains(const atermpp::set<action_summand> &summand_set, const summand_t &summand);
+        void build_pruning_parameters(const action_summand_vector &summands);
+        bool is_not_false(summand_t &summand);
+        atermpp::shared_subset<summand_t>::iterator begin(internal_state_t state);
+    };
 
     class iterator;
     class transition_t
@@ -109,6 +124,19 @@ class next_state_generator
         const lps::multi_action &action() const { return m_action; }
     };
 
+    specification m_specification;
+    rewriter_t m_rewriter;
+    enumerator_t m_enumerator;
+
+    bool m_use_enumeration_caching;
+
+    data::variable_vector m_process_parameters;
+    atermpp::function_symbol m_state_function;
+    atermpp::vector<summand_t> m_summands;
+
+    summand_subset_t m_all_summands;
+
+  public:
     class iterator: public boost::iterator_facade<iterator, const transition_t, boost::forward_traversal_tag>
     {
       protected:
@@ -117,9 +145,11 @@ class next_state_generator
         internal_state_t m_state;
         substitution_t *m_substitution;
 
+        bool m_single_summand;
+        size_t m_single_summand_index;
         bool m_use_summand_pruning;
-        atermpp::vector<summand_t>::iterator m_summand_iterator;
-        atermpp::vector<summand_t>::iterator m_summand_iterator_end;
+        std::vector<size_t>::iterator m_summand_iterator;
+        std::vector<size_t>::iterator m_summand_iterator_end;
         atermpp::shared_subset<summand_t>::iterator m_summand_subset_iterator;
         summand_t *m_summand;
 
@@ -137,7 +167,7 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution);
+        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset);
 
         iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, size_t summand_index);
 
@@ -181,7 +211,20 @@ class next_state_generator
     /// \brief Returns an iterator for generating the successors of the given state.
     iterator begin(internal_state_t state, substitution_t *substitution)
     {
-      return iterator(this, state, substitution);
+      return iterator(this, state, substitution, m_all_summands);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the given state.
+    /// Only the successors using summands from \a summand_subset are generated.
+    iterator begin(state state, substitution_t *substitution, summand_subset_t &summand_subset)
+    {
+      return begin(get_internal_state(state), substitution, summand_subset);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the given state.
+    iterator begin(internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset)
+    {
+      return iterator(this, state, substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
@@ -240,11 +283,13 @@ class next_state_generator
       return m_state_function;
     }
 
+    /// \brief Returns a reference to the summand subset containing all summands.
+    summand_subset_t &full_subset()
+    {
+      return m_all_summands;
+    }
   private:
     void declare_constructors();
-    void build_pruning_tree_order();
-    bool is_not_false(summand_t &summand);
-    atermpp::shared_subset<summand_t>::iterator summand_subset(internal_state_t state);
 };
 
 } // namespace lps

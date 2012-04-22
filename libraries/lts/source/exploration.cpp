@@ -100,20 +100,18 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     rewriter = data::rewriter(specification.data(), m_options.strat);
   }
 
+  action_summand_vector prioritised_summands;
+  action_summand_vector nonprioritised_summands;
   if (m_options.priority_action != "")
   {
     mCRL2log(verbose) << "applying confluence reduction with tau action '" << m_options.priority_action << "'..." << std::endl;
 
-    action_summand_vector prioritised_summands;
-    action_summand_vector nonprioritised_summands;
     for (action_summand_vector::iterator i = specification.process().action_summands().begin(); i != specification.process().action_summands().end(); i++)
     {
       if ((m_options.priority_action == "tau" && i->is_tau()) ||
           (i->multi_action().actions().size() == 1 && m_options.priority_action == (std::string)i->multi_action().actions().front().label().name()))
       {
-        action_summand summand(*i);
-        summand.multi_action().actions() = action_list();
-        prioritised_summands.push_back(summand);
+        prioritised_summands.push_back(*i);
       }
       else
       {
@@ -121,15 +119,11 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
       }
     }
 
-    lps::specification prioritised_specification(specification);
-    prioritised_specification.process().action_summands() = prioritised_summands;
-    specification.process().action_summands() = nonprioritised_summands;
-
-    m_confluence_generator = new next_state_generator(prioritised_specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
+    m_use_confluence_reduction = true;
   }
   else
   {
-    m_confluence_generator = 0;
+    m_use_confluence_reduction = false;
   }
 
   if (m_options.detect_divergence)
@@ -155,6 +149,17 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
+  if (!prioritised_summands.empty())
+  {
+    m_actions_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
+    m_confluence_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
+    m_main_subset = &m_actions_subset;
+  }
+  else
+  {
+    m_main_subset = &m_generator->full_subset();
+  }
+
   if (m_options.detect_deadlock)
   {
     mCRL2log(verbose) << "Detect deadlocks.\n" ;
@@ -166,7 +171,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 bool lps2lts_algorithm::generate_lts()
 {
   generator_state_t initial_state = m_generator->internal_initial_state();
-  if (m_confluence_generator != 0)
+  if (m_use_confluence_reduction != 0)
   {
     initial_state = get_prioritised_representative(initial_state);
   }
@@ -345,7 +350,7 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_represen
       low[state] = count;
       next[state] = atermpp::list<generator_state_t>();
 
-      for (next_state_generator::iterator i = m_confluence_generator->begin(state, &m_substitution); i != m_confluence_generator->end(); i++)
+      for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_confluence_subset); i; i++)
       {
         next[state].push_back(i->internal_state());
         if (number.count(i->internal_state()) == 0)
@@ -703,7 +708,7 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
   atermpp::list<next_state_generator::transition_t> transitions;
   try
   {
-    next_state_generator::iterator it(m_generator->begin(state, &m_substitution));
+    next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
     while (it)
     {
       transitions.push_back(*it);
@@ -728,7 +733,7 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
     save_deadlock(state);
   }
 
-  if (m_confluence_generator != 0)
+  if (m_use_confluence_reduction)
   {
     for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {

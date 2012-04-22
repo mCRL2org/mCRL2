@@ -41,8 +41,12 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
   private:
     lts_generation_options m_options;
     next_state_generator *m_generator;
-    next_state_generator *m_confluence_generator;
     next_state_generator::substitution_t m_substitution;
+    next_state_generator::summand_subset_t *m_main_subset;
+
+    bool m_use_confluence_reduction;
+    next_state_generator::summand_subset_t m_actions_subset;
+    next_state_generator::summand_subset_t m_confluence_subset;
 
     atermpp::indexed_set m_state_numbers;
     bit_hash_table m_bit_hash_table;
@@ -68,7 +72,6 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
   public:
     lps2lts_algorithm() :
       m_generator(0),
-      m_confluence_generator(0),
       m_must_abort(false)
     {
     }
@@ -76,7 +79,6 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     virtual ~lps2lts_algorithm()
     {
       delete m_generator;
-      delete m_confluence_generator;
     }
 
     virtual bool initialise_lts_generation(lts_generation_options* options);
