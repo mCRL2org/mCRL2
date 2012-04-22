@@ -493,6 +493,8 @@ void next_state_generator::iterator::increment()
   }
   m_transition.m_action = multi_action(action_list(actions, actions + m_summand->action_label.size()));
 
+  m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]) / sizeof(*m_summand);
+
   for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
   {
     (*m_substitution)[*i] = rewriter_term_t();

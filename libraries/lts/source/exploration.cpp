@@ -19,12 +19,6 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::lts;
 
-/*
- * TODO:
- * - optimize action-detect by computing for each summand whether it should be detected or not
- * - clean up options struct
- */
-
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* options)
 {
   m_options = *options;
@@ -134,6 +128,24 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
       {
         tau_summands.push_back(specification.process().action_summands()[i]);
       }
+    }
+  }
+
+  if (m_options.detect_action)
+  {
+    m_detected_action_summands.reserve(specification.process().action_summands().size());
+    for (size_t i = 0; i < specification.process().action_summands().size(); i++)
+    {
+      bool found = false;
+      for (action_list::iterator j = specification.process().action_summands()[i].multi_action().actions().begin(); j != specification.process().action_summands()[i].multi_action().actions().end(); j++)
+      {
+        if (m_options.trace_actions.count(j->label().name()) > 0)
+        {
+          found = true;
+          break;
+        }
+      }
+      m_detected_action_summands.push_back(found);
     }
   }
 
@@ -564,7 +576,7 @@ void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t st
   }
 }
 
-void lps2lts_algorithm::check_action(lps2lts_algorithm::generator_state_t state, next_state_generator::transition_t &transition)
+void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state, const next_state_generator::transition_t &transition)
 {
   for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
   {
@@ -691,11 +703,6 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
 
   m_num_transitions++;
 
-  if (m_options.detect_action)
-  {
-    check_action(state, transition);
-  }
-
   return destination_state_number.second;
 }
 
@@ -713,6 +720,12 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
     while (it)
     {
       transitions.push_back(*it);
+
+      if (m_options.detect_action && m_detected_action_summands[it->summand_index()])
+      {
+        save_actions(state, *it);
+      }
+
       it++;
     }
     //transitions = atermpp::list<next_state_generator::transition_t>(m_generator->begin(state), m_generator->end());

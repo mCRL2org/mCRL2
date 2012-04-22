@@ -115,6 +115,7 @@ class next_state_generator
         next_state_generator *m_generator;
         internal_state_t m_state;
         lps::multi_action m_action;
+        size_t m_summand_index;
 
       public:
         lps::state state() const { return m_generator->get_state(m_state); }
@@ -122,6 +123,7 @@ class next_state_generator
         const internal_state_t &internal_state() const { return m_state; }
         lps::multi_action &action() { return m_action; }
         const lps::multi_action &action() const { return m_action; }
+        size_t summand_index() const { return m_summand_index; }
     };
 
     specification m_specification;

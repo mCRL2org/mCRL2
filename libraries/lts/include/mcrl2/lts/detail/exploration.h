@@ -60,6 +60,8 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
 
     next_state_generator::summand_subset_t m_tau_summands;
 
+    std::vector<bool> m_detected_action_summands;
+
     atermpp::map<storage_state_t, storage_state_t> m_backpointers;
     size_t m_traces_saved;
 
@@ -104,7 +106,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     bool save_trace(generator_state_t state, std::string filename);
     bool search_divergence(generator_state_t state, std::set<generator_state_t> &current_path, atermpp::set<generator_state_t> &visited);
     void check_divergence(generator_state_t state);
-    void check_action(generator_state_t state, next_state_generator::transition_t &transition);
+    void save_actions(generator_state_t state, const next_state_generator::transition_t &transition);
     void save_deadlock(generator_state_t state);
     void save_error(generator_state_t state);
     bool add_transition(generator_state_t state, next_state_generator::transition_t &transition);
