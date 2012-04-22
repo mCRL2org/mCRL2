@@ -1676,7 +1676,7 @@ static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
   switch (ATgetType(t))
   {
     case AT_INT:
-      if (!AFun::at_lookup_table()[AS_INT.number()]->count++)
+      if (!AFun::at_lookup_table[AS_INT.number()]->count++)
       {
         nr_unique = 1;
       }
@@ -1684,9 +1684,9 @@ static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
 
     case AT_APPL:
       sym = ATgetAFun((ATermAppl) t);
-      assert(AFun::at_lookup_table().size()>sym.number());
-      nr_unique = AFun::at_lookup_table()[sym.number()]->count>0 ? 0 : 1;
-      AFun::at_lookup_table()[sym.number()]->count++;
+      assert(AFun::at_lookup_table.size()>sym.number());
+      nr_unique = AFun::at_lookup_table[sym.number()]->count>0 ? 0 : 1;
+      AFun::at_lookup_table[sym.number()]->count++;
       // AT_markAFun(sym);
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++)
@@ -1701,7 +1701,7 @@ static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
       {
         // SET_MARK(list->header);
         visited.insert(list);
-        if (!AFun::at_lookup_table()[AS_LIST.number()]->count++)
+        if (!AFun::at_lookup_table[AS_LIST.number()]->count++)
         {
           nr_unique++;
         }
@@ -1712,7 +1712,7 @@ static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
       {
         // SET_MARK(list->header);
         visited.insert(list);
-        if (!AFun::at_lookup_table()[AS_EMPTY_LIST.number()]->count++)
+        if (!AFun::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
         {
           nr_unique++;
         }

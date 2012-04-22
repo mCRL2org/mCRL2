@@ -47,13 +47,9 @@ class AFun
 
   public:
     static size_t first_free;
-    static std::vector < _SymEntry* > &at_lookup_table()// As safio uses stable pointers to _SymEntries,
+    static std::vector < _SymEntry* > at_lookup_table; // As safio uses stable pointers to _SymEntries,
                                                        // we cannot use a vector of _SymEntry, as these
                                                        // are relocated. 
-    {
-      static std::vector < _SymEntry* > at_lookup_table;
-      return at_lookup_table;
-    }
 
     template <bool CHECK>
     static void increase_reference_count(const size_t n)
@@ -61,11 +57,11 @@ class AFun
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table()[n]->reference_count,at_lookup_table()[n]->name);
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
 #endif
-        assert(n<at_lookup_table().size());
-        if (CHECK) assert(at_lookup_table()[n]->reference_count>0);
-        at_lookup_table()[n]->reference_count++;
+        assert(n<at_lookup_table.size());
+        if (CHECK) assert(at_lookup_table[n]->reference_count>0);
+        at_lookup_table[n]->reference_count++;
       }
     }
 
@@ -74,12 +70,12 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table()[n]->reference_count,at_lookup_table()[n]->name);
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
 #endif
-        assert(n<at_lookup_table().size());
-        assert(at_lookup_table()[n]->reference_count>0);
+        assert(n<at_lookup_table.size());
+        assert(at_lookup_table[n]->reference_count>0);
 
-        if (--at_lookup_table()[n]->reference_count==0)
+        if (--at_lookup_table[n]->reference_count==0)
         {
           at_free_afun(n);
         }
@@ -178,8 +174,8 @@ inline
 bool AT_isValidAFun(const size_t sym)
 {
   return (sym != size_t(-1) && 
-          sym < AFun::at_lookup_table().size() && 
-          AFun::at_lookup_table()[sym]->reference_count>0);
+          sym < AFun::at_lookup_table.size() && 
+          AFun::at_lookup_table[sym]->reference_count>0);
 }
 
 

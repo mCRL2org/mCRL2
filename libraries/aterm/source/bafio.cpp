@@ -503,7 +503,7 @@ static sym_entry* get_top_symbol(const ATerm t)
       break;
   }
 
-  return &sym_entries[AFun::at_lookup_table()[sym.number()]->index];
+  return &sym_entries[AFun::at_lookup_table[sym.number()]->index];
 }
 
 /*}}}  */
@@ -722,7 +722,7 @@ static void collect_terms(const ATerm &t, std::set<ATerm> &visited)
         sym = (AFun)(-1); // Kill compiler warnings
         break;
     }
-    entry = &sym_entries[AFun::at_lookup_table()[sym.number()]->index];
+    entry = &sym_entries[AFun::at_lookup_table[sym.number()]->index];
 
     assert(entry->id == sym);
     add_term(entry, t);
@@ -883,18 +883,18 @@ static bool write_term(const ATerm t, byte_writer* writer)
         {
           return false;
         }
-        trm_sym = &sym_entries[AFun::at_lookup_table()[AS_INT.number()]->index];
+        trm_sym = &sym_entries[AFun::at_lookup_table[AS_INT.number()]->index];
         break;
       case AT_LIST:
       {
         ATermList list = (ATermList)t;
         if (ATisEmpty(list))
         {
-          trm_sym = &sym_entries[AFun::at_lookup_table()[AS_EMPTY_LIST.number()]->index];
+          trm_sym = &sym_entries[AFun::at_lookup_table[AS_EMPTY_LIST.number()]->index];
         }
         else
         {
-          trm_sym = &sym_entries[AFun::at_lookup_table()[AS_LIST.number()]->index];
+          trm_sym = &sym_entries[AFun::at_lookup_table[AS_LIST.number()]->index];
           if (!write_arg(trm_sym, ATgetFirst(list), 0, writer))
           {
             return false;
@@ -910,7 +910,7 @@ static bool write_term(const ATerm t, byte_writer* writer)
       {
         size_t arity;
         AFun sym = ATgetAFun((ATermAppl)(t));
-        trm_sym = &sym_entries[AFun::at_lookup_table()[sym.number()]->index];
+        trm_sym = &sym_entries[AFun::at_lookup_table[sym.number()]->index];
         assert(sym == trm_sym->id);
         arity = ATgetArity(sym);
         for (arg_idx=0; arg_idx<arity; arg_idx++)
@@ -995,7 +995,7 @@ static bool
 write_baf(const ATerm &t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
-  size_t nr_symbols = AFun::at_lookup_table().size();
+  size_t nr_symbols = AFun::at_lookup_table.size();
   size_t cur;
 
   /* Initialize bit buffer */
@@ -1004,9 +1004,9 @@ write_baf(const ATerm &t, byte_writer* writer)
 
   for (size_t lcv=0; lcv<nr_symbols; lcv++)
   {
-    if (AFun::at_lookup_table()[lcv]->reference_count>0)
+    if (AFun::at_lookup_table[lcv]->reference_count>0)
     {
-      AFun::at_lookup_table()[lcv]->count = 0;
+      AFun::at_lookup_table[lcv]->count = 0;
     }
   }
   nr_unique_symbols = AT_calcUniqueAFuns(t);
@@ -1022,7 +1022,7 @@ write_baf(const ATerm &t, byte_writer* writer)
 
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
-    _SymEntry* entry = AFun::at_lookup_table()[lcv];
+    _SymEntry* entry = AFun::at_lookup_table[lcv];
     if (entry->reference_count>0 && entry->count>0)
     {
       assert(lcv == entry->id);

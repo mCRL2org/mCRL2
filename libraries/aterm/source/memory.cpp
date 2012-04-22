@@ -255,7 +255,7 @@ static bool check_that_all_objects_are_free()
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                AFun::at_lookup_table[i]->name.c_str(),AFun::at_lookup_table[i]->id,AFun::at_lookup_table[i]->reference_count);
+                AFun::at_lookup_table[i]->name,AFun::at_lookup_table[i]->id,AFun::at_lookup_table[i]->reference_count);
     }
 
   }

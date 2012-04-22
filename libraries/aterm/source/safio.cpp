@@ -463,7 +463,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 
   if (binaryWriter->indexInTerm == 0)
   {
-    _SymEntry* symEntry = AFun::at_lookup_table()[fun.number()];
+    _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
     size_t funHash = (size_t)((unsigned long) symEntry);
 
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
@@ -935,7 +935,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       char* name = binaryReader->tempBytes;
 
       AFun fun = ATmakeAFun(name, arity, isQuoted);
-      _SymEntry* symEntry = AFun::at_lookup_table()[fun.number()];
+      _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
       binaryReader->protected_afuns.insert(fun);
       // ATprotectAFun(fun);
 
