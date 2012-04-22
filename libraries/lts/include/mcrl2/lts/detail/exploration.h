@@ -45,8 +45,8 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     next_state_generator::summand_subset_t *m_main_subset;
 
     bool m_use_confluence_reduction;
-    next_state_generator::summand_subset_t m_actions_subset;
-    next_state_generator::summand_subset_t m_confluence_subset;
+    next_state_generator::summand_subset_t m_nonprioritized_subset;
+    next_state_generator::summand_subset_t m_prioritized_subset;
 
     atermpp::indexed_set m_state_numbers;
     bit_hash_table m_bit_hash_table;
@@ -58,7 +58,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     bool m_maintain_traces;
     bool m_value_prioritize;
 
-    std::vector<size_t> m_tau_summands;
+    next_state_generator::summand_subset_t m_tau_summands;
 
     atermpp::map<storage_state_t, storage_state_t> m_backpointers;
     size_t m_traces_saved;

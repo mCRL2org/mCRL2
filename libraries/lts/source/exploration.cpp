@@ -21,9 +21,7 @@ using namespace mcrl2::lts;
 
 /*
  * TODO:
- * - make enumeration caching and summand pruning user-configurable
  * - optimize action-detect by computing for each summand whether it should be detected or not
- * - optimize divergence-detect by keeping a separate next state generator
  * - clean up options struct
  */
 
@@ -126,6 +124,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     m_use_confluence_reduction = false;
   }
 
+  action_summand_vector tau_summands;
   if (m_options.detect_divergence)
   {
     mCRL2log(verbose) << "Detect divergences with tau action is `tau'.\n";
@@ -133,7 +132,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     {
       if (specification.process().action_summands()[i].is_tau())
       {
-        m_tau_summands.push_back(i);
+        tau_summands.push_back(specification.process().action_summands()[i]);
       }
     }
   }
@@ -151,13 +150,18 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   if (!prioritised_summands.empty())
   {
-    m_actions_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
-    m_confluence_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
-    m_main_subset = &m_actions_subset;
+    m_nonprioritized_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
+    m_prioritized_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
+    m_main_subset = &m_nonprioritized_subset;
   }
   else
   {
     m_main_subset = &m_generator->full_subset();
+  }
+
+  if (m_options.detect_divergence)
+  {
+    m_tau_summands = next_state_generator::summand_subset_t(m_generator, tau_summands, m_options.use_summand_pruning);
   }
 
   if (m_options.detect_deadlock)
@@ -350,7 +354,7 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_represen
       low[state] = count;
       next[state] = atermpp::list<generator_state_t>();
 
-      for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_confluence_subset); i; i++)
+      for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_prioritized_subset); i; i++)
       {
         next[state].push_back(i->internal_state());
         if (number.count(i->internal_state()) == 0)
@@ -502,20 +506,17 @@ bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t s
   current_path.insert(state);
 
   std::vector<generator_state_t> new_states;
-  for (std::vector<size_t>::iterator i = m_tau_summands.begin(); i != m_tau_summands.end(); i++)
+  for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution, m_tau_summands); j != m_generator->end(); j++)
   {
-    for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution, *i); j != m_generator->end(); j++)
-    {
-      assert(j->action().actions().size() == 0);
+    assert(j->action().actions().size() == 0);
 
-      if (visited.insert(j->internal_state()).second)
-      {
-        new_states.push_back(j->internal_state());
-      }
-      else if (visited.count(j->internal_state()) != 0)
-      {
-        return true;
-      }
+    if (visited.insert(j->internal_state()).second)
+    {
+      new_states.push_back(j->internal_state());
+    }
+    else if (visited.count(j->internal_state()) != 0)
+    {
+      return true;
     }
   }
 
