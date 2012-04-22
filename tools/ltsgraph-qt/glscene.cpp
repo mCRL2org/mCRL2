@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <cstdio>
 #include "glscene.h"
+#include "GL/glu.h" // Needed for compilation on Ubuntu 12.04
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
