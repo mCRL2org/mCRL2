@@ -120,8 +120,7 @@ HashNumber AT_hashnumber(const _ATerm *t)
  * Resize the hashtable
  */
 
-static
-void resize_hashtable()
+static void resize_hashtable()
 {
   HashNumber oldsize;
 
@@ -130,11 +129,12 @@ void resize_hashtable()
   table_size = ((HashNumber)1)<<table_class;
   table_mask = table_size-1;
   std::vector < _ATerm* > new_hashtable;
+fprintf(stderr,"RESIZE HASHTABLE %ld\n",table_class);
 
   /*{{{  Create new term table */
   try
   {
-    new_hashtable.resize(table_size);
+    new_hashtable.resize(table_size,NULL);
   }
   catch (std::bad_alloc &e)
   {
@@ -144,7 +144,7 @@ void resize_hashtable()
     table_mask = table_size-1;
     return;
   }
-
+  
   /*{{{  Rehash all old elements */
 
   for (std::vector < _ATerm*>::const_iterator p=ATerm::hashtable.begin(); p !=ATerm::hashtable.end(); p++)
@@ -153,15 +153,19 @@ void resize_hashtable()
 
     while (aterm_walker)
     {
+      assert(aterm_walker->reference_count>0);
       _ATerm* next = aterm_walker->next;
       const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & table_mask;
       assert(hnr<new_hashtable.size());
+// fprintf(stderr,"HHHH %p   %p    %p\n",aterm_walker,new_hashtable[hnr],aterm_walker->next);
       aterm_walker->next = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
+assert(aterm_walker->next!=aterm_walker);
       aterm_walker = next;
     }
   }
   new_hashtable.swap(ATerm::hashtable);
+fprintf(stderr,"RESIZE HASHTABLE END\n");
 
   /*}}}  */
 }
@@ -175,8 +179,6 @@ void resize_hashtable()
 
 void AT_initMemory()
 {
-  HashNumber hnr;
-
   /*{{{  Initialize blocks */
 
   terminfo = (TermInfo*) AT_calloc(maxTermSize, sizeof(TermInfo));
@@ -202,15 +204,15 @@ void AT_initMemory()
   /*}}}  */
   /*{{{  Create the empty list */
 
-  // ATempty = reinterpret_cast<_ATermList*>(AT_allocate(TERM_SIZE_APPL(0)));
-  ATempty = static_cast<ATermList>(ATmakeAppl0(AS_EMPTY_LIST));
+  ATempty = reinterpret_cast<_ATermList*>(AT_allocate(TERM_SIZE_APPL(0)));
+  // ATempty = static_cast<ATermList>(ATmakeAppl0(AS_EMPTY_LIST));
   address_of_ATempty=&*ATempty;
   
   ATempty->header = EMPTY_HEADER;
   ATempty->next = NULL;
 
-  hnr = hash_number(&*ATempty, TERM_SIZE_LIST);
-  ATerm::hashtable[hnr& table_mask] = &*ATempty;
+  const HashNumber hnr = hash_number(&*ATempty, TERM_SIZE_LIST);
+  ATerm::hashtable[hnr& table_mask] = &*ATempty; 
 
   /*}}}  */
 
@@ -247,13 +249,13 @@ static bool check_that_all_objects_are_free()
     }
   }
 
-  for(size_t i=0; i<AFun::at_lookup_table().size(); ++i)
+  for(size_t i=0; i<AFun::at_lookup_table.size(); ++i)
   {
-    if (i!=AS_EMPTY_LIST.number() && AFun::at_lookup_table()[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=AS_EMPTY_LIST.number() && AFun::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                AFun::at_lookup_table()[i]->name,AFun::at_lookup_table()[i]->id,AFun::at_lookup_table()[i]->reference_count);
+                AFun::at_lookup_table[i]->name.c_str(),AFun::at_lookup_table[i]->id,AFun::at_lookup_table[i]->reference_count);
     }
 
   }
@@ -561,6 +563,7 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
   for (size_t i=0; i<arity; i++)
   {
     arg = va_arg(args, _ATerm *);
+    CHECK_TERM(&*arg);
     hnr = COMBINE(hnr, HN(&*arg));
     buffer[i] = arg;
   }
@@ -674,6 +677,7 @@ ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 1);
+  CHECK_TERM(&*arg0);
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*arg0));
@@ -731,6 +735,8 @@ ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
 
   CHECK_ARITY(ATgetArity(sym), 2);
 
+  CHECK_TERM(&*arg0);
+  CHECK_TERM(&*arg1);
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*arg0));
   hnr = COMBINE(hnr, HN(&*arg1));
@@ -792,6 +798,9 @@ ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   CHECK_ARITY(ATgetArity(sym), 3);
 
+  CHECK_TERM(&*arg0);
+  CHECK_TERM(&*arg1);
+  CHECK_TERM(&*arg2);
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*arg0));
   hnr = COMBINE(hnr, HN(&*arg1));
@@ -845,6 +854,10 @@ ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 
   header = APPL_HEADER(4, sym.number());
 
+  CHECK_TERM(&*arg0);
+  CHECK_TERM(&*arg1);
+  CHECK_TERM(&*arg2);
+  CHECK_TERM(&*arg3);
   CHECK_ARITY(ATgetArity(sym), 4);
 
   hnr = START(header);
@@ -904,6 +917,11 @@ ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 5);
+  CHECK_TERM(&*arg0);
+  CHECK_TERM(&*arg1);
+  CHECK_TERM(&*arg2);
+  CHECK_TERM(&*arg3);
+
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*arg0));
@@ -966,6 +984,12 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 6);
+  CHECK_TERM(&*arg0);
+  CHECK_TERM(&*arg1);
+  CHECK_TERM(&*arg2);
+  CHECK_TERM(&*arg3);
+  CHECK_TERM(&*arg4);
+  CHECK_TERM(&*arg5);
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*arg0));
@@ -1038,6 +1062,7 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
+    CHECK_TERM(&*argptr->head);
     hnr = COMBINE(hnr, HN(&*(argptr->head)));
     argptr = argptr->tail;
   }
@@ -1111,6 +1136,7 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
+    CHECK_TERM(&*args[i]);
     hnr = COMBINE(hnr, (HashNumber)&*args[i]);
   }
   hnr = FINISH(hnr);
@@ -1224,7 +1250,8 @@ ATermInt ATmakeInt(const int val)
 
 ATermList ATmakeList1(const ATerm &el)
 {
-  _ATerm* cur;
+  return ATinsert(ATempty,el);
+  /* _ATerm* cur;
   header_type header = LIST_HEADER(1);
   HashNumber hnr;
 
@@ -1246,7 +1273,7 @@ ATermList ATmakeList1(const ATerm &el)
   if (!cur)
   {
     cur = AT_allocate(TERM_SIZE_LIST);
-    /* Delay masking until after AT_allocate */
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     el->reference_count++;
@@ -1257,7 +1284,7 @@ ATermList ATmakeList1(const ATerm &el)
     ATerm::hashtable[hnr] = cur;
   }
 
-  return reinterpret_cast<_ATermList*>(cur);
+  return reinterpret_cast<_ATermList*>(cur); */
 }
 
 /*}}}  */

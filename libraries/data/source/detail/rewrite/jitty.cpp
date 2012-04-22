@@ -591,8 +591,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 
     if (op.type()==AT_INT)
     {
-      atermpp::aterm_appl a=rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
-      return a;
+      return rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
     }
     else if (is_variable(op))
     {
