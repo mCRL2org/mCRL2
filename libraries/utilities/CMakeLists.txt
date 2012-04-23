@@ -104,6 +104,7 @@ qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
 set(mcrl2_utilities_qt_src
   ${mcrl2_utilities_qt_ui_h}
   ${mcrl2_utilities_qt_h_moc}
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/atermthread.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
 )
 

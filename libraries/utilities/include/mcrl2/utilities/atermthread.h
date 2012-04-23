@@ -9,8 +9,6 @@
 #ifndef MCRL2_UTILITIES_ATERMTHREAD_H
 #define MCRL2_UTILITIES_ATERMTHREAD_H
 
-#include <QMutex>
-#include <QMutexLocker>
 #include <QThread>
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -37,24 +35,9 @@ class AtermThread : public QThread
     }
 };
 
-AtermThread *aterm_thread = 0;
-QMutex aterm_thread_mutex;
-
 } // namespace detail
 
-QThread *get_aterm_thread()
-{
-  QMutexLocker locker(&detail::aterm_thread_mutex);
-  if (detail::aterm_thread)
-  {
-    return detail::aterm_thread;
-  }
-
-  detail::aterm_thread = new detail::AtermThread();
-  detail::aterm_thread->start();
-  return detail::aterm_thread;
-}
-
+QThread *get_aterm_thread();
 
 } // namespace qt
 } // namespace utilities
