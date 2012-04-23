@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-#include "mcrl2xi_qt_highlighter.h"
+#include "highlighter.h"
 
 Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)

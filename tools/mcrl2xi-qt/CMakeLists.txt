@@ -10,46 +10,48 @@
 project(mcrl2xi_qt)
 cmake_minimum_required(VERSION 2.6)
 
+if (MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
 
-if (MCRL2_ENABLE_GUI_TOOLS)
 if (QT4_FOUND)
-
-set(QT_USE_QTOPENGL TRUE)
 include(${QT_USE_FILE})
 
 set(UI_FILES
-  mcrl2xi_qt_mainwindow.ui
-  mcrl2xi_qt_rewriter.ui
-  mcrl2xi_qt_solver.ui
-  mcrl2xi_qt_parse_and_typecheck.ui
+  mainwindow.ui
+#  rewriter.ui
+#  solver.ui
+#  parse_and_typecheck.ui
+  outputpanel.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
 set(MOC_HEADERS
-  mcrl2xi_qt_mainwindow.h
-  mcrl2xi_qt_highlighter.h
-  mcrl2xi_qt_rewriter.h
-  mcrl2xi_qt_solver.h
-  mcrl2xi_qt_parse_and_typecheck.h
+  mainwindow.h
+  highlighter.h
+#  rewriter.h
+#  solver.h
+#  parse_and_typecheck.h
+  outputpanel.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
 set(SRC_FILES
   ${UI_HEADERS}
   ${MOC_SOURCES}
-  mcrl2xi_qt_main.cpp
-  mcrl2xi_qt_mainwindow.cpp
-  mcrl2xi_qt_highlighter.cpp
-  mcrl2xi_qt_rewriter.cpp
-  mcrl2xi_qt_solver.cpp
-  mcrl2xi_qt_parse_and_typecheck.cpp
+  main.cpp
+  mainwindow.cpp
+  highlighter.cpp
+#  rewriter.cpp
+#  solver.cpp
+#  parse_and_typecheck.cpp
+  outputpanel.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
+  ${QT_QTMAIN_LIBRARY}
   mcrl2_lts
   mcrl2_core
   mcrl2_aterm
@@ -66,27 +68,19 @@ target_link_libraries(${PROJECT_NAME}
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # For promoted widgets
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-#include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 else(QT4_FOUND)
-  message(STATUS "Could NOT find Qt4, not building ltsgraph-qt.")
+  message(STATUS "Could NOT find Qt4, not building mcrl2xi-qt.")
 endif(QT4_FOUND)
 endif ( MCRL2_ENABLE_GUI_TOOLS )

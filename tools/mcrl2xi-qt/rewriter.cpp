@@ -1,22 +1,21 @@
-#include "mcrl2xi_qt_rewriter.h"
-#include "ui_mcrl2xi_qt_rewriter.h"
+#include "rewriter.h"
+#include "ui_rewriter.h"
 
 #include "iostream"
-#include "mcrl2xi_qt_parsing.h"
+#include "parsing.h"
 
 #include "mcrl2/process/parse.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/classic_enumerator.h"
 
 rewriter::rewriter(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::rewriter)
+    QWidget(parent)
 {
-    ui->setupUi(this);
+    ui.setupUi(this);
 
     //Connect Buttons
-    connect( ui->RewriteButton, SIGNAL(clicked()), this, SLOT(onRewrite()));
-    connect( ui->CancelButton, SIGNAL(clicked()), this, SLOT(onCancel()));
+    connect( ui.RewriteButton, SIGNAL(clicked()), this, SLOT(onRewrite()));
+    connect( ui.CancelButton, SIGNAL(clicked()), this, SLOT(onCancel()));
 
     //Setup rewriter thread
     m_thread = new RewriteThread();
@@ -25,22 +24,17 @@ rewriter::rewriter(QWidget *parent) :
 
 }
 
-rewriter::~rewriter()
-{
-    delete ui;
-}
-
 void rewriter::setSelectedEditor(QTextEdit* edtr)
 {
     m_selectedEditor = edtr;
 }
 
 void rewriter::onRewrite(){
-    m_thread->setDataExpression( ui->dataExpression->toPlainText().toStdString() );
+    m_thread->setDataExpression( ui.dataExpression->toPlainText().toStdString() );
     m_thread->setSpecification(m_selectedEditor->toPlainText().toStdString() );
     m_thread->setRewriter(mcrl2::data::jitty);
 
-    ui->rewriteOutput->clear();
+    ui.rewriteOutput->clear();
     m_thread->start();
 }
 
@@ -53,7 +47,7 @@ void rewriter::onCancel(){
 }
 
 void rewriter::onOutputText(QString s){
-    ui->rewriteOutput->append(s);
+    ui.rewriteOutput->append(s);
 }
 
 void RewriteThread::setDataExpression(std::string s)

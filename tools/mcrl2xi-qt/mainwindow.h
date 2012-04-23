@@ -1,9 +1,10 @@
-#ifndef MCRL2XI_QT_MAINWINDOW_H
-#define MCRL2XI_QT_MAINWINDOW_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QFileDialog>
-#include "mcrl2xi_qt_highlighter.h"
+#include "highlighter.h"
+#include "ui_mainwindow.h"
 
 class QTextEdit;
 
@@ -16,17 +17,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
     QTextEdit*   getEditor();
 private slots:
-    void onOpenFile();
-    void onCursorChange();
+    void onOpen();
 private:
-    Ui::MainWindow *m_ui;
+    Ui::MainWindow m_ui;
     void setupEditor();
     void setSelectedEditorInChildren();
 
     Highlighter *highlighter;
 };
 
-#endif // MCRL2XI_QT_MAINWINDOW_H
+#endif // MAINWINDOW_H

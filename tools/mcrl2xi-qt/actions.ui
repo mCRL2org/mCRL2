@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>mcrl2xi_qt_actions</class>
- <widget class="QDockWidget" name="mcrl2xi_qt_actions">
+ <class>actions</class>
+ <widget class="QDockWidget" name="actions">
   <property name="geometry">
    <rect>
     <x>0</x>

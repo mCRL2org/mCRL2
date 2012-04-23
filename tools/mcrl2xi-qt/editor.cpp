@@ -1,4 +1,4 @@
-#include "mcrl2xi_qt_editor.h"
+#include "editor.h"
 
 editor::editor()
 {

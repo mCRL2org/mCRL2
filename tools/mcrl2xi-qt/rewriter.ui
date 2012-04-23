@@ -51,13 +51,19 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
-         <number>-1</number>
+         <number>6</number>
         </property>
         <property name="bottomMargin">
          <number>10</number>
         </property>
         <item>
          <widget class="QPushButton" name="RewriteButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>23</height>
+           </size>
+          </property>
           <property name="text">
            <string>Rewrite</string>
           </property>
@@ -65,6 +71,12 @@
         </item>
         <item>
          <widget class="QPushButton" name="CancelButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>23</height>
+           </size>
+          </property>
           <property name="text">
            <string>Cancel</string>
           </property>

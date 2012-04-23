@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "mcrl2xi_qt_mainwindow.h"
+#include "mainwindow.h"
 #include "mcrl2/aterm/aterm1.h"
 
 int main(int argc, char *argv[])

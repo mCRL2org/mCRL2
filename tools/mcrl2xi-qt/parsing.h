@@ -1,5 +1,5 @@
-#ifndef MCRL2XI_QT_PARSING_H
-#define MCRL2XI_QT_PARSING_H
+#ifndef PARSING_H
+#define PARSING_H
 
 #include "mcrl2/process/parse.h"
 #include "mcrl2/data/parse.h"
@@ -94,4 +94,4 @@ static
       return true;
     }
 }
-#endif // MCRL2XI_QT_PARSING_H
+#endif // PARSING_H

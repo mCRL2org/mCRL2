@@ -1,10 +1,11 @@
-#ifndef MCRL2XI_QT_REWRITER_H
-#define MCRL2XI_QT_REWRITER_H
+#ifndef REWRITER_H
+#define REWRITER_H
 
 #include <QWidget>
 #include <QThread>
 #include <QTextEdit>
 #include "mcrl2/data/rewrite_strategy.h"
+#include "ui_rewriter.h"
 
 namespace Ui {
 class rewriter;
@@ -25,7 +26,7 @@ private slots:
     void onCancel();
     void onOutputText(QString s);
 private:
-    Ui::rewriter *ui;
+    Ui::rewriter ui;
     RewriteThread *m_thread ;
     QTextEdit  *m_selectedEditor;
 
@@ -49,4 +50,21 @@ private:
 
 };
 
-#endif // MCRL2XI_QT_REWRITER_H
+//class Rewriter : public QObject
+//{
+//  Q_OBJECT
+//  public:
+//    Rewriter(const mcrl2::lps::specification &specification, mcrl2::data::rewrite_strategy strategy);
+
+//  public slots:
+//    void rewriteDataExpression(std::string expression);
+
+//  signals:
+//    void rewroteDataExpression(std::string original, std::string result);
+
+//  private:
+//    mcrl2::lps::specification m_specification;
+//    mcrl2::data::rewriter m_rewriter;
+//};
+
+#endif // REWRITER_H

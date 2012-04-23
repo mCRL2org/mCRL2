@@ -1,12 +1,13 @@
-#ifndef MCRL2XI_QT_SOLVER_H
-#define MCRL2XI_QT_SOLVER_H
+#ifndef SOLVER_H
+#define SOLVER_H
 
 #include <QWidget>
 #include <QThread>
 #include <QTextEdit>
 
-#include "mcrl2xi_qt_parsing.h"
+#include "parsing.h"
 #include "mcrl2/data/rewrite_strategy.h"
+#include "ui_solver.h"
 
 namespace Ui {
 class solver;
@@ -30,7 +31,7 @@ private slots:
     void onStopped();
     void onOutputText(QString s);
 private:
-    Ui::solver *ui;
+    Ui::solver ui;
     SolverThread *m_thread;
     QTextEdit  *m_selectedEditor;
 };
@@ -55,4 +56,4 @@ private:
     mcrl2::data::rewrite_strategy m_rewrite_strategy;
 };
 
-#endif // MCRL2XI_QT_SOLVER_H
+#endif // SOLVER_H

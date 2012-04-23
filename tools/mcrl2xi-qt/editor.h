@@ -1,8 +1,8 @@
-#ifndef MCRL2XI_QT_EDITOR_H
-#define MCRL2XI_QT_EDITOR_H
+#ifndef EDITOR_H
+#define EDITOR_H
 
 #include <QTextEdit>
-#include "mcrl2xi_qt_highlighter.h"
+#include "highlighter.h"
 
 class editor : public QTextEdit
 {
@@ -20,4 +20,4 @@ public slots:
     
 };
 
-#endif // MCRL2XI_QT_EDITOR_H
+#endif // EDITOR_H

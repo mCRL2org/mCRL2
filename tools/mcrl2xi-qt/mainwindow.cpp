@@ -1,29 +1,23 @@
-#include "mcrl2xi_qt_mainwindow.h"
-#include "ui_mcrl2xi_qt_mainwindow.h"
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    m_ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
 
-    m_ui->setupUi(this);
+    m_ui.setupUi(this);
 
     setupEditor();
 
-    connect(m_ui->actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
-    connect(m_ui->editor, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorChange()));
+    connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
 
     setSelectedEditorInChildren();
     statusBar()->showMessage(QString::number(getEditor()->textCursor().position()));
 }
 
-MainWindow::~MainWindow()
-{
-}
-
-void MainWindow::onOpenFile()
+void MainWindow::onOpen()
 {
     QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
       tr("mCRL2 specification (*.mcrl2 *.txt )")));
@@ -37,7 +31,7 @@ void MainWindow::onOpenFile()
 
 QTextEdit *MainWindow::getEditor()
 {
-    return m_ui->editor;
+    return m_ui.editor;
 }
 
 void MainWindow::setupEditor()
@@ -52,14 +46,9 @@ void MainWindow::setupEditor()
     highlighter = new Highlighter(getEditor()->document());
 }
 
-void MainWindow::onCursorChange()
-{
-   statusBar()->showMessage(QString::number(getEditor()->textCursor().position()));
-}
-
 void MainWindow::setSelectedEditorInChildren()
 {
-   m_ui->dockWidgetParseAndTypeCheck->setSelectedEditor( m_ui->editor );
-   m_ui->dockWidgetRewriter->setSelectedEditor( m_ui->editor );
-   m_ui->dockWidgetSolver->setSelectedEditor( m_ui->editor );
+//   m_ui.dockWidgetParseAndTypeCheck->setSelectedEditor( m_ui.editor );
+//   m_ui.dockWidgetRewriter->setSelectedEditor( m_ui.editor );
+//   m_ui.dockWidgetSolver->setSelectedEditor( m_ui.editor );
 }

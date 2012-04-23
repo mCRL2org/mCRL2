@@ -1,5 +1,5 @@
-#include "mcrl2xi_qt_solver.h"
-#include "ui_mcrl2xi_qt_solver.h"
+#include "solver.h"
+#include "ui_solver.h"
 #include "iostream"
 
 #include "mcrl2/process/parse.h"
@@ -7,14 +7,13 @@
 #include "mcrl2/data/classic_enumerator.h"
 
 solver::solver(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::solver)
+    QWidget(parent)
 {
-    ui->setupUi(this);
+    ui.setupUi(this);
 
     //Connect Buttons
-    connect( ui->SolveButton, SIGNAL(clicked()), this, SLOT(onSolve()));
-    connect( ui->CancelButton, SIGNAL(clicked()), this, SLOT(onCancel()));
+    connect( ui.SolveButton, SIGNAL(clicked()), this, SLOT(onSolve()));
+    connect( ui.CancelButton, SIGNAL(clicked()), this, SLOT(onCancel()));
 
     //Setup solver thread
     m_thread = NULL;
@@ -28,7 +27,6 @@ solver::~solver()
         static_cast<SolverThread*>(m_thread)->stop();
         m_thread->wait();
     }
-    delete ui;
 }
 
 void solver::setSelectedEditor(QTextEdit* edtr)
@@ -41,12 +39,12 @@ void solver::onSolve(){
     if (m_thread == NULL)
     {
         /* Clear output */
-        ui->solveOutput->clear();
+        ui.solveOutput->clear();
 
         m_thread = new SolverThread();
 
         /* Should eventually be moved into constructor */
-        m_thread->setDataExpression( ui->evalExpression->toPlainText().toStdString() );
+        m_thread->setDataExpression( ui.evalExpression->toPlainText().toStdString() );
         m_thread->setSpecification(m_selectedEditor->toPlainText().toStdString() );
         m_thread->setRewriter(mcrl2::data::jitty);
 
@@ -69,15 +67,15 @@ void solver::onCancel(){
 }
 
 void solver::onOutputText(QString s){
-    ui->solveOutput->append(s);
+    ui.solveOutput->append(s);
 }
 
 void solver::onStarted(){
-    ui->SolveButton->setEnabled(false);
+    ui.SolveButton->setEnabled(false);
 }
 
 void solver::onStopped(){
-    ui->SolveButton->setEnabled(true);
+    ui.SolveButton->setEnabled(true);
 }
 
 void SolverThread::setDataExpression(std::string s)
