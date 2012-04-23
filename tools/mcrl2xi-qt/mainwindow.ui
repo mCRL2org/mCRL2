@@ -58,7 +58,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -171,7 +171,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="OutputPanel" name="dockWidgetOutput"/>
+   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
   <widget class="QDockWidget" name="dockParse">
    <property name="windowTitle">
@@ -366,9 +366,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>OutputPanel</class>
+   <class>LogWidget</class>
    <extends>QWidget</extends>
-   <header>outputpanel.h</header>
+   <header>mcrl2/utilities/logwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

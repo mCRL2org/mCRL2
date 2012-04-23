@@ -21,7 +21,6 @@ set(UI_FILES
 #  rewriter.ui
 #  solver.ui
 #  parse_and_typecheck.ui
-  outputpanel.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
@@ -31,7 +30,6 @@ set(MOC_HEADERS
 #  rewriter.h
 #  solver.h
 #  parse_and_typecheck.h
-  outputpanel.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -44,7 +42,6 @@ set(SRC_FILES
 #  rewriter.cpp
 #  solver.cpp
 #  parse_and_typecheck.cpp
-  outputpanel.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
@@ -52,15 +49,12 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${QT_QTMAIN_LIBRARY}
-  mcrl2_lts
-  mcrl2_core
   mcrl2_aterm
+  mcrl2_core
   mcrl2_data
-  mcrl2_utilities
   mcrl2_lps
-
-  mcrl2_process
-  dparser
+  mcrl2_utilities
+  mcrl2_utilities_qt
 )
 
 # Don't forget to include output directory, otherwise
