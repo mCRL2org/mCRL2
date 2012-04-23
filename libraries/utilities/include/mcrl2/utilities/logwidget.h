@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef MCRL2_UTILITIES_LOGWIDGET_H
-#define MCRL2_UTILITIES_LOGWIDGET_G
+#define MCRL2_UTILITIES_LOGWIDGET_H
 
 #include <QWidget>
 #include <QDateTime>
