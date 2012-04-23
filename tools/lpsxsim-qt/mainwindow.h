@@ -11,6 +11,7 @@
 
 #include <QMainWindow>
 #include "ui_mainwindow.h"
+#include "simulation.h"
 
 class MainWindow : public QMainWindow
 {
@@ -19,8 +20,20 @@ class MainWindow : public QMainWindow
     public:
     MainWindow();
 
+    protected slots:
+    void open();
+    void loadTrace();
+    void saveTrace();
+    void playTrace();
+    void randomPlay();
+    void stopPlay();
+    void setPlayDelay();
+    void contents();
+    void about();
+
     protected:
     Ui::MainWindow m_ui;
+    Simulation *m_simulation;
 };
 
 #endif

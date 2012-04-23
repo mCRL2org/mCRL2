@@ -21,6 +21,7 @@ qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
 set(MOC_HEADERS
   mainwindow.h
+  simulation.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -29,6 +30,7 @@ set(SRC_FILES
   ${MOC_SOURCES}
   main.cpp
   mainwindow.cpp
+  simulation.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
@@ -43,6 +45,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_lts
   mcrl2_utilities
+  mcrl2_utilities_qt
 )
 
 # Don't forget to include output directory, otherwise

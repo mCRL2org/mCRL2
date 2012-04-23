@@ -8,44 +8,81 @@
 
 #include "simulation.h"
 #include <QMetaObject>
+#include "mcrl2/utilities/atermthread.h"
 
-Simulation::Simulation(QThread *atermThread, const std::string& filename, mcrl2::data::rewrite_strategy strategy)
+Simulation::Simulation(const std::string& filename, mcrl2::data::rewrite_strategy strategy)
   : m_filename(filename),
     m_strategy(strategy)
 {
-  moveToThread(atermThread);
+  moveToThread(mcrl2::utilities::qt::get_aterm_thread());
   QMetaObject::invokeMethod(this, "init");
 }
 
 void Simulation::init()
 {
   // TODO: error handling
-  mcrl2::lps::specification;
+  mcrl2::lps::specification specification;
   specification.load(m_filename);
 
-  m_simulation = new mcrl2::lps::simulation(specification, strategy);
+  m_simulation = new mcrl2::lps::simulation(specification, m_strategy);
 }
 
 void Simulation::updateTrace(size_t first_changed_state)
 {
   QMutexLocker locker(&m_traceMutex);
 
-  m_trace.resize(first_changed_state - 1);
+  m_trace.erase(m_trace.begin() + first_changed_state, m_trace.end());
 
   for (size_t i = first_changed_state; i < m_simulation->trace().size(); i++)
   {
     State state;
-    state.state = mcrl2::lps::pp(m_simulation->trace()[i].source_state);
-    state.transition_number = m_simulation->trace()[i].simulation_number;
+    state.state = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].source_state));
+    state.transition_number = m_simulation->trace()[i].transition_number;
     for (size_t j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
     {
       Transition transition;
-      transition.destination = mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].destination);
-      transition.action = mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].action);
+      transition.destination = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].destination));
+      transition.action = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].action));
       state.transitions += transition;
     }
-    trace += state;
+    m_trace += state;
   }
 
   emit traceChanged();
 }
+
+void Simulation::load(QString filename)
+{
+  try
+  {
+    m_simulation->load(filename.toStdString());
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    emit error(e.what());
+    return;
+  }
+  catch (...)
+  {
+    emit error("Unknown error");
+  }
+}
+
+void Simulation::save(QString filename)
+{
+  try
+  {
+    m_simulation->save(filename.toStdString());
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    emit error(e.what());
+    return;
+  }
+  catch (...)
+  {
+    emit error("Unknown error");
+  }
+}
+
+
