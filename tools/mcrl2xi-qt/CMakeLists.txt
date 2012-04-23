@@ -18,6 +18,7 @@ include(${QT_USE_FILE})
 
 set(UI_FILES
   mainwindow.ui
+  documentmanager.ui
 #  rewriter.ui
 #  solver.ui
 #  parse_and_typecheck.ui
@@ -27,6 +28,7 @@ qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 set(MOC_HEADERS
   mainwindow.h
   highlighter.h
+  documentmanager.h
 #  rewriter.h
 #  solver.h
 #  parse_and_typecheck.h
@@ -39,6 +41,7 @@ set(SRC_FILES
   main.cpp
   mainwindow.cpp
   highlighter.cpp
+  documentmanager.cpp
 #  rewriter.cpp
 #  solver.cpp
 #  parse_and_typecheck.cpp

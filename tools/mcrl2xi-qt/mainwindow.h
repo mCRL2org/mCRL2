@@ -17,13 +17,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
-    QTextEdit*   getEditor();
+public slots:
+  void setupEditor(QTextEdit *editorWidget);
 private slots:
     void onOpen();
 private:
     Ui::MainWindow m_ui;
-    void setupEditor();
-    void setSelectedEditorInChildren();
 
     Highlighter *highlighter;
 };

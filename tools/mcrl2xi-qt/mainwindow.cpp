@@ -9,12 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui.setupUi(this);
 
-    setupEditor();
-
     connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
-
-    setSelectedEditorInChildren();
-    statusBar()->showMessage(QString::number(getEditor()->textCursor().position()));
+    connect(m_ui.documentManager, SIGNAL(documentCreated(QTextEdit)), this, SLOT(setupEditor(QTextEdit)));
 }
 
 void MainWindow::onOpen()
@@ -25,30 +21,17 @@ void MainWindow::onOpen()
     QFile file(fileName);
     if (file.open(QFile::ReadOnly | QFile::Text))
     {
-       getEditor()->setPlainText(file.readAll());
+
     }
 }
 
-QTextEdit *MainWindow::getEditor()
-{
-    return m_ui.editor;
-}
-
-void MainWindow::setupEditor()
+void MainWindow::setupEditor(QTextEdit *editor)
 {
     QFont font;
     font.setFamily("Courier");
     font.setFixedPitch(true);
 
-    getEditor()->setFont(font);
-    getEditor()->clear();
+    editor->setFont(font);
 
-    highlighter = new Highlighter(getEditor()->document());
-}
-
-void MainWindow::setSelectedEditorInChildren()
-{
-//   m_ui.dockWidgetParseAndTypeCheck->setSelectedEditor( m_ui.editor );
-//   m_ui.dockWidgetRewriter->setSelectedEditor( m_ui.editor );
-//   m_ui.dockWidgetSolver->setSelectedEditor( m_ui.editor );
+    highlighter = new Highlighter(editor->document());
 }

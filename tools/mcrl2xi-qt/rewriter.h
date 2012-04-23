@@ -50,21 +50,21 @@ private:
 
 };
 
-//class Rewriter : public QObject
-//{
-//  Q_OBJECT
-//  public:
-//    Rewriter(const mcrl2::lps::specification &specification, mcrl2::data::rewrite_strategy strategy);
+class Rewriter : public QObject
+{
+  Q_OBJECT
+  public:
+    Rewriter(const mcrl2::lps::specification &specification, mcrl2::data::rewrite_strategy strategy);
 
-//  public slots:
-//    void rewriteDataExpression(std::string expression);
+  public slots:
+    void rewriteDataExpression(std::string expression);
 
-//  signals:
-//    void rewroteDataExpression(std::string original, std::string result);
+  signals:
+    void rewroteDataExpression(std::string original, std::string result);
 
-//  private:
-//    mcrl2::lps::specification m_specification;
-//    mcrl2::data::rewriter m_rewriter;
-//};
+  private:
+    mcrl2::lps::specification m_specification;
+    mcrl2::data::rewriter m_rewriter;
+};
 
 #endif // REWRITER_H
