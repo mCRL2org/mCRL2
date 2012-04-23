@@ -347,7 +347,7 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(lps2lts_algo
 
 lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_representative(lps2lts_algorithm::generator_state_t state)
 {
-  assert(m_confluence_generator != 0);
+  assert(m_use_confluence_reduction);
 
   atermpp::map<generator_state_t, size_t> number;
   atermpp::map<generator_state_t, size_t> low;
