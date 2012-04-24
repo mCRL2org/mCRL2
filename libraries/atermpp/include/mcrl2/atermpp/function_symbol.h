@@ -21,8 +21,10 @@ namespace atermpp
 
 using namespace aterm;
 
+typedef AFun function_symbol;
+
 /// \brief Function symbol.
-class function_symbol
+/* class function_symbol
 {
   protected:
     /// The wrapped AFun value.
@@ -91,6 +93,7 @@ class function_symbol
 
     friend bool operator!=(const function_symbol& x, const function_symbol& y);
 };
+*/
 
 /// \brief Equality operator.
 /// Function symbols x and y are considered equal if they have the same name,
@@ -98,24 +101,24 @@ class function_symbol
 /// \param x A function symbol.
 /// \param y A function symbol.
 /// \return True if the function symbols are equal.
-inline
+/* inline
 bool operator==(const function_symbol& x, const function_symbol& y)
 {
   // return x.name() == y.name() && x.arity() == y.arity() && x.is_quoted() == y.is_quoted();
-  return AFun(x) == AFun(y);
-}
+  return x == AFun(y).number();
+} */
 
-inline
+/* inline
 bool operator==(const function_symbol& x, const AFun& y)
 {
   return AFun(x) == y;
-}
+} */
 
-inline
+/* inline
 bool operator==(const AFun& x, const function_symbol& y)
 {
-  return x == AFun(y);
-}
+  return x == y;
+} */
 
 /// \brief Inequality operator.
 /// Function symbols x and y are considered equal if they have the same name,
@@ -123,11 +126,11 @@ bool operator==(const AFun& x, const function_symbol& y)
 /// \param x A function symbol.
 /// \param y A function symbol.
 /// \return True if the function symbols are not equal.
-inline
+/* inline
 bool operator!=(const function_symbol& x, const function_symbol& y)
 {
   return !(x == y);
-}
+} */
 
 } // namespace atermpp
 

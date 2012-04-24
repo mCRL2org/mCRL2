@@ -27,6 +27,13 @@ namespace core
 namespace detail
 {
 
+inline
+bool operator==(const size_t x, const atermpp::function_symbol& y)
+{
+  // return x.name() == y.name() && x.arity() == y.arity() && x.is_quoted() == y.is_quoted();
+  return x == AFun(y).number();
+}
+
 //Global precondition: the ATerm library has been initialised
 
 //--- start generated code ---//
