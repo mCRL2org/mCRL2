@@ -15,15 +15,19 @@ class DocumentManager : public QWidget
     //~DocumentManager();
 
     void newFile();
-    //void openFile(QString fileName);
-    //void saveFile(QString fileName);
+    void openFile(QString fileName);
+    void saveFile(QString fileName);
+    QTextEdit* currentEditor();
+    QWidget* currentTab();
     
   signals:
     void documentCreated(QTextEdit *editor);
     void documentSwitched(QTextEdit *editor);
 
   private:
-    Ui::DocumentManager ui;
+    QTextEdit* createEditor(QString title);
+
+    Ui::DocumentManager m_ui;
 };
 
 #endif // DOCUMENTMANAGER_H

@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
-#include "highlighter.h"
+
 #include "ui_mainwindow.h"
+#include "highlighter.h"
 
 class QTextEdit;
 
@@ -16,15 +17,20 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
+  MainWindow(QWidget *parent = 0);
+  ~MainWindow();
+
 public slots:
-  void setupEditor(QTextEdit *editorWidget);
+  void setupEditor(QTextEdit *editor);
+
 private slots:
-    void onOpen();
+  void onNew();
+  void onOpen();
+  void onSave();
+
 private:
     Ui::MainWindow m_ui;
-
-    Highlighter *highlighter;
+    QVector<Highlighter*> highlighters;
 };
 
 #endif // MAINWINDOW_H

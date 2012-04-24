@@ -80,36 +80,19 @@
     <addaction name="actionFind"/>
     <addaction name="separator"/>
     <addaction name="actionWrap_mode"/>
-   </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
-    <widget class="QMenu" name="menuDockable_panels">
-     <property name="title">
-      <string>Dockable panels</string>
-     </property>
-     <addaction name="actionParse"/>
-     <addaction name="actionRewriter"/>
-     <addaction name="actionSolver"/>
-     <addaction name="actionOutput"/>
-    </widget>
-    <addaction name="menuDockable_panels"/>
-    <addaction name="separator"/>
     <addaction name="actionReset_perspective"/>
    </widget>
    <addaction name="mnuFile"/>
    <addaction name="menu_Tools"/>
    <addaction name="menuView"/>
    <addaction name="menuAnalyze"/>
-   <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockParse">
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>60</height>
+     <height>69</height>
     </size>
    </property>
    <property name="features">
@@ -124,7 +107,7 @@
    <widget class="QWidget" name="dockWidgetParseAndTypeCheck">
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <property name="topMargin">
-      <number>0</number>
+      <number>9</number>
      </property>
      <property name="bottomMargin">
       <number>0</number>
@@ -136,6 +119,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -143,7 +139,7 @@
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>204</height>
+     <height>210</height>
     </size>
    </property>
    <property name="features">
