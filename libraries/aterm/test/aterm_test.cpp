@@ -21,7 +21,7 @@ using namespace aterm;
 void test_plain_aterm_construction()
 {
   const char *s0="f0";
-  const AFun f0=ATmakeAFun(s0,0,true);
+  const AFun f0(s0,0,true);
   BOOST_CHECK(ATgetArity(f0)==0);
   BOOST_CHECK(!strcmp(ATgetName(f0),s0));
   BOOST_CHECK(ATisQuoted(f0));
@@ -30,7 +30,7 @@ void test_plain_aterm_construction()
   BOOST_CHECK(ATgetAFun(a0)==f0.number());
 
   const char *s1="f1";
-  const AFun f1=ATmakeAFun(s1,1,false);
+  const AFun f1(s1,1,false);
   BOOST_CHECK(ATgetArity(f1)==1);
   BOOST_CHECK(!strcmp(ATgetName(f1),s1));
   BOOST_CHECK(!ATisQuoted(f1));
@@ -40,7 +40,7 @@ void test_plain_aterm_construction()
   BOOST_CHECK(ATgetArgument(a1,0)==a0);
 
   const char *s2="f0"; // Intentionally reuse string "f0".
-  const AFun f2=ATmakeAFun(s2,2,true);
+  const AFun f2(s2,2,true);
   BOOST_CHECK(ATgetArity(f2)==2);
   BOOST_CHECK(!strcmp(ATgetName(f2),s0));
   BOOST_CHECK(!strcmp(ATgetName(f2),s2));

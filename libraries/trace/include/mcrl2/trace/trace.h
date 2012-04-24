@@ -582,7 +582,7 @@ class Trace
     {
       if (trace_pair_set == 0)
       {
-        trace_pair = ATmakeAFun("pair",2,false);
+        trace_pair = AFun("pair",2,false);
         ATprotectAFun(trace_pair);
       }
       trace_pair_set++;

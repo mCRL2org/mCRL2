@@ -145,6 +145,11 @@ ATinit()
   
   // Check that AS_INT, AS_LIST and AS_EMPTY_LIST have indices 0,1 and 2. Bafio files have been saved with
   // these numbers to represent these notions.
+
+  AS_INT=AFun("<int>", 0);
+  AS_LIST=AFun("[_,_]", 2);
+  AS_EMPTY_LIST=AFun("[]", 0);
+
   assert(AS_INT.number()==0);
   assert(AS_LIST.number()==1);
   assert(AS_EMPTY_LIST.number()==2);
@@ -450,7 +455,7 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
       case 'y':
         AT_printAFun(va_arg(args, size_t), stream);
         break;
-      case 'n':
+      /* case 'n':
         {
           _ATerm* t = va_arg(args, _ATerm*);
           switch (ATgetType(t))
@@ -481,7 +486,7 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
               break;
           }
           break;
-        }
+        } */
       default:
         fputc(*p, stream);
         break;
@@ -895,7 +900,7 @@ fparse_quoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name, ATgetLength(args), true);
+  sym = AFun(name, ATgetLength(args), true);
   AT_free(name);
   return ATmakeApplList(sym, args);
 }
@@ -954,7 +959,7 @@ fparse_unquoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name ? name : "", ATgetLength(args), false);
+  sym = AFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
     AT_free(name);
@@ -1331,7 +1336,7 @@ sparse_quoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name, ATgetLength(args), true);
+  sym = AFun(name, ATgetLength(args), true);
   AT_free(name);
   return ATmakeApplList(sym, args);
 }
@@ -1390,7 +1395,7 @@ sparse_unquoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name ? name : "", ATgetLength(args), false);
+  sym = AFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
     AT_free(name);

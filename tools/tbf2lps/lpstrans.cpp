@@ -50,7 +50,7 @@ static ATermList typelist = NULL;
 
 bool is_mCRL_spec(ATermAppl spec)
 {
-  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false).number();
+  return ATgetAFun(spec) == AFun("spec2gen", 2, false).number();
 }
 
 
@@ -157,7 +157,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
   using namespace mcrl2::data;
 
   ATermList l = ATgetArguments(t);
-  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,true));
+  ATermAppl t2 = ATmakeAppl0(AFun(ATgetName(ATgetAFun(t)),0,true));
 
   if (ATisEmpty(l))
   {
@@ -208,7 +208,7 @@ static ATermList get_substs(ATermList ids)
   atermpp::set < ATerm > used;
   ATermList substs = ATmakeList0();
 
-  used.insert((ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)));
+  used.insert((ATerm) ATmakeAppl0(AFun("if",0,true)));
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
   {
@@ -241,7 +241,7 @@ static ATermList get_substs(ATermList ids)
     size_t i = 0;
     ATermAppl new_id = 0;
     while (!is_user_identifier(s) ||
-           (used.count((ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >0))
+           (used.count((ATerm)(new_id = ATmakeAppl0(AFun(s,0,true)))) >0))
     {
       sprintf(t,"%zu",i);
       i++;

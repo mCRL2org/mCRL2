@@ -106,7 +106,7 @@ Number     [0]|([1-9][0-9]*)
 void concrete_fsm_lexer::processId()
 {
   posNo += YYLeng();
-  // fsmyylval.result_string = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
+  // fsmyylval.result_string = ATmakeAppl0( AFun( YYText(), 0, ATtrue ) );
   // fsmyylval.result_string = YYText();
   fsmyylval = static_cast<std::string>(YYText());
 }
@@ -118,7 +118,7 @@ void concrete_fsm_lexer::processQuoted()
   value = value.substr( 1, value.length() - 2 );
   fsmyylval = value;
   // fsmyylval.result_string = value;
-  // fsmyylval.result_string = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
+  // fsmyylval.result_string = ATmakeAppl0( AFun( value.c_str(), 0, ATtrue ) );
 }
 
 void concrete_fsm_lexer::processNumber()
@@ -182,9 +182,9 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts_fsm_t &l)
 
   /* protect_table = ATindexedSetCreate(10000,50);
 
-  const_ATtype = ATmakeAFun( "Type", 2, ATfalse );
+  const_ATtype = AFun( "Type", 2, ATfalse );
   ATprotectAFun( const_ATtype );
-  const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
+  const_ATvalue = AFun( "Value", 2, ATfalse );
   ATprotectAFun( const_ATvalue );
   // stateVector = ATempty;
   // ATprotectList( &stateVector );

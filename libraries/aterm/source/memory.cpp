@@ -33,7 +33,7 @@ Block* at_freeblocklist = NULL;
 size_t at_freeblocklist_size = 0;
 BlockBucket block_table[BLOCK_TABLE_SIZE] = { { NULL, NULL } };
 
-size_t total_nodes = 0;
+static size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);

@@ -4952,7 +4952,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       ATermAppl OldPar=*Par;
       *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(gsMakeDataAppl(sort_int::cint(),
                           ATmakeList1(gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(*Par)))),
-                          // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
+                          // (ATerm)gsMakeOpId(ATmakeAppl0(AFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
                           (ATermAppl)sort_pos::c1()));
       if (warn_upcasting)
       {
@@ -4965,7 +4965,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
     {
       ATermAppl OldPar=*Par;
       *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(gsMakeDataAppl(sort_int::cint(),ATmakeList1(*Par)),
-                          // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
+                          // (ATerm)gsMakeOpId(ATmakeAppl0(AFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
                           (ATermAppl)(sort_pos::c1())));
       if (warn_upcasting)
       {
@@ -4978,7 +4978,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
     {
       ATermAppl OldPar=*Par;
       *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(*Par,
-                          // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
+                          // (ATerm)gsMakeOpId(ATmakeAppl0(AFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
                           (ATermAppl)data_expression(sort_pos::c1())));
       if (warn_upcasting)
       {

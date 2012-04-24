@@ -38,7 +38,7 @@ class function_symbol
     /// \param arity The arity of the function.
     /// \param quoted True if the function symbol is a quoted string.
     function_symbol(const std::string& name, int arity, bool quoted = false)
-      : m_function(ATmakeAFun(const_cast<char*>(name.c_str()), arity, quoted ? true : false))
+      : m_function(const_cast<char*>(name.c_str()), arity, quoted)
     {}
 
     /// \brief Constructor.

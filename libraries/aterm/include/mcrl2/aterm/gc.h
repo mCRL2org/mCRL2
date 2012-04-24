@@ -10,8 +10,6 @@ const size_t max_freeblocklist_size = 100;
 
 void AT_collect();
 
-extern size_t total_nodes;
-
 }
 
 #endif

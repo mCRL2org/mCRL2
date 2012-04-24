@@ -177,7 +177,7 @@ std::string description(const transformation_strategy s)
 /* Declare a protected PAIR symbol */
 inline AFun PAIR()
 {
-  static AFun PAIR = ATmakeAFun("PAIR", 2, false);
+  static AFun PAIR("PAIR", 2, false);
   return PAIR;
 }
 
@@ -448,19 +448,19 @@ void use_hashtables(void)
 
 inline AFun AFunBESAnd()
 {
-  static AFun BESAnd = ATmakeAFun("BESAnd", 2, false);
+  static AFun BESAnd("BESAnd", 2, false);
   return BESAnd;
 }
 
 inline AFun AFunBESOr()
 {
-  static AFun BESOr = ATmakeAFun("BESOr", 2, false);
+  static AFun BESOr("BESOr", 2, false);
   return BESOr;
 }
 
 inline AFun AFunBESIf()
 {
-  static AFun BESIf = ATmakeAFun("BESIf", 3, false);
+  static AFun BESIf("BESIf", 3, false);
   return BESIf;
 }
 
@@ -468,7 +468,7 @@ inline AFun AFunBESIf()
 inline
 AFun gsAFunBESFalse()
 {
-  static AFun AFunBESFalse = ATmakeAFun("BESFalse", 0, false);
+  static AFun AFunBESFalse("BESFalse", 0, false);
   return AFunBESFalse;
 }
 
@@ -482,7 +482,7 @@ bool gsIsBESFalse(ATermAppl Term)
 inline
 AFun gsAFunBESTrue()
 {
-  static AFun AFunBESTrue = ATmakeAFun("BESTrue", 0, false);
+  static AFun AFunBESTrue("BESTrue", 0, false);
   return AFunBESTrue;
 }
 
@@ -496,7 +496,7 @@ bool gsIsBESTrue(ATermAppl Term)
 inline
 AFun gsAFunBESDummy()
 {
-  static AFun AFunBESDummy = ATmakeAFun("BESDummy", 0, false);
+  static AFun AFunBESDummy("BESDummy", 0, false);
   return AFunBESDummy;
 }
 

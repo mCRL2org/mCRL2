@@ -67,13 +67,13 @@ class state_label_lts : public atermpp::aterm_appl
       }
       if (vector_templates[arity]==NULL)
       {
-        ATermAppl stub=ATmakeAppl0(ATmakeAFun("STUB",0,false));
+        ATermAppl stub=ATmakeAppl0(AFun("STUB",0,false));
         ATermList l=ATempty;
         for (size_t i=0; i<arity; ++i)
         {
           l=ATinsert(l,(ATerm)stub);
         }
-        vector_templates[arity]=ATmakeApplList(ATmakeAFun("STATE",arity,false),l);
+        vector_templates[arity]=ATmakeApplList(AFun("STATE",arity,false),l);
       }
       return ATgetAFun(vector_templates[arity]);
     }

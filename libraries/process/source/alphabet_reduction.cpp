@@ -2317,7 +2317,7 @@ namespace mcrl2
     {
       mCRL2log(verbose) << "applying alphabet reductions...\n";
       //create the tables
-      detail::afunPair=ATmakeAFun("p_allow",2,false);
+      detail::afunPair=AFun("p_allow",2,false);
       ATprotectAFun(detail::afunPair);
 
       //fill in tables

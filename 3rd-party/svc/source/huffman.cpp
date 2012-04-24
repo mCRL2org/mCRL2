@@ -50,8 +50,8 @@ int HFinit(HFtree* tree, HTable* terms)
   NO_ATERM=ATerm();
   ATprotect(&ESCAPE_SEQUENCE);
   ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=ATmakeAppl1(ATmakeAFun("ESC",1,true),ATmakeAppl0(ATmakeAFun("NEW",0,false)));
-  NO_ATERM       =ATmakeAppl1(ATmakeAFun("ESC",1,true),ATmakeAppl0(ATmakeAFun("NIL",0,false)));
+  ESCAPE_SEQUENCE=ATmakeAppl1(AFun("ESC",1,true),ATmakeAppl0(AFun("NEW",0,false)));
+  NO_ATERM       =ATmakeAppl1(AFun("ESC",1,true),ATmakeAppl0(AFun("NIL",0,false)));
 
   /* Init LZ buffer */
 

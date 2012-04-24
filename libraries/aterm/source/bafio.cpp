@@ -1241,7 +1241,7 @@ static AFun read_symbol(byte_reader* reader)
     return ATERM_NON_EXISTING_POSITION;
   }
 
-  return ATmakeAFun(text_buffer, arity, quoted ? true : false);
+  return AFun(text_buffer, arity, quoted ? true : false);
 }
 
 /*}}}  */

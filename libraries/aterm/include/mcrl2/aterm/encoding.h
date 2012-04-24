@@ -219,8 +219,8 @@ static const header_type SHIFT_TYPE = MCRL2_HT(4);
 
 static const header_type SHIFT_ARITY = MCRL2_HT(7);
 
-// static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
-static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
+static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
+// static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
 static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
 static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
 
@@ -264,11 +264,11 @@ size_t GET_LENGTH(const header_type h)
   return h >> SHIFT_LENGTH;
 }
 
-inline
+/* inline
 bool IS_QUOTED(const header_type h)
 {
   return (h & MASK_QUOTED) != (header_type)(0);
-}
+} */
 
 /* inline
 void SET_MARK(header_type& h)
@@ -280,7 +280,7 @@ void SET_MARK(header_type& h)
   while (0);
 } */
 
-inline
+/* inline
 void SET_QUOTED(header_type& h)
 {
   do
@@ -288,7 +288,7 @@ void SET_QUOTED(header_type& h)
     (h) |= MASK_QUOTED;
   }
   while (0);
-}
+} */
 
 /* inline
 void CLR_MARK(header_type& h)
@@ -300,7 +300,7 @@ void CLR_MARK(header_type& h)
   while (0);
 } */
 
-inline
+/* inline
 void CLR_QUOTED(header_type& h)
 {
   do
@@ -308,7 +308,7 @@ void CLR_QUOTED(header_type& h)
     (h) &= ~MASK_QUOTED;
   }
   while (0);
-}
+} */
 
 inline
 header_type APPL_HEADER(const size_t ari, const size_t sym)
@@ -328,13 +328,13 @@ header_type LIST_HEADER(const size_t len)
          ((MachineWord)(len) << SHIFT_LENGTH) | ((MachineWord)(2) << SHIFT_ARITY);
 }
 
-inline
+/* inline
 header_type SYMBOL_HEADER(const size_t arity, const bool quoted)
 {
   return ((header_type)(arity) << SHIFT_SYM_ARITY) |
          ((quoted) ? MASK_QUOTED : 0) |
          (AT_SYMBOL << SHIFT_TYPE);
-}
+} */
 
 static const size_t FREE_HEADER = AT_FREE << SHIFT_TYPE;
 

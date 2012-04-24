@@ -74,44 +74,44 @@ static void initialise_common()
 {
   if (is_initialised == 0)
   {
-    afunS = ATmakeAFun("@@S",2,false); // Store term ( target_variable, result_tree )
+    afunS = AFun("@@S",2,false); // Store term ( target_variable, result_tree )
     ATprotectAFun(afunS);
-    afunM = ATmakeAFun("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
+    afunM = AFun("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
     ATprotectAFun(afunM);
-    afunF = ATmakeAFun("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
+    afunF = AFun("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
     ATprotectAFun(afunF);
-    afunN = ATmakeAFun("@@N",1,false); // Go to next parameter ( result_tree )
+    afunN = AFun("@@N",1,false); // Go to next parameter ( result_tree )
     ATprotectAFun(afunN);
-    afunD = ATmakeAFun("@@D",1,false); // Go down a level ( result_tree )
+    afunD = AFun("@@D",1,false); // Go down a level ( result_tree )
     ATprotectAFun(afunD);
-    afunR = ATmakeAFun("@@R",1,false); // End of tree ( matching_rule )
+    afunR = AFun("@@R",1,false); // End of tree ( matching_rule )
     ATprotectAFun(afunR);
-    afunCR = ATmakeAFun("@@CR",2,false); // End of tree ( condition, matching_rule )
+    afunCR = AFun("@@CR",2,false); // End of tree ( condition, matching_rule )
     ATprotectAFun(afunCR);
-    afunC = ATmakeAFun("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
+    afunC = AFun("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
     ATprotectAFun(afunC);
-    afunX = ATmakeAFun("@@X",0,false); // End of tree
+    afunX = AFun("@@X",0,false); // End of tree
     ATprotectAFun(afunX);
-    afunRe = ATmakeAFun("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
+    afunRe = AFun("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
     ATprotectAFun(afunRe);
-    afunCRe = ATmakeAFun("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
+    afunCRe = AFun("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     ATprotectAFun(afunCRe);
-    afunMe = ATmakeAFun("@@Me",2,false); // Match term ( match_variable, variable_index )
+    afunMe = AFun("@@Me",2,false); // Match term ( match_variable, variable_index )
     ATprotectAFun(afunMe);
 
     dummy=NULL;
     ATprotect(&dummy);
     dummy = (ATerm) gsMakeNil();
 
-    afunARtrue = ATmakeAFun("@@true",0,false);
+    afunARtrue = AFun("@@true",0,false);
     ATprotectAFun(afunARtrue);
-    afunARfalse = ATmakeAFun("@@false",0,false);
+    afunARfalse = AFun("@@false",0,false);
     ATprotectAFun(afunARfalse);
-    afunARand = ATmakeAFun("@@and",2,false);
+    afunARand = AFun("@@and",2,false);
     ATprotectAFun(afunARand);
-    afunARor = ATmakeAFun("@@or",2,false);
+    afunARor = AFun("@@or",2,false);
     ATprotectAFun(afunARor);
-    afunARvar = ATmakeAFun("@@var",1,false);
+    afunARvar = AFun("@@var",1,false);
     ATprotectAFun(afunARvar);
     ar_true = NULL;
     ATprotectAppl(&ar_true);

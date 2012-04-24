@@ -387,7 +387,7 @@ bool     ATindexedSetRemove(ATermIndexedSet set, const ATerm &elem);   /* Return
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
-AFun  ATmakeAFun(const char* name, const size_t arity, const bool quoted);
+// AFun  ATmakeAFun(const char* name, const size_t arity, const bool quoted);
 
 inline
 char* ATgetName(const AFun &sym)
@@ -395,22 +395,23 @@ char* ATgetName(const AFun &sym)
   return AFun::at_lookup_table[sym.number()]->name;
 }
 
-inline
+/* inline
 size_t ATgetArity(const size_t n)
 {
-  return GET_LENGTH(AFun::at_lookup_table[n]->header);
-}
+  return GET_LENGTH(AFun::at_lookup_table[n]->header >> 1);
+} */
 
 inline
 size_t ATgetArity(const AFun &sym)
 {
-  return GET_LENGTH(AFun::at_lookup_table[sym.number()]->header);
-}
+  return sym.arity();
+} 
+
 
 inline
 bool ATisQuoted(const AFun &sym)
 {
-  return IS_QUOTED(AFun::at_lookup_table[sym.number()]->header);
+  return sym.is_quoted();
 }
 
 void    ATprotectAFun(const AFun &sym);

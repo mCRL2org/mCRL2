@@ -52,9 +52,9 @@ size_t AFun::first_free = size_t(-1);
 
 std::vector < _SymEntry* > AFun::at_lookup_table;
 
-const AFun AS_INT=ATmakeAFun("<int>", 0, false);
-const AFun AS_LIST=ATmakeAFun("[_,_]", 2, false);
-const AFun AS_EMPTY_LIST=ATmakeAFun("[]", 0, false);
+AFun AS_INT;
+AFun AS_LIST;
+AFun AS_EMPTY_LIST;
 
 
 // static std::multiset < AFun > protected_symbols;
@@ -106,7 +106,7 @@ fprintf(stderr,"resize_afun_hashtable to class %ld\n",afun_table_class);
     _SymEntry* entry = AFun::at_lookup_table[i];
     if (entry->reference_count>0)
     {
-      ShortHashNumber hnr = AT_hashAFun(entry->name, GET_LENGTH(entry->header));
+      ShortHashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
       hnr &= afun_table_mask;
       entry->next = afun_hashtable[hnr];
       afun_hashtable[hnr] = i;
@@ -129,7 +129,7 @@ size_t AT_printAFun(const size_t fun, FILE* f)
   char* id = entry->name;
   size_t size = 0;
 
-  if (IS_QUOTED(entry->header))
+  if (entry->is_quoted())
   {
     /* This function symbol needs quotes */
     fputc('"', f);
@@ -187,7 +187,7 @@ std::string ATwriteAFunToString(const AFun &fun)
   _SymEntry* entry = AFun::at_lookup_table[fun.number()];
   char* id = entry->name;
 
-  if (IS_QUOTED(entry->header))
+  if (entry->is_quoted())
   {
     /* This function symbol needs quotes */
     oss << "\"";
@@ -249,9 +249,8 @@ ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 
 /*{{{  AFun ATmakeAFun(const char *name, int arity, ATbool quoted) */
 
-AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
+AFun::AFun(const char* name, const size_t arity, const bool quoted)
 {
-  const header_type header = SYMBOL_HEADER(arity, quoted);
   const ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
   if (arity >= MAX_ARITY)
@@ -261,53 +260,56 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 
   /* Find symbol in table */
   size_t cur = afun_hashtable[hnr];
-  while (cur!=size_t(-1) && (!EQUAL_HEADER(AFun::at_lookup_table[cur]->header,header) || !streq(AFun::at_lookup_table[cur]->name, name)))
+  while (cur!=size_t(-1) && !(at_lookup_table[cur]->arity()==arity &&
+                              at_lookup_table[cur]->is_quoted()==quoted &&
+                              streq(at_lookup_table[cur]->name, name)))
   {
-    cur = AFun::at_lookup_table[cur]->next;
+    cur = at_lookup_table[cur]->next;
   }
 
   if (cur == size_t(-1))
   {
-    const size_t free_entry = AFun::first_free;
-    assert(AFun::at_lookup_table.size()<afun_table_size);
-    assert(AFun::at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
+    const size_t free_entry = first_free;
+    assert(at_lookup_table.size()<afun_table_size);
+    assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
 
     if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table to store an AFun.
     { 
-      assert(AFun::first_free<AFun::at_lookup_table.size());
-      cur=AFun::first_free;
-      AFun::first_free = (size_t)AFun::at_lookup_table[AFun::first_free]->id;
-      assert(AFun::first_free==size_t(-1) || AFun::first_free<AFun::at_lookup_table.size());
-      assert(free_entry<AFun::at_lookup_table.size());
-      AFun::at_lookup_table[cur]->id = cur;
-      assert(AFun::at_lookup_table[cur]->reference_count==0);
-      AFun::at_lookup_table[cur]->reference_count=0;
-      AFun::at_lookup_table[cur]->header = header;
-      AFun::at_lookup_table[cur]->count = 0;
-      AFun::at_lookup_table[cur]->index = -1;
+      assert(first_free<at_lookup_table.size());
+      cur=first_free;
+      first_free = (size_t)at_lookup_table[first_free]->id;
+      assert(first_free==size_t(-1) || first_free<at_lookup_table.size());
+      assert(free_entry<at_lookup_table.size());
+      at_lookup_table[cur]->id = cur;
+      assert(at_lookup_table[cur]->reference_count==0);
+      at_lookup_table[cur]->reference_count=0;
+      at_lookup_table[cur]->header = _SymEntry::make_header(arity,quoted);
+      at_lookup_table[cur]->count = 0;
+      at_lookup_table[cur]->index = -1;
     }
     else 
     { 
-      cur = AFun::at_lookup_table.size();
-      AFun::at_lookup_table.push_back(new _SymEntry(header,cur,0,size_t(-1)));
+      cur = at_lookup_table.size();
+      at_lookup_table.push_back(new _SymEntry(arity,quoted,cur,0,size_t(-1)));
     }
 
 
-    AFun::at_lookup_table[cur]->name = _strdup(name);
-    if (AFun::at_lookup_table[cur]->name == NULL)
+    at_lookup_table[cur]->name = _strdup(name);
+    if (at_lookup_table[cur]->name == NULL)
     {
-      throw std::runtime_error("ATmakeAFun: no room for name of length " + to_string(strlen(name)));
+      throw std::runtime_error("Construct AFun: no room for name of length " + to_string(strlen(name)));
     }
 
-    AFun::at_lookup_table[cur]->next = afun_hashtable[hnr];
+    at_lookup_table[cur]->next = afun_hashtable[hnr];
     afun_hashtable[hnr] = cur;
   }
 
-  if (AFun::at_lookup_table.size()>=afun_table_size) 
+  at_lookup_table[cur]->reference_count++;
+  if (at_lookup_table.size()>=afun_table_size) 
   {
     resize_table();
   }
-  return cur;
+  m_number=cur;
 }
 
 /*}}}  */
@@ -325,7 +327,7 @@ void at_free_afun(const size_t n)
   assert(sym->id==n);
 
   /* Calculate hashnumber */
-  const ShortHashNumber hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header)) & afun_table_mask;
+  const ShortHashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & afun_table_mask;
 
   /* Update hashtable */
   if (afun_hashtable[hnr] == n)

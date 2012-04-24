@@ -934,7 +934,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       bool isQuoted = binaryReader->tempIsQuoted;
       char* name = binaryReader->tempBytes;
 
-      AFun fun = ATmakeAFun(name, arity, isQuoted);
+      AFun fun(name, arity, isQuoted);
       _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
       binaryReader->protected_afuns.insert(fun);
       // ATprotectAFun(fun);

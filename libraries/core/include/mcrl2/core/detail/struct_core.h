@@ -2813,7 +2813,7 @@ ATermAppl gsString2ATermAppl(const char* s)
 {
   if (s != NULL)
   {
-    return ATmakeAppl0(ATmakeAFun(s, 0, true));
+    return ATmakeAppl0(AFun(s, 0, true));
   }
   else
   {
