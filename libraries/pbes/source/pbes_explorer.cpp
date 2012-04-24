@@ -204,8 +204,8 @@ void lts_info::compute_lts_type()
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
-
-                this->param_default_values.push_back(default_expression_generator(varparam.sort()));
+                data_expression e(default_expression_generator(varparam.sort()));
+                this->param_default_values.push_back(pgg->rewrite_and_simplify_expression(e,false));
             }
         }
         //params.sort();
