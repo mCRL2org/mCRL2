@@ -28,18 +28,29 @@ class DocumentManager : public QWidget
     void openFile(QString fileName);
     void saveFile(QString fileName);
 
-    DocumentWidget* currentDocument();
+    int documentCount();
+    DocumentWidget* getDocument(int index);
     DocumentWidget* findDocument(QString fileName);
+    void closeDocument(int index);
+
+    DocumentWidget* currentDocument();
     QString currentFileName();
     
   signals:
     void documentCreated(DocumentWidget *document);
     void documentSwitched(DocumentWidget *document);
+    void tabCloseRequested(int index);
 
   private:
     DocumentWidget* createDocument(QString title);
 
     Ui::DocumentManager m_ui;
+
+  private slots:
+    void onCloseRequest(int index) { emit tabCloseRequested(index); }
+
+  protected:
+    void showEvent(QShowEvent *event);
 };
 
 #endif // DOCUMENTMANAGER_H

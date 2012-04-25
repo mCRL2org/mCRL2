@@ -24,6 +24,7 @@ class DocumentWidget : public QWidget
 
     QTextEdit* getEditor();
     QString getFileName();
+    bool isModified();
 
     void openFile(QString fileName);
     void saveFile(QString fileName);

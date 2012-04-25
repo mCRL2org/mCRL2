@@ -16,28 +16,47 @@
 #include "ui_mainwindow.h"
 #include "highlighter.h"
 #include "documentwidget.h"
+#include "documentmanager.h"
 
 class QTextEdit;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-public:
-  MainWindow(QWidget *parent = 0);
-  ~MainWindow();
+  public:
+    MainWindow(QWidget *parent = 0);
+    bool saveDocument(DocumentWidget *document);
 
-public slots:
-  void formatDocument(DocumentWidget *document);
+  public slots:
+    void formatDocument(DocumentWidget *document);
+    bool onCloseRequest(int index);
 
-private slots:
-  void onNew();
-  void onOpen();
-  void onSave();
-  void onSaveAs();
+  private slots:
+    void onNew();
+    void onOpen();
+    void onSave();
+    void onSaveAs();
+    void onExit();
 
-private:
+    void onUndo();
+    void onRedo();
+    void onCut();
+    void onCopy();
+    void onPaste();
+    void onDelete();
+    void onSelectAll();
+
+    void onFind();
+    void onWrapMode();
+    void onResetPerspective();
+
+    void onAbout();
+
+  private:
     Ui::MainWindow m_ui;
-    QVector<Highlighter*> highlighters;
+
+  protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

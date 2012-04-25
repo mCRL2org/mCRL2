@@ -19,7 +19,15 @@ DocumentManager::DocumentManager(QWidget *parent) :
   QWidget(parent)
 {
   m_ui.setupUi(this);
-  this->newFile();
+  connect(m_ui.tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
+}
+
+void DocumentManager::showEvent(QShowEvent *event)
+{
+  // This cannot be done in the constructor because
+  // the documentCreated signal is fired before the connection can be made
+  if (m_ui.tabWidget->count() == 0)
+    this->newFile();
 }
 
 DocumentWidget* DocumentManager::createDocument(QString title)
@@ -34,18 +42,37 @@ DocumentWidget* DocumentManager::createDocument(QString title)
   return document;
 }
 
-DocumentWidget* DocumentManager::currentDocument()
+int DocumentManager::documentCount()
 {
-  return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->currentWidget());
+  return m_ui.tabWidget->count();
+}
+
+DocumentWidget* DocumentManager::getDocument(int index)
+{
+  return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(index));
 }
 
 DocumentWidget* DocumentManager::findDocument(QString fileName)
 {
-  for (int i = 0; i < m_ui.tabWidget->count(); i++) {
-    if (dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(i))->getFileName() == fileName)
-      return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(i));
+  for (int i = 0; i < this->documentCount(); i++) {
+    if (this->getDocument(i)->getFileName() == fileName)
+      return this->getDocument(i);
   }
   return 0;
+}
+
+void DocumentManager::closeDocument(int index)
+{
+  DocumentWidget* document = this->getDocument(index);
+  delete document;
+
+  if (m_ui.tabWidget->count() == 0)
+    this->newFile();
+}
+
+DocumentWidget* DocumentManager::currentDocument()
+{
+  return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->currentWidget());
 }
 
 QString DocumentManager::currentFileName()

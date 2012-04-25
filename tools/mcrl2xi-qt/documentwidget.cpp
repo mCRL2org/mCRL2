@@ -15,6 +15,7 @@ DocumentWidget::DocumentWidget(QWidget *parent) :
   QWidget(parent)
 {
   m_ui.setupUi(this);
+  m_ui.textEdit->document()->setModified(false);
 }
 
 QTextEdit* DocumentWidget::getEditor()
@@ -27,6 +28,11 @@ QString DocumentWidget::getFileName()
   return m_filename;
 }
 
+bool DocumentWidget::isModified()
+{
+  return m_ui.textEdit->document()->isModified();
+}
+
 void DocumentWidget::openFile(QString fileName)
 {
   QFile file(fileName);
@@ -36,6 +42,7 @@ void DocumentWidget::openFile(QString fileName)
     m_ui.textEdit->setPlainText(file.readAll());
     file.close();
     m_filename = fileName;
+    m_ui.textEdit->document()->setModified(false);
   }
 }
 
@@ -48,5 +55,6 @@ void DocumentWidget::saveFile(QString fileName)
     file.write((const char *)m_ui.textEdit->toPlainText().toAscii().data());
     file.close();
     m_filename = fileName;
+    m_ui.textEdit->document()->setModified(false);
   }
 }

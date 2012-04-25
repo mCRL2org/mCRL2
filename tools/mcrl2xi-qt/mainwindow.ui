@@ -66,13 +66,6 @@
     <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
    </widget>
-   <widget class="QMenu" name="menuAnalyze">
-    <property name="title">
-     <string>Analyze</string>
-    </property>
-    <addaction name="actionEvaluate"/>
-    <addaction name="actionType_check"/>
-   </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
@@ -82,10 +75,16 @@
     <addaction name="actionWrap_mode"/>
     <addaction name="actionReset_perspective"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="mnuFile"/>
    <addaction name="menu_Tools"/>
    <addaction name="menuView"/>
-   <addaction name="menuAnalyze"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockParse">
@@ -455,6 +454,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
