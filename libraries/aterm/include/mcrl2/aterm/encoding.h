@@ -37,12 +37,55 @@ typedef MachineWord header_type;
 
 #define MCRL2_HT(t) (static_cast<MachineWord>(t))
 
-class _ATerm
+typedef void (*ATermProtFunc)();
+
+/**
+ * These are the types of ATerms there are. \see ATgetType().
+ */
+static const size_t AT_FREE = 0;
+static const size_t AT_APPL = 1;
+static const size_t AT_INT = 2;
+static const size_t AT_LIST = 4;
+static const size_t AT_SYMBOL = 7;
+
+static const size_t HEADER_BITS = sizeof(size_t)*8;
+
+#ifdef AT_64BIT
+static const header_type SHIFT_LENGTH = MCRL2_HT(34);
+// static const header_type ARITY_BITS = MCRL2_HT(8);
+#endif /* AT_64BIT */
+#ifdef AT_32BIT
+static const header_type SHIFT_LENGTH = MCRL2_HT(10);
+// static const header_type ARITY_BITS = MCRL2_HT(3);
+#endif /* AT_32BIT */
+
+static const header_type TYPE_BITS = MCRL2_HT(3);
+// static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
+
+static const header_type SHIFT_TYPE = MCRL2_HT(4);
+
+// static const header_type SHIFT_ARITY = MCRL2_HT(7);
+
+// static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
+// static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
+static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
+// static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
+
+// static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
+
+
+
+
+struct _ATerm
 {
-  public:
     header_type   header;
     size_t reference_count;
     _ATerm* next;
+
+    size_t type() const
+    {
+      return ((header)  & MASK_TYPE) >> SHIFT_TYPE;
+    }
 };
 
 inline
@@ -138,6 +181,22 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       return m_aterm;
     }
 
+    /// \brief Return the type of term.
+    /// Result is one of AT_APPL, AT_INT,
+    /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
+    /// \return The type of the term.
+    size_t type() const
+    {
+      return m_aterm->type(); 
+    }
+
+    /// \brief Writes the term to a string.
+    /// \return A string representation of the term.
+    std::string to_string() const;
+    /* {
+      return ATwriteToString(m_aterm);
+    } */
+
     bool operator ==(const ATerm &t) const
     {
       assert(m_aterm==NULL || m_aterm->reference_count>0);
@@ -190,42 +249,6 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
 
 
 
-typedef void (*ATermProtFunc)();
-
-/**
- * These are the types of ATerms there are. \see ATgetType().
- */
-static const size_t AT_FREE = 0;
-static const size_t AT_APPL = 1;
-static const size_t AT_INT = 2;
-static const size_t AT_LIST = 4;
-static const size_t AT_SYMBOL = 7;
-
-static const size_t HEADER_BITS = sizeof(size_t)*8;
-
-#ifdef AT_64BIT
-static const header_type SHIFT_LENGTH = MCRL2_HT(34);
-static const header_type ARITY_BITS = MCRL2_HT(8);
-#endif /* AT_64BIT */
-#ifdef AT_32BIT
-static const header_type SHIFT_LENGTH = MCRL2_HT(10);
-static const header_type ARITY_BITS = MCRL2_HT(3);
-#endif /* AT_32BIT */
-
-static const header_type TYPE_BITS = MCRL2_HT(3);
-static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
-
-static const header_type SHIFT_TYPE = MCRL2_HT(4);
-
-static const header_type SHIFT_ARITY = MCRL2_HT(7);
-
-static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
-// static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
-static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
-static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
-
-static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
-
 inline
 bool EQUAL_HEADER(const header_type h1, const header_type h2)
 {
@@ -233,7 +256,7 @@ bool EQUAL_HEADER(const header_type h1, const header_type h2)
 }
 
 static const size_t SHIFT_SYMBOL = SHIFT_LENGTH;
-static const size_t SHIFT_SYM_ARITY = SHIFT_LENGTH;
+// static const size_t SHIFT_SYM_ARITY = SHIFT_LENGTH;
 
 /* inline
 bool IS_MARKED(const header_type h)
@@ -241,28 +264,28 @@ bool IS_MARKED(const header_type h)
   return (h & MASK_MARK) != (header_type)(0);
 } */
 
-inline
+/* inline
 size_t GET_TYPE(const header_type h)
 {
   return (h & MASK_TYPE) >> SHIFT_TYPE;
-}
+} */
 
-inline
+/* inline
 size_t GET_ARITY(const header_type h)
 {
   return (h & MASK_ARITY) >> SHIFT_ARITY;
-}
+} */
 
 inline size_t GET_SYMBOL(const header_type h)
 {
   return h >> SHIFT_SYMBOL;
-}
+} 
 
-inline
+/* inline
 size_t GET_LENGTH(const header_type h)
 {
   return h >> SHIFT_LENGTH;
-}
+} */
 
 /* inline
 bool IS_QUOTED(const header_type h)
@@ -311,9 +334,10 @@ void CLR_QUOTED(header_type& h)
 } */
 
 inline
-header_type APPL_HEADER(const size_t ari, const size_t sym)
+// header_type APPL_HEADER(const size_t ari, const size_t sym)
+header_type APPL_HEADER(const size_t sym)
 {
-  return ((ari) << SHIFT_ARITY) |
+  return // ((ari) << SHIFT_ARITY) |
          (AT_APPL << SHIFT_TYPE) |
          ((header_type)(sym) << SHIFT_SYMBOL);
 }
@@ -325,7 +349,8 @@ inline
 header_type LIST_HEADER(const size_t len)
 {
   return (AT_LIST << SHIFT_TYPE) |
-         ((MachineWord)(len) << SHIFT_LENGTH) | ((MachineWord)(2) << SHIFT_ARITY);
+         ((MachineWord)(len) << SHIFT_LENGTH);
+        //  | ((MachineWord)(2) << SHIFT_ARITY);
 }
 
 /* inline
@@ -358,7 +383,7 @@ MachineWord AT_TABLE_MASK(const size_t table_class)
  * BAF terms can be exchanged between platforms. */
 static const size_t INT_SIZE_IN_BAF = 32;
 
-static const size_t MAX_ARITY = MAX_LENGTH;
+// static const size_t MAX_ARITY = MAX_LENGTH;
 
 /* The constants below are not static to prevent some compiler warnings */
 const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);

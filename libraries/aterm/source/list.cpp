@@ -421,19 +421,23 @@ ATermList ATgetArguments(const ATermAppl &appl)
 
 size_t ATgetLength(const ATermList &list_in)
 {
-  size_t length = ((size_t)GET_LENGTH((list_in)->header));
+  /* size_t length = ((size_t)GET_LENGTH((list_in)->header));
 
   if (length < MAX_LENGTH-1)
   {
     return length;
-  }
+  } */
 
   /* Length of the list exceeds the size that can be stored in the header
      Count the length of the list.
   */
 
-  ATermList list=list_in;
-  while (1)
+  size_t length=0;
+  for(_ATermList* list=&*list_in; list!=&*ATempty; list=&*list->tail)
+  { 
+    ++length;
+  }
+  /* for( ; while (1)
   {
     list = ATgetNext(list);
     if ((size_t)GET_LENGTH((list)->header) < (MAX_LENGTH-1))
@@ -441,7 +445,7 @@ size_t ATgetLength(const ATermList &list_in)
       break;
     }
     length += 1;
-  };
+  }; */
 
   return length;
 }

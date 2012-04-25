@@ -9,7 +9,7 @@
 namespace aterm
 {
 
-static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
+// static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
 
 
 /* To change the block size, modify BLOCK_SHIFT only! */
@@ -216,7 +216,8 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
   HashNumber hnr;
   _ATerm* arg;
 
-  header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym.number());
+  // header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym.number());
+  header = APPL_HEADER(sym.number());
  
   hnr = START(header);
   for (ForwardIterator i=begin; i!=end; i++)

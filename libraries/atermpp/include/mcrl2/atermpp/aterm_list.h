@@ -207,7 +207,7 @@ class term_list: public aterm_base
     /// \return The largest possible size of the list.
     size_type max_size() const
     {
-      return GET_LENGTH((std::numeric_limits<unsigned long>::max)());
+      return (std::numeric_limits<size_t>::max)();
     }
 
     /// \brief Returns true if the list's size is 0.

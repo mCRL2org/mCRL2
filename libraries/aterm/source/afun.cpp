@@ -253,10 +253,10 @@ AFun::AFun(const char* name, const size_t arity, const bool quoted)
 {
   const ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
-  if (arity >= MAX_ARITY)
+  /* if (arity >= MAX_ARITY)
   {
     throw std::runtime_error("cannot handle symbols with arity " + to_string(arity) + "(max=" + to_string(MAX_ARITY-1) + ")");
-  }
+  } */
 
   /* Find symbol in table */
   size_t cur = afun_hashtable[hnr];

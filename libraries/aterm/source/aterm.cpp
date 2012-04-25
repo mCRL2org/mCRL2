@@ -715,11 +715,11 @@ topWriteToStream(const ATerm &t, std::ostream& os)
  * Write a term into its text representation.
  */
 
-std::string
-ATwriteToString(const ATerm &t)
+// std::string ATwriteToString(const ATerm &t)
+std::string ATerm::to_string() const
 {
   std::ostringstream oss;
-  topWriteToStream(t, oss);
+  topWriteToStream(*this, oss);
   return oss.str();
 }
 

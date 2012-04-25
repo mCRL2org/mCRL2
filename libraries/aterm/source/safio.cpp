@@ -1244,8 +1244,8 @@ ATerm ATgetRoot(BinaryReader binaryReader)
  */
 void ATdestroyBinaryReader(BinaryReader binaryReader)
 {
-  _SymEntry** sharedAFuns = binaryReader->sharedAFuns;
-  ptrdiff_t sharedAFunsIndex = binaryReader->sharedAFunsIndex;
+  // _SymEntry** sharedAFuns = binaryReader->sharedAFuns;
+  // ptrdiff_t sharedAFunsIndex = binaryReader->sharedAFunsIndex;
 
   // destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
 

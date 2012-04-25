@@ -197,7 +197,7 @@ int LZwriteATerm(BitStream* bs, LZbuffer* buffer, ATerm term)
 {
   char* buf;
 
-  buf=_strdup(ATwriteToString(term).c_str());
+  buf=_strdup(term.to_string().c_str());
   compress(bs,buffer,buf);
   free(buf);
 

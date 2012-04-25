@@ -75,7 +75,7 @@ template <typename TermType>
 inline
 size_t ATgetType(const TermType &t)
 {
-  return GET_TYPE(t->header);
+  return t->type();
 }
 
 inline
@@ -116,7 +116,7 @@ bool ATwriteToNamedBinaryFile(const ATerm &t, const char* name);
  * Serialize an ATerm to a string.
  * \arg t term to write
  */
-std::string ATwriteToString(const ATerm &t);
+// std::string ATwriteToString(const ATerm &t);
 
 /**
  * Serialize an ATerm to a static buffer in binary format. Note that

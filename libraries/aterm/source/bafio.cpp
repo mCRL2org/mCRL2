@@ -498,7 +498,7 @@ static sym_entry* get_top_symbol(const ATerm t)
       sym = ATgetAFun((ATermAppl)t);
       break;
     default:
-      throw std::runtime_error("get_top_symbol: illegal term (" + ATwriteToString(t) + ")");
+      throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
       sym = (AFun)-1; // error path...
       break;
   }
@@ -931,7 +931,7 @@ static bool write_term(const ATerm t, byte_writer* writer)
   if (trm_sym->terms[trm_sym->cur_index].t != t)
   {
     throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + ATwriteAFunToString(trm_sym->id) +
-                             ", term in table was " + ATwriteToString(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + ATwriteToString(t));
+                             ", term in table was " + (trm_sym->terms[trm_sym->cur_index].t).to_string() + ", expected " + t.to_string());
   }
   trm_sym->cur_index++;
 
@@ -1483,7 +1483,7 @@ static void free_read_space()
       free(entry->topsyms);
     }
 
-    ATunprotectAFun(entry->sym);
+    // ATunprotectAFun(entry->sym);
   }
   read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be 
                                               // destructed after the destruction of AFuns, which leads

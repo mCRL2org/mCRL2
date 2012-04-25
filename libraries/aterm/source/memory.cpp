@@ -536,7 +536,8 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
   // ATerm* buffer;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,arity);
 
-  header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  // header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  header = APPL_HEADER(sym.number());
 
   // buffer = (ATerm*)AT_alloc_protected(arity);
 
@@ -601,7 +602,7 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
 ATermAppl ATmakeAppl0(const AFun &sym)
 {
   _ATerm *cur, *prev, **hashspot;
-  header_type header = APPL_HEADER(0, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
 
@@ -652,7 +653,7 @@ ATermAppl ATmakeAppl0(const AFun &sym)
 ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
 {
   _ATerm* cur, *prev, **hashspot;
-  header_type header = APPL_HEADER(1, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   CHECK_ARITY(ATgetArity(sym), 1);
@@ -707,7 +708,7 @@ ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
 ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
 {
   _ATerm* cur, *prev, **hashspot;
-  header_type header = APPL_HEADER(2, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   CHECK_ARITY(ATgetArity(sym), 2);
@@ -768,7 +769,7 @@ ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
 ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, const ATerm &arg2)
 {
   _ATerm *cur;
-  header_type header = APPL_HEADER(3, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   CHECK_ARITY(ATgetArity(sym), 3);
@@ -825,7 +826,7 @@ ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   header_type header;
   HashNumber hnr;
 
-  header = APPL_HEADER(4, sym.number());
+  header = APPL_HEADER(sym.number());
 
   CHECK_TERM(&*arg0);
   CHECK_TERM(&*arg1);
@@ -884,7 +885,7 @@ ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
                                        const ATerm &arg3, const ATerm &arg4)
 {
   _ATerm *cur;
-  header_type header = APPL_HEADER(5, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   CHECK_ARITY(ATgetArity(sym), 5);
@@ -949,7 +950,7 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
                                       const ATerm &arg3, const ATerm &arg4, const ATerm &arg5)
 {
   _ATerm* cur;
-  header_type header = APPL_HEADER(6, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   CHECK_ARITY(ATgetArity(sym), 6);
@@ -1020,7 +1021,8 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
   _ATerm *cur;
   size_t arity = ATgetArity(sym);
   bool found;
-  header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  // header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  header_type header = APPL_HEADER(sym.number());
   HashNumber hnr;
 
   assert(arity == ATgetLength(args));
@@ -1094,7 +1096,8 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
   size_t arity = ATgetArity(sym);
   bool found;
   HashNumber hnr;
-  header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  // header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
+  header_type header = APPL_HEADER(sym.number());
 
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
@@ -1254,8 +1257,8 @@ ATermList ATmakeList1(const ATerm &el)
 
 ATermList ATinsert(const ATermList &tail, const ATerm &el)
 {
-  size_t curLength = GET_LENGTH(tail->header);
-  size_t newLength;
+  // size_t curLength = GET_LENGTH(tail->header);
+  // size_t newLength;
   header_type header;
   HashNumber hnr;
   _ATerm* cur;
@@ -1264,16 +1267,16 @@ ATermList ATinsert(const ATermList &tail, const ATerm &el)
      store MAX_LENGTH-1 in the header. ATgetLength will then count the length of the
      list instead of using on the header
   */
-  if (curLength >= MAX_LENGTH-1)
+  /* if (curLength >= MAX_LENGTH-1)
   {
     newLength = MAX_LENGTH-1;
   }
   else
   {
     newLength = curLength+1;
-  }
+  } */
 
-  header = LIST_HEADER(newLength);
+  header = LIST_HEADER(0);
 
 
   assert(ATgetType(tail) == AT_LIST);
@@ -1410,10 +1413,10 @@ ATermAppl ATsetArgument(const ATermAppl &appl, const ATerm &arg, const size_t n)
 bool AT_isValidTerm(const _ATerm *term)
 {
   Block* cur;
-  header_type header;
+  // header_type header;
   bool inblock = false;
   size_t idx = ADDR_TO_BLOCK_IDX(term);
-  size_t type;
+  // size_t type;
   ptrdiff_t offset = 0;
 
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
@@ -1458,17 +1461,17 @@ bool AT_isValidTerm(const _ATerm *term)
      are not allowed.
      */
 
-  if (offset % (cur->size*sizeof(header)))
+  if (offset % (cur->size*sizeof(header_type)))
   {
     return false;
   }
 
-  header = term->header;
+  /* header = term->header;
 
-  type = GET_TYPE(header);
+  type = GET_TYPE(header); */
 
   /* The only possibility left for an invalid term is AT_FREE */
-  return (type != AT_FREE) && (type != AT_SYMBOL);
+  return (term->type() != AT_FREE) && (term->type() != AT_SYMBOL);
 } 
 
 /*}}}  */
