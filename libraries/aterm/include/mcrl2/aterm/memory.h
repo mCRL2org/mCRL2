@@ -231,7 +231,7 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
   cur = ATerm::hashtable[hnr & table_mask];
   while (cur)
   {
-    if (EQUAL_HEADER(cur->header,header))
+    if (cur->header==header)
     {
       found = true;
       size_t j=0;

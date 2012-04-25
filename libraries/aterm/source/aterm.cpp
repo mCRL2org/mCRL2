@@ -573,10 +573,11 @@ writeToTextFile(const ATerm &t, FILE* f)
       }
       return false;
 
-    case AT_SYMBOL:
+    /* case AT_SYMBOL:
       // throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));
       throw std::runtime_error("ATwriteToTextFile: not a term but an afun: ");
       return false;
+    */
   }
 
   return true;

@@ -212,12 +212,6 @@ class aterm: public aterm_base
     { }
 
     /// \brief Constructor.
-    /// \param term A real-valued term
-    /* aterm(ATermReal term)
-      : aterm_base(term)
-    { } */
-
-    /// \brief Constructor.
     /// \param term A term containing binary data
     /* aterm(ATermBlob term)
       : aterm_base(term)
@@ -229,12 +223,6 @@ class aterm: public aterm_base
       : aterm_base(term)
     { }
 
-    /// \brief Constructor.
-    /// \param s A string
-    /* aterm(const std::string& s)
-      : aterm_base(s)
-    { }
-    */
     /// \brief Conversion operator.
     /// \return The wrapped ATerm pointer
     operator ATerm() const
@@ -287,18 +275,6 @@ aterm read_from_binary_string(const std::string& s, unsigned int size)
   return ATreadFromBinaryString(reinterpret_cast<const unsigned char*>(s.c_str()), size);
 }
 
-/// \brief Read a aterm from a string in taf format.
-/// This function decodes a taf character string into an aterm.
-/// \param s A string
-/// \param size A positive integer
-/// \return The term read from string.
-/*   inline
-  aterm read_from_shared_string(const std::string& s, unsigned int size)
-  {
-    return ATreadFromSharedString(s.c_str(), size);
-  }
-*/
-
 /// \brief Read an aterm from named binary or text file.
 /// This function reads an aterm file filename. A test is performed to see if the file
 /// is in baf, taf, or plain text. "-" is standard input's filename.
@@ -343,47 +319,6 @@ bool write_to_named_saf_file(aterm t, const std::string& filename)
 }
 */
 
-/// \brief Annotate a term with a labeled annotation.
-/// Creates a version of t that is annotated with annotation and labeled by
-/// label.
-/// \param t A term.
-/// \param label A label.
-/// \param annotation An annotation.
-/// \return A term with an added annotation.
-/*   inline
-  aterm set_annotation(aterm t, aterm label, aterm annotation)
-  {
-    return ATsetAnnotation(t, label, annotation);
-  }
-*/
-
-/// \brief Retrieves annotation of t with label label.
-/// This function can be used to retrieve a specific annotation of a term. If t has
-/// no annotations, or no annotation labeled with label exists, `aterm()` is returned. Otherwise the
-/// annotation is returned.
-/// \param t A term.
-/// \param label A label.
-/// \return The annotation with the given label.
-/*  inline
-  aterm get_annotation(aterm t, aterm label)
-  {
-    return ATgetAnnotation(t, label);
-  }
-*/
-
-/// \brief Remove a specific annotation from a term.
-/// This function returns a version of t which has its annotation with label label
-/// removed. If t has no annotations, or no annotation labeled with label exists, t itself is returned.
-/// \param t A term.
-/// \param label A label.
-/// \return The term with a removed annotation.
-/* inline
-  aterm remove_annotation(aterm t, aterm label)
-  {
-    return ATremoveAnnotation(t, label);
-  }
-*/
-
 /// \brief Equality operator.
 /// \param x A term.
 /// \param y A term.
@@ -394,26 +329,6 @@ bool operator==(const aterm& x, const aterm& y)
   return ATisEqual(x, y) == true;
 } 
 
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-/* inline
-bool operator==(const aterm& x, const ATerm &y)
-{
-  return ATisEqual(x, y) == true;
-} */
-
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-/* inline
-bool operator==(const ATerm& x, const aterm &y)
-{
-  return ATisEqual(x, y) == true;
-} */
-
 /// \brief Inequality operator.
 /// \param x A term.
 /// \param y A term.
@@ -423,26 +338,6 @@ bool operator!=(const aterm& x, const aterm& y)
 {
   return ATisEqual(x, y) == false;
 } 
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-/* inline
-bool operator!=(const aterm& x, ATerm y)
-{
-  return ATisEqual(x, y) == false;
-} */
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-/* inline
-bool operator!=(const ATerm& x, aterm y)
-{
-  return ATisEqual(x, y) == false;
-} */
 
 } // namespace atermpp
 

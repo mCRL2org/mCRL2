@@ -46,9 +46,9 @@ static const size_t AT_FREE = 0;
 static const size_t AT_APPL = 1;
 static const size_t AT_INT = 2;
 static const size_t AT_LIST = 4;
-static const size_t AT_SYMBOL = 7;
+// static const size_t AT_SYMBOL = 7;
 
-static const size_t HEADER_BITS = sizeof(size_t)*8;
+// static const size_t HEADER_BITS = sizeof(size_t)*8;
 
 #ifdef AT_64BIT
 static const header_type SHIFT_LENGTH = MCRL2_HT(34);
@@ -249,11 +249,11 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
 
 
 
-inline
+/* inline
 bool EQUAL_HEADER(const header_type h1, const header_type h2)
 {
   return h1==h2;
-}
+} */
 
 static const size_t SHIFT_SYMBOL = SHIFT_LENGTH;
 // static const size_t SHIFT_SYM_ARITY = SHIFT_LENGTH;
@@ -346,11 +346,11 @@ static const header_type INT_HEADER = AT_INT << SHIFT_TYPE;
 static const header_type EMPTY_HEADER = AT_LIST << SHIFT_TYPE;
 
 inline
-header_type LIST_HEADER(const size_t len)
+header_type LIST_HEADER()
 {
-  return (AT_LIST << SHIFT_TYPE) |
-         ((MachineWord)(len) << SHIFT_LENGTH);
-        //  | ((MachineWord)(2) << SHIFT_ARITY);
+  return AT_LIST << SHIFT_TYPE;
+         //((MachineWord)(len) << SHIFT_LENGTH);
+         //  | ((MachineWord)(2) << SHIFT_ARITY);
 }
 
 /* inline
