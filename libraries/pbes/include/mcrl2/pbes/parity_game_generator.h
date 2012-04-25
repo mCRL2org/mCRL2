@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
@@ -319,7 +320,9 @@ class parity_game_generator
       R(datarv, datae),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity(is_min_parity)
-    {}
+    {
+      detail::instantiate_global_variables(p);
+    }
 
     /// \brief Returns the (rewritten) initial state.
     /// \return the initial state rewritten by R
