@@ -97,11 +97,11 @@ class tbf2lps_tool: public input_output_tool
         }
       }
 
-      ATprotectAppl(&mcrl_spec);
+      // ATprotectAppl(&mcrl_spec);
       assert(is_mCRL_spec(mcrl_spec));
 
       ATermAppl spec = translate(mcrl_spec,true,m_not_convert_mappings);
-      ATprotectAppl(&spec);
+      // ATprotectAppl(&spec);
 
       if (output_filename().empty())
       {

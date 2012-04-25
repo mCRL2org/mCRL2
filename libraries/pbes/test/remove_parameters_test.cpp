@@ -17,7 +17,6 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::core;
@@ -97,7 +96,6 @@ int test_main(int argc, char** argv)
   ATinit();
 
   test_propositional_variable_instantiation();
-  core::garbage_collect();
 
   return 0;
 }

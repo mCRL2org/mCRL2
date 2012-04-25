@@ -260,7 +260,7 @@ inline size_t get_appl_afun_value(size_t arity)
     {
       assert(old_num==apples.size());
       apples.push_back(AFun("#REWR#",old_num,false));
-      ATprotectAFun(apples[old_num]);
+      // ATprotectAFun(apples[old_num]);
     }
   }
   assert(arity<apples.size());

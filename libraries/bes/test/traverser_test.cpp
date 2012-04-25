@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 //#include "mcrl2/bes/find.h"
 #include "mcrl2/bes/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/traverser.h"
 
 using namespace mcrl2;
@@ -52,7 +51,6 @@ void test_custom_traverser()
   boolean_equation_system<> eqn;
   t(eqn);
 
-  core::garbage_collect();
 }
 
 class traverser1: public boolean_variable_traverser<traverser1>
@@ -122,7 +120,6 @@ void test_traverser1()
   BOOST_CHECK(t2.expression_count == 7);
   BOOST_CHECK(t2.equation_count == 2);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

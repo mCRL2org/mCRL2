@@ -15,7 +15,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
@@ -193,11 +192,9 @@ void allocation_test()
   data::rewriter                  R_stack(data_spec);
 
   R_stack(parse_data_expression("1 == 2"));
-  core::garbage_collect();
   R_stack(parse_data_expression("1 == 2"));
 
   (*R_heap)(parse_data_expression("1 == 2"));
-  core::garbage_collect();
   (*R_heap)(parse_data_expression("1 == 2"));
 }
 

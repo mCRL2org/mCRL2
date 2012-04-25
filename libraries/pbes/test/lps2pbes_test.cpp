@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "test_specifications.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -62,7 +61,6 @@ void test_trivial()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
 }
 
 void test_timed()
@@ -77,7 +75,6 @@ void test_timed()
 
   const atermpp::vector<sort_expression> sorts(p.data().sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
-  core::garbage_collect();
 }
 
 void test_lps2pbes()
@@ -182,7 +179,6 @@ void test_lps2pbes()
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
-  core::garbage_collect();
 }
 
 void test_lps2pbes2()
@@ -210,7 +206,6 @@ void test_lps2pbes2()
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))";
   p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
 }
 
 void test_lps2pbes3()
@@ -239,7 +234,6 @@ void test_lps2pbes3()
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
   std::cerr << "p = " << pbes_system::pp(p) << std::endl;
-  core::garbage_collect();
 }
 
 // Trac ticket #841, example supplied by Tim Willemse.
@@ -271,7 +265,6 @@ void test_lps2pbes4()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cerr << "p = " << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
 }
 
 #ifdef MCRL2_USE_BOOST_FILESYSTEM
@@ -337,7 +330,6 @@ void test_directory(int argc, char** argv)
       }
     }
   }
-  core::garbage_collect();
 }
 #endif
 
@@ -376,7 +368,6 @@ void test_formulas()
     pbes<> result2 = lps2pbes(SPEC, *i, true);
     std::cout << " <untimed>" << std::endl;
   }
-  core::garbage_collect();
 }
 
 const std::string MACHINE_SPECIFICATION =
@@ -439,7 +430,6 @@ void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
   state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  core::garbage_collect();
 }
 
 // Submitted by Tim, 2-9-2010
@@ -467,7 +457,6 @@ void test_example()
   bool result = pbes2_bool_test(p);
   BOOST_CHECK(result == true);
 
-  core::garbage_collect();
 }
 
 // Submitted by Jeroen Keiren, 10-09-2010
@@ -535,7 +524,6 @@ void test_elevator()
   p = lps2pbes(SPEC, formula3, timed);
   p = lps2pbes(SPEC, formula4, timed);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

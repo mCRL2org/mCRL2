@@ -11,7 +11,6 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -62,7 +61,6 @@ void test_remove_unreachable_variables(const std::string& pbes_spec, const std::
     std::cerr << diff << std::endl;
   }
   BOOST_CHECK(diff.empty());
-  core::garbage_collect();
 }
 
 void test_remove_unreachable_variables()

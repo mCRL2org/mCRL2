@@ -17,7 +17,6 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -50,7 +49,6 @@ int test_main(int argc, char* argv[])
   std::cerr << info1.to_string() << std::endl;
   lps::detail::specification_property_map info2(LPSINFO);
   std::cerr << info1.compare(info2) << std::endl;
-  core::garbage_collect();
 
   return 0;
 }

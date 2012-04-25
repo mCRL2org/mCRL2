@@ -15,7 +15,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/lps/action.h"
@@ -66,7 +65,6 @@ int test_main(int argc, char** argv)
   l=push_front(l,aY);
   BOOST_CHECK(l.front()==aY);
   action_label_list l1=l;
-  core::garbage_collect();
   BOOST_CHECK(l1.front()==aY);
   BOOST_CHECK(l.front()==aY);
   action_label a=l.front();

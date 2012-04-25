@@ -19,7 +19,6 @@ add_custom_target(${PROJECT_NAME}_headers
 add_library(${PROJECT_NAME}
   source/idmappings.cpp
   source/bafio.cpp
-  source/memmgnt.cpp
   source/memory.cpp
   source/aterm.cpp
   source/hash.cpp
@@ -28,7 +27,6 @@ add_library(${PROJECT_NAME}
   source/safio.cpp
   source/byteencoding.cpp
   source/byteio.cpp
-  source/gc.cpp
   source/aterm_ext.cpp
 )
 

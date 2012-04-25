@@ -8,8 +8,6 @@ namespace aterm
 
 const size_t max_freeblocklist_size = 100;
 
-void AT_collect();
-
 }
 
 #endif

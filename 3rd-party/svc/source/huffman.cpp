@@ -48,8 +48,8 @@ int HFinit(HFtree* tree, HTable* terms)
 
   ESCAPE_SEQUENCE=ATerm();
   NO_ATERM=ATerm();
-  ATprotect(&ESCAPE_SEQUENCE);
-  ATprotect(&NO_ATERM);
+  // ATprotect(&ESCAPE_SEQUENCE);
+  // ATprotect(&NO_ATERM);
   ESCAPE_SEQUENCE=ATmakeAppl1(AFun("ESC",1,true),ATmakeAppl0(AFun("NEW",0,false)));
   NO_ATERM       =ATmakeAppl1(AFun("ESC",1,true),ATmakeAppl0(AFun("NIL",0,false)));
 
@@ -69,7 +69,7 @@ int HFinit(HFtree* tree, HTable* terms)
   tree->codes->parent=NULL;
   tree->codes->frequency=0L;
   tree->codes->term=ATerm();
-  ATprotect(&tree->codes->term);
+  // ATprotect(&tree->codes->term);
 
   /* Create the leaf for the escape code */
 
@@ -80,7 +80,7 @@ int HFinit(HFtree* tree, HTable* terms)
   tree->codes->low->parent=tree->codes;
   tree->codes->low->frequency=0L;
   tree->codes->low->term=ESCAPE_SEQUENCE;
-  ATprotect(&tree->codes->low->term);
+  // ATprotect(&tree->codes->low->term);
   /* Store the escape sequence term */
 
   tree->top=tree->codes->low;
@@ -113,7 +113,7 @@ void HFfreeLoop(struct HFnode* node)
   {
     HFfreeLoop(node->low);
     HFfreeLoop(node->high);
-    ATunprotect(&node->term);
+    // ATunprotect(&node->term);
     delete node;
   }
 }
@@ -589,7 +589,7 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
     newNode->parent=tmp->parent;
     newNode->frequency=0L;
     newNode->term=term;
-    ATprotect(&newNode->term);
+    // ATprotect(&newNode->term);
     tmp->parent->high=newNode;
 
     BLinsert(&tree->blockList, newNode);
@@ -616,7 +616,7 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
     newNode->parent=tmp->parent;
     newNode->frequency=tmp->frequency;
     newNode->term=ATerm();
-    ATprotect(&newNode->term);
+    // ATprotect(&newNode->term);
     if (tmp->parent->low==tmp)
     {
       tmp->parent->low=newNode;
@@ -640,7 +640,7 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
     newNode->high->parent=newNode;
     newNode->high->frequency=0L;
     newNode->high->term=term;
-    ATprotect(&newNode->high->term);
+    // ATprotect(&newNode->high->term);
 
     BLinsert(&tree->blockList, newNode);
     BLinsert(&tree->blockList, newNode->high);

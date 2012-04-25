@@ -22,7 +22,7 @@ static void resize_buffer(byte_writer* writer, size_t delta)
   if (size_needed >= writer->u.string_data.max_size)
   {
     new_size = MAX(size_needed, writer->u.string_data.max_size*2);
-    writer->u.string_data.buf = (unsigned char*)AT_realloc(writer->u.string_data.buf, new_size);
+    writer->u.string_data.buf = (unsigned char*)realloc(writer->u.string_data.buf, new_size);
     if (!writer->u.string_data.buf)
     {
       std::runtime_error("bafio: unable to resize buffer to " + to_string(new_size) + " bytes.");

@@ -136,20 +136,12 @@ namespace lps
 namespace detail
 {
 
-inline
-ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
-{
-  f=NULL;
-  ATprotectAppl(&f);
-  return v;
-}
-
 /**
  * \brief Creates an identifier for the for the ctau action
  **/
 inline action_label make_ctau_act_id()
 {
-  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(AFun("ctau", 0, true)), ATmakeList0()));
+  static ATermAppl ctau_act_id = mcrl2::core::detail::gsMakeActId(ATmakeAppl0(AFun("ctau", 0, true)), ATmakeList0());
 
   assert(&*ctau_act_id);
 
@@ -161,7 +153,7 @@ inline action_label make_ctau_act_id()
  **/
 inline action make_ctau_action()
 {
-  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
+  static ATermAppl ctau_action = mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0());
 
   assert(&*ctau_action);
 

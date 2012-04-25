@@ -12,7 +12,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
@@ -172,14 +171,9 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   test1();
-  core::garbage_collect();
   test2();
-  core::garbage_collect();
   test3();
-  core::garbage_collect();
   test4();
-  core::garbage_collect();
   test5();
-  core::garbage_collect();
   return 0;
 }

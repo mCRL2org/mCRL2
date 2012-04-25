@@ -6,19 +6,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/gc.h"
 
-/* Uncomment the second line, to do a garbage collection before a term
- * is constructed. This can be used to find subtle garbage collection problems.
- * Note that this is very time consuming... The first line below expresses that
- * no agressive checking is done, which is the default. */
-// #define DO_AGGRESSIVE_GARBAGE_COLLECT
-
-#ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect()
-#else
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK
-#endif
-
-
 namespace aterm
 {
 
@@ -157,15 +144,6 @@ size_t AT_inAnyFreeList(const _ATerm *t);
 typedef struct _ATprotected_block* ATprotected_block;
 */
 
-/* Protected Memory management functions */
-void* AT_malloc(const size_t size);
-void* AT_calloc(const size_t nmemb, const size_t size);
-void* AT_realloc(void* ptr, const size_t size);
-void AT_free(void* ptr); 
-/* ATerm* AT_alloc_protected(const size_t nelem);
-void AT_free_protected(ATerm* term);
-void AT_free_protected_blocks(); */
-
 size_t AT_getMaxTermSize();
 
 /*{{{  defines */
@@ -238,7 +216,6 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
   HashNumber hnr;
   _ATerm* arg;
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym.number());
  
   hnr = START(header);

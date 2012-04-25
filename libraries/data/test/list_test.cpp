@@ -16,7 +16,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -71,7 +70,6 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   list_expression_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

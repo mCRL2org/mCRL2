@@ -22,7 +22,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -92,7 +91,6 @@ int test_main(int argc, char* argv[])
   BOOST_CHECK(search_variable(V, n1));
   BOOST_CHECK(!search_variable(V, n2));
 
-  core::garbage_collect();
 
   //--- find_variables ---//
   std::set<variable> v = find_variables(x);
@@ -119,7 +117,6 @@ int test_main(int argc, char* argv[])
   find_sort_expressions(q1, std::inserter(Z, Z.end()));
   find_sort_expressions(S, std::inserter(Z, Z.end()));
 
-  core::garbage_collect();
 
   //--- data_specification ---//
   // TODO: discuss whether this test should fail or not

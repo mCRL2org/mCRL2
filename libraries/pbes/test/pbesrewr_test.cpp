@@ -23,7 +23,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"

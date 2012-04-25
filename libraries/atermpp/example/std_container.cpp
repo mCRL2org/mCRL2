@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/aterm/gc.h"               // AT_collect
 
 using namespace std;
 using namespace atermpp;
@@ -175,9 +174,6 @@ int main(int argc, char* argv[])
     m1.insert(make_pair(i, aterm_int(i)));
   }
   m1.insert(make_pair(1, aterm_int(2)));
-
-  AT_collect(); // force garbage collection
-  AT_collect(); // force garbage collection
 
   return 0;
 }

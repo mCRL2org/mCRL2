@@ -75,49 +75,29 @@ static void initialise_common()
   if (is_initialised == 0)
   {
     afunS = AFun("@@S",2,false); // Store term ( target_variable, result_tree )
-    ATprotectAFun(afunS);
     afunM = AFun("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
-    ATprotectAFun(afunM);
     afunF = AFun("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
-    ATprotectAFun(afunF);
     afunN = AFun("@@N",1,false); // Go to next parameter ( result_tree )
-    ATprotectAFun(afunN);
     afunD = AFun("@@D",1,false); // Go down a level ( result_tree )
-    ATprotectAFun(afunD);
     afunR = AFun("@@R",1,false); // End of tree ( matching_rule )
-    ATprotectAFun(afunR);
     afunCR = AFun("@@CR",2,false); // End of tree ( condition, matching_rule )
-    ATprotectAFun(afunCR);
     afunC = AFun("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
-    ATprotectAFun(afunC);
     afunX = AFun("@@X",0,false); // End of tree
-    ATprotectAFun(afunX);
     afunRe = AFun("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
-    ATprotectAFun(afunRe);
     afunCRe = AFun("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
-    ATprotectAFun(afunCRe);
     afunMe = AFun("@@Me",2,false); // Match term ( match_variable, variable_index )
-    ATprotectAFun(afunMe);
 
     dummy=NULL;
-    ATprotect(&dummy);
     dummy = (ATerm) gsMakeNil();
 
     afunARtrue = AFun("@@true",0,false);
-    ATprotectAFun(afunARtrue);
     afunARfalse = AFun("@@false",0,false);
-    ATprotectAFun(afunARfalse);
     afunARand = AFun("@@and",2,false);
-    ATprotectAFun(afunARand);
     afunARor = AFun("@@or",2,false);
-    ATprotectAFun(afunARor);
     afunARvar = AFun("@@var",1,false);
-    ATprotectAFun(afunARvar);
     ar_true = NULL;
-    ATprotectAppl(&ar_true);
     ar_true = ATmakeAppl0(afunARtrue);
     ar_false = NULL;
-    ATprotectAppl(&ar_false);
     ar_false = ATmakeAppl0(afunARfalse);
   }
 
@@ -126,34 +106,7 @@ static void initialise_common()
 
 static void finalise_common()
 {
-  assert(is_initialised > 0);
   is_initialised--;
-
-  if (is_initialised == 0)
-  {
-    ATunprotectAppl(&ar_false);
-    ATunprotectAppl(&ar_true);
-    ATunprotectAFun(afunARvar);
-    ATunprotectAFun(afunARor);
-    ATunprotectAFun(afunARand);
-    ATunprotectAFun(afunARfalse);
-    ATunprotectAFun(afunARtrue);
-
-    ATunprotect(&dummy);
-
-    ATunprotectAFun(afunMe);
-    ATunprotectAFun(afunCRe);
-    ATunprotectAFun(afunRe);
-    ATunprotectAFun(afunX);
-    ATunprotectAFun(afunC);
-    ATunprotectAFun(afunCR);
-    ATunprotectAFun(afunR);
-    ATunprotectAFun(afunD);
-    ATunprotectAFun(afunN);
-    ATunprotectAFun(afunF);
-    ATunprotectAFun(afunM);
-    ATunprotectAFun(afunS);
-  }
 }
 
 #define is_ar_true(x) (ATisEqual((x),ar_true))
@@ -238,7 +191,6 @@ static _ATerm* get_int2aterm_value(int i)
     {
       int2aterms[j] = NULL;
     }
-    ATprotectArray((ATerm*)int2aterms,num_int2aterms);
     for (; old_num < num_int2aterms; old_num++)
     {
       int2aterms[old_num] = (_ATerm*) &*ATmakeInt(old_num);
@@ -2415,7 +2367,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   {
     ar[i] = NULL;
   }
-  ATprotectArray((ATerm*) ar,ar_size);
   */
 
   for(std::map <int,int> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)

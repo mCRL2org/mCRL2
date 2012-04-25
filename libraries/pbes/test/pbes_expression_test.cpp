@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -157,7 +156,6 @@ void test_accessors()
     q1 = p::split_or(a);
     q1 = p::split_and(a);
   }
-  core::garbage_collect();
 }
 
 void test_pbes_expression_with_variables()
@@ -190,7 +188,6 @@ void test_pbes_expression_with_variables()
 
   pbes_expression_with_variables yz = tr::and_(y, z);
   BOOST_CHECK(yz.variables().size() == 2);
-  core::garbage_collect();
 }
 
 void test_pbes_expression_with_propositional_variables()
@@ -219,7 +216,6 @@ void test_pbes_expression_with_propositional_variables()
   pbes_expression_with_propositional_variables Z = tr::and_(X, Y);
   BOOST_CHECK(Z.variables().size() == 2);
   BOOST_CHECK(Z.propositional_variables().size() == 4);
-  core::garbage_collect();
 }
 
 void test_term_traits()
@@ -314,7 +310,6 @@ void test_term_traits()
   v = tr::var(x);
   z = tr::arg(x);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)

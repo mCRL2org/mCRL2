@@ -18,7 +18,6 @@
 
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 

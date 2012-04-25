@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
@@ -81,7 +80,6 @@ void test_basic()
 
   BOOST_CHECK(data::replace_free_variables(lambda(y,y), sb) == lambda(y,y));
   BOOST_CHECK(data::replace_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
-  core::garbage_collect();
 }
 
 void test_indexed_substitution()
@@ -126,7 +124,6 @@ void test_indexed_substitution()
 
   BOOST_CHECK(data::replace_free_variables(lambda(y,y), sb) == lambda(y,y));
   BOOST_CHECK(data::replace_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
-  core::garbage_collect();
 }
 
 struct my_assignment_sequence_substitution: public std::unary_function<variable, data_expression>
@@ -179,7 +176,6 @@ void test_my_assignment_sequence_substitution()
   BOOST_CHECK(g(y) == z);
   BOOST_CHECK(g(z) == z);
   BOOST_CHECK(g(u) == z);
-  core::garbage_collect();
 }
 
 void test_my_list_substitution()
@@ -205,7 +201,6 @@ void test_my_list_substitution()
   BOOST_CHECK(replace_variables(uz, my_assignment_sequence_substitution(r)) == uz);
   std::cerr << replace_variables(l,   my_assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(replace_variables(l,  my_assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
-  core::garbage_collect();
 }
 
 void test_assignment_sequence_substitution()
@@ -234,7 +229,6 @@ void test_assignment_sequence_substitution()
   BOOST_CHECK(g(y) == z);
   BOOST_CHECK(g(z) == z);
   BOOST_CHECK(g(u) == z);
-  core::garbage_collect();
 }
 
 void test_list_substitution()
@@ -261,7 +255,6 @@ void test_list_substitution()
 
   std::cerr << replace_variables(l, assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(replace_variables(l, assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
-  core::garbage_collect();
 }
 
 void test_mutable_substitution_composer()
@@ -288,7 +281,6 @@ void test_mutable_substitution_composer()
   h[z] = x;
   BOOST_CHECK(replace_free_variables(y, h) == x);
 #endif
-  core::garbage_collect();
 }
 
 void test_mutable_substitution()
@@ -308,7 +300,6 @@ void test_mutable_substitution()
   mutable_map_substitution< atermpp::map< variable, variable > > sigmaprime;
 
   sigma[v] = v;
-  core::garbage_collect();
 }
 
 struct my_sort_substitution: public std::unary_function<data::basic_sort, data::sort_expression>
@@ -364,7 +355,6 @@ void test_sort_substitution()
   std::cout << "s4 = " << data::pp(s4) << std::endl;
   BOOST_CHECK(s4 == s2);
 
-  core::garbage_collect();
 }
 
 int test_main(int a, char** aa)

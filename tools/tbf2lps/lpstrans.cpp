@@ -494,7 +494,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   remove_standard_functions = convert_funcs;
   has_func_T = false;
   typelist = ATmakeList0();
-  ATprotectList(&typelist);
+  // ATprotectList(&typelist);
 
   mCRL2log(verbose) << "converting sort declarations..." << std::endl;
   sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
@@ -571,7 +571,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
 
 
-  ATunprotectList(&typelist);
+  // ATunprotectList(&typelist);
 
   return r;
 }

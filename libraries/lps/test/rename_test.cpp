@@ -16,7 +16,6 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -109,9 +108,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_rename();
-  core::garbage_collect();
   test_lps_rename();
-  core::garbage_collect();
 
   return 0;
 }

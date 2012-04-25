@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
@@ -47,7 +46,6 @@ void test_boolean_expressions()
   q.load(filename);
   BOOST_CHECK(p == q);
   boost::filesystem::remove(boost::filesystem::path(filename));
-  core::garbage_collect();
 }
 
 void test_bes2pbes()
@@ -78,7 +76,6 @@ void test_bes2pbes()
   std::cout << "----------------" << std::endl;
   std::cout << pbes_system::pp(q) << std::endl;
 
-  core::garbage_collect();
 }
 
 void test_precedence()

@@ -346,7 +346,7 @@ void at_free_afun(const size_t n)
   }
 
   /* Free symbol name */
-  AT_free(sym->name);
+  free(sym->name);
   sym->name = NULL;
 
   assert(n<AFun::at_lookup_table.size());

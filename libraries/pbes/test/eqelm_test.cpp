@@ -23,7 +23,6 @@
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -92,7 +91,6 @@ void test_pbes(const std::string& pbes_spec,
   }
   BOOST_CHECK(diff.empty());
 
-  core::garbage_collect();
 }
 
 void test_eqelm(const std::string& pbes_spec)

@@ -13,7 +13,6 @@
 
 #include <sstream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -36,7 +35,6 @@ void test_print()
   // print using the two argument function print
   BOOST_CHECK(core::pp(s) == "abc");
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)

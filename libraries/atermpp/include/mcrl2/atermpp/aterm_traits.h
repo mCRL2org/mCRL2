@@ -66,17 +66,17 @@ struct aterm_traits: public select_traits_base< T >::base_type
 template <>
 struct aterm_traits<ATerm>
 {
-  static void protect(const ATerm* t)
+  static void protect(const ATerm* /* t */)
   {
-    ATprotect(t);
+    // ATprotect(t);
   }
-  static void unprotect(const ATerm* t)
+  static void unprotect(const ATerm* /* t */)
   {
-    ATunprotect(t);
+    // ATunprotect(t);
   }
-  static void mark(const ATerm t)
+  static void mark(const ATerm /* t */)
   {
-    ATmarkTerm(t);
+    // ATmarkTerm(t);
   }
   static ATerm term(ATerm t)
   {

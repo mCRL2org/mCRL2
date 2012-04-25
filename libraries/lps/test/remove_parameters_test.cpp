@@ -19,7 +19,6 @@
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -60,13 +59,11 @@ void test_remove_parameters()
   std::string expected_result = "process_parameter_names =";
   lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info, expected_result));
-  core::garbage_collect();
 
   specification spec2 = parse_linear_process_specification(SPEC);
   remove_parameters(spec2, to_be_removed);
   lps::detail::specification_property_map info2(spec);
   BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info2, expected_result));
-  core::garbage_collect();
 }
 
 void test_instantiate_free_variables()
@@ -74,7 +71,6 @@ void test_instantiate_free_variables()
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   lps::detail::lps_algorithm algorithm(spec);
   algorithm.instantiate_free_variables();
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

@@ -23,7 +23,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -402,7 +401,6 @@ void test_constelm(const std::string& message, const std::string& spec_text, con
   constelm(spec, R, instantiate_free_variables);
   lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
-  core::garbage_collect();
 }
 
 void test_constelm()
@@ -427,7 +425,6 @@ void test_abp()
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);
   BOOST_CHECK(is_well_typed(spec));
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

@@ -16,7 +16,6 @@
 #include <boost/filesystem/path.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/ltsmin.h"
 #include "mcrl2/lps/detail/test_input.h"

@@ -16,7 +16,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
@@ -68,7 +67,6 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 
-  core::garbage_collect();
 }
 
 void test_free_variables()

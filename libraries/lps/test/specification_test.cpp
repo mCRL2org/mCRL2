@@ -19,7 +19,6 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -53,10 +52,8 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find_sort_expressions();
-  core::garbage_collect();
 
   test_system_defined_sorts();
-  core::garbage_collect();
 
   return 0;
 }

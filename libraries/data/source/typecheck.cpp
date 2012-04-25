@@ -1180,7 +1180,7 @@ void gstcDataInit(void)
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
   body.equations=NULL;
-  ATprotectList(&body.equations);
+  // ATprotectList(&body.equations);
   body.equations = ATmakeList0();
 
   //Creation of operation identifiers for system defined operations.
@@ -1330,7 +1330,7 @@ void gstcDataDestroy(void)
   ATtableDestroy(context.glob_vars);
   ATtableDestroy(body.proc_pars);
   ATtableDestroy(body.proc_bodies);
-  ATunprotectList(&body.equations);
+  // ATunprotectList(&body.equations);
 }
 
 static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(

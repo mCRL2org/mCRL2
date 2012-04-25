@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
@@ -82,7 +81,6 @@ void test_propositional_variable_substitution()
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

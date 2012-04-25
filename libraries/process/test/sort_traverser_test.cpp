@@ -14,7 +14,6 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/process_specification.h"
@@ -161,7 +160,6 @@ void test_process(std::string text)
   std::set<data::sort_expression> sorts;
   process::find_sort_expressions(spec, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

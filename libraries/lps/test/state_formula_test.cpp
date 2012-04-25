@@ -23,7 +23,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -347,7 +346,6 @@ void test_rename()
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "mu X. mu X1. X1");
-  core::garbage_collect();
 }
 
 void test_normalize()
@@ -388,7 +386,6 @@ void test_normalize()
     state_formula r2 = normalize(req1_2);
   */
 
-  core::garbage_collect();
 }
 
 void test_type_checking()
@@ -407,7 +404,6 @@ void test_type_checking()
   std::cerr << "Hier\n";
   BOOST_CHECK(is_may(formula));
   BOOST_CHECK(act(formula)!=action());
-  core::garbage_collect();
 }
 
 state_formula negate_variable(const variable& x)

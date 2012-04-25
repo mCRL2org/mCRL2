@@ -18,7 +18,6 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -47,7 +46,6 @@ void test_replace()
   assignment a(c, d);
   action_summand t = s;
   lps::replace_variables(t, a);
-  core::garbage_collect();
 }
 
 std::string SPEC1a =
@@ -95,7 +93,6 @@ void test_lps_substituter()
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << lps::pp(spec2.process()) << std::endl;
   BOOST_CHECK(lps::pp(spec1.process()) == lps::pp(spec2.process()));
-  core::garbage_collect();
 }
 
 void test_lps_substitute()
@@ -105,7 +102,6 @@ void test_lps_substitute()
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
   lps::replace_free_variables(v, sigma);
-  core::garbage_collect();
 }
 
 void test_replace_process_parameters()
@@ -123,7 +119,6 @@ void test_replace_process_parameters()
   lps::replace_process_parameters(spec, sigma);
   std::set<data::variable> variables = lps::find_variables(spec);
   BOOST_CHECK(variables.find(b) == variables.end());
-  core::garbage_collect();
 }
 
 void test_replace_summand_variables()
@@ -142,7 +137,6 @@ void test_replace_summand_variables()
   std::cout << lps::pp(spec) << std::endl;
   std::set<data::variable> variables = lps::find_variables(spec);
   BOOST_CHECK(variables.find(c) == variables.end());
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

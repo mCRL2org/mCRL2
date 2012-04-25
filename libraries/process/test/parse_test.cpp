@@ -17,7 +17,6 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;

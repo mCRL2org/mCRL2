@@ -39,12 +39,6 @@ static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
-static const size_t garbage_collect_factor = 75; // percentage. If the hashtable is empty for more than
-                                                 // garbage_collect_factor% after a garbage collect, it
-                                                 // will not be resized. Otherwise it is resized immediately.
-                                                 // Memory requirement is 1/(1-garbage_collect_factor/100).
-                                                 // Amortized time on insertions in the hashtable is
-                                                 // 100/garbage_collect_factor.
 std::vector <_ATerm*> ATerm::hashtable;
 
 extern void AT_initMemmgnt();
@@ -181,7 +175,7 @@ void AT_initMemory()
 {
   /*{{{  Initialize blocks */
 
-  terminfo = (TermInfo*) AT_calloc(maxTermSize, sizeof(TermInfo));
+  terminfo = (TermInfo*) calloc(maxTermSize, sizeof(TermInfo));
 
   /*}}}  */
   /*{{{  Create term term table */
@@ -216,7 +210,6 @@ void AT_initMemory()
 
   /*}}}  */
 
-  // AT_initMemmgnt();
 }
 
 static bool check_that_all_objects_are_free()
@@ -275,7 +268,7 @@ void AT_cleanupMemory()
   // AT_free(hashtable);
   // AT_free_protected_blocks();
   // check_that_all_objects_are_free();
-  // AT_free(terminfo); 
+  // free(terminfo); 
 }
 
 /*}}}  */
@@ -304,7 +297,7 @@ static void allocate_block(size_t size)
   }
   else
   {
-    newblock = (Block*)AT_calloc(1, sizeof(Block));
+    newblock = (Block*)calloc(1, sizeof(Block));
     if (newblock == NULL)
     {
       std::runtime_error("allocate_block: out of memory!");
@@ -364,12 +357,12 @@ static void AT_growMaxTermSize(size_t neededsize)
   mCRL2log(mcrl2::log::info) << "Growing administrative structures to accomodate terms of size " << newsize << std::endl;
 #endif
 
-  newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
+  newterminfo = (TermInfo*)realloc((void*)terminfo, newsize*sizeof(TermInfo));
   if ((!newterminfo)&&(newsize>neededsize))
   {
     /* Realloc failed again; try with needed size */
     newsize = neededsize;
-    newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
+    newterminfo = (TermInfo*)realloc((void*)terminfo, newsize*sizeof(TermInfo));
   }
   if (!newterminfo)
   {
@@ -387,27 +380,17 @@ static void AT_growMaxTermSize(size_t neededsize)
 
 _ATerm* AT_allocate(const size_t size)
 {
-  static size_t nr_of_nodes_for_the_next_garbage_collect=table_size*garbage_collect_factor/100;
-
   if (size+1 > maxTermSize)
   {
     AT_growMaxTermSize(size+1);
   }
 
-  if (total_nodes >= nr_of_nodes_for_the_next_garbage_collect)
+  if (total_nodes>=table_size)
   {
-    AT_collect();
-    // Do a collect again if table_size/garbage_collect_factor new terms have been 
-    // allocated. This guarantees that the garbage collection is constant in terms of 
-    // each allocation.
-    nr_of_nodes_for_the_next_garbage_collect=total_nodes+table_size*garbage_collect_factor/100;
-    if (nr_of_nodes_for_the_next_garbage_collect>table_size)
-    {
-      // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
-      // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
-      // an arbitrary number of element, at some performance penalty.
-      resize_hashtable();
-    }
+    // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
+    // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
+    // an arbitrary number of element, at some performance penalty.
+    resize_hashtable();
   }
 
   _ATerm *at;
@@ -553,7 +536,6 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
   // ATerm* buffer;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,arity);
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
 
   // buffer = (ATerm*)AT_alloc_protected(arity);
@@ -622,7 +604,6 @@ ATermAppl ATmakeAppl0(const AFun &sym)
   header_type header = APPL_HEADER(0, sym.number());
   HashNumber hnr;
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 0);
 
@@ -673,8 +654,6 @@ ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
   _ATerm* cur, *prev, **hashspot;
   header_type header = APPL_HEADER(1, sym.number());
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 1);
   CHECK_TERM(&*arg0);
@@ -730,8 +709,6 @@ ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
   _ATerm* cur, *prev, **hashspot;
   header_type header = APPL_HEADER(2, sym.number());
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 2);
 
@@ -794,8 +771,6 @@ ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   header_type header = APPL_HEADER(3, sym.number());
   HashNumber hnr;
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-
   CHECK_ARITY(ATgetArity(sym), 3);
 
   CHECK_TERM(&*arg0);
@@ -849,8 +824,6 @@ ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   _ATerm* cur;
   header_type header;
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   header = APPL_HEADER(4, sym.number());
 
@@ -913,8 +886,6 @@ ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   _ATerm *cur;
   header_type header = APPL_HEADER(5, sym.number());
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 5);
   CHECK_TERM(&*arg0);
@@ -980,8 +951,6 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
   _ATerm* cur;
   header_type header = APPL_HEADER(6, sym.number());
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   CHECK_ARITY(ATgetArity(sym), 6);
   CHECK_TERM(&*arg0);
@@ -1054,8 +1023,6 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
   header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
   HashNumber hnr;
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-
   assert(arity == ATgetLength(args));
 
   _ATermList* argptr = &*args;
@@ -1094,9 +1061,7 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList &args)
 
   if (!cur)
   {
-    ATprotectList(&args);
     cur = AT_allocate(TERM_SIZE_APPL(arity));
-    ATunprotect((ATerm*)(void*)&args);
 
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
@@ -1131,8 +1096,6 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
   HashNumber hnr;
   header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?  MAX_INLINE_ARITY+1 : arity, sym.number());
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-
   hnr = START(header);
   for (size_t i=0; i<arity; i++)
   {
@@ -1165,9 +1128,7 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
 
   if (!cur)
   {
-    // ATprotectArray(args, arity);
     cur = AT_allocate(TERM_SIZE_APPL(arity));
-    // ATunprotectArray(args);
 
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
@@ -1211,7 +1172,6 @@ ATermInt ATmakeInt(const int val)
   header_type header = INT_HEADER;
   HashNumber hnr;
 
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   hnr = START(header);
   hnr = COMBINE(hnr, HN(_val.reserved));
   hnr = FINISH(hnr);
@@ -1254,8 +1214,6 @@ ATermList ATmakeList1(const ATerm &el)
   /* _ATerm* cur;
   header_type header = LIST_HEADER(1);
   HashNumber hnr;
-
-  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
 
   hnr = START(header);
   hnr = COMBINE(hnr, HN(&*el));

@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/parse.h"

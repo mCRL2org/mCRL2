@@ -13,7 +13,6 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
@@ -35,7 +34,6 @@ void test_initial_state_successors(const specification& lps_spec)
   {
     std::cout << lps::pp(it->state()) << std::endl;
   }
-  core::garbage_collect();
 }
 
 void test_next_state_generator(const specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)

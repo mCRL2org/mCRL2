@@ -192,13 +192,13 @@ ATerm ATparse(const char* s)
  * Protect an ATerm from being garbage collected in the future.
  * \arg atp memory address of an ATerm
  */
-void ATprotect(const ATerm* atp);
+// void ATprotect(const ATerm* atp);
 
 /**
  * Remove the protection from the garbage collector for a certain term.
  * \arg atp the address of a previously protected ATerm, see ATprotect()
  */
-void ATunprotect(const ATerm* atp);
+// void ATunprotect(const ATerm* atp);
 
 /**
  * Efficiently ATprotect() an array of terms from the garbage collector.
@@ -231,14 +231,6 @@ void ATaddProtectFunction(const ATermProtFunc f);
  */
 /* void ATremoveProtectFunction(ATermProtFunc f);
 */
-
-/**
- * Mark a term to prevent it from being garbage collected. CAVEAT EMPTOR.
- * This function should only be called from a function previously registered
- * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
- * core dumps.
- */
-void ATmarkTerm(const ATerm &t);
 
 /**
  * Initialize the ATerm library. It is essential to call this function in the

@@ -21,7 +21,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
@@ -426,7 +425,6 @@ void test_substitutions1()
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
   BOOST_CHECK(r(d1, sigma) == r(d2));
-  core::garbage_collect();
 }
 
 template <typename PbesRewriter>
@@ -435,7 +433,6 @@ void test_map_substitution_adapter(PbesRewriter r)
   atermpp::map<data::variable, data::data_expression_with_variables> sigma;
   pbes_system::pbes_expression x = data::sort_bool::true_();
   pbes_system::pbes_expression y = r(x, data::make_map_substitution(sigma));
-  core::garbage_collect();
 }
 
 void test_substitutions2()
@@ -590,7 +587,6 @@ void test_substitutions3()
 
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
   pbes_system::pbes_expression x = r(phi, sigma);
-  core::garbage_collect();
 }
 
 void test_one_point_rule_rewriter()

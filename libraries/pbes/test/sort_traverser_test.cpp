@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -166,7 +165,6 @@ void test_pbes(std::string text)
   std::set<data::sort_expression> sorts;
   pbes_system::find_sort_expressions(p, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

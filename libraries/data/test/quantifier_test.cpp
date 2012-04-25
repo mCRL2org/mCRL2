@@ -19,7 +19,6 @@
 #include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
 
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/test_utilities.h"
@@ -244,7 +243,6 @@ int test_main(int argc, char** argv)
   {
     std::clog << "  Strategy: " << data::pp(*strat) << std::endl;
     quantifier_expression_test(*strat);
-    core::garbage_collect();
   }
 
   return EXIT_SUCCESS;

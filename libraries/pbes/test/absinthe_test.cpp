@@ -14,7 +14,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -47,7 +46,6 @@ void test_absinthe(const std::string& pbes_text, const std::string& abstraction_
   pbes<> p = txt2pbes(pbes_text);
   absinthe_algorithm algorithm;
   algorithm.run(p, abstraction_text, is_over_approximation);
-  core::garbage_collect();
 }
 
 // test with structured sorts

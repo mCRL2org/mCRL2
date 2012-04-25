@@ -95,7 +95,7 @@ class aterm_base
     /// Protects the aterm from being freed at garbage collection.
     void protect() const
     {
-      ATprotect(&m_term);
+      // ATprotect(&m_term);
     }
 
     /// \brief Unprotect the aterm.
@@ -103,13 +103,13 @@ class aterm_base
     /// call to protect.
     void unprotect() const
     {
-      ATunprotect(&m_term);
+      // ATunprotect(&m_term);
     }
 
     /// \brief Mark the aterm for not being garbage collected.
     void mark() const
     {
-      ATmarkTerm(m_term);
+      // ATmarkTerm(m_term);
     }
 
     /// \brief Return the type of term.

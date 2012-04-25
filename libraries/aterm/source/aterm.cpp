@@ -129,7 +129,7 @@ ATinit()
   /*{{{  Initialize protected terms */
 
   /* at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
-  at_prot_table = (ProtEntry**)AT_calloc(at_prot_table_size, sizeof(ProtEntry*));
+  at_prot_table = (ProtEntry**)calloc(at_prot_table_size, sizeof(ProtEntry*));
   if (!at_prot_table)
   {
     throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
@@ -234,7 +234,7 @@ void ATprotectArray(const ATerm*, const size_t )
 
   if (!free_prot_entries)
   {
-    ProtEntry* entries = (ProtEntry*)AT_calloc(PROTECT_EXPAND_SIZE, sizeof(ProtEntry));
+    ProtEntry* entries = (ProtEntry*)calloc(PROTECT_EXPAND_SIZE, sizeof(ProtEntry));
     if (!entries)
     {
       throw std::runtime_error("out of memory in ATprotect.");
@@ -901,7 +901,7 @@ fparse_quoted_appl(int* c, FILE* f)
 
   /* Wrap up this function application */
   sym = AFun(name, ATgetLength(args), true);
-  AT_free(name);
+  free(name);
   return ATmakeApplList(sym, args);
 }
 
@@ -962,7 +962,7 @@ fparse_unquoted_appl(int* c, FILE* f)
   sym = AFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
-    AT_free(name);
+    free(name);
   }
 
   return ATmakeApplList(sym, args);
@@ -1337,7 +1337,7 @@ sparse_quoted_appl(int* c, char** s)
 
   /* Wrap up this function application */
   sym = AFun(name, ATgetLength(args), true);
-  AT_free(name);
+  free(name);
   return ATmakeApplList(sym, args);
 }
 
@@ -1398,7 +1398,7 @@ sparse_unquoted_appl(int* c, char** s)
   sym = AFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
-    AT_free(name);
+    free(name);
   }
 
   return ATmakeApplList(sym, args);

@@ -18,7 +18,6 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/gauss_elimination.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
@@ -129,7 +128,6 @@ void test_bes(std::string bes_spec, bool expected_result)
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
 
-  core::garbage_collect();
 }
 
 void test_bes_examples()
@@ -168,7 +166,6 @@ void test_abp()
       break;
   }
 
-  core::garbage_collect();
 }
 
 void test_bes()
@@ -223,7 +220,6 @@ void test_bes()
   BOOST_CHECK(gauss_elimination(bes3) == false);
   BOOST_CHECK(gauss_elimination(bes4) == true);
 
-  core::garbage_collect();
 }
 
 inline
@@ -254,7 +250,6 @@ void test_approximate()
   {
     std::cout << "UNKNOWN" << std::endl;
   }
-  core::garbage_collect();
 }
 
 // Used as an example in the quickbook documentation.

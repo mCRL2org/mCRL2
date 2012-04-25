@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"

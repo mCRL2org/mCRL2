@@ -57,7 +57,7 @@ static const size_t PROTECTEDMEMORYSTACKBLOCKSIZE = 1024;
 {
   ATerm* block;
 
-  ProtectedMemoryStack protectedMemoryStack = (ProtectedMemoryStack) AT_malloc(sizeof(struct _ProtectedMemoryStack));
+  ProtectedMemoryStack protectedMemoryStack = (ProtectedMemoryStack) malloc(sizeof(struct _ProtectedMemoryStack));
   if (protectedMemoryStack == NULL)
   {
     std::runtime_error("Unable to allocate protected memory stack.");
@@ -69,7 +69,7 @@ static const size_t PROTECTEDMEMORYSTACKBLOCKSIZE = 1024;
     std::runtime_error("Unable to allocate block for the protected memory stack.");
   }
 
-  protectedMemoryStack->blocks = (ATerm**) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(ATerm*));
+  protectedMemoryStack->blocks = (ATerm**) malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(ATerm*));
   if (protectedMemoryStack->blocks == NULL)
   {
     std::runtime_error("Unable to allocate blocks for the protected memory stack.");
@@ -83,7 +83,7 @@ static const size_t PROTECTEDMEMORYSTACKBLOCKSIZE = 1024;
   protectedMemoryStack->currentIndex = block;
   protectedMemoryStack->spaceLeft = PROTECTEDMEMORYSTACKBLOCKSIZE;
 
-  protectedMemoryStack->freeBlockSpaces = (size_t*) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(size_t));
+  protectedMemoryStack->freeBlockSpaces = (size_t*) malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(size_t));
   if (protectedMemoryStack->freeBlockSpaces == NULL)
   {
     std::runtime_error("Unable to allocate array for registering free block spaces of the protected memory stack.");
@@ -235,13 +235,13 @@ ByteBuffer ATcreateByteBuffer(size_t capacity)
 {
   char* buffer;
 
-  ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
+  ByteBuffer byteBuffer = (ByteBuffer) malloc(sizeof(struct _ByteBuffer));
   if (byteBuffer == NULL)
   {
     std::runtime_error("Failed to allocate byte buffer.");
   }
 
-  buffer = (char*) AT_malloc(capacity * sizeof(char));
+  buffer = (char*) malloc(capacity * sizeof(char));
   if (buffer == NULL)
   {
     std::runtime_error("Failed to allocate buffer string for the byte buffer.");
@@ -263,7 +263,7 @@ ByteBuffer ATcreateByteBuffer(size_t capacity)
  */
 ByteBuffer ATwrapBuffer(char* buffer, size_t capacity)
 {
-  ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
+  ByteBuffer byteBuffer = (ByteBuffer) malloc(sizeof(struct _ByteBuffer));
   if (byteBuffer == NULL)
   {
     std::runtime_error("Failed to allocate byte buffer.");
@@ -312,9 +312,9 @@ inline void ATresetByteBuffer(ByteBuffer byteBuffer)
  */
 void ATdestroyByteBuffer(ByteBuffer byteBuffer)
 {
-  AT_free(byteBuffer->buffer);
+  free(byteBuffer->buffer);
 
-  AT_free(byteBuffer);
+  free(byteBuffer);
 }
 
 
@@ -574,13 +574,13 @@ BinaryWriter ATcreateBinaryWriter(const ATerm term)
   // ATermMapping* stack;
   ATermMapping* tm;
 
-  BinaryWriter binaryWriter = new _BinaryWriter; // (BinaryWriter) AT_malloc(sizeof(struct _BinaryWriter));
+  BinaryWriter binaryWriter = new _BinaryWriter; // (BinaryWriter) malloc(sizeof(struct _BinaryWriter));
   /* if (binaryWriter == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binary writer.");
   } */
 
-  // stack = new _ATermMapping; // (ATermMapping*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermMapping));
+  // stack = new _ATermMapping; // (ATermMapping*) malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermMapping));
   /* if (stack == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryWriter's stack.");
@@ -627,7 +627,7 @@ int ATisFinishedWriting(BinaryWriter binaryWriter)
  */
 void ATdestroyBinaryWriter(BinaryWriter binaryWriter)
 {
-  // AT_free(binaryWriter->stack);
+  // free(binaryWriter->stack);
   // delete binaryWriter->stack;
 
   IMdestroyIDMappings(binaryWriter->sharedTerms);
@@ -763,7 +763,7 @@ static void ensureReadSharedAFunCapacity(BinaryReader binaryReader)
 {
   if ((binaryReader->sharedAFunsIndex + 1) >= binaryReader->sharedAFunsSize)
   {
-    binaryReader->sharedAFuns = (_SymEntry**) AT_realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(_SymEntry*));
+    binaryReader->sharedAFuns = (_SymEntry**) realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(_SymEntry*));
     if (binaryReader->sharedAFuns == NULL)
     {
       std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared signatures array.");
@@ -781,7 +781,7 @@ inline static void resetTempReaderData(BinaryReader binaryReader)
   binaryReader->tempType = 0;
 
   /* It doesn't matter if tempBytes is NULL, since free(NULL) does nothing */
-  AT_free(binaryReader->tempBytes);
+  free(binaryReader->tempBytes);
   binaryReader->tempBytes = NULL;
 
   binaryReader->tempBytesSize = 0;
@@ -1026,7 +1026,7 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
     }
     else
     {
-      binaryReader->tempBytes = (char*) AT_malloc((nameLength + 1) * sizeof(char));
+      binaryReader->tempBytes = (char*) malloc((nameLength + 1) * sizeof(char));
       if (binaryReader->tempBytes == NULL)
       {
         std::runtime_error("The binary reader was unable to allocate memory for temporary function symbol data.");
@@ -1160,7 +1160,7 @@ BinaryReader ATcreateBinaryReader()
   // ATerm* sharedTerms;
   _SymEntry** sharedAFuns;
 
-  BinaryReader binaryReader = new _BinaryReader; // (BinaryReader) AT_malloc(sizeof(struct _BinaryReader));
+  BinaryReader binaryReader = new _BinaryReader; // (BinaryReader) malloc(sizeof(struct _BinaryReader));
   /* if (binaryReader == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binary reader.");
@@ -1168,7 +1168,7 @@ BinaryReader ATcreateBinaryReader()
 
   // binaryReader->protectedMemoryStack = createProtectedMemoryStack();
 
-  // stack = (ATermConstruct*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermConstruct));
+  // stack = (ATermConstruct*) malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermConstruct));
   /* if (stack == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's stack.");
@@ -1178,7 +1178,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->stackPosition = (size_t)-1; // Initialise
   */
 
-  /* sharedTerms = (ATerm*) AT_malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
+  /* sharedTerms = (ATerm*) malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
   if (sharedTerms == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's shared terms array.");
@@ -1187,7 +1187,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->sharedTermsSize = DEFAULTSHAREDTERMARRAYSIZE;
   binaryReader->sharedTermsIndex = 0; */
 
-  sharedAFuns = (_SymEntry**) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(_SymEntry*));
+  sharedAFuns = (_SymEntry**) malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(_SymEntry*));
   if (sharedAFuns == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's shared symbols array.");
@@ -1196,7 +1196,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->sharedAFunsSize = DEFAULTSHAREDSYMBOLARRAYSIZE;
   binaryReader->sharedAFunsIndex = 0;
 
-  binaryReader->tempNamePage = (char*) AT_malloc(TEMPNAMEPAGESIZE * sizeof(char));
+  binaryReader->tempNamePage = (char*) malloc(TEMPNAMEPAGESIZE * sizeof(char));
   if (binaryReader->tempNamePage == NULL)
   {
     std::runtime_error("Unable to allocate temporary name page.");
@@ -1250,17 +1250,17 @@ void ATdestroyBinaryReader(BinaryReader binaryReader)
   // destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
 
   /* We can just free the shared terms, shared signatures and the stack, since they're all present in the memory block store. */
-  // AT_free(binaryReader->sharedTerms);
+  // free(binaryReader->sharedTerms);
 
-  // AT_free(binaryReader->stack);
+  // free(binaryReader->stack);
 
-  while (--sharedAFunsIndex >= 0)
+  /* while (--sharedAFunsIndex >= 0)
   {
-    ATunprotectAFun(sharedAFuns[sharedAFunsIndex]->id);
-  }
-  AT_free(binaryReader->sharedAFuns);
+   ATunprotectAFun(sharedAFuns[sharedAFunsIndex]->id);
+  } */
+  free(binaryReader->sharedAFuns);
 
-  AT_free(binaryReader->tempNamePage);
+  free(binaryReader->tempNamePage);
 
   resetTempReaderData(binaryReader);
 
@@ -1499,7 +1499,7 @@ char* ATwriteToSAFString(const ATerm aTerm, size_t* length)
 
   BufferNode* last;
   BufferNode* currentBufferNode;
-  BufferNode* root = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
+  BufferNode* root = (BufferNode*) malloc(sizeof(struct _BufferNode));
   if (root == NULL)
   {
     std::runtime_error("Unable to allocate space for BufferNode.");
@@ -1514,7 +1514,7 @@ char* ATwriteToSAFString(const ATerm aTerm, size_t* length)
     ATresetByteBuffer(byteBuffer);
     ATserialize(binaryWriter, byteBuffer);
 
-    current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
+    current = (BufferNode*) malloc(sizeof(struct _BufferNode));
     current->byteBuffer = byteBuffer;
     current->next = NULL;
     last->next = current;
@@ -1533,7 +1533,7 @@ char* ATwriteToSAFString(const ATerm aTerm, size_t* length)
   }
 
   currentBufferNode = root->next;
-  AT_free(root);
+  free(root);
   do
   {
     BufferNode* nextBufferNode;
@@ -1548,7 +1548,7 @@ char* ATwriteToSAFString(const ATerm aTerm, size_t* length)
     ATdestroyByteBuffer(currentByteBuffer);
 
     nextBufferNode = currentBufferNode->next;
-    AT_free(currentBufferNode);
+    free(currentBufferNode);
     currentBufferNode = nextBufferNode;
   }
   while (currentBufferNode != NULL);

@@ -27,7 +27,6 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 #ifdef MCRL2_PGSOLVER_ENABLED
@@ -158,7 +157,6 @@ void test_pbes(std::string pbes_spec)
   BOOST_CHECK(player == 0);
   BOOST_CHECK(expected_result = (winner == 0));
 #endif
-  core::garbage_collect();
 }
 
 // mimick the way parity_game_generator is used in parity game solver from Twente

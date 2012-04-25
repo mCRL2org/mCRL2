@@ -15,7 +15,6 @@
 
 #include "mcrl2/data/standard_utility.h"
 
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -38,7 +37,6 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   recogniser_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

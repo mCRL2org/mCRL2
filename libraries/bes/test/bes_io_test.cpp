@@ -13,7 +13,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/io.h"
@@ -44,7 +43,6 @@ void test_parse_bes()
   std::stringstream from2(bes1);
   from2 >> b;
 
-  core::garbage_collect();
 }
 
 void test_bes()
@@ -55,7 +53,6 @@ void test_bes()
 
   std::stringstream out;
   bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 }
 
 void test_pbes()
@@ -66,7 +63,6 @@ void test_pbes()
 
   std::stringstream out;
   bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 }
 
 void test_pgsolver()
@@ -77,7 +73,6 @@ void test_pgsolver()
 
   std::stringstream out;
   bes::bes2pgsolver(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 
   std::clog << out.str() << std::endl;
 }

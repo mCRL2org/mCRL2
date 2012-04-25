@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -61,7 +60,6 @@ int test_main(int argc, char* argv[])
   pbes_system::detail::pbes_property_map info2(INFO);
   std::string diff = info1.compare(info2);
   BOOST_CHECK(diff.empty());
-  core::garbage_collect();
 
   return 0;
 }

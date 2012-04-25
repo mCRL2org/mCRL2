@@ -17,7 +17,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/linearise.h"
@@ -221,7 +220,6 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
       std::cout << "pbesinst failed: " << e.what() << std::endl;
     }
   }
-  core::garbage_collect();
 }
 
 void test_pbesinst()
@@ -344,7 +342,6 @@ void test_cabp()
   pbesinst_algorithm algorithm(p.data());
   pbesinst_rewriter& R = algorithm.rewriter();
   pbes_expression z = R(t, sigma);
-  core::garbage_collect();
 }
 
 // Note: this test takes a lot of time!

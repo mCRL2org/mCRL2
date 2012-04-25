@@ -241,7 +241,6 @@ ATermAppl NextState::makeStateVector(ATerm state)
   {
     stateAFun_made = true;
     info.stateAFun = AFun("STATE",info.statelen,false);
-    ATprotectAFun(info.stateAFun);
   }
 
   // XXX can be done more efficiently in some cases
@@ -332,7 +331,6 @@ ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state m
   {
     stateAFun_made = true;
     info.stateAFun = AFun("STATE",info.statelen,false);
-    ATprotectAFun(info.stateAFun);
   }
 
   bool valid = true;
@@ -378,7 +376,6 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
   {
     stateAFun_made = true;
     info.stateAFun = AFun("STATE",info.statelen,false);
-    ATprotectAFun(info.stateAFun);
   }
 
   if (ATisEqualAFun(info.stateAFun,ATgetAFun(state)))
@@ -583,10 +580,8 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   info.stateformat = state_format;
   info.pairAFun = AFun("@STATE_PAIR@",2,false);
-  ATprotectAFun(info.pairAFun);
 
   info.nil = NULL;
-  ATprotectAppl(&info.nil);
   info.nil = gsMakeNil();
 
   // Declare all constructors to the rewriter to prevent unnecessary compilation.
@@ -623,7 +618,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
   pars = NULL;
-  ATprotectList(&pars);
   pars = spec.process().process_parameters();
 
   info.statelen = ATgetLength(pars);
@@ -631,7 +625,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   {
     stateAFun_made = true;
     info.stateAFun = AFun("STATE",info.statelen,false);
-    ATprotectAFun(info.stateAFun);
   }
   else
   {
@@ -639,13 +632,11 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   }
 
   info.procvars = NULL;
-  ATprotectList(&info.procvars);
   info.procvars = spec.process().process_parameters();
 
   stateargs = std::vector<ATerm>(info.statelen); 
 
   smndAFun = AFun("@SMND@",4,false);
-  ATprotectAFun(smndAFun);
   ATermList sums = mcrl2::lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();
   for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
@@ -696,7 +687,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     {
       mCRL2log(error) << "Parameter '" << atermpp::aterm(ATgetArgument(ATAgetFirst(l),0)) << "' does not have an initial value." << std::endl;
       initial_state = NULL;
-      ATprotect(&initial_state);
       return;
     }
   }
@@ -711,7 +701,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   }
 
   initial_state = NULL;
-  ATprotect(&initial_state);
 
   switch (info.stateformat)
   {
@@ -731,21 +720,6 @@ NextState::~NextState()
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::~NextState called" << std::endl;
 #endif
-  ATunprotect(&initial_state);
-
-  ATunprotectAppl(&info.nil);
-
-  ATunprotectAFun(info.pairAFun);
-
-  ATunprotectList(&pars);
-  if (stateAFun_made)
-  {
-    ATunprotectAFun(info.stateAFun);
-  }
-
-  ATunprotectList(&info.procvars);
-
-  ATunprotectAFun(smndAFun);
 
   free(tree_init);
 }
@@ -996,9 +970,6 @@ NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identi
   cur_state = NULL;
   cur_act = NULL;
   cur_nextstate = NULL;
-  ATprotect(&cur_state);
-  ATprotect(&cur_act);
-  ATprotectList(&cur_nextstate);
 
   stateargs = std::vector <ATerm>(info.statelen);
 
@@ -1010,9 +981,6 @@ NextStateGenerator::~NextStateGenerator()
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::~NextStateGenerator called" << std::endl;
 #endif
-  ATunprotectList(&cur_nextstate);
-  ATunprotect(&cur_act);
-  ATunprotect(&cur_state);
 }
 
 void NextStateGenerator::set_substitutions()

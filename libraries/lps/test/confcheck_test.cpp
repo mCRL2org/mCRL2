@@ -17,7 +17,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;

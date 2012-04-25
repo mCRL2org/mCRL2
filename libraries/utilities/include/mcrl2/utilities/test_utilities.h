@@ -13,7 +13,6 @@
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
 #include <vector>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
@@ -28,7 +27,7 @@ struct collect_after_test_case
 {
   ~collect_after_test_case()
   {
-    core::garbage_collect();
+    // core::garbage_collect();
   }
 };
 

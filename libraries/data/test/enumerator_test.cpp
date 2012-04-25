@@ -24,7 +24,6 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
@@ -83,7 +82,6 @@ void test_data_enumerator()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
-  core::garbage_collect();
 }
 
 void test_data_enumerator2()
@@ -110,7 +108,6 @@ void test_data_enumerator2()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
-  core::garbage_collect();
 }
 
 class A: public data_expression
@@ -145,7 +142,6 @@ void test2()
   A a = n;
   f(a);
   std::cout << "a = " << data::pp(a) << std::endl;
-  core::garbage_collect();
 }
 
 void test3()
@@ -158,7 +154,6 @@ void test3()
   variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
   data_expression_with_variables x(c, atermpp::make_vector(n));
-  core::garbage_collect();
 }
 
 void test4()
@@ -170,7 +165,6 @@ void test4()
   variable y = parse_data_expression("n", "n: Nat;\n");
   atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
-  core::garbage_collect();
 }
 
 // This test verifies that the enumerator is able to find all terms n
@@ -215,7 +209,6 @@ void test5()
   }
 
   BOOST_CHECK(result.size() == 4);
-  core::garbage_collect();
 }
 
 /// \brief Computes the range of values that a finite sort can take

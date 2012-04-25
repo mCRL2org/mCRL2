@@ -184,7 +184,7 @@ typedef _ATermTable *ATermTable;
  *   "dereferencing type-punned pointer will break strict-aliasing rules"
  * example usage: ATprotectList(&ATempty);
  */
-inline
+/* inline
 void ATprotectTerm(const ATerm* p)
 {
   ATprotect(p);
@@ -230,7 +230,7 @@ inline
 void ATunprotectInt(const ATermInt* p)
 {
   ATunprotect((const ATerm*) p);
-}
+} */
 
 /** The following functions implement the operations of
   * the 'standard' ATerm interface, and should appear
@@ -414,8 +414,8 @@ bool ATisQuoted(const AFun &sym)
   return sym.is_quoted();
 }
 
-void    ATprotectAFun(const AFun &sym);
-void    ATunprotectAFun(const AFun &sym);
+// void    ATprotectAFun(const AFun &sym);
+// void    ATunprotectAFun(const AFun &sym);
 
 } // namespace aterm
 

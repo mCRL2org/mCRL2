@@ -21,7 +21,6 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 
@@ -105,7 +104,6 @@ void test_normalize1()
   z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
-  core::garbage_collect();
 }
 
 void test_normalize2()
@@ -116,7 +114,6 @@ void test_normalize2()
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
-  core::garbage_collect();
 }
 
 void test_normalize3()
@@ -130,7 +127,6 @@ void test_normalize3()
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
-  core::garbage_collect();
 }
 
 const std::string VARIABLE_SPECIFICATION =
@@ -212,7 +208,6 @@ void test_normalize_and_or()
   test_normalize_and_or_equality("X && Y", "Y && X");
   test_normalize_and_or_equality("X && X && Y", "X && Y && X");
   test_normalize_and_or_equality("X && X && Y", "Y && X && X");
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)

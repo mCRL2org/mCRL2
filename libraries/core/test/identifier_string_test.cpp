@@ -10,7 +10,6 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -34,7 +33,6 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_identifier_string();
-  core::garbage_collect();
 
   return 0;
 }

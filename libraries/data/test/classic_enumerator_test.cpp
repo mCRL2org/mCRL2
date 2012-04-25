@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
@@ -305,17 +304,12 @@ int test_main(int argc, char** argv)
   ATinit();
 
   check_concepts();
-  core::garbage_collect();
 
   empty_test();
-  core::garbage_collect();
 
   list_test();
-  core::garbage_collect();
   tree_test();
-  core::garbage_collect();
   mutually_recursive_test();
-  core::garbage_collect();
   equality_substitution_test();
 
   generate_values_test();

@@ -44,7 +44,6 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
       BOOST_CHECK_THROW(process::type_check(ps), mcrl2::runtime_error);
     }
   }
-  core::garbage_collect();
 }
 
 BOOST_AUTO_TEST_CASE(test_process_reference_assignment)

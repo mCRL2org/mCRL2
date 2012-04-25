@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
@@ -221,7 +220,6 @@ void test_linear(const std::string& text, bool result = true)
   }
   bool verbose = true;
   BOOST_CHECK(is_linear(p, verbose) == result);
-  core::garbage_collect();
 }
 
 // Test case supplied by Frank Stappers. A segmentation fault is reported on Suse 64 bit.
@@ -229,7 +227,6 @@ void test_data_spec()
 {
   process_specification spec = parse_process_specification("sort  X; init tau;", false);
   data::pp(spec.data());
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])

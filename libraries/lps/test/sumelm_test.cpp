@@ -15,7 +15,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"

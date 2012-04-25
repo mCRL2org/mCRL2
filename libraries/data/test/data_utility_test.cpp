@@ -23,7 +23,6 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -60,7 +59,6 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_fresh_variables();
-  core::garbage_collect();
 
   return 0;
 }

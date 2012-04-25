@@ -285,12 +285,12 @@ static void hashResizeSet(ATermIndexedSet s)
   newsizeMinus1 = calculateNewSize(s->sizeMinus1,
                                    s->nr_deletions, s->nr_entries);
 
-  newhashtable = (size_t*)AT_malloc(sizeof(size_t) * (newsizeMinus1+1));
+  newhashtable = (size_t*)malloc(sizeof(size_t) * (newsizeMinus1+1));
 
   if (newhashtable!=NULL)
   {
     /* the hashtable has properly been resized */
-    AT_free(s->hashtable);
+    free(s->hashtable);
 
     s->hashtable = newhashtable;
     s->sizeMinus1=newsizeMinus1;
@@ -370,7 +370,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   hashset->max_load = max_load_pct;
   hashset->max_entries = ((hashset->sizeMinus1/100)*hashset->max_load);
   hashset->hashtable=
-    (size_t*)AT_malloc(sizeof(size_t)*(1+hashset->sizeMinus1));
+    (size_t*)malloc(sizeof(size_t)*(1+hashset->sizeMinus1));
   if (hashset->hashtable==NULL)
   {
     std::runtime_error("ATindexedSetCreate: cannot allocate ATermIndexedSet "
@@ -383,7 +383,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
 
   hashset->contains_values=false;
   /* hashset->nr_tables = INITIAL_NR_OF_TABLES;
-  hashset->keys = (_ATerm***)AT_calloc(hashset->nr_tables,
+  hashset->keys = (_ATerm***)calloc(hashset->nr_tables,
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
   {
@@ -392,7 +392,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES; */
   // hashset->first_free_position = 0;
-  /* hashset->free_table=(size_t**)AT_calloc(sizeof(size_t*),
+  /* hashset->free_table=(size_t**)calloc(sizeof(size_t*),
                                           hashset->nr_free_tables);
   if (hashset->free_table == NULL)
   {
@@ -562,7 +562,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
   hashtable->contains_values=true;
 
-  /* hashtable->values = (_ATerm***)AT_calloc(hashtable->nr_tables,
+  /* hashtable->values = (_ATerm***)calloc(hashtable->nr_tables,
                                          sizeof(ATerm*));
   
 
@@ -579,44 +579,8 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
 void ATtableDestroy(ATermTable table)
 {
-  // size_t i;
-
-  AT_free(table->hashtable);
+  free(table->hashtable);
   delete table;
-
-  
-  /* for (i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++)
-  {
-    AT_free_protected((ATerm*)table->keys[i]);
-  }
-
-  AT_free(table->keys);
-
-  if (table->values != NULL)
-  {
-    for (i=0; ((i<table->nr_tables) &&
-               (table->values[i]!=NULL)); i++)
-    {
-      AT_free_protected((ATerm*)table->values[i]);
-    }
-
-    AT_free(table->values);
-  }
-
-  for (i=0; ((i<table->nr_free_tables) &&
-             (table->free_table[i]!=NULL)) ; i++)
-  {
-    AT_free(table->free_table[i]);
-  }
-
-  AT_free(table->free_table); */
-
-  /* using namespace std;
-  table->values.~vector<vector<ATerm> >();
-  table->keys.~vector<vector<ATerm> >();
-  table->free_positions.~stack<size_t>();
-
-  AT_free(table); */
 }
 
 /*}}}  */
@@ -637,17 +601,6 @@ void ATtableReset(ATermTable table)
   {
     table->values.clear();
   }
-  /* for (size_t i=0; i<table->keys->size() ; i++)
-  {
-    AT_free_protected((ATerm*)table->keys[i]);
-    table->keys[i]=NULL;
-    if (table->contains_values)
-    {
-      AT_free_protected((ATerm*)table->values[i]);
-      table->values[i]=NULL;
-    }
-  } */
-
   table->free_positions=std::stack<size_t>();
 }
 

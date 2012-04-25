@@ -18,7 +18,6 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
@@ -67,7 +66,6 @@ void test_assignment_list()
   BOOST_CHECK(m2 == m3);
   std::cout << "<m2>" << data::pp(m2) << std::endl;
   std::cout << "<m3>" << data::pp(m3) << std::endl;
-  core::garbage_collect();
 }
 
 void test_variable_replace()
@@ -121,7 +119,6 @@ void test_variable_replace()
   BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(v, l)));
   BOOST_CHECK(t1 == replace_free_variables(t, make_mutable_map_substitution(variables, replacements)));
-  core::garbage_collect();
 }
 
 void test_replace_with_binders()
@@ -137,7 +134,6 @@ void test_replace_with_binders()
 
   // variable c is bound and should not be replaced
   BOOST_CHECK(replace_free_variables(input2, sigma) == input2);
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)

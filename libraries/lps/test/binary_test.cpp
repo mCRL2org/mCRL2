@@ -16,7 +16,6 @@
 #include <mcrl2/lps/binary.h>
 #include <mcrl2/lps/linearise.h>
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -284,7 +283,6 @@ void test_abp()
   binary_algorithm<rewriter>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(is_well_typed(spec));
-  core::garbage_collect();
 }
 
 int test_main(int ac, char** av)
@@ -292,19 +290,12 @@ int test_main(int ac, char** av)
   MCRL2_ATERMPP_INIT(ac, av)
 
   test_case_1();
-  core::garbage_collect();
   test_case_2();
-  core::garbage_collect();
   test_case_3();
-  core::garbage_collect();
   test_case_4();
-  core::garbage_collect();
   test_case_5();
-  core::garbage_collect();
   test_case_6();
-  core::garbage_collect();
   test_bug_623();
-  core::garbage_collect();
   test_abp();
 
   return 0;

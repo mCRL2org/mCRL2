@@ -14,7 +14,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
@@ -38,7 +37,6 @@ void test_pbes_specification(const std::string& pbes_in, bool test_type_checker 
     }
     BOOST_CHECK(pbes_in == pbes_out);
   }
-  core::garbage_collect();
 }
 
 void test_pbes_specification1()

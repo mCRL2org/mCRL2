@@ -583,7 +583,6 @@ class Trace
       if (trace_pair_set == 0)
       {
         trace_pair = AFun("pair",2,false);
-        ATprotectAFun(trace_pair);
       }
       trace_pair_set++;
 
@@ -594,10 +593,6 @@ class Trace
     void cleanup()
     {
       trace_pair_set--;
-      if (trace_pair_set == 0)
-      {
-        ATunprotectAFun(trace_pair);
-      }
     }
 
     TraceFormat detectFormat(std::istream& is)

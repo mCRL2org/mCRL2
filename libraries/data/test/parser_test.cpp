@@ -17,7 +17,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/basic_sort.h"
 
@@ -44,7 +43,6 @@ void parser_test()
   BOOST_CHECK(data::parse_sort_expression("Nat") == data::sort_nat::nat());
 //  BOOST_CHECK(data::parse_data_expression("-1") == data::sort_int::int_(-1));
 //  BOOST_CHECK(data::parse_data_expression("1/2") == data::sort_real::real_(1, 2));
-  core::garbage_collect();
 }
 
 // This test triggers a sort normalization problem.
@@ -55,14 +53,12 @@ void test_user_defined_sort()
   std::string text = "sort D = struct d1 | d2;\n";
   data_specification data_spec = parse_data_specification(text);
   sort_expression s = parse_sort_expression("D", data_spec);
-  core::garbage_collect();
 }
 
 void test_whr()
 {
   using namespace data;
   data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
-  core::garbage_collect();
 }
 
 void test_sort()

@@ -11,7 +11,6 @@
 
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/process/is_linear.h"
@@ -201,19 +200,14 @@ int test_main(int argc, char* argv[])
 
   std::clog << "SPEC1" << std::endl;
   test_process(SPEC1, true);
-  core::garbage_collect();
   std::clog << "SPEC2" << std::endl;
   test_process(SPEC2);
-  core::garbage_collect();
   std::clog << "SPEC3" << std::endl;
   test_process(SPEC3);
-  core::garbage_collect();
   std::clog << "SPEC4" << std::endl;
   test_process(SPEC4, true);
-  core::garbage_collect();
   std::clog << "ABS_SPEC_LINEARIZED" << std::endl;
   test_process(ABS_SPEC_LINEARIZED);
-  core::garbage_collect();
 
   return 0;
 }
