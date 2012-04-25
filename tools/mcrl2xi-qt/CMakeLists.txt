@@ -1,4 +1,4 @@
-# Authors: Frank Stappers and Aad Mathijssen
+# Authors: Frank Stappers, Aad Mathijssen and Rimco Boudewijns
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -19,6 +19,7 @@ include(${QT_USE_FILE})
 set(UI_FILES
   mainwindow.ui
   documentmanager.ui
+  documentwidget.ui
 #  rewriter.ui
 #  solver.ui
 #  parse_and_typecheck.ui
@@ -29,6 +30,7 @@ set(MOC_HEADERS
   mainwindow.h
   highlighter.h
   documentmanager.h
+  documentwidget.h
 #  rewriter.h
 #  solver.h
 #  parse_and_typecheck.h
@@ -42,6 +44,7 @@ set(SRC_FILES
   mainwindow.cpp
   highlighter.cpp
   documentmanager.cpp
+  documentwidget.cpp
 #  rewriter.cpp
 #  solver.cpp
 #  parse_and_typecheck.cpp

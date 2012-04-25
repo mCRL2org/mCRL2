@@ -1,3 +1,12 @@
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -13,8 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
+  connect(m_ui.actionSave_As, SIGNAL(triggered()), this, SLOT(onSaveAs()));
 
-  connect(m_ui.documentManager, SIGNAL(documentCreated(QTextEdit*)), this, SLOT(setupEditor(QTextEdit*)));
+  connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
 }
 
 MainWindow::~MainWindow()
@@ -35,11 +45,23 @@ void MainWindow::onOpen()
   QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
   if (!fileName.isNull()) {
-      m_ui.documentManager->openFile(fileName);
-    }
+    m_ui.documentManager->openFile(fileName);
+  }
 }
 
 void MainWindow::onSave()
+{
+  QString fileName = m_ui.documentManager->currentFileName();
+  if (fileName.isNull()) {
+    fileName = QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+                                            tr("mCRL2 specification (*.mcrl2 *.txt )"));
+  }
+  if (!fileName.isNull()) {
+    m_ui.documentManager->saveFile(fileName);
+  }
+}
+
+void MainWindow::onSaveAs()
 {
   QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
@@ -48,8 +70,9 @@ void MainWindow::onSave()
   }
 }
 
-void MainWindow::setupEditor(QTextEdit *editor)
+void MainWindow::formatDocument(DocumentWidget *document)
 {
+  QTextEdit *editor = document->getEditor();
   editor->setWordWrapMode(QTextOption::NoWrap);
 
   QFont font;

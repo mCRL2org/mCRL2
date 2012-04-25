@@ -1,3 +1,12 @@
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -6,12 +15,9 @@
 
 #include "ui_mainwindow.h"
 #include "highlighter.h"
+#include "documentwidget.h"
 
 class QTextEdit;
-
-namespace Ui {
-    class MainWindow;
-}
 
 class MainWindow : public QMainWindow
 {
@@ -21,12 +27,13 @@ public:
   ~MainWindow();
 
 public slots:
-  void setupEditor(QTextEdit *editor);
+  void formatDocument(DocumentWidget *document);
 
 private slots:
   void onNew();
   void onOpen();
   void onSave();
+  void onSaveAs();
 
 private:
     Ui::MainWindow m_ui;

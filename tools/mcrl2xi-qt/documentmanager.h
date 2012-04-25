@@ -1,3 +1,12 @@
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #ifndef DOCUMENTMANAGER_H
 #define DOCUMENTMANAGER_H
 
@@ -5,6 +14,7 @@
 #include <QTextEdit>
 
 #include "ui_documentmanager.h"
+#include "documentwidget.h"
 
 class DocumentManager : public QWidget
 {
@@ -17,15 +27,17 @@ class DocumentManager : public QWidget
     void newFile();
     void openFile(QString fileName);
     void saveFile(QString fileName);
-    QTextEdit* currentEditor();
-    QWidget* currentTab();
+
+    DocumentWidget* currentDocument();
+    DocumentWidget* findDocument(QString fileName);
+    QString currentFileName();
     
   signals:
-    void documentCreated(QTextEdit *editor);
-    void documentSwitched(QTextEdit *editor);
+    void documentCreated(DocumentWidget *document);
+    void documentSwitched(DocumentWidget *document);
 
   private:
-    QTextEdit* createEditor(QString title);
+    DocumentWidget* createDocument(QString title);
 
     Ui::DocumentManager m_ui;
 };
