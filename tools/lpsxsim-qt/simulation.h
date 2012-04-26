@@ -13,55 +13,66 @@
 #include <QMutex>
 #include <QObject>
 #include <QString>
-#include <QVector>
+#include <QStringList>
+#include <QWaitCondition>
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/simulation.h"
 
+
 class Simulation : public QObject
 {
-  struct Transition
-  {
-    QString destination;
-    QString action;
-  };
-  struct State
-  {
-    QString state;
-    QVector<Transition> transitions;
-    size_t transition_number;
-  };
-  typedef QList<State> Trace;
-
   Q_OBJECT
 
   public:
-  Simulation(const std::string& filename, mcrl2::data::rewrite_strategy strategy);
-  ~Simulation() { delete m_simulation; }
-  Trace trace() { QMutexLocker locker(&m_traceMutex); return m_trace; }
+    typedef QStringList State;
+    struct Transition
+    {
+      State destination;
+      QString action;
+    };
+    struct TracePosition
+    {
+      State state;
+      QList<Transition> transitions;
+      size_t transitionNumber;
+    };
+    typedef QList<TracePosition> Trace;
+
+  public:
+    Simulation(QString filename, mcrl2::data::rewrite_strategy strategy);
+    ~Simulation() { delete m_simulation; }
+    bool initialized() const { return m_initialized; }
+    const QStringList &parameters() const { return m_parameters; }
+    Trace trace() { QMutexLocker locker(&m_traceMutex); return m_trace; }
 
   private slots:
-  void init();
-  void updateTrace(size_t first_changed_state);
-
-  public slots:
-  void reset(size_t state_number) { m_simulation->truncate(state_number); updateTrace(state_number); }
-  void select(size_t transition_number) { m_simulation->select(transition_number); updateTrace(m_simulation->trace().size() - 1); }
-  void enable_tau_prioritization(bool enable, QString action = "ctau") { m_simulation->enable_tau_prioritization(enable, action.toStdString()); updateTrace(0); }
-  void load(QString filename);
-  void save(QString filename);
-
-  signals:
-  void traceChanged();
-  void error(QString message);
+    void init();
+    void updateTrace(unsigned int firstChangedState);
 
   private:
-  std::string m_filename;
-  mcrl2::data::rewrite_strategy m_strategy;
+    State renderState(const mcrl2::lps::state &state);
 
-  mcrl2::lps::simulation *m_simulation;
-  Trace m_trace;
-  QMutex m_traceMutex;
+  public slots:
+    void reset(unsigned int stateNumber) { m_simulation->truncate(stateNumber); updateTrace(stateNumber); }
+    void select(unsigned int transitionNumber) { m_simulation->select(transitionNumber); updateTrace(m_trace.size() - 1); }
+    void enable_tau_prioritization(bool enable, QString action = "ctau") { m_simulation->enable_tau_prioritization(enable, action.toStdString()); updateTrace(0); }
+    void load(QString filename);
+    void save(QString filename);
+
+  signals:
+    void traceChanged(unsigned int firstChangedState);
+    void error(QString message);
+
+  private:
+    QString m_filename;
+    mcrl2::data::rewrite_strategy m_strategy;
+    bool m_initialized;
+
+    mcrl2::lps::simulation *m_simulation;
+    QStringList m_parameters;
+    Trace m_trace;
+    QMutex m_traceMutex;
 };
 
 #endif

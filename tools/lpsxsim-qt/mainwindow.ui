@@ -37,6 +37,9 @@
          </property>
          <item>
           <widget class="QTableWidget" name="transitionTable">
+           <property name="tabKeyNavigation">
+            <bool>false</bool>
+           </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::SingleSelection</enum>
            </property>
@@ -82,6 +85,9 @@
          </property>
          <item>
           <widget class="QTableWidget" name="stateTable">
+           <property name="tabKeyNavigation">
+            <bool>false</bool>
+           </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::NoSelection</enum>
            </property>
@@ -125,6 +131,9 @@
         </property>
         <item>
          <widget class="QTableWidget" name="traceTable">
+          <property name="tabKeyNavigation">
+           <bool>false</bool>
+          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
           </property>
@@ -158,14 +167,12 @@
           </column>
           <column>
            <property name="text">
-            <string>State</string>
+            <string>State Change</string>
            </property>
           </column>
          </widget>
         </item>
        </layout>
-       <zorder>traceTable</zorder>
-       <zorder>traceTable</zorder>
       </widget>
      </widget>
     </item>
@@ -177,7 +184,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -314,7 +321,7 @@
     <string>&amp;Contents</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>F1</string>
    </property>
   </action>
   <action name="actionAbout">

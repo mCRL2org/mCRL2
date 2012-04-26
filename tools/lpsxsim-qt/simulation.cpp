@@ -10,45 +10,82 @@
 #include <QMetaObject>
 #include "mcrl2/utilities/atermthread.h"
 
-Simulation::Simulation(const std::string& filename, mcrl2::data::rewrite_strategy strategy)
+Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy)
   : m_filename(filename),
-    m_strategy(strategy)
+    m_strategy(strategy),
+    m_initialized(false)
 {
   moveToThread(mcrl2::utilities::qt::get_aterm_thread());
-  QMetaObject::invokeMethod(this, "init");
+  QMetaObject::invokeMethod(this, "init", Qt::BlockingQueuedConnection);
 }
 
 void Simulation::init()
 {
-  // TODO: error handling
   mcrl2::lps::specification specification;
-  specification.load(m_filename);
+  try
+  {
+    specification.load(m_filename.toStdString());
+    m_simulation = new mcrl2::lps::simulation(specification, m_strategy);
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    emit error(e.what());
+    return;
+  }
+  catch (...)
+  {
+    emit error("Unknown error");
+    return;
+  }
 
-  m_simulation = new mcrl2::lps::simulation(specification, m_strategy);
+  for (mcrl2::data::variable_list::const_iterator i = specification.process().process_parameters().begin(); i != specification.process().process_parameters().end(); i++)
+  {
+    m_parameters += QString::fromStdString(mcrl2::data::pp(*i));
+  }
+
+  updateTrace(0);
+  m_initialized = true;
 }
 
-void Simulation::updateTrace(size_t first_changed_state)
+void Simulation::updateTrace(unsigned int firstChangedState)
 {
   QMutexLocker locker(&m_traceMutex);
 
-  m_trace.erase(m_trace.begin() + first_changed_state, m_trace.end());
+  m_trace.erase(m_trace.begin() + firstChangedState, m_trace.end());
 
-  for (size_t i = first_changed_state; i < m_simulation->trace().size(); i++)
+  for (size_t i = firstChangedState; i < m_simulation->trace().size(); i++)
   {
-    State state;
-    state.state = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].source_state));
-    state.transition_number = m_simulation->trace()[i].transition_number;
+    TracePosition position;
+    position.state = renderState(m_simulation->trace()[i].source_state);
+    position.transitionNumber = m_simulation->trace()[i].transition_number;
     for (size_t j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
     {
       Transition transition;
-      transition.destination = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].destination));
+      transition.destination = renderState(m_simulation->trace()[i].transitions[j].destination);
       transition.action = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].transitions[j].action));
-      state.transitions += transition;
+      position.transitions += transition;
     }
-    m_trace += state;
+    m_trace += position;
   }
 
-  emit traceChanged();
+  emit traceChanged(firstChangedState);
+}
+
+Simulation::State Simulation::renderState(const mcrl2::lps::state &state)
+{
+  State output;
+  for (size_t i = 0; i < state.size(); i++)
+  {
+    if (mcrl2::data::is_variable(state[i]))
+    {
+      output += "_";
+    }
+    else
+    {
+      output += QString::fromStdString(mcrl2::data::pp(state[i]));
+    }
+  }
+  return output;
 }
 
 void Simulation::load(QString filename)
@@ -60,12 +97,13 @@ void Simulation::load(QString filename)
   catch (mcrl2::runtime_error& e)
   {
     emit error(e.what());
-    return;
   }
   catch (...)
   {
     emit error("Unknown error");
   }
+
+  updateTrace(0);
 }
 
 void Simulation::save(QString filename)
@@ -77,12 +115,9 @@ void Simulation::save(QString filename)
   catch (mcrl2::runtime_error& e)
   {
     emit error(e.what());
-    return;
   }
   catch (...)
   {
     emit error("Unknown error");
   }
 }
-
-

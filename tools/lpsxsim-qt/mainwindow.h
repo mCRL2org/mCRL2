@@ -10,17 +10,21 @@
 #define LPSXSIM_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QAbstractTableModel>
 #include "ui_mainwindow.h"
 #include "simulation.h"
 
+class TraceTableModel;
+
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+  public:
     MainWindow();
+    ~MainWindow();
 
-    protected slots:
+  protected slots:
     void open();
     void loadTrace();
     void saveTrace();
@@ -31,9 +35,18 @@ class MainWindow : public QMainWindow
     void contents();
     void about();
 
-    protected:
+    void updateSimulation();
+    void stateSelected();
+    void truncateTrace(int state);
+    void selectTransition(int transition);
+
+  protected:
+    QString renderStateChange(Simulation::State source, Simulation::State destination);
+
+  protected:
     Ui::MainWindow m_ui;
     Simulation *m_simulation;
+    int m_selectedState;
 };
 
 #endif
