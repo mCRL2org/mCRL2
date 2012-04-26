@@ -1,185 +1,119 @@
-#include "solver.h"
-#include "ui_solver.h"
-#include "iostream"
-
-#include "mcrl2/process/parse.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/classic_enumerator.h"
-
-solver::solver(QWidget *parent) :
-    QWidget(parent)
-{
-    ui.setupUi(this);
-
-    //Connect Buttons
-    connect( ui.SolveButton, SIGNAL(clicked()), this, SLOT(onSolve()));
-    connect( ui.CancelButton, SIGNAL(clicked()), this, SLOT(onCancel()));
-
-    //Setup solver thread
-    m_thread = NULL;
-
-}
-
-solver::~solver()
-{
-    if (m_thread != NULL)
-    {
-        static_cast<SolverThread*>(m_thread)->stop();
-        m_thread->wait();
-    }
-}
-
-void solver::setSelectedEditor(QTextEdit* edtr)
-{
-    m_selectedEditor = edtr;
-}
-
-void solver::onSolve(){
-
-    if (m_thread == NULL)
-    {
-        /* Clear output */
-        ui.solveOutput->clear();
-
-        m_thread = new SolverThread();
-
-        /* Should eventually be moved into constructor */
-        m_thread->setDataExpression( ui.evalExpression->toPlainText().toStdString() );
-        m_thread->setSpecification(m_selectedEditor->toPlainText().toStdString() );
-        m_thread->setRewriter(mcrl2::data::jitty);
-
-        m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
-        m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
-        m_thread->connect(m_thread, SIGNAL(emitToLocalOutput(QString)), this, SLOT(onOutputText(QString)) );
-
-        m_thread->setPriority(QThread::IdlePriority);
-
-        m_thread->start();
-
-    }
-}
-
-void solver::onCancel(){
-    if(m_thread != NULL){
-        m_thread->stop();
-        m_thread = NULL;
-    }
-}
-
-void solver::onOutputText(QString s){
-    ui.solveOutput->append(s);
-}
-
-void solver::onStarted(){
-    ui.SolveButton->setEnabled(false);
-}
-
-void solver::onStopped(){
-    ui.SolveButton->setEnabled(true);
-}
-
-void SolverThread::setDataExpression(std::string s)
-{
-    m_dataExpression = s;
-}
-
-void SolverThread::setSpecification(std::string s)
-{
-    m_specification = s;
-}
-
-void SolverThread::setRewriter( mcrl2::data::rewrite_strategy rw)
-{
-    m_rewrite_strategy = rw;
-}
-
-void SolverThread::stop()
-{
-    m_abort=true;
-}
-
-void SolverThread::run()
-{
-//    MoveToThread uitvoeren:
-//    http://www.developer.nokia.com/Community/Wiki/How_to_move_a_QObject_to_a_thread
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-//    Ipv:
-//    aterm::ATerm stack;
-//    aterm::ATinit(&stack);
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
-    m_abort = false;
-    try
+#include "solver.h"
+#include "parsing.h"
+
+#include "mcrl2/utilities/atermthread.h"
+
+const std::string Solver::className = "Solver";
+
+Solver::Solver()
+{
+  moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  m_parsed = false;
+}
+
+void Solver::setRewriter(QString solver)
+{
+  m_rewrite_strategy = mcrl2::data::parse_rewrite_strategy(solver.toStdString())  ;
+}
+
+void Solver::solve(QString specification, QString dataExpression)
+{
+  m_abort = false;
+  try
+  {
+    if (m_specification != specification)
     {
-
-      mCRL2log(info) << "Solving: \"" << m_dataExpression << "\"" << std::endl;
-
-      int dotpos =  m_dataExpression.find('.');
-      if (dotpos  == -1)
-      {
-        throw mcrl2::runtime_error("Expect a `.' in the input.");
-      }
-
-      mcrl2::data::data_specification data_spec;
-      atermpp::set <mcrl2::data::variable > vars;
-
-      if(!mcrl2xi_qt::parse_mcrl2_specification_with_variables(m_specification, data_spec, vars))
-      {
+      m_specification = specification;
+      mCRL2log(info) << "Parsing and type checking specification" << std::endl;
+      m_parsed = mcrl2xi_qt::parse_mcrl2_specification_with_variables(specification.toStdString(), m_data_spec, m_vars);
+      if (!m_parsed) {
+        emit solved();
         return;
       }
-
-      parse_variables(std::string(m_dataExpression.substr(0, dotpos)
-                          ) + ";",std::inserter(vars,vars.begin()),data_spec);
-
-      mcrl2::data::data_expression term =
-        mcrl2::data::parse_data_expression(
-          m_dataExpression.substr(dotpos+1, m_dataExpression.length()-1),
-          vars.begin(), vars.end(),
-          data_spec
-        );
-      if (term.sort()!=mcrl2::data::sort_bool::bool_())
-      {
-        throw mcrl2::runtime_error("Expression is not of sort Bool.");
-      }
-
-      mcrl2::data::rewriter rewr(data_spec,m_rewrite_strategy);
-      term=rewr(term);
-
-      typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
-
-      enumerator_type enumerator(data_spec,rewr);
-
-      for (enumerator_type::iterator i = enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required.
-                   i != enumerator.end() && !m_abort; ++i)
-      {
-        mCRL2log(info) << "Solution found" << std::endl;
-
-        QString s('[');
-
-        for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
-        {
-          if( v != vars.begin() )
-          {
-            s.append(", ");
-          }
-          s.append(mcrl2::data::pp(*v).c_str());
-          s.append(" := ");
-          s.append(mcrl2::data::pp((*i)(*v)).c_str());
-        }
-        s.append("] evaluates to ");
-        s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
-
-        emit emitToLocalOutput(s);
-      }
-
-      if (m_abort)
-          mCRL2log(info) << "Abort by user." << std::endl;
-      else
-          mCRL2log(info) << "Done solving." << std::endl;
-
     }
-    catch (mcrl2::runtime_error e)
+    else if (!m_parsed)
     {
-      mCRL2log(error) << e.what() << std::endl;
+      throw mcrl2::runtime_error("Specification contains no valid data or mCRL2 specification.");
     }
 
+    std::string stdDataExpression = dataExpression.toStdString();
+
+    mCRL2log(info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
+
+    int dotpos =  stdDataExpression.find('.');
+    if (dotpos  == -1)
+    {
+      throw mcrl2::runtime_error("Expected a '.' in the input.");
+    }
+
+    parse_variables(std::string(stdDataExpression.substr(0, dotpos)
+                                ) + ";",std::inserter(m_vars,m_vars.begin()),m_data_spec);
+
+    mcrl2::data::data_expression term =
+        mcrl2::data::parse_data_expression(
+          stdDataExpression.substr(dotpos+1, stdDataExpression.length()-1),
+          m_vars.begin(), m_vars.end(),
+          m_data_spec
+          );
+    if (term.sort()!=mcrl2::data::sort_bool::bool_())
+    {
+      throw mcrl2::runtime_error("Expression is not of sort Bool.");
+    }
+
+    mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
+    term=rewr(term);
+
+    typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
+
+    enumerator_type enumerator(m_data_spec,rewr);
+
+    for (enumerator_type::iterator i = enumerator.begin(m_vars,term,10000); // Stop when more than 10000 internal variables are required.
+         i != enumerator.end() && !m_abort; ++i)
+    {
+      mCRL2log(info) << "Solution found" << std::endl;
+
+      QString s('[');
+
+      for (atermpp::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
+      {
+        if( v != m_vars.begin() )
+        {
+          s.append(", ");
+        }
+        s.append(mcrl2::data::pp(*v).c_str());
+        s.append(" := ");
+        s.append(mcrl2::data::pp((*i)(*v)).c_str());
+      }
+      s.append("] evaluates to ");
+      s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
+
+      emit solvedPart(s);
+    }
+
+    if (m_abort)
+      mCRL2log(info) << "Abort by user." << std::endl;
+    else
+      mCRL2log(info) << "Done solving." << std::endl;
+
+  }
+  catch (mcrl2::runtime_error e)
+  {
+    mCRL2log(error) << e.what() << std::endl;
+  }
+  emit solved();
 }
+
+void Solver::abort()
+{
+  m_abort = true;
+}
+

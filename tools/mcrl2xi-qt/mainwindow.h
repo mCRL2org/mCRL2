@@ -19,7 +19,6 @@
 #include "documentwidget.h"
 #include "documentmanager.h"
 #include "parser.h"
-#include "rewriter.h"
 
 class QTextEdit;
 
@@ -65,8 +64,15 @@ class MainWindow : public QMainWindow
   private slots:
     void onParse();
     void parsed();
+
     void onRewrite();
     void rewritten(QString output);
+
+    void onSolve();
+    void onSolveAbort();
+    void solvedPart(QString output);
+    void solved();
+
 
   protected:
     void closeEvent(QCloseEvent *event);

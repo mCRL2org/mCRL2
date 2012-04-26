@@ -1,59 +1,45 @@
-#ifndef SOLVER_H
-#define SOLVER_H
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
-#include <QWidget>
-#include <QThread>
-#include <QTextEdit>
+#ifndef MCRL2XI_SOLVER_H
+#define MCRL2XI_SOLVER_H
 
-#include "parsing.h"
+#include <QObject>
 #include "mcrl2/data/rewrite_strategy.h"
-#include "ui_solver.h"
+#include "mcrl2/data/classic_enumerator.h"
 
-namespace Ui {
-class solver;
-}
-
-class SolverThread;
-
-class solver : public QWidget
+class Solver : public QObject
 {
     Q_OBJECT
+  public:
+    Solver();
+    static const std::string className;
+
+  signals:
+    void solvedPart(QString output);
+    void solved();
     
-public:
-    explicit solver(QWidget *parent = 0);
-    ~solver();
-    void setSelectedEditor( QTextEdit* edt );
+  public slots:
+    void setRewriter(QString rewriter);
+    void solve(QString specification, QString dataExpression);
+    void abort();
+    
+  private:
 
-private slots:
-    void onSolve();
-    void onCancel();
-    void onStarted();
-    void onStopped();
-    void onOutputText(QString s);
-private:
-    Ui::solver ui;
-    SolverThread *m_thread;
-    QTextEdit  *m_selectedEditor;
-};
-
-// Solver Thread
-class SolverThread : public QThread
-{
-    Q_OBJECT
-public:
-    void setDataExpression( std::string s );
-    void setSpecification( std::string s);
-    void setRewriter( mcrl2::data::rewrite_strategy rw);
-    void stop();
-signals:
-    void emitToLocalOutput(QString s);
-private:
-    void run();
-    void DoWork();
-    bool m_abort;
-    std::string m_dataExpression;
-    std::string m_specification;
     mcrl2::data::rewrite_strategy m_rewrite_strategy;
+
+    mcrl2::data::data_specification m_data_spec;
+    atermpp::set <mcrl2::data::variable > m_vars;
+
+    bool m_abort;
+    bool m_parsed;
+    QString m_specification;
 };
 
-#endif // SOLVER_H
+#endif // MCRL2XI_SOLVER_H

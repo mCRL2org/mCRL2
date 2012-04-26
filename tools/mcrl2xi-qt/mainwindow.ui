@@ -227,7 +227,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="buttonSolveCancel">
+        <widget class="QPushButton" name="buttonSolveAbort">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Cancel</string>
          </property>

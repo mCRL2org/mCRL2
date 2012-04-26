@@ -11,18 +11,32 @@
 #define MCRL2XI_REWRITER_H
 
 #include <QObject>
-#include "rewriterthread.h"
+#include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/classic_enumerator.h"
 
 class Rewriter : public QObject
 {
     Q_OBJECT
   public:
-    Rewriter(QObject *parent);
-    ~Rewriter();
-    RewriterThread *getThread();
+    Rewriter();
+    static const std::string className;
 
+  signals:
+    void rewritten(QString output);
+    
+  public slots:
+    void setRewriter(QString rewriter);
+    void rewrite(QString specification, QString dataExpression);
+    
   private:
-    RewriterThread *m_rewriterthread;
+
+    mcrl2::data::rewrite_strategy m_rewrite_strategy;
+
+    mcrl2::data::data_specification m_data_spec;
+    atermpp::set <mcrl2::data::variable > m_vars;
+
+    bool m_parsed;
+    QString m_specification;
 };
 
 #endif // MCRL2XI_REWRITER_H

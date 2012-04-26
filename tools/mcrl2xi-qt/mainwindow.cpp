@@ -7,11 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mainwindow.h"
-
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QMessageBox>
+
+#include "mainwindow.h"
+#include "threadparent.h"
+#include "rewriter.h"
+#include "solver.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
@@ -44,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
+
+  connect(m_ui.buttonSolve, SIGNAL(clicked()), this, SLOT(onSolve()));
+  connect(m_ui.buttonSolveAbort, SIGNAL(clicked()), this, SLOT(onSolveAbort()));
 
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
 
@@ -173,13 +179,58 @@ void MainWindow::onRewrite()
   m_ui.buttonRewrite->setEnabled(false);
   m_ui.editRewriteOutput->clear();
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-  QMetaObject::invokeMethod(document->findChild<Rewriter *>()->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
+
+  // findChild<ThreadParent<Rewriter> *> seems to match all objects instead of only those
+  // with type findChild<ThreadParent<Rewriter> *>, "Rewriter" as objectName was added to find the appropriate object
+  // findChild<...> without using templates works correctly, this could be a Qt bug
+
+  ThreadParent<Rewriter> *rewriterparent = document->findChild<ThreadParent<Rewriter> *>("Rewriter");
+  QMetaObject::invokeMethod(rewriterparent->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
 }
 
 void MainWindow::rewritten(QString output)
 {
   m_ui.editRewriteOutput->setPlainText(output);
   m_ui.buttonRewrite->setEnabled(true);
+}
+
+void MainWindow::onSolve()
+{
+  m_ui.buttonSolve->setEnabled(false);
+  m_ui.buttonSolveAbort->setEnabled(true);
+  m_ui.editSolveOutput->clear();
+  DocumentWidget *document = m_ui.documentManager->currentDocument();
+
+  // findChild<ThreadParent<Solver> *> seems to match all objects instead of only those
+  // with type findChild<ThreadParent<Solver> *>, "Solver" as objectName was added to find the appropriate object
+  // findChild<...> without using templates works correctly, this could be a Qt bug
+
+  ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
+  QMetaObject::invokeMethod(solverparent->getThread(), "solve", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editSolveExpr->text()));
+}
+
+void MainWindow::onSolveAbort()
+{
+  DocumentWidget *document = m_ui.documentManager->currentDocument();
+
+  // findChild<ThreadParent<Solver> *> seems to match all objects instead of only those
+  // with type findChild<ThreadParent<Solver> *>, "Solver" as objectName was added to find the appropriate object
+  // findChild<...> without using templates works correctly, this could be a Qt bug
+
+  ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
+  QMetaObject::invokeMethod(solverparent->getThread(), "abort", Qt::QueuedConnection);
+
+}
+
+void MainWindow::solvedPart(QString output)
+{
+  m_ui.editSolveOutput->appendPlainText(output);
+}
+
+void MainWindow::solved()
+{
+  m_ui.buttonSolveAbort->setEnabled(false);
+  m_ui.buttonSolve->setEnabled(true);
 }
 
 
@@ -243,9 +294,14 @@ void MainWindow::formatDocument(DocumentWidget *document)
   editor->setFont(font);
   Highlighter *highlighter = new Highlighter(editor->document());
 
-  Rewriter *rewriter = new Rewriter(document);
+  ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
   QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
   connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
+
+  ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
+  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
+  connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
 }
 
 void MainWindow::cleanupDocument(DocumentWidget *document)

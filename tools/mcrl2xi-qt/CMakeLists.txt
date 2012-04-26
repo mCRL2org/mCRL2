@@ -31,7 +31,7 @@ set(MOC_HEADERS
   documentwidget.h
   parser.h
   rewriter.h
-  rewriterthread.h
+  solver.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -46,7 +46,7 @@ set(SRC_FILES
   documentwidget.cpp
   parser.cpp
   rewriter.cpp
-  rewriterthread.cpp
+  solver.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
