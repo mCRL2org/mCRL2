@@ -61,7 +61,6 @@ class MainWindow : public QMainWindow
   private:
     Ui::MainWindow m_ui;
     Parser *m_parser;
-    Rewriter *m_rewriter;
 
   private slots:
     void onParse();

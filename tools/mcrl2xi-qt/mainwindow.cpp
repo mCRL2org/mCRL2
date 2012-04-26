@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
   m_ui.setupUi(this);
   m_parser = new Parser();
-  m_rewriter = new Rewriter();
 
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
@@ -45,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
-  connect(m_rewriter, SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
 
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
 
@@ -58,7 +56,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   m_parser->deleteLater();
-  m_rewriter->deleteLater();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -161,7 +158,7 @@ void MainWindow::onAbout()
 
 void MainWindow::onParse()
 {
-  this->m_ui.buttonParse->setEnabled(false);
+  m_ui.buttonParse->setEnabled(false);
   DocumentWidget *document = m_ui.documentManager->currentDocument();
   QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
 }
@@ -173,16 +170,16 @@ void MainWindow::parsed()
 
 void MainWindow::onRewrite()
 {
-  this->m_ui.buttonParse->setEnabled(false);
+  m_ui.buttonRewrite->setEnabled(false);
+  m_ui.editRewriteOutput->clear();
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-  QMetaObject::invokeMethod(m_rewriter, "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
-  QMetaObject::invokeMethod(m_rewriter, "setSpecification", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
-  QMetaObject::invokeMethod(m_rewriter, "rewrite", Qt::QueuedConnection, Q_ARG(QString, m_ui.editRewriteExpr->text()));
+  QMetaObject::invokeMethod(document->findChild<Rewriter *>()->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
 }
 
 void MainWindow::rewritten(QString output)
 {
   m_ui.editRewriteOutput->setPlainText(output);
+  m_ui.buttonRewrite->setEnabled(true);
 }
 
 
@@ -246,6 +243,9 @@ void MainWindow::formatDocument(DocumentWidget *document)
   editor->setFont(font);
   Highlighter *highlighter = new Highlighter(editor->document());
 
+  Rewriter *rewriter = new Rewriter(document);
+  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
 }
 
 void MainWindow::cleanupDocument(DocumentWidget *document)
