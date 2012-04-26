@@ -25,18 +25,19 @@ class MainWindow : public QMainWindow
     ~MainWindow();
 
   protected slots:
-    void open();
+    void openSpecification();
     void loadTrace();
     void saveTrace();
     void playTrace();
     void randomPlay();
     void stopPlay();
     void setPlayDelay();
-    void contents();
-    void about();
-
     void updateSimulation();
     void stateSelected();
+
+  public slots:
+    void openSpecification(QString filename);
+    void selectState(int state);
     void truncateTrace(int state);
     void selectTransition(int transition);
     void animationStep();

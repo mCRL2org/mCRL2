@@ -8,7 +8,6 @@
 
 #include "mainwindow.h"
 #include <QApplication>
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMetaObject>
@@ -24,7 +23,7 @@ MainWindow::MainWindow()
   m_ui.traceTable->resizeColumnToContents(0);
   m_ui.traceTable->resizeColumnToContents(1);
 
-  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(open()));
+  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(openSpecification()));
   connect(m_ui.actionLoadTrace, SIGNAL(triggered()), this, SLOT(loadTrace()));
   connect(m_ui.actionSaveTrace, SIGNAL(triggered()), this, SLOT(saveTrace()));
   connect(m_ui.actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
@@ -32,8 +31,6 @@ MainWindow::MainWindow()
   connect(m_ui.actionRandomPlay, SIGNAL(triggered()), this, SLOT(randomPlay()));
   connect(m_ui.actionStop, SIGNAL(triggered()), this, SLOT(stopPlay()));
   connect(m_ui.actionSetPlayDelay, SIGNAL(triggered()), this, SLOT(setPlayDelay()));
-  connect(m_ui.actionContents, SIGNAL(triggered()), this, SLOT(contents()));
-  connect(m_ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
@@ -58,7 +55,7 @@ QTableWidgetItem *item()
   return item;
 }
 
-void MainWindow::open()
+void MainWindow::openSpecification()
 {
   QString filename = QFileDialog::getOpenFileName(this, "Open Process Specification", "", "Process specifications (*.lps)");
   if (filename.isNull())
@@ -66,33 +63,7 @@ void MainWindow::open()
     return;
   }
 
-  Simulation *simulation = new Simulation(filename, mcrl2::data::rewrite_strategy());
-  if (!simulation->initialized())
-  {
-    delete simulation;
-    return;
-  }
-
-  if (m_simulation)
-  {
-    m_simulation->deleteLater();
-  }
-  m_simulation = simulation;
-  m_selectedState = 0;
-
-  QStringList parameters = m_simulation->parameters();
-  m_ui.stateTable->setRowCount(0);
-  m_ui.stateTable->setRowCount(parameters.size());
-  for (int i = 0; i < parameters.size(); i++)
-  {
-    m_ui.stateTable->setItem(i, 0, item());
-    m_ui.stateTable->setItem(i, 1, item());
-
-    m_ui.stateTable->item(i, 0)->setText(parameters[i]);
-  }
-
-  connect(m_simulation, SIGNAL(traceChanged(unsigned int)), this, SLOT(updateSimulation()));
-  updateSimulation();
+  openSpecification(filename);
 }
 
 void MainWindow::loadTrace()
@@ -155,15 +126,6 @@ void MainWindow::setPlayDelay()
   }
 }
 
-void MainWindow::contents()
-{
-  QDesktopServices::openUrl(QUrl("http://mcrl2.org/release/user_manual/tools/lpsxsim.html"));
-}
-
-void MainWindow::about()
-{
-}
-
 void MainWindow::updateSimulation()
 {
   assert(m_simulation);
@@ -223,12 +185,52 @@ void MainWindow::stateSelected()
   QList<QTableWidgetSelectionRange> selection = m_ui.traceTable->selectedRanges();
   if (selection.size() > 0)
   {
-    int row = selection[0].topRow();
-    if (row != m_selectedState)
-    {
-      m_selectedState = row;
-      updateSimulation();
-    }
+    selectState(selection[0].topRow());
+  }
+}
+
+void MainWindow::openSpecification(QString filename)
+{
+  Simulation *simulation = new Simulation(filename, mcrl2::data::rewrite_strategy());
+  if (!simulation->initialized())
+  {
+    simulation->deleteLater();
+    return;
+  }
+
+  if (m_simulation)
+  {
+    m_simulation->deleteLater();
+  }
+  m_simulation = simulation;
+  m_selectedState = 0;
+
+  QStringList parameters = m_simulation->parameters();
+  m_ui.stateTable->setRowCount(0);
+  m_ui.stateTable->setRowCount(parameters.size());
+  for (int i = 0; i < parameters.size(); i++)
+  {
+    m_ui.stateTable->setItem(i, 0, item());
+    m_ui.stateTable->setItem(i, 1, item());
+
+    m_ui.stateTable->item(i, 0)->setText(parameters[i]);
+  }
+
+  connect(m_simulation, SIGNAL(traceChanged(unsigned int)), this, SLOT(updateSimulation()));
+  updateSimulation();
+}
+
+void MainWindow::selectState(int state)
+{
+  if (!m_simulation)
+  {
+    return;
+  }
+
+  if (state != m_selectedState)
+  {
+    m_selectedState = state;
+    updateSimulation();
   }
 }
 
