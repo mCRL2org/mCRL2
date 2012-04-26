@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   m_ui.setupUi(this);
   m_parser = new Parser();
+  m_rewriter = new Rewriter();
 
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
@@ -41,7 +42,10 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
-  connect(m_parser, SIGNAL(parsed()), this, SLOT(Parsed()));
+  connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
+
+  connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
+  connect(m_rewriter, SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
 
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
 
@@ -54,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   m_parser->deleteLater();
+  m_rewriter->deleteLater();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -161,9 +166,23 @@ void MainWindow::onParse()
   QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
 }
 
-void MainWindow::Parsed()
+void MainWindow::parsed()
 {
-  this->m_ui.buttonParse->setEnabled(true);
+  m_ui.buttonParse->setEnabled(true);
+}
+
+void MainWindow::onRewrite()
+{
+  this->m_ui.buttonParse->setEnabled(false);
+  DocumentWidget *document = m_ui.documentManager->currentDocument();
+  QMetaObject::invokeMethod(m_rewriter, "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  QMetaObject::invokeMethod(m_rewriter, "setSpecification", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
+  QMetaObject::invokeMethod(m_rewriter, "rewrite", Qt::QueuedConnection, Q_ARG(QString, m_ui.editRewriteExpr->text()));
+}
+
+void MainWindow::rewritten(QString output)
+{
+  m_ui.editRewriteOutput->setPlainText(output);
 }
 
 

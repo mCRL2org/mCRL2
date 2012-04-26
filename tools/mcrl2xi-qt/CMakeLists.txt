@@ -30,6 +30,7 @@ set(MOC_HEADERS
   documentmanager.h
   documentwidget.h
   parser.h
+  rewriter.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -43,6 +44,7 @@ set(SRC_FILES
   documentmanager.cpp
   documentwidget.cpp
   parser.cpp
+  rewriter.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})

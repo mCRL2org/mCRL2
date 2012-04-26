@@ -19,6 +19,7 @@
 #include "documentwidget.h"
 #include "documentmanager.h"
 #include "parser.h"
+#include "rewriter.h"
 
 class QTextEdit;
 
@@ -60,10 +61,13 @@ class MainWindow : public QMainWindow
   private:
     Ui::MainWindow m_ui;
     Parser *m_parser;
+    Rewriter *m_rewriter;
 
   private slots:
     void onParse();
-    void Parsed();
+    void parsed();
+    void onRewrite();
+    void rewritten(QString output);
 
   protected:
     void closeEvent(QCloseEvent *event);

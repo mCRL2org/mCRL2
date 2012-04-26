@@ -1,70 +1,35 @@
-#ifndef REWRITER_H
-#define REWRITER_H
+// Author(s): Rimco Boudewijns
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
-#include <QWidget>
-#include <QThread>
-#include <QTextEdit>
+#ifndef MCRL2XI_REWRITER_H
+#define MCRL2XI_REWRITER_H
+
+#include <QObject>
 #include "mcrl2/data/rewrite_strategy.h"
-#include "ui_rewriter.h"
-
-namespace Ui {
-class rewriter;
-}
-
-class RewriteThread;
-
-class rewriter : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit rewriter(QWidget *parent = 0);
-    ~rewriter();
-    void setSelectedEditor( QTextEdit* edt );
-private slots:
-    void onRewrite();
-    void onCancel();
-    void onOutputText(QString s);
-private:
-    Ui::rewriter ui;
-    RewriteThread *m_thread ;
-    QTextEdit  *m_selectedEditor;
-
-};
-
-// Rewrite Thread
-class RewriteThread : public QThread
-{
-    Q_OBJECT
-public:
-    void setDataExpression( std::string s );
-    void setSpecification( std::string s);
-    void setRewriter( mcrl2::data::rewrite_strategy rw);
-signals:
-    void emitToLocalOutput(QString s);
-private:
-    void run();
-    std::string m_dataExpression;
-    std::string m_specification;
-    mcrl2::data::rewrite_strategy m_rewrite_strategy;
-
-};
 
 class Rewriter : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
   public:
-    Rewriter(const mcrl2::lps::specification &specification, mcrl2::data::rewrite_strategy strategy);
-
-  public slots:
-    void rewriteDataExpression(std::string expression);
+    explicit Rewriter();
 
   signals:
-    void rewroteDataExpression(std::string original, std::string result);
-
+    void rewritten(QString output);
+    
+  public slots:
+    void setRewriter(QString rewriter);
+    void setSpecification(QString specification);
+    void rewrite(QString dataExpression);
+    
   private:
-    mcrl2::lps::specification m_specification;
-    mcrl2::data::rewriter m_rewriter;
+    mcrl2::data::rewrite_strategy m_rewrite_strategy;
+    std::string m_specification;
 };
 
-#endif // REWRITER_H
+#endif // MCRL2XI_REWRITER_H
