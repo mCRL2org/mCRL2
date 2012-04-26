@@ -8,8 +8,8 @@
 //
 
 
-#ifndef HIGHLIGHTER_H
-#define HIGHLIGHTER_H
+#ifndef MCRL2XI_HIGHLIGHTER_H
+#define MCRL2XI_HIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
 
@@ -43,5 +43,5 @@ private:
     QTextCharFormat functionFormat;
 };
 
-#endif // HIGHLIGHTER_H
+#endif // MCRL2XI_HIGHLIGHTER_H
 

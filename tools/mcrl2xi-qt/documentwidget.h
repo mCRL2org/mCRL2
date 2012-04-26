@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef DOCUMENTWIDGET_H
-#define DOCUMENTWIDGET_H
+#ifndef MCRL2XI_DOCUMENTWIDGET_H
+#define MCRL2XI_DOCUMENTWIDGET_H
 
 #include <QWidget>
 #include <QTextEdit>
@@ -36,4 +36,4 @@ class DocumentWidget : public QWidget
     QString m_filename;
 };
 
-#endif // DOCUMENTWIDGET_H
+#endif // MCRL2XI_DOCUMENTWIDGET_H

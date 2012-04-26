@@ -7,16 +7,18 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MCRL2XI_MAINWINDOW_H
+#define MCRL2XI_MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QFileDialog>
 
 #include "ui_mainwindow.h"
+
 #include "highlighter.h"
 #include "documentwidget.h"
 #include "documentmanager.h"
+#include "parser.h"
 
 class QTextEdit;
 
@@ -25,11 +27,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
   public:
     MainWindow(QWidget *parent = 0);
+    ~MainWindow();
     bool saveDocument(DocumentWidget *document);
 
   public slots:
     void formatDocument(DocumentWidget *document);
+    void cleanupDocument(DocumentWidget *document);
     bool onCloseRequest(int index);
+    void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 
   private slots:
     void onNew();
@@ -54,9 +59,14 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow m_ui;
+    Parser *m_parser;
+
+  private slots:
+    void onParse();
+    void Parsed();
 
   protected:
     void closeEvent(QCloseEvent *event);
 };
 
-#endif // MAINWINDOW_H
+#endif // MCRL2XI_MAINWINDOW_H

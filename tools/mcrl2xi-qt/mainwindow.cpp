@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
   m_ui.setupUi(this);
+  m_parser = new Parser();
 
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
@@ -39,8 +40,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect(m_ui.actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 
+  connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
+  connect(m_parser, SIGNAL(parsed()), this, SLOT(Parsed()));
+
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
+
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
+  connect(m_ui.documentManager, SIGNAL(documentClosed(DocumentWidget*)), this, SLOT(cleanupDocument(DocumentWidget*)));
+
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+}
+
+MainWindow::~MainWindow()
+{
+  m_parser->deleteLater();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -141,6 +154,18 @@ void MainWindow::onAbout()
 {
 }
 
+void MainWindow::onParse()
+{
+  this->m_ui.buttonParse->setEnabled(false);
+  DocumentWidget *document = m_ui.documentManager->currentDocument();
+  QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
+}
+
+void MainWindow::Parsed()
+{
+  this->m_ui.buttonParse->setEnabled(true);
+}
+
 
 bool MainWindow::saveDocument(DocumentWidget *document)
 {
@@ -185,15 +210,26 @@ bool MainWindow::onCloseRequest(int index)
   return true;
 }
 
+void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
+{
+  m_ui.statusBar->showMessage(formattedMessage, 5000);
+}
+
 void MainWindow::formatDocument(DocumentWidget *document)
 {
   QTextEdit *editor = document->getEditor();
   editor->setWordWrapMode(QTextOption::NoWrap);
 
   QFont font;
-  font.setFamily("Courier");
+  font.setFamily("Monospace");
   font.setFixedPitch(true);
 
   editor->setFont(font);
   Highlighter *highlighter = new Highlighter(editor->document());
+
+}
+
+void MainWindow::cleanupDocument(DocumentWidget *document)
+{
+
 }

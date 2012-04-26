@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef DOCUMENTMANAGER_H
-#define DOCUMENTMANAGER_H
+#ifndef MCRL2XI_DOCUMENTMANAGER_H
+#define MCRL2XI_DOCUMENTMANAGER_H
 
 #include <QWidget>
 #include <QTextEdit>
@@ -29,20 +29,22 @@ class DocumentManager : public QWidget
     void saveFile(QString fileName);
 
     int documentCount();
-    DocumentWidget* getDocument(int index);
-    DocumentWidget* findDocument(QString fileName);
+    int indexOf(DocumentWidget *document);
+    DocumentWidget *getDocument(int index);
+    DocumentWidget *findDocument(QString fileName);
     void closeDocument(int index);
 
-    DocumentWidget* currentDocument();
+    DocumentWidget *currentDocument();
     QString currentFileName();
     
   signals:
     void documentCreated(DocumentWidget *document);
-    void documentSwitched(DocumentWidget *document);
+    void documentClosed(DocumentWidget *document);
+
     void tabCloseRequested(int index);
 
   private:
-    DocumentWidget* createDocument(QString title);
+    DocumentWidget *createDocument(QString title);
 
     Ui::DocumentManager m_ui;
 
@@ -53,4 +55,4 @@ class DocumentManager : public QWidget
     void showEvent(QShowEvent *event);
 };
 
-#endif // DOCUMENTMANAGER_H
+#endif // MCRL2XI_DOCUMENTMANAGER_H

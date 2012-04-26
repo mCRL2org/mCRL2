@@ -20,20 +20,16 @@ set(UI_FILES
   mainwindow.ui
   documentmanager.ui
   documentwidget.ui
-#  rewriter.ui
-#  solver.ui
-#  parse_and_typecheck.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
 set(MOC_HEADERS
   mainwindow.h
   highlighter.h
+
   documentmanager.h
   documentwidget.h
-#  rewriter.h
-#  solver.h
-#  parse_and_typecheck.h
+  parser.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -43,11 +39,10 @@ set(SRC_FILES
   main.cpp
   mainwindow.cpp
   highlighter.cpp
+
   documentmanager.cpp
   documentwidget.cpp
-#  rewriter.cpp
-#  solver.cpp
-#  parse_and_typecheck.cpp
+  parser.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})

@@ -47,6 +47,11 @@ int DocumentManager::documentCount()
   return m_ui.tabWidget->count();
 }
 
+int DocumentManager::indexOf(DocumentWidget *document)
+{
+  return m_ui.tabWidget->indexOf(document);
+}
+
 DocumentWidget* DocumentManager::getDocument(int index)
 {
   return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(index));
@@ -64,6 +69,7 @@ DocumentWidget* DocumentManager::findDocument(QString fileName)
 void DocumentManager::closeDocument(int index)
 {
   DocumentWidget* document = this->getDocument(index);
+  emit documentClosed(document);
   delete document;
 
   if (m_ui.tabWidget->count() == 0)
