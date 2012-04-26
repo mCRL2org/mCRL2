@@ -10,7 +10,7 @@
 #define LPSXSIM_MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QAbstractTableModel>
+#include <QTimer>
 #include "ui_mainwindow.h"
 #include "simulation.h"
 
@@ -39,6 +39,7 @@ class MainWindow : public QMainWindow
     void stateSelected();
     void truncateTrace(int state);
     void selectTransition(int transition);
+    void animationStep();
 
   protected:
     QString renderStateChange(Simulation::State source, Simulation::State destination);
@@ -46,7 +47,10 @@ class MainWindow : public QMainWindow
   protected:
     Ui::MainWindow m_ui;
     Simulation *m_simulation;
+    Simulation::Trace m_trace;
     int m_selectedState;
+    QTimer *m_animationTimer;
+    bool m_randomAnimation;
 };
 
 #endif

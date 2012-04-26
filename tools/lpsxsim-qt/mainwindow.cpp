@@ -10,11 +10,14 @@
 #include <QApplication>
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMetaObject>
 #include <QUrl>
+#include <climits>
 
 MainWindow::MainWindow()
-  : m_simulation(0)
+  : m_simulation(0),
+    m_animationTimer(new QTimer(this))
 {
   m_ui.setupUi(this);
 
@@ -35,6 +38,9 @@ MainWindow::MainWindow()
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
   connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(selectTransition(int)));
+
+  m_animationTimer->setInterval(1000);
+  connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +75,7 @@ void MainWindow::open()
 
   if (m_simulation)
   {
-    delete m_simulation;
+    m_simulation->deleteLater();
   }
   m_simulation = simulation;
   m_selectedState = 0;
@@ -124,18 +130,29 @@ void MainWindow::saveTrace()
 
 void MainWindow::playTrace()
 {
+  m_randomAnimation = false;
+  m_animationTimer->start();
 }
 
 void MainWindow::randomPlay()
 {
+  m_randomAnimation = true;
+  m_animationTimer->start();
 }
 
 void MainWindow::stopPlay()
 {
+  m_animationTimer->stop();
 }
 
 void MainWindow::setPlayDelay()
 {
+  bool success;
+  int newValue = QInputDialog::getInt(this, "Set Animation Delay", "Enter the time between two animation steps in milliseconds.", m_animationTimer->interval(), 0, INT_MAX, 1, &success);
+  if (success)
+  {
+    m_animationTimer->setInterval(newValue);
+  }
 }
 
 void MainWindow::contents()
@@ -151,53 +168,53 @@ void MainWindow::updateSimulation()
 {
   assert(m_simulation);
 
-  Simulation::Trace trace = m_simulation->trace();
+  m_trace = m_simulation->trace();
 
-  int selectedState = m_selectedState < trace.size() ? m_selectedState : trace.size() - 1;
+  int selectedState = m_selectedState < m_trace.size() ? m_selectedState : m_trace.size() - 1;
 
   int oldSize = m_ui.traceTable->rowCount();
-  m_ui.traceTable->setRowCount(trace.size());
-  for (int i = oldSize; i < trace.size(); i++)
+  m_ui.traceTable->setRowCount(m_trace.size());
+  for (int i = oldSize; i < m_trace.size(); i++)
   {
     m_ui.traceTable->setItem(i, 0, item());
     m_ui.traceTable->setItem(i, 1, item());
     m_ui.traceTable->setItem(i, 2, item());
   }
-  for (int i = 0; i < trace.size(); i++)
+  for (int i = 0; i < m_trace.size(); i++)
   {
     m_ui.traceTable->item(i, 0)->setText(QString::number(i));
     if (i == 0)
     {
       m_ui.traceTable->item(i, 1)->setText("");
-      m_ui.traceTable->item(i, 2)->setText(renderStateChange(Simulation::State(), trace[i].state));
+      m_ui.traceTable->item(i, 2)->setText(renderStateChange(Simulation::State(), m_trace[i].state));
     }
     else
     {
-      m_ui.traceTable->item(i, 1)->setText(trace[i - 1].transitions[trace[i - 1].transitionNumber].action);
-      m_ui.traceTable->item(i, 2)->setText(renderStateChange(trace[i - 1].state, trace[i].state));
+      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action);
+      m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
   }
-  m_ui.traceTable->setRangeSelected(QTableWidgetSelectionRange(0, 0, trace.size() - 1, 2), false);
+  m_ui.traceTable->setRangeSelected(QTableWidgetSelectionRange(0, 0, m_trace.size() - 1, 2), false);
   if (selectedState == m_selectedState)
   {
     m_ui.traceTable->setRangeSelected(QTableWidgetSelectionRange(selectedState, 0, selectedState, 2), true);
   }
 
   m_ui.transitionTable->setRowCount(0);
-  m_ui.transitionTable->setRowCount(trace[selectedState].transitions.size());
-  for (int i = 0; i < trace[selectedState].transitions.size(); i++)
+  m_ui.transitionTable->setRowCount(m_trace[selectedState].transitions.size());
+  for (int i = 0; i < m_trace[selectedState].transitions.size(); i++)
   {
     m_ui.transitionTable->setItem(i, 0, item());
     m_ui.transitionTable->setItem(i, 1, item());
 
-    m_ui.transitionTable->item(i, 0)->setText(trace[selectedState].transitions[i].action);
-    m_ui.transitionTable->item(i, 1)->setText(renderStateChange(trace[selectedState].state, trace[selectedState].transitions[i].destination));
+    m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action);
+    m_ui.transitionTable->item(i, 1)->setText(renderStateChange(m_trace[selectedState].state, m_trace[selectedState].transitions[i].destination));
   }
 
-  assert(trace[selectedState].state.size() == m_ui.stateTable->rowCount());
-  for (int i = 0; i < trace[selectedState].state.size(); i++)
+  assert(m_trace[selectedState].state.size() == m_ui.stateTable->rowCount());
+  for (int i = 0; i < m_trace[selectedState].state.size(); i++)
   {
-    m_ui.stateTable->item(i, 1)->setText(trace[selectedState].state[i]);
+    m_ui.stateTable->item(i, 1)->setText(m_trace[selectedState].state[i]);
   }
 }
 
@@ -235,6 +252,36 @@ void MainWindow::selectTransition(int transition)
   QMetaObject::invokeMethod(m_simulation, "reset", Q_ARG(unsigned int, m_selectedState));
   QMetaObject::invokeMethod(m_simulation, "select", Q_ARG(unsigned int, transition));
   m_selectedState++;
+}
+
+void MainWindow::animationStep()
+{
+  if (!m_simulation)
+  {
+    return;
+  }
+
+  if (m_randomAnimation)
+  {
+    if (m_selectedState >= m_trace.size())
+    {
+      m_selectedState = m_trace.size() - 1;
+    }
+
+    selectTransition(qrand() % m_trace[m_selectedState].transitions.size());
+  }
+  else
+  {
+    if (m_selectedState + 1 < m_trace.size())
+    {
+      m_selectedState++;
+      updateSimulation();
+    }
+    else
+    {
+      stopPlay();
+    }
+  }
 }
 
 QString MainWindow::renderStateChange(Simulation::State source, Simulation::State destination)
