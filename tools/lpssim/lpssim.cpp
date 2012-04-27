@@ -24,15 +24,14 @@
 #include <cassert>
 
 #include "mcrl2/exception.h"
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/simulator.h"
+#include "mcrl2/lps/simulation.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -44,29 +43,31 @@ using namespace mcrl2::lps;
 
 class sim_tool : public rewriter_tool< input_tool >
 {
-
     typedef rewriter_tool<input_tool> super;
 
   private:
-    static void PrintState(const mcrl2::lps::state s)
+    static std::string print_state(state s)
     {
-      for (size_t i=0; i<s.size(); i++)
+      std::string output;
+      bool first = true;
+      for (state::iterator i = s.begin(); i != s.end(); i++)
       {
-        if (i > 0)
+        if (!first)
         {
-          std::cout << ", ";
+          output += ", ";
         }
+        first = false;
 
-        const data_expression t = s[i];
-        if (mcrl2::data::is_variable(t))
+        if (mcrl2::data::is_variable(*i))
         {
-          std::cout << "_";
+          output += "_";
         }
         else
         {
-          std::cout << pp(t);
+          output += data::pp(*i);
         }
       }
+      return "[" + output + "]";
     }
 
   protected:
@@ -103,52 +104,41 @@ class sim_tool : public rewriter_tool< input_tool >
 
       lps_specification.load(m_input_filename);
 
-      StandardSimulator simulator;
-      simulator.rewr_strat = rewrite_strategy();
-      simulator.use_dummies = m_use_dummies;
-      simulator.LoadSpec(lps_specification);
+      if (m_use_dummies)
+      {
+        lps::detail::instantiate_global_variables(lps_specification);
+      }
 
-      std::cout << std::endl << "initial state: [ ";
-      PrintState(simulator.GetState());
-      std::cout << " ]" << std::endl;
+      lps::simulation simulation(lps_specification);
+      size_t state_index = 0;
+
 
       bool notdone = true;
       while (notdone)
       {
-        std::vector < mcrl2::lps::state > next_states;
-        atermpp::vector < mcrl2::lps::multi_action > next_actions;
+        assert(state_index < simulation.trace().size());
+        const simulation::state_t &current_state = simulation.trace()[state_index];
+        std::cout << std::endl << (state_index == 0 ? "initial" : "current") << " state: " << print_state(current_state.source_state) << std::endl;
 
-        try
+        for (size_t i = 0; i < current_state.transitions.size(); i++)
         {
-          next_states = simulator.GetNextStates();
-          next_actions = simulator.GetNextActions();
-          for (size_t i=0; i<next_states.size(); ++i)
-          {
-            const multi_action Transition = next_actions[i];
-            const state NewState = next_states[i];
-            std::cout << i <<": " << pp(Transition) << "  ->  [ ";
-            PrintState(NewState);
-            std::cout << " ]" << std::endl;
-          }
-          if (next_states.empty())
-          {
-            std::cout << "deadlock" << std::endl;
-          }
+          std::cout << i << ": " << lps::pp(current_state.transitions[i].action) << "  ->  " << print_state(current_state.transitions[i].destination) << std::endl;
         }
-        catch (mcrl2::runtime_error& e)
+
+        if (current_state.transitions.size() == 0)
         {
-          mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
+          std::cout << "deadlock" << std::endl;
         }
 
         while (true)
         {
           std::string s;
 
-          (std::cout << "? ").flush();
+          std::cout << "? ";
+          std::cout.flush();
           getline(std::cin, s);
           if ((s.length() > 0) && (s[s.length()-1] == '\r'))
           {
-            // remove CR
             s.resize(s.length()-1);
           }
 
@@ -179,43 +169,36 @@ class sim_tool : public rewriter_tool< input_tool >
           }
           else if (isdigit(s[0]))
           {
-            size_t idx;
-            sscanf(s.c_str(),"%zu",&idx);
-            if (idx < next_states.size())
+            size_t index;
+            sscanf(s.c_str(), "%zu", &index);
+            if (index < current_state.transitions.size())
             {
-              std::cout << std::endl << "transition: " << pp(next_actions[idx]) << std::endl;
-              simulator.ChooseTransition(idx);
-              std::cout << "current state: [ ";
-              PrintState(simulator.GetState());
-              std::cout << " ]" << std::endl;
+              simulation.truncate(state_index);
+              simulation.select(index);
+              std::cout << std::endl << "transition: " << lps::pp(current_state.transitions[index].action) << std::endl;
+              state_index++;
               break;
             }
             else
             {
               std::cout << "invalid transition index";
-              if (next_states.size() > 0)
+              if (current_state.transitions.size() > 0)
               {
-                std::cout << " " << idx << " (maximum is " << next_states.size()-1 << ")";
+                std::cout << " " << index << " (maximum is " << current_state.transitions.size() - 1 << ")";
               }
               std::cout << std::endl;
             }
           }
           else if ((s == "i") || (s == "initial"))
           {
-            simulator.SetTracePos(0);
-            std::cout << std::endl << "initial state: [ ";
-            PrintState(simulator.GetState());
-            std::cout <<  " ]" << std::endl;
+            state_index = 0;
             break;
           }
           else if ((s == "u") || (s == "undo"))
           {
-            if (simulator.GetTracePos() > 0)
+            if (state_index > 0)
             {
-              simulator.Undo();
-              std::cout << std::endl << "current state: [ ";
-              PrintState(simulator.GetState());
-              std::cout << " ]" << std::endl;
+              state_index--;
               break;
             }
             else
@@ -225,14 +208,10 @@ class sim_tool : public rewriter_tool< input_tool >
           }
           else if ((s == "r") || (s == "redo"))
           {
-            if (simulator.GetTraceLength() > simulator.GetTracePos())
+            if (state_index + 1 < simulation.trace().size())
             {
-              multi_action trans = simulator.GetNextTransitionFromTrace();
-              std::cout << std::endl << "transition: "<< pp(trans) << std::endl;
-              simulator.Redo();
-              std::cout << "current state: [ ";
-              PrintState(simulator.GetState());
-              std::cout << " ]" << std::endl;
+              state_index++;
+              std::cout << std::endl << "transition: " << lps::pp(current_state.transitions[current_state.transition_number].action) << std::endl;
               break;
             }
             else
@@ -243,54 +222,51 @@ class sim_tool : public rewriter_tool< input_tool >
           else if ((s.substr(0,2) == "g ") || (s.substr(0,5) == "goto "))
           {
             std::istringstream sin(((s[1] == ' ') ? s.substr(2) : s.substr(5)));
-            size_t idx;
-            sin >> idx;
-            if (idx <= simulator.GetTraceLength())
+            size_t index;
+            sin >> index;
+            if (index < simulation.trace().size())
             {
-              simulator.SetTracePos(idx);
-              std::cout << std::endl << "current state: [ ";
-              PrintState(simulator.GetState());
-              std::cout << " ]" << std::endl;
+              state_index = index;
               break;
             }
             else
             {
-              std::cout << "invalid trace position " << idx << " (maximum is " << (simulator.GetTraceLength()) << ")" << std::endl;
+              std::cout << "invalid trace position " << index << " (maximum is " << (current_state.transitions.size() - 1) << ")" << std::endl;
             }
           }
           else if ((s == "t") || (s == "trace"))
           {
             std::cout << std::endl << "current trace:" << std::endl;
-            mcrl2::trace::Trace tr = simulator.GetTrace();
-            size_t pos = simulator.GetTracePos();
-            tr.setPosition(0);
-            std::cout << "initial state: [ "; 
-            PrintState(tr.currentState());
-            std::cout << " ]" << std::endl;
-            for (size_t i=0; i< tr.number_of_actions(); ++i)
+            for (size_t i = 0; i < simulation.trace().size(); i++)
             {
-              tr.setPosition(i);
-              state NewState = tr.nextState();
-              multi_action Transition = tr.currentAction(); 
-              if (i==pos)
-                { std::cout << ">"; }
+              if (i == state_index)
+              {
+                std::cout << ">";
+              }
               else
-                { std::cout << " "; }
-              std::cout << i << ": " << pp(Transition)<< "  ->  [ ";
-              if (i==pos)
-                { std::cout << ">"; }
+              {
+                std::cout << " ";
+              }
+
+              if (i == 0)
+              {
+                std::cout << "initial state: ";
+              }
               else
-                { std::cout << " "; }
-              PrintState(NewState);
-              std::cout << " ]" << std::endl;
+              {
+                std::cout << lps::pp(simulation.trace()[i - 1].transitions[simulation.trace()[i - 1].transition_number].action) << "  ->  ";
+              }
+
+              std::cout << print_state(simulation.trace()[i].source_state) << std::endl;
             }
+            break;
           }
           else if ((s.substr(0,2) == "s ") || (s.substr(0,5) == "save "))
           {
             std::string filename((s[1] == ' ') ? s.substr(2) : s.substr(5));
             try
             {
-              simulator.SaveTrace(filename);
+              simulation.save(filename);
               std::cout << "trace saved" << std::endl;
             }
             catch (mcrl2::runtime_error &err)
@@ -303,11 +279,9 @@ class sim_tool : public rewriter_tool< input_tool >
             std::string filename((s[1] == ' ') ? s.substr(2) : s.substr(5));
             try
             {
-              simulator.LoadTrace(filename);
+              simulation.load(filename);
+              state_index = 0;
               std::cout << "trace loaded" << std::endl;
-              std::cout << std::endl << "initial state: [ ";
-              PrintState(simulator.GetState());
-              std::cout << " ]" << std::endl;
               break;
             }
             catch (mcrl2::runtime_error &err)
@@ -332,4 +306,3 @@ int main(int argc, char** argv)
 
   return sim_tool().execute(argc, argv);
 }
-
