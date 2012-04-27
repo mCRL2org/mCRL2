@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.setupUi(this);
   m_parser = new Parser();
 
+  //All menu items
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
@@ -41,8 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionWrap_mode, SIGNAL(triggered()), this, SLOT(onWrapMode()));
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
 
-  connect(m_ui.actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
-
+  //All button functionality
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
   connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
 
@@ -51,10 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.buttonSolve, SIGNAL(clicked()), this, SLOT(onSolve()));
   connect(m_ui.buttonSolveAbort, SIGNAL(clicked()), this, SLOT(onSolveAbort()));
 
+  //Documentmanager events
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
-
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
-  connect(m_ui.documentManager, SIGNAL(documentClosed(DocumentWidget*)), this, SLOT(cleanupDocument(DocumentWidget*)));
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 }
@@ -64,18 +63,85 @@ MainWindow::~MainWindow()
   m_parser->deleteLater();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+
+bool MainWindow::saveDocument(DocumentWidget *document)
 {
-  for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
-  {
-    if (!this->onCloseRequest(i))
-    {
-      event->ignore();
-      return;
-    }
+  QString fileName = document->getFileName();
+  if (fileName.isNull()) {
+    fileName = QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+                                            tr("mCRL2 specification (*.mcrl2 *.txt )"));
   }
-  event->accept();
+  if (!fileName.isNull()) {
+    m_ui.documentManager->saveFile(fileName);
+    return true;
+  }
+  return false;
 }
+
+void MainWindow::openDocument(QString fileName)
+{
+  if (!fileName.isNull()) {
+    m_ui.documentManager->openFile(fileName);
+  }
+}
+
+
+void MainWindow::formatDocument(DocumentWidget *document)
+{
+  QTextEdit *editor = document->getEditor();
+  editor->setWordWrapMode(QTextOption::NoWrap);
+
+  QFont font;
+  font.setFamily("Monospace");
+  font.setFixedPitch(true);
+
+  editor->setFont(font);
+  Highlighter *highlighter = new Highlighter(editor->document());
+
+  ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
+  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
+
+  ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
+  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
+  connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
+}
+
+bool MainWindow::onCloseRequest(int index)
+{
+  DocumentWidget *document = m_ui.documentManager->getDocument(index);
+
+  if (!document->isModified()) {
+    m_ui.documentManager->closeDocument(index);
+    return true;
+  }
+
+  int ret = QMessageBox::question ( this, tr("Specification modified"), tr("Do you want to save your modifications?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+  switch(ret)
+  {
+    case QMessageBox::Yes:
+      if (this->saveDocument(document))
+      {
+        m_ui.documentManager->closeDocument(index);
+      }
+      break;
+    case QMessageBox::No:
+      m_ui.documentManager->closeDocument(index);
+      break;
+    case QMessageBox::Cancel:
+      return false;
+      break;
+  }
+
+  return true;
+}
+
+void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
+{
+  m_ui.statusBar->showMessage(formattedMessage, 5000);
+}
+
 
 void MainWindow::onNew()
 {
@@ -86,9 +152,7 @@ void MainWindow::onOpen()
 {
   QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
-  if (!fileName.isNull()) {
-    m_ui.documentManager->openFile(fileName);
-  }
+  this->openDocument(fileName);
 }
 
 void MainWindow::onSave()
@@ -117,7 +181,6 @@ void MainWindow::onUndo()
 
 void MainWindow::onRedo()
 {
-  QMessageBox::information(this,tr("Hoi"),tr("Redo"),QMessageBox::Ok);
   m_ui.documentManager->currentDocument()->getEditor()->redo();
 }
 
@@ -148,19 +211,19 @@ void MainWindow::onSelectAll()
 
 void MainWindow::onFind()
 {
+  //TODO
 }
 
 void MainWindow::onWrapMode()
 {
+  //TODO
 }
 
 void MainWindow::onResetPerspective()
 {
+  //TODO
 }
 
-void MainWindow::onAbout()
-{
-}
 
 void MainWindow::onParse()
 {
@@ -234,77 +297,15 @@ void MainWindow::solved()
 }
 
 
-bool MainWindow::saveDocument(DocumentWidget *document)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-  QString fileName = document->getFileName();
-  if (fileName.isNull()) {
-    fileName = QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
-                                            tr("mCRL2 specification (*.mcrl2 *.txt )"));
-  }
-  if (!fileName.isNull()) {
-    m_ui.documentManager->saveFile(fileName);
-    return true;
-  }
-  return false;
-}
-
-bool MainWindow::onCloseRequest(int index)
-{
-  DocumentWidget *document = m_ui.documentManager->getDocument(index);
-
-  if (!document->isModified()) {
-    m_ui.documentManager->closeDocument(index);
-    return true;
-  }
-
-  int ret = QMessageBox::question ( this, tr("Specification modified"), tr("Do you want to save your modifications?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
-  switch(ret)
+  for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
   {
-    case QMessageBox::Yes:
-      if (this->saveDocument(document))
-      {
-        m_ui.documentManager->closeDocument(index);
-      }
-      break;
-    case QMessageBox::No:
-      m_ui.documentManager->closeDocument(index);
-      break;
-    case QMessageBox::Cancel:
-      return false;
-      break;
+    if (!this->onCloseRequest(i))
+    {
+      event->ignore();
+      return;
+    }
   }
-
-  return true;
-}
-
-void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
-{
-  m_ui.statusBar->showMessage(formattedMessage, 5000);
-}
-
-void MainWindow::formatDocument(DocumentWidget *document)
-{
-  QTextEdit *editor = document->getEditor();
-  editor->setWordWrapMode(QTextOption::NoWrap);
-
-  QFont font;
-  font.setFamily("Monospace");
-  font.setFixedPitch(true);
-
-  editor->setFont(font);
-  Highlighter *highlighter = new Highlighter(editor->document());
-
-  ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
-  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
-  connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
-
-  ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
-  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
-  connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
-  connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
-}
-
-void MainWindow::cleanupDocument(DocumentWidget *document)
-{
-
+  event->accept();
 }

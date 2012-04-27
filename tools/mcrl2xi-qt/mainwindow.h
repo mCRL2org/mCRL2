@@ -29,12 +29,16 @@ class MainWindow : public QMainWindow
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
     bool saveDocument(DocumentWidget *document);
+    void openDocument(QString fileName);
 
   public slots:
     void formatDocument(DocumentWidget *document);
-    void cleanupDocument(DocumentWidget *document);
     bool onCloseRequest(int index);
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
+
+  private:
+    Ui::MainWindow m_ui;
+    Parser *m_parser;
 
   private slots:
     void onNew();
@@ -55,13 +59,6 @@ class MainWindow : public QMainWindow
     void onWrapMode();
     void onResetPerspective();
 
-    void onAbout();
-
-  private:
-    Ui::MainWindow m_ui;
-    Parser *m_parser;
-
-  private slots:
     void onParse();
     void parsed();
 
