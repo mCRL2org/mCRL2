@@ -222,7 +222,7 @@ bool EnumeratorSolutionsStandard::find_equality(
     assert(t.size()==3);
     return find_equality(t(1),vars,v,e) || find_equality(t(2),vars,v,e);
   }
-  else if (m_enclosing_enumerator->eqs.find(t(0)) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
+  else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_int(t(0))) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
   {
     const atermpp::aterm_appl a1 = t(1);
     const atermpp::aterm_appl a2 = t(2);
@@ -668,7 +668,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
     if (i->name() == "==")
     {
       atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
-      eqs.insert(t(0));
+      eqs.insert(atermpp::aterm_int(t(0)));
     }
   }
 }

@@ -44,9 +44,11 @@ class ATermInt:public ATerm
 {
   public:
 
-    ATermInt():ATerm()
+    /// \brief Constructor.
+    ATermInt()
     {}
 
+    
     ATermInt(_ATermInt *t):ATerm(reinterpret_cast<_ATerm*>(t))
     {
     }
@@ -54,7 +56,13 @@ class ATermInt:public ATerm
     explicit ATermInt(const ATerm &t):ATerm(t) 
     {
     }
+    
+    /// \brief Constructor.
+    /// \param value An integer value.
+    ATermInt(int value);
 
+    /// \brief Assignment operator.
+    /// \param t A term representing an integer.
     ATermInt &operator=(const ATermInt &t)
     {
       copy_term(t.m_aterm);
@@ -75,6 +83,13 @@ class ATermInt:public ATerm
       assert(m_aterm!=NULL);
       assert(m_aterm->reference_count>0);
       return reinterpret_cast<_ATermInt*>(m_aterm);
+    }
+
+    /// \brief Get the integer value of the aterm_int.
+    /// \return The value of the term.
+    int value() const
+    {
+      return reinterpret_cast<_ATermInt*>(&*m_aterm)->value;
     }
 };
 
@@ -239,12 +254,17 @@ void ATunprotectInt(const ATermInt* p)
   */
 
 /* The ATermInt type */
-ATermInt ATmakeInt(const int value);
+inline
+ATermInt ATmakeInt(const int value)
+{
+  return ATermInt(value);
+}
 
 inline
 int ATgetInt(const ATermInt &t)
 {
-  return t->value;
+  return t.value();
+  // return t->value;
 }
 
 /* The ATermAppl type */

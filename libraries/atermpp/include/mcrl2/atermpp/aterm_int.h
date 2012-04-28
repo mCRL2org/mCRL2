@@ -12,12 +12,16 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
+  typedef ::aterm::ATermInt aterm_int;
+
+
 /// \brief Term containing an integer.
-class aterm_int: public aterm_base
+/* class aterm_int: public aterm_base
 {
   public:
     /// \brief Constructor.
@@ -66,10 +70,10 @@ class aterm_int: public aterm_base
     {
       return ATgetInt(reinterpret_cast<_ATermInt*>(&*m_term));
     }
-};
+}; */
 
 /// \cond INTERNAL_DOCS
-template <>
+/* template <>
 struct aterm_traits<aterm_int>
 {
   static void protect(const aterm_int& t)
@@ -88,7 +92,7 @@ struct aterm_traits<aterm_int>
   {
     return t.term();
   }
-};
+}; */
 /// \endcond
 
 } // namespace atermpp

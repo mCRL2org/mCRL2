@@ -100,8 +100,8 @@ void test_operators()
   }
 
   {
-    aterm_int a1 = make_term("1");
-    aterm_int a2 = make_term("2");
+    aterm_int a1 = static_cast<aterm_int>(make_term("1"));
+    aterm_int a2 = static_cast<aterm_int>(make_term("2"));
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }

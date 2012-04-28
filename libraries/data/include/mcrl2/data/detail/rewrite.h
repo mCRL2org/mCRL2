@@ -289,7 +289,7 @@ inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, c
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply0(const atermpp::aterm &head)
 {
- return ATmakeAppl1(get_appl_afun_value(1),(ATerm)head);
+  return ATmakeAppl1(get_appl_afun_value(1),(ATerm)head);
 }
 
 
@@ -298,7 +298,7 @@ inline atermpp::aterm_appl Apply1(
          const atermpp::aterm &head,
          const atermpp::aterm_appl &arg1)
 {
- return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATermAppl)arg1);
+  return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATermAppl)arg1);
 }
 
 
@@ -308,7 +308,7 @@ inline atermpp::aterm_appl Apply2(
          const atermpp::aterm_appl &arg1,
          const atermpp::aterm_appl &arg2)
 {
- return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATermAppl)arg1,(ATermAppl)arg2);
+  return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATermAppl)arg1,(ATermAppl)arg2);
 }
 
 /** \brief See Apply. */
@@ -318,7 +318,7 @@ inline atermpp::aterm_appl Apply3(
          const atermpp::aterm_appl &arg2,
          const atermpp::aterm_appl &arg3)
 {
- return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATermAppl)arg1,
+  return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATermAppl)arg1,
                 (ATermAppl)arg2,(ATermAppl)arg3);
 }
 

@@ -256,7 +256,7 @@ class InternalFormatInfo
     InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
+      f_if_then_else_bool = atermpp::aterm_int((f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0));
     }
 
     /// \brief Destructor with no particular functionality.

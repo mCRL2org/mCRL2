@@ -1149,7 +1149,8 @@ ATermAppl ATmakeApplArray(const AFun &sym, const ATerm args[])
  * Create an ATermInt
  */
 
-ATermInt ATmakeInt(const int val)
+// ATermInt ATmakeInt(const int val)
+ATermInt::ATermInt(int val)
 {
   _ATerm* cur;
   /* The following emulates the encoding trick that is also used in the definition
@@ -1165,9 +1166,7 @@ ATermInt ATmakeInt(const int val)
   _val.value = val;
 
   // header_type header = INT_HEADER;
-  HashNumber hnr;
-
-  hnr = START(AS_INT.number());
+  HashNumber hnr = START(AS_INT.number());
   hnr = COMBINE(hnr, HN(_val.reserved));
   hnr = FINISH(hnr);
 
@@ -1191,8 +1190,8 @@ ATermInt ATmakeInt(const int val)
   }
 
   assert((hnr & table_mask) == (hash_number(cur, TERM_SIZE_INT) & table_mask));
-
-  return reinterpret_cast<_ATermInt*>(cur);
+  m_aterm=cur;
+  increase_reference_count<false>(m_aterm);
 }
 
 /*}}}  */
