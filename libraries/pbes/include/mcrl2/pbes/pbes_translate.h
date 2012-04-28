@@ -56,9 +56,9 @@ namespace pbes_system
 /// \param q A sequence of PBES equations
 /// \return The concatenation result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const std::vector<pbes_equation>& q)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.insert(result.end(), q.begin(), q.end());
   return result;
 }
@@ -71,9 +71,9 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 /// \param e A PBES equation
 /// \return The append result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const pbes_equation& e)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.push_back(e);
   return result;
 }
@@ -84,11 +84,11 @@ namespace detail
 {
 
 inline
-std::string myprint(const atermpp::vector<pbes_equation>& v)
+std::string myprint(const std::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
-  for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (std::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
   }
@@ -383,7 +383,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_must(f))
         {
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
           const lps::action_summand_vector& asv = lps.action_summands();
@@ -420,7 +420,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_may(f))
         {
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           action_formulas::action_formula alpha = a::act(f);
           state_formulas::state_formula phi = a::arg(f);
           const lps::action_summand_vector& asv=lps.action_summands();
@@ -455,7 +455,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         else if (s::is_delay_timed(f))
         {
           data::data_expression t = a::time(f);
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           const lps::action_summand_vector& asv=lps.action_summands();
           for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
           {
@@ -479,7 +479,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         else if (s::is_yaled_timed(f))
         {
           data::data_expression t = a::time(f);
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           const lps::action_summand_vector& asv=lps.action_summands();
           for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
           {
@@ -618,7 +618,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \param lps A linear process
     /// \param T A data variable
     /// \return The function result
-    atermpp::vector<pbes_equation> E(state_formulas::state_formula f0,
+    std::vector<pbes_equation> E(state_formulas::state_formula f0,
                                      state_formulas::state_formula f,
                                      const lps::linear_process& lps,
                                      data::variable T)
@@ -630,7 +630,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       using namespace state_formulas::detail::accessors;
       namespace s = state_formulas;
       using namespace data;
-      atermpp::vector<pbes_equation> result;
+      std::vector<pbes_equation> result;
 
       if (!s::is_not(f))
       {
@@ -689,7 +689,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           data::set_identifier_generator id_generator;
           pbes_expression expr = RHS(f0, g, lps, T, id_generator);
           pbes_equation e(sigma, v, expr);
-          result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
+          result = std::vector<pbes_equation>() + e + E(f0, g, lps, T);
         }
         else if (s::is_yaled_timed(f))
         {
@@ -767,7 +767,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           data::set_identifier_generator id_generator;
           pbes_expression expr = RHS(f0, g, lps, T, id_generator);
           pbes_equation e(sigma, v, expr);
-          result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
+          result = std::vector<pbes_equation>() + e + E(f0, g, lps, T);
         }
         else if (s::is_yaled_timed(f))
         {
@@ -819,7 +819,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       lps::detail::make_timed_lps(lps, id_generator);
 
       // compute the equations
-      atermpp::vector<pbes_equation> e = E(f, f, lps, T);
+      std::vector<pbes_equation> e = E(f, f, lps, T);
 
       // compute initial state
       assert(e.size() > 0);
@@ -1006,7 +1006,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_must(f))
         {
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           action_formulas::action_formula alpha(a::act(f));
           state_formulas::state_formula phi(a::arg(f));
           const lps::action_summand_vector& asv=lps.action_summands();
@@ -1034,7 +1034,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_may(f))
         {
-          atermpp::vector<pbes_expression> v;
+          std::vector<pbes_expression> v;
           action_formulas::action_formula alpha(a::act(f));
           state_formulas::state_formula phi(a::arg(f));
           const lps::action_summand_vector& asv=lps.action_summands();
@@ -1175,7 +1175,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
     /// \param f A modal formula
     /// \param lps A linear process
     /// \return The function result
-    atermpp::vector<pbes_equation> E(
+    std::vector<pbes_equation> E(
       state_formulas::state_formula f0,
       state_formulas::state_formula f,
       const lps::linear_process& lps)
@@ -1188,7 +1188,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       namespace s = state_formulas;
       using namespace data;
       //using state_formulas::is_variable;
-      atermpp::vector<pbes_equation> result;
+      std::vector<pbes_equation> result;
 
       if (!s::is_not(f))
       {
@@ -1247,7 +1247,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           data::set_identifier_generator id_generator;
           pbes_expression expr = RHS(f0, g, lps, id_generator);
           pbes_equation e(sigma, v, expr);
-          result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
+          result = std::vector<pbes_equation>() + e + E(f0, g, lps);
         }
         else if (s::is_yaled(f))
         {
@@ -1325,7 +1325,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           data::set_identifier_generator id_generator;
           pbes_expression expr = RHS(f0, g, lps, id_generator);
           pbes_equation e(sigma, v, expr);
-          result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
+          result = std::vector<pbes_equation>() + e + E(f0, g, lps);
         }
         else if (s::is_yaled_timed(f))
         {
@@ -1375,7 +1375,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 #endif
 
       // compute the equations
-      atermpp::vector<pbes_equation> e = E(f, f, lps);
+      std::vector<pbes_equation> e = E(f, f, lps);
 
       // compute the initial state
       assert(e.size() > 0);

@@ -15,7 +15,6 @@
 #include <fstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
@@ -40,7 +39,7 @@ class BDD2Dot
     std::ofstream f_dot_file;
 
     /// \brief A table containing all the visited nodes. It maps these nodes to the corresponding node numbers.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_int> f_visited;
+    std::map < atermpp::aterm_appl, atermpp::aterm_int> f_visited;
 
     /// \brief A class that gives information about the structure of BDDs.
     BDD_Info f_bdd_info;

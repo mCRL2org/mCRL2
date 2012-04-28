@@ -21,8 +21,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/sequence.h"
 #include "mcrl2/utilities/detail/join.h"
@@ -278,7 +276,7 @@ class quantifier_enumerator
     /// \param Di A sequence of data terms
     /// \param i A positive integer
     /// \return A string representation of D[i]
-    std::string print_D_element(const atermpp::vector<data_term_type>& Di, size_t i) const
+    std::string print_D_element(const std::vector<data_term_type>& Di, size_t i) const
     {
       std::ostringstream out;
       out << "D[" << i << "] = " << print_term_container(Di) << std::endl;
@@ -287,7 +285,7 @@ class quantifier_enumerator
 
     /// \brief Prints debug information to standard error
     /// \param D The sequence D of the algorithm
-    void print_D(const std::vector<atermpp::vector<data_term_type> >& D) const
+    void print_D(const std::vector<std::vector<data_term_type> >& D) const
     {
       for (size_t i = 0; i < D.size(); i++)
       {
@@ -340,7 +338,7 @@ class quantifier_enumerator
                        )
     {
       // Undo substitutions to quantifier variables
-      atermpp::map<variable_type, term_type> undo;
+      std::map<variable_type, term_type> undo;
       for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
       {
         term_type sigma_i = sigma(*i);
@@ -363,9 +361,9 @@ class quantifier_enumerator
 
       typedef std::pair<variable_type, data_term_type> data_assignment;
 
-      atermpp::set<term_type> A;
-      std::vector<atermpp::vector<data_term_type> > D;
-      atermpp::set<variable_type> dependencies;
+      std::set<term_type> A;
+      std::vector<std::vector<data_term_type> > D;
+      std::set<variable_type> dependencies;
 
       // For an element (v, t, k) of todo, we have the invariant v == x[k].
       // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
@@ -376,7 +374,7 @@ class quantifier_enumerator
       for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
       {
         data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
-        D.push_back(atermpp::vector<data_term_type>(1, t));
+        D.push_back(std::vector<data_term_type>(1, t));
         todo.push_back(boost::make_tuple(*i, t, j++));
         dependencies.insert(t.variables().begin(), t.variables().end());
       }
@@ -405,9 +403,9 @@ class quantifier_enumerator
           }
 
           // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
-          atermpp::vector<data_term_type> Dk = D[k];
-          atermpp::vector<data_term_type> z = datae.enumerate(y);
-          for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+          std::vector<data_term_type> Dk = D[k];
+          std::vector<data_term_type> z = datae.enumerate(y);
+          for (typename std::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
           {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
             std::cerr << "      e = " << data::pp(*i) << std::endl;

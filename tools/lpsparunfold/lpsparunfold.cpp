@@ -162,7 +162,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       lps_specification.load(m_input_filename);
 
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
-      atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
+      std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
 
       for (size_t i =0; i != m_repeat_unfold; ++i)
       {

@@ -119,7 +119,7 @@ private:
     int priority; // Priority (depends on fixpoint operator and equation order)
     std::string var; // Propositional variable name
     operation_type type; // player or type (And/Or, Abelard/Eloise, Odd/Even)
-    atermpp::vector<data_expression> param_values; // List of parameter values
+    std::vector<data_expression> param_values; // List of parameter values
 
 protected:
     /// \brief Constructor.
@@ -136,7 +136,7 @@ protected:
     ltsmin_state(int priority, const propositional_variable& v, operation_type type, const pbes_expression& e);
 
     /// \brief Returns the list of parameter values.
-    const atermpp::vector<data_expression>& get_parameter_values() const;
+    const std::vector<data_expression>& get_parameter_values() const;
 
     /// \brief Adds a parameter value to the list of parameter values.
     void add_parameter_value(const data_expression&);
@@ -201,16 +201,16 @@ private:
     std::map<int,std::vector<bool> > write_matrix;
     std::map<int,std::vector<bool> > matrix;
     std::map<std::string,int> param_index;
-    atermpp::vector<data_expression> param_default_values;
+    std::vector<data_expression> param_default_values;
     int number_of_groups;
-    atermpp::map<int,pbes_expression> transition_expression;
+    std::map<int,pbes_expression> transition_expression;
     std::map<int,std::string> transition_variable_name;
     std::map<int,operation_type> transition_type;
-    atermpp::map<std::string, propositional_variable> variables;
+    std::map<std::string, propositional_variable> variables;
     std::map<std::string, operation_type> variable_type;
-    atermpp::map<std::string, fixpoint_symbol> variable_symbol;
+    std::map<std::string, fixpoint_symbol> variable_symbol;
     std::map<std::string, int> variable_priority;
-    atermpp::map<std::string, data::variable_list> variable_parameters;
+    std::map<std::string, data::variable_list> variable_parameters;
     std::map<std::string, std::vector<std::string> > variable_parameter_signatures;
     std::map<std::string, std::vector<int> > variable_parameter_indices;
     std::map<std::string, std::map<int,int> > variable_parameter_index_positions;
@@ -227,16 +227,16 @@ private:
 protected:
 
     /// \brief Returns the map from transition group number to the expression of the transition group.
-    const atermpp::map<int, pbes_expression>& get_transition_expressions() const;
+    const std::map<int, pbes_expression>& get_transition_expressions() const;
 
     /// \brief Returns the map from variable names to the variable object for the variable.
-    const atermpp::map<std::string, propositional_variable>& get_variables() const;
+    const std::map<std::string, propositional_variable>& get_variables() const;
 
     /// \brief Returns the map from variable names to the fixpoint operator of the equation for the variable.
-    const atermpp::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
+    const std::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
 
     /// \brief Returns the map from variable names to the sequence of parameters for the variable.
-    const atermpp::map<std::string, data::variable_list>& get_variable_parameters() const;
+    const std::map<std::string, data::variable_list>& get_variable_parameters() const;
 
     /// \brief Determines if the term phi contains a branch that directly results in
     /// <tt>true</tt> or <tt>false</tt> (not a variable).
@@ -411,8 +411,8 @@ private:
     lts_info* info;
     std::map<std::string,int> localmap_string2int;
     std::vector<std::string> localmap_int2string;
-    atermpp::vector<atermpp::map<data_expression,int> > localmaps_data2int;
-    atermpp::vector<atermpp::vector<data_expression> > localmaps_int2data;
+    std::vector<std::map<data_expression,int> > localmaps_data2int;
+    std::vector<std::vector<data_expression> > localmaps_int2data;
 
 protected:
     /// \brief Returns a PBES_State object for <tt>expr</tt>.
@@ -584,7 +584,7 @@ public:
         int state_length = this->info->get_lts_type().get_state_length();
         ltsmin_state* state = this->from_state_vector(src);
         std::vector<ltsmin_state*> successors = this->get_successors(*state, group);
-        for (atermpp::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
+        for (std::vector<ltsmin_state*>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
             // int dst[state_length]; N.B. This is not portable C++
             MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);

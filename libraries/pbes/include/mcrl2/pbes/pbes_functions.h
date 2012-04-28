@@ -82,12 +82,12 @@ namespace pbes_expr {
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr)
+std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
-  utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
+  utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
 
   return result;
 }
@@ -99,12 +99,12 @@ atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr)
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_conjuncts(const pbes_expression& expr)
+std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
-  utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
+  utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
 
   return result;
 }

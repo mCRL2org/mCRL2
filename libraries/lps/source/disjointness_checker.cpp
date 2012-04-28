@@ -26,10 +26,10 @@ using namespace mcrl2::data;
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static bool disjoint_sets(
-  atermpp::set<variable> &a_set_1,
-  atermpp::set<variable> &a_set_2)
+  std::set<variable> &a_set_1,
+  std::set<variable> &a_set_2)
 {
-  for (atermpp::set<variable>::const_iterator i = a_set_1.begin(); i!=a_set_1.end(); ++i)
+  for (std::set<variable>::const_iterator i = a_set_1.begin(); i!=a_set_1.end(); ++i)
   {
     if (a_set_2.count(*i)>0)
     {
@@ -135,9 +135,9 @@ Disjointness_Checker::Disjointness_Checker(const linear_process& a_process_equat
 
   f_number_of_summands = v_summands.size();
   f_used_parameters_per_summand =
-    std::vector< atermpp::set < variable > >(f_number_of_summands + 1,atermpp::set < variable >());
+    std::vector< std::set < variable > >(f_number_of_summands + 1,std::set < variable >());
   f_changed_parameters_per_summand =
-    std::vector< atermpp::set < variable > >(f_number_of_summands + 1,atermpp::set < variable >());
+    std::vector< std::set < variable > >(f_number_of_summands + 1,std::set < variable >());
 
   for (action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
   {

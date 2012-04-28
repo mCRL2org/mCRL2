@@ -24,7 +24,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
@@ -88,7 +87,7 @@ class Trace
     // states and actions at positions n'<n exist.
     
     std::vector < mcrl2::lps::state > states;
-    atermpp::vector < mcrl2::lps::multi_action > actions;
+    std::vector < mcrl2::lps::multi_action > actions;
     size_t pos; // Invariant: pos <= actions.size().
 
     AFun trace_pair;

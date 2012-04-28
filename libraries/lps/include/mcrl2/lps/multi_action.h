@@ -268,11 +268,11 @@ struct equal_data_parameters_builder
 {
   const std::vector<action>& a;
   const std::vector<action>& b;
-  atermpp::set<data::data_expression>& result;
+  std::set<data::data_expression>& result;
 
   equal_data_parameters_builder(const std::vector<action>& a_,
                                 const std::vector<action>& b_,
-                                atermpp::set<data::data_expression>& result_
+                                std::set<data::data_expression>& result_
                                )
     : a(a_),
       b(b_),
@@ -285,7 +285,7 @@ struct equal_data_parameters_builder
     using namespace data::lazy;
     namespace d = data;
 
-    atermpp::vector<data::data_expression> v;
+    std::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
@@ -311,11 +311,11 @@ struct not_equal_multi_actions_builder
 {
   const std::vector<action>& a;
   const std::vector<action>& b;
-  atermpp::vector<data::data_expression>& result;
+  std::vector<data::data_expression>& result;
 
   not_equal_multi_actions_builder(const std::vector<action>& a_,
                                   const std::vector<action>& b_,
-                                  atermpp::vector<data::data_expression>& result_
+                                  std::vector<data::data_expression>& result_
                                  )
     : a(a_),
       b(b_),
@@ -327,7 +327,7 @@ struct not_equal_multi_actions_builder
   {
     using namespace data::lazy;
 
-    atermpp::vector<data::data_expression> v;
+    std::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
@@ -388,7 +388,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
     first = next;
   }
 
-  atermpp::set<data::data_expression> z;
+  std::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_or(z.begin(), z.end());
@@ -425,7 +425,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
-  atermpp::vector<data::data_expression> z;
+  std::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());

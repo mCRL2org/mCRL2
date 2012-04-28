@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_PBESINST_FINITE_BUILDER_H
 #define MCRL2_PBES_DETAIL_PBESINST_FINITE_BUILDER_H
 
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -114,7 +113,7 @@ struct pbesinst_finite_builder: public pbes_expr_builder<pbes_expression, Substi
     const std::vector<data::variable>& finite_variables = m_finite_variables[v.name()];
     data::data_expression condition = make_condition(finite_variables, finite_expressions);
 
-    atermpp::set<pbes_expression> result;
+    std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(m_dataspec,m_rewriter);
     for (data::classic_enumerator<>::iterator i=enumerator.begin(finite_variables, m_rewriter); 
               i != enumerator.end(); ++i)

@@ -20,7 +20,6 @@
 #include <map>
 
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/state_formula.h"

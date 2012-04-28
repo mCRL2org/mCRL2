@@ -14,7 +14,6 @@
 #include <set>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
@@ -535,14 +534,14 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
 
   data_specification specification;
 
-  atermpp::vector< structured_sort_constructor_argument > arguments;
+  std::vector< structured_sort_constructor_argument > arguments;
 
   arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
   arguments.push_back(structured_sort_constructor_argument(static_cast<sort_expression const&>(bool_())));
   arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
   arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
 
-  atermpp::vector< structured_sort_constructor > constructors;
+  std::vector< structured_sort_constructor > constructors;
   // without arguments or recogniser
   //  c0
   constructors.push_back(structured_sort_constructor("c0"));

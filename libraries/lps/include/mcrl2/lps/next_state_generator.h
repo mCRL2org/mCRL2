@@ -21,7 +21,6 @@
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/state.h"
-#include "mcrl2/atermpp/list.h"
 #include "mcrl2/atermpp/shared_subset.h"
 
 namespace mcrl2
@@ -38,7 +37,7 @@ class next_state_generator
   protected:
     typedef atermpp::aterm_appl rewriter_term_t;
     typedef atermpp::term_list<rewriter_term_t> valuation_t;
-    typedef atermpp::list<valuation_t> summand_enumeration_t;
+    typedef std::list<valuation_t> summand_enumeration_t;
     typedef atermpp::term_appl<rewriter_term_t> condition_arguments_t;
 
     typedef data::detail::legacy_rewriter rewriter_t;
@@ -47,7 +46,7 @@ class next_state_generator
     struct action_internal_t
     {
       lps::action_label label;
-      atermpp::vector<rewriter_term_t> arguments;
+      std::vector<rewriter_term_t> arguments;
     };
     friend struct atermpp::aterm_traits<action_internal_t>;
 
@@ -56,19 +55,19 @@ class next_state_generator
       data::variable_list variables;
       rewriter_term_t condition;
       atermpp::aterm_appl result_state;
-      atermpp::vector<action_internal_t> action_label;
+      std::vector<action_internal_t> action_label;
 
       std::vector<size_t> condition_parameters;
       atermpp::function_symbol condition_arguments_function;
       atermpp::aterm_appl condition_arguments_function_dummy;
-      atermpp::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
+      std::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
     };
     friend struct atermpp::aterm_traits<summand_t>;
 
     struct pruning_tree_node_t
     {
       atermpp::shared_subset<summand_t> summand_subset;
-      atermpp::map<rewriter_term_t, pruning_tree_node_t> children;
+      std::map<rewriter_term_t, pruning_tree_node_t> children;
     };
     friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
@@ -81,7 +80,7 @@ class next_state_generator
 
     data::variable_vector m_process_parameters;
     atermpp::function_symbol m_state_function;
-    atermpp::vector<summand_t> m_summands;
+    std::vector<summand_t> m_summands;
 
     pruning_tree_node_t m_pruning_tree;
     std::vector<size_t> m_pruning_tree_parameters;
@@ -118,8 +117,8 @@ class next_state_generator
         substitution_t *m_substitution;
 
         bool m_use_summand_pruning;
-        atermpp::vector<summand_t>::iterator m_summand_iterator;
-        atermpp::vector<summand_t>::iterator m_summand_iterator_end;
+        std::vector<summand_t>::iterator m_summand_iterator;
+        std::vector<summand_t>::iterator m_summand_iterator_end;
         atermpp::shared_subset<summand_t>::iterator m_summand_subset_iterator;
         summand_t *m_summand;
 

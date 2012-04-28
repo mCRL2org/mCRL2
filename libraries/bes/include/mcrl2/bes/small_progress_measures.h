@@ -83,7 +83,7 @@ unsigned int mu_block_count(const boolean_equation_system<>& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-  for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
   {
     if (i->symbol().is_mu() && last_symbol.is_nu())
     {
@@ -99,7 +99,7 @@ unsigned int block_count(const boolean_equation_system<>& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol;
-  for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
   {
     if (i == b.equations().begin() || (i->symbol() != last_symbol))
     {
@@ -115,7 +115,7 @@ unsigned int maximum_rank(const boolean_equation_system<>& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol;
-  for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
   {
     if (i == b.equations().begin())
     {
@@ -263,7 +263,7 @@ class small_progress_measures_algorithm
       unsigned int block_size = 0;
       unsigned int last_rank = 0;
       fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-      for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         if (i->symbol() != last_symbol)
         {
@@ -292,7 +292,7 @@ class small_progress_measures_algorithm
       }
 
       // add successor information
-      for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         std::set<boolean_variable> succ = bes::find_boolean_variables(i->formula());
         vertex_map::iterator k = m_vertices.find(i->variable());
@@ -311,7 +311,7 @@ class small_progress_measures_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         const vertex& v = m_vertices.find(i->variable())->second;
         out << v.name << " " << v << std::endl;

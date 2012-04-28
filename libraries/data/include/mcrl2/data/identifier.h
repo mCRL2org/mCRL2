@@ -47,7 +47,7 @@ class identifier: public data_expression
 /// \brief list of identifiers
 typedef atermpp::term_list< identifier > identifier_list;
 /// \brief vector of identifiers
-typedef atermpp::vector< identifier > identifier_vector;
+typedef std::vector< identifier > identifier_vector;
 
 
 } // namespace data

@@ -17,7 +17,6 @@
 #include <iterator>
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -60,7 +59,7 @@ class pbes_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
 /// \brief vector of pbes_expressions
-typedef atermpp::vector<pbes_expression>    pbes_expression_vector;
+typedef std::vector<pbes_expression>    pbes_expression_vector;
 
 
 /// \brief A propositional variable instantiation
@@ -119,7 +118,7 @@ class propositional_variable_instantiation: public pbes_expression
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
 /// \brief vector of propositional_variable_instantiations
-typedef atermpp::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
 
 /// \brief The value true for pbes expressions
@@ -837,18 +836,18 @@ pbes_expression join_and(FwdIt first, FwdIt last)
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_expressions = false)
+std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_expressions = false)
 {
   using namespace accessors;
-  atermpp::set<pbes_expression> result;
+  std::set<pbes_expression> result;
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), data_is_or, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_or, data_left, data_right);
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_or, left, right);
   }
 
   return result;
@@ -861,18 +860,18 @@ atermpp::set<pbes_expression> split_or(const pbes_expression& expr, bool split_d
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data_expressions = false)
+std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data_expressions = false)
 {
   using namespace accessors;
-  atermpp::set<pbes_expression> result;
+  std::set<pbes_expression> result;
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), data_is_and, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_and, data_left, data_right);
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_and, left, right);
   }
 
   return result;

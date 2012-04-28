@@ -14,7 +14,6 @@
 
 #include <map>
 #include <set>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
@@ -24,11 +23,11 @@ namespace pbes_system {
 namespace detail {
 
 inline
-std::string print_removed_equations(const atermpp::vector<propositional_variable>& removed)
+std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
   std::ostringstream out;
   out << "\nremoved the following equations:" << std::endl;
-  for (atermpp::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+  for (std::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
   {
     out << "  " << pbes_system::pp(*i) << std::endl;
   }
@@ -79,9 +78,9 @@ std::set<propositional_variable> reachable_variables(const pbes<Container>& p)
 /// \brief Removes equations that are not (syntactically) reachable from the initial state of a PBES.
 /// \return The removed variables
 template <typename Container>
-atermpp::vector<propositional_variable> remove_unreachable_variables(pbes<Container>& p)
+std::vector<propositional_variable> remove_unreachable_variables(pbes<Container>& p)
 {
-  atermpp::vector<propositional_variable> result;
+  std::vector<propositional_variable> result;
 
   std::set<propositional_variable> V = reachable_variables(p);
   Container eqn;

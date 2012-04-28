@@ -20,7 +20,6 @@
 #include <algorithm>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/utilities/logger.h"
@@ -50,7 +49,7 @@ namespace lts
 namespace detail
 {
 
-atermpp::vector < ATermAppl > state_label_lts::vector_templates;
+std::vector < ATermAppl > state_label_lts::vector_templates;
 
 lts_type guess_format(string const& s)
 {

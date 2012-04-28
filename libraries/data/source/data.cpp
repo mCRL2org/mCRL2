@@ -68,7 +68,6 @@ bool search_variable(const data::data_expression& x, const data::variable& v) { 
 //--- end generated data overloads ---//
 
 std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }
-std::string pp(const atermpp::set<variable>& x) { return data::pp< atermpp::set<variable> >(x); }
 
 // TODO: These should be removed when the ATerm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return x.to_string(); }

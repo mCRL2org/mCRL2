@@ -40,9 +40,9 @@ std::string EXPRESSIONS =
   "  val(n > 3)                             \n"
   ;
 
-void print(atermpp::set<pbes_expression> q)
+void print(std::set<pbes_expression> q)
 {
-  for (atermpp::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
+  for (std::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
   {
     std::cout << pbes_system::pp(*i) << std::endl;
   }
@@ -61,7 +61,7 @@ void test_accessors()
   pbes_expression z = d;
   propositional_variable_instantiation X(identifier_string("X"), make_list(d));
 
-  atermpp::set<pbes_expression> q;
+  std::set<pbes_expression> q;
   q.insert(x);
   q.insert(y);
   q.insert(z);
@@ -73,7 +73,7 @@ void test_accessors()
     variable_list w;
     identifier_string s;
     data_expression e;
-    atermpp::set<pbes_expression> q1;
+    std::set<pbes_expression> q1;
 
     e = val(z);
 
@@ -139,7 +139,7 @@ void test_accessors()
     pbes_expression a;
     identifier_string s;
     data_expression e;
-    atermpp::set<pbes_expression> q1;
+    std::set<pbes_expression> q1;
 
     e = val(z);
 

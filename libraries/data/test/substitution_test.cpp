@@ -48,10 +48,10 @@ void test_basic()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< atermpp::map< variable, data_expression > > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< atermpp::map< variable, variable > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, data_expression > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, variable > > >));
 
-  mutable_map_substitution< atermpp::map< variable, data_expression > > s;
+  mutable_map_substitution< std::map< variable, data_expression > > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -74,7 +74,7 @@ void test_basic()
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
 
   // Replacing free variables only
-  mutable_map_substitution< atermpp::map< variable, data_expression > > sb;
+  mutable_map_substitution< std::map< variable, data_expression > > sb;
 
   sb[y] = c;
 
@@ -92,10 +92,10 @@ void test_indexed_substitution()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, atermpp::vector< data_expression > > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, atermpp::vector< variable > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< data_expression > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< variable > > >));
 
-  mutable_indexed_substitution< variable, atermpp::vector< data_expression > > s;
+  mutable_indexed_substitution< variable, std::vector< data_expression > > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -118,7 +118,7 @@ void test_indexed_substitution()
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
 
   // Replacing free variables only
-  mutable_indexed_substitution< variable, atermpp::vector< data_expression > > sb;
+  mutable_indexed_substitution< variable, std::vector< data_expression > > sb;
 
   sb[y] = c;
 
@@ -287,7 +287,7 @@ void test_mutable_substitution()
 {
   using namespace mcrl2::data::detail;
 
-  mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > sigma;
+  mutable_map_substitution< std::map< variable, data_expression_with_variables > > sigma;
   variable v("v", sort_nat::nat());
   data_expression e = v;
 
@@ -297,7 +297,7 @@ void test_mutable_substitution()
   sigma[v] = e;
 
   // Compile test
-  mutable_map_substitution< atermpp::map< variable, variable > > sigmaprime;
+  mutable_map_substitution< std::map< variable, variable > > sigmaprime;
 
   sigma[v] = v;
 }
@@ -326,17 +326,17 @@ void test_sort_substitution()
   sort_expression s0 = basic_sort("A");
 
   // s1 = f(A)|g
-  atermpp::vector< structured_sort_constructor_argument > arguments1;
+  std::vector< structured_sort_constructor_argument > arguments1;
   arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
-  atermpp::vector< structured_sort_constructor > constructors1;
+  std::vector< structured_sort_constructor > constructors1;
   constructors1.push_back(structured_sort_constructor("f", arguments1));
   constructors1.push_back(structured_sort_constructor("g"));
   sort_expression s1=structured_sort(constructors1);
 
   // s2 = f(struct f(A)|g) |g
-  atermpp::vector< structured_sort_constructor_argument > arguments2;
+  std::vector< structured_sort_constructor_argument > arguments2;
   arguments2.push_back(structured_sort_constructor_argument(s1));
-  atermpp::vector< structured_sort_constructor > constructors2;
+  std::vector< structured_sort_constructor > constructors2;
   constructors2.push_back(structured_sort_constructor("f", arguments2));
   constructors2.push_back(structured_sort_constructor("g"));
   sort_expression s2=structured_sort(constructors2);

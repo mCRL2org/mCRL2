@@ -28,8 +28,6 @@
 #include "boost/iterator/iterator_adaptor.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 
@@ -61,24 +59,6 @@ struct is_container_impl< std::set< T > >
 
 template < typename T >
 struct is_container_impl< std::multiset< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< atermpp::set< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< atermpp::multiset< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< atermpp::vector< T > >
 {
   typedef boost::true_type type;
 };
@@ -166,18 +146,6 @@ struct is_set_impl< std::multiset< T > >
   typedef boost::true_type type;
 };
 
-template < typename T >
-struct is_set_impl< atermpp::set< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_set_impl< atermpp::multiset< T > >
-{
-  typedef boost::true_type type;
-};
-
 // type condition for use with boost::enable_if
 template < typename T >
 struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
@@ -209,9 +177,9 @@ struct construct
 ///
 /// \param[in] t1 The first element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1)
+std::vector<T> make_vector(const T& t1)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   return v;
 }
@@ -221,9 +189,9 @@ atermpp::vector<T> make_vector(const T& t1)
 /// \param[in] t1 The first element of the vector.
 /// \param[in] t2 The second element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2)
+std::vector<T> make_vector(const T& t1, const T& t2)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   return v;
@@ -235,9 +203,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2)
 /// \param[in] t2 The second element of the vector.
 /// \param[in] t3 The third element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);
@@ -251,9 +219,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3)
 /// \param[in] t3 The third element of the vector.
 /// \param[in] t4 The fourth element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);
@@ -269,9 +237,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t
 /// \param[in] t4 The fourth element of the vector.
 /// \param[in] t5 The fifth element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);
@@ -289,9 +257,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t
 /// \param[in] t5 The fifth element of the vector.
 /// \param[in] t6 The sixth element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);
@@ -311,9 +279,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t
 /// \param[in] t6 The sixth element of the vector.
 /// \param[in] t7 The seventh element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);
@@ -335,9 +303,9 @@ atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t
 /// \param[in] t7 The seventh element of the vector.
 /// \param[in] t8 The eighth element of the vector.
 template <typename T>
-atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7, const T& t8)
+std::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7, const T& t8)
 {
-  atermpp::vector<T> v;
+  std::vector<T> v;
   v.push_back(t1);
   v.push_back(t2);
   v.push_back(t3);

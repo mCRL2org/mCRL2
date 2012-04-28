@@ -52,9 +52,9 @@ using mcrl2::utilities::tools::rewriter_tool;
 
 static bool check_whether_variable_string_is_in_use(
   const std::string& s,
-  const atermpp::set < variable > &varset)
+  const std::set < variable > &varset)
 {
-  for (atermpp::set < variable >::const_iterator i=varset.begin();
+  for (std::set < variable >::const_iterator i=varset.begin();
        i!=varset.end(); ++i)
   {
     if (i->name()==s.c_str())
@@ -89,8 +89,8 @@ static string trim_spaces(const string& str)
 
 static data_expression parse_term(const string& term_string,
                                   const data_specification& spec,
-                                  atermpp::set < variable > context_variables,
-                                  const atermpp::set < variable > &local_variables = atermpp::set < variable >())
+                                  std::set < variable > context_variables,
+                                  const std::set < variable > &local_variables = std::set < variable >())
 {
   context_variables.insert(local_variables.begin(),local_variables.end());
   return parse_data_expression(term_string,context_variables.begin(),context_variables.end(),spec);
@@ -98,7 +98,7 @@ static data_expression parse_term(const string& term_string,
 
 static void declare_variables(
   const string& vars,
-  atermpp::set <variable> &context_variables,
+  std::set <variable> &context_variables,
   data_specification& spec)
 {
   parse_variables(vars + ";",std::inserter(context_variables,context_variables.begin()),
@@ -156,7 +156,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     /// Runs the algorithm.
     bool run()
     {
-      atermpp::set < variable > context_variables;
+      std::set < variable > context_variables;
       data_specification spec;
       if (!input_filename().empty())
       {
@@ -196,7 +196,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       rewriter rewr(spec,m_rewrite_strategy);
 
-      mutable_map_substitution < atermpp::map < variable, data_expression > > assignments;
+      mutable_map_substitution < std::map < variable, data_expression > > assignments;
 
       bool done = false;
       while (!done)
@@ -262,7 +262,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
-            atermpp::set <variable> vars;
+            std::set <variable> vars;
             string::size_type dotpos=s.find(".");
             if (dotpos==string::npos)
             {
@@ -284,7 +284,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                       i != enumerator.end() ; ++i)
             {
               cout << "[";
-              for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
                 cout << data::pp(*v) << " := " << data::pp((*i)(*v));
                 if (boost::next(v)!=vars.end())

@@ -17,7 +17,6 @@
 #include <set>
 #include <vector>
 #include <boost/bind.hpp>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"

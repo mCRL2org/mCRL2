@@ -39,9 +39,9 @@ using namespace mcrl2::core::detail;
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static
-atermpp::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
+std::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
 {
-  atermpp::map < variable,data_expression> v_substitutions;
+  std::map < variable,data_expression> v_substitutions;
 
   for (assignment_list::const_iterator i=a_assignments.begin(); i!=a_assignments.end(); ++i)
   {
@@ -56,8 +56,8 @@ data_expression get_subst_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
   assignment_list a_assignments_2,
-  const atermpp::map<variable,data_expression> &a_substitutions_1,
-  const atermpp::map<variable,data_expression> &a_substitutions_2)
+  const std::map<variable,data_expression> &a_substitutions_1,
+  const std::map<variable,data_expression> &a_substitutions_2)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -169,7 +169,7 @@ data_expression get_equation_from_assignments(
 static
 data_expression get_subst_equation_from_actions(
   const action_list a_actions,
-  const atermpp::map<variable,data_expression> &a_substitutions)
+  const std::map<variable,data_expression> &a_substitutions)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -200,12 +200,12 @@ data_expression get_confluence_condition(
   const data_expression v_condition_1 = a_summand_1.condition();
   const assignment_list v_assignments_1 = a_summand_1.assignments();
 
-  atermpp::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+  std::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
   const data_expression v_condition_2 = a_summand_2.condition();
   const data_expression v_lhs = sort_bool::and_(sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
   const assignment_list v_assignments_2 = a_summand_2.assignments();
 
-  atermpp::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+  std::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
   const data_expression v_subst_condition_1 = data::replace_free_variables(v_condition_1,
       data::make_map_substitution(v_substitutions_2));
   const data_expression v_subst_condition_2 = data::replace_free_variables(v_condition_2,

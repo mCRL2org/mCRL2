@@ -106,11 +106,11 @@ class BDD_Prover: public Prover
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
+    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
+    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -180,7 +180,7 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
@@ -326,7 +326,7 @@ class BDD_Prover: public Prover
         return atermpp::aterm_appl();
       }
 
-      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
+      const std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
       if (i!=f_smallest.end()) //found
       {
         return i->second;

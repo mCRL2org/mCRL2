@@ -23,7 +23,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
@@ -86,19 +85,19 @@ struct pbes_actions: public data::data_specification_actions
     return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
   {
     return parse_vector<pbes_equation>(node, "PbesEqnDecl", boost::bind(&pbes_actions::parse_PbesEqnDecl, this, _1));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
   {
     return parse_PbesEqnDeclList(node.child(1));
   }
 
   pbes_system::pbes<> parse_PbesSpec(const core::parse_node& node)
   {
-    return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<atermpp::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
+    return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<std::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
   }
 };
 
@@ -185,7 +184,7 @@ pbes<> parse_pbes(const std::string& text)
 /// for types like Pos and Nat are generated or not.
 /// \return The parsed expression and the data specification that was used.
 inline
-std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
+std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
 {
   std::string unique_prefix("UNIQUE_PREFIX");
   int unique_prefix_index = 0;
@@ -295,7 +294,7 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
     throw e;
   }
 
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
   for (pbes<>::container_type::iterator i = p.equations().end() - expressions.size(); i != p.equations().end(); ++i)
   {
     result.push_back(i->formula());

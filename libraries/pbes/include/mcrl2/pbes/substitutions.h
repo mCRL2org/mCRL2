@@ -29,7 +29,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
 {
   public:
     // maps X to (phi, d), where X(d) is the propositional variable corresponding to X
-    typedef atermpp::map<core::identifier_string, std::pair<pbes_expression, data::variable_list> > map_type;
+    typedef std::map<core::identifier_string, std::pair<pbes_expression, data::variable_list> > map_type;
 
     typedef map_type::iterator iterator;
     typedef map_type::const_iterator const_iterator;

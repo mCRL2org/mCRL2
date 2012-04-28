@@ -42,9 +42,6 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/lps/find.h"
 
-// atermpp includes
-#include "mcrl2/atermpp/set.h"
-
 //mCRL2 data
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"
@@ -189,7 +186,7 @@ class specification_basic_type:public boost::noncopyable
 {
   public:
     action_label_list acts;     /* storage place for actions */
-    atermpp::set < variable > global_variables; /* storage place for free variables occurring
+    std::set < variable > global_variables; /* storage place for free variables occurring
                                    in processes ranging over data */
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
@@ -201,7 +198,7 @@ class specification_basic_type:public boost::noncopyable
     class enumtype;
     class enumeratedtype;
 
-    atermpp::vector < process_equation > procs;
+    std::vector < process_equation > procs;
     /* storage place for processes,
        uses alt, seq, par, lmer, cond,sum,
        com, bound, at, name, delta,
@@ -212,9 +209,9 @@ class specification_basic_type:public boost::noncopyable
                                             action */
     process_identifier tau_process;
     process_identifier delta_process;
-    atermpp::vector < process_identifier > seq_varnames; /* Contains names of processes which represent a sequence
+    std::vector < process_identifier > seq_varnames; /* Contains names of processes which represent a sequence
                                                             of process variables */
-    std::vector < atermpp::vector < process_instance > > representedprocesses; /* contains the sequences of process
+    std::vector < std::vector < process_instance > > representedprocesses; /* contains the sequences of process
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
@@ -227,10 +224,10 @@ class specification_basic_type:public boost::noncopyable
 
   public:
     specification_basic_type(const action_label_list as,
-                             const atermpp::vector< process_equation > &ps,
+                             const std::vector< process_equation > &ps,
                              const variable_list idvs,
                              const data_specification& ds,
-                             const atermpp::set < data::variable > &glob_vars,
+                             const std::set < data::variable > &glob_vars,
                              const t_lin_options& opt,
                              const process_specification procspec):
       acts(),
@@ -410,7 +407,7 @@ class specification_basic_type:public boost::noncopyable
     // If the expression is a variable not occurring in the occurs_set that variable
     // is used.
     variable_list make_parameters_rec(const data_expression_list l,
-                                      atermpp::set < variable> &occurs_set)
+                                      std::set < variable> &occurs_set)
     {
       variable_list result;
       for (data_expression_list::const_iterator l1=l.begin();
@@ -436,7 +433,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     variable_list getparameters_rec(const process_expression multiAction,
-                                    atermpp::set < variable> &occurs_set)
+                                    std::set < variable> &occurs_set)
     {
       if (is_action(multiAction))
       {
@@ -449,7 +446,7 @@ class specification_basic_type:public boost::noncopyable
 
     variable_list getparameters(const process_expression multiAction)
     {
-      atermpp::set < variable > occurs_set;
+      std::set < variable > occurs_set;
       return getparameters_rec(multiAction,occurs_set);
     }
 
@@ -711,9 +708,9 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    void storeprocs(const atermpp::vector< process_equation > & procs)
+    void storeprocs(const std::vector< process_equation > & procs)
     {
-      for (atermpp::vector< process_equation >::const_iterator i=procs.begin();
+      for (std::vector< process_equation >::const_iterator i=procs.begin();
            i!=procs.end(); ++i)
       {
         insertProcDeclaration(
@@ -1058,8 +1055,8 @@ class specification_basic_type:public boost::noncopyable
     /***********  collect pcrlprocessen **********************************/
 
     void collectPcrlProcesses_term(const process_expression body,
-                                   atermpp::vector <process_identifier>  &pcrlprocesses,
-                                   atermpp::set <process_identifier>  &visited)
+                                   std::vector <process_identifier>  &pcrlprocesses,
+                                   std::set <process_identifier>  &visited)
     {
       if (is_if_then(body))
       {
@@ -1168,8 +1165,8 @@ class specification_basic_type:public boost::noncopyable
 
     void collectPcrlProcesses(
       const process_identifier procDecl,
-      atermpp::vector <process_identifier>  &pcrlprocesses,
-      atermpp::set <process_identifier>  &visited)
+      std::vector <process_identifier>  &pcrlprocesses,
+      std::set <process_identifier>  &visited)
     {
       if (visited.count(procDecl)==0)
       {
@@ -1185,9 +1182,9 @@ class specification_basic_type:public boost::noncopyable
 
     void collectPcrlProcesses(
       const process_identifier procDecl,
-      atermpp::vector <process_identifier>  &pcrlprocesses)
+      std::vector <process_identifier>  &pcrlprocesses)
     {
-      atermpp::set <process_identifier>  visited;
+      std::set <process_identifier>  visited;
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
@@ -1200,8 +1197,8 @@ class specification_basic_type:public boost::noncopyable
 
     void filter_vars_by_term(
       const data_expression t,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       if (is_variable(t))
       {
@@ -1254,8 +1251,8 @@ class specification_basic_type:public boost::noncopyable
 
     void filter_vars_by_termlist(
       const data_expression_list tl,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       for (data_expression_list::const_iterator l=tl.begin(); l!=tl.end(); ++l)
       {
@@ -1265,8 +1262,8 @@ class specification_basic_type:public boost::noncopyable
 
     void filter_vars_by_multiaction(
       const action_list multiaction,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       for (action_list::const_iterator ma=multiaction.begin() ; ma!=multiaction.end() ; ++ma)
       {
@@ -1278,8 +1275,8 @@ class specification_basic_type:public boost::noncopyable
     void filter_vars_by_assignmentlist(
       const assignment_list assignments,
       const variable_list parameters,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       filter_vars_by_termlist(data_expression_list(parameters),vars_set,vars_result_set);
       for (assignment_list::const_iterator i=assignments.begin();
@@ -1885,7 +1882,7 @@ class specification_basic_type:public boost::noncopyable
          get_fresh_variable will return the same variable for the same s,sort and reuse_triple.
          This feature is added to make it possible to avoid generating too many different variables. */
 
-      std::map < int , atermpp::map < variable,variable > > generated_variables;
+      std::map < int , std::map < variable,variable > > generated_variables;
 
       if (reuse_index<0)
       {
@@ -2295,10 +2292,10 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    void procstovarheadGNF(const atermpp::vector < process_identifier> &procs)
+    void procstovarheadGNF(const std::vector < process_identifier> &procs)
     {
       /* transform the processes in procs into newprocs */
-      for (atermpp::vector < process_identifier >::const_iterator i=procs.begin(); i!=procs.end(); ++i)
+      for (std::vector < process_identifier >::const_iterator i=procs.begin(); i!=procs.end(); ++i)
       {
         size_t n=objectIndex(*i);
 
@@ -2484,8 +2481,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     int match_sequence(
-      const atermpp::vector < process_instance > &s1,
-      const atermpp::vector < process_instance > &s2,
+      const std::vector < process_instance > &s1,
+      const std::vector < process_instance > &s2,
       const bool regular2)
     {
       /* s1 and s2 are sequences of typed variables of
@@ -2494,8 +2491,8 @@ class specification_basic_type:public boost::noncopyable
          This function yields true if the names and types of
          the processes in s1 and s2 match. */
 
-      atermpp::vector < process_instance >::const_iterator i2=s2.begin();
-      for (atermpp::vector < process_instance >::const_iterator i1=s1.begin();
+      std::vector < process_instance >::const_iterator i2=s2.begin();
+      for (std::vector < process_instance >::const_iterator i1=s1.begin();
            i1!=s1.end(); ++i1,++i2)
       {
         if (i2==s2.end())
@@ -2525,11 +2522,11 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool exists_variable_for_sequence(
-      const atermpp::vector < process_instance > &process_names,
+      const std::vector < process_instance > &process_names,
       process_identifier& result)
     {
-      std::vector < atermpp::vector < process_instance > >::const_iterator rwalker=representedprocesses.begin();
-      for (atermpp::vector < process_identifier >::const_iterator walker=seq_varnames.begin();
+      std::vector < std::vector < process_instance > >::const_iterator rwalker=representedprocesses.begin();
+      for (std::vector < process_identifier >::const_iterator walker=seq_varnames.begin();
            walker!=seq_varnames.end(); ++walker,++rwalker)
       {
         assert(rwalker!=representedprocesses.end());
@@ -2546,7 +2543,7 @@ class specification_basic_type:public boost::noncopyable
 
     void extract_names(
       const process_expression sequence,
-      atermpp::vector < process_instance > &result)
+      std::vector < process_instance > &result)
     {
       if (is_action(sequence)||is_process_instance(sequence))
       {
@@ -2661,7 +2658,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression create_regular_invocation(
       const process_expression sequence1,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const variable_list freevars)
     {
       process_identifier new_process;
@@ -2672,7 +2669,7 @@ class specification_basic_type:public boost::noncopyable
          concatenated with the sequential composition operator */
       sequence=cut_off_unreachable_tail(sequence);
       sequence=pCRLrewrite(sequence);
-      atermpp::vector < process_instance > process_names;
+      std::vector < process_instance > process_names;
       extract_names(sequence,process_names);
       assert(!process_names.empty());
 
@@ -2731,7 +2728,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression to_regular_form(
       const process_expression t,
-      atermpp::vector <process_identifier>  &todo,
+      std::vector <process_identifier>  &todo,
       const variable_list freevars)
     /* t has the form of the sum, and condition over actions
        each followed by a sequence of variables. We replace
@@ -2847,7 +2844,7 @@ class specification_basic_type:public boost::noncopyable
     process_expression procstorealGNFbody(
       const process_expression body,
       variableposition v,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const bool regular,
       processstatustype mode,
       const variable_list freevars)
@@ -3025,7 +3022,7 @@ class specification_basic_type:public boost::noncopyable
     void procstorealGNFrec(
       const process_identifier procIdDecl,
       variableposition v,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const bool regular)
 
     /* Do a depth first search on process variables and substitute
@@ -3088,7 +3085,7 @@ class specification_basic_type:public boost::noncopyable
     void procstorealGNF(const process_identifier procsIdDecl,
                         const bool regular)
     {
-      atermpp::vector <process_identifier> todo;
+      std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
       for (; !todo.empty() ;)
       {
@@ -3112,7 +3109,7 @@ class specification_basic_type:public boost::noncopyable
     /**************** Make pCRL procs  ******************************/
 
     void makepCRLprocs(const process_expression t,
-                       atermpp::vector <process_identifier> &pCRLprocs)
+                       std::vector <process_identifier> &pCRLprocs)
     {
       if (is_choice(t))
       {
@@ -3227,10 +3224,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     variable_list collectparameterlist(
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       variable_list parameters;
-      for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
+      for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
         size_t n=objectIndex(*walker);
@@ -3242,7 +3239,7 @@ class specification_basic_type:public boost::noncopyable
     /****************  Declare local datatypes  ******************************/
 
     void declare_control_state(
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       create_enumeratedtype(pCRLprocs.size());
     }
@@ -3302,7 +3299,7 @@ class specification_basic_type:public boost::noncopyable
           push=sc_push.constructor_function(stack_sort_alias);
           emptystack=sc_emptystack.constructor_function(stack_sort_alias);
           empty=sc_emptystack.recogniser_function(stack_sort_alias);
-          const atermpp::vector< function_symbol > projection_functions =
+          const std::vector< function_symbol > projection_functions =
             sc_push.projection_functions(stack_sort_alias);
           pop=projection_functions.back();
           getstate=projection_functions.front();
@@ -3361,7 +3358,7 @@ class specification_basic_type:public boost::noncopyable
         stacklisttype(const variable_list parlist,
                       specification_basic_type& spec,
                       const bool regular,
-                      const atermpp::vector < process_identifier> &pCRLprocs,
+                      const std::vector < process_identifier> &pCRLprocs,
                       const bool singlecontrolstate)
         {
           booleanStateVariables.protect();
@@ -3455,7 +3452,7 @@ class specification_basic_type:public boost::noncopyable
     {
       /* first search whether the variable is a free process variable */
 
-      for (atermpp::set <variable>::const_iterator walker=global_variables.begin() ;
+      for (std::set <variable>::const_iterator walker=global_variables.begin() ;
            walker!=global_variables.end() ; ++walker)
       {
         if (*walker==var)
@@ -3527,7 +3524,7 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression correctstatecond(
       const process_identifier procId,
-      const atermpp::vector < process_identifier> &pCRLproc,
+      const std::vector < process_identifier> &pCRLproc,
       const stacklisttype& stack,
       int regular)
     {
@@ -3766,7 +3763,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list args,
       const data_expression_list t2,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pCRLprcs,
+      const std::vector < process_identifier > &pCRLprcs,
       const variable_list vars,
       bool regular,
       bool singlestate)
@@ -3796,7 +3793,7 @@ class specification_basic_type:public boost::noncopyable
     data_expression_list make_procargs(
       const process_expression t,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pcrlprcs,
+      const std::vector < process_identifier > &pcrlprcs,
       const variable_list vars,
       const bool regular,
       const bool singlestate)
@@ -3933,7 +3930,7 @@ class specification_basic_type:public boost::noncopyable
     assignment_list make_initialstate(
       const process_identifier initialProcId,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pcrlprcs,
+      const std::vector < process_identifier > &pcrlprcs,
       int regular,
       int singlecontrolstate,
       const variable_list parameters)
@@ -4010,7 +4007,7 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier procId,
       deprecated::summand_list& sumlist,
       process_expression summandterm,
-      const atermpp::vector < process_identifier> &pCRLprocs,
+      const std::vector < process_identifier> &pCRLprocs,
       const variable_list parameters,
       const stacklisttype& stack,
       //const bool canterminate,
@@ -4194,7 +4191,7 @@ class specification_basic_type:public boost::noncopyable
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       if (is_choice(body))
       {
@@ -4215,14 +4212,14 @@ class specification_basic_type:public boost::noncopyable
     }
 
     deprecated::summand_list collectsumlist(
-      const atermpp::vector < process_identifier> &pCRLprocs,
+      const std::vector < process_identifier> &pCRLprocs,
       const variable_list pars,
       const stacklisttype& stack,
       bool regular,
       bool singlestate)
     {
       deprecated::summand_list sumlist;
-      for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
+      for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
         const process_identifier procId= *walker;
@@ -4625,8 +4622,8 @@ class specification_basic_type:public boost::noncopyable
    variable_list merge_var(
       const variable_list v1,
       const variable_list v2,
-      atermpp::vector < variable_list> &renamings_pars,
-      atermpp::vector < data_expression_list> &renamings_args,
+      std::vector < variable_list> &renamings_pars,
+      std::vector < data_expression_list> &renamings_args,
       data_expression_list& conditionlist)
     {
       data_expression_list renamingargs;
@@ -4815,8 +4812,8 @@ class specification_basic_type:public boost::noncopyable
       action_list resultmultiaction;
       data_expression resulttime;
 
-      atermpp::vector < variable_list > rename_list_pars;
-      atermpp::vector < data_expression_list > rename_list_args;
+      std::vector < variable_list > rename_list_pars;
+      std::vector < data_expression_list > rename_list_args;
       /* rename list is a list of pairs of variable and term lists */
       data_expression_list conditionlist;
       data_expression binarysumcondition;
@@ -4843,8 +4840,8 @@ class specification_basic_type:public boost::noncopyable
 
       /* we construct the resulting condition */
       data_expression_list auxresult;
-      atermpp::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-      atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
 
       data_expression equalterm;
       equaluptillnow=1;
@@ -4908,7 +4905,7 @@ class specification_basic_type:public boost::noncopyable
       /* now we construct the arguments of the action */
       /* First we collect all multi-actions in a separate vector
          of multiactions */
-      atermpp::vector < action_list > multiActionList;
+      std::vector < action_list > multiActionList;
       bool multiActionIsDelta=false;
 
       for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
@@ -4941,9 +4938,9 @@ class specification_basic_type:public boost::noncopyable
             data_expression_list auxresult;
             data_expression equalterm;
             bool equaluptillnow=true;
-            atermpp::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
-            atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-            atermpp::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
+            std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
+            std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+            std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
             for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end();
                  ++walker,++multiactionwalker)
             {
@@ -5268,7 +5265,7 @@ class specification_basic_type:public boost::noncopyable
       bool singlecontrolstate=false;
       size_t n=objectIndex(procId);
 
-      atermpp::vector < process_identifier > pCRLprocs;
+      std::vector < process_identifier > pCRLprocs;
       pCRLprocs.push_back(procId);
       makepCRLprocs(objectdata[n].processbody,pCRLprocs);
       /* now pCRLprocs contains a list of all process id's in this
@@ -5942,8 +5939,8 @@ class specification_basic_type:public boost::noncopyable
     // can occur.
     typedef struct
     {
-      atermpp::vector < action_list > actions;
-      atermpp::vector < data_expression > conditions;
+      std::vector < action_list > actions;
+      std::vector < data_expression > conditions;
     } tuple_list;
 
     tuple_list addActionCondition(
@@ -5972,9 +5969,9 @@ class specification_basic_type:public boost::noncopyable
     class comm_entry:public boost::noncopyable
     {
       public:
-        atermpp::vector <identifier_string_list> lhs;
-        atermpp::vector <identifier_string> rhs;
-        atermpp::vector <identifier_string_list> tmp;
+        std::vector <identifier_string_list> lhs;
+        std::vector <identifier_string> rhs;
+        std::vector <identifier_string_list> tmp;
         std::vector< bool > match_failed;
 
         comm_entry(const communication_expression_list communications)
@@ -6149,7 +6146,7 @@ class specification_basic_type:public boost::noncopyable
 
         // rest[i] contains the part of n in which lhs i has to find matching actions
         // rest_is_null[i] contains indications whether rest[i] is NULL.
-        atermpp::vector < action_list > rest(comm_table.size(),n);
+        std::vector < action_list > rest(comm_table.size(),n);
         std::vector < bool > rest_is_null(comm_table.size(),n_is_null);
 
         // check every lhs
@@ -6576,7 +6573,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for (atermpp::set<variable>::const_iterator p=global_variables.begin();
+      for (std::set<variable>::const_iterator p=global_variables.begin();
            p!=global_variables.end() ; ++p)
       {
         if (occursinterm(*p,result))
@@ -6629,8 +6626,8 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression_list results;
       data_expression_list condition_list;
-      atermpp::vector < variable_list> renamings_pars;
-      atermpp::vector < data_expression_list> renamings_args;
+      std::vector < variable_list> renamings_pars;
+      std::vector < data_expression_list> renamings_args;
       for (deprecated::summand_list::const_iterator walker=sumlist.begin();
            walker!=sumlist.end(); ++walker)
       {
@@ -6664,8 +6661,8 @@ class specification_basic_type:public boost::noncopyable
       assert(results.size()==renamings_pars.size());
       assert(results.size()==renamings_args.size());
 
-      atermpp::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
-      atermpp::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
+      std::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
+      std::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
       condition_list=reverse(condition_list);
       results=reverse(results);
       data_expression_list::const_iterator j=condition_list.begin();
@@ -7100,7 +7097,7 @@ class specification_basic_type:public boost::noncopyable
           }
 
           t3=deprecated::summand_list();
-          for (atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
+          for (std::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
                i!=temporary_spec.process().action_summands().end(); ++i)
           {
             if (i->condition()!=sort_bool::false_())
@@ -7114,7 +7111,7 @@ class specification_basic_type:public boost::noncopyable
                                         i->assignments()));
             }
           }
-          for (atermpp::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
+          for (std::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
                i!=temporary_spec.process().deadlock_summands().end(); ++i)
           {
             if (i->condition()!=sort_bool::false_())
@@ -7386,7 +7383,7 @@ class specification_basic_type:public boost::noncopyable
     bool containstimebody(
       const process_expression t,
       bool* stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       bool allowrecursion,
       bool& contains_if_then)
     {
@@ -7510,7 +7507,7 @@ class specification_basic_type:public boost::noncopyable
     bool containstime_rec(
       const process_identifier procId,
       bool* stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       bool& contains_if_then)
     {
       size_t n=objectIndex(procId);
@@ -7541,7 +7538,7 @@ class specification_basic_type:public boost::noncopyable
 
     bool containstimebody(const process_expression t)
     {
-      atermpp::set < process_identifier > visited;
+      std::set < process_identifier > visited;
       bool stable;
       bool contains_if_then;
       return containstimebody(t,&stable,visited,false,contains_if_then);
@@ -7559,7 +7556,7 @@ class specification_basic_type:public boost::noncopyable
       bool contains_if_then=false;
       while (!stable)
       {
-        atermpp::set < process_identifier > visited;
+        std::set < process_identifier > visited;
         stable=1;
         containstime_rec(procId,&stable,visited,contains_if_then);
       }
@@ -7570,7 +7567,7 @@ class specification_basic_type:public boost::noncopyable
     bool canterminatebody(
       const process_expression t,
       bool& stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       const bool allowrecursion)
     {
       if (is_merge(t))
@@ -7691,7 +7688,7 @@ class specification_basic_type:public boost::noncopyable
     bool canterminate_rec(
       const process_identifier procId,
       bool& stable,
-      atermpp::set < process_identifier > &visited)
+      std::set < process_identifier > &visited)
     {
       size_t n=objectIndex(procId);
 
@@ -7713,7 +7710,7 @@ class specification_basic_type:public boost::noncopyable
 
     bool canterminatebody(const process_expression t)
     {
-      atermpp::set < process_identifier > visited;
+      std::set < process_identifier > visited;
       bool stable=false;
       return canterminatebody(t,stable,visited,false);
     }
@@ -7723,7 +7720,7 @@ class specification_basic_type:public boost::noncopyable
       bool stable=false;
       while (!stable)
       {
-        atermpp::set < process_identifier > visited;
+        std::set < process_identifier > visited;
         stable=true;
         canterminate_rec(procId,stable,visited);
       }
@@ -7732,8 +7729,8 @@ class specification_basic_type:public boost::noncopyable
     /*****  distinguishmCRLandpCRLprocsAndAddTerminatedAction  ******/
 
     process_identifier split_process(const process_identifier procId,
-                                     atermpp::map < process_identifier,process_identifier > &visited_id,
-                                     atermpp::map < process_expression,process_expression > &visited_proc)
+                                     std::map < process_identifier,process_identifier > &visited_id,
+                                     std::map < process_expression,process_expression > &visited_proc)
     {
       if (visited_id.count(procId)>0)
       {
@@ -7782,8 +7779,8 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression split_body(
       const process_expression t,
-      atermpp::map < process_identifier,process_identifier > &visited_id,
-      atermpp::map < process_expression,process_expression> &visited_proc,
+      std::map < process_identifier,process_identifier > &visited_id,
+      std::map < process_expression,process_expression> &visited_proc,
       const variable_list parameters)
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
@@ -7885,8 +7882,8 @@ class specification_basic_type:public boost::noncopyable
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
       const process_identifier procId)
     {
-      atermpp::map < process_identifier,process_identifier> visited_id;
-      atermpp::map < process_expression,process_expression> visited_proc;
+      std::map < process_identifier,process_identifier> visited_id;
+      std::map < process_expression,process_expression> visited_proc;
       return split_process(procId,visited_id,visited_proc);
     }
 
@@ -7910,7 +7907,7 @@ class specification_basic_type:public boost::noncopyable
     /********************** SieveProcDataVars ***********************/
   public:
     variable_list SieveProcDataVarsSummands(
-      const atermpp::set <variable> &vars,
+      const std::set <variable> &vars,
       const deprecated::summand_list summands,
       const variable_list parameters)
     {
@@ -7920,8 +7917,8 @@ class specification_basic_type:public boost::noncopyable
          parameters are needed to check occurrences of vars
          in the assignment list */
 
-      atermpp::set < variable > vars_set(vars.begin(),vars.end());
-      atermpp::set < variable > vars_result_set;
+      std::set < variable > vars_set(vars.begin(),vars.end());
+      std::set < variable > vars_result_set;
 
       for (deprecated::summand_list::const_iterator smds=summands.begin();
            smds!=summands.end(); ++smds)
@@ -7940,7 +7937,7 @@ class specification_basic_type:public boost::noncopyable
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
       }
       variable_list result;
-      for (atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
+      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
         result=push_front(result,*i);
@@ -7951,18 +7948,18 @@ class specification_basic_type:public boost::noncopyable
 
   public:
     variable_list SieveProcDataVarsAssignments(
-      const atermpp::set <variable> &vars,
+      const std::set <variable> &vars,
       const assignment_list assignments,
       const variable_list parameters)
     {
-      const atermpp::set < variable > vars_set(vars.begin(),vars.end());
-      atermpp::set < variable > vars_result_set;
+      const std::set < variable > vars_set(vars.begin(),vars.end());
+      std::set < variable > vars_result_set;
 
 
       filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);
 
       variable_list result;
-      for (atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
+      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
         result=push_front(result,*i);
@@ -7985,7 +7982,7 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
       determinewhetherprocessescontaintime(init1);
 
-      atermpp::vector <process_identifier> pcrlprocesslist;
+      std::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
       {
@@ -8048,7 +8045,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   // compute global variables
   data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
   data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
-  atermpp::set<data::variable> global_variables;
+  std::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 

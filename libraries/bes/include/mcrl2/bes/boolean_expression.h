@@ -20,8 +20,6 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -65,7 +63,7 @@ class boolean_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
 /// \brief vector of boolean_expressions
-typedef atermpp::vector<boolean_expression>    boolean_expression_vector;
+typedef std::vector<boolean_expression>    boolean_expression_vector;
 
 
 /// \brief The value true for boolean expressions
@@ -684,11 +682,11 @@ operator<(const boolean_expression& x, const boolean_expression& y)
 /// \param expr A boolean expression
 /// \return A sequence of operands
 inline
-atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
+std::set<boolean_expression> split_or(const boolean_expression& expr)
 {
   using namespace accessors;
-  atermpp::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_or, left, right);
+  std::set<boolean_expression> result;
+  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_or, left, right);
   return result;
 }
 
@@ -699,11 +697,11 @@ atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
 /// \param expr A boolean expression
 /// \return A sequence of operands
 inline
-atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
+std::set<boolean_expression> split_and(const boolean_expression& expr)
 {
   using namespace accessors;
-  atermpp::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
+  std::set<boolean_expression> result;
+  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
 

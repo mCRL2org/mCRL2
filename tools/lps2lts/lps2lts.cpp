@@ -47,9 +47,9 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
-static atermpp::set < identifier_string > parse_action_list(const std::string& s)
+static std::set < identifier_string > parse_action_list(const std::string& s)
 {
-  atermpp::set < identifier_string > result;
+  std::set < identifier_string > result;
 
   for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
   {
@@ -77,10 +77,10 @@ static atermpp::set < identifier_string > parse_action_list(const std::string& s
 }
 
 static void check_whether_actions_on_commandline_exist(
-             const atermpp::set < identifier_string > &actions,
+             const std::set < identifier_string > &actions,
              const action_label_list action_labels)
 {
-  for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
+  for(std::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
   {
     mCRL2log(verbose) << "checking for occurrences of action '" << pp(*i) << "'.\n";

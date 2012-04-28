@@ -29,7 +29,7 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 
 void enumerate(const data_specification & d,
-               const atermpp::set< variable > & v,
+               const std::set< variable > & v,
                const data_expression & c,
                const size_t expected_no_of_solutions,
                const bool more_solutions_possible=false)
@@ -56,7 +56,7 @@ void enumerate(const std::string &specification,
                const bool more_solutions_possible=false)
 {
   data_specification data_spec(parse_data_specification(specification));
-  atermpp::set < variable > enum_vars;
+  std::set < variable > enum_vars;
   parse_variables(enum_variables, inserter(enum_vars,enum_vars.begin()),data_spec);
   const data_expression cond=parse_data_expression(condition,free_variables,data_spec);
   enumerate(data_spec,
@@ -75,7 +75,7 @@ void empty_test()
   data::data_specification specification;
   data::rewriter           evaluator(specification);
 
-  atermpp::set< variable > variables;
+  std::set< variable > variables;
 
   size_t count = 0;
 
@@ -118,7 +118,7 @@ void list_test()
     "     size(lcons(b,l)) = 1 + size(l);                      \n"
     ;
 
-  atermpp::set< variable > variables;
+  std::set< variable > variables;
 
   variables.insert(variable("x", basic_sort("list_of_booleans")));
   variables.insert(variable("y", basic_sort("Nat")));
@@ -132,7 +132,7 @@ void list_test()
 void equality_substitution_test()
 {
   const data_specification spec=parse_data_specification("sort L=Nat;");
-  atermpp::set< variable > variables;
+  std::set< variable > variables;
   variables.insert(variable("x", basic_sort("Pos")));
   std::clog << "Test1 equality\n";
   enumerate(spec,
@@ -156,7 +156,7 @@ void equality_substitution_test()
             parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),
             2);
   std::clog << "Test4 equality: return two non exact solutions\n";
-  atermpp::set< variable > bvar;
+  std::set< variable > bvar;
   enumerate(spec,
             bvar, // intentionally empty.
             parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),

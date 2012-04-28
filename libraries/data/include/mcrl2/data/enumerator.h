@@ -15,8 +15,6 @@
 #include <functional>
 #include <utility>
 #include <boost/shared_ptr.hpp>
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/sequence.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
@@ -39,12 +37,12 @@ namespace detail
 struct data_enumerator_helper
 {
   const data_expression_with_variables& e_;
-  const atermpp::vector<data_expression_with_variables>& values_;
-  atermpp::vector<data_expression_with_variables>& result_;
+  const std::vector<data_expression_with_variables>& values_;
+  std::vector<data_expression_with_variables>& result_;
 
   data_enumerator_helper(const data_expression_with_variables& e,
-                         const atermpp::vector<data_expression_with_variables>& values,
-                         atermpp::vector<data_expression_with_variables>& result
+                         const std::vector<data_expression_with_variables>& values,
+                         std::vector<data_expression_with_variables>& result
                         )
     : e_(e), values_(values), result_(result)
   {}
@@ -54,8 +52,8 @@ struct data_enumerator_helper
   {
     data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
 
-    atermpp::vector<variable> v;
-    for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
+    std::vector<variable> v;
+    for (std::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
     {
       v.insert(v.end(), i->variables().begin(), i->variables().end());
     }
@@ -73,7 +71,7 @@ class data_enumerator
   protected:
 
     /// \brief A map that caches the constructors corresponding to sort expressions.
-    typedef atermpp::map<sort_expression, atermpp::vector<function_symbol> > constructor_map;
+    typedef std::map<sort_expression, std::vector<function_symbol> > constructor_map;
 
     /// \brief A data specification.
     const data_specification* m_data;
@@ -90,7 +88,7 @@ class data_enumerator
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const atermpp::vector<function_symbol>& constructors(sort_expression s) const
+    const std::vector<function_symbol>& constructors(sort_expression s) const
     {
       constructor_map::const_iterator i = m_constructors.find(s);
       if (i != m_constructors.end())
@@ -129,9 +127,9 @@ class data_enumerator
     /// \brief Enumerates a data variable.
     /// \param v A data variable
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
-    atermpp::vector<data_expression_with_variables> enumerate(const variable& v) const
+    std::vector<data_expression_with_variables> enumerate(const variable& v) const
     {
-      atermpp::vector<data_expression_with_variables> result;
+      std::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
 
       if (c.empty())
@@ -142,7 +140,7 @@ class data_enumerator
       {
         if (is_function_sort(i->sort()))
         {
-          atermpp::vector<variable> variables;
+          std::vector<variable> variables;
 
           sort_expression_list i_domain(function_sort(i->sort()).domain());
           for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
@@ -167,19 +165,19 @@ class data_enumerator
     /// identifier generator that was passed in the constructor.
     /// \param e A data expression.
     /// \return A sequence of expressions that is the result of applying the enumerator to the expression once.
-    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
+    std::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
     {
-      atermpp::vector<data_expression_with_variables> result;
+      std::vector<data_expression_with_variables> result;
 
       // Compute the instantiations for each variable of e.
-      std::vector<atermpp::vector<data_expression_with_variables> > enumerated_values;
+      std::vector<std::vector<data_expression_with_variables> > enumerated_values;
       variable_list variables(e.variables());
       for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
         enumerated_values.push_back(enumerate(*i));
       }
 
-      atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
+      std::vector<data_expression_with_variables> values(enumerated_values.size());
 
       utilities::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;

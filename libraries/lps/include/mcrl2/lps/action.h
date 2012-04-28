@@ -62,7 +62,7 @@ class action: public atermpp::aterm_appl
 typedef atermpp::term_list<action> action_list;
 
 /// \brief vector of actions
-typedef atermpp::vector<action>    action_vector;
+typedef std::vector<action>    action_vector;
 
 
 /// \brief Test for a action expression

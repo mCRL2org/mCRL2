@@ -150,12 +150,12 @@ struct process_actions: public lps::action_actions
     return process::process_equation(id, variables, parse_ProcExpr(node.child(3)));
   }
 
-  atermpp::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
   {
     return parse_vector<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
   }
 
-  atermpp::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
   {
     return parse_ProcDeclList(node.child(1));
   }
@@ -186,7 +186,7 @@ struct process_actions: public lps::action_actions
     else if (symbol_name(node) == "GlobVarSpec")
     {
       data::variable_list variables = parse_GlobVarSpec(node);
-      result.global_variables() = atermpp::set<data::variable>(variables.begin(), variables.end());
+      result.global_variables() = std::set<data::variable>(variables.begin(), variables.end());
       return true;
     }
     else if (symbol_name(node) == "ActSpec")
@@ -196,7 +196,7 @@ struct process_actions: public lps::action_actions
     }
     else if (symbol_name(node) == "ProcSpec")
     {
-      atermpp::vector<process::process_equation> eqn = parse_ProcSpec(node);
+      std::vector<process::process_equation> eqn = parse_ProcSpec(node);
       result.equations().insert(result.equations().end(), eqn.begin(), eqn.end());
       return true;
     }

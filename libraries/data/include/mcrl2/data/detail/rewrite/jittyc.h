@@ -54,8 +54,8 @@ class RewriterCompilingJitty: public Rewriter
 
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
-    atermpp::vector<variable_list> rewriter_binding_variable_lists;
-    atermpp::map <variable_list, size_t> variable_list_indices1;
+    std::vector<variable_list> rewriter_binding_variable_lists;
+    std::map <variable_list, size_t> variable_list_indices1;
     size_t binding_variable_list_index(const variable_list &v);
     inline variable_list binding_variable_list_get(const size_t i)
     {
@@ -67,15 +67,15 @@ class RewriterCompilingJitty: public Rewriter
     // known that some of the arguments are in normal form. These are
     // used inside the compiling rewriter, but should never be returned
     // and show up in any normal form being returned from the rewriter.
-    atermpp::set < function_symbol > partially_rewritten_functions;
+    std::set < function_symbol > partially_rewritten_functions;
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
     // in the compiled required, these variables can be retrieved from
     // the array rewriter_bound_variables. variable_indices0 is used
     // to prevent double occurrences in the vector.
-    atermpp::vector<variable> rewriter_bound_variables;
-    atermpp::map <variable, size_t> variable_indices0;
+    std::vector<variable> rewriter_bound_variables;
+    std::map <variable, size_t> variable_indices0;
     size_t bound_variable_index(const variable &v);
     variable bound_variable_get(const size_t i)
     {
@@ -83,7 +83,7 @@ class RewriterCompilingJitty: public Rewriter
     }
 
   private:
-    atermpp::set < data_equation > rewrite_rules;
+    std::set < data_equation > rewrite_rules;
     // used_data_equation_selector data_equation_selector;
     bool need_rebuild;
     bool made_files;
@@ -91,7 +91,7 @@ class RewriterCompilingJitty: public Rewriter
     atermpp::aterm_int true_inner;
     int true_num;
 
-    atermpp::vector < data_equation_list >  jittyc_eqns;
+    std::vector < data_equation_list >  jittyc_eqns;
 
     std::map <int,int> int2ar_idx;
     size_t ar_size;

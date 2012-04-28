@@ -4,7 +4,6 @@
 
 #include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/gc.h"
 
 namespace aterm
 {

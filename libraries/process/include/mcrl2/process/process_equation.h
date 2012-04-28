@@ -84,7 +84,7 @@ class process_equation: public atermpp::aterm_appl
 typedef atermpp::term_list<process_equation> process_equation_list;
 
 /// \brief vector of process equations
-typedef atermpp::vector<process_equation> process_equation_vector;
+typedef std::vector<process_equation> process_equation_vector;
 
 // template function overloads
 std::string pp(const process_equation& x);

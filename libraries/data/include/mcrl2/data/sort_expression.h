@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
 #include "mcrl2/atermpp/convert.h"
@@ -122,7 +121,7 @@ class sort_expression: public atermpp::aterm_appl
 /// \brief list of sorts
 typedef atermpp::term_list< sort_expression >  sort_expression_list;
 /// \brief vector of sorts
-typedef atermpp::vector< sort_expression >     sort_expression_vector;
+typedef std::vector< sort_expression >     sort_expression_vector;
 
 // template function overloads
 std::string pp(const sort_expression& x);

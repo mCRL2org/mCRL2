@@ -133,11 +133,11 @@ std::vector<int> parse_integers(std::string text)
   return result;
 }
 
-void run(std::map<std::string, rewriter_variant>& rewriters, const atermpp::vector<pbes_expression>& expressions)
+void run(std::map<std::string, rewriter_variant>& rewriters, const std::vector<pbes_expression>& expressions)
 {
   for (std::map<std::string, rewriter_variant>::iterator i = rewriters.begin(); i != rewriters.end(); ++i)
   {
-    for (atermpp::vector<pbes_expression>::const_iterator j = expressions.begin(); j != expressions.end(); ++j)
+    for (std::vector<pbes_expression>::const_iterator j = expressions.begin(); j != expressions.end(); ++j)
     {
       pbes_expression result = boost::apply_visitor(rewriter_visitor(*j), i->second);
       std::cout << i->first << " " << core::pp(*j) << " -> " << core::pp(result) << std::endl;
@@ -218,8 +218,8 @@ int main(int argc, char* argv[])
 
     // parse the input file
     std::string text = core::read_text(infile);
-    std::pair<atermpp::vector<pbes_expression>, data_specification> parse_result = parse_pbes_expressions(text);
-    const atermpp::vector<pbes_expression>& expressions = parse_result.first;
+    std::pair<std::vector<pbes_expression>, data_specification> parse_result = parse_pbes_expressions(text);
+    const std::vector<pbes_expression>& expressions = parse_result.first;
     const data_specification& data_spec = parse_result.second;
 
     // parse the program options

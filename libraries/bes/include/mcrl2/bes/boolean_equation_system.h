@@ -18,9 +18,9 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <boost/foreach.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -46,7 +46,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 
 /// \brief boolean equation system
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
-template <typename Container = atermpp::vector<boolean_equation> >
+template <typename Container = std::vector<boolean_equation> >
 class boolean_equation_system
 {
     friend struct atermpp::aterm_traits<boolean_equation_system>;

@@ -14,7 +14,6 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
@@ -113,7 +112,7 @@ void test2()
 
 void test3()
 {
-  typedef mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
+  typedef mutable_map_substitution< std::map< variable, data_expression_with_variables > > substitution_function;
 
   data_specification data_spec = parse_data_specification(
                                    "map dummy1:Pos;  \n"
@@ -156,7 +155,7 @@ void test3()
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
 {
-  mutable_map_substitution< atermpp::map< variable, data_expression > > sigma;
+  mutable_map_substitution< std::map< variable, data_expression > > sigma;
   data::detail::parse_substitutions(substitutions, data_spec, sigma);
   data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
   data_expression d2 = parse_data_expression(expr2, declarations, data_spec);

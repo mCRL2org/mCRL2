@@ -54,11 +54,11 @@ class SMT_LIB_Solver: public SMT_Solver
     std::string f_variables_extrafuns;
     std::string f_extrapreds;
     std::string f_formula;
-    atermpp::map < sort_expression, size_t > f_sorts;
-    atermpp::map < function_symbol, size_t > f_operators;
-    atermpp::set < variable > f_variables;
-    atermpp::set < variable > f_nat_variables;
-    atermpp::set < variable > f_pos_variables;
+    std::map < sort_expression, size_t > f_sorts;
+    std::map < function_symbol, size_t > f_operators;
+    std::set < variable > f_variables;
+    std::set < variable > f_nat_variables;
+    std::set < variable > f_pos_variables;
     bool f_bool2pred;
 
     void declare_sorts()
@@ -68,7 +68,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         f_extrasorts = "  :extrasorts (";
         sort_expression v_sort;
-        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
+        for(std::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
           if (v_sort != sort_expression())
           {
@@ -89,7 +89,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_operators.empty())
       {
         f_operators_extrafuns = "  :extrafuns (";
-        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
+        for(std::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
           std::stringstream v_operator_string;
           v_operator_string << "op" << i->second;
@@ -135,7 +135,7 @@ class SMT_LIB_Solver: public SMT_Solver
               }
               else
               {
-                atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
+                std::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
                 size_t v_sort_number=f_sorts.size();
                 if (j==f_sorts.end())  // not found
                 {
@@ -166,7 +166,7 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
       }
 
-      for(atermpp::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
+      for(std::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
       {
         const variable v_variable = *i;
         std::string v_variable_string = v_variable.name();
@@ -189,7 +189,7 @@ class SMT_LIB_Solver: public SMT_Solver
         }
         else
         {
-          atermpp::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort);
+          std::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort);
           size_t v_sort_number=f_sorts.size();
           if (j==f_sorts.end())  // not found
           {
@@ -232,7 +232,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_sorts.empty())
       {
         f_sorts_notes = "  :notes \"";
-        for(atermpp::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
+        for(std::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
           std::stringstream v_sort_string;
           v_sort_string << "sort" << i->second;
@@ -249,7 +249,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_operators.empty())
       {
         f_operators_notes = "  :notes \"";
-        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
+        for(std::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
           std::stringstream v_operator_string;
           v_operator_string << "op" << i->second;
@@ -626,7 +626,7 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_unknown_operator(const data_expression &a_clause)
     {
       const data_expression v_operator = application(a_clause).head();
-      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+      std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
       if (i==f_operators.end()) // not found.
@@ -718,7 +718,7 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_constant(const data_expression &a_clause)
     {
       const data_expression v_operator = application(a_clause).head();
-      atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+      std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
       if (i==f_operators.end()) // not found.
@@ -737,7 +737,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_nat_clauses()
     {
-      for(atermpp::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
+      for(std::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
       {
         std::string v_variable_string = i->name();
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
@@ -746,7 +746,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_pos_clauses()
     {
-      for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
+      for(std::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
       {
         std::string v_variable_string = i->name();
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";

@@ -137,7 +137,7 @@ next_state_generator::next_state_generator(
       }
     }
     summand.condition_arguments_function = atermpp::function_symbol("condition_arguments", summand.condition_parameters.size());
-    atermpp::vector<atermpp::aterm_int> dummy(summand.condition_arguments_function.arity(), atermpp::aterm_int(0));
+    std::vector<atermpp::aterm_int> dummy(summand.condition_arguments_function.arity(), atermpp::aterm_int(0));
     summand.condition_arguments_function_dummy = atermpp::aterm_appl(summand.condition_arguments_function, dummy.begin(), dummy.end());
 
     m_summands.push_back(summand);
@@ -254,7 +254,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
     size_t parameter = m_pruning_tree_parameters[i];
     rewriter_term_t argument = state(parameter);
     m_pruning_tree_substitution[m_process_parameters[parameter]] = argument;
-    atermpp::map<rewriter_term_t, pruning_tree_node_t>::iterator position = node->children.find(argument);
+    std::map<rewriter_term_t, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
     {
       pruning_tree_node_t child;
@@ -360,7 +360,7 @@ void next_state_generator::iterator::increment()
         condition_arguments[i] = m_state(m_summand->condition_parameters[i]);
       }
       m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
-      atermpp::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
+      std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
       {
         m_cached = false;

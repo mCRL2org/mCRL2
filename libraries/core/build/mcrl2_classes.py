@@ -140,11 +140,11 @@ deadlock_summand(const data::variable_list& summation_variables, const data::dat
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS | None              | An action summand
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | S   | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS  | LinearProcess     | A linear process
-specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MS  | LinProcSpec       | A linear process specification
+specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MS  | LinProcSpec       | A linear process specification
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
 rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
@@ -179,7 +179,7 @@ PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                  : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                 : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
 pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                            | M | PBEqn       | A PBES equation
-pbes<Container>(const data::data_specification& data, const Container& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                              | M | PBES        | A PBES
+pbes<Container>(const data::data_specification& data, const Container& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                              | M | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -771,7 +771,7 @@ class Class:
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
 /// \\brief vector of <CLASSNAME>s
-typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
+typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         return text
@@ -1204,9 +1204,9 @@ def make_modifiability_map(all_classes):
 def is_modifiable_type(type, modifiability_map):
     if type in modifiability_map:
         return modifiability_map[type]
-    elif type.startswith('atermpp::vector<'):
+    elif type.startswith('std::vector<'):
         return True
-    elif type.startswith('atermpp::set<'):
+    elif type.startswith('std::set<'):
         return True
     elif type.endswith('Container'): # TODO: handle containers properly
         return True

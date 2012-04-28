@@ -76,7 +76,7 @@ class function_sort: public sort_expression
 /// \brief list of function sorts
 typedef atermpp::term_list<function_sort> function_sort_list;
 /// \brief vector of function sorts
-typedef atermpp::vector<function_sort> function_sort_vector;
+typedef std::vector<function_sort> function_sort_vector;
 
 /// \brief Convenience constructor for function sort with domain size 1
 ///

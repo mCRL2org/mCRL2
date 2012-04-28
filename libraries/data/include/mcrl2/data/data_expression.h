@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
@@ -261,7 +260,7 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 
 /// \brief vector of data expressions
 ///
-typedef atermpp::vector<data_expression> data_expression_vector;
+typedef std::vector<data_expression> data_expression_vector;
 
 /// \brief Converts an container with data expressions to data_expression_list
 /// \param r A range of data expressions.

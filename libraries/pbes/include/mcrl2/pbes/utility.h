@@ -121,7 +121,7 @@ inline bool get_fixpoint_symbol(const propositional_variable_instantiation curre
 // set of the form { p1,p2, ..., pn}, assuming that pi does not have a && as main
 // function symbol.
 
-static void distribute_and(const pbes_expression& expr,atermpp::set < pbes_expression> &conjunction_set)
+static void distribute_and(const pbes_expression& expr,std::set < pbes_expression> &conjunction_set)
 {
   /* distribute the conjuncts of expr over the conjunction_set */
   if (is_pbes_and(expr))
@@ -138,11 +138,11 @@ static void distribute_and(const pbes_expression& expr,atermpp::set < pbes_expre
 // given a set { p1, p2, ... , pn}, the function below yields an expression
 // of the form p1 && ... && pn.
 
-static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &conjunction_set)
+static pbes_expression make_conjunction(const std::set < pbes_expression> &conjunction_set)
 {
   pbes_expression t=pbes_expr::true_();
 
-  for (atermpp::set < pbes_expression>::const_iterator i=conjunction_set.begin();
+  for (std::set < pbes_expression>::const_iterator i=conjunction_set.begin();
        i!=conjunction_set.end() ; i++)
   {
     if (is_pbes_true(t))
@@ -159,7 +159,7 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
 
 // see distribute_and.
 
-static void distribute_or(const pbes_expression& expr,atermpp::set < pbes_expression> &disjunction_set)
+static void distribute_or(const pbes_expression& expr,std::set < pbes_expression> &disjunction_set)
 {
   /* distribute the conjuncts of expr over the conjunction_set */
   if (is_pbes_or(expr))
@@ -175,11 +175,11 @@ static void distribute_or(const pbes_expression& expr,atermpp::set < pbes_expres
 
 // see make_conjunction.
 
-static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &disjunction_set)
+static pbes_expression make_disjunction(const std::set < pbes_expression> &disjunction_set)
 {
   pbes_expression t=pbes_expr::false_();
 
-  for (atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
+  for (std::set < pbes_expression>::const_iterator i=disjunction_set.begin();
        i!=disjunction_set.end() ; i++)
   {
     if (is_pbes_false(t))
@@ -195,13 +195,13 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 }
 
 // The function below restores a saved substitution.
-static void restore_saved_substitution(const atermpp::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
+static void restore_saved_substitution(const std::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
                                        data::detail::legacy_rewriter& /* r */,
                                        const bool use_internal_rewrite_format,
                                        data::detail::legacy_rewriter::substitution_type &sigma,
                                        data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
-  for (atermpp::map<data::variable,atermpp::aterm_appl>::const_iterator i=saved_substitutions.begin();
+  for (std::map<data::variable,atermpp::aterm_appl>::const_iterator i=saved_substitutions.begin();
        i!=saved_substitutions.end(); ++i)
   {
     if (use_internal_rewrite_format)
@@ -358,7 +358,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          First the substitutions for existing variables that are also bound in the
          quantifier are saved and reset to the variable. At the end they must be reset. */
 
-      atermpp::map < data::variable, atermpp::aterm_appl > saved_substitutions;
+      std::map < data::variable, atermpp::aterm_appl > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         atermpp::aterm_appl d;
@@ -393,7 +393,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
-      atermpp::set < pbes_expression > conjunction_set;
+      std::set < pbes_expression > conjunction_set;
       distribute_and(expr,conjunction_set);
       bool constructor_sorts_found=true;
       for (; constructor_sorts_found ;)
@@ -409,8 +409,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           }
           else
           {
-            atermpp::set <pbes_expression> new_conjunction_set;
-            for (atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
+            std::set <pbes_expression> new_conjunction_set;
+            for (std::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                  t!=conjunction_set.end() ; t++)
             {
               if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))
@@ -539,7 +539,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          quantifier are saved and reset to the variable. At the end they must be reset.
       */
 
-      atermpp::map < data::variable,  atermpp::aterm_appl> saved_substitutions;
+      std::map < data::variable,  atermpp::aterm_appl> saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         atermpp::aterm_appl d;
@@ -573,7 +573,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
-      atermpp::set < pbes_expression > disjunction_set;
+      std::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
       for (; constructor_sorts_found ;)
@@ -588,8 +588,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           }
           else
           {
-            atermpp::set <pbes_expression> new_disjunction_set;
-            for (atermpp::set <pbes_expression >::iterator t=disjunction_set.begin() ;
+            std::set <pbes_expression> new_disjunction_set;
+            for (std::set <pbes_expression >::iterator t=disjunction_set.begin() ;
                  t!=disjunction_set.end() ; t++)
             {
               if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))

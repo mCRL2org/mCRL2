@@ -278,8 +278,8 @@ RewriterJitty::RewriterJitty(
   max_vars = 0;
   need_rebuild = false;
 
-  const atermpp::vector< data_equation > &l = data_spec.equations();
-  for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  const std::vector< data_equation > &l = data_spec.equations();
+  for (std::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     if (equation_selector(*j))
     {
@@ -296,7 +296,7 @@ RewriterJitty::RewriterJitty(
       atermpp::aterm_int lhs_head_index=OpId2Int(get_function_symbol_of_head(j->lhs()));
 
       data_equation_list n;
-      atermpp::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
+      std::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
       if (it != jitty_eqns.end())
       {
         n = it->second;
@@ -310,13 +310,13 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  for(atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
+  for(std::map< function_symbol, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
       ; l1 != term2int_end()
       ; ++l1)
   {
 
     atermpp::aterm_int i = l1->second;
-    atermpp::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find( i );
+    std::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find( i );
 
     make_jitty_strat_sufficiently_larger(i.value());
     if (it == jitty_eqns.end() )
@@ -348,7 +348,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
 
   atermpp::aterm_int lhs_head_index=OpId2Int(get_function_symbol_of_head(rule.lhs()));
   data_equation_list n;
-  atermpp::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
+  std::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
   if (it != jitty_eqns.end())
   {
     n = it->second;
@@ -372,7 +372,7 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
   atermpp::aterm_int lhs_head_index=OpId2Int(get_function_symbol_of_head(rule.lhs()));
 
   data_equation_list n;
-  const atermpp::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
+  const std::map< atermpp::aterm_int, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
   if (it != jitty_eqns.end())
   {
     n = it->second;
@@ -397,8 +397,8 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
 }
 
 static atermpp::aterm subst_values(
-            const atermpp::vector <variable> &vars,
-            const atermpp::vector <atermpp::aterm> &vals,
+            const std::vector <variable> &vars,
+            const std::vector <atermpp::aterm> &vals,
             const atermpp::aterm &t)
 {
   if (t.type()==AT_INT)
@@ -452,7 +452,7 @@ static atermpp::aterm subst_values(
     }
 #endif
 
-    atermpp::vector < atermpp::aterm_appl > new_assignments;
+    std::vector < atermpp::aterm_appl > new_assignments;
 
     for(atermpp::term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
     {
@@ -461,7 +461,7 @@ static atermpp::aterm subst_values(
     		(atermpp::aterm_appl)  subst_values(vars,vals,(atermpp::aterm_appl)assignment(1))));
     }
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
-    for(atermpp::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
+    for(std::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
     {
       new_assignment_list=push_front(new_assignment_list,*it);
     }
@@ -491,8 +491,8 @@ static atermpp::aterm subst_values(
 static bool match_jitty(
                     const atermpp::aterm &t,
                     const atermpp::aterm &p,
-                    atermpp::vector <variable> &vars,
-                    atermpp::vector <atermpp::aterm> &vals,
+                    std::vector <variable> &vars,
+                    std::vector <atermpp::aterm> &vals,
                     const size_t maxlen)
 {
   if (p.type()==AT_INT)
@@ -704,8 +704,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   make_jitty_strat_sufficiently_larger(op.value());
   if ((strat = jitty_strat[op.value()])!=NULL)
   {
-    atermpp::vector <variable> vars;
-    atermpp::vector <atermpp::aterm> vals;
+    std::vector <variable> vars;
+    std::vector <atermpp::aterm> vals;
 
     for (; !ATisEmpty(strat); strat=ATgetNext(strat))
     {
@@ -828,7 +828,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
 {
   if (need_rebuild)
   {
-    for( atermpp::map< atermpp::aterm_int, data_equation_list >::iterator opids = jitty_eqns.begin()
+    for( std::map< atermpp::aterm_int, data_equation_list >::iterator opids = jitty_eqns.begin()
         ; opids != jitty_eqns.end()
         ; ++opids )
     {

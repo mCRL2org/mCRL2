@@ -172,7 +172,7 @@ class structured_sort_constructor_argument: public detail::structured_sort_const
 /// \brief List of structured_sort_constructor_argument
 typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
 /// \brief Vector of structured_sort_constructor_argument
-typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
+typedef std::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
 
 } // namespace data
 

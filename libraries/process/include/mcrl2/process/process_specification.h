@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PROCESS_SPECIFICATION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action_label.h"
@@ -50,10 +49,10 @@ class process_specification
     lps::action_label_list m_action_labels;
 
     /// \brief The set of global variables
-    atermpp::set<data::variable> m_global_variables;
+    std::set<data::variable> m_global_variables;
 
     /// \brief The equations of the specification
-    atermpp::vector<process_equation> m_equations;
+    std::vector<process_equation> m_equations;
 
     /// \brief The initial state of the specification
     process_expression m_initial_process;
@@ -66,11 +65,11 @@ class process_specification
       m_data            = atermpp::aterm_appl(*i++);
       m_action_labels   = atermpp::aterm_appl(*i++)(0);
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       process_equation_list l = atermpp::aterm_appl(*i++)(0);
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
       m_initial_process = atermpp::aterm_appl(init(0));
-      m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
+      m_equations       = std::vector<process_equation>(l.begin(), l.end());
     }
 
   public:
@@ -149,28 +148,28 @@ class process_specification
 
     /// \brief Returns the declared free variables of the process specification.
     /// \return The declared free variables of the process specification.
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the process specification.
     /// \return The declared free variables of the process specification.
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }
 
     /// \brief Returns the equations of the process specification
     /// \return The equations of the process specification
-    const atermpp::vector<process_equation>& equations() const
+    const std::vector<process_equation>& equations() const
     {
       return m_equations;
     }
 
     /// \brief Returns the equations of the process specification
     /// \return The equations of the process specification
-    atermpp::vector<process_equation>& equations()
+    std::vector<process_equation>& equations()
     {
       return m_equations;
     }

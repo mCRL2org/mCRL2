@@ -20,7 +20,6 @@
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
-#include "mcrl2/atermpp/list.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
 
 #include "workarounds.h"
@@ -40,7 +39,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
   struct state_info
   {
     state_t state;
-    atermpp::list<next_state_generator::transition_t> transitions;
+    std::list<next_state_generator::transition_t> transitions;
   };
   friend struct atermpp::aterm_traits<state_info>;
 
@@ -62,7 +61,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
 
     std::vector<size_t> m_tau_summands;
 
-    atermpp::map<state_t, state_t> m_backpointers;
+    std::map<state_t, state_t> m_backpointers;
     size_t m_traces_saved;
 
     size_t m_num_states;
@@ -102,15 +101,15 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
 
   private:
     state_t get_prioritised_representative(state_t state);
-    void value_prioritize(atermpp::list<next_state_generator::transition_t> &transitions);
+    void value_prioritize(std::list<next_state_generator::transition_t> &transitions);
     bool save_trace(state_t state, std::string filename);
-    bool search_divergence(state_t state, std::set<state_t> &current_path, atermpp::set<state_t> &visited);
+    bool search_divergence(state_t state, std::set<state_t> &current_path, std::set<state_t> &visited);
     void check_divergence(state_t state);
     void check_action(state_t state, next_state_generator::transition_t &transition);
     void save_deadlock(state_t state);
     void save_error(state_t state);
     bool add_transition(state_t state, next_state_generator::transition_t &transition);
-    atermpp::list<next_state_generator::transition_t> get_transitions(state_t state);
+    std::list<next_state_generator::transition_t> get_transitions(state_t state);
 
     void generate_lts_breadth(state_t initial_state);
     void generate_lts_breadth_bithashing(state_t initial_state);

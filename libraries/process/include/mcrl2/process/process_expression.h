@@ -60,7 +60,7 @@ class process_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<process_expression> process_expression_list;
 
 /// \brief vector of process_expressions
-typedef atermpp::vector<process_expression>    process_expression_vector;
+typedef std::vector<process_expression>    process_expression_vector;
 
 
 /// \brief Test for a process_expression expression

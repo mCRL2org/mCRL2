@@ -15,7 +15,6 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
@@ -66,7 +65,7 @@ class basic_sort: public sort_expression
 /// \brief list of basic sorts
 typedef atermpp::term_list<basic_sort> basic_sort_list;
 /// \brief vector of basic sorts
-typedef atermpp::vector<basic_sort> basic_sort_vector;
+typedef std::vector<basic_sort> basic_sort_vector;
 
 } // namespace data
 

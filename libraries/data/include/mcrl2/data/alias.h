@@ -92,7 +92,7 @@ class alias: public atermpp::aterm_appl
 typedef atermpp::term_list< alias >    alias_list;
 
 /// \brief vector of aliases
-typedef atermpp::vector< alias > alias_vector;
+typedef std::vector< alias > alias_vector;
 
 } // namespace data
 

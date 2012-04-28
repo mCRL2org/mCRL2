@@ -123,7 +123,7 @@ void test_boolean_equation()
   BOOST_CHECK(e.formula() == tr::and_(Y,Z));
 
   // Check for finding variables in the right hand side
-  atermpp::set<boolean_variable> expected;
+  std::set<boolean_variable> expected;
   expected.insert(Y);
   expected.insert(Z);
 
@@ -150,7 +150,7 @@ void test_bes()
   boolean_equation eqX(fixpoint_symbol::nu(), X, tr::and_(X, tr::and_(Y,Z)));
   boolean_equation eqY(fixpoint_symbol::nu(), Y, tr::and_(X, Y));
   boolean_equation eqZ(fixpoint_symbol::mu(), Z, tr::or_(Z, X));
-  atermpp::vector<boolean_equation> eqns;
+  std::vector<boolean_equation> eqns;
   eqns.push_back(eqX);
   eqns.push_back(eqY);
   eqns.push_back(eqZ);

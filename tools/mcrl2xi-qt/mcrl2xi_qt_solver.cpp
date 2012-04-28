@@ -122,7 +122,7 @@ void SolverThread::run()
       }
 
       mcrl2::data::data_specification data_spec;
-      atermpp::set <mcrl2::data::variable > vars;
+      std::set <mcrl2::data::variable > vars;
 
       if(!mcrl2xi_qt::parse_mcrl2_specification_with_variables(m_specification, data_spec, vars))
       {
@@ -157,7 +157,7 @@ void SolverThread::run()
 
         QString s('[');
 
-        for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+        for (std::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
         {
           if( v != vars.begin() )
           {

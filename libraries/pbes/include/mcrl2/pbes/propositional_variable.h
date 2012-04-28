@@ -101,7 +101,7 @@ class propositional_variable: public atermpp::aterm_appl
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
 /// \brief Vector of propositional variable declarations
-typedef atermpp::vector<propositional_variable> propositional_variable_vector;
+typedef std::vector<propositional_variable> propositional_variable_vector;
 
 /// \brief Returns true if the term t is a propositional variable declaration
 /// \param t A term

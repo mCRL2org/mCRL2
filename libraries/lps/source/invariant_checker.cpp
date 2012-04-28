@@ -71,7 +71,7 @@ void Invariant_Checker::save_dot_file(size_t a_summand_number)
 
 bool Invariant_Checker::check_init(const data_expression a_invariant)
 {
-  atermpp::map < variable, data_expression> v_substitutions;
+  std::map < variable, data_expression> v_substitutions;
   const assignment_list l=f_init.assignments();
   for (assignment_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
@@ -107,7 +107,7 @@ bool Invariant_Checker::check_summand(
   const data_expression v_condition = a_summand.condition();
   const assignment_list v_assignments = a_summand.assignments();
 
-  atermpp::map < variable, data_expression> v_substitutions;
+  std::map < variable, data_expression> v_substitutions;
 
   for (assignment_list::const_iterator i=v_assignments.begin(); i!=v_assignments.end(); ++i)
   {

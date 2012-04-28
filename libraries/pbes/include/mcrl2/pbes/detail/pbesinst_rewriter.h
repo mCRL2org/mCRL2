@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_PBESINST_REWRITER_H
 
 #include <iostream>
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
@@ -31,7 +30,7 @@ namespace detail
 {
 
 /// \brief The substitution function used by the pbesinst rewriter.
-typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
+typedef data::mutable_map_substitution<std::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
 
 /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// As a side effect propositional variable instantiations are being renamed

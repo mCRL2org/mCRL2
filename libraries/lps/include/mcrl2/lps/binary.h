@@ -44,10 +44,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
     DataRewriter m_rewriter;
 
     /// Mapping of finite variables to boolean vectors
-    atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
+    std::map<data::variable, std::vector<data::variable> > m_new_parameters;
 
     /// Mapping of variables to all values they can be assigned
-    atermpp::map<data::variable, atermpp::vector<data::data_expression> > m_enumerated_elements;
+    std::map<data::variable, std::vector<data::data_expression> > m_enumerated_elements;
 
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;

@@ -180,7 +180,7 @@ static _ATerm* get_int2aterm_value(int i)
     num_int2aterms = i+1;
     if (int2aterms != NULL)
     {
-      ATunprotectArray(reinterpret_cast<ATerm*>(int2aterms));
+      // ATunprotectArray(reinterpret_cast<ATerm*>(int2aterms));
     }
     int2aterms = (_ATerm**) realloc(int2aterms,num_int2aterms*sizeof(ATerm));
     if (int2aterms == NULL)
@@ -206,7 +206,7 @@ static _ATerm* get_int2aterm_value(const ATermInt &i)
 
 static _ATermAppl* get_rewrappl_value(const size_t i)
 {
-  static atermpp::vector <ATermAppl> rewr_appls;
+  static std::vector <ATermAppl> rewr_appls;
   while (rewr_appls.size()<i+1)
   {
     rewr_appls.push_back(Apply0(atermpp::aterm_int(rewr_appls.size())));
@@ -2537,11 +2537,6 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
     delete rewriter_so;
     rewriter_so = NULL;
   }
-  /* if (ar != NULL)
-  {
-    ATunprotectArray((ATerm*) ar);
-    free(ar);
-  } */
 }
 
 /* Opens a .cpp file, saves filenames to file_c, file_o and file_so.
@@ -2674,7 +2669,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ar_size = 0;
   int2ar_idx.clear();
 
-  for(atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator l = term2int_begin()
+  for(std::map< function_symbol, atermpp::aterm_int >::const_iterator l = term2int_begin()
         ; l != term2int_end()
         ; ++l)
   {
@@ -2686,7 +2681,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       ar_size += (arity*(arity+1))/2;
     }
   }
-  for(atermpp::set < data_equation >::const_iterator it=rewrite_rules.begin();
+  for(std::set < data_equation >::const_iterator it=rewrite_rules.begin();
                    it!=rewrite_rules.end(); ++it)
   {
     size_t main_op_id_index=atermpp::aterm_int(toInner(it->lhs(),true)(0)).value(); // main symbol of equation.

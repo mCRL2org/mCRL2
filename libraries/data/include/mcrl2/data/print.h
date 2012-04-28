@@ -654,7 +654,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fbag_cons_list(data_expression x)
   {
-    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
+    std::vector<std::pair<data_expression, data_expression> > arguments;
     while (sort_fbag::is_cons_application(x) || sort_fbag::is_insert_application(x) || sort_fbag::is_cinsert_application(x))
     {
       if (sort_fbag::is_cons_application(x))

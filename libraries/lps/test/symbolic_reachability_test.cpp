@@ -13,7 +13,6 @@
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 const std::string case_no_influenced_parameters(
@@ -230,7 +229,7 @@ int test_main(int argc, char** argv)
     NextState* explorer = createNextState(model, rewriter, false);
 
     std::stack< ATerm >     stack;
-    atermpp::set< ATerm >   known;
+    std::set< ATerm >   known;
 
     stack.push(explorer->getInitialState());
     known.insert(stack.top());

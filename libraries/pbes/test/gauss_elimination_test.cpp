@@ -178,7 +178,7 @@ void test_bes()
   boolean_variable Y("Y");
 
   // empty boolean equation system
-  atermpp::vector<boolean_equation> empty;
+  std::vector<boolean_equation> empty;
 
   pbes_system::fixpoint_symbol mu = pbes_system::fixpoint_symbol::mu();
   pbes_system::fixpoint_symbol nu = pbes_system::fixpoint_symbol::nu();

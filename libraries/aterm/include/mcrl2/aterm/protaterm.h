@@ -7,7 +7,7 @@
 namespace aterm
 {
 
-class IProtectedATerm
+/* class IProtectedATerm
 {
     typedef std::list< IProtectedATerm* > pa_container;
     pa_container::iterator node;
@@ -61,7 +61,7 @@ class IProtectedATerm
     {
       p_aterms().erase(node);
     }
-};
+}; */
 
 } // namespace aterm
 

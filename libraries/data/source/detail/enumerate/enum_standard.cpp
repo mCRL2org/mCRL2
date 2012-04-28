@@ -134,7 +134,7 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
-                                atermpp::deque < fs_expr> &fs_stack,
+                                std::deque < fs_expr> &fs_stack,
                                 const variable_list &var_list,
                                 const variable_list &substituted_vars,
                                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
@@ -182,7 +182,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
-                                atermpp::deque < fs_expr> &fs_stack,
+                                std::deque < fs_expr> &fs_stack,
                                 const variable_list &var_list,
                                 const variable_list &substituted_vars,
                                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,

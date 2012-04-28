@@ -39,7 +39,7 @@ class used_data_equation_selector
 {
   private:
 
-    atermpp::set< function_symbol > m_used_symbols;
+    std::set< function_symbol > m_used_symbols;
 
     bool add_all;
 
@@ -56,8 +56,8 @@ class used_data_equation_selector
       m_used_symbols.insert(if_(sort_bool::bool_()));
 
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
-      atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
-      for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
+      std::set< sort_expression > sorts(boost::copy_range< std::set< sort_expression > >(specification.sorts()));
+      for (std::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
       {
         add_symbols(specification.constructors(*j));
       }
@@ -143,11 +143,11 @@ class used_data_equation_selector
 
     used_data_equation_selector(const data_specification& specification,
                                 const std::set<function_symbol>& function_symbols,
-                                const atermpp::set<data::variable>& global_variables
+                                const std::set<data::variable>& global_variables
                                ):add_all(false)
     {
       // Compensate for symbols that could be used as part of an instantiation of free variables
-      for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
+      for (std::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
       {
         add_symbols(specification.constructors(j->sort()));
         add_symbols(specification.mappings(j->sort()));

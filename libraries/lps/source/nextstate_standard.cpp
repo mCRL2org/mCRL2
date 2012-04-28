@@ -255,12 +255,12 @@ ATermAppl NextState::makeStateVector(ATerm state)
 static bool statearg_match(
      const data_expression arg,
      const data_expression pat,
-     atermpp::map < variable, data_expression > &vars);
+     std::map < variable, data_expression > &vars);
 
 static bool statearg_match_list(
      data_expression_list arg,
      data_expression_list pat,
-     atermpp::map < variable, data_expression > &vars)
+     std::map < variable, data_expression > &vars)
 {
   assert(arg.size() == pat.size());
   bool r = true;
@@ -278,7 +278,7 @@ static bool statearg_match_list(
 static bool statearg_match(
      const data_expression arg,
      const data_expression pat,
-     atermpp::map < variable, data_expression > &vars)
+     std::map < variable, data_expression > &vars)
 {
   bool r;
   if (is_application(pat))
@@ -295,7 +295,7 @@ static bool statearg_match(
   }
   else if (is_variable(pat))
   {
-    atermpp::map < variable, data_expression >::const_iterator it=vars.find(pat);
+    std::map < variable, data_expression >::const_iterator it=vars.find(pat);
     if (it==vars.end())  // not found
     {
       vars[pat]=arg;
@@ -320,7 +320,7 @@ static bool statearg_match(
 
 static bool statearg_match(const data_expression arg, const data_expression pat)
 {
-  atermpp::map < variable, data_expression > vars;
+  std::map < variable, data_expression > vars;
   return statearg_match(arg,pat,vars);
 
 }

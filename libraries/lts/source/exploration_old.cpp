@@ -20,7 +20,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
@@ -227,7 +226,7 @@ bool lps2lts_algorithm::savetrace(
   const multi_action extra_transition)
 {
   atermpp::aterm s = state;
-  atermpp::map<atermpp::aterm,atermpp::aterm>::iterator ns;
+  std::map<atermpp::aterm,atermpp::aterm>::iterator ns;
   ATermList tr = ATmakeList0();
   NextStateGenerator* nsgen = NULL;
 
@@ -287,7 +286,7 @@ bool lps2lts_algorithm::savetrace(
 
 void lps2lts_algorithm::check_actiontrace(const state_t OldState, const mcrl2::lps::multi_action ma, const state_t NewState)
 {
-  for (atermpp::set < mcrl2::core::identifier_string >::const_iterator j=lgopts->trace_actions.begin();
+  for (std::set < mcrl2::core::identifier_string >::const_iterator j=lgopts->trace_actions.begin();
                                        j!=lgopts->trace_actions.end(); j++)
   {
     if (occurs_in(*j,ma))
@@ -419,7 +418,7 @@ void lps2lts_algorithm::cleanup_representation()
 bool lps2lts_algorithm::search_divergence_recursively(
   const state_t current_state,
   set < state_t > &on_current_depth_first_path,
-  atermpp::set< state_t > &repr_visited)
+  std::set< state_t > &repr_visited)
 {
   on_current_depth_first_path.insert(current_state);
   vector < state_t > new_states;
@@ -461,7 +460,7 @@ void lps2lts_algorithm::check_divergence(const state_t state)
 {
   if (lgopts->detect_divergence)
   {
-    atermpp::set < state_t >repr_visited;
+    std::set < state_t >repr_visited;
     set < state_t > on_current_depth_first_path;
     repr_visited.insert(state);
 
@@ -505,10 +504,10 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
   }
 
   state_t v = state;
-  atermpp::map<atermpp::aterm,size_t> repr_number;
-  atermpp::map<atermpp::aterm,size_t> repr_low;
-  atermpp::map<atermpp::aterm,atermpp::aterm_list> repr_next;
-  atermpp::map<atermpp::aterm,atermpp::aterm> repr_back;
+  std::map<atermpp::aterm,size_t> repr_number;
+  std::map<atermpp::aterm,size_t> repr_low;
+  std::map<atermpp::aterm,atermpp::aterm_list> repr_next;
+  std::map<atermpp::aterm,atermpp::aterm> repr_back;
   size_t count;
 
   repr_number[v]=0;

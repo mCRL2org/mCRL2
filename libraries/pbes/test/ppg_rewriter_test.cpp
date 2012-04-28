@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
 #include "mcrl2/pbes/detail/bqnf2ppg_rewriter.h"

@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
-#include "mcrl2/atermpp/vector.h"
 
 namespace atermpp
 {
@@ -385,7 +384,7 @@ template <typename Term, typename Function>
 inline
 term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
 {
-  atermpp::vector < Term > result;
+  std::vector < Term > result;
 
   for (typename term_balanced_tree< Term >::const_iterator i = l.begin(); i != l.end(); ++i)
   {

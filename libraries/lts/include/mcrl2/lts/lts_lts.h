@@ -54,7 +54,7 @@ class state_label_lts : public atermpp::aterm_appl
     /** \brief We store functions symbols with varying arity and string "STATE"
         in this ATermAppl array, as they are automatically protected.
     */
-    static atermpp::vector < ATermAppl > vector_templates;
+    static std::vector < ATermAppl > vector_templates;
 
     /** \brief A function to get a protected STATE function symbol of the
                indicated arity.
@@ -104,7 +104,7 @@ class state_label_lts : public atermpp::aterm_appl
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const atermpp::vector < mcrl2::data::data_expression > &l):
+    state_label_lts(const std::vector < mcrl2::data::data_expression > &l):
       atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 

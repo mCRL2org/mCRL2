@@ -23,7 +23,6 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/vector.h"
 
 using namespace std;
 using namespace atermpp;
@@ -47,7 +46,7 @@ void test_algorithm()
   aterm_appl t1 = find_if(b, is_f());
   BOOST_CHECK(t1 == aterm_appl());
 
-  atermpp::vector<aterm_appl> v;
+  std::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));

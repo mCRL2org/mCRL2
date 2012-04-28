@@ -23,7 +23,6 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/exists.h"
@@ -177,9 +176,9 @@ namespace detail {
 
 struct absinthe_algorithm
 {
-  typedef atermpp::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
-  typedef atermpp::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
-  typedef atermpp::map<data::sort_expression, data::function_symbol> abstraction_map;
+  typedef std::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
+  typedef std::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
+  typedef std::map<data::sort_expression, data::function_symbol> abstraction_map;
 
   struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
@@ -336,7 +335,7 @@ struct absinthe_algorithm
 
     data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::data_expression_list::const_iterator j = x.begin(); j != x.end(); ++i, ++j)
       {
@@ -666,9 +665,9 @@ struct absinthe_algorithm
     lift_equation_1_2()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
+    std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
@@ -721,7 +720,7 @@ struct absinthe_algorithm
           throw std::runtime_error("can not generalize functions with abstraction sorts in the domain: " + data::pp(f1) + ": " + data::pp(s1));
         }
 
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
         variables = atermpp::convert<data::variable_list>(x);
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
@@ -774,9 +773,9 @@ struct absinthe_algorithm
     lift_equation_2_3()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
+    std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
@@ -788,11 +787,11 @@ struct absinthe_algorithm
     // Let x = [x1:D1, ..., xn:Dn] and X = [X1:Set(D1), ..., Xn:Set(Dn)]. Returns the expression
     //
     // (x1 in X1 /\ ... /\ xn in Xn)
-    data::data_expression enumerate_domain(const atermpp::vector<data::variable>& x, const atermpp::vector<data::variable>& X) const
+    data::data_expression enumerate_domain(const std::vector<data::variable>& x, const std::vector<data::variable>& X) const
     {
-      atermpp::vector<data::data_expression> a;
-      atermpp::vector<data::variable>::const_iterator i = x.begin();
-      atermpp::vector<data::variable>::const_iterator j = X.begin();
+      std::vector<data::data_expression> a;
+      std::vector<data::variable>::const_iterator i = x.begin();
+      std::vector<data::variable>::const_iterator j = X.begin();
       for (; i != x.end(); ++i, ++j)
       {
         a.push_back(data::detail::create_set_in(*i, *j));
@@ -822,8 +821,8 @@ struct absinthe_algorithm
         data::function_sort fs3(f3.sort());
 
         // TODO: generate these variables in a proper way
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
-        atermpp::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
+        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        std::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
 
         variables = data::variable_list(X.begin(), X.end());
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));

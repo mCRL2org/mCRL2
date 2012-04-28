@@ -12,7 +12,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"

@@ -79,7 +79,7 @@ class SimulatorInterface
     virtual std::vector < mcrl2::lps::state > GetNextStates()=0;
     /* Returns the currently enabled next states; The vectors with next states and next actions
        correspond at their respective positions */
-    virtual atermpp::vector < mcrl2::lps::multi_action > GetNextActions()=0;
+    virtual std::vector < mcrl2::lps::multi_action > GetNextActions()=0;
     /* Returns the currently enabled next multi_actions;  */
 
     virtual mcrl2::lps::NextState* GetNextState() = 0;
@@ -128,11 +128,11 @@ class SimulatorViewInterface
     virtual void StateChanged(
                   mcrl2::lps::multi_action Transition,
                   const mcrl2::lps::state State,
-                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::multi_action > next_actions,
                   std::vector < mcrl2::lps::state > next_states) = 0;
     virtual void StateChanged(
                   const mcrl2::lps::state State,
-                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
+                  std::vector < mcrl2::lps::multi_action > next_actions,
                   std::vector < mcrl2::lps::state > next_states) = 0;
     /* Is called whenever the current state in the simulator is
      * changed.

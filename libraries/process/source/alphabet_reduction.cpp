@@ -43,9 +43,9 @@ namespace mcrl2
 
       
       template < class T >
-      static atermpp::multiset <T> to_multiset(const atermpp::term_list <T> l)
+      static std::multiset <T> to_multiset(const atermpp::term_list <T> l)
       {
-        atermpp::multiset <T> s;
+        std::multiset <T> s;
         for (typename atermpp::term_list <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
           s.insert(*i);
@@ -54,10 +54,10 @@ namespace mcrl2
       }
 
       template < class T >
-      static atermpp::term_list <T> to_list(const atermpp::multiset <T> &l)
+      static atermpp::term_list <T> to_list(const std::multiset <T> &l)
       {
         atermpp::term_list <T> r;
-        for (typename atermpp::multiset <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
+        for (typename std::multiset <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
           r=push_front(r,*i);
         }
@@ -105,7 +105,7 @@ namespace mcrl2
       }
 
       template <class T>
-      static void gsaATindexedSetPutList(atermpp::set < T > &m, atermpp::term_list <T> l)
+      static void gsaATindexedSetPutList(std::set < T > &m, atermpp::term_list <T> l)
       {
         //add l into m
         for (typename atermpp::term_list <T>::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -155,7 +155,7 @@ namespace mcrl2
       template < class T >
       static atermpp::term_list<T> merge_list(atermpp::term_list<T> l, atermpp::term_list<T> m)
       {
-        atermpp::set < T> r;
+        std::set < T> r;
         for (typename atermpp::term_list<T>::const_iterator i=m.begin(); i!=m.end(); ++i)
         {
           r.insert(*i);
@@ -166,7 +166,7 @@ namespace mcrl2
         }
 
         atermpp::term_list<T> result;
-        for (typename atermpp::set<T>::const_iterator i=r.begin(); i!=r.end(); ++i)
+        for (typename std::set<T>::const_iterator i=r.begin(); i!=r.end(); ++i)
         {
           result=push_front(result,*i);
         }
@@ -204,11 +204,11 @@ namespace mcrl2
         return reverse(n);
       }
 
-      static std::vector < atermpp::multiset < identifier_string > > 
+      static std::vector < std::multiset < identifier_string > > 
                  from_allow_list_to_allow_vector(const atermpp::term_list < core::identifier_string_list > V)
       {
         //returns the list of multiactions that are allowed
-        std::vector < atermpp::multiset < identifier_string > > m;
+        std::vector < std::multiset < identifier_string > > m;
         for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
           m.push_back(detail::to_multiset(*i));
@@ -217,11 +217,11 @@ namespace mcrl2
       }
 
       static atermpp::term_list < core::identifier_string_list > 
-                 from_allow_vector_to_allow_list(const std::vector < atermpp::multiset < identifier_string > > &V)
+                 from_allow_vector_to_allow_list(const std::vector < std::multiset < identifier_string > > &V)
       {
         //returns the list of multiactions that are allowed
         atermpp::term_list < core::identifier_string_list > m;
-        for (std::vector < atermpp::multiset < identifier_string > > ::const_iterator i=V.begin(); i!=V.end(); ++i)
+        for (std::vector < std::multiset < identifier_string > > ::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
           m=push_front(m,detail::to_list(*i));
         }
@@ -304,13 +304,13 @@ namespace mcrl2
 
       // returns true if l1 united with l2 is a subset of m
       static bool sub_multiaction(
-                     const atermpp::multiset < identifier_string > &l1, 
-                     const atermpp::multiset < identifier_string > &l2, 
-                     const atermpp::multiset < identifier_string > &m)
+                     const std::multiset < identifier_string > &l1, 
+                     const std::multiset < identifier_string > &l2, 
+                     const std::multiset < identifier_string > &m)
       {
-        atermpp::multiset < identifier_string >::const_iterator l1_walker=l1.begin();
-        atermpp::multiset < identifier_string >::const_iterator l2_walker=l2.begin();
-        for(atermpp::multiset < identifier_string >::const_iterator m_walker=m.begin(); m_walker!=m.end(); m_walker++)
+        std::multiset < identifier_string >::const_iterator l1_walker=l1.begin();
+        std::multiset < identifier_string >::const_iterator l2_walker=l2.begin();
+        for(std::multiset < identifier_string >::const_iterator m_walker=m.begin(); m_walker!=m.end(); m_walker++)
         {
           if (l1_walker==l1.end())
           { 
@@ -366,12 +366,12 @@ namespace mcrl2
       
       // Return true iff the union of l1 and l2 is a subset of one of the elements of MActL.
       static bool sub_multiaction_list(
-                     const atermpp::multiset < identifier_string > &l1, 
-                     const atermpp::multiset < identifier_string > &l2, 
-                     const std::vector < atermpp::multiset < identifier_string > > &MActL)
+                     const std::multiset < identifier_string > &l1, 
+                     const std::multiset < identifier_string > &l2, 
+                     const std::vector < std::multiset < identifier_string > > &MActL)
       {
         // true if multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
-        for (std::vector < atermpp::multiset < identifier_string > >::const_iterator i=MActL.begin(); i!=MActL.end(); ++i)
+        for (std::vector < std::multiset < identifier_string > >::const_iterator i=MActL.begin(); i!=MActL.end(); ++i)
         {
           if (sub_multiaction(l1,l2,*i))
           {
@@ -497,9 +497,9 @@ namespace mcrl2
         return gsaATsortList(m);
       }
 
-      static atermpp::multiset < core::identifier_string > untypeMA_set(lps::action_label_list MAct)
+      static std::multiset < core::identifier_string > untypeMA_set(lps::action_label_list MAct)
       {
-        atermpp::multiset < core::identifier_string > result;
+        std::multiset < core::identifier_string > result;
         for(lps::action_label_list::const_iterator i=MAct.begin(); i!=MAct.end(); ++i)
         {
           result.insert(i->name());
@@ -543,14 +543,14 @@ namespace mcrl2
     atermpp::term_list < core::identifier_string_list > alphabet_reduction::untypeMAL(action_label_list_list LMAct)
     {
       //returns List of "untyped multiaction name" of List(MAct)
-      atermpp::set < core::identifier_string_list > name_set;
+      std::set < core::identifier_string_list > name_set;
       for (action_label_list_list::const_iterator i=LMAct.begin(); i!=LMAct.end(); ++i)
       {
         name_set.insert(untypeMA(*i));
       }
 
       atermpp::term_list < core::identifier_string_list > R;
-      for(atermpp::set < core::identifier_string_list >::const_iterator j=name_set.begin(); j!=name_set.end(); ++j)
+      for(std::set < core::identifier_string_list >::const_iterator j=name_set.begin(); j!=name_set.end(); ++j)
       { 
         R=push_front(R,*j);
       }
@@ -639,7 +639,7 @@ namespace mcrl2
       //splits V according to the 2 alphabets (see paper) and returns the first part.
       atermpp::term_list < core::identifier_string_list > m;
 
-      atermpp::set < core::identifier_string_list > VV;
+      std::set < core::identifier_string_list > VV;
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
         VV.insert(*i);
@@ -664,18 +664,18 @@ namespace mcrl2
            const atermpp::term_list < core::identifier_string_list > l,
            const atermpp::term_list < core::identifier_string_list > m)
     {
-      atermpp::set < core::identifier_string_list > all_set;
+      std::set < core::identifier_string_list > all_set;
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
         for (atermpp::term_list < core::identifier_string_list >::const_iterator j=m.begin(); j!=m.end(); ++j)
         {
-          atermpp::multiset < core::identifier_string > ma;
+          std::multiset < core::identifier_string > ma;
           std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
           all_set.insert(detail::to_list(ma));
         }
       }
       atermpp::term_list < core::identifier_string_list > result;
-      for (atermpp::set <  core::identifier_string_list >::const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
+      for (std::set <  core::identifier_string_list >::const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
         result=push_front(result,*i);
       }
@@ -687,26 +687,26 @@ namespace mcrl2
            const action_label_list_list l, 
            const action_label_list_list m, 
            size_t length/*=0*/, 
-           const std::vector < atermpp::multiset < identifier_string > > &allowed/* std::vector < atermpp::multiset < identifier_string > >() */)
+           const std::vector < std::multiset < identifier_string > > &allowed/* std::vector < std::multiset < identifier_string > >() */)
     {
-      std::vector < atermpp::multiset < identifier_string > > m_untyped;      
+      std::vector < std::multiset < identifier_string > > m_untyped;      
       for (action_label_list_list::const_iterator j=m.begin(); j!=m.end(); ++j)
       {
         m_untyped.push_back(detail::untypeMA_set(*j));
       }
       
-      atermpp::set < lps::action_label_list > all_set;
+      std::set < lps::action_label_list > all_set;
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        const atermpp::multiset < identifier_string > i_untyped = detail::untypeMA_set(*i);
-        std::vector < atermpp::multiset < identifier_string > >::const_iterator j_untyped=m_untyped.begin();
+        const std::multiset < identifier_string > i_untyped = detail::untypeMA_set(*i);
+        std::vector < std::multiset < identifier_string > >::const_iterator j_untyped=m_untyped.begin();
         for (action_label_list_list::const_iterator j=m.begin(); j!=m.end(); ++j,++j_untyped)
         {
           if (length==0 || i_untyped.size()+j_untyped->size()<=length)
           {
             if (allowed.empty() || detail::sub_multiaction_list(i_untyped,*j_untyped,allowed))
             {
-              atermpp::multiset < lps::action_label > ma;
+              std::multiset < lps::action_label > ma;
               std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
               all_set.insert(detail::to_list(ma));
             }
@@ -714,7 +714,7 @@ namespace mcrl2
         }
       }
       action_label_list_list result;
-      for (atermpp::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
+      for (std::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
         result=push_front(result,*i);
       }
@@ -727,7 +727,7 @@ namespace mcrl2
                         action_label_list_list l2, 
                         bool including_products_of_actions/* =true */)
     {
-      atermpp::set < lps::action_label_list > all_set;
+      std::set < lps::action_label_list > all_set;
       for (action_label_list_list::const_iterator i=l1.begin(); i!=l1.end(); ++i)
       {
         all_set.insert(*i);
@@ -751,7 +751,7 @@ namespace mcrl2
         }
       }
       action_label_list_list result;
-      for (atermpp::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
+      for (std::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
         result=push_front(result,*i);
       }
@@ -942,7 +942,7 @@ namespace mcrl2
 
 
       //create a table with the reverse mappings of the actions in ran(C)
-      atermpp::map < identifier_string, atermpp::term_list < core::identifier_string_list > > rev;
+      std::map < identifier_string, atermpp::term_list < core::identifier_string_list > > rev;
 
       for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
       {
@@ -960,7 +960,7 @@ namespace mcrl2
       }
 
       // for all elements of V get a set of multiactions using the reverse mapping.
-      atermpp::set < identifier_string_list > m;
+      std::set < identifier_string_list > m;
 
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
@@ -989,7 +989,7 @@ namespace mcrl2
       }
 
       atermpp::term_list< identifier_string_list > l;
-      for(atermpp::set < identifier_string_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
+      for(std::set < identifier_string_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
       {
         l=push_front(l,*i);
       }
@@ -1004,7 +1004,7 @@ namespace mcrl2
 
       //apply C to all elements of l
 
-      atermpp::set < lps::action_label_list > m;
+      std::set < lps::action_label_list > m;
 
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
@@ -1014,7 +1014,7 @@ namespace mcrl2
       }
 
       action_label_list_list l1;
-      for(atermpp::set < lps::action_label_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
+      for(std::set < lps::action_label_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
       {
         l1=push_front(l1,*i);
       }
@@ -1449,7 +1449,7 @@ namespace mcrl2
 
           {
             size_t max_len=detail::get_max_allowed_length(V);
-            const std::vector < atermpp::multiset < identifier_string > > allowed=detail::from_allow_list_to_allow_vector(V);
+            const std::vector < std::multiset < identifier_string > > allowed=detail::from_allow_list_to_allow_vector(V);
 
             action_label_list_list lp=alphas.count(p)==0?gsaGetAlpha(p,max_len,allowed):alphas[p];    // ZZZZZ
             action_label_list_list lq=alphas.count(q)==0?gsaGetAlpha(q,max_len,allowed):alphas[q];
@@ -1701,7 +1701,7 @@ namespace mcrl2
     alphabet_reduction::action_label_list_list alphabet_reduction::gsaGetAlpha(
                                     process_expression a, 
                                     size_t length, 
-                                    const std::vector < atermpp::multiset < identifier_string > > &allowed) 
+                                    const std::vector < std::multiset < identifier_string > > &allowed) 
     {
       // calculate the alphabet process expression a of a up to the length.
       // if length==0, then the length is unlimited.
@@ -1827,7 +1827,7 @@ namespace mcrl2
         process_expression p = comm(a).operand();
         communication_expression_list C = detail::sort_multiactions_comm(comm(a).comm_set());
 
-        std::vector < atermpp::multiset < identifier_string > > new_allowed;
+        std::vector < std::multiset < identifier_string > > new_allowed;
         
         if (length && !allowed.empty())
         {

@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_MONOTONICITY_H
 
 #include <set>
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
@@ -28,7 +27,7 @@ namespace state_formulas
 /// \param f A modal formula
 /// \return True if the state formula is monotonous.
 inline
-bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>& negated_variables)
+bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
 {
   using namespace state_formulas::detail::accessors;
 
@@ -102,9 +101,9 @@ bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>&
     }
     else if (is_mu(f))
     {
-      atermpp::set<core::identifier_string> neg = negated_variables;
+      std::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      atermpp::set<core::identifier_string>::iterator i = neg.find(X);
+      std::set<core::identifier_string>::iterator i = neg.find(X);
       if (i != neg.end())
       {
         neg.erase(i);
@@ -117,9 +116,9 @@ bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>&
     }
     else if (is_nu(f))
     {
-      atermpp::set<core::identifier_string> neg = negated_variables;
+      std::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      atermpp::set<core::identifier_string>::iterator i = neg.find(X);
+      std::set<core::identifier_string>::iterator i = neg.find(X);
       if (i != neg.end())
       {
         neg.erase(i);
@@ -212,7 +211,7 @@ bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>&
 inline
 bool is_monotonous(state_formula f)
 {
-  atermpp::set<core::identifier_string> negated_variables;
+  std::set<core::identifier_string> negated_variables;
   return is_monotonous(f, negated_variables);
 }
 

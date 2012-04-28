@@ -84,7 +84,7 @@ struct data_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunction
   /// \return The result of visiting the node
   term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& v, SubstitutionFunction& sigma)
   {
-    atermpp::vector<data_term_type> d;
+    std::vector<data_term_type> d;
     data_term_sequence_type e = tr::param(v);
     for (typename data_term_sequence_type::const_iterator i = e.begin(); i != e.end(); ++i)
     {

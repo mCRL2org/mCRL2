@@ -58,7 +58,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     size_t initial_state;
     bool must_abort;
 
-    atermpp::map<atermpp::aterm,atermpp::aterm> backpointers;
+    std::map<atermpp::aterm,atermpp::aterm> backpointers;
     bit_hash_table bithash_table;
 
     size_t tracecnt;
@@ -122,7 +122,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     bool search_divergence_recursively(
       const state_t current_state,
       std::set < state_t > &on_current_depth_first_path,
-      atermpp::set<state_t> &repr_visited);
+      std::set<state_t> &repr_visited);
     void check_divergence(const state_t state);
     state_t get_repr(const state_t state);
 

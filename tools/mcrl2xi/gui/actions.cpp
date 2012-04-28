@@ -57,7 +57,7 @@ Options::Options(wxWindow* parent, wxWindowID id, xEditor* editor, outputpanel* 
 };
 
 static
-bool parse_data_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+bool parse_data_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
 {
   log_level_t old_level = mcrl2_logger::get_reporting_level();
   std::streambuf *old = std::cerr.rdbuf();
@@ -107,7 +107,7 @@ void Options::OnEval(wxCommandEvent& /*event*/)
     wxString wx_spec = p_editor->GetStringFromDataEditor();
 
     mcrl2::data::data_specification data_spec;
-    atermpp::set <mcrl2::data::variable > vars;
+    std::set <mcrl2::data::variable > vars;
 
     if(!parse_data_specification_with_variables(std::string(wx_spec.mb_str()), data_spec, vars))
     {
@@ -188,7 +188,7 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
     wxString wx_spec = p_editor->GetStringFromDataEditor();
 
     mcrl2::data::data_specification data_spec;
-    atermpp::set <mcrl2::data::variable > vars;
+    std::set <mcrl2::data::variable > vars;
 
     if(!parse_data_specification_with_variables(std::string(wx_spec.mb_str()), data_spec, vars))
     {
@@ -219,7 +219,7 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
                  i != enumerator.end() ; ++i)
     {
       p_solutions->AppendText(wxT("["));
-      for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+      for (std::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
       {
         p_solutions->AppendText(wxString(std::string(pp(*v)).c_str(), wxConvUTF8)
                                 +  wxT(" := ")

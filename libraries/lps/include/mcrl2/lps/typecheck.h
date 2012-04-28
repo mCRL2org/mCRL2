@@ -54,14 +54,14 @@ void type_check(
  **/
 inline
 void type_check(
-  atermpp::vector<multi_action>& mult_actions,
+  std::vector<multi_action>& mult_actions,
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
   // Bleh; do conversions...
   ATermList l=ATempty;
-  for (atermpp::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
+  for (std::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
        i!=mult_actions.end(); ++i)
   {
     l=ATinsert(l,(ATerm)(ATermList)i->actions());

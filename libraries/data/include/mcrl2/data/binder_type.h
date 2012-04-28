@@ -13,7 +13,6 @@
 #define MCRL2_DATA_BINDER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -46,7 +45,7 @@ class binder_type: public atermpp::aterm_appl
 typedef atermpp::term_list<binder_type> binder_type_list;
 
 /// \brief vector of binder_types
-typedef atermpp::vector<binder_type>    binder_type_vector;
+typedef std::vector<binder_type>    binder_type_vector;
 
 
 /// \brief Binder for set or bag comprehension

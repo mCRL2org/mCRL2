@@ -205,13 +205,13 @@ ATerm ATparse(const char* s)
  * \arg start array of terms
  * \arg size  length of |start|
  */
-void ATprotectArray(const ATerm* start, const size_t size);
+// void ATprotectArray(const ATerm* start, const size_t size);
 
 /**
  * Efficiently ATunprotect() an array of terms.
  * \arg start previously protected array of terms
  */
-void ATunprotectArray(const ATerm* start);
+// void ATunprotectArray(const ATerm* start);
 
 /**
  * Register a function to be called before every garbage collection
@@ -224,7 +224,7 @@ void ATunprotectArray(const ATerm* start);
  *
  * \todo Should this functionality be in the level one interface?
  */
-void ATaddProtectFunction(const ATermProtFunc f);
+// void ATaddProtectFunction(const ATermProtFunc f);
 
 /**
  * unregister a previously registered marking function. See ATaddProtectFunction().

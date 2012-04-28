@@ -18,7 +18,6 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -54,7 +53,7 @@ class regular_formula: public atermpp::aterm_appl
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 /// \brief vector of regular_formulas
-typedef atermpp::vector<regular_formula>    regular_formula_vector;
+typedef std::vector<regular_formula>    regular_formula_vector;
 
 
 /// \brief Test for a regular_formula expression

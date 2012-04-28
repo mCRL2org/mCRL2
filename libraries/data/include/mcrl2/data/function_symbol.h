@@ -13,7 +13,6 @@
 #define MCRL2_DATA_FUNCTION_SYMBOL_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
@@ -69,7 +68,7 @@ class function_symbol: public data_expression
 typedef atermpp::term_list< function_symbol > function_symbol_list;
 
 /// \brief vector of function symbols
-typedef atermpp::vector< function_symbol >    function_symbol_vector;
+typedef std::vector< function_symbol >    function_symbol_vector;
 
 // template function overloads
 std::string pp(const function_symbol& x);

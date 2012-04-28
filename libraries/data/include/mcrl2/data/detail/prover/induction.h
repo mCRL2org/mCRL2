@@ -47,10 +47,10 @@ class Induction
     core::identifier_string f_cons_name;
 
     /// \brief
-    atermpp::vector < variable >  f_list_variables;
+    std::vector < variable >  f_list_variables;
 
     /// \brief
-    atermpp::map < variable, sort_expression > f_lists_to_sorts;
+    std::map < variable, sort_expression > f_lists_to_sorts;
 
     /// \brief
     BDD_Info f_bdd_info;
@@ -82,7 +82,7 @@ class Induction
     /// \brief
     void map_lists_to_sorts()
     {
-      for(atermpp::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
+      for(std::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
       {
         const variable v_list_variable = *it;
         const sort_expression v_sort = get_sort_of_list_elements(v_list_variable);

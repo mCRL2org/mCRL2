@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/construction_utility.h"
 
 static inline int highest_bit(size_t x)

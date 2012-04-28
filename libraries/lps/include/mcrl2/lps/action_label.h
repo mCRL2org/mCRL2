@@ -16,7 +16,6 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
@@ -70,7 +69,7 @@ class action_label: public atermpp::aterm_appl
 typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief vector of action_labels
-typedef atermpp::vector<action_label>    action_label_vector;
+typedef std::vector<action_label>    action_label_vector;
 
 
 /// \brief Test for a action_label expression

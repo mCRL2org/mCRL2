@@ -86,7 +86,7 @@ void RewriteThread::run()
       mCRL2log(info) << "Parsing and type checking specification" << std::endl;
 
       mcrl2::data::data_specification data_spec;
-      atermpp::set <mcrl2::data::variable > vars;
+      std::set <mcrl2::data::variable > vars;
 
       if(!mcrl2xi_qt::parse_mcrl2_specification_with_variables(m_specification, data_spec, vars))
       {

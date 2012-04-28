@@ -54,8 +54,8 @@ inline
 pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
 {
   data::data_specification data_spec;
-  atermpp::vector<pbes_system::pbes_equation> equations;
-  for (atermpp::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
+  std::vector<pbes_system::pbes_equation> equations;
+  for (std::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
   {
     equations.push_back(bes2pbes(*i));
   }

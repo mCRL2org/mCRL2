@@ -13,7 +13,6 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/atermpp/map.h"
 
 namespace mcrl2
 {
@@ -46,8 +45,8 @@ class RewriterJitty: public Rewriter
     size_t max_vars;
     bool need_rebuild;
 
-    atermpp::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
-    atermpp::vector < ATermList >  jitty_strat;
+    std::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
+    std::vector < ATermList >  jitty_strat;
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
     void build_strategies();
 

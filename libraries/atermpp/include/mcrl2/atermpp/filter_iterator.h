@@ -27,8 +27,6 @@
 #include "boost/iterator/iterator_adaptor.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 #include "mcrl2/atermpp/container_utility.h"

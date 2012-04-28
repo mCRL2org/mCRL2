@@ -25,7 +25,7 @@ template <typename T>
 atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
   core::msg("aterm list traversal");
-  atermpp::vector<T> result;
+  std::vector<T> result;
   for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
     result.push_back(update_copy(*i));
@@ -49,11 +49,11 @@ void operator()(T& x,
 
 // ATerm set traversal
 template <typename T>
-void operator()(atermpp::set<T>& x)
+void operator()(std::set<T>& x)
 {
   core::msg("aterm set traversal");
-  atermpp::set<T> result;
-  for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+  std::set<T> result;
+  for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
     result.insert(update_copy(*i));
   }

@@ -79,7 +79,7 @@ class pbes_eqelm_algorithm
 
     /// \brief The edges of the graph.
     /// It is a mapping from X to iocc(X).
-    std::map<string_type, atermpp::set<propositional_variable_type> > m_edges;
+    std::map<string_type, std::set<propositional_variable_type> > m_edges;
 
     /// \brief The parameters of the propositional variable declarations.
     /// These are stored inside a vector, for efficiency reasons.
@@ -153,7 +153,7 @@ class pbes_eqelm_algorithm
     std::string print_edges() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (typename std::map<string_type, std::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
         out << data::pp(i->first) << " -> " << print_set(i->second) << std::endl;
       }
@@ -211,7 +211,7 @@ class pbes_eqelm_algorithm
       for (typename std::vector<equivalence_class>::iterator j = cY.begin(); j != cY.end(); ++j)
       {
         equivalence_class& equiv = *j;
-        atermpp::map<data_term_type, equivalence_class> w;
+        std::map<data_term_type, equivalence_class> w;
         for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
         {
           size_t p = index_of(*k, m_parameters[Y]);
@@ -353,8 +353,8 @@ class pbes_eqelm_algorithm
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
-        const atermpp::set<propositional_variable_type>& edges = m_edges[X];
-        for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+        const std::set<propositional_variable_type>& edges = m_edges[X];
+        for (typename std::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
         {
           // propagate the equivalence relations in X over the edge Ye
           const propositional_variable_type& Ye = *i;

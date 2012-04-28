@@ -19,7 +19,6 @@
 #include <boost/bind.hpp>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/core/dparser.h"
@@ -193,15 +192,15 @@ struct default_parser_actions: public parser_actions
   template <typename T, typename Function>
   atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
   {
-    atermpp::vector<T> result;
+    std::vector<T> result;
     traverse(node, make_collector(table, type, result, f));
     return atermpp::term_list<T>(result.begin(), result.end());
   }
 
   template <typename T, typename Function>
-  atermpp::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
+  std::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
   {
-    atermpp::vector<T> result;
+    std::vector<T> result;
     traverse(node, make_collector(table, type, result, f));
     return result;
   }

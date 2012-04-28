@@ -192,7 +192,7 @@ class torx_tool : public rewriter_tool< input_tool >
             }
 
             int index = atoi(s.substr(1, s.size()-1 ).c_str());
-            atermpp::map<int,state>::iterator it = int_to_seenstate_mapping.find( index );
+            std::map<int,state>::iterator it = int_to_seenstate_mapping.find( index );
 
             if (it == int_to_seenstate_mapping.end())
             {
@@ -204,7 +204,7 @@ class torx_tool : public rewriter_tool< input_tool >
             {
               simulator.Reset( it->second );
               std::vector < state > next_states=simulator.GetNextStates();
-              atermpp::vector < multi_action > next_actions=simulator.GetNextActions();
+              std::vector < multi_action > next_actions=simulator.GetNextActions();
 
               visited_states.insert( simulator.GetState() );
 

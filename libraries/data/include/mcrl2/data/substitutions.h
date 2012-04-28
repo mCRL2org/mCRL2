@@ -244,7 +244,7 @@ make_map_substitution(const AssociativeContainer& m)
 /// sigma[v] = e; // add the assignment of e to v
 /// sigma[v] = v; // remove the assignment to v
 ///\endverbatim
-template <typename AssociativeContainer = atermpp::map<variable,data_expression> >
+template <typename AssociativeContainer = std::map<variable,data_expression> >
 class mutable_map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
 protected:
@@ -259,11 +259,11 @@ public:
   /// \brief Friend functions that collect some details of a substitution,
   /// needed for rewriting in internal format, as well as alpha-conversion.
   template<typename AssociativeContainer1, typename UnaryOperator>
-  friend mutable_map_substitution< typename atermpp::map<typename AssociativeContainer1::key_type, atermpp::aterm_appl> >
+  friend mutable_map_substitution< typename std::map<typename AssociativeContainer1::key_type, atermpp::aterm_appl> >
   apply(const mutable_map_substitution< AssociativeContainer1 >& sigma, UnaryOperator f);
 
   template<typename AssociativeContainer1>
-  friend atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer1 >& sigma);
+  friend std::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer1 >& sigma);
 
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
@@ -455,7 +455,7 @@ namespace detail
 ///          Provided that, given a variable, its index can be computed in O(1)
 ///          time, insertion is O(1) amortized, and lookup is O(1).
 ///          Memory required is O(n) where n is the largest index used.
-template <typename VariableType = data::variable, typename ExpressionSequence = atermpp::vector<data_expression> >
+template <typename VariableType = data::variable, typename ExpressionSequence = std::vector<data_expression> >
 class mutable_indexed_substitution : public std::unary_function<VariableType, typename ExpressionSequence::value_type>
 {
 protected:
@@ -467,13 +467,13 @@ public:
 
   /// \brief Friend function to get all identifiers in the substitution
   template<typename VariableType1, typename ExpressionSequence1>
-  friend atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
+  friend std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
   template<typename VariableType1, typename ExpressionSequence1>
-  friend atermpp::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma);
+  friend std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma);
 
   /// \brief Friend function that applies a function to all right hand sides of the substitution.
   template<typename VariableType1, typename ExpressionSequence1, typename UnaryOperator>
-  friend mutable_indexed_substitution<VariableType1, atermpp::vector<atermpp::aterm_appl> >
+  friend mutable_indexed_substitution<VariableType1, std::vector<atermpp::aterm_appl> >
   apply(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma, UnaryOperator f);
 
   /// \brief Type of variables
@@ -649,7 +649,7 @@ namespace detail
 // The function below gets all free variables of the term t, which has
 // the shape of an expression in internal format. The variables are added to result.
 // This routine should be removed after internal and external format have merged.
-inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < variable > &result)
+inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable > &result)
 {
   if (is_variable(t))
   {
@@ -657,7 +657,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < varia
   }
   else if (is_where_clause(t))
   {
-    atermpp::set < variable > free_variables_in_body;
+    std::set < variable > free_variables_in_body;
     get_free_variables(t(0),free_variables_in_body);
     
     variable_list bound_vars;
@@ -667,7 +667,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < varia
       bound_vars=push_front(bound_vars,it->lhs());
       get_free_variables(it->rhs(),result); 
     } 
-    for(atermpp::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {
       if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
       {
@@ -677,11 +677,11 @@ inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < varia
   }
   else if (is_abstraction(t))
   {
-    atermpp::set < variable > free_variables_in_body;
+    std::set < variable > free_variables_in_body;
     get_free_variables(t(2),free_variables_in_body);
     const variable_list bound_vars=t(1);
 
-    for(atermpp::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {
       if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
       {
@@ -706,9 +706,9 @@ inline void get_free_variables(const atermpp::aterm_appl t, atermpp::set < varia
 ///        The rhs' have the shape of an expression in internal rewriter format. 
 /// \deprecated
 template<typename VariableType, typename ExpressionSequence>
-atermpp::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
+std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
 {
-  atermpp::set < variable > result;
+  std::set < variable > result;
   typedef typename ExpressionSequence::value_type expression_type;
 
   for(size_t i = 0; i < sigma.size(); ++i)
@@ -724,11 +724,11 @@ atermpp::set < variable > get_free_variables(const mutable_indexed_substitution<
 /// \brief Function to get all identifiers in the substitution
 /// \deprecated
 /* template<typename VariableType, typename ExpressionSequence>
-atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
+std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
 {
   typedef typename ExpressionSequence::value_type expression_type;
 
-  atermpp::set<core::identifier_string> result;
+  std::set<core::identifier_string> result;
   for(size_t i = 0; i < sigma.size(); ++i)
   {
     if(sigma.get(i) != expression_type())
@@ -743,9 +743,9 @@ atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_subs
 /// \deprecated
 /// Provided for use with the rewriters in internal format
 /* template<typename AssociativeContainer>
-atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer >& sigma)
+std::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer >& sigma)
 {
-  atermpp::set<core::identifier_string> result;
+  std::set<core::identifier_string> result;
   for(typename mutable_map_substitution< AssociativeContainer >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
     result.insert(i->first.name());
@@ -758,10 +758,10 @@ atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitu
 /// Provided for use with the rewriters in internal format
 /// \brief Friend function that applies a function to all right hand sides of the substitution.
 template<typename VariableType, typename ExpressionSequence, typename UnaryOperator>
-mutable_indexed_substitution<VariableType, atermpp::vector<atermpp::aterm_appl> >
+mutable_indexed_substitution<VariableType, std::vector<atermpp::aterm_appl> >
 apply(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma, UnaryOperator f)
 {
-  mutable_indexed_substitution<VariableType, atermpp::vector<atermpp::aterm_appl> > result;
+  mutable_indexed_substitution<VariableType, std::vector<atermpp::aterm_appl> > result;
   result.resize(sigma.size());
   for(size_t i = 0; i < sigma.size(); ++i)
   {
@@ -776,10 +776,10 @@ apply(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sig
 /// \deprecated
 /// Provided for use with the rewriters in internal format
 template<typename AssociativeContainer, typename UnaryOperator>
-mutable_map_substitution< atermpp::map<typename AssociativeContainer::key_type, atermpp::aterm_appl > >
+mutable_map_substitution< std::map<typename AssociativeContainer::key_type, atermpp::aterm_appl > >
 apply(const mutable_map_substitution< AssociativeContainer >& sigma, UnaryOperator f)
 {
-  mutable_map_substitution< atermpp::map<typename AssociativeContainer::key_type, atermpp::aterm_appl > > result;
+  mutable_map_substitution< std::map<typename AssociativeContainer::key_type, atermpp::aterm_appl > > result;
   for(typename mutable_map_substitution< AssociativeContainer >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
     result[i->first] = f(i->second);
@@ -799,7 +799,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     typedef typename Substitution::expression_type expression_type;
 
     /// \brief Wrapper class for internal storage and substitution updates using operator()
-    typedef typename mutable_map_substitution<atermpp::map<variable_type, expression_type> >::assignment assignment;
+    typedef typename mutable_map_substitution<std::map<variable_type, expression_type> >::assignment assignment;
 
     /// \brief The type of the wrapped substitution
     typedef Substitution substitution_type;
@@ -809,7 +809,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     const Substitution& f_;
 
     /// \brief An additional mutable substitution
-    mutable_map_substitution<atermpp::map<variable_type, expression_type> > g_;
+    mutable_map_substitution<std::map<variable_type, expression_type> > g_;
 
   public:
     /// \brief Constructor

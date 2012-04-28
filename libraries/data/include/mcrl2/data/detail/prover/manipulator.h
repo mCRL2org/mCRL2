@@ -40,7 +40,7 @@ class InternalFormatManipulator
     /// The method InternalFormatManipulator::orient stores resulting terms in this
     /// table. If a term is encountered that has already been processed, it is
     /// not processed again, but retreived from this table.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> f_orient;
+    std::map < atermpp::aterm_appl, atermpp::aterm_appl> f_orient;
 
     /// \brief aterm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
     atermpp::aterm f_if_then_else;
@@ -51,7 +51,7 @@ class InternalFormatManipulator
     atermpp::aterm_appl set_true_auxiliary(
                 const atermpp::aterm_appl &a_formula, 
                 const atermpp::aterm_appl &a_guard,
-                atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_true)
+                std::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_true)
     {
       if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
       {
@@ -74,7 +74,7 @@ class InternalFormatManipulator
         return a_formula;
       }
 
-      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i=f_set_true.find(a_formula);
+      std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i=f_set_true.find(a_formula);
       if (i!=f_set_true.end())
       {
         return i->second;
@@ -106,7 +106,7 @@ class InternalFormatManipulator
     atermpp::aterm_appl set_false_auxiliary(
               const atermpp::aterm_appl &a_formula, 
               const atermpp::aterm_appl &a_guard,
-              atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_false)
+              std::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_false)
     {
       if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
       {
@@ -121,7 +121,7 @@ class InternalFormatManipulator
         return a_formula;
       }
 
-      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i=f_set_false.find(a_formula);
+      std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i=f_set_false.find(a_formula);
       if (i!=f_set_false.end())
       {
         return i->second;
@@ -205,7 +205,7 @@ class InternalFormatManipulator
       } 
 
       // v_result is NULL if not found; Therefore type ATerm.
-      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
+      std::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
       if (it!=f_orient.end())   // found
       {
         return it->second;
@@ -252,7 +252,7 @@ class InternalFormatManipulator
                  const atermpp::aterm_appl &a_formula, 
                  const atermpp::aterm_appl &a_guard)
     {
-      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_true;
+      std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_true;
       return set_true_auxiliary(a_formula, a_guard, f_set_true);
     }
 
@@ -262,7 +262,7 @@ class InternalFormatManipulator
                  const atermpp::aterm_appl &a_formula, 
                  const atermpp::aterm_appl &a_guard)
     {
-      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_false;
+      std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);
     }
 };

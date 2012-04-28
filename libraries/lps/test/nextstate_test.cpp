@@ -12,7 +12,6 @@
 #include <queue>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -61,12 +60,12 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
 
   atermpp::aterm initial_state = nstate->getInitialState();
 
-  atermpp::set<atermpp::aterm> visited;
-  atermpp::set<atermpp::aterm> seen;
-  atermpp::set<multi_action> transition_labels;
+  std::set<atermpp::aterm> visited;
+  std::set<atermpp::aterm> seen;
+  std::set<multi_action> transition_labels;
   size_t transitions = 0;
 
-  std::queue<atermpp::aterm, atermpp::deque<atermpp::aterm> > q;
+  std::queue<atermpp::aterm, std::deque<atermpp::aterm> > q;
   q.push(initial_state);
   seen.insert(initial_state);
 

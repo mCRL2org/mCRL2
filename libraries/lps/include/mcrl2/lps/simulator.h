@@ -55,7 +55,7 @@ class StandardSimulator : virtual public SimulatorInterface
     virtual bool Redo();
     virtual mcrl2::lps::state GetState();
     virtual std::vector < mcrl2::lps::state > GetNextStates();
-    virtual atermpp::vector < mcrl2::lps::multi_action > GetNextActions();
+    virtual std::vector < mcrl2::lps::multi_action > GetNextActions();
     virtual mcrl2::lps::NextState* GetNextState();
     virtual bool ChooseTransition(size_t index);
     virtual size_t GetTraceLength();
@@ -70,7 +70,7 @@ class StandardSimulator : virtual public SimulatorInterface
     bool tau_prior;
     mcrl2::lps::specification m_spec;
     std::vector < mcrl2::lps::state > next_states;
-    atermpp::vector < mcrl2::lps::multi_action > next_actions;
+    std::vector < mcrl2::lps::multi_action > next_actions;
     mcrl2::trace::Trace trace;
     viewlist views;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;

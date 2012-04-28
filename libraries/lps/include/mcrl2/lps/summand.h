@@ -20,7 +20,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
@@ -524,7 +523,7 @@ class deadlock_summand: public summand_base
 };
 
 /// \brief Vector of deadlock summands
-typedef atermpp::vector<deadlock_summand> deadlock_summand_vector;
+typedef std::vector<deadlock_summand> deadlock_summand_vector;
 
 /// \brief Conversion to ATermAppl.
 /// \return The deadlock summand converted to ATerm format.
@@ -678,7 +677,7 @@ bool operator<(const action_summand& x, const action_summand& y)
 }
 
 /// \brief Vector of action summands
-typedef atermpp::vector<action_summand> action_summand_vector;
+typedef std::vector<action_summand> action_summand_vector;
 
 /// \brief Equality operator of action summands
 inline

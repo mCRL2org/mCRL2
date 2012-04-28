@@ -67,7 +67,7 @@ typedef atermpp::term_list<container_sort> container_sort_list;
 
 /// \brief list of function sorts
 ///
-typedef atermpp::vector<container_sort> container_sort_vector;
+typedef std::vector<container_sort> container_sort_vector;
 
 } // namespace data
 

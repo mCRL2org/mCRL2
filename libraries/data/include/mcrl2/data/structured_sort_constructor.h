@@ -280,7 +280,7 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
 typedef atermpp::term_list< structured_sort_constructor > structured_sort_constructor_list;
 
 /// \brief List of structured_sort_constructor.
-typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
+typedef std::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
 // template function overloads
 std::string pp(const structured_sort_constructor& x);

@@ -12,7 +12,6 @@
 #include <set>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
@@ -79,14 +78,14 @@ class pbesinst_algorithm
     int m_equation_count;
 
     /// \brief Propositional variable instantiations that need to be handled.
-    atermpp::set<propositional_variable_instantiation> todo;
+    std::set<propositional_variable_instantiation> todo;
 
     /// \brief Propositional variable instantiations that have been handled.
-    atermpp::set<propositional_variable_instantiation> done;
+    std::set<propositional_variable_instantiation> done;
 
     /// \brief Data structure for storing the result. E[i] corresponds to the equations
     /// generated from the i-th PBES equation.
-    std::vector<atermpp::vector<pbes_equation> > E;
+    std::vector<std::vector<pbes_equation> > E;
 
     /// \brief The initial value.
     propositional_variable_instantiation init;
@@ -134,10 +133,10 @@ class pbesinst_algorithm
 
       // initialize equation_index and E
       int eqn_index = 0;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         equation_index[i->variable().name()] = eqn_index++;
-        E.push_back(atermpp::vector<pbes_equation>());
+        E.push_back(std::vector<pbes_equation>());
       }
       pbes_expression_with_propositional_variables Xinit = R(p.initial_state());
       assert(Xinit.propositional_variables().size() == 1);
@@ -177,7 +176,7 @@ class pbesinst_algorithm
     pbes<> get_result()
     {
       pbes<> result;
-      for (std::vector<atermpp::vector<pbes_equation> >::iterator i =  E.begin(); i != E.end(); ++i)
+      for (std::vector<std::vector<pbes_equation> >::iterator i =  E.begin(); i != E.end(); ++i)
       {
         result.equations().insert(result.equations().end(), i->begin(), i->end());
       }

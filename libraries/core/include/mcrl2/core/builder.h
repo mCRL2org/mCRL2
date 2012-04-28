@@ -17,7 +17,6 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
 
@@ -123,11 +122,11 @@ struct builder
 
   // aterm set visit
   template <typename T>
-  void visit(atermpp::set<T>& x)
+  void visit(std::set<T>& x)
   {
     msg("aterm set visit");
-    atermpp::set<T> result;
-    for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+    std::set<T> result;
+    for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       result.insert(update_copy(*i));
     }
@@ -148,7 +147,7 @@ struct builder
   atermpp::term_list<T> visit_copy(const atermpp::term_list<T>& x)
   {
     msg("term_list visit_copy");
-    atermpp::vector<T> result;
+    std::vector<T> result;
     for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       result.push_back(static_cast<Derived&>(*this)(*i));

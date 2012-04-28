@@ -245,8 +245,8 @@ void data_specification::check_for_alias_loop(
 static
 sort_expression find_normal_form(
   const sort_expression& e,
-  const atermpp::multimap< sort_expression, sort_expression >  &map1,
-  const atermpp::multimap< sort_expression, sort_expression >  &map2,
+  const std::multimap< sort_expression, sort_expression >  &map1,
+  const std::multimap< sort_expression, sort_expression >  &map2,
   std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
@@ -314,7 +314,7 @@ sort_expression find_normal_form(
 
 
   assert(is_basic_sort(result_sort) || is_structured_sort(result_sort));
-  const atermpp::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
+  const std::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
   if (i1!=map1.end()) // found
   {
 #ifndef NDEBUG
@@ -324,7 +324,7 @@ sort_expression find_normal_form(
                            ,sorts_already_seen
                           );
  }
- const atermpp::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
+ const std::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
  if (i2!=map2.end()) // found
  {
 #ifndef NDEBUG
@@ -359,7 +359,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // that structured sorts can be recursive, and therefore, they cannot be
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
-  atermpp::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
+  std::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
   for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
     if (is_structured_sort(i->reference()))
@@ -374,16 +374,16 @@ void data_specification::reconstruct_m_normalised_aliases() const
 
   // Apply Knuth-Bendix completion to the rules in m_normalised_aliases.
 
-  atermpp::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
+  std::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
 
   for (; !sort_aliases_to_be_investigated.empty() ;)
   {
-    const atermpp::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
+    const std::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
     const sort_expression lhs=p->first;
     const sort_expression rhs=p->second;
     sort_aliases_to_be_investigated.erase(p);
 
-    for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+    for (std::multimap< sort_expression, sort_expression >::const_iterator
          i=resulting_normalized_sort_aliases.begin();
          i!=resulting_normalized_sort_aliases.end(); ++i)
     {
@@ -437,8 +437,8 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
   // right hand side to normal form.
 
-  const atermpp::multimap< sort_expression, sort_expression > empty_multimap;
-  for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+  const std::multimap< sort_expression, sort_expression > empty_multimap;
+  for (std::multimap< sort_expression, sort_expression >::const_iterator
        i=resulting_normalized_sort_aliases.begin();
        i!=resulting_normalized_sort_aliases.end(); ++i)
   {

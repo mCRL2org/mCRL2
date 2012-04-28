@@ -205,7 +205,7 @@ static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
 
 static ATermList get_substs(ATermList ids)
 {
-  atermpp::set < ATerm > used;
+  std::set < ATerm > used;
   ATermList substs = ATmakeList0();
 
   used.insert((ATerm) ATmakeAppl0(AFun("if",0,true)));

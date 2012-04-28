@@ -116,7 +116,7 @@ class sim_tool : public rewriter_tool< input_tool >
       while (notdone)
       {
         std::vector < mcrl2::lps::state > next_states;
-        atermpp::vector < mcrl2::lps::multi_action > next_actions;
+        std::vector < mcrl2::lps::multi_action > next_actions;
 
         try
         {

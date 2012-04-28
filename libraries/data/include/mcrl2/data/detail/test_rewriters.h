@@ -40,10 +40,10 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   /// function symbol.
   /// \param expr A data expression
   /// \return A sequence of operands
-  atermpp::multiset<data_expression> split_or(const data_expression& expr)
+  std::multiset<data_expression> split_or(const data_expression& expr)
   {
-    atermpp::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data_accessors::left, data_accessors::right);
+    std::multiset<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data_accessors::left, data_accessors::right);
     return result;
   }
 
@@ -53,10 +53,10 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   /// function symbol.
   /// \param expr A data expression
   /// \return A sequence of operands
-  atermpp::multiset<data_expression> split_and(const data_expression& expr)
+  std::multiset<data_expression> split_and(const data_expression& expr)
   {
-    atermpp::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data_accessors::left, data_accessors::right);
+    std::multiset<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data_accessors::left, data_accessors::right);
     return result;
   }
 
@@ -65,12 +65,12 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
     data_expression y = super::operator()(x);
     if (sort_bool::is_and_application(y))
     {
-      atermpp::multiset<data_expression> s = split_and(y);
+      std::multiset<data_expression> s = split_and(y);
       return data::join_and(s.begin(), s.end());
     }
     else if (sort_bool::is_or_application(y))
     {
-      atermpp::multiset<data_expression> s = split_or(y);
+      std::multiset<data_expression> s = split_or(y);
       return data::join_or(s.begin(), s.end());
     }
     return y;

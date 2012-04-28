@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -60,7 +59,7 @@ class state_formula: public atermpp::aterm_appl
 typedef atermpp::term_list<state_formula> state_formula_list;
 
 /// \brief vector of state_formulas
-typedef atermpp::vector<state_formula>    state_formula_vector;
+typedef std::vector<state_formula>    state_formula_vector;
 
 
 /// \brief Test for a state_formula expression

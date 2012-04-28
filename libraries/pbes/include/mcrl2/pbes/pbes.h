@@ -25,8 +25,6 @@
 #include <stdexcept>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/replace.h"
@@ -48,7 +46,7 @@ namespace mcrl2
 namespace pbes_system
 {
 
-template <typename Container = atermpp::vector<pbes_equation> > class pbes;
+template <typename Container = std::vector<pbes_equation> > class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
 // template function overloads
@@ -97,7 +95,7 @@ class pbes
     Container m_equations;
 
     /// \brief The set of global variables
-    atermpp::set<data::variable> m_global_variables;
+    std::set<data::variable> m_global_variables;
 
     /// \brief The initial state
     propositional_variable_instantiation m_initial_state;
@@ -110,7 +108,7 @@ class pbes
       m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
 
       atermpp::aterm_appl eqn_spec = *i++;
       atermpp::aterm_list eqn = eqn_spec(0);
@@ -126,9 +124,9 @@ class pbes
 
     /// \brief Returns the predicate variables appearing in the left hand side of an equation.
     /// \return The predicate variables appearing in the left hand side of an equation.
-    atermpp::set<propositional_variable> compute_declared_variables() const
+    std::set<propositional_variable> compute_declared_variables() const
     {
-      atermpp::set<propositional_variable> result;
+      std::set<propositional_variable> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         result.insert(i->variable());
@@ -246,7 +244,7 @@ class pbes
     /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification const& data,
          const Container& equations,
-         const atermpp::set<data::variable>& global_variables,
+         const std::set<data::variable>& global_variables,
          propositional_variable_instantiation initial_state)
       :
       m_data(data),
@@ -287,14 +285,14 @@ class pbes
 
     /// \brief Returns the declared free variables of the pbes.
     /// \return The declared free variables of the pbes.
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the pbes.
     /// \return The declared free variables of the pbes.
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }
@@ -361,11 +359,11 @@ class pbes
     /// \brief Returns the set of binding variables of the pbes.
     /// This is the set variables that occur on the left hand side of an equation.
     /// \return The set of binding variables of the pbes.
-    atermpp::set<propositional_variable> binding_variables() const
+    std::set<propositional_variable> binding_variables() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-      atermpp::set<propositional_variable> result;
+      std::set<propositional_variable> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         result.insert(i->variable());
@@ -376,11 +374,11 @@ class pbes
     /// \brief Returns the set of occurring propositional variable instantiations of the pbes.
     /// This is the set of variables that occur in the right hand side of an equation.
     /// \return The occurring propositional variable instantiations of the pbes
-    atermpp::set<propositional_variable_instantiation> occurring_variable_instantiations() const
+    std::set<propositional_variable_instantiation> occurring_variable_instantiations() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-      atermpp::set<propositional_variable_instantiation> result;
+      std::set<propositional_variable_instantiation> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         detail::occurring_variable_visitor visitor;
@@ -393,16 +391,16 @@ class pbes
     /// \brief Returns the set of occurring propositional variable declarations of the pbes, i.e.
     /// the propositional variable declarations that occur in the right hand side of an equation.
     /// \return The occurring propositional variable declarations of the pbes
-    atermpp::set<propositional_variable> occurring_variables() const
+    std::set<propositional_variable> occurring_variables() const
     {
-      atermpp::set<propositional_variable> result;
-      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
+      std::set<propositional_variable> result;
+      std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
       std::map<core::identifier_string, propositional_variable> declared_variables;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         declared_variables[i->variable().name()] = i->variable();
       }
-      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
       {
         result.insert(declared_variables[i->name()]);
       }
@@ -413,8 +411,8 @@ class pbes
     /// \return Returns true if all occurring variables are binding variables, and the initial state variable is a binding variable.
     bool is_closed() const
     {
-      atermpp::set<propositional_variable> bnd = binding_variables();
-      atermpp::set<propositional_variable> occ = occurring_variables();
+      std::set<propositional_variable> bnd = binding_variables();
+      std::set<propositional_variable> occ = occurring_variables();
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
     }
 
@@ -469,11 +467,11 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
-      const atermpp::set<data::variable>& declared_global_variables = global_variables();
+      const std::set<data::variable>& declared_global_variables = global_variables();
       std::set<data::variable> occurring_global_variables = pbes_system::find_free_variables(*this);
       std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
-      atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
-      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
+      std::set<propositional_variable> declared_variables = compute_declared_variables();
+      std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
       // check 1)
       if (!data::detail::check_sorts(
@@ -572,7 +570,7 @@ class pbes
       }
 
       // check 8)
-      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {

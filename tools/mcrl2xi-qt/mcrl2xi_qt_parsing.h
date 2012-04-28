@@ -56,7 +56,7 @@ static
 }
 
 static
-    bool parse_mcrl2_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+    bool parse_mcrl2_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
     {
       log_level_t old_level = mcrl2_logger::get_reporting_level();
       std::streambuf *old = std::cerr.rdbuf();

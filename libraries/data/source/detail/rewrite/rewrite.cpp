@@ -164,7 +164,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   const atermpp::term_list < atermpp::aterm_appl > assignment_list(term(1));
   const atermpp::aterm_appl body(term(0));
 
-  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
   for(atermpp::term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
   {
     const variable v=variable((*i)(0));
@@ -175,7 +175,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
 
   // Reset variables in sigma
-  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+  for(mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
     sigma[it->second]=it->second;
@@ -197,9 +197,9 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   size_t number_of_renamed_variables=0;
   size_t count=0;
-  atermpp::vector <variable> new_variables(vl.size());
+  std::vector <variable> new_variables(vl.size());
   {
-    atermpp::set < variable > variables_in_sigma(get_free_variables(sigma));
+    std::set < variable > variables_in_sigma(get_free_variables(sigma));
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
@@ -220,7 +220,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     return a;
   }
 
-  atermpp::vector <atermpp::aterm_appl> saved_substitutions;
+  std::vector <atermpp::aterm_appl> saved_substitutions;
   count=0;
   for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
   {
@@ -254,7 +254,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   variable_list new_variable_list;
 
-  for(atermpp::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
+  for(std::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
   {
     new_variable_list=push_front(new_variable_list,*it);
   }
@@ -285,7 +285,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   }
   assert(vl.size()<arity);
 
-  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
   size_t count=1;
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
   {
@@ -298,7 +298,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
 
   // Reset variables in sigma
-  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+  for(mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
   {
     sigma[it->second]=it->second;
@@ -352,12 +352,12 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
-  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
 
   variable_list vl_new;
 
   const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
-  atermpp::set < variable > free_variables;
+  std::set < variable > free_variables;
   // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
   get_free_variables(t2,free_variables);
 
@@ -443,12 +443,12 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
       const bool t1_is_normal_form,
       internal_substitution_type &sigma)
 {
-  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
 
   variable_list vl_new;
 
   const atermpp::aterm_appl t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
-  atermpp::set < variable > free_variables;
+  std::set < variable > free_variables;
   // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
   get_free_variables(t2,free_variables);
 
@@ -617,7 +617,7 @@ static void checkPattern(const data_expression &p)
 void CheckRewriteRule(const data_equation &data_eqn)
 {
   const variable_list rule_var_list = data_eqn.variables();
-  const atermpp::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
+  const std::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars
   std::set <variable> lhs_vars;
@@ -691,26 +691,26 @@ std::vector <AFun> apples;
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
 static
-atermpp::map< function_symbol, atermpp::aterm_int > &term2int()
+std::map< function_symbol, atermpp::aterm_int > &term2int()
 {
-  static atermpp::map< function_symbol, atermpp::aterm_int > term2int;
+  static std::map< function_symbol, atermpp::aterm_int > term2int;
   return term2int;
 }
 
-atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_begin()
+std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_begin()
 {
   return term2int().begin();
 }
 
-atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end()
+std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end()
 {
   return term2int().end();
 }
 
 static
-atermpp::vector < data::function_symbol > &int2term()
+std::vector < data::function_symbol > &int2term()
 {
-  static atermpp::vector < data::function_symbol > int2term;
+  static std::vector < data::function_symbol > int2term;
   return int2term;
 }
 
@@ -727,7 +727,7 @@ function_symbol get_int2term(const size_t n)
 
 atermpp::aterm_int OpId2Int(const function_symbol &term)
 {
-  atermpp::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
+  std::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
   {
     const size_t num_opids=get_num_opids();
@@ -781,8 +781,8 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   {
     const where_clause t=term;
     atermpp::term_list<atermpp::aterm> l;
-    const atermpp::vector < assignment_expression > lv=atermpp::convert < atermpp::vector < assignment_expression > >(t.declarations());
-    for(atermpp::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
+    const std::vector < assignment_expression > lv=atermpp::convert < std::vector < assignment_expression > >(t.declarations());
+    for(std::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
     {
       l=atermpp::push_front(l,atermpp::aterm(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids))));
     }
@@ -810,7 +810,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     const data_expression body=fromInner(term(0));
     const atermpp::term_list<atermpp::aterm_appl> l=term(1);
 
-    atermpp::vector < assignment_expression > lv;
+    std::vector < assignment_expression > lv;
     for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
     {
       const atermpp::aterm_appl ass_expr= *it;

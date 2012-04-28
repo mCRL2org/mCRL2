@@ -19,7 +19,6 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
@@ -186,7 +185,7 @@ void test_global_variables()
   pbes<> p;
   std::stringstream s(TEXT);
   s >> p;
-  atermpp::set<variable> freevars = p.global_variables();
+  std::set<variable> freevars = p.global_variables();
   BOOST_CHECK(freevars.size() == 3);  // The global variable k does not occur in the specification,
   // but occurs in the global variables list.
 }

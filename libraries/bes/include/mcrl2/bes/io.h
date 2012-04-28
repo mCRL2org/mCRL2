@@ -163,12 +163,12 @@ std::string bes_expression2pgsolver(const Expression& p, const VariableMap& vari
   std::string result;
   if (tr::is_and(p))
   {
-    atermpp::set<Expression> expressions = split_and(p);
+    std::set<Expression> expressions = split_and(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_or(p))
   {
-    atermpp::set<Expression> expressions = split_or(p);
+    std::set<Expression> expressions = split_or(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_prop_var(p))

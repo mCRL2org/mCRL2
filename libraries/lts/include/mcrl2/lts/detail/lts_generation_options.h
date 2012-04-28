@@ -89,7 +89,7 @@ struct lts_generation_options
   bool detect_deadlock;
   bool detect_divergence;
   bool detect_action;
-  atermpp::set < mcrl2::core::identifier_string > trace_actions;
+  std::set < mcrl2::core::identifier_string > trace_actions;
 
   bool usedummies; /// REMOVE
   bool removeunused; /// REMOVE

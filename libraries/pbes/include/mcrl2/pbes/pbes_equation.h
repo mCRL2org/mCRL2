@@ -14,7 +14,6 @@
 
 #include <string>
 #include <sstream>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -266,7 +265,7 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 }
 
 /// \brief vector of process equations
-typedef atermpp::vector<pbes_equation> pbes_equation_vector;
+typedef std::vector<pbes_equation> pbes_equation_vector;
 
 // template function overloads
 std::string pp(const pbes_equation& x);

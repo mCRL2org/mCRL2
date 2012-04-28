@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
@@ -191,7 +190,7 @@ class structured_sort: public detail::structured_sort_base
             set_identifier_generator generator;
 
             // Create variables for equation
-            atermpp::vector< variable > variables;
+            std::vector< variable > variables;
 
             if (i->arguments().empty())
             {
@@ -285,7 +284,7 @@ class structured_sort: public detail::structured_sort_base
 
           set_identifier_generator generator;
 
-          atermpp::vector< variable > variables;
+          std::vector< variable > variables;
 
           // Create variables for equation
           for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
@@ -293,7 +292,7 @@ class structured_sort: public detail::structured_sort_base
             variables.push_back(variable(generator("v"), j->sort()));
           }
 
-          atermpp::vector< variable >::const_iterator v = variables.begin();
+          std::vector< variable >::const_iterator v = variables.begin();
 
           for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
           {

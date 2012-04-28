@@ -16,7 +16,6 @@
 #include <vector>
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/table.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -69,9 +68,9 @@ struct t_instantiations
 /// \brief Sort the equation system with respect to the order of predicate variables in the original equation system
 /// \param to_sort A sequence of PBES equations
 inline
-atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string > names_order, atermpp::vector<pbes_equation> to_sort)
+std::vector<pbes_equation> sort_names(std::vector< core::identifier_string > names_order, std::vector<pbes_equation> to_sort)
 {
-  atermpp::vector<pbes_equation> result;
+  std::vector<pbes_equation> result;
   if (names_order.size() == 1)
   {
     result = to_sort;
@@ -80,8 +79,8 @@ atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string >
   {
     for (std::vector< core::identifier_string >::iterator on = names_order.begin(); on != names_order.end(); on++)
     {
-      atermpp::vector<pbes_equation> todo;
-      for (atermpp::vector<pbes_equation>::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
+      std::vector<pbes_equation> todo;
+      for (std::vector<pbes_equation>::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
       {
         std::string name = eqi->variable().name();
         name = name.substr(0, name.find("@"));
@@ -187,14 +186,14 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   mCRL2log(log::verbose) << "Using lazy approach..." << std::endl;
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
-  atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
+  std::vector<pbes_equation> eqsys = pbes_spec.equations();
   data::data_specification& data = pbes_spec.data();
 
   propositional_variable_instantiation new_initial_state;
-  atermpp::vector<pbes_equation> new_equation_system;
+  std::vector<pbes_equation> new_equation_system;
 
-  atermpp::set< propositional_variable_instantiation > states_todo;
-  atermpp::set< propositional_variable_instantiation >::iterator current_state_it;
+  std::set< propositional_variable_instantiation > states_todo;
+  std::set< propositional_variable_instantiation >::iterator current_state_it;
 
   int nr_of_equations = 0;
   data::variable_list empty_variable_list;
@@ -206,7 +205,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   std::vector< core::identifier_string > names_order;
 
   mCRL2log(log::verbose) << "Retrieving PBES equations from equation system..." << std::endl;
-  for (atermpp::vector<pbes_equation>::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  for (std::vector<pbes_equation>::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     pbes_equations.put(eqi->variable().name(), pbes_equation_to_aterm(*eqi));
     names_order.push_back(eqi->variable().name());
@@ -291,10 +290,10 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
   mCRL2log(log::verbose) << "Using finite approach..." << std::endl;
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
-  atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
+  std::vector<pbes_equation> eqsys = pbes_spec.equations();
   data::data_specification& data = pbes_spec.data();
 
-  atermpp::vector<pbes_equation> result_eqsys;        // resulting equation system
+  std::vector<pbes_equation> result_eqsys;        // resulting equation system
   int nr_of_equations = 0;          // Nr of equations computed
 
   // Empty data::variable_list and data::data_expression_list
@@ -307,7 +306,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
   mCRL2log(log::verbose) << "Enumerating finite data sorts..." << std::endl;
   typedef data::classic_enumerator<> enumerator_type;
   enumerator_type enumerator(data, data_rewriter);
-  for (atermpp::vector<pbes_equation>::const_iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+  for (std::vector<pbes_equation>::const_iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
     data::variable_list parameters = eq_i->variable().parameters();
     for (data::variable_list::const_iterator p = parameters.begin(); p != parameters.end(); p++)
@@ -337,7 +336,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
   }
 
   mCRL2log(log::verbose) << "Computing PBES without finite data sorts..." << std::endl;
-  for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+  for (std::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
     pbes_equation equation = *eq_i;
 
@@ -348,7 +347,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
     data::variable_list propvar_parameters = propvar.parameters();
 
 
-    atermpp::vector< t_instantiations > instantiation_list;
+    std::vector< t_instantiations > instantiation_list;
     t_instantiations current_values;    // Current results
 
     // Add empty instantiation to the list
@@ -359,11 +358,11 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
 
     for (data::variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
     {
-      atermpp::vector< t_instantiations > intermediate_instantiation_list;
+      std::vector< t_instantiations > intermediate_instantiation_list;
       if (sort_enumerations.get(p->sort()) == atermpp::aterm())
       {
         // The sort is infinite
-        for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+        for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
           current_values = *inst_i;
           current_values.infinite_var = push_back(current_values.infinite_var, *p);
@@ -377,7 +376,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
         current_values.finite_var = push_back(current_values.finite_var, *p);
         data::data_expression_list enumerations = sort_enumerations.get(p->sort());
 
-        for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+        for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
           for (data::data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
           {
@@ -391,7 +390,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
 
     mCRL2log(log::verbose) << "Computing Boolean equations for each instantiation of propositional variable " <<  propvar_name_string << "..." << std::endl;
 
-    for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+    for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
     {
       propositional_variable propvar_current = propositional_variable(create_propvar_name(propvar_name, inst_i->finite_exp), inst_i->infinite_var);
 

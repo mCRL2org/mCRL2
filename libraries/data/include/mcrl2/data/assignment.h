@@ -17,7 +17,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/combine_iterator.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -66,7 +65,7 @@ class assignment_expression: public atermpp::aterm_appl,
 /// \brief list of assignment expressions
 typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 /// \brief vector of assignment expressions
-typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
+typedef std::vector<assignment_expression>    assignment_expression_vector;
 
 //--- start generated classes ---//
 
@@ -126,7 +125,7 @@ class assignment: public assignment_expression
 typedef atermpp::term_list<assignment> assignment_list;
 
 /// \brief vector of assignments
-typedef atermpp::vector<assignment>    assignment_vector;
+typedef std::vector<assignment>    assignment_vector;
 
 
 /// \brief Test for a assignment expression
@@ -200,7 +199,7 @@ class identifier_assignment: public assignment_expression
 typedef atermpp::term_list<identifier_assignment> identifier_assignment_list;
 
 /// \brief vector of identifier_assignments
-typedef atermpp::vector<identifier_assignment>    identifier_assignment_vector;
+typedef std::vector<identifier_assignment>    identifier_assignment_vector;
 
 
 /// \brief Test for a identifier_assignment expression

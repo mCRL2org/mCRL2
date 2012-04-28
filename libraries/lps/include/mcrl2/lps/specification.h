@@ -68,7 +68,7 @@ class specification
     action_label_list m_action_labels;
 
     /// \brief The set of global variables
-    atermpp::set<data::variable> m_global_variables;
+    std::set<data::variable> m_global_variables;
 
     /// \brief The linear process of the specification
     linear_process m_process;
@@ -84,7 +84,7 @@ class specification
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = atermpp::aterm_appl(*i++)(0);
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
       m_initial_process  = atermpp::aterm_appl(*i);
       m_data.declare_data_specification_to_be_type_checked();
@@ -124,7 +124,7 @@ class specification
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,
                   const action_label_list& action_labels,
-                  const atermpp::set<data::variable>& global_variables,
+                  const std::set<data::variable>& global_variables,
                   const linear_process& lps,
                   const process_initializer& initial_process)
       :
@@ -218,14 +218,14 @@ class specification
 
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }

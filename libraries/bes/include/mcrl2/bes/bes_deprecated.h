@@ -252,7 +252,7 @@ static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instan
 
   size_t n=largest_power_of_2_smaller_than(args.size());
 
-  atermpp::vector<ATermAppl> tree_store(n);
+  std::vector<ATermAppl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
    * pairs, such that the args.size() elements are stored in n positions. */
@@ -1382,7 +1382,7 @@ class boolean_equation_system
     // The value 0 for control_info indicates a wrong value.
 
     std::vector<size_t> control_info;
-    atermpp::vector<bes_expression> right_hand_sides;
+    std::vector<bes_expression> right_hand_sides;
     bool variable_occurrences_are_stored;
     std::vector< std::set <variable_type> > variable_occurrence_sets;
     atermpp::indexed_set variable_relevance_indexed_set;
@@ -2258,7 +2258,6 @@ class boolean_equation_system
         {
 
           pbes_equation current_pbeq;
-          // atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
 
           // Add the required substitutions
           if (internal_opt_store_as_tree)
@@ -2727,7 +2726,7 @@ mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& be
   mCRL2log(mcrl2::log::verbose) << "Converting result to BES-format..." << std::endl;
   // Use an indexed set to keep track of the variables and their bes-representations
 
-  atermpp::vector < boolean_equation > eqns;
+  std::vector < boolean_equation > eqns;
   for (size_t r=1 ; r<=bes_equations.max_rank ; ++r)
   {
     for (size_t i=1; i<=bes_equations.nr_of_variables() ; ++i)
@@ -2758,7 +2757,7 @@ mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& be
 static bes_expression substitute_rank(
   bes_expression b,
   const size_t current_rank,
-  const atermpp::vector<bes_expression> &approximation,
+  const std::vector<bes_expression> &approximation,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
   atermpp::table& hashtable,
@@ -2947,7 +2946,7 @@ static bes_expression substitute_rank(
 
 static bes_expression evaluate_bex(
   bes_expression b,
-  const atermpp::vector<bes_expression> &approximation,
+  const std::vector<bes_expression> &approximation,
   const size_t rank,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
@@ -3119,7 +3118,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   mCRL2log(mcrl2::log::verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
               " equations." << std::endl;
 
-  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
+  std::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   atermpp::table bex_hashtable(10,5);
 

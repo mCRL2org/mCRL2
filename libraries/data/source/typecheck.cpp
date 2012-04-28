@@ -18,7 +18,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -236,9 +235,9 @@ static ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec);
 ///\brief Increases the value of each key in map
 ///\param[in] m A mapping from an ATerm to a boolean
 ///\return m in which all values are negated
-static inline atermpp::map<atermpp::aterm,bool> neg_values(atermpp::map<atermpp::aterm,bool> m)
+static inline std::map<atermpp::aterm,bool> neg_values(std::map<atermpp::aterm,bool> m)
 {
-  for (atermpp::map<atermpp::aterm,bool>::iterator i = m.begin() ; i != m.end(); i++)
+  for (std::map<atermpp::aterm,bool>::iterator i = m.begin() ; i != m.end(); i++)
   {
     m[i->first] = !i->second;
   }
@@ -1558,13 +1557,13 @@ static bool gstcReadInConstructors(ATermList NewSorts)
 }
 
 static
-atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_aliases()
+std::map < data::sort_expression, data::basic_sort > construct_normalised_aliases()
 {
   // This function does the same as data_specification::reconstruct_m_normalised_aliases().
   // Therefore, it should be replaced by that function, after restructuring the type checker.
   // First reset the normalised aliases and the mappings and constructors that have been
   // inherited to basic sort aliases during a previous round of sort normalisation.
-  atermpp::map < data::sort_expression, data::basic_sort > normalised_aliases;
+  std::map < data::sort_expression, data::basic_sort > normalised_aliases;
 
   // Fill normalised_aliases. Simple aliases are stored from left to
   // right. If the right hand side is non trivial (struct, list, set or bag)
@@ -1582,7 +1581,7 @@ atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_al
       // Rewrite every occurrence of ComplexType to A. Suppose that there are
       // two declarations of the shape sort A=ComplexType; B=ComplexType then
       // ComplexType is rewritten to A and B is also rewritten to A.
-      const atermpp::map< sort_expression, basic_sort >::const_iterator j=normalised_aliases.find(second);
+      const std::map< sort_expression, basic_sort >::const_iterator j=normalised_aliases.find(second);
       if (j!=normalised_aliases.end())
       {
         normalised_aliases[first]=j->second;
@@ -1603,7 +1602,7 @@ atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_al
   // Close the mapping normalised_aliases under itself. If a rewriting
   // loop is detected, throw a runtime error.
 
-  for (atermpp::map< sort_expression, basic_sort >::iterator i=normalised_aliases.begin();
+  for (std::map< sort_expression, basic_sort >::iterator i=normalised_aliases.begin();
        i!=normalised_aliases.end(); i++)
   {
     std::set < sort_expression > sort_already_seen;
@@ -1638,7 +1637,7 @@ atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_al
   return normalised_aliases;
 }
 
-static sort_expression mapping(sort_expression s,atermpp::map < sort_expression, basic_sort > &m)
+static sort_expression mapping(sort_expression s,std::map < sort_expression, basic_sort > &m)
 {
   if (m.find(s)==m.end())
   {
@@ -1664,7 +1663,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
   try
   {
     ATermList defined_sorts=ATtableKeys(context.defined_sorts);
-    atermpp::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
+    std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
     std::set< sort_expression > all_sorts;
     for (; defined_sorts!=ATempty; defined_sorts=ATgetNext(defined_sorts))
     {

@@ -179,8 +179,8 @@ void lts_info::compute_lts_type()
     //std::clog << "pbes_type:" << std::endl;
     std::vector<std::string> params;
     std::map<std::string,std::string> paramtypes;
-    //this->param_default_values = new atermpp::vector<data_expression>();
-    for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
+    //this->param_default_values = new std::vector<data_expression>();
+    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
             != p.equations().end(); ++eqn) {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
@@ -202,7 +202,7 @@ void lts_info::compute_lts_type()
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
-                atermpp::vector< function_symbol > c = p.data().constructors(varparam.sort());
+                std::vector< function_symbol > c = p.data().constructors(varparam.sort());
                 if (c.size() == 0) {
                     throw(std::runtime_error("Error in info: no constructor for parameter sort " + signature + "."));
                 } else {
@@ -274,7 +274,7 @@ void lts_info::compute_transition_groups()
 
     symbol = fixpoint_symbol::nu();
 
-    for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
+    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
             != p.equations().end(); ++eqn) {
         pbes_expression expr = pgg->from_rewrite_format(pgg->get_pbes_equation((*eqn).variable().name()).formula());
         std::string variable_name = (*eqn).variable().name();
@@ -296,7 +296,7 @@ void lts_info::compute_transition_groups()
         this->variable_parameter_indices.insert(var_param_indices_entry);
         std::pair<std::string,std::map<int,int> > var_param_index_positions_entry = std::make_pair(variable_name, this->get_param_index_positions((*eqn).variable().parameters()));
         this->variable_parameter_index_positions.insert(var_param_index_positions_entry);
-        atermpp::vector<pbes_expression> expression_parts;
+        std::vector<pbes_expression> expression_parts;
         if (tr::is_and(expr)) {
             expression_parts = pbes_expr::split_conjuncts(expr);
         } else if (tr::is_or(expr)) {
@@ -304,7 +304,7 @@ void lts_info::compute_transition_groups()
         } else {
             expression_parts.push_back(expr);
         }
-        for (atermpp::vector<pbes_expression>::const_iterator e =
+        for (std::vector<pbes_expression>::const_iterator e =
                 expression_parts.begin(); e != expression_parts.end(); ++e) {
             this->transition_expression.insert(std::make_pair(group, pgg->rewrite_and_simplify_expression(*e)));
             this->transition_variable_name.insert(
@@ -363,7 +363,7 @@ int lts_info::get_number_of_groups() const
 }
 
 
-const atermpp::map<int, pbes_expression>& lts_info::get_transition_expressions() const
+const std::map<int, pbes_expression>& lts_info::get_transition_expressions() const
 {
     return transition_expression;
 }
@@ -381,7 +381,7 @@ const std::map<int, lts_info::operation_type>& lts_info::get_transition_types() 
 }
 
 
-const atermpp::map<std::string, propositional_variable>& lts_info::get_variables() const
+const std::map<std::string, propositional_variable>& lts_info::get_variables() const
 {
     return variables;
 }
@@ -392,7 +392,7 @@ const std::map<std::string, lts_info::operation_type>& lts_info::get_variable_ty
     return variable_type;
 }
 
-const atermpp::map<std::string, fixpoint_symbol>& lts_info::get_variable_symbols() const
+const std::map<std::string, fixpoint_symbol>& lts_info::get_variable_symbols() const
 {
     return variable_symbol;
 }
@@ -404,7 +404,7 @@ const std::map<std::string, int>& lts_info::get_variable_priorities() const
 }
 
 
-const atermpp::map<std::string, data::variable_list>& lts_info::get_variable_parameters() const
+const std::map<std::string, data::variable_list>& lts_info::get_variable_parameters() const
 {
     return variable_parameters;
 }
@@ -780,12 +780,12 @@ std::string lts_info::to_string(const ltsmin_state& state)
     ss << (state.get_type()==parity_game_generator::PGAME_AND ? "AND" : "OR");
     ss << ":" << state.get_variable();
     ss << "(";
-    const atermpp::vector<data_expression>& param_values = state.get_parameter_values();
+    const std::vector<data_expression>& param_values = state.get_parameter_values();
     std::vector<std::string> param_signatures =
                 this->variable_parameter_signatures[state.get_variable()];
     std::vector<std::string>::const_iterator param_signature =
             param_signatures.begin();
-    for (atermpp::vector<data_expression>::const_iterator param_value =
+    for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
         if (param_value != param_values.begin())
             ss << ", ";
@@ -965,7 +965,7 @@ ltsmin_state::operation_type ltsmin_state::get_type() const
 }
 
 
-const atermpp::vector<data_expression>& ltsmin_state::get_parameter_values() const
+const std::vector<data_expression>& ltsmin_state::get_parameter_values() const
 {
     return param_values;
 }
@@ -981,7 +981,7 @@ pbes_expression ltsmin_state::to_pbes_expression() const
 {
     //std::clog << "to_pbes_expression (this = " << this->to_string() << ")" << std::endl;
     data::data_expression_list parameter_values = data::data_expression_list();
-    for (atermpp::vector<data_expression>::const_iterator param_value =
+    for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
         parameter_values = parameter_values + *param_value;
     }
@@ -1001,7 +1001,7 @@ std::string ltsmin_state::to_string() const
     ss << (type==parity_game_generator::PGAME_AND ? "AND" : "OR");
     ss << ":" << var;
     ss << "(";
-    for (atermpp::vector<data_expression>::const_iterator entry =
+    for (std::vector<data_expression>::const_iterator entry =
             param_values.begin(); entry != param_values.end(); ++entry) {
         if (entry != param_values.begin())
             ss << ", ";
@@ -1031,9 +1031,9 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
-        atermpp::map<data_expression,int> data2int_map;
+        std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
-        atermpp::vector<data_expression> int2data_map;
+        std::vector<data_expression> int2data_map;
         this->localmaps_int2data.push_back(int2data_map);
     }
     //std::clog << "-- end of explorer." << std::endl;
@@ -1047,9 +1047,9 @@ explorer::explorer(const pbes<>& p_, const std::string& rewrite_strategy = "jitt
     this->info = new lts_info(p, pgg, reset_flag);
     //std::clog << "explorer" << std::endl;
     for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
-        atermpp::map<data_expression,int> data2int_map;
+        std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
-        atermpp::vector<data_expression> int2data_map;
+        std::vector<data_expression> int2data_map;
         this->localmaps_int2data.push_back(int2data_map);
     }
     //std::clog << "-- end of explorer." << std::endl;
@@ -1155,8 +1155,8 @@ int explorer::get_string_index(const std::string& s)
 int explorer::get_value_index(int type_no, const data_expression& value)
 {
     //std::clog << "get_value_index type_no=" << type_no << " (" << info->get_lts_type().get_number_of_state_types() << ")" << std::endl;
-    atermpp::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
-    atermpp::map<data_expression,int>::iterator it = data2int_map.find(value);
+    std::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
+    std::map<data_expression,int>::iterator it = data2int_map.find(value);
     int index;
     if (it != data2int_map.end()) {
         index = it->second;
@@ -1292,7 +1292,7 @@ const std::string& explorer::get_string_value(int index)
 
 const data_expression& explorer::get_data_value(int type_no, int index)
 {
-    atermpp::vector<data_expression>& int2data_map = this->localmaps_int2data.at(type_no);
+    std::vector<data_expression>& int2data_map = this->localmaps_int2data.at(type_no);
     if (index >= (int)(int2data_map.size()))
     {
         throw(std::runtime_error("Error in get_data_value: Value not found for type_no "
@@ -1352,7 +1352,7 @@ ltsmin_state* explorer::from_state_vector(int* const& src)
 std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state)
 {
     //std::cout << "get_successors: " << state->to_string() << std::endl;
-    atermpp::vector<ltsmin_state*> result;
+    std::vector<ltsmin_state*> result;
 
     pbes_expression e = state.to_pbes_expression();
     assert(core::detail::check_term_PropVarInst(e));
@@ -1368,9 +1368,9 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state)
     }
     else
     {
-        atermpp::set<pbes_expression> successors
+        std::set<pbes_expression> successors
                 = pgg->get_successors(e);
-        for (atermpp::set<pbes_expression>::const_iterator expr = successors.begin(); expr
+        for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             if (tr::is_prop_var(*expr)) {
                 result.push_back(get_state(*expr));
@@ -1397,7 +1397,7 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
                                                      int group)
 {
     //std::clog << "get_successors: " << state->to_string() << ", group=" << group << std::endl;
-    atermpp::vector<ltsmin_state*> result;
+    std::vector<ltsmin_state*> result;
 
     pbes_expression e = state.to_pbes_expression();
     //std::clog << "* Expression: " << core::pp(e) << std::endl;
@@ -1414,10 +1414,10 @@ std::vector<ltsmin_state*> explorer::get_successors(const ltsmin_state& state,
     }
     else
     {
-        atermpp::set<pbes_expression> successors
+        std::set<pbes_expression> successors
                 = pgg->get_successors(e, detail::map_at(info->get_transition_variable_names(), group),
                                          detail::map_at(info->get_transition_expressions(), group));
-        for (atermpp::set<pbes_expression>::const_iterator expr = successors.begin(); expr
+        for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             //std::clog << "* Successor: " << pgg->print(*expr) << std::endl;
             if (tr::is_prop_var(*expr)) {

@@ -737,7 +737,7 @@ void count_occurrences(
 }
 
 template < class Variable_iterator >
-atermpp::set < variable >  gauss_elimination(
+std::set < variable >  gauss_elimination(
   const std::vector < linear_inequality > &inequalities,
   std::vector < linear_inequality > &resulting_equalities,
   std::vector < linear_inequality > &resulting_inequalities,
@@ -780,7 +780,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 
   std::vector < linear_inequality > inequalities;
   std::vector < linear_inequality > equalities;
-  atermpp::set < variable > vars=
+  std::set < variable > vars=
     gauss_elimination(inequalities_in,
                       equalities,      // Store all resulting equalities here.
                       inequalities,    // Store all resulting non equalities here.
@@ -793,7 +793,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // At this stage, the variables that should be eliminated only occur in
   // inequalities. Group the inequalities into positive, 0, and negative
   // occurrences of each variable, and create a new system.
-  for (atermpp::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
+  for (std::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
     std::map < variable, size_t> nr_positive_occurrences;
     std::map < variable, size_t> nr_negative_occurrences;
@@ -802,7 +802,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     bool found=false;
     size_t best_choice=0;
     variable best_variable;
-    for (atermpp::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
+    for (std::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
     {
       const size_t p=nr_positive_occurrences[*k];
       const size_t n=nr_negative_occurrences[*k];
@@ -1076,7 +1076,7 @@ inline void remove_redundant_inequalities(
     }
   }
 
-  atermpp::set<variable> dvs;
+  std::set<variable> dvs;
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
   { i->add_variables(dvs);
@@ -1114,7 +1114,7 @@ static void pivot_and_update(
   const data_expression v_delta_correction,
   atermpp::map < variable,data_expression > &beta,
   atermpp::map < variable,data_expression > &beta_delta_correction,
-  atermpp::set < variable > &basic_variables,
+  std::set < variable > &basic_variables,
   std::map < variable, linear_inequality::lhs_t > &working_equalities,
   const rewriter& r)
 {
@@ -1128,7 +1128,7 @@ static void pivot_and_update(
   beta_delta_correction[xj]=rewrite_with_memory(sort_real::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
   // mCRL2log(debug) << "Pivoting phase 0\n";
-  for (atermpp::set < variable >::const_iterator k=basic_variables.begin();
+  for (std::set < variable >::const_iterator k=basic_variables.begin();
        k!=basic_variables.end(); ++k)
   {
     if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
@@ -1228,8 +1228,8 @@ inline bool is_inconsistent(
   atermpp::map < variable,data_expression > lowerbounds_delta_correction;
   atermpp::map < variable,data_expression > upperbounds_delta_correction;
   atermpp::map < variable,data_expression > beta_delta_correction;
-  atermpp::set < variable > non_basic_variables;
-  atermpp::set < variable > basic_variables;
+  std::set < variable > non_basic_variables;
+  std::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
   set_identifier_generator fresh_variable_name;
@@ -1351,7 +1351,7 @@ inline bool is_inconsistent(
   // Now set the values for beta:
   // The beta values for the non basic variables must satisfy the lower and
   // upperbounds.
-  for (atermpp::set < variable >::const_iterator i=non_basic_variables.begin();
+  for (std::set < variable >::const_iterator i=non_basic_variables.begin();
        i!=non_basic_variables.end(); ++i)
   {
     if (lowerbounds.count(*i)>0)
@@ -1382,7 +1382,7 @@ inline bool is_inconsistent(
   }
 
   // Subsequently set the values for the basic variables
-  for (atermpp::set < variable >::const_iterator i=basic_variables.begin();
+  for (std::set < variable >::const_iterator i=basic_variables.begin();
        i!=basic_variables.end(); ++i)
   {
     beta[*i]=working_equalities[*i].evaluate(beta,r);
@@ -1403,7 +1403,7 @@ inline bool is_inconsistent(
     bool found=false;
     bool lowerbound_violation = false;
     variable xi;
-    for (atermpp::set < variable > :: const_iterator i=basic_variables.begin() ;
+    for (std::set < variable > :: const_iterator i=basic_variables.begin() ;
          i!=basic_variables.end() ; ++i)
     {
       // mCRL2log(debug) << "Evaluate start\n";
@@ -1571,7 +1571,7 @@ inline bool is_inconsistent(
 /// \ret The variables that could not be removed by gauss elimination.
 
 template < class Variable_iterator >
-atermpp::set < variable >  gauss_elimination(
+std::set < variable >  gauss_elimination(
   const std::vector < linear_inequality > &inequalities,
   std::vector < linear_inequality > &resulting_equalities,
   std::vector < linear_inequality > &resulting_inequalities,
@@ -1579,7 +1579,7 @@ atermpp::set < variable >  gauss_elimination(
   Variable_iterator variables_end,
   const rewriter& r)
 {
-  atermpp::set < variable >  remaining_variables;
+  std::set < variable >  remaining_variables;
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
   for (std::vector < linear_inequality > ::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)

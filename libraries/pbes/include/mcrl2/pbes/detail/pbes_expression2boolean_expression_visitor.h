@@ -38,7 +38,7 @@ struct pbes_expression2boolean_expression_visitor: public pbes_expression_visito
   typedef core::term_traits<bes::boolean_expression> br;
 
   /// \brief A stack containing boolean expressions.
-  atermpp::vector<bes::boolean_expression> expression_stack;
+  std::vector<bes::boolean_expression> expression_stack;
 
   /// \brief Returns the top element of the expression stack, which is the result of the conversion.
   bes::boolean_expression result() const

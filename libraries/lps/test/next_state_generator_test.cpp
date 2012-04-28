@@ -12,7 +12,6 @@
 #include <queue>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
@@ -44,12 +43,12 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
 
   state initial_state = generator.initial_state();
 
-  atermpp::set<state> visited;
-  atermpp::set<state> seen;
-  atermpp::set<multi_action> transition_labels;
+  std::set<state> visited;
+  std::set<state> seen;
+  std::set<multi_action> transition_labels;
   size_t transitions = 0;
 
-  std::queue<state, atermpp::deque<state> > q;
+  std::queue<state, std::deque<state> > q;
   q.push(initial_state);
   seen.insert(initial_state);
 

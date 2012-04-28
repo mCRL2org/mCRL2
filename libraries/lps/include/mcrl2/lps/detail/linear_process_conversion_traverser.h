@@ -14,7 +14,6 @@
 
 #include <stdexcept>
 #include "mcrl2/exception.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"

@@ -13,7 +13,6 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 
@@ -119,7 +118,7 @@ class EnumeratorStandard
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
-    atermpp::set< atermpp::aterm_int > eqs;
+    std::set< atermpp::aterm_int > eqs;
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();
@@ -151,8 +150,8 @@ class EnumeratorSolutionsStandard
     atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
     internal_substitution_type &enum_sigma;
 
-    atermpp::deque < fs_expr> fs_stack;
-    atermpp::vector< ss_solution > ss_stack;
+    std::deque < fs_expr> fs_stack;
+    std::vector< ss_solution > ss_stack;
 
     size_t used_vars;
     size_t max_vars;
@@ -303,7 +302,7 @@ class EnumeratorSolutionsStandard
                  const atermpp::term_list< atermpp::aterm_appl > &negation_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or(
-                 atermpp::deque < fs_expr> &fs_stack,
+                 std::deque < fs_expr> &fs_stack,
                  const variable_list &var_list,
                  const variable_list &substituted_vars,
                  const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
@@ -311,7 +310,7 @@ class EnumeratorSolutionsStandard
                  const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or_without_rewriting(
-                 atermpp::deque < fs_expr> &fs_stack,
+                 std::deque < fs_expr> &fs_stack,
                  const variable_list &var_list,
                  const variable_list &substituted_vars,
                  const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,

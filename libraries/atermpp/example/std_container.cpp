@@ -19,11 +19,6 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/deque.h"
-#include "mcrl2/atermpp/list.h"
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 
 using namespace std;
 using namespace atermpp;
@@ -122,7 +117,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   // deque
-  atermpp::deque<aterm_appl> d;
+  std::deque<aterm_appl> d;
   d.assign(3, make_term("f(1)"));
   d.push_back(make_term("f(2)"));
   d.push_front(make_term("f(3)"));
@@ -130,7 +125,7 @@ int main(int argc, char* argv[])
   cout << endl;
 
   // vector
-  atermpp::vector<aterm_appl> v;
+  std::vector<aterm_appl> v;
   v.reserve(5);
   v.push_back(make_term("g(1)"));
   v.push_back(make_term("g(2)"));
@@ -139,13 +134,13 @@ int main(int argc, char* argv[])
   v.insert(v.begin()+1, make_term("a(0)"));
 
   // list
-  atermpp::list<aterm_appl> l;
+  std::list<aterm_appl> l;
   l.push_back(make_term("l(1)"));
   l.push_front(make_term("l(2)"));
   l.push_front(make_term("l(4)"));
 
   // set
-  atermpp::set<A> s;
+  std::set<A> s;
   for (int i = 0; i < 5; i++)
   {
     s.insert(A(5-i));
@@ -153,7 +148,7 @@ int main(int argc, char* argv[])
   s.insert(A(1));
 
   // multiset
-  atermpp::multiset<A> s1;
+  std::multiset<A> s1;
   for (int i = 0; i < 5; i++)
   {
     s1.insert(A(5-i));
@@ -161,14 +156,14 @@ int main(int argc, char* argv[])
   s1.insert(A(1));
 
   // map
-  atermpp::map<int, aterm_int> m;
+  std::map<int, aterm_int> m;
   for (int i = 0; i < 5; i++)
   {
     m[i] = aterm_int(i);
   }
 
   // multimap
-  atermpp::multimap<int, aterm_int> m1;
+  std::multimap<int, aterm_int> m1;
   for (int i = 0; i < 5; i++)
   {
     m1.insert(make_pair(i, aterm_int(i)));

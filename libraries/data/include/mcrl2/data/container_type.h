@@ -13,7 +13,6 @@
 #define MCRL2_DATA_CONTAINER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -46,7 +45,7 @@ class container_type: public atermpp::aterm_appl
 typedef atermpp::term_list<container_type> container_type_list;
 
 /// \brief vector of container_types
-typedef atermpp::vector<container_type>    container_type_vector;
+typedef std::vector<container_type>    container_type_vector;
 
 
 /// \brief Container type for lists

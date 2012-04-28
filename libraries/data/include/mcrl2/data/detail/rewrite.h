@@ -49,8 +49,8 @@ class Rewriter
   public:
     data::set_identifier_generator generator;  //name for variables.
 
-    typedef mutable_indexed_substitution<data::variable, atermpp::vector< atermpp::aterm_appl > > internal_substitution_type;
-    typedef mutable_indexed_substitution<data::variable, atermpp::vector< data::data_expression > > substitution_type;
+    typedef mutable_indexed_substitution<data::variable, std::vector< atermpp::aterm_appl > > internal_substitution_type;
+    typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
     atermpp::aterm_appl internal_true;
     atermpp::aterm_appl internal_false;
@@ -328,9 +328,9 @@ size_t get_num_opids();
 
 function_symbol get_int2term(const size_t n);
 
-atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator term2int_begin();
+std::map< function_symbol, atermpp::aterm_int >::const_iterator term2int_begin();
 
-atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end();
+std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end();
 
 inline size_t getArity(const data::function_symbol &op)
 {

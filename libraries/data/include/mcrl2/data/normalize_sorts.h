@@ -28,7 +28,7 @@ namespace detail
 struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
 {
   /* const data_specification& m_data_spec; */
-  const atermpp::map< sort_expression, sort_expression > &m_normalised_aliases;
+  const std::map< sort_expression, sort_expression > &m_normalised_aliases;
 
   normalize_sorts_function(const data_specification& data_spec)
     : m_normalised_aliases(data_spec.sort_alias_map())
@@ -43,7 +43,7 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     // strategy. Note that it is assumed that m_normalised_aliases contain rewrite rules <A,B>, such
     // that B is a normal form. This allows to check that if e matches A, then we can return B.
 
-    const atermpp::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
+    const std::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
     if (i1!=m_normalised_aliases.end())
     {
       return i1->second;
@@ -56,7 +56,7 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     if (is_function_sort(e))
     {
       // Rewrite the arguments into normal form.
-      atermpp::vector< sort_expression > new_domain;
+      std::vector< sort_expression > new_domain;
       sort_expression_list e_domain(function_sort(e).domain());
       for (sort_expression_list::const_iterator i = e_domain.begin(); i != e_domain.end(); ++i)
       {
@@ -75,11 +75,11 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     else if (is_structured_sort(e))
     {
       // Rewrite the argument sorts to normal form.
-      atermpp::vector< structured_sort_constructor > new_constructors;
+      std::vector< structured_sort_constructor > new_constructors;
       structured_sort_constructor_list e_constructors(structured_sort(e).struct_constructors());
       for (structured_sort_constructor_list::const_iterator i = e_constructors.begin(); i != e_constructors.end(); ++i)
       {
-        atermpp::vector< structured_sort_constructor_argument > new_arguments;
+        std::vector< structured_sort_constructor_argument > new_arguments;
         structured_sort_constructor_argument_list i_arguments(i->arguments());
         for (structured_sort_constructor_argument_list::const_iterator j = i_arguments.begin(); j != i_arguments.end(); ++j)
         {
@@ -94,7 +94,7 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
 
     // The arguments of new_sort are now in normal form.
     // Rewrite it to normal form.
-    const atermpp::map< sort_expression, sort_expression >::const_iterator i2=m_normalised_aliases.find(new_sort);
+    const std::map< sort_expression, sort_expression >::const_iterator i2=m_normalised_aliases.find(new_sort);
     if (i2!=m_normalised_aliases.end())
     {
       new_sort=this->operator()(i2->second); // rewrite the result until normal form.

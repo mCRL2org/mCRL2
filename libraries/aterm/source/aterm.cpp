@@ -17,9 +17,7 @@
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/afun.h"
-#include "mcrl2/aterm/gc.h"
 #include "mcrl2/aterm/util.h"
-// #include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/atypes.h"
 #include "mcrl2/aterm/safio.h"
 #include "mcrl2/aterm/afun.h"
@@ -39,12 +37,12 @@ static const int ERROR_SIZE = 32;
 /* In the current implementation this means that
    excessive term protection can lead to deteriorating
    performance! */
-static const size_t INITIAL_PROT_TABLE_SIZE = 100003;
-static const size_t PROTECT_EXPAND_SIZE = 100000;
+// static const size_t INITIAL_PROT_TABLE_SIZE = 100003;
+// static const size_t PROTECT_EXPAND_SIZE = 100000;
 
 /* The same for protection function */
-static const size_t PROTECT_FUNC_INITIAL_SIZE = 32;
-static const size_t PROTECT_FUNC_EXPAND_SIZE = 32;
+// static const size_t PROTECT_FUNC_INITIAL_SIZE = 32;
+// static const size_t PROTECT_FUNC_EXPAND_SIZE = 32;
 
 /*}}}  */
 /*{{{  globals */
@@ -62,14 +60,6 @@ static int      line = 0;
 static int      col = 0;
 static char     error_buf[ERROR_SIZE];
 static int      error_idx = 0;
-
-// ProtEntry*       free_prot_entries = NULL;
-// ProtEntry**       at_prot_table = NULL;
-// size_t    at_prot_table_size = 0;
-// ProtEntry*       at_prot_memory = NULL;
-// ATermProtFunc*   at_prot_functions = NULL;
-// size_t    at_prot_functions_size = 0;
-// size_t    at_prot_functions_count = 0;
 
 /*}}}  */
 /*{{{  function declarations */
@@ -181,11 +171,11 @@ bool ATisInitialized()
  * Protect a given term.
  */
 
-void
-ATprotect(const ATerm* )
-{
+// void
+// ATprotect(const ATerm* )
+// {
   // ATprotectArray(term, 1);
-}
+// }
 
 /*}}}  */
 /*{{{  void ATunprotect(ATerm *term) */
@@ -194,11 +184,11 @@ ATprotect(const ATerm* )
  * Unprotect a given term.
  */
 
-void
-ATunprotect(const ATerm* )
-{
+// void
+// ATunprotect(const ATerm* )
+// {
   // ATunprotectArray(term);
-}
+// }
 
 /*}}}  */
 /*{{{  void ATprotectArray(ATerm *start, int size) */
@@ -207,9 +197,9 @@ ATunprotect(const ATerm* )
  * Protect an array
  */
 
-void ATprotectArray(const ATerm*, const size_t )
-{
-  return;
+// void ATprotectArray(const ATerm*, const size_t )
+// {
+//   return;
 
 /*
   ProtEntry* entry;
@@ -246,7 +236,7 @@ void ATprotectArray(const ATerm*, const size_t )
   at_prot_table[hnr] = entry;
   entry->start = start;
   entry->size  = size; */
-} 
+// } 
 
 /*}}}  */
 /*{{{  void ATunprotectArrray(ATerm *start) */
@@ -255,9 +245,9 @@ void ATprotectArray(const ATerm*, const size_t )
  * Unprotect an array of terms.
  */
 
-void ATunprotectArray(const ATerm* )
-{
-  return;
+// void ATunprotectArray(const ATerm* )
+// {
+//   return;
 /*
   ShortHashNumber hnr;
   ProtEntry* entry, *prev;
@@ -285,13 +275,13 @@ void ATunprotectArray(const ATerm* )
 
   entry->next = free_prot_entries;
   free_prot_entries = entry; */
-} 
+// } 
 
 /*}}}  */
 
-void ATaddProtectFunction(const ATermProtFunc )
-{
-  return;
+// void ATaddProtectFunction(const ATermProtFunc )
+// {
+  // return;
   /*
  
   ATermProtFunc* new_at_prot_functions;
@@ -322,7 +312,7 @@ void ATaddProtectFunction(const ATermProtFunc )
   }
 
   at_prot_functions[at_prot_functions_count++] = f;*/
-} 
+// } 
 
 /*}}}  */
 

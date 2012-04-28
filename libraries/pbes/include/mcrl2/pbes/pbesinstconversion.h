@@ -58,8 +58,8 @@ bes::boolean_equation_system<> pbesinstconversion(const pbes<>& p)
 {
   assert(is_bes(p));
 
-  atermpp::vector<bes::boolean_equation> equations;
-  for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  std::vector<bes::boolean_equation> equations;
+  for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     equations.push_back(pbesinstconversion(*i));
   }

@@ -13,8 +13,6 @@
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
 
 #include <set>
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/builder.h"
@@ -39,7 +37,7 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     using super::leave;
     using super::operator();
 
-    typedef atermpp::map<core::identifier_string, atermpp::vector<core::identifier_string> > name_map;
+    typedef std::map<core::identifier_string, std::vector<core::identifier_string> > name_map;
 
     /// \brief The stack of names.
     name_map m_names;
@@ -56,7 +54,7 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     /// \brief Pushes name on the stack.
     void push(const core::identifier_string& name)
     {
-      atermpp::vector<core::identifier_string>& names = m_names[name];
+      std::vector<core::identifier_string>& names = m_names[name];
       if (names.empty())
       {
         names.push_back(name);

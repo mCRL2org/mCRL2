@@ -13,7 +13,6 @@
 #define PARSER_TYPECHECK_H
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/vector.h"
 
 namespace mcrl2
 {

@@ -184,7 +184,7 @@ std::vector < mcrl2::lps::state > StandardSimulator::GetNextStates()
   return next_states;
 }
 
-atermpp::vector < mcrl2::lps::multi_action > StandardSimulator::GetNextActions()
+std::vector < mcrl2::lps::multi_action > StandardSimulator::GetNextActions()
 {
   return next_actions;
 }
@@ -329,7 +329,7 @@ bool StandardSimulator::match_trace_recursively(const size_t pos, size_t &culpri
   // Avoid that the nextstate generator is invoked recursively. First store all
   // outgoing transitions of the current states in local data structures.
   std::vector < state > local_states;
-  atermpp::vector < multi_action > local_actions;
+  std::vector < multi_action > local_actions;
   ATerm NewState;
   while (nextstategen->next(ma,&NewState))
   {

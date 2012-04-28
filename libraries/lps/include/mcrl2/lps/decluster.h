@@ -28,8 +28,8 @@ class decluster_algorithm: public lps::detail::lps_algorithm
     template <typename SummandType, typename OutIter>
     void decluster_summand(const SummandType& summand, OutIter& out)
     {
-      atermpp::set<data::data_expression> disjuncts = data::split_or(summand.condition());
-      for(atermpp::set<data::data_expression>::const_iterator i = disjuncts.begin(); i != disjuncts.end(); ++i)
+      std::set<data::data_expression> disjuncts = data::split_or(summand.condition());
+      for(std::set<data::data_expression>::const_iterator i = disjuncts.begin(); i != disjuncts.end(); ++i)
       {
         SummandType s(summand);
         s.condition() = *i;

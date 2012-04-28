@@ -37,9 +37,9 @@ one_point_rule_preprocessor
       }
       else if (data::sort_bool::is_and_application(y))
       {
-        atermpp::set<data::data_expression> args = data::split_and(y);
-        atermpp::vector<data::data_expression> result;
-        for (atermpp::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        std::set<data::data_expression> args = data::split_and(y);
+        std::vector<data::data_expression> result;
+        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
         {
           result.push_back((*this)(data::sort_bool::not_(*i)));
         }
@@ -47,9 +47,9 @@ one_point_rule_preprocessor
       }
       else if (data::sort_bool::is_or_application(y))
       {
-        atermpp::set<data::data_expression> args = data::split_or(y);
-        atermpp::vector<data::data_expression> result;
-        for (atermpp::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        std::set<data::data_expression> args = data::split_or(y);
+        std::vector<data::data_expression> result;
+        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
         {
           result.push_back((*this)(data::sort_bool::not_(*i)));
         }

@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_REPLACE_H
 #define MCRL2_DATA_REPLACE_H
 
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 

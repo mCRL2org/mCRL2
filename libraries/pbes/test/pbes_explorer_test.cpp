@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
@@ -164,7 +163,7 @@ void explorer::bfs()
         for(std::vector<std::vector<int> >::iterator succ = successors.begin(); succ != successors.end(); ++succ)
         {
           std::vector<int> s = *succ;
-          std::pair<atermpp::set<std::vector<int> >::iterator,bool> ret;
+          std::pair<std::set<std::vector<int> >::iterator,bool> ret;
           ret = visited.insert(s);
           if (ret.second)
           {

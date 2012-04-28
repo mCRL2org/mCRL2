@@ -30,7 +30,7 @@ using namespace mcrl2::log;
 */
 
 lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
-    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
+    std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
     bool add_distribution_laws
 )
 {
@@ -44,7 +44,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
   m_glob_vars = spec.global_variables();
   m_action_label_list = spec.action_labels();
 
-  for (atermpp::vector<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
+  for (std::vector<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
        i != m_data_specification.sorts().end();
        ++i)
   {
@@ -179,7 +179,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
   std::string str = "pi_";
   str.append(string(fresh_basic_sort.name()).append("_"));
 
-  atermpp::set<mcrl2::data::sort_expression> processed;
+  std::set<mcrl2::data::sort_expression> processed;
   for (function_symbol_vector::iterator i = k.begin() ; i != k.end(); ++i)
   {
     if (is_function_sort(i->sort()))
@@ -205,7 +205,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 {
   variable_vector vars;        /* Equation variables  */
   data_equation_vector del;    /* Generated equations */
-  atermpp::set<mcrl2::core::identifier_string> var_names; /* var_names */
+  std::set<mcrl2::core::identifier_string> var_names; /* var_names */
   mcrl2::data::set_identifier_generator generator;
   variable v;
 
@@ -234,8 +234,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   }
 
   /* Creating Detector equations */
-  atermpp::map< sort_expression, variable_vector > sort_vars;//type_var_list;    /* Mapping for Sort |-> [Variable] */
-  atermpp::map< sort_expression, size_t             > sort_index;//type_var_count;  /* Mapping for counting the number of unique Sorts of an equation */
+  std::map< sort_expression, variable_vector > sort_vars;//type_var_list;    /* Mapping for Sort |-> [Variable] */
+  std::map< sort_expression, size_t             > sort_index;//type_var_count;  /* Mapping for counting the number of unique Sorts of an equation */
 
   size_t e = 0;
   for (function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
@@ -385,7 +385,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   return del;
 }
 
-mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, atermpp::set<mcrl2::core::identifier_string>& process_parameter_names)
+mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names)
 {
   mcrl2::data::set_identifier_generator generator;
   generator.add_identifiers(process_parameter_names);
@@ -400,7 +400,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
 
   /* Get process_parameters names from lps */
-  atermpp::set<mcrl2::core::identifier_string> process_parameter_names;
+  std::set<mcrl2::core::identifier_string> process_parameter_names;
   for (mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
        i != lps_proc_pars.end();
        ++i)
@@ -486,7 +486,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   mcrl2::lps::summand_vector new_summands;
 
   //Prepare parameter substitution
-  atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
+  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
   mcrl2::lps::deprecated::summand_list s = mcrl2::lps::deprecated::linear_process_summands(m_lps);
   for (mcrl2::lps::deprecated::summand_list::iterator j = s.begin()
@@ -547,11 +547,11 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
   mcrl2::lps::deprecated::set_linear_process_summands(new_lps, mcrl2::lps::deprecated::summand_list(new_summands.begin(), new_summands.end()));
 
-  for (atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
+  for (std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
        ; i != parsub.end()
        ; ++i)
   {
-    mutable_map_substitution< atermpp::map< mcrl2::data::variable , mcrl2::data::data_expression > > s;
+    mutable_map_substitution< std::map< mcrl2::data::variable , mcrl2::data::data_expression > > s;
     s[ i->first ] = i->second;
     mcrl2::lps::replace_variables( new_lps, s );
   }
@@ -630,15 +630,15 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   return new_init;
 }
 
-atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function)
+std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function)
 {
-  atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
+  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
   data_expression_vector dev;
 
   set<mcrl2::data::variable_vector::iterator> used_iters;
 
   mcrl2::data::variable prev;
-  for (atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
+  for (std::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
        ; i != proc_par_to_proc_par_inj.end()
        ; ++i)
   {
@@ -955,7 +955,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
     /* Using cache */
     mCRL2log(verbose) << "Update using cache for sort: \"" <<  mcrl2::data::pp(m_unfold_process_parameter)  << "\"..." << std::endl;
 
-    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
+    std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
 
     fresh_basic_sort = ce->second.cached_fresh_basic_sort;
     k = ce->second.cached_k;

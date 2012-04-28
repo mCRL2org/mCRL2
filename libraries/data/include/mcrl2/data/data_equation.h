@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -143,7 +142,7 @@ class data_equation: public atermpp::aterm_appl
 typedef atermpp::term_list< data_equation >    data_equation_list;
 
 /// \brief list of data_equations
-typedef atermpp::vector< data_equation >       data_equation_vector;
+typedef std::vector< data_equation >       data_equation_vector;
 
 // template function overloads
 std::string pp(const data_equation& x);

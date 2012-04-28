@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
@@ -72,7 +71,7 @@ class variable: public data_expression
 typedef atermpp::term_list<variable> variable_list;
 
 /// \brief vector of variables
-typedef atermpp::vector<variable>    variable_vector;
+typedef std::vector<variable>    variable_vector;
 
 //--- end generated class variable ---//
 
@@ -81,7 +80,7 @@ std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);
-std::string pp(const atermpp::set<variable>& x);
+std::string pp(const std::set<variable>& x);
 std::set<data::variable> find_variables(const data::variable& x);
 std::set<data::variable> find_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);

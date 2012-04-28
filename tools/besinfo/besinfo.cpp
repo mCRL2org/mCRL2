@@ -105,7 +105,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+        for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
         {
           std::cout << core::pp(i->symbol()) << "." << bes::pp(i->variable()) << std::endl;
         }

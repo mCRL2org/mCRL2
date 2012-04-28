@@ -18,7 +18,6 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
@@ -76,7 +75,7 @@ class action_formula: public atermpp::aterm_appl
 typedef atermpp::term_list<action_formula> action_formula_list;
 
 /// \brief vector of action_formulas
-typedef atermpp::vector<action_formula>    action_formula_vector;
+typedef std::vector<action_formula>    action_formula_vector;
 
 
 /// \brief Test for a action_formula expression

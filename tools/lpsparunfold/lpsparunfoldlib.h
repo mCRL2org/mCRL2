@@ -30,7 +30,7 @@ namespace mcrl2
 {
 namespace lps
 {
-typedef atermpp::vector< mcrl2::lps::deprecated::summand >     summand_vector;
+typedef std::vector< mcrl2::lps::deprecated::summand >     summand_vector;
 }
 }
 
@@ -57,7 +57,7 @@ class lpsparunfold
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(mcrl2::lps::specification spec,
-        atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
+        std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
         bool add_distribution_laws=false
     );
 
@@ -75,7 +75,7 @@ class lpsparunfold
 
   private:
 
-    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >* m_cache;
+    std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >* m_cache;
 
     /// \brief The sort of the process parameter that needs to be unfold.
     mcrl2::data::sort_expression m_unfold_process_parameter;
@@ -90,7 +90,7 @@ class lpsparunfold
     mcrl2::lps::linear_process m_lps;
 
     /// \brief The global variables of the specification
-    atermpp::set< mcrl2::data::variable > m_glob_vars;
+    std::set< mcrl2::data::variable > m_glob_vars;
 
     /// \brief The initialization of a linear process used for manipulation
     mcrl2::lps::process_initializer m_init_process;
@@ -102,13 +102,13 @@ class lpsparunfold
     mcrl2::data::basic_sort fresh_basic_sort;
 
     /// \brief The set of sort names occurring in the process specification.
-    atermpp::set<mcrl2::core::identifier_string> sort_names;
+    std::set<mcrl2::core::identifier_string> sort_names;
 
     /// \brief The set of constructor and mapping names occurring in the process specification.
-    atermpp::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
+    std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
 
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
-    atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
+    std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
@@ -189,7 +189,7 @@ class lpsparunfold
       *         with respect to the set of process parameters (process_parameter_names).
       * \return A fresh process parameter name.
     **/
-    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, atermpp::set<mcrl2::core::identifier_string>& process_parameter_names);
+    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names);
 
     /** \brief  Get the sort of the process parameter at given index
       * \param  str denotes the prefered parameter_at_index name for index value.
@@ -201,8 +201,8 @@ class lpsparunfold
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions.
     **/
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameter_substitution(
-      atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector > i,
+    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameter_substitution(
+      std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i,
       mcrl2::data::function_symbol_vector AffectedConstructors,
       mcrl2::data::function_symbol case_function);
 

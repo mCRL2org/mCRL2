@@ -105,7 +105,7 @@ class representative_generator
     data_specification const&                        m_specification;
 
     /// \brief Serves as a cache for later find operations
-    atermpp::map< sort_expression, data_expression > m_representatives;
+    std::map< sort_expression, data_expression > m_representatives;
 
   protected:
 
@@ -244,7 +244,7 @@ class representative_generator
     /// \param[in] maximum_depth unfold generate terms recursively up to this depth
     data_expression operator()(sort_expression const& sort, const unsigned int maximum_depth = 3)
     {
-      for (atermpp::map< sort_expression, data_expression >::iterator i = m_representatives.find(sort); i != m_representatives.end();)
+      for (std::map< sort_expression, data_expression >::iterator i = m_representatives.find(sort); i != m_representatives.end();)
       {
         return i->second;
       }
