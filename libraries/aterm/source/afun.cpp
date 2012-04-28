@@ -52,10 +52,9 @@ size_t AFun::first_free = size_t(-1);
 
 std::vector < _SymEntry* > AFun::at_lookup_table;
 
-AFun AS_INT;
-AFun AS_LIST;
-AFun AS_EMPTY_LIST;
-
+const AFun AS_INT("<int>", 0);
+const AFun AS_LIST("[_,_]", 2);
+const AFun AS_EMPTY_LIST("[]", 0);
 
 // static std::multiset < AFun > protected_symbols;
 
@@ -63,6 +62,8 @@ AFun AS_EMPTY_LIST;
 /*}}}  */
 
 /*{{{  function declarations */
+
+static ShortHashNumber AT_hashAFun(const char* name, const size_t arity);
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);
@@ -231,7 +232,7 @@ std::string ATwriteAFunToString(const AFun &fun)
  * Calculate the hash value of a symbol.
  */
 
-ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
+static ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 {
   ShortHashNumber hnr;
   const char* walk = name;
@@ -271,7 +272,6 @@ AFun::AFun(const char* name, const size_t arity, const bool quoted)
   {
     const size_t free_entry = first_free;
     assert(at_lookup_table.size()<afun_table_size);
-    assert(at_lookup_table.size()<afun_table_size); // There is a free places in the hash table.
 
     if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table to store an AFun.
     { 
@@ -304,12 +304,12 @@ AFun::AFun(const char* name, const size_t arity, const bool quoted)
     afun_hashtable[hnr] = cur;
   }
 
-  at_lookup_table[cur]->reference_count++;
   if (at_lookup_table.size()>=afun_table_size) 
   {
     resize_table();
   }
   m_number=cur;
+  increase_reference_count<false>(m_number);
 }
 
 /*}}}  */

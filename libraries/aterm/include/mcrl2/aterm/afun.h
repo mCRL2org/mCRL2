@@ -1,3 +1,4 @@
+// #define PRINT_GC_INFO
 #ifndef AFUN_H
 #define AFUN_H
 
@@ -69,6 +70,7 @@ class AFun
                                                        // we cannot use a vector of _SymEntry, as these
                                                        // are relocated. 
 
+  protected:
     template <bool CHECK>
     static void increase_reference_count(const size_t n)
     {
@@ -232,9 +234,9 @@ AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted);
 // The following afuns are used in bafio.
 
 
-extern AFun AS_INT;
-extern AFun AS_LIST;
-extern AFun AS_EMPTY_LIST;
+extern const AFun AS_INT;
+extern const AFun AS_LIST;
+extern const AFun AS_EMPTY_LIST;
 
 
 inline
@@ -246,37 +248,7 @@ bool AT_isValidAFun(const size_t sym)
 }
 
 
-// void AT_initAFun();
 size_t AT_printAFun(const size_t sym, FILE* f);
-
-/* inline
-void AT_markAFun(const AFun &s)
-{
-  assert(s.number()<AFun::at_lookup_table.size());
-  AFun::at_lookup_table[s.number()]->header |= MASK_MARK;
-} */
-
-/* inline
-void AT_unmarkAFun(const AFun &s)
-{
-  assert(s.number()<AFun::at_lookup_table.size());
-  AFun::at_lookup_table[s.number()]->header &= ~MASK_MARK;
-} */
-
-/* inline
-bool AT_isMarkedAFun(const AFun &sym)
-{
-  assert(sym<AFun::at_lookup_table.size());
-  return IS_MARKED(AFun::at_lookup_table[sym.number()]->header);
-} */
-
-/* void  AT_freeAFun(SymEntry sym);
-void AT_markProtectedAFuns();
-*/
-
-size_t AT_hashAFun(const char* name, const size_t arity);
-bool AT_findAFun(const char* name, const size_t arity, const bool quoted);
-// void AT_unmarkAllAFuns();
 
 std::string ATwriteAFunToString(const AFun &t);
 

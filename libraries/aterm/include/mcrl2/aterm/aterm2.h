@@ -269,13 +269,15 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
 inline
 size_t ATgetAFun(const _ATermAppl* appl)
 {
-  return GET_SYMBOL(appl->header);
+  return appl->m_function_symbol.number();
+  // return GET_SYMBOL(appl->header);
 }
 
 inline
 size_t ATgetAFun(const ATermAppl &appl)
 {
-  return GET_SYMBOL(appl->header);
+  return appl.function_symbol().number();
+  // return GET_SYMBOL(appl->header);
 }
 
 inline
@@ -413,9 +415,6 @@ bool ATisQuoted(const AFun &sym)
 {
   return sym.is_quoted();
 }
-
-// void    ATprotectAFun(const AFun &sym);
-// void    ATunprotectAFun(const AFun &sym);
 
 } // namespace aterm
 

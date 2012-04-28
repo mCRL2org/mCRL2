@@ -364,7 +364,6 @@ template <typename Term>
 inline
 term_list<Term> operator+(term_list<Term> l, Term t)
 {
-  assert(t.type() != AT_FREE);
   return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t)));
 }
 

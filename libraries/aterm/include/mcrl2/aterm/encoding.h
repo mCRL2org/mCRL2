@@ -1,4 +1,3 @@
-// #define PRINT_GC_INFO
 /**
   * encoding.h: Low level encoding of ATerm datatype.
   */
@@ -35,56 +34,33 @@ namespace aterm
    typedef unsigned long header_type; */
 typedef MachineWord header_type;
 
-#define MCRL2_HT(t) (static_cast<MachineWord>(t))
-
 typedef void (*ATermProtFunc)();
 
 /**
  * These are the types of ATerms there are. \see ATgetType().
  */
-static const size_t AT_FREE = 0;
+
 static const size_t AT_APPL = 1;
 static const size_t AT_INT = 2;
-static const size_t AT_LIST = 4;
-// static const size_t AT_SYMBOL = 7;
-
-// static const size_t HEADER_BITS = sizeof(size_t)*8;
-
-#ifdef AT_64BIT
-static const header_type SHIFT_LENGTH = MCRL2_HT(34);
-// static const header_type ARITY_BITS = MCRL2_HT(8);
-#endif /* AT_64BIT */
-#ifdef AT_32BIT
-static const header_type SHIFT_LENGTH = MCRL2_HT(10);
-// static const header_type ARITY_BITS = MCRL2_HT(3);
-#endif /* AT_32BIT */
-
-static const header_type TYPE_BITS = MCRL2_HT(3);
-// static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
-
-static const header_type SHIFT_TYPE = MCRL2_HT(4);
-
-// static const header_type SHIFT_ARITY = MCRL2_HT(7);
-
-// static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
-// static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
-static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
-// static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
-
-// static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
-
-
-
+static const size_t AT_LIST = 3;
 
 struct _ATerm
 {
-    header_type   header;
-    size_t reference_count;
+    AFun    m_function_symbol;
+    size_t  reference_count;
     _ATerm* next;
 
     size_t type() const
     {
-      return ((header)  & MASK_TYPE) >> SHIFT_TYPE;
+      if (m_function_symbol.number()==AS_LIST.number() || m_function_symbol.number()==AS_EMPTY_LIST.number())
+      { 
+        return AT_LIST;
+      }
+      else if (m_function_symbol.number()==AS_INT.number())
+      {
+        return AT_INT;
+      }
+      return AT_APPL;
     }
 };
 
@@ -181,9 +157,20 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       return m_aterm;
     }
 
-    /// \brief Return the type of term.
+    /// \brief Returns the function symbol belonging to a term.
+    /// \return The function symbol of this term.
+    const AFun &function_symbol() const
+    {
+      return m_aterm->m_function_symbol;
+    }
+
+    /// \brief Returns the type of this term.
     /// Result is one of AT_APPL, AT_INT,
-    /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
+    /// or AT_LIST.
+    /// \detail Often it is more efficient to use function_symbol(),
+    /// and check whether the function symbol matches AS_INT for an 
+    /// AT_INT, AS_LIST or AS_EMPTY_LIST for AT_LIST, or something else
+    /// for AT_APPL.
     /// \return The type of the term.
     size_t type() const
     {
@@ -248,120 +235,7 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
 };
 
 
-
-/* inline
-bool EQUAL_HEADER(const header_type h1, const header_type h2)
-{
-  return h1==h2;
-} */
-
-static const size_t SHIFT_SYMBOL = SHIFT_LENGTH;
-// static const size_t SHIFT_SYM_ARITY = SHIFT_LENGTH;
-
-/* inline
-bool IS_MARKED(const header_type h)
-{
-  return (h & MASK_MARK) != (header_type)(0);
-} */
-
-/* inline
-size_t GET_TYPE(const header_type h)
-{
-  return (h & MASK_TYPE) >> SHIFT_TYPE;
-} */
-
-/* inline
-size_t GET_ARITY(const header_type h)
-{
-  return (h & MASK_ARITY) >> SHIFT_ARITY;
-} */
-
-inline size_t GET_SYMBOL(const header_type h)
-{
-  return h >> SHIFT_SYMBOL;
-} 
-
-/* inline
-size_t GET_LENGTH(const header_type h)
-{
-  return h >> SHIFT_LENGTH;
-} */
-
-/* inline
-bool IS_QUOTED(const header_type h)
-{
-  return (h & MASK_QUOTED) != (header_type)(0);
-} */
-
-/* inline
-void SET_MARK(header_type& h)
-{
-  do
-  {
-    (h) |= MASK_MARK;
-  }
-  while (0);
-} */
-
-/* inline
-void SET_QUOTED(header_type& h)
-{
-  do
-  {
-    (h) |= MASK_QUOTED;
-  }
-  while (0);
-} */
-
-/* inline
-void CLR_MARK(header_type& h)
-{
-  do
-  {
-    (h) &= ~MASK_MARK;
-  }
-  while (0);
-} */
-
-/* inline
-void CLR_QUOTED(header_type& h)
-{
-  do
-  {
-    (h) &= ~MASK_QUOTED;
-  }
-  while (0);
-} */
-
-inline
-// header_type APPL_HEADER(const size_t ari, const size_t sym)
-header_type APPL_HEADER(const size_t sym)
-{
-  return // ((ari) << SHIFT_ARITY) |
-         (AT_APPL << SHIFT_TYPE) |
-         ((header_type)(sym) << SHIFT_SYMBOL);
-}
-
-static const header_type INT_HEADER = AT_INT << SHIFT_TYPE;
-static const header_type EMPTY_HEADER = AT_LIST << SHIFT_TYPE;
-
-inline
-header_type LIST_HEADER()
-{
-  return AT_LIST << SHIFT_TYPE;
-         //((MachineWord)(len) << SHIFT_LENGTH);
-         //  | ((MachineWord)(2) << SHIFT_ARITY);
-}
-
-/* inline
-header_type SYMBOL_HEADER(const size_t arity, const bool quoted)
-{
-  return ((header_type)(arity) << SHIFT_SYM_ARITY) |
-         ((quoted) ? MASK_QUOTED : 0) |
-         (AT_SYMBOL << SHIFT_TYPE);
-} */
-
-static const size_t FREE_HEADER = AT_FREE << SHIFT_TYPE;
+// static const size_t FREE_HEADER = AT_FREE << SHIFT_TYPE;
 
 static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
 

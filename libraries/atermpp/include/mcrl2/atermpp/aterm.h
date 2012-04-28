@@ -63,7 +63,7 @@ class aterm_base
     aterm_base(ATerm term)
       : m_term(term)
     {
-      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
+      assert(m_term==ATerm() || m_term->reference_count>0);
     }
 
     /// \brief Constructor.
@@ -71,7 +71,7 @@ class aterm_base
     aterm_base(ATermList term)
       : m_term(term)
     {
-      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
+      assert(m_term==ATerm() || m_term->reference_count>0);
     }
 
     /// \brief Constructor.
@@ -79,7 +79,7 @@ class aterm_base
     aterm_base(ATermInt term)
       : m_term(term)
     {
-      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
+      assert(m_term==ATerm() || m_term->reference_count>0);
     }
 
     /// \brief Constructor.
@@ -87,8 +87,8 @@ class aterm_base
     aterm_base(ATermAppl term)
       : m_term(term)
     {
-      assert((term == ATermAppl()) || (ATgetType(term)!= AT_FREE));
-      assert((m_term==ATerm()) || (ATgetType(m_term)!=AT_FREE));
+      assert(m_term==ATerm() || m_term->reference_count>0);
+      assert(m_term==ATerm() || m_term->reference_count>0);
     }
 
     /// \brief Protect the aterm.

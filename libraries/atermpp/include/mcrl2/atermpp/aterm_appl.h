@@ -187,7 +187,7 @@ class term_appl: public aterm_base
     /// \return The result of the assignment.
     term_appl<Term>& operator=(ATermAppl t)
     {
-      assert(t==ATermAppl() || ATgetType(t) != AT_FREE);
+      assert(t==ATermAppl() || t->reference_count>0);
       m_term = t;
       return *this;
     }

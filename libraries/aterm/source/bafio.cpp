@@ -682,7 +682,7 @@ static void collect_terms(const ATerm &t, std::set<ATerm> &visited)
   AFun sym;
   sym_entry* entry;
 
-  // if (!IS_MARKED(t->header))
+// ATfprintf(stderr,"COLLECT %t\n",&*t);
   if (visited.count(t)==0)
   {
     switch (ATgetType(t))
@@ -727,7 +727,6 @@ static void collect_terms(const ATerm &t, std::set<ATerm> &visited)
     assert(entry->id == sym);
     add_term(entry, t);
 
-    // SET_MARK(t->header);
     visited.insert(t);
   }
 }

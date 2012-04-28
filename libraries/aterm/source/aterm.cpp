@@ -146,15 +146,6 @@ ATinit()
   // Check that AS_INT, AS_LIST and AS_EMPTY_LIST have indices 0,1 and 2. Bafio files have been saved with
   // these numbers to represent these notions.
 
-  AS_INT=AFun("<int>", 0);
-  AS_LIST=AFun("[_,_]", 2);
-  AS_EMPTY_LIST=AFun("[]", 0);
-
-  assert(AS_INT.number()==0);
-  assert(AS_LIST.number()==1);
-  assert(AS_EMPTY_LIST.number()==2);
-
-
   /*}}}  */
 
 #ifdef WIN32
@@ -513,6 +504,7 @@ writeToTextFile(const ATerm &t, FILE* f)
   ATermList       list;
   char*            name;
 
+  assert(t->reference_count>0);
   switch (ATgetType(t))
   {
     case AT_INT:
@@ -562,7 +554,7 @@ writeToTextFile(const ATerm &t, FILE* f)
 
       /*}}}  */
       break;
-    case AT_FREE:
+    /* case AT_FREE:
       if (AT_inAnyFreeList(&*t))
       {
         throw std::runtime_error("ATwriteToTextFile: printing free term at " + to_string(t));
@@ -572,6 +564,7 @@ writeToTextFile(const ATerm &t, FILE* f)
         throw std::runtime_error("ATwriteToTextFile: free term " + to_string(t) + " not in freelist?");
       }
       return false;
+    */
 
     /* case AT_SYMBOL:
       // throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));

@@ -212,14 +212,9 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
   _ATerm* cur;
   size_t arity = ATgetArity(sym);
   bool found;
-  header_type header;
-  HashNumber hnr;
   _ATerm* arg;
 
-  // header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym.number());
-  header = APPL_HEADER(sym.number());
- 
-  hnr = START(header);
+  HashNumber hnr = START(sym.number());
   for (ForwardIterator i=begin; i!=end; i++)
   {
     arg = &*convert_to_aterm(*i);
@@ -231,7 +226,7 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
   cur = ATerm::hashtable[hnr & table_mask];
   while (cur)
   {
-    if (cur->header==header)
+    if (cur->m_function_symbol==sym)
     {
       found = true;
       size_t j=0;
@@ -257,8 +252,7 @@ ATermAppl ATmakeAppl(const AFun &sym, const ForwardIterator begin, const Forward
     cur = (_ATermAppl*) AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
-    cur->header = header;
-    AFun::increase_reference_count<true>(sym.number());
+    cur->m_function_symbol = sym;
     
     size_t j=0;
     for (ForwardIterator i=begin; i!=end; i++,j++)
