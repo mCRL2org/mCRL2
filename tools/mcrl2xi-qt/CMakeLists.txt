@@ -20,6 +20,7 @@ set(UI_FILES
   mainwindow.ui
   documentmanager.ui
   documentwidget.ui
+  findreplacedialog.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
@@ -32,6 +33,7 @@ set(MOC_HEADERS
   parser.h
   rewriter.h
   solver.h
+  findreplacedialog.h
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
@@ -47,6 +49,7 @@ set(SRC_FILES
   parser.cpp
   rewriter.cpp
   solver.cpp
+  findreplacedialog.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})

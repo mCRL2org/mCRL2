@@ -20,6 +20,8 @@
 #include "documentmanager.h"
 #include "parser.h"
 
+#include "findreplacedialog.h"
+
 class QTextEdit;
 
 class MainWindow : public QMainWindow
@@ -39,6 +41,10 @@ class MainWindow : public QMainWindow
   private:
     Ui::MainWindow m_ui;
     Parser *m_parser;
+
+    QByteArray m_state;
+
+    FindReplaceDialog *m_findReplaceDialog;
 
   private slots:
     void onNew();

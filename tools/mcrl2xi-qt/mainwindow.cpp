@@ -56,6 +56,10 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+
+  m_state = saveState();
+  m_findReplaceDialog = new FindReplaceDialog(this);
+  m_findReplaceDialog->setModal(false);
 }
 
 MainWindow::~MainWindow()
@@ -89,7 +93,14 @@ void MainWindow::openDocument(QString fileName)
 void MainWindow::formatDocument(DocumentWidget *document)
 {
   QTextEdit *editor = document->getEditor();
-  editor->setWordWrapMode(QTextOption::NoWrap);
+  if (m_ui.actionWrap_mode->isChecked())
+  {
+    editor->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+  }
+  else
+  {
+    editor->setWordWrapMode(QTextOption::NoWrap);
+  }
 
   QFont font;
   font.setFamily("Monospace");
@@ -211,17 +222,27 @@ void MainWindow::onSelectAll()
 
 void MainWindow::onFind()
 {
-  //TODO
+  m_findReplaceDialog->show();
 }
 
 void MainWindow::onWrapMode()
 {
-  //TODO
+  for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
+  {
+    if (m_ui.actionWrap_mode->isChecked())
+    {
+      m_ui.documentManager->getDocument(i)->getEditor()->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    }
+    else
+    {
+      m_ui.documentManager->getDocument(i)->getEditor()->setWordWrapMode(QTextOption::NoWrap);
+    }
+  }
 }
 
 void MainWindow::onResetPerspective()
 {
-  //TODO
+  restoreState(m_state);
 }
 
 
