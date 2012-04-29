@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow
 
   public slots:
     void formatDocument(DocumentWidget *document);
+    void changeDocument(DocumentWidget *document);
     bool onCloseRequest(int index);
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 

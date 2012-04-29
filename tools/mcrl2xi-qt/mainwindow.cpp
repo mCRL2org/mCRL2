@@ -19,6 +19,8 @@
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
 {
+  m_findReplaceDialog = new FindReplaceDialog(this);
+  m_findReplaceDialog->setModal(false);
 
   m_ui.setupUi(this);
   m_parser = new Parser();
@@ -54,16 +56,16 @@ MainWindow::MainWindow(QWidget *parent) :
   //Documentmanager events
   connect(m_ui.documentManager, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
+  connect(m_ui.documentManager, SIGNAL(documentChanged(DocumentWidget*)), this, SLOT(changeDocument(DocumentWidget*)));
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
   m_state = saveState();
-  m_findReplaceDialog = new FindReplaceDialog(this);
-  m_findReplaceDialog->setModal(false);
 }
 
 MainWindow::~MainWindow()
 {
+  delete m_findReplaceDialog;
   m_parser->deleteLater();
 }
 
@@ -119,11 +121,20 @@ void MainWindow::formatDocument(DocumentWidget *document)
   connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
 }
 
+void MainWindow::changeDocument(DocumentWidget *document)
+{
+  if (document)
+    m_findReplaceDialog->setTextEdit(document->getEditor());
+  else
+    m_findReplaceDialog->setTextEdit(0);
+}
+
 bool MainWindow::onCloseRequest(int index)
 {
   DocumentWidget *document = m_ui.documentManager->getDocument(index);
 
   if (!document->isModified()) {
+    m_findReplaceDialog->setTextEdit(0);
     m_ui.documentManager->closeDocument(index);
     return true;
   }
@@ -134,10 +145,12 @@ bool MainWindow::onCloseRequest(int index)
     case QMessageBox::Yes:
       if (this->saveDocument(document))
       {
+        m_findReplaceDialog->setTextEdit(0);
         m_ui.documentManager->closeDocument(index);
       }
       break;
     case QMessageBox::No:
+      m_findReplaceDialog->setTextEdit(0);
       m_ui.documentManager->closeDocument(index);
       break;
     case QMessageBox::Cancel:
@@ -222,6 +235,7 @@ void MainWindow::onSelectAll()
 
 void MainWindow::onFind()
 {
+  m_findReplaceDialog->setTextEdit(m_ui.documentManager->currentDocument()->getEditor());
   m_findReplaceDialog->show();
 }
 
@@ -320,6 +334,7 @@ void MainWindow::solved()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+  m_findReplaceDialog->close();
   for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
   {
     if (!this->onCloseRequest(i))

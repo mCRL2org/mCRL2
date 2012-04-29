@@ -19,6 +19,7 @@ DocumentManager::DocumentManager(QWidget *parent) :
   QWidget(parent)
 {
   m_ui.setupUi(this);
+  connect(m_ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
   connect(m_ui.tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
 }
 
@@ -54,6 +55,8 @@ int DocumentManager::indexOf(DocumentWidget *document)
 
 DocumentWidget* DocumentManager::getDocument(int index)
 {
+  if (index < 0 || index >= documentCount())
+    return 0;
   return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(index));
 }
 
@@ -97,12 +100,26 @@ void DocumentManager::openFile(QString fileName)
 
   QFileInfo fileInfo(fileName);
   DocumentWidget *document = this->findDocument(fileName);
+
   if (document) {
     m_ui.tabWidget->setCurrentWidget(document);
     return;
   }
 
-  document = this->createDocument(fileInfo.baseName());
+  for (int i = 0; i < documentCount(); i++)
+  {
+    if (getDocument(i)->getFileName() == QString() && !getDocument(i)->isModified())
+    {
+      document = getDocument(i);
+      m_ui.tabWidget->setCurrentWidget(document);
+      m_ui.tabWidget->setTabText(indexOf(document), fileInfo.baseName());
+      break;
+    }
+  }
+
+  if (!document)
+    document = this->createDocument(fileInfo.baseName());
+
   document->openFile(fileName);
 }
 

@@ -13,102 +13,122 @@
 #include "findreplacedialog.h"
 
 FindReplaceDialog::FindReplaceDialog(QWidget *parent) :
-    QDialog(parent), m_textEdit(0)
+  QDialog(parent), m_textEdit(0)
 {
-    m_ui.setupUi(this);
+  m_ui.setupUi(this);
 
-    m_ui.errorLabel->setText("");
+  m_ui.errorLabel->setText("");
 
-    connect(m_ui.textToFind, SIGNAL(textChanged(QString)), this, SLOT(textToFindChanged()));
+  connect(m_ui.textToFind, SIGNAL(textChanged(QString)), this, SLOT(textToFindChanged()));
 
-    connect(m_ui.findButton, SIGNAL(clicked()), this, SLOT(find()));
-    connect(m_ui.closeButton, SIGNAL(clicked()), parent, SLOT(close()));
+  connect(m_ui.findButton, SIGNAL(clicked()), this, SLOT(find()));
+  connect(m_ui.closeButton, SIGNAL(clicked()), this, SLOT(close()));
 
-    connect(m_ui.replaceButton, SIGNAL(clicked()), this, SLOT(replace()));
-    connect(m_ui.replaceAllButton, SIGNAL(clicked()), this, SLOT(replaceAll()));
+  connect(m_ui.replaceButton, SIGNAL(clicked()), this, SLOT(replace()));
+  connect(m_ui.replaceAllButton, SIGNAL(clicked()), this, SLOT(replaceAll()));
 }
 
-FindReplaceDialog::~FindReplaceDialog()
+void FindReplaceDialog::setTextEdit(QTextEdit *textEdit)
 {
-}
+  if (m_textEdit)
+    disconnect(m_textEdit, 0, m_ui.replaceButton, 0);
 
-void FindReplaceDialog::setTextEdit(QTextEdit *textEdit) {
-    m_textEdit = textEdit;
+  m_textEdit = textEdit;
+  if (m_textEdit)
     connect(m_textEdit, SIGNAL(copyAvailable(bool)), m_ui.replaceButton, SLOT(setEnabled(bool)));
-    connect(m_textEdit, SIGNAL(copyAvailable(bool)), m_ui.replaceAllButton, SLOT(setEnabled(bool)));
 }
 
-void FindReplaceDialog::textToFindChanged() {
-    m_ui.findButton->setEnabled(m_ui.textToFind->text().size() > 0);
+void FindReplaceDialog::textToFindChanged()
+{
+  m_ui.findButton->setEnabled(m_ui.textToFind->text().size() > 0);
 }
 
-void FindReplaceDialog::showError(const QString &error) {
-    if (error == "") {
-        m_ui.errorLabel->setText("");
-    } else {
-        m_ui.errorLabel->setText("<span style=\" font-weight:600; color:#ff0000;\">" +
-                                error +
-                                "</spn>");
-    }
+void FindReplaceDialog::showError(const QString &error)
+{
+  if (error == "")
+  {
+    m_ui.errorLabel->setText("");
+  } else {
+    m_ui.errorLabel->setText("<span style=\" font-weight:600; color:#ff0000;\">" +
+                             error +
+                             "</spn>");
+  }
 }
 
-void FindReplaceDialog::showMessage(const QString &message) {
-    if (message == "") {
-        m_ui.errorLabel->setText("");
-    } else {
-        m_ui.errorLabel->setText("<span style=\" font-weight:600; color:green;\">" +
-                                message +
-                                "</span>");
-    }
+void FindReplaceDialog::showMessage(const QString &message)
+{
+  if (message == "")
+  {
+    m_ui.errorLabel->setText("");
+  } else {
+    m_ui.errorLabel->setText("<span style=\" font-weight:600; color:green;\">" +
+                             message +
+                             "</span>");
+  }
 }
 
-void FindReplaceDialog::find() {
-    find(m_ui.downRadioButton->isChecked());
+void FindReplaceDialog::find()
+{
+  find(m_ui.downRadioButton->isChecked());
 }
 
-void FindReplaceDialog::find(bool next) {
-    if (!m_textEdit)
-        return;
+void FindReplaceDialog::find(bool next)
+{
+  if (!m_textEdit)
+    return;
 
-    bool back = !next;
-    const QString &toSearch = m_ui.textToFind->text();
-    bool result = false;
+  bool back = !next;
+  const QString &toSearch = m_ui.textToFind->text();
+  bool result = false;
 
-    QTextDocument::FindFlags flags;
+  QTextDocument::FindFlags flags;
 
-    if (back)
-        flags |= QTextDocument::FindBackward;
-    if (m_ui.caseCheckBox->isChecked())
-        flags |= QTextDocument::FindCaseSensitively;
-    if (m_ui.wholeCheckBox->isChecked())
-        flags |= QTextDocument::FindWholeWords;
+  if (back)
+    flags |= QTextDocument::FindBackward;
+  if (m_ui.caseCheckBox->isChecked())
+    flags |= QTextDocument::FindCaseSensitively;
+  if (m_ui.wholeCheckBox->isChecked())
+    flags |= QTextDocument::FindWholeWords;
 
-    result = m_textEdit->find(toSearch, flags);
+  result = m_textEdit->find(toSearch, flags);
 
-    if (result) {
-        showError("");
-    } else {
-        showError(tr("No match found"));
-        m_textCursor.setPosition(0);
-        m_textEdit->setTextCursor(m_textCursor);
-    }
+  if (result)
+  {
+    showError("");
+  } else {
+    showError(tr("No match found"));
+    m_textCursor.setPosition(0);
+    m_textEdit->setTextCursor(m_textCursor);
+  }
 }
 
-void FindReplaceDialog::replace() {
-    if (!m_textEdit->textCursor().hasSelection()) {
-        find();
-    } else {
-        m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
-        find();
-    }
+void FindReplaceDialog::replace()
+{
+  if (!m_textEdit)
+    return;
+  if (!m_textEdit->textCursor().hasSelection())
+  {
+    find();
+  } else {
+    m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
+    find();
+  }
 }
 
-void FindReplaceDialog::replaceAll() {
-    int i=0;
-    while (m_textEdit->textCursor().hasSelection()){
-        m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
-        find();
-        i++;
-    }
-    showMessage(tr("Replaced %1 occurrence(s)").arg(i));
+void FindReplaceDialog::replaceAll()
+{
+  if (!m_textEdit)
+    return;
+
+  m_textCursor.setPosition(0);
+  m_textEdit->setTextCursor(m_textCursor);
+  find(true);
+
+  int i=0;
+  while (m_textEdit->textCursor().hasSelection()){
+    m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
+    find();
+    i++;
+  }
+  showMessage(tr("Replaced %1 occurrence(s)").arg(i));
 }

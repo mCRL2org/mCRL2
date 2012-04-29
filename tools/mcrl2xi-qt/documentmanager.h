@@ -39,6 +39,7 @@ class DocumentManager : public QWidget
     
   signals:
     void documentCreated(DocumentWidget *document);
+    void documentChanged(DocumentWidget *document);
     void documentClosed(DocumentWidget *document);
 
     void tabCloseRequested(int index);
@@ -50,6 +51,7 @@ class DocumentManager : public QWidget
 
   private slots:
     void onCloseRequest(int index) { emit tabCloseRequested(index); }
+    void onCurrentChanged(int index) { emit documentChanged(getDocument(index)); }
 
   protected:
     void showEvent(QShowEvent *event);

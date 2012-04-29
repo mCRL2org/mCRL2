@@ -18,13 +18,12 @@
 
 class FindReplaceDialog : public QDialog {
     Q_OBJECT
-public:
+  public:
     FindReplaceDialog(QWidget *parent = 0);
-    virtual ~FindReplaceDialog();
 
     void setTextEdit(QTextEdit *textEdit);
 
-public slots:
+  public slots:
     void find(bool down);
     void find();
 
@@ -34,15 +33,15 @@ public slots:
     void replace();
     void replaceAll();
 
-protected:
+  protected:
 
     void showError(const QString &error);
     void showMessage(const QString &message);
 
-protected slots:
+  protected slots:
     void textToFindChanged();
 
-protected:
+  protected:
     Ui::FindReplaceDialog m_ui;
     QTextCursor m_textCursor;
     QTextEdit *m_textEdit;
