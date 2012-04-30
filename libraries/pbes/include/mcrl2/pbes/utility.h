@@ -61,7 +61,7 @@ static bool occurs_in_varL(
   // expressions in internal format. So, it will not search the whole expression.
   if (use_internal_rewrite_format)
   {
-    return find_if(l, compare_variableL(v)) != atermpp::aterm();
+    return find_if(l, compare_variableL(v)) != atermpp::aterm_appl();
   }
   else
   {

@@ -24,6 +24,7 @@ using namespace aterm;
 /// \brief The main namespace for the ATerm++ library.
 namespace atermpp
 {
+
 	
 /// \brief Base class for aterm.
 class aterm_base
@@ -181,7 +182,10 @@ std::ostream& operator<<(std::ostream& out, const aterm_base& t)
 ///////////////////////////////////////////////////////////////////////////////
 // aterm
 /// \brief Represents a generic term.
-class aterm: public aterm_base
+
+  typedef aterm::ATerm aterm;
+
+/* class aterm: public aterm_base
 {
   public:
     /// \brief Constructor.
@@ -212,12 +216,6 @@ class aterm: public aterm_base
     { }
 
     /// \brief Constructor.
-    /// \param term A term containing binary data
-    /* aterm(ATermBlob term)
-      : aterm_base(term)
-    { } */
-
-    /// \brief Constructor.
     /// \param term A term
     aterm(ATermAppl term)
       : aterm_base(term)
@@ -229,10 +227,10 @@ class aterm: public aterm_base
     {
       return m_term;
     }
-};
+}; */
 
 /// \cond INTERNAL_DOCS
-template <>
+/* template <>
 struct aterm_traits<aterm>
 {
   static void protect(const aterm& t)
@@ -251,7 +249,7 @@ struct aterm_traits<aterm>
   {
     return t.term();
   }
-};
+}; */
 /// \endcond
 
 /// \brief Read an aterm from string.
@@ -323,21 +321,21 @@ bool write_to_named_saf_file(aterm t, const std::string& filename)
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are equal.
-inline
+/* inline
 bool operator==(const aterm& x, const aterm& y)
 {
   return ATisEqual(x, y) == true;
-} 
+}  */
 
 /// \brief Inequality operator.
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are not equal.
-inline
+/* inline
 bool operator!=(const aterm& x, const aterm& y)
 {
   return ATisEqual(x, y) == false;
-} 
+} */
 
 } // namespace atermpp
 

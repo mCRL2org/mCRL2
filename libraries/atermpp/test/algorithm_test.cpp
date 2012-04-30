@@ -38,18 +38,18 @@ struct is_f
 
 void test_algorithm()
 {
-  aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
-  aterm_appl b = make_term("h(g(x),p(a(x,y),q(g(z))))");
+  aterm_appl a = static_cast<aterm_appl>(make_term("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm_appl b = static_cast<aterm_appl>(make_term("h(g(x),p(a(x,y),q(g(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == make_term("f(y)"));
+  BOOST_CHECK(t == static_cast<aterm_appl>(make_term("f(y)")));
   aterm_appl t1 = find_if(b, is_f());
   BOOST_CHECK(t1 == aterm_appl());
 
   std::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == make_term("f(y)"));
-  BOOST_CHECK(v.back() == make_term("f(z)"));
+  BOOST_CHECK(v.front() == static_cast<aterm_appl>(make_term("f(y)")));
+  BOOST_CHECK(v.back() == static_cast<aterm_appl>(make_term("f(z)")));
 }
 
 struct for_each_proc
@@ -69,7 +69,7 @@ struct for_each_proc
 
 void test_for_each()
 {
-  aterm_appl t = make_term("h(g(x),f(y))");
+  aterm_appl t = static_cast<aterm_appl>(make_term("h(g(x),f(y))"));
   std::set<std::string> names;
   for_each(t, for_each_proc(names));
   for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
@@ -86,8 +86,8 @@ void test_for_each()
 void test_operators()
 {
   {
-    aterm_appl a1 = make_term("a1");
-    aterm_appl a2 = make_term("a2");
+    aterm_appl a1 = static_cast<aterm_appl>(make_term("a1"));
+    aterm_appl a2 = static_cast<aterm_appl>(make_term("a2"));
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }
@@ -100,15 +100,15 @@ void test_operators()
   }
 
   {
-    aterm_int a1 = static_cast<aterm_int>(make_term("1"));
-    aterm_int a2 = static_cast<aterm_int>(make_term("2"));
+    aterm_int a1 = static_cast<aterm_int>(static_cast<aterm_int>(make_term("1")));
+    aterm_int a2 = static_cast<aterm_int>(static_cast<aterm_int>(make_term("2")));
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
-    aterm_list a1 = make_term("[1,2]");
-    aterm_list a2 = make_term("[3,2]");
+    aterm_list a1 = static_cast<aterm_list>(make_term("[1,2]"));
+    aterm_list a2 = static_cast<aterm_list>(make_term("[3,2]"));
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }

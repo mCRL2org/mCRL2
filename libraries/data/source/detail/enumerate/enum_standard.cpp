@@ -89,7 +89,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
     }
     else if (second_argument(0) == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=second_argument(1);
+      second_argument=static_cast<atermpp::aterm_appl>(second_argument(1));
     }
     else
     {
@@ -325,7 +325,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   {
     const atermpp::aterm_appl t1=t;
     const atermpp::aterm_appl binder=t1(0);
-    const variable_list bound_variables=t1(1);
+    const variable_list bound_variables=static_cast<variable_list>(t1(1));
     const atermpp::aterm_appl body=build_solution_aux(t1(2),substituted_vars,exprs);
     return gsMakeBinder(binder,bound_variables,body);
   }

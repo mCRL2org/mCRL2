@@ -59,11 +59,11 @@ class InternalFormatInfo
     }
 
     Compare_Result compare_address(
-              const atermpp::aterm_appl &a_term1, 
-              const atermpp::aterm_appl &a_term2)
+              const atermpp::aterm &a_term1, 
+              const atermpp::aterm &a_term2)
     {
-      long v_address1 = reinterpret_cast < long >(&*(ATermAppl)a_term1);
-      long v_address2 = reinterpret_cast < long >(&*(ATermAppl)a_term2);
+      long v_address1 = reinterpret_cast < long >(&*(ATerm)a_term1);
+      long v_address2 = reinterpret_cast < long >(&*(ATerm)a_term2);
 
       if (v_address1 < v_address2)
       {

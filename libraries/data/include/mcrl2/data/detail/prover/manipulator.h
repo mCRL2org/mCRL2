@@ -230,11 +230,8 @@ class InternalFormatManipulator
 
       if (f_info.is_equality(v_result))
       {
-        atermpp::aterm_appl v_term1;
-        atermpp::aterm_appl v_term2;
-
-        v_term1 = v_result(1);
-        v_term2 = v_result(2);
+        atermpp::aterm_appl v_term1 = static_cast<atermpp::aterm_appl>(v_result(1));
+        atermpp::aterm_appl v_term2 = static_cast<atermpp::aterm_appl>(v_result(2));
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
           v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, 

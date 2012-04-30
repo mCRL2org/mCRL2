@@ -126,7 +126,7 @@ class term_list: public aterm_base
 
     /// Allow construction from an aterm. The aterm must be of the right type.
     /// \param t A term containing a list.
-    term_list(aterm t)
+    explicit term_list(aterm t)
       : aterm_base(t)
     {
       assert(type() == AT_LIST);

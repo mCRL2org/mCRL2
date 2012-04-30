@@ -63,7 +63,7 @@ class boolean_equation_system
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      boolean_equation_list eqn = *i++;
+      boolean_equation_list eqn = static_cast<boolean_equation_list>(*i++);
       m_initial_state = boolean_expression(*i);
       m_equations = Container(eqn.begin(), eqn.end());
     }
@@ -128,7 +128,7 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
+      if (t==atermpp::aterm() || t.type() != AT_APPL || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
       }

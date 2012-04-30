@@ -1986,7 +1986,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     else
     {
-      fprintf(f,"%sif (%s==%s%i(%i)) // M\n"
+      fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%i(%i))) // M\n"
               "%s{\n",
               whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)

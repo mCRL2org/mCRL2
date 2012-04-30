@@ -6,6 +6,7 @@
 #define ENCODING_H
 #include <vector>
 #include <assert.h>
+#include <iostream>
 #include "mcrl2/aterm/architecture.h"
 #include "mcrl2/aterm/atypes.h"
 #include "mcrl2/aterm/afun.h"
@@ -234,6 +235,11 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     }
 };
 
+inline
+std::ostream& operator<<(std::ostream& out, const ATerm& t)
+{
+  return out << t.to_string();
+}
 
 // static const size_t FREE_HEADER = AT_FREE << SHIFT_TYPE;
 

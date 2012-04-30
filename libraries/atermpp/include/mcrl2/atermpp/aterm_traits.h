@@ -24,7 +24,7 @@ using namespace aterm;
 namespace atermpp
 {
 
-class aterm;
+// class aterm;
 
 template < typename T >
 struct non_aterm_traits

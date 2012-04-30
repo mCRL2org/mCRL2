@@ -18,7 +18,7 @@
 #include <stack>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
@@ -28,11 +28,16 @@ namespace atermpp
 template < typename Value >
 class term_balanced_tree_iterator;
 
+// NOTE: BALANCED TREES DO NOT APPEAR TO WORK WELL WITH REFERENCE COUNT GARBAGE COLLECTIONS
+// AS IT STANDS. REENABLE THE BALANCED TREES TEST TO SEE THAT IT FAILS. AS IT STANDS BALANCED
+// TREES ARE NOT USED AT ANY PLACE.
+
 /// \brief Read-only balanced binary tree of terms.
 ///
 /// Models Random Access Container (STL concept)
 template <typename Term>
-class term_balanced_tree: public aterm_base
+// class term_balanced_tree: public aterm_base OLD
+class term_balanced_tree: public ATerm 
 {
     template < typename T >
     friend class term_balanced_tree_iterator;
@@ -42,15 +47,15 @@ class term_balanced_tree: public aterm_base
 
   protected:
 
-    static function_symbol const& tree_empty()
+    static atermpp::function_symbol const& tree_empty()
     {
-      static function_symbol empty = function_symbol("@empty@", 0);
+      static atermpp::function_symbol empty("@empty@", 0);
       return empty;
     }
 
-    static function_symbol const& tree_node()
+    static atermpp::function_symbol const& tree_node()
     {
-      static function_symbol node = function_symbol("@node@", 2);
+      static atermpp::function_symbol node("@node@", 2);
       return node;
     }
 
@@ -93,7 +98,7 @@ class term_balanced_tree: public aterm_base
 
     Term element_at(size_t position) const
     {
-      return element_at(term(), m_size, position);
+      return element_at(aterm(), m_size, position);
     }
 
     static Term element_at(aterm tree, size_t size, size_t position)
@@ -181,29 +186,29 @@ class term_balanced_tree: public aterm_base
 
     /// Default constructor. Creates an empty tree.
     term_balanced_tree()
-      : aterm_base(aterm_appl(tree_empty())), m_size(0)
+      : aterm(aterm_appl(tree_empty())), m_size(0)
     {}
 
     /// Construction from aterm
-    term_balanced_tree(aterm tree)
-      : aterm_base(tree), m_size(tree_size(tree))
+    term_balanced_tree(const aterm &tree)
+      : aterm(tree), m_size(tree_size(tree))
     {
     }
 
-    /// Construction from ATermList.
+    /// Construction from ATermList. THIS IS A VERY ODD ASSIGNMENT OPERATOR. UGLY.
     /// \param l A list.
     term_balanced_tree(atermpp::aterm_list l)
       : m_size(l.size())
     {
       atermpp::aterm_list::const_iterator first=l.begin();
-      m_term=make_tree(first,m_size);
-    }
+      copy_term(&*make_tree(first,m_size));
+    } 
 
     /// Construction from a term_balanced_tree.
     /// \param t A term containing a list.
     template <typename SpecificTerm>
     term_balanced_tree(term_balanced_tree< SpecificTerm > const& t) :
-      aterm_base(t.m_term), m_size(t.m_size)
+      aterm(t.m_aterm), m_size(t.m_size)
     { }
 
     /// Creates an term_balanced_tree with a copy of a range.
@@ -213,27 +218,27 @@ class term_balanced_tree: public aterm_base
     term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
     {
       m_size=get_distance(first,last);
-      m_term = make_tree(first,m_size);
+      copy_term(&*make_tree(first,m_size));
     }
 
-    /// Creates an term_balanced_tree with a copy of a range.
+    /// Creates an term_balanced_tree with a copy of a range. THIS IS A VERY NON STANDARD ITERATOR 
     /// \param first The start of a range of elements.
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
     {
       m_size=size;
-      m_term = make_tree(first,m_size);
+      copy_term(&*make_tree(first,m_size));
     }
 
-    /// Assignment operator.
+    /// Assignment operator. THIS IS ALSO A NON STANDARD CONSTRUCTOR.
     /// \param t A term containing a list.
-    term_balanced_tree<Term>& operator=(ATermList t)
+    term_balanced_tree<Term>& operator=(ATermList &t)
     {
       m_size=ATgetLength(t);
-      m_term = make_tree(t,m_size);
+      copy_term(make_tree(t,m_size));
       return *this;
-    }
+    } 
 
     /// Element indexing operator.
     /// \param position Index in the tree.
@@ -260,7 +265,7 @@ class term_balanced_tree: public aterm_base
     /// \brief Swaps contents of containers
     void swap(term_balanced_tree< Term >& other)
     {
-      std::swap(m_term, other.m_term);
+      std::swap(m_aterm, other.m_aterm);
       std::swap(m_size, other.m_size);
     }
 
@@ -275,7 +280,7 @@ class term_balanced_tree: public aterm_base
     /// \return True if the list is empty.
     bool empty() const
     {
-      return ATisEmpty((ATermList)term()) == true;
+      return ATisEmpty(static_cast<ATermList>(m_aterm));
     }
 
     /// \brief Conversion to ATermList.
@@ -296,7 +301,7 @@ class term_balanced_tree: public aterm_base
     {
       return term_balanced_tree<Term>(f(*this));
     }
-};
+}; 
 
 template < typename Value >
 class term_balanced_tree_iterator: public boost::iterator_facade<
@@ -392,7 +397,7 @@ term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
   }
 
   return term_balanced_tree< Term >(result.begin(),result.size());
-}
+} 
 
 /// \cond INTERNAL_DOCS
 template <typename Term>
@@ -412,7 +417,7 @@ struct aterm_traits<term_balanced_tree<Term> >
   }
   static ATerm term(const term_balanced_tree<Term>& t)
   {
-    return t.term();
+    return (ATerm)t;
   }
 };
 /// \endcond
@@ -435,7 +440,7 @@ template <typename Term>
 bool operator!=(const term_balanced_tree<Term>& x, const term_balanced_tree<Term>& y)
 {
   return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == false;
-}
+} 
 
 } // namespace atermpp
 

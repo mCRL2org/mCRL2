@@ -374,7 +374,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
       {
         // The sort is finite
         current_values.finite_var = push_back(current_values.finite_var, *p);
-        data::data_expression_list enumerations = sort_enumerations.get(p->sort());
+        data::data_expression_list enumerations = static_cast<data::data_expression_list>(sort_enumerations.get(p->sort()));
 
         for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {

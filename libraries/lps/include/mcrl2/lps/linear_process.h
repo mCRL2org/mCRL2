@@ -124,7 +124,7 @@ class linear_process
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = *i++;
       m_process_parameters.protect();
-      set_summands(*i);
+      set_summands(static_cast<deprecated::summand_list>(*i));
     }
 
     /// \brief Destructor

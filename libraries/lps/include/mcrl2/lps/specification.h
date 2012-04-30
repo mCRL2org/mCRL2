@@ -83,7 +83,7 @@ class specification
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = atermpp::aterm_appl(*i++)(0);
-      data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
+      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)(0));
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
       m_initial_process  = atermpp::aterm_appl(*i);
@@ -144,7 +144,7 @@ class specification
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
+      if (t==atermpp::aterm() || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }

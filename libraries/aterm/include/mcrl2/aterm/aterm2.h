@@ -69,7 +69,6 @@ class ATermInt:public ATerm
       return *this;
     }
 
-
     _ATermInt & operator *() const
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_aterm is checked,

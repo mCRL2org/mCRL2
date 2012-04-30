@@ -661,7 +661,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
     get_free_variables(t(0),free_variables_in_body);
     
     variable_list bound_vars;
-    const assignment_expression_list lv=t(1);
+    const assignment_expression_list lv=assignment_expression_list(t(1));
     for(assignment_expression_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
     {
       bound_vars=push_front(bound_vars,it->lhs());
@@ -679,7 +679,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
   {
     std::set < variable > free_variables_in_body;
     get_free_variables(t(2),free_variables_in_body);
-    const variable_list bound_vars=t(1);
+    const variable_list bound_vars=variable_list(t(1));
 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {

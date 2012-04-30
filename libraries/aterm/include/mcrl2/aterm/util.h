@@ -35,6 +35,7 @@ std::string to_string(const ATerm t)
 #  define MAX(a,b)  ((a) > (b) ? (a) : (b))
 #endif
 
+
 } // namespace aterm
 
 #endif

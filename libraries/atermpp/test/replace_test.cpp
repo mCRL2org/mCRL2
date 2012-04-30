@@ -85,12 +85,12 @@ void test_find()
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == make_term("f(y)"));
+  BOOST_CHECK(t == static_cast<aterm_appl>(make_term("f(y)")));
 
   std::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == make_term("f(y)"));
-  BOOST_CHECK(v.back() == make_term("f(z)"));
+  BOOST_CHECK(v.front() == static_cast<aterm_appl>(make_term("f(y)")));
+  BOOST_CHECK(v.back() == static_cast<aterm_appl>(make_term("f(z)")));
 }
 
 void test_replace()
@@ -101,13 +101,14 @@ void test_replace()
 
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
-  BOOST_CHECK(b == make_term("f(x)"));
+  BOOST_CHECK(b == static_cast<aterm_appl>(make_term("f(x)")));
   b = bottom_up_replace(a, make_term("f(x)"), make_term("x"));
-  BOOST_CHECK(b == make_term("x"));
+  BOOST_CHECK(b == static_cast<aterm_appl>(make_term("x")));
 
   atermpp::aterm f = make_term("[]");
-  aterm_appl g = replace(f, a, b);
+  atermpp::aterm g = replace(f, a, b);
   BOOST_CHECK(f == make_term("[]"));
+  BOOST_CHECK(g == make_term("[]"));
 
   atermpp::aterm x = make_term("g(f(x),f(y),h(f(x)))");
   atermpp::aterm y = replace(x, fg_replacer());

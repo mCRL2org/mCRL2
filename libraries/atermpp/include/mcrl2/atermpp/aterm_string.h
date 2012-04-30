@@ -80,7 +80,7 @@ class aterm_string: public aterm_appl
     aterm_string& operator=(aterm_base t)
     {
       assert(t.type() == AT_APPL);
-      assert(aterm_appl(t).size() == 0);
+      assert(aterm_traits<aterm_base>::term(t).function_symbol().arity() == 0);
       m_term = aterm_traits<aterm_base>::term(t);
       return *this;
     }

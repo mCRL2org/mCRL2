@@ -419,7 +419,7 @@ class bes_expression: public atermpp::aterm
       : atermpp::aterm()
     {}
 
-    bes_expression(atermpp::aterm_appl term)
+    bes_expression(const atermpp::aterm &term)
       : atermpp::aterm(term)
     {}
 
@@ -428,15 +428,15 @@ class bes_expression: public atermpp::aterm
     // {}
 
     // allow assignment from aterms
-    bes_expression& operator=(const atermpp::aterm& t)
+    bes_expression& operator=(const bes_expression& t)
     {
-      m_term = t;
+      copy_term(t.m_aterm);
       return *this;
-    }
+    } 
 
     atermpp::aterm aterm() const
     {
-      return m_term;
+      return m_aterm;
     }
 };
 
@@ -2645,22 +2645,22 @@ namespace atermpp
 template<>
 struct aterm_traits<bes::bes_expression>
 {
-  static void protect(const bes::bes_expression& t)
+  static void protect(const bes::bes_expression& )
   {
-    t.aterm().protect();  // protect the term against garbage collection
+    // t.aterm().protect();  // protect the term against garbage collection
   }
-  static void unprotect(const bes::bes_expression& t)
+  static void unprotect(const bes::bes_expression& )
   {
-    t.aterm().unprotect();  // undo the protection against garbage collection
+    // t.aterm().unprotect();  // undo the protection against garbage collection
   }
-  static void mark(const bes::bes_expression& t)
+  static void mark(const bes::bes_expression& )
   {
-    t.aterm().mark();  // mark the term for not being garbage collected
+    // t.aterm().mark();  // mark the term for not being garbage collected
   }
   // when it is inside a protected container
   static ATerm term(const bes::bes_expression& t)
   {
-    return t.term();  // return the ATerm corresponding to t
+    return static_cast<ATerm>(t);  // return the ATerm corresponding to t
   }
 };
 } // namespace atermpp

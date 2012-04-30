@@ -157,7 +157,7 @@ void CHECK_ARGUMENT(const ATermAppl / *t* /, const size_t / *n* /)
 inline
 void CHECK_ARITY(const size_t ari1, const size_t ari2)
 {
-  assert((ari1) == (ari2));
+  assert(ari1 == ari2);
 }
 
 inline

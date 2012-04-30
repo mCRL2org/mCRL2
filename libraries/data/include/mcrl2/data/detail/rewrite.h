@@ -67,26 +67,16 @@ class Rewriter
      **/
     Rewriter()
     {
-      internal_true.protect();
       internal_true=toInner(sort_bool::true_(),true);
-      internal_false.protect();
       internal_false=toInner(sort_bool::false_(),true);
-      internal_not.protect();
       internal_not=toInner(sort_bool::not_(),true)(0);
-      internal_and.protect();
       internal_and=toInner(sort_bool::and_(),true)(0);
-      internal_or.protect();
       internal_or=toInner(sort_bool::or_(),true)(0);
     }
 
     /** \brief Destructor. */
     virtual ~Rewriter()
     {
-      internal_true.unprotect();
-      internal_false.unprotect();
-      internal_not.unprotect();
-      internal_and.unprotect();
-      internal_or.unprotect();
     }
 
     /**

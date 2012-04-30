@@ -275,7 +275,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       internal_substitution_type &sigma)
 {
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
-  const variable_list vl=lambda_term(1);
+  const variable_list vl=static_cast<variable_list>(lambda_term(1));
   const atermpp::aterm_appl lambda_body=rewrite_internal(lambda_term(2),sigma);
   size_t arity=t.size();
   assert(arity>0);
@@ -339,7 +339,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   const atermpp::aterm_appl t1 = t(2);
 
   // Put the variables in the right order in vl.
-  variable_list vl=t(1);
+  variable_list vl=static_cast<variable_list>(t(1));
   return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
 }
 
@@ -430,7 +430,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   assert(is_abstraction(t) && t(0)==gsMakeForall());
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = t(2);
-  const variable_list vl=t(1);
+  const variable_list vl=static_cast<variable_list>(t(1));
   return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
 }
 
@@ -504,7 +504,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     }
     else if (evaluated_condition(0) == internal_not)
     {
-      evaluated_condition=evaluated_condition(1);
+      evaluated_condition=static_cast<atermpp::aterm_appl>(evaluated_condition(1));
     }
     else
     {
@@ -750,25 +750,25 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   }
   else if (is_application(term))
   {
-    atermpp::term_list <atermpp::aterm_appl> l;
+    atermpp::term_list <atermpp::aterm> l;
     atermpp::aterm_appl arg0 = toInner(application(term).head(), add_opids);
     // Reflect the way of encoding the other arguments!
     if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
     {
-      l = push_front(l, arg0);
+      l = push_front(l, static_cast<atermpp::aterm>(arg0));
     }
     else
     {
       size_t arity = arg0.size(); //ATgetArity(ATgetAFun(arg0));
       for (size_t i = 0; i < arity; ++i)
       {
-        l = push_front(l, atermpp::aterm_appl(arg0(i)));
+        l = push_front(l, arg0(i));
       }
     }
     const data_expression_list args= application(term).arguments();
     for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i)
     {
-      l = push_front(l, toInner(*i,add_opids));
+      l = push_front(l, static_cast<atermpp::aterm>(toInner(*i,add_opids)));
     }
     l = reverse(l);
     return Apply(l);
@@ -808,7 +808,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   if (is_where_clause(term))
   {
     const data_expression body=fromInner(term(0));
-    const atermpp::term_list<atermpp::aterm_appl> l=term(1);
+    const atermpp::term_list<atermpp::aterm_appl> l=static_cast<atermpp::term_list<atermpp::aterm_appl> >(term(1));
 
     std::vector < assignment_expression > lv;
     for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
@@ -825,7 +825,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   }
 
   size_t arity = ATgetArity(ATgetAFun(term));
-  atermpp::aterm_appl t = term(0);
+  atermpp::aterm t = term(0);
   data_expression a;
 
   if (t.type()==AT_INT)

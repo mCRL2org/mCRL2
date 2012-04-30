@@ -142,9 +142,10 @@ class term_appl: public aterm_base
 
     /// Allow construction from an aterm. The aterm must be of the right type.
     /// \param t A term.
-    term_appl(aterm t)
+    /* term_appl(aterm t)
       : aterm_base(t)
     {}
+    */
 
     /// \brief Constructor.
     /// \param sym A function symbol.
@@ -175,12 +176,12 @@ class term_appl: public aterm_base
     /// \brief Assignment operator.
     /// \param t A term.
     /// \return The result of the assignment.
-    term_appl<Term>& operator=(aterm_base t)
+    /* term_appl<Term>& operator=(aterm_base t)
     {
       assert(t.type() == AT_APPL);
       m_term = aterm_traits<aterm_base>::term(t);
       return *this;
-    }
+    } */
 
     /// Assignment operator.
     /// \param t A term.

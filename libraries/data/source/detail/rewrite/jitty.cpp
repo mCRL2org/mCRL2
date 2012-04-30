@@ -51,7 +51,7 @@ static variable_list get_vars(const atermpp::aterm_appl &a)
     variable_list l;
     for(atermpp::aterm_appl::const_iterator arg=a.begin(); arg!=a.end(); ++arg)
     {
-      if (a.type()!=AT_INT)
+      if (arg->type()!=AT_INT)
       {
         l= get_vars(*arg)+l;
       }
@@ -160,7 +160,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
             bool b = false;
             for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
             {
-              if (std::find(o->begin(),o->end(),pars(i+1)) != o->end())
+              if (std::find(o->begin(),o->end(),variable(pars(i+1))) != o->end())
               {
                 if (j >= 0)
                 {
@@ -420,7 +420,7 @@ static atermpp::aterm subst_values(
   {
     const atermpp::aterm_appl t1=t;
     const atermpp::aterm_appl binder=t1(0);
-    const variable_list bound_variables=t1(1);
+    const variable_list bound_variables=static_cast<variable_list>(t1(1));
     const atermpp::aterm_appl body=subst_values(vars,vals,t1(2));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
@@ -438,7 +438,7 @@ static atermpp::aterm subst_values(
   else if (is_where_clause(t))
   {
     const atermpp::aterm_appl t1=t;
-    const atermpp::term_list < atermpp::aterm_appl > assignment_list=t1(1);
+    const atermpp::term_list < atermpp::aterm_appl > assignment_list=static_cast<atermpp::term_list < atermpp::aterm_appl > >(t1(1));
     const atermpp::aterm_appl body=subst_values(vars,vals,t1(0));
 
 #ifndef NDEBUG
@@ -577,7 +577,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     if (binder==gsMakeLambda())
     {
-      atermpp::aterm_appl a=rewrite_single_lambda(term(1),term(2),false,sigma);
+      atermpp::aterm_appl a=rewrite_single_lambda(static_cast<variable_list>(term(1)),term(2),false,sigma);
       return a;
     }
     assert(0);
@@ -599,7 +599,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     else if (is_abstraction(op))
     {
-      head=op;
+      head=static_cast<atermpp::aterm_appl>(op);
     }
     else if (is_where_clause(op))
     {
@@ -608,7 +608,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     else
     {
       // op has the shape = #REWR#(u1,...,un).
-      head=op;
+      head=static_cast<atermpp::aterm_appl>(op);
     }
 
     // Here head has the shape
