@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers
+// Author(s): Frank Stappers and Rimco Boudewijns
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,7 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-
+/// \file highlighter.h
+/// \brief Highlicher class that implements syntax highlighting for a QTextEdit
 
 #ifndef MCRL2XI_HIGHLIGHTER_H
 #define MCRL2XI_HIGHLIGHTER_H
@@ -22,13 +23,15 @@ class Highlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
-public:
+  public:
+    // Constructor
     Highlighter(QTextDocument *parent = 0);
 
-protected:
+  protected:
+    // Highlight a single block of text
     void highlightBlock(const QString &text);
 
-private:
+  private:
     struct HighlightingRule
     {
         QRegExp pattern;

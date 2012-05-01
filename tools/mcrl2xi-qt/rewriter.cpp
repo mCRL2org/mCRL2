@@ -50,7 +50,7 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
     mCRL2log(info) << "Parsing data expression: \"" << stdDataExpression << "\"" << std::endl;
 
     mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(stdDataExpression,
-        m_vars.begin(), m_vars.end(), m_data_spec);
+                                                                           m_vars.begin(), m_vars.end(), m_data_spec);
 
     mCRL2log(info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
 

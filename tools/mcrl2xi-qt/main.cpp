@@ -20,11 +20,11 @@ class mcrl2xi_tool : public mcrl2xi_base
   public:
     mcrl2xi_tool():
       mcrl2xi_base("mCRL2xi",
-        "Rimco Boudewijns",
-        "A graphical mCRL2 data specification editor.",
-        "A graphical mCRL2 data specification editor. If INFILE is supplied it will be loaded into the editor.",
-        "A graphical mCRL2 data specification editor.",
-        "http://mcrl2.org/release/user_manual/tools/mcrl2xi.html")
+                   "Rimco Boudewijns",
+                   "A graphical mCRL2 data specification editor.",
+                   "A graphical mCRL2 data specification editor. If INFILE is supplied it will be loaded into the editor.",
+                   "A graphical mCRL2 data specification editor.",
+                   "http://mcrl2.org/release/user_manual/tools/mcrl2xi.html")
     {}
 
     bool run()
@@ -42,5 +42,5 @@ class mcrl2xi_tool : public mcrl2xi_base
 
 int main(int argc, char *argv[])
 {
-    return mcrl2xi_tool().execute(argc, argv);
+  return mcrl2xi_tool().execute(argc, argv);
 }

@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+/// \file documentwidget.h
+/// \brief Widget containing a single QTextEdit for a document with built-in file operations
 
 #ifndef MCRL2XI_DOCUMENTWIDGET_H
 #define MCRL2XI_DOCUMENTWIDGET_H
@@ -20,19 +22,23 @@ class DocumentWidget : public QWidget
     Q_OBJECT
 
   public:
+    // Constructor
     DocumentWidget(QWidget *parent = 0);
 
+    // Getters
     QTextEdit* getEditor();
     QString getFileName();
     bool isModified();
 
+    // File operations
     void openFile(QString fileName);
     void saveFile(QString fileName);
 
   private:
-
+    // UI variable
     Ui::DocumentWidget m_ui;
 
+    // Filename of the document, NULL-string if none
     QString m_filename;
 };
 

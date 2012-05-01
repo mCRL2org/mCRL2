@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+/// \file mainwindow.h
+/// \brief Main Window of mCRL2xi used as GUI
 
 #ifndef MCRL2XI_MAINWINDOW_H
 #define MCRL2XI_MAINWINDOW_H
@@ -28,26 +30,40 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
   public:
+    // Constructor
     MainWindow(QWidget *parent = 0);
+
+    // Destructor
     ~MainWindow();
+
+    // Save/Open operations
     bool saveDocument(DocumentWidget *document);
     void openDocument(QString fileName);
 
   public slots:
+    // Slots that receive the signals of the DocumentManager
     void formatDocument(DocumentWidget *document);
     void changeDocument(DocumentWidget *document);
     bool onCloseRequest(int index);
+
+    // Slot to update the statusbar using the log widget
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 
   private:
+    // UI variable
     Ui::MainWindow m_ui;
+
+    // Parser object pointer
     Parser *m_parser;
 
+    // Variable to save the state/perspective of the window
     QByteArray m_state;
 
+    // Find and Replace dialog object pointer
     FindReplaceDialog *m_findReplaceDialog;
 
   private slots:
+    // Slots for all menu items
     void onNew();
     void onOpen();
     void onSave();
@@ -66,19 +82,22 @@ class MainWindow : public QMainWindow
     void onWrapMode();
     void onResetPerspective();
 
+    // Slots for the parser
     void onParse();
     void parsed();
 
+    // Slots for the rewriter
     void onRewrite();
     void rewritten(QString output);
 
+    // Slots for the solver
     void onSolve();
     void onSolveAbort();
     void solvedPart(QString output);
     void solved();
 
-
   protected:
+    // Overridden function that asks to save modified specifications
     void closeEvent(QCloseEvent *event);
 };
 
