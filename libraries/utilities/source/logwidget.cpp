@@ -34,6 +34,19 @@ LogWidget::~LogWidget()
 void LogWidget::writeMessage(QString level, QString hint, QDateTime timestamp, QString message)
 {
   QString formattedMessage = QString("[%1 %2] %3 %4").arg(timestamp.toString("hh:mm:ss")).arg(level).arg(hint).arg(message).trimmed();
-  m_ui->editOutput->appendPlainText(formattedMessage);
+  switch (log_level_from_string(level.toStdString()))
+  {
+    case error:
+      m_ui->editOutput->setTextColor(Qt::red);
+      break;
+    case warning:
+      m_ui->editOutput->setTextColor(QColor("orange"));
+      break;
+    default:
+      m_ui->editOutput->setTextColor(Qt::black);
+      break;
+  }
+
+  m_ui->editOutput->append(formattedMessage);
   emit logMessage(level, hint, timestamp, message, formattedMessage);
 }

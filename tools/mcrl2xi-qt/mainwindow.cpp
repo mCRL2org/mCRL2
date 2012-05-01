@@ -16,6 +16,8 @@
 #include "rewriter.h"
 #include "solver.h"
 
+#include "mcrl2/utilities/logger.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
 {
@@ -46,11 +48,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
   //All button functionality
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
+  connect(m_ui.actionParse, SIGNAL(triggered()), this, SLOT(onParse()));
   connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
+  connect(m_ui.actionRewrite, SIGNAL(triggered()), this, SLOT(onRewrite()));
 
   connect(m_ui.buttonSolve, SIGNAL(clicked()), this, SLOT(onSolve()));
+  connect(m_ui.actionSolve, SIGNAL(triggered()), this, SLOT(onSolve()));
   connect(m_ui.buttonSolveAbort, SIGNAL(clicked()), this, SLOT(onSolveAbort()));
 
   //Documentmanager events
@@ -107,6 +112,7 @@ void MainWindow::formatDocument(DocumentWidget *document)
   QFont font;
   font.setFamily("Monospace");
   font.setFixedPitch(true);
+  font.setWeight(QFont::Light);
 
   editor->setFont(font);
   Highlighter *highlighter = new Highlighter(editor->document());
@@ -318,6 +324,7 @@ void MainWindow::onSolveAbort()
   ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
   QMetaObject::invokeMethod(solverparent->getThread(), "abort", Qt::QueuedConnection);
 
+  m_ui.buttonSolveAbort->setEnabled(false);
 }
 
 void MainWindow::solvedPart(QString output)

@@ -29,6 +29,8 @@ class Rewriter : public QObject
   signals:
     // Signal to indicate the rewrite process is finished
     void rewritten(QString output);
+    // Signal to indicate an epression error
+    void exprError();
     
   public slots:
     // Slots to set-up and start the rewriting process

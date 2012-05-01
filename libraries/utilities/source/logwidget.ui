@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>LogWidget</class>
-  <widget class="QWidget" name="LogWidget">
-    <property name="windowTitle">
-      <string>Output</string>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-        <widget class="QPlainTextEdit" name="editOutput">
-          <property name="lineWrapMode">
-            <enum>QPlainTextEdit::NoWrap</enum>
-          </property>
-          <property name="readOnly">
-            <bool>true</bool>
-          </property>
-          <property name="textInteractionFlags">
-            <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-          </property>
-        </widget>
-      </item>
-    </layout>
-  </widget>
-  <resources/>
-  <connections/>
+ <class>LogWidget</class>
+ <widget class="QWidget" name="LogWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>274</width>
+    <height>210</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Output</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTextEdit" name="editOutput"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

@@ -31,6 +31,8 @@ class Solver : public QObject
     void solvedPart(QString output);
     // Signal to indicate that the complete problem was solved
     void solved();
+    // Signal to indicate an expression error
+    void exprError();
     
   public slots:
     // Slots to set-up, start and stop the solving process

@@ -16,6 +16,7 @@
 Parser::Parser()
 {
   moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  thread()->setPriority(QThread::IdlePriority);
 }
 
 void Parser::parse(QString specification)

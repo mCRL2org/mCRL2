@@ -17,6 +17,7 @@ const std::string Rewriter::className = "Rewriter";
 Rewriter::Rewriter()
 {
   moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  thread()->setPriority(QThread::IdlePriority);
   m_parsed = false;
 }
 
@@ -65,7 +66,10 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
   catch (mcrl2::runtime_error e)
   {
     mCRL2log(error) << e.what() << std::endl;
-    emit rewritten(QString());
+    if (m_parsed)
+      emit rewritten(QString("Syntax Error"));
+    else
+      emit rewritten(QString());
   }
 }
 

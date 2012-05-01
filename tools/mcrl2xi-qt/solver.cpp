@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <QCoreApplication>
+
 #include "solver.h"
 #include "parsing.h"
 
@@ -17,6 +19,7 @@ const std::string Solver::className = "Solver";
 Solver::Solver()
 {
   moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  thread()->setPriority(QThread::IdlePriority);
   m_parsed = false;
 }
 
@@ -97,6 +100,10 @@ void Solver::solve(QString specification, QString dataExpression)
       s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
 
       emit solvedPart(s);
+
+      QCoreApplication::processEvents(); // To process the signals
+      if (!m_abort)
+        break;
     }
 
     if (m_abort)
@@ -108,6 +115,8 @@ void Solver::solve(QString specification, QString dataExpression)
   catch (mcrl2::runtime_error e)
   {
     mCRL2log(error) << e.what() << std::endl;
+    if (m_parsed)
+      emit solvedPart(QString("Syntax Error"));
   }
   emit solved();
 }

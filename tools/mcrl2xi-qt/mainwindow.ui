@@ -75,9 +75,18 @@
     <addaction name="actionWrap_mode"/>
     <addaction name="actionReset_perspective"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>Actions</string>
+    </property>
+    <addaction name="actionParse"/>
+    <addaction name="actionRewrite"/>
+    <addaction name="actionSolve"/>
+   </widget>
    <addaction name="mnuFile"/>
    <addaction name="menu_Tools"/>
    <addaction name="menuView"/>
+   <addaction name="menuActions"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockParse">
@@ -91,7 +100,7 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Parser</string>
+    <string>Parse Specification:</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -138,20 +147,13 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Rewriter</string>
+    <string>Rewrite Data expression:</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetRewriter">
     <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QLabel" name="lblRewrite">
-       <property name="text">
-        <string>Rewrite Data expression:</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLineEdit" name="editRewriteExpr"/>
      </item>
@@ -163,14 +165,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lblRewriteOutput">
-       <property name="text">
-        <string>Output:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPlainTextEdit" name="editRewriteOutput">
+       <property name="styleSheet">
+        <string notr="true">background: #EEE;</string>
+       </property>
        <property name="lineWrapMode">
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>
@@ -193,20 +191,13 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Solver</string>
+    <string>Solve Data expression:</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetSolver">
     <layout class="QVBoxLayout" name="verticalLayout_4">
-     <item>
-      <widget class="QLabel" name="lblSolve">
-       <property name="text">
-        <string>Solve Data expression:</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLineEdit" name="editSolveExpr"/>
      </item>
@@ -232,14 +223,13 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="lblSolveOutput">
-       <property name="text">
-        <string>Output:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPlainTextEdit" name="editSolveOutput">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: #EEE;</string>
+       </property>
        <property name="undoRedoEnabled">
         <bool>false</bool>
        </property>
@@ -248,6 +238,9 @@
        </property>
        <property name="readOnly">
         <bool>true</bool>
+       </property>
+       <property name="backgroundVisible">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -265,7 +258,7 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Log Output</string>
+    <string/>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -380,57 +373,9 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionEvaluate">
-   <property name="text">
-    <string>&amp;Evaluate</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
-   </property>
-  </action>
-  <action name="actionType_check">
-   <property name="text">
-    <string>&amp;Type check</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+T</string>
-   </property>
-  </action>
   <action name="actionReset_perspective">
    <property name="text">
     <string>Reset perspective</string>
-   </property>
-  </action>
-  <action name="actionParse">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Parser</string>
-   </property>
-  </action>
-  <action name="actionRewriter">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Rewriter</string>
-   </property>
-  </action>
-  <action name="actionSolver">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Solver</string>
-   </property>
-  </action>
-  <action name="actionOutput">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Output</string>
    </property>
   </action>
   <action name="actionFind">
@@ -452,9 +397,28 @@
     <string>Ctrl+U</string>
    </property>
   </action>
-  <action name="actionAbout">
+  <action name="actionRewrite">
    <property name="text">
-    <string>About</string>
+    <string>Rewrite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSolve">
+   <property name="text">
+    <string>Solve</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionParse">
+   <property name="text">
+    <string>Parse</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>
