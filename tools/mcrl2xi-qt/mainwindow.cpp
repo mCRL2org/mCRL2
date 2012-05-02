@@ -125,6 +125,8 @@ void MainWindow::formatDocument(DocumentWidget *document)
   QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
   connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
   connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
+
+  connect(editor, SIGNAL(textChanged()), this, SLOT(textChanged()));
 }
 
 void MainWindow::changeDocument(DocumentWidget *document)
@@ -170,8 +172,39 @@ bool MainWindow::onCloseRequest(int index)
 void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
 {
   m_ui.statusBar->showMessage(formattedMessage, 5000);
+
+  QRegExp rxlen("line (\\d+) col (\\d+): syntax error");
+   int pos = rxlen.indexIn(message);
+   if (pos > -1) {
+       int lineNr = rxlen.cap(1).toInt();
+       int ColNr = rxlen.cap(1).toInt();
+
+       QTextEdit::ExtraSelection highlight;
+
+       QTextEdit *editor = m_ui.documentManager->currentDocument()->getEditor();
+
+       QTextBlock block = editor->document()->findBlockByNumber(lineNr-1);
+
+       QTextCursor cursor = editor->textCursor();
+       cursor.setPosition(block.position()+ColNr);
+
+       editor->setTextCursor(cursor);
+
+       highlight.cursor = cursor;
+       highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+       highlight.format.setBackground(QColor("orange"));
+
+       QList<QTextEdit::ExtraSelection> extras;
+       extras << highlight;
+       editor->setExtraSelections(extras);
+   }
 }
 
+void MainWindow::textChanged()
+{
+  QList<QTextEdit::ExtraSelection> extras;
+  m_ui.documentManager->currentDocument()->getEditor()->setExtraSelections(extras);
+}
 
 void MainWindow::onNew()
 {

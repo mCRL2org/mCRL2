@@ -49,6 +49,9 @@ class MainWindow : public QMainWindow
     // Slot to update the statusbar using the log widget
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 
+    // Slot to remove the highlights
+    void textChanged();
+
   private:
     // UI variable
     Ui::MainWindow m_ui;

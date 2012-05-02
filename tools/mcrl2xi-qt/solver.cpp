@@ -102,7 +102,7 @@ void Solver::solve(QString specification, QString dataExpression)
       emit solvedPart(s);
 
       QCoreApplication::processEvents(); // To process the signals
-      if (!m_abort)
+      if (m_abort)
         break;
     }
 
