@@ -114,13 +114,12 @@ void next_state_generator::declare_constructors()
 
 next_state_generator::internal_state_t next_state_generator::get_internal_state(state s) const
 {
-  //rewriter_term_t arguments[s.size()];
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, rewriter_term_t, s.size());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, internal_state_argument_t, s.size());
   for (size_t i = 0; i < s.size(); i++)
   {
-    arguments[i] = m_rewriter.convert_to(s[i]);
+    arguments[i] = get_internal_state_argument(s[i]);
   }
-  return internal_state_t(m_state_function, arguments, arguments + s.size());
+  return get_internal_state(arguments);
 }
 
 state next_state_generator::get_state(next_state_generator::internal_state_t internal_state) const
@@ -128,7 +127,7 @@ state next_state_generator::get_state(next_state_generator::internal_state_t int
   state s;
   for (internal_state_t::const_iterator i = internal_state.begin(); i != internal_state.end(); i++)
   {
-    s.push_back(m_rewriter.convert_from(*i));
+    s.push_back(get_state_argument(*i));
   }
   return s;
 }
@@ -292,16 +291,16 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
 
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
-    m_pruning_substitution[m_generator->m_process_parameters[m_pruning_parameters[i]]] = rewriter_term_t();
+    m_pruning_substitution[m_generator->m_process_parameters[m_pruning_parameters[i]]] = rewriter_expression_t();
   }
 
   pruning_tree_node_t *node = &m_pruning_tree;
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    rewriter_term_t argument = state(parameter);
+    internal_state_argument_t argument = state(parameter);
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
-    atermpp::map<rewriter_term_t, pruning_tree_node_t>::iterator position = node->children.find(argument);
+    atermpp::map<internal_state_argument_t, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
     {
       pruning_tree_node_t child;
@@ -410,8 +409,7 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      //rewriter_term_t condition_arguments[m_summand->condition_parameters.size()];
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(condition_arguments, rewriter_term_t, m_summand->condition_parameters.size());
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(condition_arguments, rewriter_expression_t, m_summand->condition_parameters.size());
 
       for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
       {
@@ -442,7 +440,7 @@ void next_state_generator::iterator::increment()
     {
       for (data::variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
       {
-        (*m_substitution)[*i] = rewriter_term_t();
+        (*m_substitution)[*i] = rewriter_expression_t();
       }
       m_enumeration_iterator = m_generator->m_enumerator.begin_internal(m_summand->variables, m_summand->condition, *m_substitution);
     }
@@ -471,19 +469,16 @@ void next_state_generator::iterator::increment()
     (*m_substitution)[*i] = *v;
   }
 
-  //rewriter_term_t state_arguments[m_summand->result_state.size()];
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, rewriter_term_t, m_summand->result_state.size());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, internal_state_argument_t, m_summand->result_state.size());
   for (size_t i = 0; i < m_summand->result_state.size(); i++)
   {
     state_arguments[i] = m_generator->m_rewriter.rewrite_internal(m_summand->result_state(i), *m_substitution);
   }
   m_transition.m_state = internal_state_t(m_generator->m_state_function, state_arguments, state_arguments + m_summand->result_state.size());
 
-  //action actions[m_summand->action_label.size()];
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(actions, action, m_summand->action_label.size());
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
   {
-    //data_expression arguments[m_summand->action_label[i].arguments.size()];
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, data_expression, m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
@@ -497,6 +492,6 @@ void next_state_generator::iterator::increment()
 
   for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
   {
-    (*m_substitution)[*i] = rewriter_term_t();
+    (*m_substitution)[*i] = rewriter_expression_t();
   }
 }

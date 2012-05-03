@@ -32,22 +32,26 @@ namespace lps
 
 class next_state_generator
 {
-  public:
-    typedef data::rewriter::internal_substitution_type substitution_t;
-
   protected:
-    typedef atermpp::aterm_appl rewriter_term_t;
-    typedef atermpp::term_list<rewriter_term_t> valuation_t;
+    // A rewriter_expression_t is a data expression in rewriter-internal format.
+    typedef atermpp::aterm_appl rewriter_expression_t;
+    typedef atermpp::term_list<rewriter_expression_t> valuation_t;
     typedef atermpp::list<valuation_t> summand_enumeration_t;
-    typedef atermpp::term_appl<rewriter_term_t> condition_arguments_t;
+    typedef atermpp::term_appl<rewriter_expression_t> condition_arguments_t;
 
     typedef data::detail::legacy_rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
+  public:
+    typedef data::rewriter::internal_substitution_type substitution_t;
+    typedef rewriter_expression_t internal_state_argument_t;
+    typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
+
+  protected:
     struct action_internal_t
     {
       lps::action_label label;
-      atermpp::vector<rewriter_term_t> arguments;
+      atermpp::vector<rewriter_expression_t> arguments;
     };
     friend struct atermpp::aterm_traits<action_internal_t>;
 
@@ -55,7 +59,7 @@ class next_state_generator
     {
       action_summand *summand;
       data::variable_list variables;
-      rewriter_term_t condition;
+      rewriter_expression_t condition;
       atermpp::aterm_appl result_state;
       atermpp::vector<action_internal_t> action_label;
 
@@ -69,13 +73,11 @@ class next_state_generator
     struct pruning_tree_node_t
     {
       atermpp::shared_subset<summand_t> summand_subset;
-      atermpp::map<rewriter_term_t, pruning_tree_node_t> children;
+      atermpp::map<internal_state_argument_t, pruning_tree_node_t> children;
     };
     friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
   public:
-    typedef atermpp::term_appl<rewriter_term_t> internal_state_t;
-
     class summand_subset_t
     {
       friend class next_state_generator;
@@ -98,7 +100,7 @@ class next_state_generator
         pruning_tree_node_t m_pruning_tree;
         std::vector<size_t> m_pruning_parameters;
         substitution_t m_pruning_substitution;
-        rewriter_term_t m_false;
+        rewriter_expression_t m_false;
 
         static bool summand_set_contains(const atermpp::set<action_summand> &summand_set, const summand_t &summand);
         void build_pruning_parameters(const action_summand_vector &summands);
@@ -126,19 +128,6 @@ class next_state_generator
         size_t summand_index() const { return m_summand_index; }
     };
 
-    specification m_specification;
-    rewriter_t m_rewriter;
-    enumerator_t m_enumerator;
-
-    bool m_use_enumeration_caching;
-
-    data::variable_vector m_process_parameters;
-    atermpp::function_symbol m_state_function;
-    atermpp::vector<summand_t> m_summands;
-
-    summand_subset_t m_all_summands;
-
-  public:
     class iterator: public boost::iterator_facade<iterator, const transition_t, boost::forward_traversal_tag>
     {
       protected:
@@ -195,6 +184,20 @@ class next_state_generator
         bool summand_finished();
     };
 
+  protected:
+    specification m_specification;
+    rewriter_t m_rewriter;
+    enumerator_t m_enumerator;
+
+    bool m_use_enumeration_caching;
+
+    data::variable_vector m_process_parameters;
+    atermpp::function_symbol m_state_function;
+    atermpp::vector<summand_t> m_summands;
+
+    summand_subset_t m_all_summands;
+
+  public:
     /// \brief Constructor
     /// \param specification The process specification
     /// \param rewriter_strategy The rewriter strategy used
@@ -273,6 +276,24 @@ class next_state_generator
       return m_rewriter;
     }
 
+    /// \brief Converts a state arguments to internal state arguments.
+    internal_state_argument_t get_internal_state_argument(data::data_expression argument) const
+    {
+      return m_rewriter.convert_to(argument);
+    }
+
+    /// \brief Converts a internal state arguments to state arguments.
+    data::data_expression get_state_argument(internal_state_argument_t internal_argument) const
+    {
+      return m_rewriter.convert_from(internal_argument);
+    }
+
+    /// \brief Constructs internal states out of internal state arguments.
+    internal_state_t get_internal_state(const internal_state_argument_t *internal_arguments) const
+    {
+      return internal_state_t(m_state_function, internal_arguments, internal_arguments + m_state_function.arity());
+    }
+
     /// \brief Converts states to internal states.
     internal_state_t get_internal_state(state s) const;
 
@@ -290,6 +311,7 @@ class next_state_generator
     {
       return m_all_summands;
     }
+
   private:
     void declare_constructors();
 };
