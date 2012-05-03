@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME}
   ${QT_QTCORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
-  ${QT_MAIN_LIBRARY}
+  ${QT_QTMAIN_LIBRARY}
   mcrl2_aterm
   mcrl2_core
   mcrl2_data
