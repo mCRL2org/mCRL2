@@ -9,6 +9,8 @@
 project(mcrl2_atermpp)
 cmake_minimum_required(VERSION 2.6)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
 FILE(GLOB HEADERS "include/mcrl2/atermpp/*.h")
 FILE(GLOB DETAIL_HEADERS "include/mcrl2/atermpp/detail/*.h")

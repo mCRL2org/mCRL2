@@ -191,48 +191,6 @@ static void insertKeyValue(ATermIndexedSet s,
       s->values.push_back(std::vector<ATerm>(ELEMENTS_PER_TABLE));
     }
 
-    /* s->keys = (_ATerm***)AT_realloc(s->keys, sizeof(ATerm*)*nr_tables*2);
-    if (s->keys==NULL)
-    {
-      std::runtime_error("insertKeyValue: Cannot extend key table");
-    }
-    memset((void*)&s->keys[nr_tables], 0, sizeof(ATerm*)*nr_tables);
-
-    if (s->values!=NULL)
-    {
-      s->values = (_ATerm***)AT_realloc(s->values,
-                                      sizeof(ATerm*)*nr_tables*2);
-      if (s->values == NULL)
-      {
-        std::runtime_error("insertKeyValue: Cannot extend value table");
-      }
-      memset((void*)&s->values[nr_tables], 0, sizeof(ATerm*)*nr_tables);
-    }
-
-    s->nr_tables = nr_tables*2; */
-  }
-
-  /* if (keytable == NULL)
-  {
-    / * create a new key table * /
-    keytable = (_ATerm**)AT_alloc_protected(ELEMENTS_PER_TABLE);
-    s->keys[x] = keytable;
-    if (keytable == NULL)
-    {
-      std::runtime_error("insertKeyValue: Cannot create new key table");
-    }
-
-    if (s->values != NULL)
-    {
-      valuetable = (_ATerm**)AT_alloc_protected(ELEMENTS_PER_TABLE);
-      s->values[x] = valuetable;
-      if (valuetable == NULL)
-      {
-        std::runtime_error("insertKeyValue: Cannot create new value table");
-      }
-    }
-  } */
-
   s->keys[x][y] = t;
   if (s->contains_values)
   {
@@ -358,11 +316,6 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
 {
   ATermIndexedSet hashset=new _ATermTable;
 
-  // hashset = new _ATermTable; // (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
-  /* if (hashset==NULL)
-  {
-    std::runtime_error("ATindexedSetCreate: cannot allocate new ATermIndexedSet");
-  } */
   hashset->sizeMinus1 = approximatepowerof2(initial_size);
   hashset->nr_entries = 0;
   hashset->nr_deletions = 0;
@@ -381,24 +334,6 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   }
 
   hashset->contains_values=false;
-  /* hashset->nr_tables = INITIAL_NR_OF_TABLES;
-  hashset->keys = (_ATerm***)calloc(hashset->nr_tables,
-                                     sizeof(ATerm*));
-  if (hashset->keys == NULL)
-  {
-    std::runtime_error("ATindexedSetCreate: cannot create key index table");
-  }
-
-  hashset->nr_free_tables = INITIAL_NR_OF_TABLES; */
-  // hashset->first_free_position = 0;
-  /* hashset->free_table=(size_t**)calloc(sizeof(size_t*),
-                                          hashset->nr_free_tables);
-  if (hashset->free_table == NULL)
-  {
-    std::runtime_error("ATindexedSetCreate: cannot allocate table to store deleted elements");
-  }
-
-  hashset->values = NULL; */
 
   return hashset;
 }
@@ -450,9 +385,6 @@ static size_t keyPut(ATermIndexedSet hashset, const ATerm &key,
   {
     const size_t m = hashset->free_positions.top();
     hashset->free_positions.pop();
-    /* m = hashset->free_table
-        [divELEMENTS_PER_TABLE(hashset->first_free_position-1)]
-        [modELEMENTS_PER_TABLE(hashset->first_free_position-1)]; */
     n = hashPut(hashset, key, m);
     if (n != m)
     {
@@ -561,15 +493,6 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
   hashtable->contains_values=true;
 
-  /* hashtable->values = (_ATerm***)calloc(hashtable->nr_tables,
-                                         sizeof(ATerm*));
-  
-
-  if (hashtable->values == NULL)
-  {
-    std::runtime_error("ATtableCreate: cannot create value index table");
-  } */
-
   return hashtable;
 }
 
@@ -662,36 +585,6 @@ bool ATtableRemove(ATermTable table, const ATerm &key)
 
   insertKeyValue(table, v, ATerm(), ATerm());
 
-  /* x=divELEMENTS_PER_TABLE(table->first_free_position);
-  if (x>=table->nr_free_tables)
-  {
-    table->free_table = (size_t**)AT_realloc(table->free_table,
-                        sizeof(size_t)*table->nr_free_tables*2);
-    if (table->free_table==NULL)
-    {
-      std::runtime_error("ATtableRemove: Cannot allocate memory for free table index");
-    }
-
-    memset((void*)&table->free_table[table->nr_free_tables], 0, table->nr_free_tables);
-
-    table->nr_free_tables = table->nr_free_tables*2;
-  }
-
-  ltable = table->free_table[x];
-  if (ltable == NULL)
-  {
-    / * create a new key table * /
-    ltable = (size_t*)AT_malloc(sizeof(size_t)*ELEMENTS_PER_TABLE);
-    table->free_table[x] = ltable;
-    if (ltable == NULL)
-    {
-      std::runtime_error("ATtableRemove: Cannot create new free table");
-    }
-  } */
-
-  /* y = modELEMENTS_PER_TABLE(table->first_free_position);
-  ltable[y] = v;
-  table->first_free_position++; */
   table->free_positions.push(v);
   table->nr_deletions++;
   return true;
