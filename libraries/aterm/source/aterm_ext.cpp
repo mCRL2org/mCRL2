@@ -29,7 +29,6 @@ ATermAppl gsMakeSubst(const ATerm OldValue, const ATerm NewValue)
   if (substafun_notset)
   {
     substafun = AFun("subst", 2, false);
-    // ATprotectAFun(substafun);
     substafun_notset = false;
   }
   return ATmakeAppl2(substafun, OldValue, NewValue);
@@ -67,7 +66,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
         {
           Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeAppl(Head, Args.begin(),Args.end());
+        ATerm a = ATmakeAppl_iterator(Head, Args.begin(),Args.end());
         return a;
       }
       else
@@ -121,7 +120,7 @@ ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursi
         {
           Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
         }
-        ATerm a = ATmakeAppl(Head, Args.begin(),Args.end());
+        ATerm a = ATmakeAppl_iterator(Head, Args.begin(),Args.end());
         return a;
       }
       else

@@ -36,7 +36,7 @@ std::string print_state(atermpp::aterm_appl s, legacy_rewriter& R)
       result.append(", ");
     }
 
-    result.append(core::pp(atermpp::aterm(R.convert_from(static_cast<ATerm>(*i)))));
+    result.append(core::pp(atermpp::aterm(R.convert_from(static_cast<atermpp::aterm_appl>(*i)))));
   }
   result.append(")");
   return result;

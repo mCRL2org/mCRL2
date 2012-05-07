@@ -187,7 +187,7 @@ class BDD_Prover: public Prover
       }
 
       atermpp::aterm_appl v_guard = smallest(a_formula);
-      if (!v_guard)
+      if (v_guard==ATerm())
       {
         return a_formula;
       }
@@ -250,7 +250,7 @@ class BDD_Prover: public Prover
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
-            f_formula = f_induction.apply_induction();
+            f_formula = data_expression(f_induction.apply_induction());
             build_bdd();
             eliminate_paths();
           }
@@ -267,7 +267,7 @@ class BDD_Prover: public Prover
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
             {
               mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
-              f_formula = f_induction.apply_induction();
+              f_formula = data_expression(f_induction.apply_induction());
               build_bdd();
               eliminate_paths();
             }
@@ -356,7 +356,7 @@ class BDD_Prover: public Prover
           }
         }
       }
-      if (!v_result && f_info.has_type_bool(a_formula))
+      if (v_result==atermpp::aterm_appl() && f_info.has_type_bool(a_formula))
       {
         v_result = a_formula;
       }

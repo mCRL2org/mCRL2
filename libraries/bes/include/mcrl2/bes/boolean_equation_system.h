@@ -199,26 +199,6 @@ class boolean_equation_system
       std::set<boolean_variable> occ = occurring_variables();
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
     }
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_initial_state.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_initial_state.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_initial_state.mark();
-    }
 };
 
 template <typename Container>
@@ -237,7 +217,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
   for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = boolean_equation_to_aterm(*i);
-    eqn_list = atermpp::push_front(eqn_list, a);
+    eqn_list = aterm::push_front(eqn_list, a);
   }
   return core::detail::gsMakeBES(eqn_list, p.initial_state());
 }
@@ -252,18 +232,6 @@ namespace atermpp
 template<typename Container>
 struct aterm_traits<mcrl2::bes::boolean_equation_system<Container> >
 {
-  static void protect(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.mark();
-  }
 };
 } // namespace atermpp
 /// \endcond

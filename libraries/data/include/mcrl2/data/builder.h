@@ -289,15 +289,15 @@ struct add_sort_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -468,15 +468,15 @@ struct add_data_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      result = static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

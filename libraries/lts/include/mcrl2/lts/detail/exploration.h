@@ -125,9 +125,6 @@ namespace atermpp
 {
   template<> struct aterm_traits<mcrl2::lts::lps2lts_algorithm::state_info>
   {
-    static void protect(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.protect(); }
-    static void unprotect(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.unprotect(); }
-    static void mark(const mcrl2::lts::lps2lts_algorithm::state_info &state_info) { state_info.state.mark(); }
   };
 }
 

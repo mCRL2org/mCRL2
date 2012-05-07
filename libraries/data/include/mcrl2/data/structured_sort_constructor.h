@@ -70,7 +70,7 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
 
     structured_sort_constructor_argument_list arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return structured_sort_constructor_argument_list(atermpp::list_arg2(*this));
     }
 
     core::identifier_string recogniser() const
@@ -142,8 +142,8 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
 
     /// \brief Constructor.
     /// \param term A term
-    structured_sort_constructor(atermpp::aterm_appl term)
-      : detail::structured_sort_constructor_base(term)
+    structured_sort_constructor(const ATerm &term)
+      : detail::structured_sort_constructor_base(atermpp::aterm_appl(term))
     {}
 
     /// \brief Constructor

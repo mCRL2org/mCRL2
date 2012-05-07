@@ -38,14 +38,22 @@ class action_name_multiset: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action_name_multiset(atermpp::aterm_appl term)
+    action_name_multiset(const atermpp::aterm_appl &term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_MultActName(m_term));
     }
 
     /// \brief Constructor.
-    action_name_multiset(core::identifier_string_list names)
+    /// \param term A term
+    explicit action_name_multiset(const ATerm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_MultActName(m_term));
+    }
+
+    /// \brief Constructor.
+    action_name_multiset(const core::identifier_string_list &names)
       : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
     {}
 
@@ -53,7 +61,7 @@ class action_name_multiset: public atermpp::aterm_appl
     /// \return The names of the multi-action
     core::identifier_string_list names() const
     {
-      return atermpp::list_arg1(*this);
+      return core::identifier_string_list(atermpp::list_arg1(*this));
     }
 };
 

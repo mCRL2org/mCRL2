@@ -24,7 +24,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/util.h"
 #include "mcrl2/aterm/memory.h"
 

@@ -170,8 +170,6 @@ class EnumeratorSolutionsStandard
        enum_sigma(default_sigma()),
        m_max_internal_variables(0)
     {
-      enum_vars.protect();
-      enum_expr.protect();
     } 
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
@@ -213,16 +211,12 @@ class EnumeratorSolutionsStandard
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
-      enum_vars.protect();
-      enum_expr.protect();
       reset(not_equal_to_false,expr_is_normal_form);
     }
 
     /// Standard destructor.
     ~EnumeratorSolutionsStandard()
     {
-      enum_vars.unprotect();
-      enum_expr.unprotect();
     }
  
    /**
@@ -322,56 +316,6 @@ class EnumeratorSolutionsStandard
 };
 }
 }
-}
-
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::data::detail::fs_expr>
-{
-  static void protect(const mcrl2::data::detail::fs_expr& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.vars().protect();
-    t.substituted_vars().protect();
-    t.vals().protect();
-    t.expr().protect();
-  }
-  static void unprotect(const mcrl2::data::detail::fs_expr& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.vars().unprotect();
-    t.substituted_vars().unprotect();
-    t.vals().unprotect();
-    t.expr().unprotect();
-  }
-  static void mark(const mcrl2::data::detail::fs_expr& t)
-  {
-    t.vars().mark();
-    t.substituted_vars().mark();
-    t.vals().mark();
-    t.expr().mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::data::detail::ss_solution>
-{
-  static void protect(const mcrl2::data::detail::ss_solution& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.solution().protect();
-  }
-  static void unprotect(const mcrl2::data::detail::ss_solution& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.solution().unprotect();
-  }
-  static void mark(const mcrl2::data::detail::ss_solution& t)
-  {
-    t.solution().mark();
-  }
-};
 } // namespace atermpp
 /// \endcond
 

@@ -45,6 +45,14 @@ class rename_expression: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param term A term
+    explicit rename_expression(const ATerm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_RenameExpr(m_term));
+    }
+
+    /// \brief Constructor.
     rename_expression(core::identifier_string source, core::identifier_string target)
       : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
     {}

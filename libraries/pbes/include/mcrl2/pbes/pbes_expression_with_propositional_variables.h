@@ -78,37 +78,6 @@ class pbes_expression_with_propositional_variables: public pbes_expression_with_
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_propositional_variables >
-{
-  static void protect(const mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)
-  {
-    t.protect();
-    t.variables().protect();
-    t.propositional_variables().protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)
-  {
-    t.unprotect();
-    t.variables().unprotect();
-    t.propositional_variables().unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)
-  {
-    t.mark();
-    t.variables().mark();
-    t.propositional_variables().mark();
-  }
-  static ATerm term(const mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)
-  {
-    return t.term();
-  }
-};
-}
-/// \endcond
 
 namespace mcrl2
 {

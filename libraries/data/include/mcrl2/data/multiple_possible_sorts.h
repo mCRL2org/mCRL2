@@ -52,7 +52,7 @@ class multiple_possible_sorts: public sort_expression
 
     sort_expression_list sorts() const
     {
-      return atermpp::list_arg1(*this);
+      return sort_expression_list(atermpp::list_arg1(*this));
     }
 };
 //--- end generated class multiple_possible_sorts ---//

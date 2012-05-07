@@ -46,13 +46,22 @@ class process_equation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param term A term
+    explicit process_equation(const ATerm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_ProcEqn(m_term));
+    }
+
+    /// \brief Constructor.
     /// \param name A process identifier
     /// \param formal_parameters A sequence of data variables
     /// \param expression A process expression
     process_equation(process_identifier name, data::variable_list formal_parameters, process_expression expression)
       : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
                               name,
-                              atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
+                              // atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
+                              formal_parameters,
                               expression))
     {}
 
@@ -67,9 +76,10 @@ class process_equation: public atermpp::aterm_appl
     /// \return The formal parameters of the equation
     data::variable_list formal_parameters() const
     {
-      return data::variable_list(
+      return data::variable_list((*this)(1));
+      /* return data::variable_list(
                atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
-               atermpp::term_list_iterator<data::variable>());
+               atermpp::term_list_iterator<data::variable>()); */
     }
 
     /// \brief Returns the expression of the process equation

@@ -47,11 +47,11 @@ struct fg_replacer
   {
     if (t.function().name() == "f")
     {
-      return aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end()));
+      return aterm_appl(function_symbol("g", t.function().arity()), t.begin(), t.end());
     }
     else if (t.function().name() == "g")
     {
-      return aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end()));
+      return aterm_appl(function_symbol("f", t.function().arity()), t.begin(), t.end());
     }
     else
     {
@@ -63,15 +63,15 @@ struct fg_replacer
 // replaces function names f by g and vice versa, but stops the recursion once an f or g term is found
 struct fg_partial_replacer
 {
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair< aterm_appl, bool> operator()(aterm_appl t) const
   {
     if (t.function().name() == "f")
     {
-      return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+      return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), t.begin(), t.end()), false);
     }
     else if (t.function().name() == "g")
     {
-      return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+      return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), t.begin(), t.end()), false);
     }
     else
     {
@@ -82,28 +82,28 @@ struct fg_partial_replacer
 
 void test_find()
 {
-  aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl a(make_term("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == static_cast<aterm_appl>(make_term("f(y)")));
+  BOOST_CHECK(t == static_cast< aterm_appl>(make_term("f(y)")));
 
-  std::vector<aterm_appl> v;
+  std::vector< aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == static_cast<aterm_appl>(make_term("f(y)")));
-  BOOST_CHECK(v.back() == static_cast<aterm_appl>(make_term("f(z)")));
+  BOOST_CHECK(v.front() == static_cast< aterm_appl>(make_term("f(y)")));
+  BOOST_CHECK(v.back() == static_cast< aterm_appl>(make_term("f(z)")));
 }
 
 void test_replace()
 {
-  BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(a)")) == make_term("f(a)"));
-  BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(x)")) == make_term("f(x)"));
-  BOOST_CHECK(replace(make_term("[x]"), make_term("x"), make_term("f(x)")) == make_term("[f(x)]"));
+  BOOST_CHECK(replace(aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(a)"))) == make_term("f(a)"));
+  BOOST_CHECK(replace(aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(x)"))) == make_term("f(x)"));
+  BOOST_CHECK(replace(atermpp::aterm_list(make_term("[x]")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(x)"))) == make_term("[f(x)]"));
 
-  aterm_appl a = make_term("f(f(x))");
-  aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
-  BOOST_CHECK(b == static_cast<aterm_appl>(make_term("f(x)")));
-  b = bottom_up_replace(a, make_term("f(x)"), make_term("x"));
-  BOOST_CHECK(b == static_cast<aterm_appl>(make_term("x")));
+  aterm_appl a(make_term("f(f(x))"));
+  aterm_appl b(replace(a, atermpp::aterm_appl(make_term("f(x)")), atermpp::aterm_appl(make_term("x"))));
+  BOOST_CHECK(b == static_cast< aterm_appl>(make_term("f(x)")));
+  b = bottom_up_replace(a, atermpp::aterm_appl(make_term("f(x)")), atermpp::aterm_appl(make_term("x")));
+  BOOST_CHECK(b == static_cast< aterm_appl>(make_term("x")));
 
   atermpp::aterm f = make_term("[]");
   atermpp::aterm g = replace(f, a, b);

@@ -24,11 +24,6 @@
 using namespace std;
 using namespace atermpp;
 
-// This test has been disabled, until the balanced trees
-// are made functional again. As it stands they are not used,
-// and must be adapted to work properly using the reference
-// counting implementation.
-
 struct counter
 {
   int& m_sum;
@@ -111,8 +106,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  // test_aterm_balanced_tree(); Test is disabled, as it is not working with the
-  //                             reference count garbage collection, and balanced trees are not used.
+  test_aterm_balanced_tree(); 
 
   return 0;
 }

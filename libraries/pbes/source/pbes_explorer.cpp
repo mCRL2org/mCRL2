@@ -983,7 +983,7 @@ pbes_expression ltsmin_state::to_pbes_expression() const
     data::data_expression_list parameter_values = data::data_expression_list();
     for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
-        parameter_values = parameter_values + *param_value;
+        parameter_values = parameter_values + term_list<data::data_expression>(term_list<data::data_expression>(),*param_value);
     }
     // Create propositional variable instantiation.
     propositional_variable_instantiation expr =

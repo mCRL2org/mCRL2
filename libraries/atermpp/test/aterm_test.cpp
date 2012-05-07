@@ -30,7 +30,7 @@ void test_aterm()
   BOOST_CHECK(aterm_int(d).value() == 10);
 
   atermpp::aterm e = atermpp::aterm();
-  BOOST_CHECK(!e);
+  BOOST_CHECK(e==atermpp::aterm());
 }
 
 int test_main(int argc, char* argv[])

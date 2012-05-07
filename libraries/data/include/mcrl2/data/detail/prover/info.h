@@ -357,7 +357,7 @@ class InternalFormatInfo
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
     atermpp::aterm_appl get_argument(const atermpp::aterm_appl &a_term, const size_t a_number)
     {
-      return a_term(a_number + 1);
+      return atermpp::aterm_appl(a_term(a_number + 1));
     }
 
     /// \brief Indicates whether or not a term is equal to \c true.

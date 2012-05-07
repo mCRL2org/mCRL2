@@ -13,16 +13,6 @@
  * administration of maximal subterm sharing and garbage collection, both
  * are hidden from the programmer.
  *
- * The major blessing AND pitfall of ATerm programming is automatic garbage
- * collection. The garbage
- * collector automatically finds all living terms that are rooted somewhere
- * on the
- * C call stack (which means they are local variables in one of your
- * functions). Global variables, or ATerm members of your own structures
- * that are allocated on the heap need to be protected from garbage collection
- * by ATprotect(), and unprotected again when their context is freed by
- * ATunprotect().
- *
  * \section docs Other sources of documentation
  *
  * Please visit <a href="http://www.meta-environment.org">meta-environment.org</a>
@@ -187,50 +177,6 @@ ATerm ATparse(const char* s)
 {
   return ATreadFromString(s);
 }
-
-/**
- * Protect an ATerm from being garbage collected in the future.
- * \arg atp memory address of an ATerm
- */
-// void ATprotect(const ATerm* atp);
-
-/**
- * Remove the protection from the garbage collector for a certain term.
- * \arg atp the address of a previously protected ATerm, see ATprotect()
- */
-// void ATunprotect(const ATerm* atp);
-
-/**
- * Efficiently ATprotect() an array of terms from the garbage collector.
- * \arg start array of terms
- * \arg size  length of |start|
- */
-// void ATprotectArray(const ATerm* start, const size_t size);
-
-/**
- * Efficiently ATunprotect() an array of terms.
- * \arg start previously protected array of terms
- */
-// void ATunprotectArray(const ATerm* start);
-
-/**
- * Register a function to be called before every garbage collection
- * starts. This can be used to enhance the garbage collector with a
- * user defined scheme for protecting terms. The function registered
- * should use ATmakeTerm() or ATmarkArray() to protect terms from
- * garbage collection. This scheme is a more complex alternative to
- * using the ATprotect() and ATunprotect() functions.
- * \arg f function to register
- *
- * \todo Should this functionality be in the level one interface?
- */
-// void ATaddProtectFunction(const ATermProtFunc f);
-
-/**
- * unregister a previously registered marking function. See ATaddProtectFunction().
- */
-/* void ATremoveProtectFunction(ATermProtFunc f);
-*/
 
 /**
  * Initialize the ATerm library. It is essential to call this function in the

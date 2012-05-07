@@ -645,7 +645,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
     {
       if (gstcReadInFuncs(constructors,mappings))
       {
-        if (action_labels != ATermList())
+        if (action_labels != ATerm())
         {
           if (!gstcReadInActs(action_labels))
           {
@@ -1178,8 +1178,6 @@ void gstcDataInit(void)
   context.glob_vars=ATtableCreate(63,50);
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
-  body.equations=NULL;
-  // ATprotectList(&body.equations);
   body.equations = ATmakeList0();
 
   //Creation of operation identifiers for system defined operations.
@@ -2566,7 +2564,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
   else // domain.size()>0
   {
     ATermList L=ATLtableGet(gssystem.functions, Name);
-    for (; L!=ATermList() && L!=ATempty ; L=ATgetNext(L))
+    for (; L!=ATerm() && L!=ATempty ; L=ATgetNext(L))
     {
       if (gstcTypeMatchA(Sort,(ATermAppl)ATgetFirst(L))!=ATerm())
       {
@@ -3778,7 +3776,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         Arguments=ATreverse(NewArguments);
 
         Type=sort_list::list(sort_expression(Type));
-        *DataTerm=sort_list::list_enumeration(sort_expression(Type), atermpp::aterm_list(Arguments));
+        *DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(Arguments));
         return Type;
       }
       if (Name == sort_set::set_enumeration_name())
@@ -3842,7 +3840,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         Arguments=ATreverse(NewArguments);
         Type=sort_set::set_(sort_expression(Type));
-        *DataTerm=sort_set::set_enumeration(sort_expression(Type),atermpp::aterm_list(Arguments));
+        *DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(Arguments));
         return Type;
       }
       if (Name == sort_bag::bag_enumeration_name())
@@ -3919,7 +3917,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         Arguments=ATreverse(NewArguments);
         Type=sort_bag::bag(sort_expression(Type));
-        *DataTerm=sort_bag::bag_enumeration(sort_expression(Type), atermpp::aterm_list(Arguments));
+        *DataTerm=sort_bag::bag_enumeration(sort_expression(Type), data_expression_list(Arguments));
         return Type;
       }
     }
@@ -4524,7 +4522,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       else
       {
-        Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
+        // Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
+        Sort=multiple_possible_sorts(sort_expression_list(CandidateParList));
       }
       *DataTerm=gsMakeOpId(Name,Sort);
       if (nFactPars!=ATERM_NON_EXISTING_POSITION)
@@ -4837,7 +4836,8 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
     }
     else
     {
-      Sort=multiple_possible_sorts(atermpp::aterm_list(ATreverse(Pars[i-1])));
+      // Sort=multiple_possible_sorts(atermpp::aterm_list(ATreverse(Pars[i-1])));
+      Sort=multiple_possible_sorts(sort_expression_list(ATreverse(Pars[i-1])));
     }
     Result=ATinsert(Result,Sort);
   }
@@ -4866,7 +4866,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
 
   if (data::is_multiple_possible_sorts(data::sort_expression(NeededType)))
   {
-    sort_expression_list l=ATLgetArgument(NeededType,0);
+    sort_expression_list l=sort_expression_list(ATLgetArgument(NeededType,0));
     for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
     {
       ATermAppl r=gstcUpCastNumericType(*i,Type,Par,warn_upcasting);
@@ -5145,7 +5145,8 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
       return ATAgetFirst(NewTypeList);
     }
 
-    return multiple_possible_sorts(atermpp::aterm_list(ATreverse(NewTypeList)));
+    return multiple_possible_sorts(sort_expression_list(ATreverse(NewTypeList)));
+    // return multiple_possible_sorts(atermpp::aterm_list(ATreverse(NewTypeList)));
   }
 
   //PosType is a normal type
@@ -5344,7 +5345,8 @@ static ATermAppl gstcUnSet(ATermAppl PosType)
       NewPosTypes=ATinsert(NewPosTypes,NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
+    return multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    // return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
   }
   return NULL;
 }
@@ -5386,7 +5388,8 @@ static ATermAppl gstcUnBag(ATermAppl PosType)
       NewPosTypes=ATinsert(NewPosTypes,NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
+    return multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    // return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
   }
   return NULL;
 }
@@ -5428,7 +5431,8 @@ static ATermAppl gstcUnList(ATermAppl PosType)
       NewPosTypes=ATinsert(NewPosTypes,NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
+    return multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    // return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
   }
   return NULL;
 }
@@ -5489,7 +5493,8 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType)
       NewPosTypes=ATinsertUnique(NewPosTypes,NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
+    return multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    // return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
   }
   return NULL;
 }
@@ -6476,7 +6481,8 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
       }
       else
       {
-        Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
+        // Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
+        Sort=multiple_possible_sorts(sort_expression_list(PosTypes));
       }
       mCRL2log(error) << "this is, for instance, because cannot cast " << core::pp_deprecated(ATAgetFirst(l)) << " to type " << core::pp_deprecated(Sort) << std::endl;
       break;

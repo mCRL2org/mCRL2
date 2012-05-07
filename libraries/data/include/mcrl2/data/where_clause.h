@@ -53,12 +53,12 @@ class where_clause: public data_expression
 
     data_expression body() const
     {
-      return atermpp::arg1(*this);
+      return data_expression(atermpp::arg1(*this));
     }
 
     assignment_expression_list declarations() const
     {
-      return atermpp::list_arg2(*this);
+      return assignment_expression_list(atermpp::list_arg2(*this));
     }
 };
 //--- end generated class where_clause ---//

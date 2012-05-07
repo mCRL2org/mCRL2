@@ -43,6 +43,14 @@ class action: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param term A term
+    explicit action(const ATerm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_Action(m_term));
+    }
+
+    /// \brief Constructor.
     action(const action_label& label, const data::data_expression_list& arguments)
       : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments))
     {}
@@ -54,7 +62,7 @@ class action: public atermpp::aterm_appl
 
     data::data_expression_list arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return data::data_expression_list(atermpp::list_arg2(*this));
     }
 };
 

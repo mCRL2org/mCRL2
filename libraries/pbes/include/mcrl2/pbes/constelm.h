@@ -624,13 +624,12 @@ class pbes_constelm_algorithm
 
           bool changed = false;
 
-          typename data_term_sequence_type::iterator i;
-          typename variable_sequence_type::iterator j;
           variable_sequence_type params = m_variable.parameters();
 
           if (m_constraints.empty())
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            typename variable_sequence_type::iterator j = params.begin();
+            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
             {
               // TODO: why not use R(t, sigma) interface here?
               data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
@@ -647,7 +646,8 @@ class pbes_constelm_algorithm
           }
           else
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            typename variable_sequence_type::iterator j = params.begin();
+            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
             {
               typename constraint_map::iterator k = m_constraints.find(*j);
               assert(k != m_constraints.end());

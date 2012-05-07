@@ -41,10 +41,10 @@ class assignment_expression: public atermpp::aterm_appl,
       : atermpp::aterm_appl(core::detail::constructWhrDecl())
     {}
 
-    assignment_expression(atermpp::aterm_appl term)
+    assignment_expression(const ATerm &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_WhrDecl(term));
+      assert(core::detail::check_rule_WhrDecl(atermpp::aterm_appl(term)));
     }
 
     assignment_expression(const variable v, const data_expression d)
@@ -58,7 +58,7 @@ class assignment_expression: public atermpp::aterm_appl,
 
     data_expression rhs() const
     {
-      return atermpp::arg2(*this);
+      return data_expression(atermpp::arg2(*this));
     }
 };
 
@@ -80,8 +80,8 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    assignment(const atermpp::aterm_appl& term)
-      : assignment_expression(term)
+    assignment(const ATerm& term)
+      : assignment_expression(atermpp::aterm_appl(term))
     {
       assert(core::detail::check_term_DataVarIdInit(m_term));
     }
@@ -98,7 +98,7 @@ class assignment: public assignment_expression
 
     data_expression rhs() const
     {
-      return atermpp::arg2(*this);
+      return data_expression(atermpp::arg2(*this));
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
@@ -172,7 +172,7 @@ class identifier_assignment: public assignment_expression
 
     data_expression rhs() const
     {
-      return atermpp::arg2(*this);
+      return data_expression(atermpp::arg2(*this));
     }
 //--- start user section identifier_assignment ---//
     /// \brief Applies the assignment to a variable

@@ -44,38 +44,23 @@ class multi_action
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-      m_actions.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-      m_actions.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_time.mark();
-      m_actions.mark();
-    }
-
   public:
     /// \brief Constructor
-    multi_action(action_list actions = action_list(), data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+    multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression(core::detail::gsMakeNil()))
       : m_actions(actions), m_time(time)
     {}
 
     /// \brief Constructor
     multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
     {
+      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+    }
+
+    /// \brief Constructor
+    explicit multi_action(const ATerm& t1) : m_time(core::detail::gsMakeNil())
+    {
+      const atermpp::aterm_appl t(t1);
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
       m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
     }
@@ -292,8 +277,8 @@ struct equal_data_parameters_builder
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1, i2;
-      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      data::data_expression_list::iterator i1 = d1.begin(), i2 = d2.begin();
+      for (     ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(d::lazy::equal_to(*i1, *i2));
       }
@@ -334,8 +319,8 @@ struct not_equal_multi_actions_builder
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1, i2;
-      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      data::data_expression_list::iterator i1=d1.begin(), i2=d2.begin();
+      for (   ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::not_equal_to(*i1, *i2));
       }
@@ -442,18 +427,6 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::multi_action>
 {
-  static void protect(const mcrl2::lps::multi_action& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::multi_action& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::multi_action& t)
-  {
-    t.mark();
-  }
 };
 } // namespace atermpp
 /// \endcond

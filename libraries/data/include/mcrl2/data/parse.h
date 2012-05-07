@@ -618,7 +618,7 @@ void parse_variables(std::istream& in,
   {
     throw mcrl2::runtime_error("Error while type checking data variable declarations.");
   }
-  data_vars=temporary_data_vars;
+  data_vars=variable_list(temporary_data_vars);
 
   // Undo sort renamings for compatibility with type checker
   // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);

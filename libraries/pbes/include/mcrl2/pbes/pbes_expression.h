@@ -53,6 +53,14 @@ class pbes_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_PBExpr(m_term));
     }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit pbes_expression(const ATerm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_PBExpr(m_term));
+    }
 };
 
 /// \brief list of pbes_expressions
@@ -70,6 +78,14 @@ class propositional_variable_instantiation: public pbes_expression
     propositional_variable_instantiation()
       : pbes_expression(core::detail::constructPropVarInst())
     {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit propositional_variable_instantiation(const ATerm& term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PropVarInst(m_term));
+    }
 
     /// \brief Constructor.
     /// \param term A term
@@ -96,7 +112,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     data::data_expression_list parameters() const
     {
-      return atermpp::list_arg2(*this);
+      return data::data_expression_list(atermpp::list_arg2(*this));
     }
 //--- start user section propositional_variable_instantiation ---//
     /// \brief Type of the parameters.
@@ -109,7 +125,7 @@ class propositional_variable_instantiation: public pbes_expression
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
       data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      m_term = static_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters));
+      this->copy_term(&*static_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters)));
     }
 //--- end user section propositional_variable_instantiation ---//
 };
@@ -308,7 +324,7 @@ class forall: public pbes_expression
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     pbes_expression body() const
@@ -341,7 +357,7 @@ class exists: public pbes_expression
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     pbes_expression body() const
@@ -602,7 +618,7 @@ inline
 data::data_expression val(const pbes_expression& t)
 {
   assert(data::is_data_expression(t));
-  return atermpp::aterm_appl(t);
+  return data::data_expression(atermpp::aterm_appl(t));
 }
 
 /// \brief Returns the pbes expression argument of expressions of type not, exists and forall.
@@ -696,8 +712,9 @@ inline
 data::variable_list var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
-  return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-                             atermpp::term_list_iterator< data::variable >());
+  return data::variable_list(t(0));
+  /* return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
+                             atermpp::term_list_iterator< data::variable >()); */
 }
 
 /// \brief Returns the name of a propositional variable expression
@@ -717,8 +734,9 @@ inline
 data::data_expression_list param(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
-                                    atermpp::term_list_iterator< data::data_expression >());
+  return data::data_expression_list(t(1));
+  /* return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
+                                    atermpp::term_list_iterator< data::data_expression >()); */
 }
 } // accessors
 
@@ -1374,7 +1392,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   data_term_type term2dataterm(const term_type& t)
   {
-    return t;
+    return data_term_type(t);
   }
 
   /// \brief Test if a term is constant

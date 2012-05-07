@@ -43,6 +43,14 @@ class communication_expression: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param term A term
+    explicit communication_expression(const ATerm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_CommExpr(m_term));
+    }
+
+    /// \brief Constructor.
     communication_expression(action_name_multiset action_name, core::identifier_string name)
       : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
     {}

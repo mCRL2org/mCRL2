@@ -219,13 +219,6 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
       return m_number>=f.m_number;
     }
-
-    /// Functions below must be removed.
-    void protect() const // to be removed.
-    {}
-
-    void unprotect() const // to be removed
-    {}
 };
 
 

@@ -245,27 +245,15 @@ namespace atermpp
 {
   template<> struct aterm_traits<mcrl2::lps::next_state_generator::action_internal_t>
   {
-    static void protect(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.protect(); }
-    static void unprotect(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.unprotect(); }
-    static void mark(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.mark(); }
   };
   template<> struct aterm_traits<mcrl2::lps::next_state_generator::summand_t>
   {
-    static void protect(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.protect(); summand.result_state.protect(); summand.condition_arguments_function_dummy.protect(); }
-    static void unprotect(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.unprotect(); summand.result_state.unprotect(); summand.condition_arguments_function_dummy.unprotect(); }
-    static void mark(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.mark(); summand.result_state.mark(); summand.condition_arguments_function_dummy.mark(); }
   };
   template<> struct aterm_traits<mcrl2::lps::next_state_generator::transition_t>
   {
-    static void protect(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.protect(); aterm_traits<mcrl2::lps::multi_action>::protect(transition.m_action); }
-    static void unprotect(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.unprotect(); aterm_traits<mcrl2::lps::multi_action>::unprotect(transition.m_action); }
-    static void mark(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.mark(); aterm_traits<mcrl2::lps::multi_action>::mark(transition.m_action); }
   };
   template<> struct aterm_traits<mcrl2::lps::next_state_generator::pruning_tree_node_t>
   {
-    static void protect(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::protect(node.summand_subset); }
-    static void unprotect(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::unprotect(node.summand_subset); }
-    static void mark(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::mark(node.summand_subset); }
   };
 }
 

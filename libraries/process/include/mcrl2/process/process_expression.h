@@ -54,6 +54,14 @@ class process_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ProcExpr(m_term));
     }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit process_expression(const ATerm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_ProcExpr(m_term));
+    }
 };
 
 /// \brief list of process_expressions
@@ -102,7 +110,7 @@ class process_instance: public process_expression
 
     data::data_expression_list actual_parameters() const
     {
-      return atermpp::list_arg2(*this);
+      return data::data_expression_list(atermpp::list_arg2(*this));
     }
 };
 
@@ -145,7 +153,7 @@ class process_instance_assignment: public process_expression
 
     data::assignment_list assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return data::assignment_list(atermpp::list_arg2(*this));
     }
 };
 
@@ -239,7 +247,7 @@ class sum: public process_expression
 
     data::variable_list bound_variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -282,7 +290,7 @@ class block: public process_expression
 
     core::identifier_string_list block_set() const
     {
-      return atermpp::list_arg1(*this);
+      return core::identifier_string_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -325,7 +333,7 @@ class hide: public process_expression
 
     core::identifier_string_list hide_set() const
     {
-      return atermpp::list_arg1(*this);
+      return core::identifier_string_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -368,7 +376,7 @@ class rename: public process_expression
 
     rename_expression_list rename_set() const
     {
-      return atermpp::list_arg1(*this);
+      return rename_expression_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -411,7 +419,7 @@ class comm: public process_expression
 
     communication_expression_list comm_set() const
     {
-      return atermpp::list_arg1(*this);
+      return communication_expression_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -454,7 +462,7 @@ class allow: public process_expression
 
     action_name_multiset_list allow_set() const
     {
-      return atermpp::list_arg1(*this);
+      return action_name_multiset_list(atermpp::list_arg1(*this));
     }
 
     process_expression operand() const
@@ -545,7 +553,7 @@ class at: public process_expression
 
     data::data_expression time_stamp() const
     {
-      return atermpp::arg2(*this);
+      return data::data_expression(atermpp::arg2(*this));
     }
 };
 
@@ -626,7 +634,7 @@ class if_then: public process_expression
 
     data::data_expression condition() const
     {
-      return atermpp::arg1(*this);
+      return data::data_expression(atermpp::arg1(*this));
     }
 
     process_expression then_case() const
@@ -669,7 +677,7 @@ class if_then_else: public process_expression
 
     data::data_expression condition() const
     {
-      return atermpp::arg1(*this);
+      return data::data_expression(atermpp::arg1(*this));
     }
 
     process_expression then_case() const

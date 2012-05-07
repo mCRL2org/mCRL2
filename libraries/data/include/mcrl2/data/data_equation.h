@@ -50,7 +50,7 @@ class data_equation: public atermpp::aterm_appl
     /// \brief Constructor
     ///
     /// \param[in] a An aterm adhering to the internal format.
-    data_equation(const atermpp::aterm_appl& a)
+    data_equation(const ATerm& a)
       : atermpp::aterm_appl(a)
     { }
 
@@ -115,25 +115,25 @@ class data_equation: public atermpp::aterm_appl
     /// \brief Returns the variables of the data equation.
     variable_list variables() const
     {
-      return atermpp::list_arg1(appl());
+      return variable_list(atermpp::list_arg1(appl()));
     }
 
     /// \brief Returns the condition of the data equation.
     data_expression condition() const
     {
-      return atermpp::arg2(*this);
+      return data_expression(atermpp::arg2(*this));
     }
 
     /// \brief Returns the left hand side of the data equation.
     data_expression lhs() const
     {
-      return atermpp::arg3(*this);
+      return data_expression(atermpp::arg3(*this));
     }
 
     /// \brief Returns the right hand side of the data equation.
     data_expression rhs() const
     {
-      return atermpp::arg4(*this);
+      return data_expression(atermpp::arg4(*this));
     }
 
 }; // class data_equation

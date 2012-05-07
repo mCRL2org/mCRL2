@@ -25,7 +25,7 @@ void bool_sort_test()
 {
   basic_sort b(bool_());
   BOOST_CHECK(b == bool_());
-  BOOST_CHECK(b.name() == "Bool");
+  BOOST_CHECK(b.name().to_string() == "\"Bool\"");
 }
 
 int test_main(int argc, char** argv)

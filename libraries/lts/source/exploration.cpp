@@ -711,7 +711,7 @@ void lps2lts_algorithm::generate_lts_breadth(state_t initial_state)
 
   while (!m_must_abort && (current_state < m_state_numbers.size()) && (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    state_t state = m_state_numbers.get(current_state);
+    state_t state (m_state_numbers.get(current_state));
     std::list<next_state_generator::transition_t> transitions = get_transitions(state);
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)

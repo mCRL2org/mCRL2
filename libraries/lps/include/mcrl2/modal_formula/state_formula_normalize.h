@@ -253,7 +253,7 @@ bool is_normalized(const T& x)
 /// \param x an object containing state formulas
 template <typename T>
 void normalize(T& x,
-               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+               typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
               )
 {
   normalize_builder f;
@@ -265,7 +265,7 @@ void normalize(T& x,
 /// \param x an object containing state formulas
 template <typename T>
 T normalize(const T& x,
-            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+            typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
            )
 {
   normalize_builder f;

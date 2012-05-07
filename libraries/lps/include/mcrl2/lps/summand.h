@@ -93,23 +93,25 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param t A term
-    summand(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
+    explicit summand(const ATerm &t1)
+      : atermpp::aterm_appl(t1)
     {
+      atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_LinearProcessSummand(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
 
-      m_summation_variables = *i++;
+      m_summation_variables = data::variable_list(*i++);
       m_condition           = data::data_expression(*i++);
-      atermpp::aterm_appl x          = *i++;
+      atermpp::aterm_appl x(*i++);
       m_delta = core::detail::gsIsDelta(x);
       if (!m_delta)
       {
         assert(core::detail::gsIsMultAct(x));
-        m_actions = action_list(x.argument(0));
+        m_actions = action_list(x(0));
+        // m_actions = action_list(x.argument(0));
       }
       m_time                = data::data_expression(*i++);
-      m_assignments = *i;
+      m_assignments = data::assignment_list(*i);
     }
 
     /// \brief Constructor.
@@ -392,29 +394,6 @@ class summand_base
     /// \brief The condition of the summand
     data::data_expression m_condition;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_summation_variables.protect();
-      m_condition.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_summation_variables.unprotect();
-      m_condition.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_summation_variables.mark();
-      m_condition.mark();
-    }
-
   public:
     /// \brief Constructor.
     summand_base()
@@ -466,29 +445,6 @@ class deadlock_summand: public summand_base
 
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      super::protect();
-      m_deadlock.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      super::unprotect();
-      m_deadlock.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      super::mark();
-      m_deadlock.mark();
-    }
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
@@ -563,32 +519,6 @@ class action_summand: public summand_base
 
     /// \brief The assignments of the next state
     data::assignment_list m_assignments;
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      super::protect();
-      m_multi_action.protect();
-      m_assignments.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      super::unprotect();
-      m_multi_action.unprotect();
-      m_assignments.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      super::mark();
-      m_multi_action.mark();
-      m_assignments.mark();
-    }
 
   public:
     /// \brief Constructor.
@@ -721,52 +651,16 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::summand_base>
 {
-  static void protect(const mcrl2::lps::summand_base& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::summand_base& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::summand_base& t)
-  {
-    t.mark();
-  }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps::deadlock_summand>
 {
-  static void protect(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.mark();
-  }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps::action_summand>
 {
-  static void protect(const mcrl2::lps::action_summand& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::action_summand& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::action_summand& t)
-  {
-    t.mark();
-  }
 };
 
 } // namespace atermpp

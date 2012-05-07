@@ -125,7 +125,6 @@ class classic_enumerator
                                                               not_equal_to_false,
                                                               &(m_enclosing_enumerator->m_enumerator),
                                                               max_internal_variables));
-            m_assignments.protect();
             increment();
           }
         }
@@ -143,7 +142,6 @@ class classic_enumerator
         {
           if (m_generator!=NULL)
           {
-            m_assignments.unprotect();
             m_generator.reset();
           }
         }
@@ -158,11 +156,9 @@ class classic_enumerator
           m_solution_possible=other.m_solution_possible;
           if (m_generator==NULL && other.m_generator!=NULL)
           {
-            m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
-            m_assignments.unprotect();
           }
           m_generator=other.m_generator;
           return *this;
@@ -178,11 +174,9 @@ class classic_enumerator
           m_solution_possible=other.m_solution_possible;
           if (m_generator==NULL && other.m_generator!=NULL)
           {
-            m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
-            m_assignments.unprotect();
           }
           m_generator=other.m_generator;
         }
@@ -373,8 +367,8 @@ class classic_enumerator
             }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
-            for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                 i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i,++j)
+            for (atermpp::term_list_iterator< atermpp::aterm_appl > i=assignment_list.begin();
+                 i != assignment_list.end(); ++i,++j)
             {
               assert(static_cast< variable_type >(*j).sort() ==
                               m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());

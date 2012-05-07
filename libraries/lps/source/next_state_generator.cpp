@@ -105,16 +105,14 @@ next_state_generator::next_state_generator(
 
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
   m_state_function = atermpp::function_symbol("STATE", m_process_parameters.size());
-  m_state_function.protect();
   m_false = m_rewriter.convert_to(data::sort_bool::false_());
-  m_false.protect();
 
   for (action_summand_vector::iterator i = m_specification.process().action_summands().begin(); i != m_specification.process().action_summands().end(); i++)
   {
     summand_t summand;
     summand.variables = i->summation_variables();
     summand.condition = m_rewriter.convert_to(i->condition());
-    summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
+    summand.result_state = atermpp::aterm_appl(get_internal_state(i->next_state(m_specification.process().process_parameters())));
 
     for (action_list::iterator j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
@@ -174,8 +172,6 @@ next_state_generator::next_state_generator(
 
 next_state_generator::~next_state_generator()
 {
-  m_false.unprotect();
-  m_state_function.unprotect();
 }
 
 void next_state_generator::declare_constructors()
@@ -221,7 +217,7 @@ next_state_generator::internal_state_t next_state_generator::get_internal_state(
   {
     arguments[i] = m_rewriter.convert_to(s[i]);
   }
-  return internal_state_t(m_state_function, arguments.begin(), arguments.end());
+  return internal_state_t(atermpp::aterm_appl(m_state_function, arguments.begin(), arguments.end()));
 }
 
 state next_state_generator::get_state(next_state_generator::internal_state_t internal_state) const
@@ -418,7 +414,7 @@ void next_state_generator::iterator::increment()
   std::vector <rewriter_term_t> state_arguments(m_summand->result_state.size());
   for (size_t i = 0; i < m_summand->result_state.size(); i++)
   {
-    state_arguments[i] = m_generator->m_rewriter.rewrite_internal(m_summand->result_state(i), *m_substitution);
+    state_arguments[i] = m_generator->m_rewriter.rewrite_internal(atermpp::aterm_appl(m_summand->result_state(i)), *m_substitution);
   }
   m_transition.m_state = internal_state_t(m_generator->m_state_function, state_arguments.begin(), state_arguments.end());
 

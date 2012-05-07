@@ -24,7 +24,7 @@ namespace atermpp
 inline
 aterm_appl arg1(ATermAppl t)
 {
-  return aterm_appl(t)(0);
+  return aterm_appl(aterm_appl(t)(0));
 }
 
 /// \brief Returns the second child of t casted to an aterm_appl.
@@ -34,7 +34,7 @@ inline
 aterm_appl arg2(ATermAppl t)
 {
   assert(t == ATerm() || t->reference_count>0);
-  return aterm_appl(t)(1);
+  return aterm_appl(aterm_appl(t)(1));
 }
 
 /// \brief Returns the third child of t casted to an aterm_appl.
@@ -43,7 +43,7 @@ aterm_appl arg2(ATermAppl t)
 inline
 aterm_appl arg3(ATermAppl t)
 {
-  return aterm_appl(t)(2);
+  return aterm_appl(aterm_appl(t)(2));
 }
 
 /// \brief Returns the fourth child of t casted to an aterm_appl.
@@ -52,7 +52,7 @@ aterm_appl arg3(ATermAppl t)
 inline
 aterm_appl arg4(ATermAppl t)
 {
-  return aterm_appl(t)(3);
+  return aterm_appl(aterm_appl(t)(3));
 }
 
 /// \brief Returns the first child of t casted to an aterm_list.

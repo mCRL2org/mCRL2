@@ -430,13 +430,13 @@ class bes_expression: public atermpp::aterm
     // allow assignment from aterms
     bes_expression& operator=(const bes_expression& t)
     {
-      copy_term(t.m_aterm);
+      copy_term(t.m_term);
       return *this;
     } 
 
     atermpp::aterm aterm() const
     {
-      return m_aterm;
+      return m_term;
     }
 };
 
@@ -2529,7 +2529,7 @@ class boolean_equation_system
       {
         if (opt_precompile_pbes)
         {
-          data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
+          data_expression t1(Mucks_rewriter.convert_from(atermpp::aterm_appl(t)));
           f << c << mcrl2::data::pp(t1);
         }
         else
@@ -2569,8 +2569,8 @@ class boolean_equation_system
         data_expression_list tl=X.parameters();
         std::string s=X.name();
         f << s;
-        data_expression_list::iterator t;
-        for (t=tl.begin(); t!=tl.end(); ++t)
+        data_expression_list::iterator t=tl.begin();
+        for (     ; t!=tl.end(); ++t)
         {
           f << ((t==tl.begin())?"(":",");
           if (opt_precompile_pbes)
@@ -2639,31 +2639,6 @@ class boolean_equation_system
 
 
 } // namespace bes.
-
-namespace atermpp
-{
-template<>
-struct aterm_traits<bes::bes_expression>
-{
-  static void protect(const bes::bes_expression& )
-  {
-    // t.aterm().protect();  // protect the term against garbage collection
-  }
-  static void unprotect(const bes::bes_expression& )
-  {
-    // t.aterm().unprotect();  // undo the protection against garbage collection
-  }
-  static void mark(const bes::bes_expression& )
-  {
-    // t.aterm().mark();  // mark the term for not being garbage collected
-  }
-  // when it is inside a protected container
-  static ATerm term(const bes::bes_expression& t)
-  {
-    return static_cast<ATerm>(t);  // return the ATerm corresponding to t
-  }
-};
-} // namespace atermpp
 
 
 namespace bes

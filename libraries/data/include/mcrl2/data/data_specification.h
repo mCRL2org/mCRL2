@@ -294,7 +294,8 @@ class data_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_system_defined_mapping(const function_symbol& f) const
     {
-      detail::insert_unique(m_normalised_mappings,normalize_sorts(f,*this));
+      const function_symbol p=normalize_sorts(f,*this);
+      detail::insert_unique(m_normalised_mappings,p);
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -768,6 +769,7 @@ class data_specification
         function_symbol_vector f(sort_bool::bool_generate_constructors_code());
         std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
         f = sort_bool::bool_generate_functions_code();
+
         std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
         data_equation_vector e(sort_bool::bool_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));

@@ -40,16 +40,16 @@ void variable_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  BOOST_CHECK(x.name() == "x");
+  BOOST_CHECK(x.name().to_string() == "\"x\"");
   BOOST_CHECK(x.sort() == s);
 
   core::identifier_string y_name("y");
   variable y(y_name, s);
-  BOOST_CHECK(y.name() == "y");
+  BOOST_CHECK(y.name().to_string() == "\"y\"");
   BOOST_CHECK(y.sort() == s);
 
   variable y_("y", s);
-  BOOST_CHECK(y_.name() == "y");
+  BOOST_CHECK(y_.name().to_string() == "\"y\"");
   BOOST_CHECK(y.sort() == s);
 
   BOOST_CHECK(x != y);
@@ -76,16 +76,16 @@ void function_symbol_test()
 
 
   function_symbol f("f", fs);
-  BOOST_CHECK(f.name() == "f");
+  BOOST_CHECK(f.name().to_string() == "\"f\"");
   BOOST_CHECK(f.sort() == fs);
 
   function_symbol g("g", s0);
-  BOOST_CHECK(g.name() == "g");
+  BOOST_CHECK(g.name().to_string() == "\"g\"");
   BOOST_CHECK(g.sort() == s0);
 
   core::identifier_string g_name("g");
   function_symbol g_(g_name, s0);
-  BOOST_CHECK(g_.name() == "g");
+  BOOST_CHECK(g_.name().to_string() == "\"g\"");
   BOOST_CHECK(g_.sort() == s0);
 
   BOOST_CHECK(f != g);

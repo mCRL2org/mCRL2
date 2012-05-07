@@ -95,10 +95,10 @@ class sort_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param[in] t A term.
     /// \pre t has the internal structure of a sort expression.
-    sort_expression(const atermpp::aterm_appl& t)
+    sort_expression(const ATerm& t)
       : atermpp::aterm_appl(t)
     {
-      assert(is_sort_expression(t));
+      assert(is_sort_expression(*this));
     }
 
     /// \brief Returns the target sort of this expression.

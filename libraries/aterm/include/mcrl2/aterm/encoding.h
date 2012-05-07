@@ -63,6 +63,11 @@ struct _ATerm
       }
       return AT_APPL;
     }
+
+    const AFun function() const
+    {
+      return m_function_symbol;
+    }
 };
 
 inline
@@ -76,22 +81,25 @@ extern void at_free_term(_ATerm* t);
 class ATerm
 {
   public:
+    template < typename T >
+    friend class term_appl;
+
     static std::vector <_ATerm*> hashtable;
 
   protected:
-    _ATerm *m_aterm;
+    _ATerm *m_term;
 
     void decrease_reference_count()
     {
-      if (m_aterm!=NULL)
+      if (m_term!=NULL)
       {
 #ifdef PRINT_GC_INFO
-fprintf(stderr,"decrease reference count %ld  %p\n",m_aterm->reference_count,m_aterm);
+fprintf(stderr,"decrease reference count %ld  %p\n",m_term->reference_count,m_term);
 #endif
-        assert(m_aterm->reference_count>0);
-        if (0== --m_aterm->reference_count)
+        assert(m_term->reference_count>0);
+        if (0== --m_term->reference_count)
         {
-          at_free_term(m_aterm);
+          at_free_term(m_term);
           return;
         }
       }
@@ -115,29 +123,29 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     {
       increase_reference_count<true>(t);
       decrease_reference_count();
-      m_aterm=t;
+      m_term=t;
     }
 
   public:
 
-    ATerm ():m_aterm(NULL)
+    ATerm ():m_term(NULL)
     {}
 
-    ATerm (const ATerm &t):m_aterm(t.m_aterm)
+    ATerm (const ATerm &t):m_term(t.m_term)
     {
-      increase_reference_count<true>(m_aterm);
+      increase_reference_count<true>(m_term);
     }
 
-    ATerm (_ATerm *t):m_aterm(t)
+    ATerm (_ATerm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real ATerm.
-      increase_reference_count<false>(m_aterm);
+      increase_reference_count<false>(m_term);
     }
 
     ATerm &operator=(const ATerm &t)
     {
-      copy_term(t.m_aterm);
+      copy_term(t.m_term);
       return *this;
     }
 
@@ -148,21 +156,21 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
 
     _ATerm & operator *() const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      return *m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *m_term;
     }
 
     _ATerm * operator ->() const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      return m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      return m_term;
     }
 
     /// \brief Returns the function symbol belonging to a term.
     /// \return The function symbol of this term.
-    const AFun &function_symbol() const
+    const AFun &function() const
     {
-      return m_aterm->m_function_symbol;
+      return m_term->m_function_symbol;
     }
 
     /// \brief Returns the type of this term.
@@ -175,63 +183,63 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     /// \return The type of the term.
     size_t type() const
     {
-      return m_aterm->type(); 
+      return m_term->type(); 
     }
 
     /// \brief Writes the term to a string.
     /// \return A string representation of the term.
     std::string to_string() const;
     /* {
-      return ATwriteToString(m_aterm);
+      return ATwriteToString(m_term);
     } */
 
     bool operator ==(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm==t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term==t.m_term;
     }
 
     bool operator !=(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm!=t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term!=t.m_term;
     }
 
     bool operator <(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm<t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term<t.m_term;
     }
 
     bool operator >(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm>t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term>t.m_term;
     }
 
     bool operator <=(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm<=t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term<=t.m_term;
     }
 
     bool operator >=(const ATerm &t) const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      assert(t.m_aterm==NULL || t.m_aterm->reference_count>0);
-      return m_aterm>=t.m_aterm;
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term>=t.m_term;
     }
 
     /// \brief Test on whether an the ATerm is not equal to NULL.
     bool is_defined() const
     {
-      assert(m_aterm==NULL || m_aterm->reference_count>0);
-      return m_aterm!=NULL;
+      assert(m_term==NULL || m_term->reference_count>0);
+      return m_term!=NULL;
     }
 };
 

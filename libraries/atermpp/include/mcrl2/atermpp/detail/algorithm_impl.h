@@ -27,7 +27,7 @@ namespace detail
 /// \param f A function on terms
 /// \return The transformed sequence
 template <typename Term, typename Function>
-aterm_list list_apply(term_list<Term> l, const Function f)
+aterm_list list_apply(::aterm::term_list<Term> l, const Function f)
 {
   if (l.size() == 0)
   {
@@ -64,7 +64,7 @@ aterm_list list_apply(term_list<Term> l, const Function f)
 /// \param f A function on terms
 /// \return The transformed term
 template <typename Term, typename Function>
-aterm_appl appl_apply(term_appl<Term> a, const Function f)
+aterm_appl appl_apply(::aterm::term_appl<Term> a, const Function f)
 {
   // TODO: This function can be more efficiently implemented, by using the feature
   // that ATmakeAppl can have the function f as last argument. This avoids the use
@@ -89,7 +89,7 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
     }
     if (term_changed)
     {
-      a = ATmakeAppl(a.function(), t.begin(),t.end());
+      a = ATmakeAppl_iterator(a.function(), t.begin(),t.end());
     } 
   }
   return a;
@@ -149,9 +149,10 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
   }
   else if (t.type() == AT_APPL)
   {
-    if (op(t))
+    const aterm_appl t_a(t);
+    if (op(t_a))
     {
-      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      for (aterm_appl::iterator i = t_a.begin(); i != t_a.end(); ++i)
       {
         for_each_impl(*i, op);
       }

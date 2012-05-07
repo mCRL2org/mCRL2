@@ -40,10 +40,10 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const atermpp::aterm_appl& term)
+    variable(const ATerm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_DataVarId(m_term));
+      assert(core::detail::check_term_DataVarId(atermpp::aterm_appl(m_term)));
     }
 
     /// \brief Constructor.

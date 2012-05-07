@@ -62,14 +62,14 @@ class application_base: public data_expression
 
     data_expression head() const
     {
-      return atermpp::arg1(*this);
+      return data_expression(atermpp::arg1(*this));
     }
 
     /// \brief Give the arguments of this term as a list. 
     /// \details time for this operation is constant.
     data_expression_list arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return data_expression_list(atermpp::list_arg2(*this));
     }
 };
 

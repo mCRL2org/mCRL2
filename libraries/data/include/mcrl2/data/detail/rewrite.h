@@ -272,7 +272,7 @@ inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > &l)
 template <class Iterator>
 inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, const Iterator end)
 {
-  return ATmakeAppl(get_appl_afun_value(size), begin, end);
+  return ATmakeAppl_iterator(get_appl_afun_value(size), begin, end);
 }
 
 

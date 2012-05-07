@@ -33,7 +33,7 @@ inline
 data::data_expression val(const state_formula& t)
 {
   assert(core::detail::gsIsDataExpr(t));
-  return t;
+  return data::data_expression(t);
 }
 
 /// \brief Returns the state formula argument of an expression of type
@@ -86,9 +86,10 @@ inline
 data::variable_list var(const state_formula& t)
 {
   assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
-  return data::variable_list(
+  return data::variable_list(t(0));
+  /* return data::variable_list(
            atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-           atermpp::term_list_iterator< data::variable >());
+           atermpp::term_list_iterator< data::variable >()); */
 }
 
 /// \brief Returns the time of a delay or yaled expression
@@ -98,7 +99,7 @@ inline
 data::data_expression time(const state_formula& t)
 {
   assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
-  return atermpp::arg1(t);
+  return data::data_expression(atermpp::arg1(t));
 }
 
 /// \brief Returns the name of a variable expression
@@ -121,9 +122,10 @@ inline
 data::data_expression_list param(const state_formula& t)
 {
   assert(core::detail::gsIsStateVar(t));
-  return data::data_expression_list(
+  return data::data_expression_list(t(1));
+  /* return data::data_expression_list(
            atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
-           atermpp::term_list_iterator< data::data_expression >());
+           atermpp::term_list_iterator< data::data_expression >()); */
 }
 
 /// \brief Returns the parameters of a mu or nu expression
@@ -133,9 +135,10 @@ inline
 data::assignment_list ass(const state_formula& t)
 {
   assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-  return data::assignment_list(
+  return data::assignment_list(t(1));
+  /* return data::assignment_list(
            atermpp::term_list_iterator< data::assignment >(atermpp::list_arg2(t)),
-           atermpp::term_list_iterator< data::assignment >());
+           atermpp::term_list_iterator< data::assignment >()); */
 }
 
 /// \brief Returns the regular formula of a must or may expression

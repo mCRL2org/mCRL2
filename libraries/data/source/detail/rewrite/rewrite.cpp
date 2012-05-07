@@ -170,7 +170,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
     const variable v=variable((*i)(0));
     const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
+    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl((*i)(1)),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
 
@@ -276,7 +276,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
 {
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list vl=static_cast<variable_list>(lambda_term(1));
-  const atermpp::aterm_appl lambda_body=rewrite_internal(lambda_term(2),sigma);
+  const atermpp::aterm_appl lambda_body=rewrite_internal(atermpp::aterm_appl(lambda_term(2)),sigma);
   size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
@@ -292,7 +292,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     const variable v= (*i);
     const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    sigma[v_fresh]=rewrite_internal(t(count),sigma);
+    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl(t(count)),sigma);
   }
 
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
@@ -336,7 +336,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 
   assert(is_abstraction(t) && t(0)==gsMakeExists());
   /* Get Body of Exists */
-  const atermpp::aterm_appl t1 = t(2);
+  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t(2));
 
   // Put the variables in the right order in vl.
   variable_list vl=static_cast<variable_list>(t(1));
@@ -429,7 +429,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 {
   assert(is_abstraction(t) && t(0)==gsMakeForall());
   /* Get Body of forall */
-  const atermpp::aterm_appl t1 = t(2);
+  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t(2));
   const variable_list vl=static_cast<variable_list>(t(1));
   return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
 }
@@ -807,21 +807,21 @@ data_expression fromInner(const atermpp::aterm_appl &term)
 
   if (is_where_clause(term))
   {
-    const data_expression body=fromInner(term(0));
+    const data_expression body=fromInner(atermpp::aterm_appl(term(0)));
     const atermpp::term_list<atermpp::aterm_appl> l=static_cast<atermpp::term_list<atermpp::aterm_appl> >(term(1));
 
     std::vector < assignment_expression > lv;
     for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
     {
       const atermpp::aterm_appl ass_expr= *it;
-      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(ass_expr(1))));
+      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(atermpp::aterm_appl(ass_expr(1)))));
     }
     return where_clause(body,lv);
   }
 
   if (is_abstraction(term))
   {
-    return abstraction(binder_type(term(0)),variable_list(term(1)),fromInner(term(2)));
+    return abstraction(binder_type(atermpp::aterm_appl(term(0))),variable_list(term(1)),fromInner(atermpp::aterm_appl(term(2))));
   }
 
   size_t arity = ATgetArity(ATgetAFun(term));
@@ -834,7 +834,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   }
   else
   {
-    a = fromInner(t);
+    a = fromInner(atermpp::aterm_appl(t));
   }
 
   size_t i = 1;
@@ -846,7 +846,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     while (!ATisEmpty(sort_dom))
     {
       assert(i < arity);
-      list = push_front(list, fromInner(ATgetArgument(term,i)));
+      list = push_front(list, fromInner(atermpp::aterm_appl(ATgetArgument(term,i))));
       sort_dom = pop_front(sort_dom);
       ++i;
     }

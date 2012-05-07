@@ -711,7 +711,7 @@ bool lps2lts_algorithm::generate_lts()
 
         if (number_of_outgoing_transitions > 0)
         {
-          state = NewState;
+          state = state_t(NewState);
         }
         else
         {
@@ -1038,12 +1038,12 @@ bool lps2lts_algorithm::generate_lts()
           if (ATgetLength(new_tmp_trans)>0)
           {
             size_t r = rand()%ATgetLength(new_tmp_trans);
-            tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
+            tmp_trans=atermpp::term_list < action_list >(ATgetSlice(new_tmp_trans,r,r+1));
             tmp_states=ATgetSlice(new_tmp_states,r,r+1);
           }
           else
           {
-            tmp_trans=ATempty;
+            tmp_trans=atermpp::term_list < action_list >(ATempty);
             tmp_states=ATempty;
           }
         }

@@ -12,7 +12,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/bafio.h"
-#include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/util.h"
 #include "mcrl2/aterm/byteio.h"
@@ -1286,7 +1285,6 @@ static bool read_all_symbols(byte_reader* reader)
     }
     else
     {
-      // read_symbols[i].terms = (ATerm*)AT_alloc_protected(val);
       read_symbols[i].terms = std::vector<ATerm>(val);
     }
     /* if (!read_symbols[i].terms)
@@ -1366,16 +1364,6 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
   std::vector<ATerm> args(arity);
   ATerm result;
 
-  /* if (arity > MAX_STACK_ARGS)
-  {
-    args = AT_alloc_protected(arity);
-    if (!args)
-    {
-      std::runtime_error("could not allocate space for " + to_string(arity) + " arguments.");
-    }
-    / * !!! leaks memory on the "return NULL" paths * /
-  } */
-
   for (i=0; i<arity; i++)
   {
     if (readBits(&val, sym->sym_width[i], reader) < 0)
@@ -1433,13 +1421,8 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
   else
   {
     /* Must be a function application */
-    result = (ATerm)ATmakeAppl(sym->sym, args.begin(),args.end());
+    result = (ATerm)ATmakeAppl_iterator(sym->sym, args.begin(),args.end());
   }
-
-  /* if (arity > MAX_STACK_ARGS)
-  {
-    free_protected(args);
-  } */
 
   return result;
 }
@@ -1482,7 +1465,6 @@ static void free_read_space()
       free(entry->topsyms);
     }
 
-    // ATunprotectAFun(entry->sym);
   }
   read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be 
                                               // destructed after the destruction of AFuns, which leads

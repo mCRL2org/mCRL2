@@ -8,7 +8,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/util.h"
@@ -43,6 +42,7 @@ std::vector <_ATerm*> ATerm::hashtable;
 extern void AT_initMemmgnt();
 
 ATermList ATempty;
+_ATermList* aterm::ATempty_address;
 
 size_t AT_getMaxTermSize()
 {
@@ -126,7 +126,6 @@ static void resize_hashtable()
   table_size = ((HashNumber)1)<<table_class;
   table_mask = table_size-1;
   std::vector < _ATerm* > new_hashtable;
-fprintf(stderr,"RESIZE HASHTABLE %ld\n",table_class);
 
   /*{{{  Create new term table */
   try
@@ -154,15 +153,13 @@ fprintf(stderr,"RESIZE HASHTABLE %ld\n",table_class);
       _ATerm* next = aterm_walker->next;
       const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & table_mask;
       assert(hnr<new_hashtable.size());
-// fprintf(stderr,"HHHH %p   %p    %p\n",aterm_walker,new_hashtable[hnr],aterm_walker->next);
       aterm_walker->next = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
-assert(aterm_walker->next!=aterm_walker);
+      assert(aterm_walker->next!=aterm_walker);
       aterm_walker = next;
     }
   }
   new_hashtable.swap(ATerm::hashtable);
-fprintf(stderr,"RESIZE HASHTABLE END\n");
 
   /*}}}  */
 }
@@ -206,9 +203,12 @@ void AT_initMemory()
   assert(AS_LIST.number()==1);
   assert(AS_EMPTY_LIST.number()==2);
 
-  ATempty = reinterpret_cast<_ATermList*>(AT_allocate(TERM_SIZE_APPL(0)));
-
-  ATempty->m_function_symbol = AS_EMPTY_LIST;
+  // Assignment below via ATempty_term is needed as the assignment to ATempty
+  // checks whether it has a proper function symbol. 
+  _ATerm* ATempty_term = AT_allocate(TERM_SIZE_APPL(0));
+  ATempty_term->m_function_symbol = AS_EMPTY_LIST;
+  ATempty=reinterpret_cast<_ATermList*>(ATempty_term);
+  ATempty_address=&*ATempty;
   ATempty->next = NULL;
 
   const HashNumber hnr = hash_number(&*ATempty, TERM_SIZE_APPL(0));
@@ -516,14 +516,14 @@ void at_reduce_reference_count(_ATerm *t)
   }
 }
 
-
 /*{{{  ATermAppl ATmakeAppl(AFun &sym, ...) */
 
 /**
  * Create a new ATermAppl. The argument count can be found in the symbol.
+ * This function with variable arguments is only used in the jittyc rewriter....
  */
 
-ATermAppl ATmakeAppl(const AFun &sym, ...)
+ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
 {
   _ATerm* cur;
   size_t arity = ATgetArity(sym);
@@ -584,423 +584,11 @@ ATermAppl ATmakeAppl(const AFun &sym, ...)
     ATerm::hashtable[hnr] = cur;
   }
 
-  // AT_free_protected(buffer);
-
   return reinterpret_cast<_ATermAppl*>(cur);
 }
 
 /*}}}  */
-/*{{{  ATermAppl ATmakeAppl0(AFun &sym) */
 
-ATermAppl ATmakeAppl0(const AFun &sym)
-{
-  _ATerm *cur, *prev, **hashspot;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-
-  CHECK_ARITY(ATgetArity(sym), 0);
-
-  hnr = FINISH(START(sym.number()));
-
-  prev = NULL;
-  hashspot = &(ATerm::hashtable[hnr & table_mask]);
-
-  cur = *hashspot;
-  while (cur)
-  {
-    if (cur->m_function_symbol==sym)
-    {
-      /* Promote current entry to front of hashtable */
-      if (prev!=NULL)
-      {
-        prev->next = cur->next;
-        cur->next = (_ATerm*) &**hashspot;
-        *hashspot = cur;
-      }
-
-      return reinterpret_cast<_ATermAppl*>(cur);
-    }
-    prev = cur;
-    cur = cur->next;
-  }
-
-  cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(0));
-  /* Delay masking until after AT_allocate */
-  hnr &= table_mask;
-  cur->m_function_symbol = sym;
-  // AFun::increase_reference_count<true>(sym.number());
-  cur->next = &*ATerm::hashtable[hnr];
-  ATerm::hashtable[hnr] = cur;
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl1(AFun &sym, ATerm &arg0) */
-
-/**
- * Create an ATermAppl with one argument.
- */
-
-ATermAppl ATmakeAppl1(const AFun &sym, const ATerm &arg0)
-{
-  _ATerm* cur, *prev, **hashspot;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-  CHECK_ARITY(ATgetArity(sym), 1);
-  CHECK_TERM(&*arg0);
-
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = FINISH(hnr);
-
-  prev = NULL;
-  hashspot = &(ATerm::hashtable[hnr & table_mask]);
-
-  cur = *hashspot;
-  while (cur)
-  {
-    if ((sym==cur->m_function_symbol) && 
-         reinterpret_cast<_ATermAppl*>(cur)->arg[0] == &*arg0)
-    {
-      /* Promote current entry to front of hashtable */
-      if (prev!=NULL)
-      {
-        prev->next = cur->next;
-        cur->next = *hashspot;
-        *hashspot = cur;
-      }
-      return reinterpret_cast<_ATermAppl*>(cur);
-    }
-    prev = cur;
-    cur = cur->next;
-  }
-
-  cur = AT_allocate(TERM_SIZE_APPL(1));
-  /* Delay masking until after AT_allocate */
-  hnr &= table_mask;
-  cur->m_function_symbol = sym;
-  // AFun::increase_reference_count<true>(sym.number());
-  arg0->reference_count++;
-  reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-  cur->next = ATerm::hashtable[hnr];
-  ATerm::hashtable[hnr] = cur;
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl2(AFun &sym, &arg0, &arg1) */
-
-/**
- * Create an ATermAppl with one argument.
- */
-
-ATermAppl ATmakeAppl2(const AFun &sym, const ATerm &arg0, const ATerm &arg1)
-{
-  _ATerm* cur, *prev, **hashspot;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-  CHECK_ARITY(ATgetArity(sym), 2);
-
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = FINISH(hnr);
-
-  prev = NULL;
-  hashspot = &(ATerm::hashtable[hnr & table_mask]);
-
-  cur = *hashspot;
-  while (cur)
-  {
-    if (cur->m_function_symbol==sym && 
-        reinterpret_cast<_ATermAppl*>(cur)->arg[0] == &*arg0 && 
-        reinterpret_cast<_ATermAppl*>(cur)->arg[1] == &*arg1)
-    {
-      /* Promote current entry to front of hashtable */
-      if (prev!=NULL)
-      {
-        prev->next = cur->next;
-        cur->next = *hashspot;
-        *hashspot = cur;
-      }
-      return reinterpret_cast<_ATermAppl*>(cur);
-    }
-    prev = cur;
-    cur = cur->next;
-  }
-
-  cur = AT_allocate(TERM_SIZE_APPL(2));
-  /* Delay masking until after AT_allocate */
-  hnr &= table_mask;
-  cur->m_function_symbol = sym;
-  // AFun::increase_reference_count<true>(sym.number());
-  arg0->reference_count++;
-  reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-  arg1->reference_count++;
-  reinterpret_cast<_ATermAppl*>(cur)->arg[1] = &*arg1;
-
-  cur->next = ATerm::hashtable[hnr];
-  ATerm::hashtable[hnr] = cur;
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl3(AFun &sym, ATerm &arg0, &arg1, &arg2) */
-
-/**
- * Create an ATermAppl with one argument.
- */
-
-ATermAppl ATmakeAppl3(const AFun &sym, const ATerm &arg0, const ATerm &arg1, const ATerm &arg2)
-{
-  _ATerm *cur;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-  CHECK_ARITY(ATgetArity(sym), 3);
-
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = FINISH(hnr);
-
-  cur = ATerm::hashtable[hnr & table_mask];
-  while (cur && (cur->m_function_symbol!=sym ||
-    reinterpret_cast<_ATermAppl*>(cur)->arg[0] != &*arg0 ||
-    reinterpret_cast<_ATermAppl*>(cur)->arg[1] != &*arg1 ||
-    reinterpret_cast<_ATermAppl*>(cur)->arg[2] != &*arg2))
-  {
-    cur = cur->next;
-  }
-
-  if (!cur)
-  {
-    cur = AT_allocate(TERM_SIZE_APPL(3));
-    /* Delay masking until after AT_allocate */
-    hnr &= table_mask;
-    cur->m_function_symbol=sym;
-    // AFun::increase_reference_count<true>(sym.number());
-    arg0->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-    arg1->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[1] = &*arg1;
-    arg2->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[2] = &*arg2;
-
-    cur->next = ATerm::hashtable[hnr];
-    ATerm::hashtable[hnr] = cur;
-  }
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl4(AFun &sym, ATerm &arg0, &arg1, &arg2, &a3) */
-
-/**
- * Create an ATermAppl with four arguments.
- */
-
-ATermAppl ATmakeAppl4(const AFun &sym, const ATerm &arg0, const ATerm &arg1, const ATerm &arg2, const ATerm &arg3)
-{
-  _ATerm* cur;
-  // header_type header;
-  HashNumber hnr;
-
-  // header = APPL_HEADER(sym.number());
-
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-  CHECK_ARITY(ATgetArity(sym), 4);
-
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
-  hnr = FINISH(hnr);
-
-  cur = ATerm::hashtable[hnr & table_mask];
-  while (cur && (cur->m_function_symbol!=sym ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[0] != &*arg0 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[1] != &*arg1 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[2] != &*arg2 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[3] != &*arg3))
-  {
-    cur = cur->next;
-  }
-
-  if (!cur)
-  {
-    cur = AT_allocate(TERM_SIZE_APPL(4));
-    /* Delay masking until after AT_allocate */
-    hnr &= table_mask;
-    cur->m_function_symbol = sym;
-    // AFun::increase_reference_count<true>(sym.number());
-    arg0->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-    arg1->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[1] = &*arg1;
-    arg2->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[2] = &*arg2;
-    arg3->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[3] = &*arg3;
-
-    cur->next = ATerm::hashtable[hnr];
-    ATerm::hashtable[hnr] = cur;
-  }
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl5(AFun &sym, ATerm &arg0, &arg1, &arg2, &a3, &a4) */
-
-/**
- * Create an ATermAppl with five arguments.
- */
-
-ATermAppl ATmakeAppl5(const AFun &sym, const ATerm &arg0, const ATerm &arg1, const ATerm &arg2,
-                                       const ATerm &arg3, const ATerm &arg4)
-{
-  _ATerm *cur;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-  CHECK_ARITY(ATgetArity(sym), 5);
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-
-
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
-  hnr = COMBINE(hnr, HN(&*arg4));
-  hnr = FINISH(hnr);
-
-  cur = ATerm::hashtable[hnr & table_mask];
-  while (cur && (cur->m_function_symbol!=sym ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[0] != &*arg0 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[1] != &*arg1 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[2] != &*arg2 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[3] != &*arg3 ||
-     reinterpret_cast<_ATermAppl*>(cur)->arg[4] != &*arg4))
-  {
-    cur = cur->next;
-  }
-
-  if (!cur)
-  {
-    cur = AT_allocate(TERM_SIZE_APPL(5));
-    /* Delay masking until after AT_allocate */
-    hnr &= table_mask;
-    cur->m_function_symbol = sym;
-    // AFun::increase_reference_count<true>(sym.number());
-    arg0->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-    arg1->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[1] = &*arg1;
-    arg2->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[2] = &*arg2;
-    arg3->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[3] = &*arg3;
-    arg4->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[4] = &*arg4;
-
-    cur->next = ATerm::hashtable[hnr];
-    ATerm::hashtable[hnr] = cur;
-  }
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl6(AFun &sym, ATerm &arg0, &arg1, &arg2, &a3, &a4, &a5) */
-
-/**
- * Create an ATermAppl with six arguments.
- */
-
-ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, const ATerm &arg2,
-                                      const ATerm &arg3, const ATerm &arg4, const ATerm &arg5)
-{
-  _ATerm* cur;
-  // header_type header = APPL_HEADER(sym.number());
-  HashNumber hnr;
-
-  CHECK_ARITY(ATgetArity(sym), 6);
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-  CHECK_TERM(&*arg4);
-  CHECK_TERM(&*arg5);
-
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
-  hnr = COMBINE(hnr, HN(&*arg4));
-  hnr = COMBINE(hnr, HN(&*arg5));
-  hnr = FINISH(hnr);
-
-  cur = ATerm::hashtable[hnr & table_mask];
-  while (cur && (cur->m_function_symbol!=sym ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[0] != &*arg0 ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[1] != &*arg1 ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[2] != &*arg2 ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[3] != &*arg3 ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[4] != &*arg4 ||
-  reinterpret_cast<_ATermAppl*>(cur)->arg[5] != &*arg5))
-  {
-    cur = cur->next;
-  }
-
-  if (!cur)
-  {
-    cur = AT_allocate(TERM_SIZE_APPL(6));
-    /* Delay masking until after AT_allocate */
-    hnr &= table_mask;
-    cur->m_function_symbol = sym;
-    // AFun::increase_reference_count<true>(sym.number());
-    arg0->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[0] = &*arg0;
-    arg1->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[1] = &*arg1;
-    arg2->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[2] = &*arg2;
-    arg3->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[3] = &*arg3;
-    arg4->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[4] = &*arg4;
-    arg5->reference_count++;
-    reinterpret_cast<_ATermAppl*>(cur)->arg[5] = &*arg5;
-
-    cur->next =ATerm::hashtable[hnr];
-    ATerm::hashtable[hnr] = cur;
-  }
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
 
 /*}}}  */
 /*{{{  ATermAppl ATmakeApplList(AFun &sym, ATermList &args) */
@@ -1190,8 +778,8 @@ ATermInt::ATermInt(int val)
   }
 
   assert((hnr & table_mask) == (hash_number(cur, TERM_SIZE_INT) & table_mask));
-  m_aterm=cur;
-  increase_reference_count<false>(m_aterm);
+  m_term=cur;
+  increase_reference_count<false>(m_term);
 }
 
 /*}}}  */
@@ -1214,29 +802,10 @@ ATermList ATmakeList1(const ATerm &el)
  * Insert an element at the front of a list.
  */
 
-ATermList ATinsert(const ATermList &tail, const ATerm &el)
+/* ATermList ATinsert(const ATermList &tail, const ATerm &el)
 {
-  // size_t curLength = GET_LENGTH(tail->header);
-  // size_t newLength;
-  // header_type header;
   HashNumber hnr;
   _ATerm* cur;
-
-  /* If length exceeds the maximum length that can be stored in the header,
-     store MAX_LENGTH-1 in the header. ATgetLength will then count the length of the
-     list instead of using on the header
-  */
-  /* if (curLength >= MAX_LENGTH-1)
-  {
-    newLength = MAX_LENGTH-1;
-  }
-  else
-  {
-    newLength = curLength+1;
-  } */
-
-  // header = LIST_HEADER();
-
 
   assert(ATgetType(tail) == AT_LIST);
 
@@ -1256,7 +825,7 @@ ATermList ATinsert(const ATermList &tail, const ATerm &el)
   if (!cur)
   {
     cur = AT_allocate(TERM_SIZE_LIST);
-    /* Hashtable might be resized, so delay masking until after AT_allocate */
+    / * Hashtable might be resized, so delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->m_function_symbol = AS_LIST;
     el->reference_count++;
@@ -1268,100 +837,10 @@ ATermList ATinsert(const ATermList &tail, const ATerm &el)
   }
 
   return reinterpret_cast<_ATermList*>(cur);
-}
+} */
 
 /*}}}  */
 
-/*{{{  ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n) */
-
-/**
- * Change one argument of an application.
- */
-
-ATermAppl ATsetArgument(const ATermAppl &appl, const ATerm &arg, const size_t n)
-{
-  const size_t sym_number = ATgetAFun(appl);
-  
-  bool found;
-
-  size_t arity = ATgetArity(sym_number);
-  assert(n < arity);
-
-  HashNumber hnr = START(appl->m_function_symbol.number());
-  for (size_t i=0; i<arity; i++)
-  {
-    if (i!=n)
-    {
-      hnr = COMBINE(hnr, (HashNumber)(appl->arg[i]));
-    }
-    else
-    {
-      hnr = COMBINE(hnr, (HashNumber)&*arg);
-    }
-  }
-
-  hnr = FINISH(hnr);
-
-  _ATerm *cur = ATerm::hashtable[hnr & table_mask];
-  while (cur)
-  {
-    if (cur->m_function_symbol==appl->m_function_symbol)
-    {
-      found = true;
-      for (size_t i=0; i<arity; i++)
-      {
-        if (i!=n)
-        {
-          if (reinterpret_cast<_ATermAppl*>(cur)->arg[i]!=(&*appl)->arg[i])
-          {
-            found = false;
-            break;
-          }
-        }
-        else
-        {
-          if (reinterpret_cast<_ATermAppl*>(cur)->arg[i]!=&*arg)
-          {
-            found = false;
-            break;
-          }
-        }
-      }
-      if (found)
-      {
-        break;
-      }
-    }
-    cur = cur->next;
-  }
-
-  if (!cur)
-  {
-    cur = AT_allocate(TERM_SIZE_APPL(arity));
-    /* Delay masking until after AT_allocate */
-    hnr &= table_mask;
-    cur->m_function_symbol = appl->m_function_symbol;
-    // AFun::increase_reference_count<true>(sym_number);
-    for (size_t i=0; i<arity; i++)
-    {
-      if (i!=n)
-      {
-        reinterpret_cast<_ATermAppl*>(cur)->arg[i] = appl->arg[i];
-      }
-      else
-      {
-        reinterpret_cast<_ATermAppl*>(cur)->arg[i] = &*arg;
-      }
-      reinterpret_cast<_ATermAppl*>(cur)->arg[i]->reference_count++;
-    }
-    cur->next = ATerm::hashtable[hnr];
-    ATerm::hashtable[hnr] = cur;
-  }
-
-  return reinterpret_cast<_ATermAppl*>(cur);
-}
-
-/*}}}  */
 
 /*{{{  ATbool ATisValidTerm(ATerm term) */
 

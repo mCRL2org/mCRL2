@@ -89,7 +89,7 @@ class structured_sort_base: public sort_expression
 
     structured_sort_constructor_list constructors() const
     {
-      return atermpp::list_arg1(*this);
+      return structured_sort_constructor_list(atermpp::list_arg1(*this));
     }
 };
 

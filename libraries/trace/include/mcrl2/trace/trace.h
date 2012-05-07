@@ -678,27 +678,27 @@ class Trace
       for (; !ATisEmpty(trace); trace=ATgetNext(trace))
       {
         using namespace mcrl2::lps;
-        ATermAppl e = (ATermAppl) ATgetFirst(trace);
+        ATerm e = ATgetFirst(trace);
 
-        if (core::detail::gsIsMultAct(e))   // To be compatible with old untimed version
+        if (e.type()==AT_APPL && core::detail::gsIsMultAct(static_cast<ATermAppl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(action_list(e)));
+          addAction(multi_action(action_list(static_cast<ATermAppl>(e))));
         }
-        else if (isTimedMAct(e))
+        else if (e.type()==AT_APPL && isTimedMAct(static_cast<ATermAppl>(e)))
         {
-          if (core::detail::gsIsNil(ATAgetArgument(e,1)))
+          if (core::detail::gsIsNil(ATAgetArgument(static_cast<ATermAppl>(e),1)))
           {
-            addAction(multi_action(action_list(ATgetArgument(e,0))));
+            addAction(multi_action(action_list(ATgetArgument(static_cast<ATermAppl>(e),0))));
           }
           else
           {
-            addAction(multi_action(action_list(ATAgetArgument(e,0)),mcrl2::data::data_expression(ATAgetArgument(e,1))));
+            addAction(multi_action(action_list(ATAgetArgument(static_cast<ATermAppl>(e),0)),mcrl2::data::data_expression(ATAgetArgument(static_cast<ATermAppl>(e),1))));
           }
         }
         else
         {
           // So, e is a list of data expressions.
-          ATermList l=(ATermList)(ATerm)e;
+          ATermList l(e);
           mcrl2::lps::state s;
           for( ; !ATisEmpty(l) ; l=ATgetNext(l))
           {

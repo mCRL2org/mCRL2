@@ -1521,7 +1521,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
-        Part = data::function_symbol(name, data::sort_nat::nat());
+        Part = data::function_symbol(atermpp::aterm_string(name), data::sort_nat::nat());
       }
     }
   }
@@ -1546,7 +1546,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
-        Part = data::function_symbol(name, data::sort_int::int_());
+        Part = data::function_symbol(atermpp::aterm_string(name), data::sort_int::int_());
       }
     }
   }
@@ -1562,7 +1562,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
-        Part = data::function_symbol(name, data::sort_real::real_());
+        Part = data::function_symbol(atermpp::aterm_string(name), data::sort_real::real_());
       }
     }
   }
@@ -1580,7 +1580,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
         ATermAppl name = ATAgetArgument(ArgNumerator, 0);
         if (gsIsNumericString(gsATermAppl2String(name)))
         {
-          Part = data::function_symbol(name, data::sort_real::real_());
+          Part = data::function_symbol(atermpp::aterm_string(name), data::sort_real::real_());
         }
       }
     }
@@ -1594,7 +1594,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
         if (gsIsNumericString(gsATermAppl2String(name)))
         {
           Part = data::sort_real::divides(data::data_expression(ArgNumerator),
-                                          data::function_symbol(name, data::sort_int::int_()));
+                                          data::function_symbol(atermpp::aterm_string(name), data::sort_int::int_()));
         }
       }
     }
@@ -3396,7 +3396,7 @@ std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format)
 template <typename Term>
 std::string pp_deprecated(Term part, t_pp_format pp_format = ppDefault)
 {
-  return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
+  return PrintPart_CXX(part, pp_format);
 }
 
 } // namespace core

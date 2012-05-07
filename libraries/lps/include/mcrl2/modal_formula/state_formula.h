@@ -319,7 +319,7 @@ class forall: public state_formula
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     state_formula body() const
@@ -362,7 +362,7 @@ class exists: public state_formula
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     state_formula body() const
@@ -519,7 +519,7 @@ class yaled_timed: public state_formula
 
     data::data_expression time_stamp() const
     {
-      return atermpp::arg1(*this);
+      return data::data_expression(atermpp::arg1(*this));
     }
 };
 
@@ -585,7 +585,7 @@ class delay_timed: public state_formula
 
     data::data_expression time_stamp() const
     {
-      return atermpp::arg1(*this);
+      return data::data_expression(atermpp::arg1(*this));
     }
 };
 
@@ -633,7 +633,7 @@ class variable: public state_formula
 
     data::data_expression_list arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return data::data_expression_list(atermpp::list_arg2(*this));
     }
 };
 
@@ -681,7 +681,7 @@ class nu: public state_formula
 
     data::assignment_list assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return data::assignment_list(atermpp::list_arg2(*this));
     }
 
     state_formula operand() const
@@ -734,7 +734,7 @@ class mu: public state_formula
 
     data::assignment_list assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return data::assignment_list(atermpp::list_arg2(*this));
     }
 
     state_formula operand() const

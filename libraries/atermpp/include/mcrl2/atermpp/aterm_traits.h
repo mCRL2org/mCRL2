@@ -29,18 +29,6 @@ namespace atermpp
 template < typename T >
 struct non_aterm_traits
 {
-  /// \brief Protects the term t from garbage collection.
-  /// \param t A term
-  static void protect(const T*)       {}
-
-  /// \brief Unprotects the term t from garbage collection.
-  /// \param t A term
-  static void unprotect(const T*)     {}
-
-  /// \brief Marks t for garbage collection.
-  /// \param t A term
-  static void mark(T)           {}
-
   /// \brief Returns the ATerm that corresponds to the term t.
   /// \param t A term
   /// \return The ATerm that corresponds to the term t.
@@ -66,18 +54,6 @@ struct aterm_traits: public select_traits_base< T >::base_type
 template <>
 struct aterm_traits<ATerm>
 {
-  static void protect(const ATerm* /* t */)
-  {
-    // ATprotect(t);
-  }
-  static void unprotect(const ATerm* /* t */)
-  {
-    // ATunprotect(t);
-  }
-  static void mark(const ATerm /* t */)
-  {
-    // ATmarkTerm(t);
-  }
   static ATerm term(ATerm t)
   {
     return t;
@@ -87,39 +63,15 @@ struct aterm_traits<ATerm>
 template <>
 struct aterm_traits<ATermList>
 {
-  static void protect(const ATermList* t)
-  {
-    aterm_traits<ATerm>::protect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void unprotect(const ATermList* t)
-  {
-    aterm_traits<ATerm>::unprotect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void mark(ATermList t)
-  {
-    aterm_traits<ATerm>::mark(t);
-  }
   static ATerm term(ATermList t)
   {
     return t;
   }
 };
 
-template <>
-struct aterm_traits<ATermAppl>
+template <class Term>
+struct aterm_traits<aterm::term_list<Term> >
 {
-  static void protect(const ATermAppl* t)
-  {
-    aterm_traits<ATerm>::protect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void unprotect(const ATermAppl* t)
-  {
-    aterm_traits<ATerm>::unprotect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void mark(ATermAppl t)
-  {
-    aterm_traits<ATerm>::mark(t);
-  }
   static ATerm term(ATermAppl t)
   {
     return t;
@@ -129,18 +81,6 @@ struct aterm_traits<ATermAppl>
 template <>
 struct aterm_traits<ATermInt>
 {
-  static void protect(const ATermInt* t)
-  {
-    aterm_traits<ATerm>::protect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void unprotect(const ATermInt* t)
-  {
-    aterm_traits<ATerm>::unprotect(reinterpret_cast<const ATerm*>(t));
-  }
-  static void mark(ATermInt t)
-  {
-    aterm_traits<ATerm>::mark(t);
-  }
   static ATerm term(ATermInt t)
   {
     return t;
@@ -150,21 +90,6 @@ struct aterm_traits<ATermInt>
 template<typename T1, typename T2>
 struct aterm_traits<std::pair<T1, T2> >
 {
-  static void protect(const std::pair<T1, T2>& t)
-  {
-    aterm_traits<T1>::protect(t.first);
-    aterm_traits<T2>::protect(t.second);
-  }
-  static void unprotect(const std::pair<T1, T2>& t)
-  {
-    aterm_traits<T1>::unprotect(t.first);
-    aterm_traits<T2>::unprotect(t.second);
-  }
-  static void mark(const std::pair<T1, T2>& t)
-  {
-    aterm_traits<T1>::mark(t.first);
-    aterm_traits<T2>::mark(t.second);
-  }
 };
 /// \endcond
 

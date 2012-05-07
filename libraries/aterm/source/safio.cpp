@@ -42,189 +42,10 @@ static const size_t PROTECTEDMEMORYSTACKBLOCKSINCREMENTMASK = 0x0000000fU;
 static const size_t PROTECTEDMEMORYSTACKBLOCKSIZE = 1024;
 
 
-/* COMMON STUFF */
-
-/**
- * Creates a protected memory stack.
- *
- * The memory this store holds will be returned in the order it was requested (last out, first in).
- * Additionally, all the blocks that are allocated by this store are protected,
- * so all ATerms that are referenced from inside one of the memory blocks this store holds won't be collected before it is destroyed.
- * Because all memory is pre-allocated, so we only need to increment and decrement a pointer for allocating and freeing memory,
- * which is WAY faster then calling malloc + free and ATprotect + ATunprotect for every few term pointers we need.
- */
-/* static ProtectedMemoryStack createProtectedMemoryStack()
-{
-  ATerm* block;
-
-  ProtectedMemoryStack protectedMemoryStack = (ProtectedMemoryStack) malloc(sizeof(struct _ProtectedMemoryStack));
-  if (protectedMemoryStack == NULL)
-  {
-    std::runtime_error("Unable to allocate protected memory stack.");
-  }
-
-  block = (ATerm*) AT_alloc_protected(PROTECTEDMEMORYSTACKBLOCKSIZE);
-  if (block == NULL)
-  {
-    std::runtime_error("Unable to allocate block for the protected memory stack.");
-  }
-
-  protectedMemoryStack->blocks = (ATerm**) malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(ATerm*));
-  if (protectedMemoryStack->blocks == NULL)
-  {
-    std::runtime_error("Unable to allocate blocks for the protected memory stack.");
-  }
-
-  protectedMemoryStack->blocks[0] = block;
-
-  protectedMemoryStack->nrOfBlocks = 1;
-
-  protectedMemoryStack->currentBlockNr = 0;
-  protectedMemoryStack->currentIndex = block;
-  protectedMemoryStack->spaceLeft = PROTECTEDMEMORYSTACKBLOCKSIZE;
-
-  protectedMemoryStack->freeBlockSpaces = (size_t*) malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(size_t));
-  if (protectedMemoryStack->freeBlockSpaces == NULL)
-  {
-    std::runtime_error("Unable to allocate array for registering free block spaces of the protected memory stack.");
-  }
-
-  return protectedMemoryStack;
-} */
-
-/**
- * Frees the memory associated with the given protected memory stack.
- * Additionally the protection of the memory blocks that are present in the store will be removed.
- * All references that point to data in this store will be invalid after invoking this method.
- */
-/* static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
-{
-  size_t i = protectedMemoryStack->nrOfBlocks;
-  ATerm** blocks = protectedMemoryStack->blocks;
-  do
-  {
-    ATerm* block = blocks[--i];
-
-    AT_free_protected(block);
-  }
-  while (i > 0);
-  AT_free(blocks);
-
-  AT_free(protectedMemoryStack->freeBlockSpaces);
-
-  AT_free(protectedMemoryStack);
-} */
-
-/**
- * Adds an additional block of memory to the given protected memory stack.
- * A previously allocated block will be reused if possible;
- * otherwise a new block of memory is allocated.
- */
-/* static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack)
-{
-  ATerm* block;
-
-  size_t nrOfBlocks = protectedMemoryStack->nrOfBlocks;
-
-  protectedMemoryStack->freeBlockSpaces[protectedMemoryStack->currentBlockNr++] = protectedMemoryStack->spaceLeft;
-
-  if (nrOfBlocks == protectedMemoryStack->currentBlockNr)
-  {
-    block = (ATerm*) AT_alloc_protected(PROTECTEDMEMORYSTACKBLOCKSIZE);
-    if (block == NULL)
-    {
-      std::runtime_error("Unable to allocate block for the protected memory stack.");
-    }
-
-    if ((nrOfBlocks & PROTECTEDMEMORYSTACKBLOCKSINCREMENTMASK) == 0)
-    {
-      size_t newSize = nrOfBlocks + PROTECTEDMEMORYSTACKBLOCKSINCREMENT;
-      protectedMemoryStack->blocks = (ATerm**) AT_realloc(protectedMemoryStack->blocks, newSize * sizeof(ATerm*));
-      if (protectedMemoryStack->blocks == NULL)
-      {
-        std::runtime_error("Unable to allocate blocks array for the protected memory stack.");
-      }
-
-      protectedMemoryStack->freeBlockSpaces = (size_t*) AT_realloc(protectedMemoryStack->freeBlockSpaces, newSize * sizeof(size_t));
-      if (protectedMemoryStack->freeBlockSpaces == NULL)
-      {
-        std::runtime_error("Unable to allocate array for registering free block spaces of the protected memory stack.");
-      }
-    }
-
-    protectedMemoryStack->blocks[protectedMemoryStack->nrOfBlocks++] = block;
-  }
-  else
-  {
-    block = protectedMemoryStack->blocks[protectedMemoryStack->currentBlockNr];
-  }
-
-  protectedMemoryStack->currentIndex = block;
-  protectedMemoryStack->spaceLeft = PROTECTEDMEMORYSTACKBLOCKSIZE;
-} */
-
-/**
- * Returns an array of ATerms from the given protected memory stack.
- * NOTE: If we request a ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, fall back to using malloc.
- */
 static std::vector<ATerm> getProtectedMemoryBlock(/* ProtectedMemoryStack protectedMemoryStack,*/ size_t size)
 {
   return std::vector<ATerm>(size);
-  /* ATerm* memoryBlock;
-
-  if (size <= PROTECTEDMEMORYSTACKBLOCKSIZE)
-  {
-    if (protectedMemoryStack->spaceLeft < size)
-    {
-      expandProtectedMemoryStack(protectedMemoryStack);
-    }
-
-    protectedMemoryStack->spaceLeft -= size;
-    memoryBlock = protectedMemoryStack->currentIndex;
-    protectedMemoryStack->currentIndex += size;
-  }
-  else
-  {
-    memoryBlock = (ATerm*) AT_alloc_protected(size);
-    if (memoryBlock == NULL)
-    {
-      std::runtime_error("Unable to allocated large memoryBlock.");
-    }
-  }
-
-  return memoryBlock; */
 }
-
-/**
- * Releases a certain amount of bytes in the given protected memory stack.
- * NOTE: releasing memory will not 'free' it, but it will make it possible to reuse it.
- * For this reason the protected memory stack will never shrink, but will always remain as large as it was at it's maximum size.
- * This is intended by design and will never cause a problem.
- * NOTE2: If we want to release an ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, it was allocated using malloc and WILL be freed.
- */
-/* static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, ATerm* ptr, size_t size)
-{
-  if (size <= PROTECTEDMEMORYSTACKBLOCKSIZE)
-  {
-    if (protectedMemoryStack->spaceLeft < PROTECTEDMEMORYSTACKBLOCKSIZE)
-    {
-      protectedMemoryStack->spaceLeft += size;
-      protectedMemoryStack->currentIndex -= size;
-    }
-    else
-    {
-      size_t currentBlockNr = --(protectedMemoryStack->currentBlockNr);
-      size_t freeBlockSpace = protectedMemoryStack->freeBlockSpaces[currentBlockNr] + size;
-      protectedMemoryStack->spaceLeft = freeBlockSpace;
-      protectedMemoryStack->currentIndex = protectedMemoryStack->blocks[currentBlockNr] + PROTECTEDMEMORYSTACKBLOCKSIZE - freeBlockSpace;
-    }
-  }
-  else
-  {
-    AT_free_protected(ptr);
-  }
-} */
-
 
 /* BYTE BUFFER */
 
@@ -818,9 +639,8 @@ static ATerm buildTerm(BinaryReader /* binaryReader*/, ATermConstruct* parent)
     /* Use the appropriate way of constructing the appl, depending on if it has arguments or not. */
     if (nrOfSubTerms > 0)
     {
-      constructedTerm = ATmakeAppl(fun, subTerms.begin(),subTerms.end());
+      constructedTerm = ATmakeAppl_iterator(fun, subTerms.begin(),subTerms.end());
 
-      // releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
     else
     {
@@ -844,7 +664,6 @@ static ATerm buildTerm(BinaryReader /* binaryReader*/, ATermConstruct* parent)
       }
       while (i > 0);
 
-      // releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, nrOfSubTerms);
     }
 
     constructedTerm = list;
@@ -892,14 +711,6 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm)
     shareTerm(binaryReader, parent, term);
   }
 
-  /* if (binaryReader->.stackPosition == 0)
-  {
-    / * Protect the root of the tree, once we're done de-serializing. * /
-    ATerm* term_ptr = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
-    *term_ptr = term;
-
-    binaryReader->isDone = 1;
-  } */
   if (binaryReader->stack.size()==1)
   {
     binaryReader->isDone = 1;
@@ -937,7 +748,6 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       AFun fun(name, arity, isQuoted);
       _SymEntry* symEntry = AFun::at_lookup_table[fun.number()];
       binaryReader->protected_afuns.insert(fun);
-      // ATprotectAFun(fun);
 
       ensureReadSharedAFunCapacity(binaryReader); /* Make sure we have enough space in the array */
       binaryReader->sharedAFuns[binaryReader->sharedAFunsIndex++] = symEntry;

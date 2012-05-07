@@ -14,6 +14,7 @@
 
 #include <functional>
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2
 {
@@ -75,21 +76,21 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
       {
         function_symbol head(x.head());
 
-        if (head.name() == "@ListEnum")
+        if (head.name() == sort_list::list_enumeration_name()) 
         {
           // convert to snoc list
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
 
           return sort_list::list(element_sort, static_cast<Derived&>(*this)(x.arguments()));
         }
-        else if (head.name() == "@SetEnum")
+        else if (head.name() == sort_set::set_enumeration_name())
         {
           // convert to finite set
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
 
           return sort_set::set_fset(element_sort, sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments())));
         }
-        else if (head.name() == "@BagEnum")
+        else if (head.name() == sort_bag::bag_enumeration_name())
         {
           // convert to finite bag
           using namespace sort_bag;
@@ -115,7 +116,7 @@ struct translate_user_notation_function: public std::unary_function<data_express
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             typename boost::disable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
                             )
 {
   core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function())(x);
@@ -123,7 +124,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          typename boost::enable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
                          )
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function())(x);

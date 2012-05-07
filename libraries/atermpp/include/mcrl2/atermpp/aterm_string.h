@@ -32,7 +32,7 @@ class aterm_string: public aterm_appl
 
     /// \brief Constructor.
     /// \param t A term
-    aterm_string(ATermAppl t)
+    explicit aterm_string(const ATerm &t)
       : aterm_appl(t)
     {
       assert(aterm_appl(t).size() == 0);
@@ -77,11 +77,11 @@ class aterm_string: public aterm_appl
 
     /// Assignment operator.
     /// \param t A term.
-    aterm_string& operator=(aterm_base t)
+    aterm_string& operator=(const ATerm &t)
     {
       assert(t.type() == AT_APPL);
-      assert(aterm_traits<aterm_base>::term(t).function_symbol().arity() == 0);
-      m_term = aterm_traits<aterm_base>::term(t);
+      assert(t.function().arity() == 0);
+      copy_term(&*t); 
       return *this;
     }
 
@@ -94,10 +94,10 @@ class aterm_string: public aterm_appl
 
     /// \brief Conversion operator
     /// \return The term converted to string
-    bool operator==(char const* const other) const
+    /* bool operator==(char const* const other) const
     {
       return std::string(function().name()) == other;
-    }
+    } */
 };
 
 /// \brief Remove leading and trailing quotes from a quoted aterm_string.
@@ -112,26 +112,14 @@ std::string unquote(aterm_string t)
 }
 
 /// \cond INTERNAL_DOCS
-template <>
+/* template <>
 struct aterm_traits<aterm_string>
 {
-  static void protect(const aterm_string& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const aterm_string& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const aterm_string& t)
-  {
-    t.mark();
-  }
   static ATerm term(const aterm_string& t)
   {
     return t.term();
   }
-};
+}; */
 /// \endcond
 
 } // namespace atermpp

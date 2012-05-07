@@ -61,12 +61,12 @@ class abstraction: public data_expression
 
     variable_list variables() const
     {
-      return atermpp::list_arg2(*this);
+      return variable_list(atermpp::list_arg2(*this));
     }
 
     data_expression body() const
     {
-      return atermpp::arg3(*this);
+      return data_expression(atermpp::arg3(*this));
     }
 };
 //--- end generated class abstraction ---//

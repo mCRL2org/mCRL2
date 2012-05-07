@@ -1904,8 +1904,8 @@ namespace mcrl2
         assert(0);
       }
 
-      assert((ATermList)l!=ATermList());  // This cannot be done comparing to action_label_list_list, as in this case
-                                          // the default constructor is empty;
+      assert(l!=ATerm());  // This cannot be done comparing to action_label_list_list, as in this case
+                           // the default constructor is empty;
 
       if (all_stable)
       {
@@ -1941,7 +1941,7 @@ namespace mcrl2
       else if (is_process_instance(a) || is_process_instance_assignment(a))
       {
         process_identifier pn= is_process_instance(a)?process_instance(a).identifier():process_instance_assignment(a).identifier();
-        process_identifier_list l=alphas_process_identifiers[pn]; // for this particular process term
+        process_identifier_list l(alphas_process_identifiers[pn]); // for this particular process term
 
         // if this process is not recursive we apply the alphabet reductions to it
         if (non_recursive_set.count(pn)>0)
@@ -1958,11 +1958,11 @@ namespace mcrl2
             {
               return process_expression();
             }
-            else l=alphas[new_p];
+            else l=process_identifier_list(alphas[new_p]);
           }
-          else l=alphas_process_identifiers[pn];
+          else l=process_identifier_list(alphas_process_identifiers[pn]);
         }
-        alphas[a]=l; //for this full process call
+        alphas[a]=action_label_list_list(l); //for this full process call
       }
       else if (is_block(a))
       {

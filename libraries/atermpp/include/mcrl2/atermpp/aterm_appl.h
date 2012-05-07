@@ -42,7 +42,7 @@ struct aterm_converter
 template <class InputIterator>
 inline ATermAppl at_make_appl(const function_symbol& sym, InputIterator first, InputIterator last, std::input_iterator_tag)
 {
-   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,_ATerm*,sym.arity());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,_ATerm*,sym.arity());
   size_t c=0;
   for (InputIterator i = first; i != last; ++i, ++c)
   {
@@ -68,16 +68,65 @@ inline ATermAppl at_make_appl(const function_symbol& sym, Iterator first, Iterat
 
 /// \brief A term that represents a function application.
 template <typename Term>
-class term_appl: public aterm_base
+class term_appl: public ::aterm::term_appl<Term> 
 {
-    friend class aterm_string;
+
+  public:
+    explicit term_appl(const ATerm &t)
+    {
+      assert(t.type()==AT_APPL);
+      this->copy_term(&*t);
+    }
+
+    term_appl(const ATermAppl &t)
+    {
+      assert(t.type()==AT_APPL);
+      this->copy_term(&*t);
+    }
+
+    term_appl(const AFun &sym, const Term &t1)
+    {
+      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1));
+    }
+
+    term_appl(const AFun &sym, const Term &t1, const Term &t2)
+    {
+      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2));
+    }
+
+    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3)
+    {
+      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3));
+    }
+
+    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
+    {
+      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3,t4));
+    }
+
+    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
+    {
+      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3,t4,t5));
+    }
+
+    term_appl()
+    {}
+
+    template <class Iter>
+    term_appl(const AFun &sym, Iter first, Iter last)
+    {
+      this->copy_term(&*::aterm::term_appl<Term>(sym,first,last));
+    }
+
+
+/*   friend class aterm_string;
 
   private:
     /// \brief Prevent accidental usage of operator[], since this maps to the
     /// built-in C++ operator[](ATermAppl, int)
     /// \param i A positive integer
     /// \return The default constructed term
-    Term operator[](size_t /*i*/) const
+    Term operator[](size_t ) const
     {
       return Term();
     }
@@ -140,13 +189,6 @@ class term_appl: public aterm_base
       : aterm_base(ATmakeApplList(sym, args))
     {}
 
-    /// Allow construction from an aterm. The aterm must be of the right type.
-    /// \param t A term.
-    /* term_appl(aterm t)
-      : aterm_base(t)
-    {}
-    */
-
     /// \brief Constructor.
     /// \param sym A function symbol.
     /// \param first The start of a range of elements.
@@ -172,16 +214,6 @@ class term_appl: public aterm_base
     {
       return (ATermAppl)m_term;
     }
-
-    /// \brief Assignment operator.
-    /// \param t A term.
-    /// \return The result of the assignment.
-    /* term_appl<Term>& operator=(aterm_base t)
-    {
-      assert(t.type() == AT_APPL);
-      m_term = aterm_traits<aterm_base>::term(t);
-      return *this;
-    } */
 
     /// Assignment operator.
     /// \param t A term.
@@ -275,8 +307,8 @@ class term_appl: public aterm_base
     term_list<Term> argument_list() const
     {
       return term_list<Term>(ATgetArguments(appl()));
-    }
-};
+    } */
+}; 
 
 /// \brief A term_appl with children of type aterm.
 typedef term_appl<aterm> aterm_appl;
@@ -285,21 +317,21 @@ typedef term_appl<aterm> aterm_appl;
 template <typename Term>
 struct aterm_traits<term_appl<Term> >
 {
-  static void protect(const term_appl<Term>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const term_appl<Term>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const term_appl<Term>& t)
-  {
-    t.mark();
-  }
+  // static void protect(const term_appl<Term>& t)
+  // {
+  //   t.protect();
+  // }
+  // static void unprotect(const term_appl<Term>& t)
+  // {
+    // t.unprotect();
+  //  }
+  //static void mark(const term_appl<Term>& t)
+  //{
+  //  t.mark();
+  //}
   static ATerm term(const term_appl<Term>& t)
   {
-    return t.term();
+    return t;
   }
 };
 
@@ -308,32 +340,32 @@ struct aterm_appl_traits
 {
   /// \brief Protects the term t from garbage collection.
   /// \param t A term
-  static void protect(const aterm_appl& t)
-  {
-    t.protect();
-  }
+  // static void protect(const aterm_appl& t)
+  // {
+  //   t.protect();
+  // }
 
   /// \brief Unprotects the term t from garbage collection.
   /// \param t A term
-  static void unprotect(const aterm_appl& t)
-  {
-    t.unprotect();
-  }
+  // static void unprotect(const aterm_appl& t)
+  // {
+  //   t.unprotect();
+  // }
 
   /// \brief Marks t for garbage collection.
   /// \param t A term
-  static void mark(const aterm_appl& t)
-  {
-    t.mark();
-  }
+  // static void mark(const aterm_appl& t)
+  // {
+  //   t.mark();
+  // }
 
   /// \brief Returns the ATerm that corresponds to the term t.
   /// \param t A term
   /// \return The ATerm that corresponds to the term t.
-  static ATerm term(const aterm_appl& t)
-  {
-    return t.term();
-  }
+  // static ATerm term(const aterm_appl& t)
+  // {
+  //  return t.term();
+  //}
 };
 
 template < typename T >
@@ -347,7 +379,7 @@ struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_
 /// \param x A term.
 /// \param y A term.
 /// \return True if the terms are equal.
-template <typename Term>
+/* template <typename Term>
 bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 {
   return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == true;
@@ -362,7 +394,7 @@ bool operator==(const term_appl<Term>& x, ATermAppl y)
 {
   // return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
   return (ATermAppl)aterm_traits<term_appl<Term> >::term(x)==y;
-}
+} 
 
 /// \brief Equality operator.
 /// \param x A term.
@@ -402,7 +434,7 @@ template <typename Term>
 bool operator!=(ATermAppl x, const term_appl<Term>& y)
 {
   return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == false;
-}
+} */
 
 } // namespace atermpp
 

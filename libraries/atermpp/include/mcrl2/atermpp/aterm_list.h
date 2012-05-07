@@ -17,6 +17,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_convertible.hpp>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_conversion.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
@@ -64,8 +65,54 @@ size_t aterm_get_length(ATermList l)
 
 /// \brief Read-only singly linked list of terms.
 template <typename Term>
-class term_list: public aterm_base
+class term_list: public ::aterm::term_list<Term>
 {
+  public:
+    explicit term_list<Term>(const ATerm &t)
+    {
+      this->copy_term(&*t);
+      assert(t.type()==AT_LIST);
+    };
+ 
+    term_list<Term>(const ::aterm::term_list<Term> &t)
+    {
+      this->copy_term(&*t);
+      assert(t.type()==AT_LIST);
+    };
+ 
+    term_list<Term>()
+    {};
+
+    template <typename SpecificTerm>
+    term_list<Term>(const term_list<SpecificTerm> &t): ::aterm::term_list<Term>(t)
+    {}
+
+
+    template <class Iter>
+    term_list(Iter first, Iter last, typename boost::enable_if<
+              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+              boost::random_access_traversal_tag >::type >::type* = 0)
+    {
+      this->copy_term(&*::aterm::term_list<typename Iter::value_type>(first,last));
+    }
+
+    template <class Iter>
+                term_list(Iter first, Iter last, typename boost::disable_if<
+                             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+                                          boost::random_access_traversal_tag >::type >::type* = 0)
+    {
+      this->copy_term(&*::aterm::term_list<Term>(first,last));
+    }
+
+    operator ::aterm::term_list<Term> &() const
+    {
+      return this->m_aterm;
+    }
+};
+
+
+/* 
+{ 
   protected:
     /// \brief Returns the wrapped ATermList.
     /// \return The wrapped ATermList.
@@ -260,10 +307,11 @@ class term_list: public aterm_base
     {
       return term_list<Term>(f(*this));
     }
-};
+}; */
 
 /// \brief A term_list with elements of type aterm.
-typedef term_list<aterm> aterm_list;
+// typedef term_list<aterm> aterm_list;
+typedef ::aterm::ATermList aterm_list;
 
 /// \brief Returns the first element of the list l.
 /// \param l A list
@@ -283,7 +331,8 @@ template <typename Term>
 inline
 term_list<Term> push_front(term_list<Term> l, Term elem)
 {
-  return term_list<Term>(ATinsert(l, aterm_traits<Term>::term(elem)));
+  return ::aterm::push_front(l,elem);
+  // return term_list<Term>(ATinsert(l, elem));
 }
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
@@ -296,7 +345,8 @@ template <typename Term>
 inline
 term_list<Term> push_back(term_list<Term> l, Term elem)
 {
-  return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
+  return ::aterm::push_back(l,elem);
+  // return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
 }
 
 /// \brief Returns the list obtained by removing the first element.
@@ -326,7 +376,8 @@ template <typename Term>
 inline
 term_list<Term> remove_one_element(const term_list<Term>& l, const Term& x)
 {
-  return term_list<Term>(ATremoveElement(l, aterm_traits<Term>::term(x)));
+  return ::aterm::remove_one_element(l,x);
+  // return term_list<Term>(ATremoveElement(l, aterm_traits<Term>::term(x)));
 }
 
 /// \brief Applies a function to all elements of the list and returns the result.
@@ -376,31 +427,20 @@ inline
 term_list<Term> operator+(Term t, term_list<Term> l)
 {
   return push_front(l, t);
-}
+} 
 
 /// \cond INTERNAL_DOCS
 template <typename Term>
 struct aterm_traits<term_list<Term> >
 {
-  static void protect(const term_list<Term>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const term_list<Term>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const term_list<Term>& t)
-  {
-    t.mark();
-  }
   static ATerm term(const term_list<Term>& t)
   {
-    return t.term();
+    return t;
   }
 };
 /// \endcond
 
+/* 
 /// \brief Equality operator.
 /// \param x A list.
 /// \param y A list.
@@ -459,14 +499,15 @@ template <typename Term>
 bool operator!=(ATermList x, const term_list<Term>& y)
 {
   return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == false;
-}
+} */
 
 // implementation
-template <typename Term>
+/* template <typename Term>
 template <typename SpecificTerm>
 term_list<Term>::term_list(const term_list<SpecificTerm>& t)
   : aterm_base(t)
 {}
+*/
 
 } // namespace atermpp
 

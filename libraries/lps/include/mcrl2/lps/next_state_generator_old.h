@@ -262,15 +262,15 @@ std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data:
     /// \brief Returns the i-th component of the state s.
     data::data_expression state_component(const state_type& s, std::size_t i) const
     {
-      ATerm t = s[i];
+      const atermpp::aterm_appl t (s[i]);
       return atermpp::aterm_appl(m_rewriter.convert_from(t));
     }
 
     /// \brief Converts a value in next state format to a data expression.
     data::data_expression aterm2expression(const atermpp::aterm& x) const
     {
-      ATerm a = x;
-      atermpp::aterm_appl result = m_rewriter.convert_from(a);
+      const atermpp::aterm_appl a(x);
+      const atermpp::aterm_appl result = m_rewriter.convert_from(a);
       return result;
     }
 

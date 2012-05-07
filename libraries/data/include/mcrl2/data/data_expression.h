@@ -88,9 +88,9 @@ inline bool is_function_symbol(atermpp::aterm_appl p)
 }
 
 /// \brief Returns true if the term t is a variable
-inline bool is_variable(atermpp::aterm_appl p)
+inline bool is_variable(const ATerm &p)
 {
-  return core::detail::gsIsDataVarId(p);
+  return core::detail::gsIsDataVarId(atermpp::aterm_appl(p));
 }
 
 /// \brief Returns true if the term t is an application
@@ -136,6 +136,19 @@ class data_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     ///
     /// \param[in] t a term adhering to the internal format.
+    explicit data_expression(const aterm::ATerm& t)
+      : atermpp::aterm_appl(t)
+    {
+      // As Nil is used to indicate a non existing time value
+      // in a linear process, we allow the occurrence of a Nil
+      // term as a data_expression. This is a workaround which
+      // should be removed.
+      assert(is_data_expression(atermpp::aterm_appl(t)) || core::detail::gsIsNil(atermpp::aterm_appl(t)));
+    }
+    
+    /// \brief Constructor.
+    ///
+    /// \param[in] t a term adhering to the internal format.
     data_expression(const atermpp::aterm_appl& t)
       : atermpp::aterm_appl(t)
     {
@@ -143,7 +156,7 @@ class data_expression: public atermpp::aterm_appl
       // in a linear process, we allow the occurrence of a Nil
       // term as a data_expression. This is a workaround which
       // should be removed.
-      assert(is_data_expression(t) || core::detail::gsIsNil(t));
+      assert(is_data_expression(atermpp::aterm_appl(t)) || core::detail::gsIsNil(atermpp::aterm_appl(t)));
     }
 
     application operator()(const data_expression& e) const;
@@ -188,7 +201,7 @@ class data_expression: public atermpp::aterm_appl
         }
         else if (is_lambda(*this))
         {
-          atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+          atermpp::term_list<data_expression> v_variables = atermpp::term_list<data_expression>(atermpp::list_arg2(*this));
           sort_expression_vector s;
           for (atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
           {
@@ -198,7 +211,7 @@ class data_expression: public atermpp::aterm_appl
         }
         else if (is_set_comprehension(*this) || is_bag_comprehension(*this))
         {
-          atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+          atermpp::term_list<data_expression> v_variables = atermpp::term_list<data_expression> (atermpp::list_arg2(*this));
           if (v_variables.size() != 1)
           {
             throw mcrl2::runtime_error("Set or bag comprehension has multiple bound variables, but may only have 1 bound variable");
@@ -221,7 +234,7 @@ class data_expression: public atermpp::aterm_appl
       }
       else if (is_application(*this))
       {
-        data_expression head = atermpp::arg1(*this);
+        data_expression head = data_expression(atermpp::arg1(*this));
         sort_expression s(head.sort());
         if (s == sort_expression())
         {

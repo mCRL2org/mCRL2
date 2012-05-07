@@ -47,32 +47,6 @@ class boolean_equation
     /// \brief The formula of the equation
     boolean_expression m_formula;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_symbol.protect();
-      m_variable.protect();
-      m_formula.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_symbol.unprotect();
-      m_variable.unprotect();
-      m_formula.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_symbol.mark();
-      m_variable.mark();
-      m_formula.mark();
-    }
-
   public:
     /// \brief The expression type of the equation.
     typedef boolean_expression term_type;
@@ -87,6 +61,20 @@ class boolean_equation
     boolean_equation()
     {}
 
+    /// \brief Constructor.
+    /// \param t A term
+    explicit boolean_equation(const ATerm &t1)
+    {
+      atermpp::aterm_appl t(t1);
+      assert(core::detail::check_rule_BooleanEquation(t));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_symbol   = fixpoint_symbol(*i++);
+      atermpp::aterm_appl var(*i++);
+      m_variable = boolean_variable(var);
+      m_formula  = boolean_expression(*i);
+    }
+
+    /// \brief Constructor.
     /// \brief Constructor.
     /// \param t A term
     boolean_equation(atermpp::aterm_appl t)
@@ -195,18 +183,6 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::bes::boolean_equation>
 {
-  static void protect(const mcrl2::bes::boolean_equation& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::bes::boolean_equation& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::bes::boolean_equation& t)
-  {
-    t.mark();
-  }
 };
 
 } // namespace atermpp

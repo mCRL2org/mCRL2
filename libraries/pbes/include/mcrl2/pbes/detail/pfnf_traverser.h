@@ -126,20 +126,6 @@ struct pfnf_traverser_implication
     g = pbes_system::replace_free_variables(g, variable_data_expression_substitution(sigma));
   }
 
-  void mark() const
-  {
-  	g.mark();
-  }
-
-  void protect() const
-  {
-  	g.protect();
-  }
-
-  void unprotect() const
-  {
-  	g.unprotect();
-  }
 };
 
 struct pfnf_traverser_expression
@@ -171,21 +157,6 @@ struct pfnf_traverser_expression
     }
     expr = pbes_system::replace_free_variables(expr, variable_data_expression_substitution(sigma));
   }
-
-  void mark() const
-  {
-  	expr.mark();
-  }
-
-  void protect() const
-  {
-  	expr.protect();
-  }
-
-  void unprotect() const
-  {
-  	expr.unprotect();
-  }
 };
 
 } // namespace detail
@@ -200,58 +171,16 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_quantifier>
 {
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.mark();
-  }
 };
 
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_implication>
 {
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.mark();
-  }
 };
 
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_expression>
 {
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.mark();
-  }
 };
 
 } // namespace atermpp

@@ -364,7 +364,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
+          d=r.rewrite_internal(*i,sigma_internal);
         }
         else
         {
@@ -545,7 +545,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
+          d=r.rewrite_internal(*i,sigma_internal);
         }
         else
         {
@@ -726,7 +726,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p is a data::data_expression
     if (use_internal_rewrite_format)
     {
-      data::data_expression d = (data::data_expression)r.rewrite_internal((atermpp::aterm)p,sigma_internal);
+      data::data_expression d = (data::data_expression)r.rewrite_internal(p,sigma_internal);
       if (d==r.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();

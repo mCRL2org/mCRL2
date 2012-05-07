@@ -210,7 +210,7 @@ size_t ATindexOf(const ATermList &list_in, const ATerm &el, const int startpos)
  * Return NULL when index not in list.
  */
 
-const ATerm &ATelementAt(const ATermList &list_in, size_t index)
+const ATerm ATelementAt(const ATermList &list_in, size_t index)
 {
   ATermList list=list_in;
   for (; index > 0 && !ATisEmpty(list); --index)

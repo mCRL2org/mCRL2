@@ -91,24 +91,9 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
 {
-  static void protect(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.protect();
-    t.variables().protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.unprotect();
-    t.variables().unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.mark();
-    t.variables().mark();
-  }
   static ATerm term(const mcrl2::pbes_system::pbes_expression_with_variables& t)
   {
-    return t.term();
+    return static_cast<ATerm>(t);
   }
 };
 }

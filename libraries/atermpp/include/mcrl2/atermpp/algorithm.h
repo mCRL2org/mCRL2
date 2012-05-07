@@ -42,7 +42,7 @@ aterm_appl find_if(Term t, MatchPredicate match)
 {
   try
   {
-    detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match);
+    detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match);
   }
   catch (detail::found_term_exception& e)
   {

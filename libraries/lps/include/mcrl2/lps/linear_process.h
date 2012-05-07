@@ -74,12 +74,12 @@ class linear_process
       deprecated::summand_list result;
       for (deadlock_summand_vector::const_reverse_iterator i = m_deadlock_summands.rbegin(); i != m_deadlock_summands.rend(); ++i)
       {
-        deprecated::summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
+        deprecated::summand s(atermpp::aterm_appl(deadlock_summand_to_aterm(*i)));
         result = atermpp::push_front(result, s);
       }
       for (action_summand_vector::const_reverse_iterator i = m_action_summands.rbegin(); i != m_action_summands.rend(); ++i)
       {
-        deprecated::summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
+        deprecated::summand s(atermpp::aterm_appl(action_summand_to_aterm(*i)));
         result = atermpp::push_front(result, s);
       }
       return result;
@@ -89,7 +89,6 @@ class linear_process
     /// \brief Constructor.
     linear_process()
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Copy constructor.
@@ -98,7 +97,6 @@ class linear_process
       m_deadlock_summands(other.m_deadlock_summands),
       m_action_summands(other.m_action_summands)
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Constructor.
@@ -111,7 +109,6 @@ class linear_process
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Constructor.
@@ -122,15 +119,13 @@ class linear_process
 
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_process_parameters = *i++;
-      m_process_parameters.protect();
+      m_process_parameters = data::variable_list(*i++);
       set_summands(static_cast<deprecated::summand_list>(*i));
     }
 
     /// \brief Destructor
     ~linear_process()
     {
-      m_process_parameters.unprotect();
     }
 
     /// \brief Returns the number of LPS summands.
@@ -246,12 +241,12 @@ summand_list linear_process_summands(const linear_process& p)
   summand_list result;
   for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
-    summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
+    summand s(atermpp::aterm_appl(deadlock_summand_to_aterm(*i)));
     result = atermpp::push_front(result, s);
   }
   for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
-    summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
+    summand s(atermpp::aterm_appl(action_summand_to_aterm(*i)));
     result = atermpp::push_front(result, s);
   }
   return result;

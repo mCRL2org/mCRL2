@@ -57,7 +57,7 @@ static bool check_whether_variable_string_is_in_use(
   for (std::set < variable >::const_iterator i=varset.begin();
        i!=varset.end(); ++i)
   {
-    if (i->name()==s.c_str())
+    if (i->name().to_string()==s.c_str())
     {
       return true;
     }

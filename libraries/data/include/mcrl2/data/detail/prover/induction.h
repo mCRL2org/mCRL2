@@ -223,8 +223,8 @@ class Induction
       }
       else
       {
-        data_expression v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
-        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
+        data_expression v_hypotheses_1 = create_hypotheses(data_expression(a_hypothesis), v_list_of_variables, data_expression_list(v_list_of_dummies));
+        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, data_expression_list(a_list_of_dummies));
         return data_expression_list(sort_bool::implies(v_hypotheses_1, v_formula_1))+
                    data_expression_list(sort_bool::implies(v_hypotheses_2, v_formula_2));
       }
@@ -234,7 +234,7 @@ class Induction
     /// \brief
     Induction(const data_specification& a_data_spec)
     {
-      f_constructors=atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors());
+      f_constructors=function_symbol_list(atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors()));
       f_cons_name = sort_list::cons_name();
     }
 
@@ -281,7 +281,7 @@ class Induction
       else
       {
         mCRL2log(log::verbose) << "Induction on " << f_count << " variables." << std::endl;
-        data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), data_expression_list());
+        data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), variable_list());
         v_result = v_list_of_clauses.front();
         v_list_of_clauses = pop_front(v_list_of_clauses);
         while (!v_list_of_clauses.empty())

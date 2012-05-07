@@ -57,6 +57,14 @@ class boolean_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_BooleanExpression(m_term));
     }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit boolean_expression(const ATerm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_BooleanExpression(m_term));
+    }
 };
 
 /// \brief list of boolean_expressions

@@ -279,7 +279,7 @@ struct expression_traits : public core::term_traits< Expression >
 
   static data_expression_list variables(data_expression const& a)
   {
-    return abstraction(a).variables();
+    return data_expression_list(abstraction(a).variables());
   }
 
   static data_expression body(data_expression const& a)

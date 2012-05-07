@@ -99,7 +99,8 @@ class state_label_lts : public atermpp::aterm_appl
     /** \brief Construct a state label out of a data_expression_list.
     */
     state_label_lts(const mcrl2::data::data_expression_list& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),atermpp::aterm_list(l))
+      // atermpp::aterm_appl(get_STATE_function_symbol(l.size()),atermpp::aterm_list(l))
+      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
     /** \brief Construct a state label out of a data_expression_vector.
@@ -115,7 +116,7 @@ class state_label_lts : public atermpp::aterm_appl
     mcrl2::data::data_expression operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression(this->argument(i));
+      return mcrl2::data::data_expression((*this)(i));
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -446,35 +447,11 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lts::detail::state_label_lts>
 {
-  static void protect(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.mark();
-  }
 };
 
 template<>
 struct aterm_traits<mcrl2::lts::detail::action_label_lts>
 {
-  static void protect(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.mark();
-  }
 };
 } // namespace atermpp
 /// \endcond

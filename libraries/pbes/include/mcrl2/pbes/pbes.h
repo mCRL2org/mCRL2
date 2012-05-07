@@ -110,7 +110,7 @@ class pbes
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)(0));
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
 
-      atermpp::aterm_appl eqn_spec = *i++;
+      atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
       atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec(0));
       m_equations.clear();
       for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
@@ -427,26 +427,6 @@ class pbes
       std::transform(equations().begin(), equations().end(), equations().begin(), f);
     }
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_initial_state.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_initial_state.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_initial_state.mark();
-    }
-
     /// \brief Checks if the PBES is well typed
     /// \return True if
     /// <ul>
@@ -608,7 +588,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
   for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = pbes_equation_to_aterm(*i);
-    eqn_list = atermpp::push_front(eqn_list, a);
+    eqn_list = ::aterm::push_front(eqn_list, a);
   }
   ATermAppl equations = core::detail::gsMakePBEqnSpec(eqn_list);
   ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());

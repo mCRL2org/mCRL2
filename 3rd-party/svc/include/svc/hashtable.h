@@ -24,6 +24,7 @@
 #define __HASH_TABLE_H
 
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/memory.h"
 #include "ptable.h"
 
   typedef struct

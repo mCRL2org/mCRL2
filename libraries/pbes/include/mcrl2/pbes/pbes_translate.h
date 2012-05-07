@@ -524,7 +524,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         f = a::arg(f);
         if (data::is_data_expression(f))
         {
-          result = pbes_expression(data::sort_bool::not_(f));
+          result = pbes_expression(data::sort_bool::not_(data::data_expression(f)));
         }
         else if (s::is_true(f))
         {

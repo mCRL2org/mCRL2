@@ -271,15 +271,15 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -439,15 +439,15 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -612,15 +612,15 @@ struct add_traverser_variables: public Traverser<Derived>
     data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -879,15 +879,15 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::forall(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::exists(data_expression(atermpp::aterm_appl(x))));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(data::lambda(data_expression(atermpp::aterm_appl(x))));
     }
     static_cast<Derived&>(*this).leave(x);
   }

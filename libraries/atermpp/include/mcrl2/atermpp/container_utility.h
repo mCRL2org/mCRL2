@@ -76,6 +76,12 @@ struct is_container_impl< atermpp::term_list< T > >
 };
 
 template < typename T >
+struct is_container_impl< ::aterm::term_list< T > >
+{
+  typedef boost::true_type type;
+};
+
+template < typename T >
 struct is_container_impl< boost::iterator_range< T > >
 {
   typedef boost::true_type type;

@@ -335,7 +335,7 @@ class forall: public action_formula
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return data::variable_list(atermpp::list_arg1(*this));
     }
 
     action_formula body() const
@@ -378,7 +378,7 @@ class exists: public action_formula
 
     data::variable_list variables() const
     {
-      return atermpp::list_arg1(*this);
+      return  data::variable_list(atermpp::list_arg1(*this));
     }
 
     action_formula body() const
@@ -426,7 +426,7 @@ class at: public action_formula
 
     data::data_expression time_stamp() const
     {
-      return atermpp::arg2(*this);
+      return data::data_expression(atermpp::arg2(*this));
     }
 };
 

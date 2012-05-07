@@ -99,11 +99,11 @@ inline bool ATisListOrNull(const ATerm &t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
+inline const ATermAppl ATAelementAt(const ATermList &List, const size_t Index)
 {
-  const ATerm &Result = ATelementAt(List, Index);
+  const ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
-  return static_cast<const ATermAppl &>(Result);
+  return static_cast<const ATermAppl>(Result);
 }
 
 /**

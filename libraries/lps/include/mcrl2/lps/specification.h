@@ -82,7 +82,7 @@ class specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
-      m_action_labels    = atermpp::aterm_appl(*i++)(0);
+      m_action_labels    = action_label_list(atermpp::aterm_appl(*i++)(0));
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)(0));
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
@@ -95,7 +95,6 @@ class specification
     /// \brief Constructor.
     specification()
     {
-      m_initial_process.protect();
     }
 
     specification(specification const& other)
@@ -105,7 +104,6 @@ class specification
       m_global_variables = other.m_global_variables;
       m_process = other.m_process;
       m_initial_process = other.m_initial_process;
-      m_initial_process.protect();
     }
 
     /// \brief Constructor.
@@ -114,7 +112,6 @@ class specification
     {
       assert(core::detail::check_rule_LinProcSpec(t));
       construct_from_aterm(t);
-      m_initial_process.protect();
     }
 
     /// \brief Constructor.
@@ -134,7 +131,6 @@ class specification
       m_process(lps),
       m_initial_process(initial_process)
     {
-      m_initial_process.protect();
     }
 
     /// \brief Reads the specification from file.
@@ -246,7 +242,6 @@ class specification
 
     ~specification()
     {
-      m_initial_process.unprotect();
     }
 };
 

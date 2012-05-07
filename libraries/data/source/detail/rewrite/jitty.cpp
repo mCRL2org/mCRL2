@@ -53,7 +53,7 @@ static variable_list get_vars(const atermpp::aterm_appl &a)
     {
       if (arg->type()!=AT_INT)
       {
-        l= get_vars(*arg)+l;
+        l= get_vars(atermpp::aterm_appl(*arg))+l;
       }
     }
     return l;
@@ -138,7 +138,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
           if (!is_variable(pars(i+1)))
           {
             bs[i] = true;
-            const variable_list evars = get_vars(pars(i+1));
+            const variable_list evars = get_vars(atermpp::aterm_appl(pars(i+1)));
             for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
@@ -152,7 +152,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
                 j++;
               }
             }
-            vars = push_back(vars,get_vars(pars(i+1)));
+            vars = push_back(vars,get_vars(atermpp::aterm_appl(pars(i+1))));
           }
           else
           {
@@ -174,7 +174,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
             {
               bs[i] = true;
             }
-            vars = push_back(vars,get_vars(pars(i+1)));
+            vars = push_back(vars,get_vars(atermpp::aterm_appl(pars(i+1))));
           }
         }
 
@@ -416,12 +416,12 @@ static atermpp::aterm subst_values(
     }
     return t;
   }
-  else if (is_abstraction(t))
+  else if (is_abstraction(atermpp::aterm_appl(t)))
   {
-    const atermpp::aterm_appl t1=t;
-    const atermpp::aterm_appl binder=t1(0);
+    const atermpp::aterm_appl t1=atermpp::aterm_appl(t);
+    const atermpp::aterm_appl binder=atermpp::aterm_appl(t1(0));
     const variable_list bound_variables=static_cast<variable_list>(t1(1));
-    const atermpp::aterm_appl body=subst_values(vars,vals,t1(2));
+    const atermpp::aterm_appl body=atermpp::aterm_appl(subst_values(vars,vals,atermpp::aterm_appl(t1(2))));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(size_t i=0; i<vars.size(); ++i)
@@ -435,11 +435,11 @@ static atermpp::aterm subst_values(
     return gsMakeBinder(binder,bound_variables,body);
 
   }
-  else if (is_where_clause(t))
+  else if (is_where_clause(atermpp::aterm_appl(t)))
   {
-    const atermpp::aterm_appl t1=t;
+    const atermpp::aterm_appl t1=atermpp::aterm_appl(t);
     const atermpp::term_list < atermpp::aterm_appl > assignment_list=static_cast<atermpp::term_list < atermpp::aterm_appl > >(t1(1));
-    const atermpp::aterm_appl body=subst_values(vars,vals,t1(0));
+    const atermpp::aterm_appl body=atermpp::aterm_appl(subst_values(vars,vals,atermpp::aterm_appl(t1(0))));
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
@@ -469,7 +469,7 @@ static atermpp::aterm subst_values(
   }
   else
   {
-    const atermpp::aterm_appl t1=t;
+    const atermpp::aterm_appl t1=atermpp::aterm_appl(t);
     const size_t arity = t1.size();
     // MCRL2_SYSTEM_SPECIFIC_ALLOCA(args, atermpp::aterm, arity);
     std::vector < atermpp::aterm > args(arity);
@@ -523,13 +523,13 @@ static bool match_jitty(
   }
   else
   {
-    if (t.type()==AT_INT || is_variable(t) || is_abstraction(t) || is_where_clause(t))
+    if (t.type()==AT_INT || is_variable(atermpp::aterm_appl(t)) || is_abstraction(atermpp::aterm_appl(t)) || is_where_clause(atermpp::aterm_appl(t)))
     {
       return false;
     }
     // p and t must be aterm_appl's.
-    atermpp::aterm_appl pa=p;
-    atermpp::aterm_appl ta=t;
+    atermpp::aterm_appl pa=atermpp::aterm_appl(p);
+    atermpp::aterm_appl ta=atermpp::aterm_appl(t);
 
     if (pa.function()!=ta.function())
     {
@@ -564,7 +564,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   }
   else if (is_abstraction(term))
   {
-    atermpp::aterm_appl binder=term(0);
+    atermpp::aterm_appl binder=atermpp::aterm_appl(term(0));
     if (binder==gsMakeExists())
     {
       atermpp::aterm_appl a= internal_existential_quantifier_enumeration(term,sigma);
@@ -577,7 +577,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     if (binder==gsMakeLambda())
     {
-      atermpp::aterm_appl a=rewrite_single_lambda(static_cast<variable_list>(term(1)),term(2),false,sigma);
+      atermpp::aterm_appl a=rewrite_single_lambda(static_cast<variable_list>(term(1)),atermpp::aterm_appl(term(2)),false,sigma);
       return a;
     }
     assert(0);
@@ -597,11 +597,11 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     {
       head=sigma(variable(op));
     }
-    else if (is_abstraction(op))
+    else if (is_abstraction(atermpp::aterm_appl(op)))
     {
       head=static_cast<atermpp::aterm_appl>(op);
     }
-    else if (is_where_clause(op))
+    else if (is_where_clause(atermpp::aterm_appl(op)))
     {
       head = rewrite_aux(atermpp::aterm_appl(op),sigma);
     }
@@ -615,7 +615,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     // u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
     if (is_abstraction(head))
     {
-      const atermpp::aterm_appl binder=head(0);
+      const atermpp::aterm_appl binder=atermpp::aterm_appl(head(0));
       if (binder==gsMakeLambda())
       {
         atermpp::aterm_appl a= rewrite_lambda_application(head,term,sigma);
@@ -714,7 +714,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         size_t i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
         if (i < arity)
         {
-          rewritten[i] = rewrite_aux(args[i],sigma);
+          rewritten[i] = rewrite_aux(atermpp::aterm_appl(args[i]),sigma);
         }
         else
         {
@@ -752,14 +752,14 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         }
         assert(vars.size()==vals.size() && vars.size()<=max_len);
         if (matches && (ATAelementAt(rule,1)==internal_true ||
-                        rewrite_aux(subst_values(vars,vals,ATelementAt(rule,1)),sigma)==internal_true))
+                        rewrite_aux(atermpp::aterm_appl(subst_values(vars,vals,ATelementAt(rule,1))),sigma)==internal_true))
         {
           atermpp::aterm_appl rhs = ATAelementAt(rule,3);
           atermpp::aterm_appl result;
 
           if (arity == rule_arity)
           {
-            result=rewrite_aux(subst_values(vars,vals,rhs),sigma);
+            result=rewrite_aux(atermpp::aterm_appl(subst_values(vars,vals,rhs)),sigma);
           }
           else
           {
@@ -793,7 +793,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   {
     if (rewritten[i] == atermpp::aterm())
     {
-      rewritten[i] = rewrite_aux(args[i],sigma);
+      rewritten[i] = rewrite_aux(atermpp::aterm_appl(args[i]),sigma);
     }
   }
 

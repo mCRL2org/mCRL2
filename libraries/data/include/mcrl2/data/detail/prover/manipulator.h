@@ -67,7 +67,7 @@ class InternalFormatManipulator
       v_is_equality = f_info.is_equality(a_guard);
       if (v_is_equality && a_guard(2) == a_formula)
       {
-        return a_guard(1);
+        return atermpp::aterm_appl(a_guard(1));
       }
       if (f_info.is_variable(a_formula))
       {
@@ -92,7 +92,7 @@ class InternalFormatManipulator
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_true_auxiliary(ATgetArgument(a_formula, i), a_guard,f_set_true);
+        v_parts[i] = set_true_auxiliary(atermpp::aterm_appl(ATgetArgument(a_formula, i)), a_guard,f_set_true);
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
       f_set_true[a_formula]=v_result;
@@ -139,7 +139,7 @@ class InternalFormatManipulator
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_false_auxiliary(ATgetArgument(a_formula, i), a_guard,f_set_false);
+        v_parts[i] = set_false_auxiliary(atermpp::aterm_appl(ATgetArgument(a_formula, i)), a_guard,f_set_false);
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
       f_set_false[a_formula]=v_result;
@@ -224,9 +224,9 @@ class InternalFormatManipulator
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = orient(a_term(i));
+        v_parts[i] = orient(atermpp::aterm_appl(a_term(i)));
       }
-      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeAppl(v_symbol, v_parts.begin(),v_parts.end()));
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeAppl_iterator(v_symbol, v_parts.begin(),v_parts.end()));
 
       if (f_info.is_equality(v_result))
       {

@@ -12,7 +12,7 @@
 // ATerm traversal
 template <typename T>
 T operator()(const T& x,
-             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+             typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
             )
 {
   core::msg("aterm traversal");
@@ -36,7 +36,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 // Container traversal
 template <typename T>
 void operator()(T& x,
-                typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0,
+                typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0,
                 typename atermpp::detail::enable_if_container<T>::type* = 0
                )
 {

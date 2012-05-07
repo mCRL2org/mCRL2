@@ -114,13 +114,7 @@ class objectdatatype
 
     objectdatatype()
     {
-      objectname.protect();
-      multi_action_names.protect();
       constructor=false;
-      representedprocess.protect();
-      process_representing_action.protect();
-      processbody.protect();
-      parameters.protect();
       processstatus=unknown;
       object=none;
       canterminate=0;
@@ -131,17 +125,11 @@ class objectdatatype
     {
       objectname=o.objectname;
       multi_action_names=o.multi_action_names;
-      objectname.protect();
-      multi_action_names.protect();
       constructor=o.constructor;
       representedprocess=o.representedprocess;
-      representedprocess.protect();
       process_representing_action=o.process_representing_action;
-      process_representing_action.protect();
       processbody=o.processbody;
-      processbody.protect();
       parameters=o.parameters;
-      parameters.protect();
       processstatus=o.processstatus;
       object=o.object;
       canterminate=o.canterminate;
@@ -152,17 +140,11 @@ class objectdatatype
     {
       objectname=o.objectname;
       multi_action_names=o.multi_action_names;
-      objectname.protect();
-      multi_action_names.protect();
       constructor=o.constructor;
       representedprocess=o.representedprocess;
-      representedprocess.protect();
       process_representing_action=o.process_representing_action;
-      process_representing_action.protect();
       processbody=o.processbody;
-      processbody.protect();
       parameters=o.parameters;
-      parameters.protect();
       processstatus=o.processstatus;
       object=o.object;
       canterminate=o.canterminate;
@@ -172,12 +154,6 @@ class objectdatatype
 
     ~objectdatatype()
     {
-      objectname.unprotect();
-      multi_action_names.unprotect();
-      representedprocess.unprotect();
-      process_representing_action.unprotect();
-      processbody.unprotect();
-      parameters.unprotect();
     }
 };
 
@@ -248,12 +224,10 @@ class specification_basic_type:public boost::noncopyable
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.mappings()));
 
       stack_operations_list=NULL;
-      acts.protect();
       acts=as;
       storeact(acts);
       procs=ps;
       storeprocs(procs);
-      initdatavars.protect();
       initdatavars=idvs;
       /* if (!opt.norewrite)
       {
@@ -261,19 +235,15 @@ class specification_basic_type:public boost::noncopyable
       } */
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
-      terminationAction.protect();
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
-      terminatedProcId.protect();
-      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),variable_list());
+      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),sort_expression_list());
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
       insertProcDeclaration(
         terminatedProcId,
         variable_list(),
         seq(terminationAction,delta()),
         pCRL,0,false);
-      delta_process.protect();
       delta_process=newprocess(variable_list(),delta(),pCRL,0,false);
-      tau_process.protect();
       tau_process=newprocess(variable_list(),tau(),pCRL,1,false);
     }
 
@@ -285,12 +255,6 @@ class specification_basic_type:public boost::noncopyable
         delete stack_operations_list;
         stack_operations_list=temp;
       }
-      acts.unprotect();
-      initdatavars.unprotect();
-      terminationAction.unprotect();
-      terminatedProcId.unprotect();
-      delta_process.unprotect();
-      tau_process.unprotect();
 
       ATindexedSetDestroy(objectIndexTable);
     }
@@ -489,7 +453,7 @@ class specification_basic_type:public boost::noncopyable
       {
         // tempvar is needed as objectdata can change during a call
         // of getparameters.
-        const data_expression_list templist=getparameters(multiAction);
+        const variable_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
         // objectdata[n].objectname=identifier_string((ATermAppl)(ATermList)actionnames);
         objectdata[n].multi_action_names=actionnames;
@@ -497,8 +461,7 @@ class specification_basic_type:public boost::noncopyable
         // must separate assignment below as
         // objectdata may change as a side effect of make
         // multiaction.
-        const action_list tempvar=makemultiaction(actionnames,
-                                  objectdata[n].parameters);
+        const action_list tempvar=makemultiaction(actionnames, data_expression_list(objectdata[n].parameters));
         objectdata[n].processbody=action_list_to_process(tempvar);
       }
       return n;
@@ -1310,13 +1273,13 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(p))
       {
         if (strict)
-          return occursintermlist(var,sum(p).bound_variables())||
+          return occursintermlist(var,data_expression_list(sum(p).bound_variables()))||
                  occursinpCRLterm(var,sum(p).operand(),strict);
         /* below appears better? , but leads
            to errors. Should be investigated. */
         else
           return
-            (!occursintermlist(var,sum(p).bound_variables()))&&
+            (!occursintermlist(var,data_expression_list(sum(p).bound_variables())))&&
             occursinpCRLterm(var,sum(p).operand(),strict);
       }
       if (is_process_instance(p))
@@ -1660,7 +1623,7 @@ class specification_basic_type:public boost::noncopyable
         variable_list vars1=vars;
         data_expression_list terms1=terms;
 
-        alphaconvert(sumargs,vars1,terms1,terms,vars);
+        alphaconvert(sumargs,vars1,terms1,variable_list(terms),data_expression_list(vars));
 
         const process_expression result=sum(sumargs,
                                             substitute_pCRLproc(terms1,vars1,sum(p).operand()));
@@ -1733,7 +1696,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       return process_instance(procId.identifier(),
-                              substitute_datalist(terms,variables,objectdata[n].parameters));
+                              substitute_datalist(terms,variables,data_expression_list(objectdata[n].parameters)));
     }
 
     /********************************************************************/
@@ -1853,7 +1816,7 @@ class specification_basic_type:public boost::noncopyable
                                          canterminatebody(body),containstimebody(body));
         return at(process_instance(
                     newproc,
-                    objectdata[objectIndex(newproc)].parameters),
+                    data::data_expression_list(objectdata[objectIndex(newproc)].parameters)),
                   time);
       }
 
@@ -1915,7 +1878,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (sortlist.empty())
       {
-        return data_expression_list();
+        return variable_list();
       }
 
       sort_expression sort=sortlist.front();
@@ -2024,7 +1987,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_sum(body))
@@ -2053,7 +2016,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_if_then(body))
@@ -2071,7 +2034,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body2,pCRL,
                                          canterminatebody(body2),
                                          containstimebody(body2));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
 
       }
 
@@ -2116,7 +2079,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body3,pCRL,
                                          canterminatebody(body3),
                                          containstimebody(body3));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
 
       }
 
@@ -2176,7 +2139,7 @@ class specification_basic_type:public boost::noncopyable
         body1=bodytovarheadGNF(body,alt_state,freevars,first);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
                                          containstimebody(body));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_action(body))
@@ -2256,7 +2219,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_process_instance(body))
@@ -2577,7 +2540,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_identifier procId=process_instance(oldbody).identifier();
         const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-        newbody=process_instance(procId,parameters);
+        newbody=process_instance(procId,data::data_expression_list(parameters));
         return parameters;
       }
 
@@ -2595,14 +2558,14 @@ class specification_basic_type:public boost::noncopyable
 
             construct_renaming(pars,objectdata[objectIndex(procId)].parameters,pars1,pars2,false);
 
-            newbody=seq(process_instance(procId,pars1),newbody);
+            newbody=seq(process_instance(procId,data::data_expression_list(pars1)),newbody);
             return pars1+pars;
           }
           else
           {
             const process_identifier procId=process_instance(first).identifier();
             const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-            newbody=process_instance(procId,parameters);
+            newbody=process_instance(procId,data::data_expression_list(parameters));
             return parameters;
           }
         }
@@ -2721,7 +2684,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        args=objectdata[objectIndex(new_process)].parameters;
+        args=data::data_expression_list(objectdata[objectIndex(new_process)].parameters);
       }
       return process_instance(new_process,args);
     }
@@ -3188,11 +3151,11 @@ class specification_basic_type:public boost::noncopyable
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
         // below.
-        data_expression_list templist=substitute_datalist(push_front(variable_list(),var2),
+        data_expression_list templist=substitute_datalist(data_expression_list(push_front(variable_list(),var2)),
                                       push_front(variable_list(),var),
-                                      objectdata[n].parameters);
+                                      data_expression_list(objectdata[n].parameters));
         objectdata[n].parameters=variable_list(templist);
-        process_expression tempvar=substitute_pCRLproc(push_front(variable_list(),var2),
+        process_expression tempvar=substitute_pCRLproc(data_expression_list(push_front(variable_list(),var2)),
                                    push_front(variable_list(),var),
                                    objectdata[n].processbody);
         objectdata[n].processbody=tempvar;
@@ -3261,16 +3224,7 @@ class specification_basic_type:public boost::noncopyable
         stackoperations(const variable_list pl,
                         specification_basic_type& spec)
         {
-          parameter_list.protect();
           parameter_list=pl;
-          stacksort.protect();
-          sorts.protect();
-          get.protect();
-          push.protect();
-          emptystack.protect();
-          empty.protect();
-          pop.protect();
-          getstate.protect();
           next=spec.stack_operations_list;
           spec.stack_operations_list=this;
 
@@ -3308,15 +3262,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~stackoperations()
         {
-          parameter_list.unprotect();
-          stacksort.unprotect();
-          sorts.unprotect();
-          get.unprotect();
-          push.unprotect();
-          emptystack.unprotect();
-          empty.unprotect();
-          pop.unprotect();
-          getstate.unprotect();
         }
     };
 
@@ -3361,9 +3306,6 @@ class specification_basic_type:public boost::noncopyable
                       const std::vector < process_identifier> &pCRLprocs,
                       const bool singlecontrolstate)
         {
-          booleanStateVariables.protect();
-          stackvar.protect();
-          parameters.protect();
           parameters=parlist;
 
           no_of_states=pCRLprocs.size();
@@ -3435,9 +3377,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~stacklisttype()
         {
-          stackvar.unprotect();
-          booleanStateVariables.unprotect();
-          parameters.unprotect();
         }
 
     };
@@ -3494,7 +3433,7 @@ class specification_basic_type:public boost::noncopyable
       if (!options.binary)
       {
         const size_t e=create_enumeratedtype(stack.no_of_states);
-        function_symbol_list l=enumeratedtypes[e].elementnames;
+        function_symbol_list l(enumeratedtypes[e].elementnames);
         for (; i>0 ; i--)
         {
           l=pop_front(l);
@@ -3819,7 +3758,7 @@ class specification_basic_type:public boost::noncopyable
           return push_front(data_expression_list(),t3.front());
         }
 
-        const data_expression_list t3=push(procId,t1,push_front(function_symbol_list(),stack.opns->emptystack),
+        const data_expression_list t3=push(procId,t1,data_expression_list(push_front(function_symbol_list(),stack.opns->emptystack)),
                                            stack,pcrlprcs,vars,regular,singlestate);
         return push_front(data_expression_list(),t3.front());
       }
@@ -3833,7 +3772,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return push(procId,
                       t1,
-                      function_symbol_list(),
+                      data_expression_list(),
                       stack,
                       pcrlprcs,
                       vars,
@@ -3855,7 +3794,7 @@ class specification_basic_type:public boost::noncopyable
         }
         const data_expression_list t3= push(procId,
                                             t1,
-                                            push_front(function_symbol_list(),stack.opns->emptystack),
+                                            data_expression_list(push_front(function_symbol_list(),stack.opns->emptystack)),
                                             stack,
                                             pcrlprcs,
                                             vars,
@@ -3965,7 +3904,7 @@ class specification_basic_type:public boost::noncopyable
         return stack.parameters;
       }
 
-      return processencoding(1,stack.parameters,stack); /* Take 1 as dummy indicator */
+      return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
       /* return push_front(stack.parameterlist,stack.stackvar); Erroneous, repaired 5/3 */
     }
 
@@ -4159,7 +4098,7 @@ class specification_basic_type:public boost::noncopyable
                                RewriteTerm(condition1),
                                multiAction,
                                atTime,
-                               dummyparameterlist(stack,(bool) singlestate),
+                               data_expression_list(dummyparameterlist(stack,(bool) singlestate)),
                                has_time,
                                is_delta_summand);
         return;
@@ -4252,9 +4191,6 @@ class specification_basic_type:public boost::noncopyable
                        specification_basic_type& spec)
         {
           size=n;
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           if (n==2)
           {
             sortId = sort_bool::bool_();
@@ -4290,9 +4226,6 @@ class specification_basic_type:public boost::noncopyable
 
         enumeratedtype(const enumeratedtype& e)
         {
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           size=e.size;
           sortId=e.sortId;
           elementnames=e.elementnames;
@@ -4301,9 +4234,6 @@ class specification_basic_type:public boost::noncopyable
 
         void operator=(const enumeratedtype& e)
         {
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           size=e.size;
           sortId=e.sortId;
           elementnames=e.elementnames;
@@ -4312,9 +4242,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~enumeratedtype()
         {
-          sortId.unprotect();
-          elementnames.unprotect();
-          functions.unprotect();
         }
     };
 
@@ -4461,7 +4388,6 @@ class specification_basic_type:public boost::noncopyable
                  const sort_expression_list gsorts,
                  specification_basic_type& spec)
         {
-          var.protect();
 
           enumeratedtype_index=spec.create_enumeratedtype(n);
 
@@ -4488,13 +4414,11 @@ class specification_basic_type:public boost::noncopyable
 
         /* enumtype(const enumtype &t)
         { var=t.var;
-          var.protect();
           enumeratedtype_index=t.enumeratedtype_index;
         } */
 
         ~enumtype()
         {
-          var.unprotect();
         }
     };
     /************** Merge summands using enumerated type ***********************/
@@ -6458,7 +6382,7 @@ class specification_basic_type:public boost::noncopyable
             {
               action_summand act_summand(summand_to_action_summand(new_summand));
               sumelm(act_summand);
-              new_summand = action_summand_to_aterm(act_summand);
+              new_summand = mcrl2::lps::deprecated::summand(action_summand_to_aterm(act_summand));
             }
 
             if (newcondition!=sort_bool::false_())

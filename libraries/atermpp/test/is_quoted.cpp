@@ -30,9 +30,9 @@ int test_main(int argc, char* argv[])
   aterm_appl f(s, x);
 
   // convert to string and back
-  aterm_appl g = make_term(f.to_string());
+  aterm_appl g ( make_term(f.to_string()));
 
-  BOOST_CHECK(g.is_quoted());
+  BOOST_CHECK(g.function().is_quoted());
   BOOST_CHECK(g.function() != s);
   function_symbol s1("f", 1, true);
   BOOST_CHECK(g.function() == s1);

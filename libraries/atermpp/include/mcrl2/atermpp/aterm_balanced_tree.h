@@ -28,10 +28,6 @@ namespace atermpp
 template < typename Value >
 class term_balanced_tree_iterator;
 
-// NOTE: BALANCED TREES DO NOT APPEAR TO WORK WELL WITH REFERENCE COUNT GARBAGE COLLECTIONS
-// AS IT STANDS. REENABLE THE BALANCED TREES TEST TO SEE THAT IT FAILS. AS IT STANDS BALANCED
-// TREES ARE NOT USED AT ANY PLACE.
-
 /// \brief Read-only balanced binary tree of terms.
 ///
 /// Models Random Access Container (STL concept)
@@ -47,13 +43,13 @@ class term_balanced_tree: public ATerm
 
   protected:
 
-    static atermpp::function_symbol const& tree_empty()
+    static atermpp::function_symbol const tree_empty()
     {
       static atermpp::function_symbol empty("@empty@", 0);
       return empty;
     }
 
-    static atermpp::function_symbol const& tree_node()
+    static atermpp::function_symbol const tree_node()
     {
       static atermpp::function_symbol node("@node@", 2);
       return node;
@@ -98,7 +94,7 @@ class term_balanced_tree: public ATerm
 
     Term element_at(size_t position) const
     {
-      return element_at(aterm(), m_size, position);
+      return element_at(*this, m_size, position);
     }
 
     static Term element_at(aterm tree, size_t size, size_t position)
@@ -208,7 +204,7 @@ class term_balanced_tree: public ATerm
     /// \param t A term containing a list.
     template <typename SpecificTerm>
     term_balanced_tree(term_balanced_tree< SpecificTerm > const& t) :
-      aterm(t.m_aterm), m_size(t.m_size)
+      aterm(t.m_term), m_size(t.m_size)
     { }
 
     /// Creates an term_balanced_tree with a copy of a range.
@@ -265,7 +261,7 @@ class term_balanced_tree: public ATerm
     /// \brief Swaps contents of containers
     void swap(term_balanced_tree< Term >& other)
     {
-      std::swap(m_aterm, other.m_aterm);
+      std::swap(m_term, other.m_term);
       std::swap(m_size, other.m_size);
     }
 
@@ -280,7 +276,7 @@ class term_balanced_tree: public ATerm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return ATisEmpty(static_cast<ATermList>(m_aterm));
+      return m_term==&*ATempty;
     }
 
     /// \brief Conversion to ATermList.
@@ -403,18 +399,6 @@ term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
 template <typename Term>
 struct aterm_traits<term_balanced_tree<Term> >
 {
-  static void protect(const term_balanced_tree<Term>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const term_balanced_tree<Term>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const term_balanced_tree<Term>& t)
-  {
-    t.mark();
-  }
   static ATerm term(const term_balanced_tree<Term>& t)
   {
     return (ATerm)t;

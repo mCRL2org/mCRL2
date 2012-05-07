@@ -96,28 +96,13 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::data::data_expression_with_variables>
 {
-  static void protect(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.protect();
-    t.variables().protect();
-  }
-  static void unprotect(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.unprotect();
-    t.variables().unprotect();
-  }
-  static void mark(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.mark();
-    t.variables().mark();
-  }
   static ATerm term(mcrl2::data::data_expression_with_variables& t)
   {
-    return t.term();
+    return t; // t.term();
   }
   static ATerm* ptr(mcrl2::data::data_expression_with_variables& t)
   {
-    return &t.term();
+    return &t; // .term();
   }
 };
 } // namespace atermpp

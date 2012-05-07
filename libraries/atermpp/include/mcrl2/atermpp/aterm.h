@@ -27,7 +27,7 @@ namespace atermpp
 
 	
 /// \brief Base class for aterm.
-class aterm_base
+/* class aterm_base
 {
     template <typename T>
     friend struct aterm_traits;
@@ -133,10 +133,10 @@ class aterm_base
     {
       return m_term<t.m_term;
     }
-};
+}; */
 
 /// \cond INTERNAL_DOCS
-template <>
+/* template <>
 struct aterm_traits<aterm_base>
 {
   static void protect(const aterm_base& t)
@@ -155,29 +155,29 @@ struct aterm_traits<aterm_base>
   {
     return t.term();
   }
-};
+}; */
 /// \endcond
 
 /// \brief Returns true if x has the default value of an aterm. In the ATerm Library
 /// this value is given by ATfalse.
 /// \param x A term.
 /// \return True if the value of the term is ATfalse.
-inline
+/* inline
 bool operator!(const aterm_base& x)
 {
   // return ATisEqual(aterm_traits<aterm_base>::term(x), false);
   return &*(aterm_traits<aterm_base>::term(x))==NULL;
-}
+} */
 
 /// \brief Writes a string representation of the aterm t to the stream out.
 /// \param out An output stream.
 /// \param t A term.
 /// \return The stream to which the string representation has been written.
-inline
+/* inline
 std::ostream& operator<<(std::ostream& out, const aterm_base& t)
 {
   return out << t.to_string();
-}
+} */
 
 ///////////////////////////////////////////////////////////////////////////////
 // aterm

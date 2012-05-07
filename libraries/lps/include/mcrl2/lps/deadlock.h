@@ -35,29 +35,9 @@ class deadlock
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_time.mark();
-    }
-
   public:
     /// \brief Constructor
-    deadlock(data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+    deadlock(data::data_expression time = data::data_expression(core::detail::gsMakeNil()))
       : m_time(time)
     {}
 
@@ -115,18 +95,6 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::deadlock>
 {
-  static void protect(const mcrl2::lps::deadlock& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::deadlock& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::deadlock& t)
-  {
-    t.mark();
-  }
 };
 } // namespace atermpp
 /// \endcond
