@@ -190,6 +190,7 @@ static void insertKeyValue(ATermIndexedSet s,
     {
       s->values.push_back(std::vector<ATerm>(ELEMENTS_PER_TABLE));
     }
+  } 
 
   s->keys[x][y] = t;
   if (s->contains_values)
