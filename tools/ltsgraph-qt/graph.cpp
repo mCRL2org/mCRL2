@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "graph.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/lts_io.h"
@@ -22,7 +24,7 @@ namespace Graph
 
         inline float frand(float min, float max)
         {
-            return ((float)random() / RAND_MAX) * (max - min) + min;
+            return ((float)rand() / RAND_MAX) * (max - min) + min;
         }
 
         struct EdgeExtra {

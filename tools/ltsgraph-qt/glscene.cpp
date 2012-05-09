@@ -1,7 +1,10 @@
 #include <QtOpenGL>
+#include "glext.h"
+
 #include <assert.h>
 #include <cstdio>
 #include "glscene.h"
+#include "workarounds.h"
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -17,6 +20,7 @@
 #define SIZE_HANDLE     8
 #define SIZE_NODE      20
 #define SIZE_ARROWHEAD 12
+
 
 typedef Graph::Coord3D Coord3D;
 
@@ -152,19 +156,19 @@ struct VertexData
         {
             for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
             {
-                node[n++] = Coord3D( sin(stack + stackd) * sin(slice),
-                                     sin(stack + stackd) * cos(slice),
-                                     cos(stack + stackd));
-                node[n++] = Coord3D( sin(stack) * sin(slice),
-                                     sin(stack) * cos(slice),
-                                     cos(stack));
+                node[n++] = Coord3D( sin((float)(stack + stackd)) * sin(slice),
+                                     sin((float)(stack + stackd)) * cos(slice),
+                                     cos((float)(stack + stackd)));
+                node[n++] = Coord3D( sin((float)stack) * sin(slice),
+                                     sin((float)stack) * cos(slice),
+                                     cos((float)stack));
             }
-            node[n++] = Coord3D( sin(stack + stackd) * sin(0),
-                                 sin(stack + stackd) * cos(0),
-                                 cos(stack + stackd));
-            node[n++] = Coord3D( sin(stack) * sin(0),
-                                 sin(stack) * cos(0),
-                                 cos(stack));
+            node[n++] = Coord3D( 0,
+                                 sin((float)(stack + stackd)),
+                                 cos((float)(stack + stackd)));
+            node[n++] = Coord3D( 0,
+                                 sin((float)stack),
+                                 cos((float)stack));
         }
         for (size_t i = 0; i < n; ++i)
             node[i] *= 0.5 * pixelsize * SIZE_NODE;
@@ -185,8 +189,8 @@ struct VertexData
                                    0.3 * arrowheadsize * sin(t),
                                    0.3 * arrowheadsize * cos(t));
         arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
-                                           0.3 * arrowheadsize * sin(0),
-                                           0.3 * arrowheadsize * cos(0));
+                                           0.3 * arrowheadsize * sin(0.0f),
+                                           0.3 * arrowheadsize * cos(0.0f));
 
         // Generate quads for labels
         labels = new Coord3D[4 * textures.count];
