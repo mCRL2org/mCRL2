@@ -3,6 +3,7 @@
 #include <QThread>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 
 namespace Graph
 {
@@ -74,8 +75,8 @@ namespace Graph
     Coord3D SpringLayout::forceLTSGraph(const Coord3D& a, const Coord3D& b, float ideal)
     {
         Coord3D diff = (a - b);
-        float dist = max(diff.size(), 1.0);
-        float factor = m_attraction * 10000 * log(dist / (ideal + 1.0)) / dist;
+        float dist = (std::max)(diff.size(), 1.0f);
+        float factor = m_attraction * 10000 * log(dist / (ideal + 1.0f)) / dist;
         return diff * factor;
     }
 
@@ -83,11 +84,11 @@ namespace Graph
     {
         Coord3D diff = (a - b);
         float dist = diff.size() - ideal;
-        float factor = max(dist, 0.0) * m_attraction;
+        float factor = (std::max)(dist, 0.0f) * m_attraction;
         // Let springs attract really strong near their equilibrium
         if (dist > 0.0)
         {
-            factor = max(factor, 100 * m_attraction / max(dist * dist / 10000.0, 0.1));
+            factor = (std::max)(factor, 100 * m_attraction / (std::max)(dist * dist / 10000.0f, 0.1f));
         }
         return diff *  factor;
     }
@@ -97,7 +98,7 @@ namespace Graph
     {
         Coord3D diff = a - b;
         float r = repulsion;
-        r /= cube(max(diff.size() / 2.0, natlength / 10));
+        r /= cube((std::max)(diff.size() / 2.0f, natlength / 10));
         diff = diff * r + Coord3D(frand(-0.01, 0.01), frand(-0.01, 0.01), frand(-0.01, 0.01));
         return diff;
     }
