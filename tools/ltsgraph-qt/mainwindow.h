@@ -1,43 +1,38 @@
-// Author(s): Rimco Boudewijns
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file mainwindow.h
-/// \brief Main Window of LTSGraph used as GUI
-
-#ifndef LTSGRAPH_MAINWINDOW_H
-#define LTSGRAPH_MAINWINDOW_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QFileDialog>
-
-#include "ui_mainwindow.h"
 #include "graph.h"
+#include "glwidget.h"
+#include "springlayout.h"
+
+namespace Ui {
+    class MainWindow;
+}
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-  public:
-    // Constructor
-    MainWindow(QWidget *parent = 0);
-
-    // Destructor
+public:
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-
-  private:
-    // UI variable
-    Ui::MainWindow m_ui;
-
-    QFileDialog* m_opendialog;
+private slots:
+    void onOpenFile(const QString& filename);
+    void onExportImage(const QString& filename);
+    void onWidgetResized(const Graph::Coord3D& newsize);
+    void on3DChanged(bool enabled);
+    void onTimer();
+private:
+    Ui::MainWindow *m_ui;
+    GLWidget* m_glwidget;
     Graph::Graph m_graph;
+    Graph::SpringLayout* m_layout;
+    QTimer* m_timer;
+    QFileDialog* m_savedialog;
+    QFileDialog* m_opendialog;
 
-  private slots:
-    void onOpen(const QString& filename);
+    float m_dXRot, m_dYRot, m_dDepth, m_targetDepth;
+    int m_anim;
 };
 
-#endif // LTSGRAPH_MAINWINDOW_H
+#endif // MAINWINDOW_H

@@ -32,6 +32,8 @@ include(${QT_USE_FILE})
 
 set(LTSGRAPH_UI_FILES
   mainwindow.ui
+  glwidget.ui
+  springlayout.ui
 )
 qt4_wrap_ui(LTSGRAPH_UI_HEADERS ${LTSGRAPH_UI_FILES})
 
@@ -40,6 +42,7 @@ set(LTSGRAPH_MOC_HEADERS
   glwidget.h
   glscene.h
   graph.h
+  springlayout.h
 )
 qt4_wrap_cpp(LTSGRAPH_MOC_SOURCES ${LTSGRAPH_MOC_HEADERS})
 
@@ -51,6 +54,7 @@ set(LTSGRAPH_SRC_FILES
   glwidget.cpp
   glscene.cpp
   graph.cpp
+  springlayout.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${LTSGRAPH_SRC_FILES})

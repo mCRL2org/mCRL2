@@ -1,15 +1,20 @@
 #include <QtOpenGL>
-#include "glext.h"
-
 #include <assert.h>
 #include <cstdio>
 #include "glscene.h"
-#include "workarounds.h"
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include "GL/glu.h" // Needed for compilation on Ubuntu 12.04
+#endif
+
+#ifdef WIN32
+#include "glext.h"
+#endif
+
+#ifndef M_PI_2
+#define M_PI_2 M_PI/2
 #endif
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
@@ -20,7 +25,6 @@
 #define SIZE_HANDLE     8
 #define SIZE_NODE      20
 #define SIZE_ARROWHEAD 12
-
 
 typedef Graph::Coord3D Coord3D;
 
@@ -159,16 +163,16 @@ struct VertexData
                 node[n++] = Coord3D( sin((float)(stack + stackd)) * sin(slice),
                                      sin((float)(stack + stackd)) * cos(slice),
                                      cos((float)(stack + stackd)));
-                node[n++] = Coord3D( sin((float)stack) * sin(slice),
-                                     sin((float)stack) * cos(slice),
-                                     cos((float)stack));
+                node[n++] = Coord3D( sin(stack) * sin(slice),
+                                     sin(stack) * cos(slice),
+                                     cos(stack));
             }
-            node[n++] = Coord3D( 0,
-                                 sin((float)(stack + stackd)),
+            node[n++] = Coord3D( sin((float)(stack + stackd)) * sin(0.0f),
+                                 sin((float)(stack + stackd)) * cos(0.0f),
                                  cos((float)(stack + stackd)));
-            node[n++] = Coord3D( 0,
-                                 sin((float)stack),
-                                 cos((float)stack));
+            node[n++] = Coord3D( sin(stack) * sin(0.0f),
+                                 sin(stack) * cos(0.0f),
+                                 cos(stack));
         }
         for (size_t i = 0; i < n; ++i)
             node[i] *= 0.5 * pixelsize * SIZE_NODE;
