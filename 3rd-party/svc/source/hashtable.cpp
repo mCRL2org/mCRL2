@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: hashtable.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
+   $Id$ */
 /*
  * This module implements a hash table for storing mCRL states,
  * represented as term-number pairs. All the states stored in a
@@ -39,14 +39,14 @@
 
 #include <svc/hashtable.h>
 
-using namespace aterm;
+using namespace aterm_deprecated;
 
 
 /* ======= Initialize the hash table ======= */
 int HTinit(HTable* table)
 {
 
-  table->terms=ATindexedSetCreate(PT_INITIALSIZE, 75);
+  new (&table->terms) aterm_deprecated::ATermIndexedSet(PT_INITIALSIZE, 75); // Placement new.
   PTinit(&table->pointers);
 
   return 0;

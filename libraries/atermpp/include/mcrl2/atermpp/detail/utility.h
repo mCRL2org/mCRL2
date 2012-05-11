@@ -26,9 +26,9 @@ namespace detail
 /// \param s A string
 /// \return The converted string
 inline
-ATermAppl str2appl(std::string const& s)
+aterm_appl str2appl(std::string const& s)
 {
-  return ATmakeAppl0(AFun(s.c_str(), 0, true));
+  return aterm_appl(function_symbol(s.c_str(), 0, true));
 }
 
 } // namespace detail

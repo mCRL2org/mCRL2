@@ -80,7 +80,7 @@ struct normalizer
 
   pbes_expression operator()(const pbes_expression& t) const
   {
-    return detail::normalize_and_or(f(t));
+    return pbes_system::detail::normalize_and_or(f(t));
   }
 };
 
@@ -608,7 +608,7 @@ void test_one_point_rule_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();

@@ -8,12 +8,14 @@
 //
 /// \file lpstrans.h
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm.h"
 
-aterm::ATermAppl translate(aterm::ATermAppl spec, bool convert_bools, bool convert_funcs);
+
+aterm_deprecated::ATermAppl translate(aterm_deprecated::ATermAppl spec, bool convert_bools, bool convert_funcs);
 //Pre: spec is an mCRL LPE
 //Ret: an equivalent mCRL2 LPS, in which sort Bool is converted based on the
 //     values of convert_bools and convert_funcs
 
-bool is_mCRL_spec(aterm::ATermAppl spec);
+bool is_mCRL_spec(aterm_deprecated::ATermAppl spec);
 //Ret: spec is a mCRL LPE
+

@@ -25,7 +25,7 @@
 #ifndef _SVC_H
 #define _SVC_H
 
-#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/aterm.h"
 #include "svc1.h"
 
   typedef SVCint SVCstateIndex;
@@ -44,21 +44,21 @@
 
   /* Datatype 'SVClabel' */
 
-  SVClabelIndex SVCnewLabel(SVCfile*, aterm::ATerm, SVCbool*);
-  SVClabelIndex SVCaterm2Label(SVCfile*, aterm::ATerm);
-  aterm::ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
+  SVClabelIndex SVCnewLabel(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
+  SVClabelIndex SVCaterm2Label(SVCfile*, aterm_deprecated::ATerm);
+  aterm_deprecated::ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
 
   /* Datatype 'SVCstate' */
 
-  SVCstateIndex SVCnewState(SVCfile*, aterm::ATerm, SVCbool*);
-  SVCstateIndex SVCaterm2State(SVCfile*, aterm::ATerm);
-  aterm::ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
+  SVCstateIndex SVCnewState(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
+  SVCstateIndex SVCaterm2State(SVCfile*, aterm_deprecated::ATerm);
+  aterm_deprecated::ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
 
   /* Datatype 'SVCparameter' */
 
-  SVCparameterIndex SVCnewParameter(SVCfile*, aterm::ATerm, SVCbool*);
-  SVCparameterIndex SVCaterm2Parameter(SVCfile*, aterm::ATerm);
-  aterm::ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
+  SVCparameterIndex SVCnewParameter(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
+  SVCparameterIndex SVCaterm2Parameter(SVCfile*, aterm_deprecated::ATerm);
+  aterm_deprecated::ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
 
   /* Datatype 'SVCTransition' */
 

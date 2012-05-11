@@ -27,10 +27,10 @@ void test_indexed_set()
 
   std::pair<long, bool> p;
   p = t.put(make_term("a"));
-  BOOST_CHECK(t.elements().size() == 1);
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
   p = t.put(make_term("b"));
-  BOOST_CHECK(t.elements().size() == 2);
+  BOOST_CHECK(t.keys().size() == 2);
   BOOST_CHECK(t.size() == 2);
 
   {
@@ -48,19 +48,19 @@ void test_indexed_set()
   BOOST_CHECK(b == make_term("b"));
 
   t.remove(a);
-  BOOST_CHECK(t.elements().size() == 1);
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
   t.remove(make_term("x"));
-  BOOST_CHECK(t.elements().size() == 1);
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
   p = t.put(make_term("c"));
-  BOOST_CHECK(t.elements().size() == 2);
+  BOOST_CHECK(t.keys().size() == 2);
   BOOST_CHECK(p.first == 0);
 
   t.reset();
-  BOOST_CHECK(t.elements().size() == 0);
+  BOOST_CHECK(t.keys().size() == 0);
   BOOST_CHECK(t.size() == 0);
 
   std::map<int, indexed_set> x;

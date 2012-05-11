@@ -119,13 +119,7 @@ class A: public data_expression
 
     /// Constructor.
     ///
-    A(atermpp::aterm_appl term)
-      : data_expression(term)
-    {}
-
-    /// Constructor.
-    ///
-    A(ATermAppl term)
+    A(atermpp::aterm term)
       : data_expression(term)
     {}
 };
@@ -250,7 +244,7 @@ void test_enumerator_variable_limit()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_data_enumerator();
   test_data_enumerator2();

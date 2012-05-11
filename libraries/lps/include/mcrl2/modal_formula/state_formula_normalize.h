@@ -80,7 +80,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  state_formula operator()(const true_& x)
+  state_formula operator()(const true_& )
   {
     if (negated)
     {
@@ -253,7 +253,7 @@ bool is_normalized(const T& x)
 /// \param x an object containing state formulas
 template <typename T>
 void normalize(T& x,
-               typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+               typename boost::disable_if<typename boost::is_base_of< aterm::aterm, T>::type>::type* = 0
               )
 {
   normalize_builder f;
@@ -265,7 +265,7 @@ void normalize(T& x,
 /// \param x an object containing state formulas
 template <typename T>
 T normalize(const T& x,
-            typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+            typename boost::enable_if<typename boost::is_base_of< aterm::aterm, T>::type>::type* = 0
            )
 {
   normalize_builder f;

@@ -12,238 +12,187 @@
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
 
-#include <cassert>
-#include <iterator>
-#include <vector>
-#include "mcrl2/utilities/detail/memory_utility.h"
+#include <unistd.h>
+#include <stack>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/function_symbol.h"
-#include "mcrl2/atermpp/aterm_appl_iterator.h"
-#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
+
 
 namespace atermpp
 {
 
-namespace detail
+template <class Term>
+class term_appl:public aterm
 {
-
-// Function object for conversion to ATerm
-struct aterm_converter
-{
-  template <typename T>
-  ATerm operator()(const T& x)
-  {
-    return aterm_traits<T>::term(x);
-  }
-};
-
-// Note: ATmakeAppl requires a forward iterator, so we have to make a special case for input iterators.
-template <class InputIterator>
-inline ATermAppl at_make_appl(const function_symbol& sym, InputIterator first, InputIterator last, std::input_iterator_tag)
-{
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,_ATerm*,sym.arity());
-  size_t c=0;
-  for (InputIterator i = first; i != last; ++i, ++c)
-  {
-    arguments[c]=&*aterm_traits<typename std::iterator_traits<InputIterator>::value_type>::term(*i);
-  }
-  assert(c==sym.arity());
-  return ATmakeApplArray(sym, reinterpret_cast<ATerm*>(arguments));
-}
-
-template <class ForwardIterator>
-inline ATermAppl at_make_appl(const function_symbol& sym, ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
-{
-  return ATmakeAppl(sym, first, last, aterm_converter());
-}
-
-template <class Iterator>
-inline ATermAppl at_make_appl(const function_symbol& sym, Iterator first, Iterator last)
-{
-  return at_make_appl(sym, first, last, typename std::iterator_traits<Iterator>::iterator_category());
-}
-
-} // namespace detail
-
-/// \brief A term that represents a function application.
-template <typename Term>
-class term_appl: public ::aterm::term_appl<Term> 
-{
-
-  public:
-    explicit term_appl(const ATerm &t)
-    {
-      assert(t.type()==AT_APPL);
-      this->copy_term(&*t);
-    }
-
-    term_appl(const ATermAppl &t)
-    {
-      assert(t.type()==AT_APPL);
-      this->copy_term(&*t);
-    }
-
-    term_appl(const AFun &sym, const Term &t1)
-    {
-      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1));
-    }
-
-    term_appl(const AFun &sym, const Term &t1, const Term &t2)
-    {
-      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2));
-    }
-
-    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3)
-    {
-      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3));
-    }
-
-    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
-    {
-      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3,t4));
-    }
-
-    term_appl(const AFun &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
-    {
-      this->copy_term(&* ::aterm::term_appl<Term>(sym,t1,t2,t3,t4,t5));
-    }
-
-    term_appl()
-    {}
-
-    template <class Iter>
-    term_appl(const AFun &sym, Iter first, Iter last)
-    {
-      this->copy_term(&*::aterm::term_appl<Term>(sym,first,last));
-    }
-
-
-/*   friend class aterm_string;
-
-  private:
-    /// \brief Prevent accidental usage of operator[], since this maps to the
-    /// built-in C++ operator[](ATermAppl, int)
-    /// \param i A positive integer
-    /// \return The default constructed term
-    Term operator[](size_t ) const
-    {
-      return Term();
-    }
-
   protected:
     /// \brief Conversion operator.
-    /// \return The wrapped ATerm.
-    ATermAppl appl() const
+    /// \return The wrapped aterm.
+    _ATermAppl* appl() const
     {
-      return (ATermAppl)m_term;
+      return static_cast<_ATermAppl*>(m_term);
     }
 
   public:
     /// The type of object, T stored in the term_appl.
     typedef Term value_type;
-
+    
     /// Pointer to T.
     typedef Term* pointer;
-
+    
     /// Reference to T.
     typedef Term& reference;
-
+    
     /// Const reference to T.
     typedef const Term const_reference;
-
+    
     /// An unsigned integral type.
     typedef size_t size_type;
-
+    
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
-
+    
     /// Iterator used to iterate through an term_appl.
     typedef term_appl_iterator<Term> iterator;
-
+    
     /// Const iterator used to iterate through an term_appl.
     typedef term_appl_iterator<Term> const_iterator;
-
-    /// Default constructor.
-    term_appl()
+    
+    /// \brief Default constructor.
+    term_appl():aterm()
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
-    term_appl(ATerm term)
-      : aterm_base(term)
+    term_appl (_ATermAppl *t):aterm(reinterpret_cast<_ATerm*>(t))
     {
-      assert(type() == AT_APPL);
+    }
+
+    /// \brief Explicit constructor from an aterm.
+    /// \param t The aterm.
+    explicit term_appl (const aterm &t):aterm(t)
+    {
     }
 
     /// \brief Constructor.
-    /// \param term A term
-    term_appl(ATermAppl term)
-      : aterm_base(term)
-    {}
-
-    /// \brief Constructor.
-    /// \param sym A function symbol.
-    /// \param args A list of arguments.
-    term_appl(function_symbol sym, term_list<Term> args)
-      : aterm_base(ATmakeApplList(sym, args))
-    {}
-
-    /// \brief Constructor.
+    /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
+    ///          The length of the iterator range should must match the arity of the function symbol.
     /// \param sym A function symbol.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
-    template <typename Iter>
-    term_appl(function_symbol sym, Iter first, Iter last)
-    {
-      m_term = static_cast<ATerm>(detail::at_make_appl(sym, first, last));
-    }
-
+    template <class Iter>
+    term_appl(const function_symbol &sym, Iter first, Iter last);
+    
+    /// \brief Constructor.
+    /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
+    ///          This means that the ATermConverter is applied exactly once to each element.
+    ///          The length of the iterator range must be equal to the arity of the function symbol.
+    /// \param sym A function symbol.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param convert_to_aterm. An optional translator that is applied to each element in the iterator range,
+    //                              and which must translate these elements to type Term.
+    template <class Iter, class ATermConverter>
+    term_appl(const function_symbol &sym, Iter first, Iter last, ATermConverter convert_to_aterm);
+    
     /// \brief Constructor.
     /// \param sym A function symbol.
-    term_appl(function_symbol sym)
-      : aterm_base(ATmakeAppl0(sym))
-    {
-    }
+    term_appl(const function_symbol &sym):aterm(sym)
+    {}
 
-#include "mcrl2/atermpp/aterm_appl_constructor.h" // additional constructors generated by preprocessor
+    /// \brief Constructor for a unary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    term_appl(const function_symbol &sym, const Term &t1);
 
-    /// \brief Conversion operator.
-    /// \return The wrapped ATermAppl pointer
-    operator ATermAppl() const
-    {
-      return (ATermAppl)m_term;
-    }
+    /// \brief Constructor for a binary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2);
 
-    /// Assignment operator.
-    /// \param t A term.
-    /// \return The result of the assignment.
-    term_appl<Term>& operator=(ATermAppl t)
+    /// \brief Constructor for a ternary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    /// \param t3 The third argument.
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3);
+
+    /// \brief Constructor for a unary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    /// \param t3 The third argument.
+    /// \param t4 The fourth argument.
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4);
+
+    /// \brief Constructor for a unary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    /// \param t3 The third argument.
+    /// \param t4 The fourth argument.
+    /// \param t5 The fifth argument.
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5);
+
+    /// \brief Constructor for a unary function application.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    /// \param t3 The third argument.
+    /// \param t4 The fourth argument.
+    /// \param t5 The fifth argument.
+    /// \param t6 The sixth argument.
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6);
+
+    /// \brief assignment operator
+    /// \param t The assigned term
+    term_appl &operator=(const term_appl &t)
     {
-      assert(t==ATermAppl() || t->reference_count>0);
-      m_term = t;
+      copy_term(t.m_term);
       return *this;
+    }
+
+    _ATermAppl & operator *() const
+    {
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<_ATermAppl*>(m_term); 
+    }
+
+    _ATermAppl *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<_ATermAppl*>(m_term);
     }
 
     /// \brief Returns the size of the list.
     /// \return The size of the list.
     size_type size() const
     {
-      return ATgetArity(ATgetAFun(appl()));
+      return m_term->m_function_symbol.arity();
+    }
+
+    /// \brief Returns true if the term has no arguments.
+    /// \return True if this term has no arguments.
+    bool empty() const
+    {
+      return m_term->m_function_symbol.arity()==0;
     }
 
     /// \brief Returns an iterator pointing to the beginning of the list.
     /// \return An iterator pointing to the beginning of the list.
     const_iterator begin() const
     {
-      return const_iterator(((ATerm*)(&*m_term) + ARG_OFFSET));
+      return const_iterator(&(static_cast<_ATermAppl*>(m_term)->arg[0]));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the list.
     /// \return A const_iterator pointing to the beginning of the list.
     const_iterator end() const
     {
-      return const_iterator(((ATerm*)(&*m_term) + ARG_OFFSET + size()));
+      return const_iterator(&static_cast<_ATermAppl*>(m_term)->arg[size()]);
     }
 
     /// \brief Returns the largest possible size of the list.
@@ -253,189 +202,35 @@ class term_appl: public ::aterm::term_appl<Term>
       return (std::numeric_limits<unsigned long>::max)();
     }
 
-    /// \brief Returns true if the list's size is 0.
-    /// \return True if the function application has no arguments.
-    bool empty() const
-    {
-      return size() == 0;
-    }
+    /// \brief Returns a copy of the term with the i-th child replaced by t.
+    /// \deprecated
+    /// \param arg The new i-th argument
+    /// \param i A positive integer
+    /// \return The term with one of its arguments replaced.
+    term_appl<Term> set_argument(const Term &arg, const size_type i) const;
 
     /// \brief Get the function symbol (function_symbol) of the application.
     /// \return The function symbol of the function application.
-    function_symbol function() const
+    /* function_symbol function() const
     {
-      return function_symbol(ATgetAFun(appl()));
-    }
-
-    /// \brief Returns true if the term is quoted.
-    /// \return True if the term is quoted.
-    bool is_quoted() const
-    {
-      return function().is_quoted();
-    }
+      return m_term->function();
+    } */
 
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    Term operator()(size_type i) const
+    const Term operator()(size_type i) const
     {
-      return Term(ATgetArgument(appl(), i));
+      assert(i<m_term->function().arity());
+      return static_cast<const Term>(static_cast<aterm>(static_cast<_ATermAppl*>(m_term)->arg[i]));
     }
 
-    /// \brief Returns a copy of the term with the i-th child replaced by t.
-    /// \deprecated
-    /// \param t A term
-    /// \param i A positive integer
-    /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(Term t, size_type i)
-    {
-      return ATsetArgument(appl(), t, i);
-    }
+};
 
-    /// \brief Get the i-th argument of the application.
-    /// \deprecated
-    /// \param i A positive integer
-    /// \return The argument with the given index.
-    aterm argument(size_type i) const
-    {
-      return aterm(ATgetArgument(appl(), i));
-    }
-
-    /// \brief Get the list of arguments of the application.
-    /// \deprecated
-    /// \return A list containing the function arguments.
-    term_list<Term> argument_list() const
-    {
-      return term_list<Term>(ATgetArguments(appl()));
-    } */
-}; 
-
-/// \brief A term_appl with children of type aterm.
 typedef term_appl<aterm> aterm_appl;
 
-/// \cond INTERNAL_DOCS
-template <typename Term>
-struct aterm_traits<term_appl<Term> >
-{
-  // static void protect(const term_appl<Term>& t)
-  // {
-  //   t.protect();
-  // }
-  // static void unprotect(const term_appl<Term>& t)
-  // {
-    // t.unprotect();
-  //  }
-  //static void mark(const term_appl<Term>& t)
-  //{
-  //  t.mark();
-  //}
-  static ATerm term(const term_appl<Term>& t)
-  {
-    return t;
-  }
-};
-
-template <typename T>
-struct aterm_appl_traits
-{
-  /// \brief Protects the term t from garbage collection.
-  /// \param t A term
-  // static void protect(const aterm_appl& t)
-  // {
-  //   t.protect();
-  // }
-
-  /// \brief Unprotects the term t from garbage collection.
-  /// \param t A term
-  // static void unprotect(const aterm_appl& t)
-  // {
-  //   t.unprotect();
-  // }
-
-  /// \brief Marks t for garbage collection.
-  /// \param t A term
-  // static void mark(const aterm_appl& t)
-  // {
-  //   t.mark();
-  // }
-
-  /// \brief Returns the ATerm that corresponds to the term t.
-  /// \param t A term
-  /// \return The ATerm that corresponds to the term t.
-  // static ATerm term(const aterm_appl& t)
-  // {
-  //  return t.term();
-  //}
-};
-
-template < typename T >
-struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type >
-{
-  typedef aterm_appl_traits< T > base_type;
-};
-/// \endcond
-
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-/* template <typename Term>
-bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
-{
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == true;
-}
-
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-template <typename Term>
-bool operator==(const term_appl<Term>& x, ATermAppl y)
-{
-  // return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
-  return (ATermAppl)aterm_traits<term_appl<Term> >::term(x)==y;
-} 
-
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-template <typename Term>
-bool operator==(ATermAppl x, const term_appl<Term>& y)
-{
-  return x==(ATermAppl)aterm_traits<term_appl<Term> >::term(y);
-}
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-template <typename Term>
-bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
-{
-  return aterm_traits<term_appl<Term> >::term(x)!=aterm_traits<term_appl<Term> >::term(y);
-}
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-template <typename Term>
-bool operator!=(const term_appl<Term>& x, ATermAppl y)
-{
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == false;
-}
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-template <typename Term>
-bool operator!=(ATermAppl x, const term_appl<Term>& y)
-{
-  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == false;
-} */
-
 } // namespace atermpp
+
+#include "mcrl2/atermpp/detail/memory.h"
 
 #endif // MCRL2_ATERMPP_ATERM_APPL_H

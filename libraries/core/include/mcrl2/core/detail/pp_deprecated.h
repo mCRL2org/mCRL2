@@ -17,8 +17,8 @@
 #include <iostream>
 
 #include <assert.h>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/aterm/aterm.h"
+// #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -316,7 +316,7 @@ static ATermList gsGroupDeclsBySort(ATermList Decls);
        same sort are placed in sequence
 */
 
-static bool gsHasConsistentContext(const ATermTable DataVarDecls,
+static bool gsHasConsistentContext(const ATermTable &DataVarDecls,
                                    const ATermAppl Part);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the corresponding
@@ -327,7 +327,7 @@ static bool gsHasConsistentContext(const ATermTable DataVarDecls,
        the context
  */
 
-static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
+static bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
                                        const ATermList Parts);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the
@@ -378,6 +378,7 @@ static int gsPrecIdInfixRight(ATermAppl IdName);
 
 //implementation
 //--------------
+
 
 inline static void dbg_prints(const char* Value)
 {
@@ -3006,7 +3007,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
   }
 }
 
-bool gsHasConsistentContext(const ATermTable DataVarDecls,
+bool gsHasConsistentContext(const ATermTable &DataVarDecls,
                             const ATermAppl Part)
 {
   bool Result = true;
@@ -3055,7 +3056,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   return Result;
 }
 
-bool gsHasConsistentContextList(const ATermTable DataVarDecls,
+bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
                                 const ATermList Parts)
 {
   bool Result = true;

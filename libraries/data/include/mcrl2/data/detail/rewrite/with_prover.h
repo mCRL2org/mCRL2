@@ -12,7 +12,6 @@
 #ifndef __REWR_PROVER_H
 #define __REWR_PROVER_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include <mcrl2/data/detail/bdd_prover.h>
 #include "mcrl2/data/rewriter.h"
 

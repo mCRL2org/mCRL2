@@ -22,10 +22,7 @@ namespace atermpp
 /// the bottom of the program stack.
 
 inline
-void aterm_init()
-{
-  ATinit();
-}
+void aterm_init();
 
 } // namespace atermpp
 

@@ -29,7 +29,7 @@
 extern char* _strdup(const char* s);
 #endif
 
-using namespace aterm;
+using namespace aterm_deprecated;
 
 extern int svcErrno;
 int SVCerrno;

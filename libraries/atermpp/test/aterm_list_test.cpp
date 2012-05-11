@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/atermpp/transform.h"
 #include "mcrl2/atermpp/set_operations.h"
 
 using namespace std;

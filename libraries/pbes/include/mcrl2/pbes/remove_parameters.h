@@ -108,7 +108,7 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
 template <typename T>
 T remove_parameters(const T& x,
                     const std::vector<size_t>& to_be_removed,
-                    typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                    typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                    )
 {
   return core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
@@ -121,7 +121,7 @@ T remove_parameters(const T& x,
 template <typename T>
 void remove_parameters(T& x,
                        const std::vector<size_t>& to_be_removed,
-                       typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                       typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                       )
 {
   core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
@@ -197,7 +197,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 template <typename T>
 T remove_parameters(const T& x,
                     const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed,
-                    typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                    typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                    )
 {
   return core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed)(x);
@@ -210,7 +210,7 @@ T remove_parameters(const T& x,
 template <typename T>
 void remove_parameters(T& x,
                        const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed,
-                       typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                       typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                       )
 {
   core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed)(x);
@@ -291,7 +291,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 template <typename T>
 T remove_parameters(const T& x,
                     const std::set<data::variable>& to_be_removed,
-                    typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                    typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                    )
 {
   return core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed)(x);
@@ -304,7 +304,7 @@ T remove_parameters(const T& x,
 template <typename T>
 void remove_parameters(T& x,
                        const std::set<data::variable>& to_be_removed,
-                       typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                       typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                       )
 {
   core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed)(x);

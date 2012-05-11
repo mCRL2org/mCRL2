@@ -24,8 +24,6 @@
 #include <cassert>
 
 #include "mcrl2/exception.h"
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"

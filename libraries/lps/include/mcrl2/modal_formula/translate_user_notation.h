@@ -26,7 +26,7 @@ namespace action_formulas
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                             typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                             )
 {
   core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
@@ -34,7 +34,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                          typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                          )
 {
   return core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
@@ -47,7 +47,7 @@ namespace regular_formulas
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                             typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                             )
 {
   core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
@@ -55,7 +55,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                          typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                          )
 {
   return core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
@@ -68,7 +68,7 @@ namespace state_formulas
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                             typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                             )
 {
   core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
@@ -76,7 +76,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+                          typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                          )
 {
   return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);

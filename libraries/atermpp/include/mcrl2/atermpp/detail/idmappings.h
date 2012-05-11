@@ -1,9 +1,9 @@
 #ifndef IDMAPPINGS_H_
 #define IDMAPPINGS_H_
 
-#include "mcrl2/aterm/atypes.h"
+#include "mcrl2/atermpp/detail/atypes.h"
 
-namespace aterm
+namespace atermpp
 {
 
 struct Entry;
@@ -44,6 +44,6 @@ unsigned int IMgetSize(IDMappings idMappings);
 
 void IMdestroyIDMappings(IDMappings idMappings);
 
-} // namespace aterm
+} // namespace atermpp
 
 #endif /* HASHTABLE_H_ */

@@ -10,7 +10,6 @@
 
 #include <cstring>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
@@ -60,8 +59,6 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
       generic_lts.set_action_labels(lts_opts.spec->action_labels());
       aterm2state = ATindexedSetCreate(10000,50);
       aterm2label = ATindexedSetCreate(100,50);
-      assert(aterm2state != NULL);
-      assert(aterm2label != NULL);
       break;
   }
 }
@@ -79,7 +76,6 @@ void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
     default:
     {
       bool is_new;
-      assert(aterm2state != NULL);
       const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
       if (is_new /* && lts_opts.outinfo */)
       {

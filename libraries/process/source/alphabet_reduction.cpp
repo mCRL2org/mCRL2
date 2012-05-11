@@ -13,11 +13,9 @@
 #include <cstring>
 #include <cassert>
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/alphabet_reduction.h"
 #include "mcrl2/process/action_name_multiset.h"

@@ -16,9 +16,9 @@
 #include <cerrno>
 #include <string>
 #include <cstring>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 namespace mcrl2
 {
@@ -29,12 +29,14 @@ namespace core
 namespace detail
 {
 
+using namespace atermpp;
+
 /// \brief Loads an ATerm from the given file, or from stdin if filename is the empty string.
 /// If reading fails an exception is thrown.
 /// \param filename A string
 /// \return The loaded term
 inline
-ATerm load_aterm(const std::string& filename)
+aterm load_aterm(const std::string& filename)
 {
   //open filename for reading as stream
   FILE* stream = NULL;
@@ -56,7 +58,7 @@ ATerm load_aterm(const std::string& filename)
     throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading (" + err_msg + ")");
   }
   //read term from stream
-  ATerm term = ATreadFromFile(stream);
+  aterm term = read_from_file(stream);
   if (stream != stdin)
   {
     fclose(stream);
@@ -74,7 +76,7 @@ ATerm load_aterm(const std::string& filename)
 /// \param filename A string
 /// \param binary If true the term is stored in binary format
 inline
-void save_aterm(ATerm term, const std::string& filename, bool binary = true)
+void save_aterm(aterm term, const std::string& filename, bool binary = true)
 {
   //open filename for writing as stream
   FILE* stream = NULL;
@@ -119,8 +121,8 @@ void save_aterm(ATerm term, const std::string& filename, bool binary = true)
 inline
 void save_aterm(atermpp::aterm_appl term, const std::string& filename, bool binary = true)
 {
-  ATermAppl t = term;
-  save_aterm(static_cast<ATerm>(t), filename, binary);
+  aterm_appl t = term;
+  save_aterm(static_cast<aterm>(t), filename, binary);
 }
 
 } // namespace detail

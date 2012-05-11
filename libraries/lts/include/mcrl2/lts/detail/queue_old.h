@@ -13,7 +13,6 @@
 
 #include <limits.h>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2

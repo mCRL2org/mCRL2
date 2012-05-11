@@ -17,24 +17,25 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # main target
 add_library(${PROJECT_NAME}
-  source/idmappings.cpp
-  source/bafio.cpp
+#  source/idmappings.cpp
+#  source/bafio.cpp
   source/memory.cpp
   source/aterm.cpp
-  source/hash.cpp
-  source/list.cpp
-  source/afun.cpp
-  source/safio.cpp
-  source/byteencoding.cpp
-  source/byteio.cpp
+#  source/hash.cpp
+#  source/list.cpp
+#  source/afun.cpp
+#  source/safio.cpp
+#  source/byteencoding.cpp
+#  source/byteio.cpp
   source/aterm_ext.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
-target_link_libraries(
-  mcrl2_aterm
+target_link_libraries(mcrl2_aterm
+  mcrl2_atermpp   
   mcrl2_utilities
 )
 

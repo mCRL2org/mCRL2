@@ -23,7 +23,7 @@ using namespace mcrl2::pbes_system;
 void test_pbesabstract(const std::string& pbes_spec, const std::string& variable_spec, bool value_true)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, variable_spec);
+  pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, variable_spec);
   pbes_abstract_algorithm algorithm;
   algorithm.run(p, parameter_map, value_true);
   std::cout << "\n-------------------------------\n" << pbes_system::pp(p) << std::endl;
@@ -67,7 +67,7 @@ void test_pbesabstract()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_pbesabstract();
 

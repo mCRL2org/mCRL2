@@ -2,26 +2,14 @@
 #define SAFIO_H
 
 #include <stack>
-#include "mcrl2/aterm/aterm1.h"
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/idmappings.h"
+#include <set>
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/detail/idmappings.h"
 
-namespace aterm
+namespace atermpp
 {
 
 static const char SAF_IDENTIFICATION_TOKEN = '?';
-
-/* Stores */
-/* typedef struct _ProtectedMemoryStack
-{
-  ATerm** blocks;
-  size_t* freeBlockSpaces;
-  size_t nrOfBlocks;
-
-  size_t currentBlockNr;
-  ATerm* currentIndex;
-  size_t spaceLeft;
-}* ProtectedMemoryStack; */
 
 /* Buffer */
 typedef struct _ByteBuffer
@@ -49,18 +37,15 @@ void ATdestroyByteBuffer(ByteBuffer byteBuffer);
 /* For writing */
 typedef struct _ATermMapping
 {
-  ATerm term;
+  aterm term;
   size_t subTermIndex;
   size_t nrOfSubTerms;
-  ATermList nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
+  aterm_list nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
 } ATermMapping;
 
 typedef struct _BinaryWriter
 {
   std::stack <ATermMapping> stack;
-  /* ATermMapping* stack;
-  size_t stackSize;
-  size_t stackPosition; */
 
   IDMappings sharedTerms;
   int currentSharedTermKey;
@@ -68,12 +53,12 @@ typedef struct _BinaryWriter
   IDMappings sharedAFuns;
   int currentSharedAFunKey;
 
-  ATerm currentTerm;
+  aterm currentTerm;
   size_t indexInTerm;
   size_t totalBytesInTerm;
 }* BinaryWriter;
 
-BinaryWriter ATcreateBinaryWriter(const ATerm term);
+BinaryWriter ATcreateBinaryWriter(const aterm term);
 
 void ATserialize(BinaryWriter binaryWriter, ByteBuffer buffer);
 
@@ -92,7 +77,7 @@ typedef struct _ATermConstruct
 
   size_t nrOfSubTerms;
   size_t subTermIndex;
-  std::vector <ATerm> subTerms;
+  std::vector <aterm> subTerms;
 
 } ATermConstruct;
 
@@ -101,15 +86,9 @@ typedef struct _BinaryReader
 //   ProtectedMemoryStack protectedMemoryStack;
 
   std::stack <ATermConstruct> stack;
-/*   size_t stackSize;
-  size_t stackPosition; */
 
-  /* ATerm* sharedTerms;
-  size_t sharedTermsSize;
-  size_t sharedTermsIndex; */
-
-  std::vector<ATerm> sharedTerms;
-  std::set<AFun> protected_afuns;
+  std::vector<aterm> sharedTerms;
+  std::set<function_symbol> protected_afuns;
 
   _SymEntry** sharedAFuns;
   size_t sharedAFunsSize;
@@ -133,9 +112,22 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer buffer);
 
 int ATisFinishedReading(BinaryReader binaryReader);
 
-ATerm ATgetRoot(BinaryReader binaryReader);
+aterm ATgetRoot(BinaryReader binaryReader);
 
 void ATdestroyBinaryReader(BinaryReader binaryReader);
+
+bool ATwriteToSAFFile(const aterm &aTerm, FILE* file);
+
+aterm ATreadFromSAFFile(FILE* file);
+
+bool ATwriteToNamedSAFFile(const aterm &aTerm, const char* filename);
+
+aterm ATreadFromNamedSAFFile(const char* filename);
+
+char* ATwriteToSAFString(const aterm &aTerm, size_t* length);
+
+aterm ATreadFromSAFString(char* data, size_t length);
+
 
 } // namespace aterm
 

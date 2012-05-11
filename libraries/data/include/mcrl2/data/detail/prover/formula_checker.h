@@ -12,8 +12,6 @@
 #ifndef FORMULA_CHECKER_H
 #define FORMULA_CHECKER_H
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"

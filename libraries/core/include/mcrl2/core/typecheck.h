@@ -12,12 +12,14 @@
 #ifndef PARSER_TYPECHECK_H
 #define PARSER_TYPECHECK_H
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm.h"
 
 namespace mcrl2
 {
 namespace core
 {
+
+using namespace aterm_deprecated;
 
 /** \brief     Type check a parsed mCRL2 data specification.
  *  \param[in] data_spec An ATerm representation of an mCRL2 data
@@ -103,7 +105,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
  *             an appropriate error message is printed and NULL is
  *             returned.
  **/
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars=NULL);
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, const ATermTable &Vars=NULL);
 
 
 /** \brief     Type check a parsed mCRL2 multiaction with respect to a

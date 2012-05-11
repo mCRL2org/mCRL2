@@ -202,12 +202,12 @@ void lts_info::compute_lts_type()
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
-                std::vector< function_symbol > c = p.data().constructors(varparam.sort());
+                std::vector< data::function_symbol > c = p.data().constructors(varparam.sort());
                 if (c.size() == 0) {
                     throw(std::runtime_error("Error in info: no constructor for parameter sort " + signature + "."));
                 } else {
                     assert(c.size() > 0);
-                    function_symbol fs = c[0];
+                    data::function_symbol fs = c[0];
                     pbes_expression e = pgg->rewrite_and_simplify_expression(fs);
                     data_expression v = data_expression(e);
                     //std::clog << "pbes_type: " << signature << "(" << this->param_default_values.size() << ") value = " << v.to_string()

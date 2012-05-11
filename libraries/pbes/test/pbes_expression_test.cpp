@@ -314,7 +314,7 @@ void test_term_traits()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_term_traits();
   test_accessors();

@@ -28,7 +28,6 @@
 
 #include "boost/iterator/transform_iterator.hpp"
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 #include "mcrl2/lts/transition.h"

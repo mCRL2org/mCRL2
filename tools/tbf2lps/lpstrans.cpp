@@ -25,8 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/aterm/aterm.h"
 #include <assert.h>
 #include <string>
 #include <sstream>
@@ -164,7 +163,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
     ATermAppl r = find_type(t,ATmakeList0(),args);
     if (r == NULL)
     {
-      return function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,mcrl2::data::sort_expression_list())));
+      return mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,mcrl2::data::sort_expression_list())));
     }
     else
     {
@@ -179,7 +178,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
       m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
     }\
 
-    return application(function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
+    return application(mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
   }
 }
 

@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"

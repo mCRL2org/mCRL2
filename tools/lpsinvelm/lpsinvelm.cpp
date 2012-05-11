@@ -14,7 +14,6 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"

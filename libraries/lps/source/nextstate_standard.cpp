@@ -15,8 +15,6 @@
 #include <iterator>
 #include <memory>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/memory.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
@@ -190,7 +188,7 @@ ATerm NextState::getTreeElement(ATerm tree, size_t index)
   {
     size_t t = (m+n)/2;
 
-    assert((ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun));
+    assert((ATgetType(tree) == AT_APPL) && (tree.function()==info.pairAFun));
 
     if (index < t)
     {
@@ -378,7 +376,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
     info.stateAFun = AFun("STATE",info.statelen,false);
   }
 
-  if (ATisEqualAFun(info.stateAFun,ATgetAFun(state)))
+  if (info.stateAFun==ATgetAFun(state))
   {
     bool valid = true;
     ATermList l = info.procvars;
@@ -941,7 +939,7 @@ void NextStateGenerator::SetTreeStateVars(ATerm tree, ATermList* vars)
     {
       return;
     }
-    else if (ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun))
+    else if (tree.function()==info.pairAFun)
     {
       SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
       SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);

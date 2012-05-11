@@ -36,7 +36,7 @@
 extern char* _strdup(const char* s);
 #endif
 
-using namespace aterm;
+using namespace aterm_deprecated;
 
 int svcErrno;
 

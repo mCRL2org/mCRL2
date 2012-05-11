@@ -66,7 +66,7 @@ void test_case()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
   test_case();
   return 0;
 }

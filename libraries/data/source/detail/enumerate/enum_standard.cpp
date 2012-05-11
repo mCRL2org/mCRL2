@@ -8,8 +8,6 @@
 
 #include <cstdlib>
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"

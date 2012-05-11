@@ -17,7 +17,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/core/detail/construction_utility.h"
 
 namespace mcrl2
@@ -26,6 +26,8 @@ namespace core
 {
 namespace detail
 {
+
+using namespace aterm_deprecated;
 
 inline
 bool operator==(const size_t x, const atermpp::function_symbol& y)

@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-namespace aterm
+namespace atermpp
 {
 
 static const int FILE_WRITER = 0;
@@ -50,6 +50,6 @@ size_t read_bytes(char* buf, size_t count, byte_reader* reader);
 void init_file_reader(byte_reader* reader, FILE* file);
 void init_string_reader(byte_reader* reader, const unsigned char* buf, const size_t max_size);
 
-} // namespace aterm
+} // namespace atermpp
 
 #endif

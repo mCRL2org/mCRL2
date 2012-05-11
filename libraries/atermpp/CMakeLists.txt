@@ -17,3 +17,28 @@ FILE(GLOB DETAIL_HEADERS "include/mcrl2/atermpp/detail/*.h")
 add_custom_target(${PROJECT_NAME}_headers
   SOURCES ${HEADERS} ${DETAIL_HEADERS}
 )
+
+# main target
+add_library(${PROJECT_NAME}
+  source/idmappings.cpp
+  source/bafio.cpp
+  source/memory.cpp
+  source/aterm.cpp
+  source/hash.cpp
+#  source/list.cpp
+  source/afun.cpp
+  source/safio.cpp
+  source/byteencoding.cpp
+  source/byteio.cpp
+#  source/aterm_ext.cpp
+)
+
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+
+target_link_libraries( mcrl2_atermpp
+  mcrl2_utilities
+)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+

@@ -13,18 +13,18 @@
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 
 #include <boost/iterator/iterator_facade.hpp>
-#include "mcrl2/aterm/encoding.h"
+#include "mcrl2/atermpp/aterm.h"
 
-namespace aterm
+namespace atermpp
 {
 
 /// \cond INTERNAL_DOCS
 // needed for conversion of the return type of ATgetFirst
-template <class T>
+/* template <class T>
 struct term_list_iterator_traits
 {
   typedef ATerm value_type;
-};
+}; */
 /// \endcond
 
 class _ATermList:public _ATerm
@@ -67,7 +67,7 @@ class term_list_iterator: public boost::iterator_facade<
 
     /// \brief Constructor.
     /// \param l A sequence of terms
-    term_list_iterator(const ATerm &l)
+    term_list_iterator(const aterm &l)
       : m_list(static_cast<_ATermList*>(&*l))
     { 
       assert(l.type()==AT_LIST);
@@ -94,7 +94,7 @@ class term_list_iterator: public boost::iterator_facade<
     /// \return The value that the iterator references
     const Value dereference() const
     {
-      return Value(typename term_list_iterator_traits<Value>::value_type(m_list->head));
+      return Value(static_cast<aterm>(m_list->head));
     }
 
     /// \brief Increments the iterator

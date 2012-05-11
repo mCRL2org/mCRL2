@@ -1,6 +1,5 @@
 #include <boost/test/minimal.hpp>
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/trace/trace.h"
 

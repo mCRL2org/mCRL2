@@ -19,8 +19,6 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -15,12 +15,11 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
 

@@ -185,7 +185,7 @@ std::string printer(const pbes_expression& x)
 inline
 pbes_expression norm(const pbes_expression& x)
 {
-  return detail::normalize_and_or(x);
+  return pbes_system::detail::normalize_and_or(x);
 }
 
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
@@ -212,7 +212,7 @@ void test_normalize_and_or()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_normalize1();
   test_normalize2();

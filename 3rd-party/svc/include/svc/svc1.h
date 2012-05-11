@@ -25,7 +25,7 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
-#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/aterm.h"
 
 #include "compress.h"
 
@@ -83,7 +83,7 @@
 
   struct ltsTransition
   {
-    aterm::ATerm fromState,    /* label of source state */
+    aterm_deprecated::ATerm fromState,    /* label of source state */
           toState,      /* label of destination state */
           label,        /* label of transition */
           parameters;   /* parameters of the transition */

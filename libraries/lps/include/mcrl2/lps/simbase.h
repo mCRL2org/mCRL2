@@ -39,7 +39,6 @@
 #define __simbase_H__
 
 #include <list>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/trace/trace.h"
 

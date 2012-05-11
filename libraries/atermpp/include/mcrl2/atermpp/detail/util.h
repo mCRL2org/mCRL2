@@ -3,8 +3,9 @@
 
 #include <string.h>
 #include <sstream>
+#include "mcrl2/atermpp/aterm.h"
 
-namespace aterm
+namespace atermpp
 {
 
 template <typename T>
@@ -16,16 +17,12 @@ std::string to_string(const T& t)
 }
 
 inline
-std::string to_string(const ATerm t)
+std::string to_string(const aterm t)
 {
   std::ostringstream oss;
   oss << &*t;
   return oss.str();
 } 
-
-#ifndef streq
-#  define streq(s,t)  (!(strcmp(s,t)))
-#endif
 
 #ifndef MIN
 #  define MIN(a,b)  ((a) < (b) ? (a) : (b))
@@ -36,6 +33,6 @@ std::string to_string(const ATerm t)
 #endif
 
 
-} // namespace aterm
+} // namespace atermpp
 
 #endif

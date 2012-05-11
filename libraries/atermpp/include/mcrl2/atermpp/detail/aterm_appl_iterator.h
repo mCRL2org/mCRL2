@@ -9,14 +9,25 @@
 /// \file mcrl2/atermpp/aterm_appl_iterator.h
 /// \brief Iterator for term_appl.
 
-#ifndef MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
-#define MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
+#ifndef MCRL2_ATERM_ATERM_APPL_ITERATOR_H
+#define MCRL2_ATERM_ATERM_APPL_ITERATOR_H
 
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
+
+class _ATermAppl:public _ATerm
+{
+  public:
+    _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+                                (therefore it is excessive). Using mallocs an array of the
+                                appropriate length is declared, where it is possible that
+                                the array has size 0, i.e. is absent. If the value is small
+                                (it was 1), the clang compiler provides warnings. */
+};
+
 
 /// \brief Iterator for term_appl.
 template <typename Value>
@@ -28,13 +39,14 @@ class term_appl_iterator: public boost::iterator_facade<
   >
 {
   public:
-    /// \brief Constructor.
+    /* /// \brief Constructor.
     term_appl_iterator()
     {}
+    */
 
     /// \brief Constructor.
     /// \param t A term
-    term_appl_iterator(ATerm* t)
+    term_appl_iterator(_ATerm** t)
       : m_term(t)
     {}
 
@@ -68,7 +80,7 @@ class term_appl_iterator: public boost::iterator_facade<
       m_term--;
     }
 
-    ATerm* m_term;
+    _ATerm** m_term;
 };
 
 } // namespace atermpp

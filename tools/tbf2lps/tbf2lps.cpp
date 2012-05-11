@@ -18,9 +18,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "lpstrans.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -29,7 +28,7 @@
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace aterm;
+using namespace aterm_deprecated;
 
 class tbf2lps_tool: public input_output_tool
 {
@@ -55,13 +54,13 @@ class tbf2lps_tool: public input_output_tool
 
     bool run()
     {
-      ATermAppl mcrl_spec;
+      aterm_appl mcrl_spec;
 
       if (input_filename().empty())
       {
         mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
-        mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
+        mcrl_spec = (aterm_appl) ATreadFromFile(stdin);
 
         if (mcrl_spec == 0)
         {
@@ -83,7 +82,7 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
-        mcrl_spec = (ATermAppl) ATreadFromFile(in_stream);
+        mcrl_spec = (aterm_appl) ATreadFromFile(in_stream);
 
         fclose(in_stream);
 
@@ -100,14 +99,14 @@ class tbf2lps_tool: public input_output_tool
       // ATprotectAppl(&mcrl_spec);
       assert(is_mCRL_spec(mcrl_spec));
 
-      ATermAppl spec = translate(mcrl_spec,true,m_not_convert_mappings);
+      aterm_appl spec = translate(mcrl_spec,true,m_not_convert_mappings);
       // ATprotectAppl(&spec);
 
       if (output_filename().empty())
       {
         mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
-        ATwriteToSAFFile((ATerm) spec, stdout);
+        ATwriteToSAFFile(spec, stdout);
       }
       else
       {
@@ -120,7 +119,7 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
-        ATwriteToSAFFile((ATerm) spec,outstream);
+        ATwriteToSAFFile(spec,outstream);
 
         fclose(outstream);
       }
@@ -155,6 +154,6 @@ class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool>
 
 int main(int argc, char** argv)
 {
-  ATinit(); 
+  aterm_init(); 
   return tbf2lps_gui_tool().execute(argc, argv);
 }

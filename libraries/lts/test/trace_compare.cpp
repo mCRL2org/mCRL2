@@ -20,10 +20,10 @@ int test_main(int argc, char** argv)
   lts_aut_t l2;
   lts_aut_t l3;
   lts_aut_t l4;
-  const detail::action_label_string lab_a("a");
-  const detail::action_label_string lab_b("b");
-  const detail::action_label_string lab_c("c");
-  const detail::action_label_string lab_tau("tau");
+  const mcrl2::lts::detail::action_label_string lab_a("a");
+  const mcrl2::lts::detail::action_label_string lab_b("b");
+  const mcrl2::lts::detail::action_label_string lab_c("c");
+  const mcrl2::lts::detail::action_label_string lab_tau("tau");
 
   for (int i=0; i<5; i++)
   {

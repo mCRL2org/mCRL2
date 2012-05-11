@@ -243,7 +243,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_pbes(t1 , x1 , false);
   test_pbes(t2 , x2 , false);

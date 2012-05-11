@@ -22,7 +22,6 @@
 #include <vector>
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -168,21 +167,21 @@ struct printer: public core::traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(aterm::ATerm x)
+  void operator()(atermpp::aterm x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).print(atermpp::aterm(x).to_string());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(aterm::ATermList x)
+  void operator()(atermpp::aterm_list x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).print(atermpp::aterm_list(x).to_string());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(aterm::ATermAppl x)
+  void operator()(atermpp::aterm_appl x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).print(atermpp::aterm_appl(x).to_string());

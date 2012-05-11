@@ -84,7 +84,7 @@ void test_propositional_variable_substitution()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_substitution();
   test_propositional_variable_substitution();

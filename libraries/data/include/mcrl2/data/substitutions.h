@@ -649,7 +649,7 @@ namespace detail
 // The function below gets all free variables of the term t, which has
 // the shape of an expression in internal format. The variables are added to result.
 // This routine should be removed after internal and external format have merged.
-inline void get_free_variables(const aterm::ATermAppl t, std::set < variable > &result)
+inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable > &result)
 {
   if (is_variable(t))
   {
@@ -658,7 +658,7 @@ inline void get_free_variables(const aterm::ATermAppl t, std::set < variable > &
   else if (is_where_clause(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(ATermAppl(t(0)),free_variables_in_body);
+    get_free_variables(atermpp::aterm_appl(t(0)),free_variables_in_body);
     
     variable_list bound_vars;
     const assignment_expression_list lv=assignment_expression_list(t(1));
@@ -678,7 +678,7 @@ inline void get_free_variables(const aterm::ATermAppl t, std::set < variable > &
   else if (is_abstraction(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(ATermAppl(t(2)),free_variables_in_body);
+    get_free_variables(atermpp::aterm_appl(t(2)),free_variables_in_body);
     const variable_list bound_vars=variable_list(t(1));
 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
@@ -695,7 +695,7 @@ inline void get_free_variables(const aterm::ATermAppl t, std::set < variable > &
     {
       if (t(i).type()!=AT_INT)
       { 
-        get_free_variables(ATermAppl(t(i)),result);
+        get_free_variables(atermpp::aterm_appl(t(i)),result);
       }
     }
   }

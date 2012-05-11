@@ -18,8 +18,6 @@
 
 #include <sstream>
 #include <cstdlib>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/logger.h"

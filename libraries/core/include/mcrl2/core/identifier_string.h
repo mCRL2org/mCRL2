@@ -30,7 +30,7 @@ typedef atermpp::aterm_string identifier_string;
 inline
 bool is_identifier_string(atermpp::aterm t)
 {
-  return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
+  return t.type() == atermpp::AT_APPL && atermpp::aterm_appl(t).size() == 0;
 }
 
 /// \brief Read-only singly linked list of identifier strings

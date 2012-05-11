@@ -13,7 +13,6 @@
 
 #include <string>
 #include <memory>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/data/rewriter.h"

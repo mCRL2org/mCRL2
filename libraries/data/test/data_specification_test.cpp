@@ -57,12 +57,12 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
   std::set<sort_expression> right_sorts(right.sorts().begin(), right.sorts().end());
   BOOST_CHECK(left_sorts == right_sorts);
 
-  std::set<function_symbol> left_constructors(left.constructors().begin(), left.constructors().end());
-  std::set<function_symbol> right_constructors(right.constructors().begin(), right.constructors().end());
+  std::set<data::function_symbol> left_constructors(left.constructors().begin(), left.constructors().end());
+  std::set<data::function_symbol> right_constructors(right.constructors().begin(), right.constructors().end());
   BOOST_CHECK(left_constructors == right_constructors);
 
-  std::set<function_symbol> left_mappings(left.mappings().begin(), left.mappings().end());
-  std::set<function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
+  std::set<data::function_symbol> left_mappings(left.mappings().begin(), left.mappings().end());
+  std::set<data::function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
   BOOST_CHECK(left_mappings == right_mappings);
 
   std::set<data_equation> left_equations(left.equations().begin(), left.equations().end());
@@ -224,9 +224,9 @@ void test_constructors()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)),s);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
   function_symbol_vector fghl(atermpp::make_vector(f,g,h));
@@ -255,8 +255,8 @@ void test_constructors()
   BOOST_CHECK(spec.constructors(s0) == hl);
   BOOST_CHECK(spec1.constructors(s) == fgl);
   BOOST_CHECK(spec1.constructors(s0) == hl);
-  spec.add_constructor(function_symbol("i", s0));
-  function_symbol i("i", s0);
+  spec.add_constructor(data::function_symbol("i", s0));
+  data::function_symbol i("i", s0);
   spec.remove_constructor(i);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -277,9 +277,9 @@ void test_functions()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
 
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
@@ -312,7 +312,7 @@ void test_functions()
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
 
-  function_symbol i("i", s0);
+  data::function_symbol i("i", s0);
   spec.add_mapping(i);
   function_symbol_vector il(atermpp::make_vector(i));
   std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
@@ -329,7 +329,7 @@ void test_equations()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(reinterpret_cast<sort_expression&>(s0)), s);
-  function_symbol f("f", s0s);
+  data::function_symbol f("f", s0s);
   variable x("x", s0);
   data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
@@ -371,8 +371,8 @@ void test_is_certainly_finite()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s0(atermpp::make_vector(static_cast<sort_expression&>(s0)), s0);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s0);
   variable x("x", s0);
   application gx(g, boost::make_iterator_range(atermpp::make_vector(static_cast<data_expression&>(x))));
   data_specification spec;
@@ -393,8 +393,8 @@ void test_is_certainly_finite()
 
   basic_sort s1("S1");
   basic_sort s2("S2");
-  spec.add_constructor(function_symbol("h", make_function_sort(s1, s2)));
-  spec.add_constructor(function_symbol("i", make_function_sort(s2, s1)));
+  spec.add_constructor(data::function_symbol("h", make_function_sort(s1, s2)));
+  spec.add_constructor(data::function_symbol("i", make_function_sort(s2, s1)));
 
   spec.add_alias(alias(basic_sort("a"), s));
   spec.add_alias(alias(basic_sort("a0"), s0));
@@ -514,7 +514,7 @@ void test_system_defined()
 
   // A data specification that is constructed using data_specification_to_aterm_data_spec is assumed not
   // not be type checked. This must be indicated explicitly.
-  data_specification specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
+  data_specification specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1,specification));
 
@@ -534,14 +534,14 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
 
   copy = specification;
-  specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
+  specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1, specification));
 
   // Check for the non presence of function sort
   BOOST_CHECK(specification.mappings(make_function_sort(basic_sort("D"), sort_bool::bool_())).empty());
 
-  specification.add_mapping(function_symbol("f", make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
+  specification.add_mapping(data::function_symbol("f", make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
 
   BOOST_CHECK(!specification.mappings(make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())).empty());
 
@@ -566,10 +566,10 @@ void test_utility_functionality()
   basic_sort s0("S0");
   basic_sort a("a");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
-  function_symbol f("f", s);
+  data::function_symbol f("f", s);
 
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
 
   {
     const std::vector<sort_expression> sorts(spec.sorts());

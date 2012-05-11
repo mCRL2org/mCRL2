@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -605,7 +604,7 @@ void parse_variables(std::istream& in,
   // Parse the variables list.
   std::string text = utilities::read_text(in);
   variable_list data_vars = parse_variables_new(text);
-  aterm::ATermList temporary_data_vars = data_vars;
+  aterm_deprecated::ATermList temporary_data_vars = data_vars;
 
   // Type check the variable list.
   /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(

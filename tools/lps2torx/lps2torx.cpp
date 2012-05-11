@@ -24,7 +24,6 @@
 #include <cassert>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"

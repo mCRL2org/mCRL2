@@ -36,7 +36,6 @@
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/exception.h"
@@ -3214,11 +3213,11 @@ class specification_basic_type:public boost::noncopyable
         sort_expression stacksort;
         sort_expression_list sorts;
         function_symbol_list get;
-        function_symbol push;
-        function_symbol emptystack;
-        function_symbol empty;
-        function_symbol pop;
-        function_symbol getstate;
+        data::function_symbol push;
+        data::function_symbol emptystack;
+        data::function_symbol empty;
+        data::function_symbol pop;
+        data::function_symbol getstate;
         stackoperations* next;
 
         stackoperations(const variable_list pl,
@@ -3253,7 +3252,7 @@ class specification_basic_type:public boost::noncopyable
           push=sc_push.constructor_function(stack_sort_alias);
           emptystack=sc_emptystack.constructor_function(stack_sort_alias);
           empty=sc_emptystack.recogniser_function(stack_sort_alias);
-          const std::vector< function_symbol > projection_functions =
+          const std::vector< data::function_symbol > projection_functions =
             sc_push.projection_functions(stack_sort_alias);
           pop=projection_functions.back();
           getstate=projection_functions.front();
@@ -4258,7 +4257,7 @@ class specification_basic_type:public boost::noncopyable
       return w;
     }
 
-    function_symbol find_case_function(size_t index, const sort_expression sort)
+    data::function_symbol find_case_function(size_t index, const sort_expression sort)
     {
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for (function_symbol_list::const_iterator w=functions.begin();
@@ -4273,12 +4272,12 @@ class specification_basic_type:public boost::noncopyable
       };
 
       throw mcrl2::runtime_error("searching for nonexisting case function on sort " + data::pp(sort) +".");
-      return function_symbol();
+      return data::function_symbol();
     }
 
     void define_equations_for_case_function(
       const size_t index,
-      const function_symbol functionname,
+      const data::function_symbol functionname,
       const sort_expression sort)
     {
       variable_list vars;
@@ -4364,7 +4363,7 @@ class specification_basic_type:public boost::noncopyable
       newsortlist=push_front(newsortlist, sid);
 
       const function_sort newsort(newsortlist,sort);
-      const function_symbol casefunction(
+      const data::function_symbol casefunction(
         fresh_identifier_generator(str(boost::format("C%d_%s") % n % (
                          !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
         newsort);

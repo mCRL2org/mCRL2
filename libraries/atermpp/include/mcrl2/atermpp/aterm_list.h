@@ -17,167 +17,95 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/aterm_conversion.h"
-#include "mcrl2/atermpp/aterm_list_iterator.h"
+#include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 
 namespace atermpp
 {
 
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-// In the ATerm library the following functions are #define's:
-//
-// #define   ATgetNext(l)  ((l)->tail)
-// #define   ATgetFirst(l) ((l)->head)
-//
-// So we need to turn them into proper functions.
 
-/// \brief Function that calls the macro ATgetNext
-/// \param l A sequence of terms
-/// \return The result of calling ATgetNext
-inline ATermList aterm_get_next(ATermList l)
-{
-  return ATgetNext(l);
-}
-
-/// \brief Function that calls the macro ATgetFirst
-/// \param l A sequence of terms
-/// \return The result of calling ATgetFirst
-inline ATerm aterm_get_first(ATermList l)
-{
-  return ATgetFirst(l);
-}
-
-/// \brief Function that calls the macro ATgetLength
-/// \param l A sequence of terms
-/// \return The result of calling ATgetLength
-inline
-size_t aterm_get_length(ATermList l)
-{
-  return ATgetLength(l);
-}
-
-} // namespace detail
-/// \endcond
-
-/// \brief Read-only singly linked list of terms.
 template <typename Term>
-class term_list: public ::aterm::term_list<Term>
+class term_list:public aterm
 {
-  public:
-    explicit term_list<Term>(const ATerm &t)
-    {
-      this->copy_term(&*t);
-      assert(t.type()==AT_LIST);
-    };
- 
-    term_list<Term>(const ::aterm::term_list<Term> &t)
-    {
-      this->copy_term(&*t);
-      assert(t.type()==AT_LIST);
-    };
- 
-    term_list<Term>()
-    {};
-
-    template <typename SpecificTerm>
-    term_list<Term>(const term_list<SpecificTerm> &t): ::aterm::term_list<Term>(t)
-    {}
-
-
-    template <class Iter>
-    term_list(Iter first, Iter last, typename boost::enable_if<
-              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0)
-    {
-      this->copy_term(&*::aterm::term_list<typename Iter::value_type>(first,last));
-    }
-
-    template <class Iter>
-                term_list(Iter first, Iter last, typename boost::disable_if<
-                             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-                                          boost::random_access_traversal_tag >::type >::type* = 0)
-    {
-      this->copy_term(&*::aterm::term_list<Term>(first,last));
-    }
-
-    operator ::aterm::term_list<Term> &() const
-    {
-      return this->m_aterm;
-    }
-};
-
-
-/* 
-{ 
   protected:
-    /// \brief Returns the wrapped ATermList.
-    /// \return The wrapped ATermList.
-    ATermList list() const
-    {
-      return (ATermList)m_term;
-    }
 
-    /// \brief Returns the wrapped ATermList.
-    /// \return The wrapped ATermList.
-    ATermList list()
-    {
-      return (ATermList)m_term;
-    }
+    static term_list<Term> empty_list() 
+    { 
+      static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST));
+      return m_empty_list;
+    } 
 
   public:
+
     /// The type of object, T stored in the term_list.
     typedef Term value_type;
-
+    
     /// Pointer to T.
     typedef Term* pointer;
-
+    
     /// Reference to T.
     typedef Term& reference;
-
+    
     /// Const reference to T.
     typedef const Term const_reference;
-
+    
     /// An unsigned integral type.
     typedef size_t size_type;
-
+    
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
-
+    
     /// Iterator used to iterate through an term_list.
     typedef term_list_iterator<Term> iterator;
-
+    
     /// Const iterator used to iterate through an term_list.
     typedef term_list_iterator<Term> const_iterator;
-
+    
     /// Default constructor. Creates an empty list.
-    term_list()
-      : aterm_base(ATmakeList0())
-    {}
+    term_list ():aterm(reinterpret_cast<_ATerm*>(&*empty_list()))
+    {
+    }
 
     /// Construction from ATermList.
     /// \param l A list.
-    term_list(ATermList l)
-      : aterm_base(l)
+    term_list(const term_list<Term> &t):aterm(reinterpret_cast<_ATerm *>(&*t))
     {
-      assert(type() == AT_LIST);
+      assert(m_term==NULL || type() == AT_LIST); // term list can be NULL.
+    }
+
+    /// \brief Construction from ATermList.
+    /// \param l A list.
+    term_list(_ATermList *t):aterm(reinterpret_cast<_ATerm *>(t))
+    {
+      assert(t==NULL || type() == AT_LIST); // term list can be NULL. This is generally used to indicate a faulty
+                                            // situation. This used should be discouraged.
     }
 
     /// Construction from aterm_list.
     /// \param t A term containing a list.
+    //  \deprecated This conversion should be removed. Conversions
+    //  between lists must be explicit.
+    //  \return The same list of a different type.
     template <typename SpecificTerm>
-    term_list(const term_list<SpecificTerm>& t);
+    term_list<Term>(const term_list<SpecificTerm> &t): aterm(t)
+    {} 
+    
 
-    /// Allow construction from an aterm. The aterm must be of the right type.
-    /// \param t A term containing a list.
-    explicit term_list(aterm t)
-      : aterm_base(t)
+    /// Explicit construction from ATerm. 
+    ///  \param t An aterm.
+    explicit term_list(const aterm &t):aterm(t)
     {
-      assert(type() == AT_LIST);
-    } 
+      assert(m_term==NULL || t.type()==AT_LIST); // Term list can be NULL; Generally, this is used to indicate a faulty situation.
+                                                 // This use should be discouraged.
+    }
+
+    /// \brief Construction of a list from a list and an element
+    /// \detail This is the standard cons operator on lists.
+    /// \param l A list
+    /// \param t An element
+    term_list(const term_list<Term> &l, const Term &t);
+    
 
     /// Creates an term_list with a copy of a range.
     /// \param first The start of a range of elements.
@@ -186,68 +114,126 @@ class term_list: public ::aterm::term_list<Term>
     term_list(Iter first, Iter last, typename boost::enable_if<
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
               boost::random_access_traversal_tag >::type >::type* = 0)
-      : aterm_base(ATmakeList0())
     {
+      term_list<Term> result;
       while (first != last)
       {
-        m_term = detail::void2term(detail::list2void(ATinsert(list(), aterm(*(--last)))));
+        const Term t=*(--last);
+        result = term_list<Term>(result, t);
       }
+      m_term=&*result;
+      increase_reference_count<false>(m_term);
     }
-
+    
     /// Creates an term_list with a copy of a range.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-    term_list(Iter first, Iter last, typename boost::disable_if<
-              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0)
-      : aterm_base(ATmakeList0())
+             term_list(Iter first, Iter last, typename boost::disable_if<
+             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+             boost::random_access_traversal_tag >::type >::type* = 0)
     {
+      std::vector<Term> temporary_store;
       while (first != last)
       {
-        m_term = detail::void2term(detail::list2void(ATinsert(list(), aterm(*(first++)))));
+        const Term t= *first;
+        temporary_store.push_back(t);
+        first++;
       }
-      m_term = detail::void2term(detail::list2void(ATreverse(list())));
+      term_list<Term> result;
+      for(typename std::vector<Term>::reverse_iterator i=temporary_store.rbegin(); 
+              i!=temporary_store.rend(); ++i)
+      { 
+        result=term_list(result, *i); 
+      }
+      m_term=&*result;
+      increase_reference_count<false>(m_term);
     }
 
-
-    /// Assignment operator.
-    /// \param t A term containing a list.
-    term_list<Term>& operator=(aterm_base t)
+    /// Assigment operator.
+    /// \param l A list.
+    term_list<Term> &operator=(const term_list &l)
     {
-      assert(t.type() == AT_LIST);
-      m_term = aterm_traits<aterm_base>::term(t);
+      copy_term(l.m_term);
       return *this;
     }
 
-    /// Assignment operator.
-    /// \param t A term containing a list.
-    term_list<Term>& operator=(ATermList t)
+    _ATermList & operator *() const
     {
-      assert(ATgetType(t) == AT_LIST);
-      m_term = t;
-      return *this;
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<_ATermList*>(m_term); 
+    }
+
+    _ATermList *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<_ATermList*>(m_term);
+    }
+
+    /// \brief Conversion to ATermList.
+    /// \return The wrapped ATermList pointer.
+    operator term_list<aterm>() const
+    {
+      return static_cast<_ATermList*>(m_term);
+    }
+
+    /// \brief Returns the tail of the list.
+    /// \return The tail of the list.
+    const term_list<Term> tail() const
+    {
+      return (static_cast<_ATermList*>(m_term))->tail;
+    }
+
+    /// \brief Returns the head of the list.
+    /// \return The term at the head of the list.
+    const Term head()
+    {
+      return Term(static_cast<_ATermList*>(m_term)->head);
+    }
+
+    /// \brief Returns the size of the term_list.
+    /// \detail The complexity of this function is linear in the size of the list.
+    /// \return The size of the list.
+    size_type size() const
+    {
+      size_t size=0;
+      for(_ATermList* m_list=static_cast<_ATermList*>(m_term);
+                 m_list!=reinterpret_cast<_ATermList*>(&*empty_list()); m_list=m_list->tail)
+      {
+        size++;
+      }
+      return size;
+    }
+
+    /// \brief Returns true if the list's size is 0.
+    /// \return True if the list is empty.
+    bool empty() const
+    {
+      return m_term==reinterpret_cast<_ATerm*>(&*empty_list());
+    }
+
+    /// \brief Returns the first element.
+    /// \return The first element of the list.
+    Term front() const
+    {
+      return Term(static_cast<aterm>(static_cast<_ATermList*>(m_term)->head));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
     /// \return The beginning of the list.
     const_iterator begin() const
     {
-      return const_iterator(list());
+      return const_iterator(m_term);
     }
 
     /// \brief Returns a const_iterator pointing to the end of the term_list.
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(ATmakeList0());
-    }
-
-    /// \brief Returns the size of the term_list.
-    /// \return The size of the list.
-    size_type size() const
-    {
-      return detail::aterm_get_length(list());
+      return const_iterator(reinterpret_cast<_ATerm*>(&*empty_list()));
     }
 
     /// \brief Returns the largest possible size of the term_list.
@@ -256,62 +242,11 @@ class term_list: public ::aterm::term_list<Term>
     {
       return (std::numeric_limits<size_t>::max)();
     }
-
-    /// \brief Returns true if the list's size is 0.
-    /// \return True if the list is empty.
-    bool empty() const
-    {
-      return ATisEmpty(list()) == true;
-    }
-
-    /// \brief Returns the first element.
-    /// \return The first element of the list.
-    Term front() const
-    {
-      return Term(detail::void2appl(detail::term2void(detail::aterm_get_first(list()))));
-    }
-
-    /// \brief Returns an iterator prev such that ++prev == pos. Complexity: linear in the number of iterators in the range [begin(), pos).
-    /// \param pos An iterator that points to an element in the list.
-    /// \return An iterator that points to the previous element in the list.
-    const_iterator previous(const_iterator pos) const
-    {
-      const_iterator prev = end();
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        if (i == pos)
-        {
-          return prev;
-        }
-        prev = i;
-      }
-      return end();
-    }
-
-    /// \brief Conversion to ATermList.
-    /// \return The wrapped ATermList pointer.
-    operator ATermList() const
-    {
-      // return detail::void2list(m_term);
-      return (ATermList)m_term;
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> nodes appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    term_list<Term> substitute(Substitution f) const
-    {
-      return term_list<Term>(f(*this));
-    }
-}; */
+};
 
 /// \brief A term_list with elements of type aterm.
 // typedef term_list<aterm> aterm_list;
-typedef ::aterm::ATermList aterm_list;
+typedef term_list<aterm> aterm_list;
 
 /// \brief Returns the first element of the list l.
 /// \param l A list
@@ -331,8 +266,7 @@ template <typename Term>
 inline
 term_list<Term> push_front(term_list<Term> l, Term elem)
 {
-  return ::aterm::push_front(l,elem);
-  // return term_list<Term>(ATinsert(l, elem));
+  return term_list<Term>(l, elem);
 }
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
@@ -343,10 +277,27 @@ term_list<Term> push_front(term_list<Term> l, Term elem)
 /// \return The list with an element appended to it.
 template <typename Term>
 inline
-term_list<Term> push_back(term_list<Term> l, Term elem)
+term_list<Term> push_back(term_list<Term> list, const Term &elem)
 {
-  return ::aterm::push_back(l,elem);
-  // return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
+  size_t len = list.size();
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+
+  /* Collect all elements of list in buffer */
+  for (size_t i=0; i<len; i++)
+  {
+    buffer[i] = &*list.head();
+    list = list.tail();
+  }
+
+  term_list<Term> result(term_list<Term>(),elem);
+
+  /* Insert elements at the front of the list */
+  for (size_t i=len; i>0; i--)
+  {
+    result = term_list<Term>(result, Term(buffer[i-1]));
+  }
+
+  return result;
 }
 
 /// \brief Returns the list obtained by removing the first element.
@@ -354,9 +305,9 @@ term_list<Term> push_back(term_list<Term> l, Term elem)
 /// \return The list with the first element removed.
 template <typename Term>
 inline
-term_list<Term> pop_front(term_list<Term> l)
+term_list<Term> pop_front(const term_list<Term> &l)
 {
-  return term_list<Term>(detail::aterm_get_next(l));
+  return l.tail();
 }
 
 /// \brief Returns the list with the elements in reversed order.
@@ -366,7 +317,13 @@ template <typename Term>
 inline
 term_list<Term> reverse(term_list<Term> l)
 {
-  return term_list<Term>(ATreverse(l));
+  term_list<Term> result;
+  while (!l.empty())
+  {
+    result = term_list<Term>(result, l.head());
+    l = l.tail(); 
+  }
+  return result;
 }
 
 /// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
@@ -374,10 +331,38 @@ term_list<Term> reverse(term_list<Term> l)
 /// \param x A list element.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term>& l, const Term& x)
+term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 {
-  return ::aterm::remove_one_element(l,x);
-  // return term_list<Term>(ATremoveElement(l, aterm_traits<Term>::term(x)));
+  size_t i = 0;
+  term_list<Term> l = list;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,list.size());
+
+  while (l!=term_list<Term>())
+  {
+    if (l.head()==t)
+    {
+      break;
+    }
+    buffer[i++] = &*l.head();
+    l = l.tail();
+  }
+
+  if (l.empty())
+  {
+    return list;
+  }
+
+  l = l.tail();
+  term_list<Term> result = l; /* Skip element to be removed */
+
+  /* We found the element. Add all elements prior to this
+        one to the tail of the list. */
+  for ( ; i>0; i--)
+  {
+    result = term_list<Term>(result, Term(buffer[i-1]));
+  }
+
+  return result;
 }
 
 /// \brief Applies a function to all elements of the list and returns the result.
@@ -402,112 +387,57 @@ aterm_list apply(term_list<Term> l, const Function f)
 /// \return The concatenation of the lists.
 template <typename Term>
 inline
-term_list<Term> operator+(term_list<Term> l, term_list<Term> m)
+term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 {
-  return term_list<Term>(ATconcat(l, m));
-}
 
-/// \brief Appends an element to a list.
-/// \param l A list.
-/// \param t A term
-/// \return The list with an element appended to it.
-template <typename Term>
-inline
-term_list<Term> operator+(term_list<Term> l, Term t)
-{
-  return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t)));
-}
-
-/// \brief Appends an element to a list.
-/// \param t A term
-/// \param l A list.
-/// \return The list with one element appended to it.
-template <typename Term>
-inline
-term_list<Term> operator+(Term t, term_list<Term> l)
-{
-  return push_front(l, t);
-} 
-
-/// \cond INTERNAL_DOCS
-template <typename Term>
-struct aterm_traits<term_list<Term> >
-{
-  static ATerm term(const term_list<Term>& t)
+  if (m.empty())
   {
-    return t;
+    return l;
   }
-};
-/// \endcond
 
-/* 
-/// \brief Equality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are equal.
-template <typename Term>
-bool operator==(const term_list<Term>& x, const term_list<Term>& y)
-{
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == true;
+  size_t len = l.size();
+
+  if (len == 0)
+  {
+    return m;
+  }
+
+  term_list<Term> result = m;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+  /* Collect the elements of list1 in buffer */
+  term_list<Term> list1=l;
+  for (size_t i=0; i<len; i++)
+  {
+    buffer[i] = &*list1.head();
+    list1 = list1.tail();
+  }
+
+  /* Insert elements at the front of the list */
+  for (size_t i=len; i>0; i--)
+  {
+    result = term_list<Term>(result, Term(buffer[i-1]));
+  }
+
+  return result;
 }
 
-/// \brief Equality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are equal.
+
+/// \brief Returns an element at a certain position in a list
+/// \param l A list
+/// \param i An index. The first element is at position 0.
+/// \return The element at position i in the list l.
 template <typename Term>
-bool operator==(const term_list<Term>& x, ATermList y)
+inline
+Term element_at(const term_list<Term> &l, size_t m)
 {
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == true;
+  typename term_list<Term>::const_iterator i=l.begin();
+  for( ; m>0; --m, ++i)
+  {
+    assert(i!=l.end());
+  }
+  assert(i!=l.end());
+  return *i;
 }
-
-/// \brief Equality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are equal.
-template <typename Term>
-bool operator==(ATermList x, const term_list<Term>& y)
-{
-  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == true;
-}
-
-/// \brief Inequality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are not equal.
-template <typename Term>
-bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
-{
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == false;
-}
-
-/// \brief Inequality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are not equal.
-template <typename Term>
-bool operator!=(const term_list<Term>& x, ATermList y)
-{
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == false;
-}
-
-/// \brief Inequality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are not equal.
-template <typename Term>
-bool operator!=(ATermList x, const term_list<Term>& y)
-{
-  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == false;
-} */
-
-// implementation
-/* template <typename Term>
-template <typename SpecificTerm>
-term_list<Term>::term_list(const term_list<SpecificTerm>& t)
-  : aterm_base(t)
-{}
-*/
 
 } // namespace atermpp
 

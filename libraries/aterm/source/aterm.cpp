@@ -14,16 +14,11 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/memory.h"
-#include "mcrl2/aterm/afun.h"
-#include "mcrl2/aterm/util.h"
-#include "mcrl2/aterm/atypes.h"
-#include "mcrl2/aterm/safio.h"
-#include "mcrl2/aterm/afun.h"
+#include "mcrl2/aterm/aterm.h"
 
 /*}}}  */
 
-namespace aterm
+namespace aterm_deprecated
 {
 
 /*{{{  defines */
@@ -69,100 +64,7 @@ extern char* _strdup(const char* s);
 
 static ATerm    fparse_term(int* c, FILE* f);
 static ATerm    sparse_term(int* c, char** s);
-/* static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs); */
-
-/*}}}  */
-
-/*{{{  void AT_cleanup() */
-
-/**
- * Perform necessary cleanup.
- */
-
-void
-AT_cleanup(void)
-{
-  AT_cleanupMemory();
-}
-
-/*}}}  */
-
-/*{{{  void ATinit(ATerm *bottomOfStack) */
-
-/**
- * Initialize the ATerm library.
- */
-
-void
-// ATinit(ATerm* bottomOfStack)
-ATinit()
-{
-  if (initialized)
-  {
-    return;
-  }
-
-  /* Protect novice users that simply pass NULL as bottomOfStack */
-  /* if (bottomOfStack == NULL)
-  {
-    throw std::runtime_error("ATinit: illegal bottomOfStack (arg 3) passed.");
-  } */
-
-  /* Check for reasonably sized ATerm (32 bits, 4 bytes)     */
-  /* This check might break on perfectly valid architectures */
-  /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-  assert(sizeof(header_type) == sizeof(ATerm*));
-  assert(sizeof(header_type) >= 4);
-
-  /*}}}  */
-  /*{{{  Initialize protected terms */
-
-  /* at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
-  at_prot_table = (ProtEntry**)calloc(at_prot_table_size, sizeof(ProtEntry*));
-  if (!at_prot_table)
-  {
-    throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
-  } */
-
-  /*}}}  */
-  /*{{{  Initialize other components */
-
-  /* Initialize other components */
-  AT_initMemory();
-  // AT_initAFun();
-  // AT_initGC(bottomOfStack);
-  
-  // Check that AS_INT, AS_LIST and AS_EMPTY_LIST have indices 0,1 and 2. Bafio files have been saved with
-  // these numbers to represent these notions.
-
-  /*}}}  */
-
-#ifdef WIN32
-  if (_setmode(_fileno(stdin), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set inputstream to binary mode.");
-  }
-  if (_setmode(_fileno(stdout), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set outputstream to binary mode.");
-  }
-  if (_setmode(_fileno(stderr), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set errorstream to binary mode.");
-  }
-#endif
-
-  initialized = true;
-
-  atexit(AT_cleanup);
-}
-
-bool ATisInitialized()
-{
-  return initialized;
-}
-
-/*}}}  */
+int ATvfprintf(FILE* stream, const char* format, va_list args);
 
 /*{{{  int ATprintf(const char *format, ...) */
 
@@ -205,8 +107,7 @@ ATfprintf(FILE* stream, const char* format,...)
 /*}}}  */
 /*{{{  int ATvfprintf(FILE *stream, const char *format, va_list args) */
 
-int
-ATvfprintf(FILE* stream, const char* format, va_list args)
+int ATvfprintf(FILE* stream, const char* format, va_list args)
 {
   const char*     p;
   char*           s;
@@ -332,12 +233,12 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
  * Write a term in text format to file.
  */
 
-static bool
+/* static bool
 writeToTextFile(const ATerm &t, FILE* f)
 {
   AFun          sym;
   ATerm           arg;
-  size_t    i, arity; /* size; */
+  size_t    i, arity; / * size; * /
   ATermAppl       appl;
   ATermList       list;
   char*            name;
@@ -349,7 +250,7 @@ writeToTextFile(const ATerm &t, FILE* f)
       fprintf(f, "%d", ATgetInt((ATermInt)t));
       break;
     case AT_APPL:
-      /*{{{  Print application */
+      / *{{{  Print application * /
 
       appl = (ATermAppl) t;
 
@@ -372,10 +273,10 @@ writeToTextFile(const ATerm &t, FILE* f)
         fputc(')', f);
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
     case AT_LIST:
-      /*{{{  Print list */
+      / *{{{  Print list * /
 
       list = (ATermList) t;
       if (!ATisEmpty(list))
@@ -390,53 +291,12 @@ writeToTextFile(const ATerm &t, FILE* f)
         list = ATgetNext(list);
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
-    /* case AT_FREE:
-      if (AT_inAnyFreeList(&*t))
-      {
-        throw std::runtime_error("ATwriteToTextFile: printing free term at " + to_string(t));
-      }
-      else
-      {
-        throw std::runtime_error("ATwriteToTextFile: free term " + to_string(t) + " not in freelist?");
-      }
-      return false;
-    */
-
-    /* case AT_SYMBOL:
-      // throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));
-      throw std::runtime_error("ATwriteToTextFile: not a term but an afun: ");
-      return false;
-    */
   }
 
   return true;
-}
-
-bool
-ATwriteToTextFile(const ATerm &t, FILE* f)
-{
-  bool result = true;
-
-  if (ATgetType(t) == AT_LIST)
-  {
-    fputc('[', f);
-
-    if (!ATisEmpty((ATermList) t))
-    {
-      result = writeToTextFile(t, f);
-    }
-
-    fputc(']', f);
-  }
-  else
-  {
-    result = writeToTextFile(t, f);
-  }
-
-  return result;
-}
+} */
 
 /*}}}  */
 
@@ -547,15 +407,6 @@ topWriteToStream(const ATerm &t, std::ostream& os)
  * Write a term into its text representation.
  */
 
-// std::string ATwriteToString(const ATerm &t)
-std::string ATerm::to_string() const
-{
-  std::ostringstream oss;
-  topWriteToStream(*this, oss);
-  return oss.str();
-}
-
-/*}}}  */
 /*{{{  static void fnext_char(int *c, FILE *f) */
 
 /**
@@ -952,48 +803,6 @@ ATreadFromTextFile(FILE* file)
 }
 
 /*}}}  */
-/*{{{  ATerm ATreadFromFile(FILE *file) */
-
-/**
- * Read an ATerm from a file that could be binary or text.
- */
-
-ATerm ATreadFromFile(FILE* file)
-{
-  int c;
-
-  fnext_char(&c, file);
-  if (c == 0)
-  {
-    /* Might be a BAF file */
-    return ATreadFromBinaryFile(file);
-    /* } else if (c == START_OF_SHARED_TEXT_FILE) {
-      / * Might be a shared text file * /
-      return AT_readFromSharedTextFile(&c, file);   */
-  }
-  else if (c == SAF_IDENTIFICATION_TOKEN)
-  {
-    int token = ungetc(SAF_IDENTIFICATION_TOKEN, file);
-    if (token != SAF_IDENTIFICATION_TOKEN)
-    {
-      throw std::runtime_error("Unable to unget the SAF identification token.");
-    }
-
-    return ATreadFromSAFFile(file);
-  }
-  else
-  {
-    /* Probably a text file */
-    line = 0;
-    col = 0;
-    error_idx = 0;
-    memset(error_buf, 0, ERROR_SIZE);
-
-    return readFromTextFile(&c, file);
-  }
-}
-
-/*}}}  */
 /*{{{  ATerm ATreadFromNamedFile(char *name) */
 
 /**
@@ -1332,42 +1141,6 @@ sparse_term(int* c, char** s)
 }
 
 /*}}}  */
-/*{{{  ATerm ATreadFromString(const char *string) */
-
-/**
- * Read from a string.
- */
-
-ATerm
-ATreadFromString(const char* string)
-{
-  int             c;
-  const char*     orig = string;
-
-  snext_skip_layout(&c, (char**) &string);
-
-  ATerm term = sparse_term(&c, (char**) &string);
-
-  if (term == ATerm())
-  {
-    int i;
-    mCRL2log(mcrl2::log::error) << "ATreadFromString: parse error at or near:" << std::endl
-                                << orig << std::endl;
-    for (i = 1; i < string - orig; ++i)
-    {
-      mCRL2log(mcrl2::log::error) << " ";
-    }
-    mCRL2log(mcrl2::log::error) << "^" << std::endl;
-  }
-  else
-  {
-    string--;
-  }
-
-  return term;
-}
-
-/*}}}  */
 
 /*{{{  void AT_markTerm(ATerm t) */
 
@@ -1574,4 +1347,4 @@ size_t AT_calcUniqueAFuns(const ATerm &t)
 
 
 
-} // namespace aterm
+} // namespace aterm_deprecated

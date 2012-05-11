@@ -472,7 +472,7 @@ void test_pbesinst_finite()
     ;
   pbes<> p1 = txt2pbes(text);
   pbesinst_finite_algorithm algorithm(data::jitty);
-  pbesinst_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
+  pbesinst_variable_map variable_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);
 }
 
@@ -511,13 +511,13 @@ void test_functions()
   pbes<> p = txt2pbes(text);
   data::rewriter::strategy rewrite_strategy = data::jitty;
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
-  detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, "X(*:D)");
+  mcrl2::pbes_system::detail::pbes_parameter_map parameter_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p, "X(*:D)");
   algorithm.run(p, parameter_map);
 }
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
   pbes_system::detail::set_bes_equation_limit(100000);
   test_pbesinst();
   test_pbesinst_finite();

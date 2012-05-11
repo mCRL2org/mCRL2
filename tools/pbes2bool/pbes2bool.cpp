@@ -193,9 +193,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       {
         // Create a rewriter with only the necessary data equations.
         using namespace mcrl2::data;
-        std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
-        std::set < function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
-        std::set < function_symbol > function_symbol_set;
+        std::set < data::function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
+        std::set < data::function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
+        std::set < data::function_symbol > function_symbol_set;
         set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
                   init_symbol_set.begin(),init_symbol_set.end(),
                   inserter(function_symbol_set,function_symbol_set.begin()));

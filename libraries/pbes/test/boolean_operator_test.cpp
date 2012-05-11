@@ -62,7 +62,7 @@ void test_boolean_operators()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_boolean_operators();
 

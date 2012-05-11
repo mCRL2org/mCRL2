@@ -12,7 +12,6 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"

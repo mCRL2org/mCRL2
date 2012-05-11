@@ -301,7 +301,7 @@ void generate_values_test()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   check_concepts();
 

@@ -116,7 +116,7 @@ struct translate_user_notation_function: public std::unary_function<data_express
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename boost::disable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
+                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                             )
 {
   core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function())(x);
@@ -124,7 +124,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename boost::enable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
+                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                          )
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function())(x);

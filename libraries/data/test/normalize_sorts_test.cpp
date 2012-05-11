@@ -37,7 +37,7 @@ void test_normalize_sorts()
 
   data_specification dataspec = parse_data_specification(DATASPEC);
 
-  function_symbol f;
+  data::function_symbol f;
   f = parse_function_symbol("abseq : AbsBit # AbsBit -> Set(Bool)", DATASPEC);
   dataspec.add_mapping(f);
   f = parse_function_symbol("absinv : AbsBit -> Set(AbsBit)", DATASPEC);

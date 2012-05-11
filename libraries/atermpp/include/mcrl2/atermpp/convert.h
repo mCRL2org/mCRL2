@@ -30,7 +30,7 @@ struct container_value
 };
 
 template < >
-struct container_value< ATermList >
+struct container_value< aterm_list >
 {
   typedef atermpp::aterm type;
 };
@@ -47,17 +47,17 @@ struct converter
   }
 };
 
-// Specialisation for ATermList
-template < typename TargetContainer, typename TargetExpression >
-struct converter< TargetContainer, ATermList, TargetExpression, atermpp::aterm > :
+// Specialisation for aterm_list
+/* template < typename TargetContainer, typename TargetExpression >
+struct converter< TargetContainer, aterm_list, TargetExpression, atermpp::aterm > :
   public converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >
 {
 
-  static TargetContainer convert(ATermList l)
+  static TargetContainer convert(aterm_list l)
   {
     return converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >::convert(atermpp::term_list< TargetExpression >(l));
   }
-};
+}; */
 
 // Copy to from term list to term list
 template < typename TargetExpression, typename SourceExpression >

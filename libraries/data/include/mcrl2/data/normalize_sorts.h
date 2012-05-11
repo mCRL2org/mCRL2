@@ -130,7 +130,7 @@ T normalize_sorts(const T& x,
 template <typename T>
 void normalize_sorts(T& x,
                      const data::data_specification& data_spec,
-                     typename boost::disable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                     )
 {
   core::make_update_apply_builder<data::sort_expression_builder>
@@ -140,7 +140,7 @@ void normalize_sorts(T& x,
 template <typename T>
 T normalize_sorts(const T& x,
                   const data::data_specification& data_spec,
-                  typename boost::enable_if<typename boost::is_base_of<aterm::ATerm, T>::type>::type* = 0
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                  )
 {
   return core::make_update_apply_builder<data::sort_expression_builder>

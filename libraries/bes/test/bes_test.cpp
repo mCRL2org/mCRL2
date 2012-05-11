@@ -166,7 +166,7 @@ void test_bes()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_expressions();
   test_boolean_equation();

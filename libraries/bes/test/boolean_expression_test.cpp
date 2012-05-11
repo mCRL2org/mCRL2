@@ -94,7 +94,7 @@ void test_precedence()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_boolean_expressions();
   test_bes2pbes();

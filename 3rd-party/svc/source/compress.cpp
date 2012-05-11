@@ -23,7 +23,7 @@
 #include <limits.h>
 #include <svc/compress.h>
 
-using namespace aterm;
+using namespace aterm_deprecated;
 
 static char buffer[102400];
 static void calcDelta(CompressedStream*, long*);

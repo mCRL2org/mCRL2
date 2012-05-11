@@ -56,7 +56,7 @@ void test_term(const std::string& s)
   }
   else if (s.find("OpId") == 0)
   {
-    function_symbol x = atermpp::aterm_appl((ATermAppl) a);
+    data::function_symbol x = atermpp::aterm_appl((ATermAppl) a);
     test_term(s, x);
   }
   else
@@ -206,15 +206,15 @@ bool print_container_check(Container const& c)
 
 BOOST_AUTO_TEST_CASE(test_function_symbol_print)
 {
-  function_symbol f("f", sort_bool::bool_());
+  data::function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
 
 BOOST_AUTO_TEST_CASE(test_application_print)
 {
-  function_symbol f("f", make_function_sort(bool_(), bool_()));
-  function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
+  data::function_symbol f("f", make_function_sort(bool_(), bool_()));
+  data::function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
   PRINT_CHECK(f(true_()), "f(true)");
   PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");

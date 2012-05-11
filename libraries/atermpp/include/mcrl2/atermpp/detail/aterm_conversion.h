@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {

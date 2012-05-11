@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/data/detail/prover/info.h"
-#include "mcrl2/aterm/aterm_ext.h"
 
 namespace mcrl2
 {
@@ -80,24 +79,21 @@ class InternalFormatManipulator
         return i->second;
       }
 
-      AFun v_symbol;
       atermpp::aterm v_function;
-      size_t v_arity;
 
-      v_symbol = ATgetAFun(a_formula);
+      atermpp::function_symbol v_symbol = a_formula.function();
       v_function = a_formula(0);
-      v_arity = ATgetArity(v_symbol);
+      size_t v_arity = v_symbol.arity();
 
-      atermpp::aterm* v_parts = new atermpp::aterm[v_arity + 1];
+      std::vector<atermpp::aterm> v_parts(v_arity);
+      assert(v_arity>0);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_true_auxiliary(atermpp::aterm_appl(ATgetArgument(a_formula, i)), a_guard,f_set_true);
+        v_parts[i] = set_true_auxiliary(atermpp::aterm_appl(a_formula(i)), a_guard,f_set_true);
       }
-      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
       f_set_true[a_formula]=v_result;
-      delete[] v_parts;
-      v_parts = 0;
 
       return v_result;
     }
@@ -127,24 +123,21 @@ class InternalFormatManipulator
         return i->second;
       }
 
-      AFun v_symbol;
       atermpp::aterm v_function;
       size_t v_arity;
 
-      v_symbol = ATgetAFun(a_formula);
+      atermpp::function_symbol v_symbol = a_formula.function();
       v_function = a_formula(0);
-      v_arity = ATgetArity(v_symbol);
+      v_arity = v_symbol.arity();
 
-      atermpp::aterm* v_parts = new atermpp::aterm[v_arity + 1];
+      std::vector <atermpp::aterm> v_parts(v_arity);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_false_auxiliary(atermpp::aterm_appl(ATgetArgument(a_formula, i)), a_guard,f_set_false);
+        v_parts[i] = set_false_auxiliary(atermpp::aterm_appl(a_formula(i)), a_guard,f_set_false);
       }
-      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
       f_set_false[a_formula]=v_result;
-      delete[] v_parts;
-      v_parts = 0;
 
       return v_result;
     }
@@ -157,10 +150,10 @@ class InternalFormatManipulator
                const atermpp::aterm_appl &a_high, 
                const atermpp::aterm_appl &a_low)
     {
-      return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, 
-                                         (ATermAppl)a_expr, 
-                                         (ATermAppl)a_high, 
-                                         (ATermAppl)a_low);
+      return (atermpp::aterm_appl)Apply3((aterm)f_if_then_else, 
+                                         (aterm_appl)a_expr, 
+                                         (aterm_appl)a_high, 
+                                         (aterm_appl)a_low);
     }
 
   public:
@@ -169,7 +162,7 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = atermpp::aterm(ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0));
+      f_if_then_else = atermpp::aterm(ATgetArgument((aterm_appl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0));
     }
 
     /// \brief Destructor with no particular functionality.
@@ -211,13 +204,10 @@ class InternalFormatManipulator
         return it->second;
       }
 
-      AFun v_symbol;
-      atermpp::aterm v_function;
-      size_t v_arity;
 
-      v_symbol = ATgetAFun(a_term);
-      v_function = a_term(0);
-      v_arity = ATgetArity(v_symbol);
+      atermpp::function_symbol v_symbol = a_term.function();
+      atermpp::aterm v_function = a_term(0);
+      size_t v_arity = v_symbol.arity();
 
       // MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity);
       std::vector < atermpp::aterm > v_parts(v_arity);
@@ -234,8 +224,7 @@ class InternalFormatManipulator
         atermpp::aterm_appl v_term2 = static_cast<atermpp::aterm_appl>(v_result(2));
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
-          v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, 
-                    (ATermAppl)v_term2, (ATermAppl)v_term1));
+          v_result = atermpp::aterm_appl(v_symbol, v_function, v_term2, v_term1);
         }
       }
       f_orient[a_term]=v_result;

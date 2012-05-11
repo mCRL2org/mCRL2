@@ -2,14 +2,18 @@
 #define ATYPES_H
 
 #include <cstddef>
-#include "mcrl2/aterm/architecture.h"
+#include "mcrl2/atermpp/detail/architecture.h"
 
-namespace aterm
+namespace atermpp
 {
 
 typedef size_t ShortHashNumber;
 typedef size_t MachineWord;
 typedef size_t HashNumber;
+/* Although atypes.h defines MachineWord, it wasn't used here:
+ *    typedef unsigned long header_type; */
+typedef MachineWord header_type;
+
 
 /* The largest size_t is used as an indicator that an element does not exist.
  *    This is used as a replacement of a negative number as an indicator of non
@@ -65,6 +69,24 @@ HashNumber ADDR_TO_HNR(const void* a)
 }
 
 
-} // namespace aterm
+static const size_t MAX_HEADER_BITS = 64;
+
+inline
+MachineWord AT_TABLE_SIZE(const size_t table_class)
+{
+  return (size_t)1<<(table_class);
+}
+
+inline
+MachineWord AT_TABLE_MASK(const size_t table_class)
+{
+  return AT_TABLE_SIZE(table_class)-1;
+}
+
+/* Integers in BAF are always exactly 32 bits.  The size must be fixed so that
+ *  * BAF terms can be exchanged between platforms. */
+static const size_t INT_SIZE_IN_BAF = 32;
+
+} // namespace atermpp
 
 #endif /* ATYPES_H */

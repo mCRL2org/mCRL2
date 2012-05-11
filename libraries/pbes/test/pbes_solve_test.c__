@@ -133,7 +133,7 @@ void test_hblc()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
   test_hblc();
 
   return 0;

@@ -15,7 +15,6 @@
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"

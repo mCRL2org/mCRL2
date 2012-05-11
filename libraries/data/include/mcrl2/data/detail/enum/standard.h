@@ -11,7 +11,7 @@
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"

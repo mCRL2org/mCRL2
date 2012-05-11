@@ -13,10 +13,9 @@
 #include <cctype>
 
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/aterm.h"
 
-namespace aterm
+namespace aterm_deprecated
 {
 
 //Substitutions on ATerm's
@@ -93,7 +92,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
   }
 }
 
-ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursive)
+ATerm gsSubstValuesTable(const ATermTable &Substs, ATerm Term, const bool Recursive)
 {
   ATerm Result = ATtableGet(Substs, Term);
   if (&*Result != NULL)
@@ -181,5 +180,5 @@ bool gsOccurs(const ATerm Elt, ATerm Term)
   return Result;
 }
 
-}
+} // namespace aterm_deprecated
 

@@ -18,7 +18,6 @@
 #include <stack>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
@@ -33,7 +32,7 @@ class term_balanced_tree_iterator;
 /// Models Random Access Container (STL concept)
 template <typename Term>
 // class term_balanced_tree: public aterm_base OLD
-class term_balanced_tree: public ATerm 
+class term_balanced_tree: public aterm 
 {
     template < typename T >
     friend class term_balanced_tree_iterator;
@@ -191,7 +190,7 @@ class term_balanced_tree: public ATerm
     {
     }
 
-    /// Construction from ATermList. THIS IS A VERY ODD ASSIGNMENT OPERATOR. UGLY.
+    /// Construction from aterm_list. THIS IS A VERY ODD ASSIGNMENT OPERATOR. UGLY.
     /// \param l A list.
     term_balanced_tree(atermpp::aterm_list l)
       : m_size(l.size())
@@ -229,9 +228,9 @@ class term_balanced_tree: public ATerm
 
     /// Assignment operator. THIS IS ALSO A NON STANDARD CONSTRUCTOR.
     /// \param t A term containing a list.
-    term_balanced_tree<Term>& operator=(ATermList &t)
+    term_balanced_tree<Term>& operator=(aterm_list &t)
     {
-      m_size=ATgetLength(t);
+      m_size=t.size();
       copy_term(make_tree(t,m_size));
       return *this;
     } 
@@ -276,11 +275,11 @@ class term_balanced_tree: public ATerm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return m_term==&*ATempty;
+      return m_term==&*aterm_list();
     }
 
-    /// \brief Conversion to ATermList.
-    /// \return The wrapped ATermList pointer.
+    /// \brief Conversion to aterm_list.
+    /// \return The wrapped aterm_list pointer.
     operator term_list< Term >() const
     {
       return term_list< Term >(begin(), end());
@@ -393,37 +392,6 @@ term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
   }
 
   return term_balanced_tree< Term >(result.begin(),result.size());
-} 
-
-/// \cond INTERNAL_DOCS
-template <typename Term>
-struct aterm_traits<term_balanced_tree<Term> >
-{
-  static ATerm term(const term_balanced_tree<Term>& t)
-  {
-    return (ATerm)t;
-  }
-};
-/// \endcond
-
-/// \brief Equality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are equal.
-template <typename Term>
-bool operator==(const term_balanced_tree<Term>& x, const term_balanced_tree<Term>& y)
-{
-  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == true;
-}
-
-/// \brief Inequality operator.
-/// \param x A list.
-/// \param y A list.
-/// \return True if the arguments are not equal.
-template <typename Term>
-bool operator!=(const term_balanced_tree<Term>& x, const term_balanced_tree<Term>& y)
-{
-  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == false;
 } 
 
 } // namespace atermpp

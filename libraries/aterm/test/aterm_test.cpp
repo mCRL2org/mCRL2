@@ -13,10 +13,10 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm.h"
 
 using namespace std;
-using namespace aterm;
+using namespace aterm_deprecated;
 
 void test_plain_aterm_construction()
 {
@@ -55,7 +55,7 @@ void test_plain_aterm_construction()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  // ATinit();
 
   test_plain_aterm_construction(); // Run test twice. In the first run the elements are not constructed.
   test_plain_aterm_construction(); // In the second, they already exist.

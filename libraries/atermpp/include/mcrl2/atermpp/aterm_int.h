@@ -12,88 +12,78 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
-  typedef ::aterm::ATermInt aterm_int;
 
-
-/// \brief Term containing an integer.
-/* class aterm_int: public aterm_base
+class _ATermInt:public _ATerm
 {
   public:
+    union
+    {
+      int value;
+      MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
+                               as integer and as MachineWord. For all cases using bitwise
+                               operations, the MachineWord version must be used,
+                               as failing to do so may lead to improper initialisation
+                               of the last 32 bits during casting. */
+    };
+};
+
+static const size_t TERM_SIZE_INT = sizeof(_ATermInt)/sizeof(size_t);
+
+class aterm_int:public aterm
+{
+  public:
+
     /// \brief Constructor.
     aterm_int()
     {}
 
-    /// \brief Constructor.
-    /// \param t An integer term
-    aterm_int(ATermInt t)
-      : aterm_base(t)
-    {}
-
-    /// Allow construction from an aterm. The aterm must be of the right type.
-    /// \param t A term.
-    aterm_int(aterm t)
-      : aterm_base(t)
+    
+    aterm_int(_ATermInt *t):aterm(reinterpret_cast<_ATerm*>(t))
     {
-      assert(type() == AT_INT);
     }
 
+    explicit aterm_int(const aterm &t):aterm(t) 
+    {
+    }
+    
     /// \brief Constructor.
     /// \param value An integer value.
-    aterm_int(int value)
-      : aterm_base(ATmakeInt(value))
-    {}
-
-    /// \brief Conversion operator
-    /// \return The wrapped ATermInt pointer
-    operator ATermInt() const
-    {
-      return reinterpret_cast<_ATermInt*>(&*m_term);
-    }
+    aterm_int(int value);
 
     /// \brief Assignment operator.
-    /// \param t A term.
-    aterm_int& operator=(aterm_base t)
+    /// \param t A term representing an integer.
+    aterm_int &operator=(const aterm_int &t)
     {
-      assert(t.type() == AT_INT);
-      m_term = aterm_traits<aterm_base>::term(t);
+      copy_term(t.m_term);
       return *this;
+    }
+
+    _ATermInt & operator *() const
+    {
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<_ATermInt*>(m_term); 
+    }
+
+    _ATermInt *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<_ATermInt*>(m_term);
     }
 
     /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.
     int value() const
     {
-      return ATgetInt(reinterpret_cast<_ATermInt*>(&*m_term));
+      return reinterpret_cast<_ATermInt*>(&*m_term)->value;
     }
-}; */
-
-/// \cond INTERNAL_DOCS
-/* template <>
-struct aterm_traits<aterm_int>
-{
-  static void protect(const aterm_int& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const aterm_int& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const aterm_int& t)
-  {
-    t.mark();
-  }
-  static ATerm term(const aterm_int& t)
-  {
-    return t.term();
-  }
-}; */
-/// \endcond
+};
 
 } // namespace atermpp
 

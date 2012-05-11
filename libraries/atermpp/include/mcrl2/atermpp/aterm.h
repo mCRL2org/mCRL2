@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Friso Groote. Based on the ATerm library by Paul Klint and others.
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -15,328 +15,199 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/memory.h"
-#include "mcrl2/atermpp/aterm_traits.h"
+#include <vector>
+#include <assert.h>
+#include <iostream>
 
-using namespace aterm;
+#include "mcrl2/atermpp/detail/aterm.h"
 
-/// \brief The main namespace for the ATerm++ library.
+/// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
 
-	
-/// \brief Base class for aterm.
-/* class aterm_base
-{
-    template <typename T>
-    friend struct aterm_traits;
+/**
+ * These are the types of ATerms there are. \see ATgetType().
+ */
 
-    template <typename T>
-    friend struct aterm_appl_traits;
+extern void at_free_term(_ATerm* t);
+
+class aterm
+{
+  public:
+    template < typename T >
+    friend class term_appl;
+
+    static std::vector <_ATerm*> hashtable;
 
   protected:
-    /// The wrapped ATerm.
-    ATerm m_term;
+    _ATerm *m_term;
 
-    /// \brief Returns const reference to the wrapped ATerm.
-    /// \return A const reference to the wrapped ATerm.
-    const ATerm& term() const
+    void decrease_reference_count()
     {
-      return m_term;
+      if (m_term!=NULL)
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"decrease reference count %ld  %p\n",m_term->reference_count,m_term);
+#endif
+        assert(m_term->reference_count>0);
+        if (0== --m_term->reference_count)
+        {
+          at_free_term(m_term);
+          return;
+        }
+      }
     }
 
-    /// \brief Returns reference to the wrapped ATerm.
-    /// \return A reference to the wrapped ATerm.
-    ATerm& term()
+    template <bool CHECK>
+    static void increase_reference_count(_ATerm* t)
     {
-      return m_term;
+      if (t!=NULL)
+      {
+#ifdef PRINT_GC_INFO
+fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
+#endif
+        if (CHECK) assert(t->reference_count>0);
+        t->reference_count++;
+      }
+
     }
+
+    void copy_term(_ATerm* t)
+    {
+      increase_reference_count<true>(t);
+      decrease_reference_count();
+      m_term=t;
+    }
+
+    /// \brief Constructor.
+    /// \detail The function symbol must have arity 0. This function
+    /// is for internal use only. Use term_appl(sym) in applications.
+    /// \param sym A function symbol.
+    aterm(const function_symbol &sym);
 
   public:
-    /// \brief Constructor.
-    aterm_base()
-      : m_term()
+
+    aterm ():m_term(NULL)
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
-    aterm_base(ATerm term)
-      : m_term(term)
+    aterm (const aterm &t):m_term(t.m_term)
     {
-      assert(m_term==ATerm() || m_term->reference_count>0);
+      increase_reference_count<true>(m_term);
     }
 
-    /// \brief Constructor.
-    /// \param term A sequence of terms
-    aterm_base(ATermList term)
-      : m_term(term)
+    aterm (_ATerm *t):m_term(t)
     {
-      assert(m_term==ATerm() || m_term->reference_count>0);
+      // Note that reference_count can be 0, as this term can just be constructed,
+      // and is now handed over to become a real aterm.
+      increase_reference_count<false>(m_term);
     }
 
-    /// \brief Constructor.
-    /// \param term An integer term
-    aterm_base(ATermInt term)
-      : m_term(term)
+    aterm &operator=(const aterm &t)
     {
-      assert(m_term==ATerm() || m_term->reference_count>0);
+      copy_term(t.m_term);
+      return *this;
     }
 
-    /// \brief Constructor.
-    /// \param term A term
-    aterm_base(ATermAppl term)
-      : m_term(term)
+    ~aterm ()
     {
-      assert(m_term==ATerm() || m_term->reference_count>0);
-      assert(m_term==ATerm() || m_term->reference_count>0);
+      decrease_reference_count();
     }
 
-    /// \brief Protect the aterm.
-    /// Protects the aterm from being freed at garbage collection.
-    void protect() const
+    _ATerm & operator *() const
     {
-      // ATprotect(&m_term);
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *m_term;
     }
 
-    /// \brief Unprotect the aterm.
-    /// Releases protection of the aterm which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
+    _ATerm * operator ->() const
     {
-      // ATunprotect(&m_term);
+      assert(m_term==NULL || m_term->reference_count>0);
+      return m_term;
     }
 
-    /// \brief Mark the aterm for not being garbage collected.
-    void mark() const
+    /// \brief Returns the function symbol belonging to a term.
+    /// \return The function symbol of this term.
+    const function_symbol &function() const
     {
-      // ATmarkTerm(m_term);
+      return m_term->m_function_symbol;
     }
 
-    /// \brief Return the type of term.
+    /// \brief Returns the type of this term.
     /// Result is one of AT_APPL, AT_INT,
-    /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
+    /// or AT_LIST.
+    /// \detail Often it is more efficient to use function_symbol(),
+    /// and check whether the function symbol matches AS_INT for an 
+    /// AT_INT, AS_LIST or AS_EMPTY_LIST for AT_LIST, or something else
+    /// for AT_APPL.
     /// \return The type of the term.
     size_t type() const
     {
-      return ATgetType(m_term);
+      return m_term->type(); 
     }
 
     /// \brief Writes the term to a string.
     /// \return A string representation of the term.
-    std::string to_string() const
+    std::string to_string() const;
+    /* {
+      return ATwriteToString(m_term);
+    } */
+
+    bool operator ==(const aterm &t) const
     {
-      return m_term.to_string(); 
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term==t.m_term;
     }
 
-    bool operator <(const aterm_base &t) const
+    bool operator !=(const aterm &t) const
     {
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term!=t.m_term;
+    }
+
+    bool operator <(const aterm &t) const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
       return m_term<t.m_term;
     }
-}; */
 
-/// \cond INTERNAL_DOCS
-/* template <>
-struct aterm_traits<aterm_base>
-{
-  static void protect(const aterm_base& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const aterm_base& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const aterm_base& t)
-  {
-    t.mark();
-  }
-  static ATerm term(const aterm_base& t)
-  {
-    return t.term();
-  }
-}; */
-/// \endcond
+    bool operator >(const aterm &t) const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term>t.m_term;
+    }
 
-/// \brief Returns true if x has the default value of an aterm. In the ATerm Library
-/// this value is given by ATfalse.
-/// \param x A term.
-/// \return True if the value of the term is ATfalse.
-/* inline
-bool operator!(const aterm_base& x)
-{
-  // return ATisEqual(aterm_traits<aterm_base>::term(x), false);
-  return &*(aterm_traits<aterm_base>::term(x))==NULL;
-} */
+    bool operator <=(const aterm &t) const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term<=t.m_term;
+    }
 
-/// \brief Writes a string representation of the aterm t to the stream out.
-/// \param out An output stream.
-/// \param t A term.
-/// \return The stream to which the string representation has been written.
-/* inline
-std::ostream& operator<<(std::ostream& out, const aterm_base& t)
+    bool operator >=(const aterm &t) const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      assert(t.m_term==NULL || t.m_term->reference_count>0);
+      return m_term>=t.m_term;
+    }
+
+    /// \brief Test on whether an the ATerm is not equal to NULL.
+    bool is_defined() const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      return m_term!=NULL;
+    }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const aterm& t)
 {
   return out << t.to_string();
-} */
-
-///////////////////////////////////////////////////////////////////////////////
-// aterm
-/// \brief Represents a generic term.
-
-  typedef aterm::ATerm aterm;
-
-/* class aterm: public aterm_base
-{
-  public:
-    /// \brief Constructor.
-    aterm() {}
-
-    /// \brief Constructor.
-    /// \param term A term.
-    aterm(aterm_base term)
-      : aterm_base(term)
-    { }
-
-    /// \brief Constructor.
-    /// \param term A term
-    aterm(ATerm term)
-      : aterm_base(term)
-    { }
-
-    /// \brief Constructor.
-    /// \param term A sequence of terms
-    aterm(ATermList term)
-      : aterm_base(term)
-    { }
-
-    /// \brief Constructor.
-    /// \param term An integer term
-    aterm(ATermInt term)
-      : aterm_base(term)
-    { }
-
-    /// \brief Constructor.
-    /// \param term A term
-    aterm(ATermAppl term)
-      : aterm_base(term)
-    { }
-
-    /// \brief Conversion operator.
-    /// \return The wrapped ATerm pointer
-    operator ATerm() const
-    {
-      return m_term;
-    }
-}; */
-
-/// \cond INTERNAL_DOCS
-/* template <>
-struct aterm_traits<aterm>
-{
-  static void protect(const aterm& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const aterm& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const aterm& t)
-  {
-    t.mark();
-  }
-  static ATerm term(const aterm& t)
-  {
-    return t.term();
-  }
-}; */
-/// \endcond
-
-/// \brief Read an aterm from string.
-/// This function parses a character string into an aterm.
-/// \param s A string
-/// \return The term corresponding to the string.
-inline
-aterm read_from_string(const std::string& s)
-{
-  return ATreadFromString(s.c_str());
 }
-
-/// \brief Read a aterm from a string in baf format.
-/// This function decodes a baf character string into an aterm.
-/// \param s A string
-/// \param size A positive integer
-/// \return The term corresponding to the string.
-inline
-aterm read_from_binary_string(const std::string& s, unsigned int size)
-{
-  return ATreadFromBinaryString(reinterpret_cast<const unsigned char*>(s.c_str()), size);
-}
-
-/// \brief Read an aterm from named binary or text file.
-/// This function reads an aterm file filename. A test is performed to see if the file
-/// is in baf, taf, or plain text. "-" is standard input's filename.
-/// \param name A string
-/// \return A term that was read from a file.
-inline
-aterm read_from_named_file(const std::string& name)
-{
-  return ATreadFromNamedFile(name.c_str());
-}
-
-/// \brief Writes term t to file named filename in textual format.
-/// This function writes aterm t in textual representation to file filename. "-" is
-/// standard output's filename.
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-inline
-bool write_to_named_text_file(aterm t, const std::string& filename)
-{
-  return ATwriteToNamedTextFile(t, filename.c_str()) == true;
-}
-
-/// \brief Writes term t to file named filename in Binary aterm Format (baf).
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-inline
-bool write_to_named_binary_file(aterm t, const std::string& filename)
-{
-  return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
-}
-
-/// \brief Writes term t to file named filename in Streamable aterm Format (saf).
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-/* inline
-bool write_to_named_saf_file(aterm t, const std::string& filename)
-{
-  return ATwriteToNamedSAFFile(t, filename.c_str()) == ATtrue;
-}
-*/
-
-/// \brief Equality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are equal.
-/* inline
-bool operator==(const aterm& x, const aterm& y)
-{
-  return ATisEqual(x, y) == true;
-}  */
-
-/// \brief Inequality operator.
-/// \param x A term.
-/// \param y A term.
-/// \return True if the terms are not equal.
-/* inline
-bool operator!=(const aterm& x, const aterm& y)
-{
-  return ATisEqual(x, y) == false;
-} */
-
+	
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ATERM_H

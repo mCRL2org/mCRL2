@@ -24,9 +24,8 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/exception.h"
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_list.h"
+// #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 using namespace mcrl2::log;
@@ -74,7 +73,7 @@ static function_symbol get_function_symbol_of_head(const data_expression &t)
 
 
 
-static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty *rewriter)
+static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitty *rewriter)
 {
 
   size_t max_arity = 0;
@@ -88,17 +87,17 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
   }
 
 
-  ATermList rules=ATempty;
+  aterm_list rules=ATempty;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = ATinsert(rules,ATmakeList4(static_cast<ATermList>(j->variables()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->condition()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
-                                         (ATermAppl)rewriter->toRewriteFormat(j->rhs())));
+    rules = ATinsert(rules,ATmakeList4(static_cast<aterm_list>(j->variables()),
+                                         (aterm_appl)rewriter->toRewriteFormat(j->condition()),
+                                         (aterm_appl)rewriter->toRewriteFormat(j->lhs()),
+                                         (aterm_appl)rewriter->toRewriteFormat(j->rhs())));
   }
   rules = ATreverse(rules);
 
-  ATermList strat = ATmakeList0();
+  aterm_list strat = ATmakeList0();
   size_t arity;
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
@@ -110,8 +109,8 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
   arity = 0;
   while (!ATisEmpty(rules))
   {
-    ATermList l = ATmakeList0();
-    ATermList m = ATmakeList0();
+    aterm_list l = ATmakeList0();
+    aterm_list m = ATmakeList0();
 
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
     for (size_t i=0; i<arity; ++i)
@@ -178,7 +177,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
           }
         }
 
-        ATermList deps = ATmakeList0();
+        aterm_list deps = ATmakeList0();
         for (size_t i = 0; i < arity; i++)
         {
           if (bs[i] && !used[i])
@@ -200,7 +199,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
 
     while (!ATisEmpty(m))
     {
-      ATermList m2 = ATmakeList0();
+      aterm_list m2 = ATmakeList0();
       for (; !ATisEmpty(m); m=ATgetNext(m))
       {
         if (ATisEmpty(ATLgetFirst(ATLgetFirst(m))))
@@ -242,7 +241,7 @@ static ATermList create_strategy(const data_equation_list &rules1, RewriterJitty
         m2 = ATmakeList0();
         for (; !ATisEmpty(m); m=ATgetNext(m))
         {
-          m2 = ATinsert(m2,ATinsert(ATgetNext(ATLgetFirst(m)),ATremoveElement(ATLgetFirst(ATLgetFirst(m)),k)));
+          m2 = ATinsert(m2,ATinsert(ATgetNext(ATLgetFirst(m)),remove_one_element(ATLgetFirst(ATLgetFirst(m)),static_cast<aterm>(k))));
         }
         m = ATreverse(m2);
       }
@@ -687,7 +686,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
 
-  ATermList strat;
+  aterm_list strat=NULL;
   const size_t arity=term.size();
 
   // MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
@@ -723,8 +722,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        ATermList rule = ATLgetFirst(strat);
-        ATermAppl lhs = ATAelementAt(rule,2);
+        aterm_list rule = ATLgetFirst(strat);
+        aterm_appl lhs = ATAelementAt(rule,2);
         size_t rule_arity = ATgetArity(ATgetAFun(lhs));
 
         if (rule_arity > arity)

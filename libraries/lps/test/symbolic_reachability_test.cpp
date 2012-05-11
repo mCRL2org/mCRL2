@@ -201,7 +201,7 @@ void check_info(mcrl2::lps::specification const& model)
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   using namespace mcrl2;
   using namespace mcrl2::lps;

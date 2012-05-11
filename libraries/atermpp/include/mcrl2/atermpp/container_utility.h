@@ -29,7 +29,8 @@
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list_iterator.h"
+#include "mcrl2/atermpp/aterm_list.h"
+// #include "mcrl2/atermpp/aterm_list_iterator.h"
 
 namespace atermpp
 {
@@ -71,12 +72,6 @@ struct is_container_impl< std::vector< T > >
 
 template < typename T >
 struct is_container_impl< atermpp::term_list< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< ::aterm::term_list< T > >
 {
   typedef boost::true_type type;
 };

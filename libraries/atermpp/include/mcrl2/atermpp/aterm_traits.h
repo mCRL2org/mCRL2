@@ -16,10 +16,10 @@
 #include <boost/type_traits/is_base_of.hpp>
 
 #include <utility>
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm.h"
 
 // XXX Remove
-using namespace aterm;
+using namespace aterm_deprecated;
 
 namespace atermpp
 {
@@ -70,7 +70,7 @@ struct aterm_traits<ATermList>
 };
 
 template <class Term>
-struct aterm_traits<aterm::term_list<Term> >
+struct aterm_traits<atermpp::term_list<Term> >
 {
   static ATerm term(ATermAppl t)
   {

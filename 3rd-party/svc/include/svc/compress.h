@@ -38,16 +38,16 @@
 
   CompressedStream* CSinit(HTable*, BitStream*, int);
   void CSfree(CompressedStream*);
-  int   CSreadATerm(CompressedStream*, aterm::ATerm*);
-  int   CSreadIndex(CompressedStream*, aterm::ATerm*);
-  int   CSureadATerm(CompressedStream*, aterm::ATerm*);
+  int   CSreadATerm(CompressedStream*, aterm_deprecated::ATerm*);
+  int   CSreadIndex(CompressedStream*, aterm_deprecated::ATerm*);
+  int   CSureadATerm(CompressedStream*, aterm_deprecated::ATerm*);
   int   CSreadString(CompressedStream*, char**);
   int   CSureadString(CompressedStream*, char**);
   int CSreadInt(CompressedStream*, long*);
   int CSureadInt(CompressedStream*, long*);
-  int   CSwriteATerm(CompressedStream*, aterm::ATerm);
-  int   CSwriteIndex(CompressedStream*, aterm::ATerm);
-  int   CSuwriteATerm(CompressedStream*, aterm::ATerm);
+  int   CSwriteATerm(CompressedStream*, aterm_deprecated::ATerm);
+  int   CSwriteIndex(CompressedStream*, aterm_deprecated::ATerm);
+  int   CSuwriteATerm(CompressedStream*, aterm_deprecated::ATerm);
   int   CSwriteString(CompressedStream*, const char*);
   int   CSuwriteString(CompressedStream*, const char*);
   int   CSwriteInt(CompressedStream*, long);

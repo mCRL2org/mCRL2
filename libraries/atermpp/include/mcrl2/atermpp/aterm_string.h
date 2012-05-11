@@ -32,7 +32,7 @@ class aterm_string: public aterm_appl
 
     /// \brief Constructor.
     /// \param t A term
-    explicit aterm_string(const ATerm &t)
+    explicit aterm_string(const aterm &t)
       : aterm_appl(t)
     {
       assert(aterm_appl(t).size() == 0);
@@ -77,7 +77,7 @@ class aterm_string: public aterm_appl
 
     /// Assignment operator.
     /// \param t A term.
-    aterm_string& operator=(const ATerm &t)
+    aterm_string& operator=(const aterm &t)
     {
       assert(t.type() == AT_APPL);
       assert(t.function().arity() == 0);

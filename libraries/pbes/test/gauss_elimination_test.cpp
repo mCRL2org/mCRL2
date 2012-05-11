@@ -302,7 +302,7 @@ void tutorial2()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_bes();
   test_abp();

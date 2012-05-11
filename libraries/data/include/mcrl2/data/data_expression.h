@@ -136,7 +136,7 @@ class data_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     ///
     /// \param[in] t a term adhering to the internal format.
-    explicit data_expression(const aterm::ATerm& t)
+    explicit data_expression(const aterm_deprecated::ATerm& t)
       : atermpp::aterm_appl(t)
     {
       // As Nil is used to indicate a non existing time value

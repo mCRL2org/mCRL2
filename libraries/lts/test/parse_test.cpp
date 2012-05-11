@@ -207,7 +207,7 @@ void test_dot()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  atermpp::aterm_init();
 
   test_fsm();
 

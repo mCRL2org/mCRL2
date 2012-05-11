@@ -27,8 +27,7 @@
 #include <cstring>
 #include <cassert>
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/print.h"
@@ -40,7 +39,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
-using namespace aterm;
+using namespace aterm_deprecated;
 using namespace mcrl2::log;
 
 namespace mcrl2
@@ -55,18 +54,18 @@ static ATerm dummy;
 static AFun afunARtrue, afunARfalse, afunARand, afunARor, afunARvar;
 static ATermAppl ar_true, ar_false;
 
-#define isS(x) ATisEqualAFun(ATgetAFun(x),afunS)
-#define isM(x) ATisEqualAFun(ATgetAFun(x),afunM)
-#define isF(x) ATisEqualAFun(ATgetAFun(x),afunF)
-#define isN(x) ATisEqualAFun(ATgetAFun(x),afunN)
-#define isD(x) ATisEqualAFun(ATgetAFun(x),afunD)
-#define isR(x) ATisEqualAFun(ATgetAFun(x),afunR)
-#define isCR(x) ATisEqualAFun(ATgetAFun(x),afunCR)
-#define isC(x) ATisEqualAFun(ATgetAFun(x),afunC)
-#define isX(x) ATisEqualAFun(ATgetAFun(x),afunX)
-#define isRe(x) ATisEqualAFun(ATgetAFun(x),afunRe)
-#define isCRe(x) ATisEqualAFun(ATgetAFun(x),afunCRe)
-#define isMe(x) ATisEqualAFun(ATgetAFun(x),afunMe)
+#define isS(x) x.function()==afunS
+#define isM(x) x.function()==afunM
+#define isF(x) x.function()==afunF
+#define isN(x) x.function()==afunN
+#define isD(x) x.function()==afunD
+#define isR(x) x.function()==afunR
+#define isCR(x) x.function()==afunCR
+#define isC(x) x.function()==afunC
+#define isX(x) x.function()==afunX
+#define isRe(x) x.function()==afunRe
+#define isCRe(x) x.function()==afunCRe
+#define isMe(x) x.function()==afunMe
 
 static size_t is_initialised = 0;
 
@@ -111,9 +110,9 @@ static void finalise_common()
 
 #define is_ar_true(x) (ATisEqual((x),ar_true))
 #define is_ar_false(x) (ATisEqual((x),ar_false))
-#define is_ar_and(x) (ATisEqualAFun(ATgetAFun(x),afunARand))
-#define is_ar_or(x) (ATisEqualAFun(ATgetAFun(x),afunARor))
-#define is_ar_var(x) (ATisEqualAFun(ATgetAFun(x),afunARvar))
+#define is_ar_and(x) (x.function()==afunARand)
+#define is_ar_or(x) (x.function()==afunARor)
+#define is_ar_var(x) (x.function()==afunARvar)
 
 // Prototype
 static ATerm toInner_list_odd(const data_expression &t);
@@ -1222,7 +1221,7 @@ static ATermList create_strategy(
       for (; !ATisEmpty(dep_list); dep_list=ATgetNext(dep_list))
       {
         l = ATinsert(l,(ATerm) ATinsert(ATgetNext(ATLgetFirst(dep_list)),
-                   (ATerm) ATremoveElement(ATLgetFirst(ATLgetFirst(dep_list)),(ATerm) rewr_arg)));
+                   (ATerm) remove_one_element<aterm>(ATLgetFirst(ATLgetFirst(dep_list)),(ATerm) rewr_arg)));
       }
       dep_list = ATreverse(l);
     }

@@ -19,6 +19,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
@@ -334,7 +335,7 @@ void test_is_bes()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_trivial();
   test_pbes();

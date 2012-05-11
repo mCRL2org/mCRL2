@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 #include <boost/bind.hpp>
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"

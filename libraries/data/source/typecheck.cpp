@@ -16,8 +16,7 @@
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -126,17 +125,32 @@ static bool gstcAddFunction(ATermAppl, const char*, bool allow_double_decls=fals
 static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunction(ATermAppl);
 
-static void gstcATermTableCopy(ATermTable Vars, ATermTable CopyVars);
+static void gstcATermTableCopy(const ATermTable &Vars, ATermTable &CopyVars);
 
-static ATermTable gstcAddVars2Table(ATermTable,ATermList);
-static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls);
+static bool gstcAddVars2Table(ATermTable &,ATermList, ATermTable &);
+static ATermTable gstcRemoveVars(ATermTable &Vars, ATermList VarDecls);
 static bool gstcVarsUnique(ATermList VarDecls);
-static ATermAppl gstcRewrActProc(ATermTable, ATermAppl, bool is_pbes=false);
+static ATermAppl gstcRewrActProc(const ATermTable &, ATermAppl, bool is_pbes=false);
 static inline ATermAppl gstcMakeActionOrProc(bool, ATermAppl, ATermList, ATermList);
-static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
-static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
-static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl*, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
-static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, const bool warn_upcasting=false, const bool print_cast_error=true);
+static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &, ATermAppl);
+static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &, ATermAppl);
+
+static ATermAppl gstcTraverseVarConsTypeD(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl*, ATermAppl, ATermTable &FreeVars, bool strict_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
+static ATermAppl gstcTraverseVarConsTypeD(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* t1, ATermAppl t2)
+{
+  ATermTable dummy_table;
+  return gstcTraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2, 
+        dummy_table, true, false, true);
+}
+static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* , ATermAppl, 
+               ATermTable &FreeVars, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, const bool warn_upcasting=false, const bool print_cast_error=true);
+
+static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* t1, ATermAppl t2)
+{
+  ATermTable dummy_empty_table;
+  return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, t1, t2, dummy_empty_table, true, ATERM_NON_EXISTING_POSITION, false, true);
+}
+
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -201,9 +215,9 @@ static ATermAppl replace_possible_sorts(ATermAppl Type);
 static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
 
 // Typechecking modal formulas
-static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm);
-static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm);
-static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm);
+static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &StateVars, ATermAppl StateFrm);
+static ATermAppl gstcTraverseRegFrm(const ATermTable &Vars, ATermAppl RegFrm);
+static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm);
 
 
 static ATermAppl gstcFoldSortRefs(ATermAppl Spec);
@@ -314,7 +328,8 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
         {
           ATermAppl glob_var_spec = ATAgetArgument(proc_spec,2);
           ATermList glob_vars = ATLgetArgument(glob_var_spec,0);
-          if (gstcAddVars2Table(context.glob_vars, glob_vars))
+          ATermTable dummy;
+          if (gstcAddVars2Table(context.glob_vars, glob_vars,dummy))
           {
             if (gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(proc_spec,3),0),
                                        ATAgetArgument(ATAgetArgument(proc_spec,4),0)))
@@ -403,7 +418,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
   return Result;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, const ATermTable &Vars)
 {
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
@@ -448,17 +463,17 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
     }
     else if ((sort_expr == ATerm()) || gstcIsSortExprDeclared(sort_expr))
     {
-      bool destroy_vars=(Vars == NULL);
+      /* bool destroy_vars=(Vars == NULL);
       if (destroy_vars)
       {
         Vars=ATtableCreate(63,50);
-      }
+      } */
       ATermAppl data=data_expr;
       ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,(sort_expr==ATermAppl())?(ATermAppl)data::unknown_sort():sort_expr);
-      if (destroy_vars)
+      /* if (destroy_vars)
       {
         ATtableDestroy(Vars);
-      }
+      } */
       if (&*Type && !data::is_unknown_sort(data::sort_expression(Type)))
       {
         Result=data;
@@ -782,8 +797,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
             break;
           }
 
-          ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
-          if (!NewDeclaredVars)
+          ATermTable NewDeclaredVars;
+          if (!gstcAddVars2Table(DeclaredVars,VarList,NewDeclaredVars))
           {
             b = false;
             break;
@@ -878,6 +893,7 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   ATermAppl pb_eqn_spec = ATAgetArgument(pbes_spec,2);
   ATermAppl pb_init = ATAgetArgument(pbes_spec,3);
   ATermAppl glob_var_spec = ATAgetArgument(pbes_spec,1);
+  ATermTable dummy;
 
   if (!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0)))
   {
@@ -902,7 +918,7 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
 
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
 
-  if (!gstcAddVars2Table(context.glob_vars, ATLgetArgument(glob_var_spec,0)))
+  if (!gstcAddVars2Table(context.glob_vars, ATLgetArgument(glob_var_spec,0),dummy))
   {
     goto finally;
   }
@@ -972,8 +988,8 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
     mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;
 
     ATermTable Vars=ATtableCreate(63,50);
-    ATermTable NewVars=gstcAddVars2Table(Vars,data_vars);
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(Vars,data_vars,NewVars))
     {
       ATtableDestroy(Vars);
       mCRL2log(error) << "type error while typechecking data variables" << std::endl;
@@ -1699,7 +1715,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
     for (ATermList constructor_list_walker=constructor_list;
          constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
     {
-      const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
+      const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
       if (is_function_sort(s))
       {
         // if s is a constant sort, nothing needs to be added.
@@ -1715,7 +1731,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
       for (ATermList constructor_list_walker=constructor_list;
            constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
       {
-        const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
+        const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
         if (!is_function_sort(s))
         {
           if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
@@ -2097,8 +2113,8 @@ static bool gstcTransformVarConsTypeData(void)
       break;
     }
 
-    ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
-    if (!NewDeclaredVars)
+    ATermTable NewDeclaredVars;
+    if (!gstcAddVars2Table(DeclaredVars,VarList,NewDeclaredVars))
     {
       b = false;
       break;
@@ -2129,7 +2145,8 @@ static bool gstcTransformVarConsTypeData(void)
       break;
     }
     ATermAppl Right=ATAgetArgument(Eqn,3);
-    ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
+    ATermTable dummy_empty_table;
+    ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,dummy_empty_table,false);
     if (!&*RightType)
     {
       b = false;
@@ -2208,8 +2225,8 @@ static bool gstcTransformActProcVarConst(void)
     ATtableReset(Vars);
     gstcATermTableCopy(context.glob_vars,Vars);
 
-    ATermTable NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,ProcVar));
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,ProcVar),NewVars))
     {
       Result = false;
       break;
@@ -2244,8 +2261,8 @@ static bool gstcTransformPBESVarConst(void)
     ATtableReset(Vars);
     gstcATermTableCopy(context.glob_vars,Vars);
 
-    ATermTable NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,PBVar));
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,PBVar),NewVars))
     {
       Result = false;
       break;
@@ -2520,8 +2537,8 @@ static bool gstcAddConstant(ATermAppl OpId, const char* msg)
   assert(gsIsOpId(OpId));
   bool Result=true;
 
-  ATermAppl Name = function_symbol(OpId).name();
-  ATermAppl Sort = function_symbol(OpId).sort();
+  ATermAppl Name = data::function_symbol(OpId).name();
+  ATermAppl Sort = data::function_symbol(OpId).sort();
 
   if (&*ATAtableGet(context.constants, Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/)
   {
@@ -2543,7 +2560,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
 {
   assert(gsIsOpId(OpId));
   bool Result=true;
-  const function_symbol f(OpId);
+  const data::function_symbol f(OpId);
   const sort_expression_list domain=function_sort(f.sort()).domain();
   ATermAppl Name = f.name();
   ATermAppl Sort = f.sort();
@@ -2605,8 +2622,8 @@ static void gstcAddSystemConstant(ATermAppl OpId)
   //Pre: OpId is an OpId
   // append the Type to the entry of the Name of the OpId in gssystem.constants table
   assert(gsIsOpId(OpId));
-  ATermAppl OpIdName = function_symbol(OpId).name();
-  ATermAppl Type = function_symbol(OpId).sort();
+  ATermAppl OpIdName = data::function_symbol(OpId).name();
+  ATermAppl Type = data::function_symbol(OpId).sort();
 
   ATermList Types=ATLtableGet(gssystem.constants, OpIdName);
 
@@ -2623,8 +2640,8 @@ static void gstcAddSystemFunction(ATermAppl OpId)
   //Pre: OpId is an OpId
   // append the Type to the entry of the Name of the OpId in gssystem.functions table
   assert(gsIsOpId(OpId));
-  ATermAppl OpIdName = function_symbol(OpId).name();
-  ATermAppl Type = function_symbol(OpId).sort();
+  ATermAppl OpIdName = data::function_symbol(OpId).name();
+  ATermAppl Type = data::function_symbol(OpId).sort();
   assert(gsIsSortArrow(Type));
 
   ATermList Types=ATLtableGet(gssystem.functions, OpIdName);
@@ -2637,7 +2654,7 @@ static void gstcAddSystemFunction(ATermAppl OpId)
   ATtablePut(gssystem.functions,OpIdName,Types);
 }
 
-static void gstcATermTableCopy(ATermTable Orig, ATermTable Copy)
+static void gstcATermTableCopy(const ATermTable &Orig, ATermTable &Copy)
 {
   for (ATermList Keys=ATtableKeys(Orig); !ATisEmpty(Keys); Keys=ATgetNext(Keys))
   {
@@ -2672,7 +2689,7 @@ final:
   return Result;
 }
 
-static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls)
+static bool gstcAddVars2Table(ATermTable &Vars, ATermList VarDecls, ATermTable &result)
 {
   for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
   {
@@ -2682,18 +2699,18 @@ static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls)
     //test the type
     if (!gstcIsSortExprDeclared(VarType))
     {
-      return NULL;
+      return false;
     }
 
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
     ATtablePut(Vars, VarName, VarType);
   }
-
-  return Vars;
+  result=Vars;
+  return true;
 }
 
-static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls)
+static ATermTable gstcRemoveVars(ATermTable &Vars, ATermList VarDecls)
 {
   for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
   {
@@ -2707,7 +2724,7 @@ static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls)
   return Vars;
 }
 
-static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pbes)
+static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, bool is_pbes)
 {
   ATermAppl Result=NULL;
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
@@ -2868,7 +2885,7 @@ static inline ATermAppl gstcMakeActionOrProc(bool action, ATermAppl Name,
          :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
 }
 
-static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm)
+static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl ProcTerm)
 {
   ATermAppl Result=NULL;
   size_t n = ATgetArity(ATgetAFun(ProcTerm));
@@ -3334,8 +3351,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermTable CopyVars=ATtableCreate(63,50);
     gstcATermTableCopy(Vars,CopyVars);
 
-    ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(ProcTerm,0));
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(CopyVars,ATLgetArgument(ProcTerm,0),NewVars))
     {
       ATtableDestroy(CopyVars);
       mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
@@ -3355,7 +3372,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   return Result;
 }
 
-static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
+static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &Vars, ATermAppl PBESTerm)
 {
   ATermAppl Result=NULL;
 
@@ -3404,8 +3421,8 @@ static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
     ATermTable CopyVars=ATtableCreate(63,50);
     gstcATermTableCopy(Vars,CopyVars);
 
-    ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(PBESTerm,0));
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(CopyVars,ATLgetArgument(PBESTerm,0),NewVars))
     {
       ATtableDestroy(CopyVars);
       mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
@@ -3431,11 +3448,11 @@ static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
 }
 
 static ATermAppl gstcTraverseVarConsTypeD(
-  ATermTable DeclaredVars,
-  ATermTable AllowedVars,
+  const ATermTable &DeclaredVars,
+  const ATermTable &AllowedVars,
   ATermAppl* DataTerm,
   ATermAppl PosType,
-  ATermTable FreeVars,
+  ATermTable &FreeVars,
   const bool strict_ambiguous,
   const bool warn_upcasting,
   const bool print_cast_error)
@@ -3486,15 +3503,15 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       ATermAppl NewType=ATAgetArgument(VarDecl,1);
       ATermList VarList=ATmakeList1(VarDecl);
-      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-      if (!NewAllowedVars)
+      ATermTable NewAllowedVars;
+      if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
-      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-      if (!NewDeclaredVars)
+      ATermTable NewDeclaredVars;
+      if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
@@ -3540,7 +3557,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         return NULL;
       }
 
-      if (FreeVars)
+      // if (FreeVars)
       {
         gstcRemoveVars(FreeVars,VarList);
       }
@@ -3551,15 +3568,15 @@ static ATermAppl gstcTraverseVarConsTypeD(
     if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
     {
       ATermList VarList=ATLgetArgument(*DataTerm,1);
-      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-      if (!NewAllowedVars)
+      ATermTable NewAllowedVars;
+      if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
-      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-      if (!NewDeclaredVars)
+      ATermTable NewDeclaredVars;
+      if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
@@ -3586,7 +3603,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         return NULL;
       }
 
-      if (FreeVars)
+      // if (FreeVars)
       {
         gstcRemoveVars(FreeVars,VarList);
       }
@@ -3597,15 +3614,15 @@ static ATermAppl gstcTraverseVarConsTypeD(
     if (gsIsLambda(BindingOperator))
     {
       ATermList VarList=ATLgetArgument(*DataTerm,1);
-      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-      if (!NewAllowedVars)
+      ATermTable NewAllowedVars;
+      if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
-      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-      if (!NewDeclaredVars)
+      ATermTable NewDeclaredVars;
+      if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
@@ -3630,7 +3647,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
 
-      if (FreeVars)
+      // if (FreeVars)
       {
         gstcRemoveVars(FreeVars,VarList);
       }
@@ -3680,15 +3697,15 @@ static ATermAppl gstcTraverseVarConsTypeD(
     gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
 
     ATermList VarList=ATreverse(WhereVarList);
-    ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-    if (!NewAllowedVars)
+    ATermTable NewAllowedVars;
+    if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
     {
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
       return NULL;
     }
-    ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-    if (!NewDeclaredVars)
+    ATermTable NewDeclaredVars;
+    if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
     {
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
@@ -3704,7 +3721,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       return NULL;
     }
-    if (FreeVars)
+    // if (FreeVars)
     {
       gstcRemoveVars(FreeVars,VarList);
     }
@@ -4181,7 +4198,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
 
       //Add to free variables list
-      if (FreeVars)
+      // if (FreeVars)
       {
         ATtablePut(FreeVars, Name, Type);
       }
@@ -4290,11 +4307,11 @@ static ATermAppl gstcTraverseVarConsTypeD(
 }
 
 static ATermAppl gstcTraverseVarConsTypeDN(
-  ATermTable DeclaredVars,
-  ATermTable AllowedVars,
+  const ATermTable &DeclaredVars,
+  const ATermTable &AllowedVars,
   ATermAppl* DataTerm,
   ATermAppl PosType,
-  ATermTable FreeVars,
+  ATermTable &FreeVars,
   const bool strict_ambiguous,
   const size_t nFactPars,
   const bool warn_upcasting,
@@ -4321,7 +4338,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         }
 
         //Add to free variables list
-        if (FreeVars)
+        // if (FreeVars)
         {
           ATtablePut(FreeVars, Name, Type);
         }
@@ -6494,7 +6511,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
 // Type checking modal formulas
 //===================================
 
-static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm)
+static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &StateVars, ATermAppl StateFrm)
 {
   mCRL2log(debug) << "gstcTraverseStateFrm: " + core::pp_deprecated(StateFrm) + "" << std::endl;
 
@@ -6534,8 +6551,8 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     gstcATermTableCopy(Vars,CopyVars);
 
     ATermList VarList=ATLgetArgument(StateFrm,0);
-    ATermTable NewVars=gstcAddVars2Table(CopyVars,VarList);
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(CopyVars,VarList,NewVars))
     {
       ATtableDestroy(CopyVars);
       return NULL;
@@ -6739,7 +6756,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
   return NULL;
 }
 
-static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
+static ATermAppl gstcTraverseRegFrm(const ATermTable &Vars, ATermAppl RegFrm)
 {
   mCRL2log(debug) << "gstcTraverseRegFrm: " + core::pp_deprecated(RegFrm) + "" << std::endl;
   if (gsIsRegNil(RegFrm))
@@ -6781,7 +6798,7 @@ static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
   return NULL;
 }
 
-static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm)
+static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
 {
   mCRL2log(debug) << "gstcTraverseActFrm: " + core::pp_deprecated(ActFrm) + "" << std::endl;
 
@@ -6821,8 +6838,8 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm)
     gstcATermTableCopy(Vars,CopyVars);
 
     ATermList VarList=ATLgetArgument(ActFrm,0);
-    ATermTable NewVars=gstcAddVars2Table(CopyVars,VarList);
-    if (!NewVars)
+    ATermTable NewVars;
+    if (!gstcAddVars2Table(CopyVars,VarList,NewVars))
     {
       ATtableDestroy(CopyVars);
       return NULL;

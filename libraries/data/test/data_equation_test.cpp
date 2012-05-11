@@ -27,8 +27,8 @@ using namespace mcrl2::data;
 void data_equation_test()
 {
   basic_sort s("S");
-  function_symbol c("c", s);
-  function_symbol f("f", s);
+  data::function_symbol c("c", s);
+  data::function_symbol f("f", s);
   variable x("x", s);
   variable_list xl(atermpp::make_list(x));
 

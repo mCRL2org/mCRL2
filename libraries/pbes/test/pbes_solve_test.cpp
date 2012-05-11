@@ -283,7 +283,7 @@ void test_abp()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_all();
   test_abp();

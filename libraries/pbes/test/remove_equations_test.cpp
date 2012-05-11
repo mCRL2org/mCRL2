@@ -71,7 +71,7 @@ void test_remove_unreachable_variables()
 
 int test_main(int argc, char* argv[])
 {
-  ATinit();
+  aterm_init();
 
   test_remove_unreachable_variables();
 

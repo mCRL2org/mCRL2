@@ -13,7 +13,7 @@
 #define ATERM_UTILITY_H
 
 #include <string>
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 namespace atermpp
 {
@@ -24,7 +24,7 @@ namespace atermpp
 inline
 aterm make_term(const std::string& pattern)
 {
-  return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
+  return read_from_string(pattern);
 }
 
 

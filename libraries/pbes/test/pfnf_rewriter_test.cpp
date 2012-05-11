@@ -193,7 +193,7 @@ void test_pfnf_rewriter2()
 
 int test_main(int argc, char** argv)
 {
-  ATinit();
+  aterm_init();
 
   test_pfnf_visitor();
   test_pfnf_rewriter();

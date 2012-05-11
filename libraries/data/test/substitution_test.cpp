@@ -56,7 +56,7 @@ void test_basic()
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
 
-  function_symbol c("c", sort_nat::nat());
+  data::function_symbol c("c", sort_nat::nat());
 
   BOOST_CHECK(c + x == c + x);
   BOOST_CHECK(data::replace_free_variables(data_expression(c + x), s) == c + x);
@@ -100,7 +100,7 @@ void test_indexed_substitution()
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
 
-  function_symbol c("c", sort_nat::nat());
+  data::function_symbol c("c", sort_nat::nat());
 
   BOOST_CHECK(c + x == c + x);
   BOOST_CHECK(data::replace_free_variables(data_expression(c + x), s) == c + x);

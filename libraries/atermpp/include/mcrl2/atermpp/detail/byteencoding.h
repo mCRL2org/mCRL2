@@ -1,15 +1,13 @@
 #ifndef BYTEENCODING_H_
 #define BYTEENCODING_H_
 
-#include "mcrl2/aterm/atypes.h"
-
-namespace aterm
+namespace atermpp
 {
 
 size_t BEserializeMultiByteInt(const int i, char* c);
 
 int BEdeserializeMultiByteInt(const char* c, size_t* i);
 
-} // namespace aterm
+} // namespace atermpp
 
 #endif /*BYTEENCODING_H_*/

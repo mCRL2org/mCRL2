@@ -17,7 +17,7 @@
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"

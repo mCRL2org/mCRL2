@@ -95,7 +95,7 @@ class sort_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param[in] t A term.
     /// \pre t has the internal structure of a sort expression.
-    sort_expression(const ATerm& t)
+    sort_expression(const aterm& t)
       : atermpp::aterm_appl(t)
     {
       assert(is_sort_expression(*this));

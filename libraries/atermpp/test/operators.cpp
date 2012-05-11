@@ -33,9 +33,9 @@ int test_main(int argc, char* argv[])
   atermpp::aterm t      = make_term("[1,2]");
   aterm_appl a = static_cast<aterm_appl>(make_term("f(x)"));
   aterm_list l = static_cast<aterm_list>(make_term("[3]"));
-  ATerm T      = t;
-  ATermAppl A  = a;
-  ATermList L  = l;
+  aterm T      = t;
+  aterm_appl A  = a;
+  aterm_list L  = l;
 
   // assignment
   t = t;
@@ -105,9 +105,9 @@ int test_main(int argc, char* argv[])
   set<atermpp::aterm> st;
   set<aterm_appl> sa;
   set<aterm_list> sl;
-  set<ATerm> sT;
-  set<ATermAppl> sA;
-  set<ATermList> sL;
+  set<aterm> sT;
+  set<aterm_appl> sA;
+  set<aterm_list> sL;
   set<D> sD;
 
   return 0;

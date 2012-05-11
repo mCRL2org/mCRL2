@@ -453,7 +453,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         data_expression       cj = j->condition();
         variable_list         e1 = j->summation_variables();
         data_expression_list  gj = j->next_state(q.process_parameters());
-        pbes_expression       expr = pbes_expr::exists(e1, z::and_(cj, var(Y(p, q, i), d + gj + e)));
+        pbes_expression       expr = pbes_expr::exists(e1, z::and_(cj, var(Y(p, q, i), data_expression_list(d) + gj + data_expression_list(e))));
         v.push_back(expr);
       }
       return z::or_(z::join_or(v.begin(), v.end()), z::and_(var(X(p, q), d + d1), step(p, q, i)));
@@ -678,7 +678,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         data_expression      cj = j->condition();
         variable_list        e1 = j->summation_variables();
         data_expression_list gj = j->next_state(d1);
-        pbes_expression      expr = pbes_expr::exists(e1, z::and_(cj, var(Y1(p, q, i), d + gj + e)));
+        pbes_expression      expr = pbes_expr::exists(e1, z::and_(cj, var(Y1(p, q, i), data_expression_list(d) + gj + data_expression_list(e))));
         v.push_back(expr);
       }
       return z::or_(z::join_or(v.begin(), v.end()), step(p, q, i));

@@ -685,7 +685,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           data::variable_list xp = lps.process_parameters();
           state_formulas::state_formula g = arg(f);
           fixpoint_symbol sigma = s::is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
-          propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
+          propositional_variable v(X, variable_list(variable_list(),T) + xf + xp + Par(X, data::variable_list(), f0));
           data::set_identifier_generator id_generator;
           pbes_expression expr = RHS(f0, g, lps, T, id_generator);
           pbes_equation e(sigma, v, expr);
@@ -761,7 +761,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
           fixpoint_symbol sigma = s::is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
-          propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
+          propositional_variable v(X, variable_list(variable_list(),T) + xf + xp + Par(X, data::variable_list(), f0));
           state_formulas::state_formula g = s::not_(arg(f));
           g = state_formulas::detail::negate_propositional_variable(v.name(), g);
           data::set_identifier_generator id_generator;

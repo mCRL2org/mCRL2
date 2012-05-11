@@ -12,7 +12,6 @@
 #ifndef BDD_MANIPULATOR_H
 #define BDD_MANIPULATOR_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/standard.h"
 
 namespace mcrl2

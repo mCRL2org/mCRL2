@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERMPP_MAKE_LIST_H
 #define MCRL2_ATERMPP_MAKE_LIST_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp
@@ -21,26 +20,19 @@ namespace atermpp
 /// \param t0 A list element.
 /// \return The generated list.
 template <typename T>
-// aterm_list make_list(T0 t0)
 term_list<T> make_list(const T &t0)
 {
-  return term_list<T>(ATmakeList1(t0));
+  return term_list<T>(term_list<T>(),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
 /// \param t0 A list element.
 /// \param t1 A list element.
 /// \return The generated list.
-/* template <typename T0, typename T1>
-term_list make_list(T0 t0, T1 t1)
-{
-  return aterm_list(ATmakeList2(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1)));
-} */
-
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1)
 {
-  return term_list<T>(ATmakeList2(t0, t1));
+  return term_list<T>(make_list(t1),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
@@ -48,16 +40,10 @@ term_list<T> make_list(const T &t0, const T &t1)
 /// \param t1 A list element.
 /// \param t2 A list element.
 /// \return The generated list.
-/* template <typename T0, typename T1, typename T2>
-aterm_list make_list(T0 t0, T1 t1, T2 t2)
-{
-  return aterm_list(ATmakeList3(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1), aterm_traits<T2>::term(t2)));
-} */
-
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1, const T &t2)
 {
-  return term_list<T>(ATmakeList3(t0, t1, t2));
+  return term_list<T>(make_list(t1,t2),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
@@ -66,16 +52,10 @@ term_list<T> make_list(const T &t0, const T &t1, const T &t2)
 /// \param t2 A list element.
 /// \param t3 A list element.
 /// \return The generated list.
-/* template <typename T0, typename T1, typename T2, typename T3>
-aterm_list make_list(T0 t0, T1 t1, T2 t2, T3 t3)
-{
-  return aterm_list(ATmakeList4(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1), aterm_traits<T2>::term(t2), aterm_traits<T3>::term(t3)));
-} */
-
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1, const T &t2, const T &t3)
 {
-  return term_list<T>(ATmakeList4(t0, t1, t2, t3));
+  return term_list<T>(make_list(t1,t2,t3),t0); 
 }
 
 } // namespace atermpp

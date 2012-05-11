@@ -12,9 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
 namespace atermpp
@@ -27,7 +25,7 @@ namespace detail
 /// \param f A function on terms
 /// \return The transformed sequence
 template <typename Term, typename Function>
-aterm_list list_apply(::aterm::term_list<Term> l, const Function f)
+aterm_list list_apply(term_list<Term> l, const Function f)
 {
   if (l.size() == 0)
   {
@@ -64,35 +62,36 @@ aterm_list list_apply(::aterm::term_list<Term> l, const Function f)
 /// \param f A function on terms
 /// \return The transformed term
 template <typename Term, typename Function>
-aterm_appl appl_apply(::aterm::term_appl<Term> a, const Function f)
+aterm_appl appl_apply(term_appl<Term> a, const Function f)
 {
+  return  term_appl<Term>(a.function(), a.begin(),a.end(),f);
   // TODO: This function can be more efficiently implemented, by using the feature
   // that ATmakeAppl can have the function f as last argument. This avoids the use
   // the explicit vector below.
 
-  size_t n = a.size();
+  /* size_t n = a.size();
   if (n > 0)
   {
     bool term_changed = false;
 
     // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,_ATerm*,n);
-    std::vector <ATerm> t(n);
+    std::vector <aterm> t(n);
 
     for (unsigned int i = 0; i < n; i++)
     {
-      t[i] = (ATerm)f(a(i));
+      t[i] = (aterm)f(a(i));
 
-      if (t[i] != &*(ATerm)(a(i)))
+      if (t[i] != &*(aterm)(a(i)))
       {
         term_changed = true;
       }
     }
     if (term_changed)
     {
-      a = ATmakeAppl_iterator(a.function(), t.begin(),t.end());
+      a = term_appl(a.function(), a.begin(),a.end(),f);
     } 
   }
-  return a;
+  return a; */
 }
 
 //--- find ----------------------------------------------------------------//
