@@ -145,11 +145,11 @@ static ATermAppl gstcTraverseVarConsTypeD(const ATermTable &DeclaredVars, const 
 static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* , ATermAppl, 
                ATermTable &FreeVars, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, const bool warn_upcasting=false, const bool print_cast_error=true);
 
-static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* t1, ATermAppl t2)
+/* static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* t1, ATermAppl t2)
 {
   ATermTable dummy_empty_table;
   return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, t1, t2, dummy_empty_table, true, ATERM_NON_EXISTING_POSITION, false, true);
-}
+} */
 
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);

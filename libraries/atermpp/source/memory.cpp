@@ -404,7 +404,7 @@ aterm::aterm(const function_symbol &sym)
   HashNumber hnr;
 
 
-  CHECK_ARITY(sym.arity(), 0);
+  assert(sym.arity()==0);
 
   hnr = FINISH(START(sym.number()));
 

@@ -75,16 +75,16 @@ void function_symbol_test()
   function_sort fs(s01, s);
 
 
-  function_symbol f("f", fs);
+  data::function_symbol f("f", fs);
   BOOST_CHECK(f.name().to_string() == "\"f\"");
   BOOST_CHECK(f.sort() == fs);
 
-  function_symbol g("g", s0);
+  data::function_symbol g("g", s0);
   BOOST_CHECK(g.name().to_string() == "\"g\"");
   BOOST_CHECK(g.sort() == s0);
 
   core::identifier_string g_name("g");
-  function_symbol g_(g_name, s0);
+  data::function_symbol g_(g_name, s0);
   BOOST_CHECK(g_.name().to_string() == "\"g\"");
   BOOST_CHECK(g_.sort() == s0);
 
@@ -93,7 +93,7 @@ void function_symbol_test()
   BOOST_CHECK(g == g_);
 
   data_expression f_e(f);
-  function_symbol f_e_(f_e);
+  data::function_symbol f_e_(f_e);
   BOOST_CHECK(f_e == f);
   BOOST_CHECK(f_e_.name() == f.name());
   BOOST_CHECK(f_e_.sort() == f.sort());
@@ -109,7 +109,7 @@ void application_test()
   s01.push_back(sort_expression(s1));
   function_sort s01s(s01, s);
 
-  function_symbol f("f", s01s);
+  data::function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
   data_expression_list xy = atermpp::make_list(x,y);
@@ -240,7 +240,7 @@ void set_comprehension_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
+  data::function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
   data_expression e(sort_set::set_comprehension(s, x));
   BOOST_CHECK(e.sort() == sort_set::set_(s));
 }
@@ -249,7 +249,7 @@ void bag_comprehension_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  function_symbol f("f", make_function_sort(s, sort_nat::nat()));
+  data::function_symbol f("f", make_function_sort(s, sort_nat::nat()));
   data_expression e(sort_bag::bag_comprehension(s, f(x)));
   BOOST_CHECK(e.sort() == sort_bag::bag(s));
 }

@@ -441,4 +441,6 @@ Term element_at(const term_list<Term> &l, size_t m)
 
 } // namespace atermpp
 
+#include "mcrl2/atermpp/detail/memory.h"
+
 #endif // MCRL2_ATERMPP_ATERM_LIST_H

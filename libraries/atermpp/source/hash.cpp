@@ -23,8 +23,9 @@
 #include <limits.h>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/detail/memory.h"
 
 
 /*}}}  */

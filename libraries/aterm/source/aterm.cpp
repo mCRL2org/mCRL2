@@ -21,30 +21,17 @@
 namespace aterm_deprecated
 {
 
-/*{{{  defines */
+/*  defines */
 
 static const size_t DEFAULT_BUFFER_SIZE = 4096;
 
 static const int ERROR_SIZE = 32;
 
-/* Initial number of terms that can be protected */
-/* In the current implementation this means that
-   excessive term protection can lead to deteriorating
-   performance! */
-// static const size_t INITIAL_PROT_TABLE_SIZE = 100003;
-// static const size_t PROTECT_EXPAND_SIZE = 100000;
-
-/* The same for protection function */
-// static const size_t PROTECT_FUNC_INITIAL_SIZE = 32;
-// static const size_t PROTECT_FUNC_EXPAND_SIZE = 32;
-
-/*}}}  */
 /*{{{  globals */
 
 char            aterm_id[] = "$Id$";
 
 /* Flag set when ATinit is called. */
-static bool initialized = false;
 
 /* We need a buffer for printing and parsing */
 static std::string string_buffer;
@@ -65,25 +52,6 @@ extern char* _strdup(const char* s);
 static ATerm    fparse_term(int* c, FILE* f);
 static ATerm    sparse_term(int* c, char** s);
 int ATvfprintf(FILE* stream, const char* format, va_list args);
-
-/*{{{  int ATprintf(const char *format, ...) */
-
-/**
- * Extension of printf() with ATerm-support.
- */
-
-int
-ATprintf(const char* format,...)
-{
-  int             result = 0;
-  va_list         args;
-
-  va_start(args, format);
-  result = ATvfprintf(stdout, format, args);
-  va_end(args);
-
-  return result;
-}
 
 /*}}}  */
 /*{{{  int ATfprintf(FILE *stream, const char *format, ...) */
@@ -185,38 +153,6 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
       case 'y':
         AT_printAFun(va_arg(args, size_t), stream);
         break;
-      /* case 'n':
-        {
-          _ATerm* t = va_arg(args, _ATerm*);
-          switch (ATgetType(t))
-          {
-            case AT_INT:
-            case AT_LIST:
-              fprintf(stream, "[...(%zu)]", ATgetLength((ATermList) t));
-              break;
-
-            case AT_APPL:
-              if (AT_isValidAFun(ATgetAFun((ATermAppl)t)))
-              {
-                AT_printAFun(ATgetAFun((ATermAppl)t), stream);
-                fprintf(stream, "(...(%zu))",
-                        GET_ARITY(t->header));
-              }
-              else
-              {
-                fprintf(stream, "<sym>(...(%zu))",
-                        GET_ARITY(t->header));
-              }
-              break;
-            case AT_FREE:
-              fprintf(stream, "@");
-              break;
-            default:
-              fprintf(stream, "#");
-              break;
-          }
-          break;
-        } */
       default:
         fputc(*p, stream);
         break;
@@ -225,88 +161,8 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
   return result;
 }
 
-/*}}}  */
 
-/*{{{  ATbool ATwriteToTextFile(ATerm t, FILE *f) */
-
-/**
- * Write a term in text format to file.
- */
-
-/* static bool
-writeToTextFile(const ATerm &t, FILE* f)
-{
-  AFun          sym;
-  ATerm           arg;
-  size_t    i, arity; / * size; * /
-  ATermAppl       appl;
-  ATermList       list;
-  char*            name;
-
-  assert(t->reference_count>0);
-  switch (ATgetType(t))
-  {
-    case AT_INT:
-      fprintf(f, "%d", ATgetInt((ATermInt)t));
-      break;
-    case AT_APPL:
-      / *{{{  Print application * /
-
-      appl = (ATermAppl) t;
-
-      sym = ATgetAFun(appl);
-      AT_printAFun(sym.number(), f);
-      arity = ATgetArity(sym);
-      name = ATgetName(sym);
-      if (arity > 0 || (!ATisQuoted(sym) && *name == '\0'))
-      {
-        fputc('(', f);
-        for (i = 0; i < arity; i++)
-        {
-          if (i != 0)
-          {
-            fputc(',', f);
-          }
-          arg = ATgetArgument(appl, i);
-          ATwriteToTextFile(arg, f);
-        }
-        fputc(')', f);
-      }
-
-      / *}}}  * /
-      break;
-    case AT_LIST:
-      / *{{{  Print list * /
-
-      list = (ATermList) t;
-      if (!ATisEmpty(list))
-      {
-        ATwriteToTextFile(ATgetFirst(list), f);
-        list = ATgetNext(list);
-      }
-      while (!ATisEmpty(list))
-      {
-        fputc(',', f);
-        ATwriteToTextFile(ATgetFirst(list), f);
-        list = ATgetNext(list);
-      }
-
-      / *}}}  * /
-      break;
-  }
-
-  return true;
-} */
-
-/*}}}  */
-
-/*{{{  ATerm ATwriteToNamedTextFile(char *name) */
-
-/**
- * Write an ATerm to a named plaintext file
- */
-
-bool ATwriteToNamedTextFile(const ATerm &t, const char* name)
+/* bool ATwriteToNamedTextFile(const ATerm &t, const char* name)
 {
   FILE*  f;
   bool result;
@@ -325,7 +181,7 @@ bool ATwriteToNamedTextFile(const ATerm &t, const char* name)
   fclose(f);
 
   return result;
-}
+} */
 
 /*}}}  */
 
@@ -1045,9 +901,6 @@ sparse_unquoted_appl(int* c, char** s)
   return ATmakeApplList(sym, args);
 }
 
-/*}}}  */
-/*{{{  static void sparse_num(int *c, char **s) */
-
 /**
  * Parse a number
  */
@@ -1078,9 +931,6 @@ sparse_num(int* c, char** s)
   }
 }
 
-/*}}}  */
-
-/*{{{  static ATerm sparse_term(int *c, char **s) */
 
 /**
  * Parse a term from file.
@@ -1139,212 +989,5 @@ sparse_term(int* c, char** s)
   }
   return result;
 }
-
-/*}}}  */
-
-/*{{{  void AT_markTerm(ATerm t) */
-
-/**
- * Mark a term and all of its children.
- */
-/* void AT_markTerm(const ATerm t1)
-{
-  return 0;
-
-  if (IS_MARKED(t1->header))
-  {
-    return;
-  }
-
-  std::stack < ATerm > mark_stack;
-  mark_stack.push(t1);
-
-  while (!mark_stack.empty())
-  {
-    const ATerm t=mark_stack.top();
-    mark_stack.pop();
-
-    if (!(IS_MARKED(t->header)))
-    {
-      SET_MARK(t->header);
-
-      switch (GET_TYPE(t->header))
-      {
-        case AT_INT:
-          break;
-
-        case AT_APPL:
-          {
-            const AFun sym = ATgetAFun((ATermAppl) t);
-
-            if (AT_isValidAFun(sym.number()))
-            {
-              AT_markAFun(sym);
-            }
-            else
-            {
-              continue;
-            }
-            size_t arity = GET_ARITY(t->header);
-            if (arity > MAX_INLINE_ARITY)
-            {
-              arity = ATgetArity(sym);
-            }
-            for (size_t i = 0; i < arity; i++)
-            {
-              mark_stack.push((ATerm)ATgetArgument((ATermAppl) t, i));
-            }
-            break;
-          }
-        case AT_LIST:
-          if (!ATisEmpty((ATermList) t))
-          {
-            mark_stack.push(ATgetNext((ATermList) t));
-            mark_stack.push(ATgetFirst((ATermList) t));
-          }
-          break;
-
-      }
-    }
-  } 
-} */
-
-
-/*}}}  */
-/*{{{  void AT_unmarkIfAllMarked(ATerm t) */
-
-/* void AT_unmarkIfAllMarked(const ATerm &t)
-{
-  if (IS_MARKED(t->header))
-  {
-    CLR_MARK(t->header);
-    switch (ATgetType(t))
-    {
-      case AT_INT:
-        break;
-
-      case AT_LIST:
-      {
-        ATermList list = (ATermList)t;
-        while (!ATisEmpty(list))
-        {
-          CLR_MARK(list->header);
-          AT_unmarkIfAllMarked(ATgetFirst(list));
-          list = ATgetNext(list);
-          if (!IS_MARKED(list->header))
-          {
-            break;
-          }
-        }
-        CLR_MARK(list->header);
-      }
-      break;
-      case AT_APPL:
-      {
-        ATermAppl appl = (ATermAppl)t;
-        size_t cur_arity, cur_arg;
-        AFun sym;
-
-        sym = ATgetAFun(appl);
-        AT_unmarkAFun(sym);
-        cur_arity = ATgetArity(sym);
-        for (cur_arg=0; cur_arg<cur_arity; cur_arg++)
-        {
-          AT_unmarkIfAllMarked(ATgetArgument(appl, cur_arg));
-        }
-      }
-      break;
-      default:
-        throw std::runtime_error("collect_terms: illegal term");
-        break;
-    }
-
-  }
-}  */
-
-/*}}}  */
-
-/**
- * Calculate the number of unique symbols.
- */
-
-/*{{{  static size_t calcUniqueAFuns(ATerm t) */
-
-static size_t calcUniqueAFuns(const ATerm &t, std::set<ATerm> &visited)
-{
-  size_t nr_unique = 0;
-  size_t  i, arity;
-  AFun sym;
-  ATermList list;
-
-  // if (IS_MARKED(t->header))
-  if (visited.count(t)>0)
-  {
-    return 0;
-  }
-
-  switch (ATgetType(t))
-  {
-    case AT_INT:
-      if (!AFun::at_lookup_table[AS_INT.number()]->count++)
-      {
-        nr_unique = 1;
-      }
-      break;
-
-    case AT_APPL:
-      sym = ATgetAFun((ATermAppl) t);
-      assert(AFun::at_lookup_table.size()>sym.number());
-      nr_unique = AFun::at_lookup_table[sym.number()]->count>0 ? 0 : 1;
-      AFun::at_lookup_table[sym.number()]->count++;
-      // AT_markAFun(sym);
-      arity = ATgetArity(sym);
-      for (i = 0; i < arity; i++)
-      {
-        nr_unique += calcUniqueAFuns(ATgetArgument((ATermAppl)t, i),visited);
-      }
-      break;
-
-    case AT_LIST:
-      list = (ATermList)t;
-      while (!ATisEmpty(list) && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
-      {
-        // SET_MARK(list->header);
-        visited.insert(list);
-        if (!AFun::at_lookup_table[AS_LIST.number()]->count++)
-        {
-          nr_unique++;
-        }
-        nr_unique += calcUniqueAFuns(ATgetFirst(list),visited);
-        list = ATgetNext(list);
-      }
-      if (ATisEmpty(list) && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
-      {
-        // SET_MARK(list->header);
-        visited.insert(list);
-        if (!AFun::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
-        {
-          nr_unique++;
-        }
-      }
-      break;
-  }
-
-  visited.insert(t);
-  // SET_MARK(t->header);
-
-  return nr_unique;
-}
-
-size_t AT_calcUniqueAFuns(const ATerm &t)
-{
-  std::set<ATerm> visited;
-  size_t result = calcUniqueAFuns(t,visited);
-  // AT_unmarkIfAllMarked(t);
-
-  return result;
-}
-
-
 
 } // namespace aterm_deprecated
