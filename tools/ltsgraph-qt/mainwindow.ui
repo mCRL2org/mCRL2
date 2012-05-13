@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>738</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -83,6 +83,24 @@
    <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockOutput">
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string/>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
+  </widget>
   <action name="actGenerateRandomGraph">
    <property name="enabled">
     <bool>true</bool>
@@ -150,6 +168,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>mcrl2::utilities::qt::LogWidget</class>
+   <extends>QWidget</extends>
+   <header>mcrl2/utilities/logwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <slots>

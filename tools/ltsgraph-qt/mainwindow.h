@@ -7,22 +7,22 @@
 #include "springlayout.h"
 
 namespace Ui {
-    class MainWindow;
+  class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-public:
+  public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-private slots:
+  private slots:
     void onOpenFile(const QString& filename);
     void onExportImage(const QString& filename);
     void onWidgetResized(const Graph::Coord3D& newsize);
     void on3DChanged(bool enabled);
     void onTimer();
-private:
+  private:
     Ui::MainWindow *m_ui;
     GLWidget* m_glwidget;
     Graph::Graph m_graph;

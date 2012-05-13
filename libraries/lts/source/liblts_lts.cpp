@@ -311,6 +311,7 @@ void lts_lts_t::load(const std::string& filename)
   }
   else
   {
+    mCRL2log(verbose) << "Starting to load file " << filename << "\n";
     read_from_lts(*this,filename);
   }
 

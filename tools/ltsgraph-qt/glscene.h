@@ -19,7 +19,7 @@ struct CameraAnimation;
 
 class GLScene
 {
-private:
+  private:
     Graph::Graph& m_graph;      ///< The graph that is being visualised.
     VertexData *m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
     TextureData *m_texturedata; ///< Implementation details storing labels as textures.
@@ -50,7 +50,7 @@ private:
      * @param i The index of the edge of the label to render.
      */
     void renderLabel(size_t i);
-public:
+  public:
 
     /**
      * @brief An enumeration that identifies the types of objects that
@@ -58,11 +58,11 @@ public:
      */
     enum SelectableObject
     {
-        so_none,     ///< Nothing was selected.
-        so_edge,     ///< An edge was selected.
-        so_label,    ///< An edge label was selected.
-        so_handle,   ///< An edge handle was selected.
-        so_node      ///< A node was selected.
+      so_none,     ///< Nothing was selected.
+      so_edge,     ///< An edge was selected.
+      so_label,    ///< An edge label was selected.
+      so_handle,   ///< An edge handle was selected.
+      so_node      ///< A node was selected.
     };
 
     /**
