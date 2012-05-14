@@ -54,11 +54,9 @@ namespace Graph
         }
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
         {
-          qDebug() << "Loading with m_impl 1";
           // Remove old graph (if it wasn't deleted yet) and load new one
           m_graph.load(filename.toUtf8().constData());
 
-          qDebug() << "Loading with m_impl 2";
           // Resize all auxiliary data vectors
           labels.resize(m_graph.num_action_labels());
           nodes.resize(m_graph.num_states());
@@ -66,7 +64,6 @@ namespace Graph
           handles.resize(m_graph.num_transitions());
           labelnodes.resize(m_graph.num_transitions());
 
-          qDebug() << "Loading with m_impl 3";
           // Store string representations of labels
           for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
           {
@@ -76,7 +73,6 @@ namespace Graph
               labels[i] = label(m_graph.action_label(i));
           }
 
-          qDebug() << "Loading with m_impl 4";
           // Position nodes randomly
           for (size_t i = 0; i < m_graph.num_states(); ++i)
           {
@@ -89,7 +85,6 @@ namespace Graph
             nodes[i].color[2] = 0.0;
           }
 
-          qDebug() << "Loading with m_impl 5";
           // Assign and position edge handles, position edge labels
           for (size_t i = 0; i < m_graph.num_transitions(); ++i)
           {
@@ -149,7 +144,6 @@ namespace Graph
 
   void Graph::load(const QString &filename, const Coord3D& min, const Coord3D& max)
   {
-    qDebug() << "Guessing Format";
     mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
     delete m_impl;
     switch (guess)
@@ -168,9 +162,7 @@ namespace Graph
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
         break;
     }
-    qDebug() << "Loading with m_impl";
     m_impl->load(filename, min, max);
-    qDebug() << "Loaded with m_impl";
   }
 
   Edge Graph::edge(size_t index) const

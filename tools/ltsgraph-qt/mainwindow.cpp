@@ -6,10 +6,13 @@
 #include "mcrl2/lts/lts_lts.h"
 #include <QFileDialog>
 
+#include "mcrl2/utilities/atermthread.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   m_ui(new Ui::MainWindow)
 {
+
   m_ui->setupUi(this);
 
   // Create open/save dialogs
@@ -24,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                     ));
   m_opendialog = new QFileDialog(this, tr("Open file"), QString(),
                                  tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)"));
+  m_opendialog->setFileMode(QFileDialog::ExistingFile);
 
   // Add graph area
   m_glwidget = new GLWidget(m_graph, m_ui->frame);
@@ -34,8 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
   m_layout = new Graph::SpringLayout(m_graph);
   Graph::SpringLayoutUi* springlayoutui = m_layout->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
+  springlayoutui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   GLWidgetUi* glwidgetui = m_glwidget->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, glwidgetui);
+  glwidgetui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
   // Create timer for rendering (at 25fps)
   m_timer = new QTimer(this);

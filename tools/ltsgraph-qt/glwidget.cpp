@@ -110,7 +110,6 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
   QGLFormat fmt = format();
   fmt.setAlpha(true);
   setFormat(fmt);
-  qDebug() << format().alpha();
 }
 
 GLWidget::~GLWidget()
@@ -304,9 +303,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
 
 void GLWidget::rebuild()
 {
-  qDebug() << "Updating Labels";
   m_scene->updateLabels();
-  qDebug() << "Updating Shapes";
   m_scene->updateShapes();
 }
 
@@ -399,9 +396,9 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter)
                 if (alpha)
                 {
                   data[i] = qRgba(
-                        qMin(255, qRed(data[i]) * 255 / alpha),
-                        qMin(255, qGreen(data[i]) * 255 / alpha),
-                        qMin(255, qBlue(data[i]) * 255 / alpha),
+                        (std::min)(255, qRed(data[i]) * 255 / alpha),
+                        (std::min)(255, qGreen(data[i]) * 255 / alpha),
+                        (std::min)(255, qBlue(data[i]) * 255 / alpha),
                         alpha
                         );
                 }

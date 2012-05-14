@@ -66,32 +66,24 @@ struct TextureData
 
     void generate(const Graph::Graph& g)
     {
-      assert(glGetError() == 0);
       QFont font;
       QFontMetrics metrics(font);
       QPainter p;
-
-      qDebug() << "TextureData generate 1";
 
       glDeleteTextures(count, textures);
       delete[] widths;
       delete[] heights;
       delete[] textures;
 
-      qDebug() << "TextureData generate 2";
-
       count = g.labelCount();
       textures = new GLuint[count];
       widths = new size_t[count];
       heights = new size_t[count];
 
-      qDebug() << "TextureData generate 3";
-
       glGenTextures(count, textures);
 
       for (size_t i = 0; i < count; ++i)
       {
-        qDebug() << "TextureData generate 4";
 
         QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, g.labelstring(i));
         QImage label(bounds.width(), bounds.height(), QImage::Format_ARGB32_Premultiplied);
@@ -120,12 +112,11 @@ struct TextureData
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-        assert(glGetError() == 0);
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
 
         assert(glGetError() == 0);
       }
-      qDebug() << "TextureData generate finish";
     }
 };
 
@@ -697,13 +688,15 @@ void GLScene::init(const QColor& clear)
   gl2psEnable(GL2PS_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   // Get some fog in. This should probably be made custumizable for people
   // who don't like fog...
   GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 0.0};
   glFogf(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 1);
   glFogf(GL_FOG_START, 1000.0);
-  glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
+  if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
+    glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
   glFogf(GL_FOG_END, 2500.0);
   glFogfv(GL_FOG_COLOR, fog_color);
   glEnable(GL_FOG);
@@ -720,7 +713,6 @@ void GLScene::init(const QColor& clear)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   m_camera->applyFrustum();
-  assert(glGetError() == 0);
 }
 
 void GLScene::render()
@@ -752,7 +744,6 @@ void GLScene::render()
   }
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_TRUE);
-  assert(glGetError() == 0);
 }
 
 void GLScene::resize(size_t width, size_t height)
