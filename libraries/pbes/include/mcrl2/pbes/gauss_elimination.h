@@ -74,7 +74,7 @@ class gauss_elimination_algorithm
         --i;
         mCRL2log(log::verbose) << "solving equation\n  before: " << print_equation(*i);
         solve(*i);
-        mCRL2log(log::verbose) << "   after: " << print_equation(*i);
+        mCRL2log(log::verbose) << "   after: " << print_equation(*i) << "\n";
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());

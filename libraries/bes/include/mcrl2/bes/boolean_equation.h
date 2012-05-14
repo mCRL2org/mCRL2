@@ -77,7 +77,7 @@ class boolean_equation
     /// \brief Constructor.
     /// \brief Constructor.
     /// \param t A term
-    boolean_equation(atermpp::aterm_appl t)
+    boolean_equation(const atermpp::aterm_appl &t)
     {
       assert(core::detail::check_rule_BooleanEquation(t));
       atermpp::aterm_appl::iterator i = t.begin();

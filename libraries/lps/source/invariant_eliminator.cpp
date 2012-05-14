@@ -45,7 +45,7 @@ mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
     return deprecated::summand(a_summand.summation_variables(),
                    v_formula,
                    a_summand.is_delta(),
-                   a_summand.actions(),
+                   (a_summand.is_delta()?action_list():a_summand.actions()),
                    a_summand.time(),
                    a_summand.assignments());
   }
@@ -63,7 +63,7 @@ mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
       return deprecated::summand(a_summand.summation_variables(),
                      data_expression(f_bdd_prover.get_bdd()),
                      a_summand.is_delta(),
-                     a_summand.actions(),
+                     (a_summand.is_delta()?action_list():a_summand.actions()),
                      a_summand.time(),
                      a_summand.assignments());
     }

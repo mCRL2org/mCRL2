@@ -48,7 +48,7 @@ class term_list:public aterm
     typedef Term& reference;
     
     /// Const reference to T.
-    typedef const Term const_reference;
+    typedef const Term &const_reference;
     
     /// An unsigned integral type.
     typedef size_t size_type;
@@ -67,17 +67,18 @@ class term_list:public aterm
     {
     }
 
-    /// Construction from ATermList.
+    /// \brief Copy construction.
     /// \param l A list.
     term_list(const term_list<Term> &t):aterm(reinterpret_cast<_ATerm *>(&*t))
     {
       assert(m_term==NULL || type() == AT_LIST); // term list can be NULL.
     }
 
-    /// \brief Construction from ATermList.
+    /// \brief Constructor from _aterm_list*.
     /// \param l A list.
-    term_list(_ATermList *t):aterm(reinterpret_cast<_ATerm *>(t))
+    term_list(detail::_aterm_list<Term> *t):aterm(reinterpret_cast<_ATerm *>(t))
     {
+      assert(sizeof(Term)==sizeof(size_t));
       assert(t==NULL || type() == AT_LIST); // term list can be NULL. This is generally used to indicate a faulty
                                             // situation. This used should be discouraged.
     }
@@ -89,13 +90,17 @@ class term_list:public aterm
     //  \return The same list of a different type.
     template <typename SpecificTerm>
     term_list<Term>(const term_list<SpecificTerm> &t): aterm(t)
-    {} 
+    {
+      assert(sizeof(SpecificTerm)==sizeof(size_t));
+      assert(sizeof(Term)==sizeof(size_t));
+    } 
     
 
     /// Explicit construction from ATerm. 
     ///  \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
+      assert(sizeof(Term)==sizeof(size_t));
       assert(m_term==NULL || t.type()==AT_LIST); // Term list can be NULL; Generally, this is used to indicate a faulty situation.
                                                  // This use should be discouraged.
     }
@@ -115,6 +120,7 @@ class term_list:public aterm
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
               boost::random_access_traversal_tag >::type >::type* = 0)
     {
+      assert(sizeof(Term)==sizeof(size_t));
       term_list<Term> result;
       while (first != last)
       {
@@ -158,40 +164,40 @@ class term_list:public aterm
       return *this;
     }
 
-    _ATermList & operator *() const
+    detail::_aterm_list<Term> & operator *() const
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
       // which is done quite commonly.
       assert(m_term==NULL || m_term->reference_count>0);
-      return *reinterpret_cast<_ATermList*>(m_term); 
+      return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
     }
 
-    _ATermList *operator ->() const
+    detail::_aterm_list<Term> *operator ->() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count>0);
-      return reinterpret_cast<_ATermList*>(m_term);
+      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
     }
 
-    /// \brief Conversion to ATermList.
-    /// \return The wrapped ATermList pointer.
+    /// \brief Conversion to aterm_list.
+    /// \return The wrapped _aterm_list pointer.
     operator term_list<aterm>() const
     {
-      return static_cast<_ATermList*>(m_term);
+      return static_cast<detail::_aterm_list<aterm>* >(m_term);
     }
 
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
     const term_list<Term> tail() const
     {
-      return (static_cast<_ATermList*>(m_term))->tail;
+      return (static_cast<detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
     /// \brief Returns the head of the list.
     /// \return The term at the head of the list.
     const Term head()
     {
-      return Term(static_cast<_ATermList*>(m_term)->head);
+      return Term(static_cast<detail::_aterm_list<Term>*>(m_term)->head);
     }
 
     /// \brief Returns the size of the term_list.
@@ -200,8 +206,8 @@ class term_list:public aterm
     size_type size() const
     {
       size_t size=0;
-      for(_ATermList* m_list=static_cast<_ATermList*>(m_term);
-                 m_list!=reinterpret_cast<_ATermList*>(&*empty_list()); m_list=m_list->tail)
+      for(detail::_aterm_list<Term>* m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
+                 m_list!=reinterpret_cast<detail::_aterm_list<Term>*>(&*empty_list()); m_list=&*(m_list->tail))
       {
         size++;
       }
@@ -219,7 +225,7 @@ class term_list:public aterm
     /// \return The first element of the list.
     Term front() const
     {
-      return Term(static_cast<aterm>(static_cast<_ATermList*>(m_term)->head));
+      return Term(static_cast<aterm>(static_cast<detail::_aterm_list<Term>*>(m_term)->head));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -243,6 +249,23 @@ class term_list:public aterm
       return (std::numeric_limits<size_t>::max)();
     }
 };
+
+/// \cond INTERNAL_DOCS
+namespace detail
+{
+
+template <class Term>
+class _aterm_list:public _ATerm
+{
+  public:
+    Term head;
+    term_list<Term> tail;
+};
+
+static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(size_t);
+}
+/// \endcond
+
 
 /// \brief A term_list with elements of type aterm.
 // typedef term_list<aterm> aterm_list;

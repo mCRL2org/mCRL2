@@ -203,7 +203,7 @@ static _ATerm* get_int2aterm_value(const ATermInt &i)
   return get_int2aterm_value(ATgetInt(i));
 }
 
-static _ATermAppl* get_rewrappl_value(const size_t i)
+static ATermAppl get_rewrappl_value(const size_t i)
 {
   static std::vector <ATermAppl> rewr_appls;
   while (rewr_appls.size()<i+1)
@@ -213,7 +213,7 @@ static _ATermAppl* get_rewrappl_value(const size_t i)
   return &*rewr_appls[i];
 }
 
-static _ATermAppl* get_rewrappl_value(const atermpp::aterm_int &i)
+static ATermAppl get_rewrappl_value(const atermpp::aterm_int &i)
 {
   return get_rewrappl_value(i.value());
 }
@@ -1645,7 +1645,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-      ss << "atermpp::aterm_appl((_ATerm*) " << (void*) get_rewrappl_value((ATermInt) t) << ")";
+      ss << "atermpp::aterm_appl((_ATerm*) " << (void*) &*get_rewrappl_value((ATermInt) t) << ")";
     }
     return pair<bool,string>(
              rewr || b,
@@ -2054,7 +2054,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
 
     fprintf(f,"==atermpp::aterm_appl((_ATerm*) %p)) // C\n"
             "%s{\n",
-            (void*)get_rewrappl_value(true_num),
+            (void*)&*get_rewrappl_value(true_num),
             whitespace(d*2)
            );
     implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
@@ -2102,7 +2102,7 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
     fprintf(f,"==atermpp::aterm_appl((_ATerm*) %p)) // C\n"
             "%s{\n"
             "%sreturn ",
-            (void*)get_rewrappl_value(true_num),
+            (void*)&*get_rewrappl_value(true_num),
             whitespace(d*2),
             whitespace(d*2)
            );
@@ -2139,7 +2139,7 @@ static void finish_function(FILE* f, size_t arity, int opid, bool* used)
   if (arity == 0)
   {
     fprintf(f,  "  return (atermpp::aterm_appl((_ATerm*) %p)",
-            (void*)get_rewrappl_value(opid)
+            (void*)&*get_rewrappl_value(opid)
            );
   }
   else
@@ -3125,7 +3125,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
     so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
     so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl &)> (rewriter_so->proc_address("rewrite_external"));
-    // so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const _ATermAppl*)> (rewriter_so->proc_address("rewrite_external"));
 
   }
   catch(std::runtime_error &e)

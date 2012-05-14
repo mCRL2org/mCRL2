@@ -63,7 +63,8 @@ class boolean_equation_system
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      boolean_equation_list eqn = static_cast<boolean_equation_list>(*i++);
+      // boolean_equation_list eqn = static_cast<boolean_equation_list>(*i++);
+      atermpp::term_list<atermpp::aterm_appl> eqn = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
       m_initial_state = boolean_expression(*i);
       m_equations = Container(eqn.begin(), eqn.end());
     }
@@ -197,7 +198,7 @@ class boolean_equation_system
     {
       std::set<boolean_variable> bnd = binding_variables();
       std::set<boolean_variable> occ = occurring_variables();
-      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
+      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(boolean_variable(initial_state())) != bnd.end();
     }
 };
 

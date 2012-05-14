@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
+#include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -23,7 +24,6 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -88,7 +88,7 @@ inline bool is_function_symbol(atermpp::aterm_appl p)
 }
 
 /// \brief Returns true if the term t is a variable
-inline bool is_variable(const ATerm &p)
+inline bool is_variable(const atermpp::aterm &p)
 {
   return core::detail::gsIsDataVarId(atermpp::aterm_appl(p));
 }
@@ -136,7 +136,7 @@ class data_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     ///
     /// \param[in] t a term adhering to the internal format.
-    explicit data_expression(const aterm_deprecated::ATerm& t)
+    explicit data_expression(const atermpp::aterm& t)
       : atermpp::aterm_appl(t)
     {
       // As Nil is used to indicate a non existing time value

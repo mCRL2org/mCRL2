@@ -292,11 +292,11 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       {
         if (m_has_true)
         {
-          m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, m_true));
+          m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), boolean_variable(m_true), m_true));
         }
         if (m_has_false)
         {
-          m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, m_false));
+          m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), boolean_variable(m_false), m_false));
         }
       }
     }

@@ -134,7 +134,7 @@ void group_information::gather(mcrl2::lps::specification const& l)
     std::set< variable > used_variables;
 
     local::add_used_variables(used_variables, find_variables(i->condition()));
-    local::add_used_variables(used_variables, lps::find_variables(i->actions()));
+    local::add_used_variables(used_variables, lps::find_variables((i->is_delta()?lps::action_list():i->actions())));
 
     if (i->has_time())
     {

@@ -201,7 +201,7 @@ struct boolean_expr_builder
     }
     else if (tr::is_variable(e))
     {
-      result = visit_var(e, e, arg1);
+      result = visit_var(e, variable_type(e), arg1);
       if (!is_finished(result))
       {
         result = e;

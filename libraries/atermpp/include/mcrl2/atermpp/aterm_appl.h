@@ -29,9 +29,9 @@ class term_appl:public aterm
   protected:
     /// \brief Conversion operator.
     /// \return The wrapped aterm.
-    _ATermAppl* appl() const
+    detail::_aterm_appl<Term>* appl() const
     {
-      return static_cast<_ATermAppl*>(m_term);
+      return static_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
   public:
@@ -63,14 +63,24 @@ class term_appl:public aterm
     term_appl():aterm()
     {}
 
-    term_appl (_ATermAppl *t):aterm(reinterpret_cast<_ATerm*>(t))
+    /// \brief Constructor.
+    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<_ATerm*>(t))
     {
+      assert(sizeof(Term)==sizeof(size_t));
+    }
+    
+    /// \brief Copy constructor from an aterm_appl.
+    /// \param t The aterm.
+    term_appl (const term_appl &t):aterm(t)
+    {
+      assert(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Explicit constructor from an aterm.
     /// \param t The aterm.
     explicit term_appl (const aterm &t):aterm(t)
     {
+      assert(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Constructor.
@@ -152,19 +162,19 @@ class term_appl:public aterm
       return *this;
     }
 
-    _ATermAppl & operator *() const
+    detail::_aterm_appl<Term> & operator *() const
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
       // which is done quite commonly.
       assert(m_term==NULL || m_term->reference_count>0);
-      return *reinterpret_cast<_ATermAppl*>(m_term); 
+      return *reinterpret_cast<detail::_aterm_appl<Term>*>(m_term); 
     }
 
-    _ATermAppl *operator ->() const
+    detail::_aterm_appl<Term> *operator ->() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count>0);
-      return reinterpret_cast<_ATermAppl*>(m_term);
+      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
     /// \brief Returns the size of the list.
@@ -185,14 +195,14 @@ class term_appl:public aterm
     /// \return An iterator pointing to the beginning of the list.
     const_iterator begin() const
     {
-      return const_iterator(&(static_cast<_ATermAppl*>(m_term)->arg[0]));
+      return const_iterator(&(static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[0]));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the list.
     /// \return A const_iterator pointing to the beginning of the list.
     const_iterator end() const
     {
-      return const_iterator(&static_cast<_ATermAppl*>(m_term)->arg[size()]);
+      return const_iterator(&static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[size()]);
     }
 
     /// \brief Returns the largest possible size of the list.
@@ -222,7 +232,7 @@ class term_appl:public aterm
     const Term operator()(size_type i) const
     {
       assert(i<m_term->function().arity());
-      return static_cast<const Term>(static_cast<aterm>(static_cast<_ATermAppl*>(m_term)->arg[i]));
+      return static_cast<const Term>(static_cast<aterm>(static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[i]));
     }
 
 };

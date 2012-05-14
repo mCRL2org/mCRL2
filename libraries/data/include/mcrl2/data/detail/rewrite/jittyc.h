@@ -109,7 +109,6 @@ class RewriterCompilingJitty: public Rewriter
     void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
     atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl &);
-    // atermpp::aterm_appl(*so_rewr)(const _ATermAppl *);
 
     void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
     void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);

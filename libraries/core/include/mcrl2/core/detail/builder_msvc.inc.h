@@ -9,10 +9,10 @@
 /// \file mcrl2/core/builder_msvc.inc.h
 /// \brief add your file description here.
 
-// ATerm traversal
+// aterm traversal
 template <typename T>
 T operator()(const T& x,
-             typename boost::enable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0
+             typename boost::enable_if<typename boost::is_base_of< aterm::aterm, T>::type>::type* = 0
             )
 {
   core::msg("aterm traversal");
@@ -20,7 +20,7 @@ T operator()(const T& x,
   return x;
 }
 
-// ATerm list traversal
+// aterm list traversal
 template <typename T>
 atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
@@ -36,7 +36,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 // Container traversal
 template <typename T>
 void operator()(T& x,
-                typename boost::disable_if<typename boost::is_base_of< aterm::ATerm, T>::type>::type* = 0,
+                typename boost::disable_if<typename boost::is_base_of< aterm::aterm, T>::type>::type* = 0,
                 typename atermpp::detail::enable_if_container<T>::type* = 0
                )
 {
@@ -47,7 +47,7 @@ void operator()(T& x,
   }
 }
 
-// ATerm set traversal
+// aterm set traversal
 template <typename T>
 void operator()(std::set<T>& x)
 {

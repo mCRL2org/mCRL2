@@ -5148,10 +5148,10 @@ class specification_basic_type:public boost::noncopyable
         {
           if (n>1)
           {
-            const action_list multiaction=w1.front().actions();
             sort_expression_list actionsorts;
             if (!w1.front().is_delta())
             {
+              const action_list multiaction=w1.front().actions();
               actionsorts=getActionSorts(multiaction);
             }
 
@@ -5294,7 +5294,6 @@ class specification_basic_type:public boost::noncopyable
       for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end() ; ++i)
       {
         const variable_list sumvars=i->summation_variables();
-        const action_list multiaction=i->actions();
         const data_expression actiontime=i->time();
         const data_expression condition=i->condition();
         const assignment_list nextstate=i->assignments();
@@ -5302,6 +5301,7 @@ class specification_basic_type:public boost::noncopyable
         action_list acts;
         if (!i->is_delta())
         {
+          const action_list multiaction=i->actions();
           acts=hide_(hidelist,multiaction);
         }
         resultsumlist=push_front(
@@ -5418,7 +5418,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       result=push_front(reverse(result),
-                        summand_(sumvars,cond,s.is_delta(),s.actions(),s.has_time(),
+                        summand_(sumvars,cond,s.is_delta(),(s.is_delta()?action_list():s.actions()),s.has_time(),
                                  actiontime,s.assignments()));
       return result;
     }
@@ -5447,6 +5447,7 @@ class specification_basic_type:public boost::noncopyable
       }
       const identifier_string_list names=allowaction.names();
       identifier_string_list::const_iterator i=names.begin();
+
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker,++i)
       {
@@ -5454,7 +5455,6 @@ class specification_basic_type:public boost::noncopyable
         {
           return false;
         }
-
         if (*i!=walker->label().name())
         {
           return false;
@@ -5541,14 +5541,14 @@ class specification_basic_type:public boost::noncopyable
       {
         const deprecated::summand smmnd= *i;
         const variable_list sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.actions();
+        // const action_list multiaction=smmnd.actions();
         const data_expression actiontime=smmnd.time();
         const data_expression condition=smmnd.condition();
 
 
         if (!i->is_delta() &&
-            ((is_allow && allow_(allowlist,multiaction)) ||
-             (!is_allow && !encap(allowlist,multiaction))))
+            ((is_allow && allow_(allowlist,smmnd.actions())) ||
+             (!is_allow && !encap(allowlist,smmnd.actions()))))
         {
           resultactionsumlist=push_front(
                                 resultactionsumlist,
@@ -6311,7 +6311,6 @@ class specification_basic_type:public boost::noncopyable
       {
         const deprecated::summand smmnd=*sourcesumlist;
         const variable_list sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.actions();
         if (smmnd.is_delta())
         {
           resultingDeltaSummands=push_front(
@@ -6320,6 +6319,7 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
+          const action_list multiaction=smmnd.actions();
           const data_expression condition=smmnd.condition();
           const assignment_list nextstate=smmnd.assignments();
 
@@ -6642,7 +6642,11 @@ class specification_basic_type:public boost::noncopyable
         variable_list unique_sumvars=make_unique_variables(sumvars,hint);
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
-        action_list multiaction=smmnd.actions();
+        action_list multiaction;
+        if (!smmnd.is_delta())
+        { 
+          multiaction=smmnd.actions();
+        }
         data_expression actiontime=smmnd.time();
         assignment_list nextstate=smmnd.assignments();
 
@@ -6697,7 +6701,11 @@ class specification_basic_type:public boost::noncopyable
       {
         const deprecated::summand summand1= *walker1;
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
-        action_list multiaction1=summand1.actions();
+        action_list multiaction1;
+        if (!summand1.is_delta())
+        {
+          multiaction1=summand1.actions();
+        }
         data_expression actiontime1=summand1.time();
         data_expression condition1=summand1.condition();
         assignment_list nextstate1=summand1.assignments();
@@ -6755,7 +6763,11 @@ class specification_basic_type:public boost::noncopyable
       {
         const deprecated::summand summand2= *walker2;
         variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
-        action_list multiaction2=summand2.actions();
+        action_list multiaction2;
+        if (!summand2.is_delta())
+        {
+          multiaction2=summand2.actions();
+        }
         data_expression actiontime2=summand2.time();
         data_expression condition2=summand2.condition();
         assignment_list nextstate2=summand2.assignments();
@@ -6811,7 +6823,11 @@ class specification_basic_type:public boost::noncopyable
         const deprecated::summand summand1= *walker1;
 
         const variable_list sumvars1=summand1.summation_variables();
-        const action_list multiaction1=summand1.actions();
+        action_list multiaction1;
+        if (!summand1.is_delta())
+        {
+          multiaction1=summand1.actions();
+        }
         const data_expression actiontime1=summand1.time();
         const data_expression condition1=summand1.condition();
         const assignment_list nextstate1=summand1.assignments();
@@ -6821,7 +6837,11 @@ class specification_basic_type:public boost::noncopyable
         {
           const deprecated::summand summand2= *walker2;
           const variable_list sumvars2=summand2.summation_variables();
-          const action_list multiaction2=summand2.actions();
+          action_list multiaction2;
+          if (!summand2.is_delta())
+          {
+            multiaction2=summand2.actions();
+          }
           const data_expression actiontime2=summand2.time();
           const data_expression condition2=summand2.condition();
           const assignment_list nextstate2=summand2.assignments();
@@ -7817,8 +7837,7 @@ class specification_basic_type:public boost::noncopyable
       for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end(); ++i)
       {
         const deprecated::summand smd=*i;
-        const action_list multiaction=smd.actions();
-        if (multiaction==push_front(action_list(),terminationAction))
+        if (!smd.is_delta() && smd.actions()==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
           mCRL2log(mcrl2::log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;

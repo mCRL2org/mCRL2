@@ -19,65 +19,40 @@ namespace atermpp
 {
 
 /// \cond INTERNAL_DOCS
-// needed for conversion of the return type of ATgetFirst
-/* template <class T>
-struct term_list_iterator_traits
+namespace detail
 {
-  typedef ATerm value_type;
-}; */
+  template <class Term>
+  class _aterm_list;
+}
 /// \endcond
 
-class _ATermList:public _ATerm
-{
-  public:
-    _ATerm* head;
-    _ATermList* tail;
-};
-
-static const size_t TERM_SIZE_LIST = sizeof(_ATermList)/sizeof(size_t);
-
-
-class _ATermList;
-
-// template <typename Term>
-// class term_list;
-
-// extern ATermList ATempty;
-
 /// \brief Iterator for term_list.
-template <typename Value>
+template <typename Term>
 class term_list_iterator: public boost::iterator_facade<
-  term_list_iterator<Value>,         // Derived
-  const Value,                       // Value
+  term_list_iterator<Term>,         // Derived
+  const Term,                       // Value
   boost::forward_traversal_tag,      // CategoryOrTraversal
-  const Value                        // Reference
+  const Term                        // Reference
   >
 {
   public:
-    typedef typename boost::iterator_facade<term_list_iterator<Value>,
-            const Value,
+    typedef typename boost::iterator_facade<term_list_iterator<Term>,
+            const Term,
             boost::forward_traversal_tag,
-            const Value>::difference_type iterator_type;
+            const Term>::difference_type iterator_type;
 
     /// \brief Constructor.
-    /* term_list_iterator()
+    term_list_iterator()
       : m_list(NULL)
     {}
-    */
 
     /// \brief Constructor.
     /// \param l A sequence of terms
     term_list_iterator(const aterm &l)
-      : m_list(static_cast<_ATermList*>(&*l))
+      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(&*l))
     { 
       assert(l.type()==AT_LIST);
     } 
-
-    /// \brief For efficient conversion of iterator ranges
-    /* ATermList list() const
-    {
-      return m_list;
-    } */
 
   private:
     friend class boost::iterator_core_access;
@@ -92,18 +67,19 @@ class term_list_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const Value dereference() const
+    const Term &dereference() const
     {
-      return Value(static_cast<aterm>(m_list->head));
+      assert(m_list->function()==AS_LIST);
+      return m_list->head;
     }
 
     /// \brief Increments the iterator
     void increment()
     {
-      m_list = m_list->tail;
+      m_list = &*m_list->tail;
     }
 
-    _ATermList* m_list;
+    detail::_aterm_list<Term>* m_list;
 };
 
 } // namespace atermpp

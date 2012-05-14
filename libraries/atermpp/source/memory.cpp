@@ -54,12 +54,10 @@ static HashNumber hash_number(const _ATerm *t, const size_t size)
 {
   HashNumber hnr;
 
-  // hnr = START(t->word[0]);
   hnr = START(t->m_function_symbol.number());
 
   for (size_t i=ARG_OFFSET; i<size; i++)
   {
-    // hnr = COMBINE(hnr, t->word[i]);
     hnr = COMBINE(hnr, *(reinterpret_cast<const MachineWord *>(t) + i));
   }
 
@@ -167,56 +165,18 @@ static bool check_that_all_objects_are_free()
 }
 
 /*}}}  */
-/*{{{  void AT_cleanupMemory() */
-
-/**
- * Print hashtable info
- */
-
-/* void AT_cleanupMemory()
-//{
-  // AT_free(hashtable);
-  // AT_free_protected_blocks();
-  // check_that_all_objects_are_free();
-  // free(terminfo); 
-// }
-
-/ *}}}  */
-
-/**
- * Allocate a new block of a particular size class
- */
-
-// header_type* min_heap_address = (header_type*)(~0);
-// header_type* max_heap_address = 0;
-
 /*{{{  static void allocate_block(size_t size)  */
 
 static void allocate_block(size_t size)
 {
-  // size_t idx;
   Block* newblock;
-  // bool init = false;
   TermInfo* ti;
 
-/*  if (at_freeblocklist != NULL)
+  newblock = (Block*)calloc(1, sizeof(Block));
+  if (newblock == NULL)
   {
-    newblock = at_freeblocklist;
-    at_freeblocklist = at_freeblocklist->next_by_size;
-    at_freeblocklist_size--;
+    std::runtime_error("allocate_block: out of memory!");
   }
-  else 
-  { */
-    newblock = (Block*)calloc(1, sizeof(Block));
-    if (newblock == NULL)
-    {
-      std::runtime_error("allocate_block: out of memory!");
-    }
-    // init = true;
-    /* min_heap_address = MIN(min_heap_address,(newblock->data));
-    max_heap_address = MAX(max_heap_address,(newblock->data+BLOCK_SIZE));
-    assert(min_heap_address < max_heap_address); */
-  // }
 
   assert(size >= MIN_TERM_SIZE && size < terminfo.size());
 
@@ -231,21 +191,7 @@ static void allocate_block(size_t size)
   assert(ti->at_block != NULL);
   assert(((size_t)ti->top_at_blocks % MAX(sizeof(double), sizeof(void*))) == 0);
 
-  /* [pem: Feb 14 02] TODO: fast allocation */
   assert(ti->at_freelist == NULL);
-
-  /* if (init)
-  {
-    / * TODO: optimize * /
-    / * Place the new block in the block_table * /
-    / *idx = (((MachineWord)newblock) >> (BLOCK_SHIFT+2)) % BLOCK_TABLE_SIZE;* /
-    idx = ADDR_TO_BLOCK_IDX(newblock);
-    newblock->next_after = block_table[idx].first_after;
-    block_table[idx].first_after = newblock;
-    idx = (idx+1) % BLOCK_TABLE_SIZE;
-    newblock->next_before = block_table[idx].first_before;
-    block_table[idx].first_before = newblock;
-  } */
 }
 
 /*}}}  */
@@ -302,21 +248,17 @@ _ATerm* AT_allocate(const size_t size)
   return at;
 } 
 
-/*}}}  */
-
-/*{{{  void AT_freeTerm(size_t size, aterm t) */
-
 /**
- * Free a term of a particular size.
+ * Remove a term from the hashtable.
  */
 
-void AT_freeTerm(const size_t size, _ATerm *t)
+static void AT_freeTerm(_ATerm *t)
 {
   // fprintf(stderr,"Remove term from hashtable %p\n",t);
   _ATerm *prev=NULL, *cur;
 
   /* Remove the node from the hashtable */
-  const HashNumber hnr = hash_number(t, size) & table_mask;
+  const HashNumber hnr = hash_number(t, term_size(t)) & table_mask;
   cur = &*aterm::hashtable[hnr];
 
   do
@@ -360,25 +302,18 @@ void at_free_term(_ATerm *t)
 
   assert(t->reference_count==0);
   const size_t size=term_size(t);
-  AT_freeTerm(size,t);  // Remove from hash_table
+  AT_freeTerm(t);  // Remove from hash_table
 
-  // Reduce the reference count of subterms.
-  /* if (ATgetType(t)==AT_APPL)
-  {
-    const size_t afun_number=ATgetAFun(reinterpret_cast<_ATermAppl*>(t));
-  */
   for(size_t i=0; i<t->m_function_symbol.arity(); ++i)
   {
-    at_reduce_reference_count(reinterpret_cast<_ATermAppl*>(t)->arg[i]);
+#ifndef NDEBUG
+    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]=aterm();
+#else
+    at_reduce_reference_count(reinterpret_cast<_ATerm*>(&*reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]));
+#endif
   }
   t->m_function_symbol=function_symbol(); // AFun::decrease_reference_count(afun_number);
 
-  /* else if (t->m_function_symbol==AS_LIST)
-  {
-    at_reduce_reference_count(reinterpret_cast<_ATermList*>(t)->head);
-    at_reduce_reference_count(reinterpret_cast<_ATermList*>(t)->tail);
-  } */
-  // t->header = FREE_HEADER;
   TermInfo *ti = &terminfo[size];
   t->next  = ti->at_freelist;
   ti->at_freelist = t; 
@@ -392,11 +327,6 @@ void at_reduce_reference_count(_ATerm *t)
     at_free_term(t);
   }
 }
-
-
-/*{{{  ATermAppl ATmakeAppl0(function_symbol &sym) */
-
-// ATermAppl ATmakeAppl0(const function_symbol &sym)
 
 aterm::aterm(const function_symbol &sym)
 {
@@ -432,28 +362,23 @@ aterm::aterm(const function_symbol &sym)
     cur = cur->next;
   }
 
-  cur = (_ATermAppl*) &*AT_allocate(TERM_SIZE_APPL(0));
+  cur = AT_allocate(TERM_SIZE_APPL(0));
   /* Delay masking until after AT_allocate */
   hnr &= table_mask;
   cur->m_function_symbol = sym;
-  // function_symbol::increase_reference_count<true>(sym.number());
   cur->next = &*aterm::hashtable[hnr];
   aterm::hashtable[hnr] = cur;
 
   m_term=cur;
   increase_reference_count<false>(m_term);
-  // return reinterpret_cast<_ATermAppl*>(cur);
+  // return reinterpret_cast<detail::_aterm_appl<Term> *>(cur);
 }
 
-/*}}}  */
-
-/*{{{  ATermInt ATmakeInt(int val) */
 
 /**
  * Create an ATermInt
  */
 
-// ATermInt ATmakeInt(const int val)
 aterm_int::aterm_int(int val)
 {
   _ATerm* cur;
@@ -497,32 +422,6 @@ aterm_int::aterm_int(int val)
   m_term=cur;
   increase_reference_count<false>(m_term);
 }
-
-/*}}}  */
-
-/*{{{  size_t AT_inAnyFreeList(ATerm t) */
-
-/**
- * Check if a term is in any free list.
- */
-
-/* size_t AT_inAnyFreeList(const _ATerm *t)
-{
-  for (size_t i=MIN_TERM_SIZE; i<terminfo.size(); i++)
-  {
-    _ATerm* cur = terminfo[i].at_freelist;
-
-    while (cur)
-    {
-      if (cur == t)
-      {
-        return i;
-      }
-      cur = cur->next;
-    }
-  }
-  return 0;
-} */
 
 /*}}}  */
 

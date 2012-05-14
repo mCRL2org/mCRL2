@@ -18,24 +18,31 @@
 namespace atermpp
 {
 
-class _ATermAppl:public _ATerm
+/// \cond INTERNAL_DOCS
+namespace detail
+{
+
+template <class Term>
+class _aterm_appl:public _ATerm
 {
   public:
-    _ATerm      *arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+    Term        arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
                                 (therefore it is excessive). Using mallocs an array of the
                                 appropriate length is declared, where it is possible that
                                 the array has size 0, i.e. is absent. If the value is small
                                 (it was 1), the clang compiler provides warnings. */
 };
 
+} // namespace detail
+/// \endcond
 
 /// \brief Iterator for term_appl.
-template <typename Value>
+template <typename Term>
 class term_appl_iterator: public boost::iterator_facade<
-  term_appl_iterator<Value>,         // Derived
-  const Value,                       // Value
+  term_appl_iterator<Term>,         // Derived
+  const Term,                       // Value
   boost::forward_traversal_tag,      // CategoryOrTraversal
-  const Value                        // Reference
+  const Term                        // Reference
   >
 {
   public:
@@ -46,7 +53,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Constructor.
     /// \param t A term
-    term_appl_iterator(_ATerm** t)
+    term_appl_iterator(Term* t)
       : m_term(t)
     {}
 
@@ -63,9 +70,9 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const Value dereference() const
+    const Term dereference() const
     {
-      return Value(*m_term);
+      return *m_term;
     }
 
     /// \brief Increments the iterator
@@ -80,7 +87,8 @@ class term_appl_iterator: public boost::iterator_facade<
       m_term--;
     }
 
-    _ATerm** m_term;
+    Term *m_term;
+    // _ATerm** m_term;
 };
 
 } // namespace atermpp

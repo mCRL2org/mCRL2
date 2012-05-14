@@ -52,50 +52,52 @@ class summand: public atermpp::aterm_appl
 {
   protected:
     /// \brief The summation variables of the summand
-    data::variable_list m_summation_variables;
+    // data::variable_list m_summation_variables;
 
     /// \brief The condition of the summand
-    data::data_expression m_condition;
+    // data::data_expression m_condition;
 
     /// \brief If m_delta is true the summand is a delta summand
-    bool m_delta;
+    // bool m_delta;
 
     /// \brief The actions of the summand
-    action_list m_actions;
+    // action_list m_actions;
 
     /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
     /// the summand has no time.
-    data::data_expression m_time;
+    // data::data_expression m_time;
 
     /// \brief The assignments of the summand. These assignments are an encoding of
     /// the 'next states' of the summand.
-    data::assignment_list m_assignments;
+    // data::assignment_list m_assignments;
 
   public:
     /// \brief Returns the multi-action of this summand.
     /// \pre The summand is no deadlock summand.
     lps::multi_action multi_action() const
     {
-      return lps::multi_action(m_actions, m_time);
+      return lps::multi_action(actions(), time());
     }
 
     /// \brief Returns the deadlock of this summand.
     /// \pre The summand is a deadlock summand.
     lps::deadlock deadlock() const
     {
-      return lps::deadlock(m_time);
+      return lps::deadlock(time());
     }
 
     /// \brief Constructor.
     summand()
       : atermpp::aterm_appl(core::detail::constructLinearProcessSummand())
-    {}
+    {
+    }
 
     /// \brief Constructor.
     /// \param t A term
     explicit summand(const ATerm &t1)
       : atermpp::aterm_appl(t1)
     {
+/* 
       atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_LinearProcessSummand(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -111,7 +113,7 @@ class summand: public atermpp::aterm_appl
         // m_actions = action_list(x.argument(0));
       }
       m_time                = data::data_expression(*i++);
-      m_assignments = data::assignment_list(*i);
+      m_assignments = data::assignment_list(*i); */
     }
 
     /// \brief Constructor.
@@ -129,14 +131,15 @@ class summand: public atermpp::aterm_appl
                               (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                               core::detail::gsMakeNil(),
                               assignments)
-                           ),
+                           )/* ,
       m_summation_variables(summation_variables),
       m_condition(condition),
       m_delta(delta),
       m_actions(actions),
       m_time(data::data_expression(core::detail::gsMakeNil())),
-      m_assignments(assignments)
-    {}
+      m_assignments(assignments) */
+    {
+    }
 
     /// \brief Constructor.
     /// Constructs a timed summand.
@@ -154,13 +157,13 @@ class summand: public atermpp::aterm_appl
                               (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                               time,
                               assignments)
-                           ),
+                           )/* ,
       m_summation_variables(summation_variables),
       m_condition(condition),
       m_delta(delta),
       m_actions(actions),
       m_time(time),
-      m_assignments(assignments)
+      m_assignments(assignments) */
     {}
 
     /// \brief Constructor.
@@ -176,13 +179,13 @@ class summand: public atermpp::aterm_appl
                               core::detail::gsMakeMultAct(a.actions()),
                               a.time(),
                               assignments)
-                           ),
+                           )/* ,
       m_summation_variables(summation_variables),
       m_condition(condition),
       m_delta(false),
       m_actions(a.actions()),
       m_time(a.time()),
-      m_assignments(assignments)
+      m_assignments(assignments) */
     {}
 
     /// \brief Constructor.
@@ -197,25 +200,25 @@ class summand: public atermpp::aterm_appl
                               core::detail::gsMakeDelta(),
                               d.time(),
                               atermpp::term_list< data::assignment >())
-                           ),
+                           )/* ,
       m_summation_variables(summation_variables),
       m_condition(condition),
       m_delta(true),
-      m_time(d.time())
+      m_time(d.time()) */
     {}
 
     /// \brief Returns the sequence of summation variables.
     /// \return The sequence of summation variables.
     data::variable_list summation_variables() const
     {
-      return m_summation_variables;
+      return data::variable_list(this->operator ()(0)); 
     }
 
     /// \brief Returns true if the multi-action corresponding to this summand is equal to delta.
     /// \return True if the multi-action corresponding to this summand is equal to delta.
     bool is_delta() const
     {
-      return m_delta;
+      return core::detail::gsIsDelta(atermpp::aterm_appl(this->operator()(2)));
     }
 
     /// \brief Returns true if the multi-action corresponding to this summand is equal to tau.
@@ -229,14 +232,14 @@ class summand: public atermpp::aterm_appl
     /// \return True if time is available.
     bool has_time() const
     {
-      return !data::is_nil(m_time);
+      return !data::is_nil(time());
     }
 
     /// \brief Returns the condition expression.
     /// \return The condition expression.
-    data::data_expression const& condition() const
+    const data::data_expression condition() const
     {
-      return m_condition;
+      return data::data_expression(this->operator ()(1)); 
     }
 
     /// \brief Returns the sequence of actions. Returns an empty list if is_delta() holds.
@@ -244,22 +247,23 @@ class summand: public atermpp::aterm_appl
     /// \deprecated
     action_list actions() const
     {
-      return m_actions;
+      assert(!is_delta());
+      return action_list(atermpp::aterm_appl(this->operator ()(2))(0));
     }
 
     /// \brief Returns the time.
     /// \return The time.
     /// \deprecated
-    data::data_expression const& time() const
+    const data::data_expression time() const
     {
-      return m_time;
+      return data::data_expression(this->operator()(3));
     }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::assignment_list const& assignments() const
+    const data::assignment_list assignments() const
     {
-      return m_assignments;
+      return data::assignment_list(this->operator()(4));
     }
 
     /// \brief Returns the next state corresponding to this summand.
@@ -285,7 +289,7 @@ summand set_summation_variables(summand s, data::variable_list summation_variabl
   return summand(summation_variables,
                  s.condition(),
                  s.is_delta(),
-                 s.actions(),
+                 (s.is_delta()?action_list():s.actions()),
                  s.time(),
                  s.assignments()
                 );
@@ -301,7 +305,7 @@ summand set_condition(summand s, data::data_expression condition)
   return summand(s.summation_variables(),
                  condition,
                  s.is_delta(),
-                 s.actions(),
+                 (s.is_delta()?action_list():s.actions()),
                  s.time(),
                  s.assignments()
                 );
@@ -316,7 +320,7 @@ summand set_delta(summand s)
   return summand(s.summation_variables(),
                  s.condition(),
                  false,
-                 s.actions(),
+                 action_list(),
                  s.time(),
                  s.assignments()
                 );
@@ -348,7 +352,7 @@ summand set_time(summand s, data::data_expression time)
   return summand(s.summation_variables(),
                  s.condition(),
                  s.is_delta(),
-                 s.actions(),
+                 (s.is_delta()?action_list():s.actions()),
                  time,
                  s.assignments()
                 );
@@ -364,7 +368,7 @@ summand set_assignments(summand s, data::assignment_list assignments)
   return summand(s.summation_variables(),
                  s.condition(),
                  s.is_delta(),
-                 s.actions(),
+                 (s.is_delta()?action_list():s.actions()),
                  s.time(),
                  assignments
                 );
@@ -550,11 +554,11 @@ class action_summand: public summand_base
     const data::assignment_list& assignments() const
     {
       return m_assignments;
-    }
+    } 
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::assignment_list& assignments()
+    data::assignment_list &assignments()
     {
       return m_assignments;
     }

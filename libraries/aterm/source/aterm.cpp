@@ -136,12 +136,12 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
         break;
       case 'l':
         {
-          _ATermList* l = va_arg(args, _ATermList*);
+          detail::_aterm_list<aterm>* l = va_arg(args, detail::_aterm_list<aterm>*);
           fmt[strlen(fmt) - 1] = '\0';  /* Remove 'l' */
           while (!ATisEmpty(l))
           {
             ATwriteToTextFile(ATgetFirst(l), stream);
-            l = l->tail;
+            l = &*(l->tail);
             if (!ATisEmpty(l))
             {
               fputs(fmt + 1, stream);

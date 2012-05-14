@@ -60,7 +60,7 @@ class boolean_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit boolean_expression(const ATerm& term)
+    explicit boolean_expression(const aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_BooleanExpression(m_term));
@@ -308,7 +308,7 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_variable(const atermpp::aterm_appl& term)
+    explicit boolean_variable(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanVariable(m_term));
@@ -630,7 +630,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   variable_type term2variable(term_type t)
   {
-    return t;
+    return variable_type(t);
   }
 
   /// \brief Pretty print function
