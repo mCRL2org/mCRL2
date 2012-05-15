@@ -31,7 +31,7 @@ atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, a
 {
   BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
 
-  return atermpp::term_list< Expression >(ATconcat(l, m));
+  return atermpp::term_list< Expression >(l+static_cast< atermpp::term_list<Expression > >(m));
 }
 
 /// \brief Returns the concatenation of the lists l and m

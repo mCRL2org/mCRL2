@@ -50,7 +50,7 @@ class data_equation: public atermpp::aterm_appl
     /// \brief Constructor
     ///
     /// \param[in] a An aterm adhering to the internal format.
-    data_equation(const ATerm& a)
+    data_equation(const aterm& a)
       : atermpp::aterm_appl(a)
     { }
 

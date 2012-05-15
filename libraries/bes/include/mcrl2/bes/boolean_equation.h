@@ -63,7 +63,7 @@ class boolean_equation
 
     /// \brief Constructor.
     /// \param t A term
-    explicit boolean_equation(const ATerm &t1)
+    explicit boolean_equation(const atermpp::aterm &t1)
     {
       atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_BooleanEquation(t));
@@ -158,11 +158,11 @@ operator!=(const boolean_equation& x, const boolean_equation& y)
 inline bool
 operator<(const boolean_equation& x, const boolean_equation& y)
 {
-  return ATermAppl(x.variable()) < ATermAppl(y.variable());
+  return x.variable() < y.variable();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The boolean equation converted to ATerm format.
+/// \brief Conversion to atermAppl.
+/// \return The boolean equation converted to aterm format.
 inline
 atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 {

@@ -43,25 +43,25 @@ void test_term(const std::string& s, const T& x)
 
 void test_term(const std::string& s)
 {
-  ATerm a = atermpp::make_term(s);
+  atermpp::aterm a = atermpp::make_term(s);
   if (s.find("DataEqn") == 0)
   {
-    data_equation x = atermpp::aterm_appl((ATermAppl) a);
+    data_equation x = atermpp::aterm_appl((atermpp::aterm_appl) a);
     test_term(s, x);
   }
   else if (s.find("SortCons") == 0)
   {
-    sort_expression x = atermpp::aterm_appl((ATermAppl) a);
+    sort_expression x = atermpp::aterm_appl((atermpp::aterm_appl) a);
     test_term(s, x);
   }
   else if (s.find("OpId") == 0)
   {
-    data::function_symbol x = atermpp::aterm_appl((ATermAppl) a);
+    data::function_symbol x = atermpp::aterm_appl((atermpp::aterm_appl) a);
     test_term(s, x);
   }
   else
   {
-    data_expression x = atermpp::aterm_appl((ATermAppl) a);
+    data_expression x = atermpp::aterm_appl((atermpp::aterm_appl) a);
     test_term(s, x);
   }
 }

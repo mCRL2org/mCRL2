@@ -100,7 +100,7 @@ namespace detail
 inline
 bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
 {
-  return ATermAppl(v) < ATermAppl(w);
+  return v < w;
 }
 
 template <typename Term>

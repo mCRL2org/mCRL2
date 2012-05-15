@@ -56,7 +56,7 @@ class pbes_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit pbes_expression(const ATerm& term)
+    explicit pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(m_term));
@@ -81,7 +81,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit propositional_variable_instantiation(const ATerm& term)
+    explicit propositional_variable_instantiation(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PropVarInst(m_term));
@@ -125,7 +125,7 @@ class propositional_variable_instantiation: public pbes_expression
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
       data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      this->copy_term(&*static_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters)));
+      this->copy_term(&*static_cast<atermpp::aterm>(core::detail::gsMakePropVarInst(name, parameters)));
     }
 //--- end user section propositional_variable_instantiation ---//
 };
@@ -379,7 +379,7 @@ std::set<pbes_system::propositional_variable_instantiation> find_propositional_v
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
-// TODO: These should be removed when the ATerm code has been replaced.
+// TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);
 

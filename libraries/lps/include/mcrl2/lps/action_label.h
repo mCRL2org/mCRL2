@@ -38,7 +38,7 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit action_label(const ATerm& term)
+    explicit action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_ActId(m_term));
@@ -98,7 +98,7 @@ std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
 std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
 
-// TODO: These should be removed when the ATerm code has been replaced.
+// TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);
 

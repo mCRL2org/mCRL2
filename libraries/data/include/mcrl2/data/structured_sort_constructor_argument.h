@@ -123,7 +123,7 @@ class structured_sort_constructor_argument: public detail::structured_sort_const
     {}
 
     /// \overload
-    structured_sort_constructor_argument(const ATerm &term)
+    structured_sort_constructor_argument(const aterm &term)
       : detail::structured_sort_constructor_argument_base(atermpp::aterm_appl(term))
     {}
 

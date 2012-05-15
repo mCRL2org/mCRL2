@@ -44,7 +44,7 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit communication_expression(const ATerm &term)
+    explicit communication_expression(const atermpp::aterm &term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_CommExpr(m_term));

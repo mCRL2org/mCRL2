@@ -8,6 +8,7 @@
 
 using namespace aterm_deprecated;
 using namespace mcrl2::data::detail;
+using namespace atermpp;
 
 #ifdef _MSC_VER
 #define DLLEXPORT __declspec(dllexport)

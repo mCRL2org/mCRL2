@@ -129,7 +129,7 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (t==atermpp::aterm() || t.type() != AT_APPL || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
+      if (t==atermpp::aterm() || t.type() != atermpp::AT_APPL || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
       }
@@ -158,7 +158,7 @@ class boolean_equation_system
 
     /// \brief Conversion to ATermAppl.
     /// \return An ATerm representation of the boolean equation system
-    operator ATermAppl() const
+    operator atermpp::aterm_appl() const
     {
       boolean_equation_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakeBES(equations, m_initial_state);

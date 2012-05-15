@@ -335,7 +335,7 @@ void test_is_bes()
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_trivial();
   test_pbes();

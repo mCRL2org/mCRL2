@@ -36,7 +36,7 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_symbol(const ATerm& term)
+    function_symbol(const aterm& term)
       : data_expression(term)
     {
       assert(term->reference_count>0);

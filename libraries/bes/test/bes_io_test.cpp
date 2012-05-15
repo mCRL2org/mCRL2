@@ -79,7 +79,7 @@ void test_pgsolver()
 
 int test_main(int argc, char* argv[])
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_parse_bes();
   test_bes();

@@ -212,7 +212,7 @@ void test_normalize_and_or()
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_normalize1();
   test_normalize2();

@@ -122,7 +122,7 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   bool compute_conditions = false;
   bool remove_equations = true;

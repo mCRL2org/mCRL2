@@ -22,7 +22,7 @@ namespace atermpp
 template <typename T>
 term_list<T> make_list(const T &t0)
 {
-  return term_list<T>(term_list<T>(),t0);
+  return push_front(term_list<T>(),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
@@ -32,7 +32,7 @@ term_list<T> make_list(const T &t0)
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1)
 {
-  return term_list<T>(make_list(t1),t0);
+  return push_front(make_list(t1),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
@@ -43,7 +43,7 @@ term_list<T> make_list(const T &t0, const T &t1)
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1, const T &t2)
 {
-  return term_list<T>(make_list(t1,t2),t0);
+  return push_front(make_list(t1,t2),t0);
 }
 
 /// \brief Makes a list with a fixed number of arguments.
@@ -55,7 +55,7 @@ term_list<T> make_list(const T &t0, const T &t1, const T &t2)
 template <typename T>
 term_list<T> make_list(const T &t0, const T &t1, const T &t2, const T &t3)
 {
-  return term_list<T>(make_list(t1,t2,t3),t0); 
+  return push_front(make_list(t1,t2,t3),t0); 
 }
 
 } // namespace atermpp

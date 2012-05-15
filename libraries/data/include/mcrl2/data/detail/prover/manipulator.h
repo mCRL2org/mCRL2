@@ -150,10 +150,7 @@ class InternalFormatManipulator
                const atermpp::aterm_appl &a_high, 
                const atermpp::aterm_appl &a_low)
     {
-      return (atermpp::aterm_appl)Apply3((aterm)f_if_then_else, 
-                                         (aterm_appl)a_expr, 
-                                         (aterm_appl)a_high, 
-                                         (aterm_appl)a_low);
+      return (atermpp::aterm_appl)Apply3(f_if_then_else, a_expr, a_high, a_low);
     }
 
   public:
@@ -162,7 +159,7 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = atermpp::aterm(ATgetArgument((aterm_appl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0));
+      f_if_then_else = static_cast<atermpp::aterm_appl>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
     }
 
     /// \brief Destructor with no particular functionality.
@@ -197,7 +194,7 @@ class InternalFormatManipulator
         return a_term;
       } 
 
-      // v_result is NULL if not found; Therefore type ATerm.
+      // v_result is NULL if not found; Therefore type aterm.
       std::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
       if (it!=f_orient.end())   // found
       {
@@ -216,7 +213,7 @@ class InternalFormatManipulator
       {
         v_parts[i] = orient(atermpp::aterm_appl(a_term(i)));
       }
-      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeAppl_iterator(v_symbol, v_parts.begin(),v_parts.end()));
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
 
       if (f_info.is_equality(v_result))
       {

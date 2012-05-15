@@ -35,11 +35,11 @@ void type_check(
   const action_label_list& action_decls)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = core::type_check_mult_act(
+  atermpp::aterm_appl t = core::type_check_mult_act(
                   core::detail::gsMakeMultAct(mult_act.actions()),
                   data::detail::data_specification_to_aterm_data_spec(data_spec),
-                  (ATermList)action_decls);
-  if (t==ATermAppl())
+                  action_decls);
+  if (t==atermpp::aterm_appl())
   {
     throw mcrl2::runtime_error("could not type check multi action " + core::pp_deprecated(lps::detail::multi_action_to_aterm(mult_act)));
   }
@@ -60,21 +60,21 @@ void type_check(
 {
   // TODO: replace all this nonsense code by a proper type check implementation
   // Bleh; do conversions...
-  ATermList l=ATempty;
+  atermpp::aterm_list l;
   for (std::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
        i!=mult_actions.end(); ++i)
   {
-    l=ATinsert(l,(ATerm)(ATermList)i->actions());
+    l=atermpp::push_front(l,atermpp::aterm(i->actions()));
   }
   l=core::type_check_mult_actions(
-      ATreverse(l),
+      reverse(l),
       data::detail::data_specification_to_aterm_data_spec(data_spec),
-      (ATermList)action_decls);
+      action_decls);
   // And convert back...
   mult_actions.clear();
-  for (; !ATisEmpty(l) ; l=ATgetNext(l))
+  for (atermpp::aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    mult_actions.push_back(multi_action((action_list)ATgetFirst(l)));
+    mult_actions.push_back(multi_action((action_list)(*i)));
   }
 }
 

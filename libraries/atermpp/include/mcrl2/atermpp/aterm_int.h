@@ -12,29 +12,31 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
+#include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
 
-class _ATermInt:public _ATerm
-{
-  public:
-    union
-    {
-      int value;
-      MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
-                               as integer and as MachineWord. For all cases using bitwise
-                               operations, the MachineWord version must be used,
-                               as failing to do so may lead to improper initialisation
-                               of the last 32 bits during casting. */
-    };
-};
-
-static const size_t TERM_SIZE_INT = sizeof(_ATermInt)/sizeof(size_t);
-
 class aterm_int:public aterm
 {
+  public:  // These should be protected, but that is currently not yet possible.
+    detail::_aterm_int & operator *() const
+    {
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<detail::_aterm_int*>(m_term); 
+    }
+
+    detail::_aterm_int *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<detail::_aterm_int*>(m_term);
+    }
+
+    /// \brief Get the integer value of the aterm_int.
   public:
 
     /// \brief Constructor.
@@ -42,7 +44,7 @@ class aterm_int:public aterm
     {}
 
     
-    aterm_int(_ATermInt *t):aterm(reinterpret_cast<_ATerm*>(t))
+    aterm_int(detail::_aterm_int *t):aterm(reinterpret_cast<detail::_aterm*>(t))
     {
     }
 
@@ -62,26 +64,10 @@ class aterm_int:public aterm
       return *this;
     }
 
-    _ATermInt & operator *() const
-    {
-      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
-      // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
-      return *reinterpret_cast<_ATermInt*>(m_term); 
-    }
-
-    _ATermInt *operator ->() const
-    {
-      assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
-      return reinterpret_cast<_ATermInt*>(m_term);
-    }
-
-    /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.
     int value() const
     {
-      return reinterpret_cast<_ATermInt*>(&*m_term)->value;
+      return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
     }
 };
 

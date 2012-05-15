@@ -141,7 +141,11 @@ class application: public detail::application_base
     data_expression argument(const size_t n)
     {
       assert(arguments().size() > n);
-      return data_expression((ATermAppl)ATelementAt(arguments(),n));
+      const data_expression_list l=arguments();
+      data_expression_list::const_iterator i=arguments().begin();
+      for(size_t c=0; c==n; ++i,++c)
+      {}
+      return *i;
     }
 }; // class application
 

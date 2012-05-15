@@ -43,7 +43,7 @@ namespace trace
 //
 /// \brief Formats in which traces can be saved on disk
 /// \details There are several formats for traces.
-/// The tfMcrl2 format saves a trace as an mCRL2 term in ATerm internal format.
+/// The tfMcrl2 format saves a trace as an mCRL2 term in aterm internal format.
 /// This is a compact but unreadable format.
 /// The tfPlain format is an ascii representation of the trace, which is
 /// human readable but only contains the actions and no time or state information.
@@ -53,7 +53,7 @@ namespace trace
 
 enum TraceFormat
 {
-  tfMcrl2,  /**< Format is stored as an ATerm */
+  tfMcrl2,  /**< Format is stored as an aterm */
   tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
   tfUnknown /**< This value indicates that the format is unknown */
 };
@@ -72,7 +72,7 @@ enum TraceFormat
 /// a state can only be added once.
 ///
 /// States can be saved in two formats. A human readable ascii format containging only a
-/// sequence of untimed actions and a more compact ATerm format also containing time and
+/// sequence of untimed actions and a more compact aterm format also containing time and
 /// state information.
 class Trace
 {
@@ -88,7 +88,7 @@ class Trace
     std::vector < mcrl2::lps::multi_action > actions;
     size_t pos; // Invariant: pos <= actions.size().
 
-    AFun trace_pair;
+    atermpp::function_symbol trace_pair;
     int trace_pair_set;
     mcrl2::data::data_specification m_spec;
     lps::action_label_list m_act_decls;
@@ -565,21 +565,21 @@ class Trace
 
   private:
 
-    bool isTimedMAct(ATermAppl t)
+    bool isTimedMAct(const atermpp::aterm_appl &t)
     {
-      return ATgetType(t)==AT_APPL && ATgetAFun(t)==trace_pair.number();
+      return t.type()==atermpp::AT_APPL && t.function()==trace_pair;
     }
 
-    ATermAppl makeTimedMAct(const mcrl2::lps::multi_action &ma)
+    atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action &ma)
     {
-      return ATmakeAppl2(trace_pair,(ATerm)(ATermList)ma.actions(), (ATerm)(ATermAppl)ma.time());
+      return atermpp::aterm_appl(trace_pair,ma.actions(), ma.time());
     }
 
     void init()
     {
       if (trace_pair_set == 0)
       {
-        trace_pair = AFun("pair",2,false);
+        trace_pair = atermpp::function_symbol("pair",2,false);
       }
       trace_pair_set++;
 
@@ -618,7 +618,7 @@ class Trace
       return fmt;
     }
 
-    ATerm readATerm(std::istream& is)
+    atermpp::aterm readATerm(std::istream& is)
     {
 #define RAT_INIT_BUF_SIZE (64*1024)
       size_t buf_size = RAT_INIT_BUF_SIZE;
@@ -631,7 +631,7 @@ class Trace
         if (new_buf == NULL)
         {
           free(buf);
-          throw runtime_error("not enough memory to read ATerm");
+          throw runtime_error("not enough memory to read aterm");
         }
         buf = new_buf;
 
@@ -639,7 +639,7 @@ class Trace
         if (is.bad())
         {
           free(buf);
-          throw runtime_error("could not read ATerm from stream");
+          throw runtime_error("could not read aterm from stream");
         }
 
         len+=is.gcount();
@@ -647,10 +647,10 @@ class Trace
       }
       is.clear();
 
-      ATerm t = ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
+      atermpp::aterm t = atermpp::ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
       if (t == NULL)
       {
-        throw runtime_error("failed to read ATerm from stream");
+        throw runtime_error("failed to read aterm from stream");
       }
 
       free(buf);
@@ -671,36 +671,37 @@ class Trace
       resetPosition();
       truncate();
 
-      ATermList trace = (ATermList) readATerm(is);
-      assert(ATgetType(trace) == AT_LIST);
-      for (; !ATisEmpty(trace); trace=ATgetNext(trace))
+      atermpp::aterm_list trace(readATerm(is));
+      assert(trace.type() == atermpp::AT_LIST);
+      for (; !trace.empty(); trace=trace.tail())
       {
         using namespace mcrl2::lps;
-        ATerm e = ATgetFirst(trace);
+        atermpp::aterm e = trace.head();
 
-        if (e.type()==AT_APPL && core::detail::gsIsMultAct(static_cast<ATermAppl>(e)))   // To be compatible with old untimed version
+        if (e.type()==atermpp::AT_APPL && core::detail::gsIsMultAct(static_cast<atermpp::aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(action_list(static_cast<ATermAppl>(e))));
+          addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e))));
         }
-        else if (e.type()==AT_APPL && isTimedMAct(static_cast<ATermAppl>(e)))
+        else if (e.type()==atermpp::AT_APPL && isTimedMAct(static_cast<atermpp::aterm_appl>(e)))
         {
-          if (core::detail::gsIsNil(ATAgetArgument(static_cast<ATermAppl>(e),1)))
+          if (core::detail::gsIsNil(atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(e)(1))))
           {
-            addAction(multi_action(action_list(ATgetArgument(static_cast<ATermAppl>(e),0))));
+            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)(0))));
           }
           else
           {
-            addAction(multi_action(action_list(ATAgetArgument(static_cast<ATermAppl>(e),0)),mcrl2::data::data_expression(ATAgetArgument(static_cast<ATermAppl>(e),1))));
+            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)(0)),
+                               mcrl2::data::data_expression(static_cast<atermpp::aterm_appl>(e)(1))));
           }
         }
         else
         {
           // So, e is a list of data expressions.
-          ATermList l(e);
+          atermpp::aterm_list l(e);
           mcrl2::lps::state s;
-          for( ; !ATisEmpty(l) ; l=ATgetNext(l))
+          for( ; !l.empty() ; l=l.tail())
           {
-            s.push_back(mcrl2::data::data_expression(ATgetFirst(l)));
+            s.push_back(mcrl2::data::data_expression(l.head()));
           }
           setState(s);
         }
@@ -751,7 +752,7 @@ class Trace
     void saveMcrl2(std::ostream& os)
     {
       assert(actions.size()+1 >= states.size());
-      ATermList trace = ATmakeList0();
+      atermpp::aterm_list trace;
 
       size_t i=actions.size()+1;
       while (i > 0)
@@ -760,19 +761,19 @@ class Trace
         if (i<actions.size())
         {
           assert(actions.size()>i);
-          trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i]));
+          trace = push_front(trace,atermpp::aterm(makeTimedMAct(actions[i])));
         }
         if (states.size()>i)
         {
           using namespace mcrl2::lps;
-          // Translate the vector into a list of ATerms representing data expressions.
-          ATermList l=ATempty;
+          // Translate the vector into a list of aterms representing data expressions.
+          atermpp::aterm_list l;
           const state & s=states[i];
           for(mcrl2::lps::state::const_reverse_iterator j=s.rbegin(); j!=s.rend(); ++j)
           {
-            l=ATinsert(l,(ATerm)(ATermAppl)*j);
+            l=push_front(l,atermpp::aterm(*j));
           }
-          trace = ATinsert(trace,(ATerm) l);
+          trace = push_front(trace,atermpp::aterm(l));
         }
       }
 
@@ -786,7 +787,7 @@ class Trace
 
       // write trace
       size_t len;
-      const char* bs = (const char*) ATwriteToBinaryString((ATerm) trace,&len);  //XXX no error handling?
+      const char* bs = (const char*) atermpp::ATwriteToBinaryString(trace,&len);  //XXX no error handling?
       os.write(bs,len);
       if (os.bad())
       {

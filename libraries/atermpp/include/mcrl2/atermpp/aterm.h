@@ -29,7 +29,7 @@ namespace atermpp
  * These are the types of ATerms there are. \see ATgetType().
  */
 
-extern void at_free_term(_ATerm* t);
+extern void at_free_term(detail::_aterm* t);
 
 class aterm
 {
@@ -37,10 +37,10 @@ class aterm
     template < typename T >
     friend class term_appl;
 
-    static std::vector <_ATerm*> hashtable;
+    static std::vector <detail::_aterm*> hashtable;
 
   protected:
-    _ATerm *m_term;
+    detail::_aterm *m_term;
 
     void decrease_reference_count()
     {
@@ -59,7 +59,7 @@ fprintf(stderr,"decrease reference count %ld  %p\n",m_term->reference_count,m_te
     }
 
     template <bool CHECK>
-    static void increase_reference_count(_ATerm* t)
+    static void increase_reference_count(detail::_aterm* t)
     {
       if (t!=NULL)
       {
@@ -72,7 +72,7 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
 
     }
 
-    void copy_term(_ATerm* t)
+    void copy_term(detail::_aterm* t)
     {
       increase_reference_count<true>(t);
       decrease_reference_count();
@@ -95,7 +95,7 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       increase_reference_count<true>(m_term);
     }
 
-    aterm (_ATerm *t):m_term(t)
+    aterm (detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
@@ -113,13 +113,13 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       decrease_reference_count();
     }
 
-    _ATerm & operator *() const
+    detail::_aterm & operator *() const
     {
       assert(m_term==NULL || m_term->reference_count>0);
       return *m_term;
     }
 
-    _ATerm * operator ->() const
+    detail::_aterm * operator ->() const
     {
       assert(m_term==NULL || m_term->reference_count>0);
       return m_term;

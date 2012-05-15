@@ -62,7 +62,7 @@ void test_parelm()
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_parelm();
 

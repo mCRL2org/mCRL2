@@ -36,7 +36,7 @@ class lps2lts_lts
     std::ofstream aut;
     std::string lts_filename;
     lts_lts_t generic_lts;
-    ATermIndexedSet aterm2state, aterm2label;
+    atermpp::indexed_set aterm2state, aterm2label;
 
   public:
     lps2lts_lts():
@@ -50,8 +50,8 @@ class lps2lts_lts
 
     void reset();
     void open_lts(const char* filename, lps2lts_lts_options& opts);
-    void save_initial_state(size_t idx, ATerm state);
-    void save_transition(size_t idx_from, ATerm from, const mcrl2::lps::multi_action action, size_t idx_to, ATerm to);
+    void save_initial_state(size_t idx, atermpp::aterm state);
+    void save_transition(size_t idx_from, atermpp::aterm from, const mcrl2::lps::multi_action action, size_t idx_to, atermpp::aterm to);
     void close_lts(size_t num_states, size_t num_trans);
     void remove_lts();
 

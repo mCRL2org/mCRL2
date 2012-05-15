@@ -132,7 +132,7 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
          * ATerm node
          */
       case 't':
-        ATwriteToTextFile(va_arg(args, _ATerm*), stream);
+        ATwriteToTextFile(va_arg(args, detail::_aterm*), stream);
         break;
       case 'l':
         {

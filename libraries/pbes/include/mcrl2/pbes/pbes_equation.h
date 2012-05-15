@@ -108,7 +108,7 @@ class pbes_equation
 
     /// \brief Constructor.
     /// \param t A term
-    explicit pbes_equation(const ATerm & t1)
+    explicit pbes_equation(const atermpp::aterm & t1)
     {
       atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_PBEqn(t));
@@ -242,8 +242,8 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
   return !(x == y);
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The specification converted to ATerm format.
+/// \brief Conversion to atermaPpl.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {

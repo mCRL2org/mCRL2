@@ -94,7 +94,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param t A term
-    explicit summand(const ATerm &t1)
+    explicit summand(const atermpp::aterm &t1)
       : atermpp::aterm_appl(t1)
     {
 /* 
@@ -485,19 +485,19 @@ class deadlock_summand: public summand_base
 /// \brief Vector of deadlock summands
 typedef std::vector<deadlock_summand> deadlock_summand_vector;
 
-/// \brief Conversion to ATermAppl.
-/// \return The deadlock summand converted to ATerm format.
+/// \brief Conversion to atermappl.
+/// \return The deadlock summand converted to aterm format.
 inline
 atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 {
-  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
                        s.condition(),
                        core::detail::gsMakeDelta(),
                        s.deadlock().time(),
                        data::assignment_list()
                      );
-  return atermpp::aterm_appl(result);
+  return result;
 }
 
 /// \brief Conversion to action summand.
@@ -620,19 +620,19 @@ bool operator==(const action_summand& x, const action_summand& y)
   return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The action summand converted to ATerm format.
+/// \brief Conversion to atermAppl.
+/// \return The action summand converted to aterm format.
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
-  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
                        s.assignments()
                      );
-  return atermpp::aterm_appl(result);
+  return result;
 }
 
 /// \brief Conversion to action summand.

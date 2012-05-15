@@ -16,7 +16,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/rewrite_strategy.h"
-// #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -238,9 +237,9 @@ void CheckRewriteRule(const data_equation &dataeqn);
 bool isValidRewriteRule(const data_equation &dataeqn);
 
 // extern size_t num_apples;
-extern std::vector <AFun> apples;
+extern std::vector <atermpp::function_symbol> apples;
 
-/** \brief Get the AFun number of the internal application symbol with given arity. */
+/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
 inline size_t get_appl_afun_value(size_t arity)
 {
   if (arity >= apples.size())
@@ -248,8 +247,7 @@ inline size_t get_appl_afun_value(size_t arity)
     for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
     {
       assert(old_num==apples.size());
-      apples.push_back(AFun("#REWR#",old_num,false));
-      // ATprotectAFun(apples[old_num]);
+      apples.push_back(atermpp::function_symbol("#REWR#",old_num,false));
     }
   }
   assert(arity<apples.size());
@@ -264,21 +262,21 @@ inline size_t get_appl_afun_value(size_t arity)
  **/
 inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > &l)
 {
-  return ATmakeApplList(get_appl_afun_value(l.size()),l);
+  return atermpp::aterm_appl(get_appl_afun_value(l.size()),l.begin(),l.end());
 }
 
 /** \brief See Apply. */
 template <class Iterator>
 inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, const Iterator end)
 {
-  return ATmakeAppl_iterator(get_appl_afun_value(size), begin, end);
+  return atermpp::aterm_appl(get_appl_afun_value(size), begin, end);
 }
 
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply0(const atermpp::aterm &head)
 {
-  return ATmakeAppl1(get_appl_afun_value(1),(ATerm)head);
+  return atermpp::aterm_appl(get_appl_afun_value(1),head);
 }
 
 
@@ -287,7 +285,7 @@ inline atermpp::aterm_appl Apply1(
          const atermpp::aterm &head,
          const atermpp::aterm_appl &arg1)
 {
-  return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATermAppl)arg1);
+  return atermpp::aterm_appl(get_appl_afun_value(2),head,arg1);
 }
 
 
@@ -297,7 +295,7 @@ inline atermpp::aterm_appl Apply2(
          const atermpp::aterm_appl &arg1,
          const atermpp::aterm_appl &arg2)
 {
-  return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATermAppl)arg1,(ATermAppl)arg2);
+  return atermpp::aterm_appl(get_appl_afun_value(3),head,arg1,arg2);
 }
 
 /** \brief See Apply. */
@@ -307,8 +305,7 @@ inline atermpp::aterm_appl Apply3(
          const atermpp::aterm_appl &arg2,
          const atermpp::aterm_appl &arg3)
 {
-  return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATermAppl)arg1,
-                (ATermAppl)arg2,(ATermAppl)arg3);
+  return atermpp::aterm_appl(get_appl_afun_value(4),head,arg1, arg2,arg3);
 }
 
 /** The functions below are used for fromInner and toInner(c). */

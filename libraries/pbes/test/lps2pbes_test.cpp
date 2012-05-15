@@ -528,7 +528,7 @@ void test_elevator()
 
 int test_main(int argc, char* argv[])
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_elevator();
   test_example();

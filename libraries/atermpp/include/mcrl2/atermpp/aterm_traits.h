@@ -16,10 +16,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 
 #include <utility>
-#include "mcrl2/aterm/aterm.h"
 
-// XXX Remove
-using namespace aterm_deprecated;
 
 namespace atermpp
 {
@@ -52,18 +49,18 @@ struct aterm_traits: public select_traits_base< T >::base_type
 
 /// \cond INTERNAL_DOCS
 template <>
-struct aterm_traits<ATerm>
+struct aterm_traits<aterm>
 {
-  static ATerm term(ATerm t)
+  static aterm term(aterm t)
   {
     return t;
   }
 };
 
 template <>
-struct aterm_traits<ATermList>
+struct aterm_traits<aterm_list>
 {
-  static ATerm term(ATermList t)
+  static aterm term(aterm_list t)
   {
     return t;
   }
@@ -72,16 +69,16 @@ struct aterm_traits<ATermList>
 template <class Term>
 struct aterm_traits<atermpp::term_list<Term> >
 {
-  static ATerm term(ATermAppl t)
+  static aterm term(aterm_appl t)
   {
     return t;
   }
 };
 
 template <>
-struct aterm_traits<ATermInt>
+struct aterm_traits<aterm_int>
 {
-  static ATerm term(ATermInt t)
+  static aterm term(aterm_int t)
   {
     return t;
   }

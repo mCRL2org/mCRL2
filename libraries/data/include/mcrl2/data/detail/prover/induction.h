@@ -13,6 +13,7 @@
 #define INDUCTION_H
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
@@ -24,6 +25,8 @@ namespace data
 namespace detail
 {
 /// The class Induction generates statements corresponding to
+
+using namespace aterm_deprecated;
 
 class Induction
 {
@@ -131,12 +134,13 @@ class Induction
     /// \brief
     data_expression apply_induction_one()
     {
+      using namespace atermpp;
       variable v_induction_variable;
       sort_expression v_induction_variable_sort;
       variable v_dummy_variable;
       sort_expression v_dummy_sort;
-      ATermAppl v_substitution;
-      ATermList v_substitution_list;
+      aterm_appl v_substitution;
+      aterm_list v_substitution_list;
       data_expression v_base_case;
       data_expression v_induction_step;
       data_expression v_result;
@@ -166,6 +170,7 @@ class Induction
                         variable_list a_list_of_variables,
                         data_expression_list a_list_of_dummies)
     {
+      using namespace atermpp;
       if (a_list_of_variables.empty())
       {
         return sort_bool::true_();
@@ -181,8 +186,8 @@ class Induction
             a_list_of_variables = pop_front(a_list_of_variables);
             data_expression v_dummy(a_list_of_dummies.front());
             a_list_of_dummies = pop_front(a_list_of_dummies);
-            ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
-            ATermList v_substitution_list = ATmakeList1(v_substitution);
+            aterm_appl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
+            aterm_list v_substitution_list=push_front(aterm_list(),aterm(v_substitution));
             v_clause = sort_bool::and_(v_clause, data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true)));
           }
         }
@@ -205,8 +210,8 @@ class Induction
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
       const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
-      ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
-      ATermList v_substitution_list = ATmakeList1(v_substitution);
+      aterm_appl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
+      aterm_list v_substitution_list = ATmakeList1(v_substitution);
       data_expression v_formula_1 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
       v_substitution = gsMakeSubst_Appl(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
       v_substitution_list = ATmakeList1(v_substitution);

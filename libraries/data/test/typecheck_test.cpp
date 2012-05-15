@@ -140,7 +140,7 @@ void test_data_expression(const std::string& de_in,
       // If exception was thrown, x is data_expression()
       if (x != data::data_expression())
       {
-        std::string de_out = core::pp_deprecated((ATerm) de_aterm);
+        std::string de_out = core::pp_deprecated((atermpp::aterm) de_aterm);
         //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
         BOOST_CHECK_EQUAL(de_in, de_out);
         // TODO: this check should be uncommented
@@ -876,7 +876,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
       data::type_check(de, begin, end, ds);
       atermpp::aterm de_aterm = de;
 
-      std::string de_out = core::pp_deprecated((ATerm) de_aterm);
+      std::string de_out = core::pp_deprecated((atermpp::aterm) de_aterm);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
       if (expected_sort != "")

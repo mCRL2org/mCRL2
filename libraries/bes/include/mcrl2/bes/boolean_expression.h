@@ -677,11 +677,11 @@ boolean_expression join_and(FwdIt first, FwdIt last)
   return utilities::detail::join(first, last, tr::and_, tr::true_());
 }
 
-inline bool
+/* inline bool
 operator<(const boolean_expression& x, const boolean_expression& y)
 {
   return ATermAppl(x) < ATermAppl(y);
-}
+} */
 
 /// \brief Splits a disjunction into a sequence of operands
 /// Given a boolean expression of the form p1 || p2 || .... || pn, this will yield a

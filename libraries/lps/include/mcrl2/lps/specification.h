@@ -139,6 +139,7 @@ class specification
     /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
     {
+      using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
       if (t==atermpp::aterm() || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {

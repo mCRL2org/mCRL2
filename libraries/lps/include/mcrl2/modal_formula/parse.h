@@ -189,8 +189,8 @@ state_formula parse_state_formula_new(const std::string& text)
 inline
 void translate_regular_formula(state_formula& f)
 {
-  ATermAppl result = regular_formulas::detail::translate_reg_frms(f);
-  if (result == NULL)
+  atermpp::aterm_appl result = regular_formulas::detail::translate_reg_frms(f);
+  if (result == atermpp::aterm_appl())
   {
     throw mcrl2::runtime_error("formula translation error");
   }

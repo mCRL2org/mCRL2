@@ -59,7 +59,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,_ATerm*,NrArgs);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,detail::_aterm*,NrArgs);
         std::vector<ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
@@ -113,7 +113,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, ATerm Term, const bool Recurs
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,_ATerm*,NrArgs);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,detail::_aterm*,NrArgs);
         std::vector <ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {

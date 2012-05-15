@@ -442,7 +442,7 @@ namespace detail
 
     size_t operator()(const data::variable& v) const
     {
-      size_t result = AFun(v.name().function()).number();
+      size_t result = v.name().function().number();
       return result;
     }
   };
@@ -693,7 +693,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
   {
     for(size_t i=0 ; i<t.size(); ++i)
     {
-      if (t(i).type()!=AT_INT)
+      if (t(i).type()!=atermpp::AT_INT)
       { 
         get_free_variables(atermpp::aterm_appl(t(i)),result);
       }

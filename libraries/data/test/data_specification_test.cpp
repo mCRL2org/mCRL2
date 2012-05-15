@@ -461,7 +461,7 @@ void test_constructor()
     "                          \n"
     ;
   data_specification data = parse_data_specification(SPEC);
-  ATermAppl a = data::detail::data_specification_to_aterm_data_spec(data);
+  atermpp::aterm_appl a = data::detail::data_specification_to_aterm_data_spec(data);
   data_specification spec1(a);
 }
 

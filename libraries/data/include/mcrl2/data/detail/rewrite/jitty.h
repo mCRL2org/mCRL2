@@ -46,7 +46,7 @@ class RewriterJitty: public Rewriter
     bool need_rebuild;
 
     std::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
-    std::vector < ATermList >  jitty_strat;
+    std::vector < atermpp::aterm_list >  jitty_strat;
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
     void build_strategies();
 

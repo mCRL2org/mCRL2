@@ -10,6 +10,19 @@
 namespace atermpp
 {
 
+inline
+size_t TERM_SIZE_APPL(const size_t arity)
+{
+  return (sizeof(detail::_aterm)/sizeof(size_t))+arity;
+}
+
+static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
+
+/* The constants below are not static to prevent some compiler warnings */
+const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
+const size_t INITIAL_MAX_TERM_SIZE = 256;
+
+
 // static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
 
 
@@ -68,7 +81,7 @@ typedef struct TermInfo
 {
   Block*       at_block;
   header_type* top_at_blocks;
-  _ATerm*       at_freelist;
+  detail::_aterm*       at_freelist;
 
   TermInfo():at_block(NULL),top_at_blocks(NULL),at_freelist(NULL)
   {}
@@ -85,9 +98,9 @@ inline size_t SIZE_TO_BYTES(const size_t size)
   return size*sizeof(header_type);
 }
 
-HashNumber AT_hashnumber(const _ATerm* t);
-_ATerm* AT_allocate(const size_t size);
-void  AT_freeTerm(const size_t size, const _ATerm *t);
+HashNumber AT_hashnumber(const detail::_aterm* t);
+detail::_aterm* AT_allocate(const size_t size);
+void  AT_freeTerm(const size_t size, const detail::_aterm *t);
 
 /*{{{  defines */
 
@@ -112,7 +125,7 @@ HashNumber FINISH(const HashNumber hnr)
 }
 
 inline
-void CHECK_TERM(const _ATerm *t)
+void CHECK_TERM(const detail::_aterm *t)
 {
   assert(&*t != NULL);
   assert(t->reference_count>0);
@@ -135,14 +148,14 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
   {
     assert(j<arity);
     new (&arguments[j]) aterm(convert_to_aterm(*i)); // Placement new.
-    _ATerm* arg = &*arguments[j];
+    detail::_aterm* arg = &*arguments[j];
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
   }
   assert(j==arity);
   hnr = FINISH(hnr);
 
-  _ATerm* cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = aterm::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==sym)
@@ -177,7 +190,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
     
     for (size_t i=0; i<arity; i++)
     {
-      _ATerm* arg = &*arguments[i];
+      detail::_aterm* arg = &*arguments[i];
       // arg->reference_count++; The reference counts do not need to be increased.
       //                         These are inherited from the array `arguments', which is
       //                         not properly deleted from the stack.
@@ -195,23 +208,26 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
 template <class Term>
 template <class ForwardIterator>
 term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, ForwardIterator end)
+                     /*      typename boost::enable_if<
+                           typename boost::is_convertible< typename boost::iterator_traversal< ForwardIterator >::type,
+                           boost::forward_traversal_tag >::type >::type* / * = 0* /) */
 {
   const size_t arity = sym.arity();
   HashNumber hnr = START(sym.number());
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, _ATerm*, arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, detail::_aterm*, arity);
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
     arguments[j]=&* *i; 
-    _ATerm* arg = arguments[j];
+    detail::_aterm* arg = arguments[j];
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
   }
   assert(j==arity);
   hnr = FINISH(hnr);
 
-  _ATerm* cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = aterm::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==sym)
@@ -242,7 +258,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
     
     for (size_t i=0; i<arity; i++)
     {
-      /* _ATerm* arg = &*arguments[i];
+      /* detail::_aterm* arg = &*arguments[i];
       arg->reference_count++; 
       reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] = arg; */
       new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
@@ -262,7 +278,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
 {
-  _ATerm* cur, *prev, **hashspot;
+  detail::_aterm* cur, *prev, **hashspot;
   HashNumber hnr;
 
   assert(sym.arity()==1);
@@ -318,7 +334,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1)
 {
-  _ATerm* cur, *prev, **hashspot;
+  detail::_aterm* cur, *prev, **hashspot;
   HashNumber hnr;
 
   assert(sym.arity()==2);
@@ -380,7 +396,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2)
 {
-  _ATerm *cur;
+  detail::_aterm *cur;
   HashNumber hnr;
 
   assert(sym.arity()==3);
@@ -438,7 +454,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2, const Term &arg3)
 {
-  _ATerm* cur;
+  detail::_aterm* cur;
   HashNumber hnr;
 
   CHECK_TERM(&*arg0);
@@ -499,7 +515,7 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4)
 {
-  _ATerm *cur;
+  detail::_aterm *cur;
   HashNumber hnr;
 
   assert(sym.arity()==5);
@@ -566,7 +582,7 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4, const Term &arg5)
 {
-  _ATerm* cur;
+  detail::_aterm* cur;
   HashNumber hnr;
 
   assert(sym.arity()==6);
@@ -657,7 +673,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) c
 
   hnr = FINISH(hnr);
 
-  _ATerm *cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm *cur = aterm::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==(*this)->m_function_symbol)
@@ -719,7 +735,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) c
 
 
 template <class Term>
-term_list<Term>::term_list(const term_list<Term> &tail, const Term &el)
+term_list<Term> push_front(const term_list<Term> &tail, const Term &el)
 {
   HashNumber hnr;
 
@@ -752,8 +768,8 @@ term_list<Term>::term_list(const term_list<Term> &tail, const Term &el)
     aterm::hashtable[hnr] = cur;
   }
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return term_list<Term>(cur);
+  // increase_reference_count<false>(m_term);
 }
 
 

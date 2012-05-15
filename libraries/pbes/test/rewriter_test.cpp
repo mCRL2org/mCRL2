@@ -608,7 +608,7 @@ void test_one_point_rule_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();

@@ -22,7 +22,8 @@ namespace atermpp
 /// the bottom of the program stack.
 
 inline
-void aterm_init();
+void aterm_init()
+{}
 
 } // namespace atermpp
 

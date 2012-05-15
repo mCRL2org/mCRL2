@@ -48,7 +48,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param t A term
-    explicit fixpoint_symbol(const ATerm &t)
+    explicit fixpoint_symbol(const aterm &t)
       : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_FixPoint(m_term));

@@ -517,7 +517,7 @@ void test_functions()
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
   pbes_system::detail::set_bes_equation_limit(100000);
   test_pbesinst();
   test_pbesinst_finite();

@@ -224,7 +224,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     {
       propositional_variable_instantiation temp_pvi = propositional_variable_instantiation(create_propvar_name(pvi->name(), pvi->parameters()), empty_data_expression_list);
       oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
-      if (states_done.index(temp_pvi) == ATERM_NON_EXISTING_POSITION)  // I.e., temp_pvi is not found.
+      if (states_done.index(temp_pvi) == -1)  // I.e., temp_pvi is not found.
       {
         states_todo.insert(*pvi);
       }

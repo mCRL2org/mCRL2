@@ -135,7 +135,7 @@ class action_rename_rule
 
     /// \brief Constructor.
     /// \param t A term
-    explicit action_rename_rule(const ATerm &t1)
+    explicit action_rename_rule(const atermpp::aterm &t1)
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_ActionRenameRule(t));
@@ -259,7 +259,7 @@ class action_rename_specification
       m_action_labels(action_labels),
       m_rules(rules)
     {
-      /* m_term = reinterpret_cast<ATerm>(
+      /* m_term = reinterpret_cast<atermpp::aterm>(
       core::detail::gsMakeActionRenameSpec(
         data::detail::data_specification_to_aterm_data_spec(data),
         core::detail::gsMakeActSpec(action_labels),
@@ -369,9 +369,9 @@ namespace detail
 /// \param spec A term
 /// \return A term in an undocumented format
 inline
-ATermAppl type_check_action_rename_specification(ATermAppl ar_spec, ATermAppl spec)
+atermpp::aterm_appl type_check_action_rename_specification(const atermpp::aterm_appl &ar_spec, const atermpp::aterm_appl &spec)
 {
-  ATermAppl result = core::type_check_action_rename_spec(ar_spec, spec);
+  atermpp::aterm_appl result = core::type_check_action_rename_spec(ar_spec, spec);
   if (result == NULL)
   {
     throw runtime_error("type check error");

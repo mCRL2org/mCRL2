@@ -79,7 +79,7 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
       {
         std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front(), i));
 
-        ATerm     state;
+        atermpp::aterm     state;
         multi_action transition;
         while (generator->next(transition, &state))
         {
@@ -98,7 +98,7 @@ std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_
     {
       std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front()));
 
-      ATerm     state;
+      atermpp::aterm     state;
       multi_action transition;
       while (generator->next(transition, &state))
       {
@@ -145,7 +145,6 @@ BOOST_AUTO_TEST_CASE(test_abp)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
+  atermpp::aterm_init();
   return 0;
 }

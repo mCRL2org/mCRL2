@@ -23,7 +23,7 @@ namespace detail
 {
 
 template <class Term>
-class _aterm_appl:public _ATerm
+class _aterm_appl:public _aterm
 {
   public:
     Term        arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
@@ -88,7 +88,6 @@ class term_appl_iterator: public boost::iterator_facade<
     }
 
     Term *m_term;
-    // _ATerm** m_term;
 };
 
 } // namespace atermpp

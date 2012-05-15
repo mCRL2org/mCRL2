@@ -58,7 +58,7 @@ class multi_action
     }
 
     /// \brief Constructor
-    explicit multi_action(const ATerm& t1) : m_time(core::detail::gsMakeNil())
+    explicit multi_action(const atermpp::aterm& t1) : m_time(core::detail::gsMakeNil())
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
@@ -166,8 +166,8 @@ std::set<data::variable> find_free_variables(const lps::multi_action& x);
 namespace detail
 {
 
-/// \brief Conversion to ATermAppl.
-/// \return The multi action converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The multi action converted to aterm format.
 inline
 atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 {

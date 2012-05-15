@@ -95,12 +95,12 @@ class RewriterCompilingJitty: public Rewriter
 
     std::map <int,int> int2ar_idx;
     size_t ar_size;
-    std::vector<ATermAppl> ar;
-    ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
-    ATermAppl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
-    ATermAppl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
+    std::vector<atermpp::aterm_appl> ar;
+    atermpp::aterm_appl build_ar_expr(atermpp::aterm expr, atermpp::aterm_appl var);
+    atermpp::aterm_appl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
+    atermpp::aterm_appl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
     bool always_rewrite_argument(const atermpp::aterm_int &opid, const size_t arity, const size_t arg);
-    bool calc_ar(const ATermAppl &expr);
+    bool calc_ar(const atermpp::aterm_appl &expr);
     void fill_always_rewrite_array();
 
     std::string rewriter_source;
@@ -113,14 +113,14 @@ class RewriterCompilingJitty: public Rewriter
     void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
     void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
     bool opid_is_nf(const atermpp::aterm_int &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
-    bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
-    std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);
-    std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
-    void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
-    void implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args);
+    void calc_nfs_list(nfs_array &a, size_t arity, atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars);
+    bool calc_nfs(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars);
+    std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
+    std::pair<bool,std::string> calc_inner_term(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
+    void calcTerm(FILE* f, atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
+    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, atermpp::aterm_list nnfvars);
+    void implement_tree(FILE* f, atermpp::aterm_appl tree, int arity, int d, int opid, bool* used);
+    void implement_strategy(FILE* f, atermpp::aterm_list strat, int arity, int d, int opid, size_t nf_args);
     void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();

@@ -12,11 +12,14 @@ static const size_t AT_APPL = 1;
 static const size_t AT_INT = 2;
 static const size_t AT_LIST = 3;
 
-struct _ATerm
+namespace detail
+{
+
+struct _aterm
 {
     function_symbol    m_function_symbol;
     size_t  reference_count;
-    _ATerm* next;
+    _aterm* next;
 
     size_t type() const
     {
@@ -40,7 +43,7 @@ struct _ATerm
 inline
 size_t TERM_SIZE_APPL(const size_t arity)
 {
-  return (sizeof(_ATerm)/sizeof(size_t))+arity;
+  return (sizeof(_aterm)/sizeof(size_t))+arity;
 }
 
 static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
@@ -49,7 +52,7 @@ static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
 const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
 const size_t INITIAL_MAX_TERM_SIZE = 256;
 
-
+} // namespace detail
 } // namespace atermpp
 
 #endif /* DETAIL_ATERM_H */

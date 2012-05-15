@@ -408,7 +408,7 @@ fparse_terms(int* c, FILE* f)
     return aterm_list();
   }
 
-  list = aterm_list(aterm_list(), el);
+  list = push_front(aterm_list(), el);
 
   while (*c == ',')
   {
@@ -418,7 +418,7 @@ fparse_terms(int* c, FILE* f)
     {
       return aterm_list();
     }
-    list = aterm_list(list, el);
+    list = push_front(list, el);
   }
 
   return reverse(list);
@@ -835,7 +835,7 @@ sparse_terms(int* c, char** s)
     return aterm_list();
   }
 
-  aterm_list list = aterm_list(aterm_list(), el);
+  aterm_list list = push_front(aterm_list(), el);
 
   while (*c == ',')
   {
@@ -845,7 +845,7 @@ sparse_terms(int* c, char** s)
     {
       return aterm_list();
     }
-    list = aterm_list(list, el);
+    list = push_front(list, el);
   }
 
   return reverse(list);

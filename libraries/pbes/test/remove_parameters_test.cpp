@@ -93,7 +93,7 @@ void test_pbes_expression()
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_propositional_variable_instantiation();
 

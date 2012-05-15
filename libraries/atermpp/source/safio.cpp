@@ -659,7 +659,7 @@ static aterm buildTerm(BinaryReader /* binaryReader*/, ATermConstruct* parent)
       size_t i = nrOfSubTerms;
       do
       {
-        list = aterm_list(list, subTerms[--i]);
+        list = push_front(list, subTerms[--i]);
       }
       while (i > 0);
 

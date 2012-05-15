@@ -41,7 +41,7 @@ class assignment_expression: public atermpp::aterm_appl,
       : atermpp::aterm_appl(core::detail::constructWhrDecl())
     {}
 
-    assignment_expression(const ATerm &term)
+    assignment_expression(const aterm &term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_WhrDecl(atermpp::aterm_appl(term)));
@@ -80,7 +80,7 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    assignment(const ATerm& term)
+    assignment(const aterm& term)
       : assignment_expression(atermpp::aterm_appl(term))
     {
       assert(core::detail::check_term_DataVarIdInit(m_term));

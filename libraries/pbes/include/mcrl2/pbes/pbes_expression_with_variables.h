@@ -91,9 +91,9 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
 {
-  static ATerm term(const mcrl2::pbes_system::pbes_expression_with_variables& t)
+  static atermpp::aterm term(const mcrl2::pbes_system::pbes_expression_with_variables& t)
   {
-    return static_cast<ATerm>(t);
+    return static_cast<atermpp::aterm>(t);
   }
 };
 }

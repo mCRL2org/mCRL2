@@ -29,7 +29,7 @@ using namespace mcrl2::pbes_system;
 
 int main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   if (argc < 4)
   {

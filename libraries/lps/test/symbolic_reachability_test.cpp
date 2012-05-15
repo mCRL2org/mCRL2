@@ -201,7 +201,7 @@ void check_info(mcrl2::lps::specification const& model)
 
 int test_main(int argc, char** argv)
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   using namespace mcrl2;
   using namespace mcrl2::lps;
@@ -228,21 +228,21 @@ int test_main(int argc, char** argv)
     // Note the second argument that specifies that don't care variables are not treated specially
     NextState* explorer = createNextState(model, rewriter, false);
 
-    std::stack< ATerm >     stack;
-    std::set< ATerm >   known;
+    std::stack< atermpp::aterm >     stack;
+    std::set< atermpp::aterm >   known;
 
     stack.push(explorer->getInitialState());
     known.insert(stack.top());
 
     while (!stack.empty())
     {
-      ATerm     current(stack.top());
+      atermpp::aterm     current(stack.top());
 
       stack.pop();
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        ATerm     state;
+        atermpp::aterm     state;
         multi_action transition;
 
         std::auto_ptr< NextStateGenerator > generator(explorer->getNextStates(current, i));

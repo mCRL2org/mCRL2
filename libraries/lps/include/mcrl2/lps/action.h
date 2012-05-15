@@ -44,7 +44,7 @@ class action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit action(const ATerm& term)
+    explicit action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_Action(m_term));

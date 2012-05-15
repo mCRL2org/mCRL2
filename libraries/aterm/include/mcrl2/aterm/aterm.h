@@ -57,14 +57,6 @@ bool ATisQuoted(const AFun &sym)
   return sym.is_quoted();
 }
 
-/* ATerm related functions */
-
-/* inline
-size_t ATgetAFun(const _ATermAppl* appl)
-{
-  return appl->m_function_symbol.number();
-} */
-
 inline
 size_t ATgetAFun(const ATerm &t)
 {
@@ -160,12 +152,12 @@ ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
 {
   va_list args;
   size_t arity = sym.arity();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);
 
   va_start(args, sym);
   for (size_t i=0; i<arity; i++)
   {
-    _ATerm* arg = va_arg(args, _ATerm *);
+    detail::_aterm* arg = va_arg(args, detail::_aterm *);
     CHECK_TERM(arg);
     buffer[i] = arg;
   }
@@ -218,7 +210,7 @@ ATermList ATgetSlice(const ATermList &list, const size_t start, const size_t end
 inline
 ATermList ATinsert(const ATermList &list, const ATerm &el)
 {
-  return term_list<ATerm>(list,el);
+  return push_front(list,el);
 }
 
 inline
@@ -286,7 +278,7 @@ ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx)
 {
   ATermList list=list_in;
   size_t i;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,idx);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,idx);
 
   for (i=0; i<idx; i++)
   {
@@ -312,7 +304,7 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
   ATermList list=list_in;
   size_t i, len = ATgetLength(list);
   ATermList result;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
   /* Collect all elements of list in buffer */
   for (i=0; i<len; i++)
@@ -343,7 +335,7 @@ ATermList ATgetArguments(const ATermAppl &appl)
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
   for (i=0; i<len; i++)
   {
@@ -369,7 +361,7 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
 {
   size_t i, size;
   ATermList result = ATmakeList0();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,(end<=start?0:end-start));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,(end<=start?0:end-start));
 
   if (end<=start)
   {

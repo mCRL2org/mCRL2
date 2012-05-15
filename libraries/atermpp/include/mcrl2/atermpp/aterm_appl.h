@@ -15,8 +15,8 @@
 #include <unistd.h>
 #include <stack>
 #include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 
 
@@ -32,6 +32,22 @@ class term_appl:public aterm
     detail::_aterm_appl<Term>* appl() const
     {
       return static_cast<detail::_aterm_appl<Term>*>(m_term);
+    }
+
+  public: // Should become protected.
+    detail::_aterm_appl<Term> & operator *() const
+    {
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<detail::_aterm_appl<Term>*>(m_term); 
+    }
+
+    detail::_aterm_appl<Term> *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
   public:
@@ -64,8 +80,9 @@ class term_appl:public aterm
     {}
 
     /// \brief Constructor.
-    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<_ATerm*>(t))
+    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
     {
+      // assert((boost::is_base_of<Term, aterm>::value));
       assert(sizeof(Term)==sizeof(size_t));
     }
     
@@ -73,6 +90,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     term_appl (const term_appl &t):aterm(t)
     {
+      // assert((boost::is_base_of<Term, aterm>::value));
       assert(sizeof(Term)==sizeof(size_t));
     }
 
@@ -80,6 +98,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     explicit term_appl (const aterm &t):aterm(t)
     {
+      // assert((boost::is_base_of<Term, aterm>::value));
       assert(sizeof(Term)==sizeof(size_t));
     }
 
@@ -91,6 +110,9 @@ class term_appl:public aterm
     /// \param last The end of a range of elements.
     template <class Iter>
     term_appl(const function_symbol &sym, Iter first, Iter last);
+    /*           typename boost::enable_if<
+              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+              boost::forward_traversal_tag >::type >::type* = 0); */
     
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
@@ -162,23 +184,8 @@ class term_appl:public aterm
       return *this;
     }
 
-    detail::_aterm_appl<Term> & operator *() const
-    {
-      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
-      // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
-      return *reinterpret_cast<detail::_aterm_appl<Term>*>(m_term); 
-    }
-
-    detail::_aterm_appl<Term> *operator ->() const
-    {
-      assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
-      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
-    }
-
-    /// \brief Returns the size of the list.
-    /// \return The size of the list.
+    /// \brief Returns the number of arguments of this term.
+    /// \return The number of arguments of this term.
     size_type size() const
     {
       return m_term->m_function_symbol.arity();
@@ -191,22 +198,22 @@ class term_appl:public aterm
       return m_term->m_function_symbol.arity()==0;
     }
 
-    /// \brief Returns an iterator pointing to the beginning of the list.
-    /// \return An iterator pointing to the beginning of the list.
+    /// \brief Returns an iterator pointing to the first argument.
+    /// \return An iterator pointing to the first argument.
     const_iterator begin() const
     {
       return const_iterator(&(static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[0]));
     }
 
-    /// \brief Returns a const_iterator pointing to the beginning of the list.
-    /// \return A const_iterator pointing to the beginning of the list.
+    /// \brief Returns a const_iterator pointing past the last argument.
+    /// \return A const_iterator pointing past the last argument.
     const_iterator end() const
     {
       return const_iterator(&static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[size()]);
     }
 
-    /// \brief Returns the largest possible size of the list.
-    /// \return The largest possible size of the list.
+    /// \brief Returns the largest possible number of arguments.
+    /// \return The largest possible number of arguments.
     size_type max_size() const
     {
       return (std::numeric_limits<unsigned long>::max)();
@@ -219,22 +226,14 @@ class term_appl:public aterm
     /// \return The term with one of its arguments replaced.
     term_appl<Term> set_argument(const Term &arg, const size_type i) const;
 
-    /// \brief Get the function symbol (function_symbol) of the application.
-    /// \return The function symbol of the function application.
-    /* function_symbol function() const
-    {
-      return m_term->function();
-    } */
-
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    const Term operator()(size_type i) const
+    const Term &operator()(size_type i) const
     {
       assert(i<m_term->function().arity());
-      return static_cast<const Term>(static_cast<aterm>(static_cast<detail::_aterm_appl<Term>*>(m_term)->arg[i]));
+      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg[i];
     }
-
 };
 
 typedef term_appl<aterm> aterm_appl;

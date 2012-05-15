@@ -34,7 +34,7 @@ inline
 void type_check(sort_expression& sort_expr, const data_specification& data_spec)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = sort_expr;
+  atermpp::aterm_appl t = sort_expr;
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
   if (!&*t)
   {
@@ -61,7 +61,7 @@ void type_check(data_expression& data_expr,
                 const data_specification& data_spec = data_specification())
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = data_expr;
+  atermpp::aterm_appl t = data_expr;
 
   atermpp::table variables;
   for (VariableIterator v = first; v != last; ++v)
@@ -109,7 +109,7 @@ inline
 void type_check(data_specification& data_spec)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = detail::data_specification_to_aterm_data_spec(data_spec);
+  atermpp::aterm_appl t = detail::data_specification_to_aterm_data_spec(data_spec);
   t = core::type_check_data_spec(t);
   if (!&*t)
   {

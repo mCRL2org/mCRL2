@@ -36,8 +36,8 @@ class alphabet_reduction
 
     std::map < process_expression, action_label_list_list > alphas;
     std::map < process_identifier, action_label_list_list > alphas_process_identifiers;
-    std::map < ATermList, action_label_list_list > alphas_length;
-    std::map < ATermAppl, process_identifier > subs_alpha;
+    std::map < atermpp::aterm_list, action_label_list_list > alphas_length;
+    std::map < atermpp::aterm_appl, process_identifier > subs_alpha;
     std::map < process_identifier, process_identifier > subs_alpha_rev;
     std::map < process_identifier, mcrl2::data::variable_list > form_pars;
  

@@ -51,7 +51,7 @@ class next_state_generator
     struct state_type
     {
       multi_action transition;
-      ATerm state;
+      atermpp::aterm state;
 
       state_type()
         : transition(),
@@ -63,7 +63,7 @@ class next_state_generator
           state(other.state)
       {}
 
-      state_type(multi_action transition_, ATerm state_)
+      state_type(multi_action transition_, atermpp::aterm state_)
         : transition(transition_),
           state(state_)
       {}
@@ -72,7 +72,7 @@ class next_state_generator
       /// \deprecated
       atermpp::aterm operator[](std::size_t i) const
       {
-        return atermpp::aterm_appl(static_cast<ATermAppl>(state))(i);
+        return atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(state))(i);
       }
 
       /// \brief Returns the label of the transition.
@@ -84,7 +84,7 @@ class next_state_generator
       /// \brief Returns the number of components of the state.
       std::size_t size() const
       {
-        return atermpp::term_appl<atermpp::aterm_appl>(static_cast<ATermAppl>(state)).size();
+        return atermpp::term_appl<atermpp::aterm_appl>(static_cast<atermpp::aterm_appl>(state)).size();
       }
     };
 

@@ -46,7 +46,6 @@ void test_assignment_list()
   l.push_back(assignment(d1, e1));
   l.push_back(assignment(e1, e2));
   l.push_back(assignment(e2, e3));
-  ATfprintf(stderr,"ASSIGNMENTLIST %t\n",&*assignment_list(l.begin(), l.end()));
 
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));

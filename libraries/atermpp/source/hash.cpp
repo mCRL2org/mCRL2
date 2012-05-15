@@ -240,7 +240,7 @@ static aterm_list tableContent(const std::vector< std::vector<aterm> > &tableind
     t = tableGet(tableindex, i-1);
     if (t != aterm())
     {
-      result = aterm_list(result, t);
+      result = push_front(result, t);
     }
   }
   return result;

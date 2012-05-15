@@ -46,7 +46,7 @@ void test_parse()
 
 int test_main(int argc, char* argv[])
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_parse();
 

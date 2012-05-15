@@ -40,6 +40,8 @@ namespace mcrl2 {
 
 namespace core {
 
+using namespace aterm_deprecated;
+
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
 

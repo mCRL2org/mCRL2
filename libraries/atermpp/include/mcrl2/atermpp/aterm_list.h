@@ -14,12 +14,12 @@
 
 #include <cassert>
 #include <limits>
+#include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 
 namespace atermpp
 {
@@ -35,6 +35,22 @@ class term_list:public aterm
       static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST));
       return m_empty_list;
     } 
+
+  public: // Should become protected.
+    detail::_aterm_list<Term> & operator *() const
+    {
+      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
+      // which is done quite commonly.
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
+    }
+
+    detail::_aterm_list<Term> *operator ->() const
+    {
+      assert(m_term!=NULL);
+      assert(m_term->reference_count>0);
+      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
+    }
 
   public:
 
@@ -63,21 +79,22 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
     
     /// Default constructor. Creates an empty list.
-    term_list ():aterm(reinterpret_cast<_ATerm*>(&*empty_list()))
+    term_list ():aterm(reinterpret_cast<detail::_aterm*>(&*empty_list()))
     {
     }
 
     /// \brief Copy construction.
     /// \param l A list.
-    term_list(const term_list<Term> &t):aterm(reinterpret_cast<_ATerm *>(&*t))
+    term_list(const term_list<Term> &t):aterm(reinterpret_cast<detail::_aterm *>(&*t))
     {
       assert(m_term==NULL || type() == AT_LIST); // term list can be NULL.
     }
 
     /// \brief Constructor from _aterm_list*.
     /// \param l A list.
-    term_list(detail::_aterm_list<Term> *t):aterm(reinterpret_cast<_ATerm *>(t))
+    term_list(detail::_aterm_list<Term> *t):aterm(reinterpret_cast<detail::_aterm *>(t))
     {
+      assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(Term)==sizeof(size_t));
       assert(t==NULL || type() == AT_LIST); // term list can be NULL. This is generally used to indicate a faulty
                                             // situation. This used should be discouraged.
@@ -91,6 +108,7 @@ class term_list:public aterm
     template <typename SpecificTerm>
     term_list<Term>(const term_list<SpecificTerm> &t): aterm(t)
     {
+      assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(SpecificTerm)==sizeof(size_t));
       assert(sizeof(Term)==sizeof(size_t));
     } 
@@ -100,17 +118,11 @@ class term_list:public aterm
     ///  \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
+      assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(Term)==sizeof(size_t));
       assert(m_term==NULL || t.type()==AT_LIST); // Term list can be NULL; Generally, this is used to indicate a faulty situation.
                                                  // This use should be discouraged.
     }
-
-    /// \brief Construction of a list from a list and an element
-    /// \detail This is the standard cons operator on lists.
-    /// \param l A list
-    /// \param t An element
-    term_list(const term_list<Term> &l, const Term &t);
-    
 
     /// Creates an term_list with a copy of a range.
     /// \param first The start of a range of elements.
@@ -120,12 +132,13 @@ class term_list:public aterm
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
               boost::random_access_traversal_tag >::type >::type* = 0)
     {
+      assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(Term)==sizeof(size_t));
       term_list<Term> result;
       while (first != last)
       {
         const Term t=*(--last);
-        result = term_list<Term>(result, t);
+        result = push_front(result, t);
       }
       m_term=&*result;
       increase_reference_count<false>(m_term);
@@ -139,6 +152,8 @@ class term_list:public aterm
              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
              boost::random_access_traversal_tag >::type >::type* = 0)
     {
+      assert((boost::is_base_of<aterm, Term>::value));
+      assert(sizeof(Term)==sizeof(size_t));
       std::vector<Term> temporary_store;
       while (first != last)
       {
@@ -150,7 +165,7 @@ class term_list:public aterm
       for(typename std::vector<Term>::reverse_iterator i=temporary_store.rbegin(); 
               i!=temporary_store.rend(); ++i)
       { 
-        result=term_list(result, *i); 
+        result=push_front(result, *i); 
       }
       m_term=&*result;
       increase_reference_count<false>(m_term);
@@ -164,21 +179,6 @@ class term_list:public aterm
       return *this;
     }
 
-    detail::_aterm_list<Term> & operator *() const
-    {
-      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
-      // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
-      return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
-    }
-
-    detail::_aterm_list<Term> *operator ->() const
-    {
-      assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
-      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-    }
-
     /// \brief Conversion to aterm_list.
     /// \return The wrapped _aterm_list pointer.
     operator term_list<aterm>() const
@@ -188,16 +188,17 @@ class term_list:public aterm
 
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
-    const term_list<Term> tail() const
+    const term_list<Term> &tail() const
     {
-      return (static_cast<detail::_aterm_list<Term>*>(m_term))->tail;
+      return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
     /// \brief Returns the head of the list.
     /// \return The term at the head of the list.
-    const Term head()
+    const Term &head() const
     {
-      return Term(static_cast<detail::_aterm_list<Term>*>(m_term)->head);
+      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
+      // return Term(static_cast<detail::_aterm_list<Term>*>(m_term)->head);
     }
 
     /// \brief Returns the size of the term_list.
@@ -218,7 +219,7 @@ class term_list:public aterm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return m_term==reinterpret_cast<_ATerm*>(&*empty_list());
+      return m_term==reinterpret_cast<detail::_aterm*>(&*empty_list());
     }
 
     /// \brief Returns the first element.
@@ -239,7 +240,7 @@ class term_list:public aterm
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(reinterpret_cast<_ATerm*>(&*empty_list()));
+      return const_iterator(reinterpret_cast<detail::_aterm*>(&*empty_list()));
     }
 
     /// \brief Returns the largest possible size of the term_list.
@@ -255,7 +256,7 @@ namespace detail
 {
 
 template <class Term>
-class _aterm_list:public _ATerm
+class _aterm_list:public _aterm
 {
   public:
     Term head;
@@ -276,9 +277,9 @@ typedef term_list<aterm> aterm_list;
 /// \return The first element of the list.
 template <typename Term>
 inline
-Term front(term_list<Term> l)
+const Term &front(const term_list<Term> &l)
 {
-  return *l.begin();
+  return l.head(); 
 }
 
 /// \brief Returns the list obtained by inserting a new element at the beginning.
@@ -287,10 +288,7 @@ Term front(term_list<Term> l)
 /// \return The list with an element inserted in front of it.
 template <typename Term>
 inline
-term_list<Term> push_front(term_list<Term> l, Term elem)
-{
-  return term_list<Term>(l, elem);
-}
+term_list<Term> push_front(const term_list<Term> &l, const Term &elem);
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
 /// that the complexity of this function is O(n), with n the number of
@@ -303,7 +301,7 @@ inline
 term_list<Term> push_back(term_list<Term> list, const Term &elem)
 {
   size_t len = list.size();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
   /* Collect all elements of list in buffer */
   for (size_t i=0; i<len; i++)
@@ -312,12 +310,12 @@ term_list<Term> push_back(term_list<Term> list, const Term &elem)
     list = list.tail();
   }
 
-  term_list<Term> result(term_list<Term>(),elem);
+  term_list<Term> result=push_front(term_list<Term>(),elem);
 
   /* Insert elements at the front of the list */
   for (size_t i=len; i>0; i--)
   {
-    result = term_list<Term>(result, Term(buffer[i-1]));
+    result = push_front(result, Term(buffer[i-1]));
   }
 
   return result;
@@ -343,7 +341,7 @@ term_list<Term> reverse(term_list<Term> l)
   term_list<Term> result;
   while (!l.empty())
   {
-    result = term_list<Term>(result, l.head());
+    result = push_front(result, l.head());
     l = l.tail(); 
   }
   return result;
@@ -358,7 +356,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 {
   size_t i = 0;
   term_list<Term> l = list;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,list.size());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,list.size());
 
   while (l!=term_list<Term>())
   {
@@ -382,7 +380,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
         one to the tail of the list. */
   for ( ; i>0; i--)
   {
-    result = term_list<Term>(result, Term(buffer[i-1]));
+    result = push_front(result, Term(buffer[i-1]));
   }
 
   return result;
@@ -426,7 +424,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   }
 
   term_list<Term> result = m;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,_ATerm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
   /* Collect the elements of list1 in buffer */
   term_list<Term> list1=l;
   for (size_t i=0; i<len; i++)
@@ -438,7 +436,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   /* Insert elements at the front of the list */
   for (size_t i=len; i>0; i--)
   {
-    result = term_list<Term>(result, Term(buffer[i-1]));
+    result = push_front(result, Term(buffer[i-1]));
   }
 
   return result;

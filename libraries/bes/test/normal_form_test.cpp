@@ -61,7 +61,7 @@ void test_standard_recursive_form()
 
 int test_main(int argc, char* argv[])
 {
-  aterm_init();
+  atermpp::aterm_init();
 
   test_standard_recursive_form();
 

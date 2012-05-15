@@ -100,7 +100,7 @@ class pbes
     /// \brief The initial state
     propositional_variable_instantiation m_initial_state;
 
-    /// \brief Initialize the pbes from an ATerm
+    /// \brief Initialize the pbes from an aterm
     /// \param t A term
     void init_term(atermpp::aterm_appl t)
     {
@@ -318,7 +318,7 @@ class pbes
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (t==atermpp::aterm() || t.type() != AT_APPL || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
+      if (t==atermpp::aterm() || t.type() != atermpp::AT_APPL || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
       }
@@ -576,12 +576,12 @@ class pbes
     }
 };
 
-/// \brief Conversion to ATermAppl.
-/// \return The PBES converted to ATerm format.
+/// \brief Conversion to atermappl.
+/// \return The PBES converted to aterm format.
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 {
-  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
+  atermpp::aterm_appl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
 
   atermpp::aterm_list eqn_list;
   const Container& eqn = p.equations();
@@ -590,8 +590,8 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
     atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list = atermpp::push_front(eqn_list, a);
   }
-  ATermAppl equations = core::detail::gsMakePBEqnSpec(eqn_list);
-  ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());
+  atermpp::aterm_appl equations = core::detail::gsMakePBEqnSpec(eqn_list);
+  atermpp::aterm_appl initial_state = core::detail::gsMakePBInit(p.initial_state());
   atermpp::aterm_appl result;
 
   result = core::detail::gsMakePBES(
@@ -632,19 +632,7 @@ namespace atermpp
 template<typename Container>
 struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 {
-  static void protect(const mcrl2::pbes_system::pbes<Container>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::pbes<Container>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::pbes<Container>& t)
-  {
-    t.mark();
-  }
-  static ATerm term(const mcrl2::pbes_system::pbes<Container>& t)
+  static atermpp::aterm term(const mcrl2::pbes_system::pbes<Container>& t)
   {
     atermpp::aterm x = pbes_to_aterm(t);
     return x;

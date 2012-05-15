@@ -1489,17 +1489,17 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
       return NULL;
     }
 
-    result = (aterm)aterm_int((int)val);
+    result = aterm_int((int)val);
 
       /*}}}  */
   }
   else if (sym->sym==AS_LIST)
   {
-      result = (aterm)aterm_list((aterm_list)args[1], args[0]);
+      result = push_front((aterm_list)args[1], args[0]);
   }
   else if (sym->sym==AS_EMPTY_LIST)
   {
-    result = (aterm)aterm_list();
+    result = aterm_list();
   }
   else
   {
