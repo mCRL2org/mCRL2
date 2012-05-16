@@ -94,7 +94,7 @@ static bool remove_func_decl(ATermAppl func)
 
 static void add_id(ATermList* ids, ATermAppl id)
 {
-  if (ATindexOf(*ids,(ATerm) id,0) == ATERM_NON_EXISTING_POSITION)
+  if (ATindexOf(*ids,(ATerm) id) == ATERM_NON_EXISTING_POSITION)
   {
     *ids = ATappend(*ids,(ATerm) id);
   }
@@ -191,7 +191,7 @@ static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
     if (!ATisEmpty(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)))
     {
       ATermAppl a = ATAgetArgument(ATAgetFirst(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)),0);
-      if (ATindexOf(acts,(ATerm) a,0) == ATERM_NON_EXISTING_POSITION)
+      if (ATindexOf(acts,(ATerm) a) == ATERM_NON_EXISTING_POSITION)
       {
         acts = ATinsert(acts,(ATerm) a);
         add_id(ids,ATAgetArgument(a,0));

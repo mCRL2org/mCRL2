@@ -281,7 +281,7 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
     {
       aterm store = atermpp::aterm_appl(afunS, t,dummy);
 
-      if (ATindexOf(*s,store,0) != ATERM_NON_EXISTING_POSITION)
+      if (ATindexOf(*s,store) != ATERM_NON_EXISTING_POSITION)
       {
         *s = push_front<aterm>(*s, static_cast<atermpp::aterm>(atermpp::aterm_appl(afunM,t,dummy,dummy)));
       }
@@ -293,7 +293,7 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
     }
     else
     {
-      int arity = ATgetArity(ATgetAFun((aterm_appl) t));
+      int arity = t.function().arity(); 
 
       *s = push_front<aterm>(*s, atermpp::aterm_appl(afunF,ATgetArgument((aterm_appl) t,0),dummy,dummy));
 
@@ -328,14 +328,14 @@ static void get_used_vars_aux(aterm t, aterm_list* vars)
   {
     if (gsIsDataVarId((aterm_appl) t))
     {
-      if (ATindexOf(*vars,t,0) == ATERM_NON_EXISTING_POSITION)
+      if (ATindexOf(*vars,t) == ATERM_NON_EXISTING_POSITION)
       {
         *vars = push_front<aterm>(*vars,t);
       }
     }
     else
     {
-      int a = ATgetArity(ATgetAFun((aterm_appl) t));
+      int a = t.function().arity(); 
       for (int i=0; i<a; i++)
       {
         get_used_vars_aux(ATgetArgument((aterm_appl) t,i),vars);
@@ -356,7 +356,7 @@ static aterm_list get_used_vars(const aterm &t)
 static aterm_list create_sequence(const data_equation &rule, int* var_cnt, const aterm_int &true_inner)
 {
   aterm_appl pat = toInner(rule.lhs(),true);
-  int pat_arity = ATgetArity(ATgetAFun(pat));
+  int pat_arity = pat.function().arity(); 
   aterm cond = toInner_list_odd(rule.condition());
   aterm rslt = toInner_list_odd(rule.rhs());
   aterm_list rseq = ATmakeList0();
@@ -917,7 +917,7 @@ static aterm_list get_vars(const aterm &a)
   else     // ATisAppl(a)
   {
     aterm_list l = ATmakeList0();
-    int arity = ATgetArity(ATgetAFun((aterm_appl) a));
+    int arity = a.function().arity();
     for (int i=0; i<arity; ++i)
     {
       l = ATconcat(get_vars(ATgetArgument((aterm_appl) a,i)),l);
@@ -928,7 +928,7 @@ static aterm_list get_vars(const aterm &a)
 
 static aterm_list dep_vars(const data_equation &eqn)
 {
-  size_t rule_arity = ATgetArity(ATgetAFun(toInner(eqn.lhs(),true)))-1;
+  size_t rule_arity = toInner(eqn.lhs(),true).function().arity()-1;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
   aterm_appl pars = toInner(eqn.lhs(),true); // pars is actually the lhs of the equation.
@@ -958,7 +958,7 @@ static aterm_list dep_vars(const data_equation &eqn)
         int j=i-1; // ATgetLength(ATgetNext(vars))-1
         for (aterm_list o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
         {
-          if (ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != ATERM_NON_EXISTING_POSITION)
+          if (ATindexOf(ATLgetFirst(o),ATgetFirst(evars)) != ATERM_NON_EXISTING_POSITION)
           {
             bs[j] = true;
           }
@@ -973,7 +973,7 @@ static aterm_list dep_vars(const data_equation &eqn)
       bool b = false;
       for (aterm_list o=vars; !ATisEmpty(o); o=ATgetNext(o))
       {
-        if (ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) != ATERM_NON_EXISTING_POSITION)
+        if (ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1)) != ATERM_NON_EXISTING_POSITION)
         {
           // Same variable, mark it
           if (j >= 0)
@@ -1069,7 +1069,7 @@ static aterm_list create_strategy(
   aterm_list dep_list = ATmakeList0();
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    size_t rule_arity = ATgetArity(ATgetAFun(toInner(it->lhs(),true)))-1;
+    size_t rule_arity = (toInner(it->lhs(),true).function().arity())-1;
     if (rule_arity > arity)
     {
       continue;
@@ -1102,7 +1102,7 @@ static aterm_list create_strategy(
           int j=i-1;
           for (aterm_list o=vars; !ATisEmpty(ATgetNext(o)); o=ATgetNext(o))
           {
-            if (ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != ATERM_NON_EXISTING_POSITION)
+            if (ATindexOf(ATLgetFirst(o),ATgetFirst(evars)) != ATERM_NON_EXISTING_POSITION)
             {
               bs[j] = true;
             }
@@ -1117,7 +1117,7 @@ static aterm_list create_strategy(
         bool b = false;
         for (aterm_list o=vars; !ATisEmpty(o); o=ATgetNext(o))
         {
-          if (ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) != ATERM_NON_EXISTING_POSITION)
+          if (ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1)) != ATERM_NON_EXISTING_POSITION)
           {
             // Same variable, mark it
             if (j >= 0)
@@ -1272,7 +1272,7 @@ bool RewriterCompilingJitty::opid_is_nf(const atermpp::aterm_int &opid, size_t n
 
   for (data_equation_list::const_iterator it=l.begin(); it!=l.end(); ++it)
   {
-    if (ATgetArity(ATgetAFun(toInner(it->lhs(),true)))-1 <= num_args)
+    if (toInner(it->lhs(),true).function().arity()-1 <= num_args)
     {
       return false;
     }
@@ -1327,12 +1327,12 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   }
   else if (/*ATisAppl(t) && */ gsIsNil((aterm_appl) t))
   {
-    return (nnfvars==NULL) || (ATindexOf(nnfvars, ATmakeInt(startarg),0) == ATERM_NON_EXISTING_POSITION);
+    return (nnfvars==NULL) || (ATindexOf(nnfvars, ATmakeInt(startarg)) == ATERM_NON_EXISTING_POSITION);
   }
   else if (/* ATisAppl(t) && */ gsIsDataVarId((aterm_appl) t))
   {
     assert(ATisAppl(t) && gsIsDataVarId((aterm_appl) t));
-    return (nnfvars==NULL) || (ATindexOf(nnfvars,t,0) == ATERM_NON_EXISTING_POSITION);
+    return (nnfvars==NULL) || (ATindexOf(nnfvars,t) == ATERM_NON_EXISTING_POSITION);
   }
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
@@ -1597,7 +1597,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         ss << ":";
         bool c = rewr;
-        if (rewr && (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION))
+        if (rewr && (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION))
         {
           ss << "rewrite(";
           c = false;
@@ -1653,7 +1653,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "(aterm_appl)";
     }
-    bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION);
+    bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
     if (rewr && b)
     {
       ss << "rewrite(arg" << startarg << ")";
@@ -1673,7 +1673,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "(aterm_appl)";
     }
-    const bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars,t,0) != ATERM_NON_EXISTING_POSITION);
+    const bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars,t) != ATERM_NON_EXISTING_POSITION);
     const variable v=variable((aterm_appl)t);
     string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
@@ -2295,7 +2295,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
     return make_ar_true();
   }
 
-  if (ATindexOf(dep_vars(eqn), arg_term,0) != ATERM_NON_EXISTING_POSITION)
+  if (ATindexOf(dep_vars(eqn), arg_term) != ATERM_NON_EXISTING_POSITION)
   {
     return make_ar_true();
   }
@@ -2630,7 +2630,7 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu_term(const atermpp::aterm_appl &t) { return rewr_%zu_%zu_%zu(", func_index, a, nfs,func_index, a,nfs);
         for(size_t i = 1; i <= a; ++i)
         {
-          fprintf(f,  "%satermpp::aterm_appl(t(%zu))", (i == 1?"":", "), i);
+          fprintf(f,  "%sreinterpret_cast<const atermpp::aterm_appl &>(t(%zu))", (i == 1?"":", "), i);
         }
         fprintf(f,  "); }\n");
       }
@@ -2695,8 +2695,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Print defs
   //
   fprintf(f,
-          "#define isAppl(x) (ATgetAFun((aterm_appl)x) != %li)\n"
-          "\n", ATgetAFun(static_cast<aterm_appl>(data::variable("x", data::sort_bool::bool_())))
+          "#define isAppl(x) (x.function().number() != %li)\n"
+          "\n", ATgetAFun(static_cast<aterm_appl>(data::variable("x", data::sort_bool::bool_()))).number()
          );
 
   //
@@ -2913,18 +2913,30 @@ void RewriterCompilingJitty::BuildRewriteSystem()
          );
 
   fprintf(f,
-      "static atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm &head, const atermpp::aterm_appl &t)\n"
+      "struct argument_rewriter_struct\n"
       "{\n"
-      "  const size_t arity = t.size();\n"
-      "  //atermpp::aterm args[arity];\n"
-//      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity));\n"
-      "  std::vector<atermpp::aterm> args(arity);\n"
-      "  args[0] = head;\n"
-      "  for (size_t i=1; i<arity; ++i)\n"
+      "  argument_rewriter_struct()\n"
+      "  {}\n"
+      "\n"
+      "  atermpp::aterm_appl operator()(const atermpp::aterm &arg)\n"
       "  {\n"
-      "    args[i] = rewrite(atermpp::aterm_appl(t(i)));\n"
+      "    return rewrite(reinterpret_cast<const atermpp::aterm_appl &>(arg));\n"
       "  }\n"
-      "  return atermpp::aterm_appl(ATgetAFun(t),args.begin(),args.end());\n"
+      "};\n"
+      "\n"
+      "static atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm_appl &t)\n"
+      "{\n"
+//      "  const size_t arity = t.size();\n"
+//      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity));\n"
+//      "  std::vector<atermpp::aterm> args(arity);\n"
+//      "  args[0] = head;\n"
+//      "  for (size_t i=1; i<arity; ++i)\n"
+//      "  {\n"
+//      "    args[i] = rewrite(atermpp::aterm_appl(t(i)));\n"
+//      "  }\n"
+//      "  return atermpp::aterm_appl(t.function(),args.begin(),args.end());\n"
+      "  const argument_rewriter_struct argument_rewriter;\n"
+      "  return atermpp::aterm_appl(t.function(),t.begin(),t.end(),argument_rewriter);\n"
       "}\n\n");
 
   fprintf(f,
@@ -3064,10 +3076,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (t.function()==apples[t.size()])\n"
       "  {\n"
       "    // Term t has the shape #REWR#(t1,...,tn)\n"
-      "    const atermpp::aterm head = t(0);\n"
+      "    const atermpp::aterm &head = t(0);\n"
       "    if (head.type()==AT_INT)\n"
       "    {\n"
-      "      const int function_index = atermpp::aterm_int(head).value();\n"
+      "      const int function_index = reinterpret_cast<const atermpp::aterm_int&>(head).value();\n"
       "      if (function_index < %zu )\n"
       "      {\n"
       "        const size_t arity = t.size();\n"
@@ -3077,12 +3089,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      }\n"
       "      else\n"
       "      {\n"
-      "        return rewrite_int_aux(head, t);"
+      "        return rewrite_int_aux(t);"
       "      }\n"
       "    }\n"
       "    else\n"
       "    {\n"
-      "      return rewrite_appl_aux(atermpp::aterm_appl(head), t);\n"
+      "      return rewrite_appl_aux(reinterpret_cast<const atermpp::aterm_appl&>(head), t);\n"
       "    }\n"
       "  }\n"
       "  \n"

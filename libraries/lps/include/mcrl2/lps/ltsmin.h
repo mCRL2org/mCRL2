@@ -699,11 +699,9 @@ class pins
       old::next_state_generator::iterator i = m_generator.begin(init);
       while (++i)
       {
-fprintf(stderr,"HIER1\n");
         const lps::old::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-fprintf(stderr,"HIER2\n");
           dest[i] = state_type_map(i)[s[i]];
         }
         labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];

@@ -58,9 +58,9 @@ bool ATisQuoted(const AFun &sym)
 }
 
 inline
-size_t ATgetAFun(const ATerm &t)
+const AFun &ATgetAFun(const ATerm &t)
 {
-  return t.function().number();
+  return t.function();
 }
 
 inline 
@@ -400,26 +400,9 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
  *      */
 
 inline
-size_t ATindexOf(const ATermList &list_in, const ATerm &el, const int startpos)
+size_t ATindexOf(const ATermList &list_in, const ATerm &el)
 {
-  assert(startpos==0);
-
   ATermList list=list_in;
-  // size_t i, start;
-
-  /* if (startpos < 0)
-  {
-    start = startpos + ATgetLength(list) + 1;
-  }
-  else
-  {
-    start = startpos;
-  }
-
-  for (i=0; i<start; i++)
-  {
-    list = ATgetNext(list);
-  } */
 
   size_t i=0;
   while (!ATisEmpty(list) && !ATisEqual(ATgetFirst(list), el))
@@ -553,7 +536,7 @@ ATfprintf(FILE* stream, const char* format,...);
  **/
 inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
 {
-  if (ATindexOf(list, el, 0) == size_t(-1))
+  if (ATindexOf(list, el) == size_t(-1))
   {
     return ATinsert(list, el);
   }

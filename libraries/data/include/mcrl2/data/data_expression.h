@@ -35,54 +35,54 @@ namespace data
 /// \param t A term
 /// \return True if the term is a data expression.
 inline
-bool is_data_expression(atermpp::aterm_appl t)
+bool is_data_expression(const atermpp::aterm_appl &t)
 {
   return core::detail::gsIsDataExpr(t);
 }
 
 /// \brief Returns true if the term t is an abstraction
-inline bool is_abstraction(atermpp::aterm_appl p)
+inline bool is_abstraction(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p);
 }
 
 /// \brief Returns true if the term t is a lambda abstraction
-inline bool is_lambda(atermpp::aterm_appl p)
+inline bool is_lambda(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
          core::detail::gsIsLambda(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is a universal quantification
-inline bool is_forall(atermpp::aterm_appl p)
+inline bool is_forall(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
          core::detail::gsIsForall(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is an existential quantification
-inline bool is_exists(atermpp::aterm_appl p)
+inline bool is_exists(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
          core::detail::gsIsExists(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is a set comprehension
-inline bool is_set_comprehension(atermpp::aterm_appl p)
+inline bool is_set_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
          core::detail::gsIsSetComp(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is a bag comprehension
-inline bool is_bag_comprehension(atermpp::aterm_appl p)
+inline bool is_bag_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
          core::detail::gsIsBagComp(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is a function symbol
-inline bool is_function_symbol(atermpp::aterm_appl p)
+inline bool is_function_symbol(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsOpId(p);
 }
@@ -90,23 +90,23 @@ inline bool is_function_symbol(atermpp::aterm_appl p)
 /// \brief Returns true if the term t is a variable
 inline bool is_variable(const atermpp::aterm &p)
 {
-  return core::detail::gsIsDataVarId(atermpp::aterm_appl(p));
+  return core::detail::gsIsDataVarId(atermpp::aterm_appl (p));
 }
 
 /// \brief Returns true if the term t is an application
-inline bool is_application(atermpp::aterm_appl p)
+inline bool is_application(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsDataAppl(p);
 }
 
 /// \brief Returns true if the term t is a where clause
-inline bool is_where_clause(atermpp::aterm_appl p)
+inline bool is_where_clause(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsWhr(p);
 }
 
 /// \brief Returns true if the term t is an identifier
-inline bool is_identifier(atermpp::aterm_appl p)
+inline bool is_identifier(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsId(p);
 }

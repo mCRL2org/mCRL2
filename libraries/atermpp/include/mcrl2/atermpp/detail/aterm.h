@@ -40,18 +40,6 @@ struct _aterm
     }
 };
 
-inline
-size_t TERM_SIZE_APPL(const size_t arity)
-{
-  return (sizeof(_aterm)/sizeof(size_t))+arity;
-}
-
-static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
-
-/* The constants below are not static to prevent some compiler warnings */
-const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
-const size_t INITIAL_MAX_TERM_SIZE = 256;
-
 } // namespace detail
 } // namespace atermpp
 

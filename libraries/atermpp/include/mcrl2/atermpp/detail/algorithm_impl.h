@@ -77,18 +77,18 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
     // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,_ATerm*,n);
     std::vector <aterm> t(n);
 
-    for (unsigned int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
-      t[i] = (aterm)f(a(i));
+      t[i] = f(a(i));
 
-      if (t[i] != &*(aterm)(a(i)))
+      if (t[i] != a(i))
       {
         term_changed = true;
       }
     }
     if (term_changed)
     {
-      a = term_appl(a.function(), a.begin(),a.end(),f);
+      a = term_appl<Term>(a.function(), t.begin(),t.end());
     } 
   }
   return a; */
@@ -310,7 +310,8 @@ struct replace_helper
   /// \return The function result
   aterm operator()(aterm t) const
   {
-    return replace_impl(t, m_replace);
+    aterm result=replace_impl(t, m_replace);
+    return result;
   }
 };
 

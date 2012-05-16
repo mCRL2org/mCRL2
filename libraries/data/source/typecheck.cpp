@@ -61,7 +61,7 @@ static ATermList list_minus(ATermList l, ATermList m)
   ATermList n = ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    if (ATindexOf(m,ATgetFirst(l),0) == ATERM_NON_EXISTING_POSITION)
+    if (ATindexOf(m,ATgetFirst(l)) == ATERM_NON_EXISTING_POSITION)
     {
       n = ATinsert(n,ATgetFirst(l));
     }
@@ -3192,7 +3192,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
           for (; !ATisEmpty(MActFrom); MActFrom=ATgetNext(MActFrom))
           {
             ATermAppl Act=ATAgetFirst(MActFrom);
-            if (ATindexOf(Acts,Act,0)==ATERM_NON_EXISTING_POSITION)
+            if (ATindexOf(Acts,Act)==ATERM_NON_EXISTING_POSITION)
             {
               Acts=ATinsert(Acts,Act);
             }
@@ -3200,7 +3200,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
           for (; !ATisEmpty(Acts); Acts=ATgetNext(Acts))
           {
             ATermAppl Act=ATAgetFirst(Acts);
-            if (ATindexOf(ActsFrom,Act,0)!=ATERM_NON_EXISTING_POSITION)
+            if (ATindexOf(ActsFrom,Act)!=ATERM_NON_EXISTING_POSITION)
             {
               mCRL2log(error) << "synchronizing action " << core::pp_deprecated(Act) << " in different ways (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return NULL;

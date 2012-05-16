@@ -724,7 +724,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       {
         aterm_list rule = ATLgetFirst(strat);
         aterm_appl lhs = ATAelementAt(rule,2);
-        size_t rule_arity = ATgetArity(ATgetAFun(lhs));
+        size_t rule_arity = lhs.size();
 
         if (rule_arity > arity)
         {

@@ -127,8 +127,9 @@ HashNumber FINISH(const HashNumber hnr)
 inline
 void CHECK_TERM(const detail::_aterm *t)
 {
-  assert(&*t != NULL);
+  assert(t != NULL);
   assert(t->reference_count>0);
+  assert(t->m_function_symbol.name().size()!=0);
 }
 
 /*}}}  */
@@ -142,12 +143,13 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
   const size_t arity = sym.arity();
 
   HashNumber hnr = START(sym.number());
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity);
+  std::vector <aterm> arguments(arity);
+  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity); // This usage leads to crashes with -DNDEBUG. 
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
-    new (&arguments[j]) aterm(convert_to_aterm(*i)); // Placement new.
+    arguments[j]=convert_to_aterm(*i);
     detail::_aterm* arg = &*arguments[j];
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
@@ -163,7 +165,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
       bool found = true;
       for (size_t i=0; i<arity; i++)
       {
-        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] != &*arguments[i])
+        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] != arguments[i])
         {
           found = false;
           break;
@@ -171,10 +173,6 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
       }
       if (found)
       {
-        for (size_t j=0; j<arity; j++)
-        {
-          arguments[j].decrease_reference_count();
-        }
         break;
       }
     }
@@ -190,11 +188,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
     
     for (size_t i=0; i<arity; i++)
     {
-      detail::_aterm* arg = &*arguments[i];
-      // arg->reference_count++; The reference counts do not need to be increased.
-      //                         These are inherited from the array `arguments', which is
-      //                         not properly deleted from the stack.
-      reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] = arg;
+      new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
     }
     cur->next = &*aterm::hashtable[hnr];
     aterm::hashtable[hnr] = cur;
