@@ -51,7 +51,28 @@ class state_label_fsm:  public std::vector < size_t >
       std::vector < size_t >(v)
     {}
 };
+/** \brief Pretty print a state value of this FSM.
+    \details The label l is printed as (t1,...,tn).
+    \param[in] l  The state value to pretty print.
+    \return           The pretty-printed representation of value. */
 
+inline std::string pp(const state_label_fsm l)
+{
+  std::string s;
+  s = "(";
+  for (size_t i=0; i<l.size(); ++i)
+  {
+    std::stringstream sNr;
+    sNr << l[i];
+    s += sNr.str();
+    if (i+1<l.size())
+    {
+      s += ",";
+    }
+  }
+  s += ")";
+  return s;
+}
 } // namespace detail
 
 

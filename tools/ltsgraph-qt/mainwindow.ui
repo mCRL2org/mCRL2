@@ -130,6 +130,9 @@
    <property name="text">
     <string>&amp;Open</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="act3D">
    <property name="checkable">
@@ -164,6 +167,9 @@
   <action name="actExportImage">
    <property name="text">
     <string>&amp;Export image...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>

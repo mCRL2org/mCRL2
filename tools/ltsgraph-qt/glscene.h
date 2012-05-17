@@ -25,7 +25,8 @@ class GLScene
     TextureData *m_texturedata; ///< Implementation details storing labels as textures.
     CameraAnimation *m_camera;  ///< Implementation details of the OpenGL camera handling.
 
-    bool m_drawlabels;          ///< Labels are only drawn if this field is true.
+    bool m_drawstatelabels;          ///< State labels are only drawn if this field is true.
+    bool m_drawtransitionlabels;          ///< Transition labels are only drawn if this field is true.
 
     /**
      * @brief Renders a single edge.
@@ -49,7 +50,13 @@ class GLScene
      * @brief Renders a single edge label.
      * @param i The index of the edge of the label to render.
      */
-    void renderLabel(size_t i);
+    void renderTransitionLabel(size_t i);
+
+    /**
+     * @brief Renders a single state label.
+     * @param i The index of the state of the label to render.
+     */
+    void renderStateLabel(size_t i);
   public:
 
     /**
@@ -221,8 +228,10 @@ class GLScene
      */
     void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
 
-    bool drawLabels() const { return m_drawlabels; }
-    void setDrawLabels(bool drawLabels) { m_drawlabels = drawLabels; }
+    bool drawStateLabels() const { return m_drawstatelabels; }
+    bool drawTransitionLabels() const { return m_drawtransitionlabels; }
+    void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
+    void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
 };
 
 #endif // GLSCENE_H

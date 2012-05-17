@@ -16,9 +16,11 @@ class MainWindow : public QMainWindow
   public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void openFile(QString fileName);
+
   private slots:
-    void onOpenFile(const QString& filename);
-    void onExportImage(const QString& filename);
+    void onOpenFile();
+    void onExportImage();
     void onWidgetResized(const Graph::Coord3D& newsize);
     void on3DChanged(bool enabled);
     void onTimer();
@@ -28,8 +30,6 @@ class MainWindow : public QMainWindow
     Graph::Graph m_graph;
     Graph::SpringLayout* m_layout;
     QTimer* m_timer;
-    QFileDialog* m_savedialog;
-    QFileDialog* m_opendialog;
 
     float m_dXRot, m_dYRot, m_dDepth, m_targetDepth;
     int m_anim;

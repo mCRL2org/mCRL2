@@ -47,21 +47,30 @@ struct Color3f
 
 struct TextureData
 {
-    size_t* widths;
-    size_t* heights;
-    GLuint* textures;
-    size_t count;
+    size_t* transition_widths;
+    size_t* transition_heights;
+    GLuint* transition_textures;
+    size_t transition_count;
+    size_t* state_widths;
+    size_t* state_heights;
+    GLuint* state_textures;
+    size_t state_count;
 
     TextureData()
-      : widths(NULL), heights(NULL), textures(NULL), count(0)
+      : transition_widths(NULL), transition_heights(NULL), transition_textures(NULL), transition_count(0),
+        state_widths(NULL), state_heights(NULL), state_textures(NULL), state_count(0)
     { }
 
     ~TextureData()
     {
-      glDeleteTextures(count, textures);
-      delete[] widths;
-      delete[] heights;
-      delete[] textures;
+      glDeleteTextures(transition_count, transition_textures);
+      delete[] transition_widths;
+      delete[] transition_heights;
+      delete[] transition_textures;
+      glDeleteTextures(state_count, state_textures);
+      delete[] state_widths;
+      delete[] state_heights;
+      delete[] state_textures;
     }
 
     void generate(const Graph::Graph& g)
@@ -70,22 +79,26 @@ struct TextureData
       QFontMetrics metrics(font);
       QPainter p;
 
-      glDeleteTextures(count, textures);
-      delete[] widths;
-      delete[] heights;
-      delete[] textures;
+      glDeleteTextures(transition_count, transition_textures);
+      delete[] transition_widths;
+      delete[] transition_heights;
+      delete[] transition_textures;
+      glDeleteTextures(state_count, state_textures);
+      delete[] state_widths;
+      delete[] state_heights;
+      delete[] state_textures;
 
-      count = g.labelCount();
-      textures = new GLuint[count];
-      widths = new size_t[count];
-      heights = new size_t[count];
+      transition_count = g.transitionLabelCount();
+      transition_textures = new GLuint[transition_count];
+      transition_widths = new size_t[transition_count];
+      transition_heights = new size_t[transition_count];
 
-      glGenTextures(count, textures);
+      glGenTextures(transition_count, transition_textures);
 
-      for (size_t i = 0; i < count; ++i)
+      for (size_t i = 0; i < transition_count; ++i)
       {
 
-        QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, g.labelstring(i));
+        QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, g.transitionLabelstring(i));
         QImage label(bounds.width(), bounds.height(), QImage::Format_ARGB32_Premultiplied);
         p.begin(&label);
         p.setFont(font);
@@ -93,11 +106,11 @@ struct TextureData
         p.fillRect(bounds, QColor(1, 1, 1, 0));
         p.setCompositionMode(QPainter::CompositionMode_SourceOver);
         p.setPen(QColor(255, 0, 0, 255));
-        p.drawText(bounds, g.labelstring(i));
+        p.drawText(bounds, g.transitionLabelstring(i));
         p.end();
         // Save the original width and height for posterity
-        widths[i] = label.width();
-        heights[i] = label.height();
+        transition_widths[i] = label.width();
+        transition_heights[i] = label.height();
         // OpenGL likes its textures to have dimensions that are powers of 2
         int w = 1, h = 1;
         while (w < label.width()) w <<= 1;
@@ -105,7 +118,50 @@ struct TextureData
         // ... and also wants the alpha component to be the 4th component
         label = QGLWidget::convertToGLFormat(label.scaled(w, h));
 
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        glBindTexture(GL_TEXTURE_2D, transition_textures[i]);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
+
+        assert(glGetError() == 0);
+      }
+
+      state_count = g.stateLabelCount();
+      state_textures = new GLuint[state_count];
+      state_widths = new size_t[state_count];
+      state_heights = new size_t[state_count];
+
+      glGenTextures(state_count, state_textures);
+
+      for (size_t i = 0; i < state_count; ++i)
+      {
+
+        QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, g.stateLabelstring(i));
+        QImage label(bounds.width(), bounds.height(), QImage::Format_ARGB32_Premultiplied);
+        p.begin(&label);
+        p.setFont(font);
+        p.setCompositionMode(QPainter::CompositionMode_Clear);
+        p.fillRect(bounds, QColor(1, 1, 1, 0));
+        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        p.setPen(QColor(255, 0, 0, 255));
+        p.drawText(bounds, g.stateLabelstring(i));
+        p.end();
+        // Save the original width and height for posterity
+        state_widths[i] = label.width();
+        state_heights[i] = label.height();
+        // OpenGL likes its textures to have dimensions that are powers of 2
+        int w = 1, h = 1;
+        while (w < label.width()) w <<= 1;
+        while (h < label.height()) h <<= 1;
+        // ... and also wants the alpha component to be the 4th component
+        label = QGLWidget::convertToGLFormat(label.scaled(w, h));
+
+        glBindTexture(GL_TEXTURE_2D, state_textures[i]);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -122,10 +178,10 @@ struct TextureData
 
 struct VertexData
 {
-    Coord3D *node, *handle, *arrowhead, *labels;
+    Coord3D *node, *handle, *arrowhead, *transition_labels, *state_labels;
 
     VertexData()
-      : node(NULL), handle(NULL), arrowhead(NULL), labels(NULL)
+      : node(NULL), handle(NULL), arrowhead(NULL), transition_labels(NULL), state_labels(NULL)
     { }
 
     ~VertexData()
@@ -133,7 +189,8 @@ struct VertexData
       delete[] node;
       delete[] handle;
       delete[] arrowhead;
-      delete[] labels;
+      delete[] transition_labels;
+      delete[] state_labels;
     }
 
     void generate(const TextureData& textures, float pixelsize)
@@ -146,7 +203,8 @@ struct VertexData
       delete[] node;
       delete[] handle;
       delete[] arrowhead;
-      delete[] labels;
+      delete[] transition_labels;
+      delete[] state_labels;
 
       // Generate vertices for node border (a line loop drawing a circle)
       float slice = 0, sliced = 2.0f * M_PI / (RES_NODE_SLICE - 1),
@@ -197,18 +255,31 @@ struct VertexData
                                          0.3 * arrowheadsize * sin(0.0f),
                                          0.3 * arrowheadsize * cos(0.0f));
 
-      // Generate quads for labels
-      labels = new Coord3D[4 * textures.count];
+      // Generate quads for transition labels
+      transition_labels = new Coord3D[4 * textures.transition_count];
       n = 0;
-      for (size_t i = 0; i < textures.count; ++i)
+      for (size_t i = 0; i < textures.transition_count; ++i)
       {
-        labels[n++] = Coord3D(-int(textures.widths[i]), -int(textures.heights[i]), 0.0f);
-        labels[n++] = Coord3D(     textures.widths[i],  -int(textures.heights[i]), 0.0f);
-        labels[n++] = Coord3D(     textures.widths[i],       textures.heights[i],  0.0f);
-        labels[n++] = Coord3D(-int(textures.widths[i]),      textures.heights[i],  0.0f);
+        transition_labels[n++] = Coord3D(-int(textures.transition_widths[i]), -int(textures.transition_heights[i]), 0.0f);
+        transition_labels[n++] = Coord3D(     textures.transition_widths[i],  -int(textures.transition_heights[i]), 0.0f);
+        transition_labels[n++] = Coord3D(     textures.transition_widths[i],       textures.transition_heights[i],  0.0f);
+        transition_labels[n++] = Coord3D(-int(textures.transition_widths[i]),      textures.transition_heights[i],  0.0f);
       }
       for (size_t i = 0; i < n; ++i)
-        labels[i] *= pixelsize / 2.0;
+        transition_labels[i] *= pixelsize / 2.0;
+
+      // Generate quads for state labels
+      state_labels = new Coord3D[4 * textures.state_count];
+      n = 0;
+      for (size_t i = 0; i < textures.state_count; ++i)
+      {
+        state_labels[n++] = Coord3D(-int(textures.state_widths[i]), -int(textures.state_heights[i]), 0.0f);
+        state_labels[n++] = Coord3D(     textures.state_widths[i],  -int(textures.state_heights[i]), 0.0f);
+        state_labels[n++] = Coord3D(     textures.state_widths[i],       textures.state_heights[i],  0.0f);
+        state_labels[n++] = Coord3D(-int(textures.state_widths[i]),      textures.state_heights[i],  0.0f);
+      }
+      for (size_t i = 0; i < n; ++i)
+        state_labels[i] *= pixelsize / 2.0;
     }
 };
 
@@ -507,16 +578,33 @@ void drawArc(const Coord3D* controlpoints)
 }
 
 inline
-void drawLabel(const VertexData& vertices, const TextureData& textures, size_t index)
+void drawTransitionLabel(const VertexData& vertices, const TextureData& textures, size_t index)
 {
   static GLfloat texCoords[] = { 0.0, 0.0,
                                  1.0, 0.0,
                                  1.0, 1.0,
                                  0.0, 1.0 };
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures.textures[index]);
+  glBindTexture(GL_TEXTURE_2D, textures.transition_textures[index]);
 
-  glVertexPointer(3, GL_FLOAT, 0, &vertices.labels[4 * index]);
+  glVertexPointer(3, GL_FLOAT, 0, &vertices.transition_labels[4 * index]);
+  glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+  glDrawArrays(GL_QUADS, 0, 4);
+
+  glDisable(GL_TEXTURE_2D);
+}
+
+inline
+void drawStateLabel(const VertexData& vertices, const TextureData& textures, size_t index)
+{
+  static GLfloat texCoords[] = { 0.0, 0.0,
+                                 1.0, 0.0,
+                                 1.0, 1.0,
+                                 0.0, 1.0 };
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, textures.state_textures[index]);
+
+  glVertexPointer(3, GL_FLOAT, 0, &vertices.state_labels[4 * index]);
   glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
   glDrawArrays(GL_QUADS, 0, 4);
 
@@ -568,7 +656,7 @@ void GLScene::renderEdge(size_t i)
   // If ctrl[3] == ctrl[2], then something odd is going on. We'll just
   // make the executive decision not to draw the arrowhead then, as it
   // will just clutter the image.
-  if (vec.size() > 0.0)
+  if (vec.size() > 0)
   {
     vec /= vec.size();
     Coord3D axis = Graph::Coord3D(1, 0, 0).cross(vec);
@@ -604,18 +692,18 @@ void GLScene::renderNode(size_t i)
   glEndName();
 }
 
-void GLScene::renderLabel(size_t i)
+void GLScene::renderTransitionLabel(size_t i)
 {
-  Graph::LabelNode& label = m_graph.label(i);
+  Graph::LabelNode& label = m_graph.transitionLabel(i);
 
   if (gl2ps())
   {
     Coord3D pos = label.pos;
-    pos.x -= m_camera->pixelsize * m_texturedata->widths[label.labelindex] / 2;
-    pos.y -= m_camera->pixelsize * m_texturedata->heights[label.labelindex] / 2;
+    pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex] / 2;
+    pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex] / 2;
     glRasterPos3fv(pos);
     if (!m_graph.isTau(label.labelindex))
-      gl2psText(m_graph.labelstring(label.labelindex).toUtf8(), "", 10);
+      gl2psText(m_graph.transitionLabelstring(label.labelindex).toUtf8(), "", 10);
     else
       gl2psText("t", "Symbol", 10);
   }
@@ -626,7 +714,32 @@ void GLScene::renderLabel(size_t i)
 
     glColor3f(label.selected, 0.0, 0.0);
     m_camera->billboard_cylindrical(label.pos);
-    drawLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+    drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+
+    glPopMatrix();
+    glEndName();
+  }
+}
+
+void GLScene::renderStateLabel(size_t i)
+{
+  Graph::NodeNode& node = m_graph.node(i);
+  if (gl2ps())
+  {
+    Coord3D pos = node.pos;
+    pos.x -= m_camera->pixelsize * m_texturedata->state_widths[i] / 2;
+    pos.y -= m_camera->pixelsize * m_texturedata->state_heights[i] / 2;
+    glRasterPos3fv(pos);
+    gl2psText(m_graph.stateLabelstring(i).toUtf8(), "", 10);
+  }
+  else
+  {
+    glStartName(so_label, i);
+    glPushMatrix();
+
+    glColor3f(node.selected, 0.0, 0.0);
+    m_camera->billboard_cylindrical(node.pos);
+    drawStateLabel(*m_vertexdata, *m_texturedata, i);
 
     glPopMatrix();
     glEndName();
@@ -661,7 +774,7 @@ void GLScene::renderHandle(size_t i)
 //
 
 GLScene::GLScene(Graph::Graph &g)
-  : m_graph(g), m_drawlabels(true)
+  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(true)
 {
   m_camera = new CameraAnimation();
   m_texturedata = new TextureData;
@@ -734,16 +847,21 @@ void GLScene::render()
   {
     renderEdge(i);
   }
-  glDepthMask(GL_FALSE);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  for (size_t i = 0; i < m_graph.nodeCount(); ++i)
+  {
+    if (m_drawstatelabels)
+      renderStateLabel(i);
+  }
+  glDepthMask(GL_FALSE);
   for (size_t i = 0; i < m_graph.edgeCount(); ++i)
   {
-    if (m_drawlabels)
-      renderLabel(i);
+    if (m_drawtransitionlabels)
+      renderTransitionLabel(i);
     renderHandle(i);
   }
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_TRUE);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void GLScene::resize(size_t width, size_t height)

@@ -32,7 +32,7 @@ struct MoveRecord
 struct LabelMoveRecord : public MoveRecord {
     void grab(Graph::Graph &graph, size_t index)
     {
-      node = &graph.label(index);
+      node = &graph.transitionLabel(index);
       node->anchored = true;
     }
 };
@@ -104,7 +104,7 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
-  : QGLWidget(parent), m_ui(NULL), m_graph(graph)
+  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false)
 {
   m_scene = new GLScene(m_graph);
   QGLFormat fmt = format();
@@ -123,7 +123,7 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
   switch (s.selectionType)
   {
     case GLScene::so_label:
-      return &g.label(s.index);
+      return &g.transitionLabel(s.index);
     case GLScene::so_handle:
       return &g.handle(s.index);
     case GLScene::so_node:
@@ -175,7 +175,7 @@ void GLWidget::updateSelection()
 
 void GLWidget::initializeGL()
 {
-  m_scene->init(parentWidget()->palette().background().color());
+  m_scene->init(Qt::white);
   resizeGL(width(), height());
 }
 
@@ -343,7 +343,7 @@ void GLWidget::endPaint()
   m_painting = false;
 }
 
-void GLWidget::renderToFile(const QString &filename, const QString &filter)
+void GLWidget::renderToFile(const QString &filename, const QString &filter, const int w, const int h)
 {
   if (filter.startsWith("PDF"))
   {
@@ -376,45 +376,20 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter)
             }
             else
             {
-              unsigned char buffer[1024 * 768 * 4];
-
-              glClearColor(0, 0, 0, 0);
-
-              QGLFramebufferObject fb(1024, 768, QGLFramebufferObject::Depth);
-              fb.bind();
-
-              m_scene->resize(1024, 768);
-              m_scene->render();
-              //swapBuffers();
-              glReadPixels(0, 0, 1024, 768, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
-              fb.release();
-              QImage img = fb.toImage();
-              QRgb* data = (QRgb*)(img.bits());
-              for (size_t i = 0; i < 1024 * 768; ++i)
-              {
-                unsigned char alpha = qAlpha(data[i]);
-                if (alpha)
-                {
-                  data[i] = qRgba(
-                        (std::min)(255, qRed(data[i]) * 255 / alpha),
-                        (std::min)(255, qGreen(data[i]) * 255 / alpha),
-                        (std::min)(255, qBlue(data[i]) * 255 / alpha),
-                        alpha
-                        );
-                }
-              }
-              img.save(filename);
-
-              //grabFrameBuffer(true).save(filename);
-
-              //renderPixmap(1024, 768).save(filename);
+              m_scene->resize(w, h);
+              qDebug() << renderPixmap(w, h).save(filename);
               m_scene->resize(width(), height());
             }
 }
 
-void GLWidget::toggleLabels(bool show)
+void GLWidget::toggleStateLabels(bool show)
 {
-  m_scene->setDrawLabels(show);
+  m_scene->setDrawStateLabels(show);
+}
+
+void GLWidget::toggleTransitionLabels(bool show)
+{
+  m_scene->setDrawTransitionLabels(show);
 }
 
 GLWidgetUi* GLWidget::ui(QWidget *parent)
@@ -435,7 +410,8 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui->btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
   connect(m_ui->btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
-  connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleLabels(bool)));
+  connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
+  connect(m_ui->cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
 }
 
 GLWidgetUi::~GLWidgetUi()

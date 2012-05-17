@@ -5,8 +5,7 @@
 #include "glwidget.h"
 #include "mcrl2/lts/lts_lts.h"
 #include <QFileDialog>
-
-#include "mcrl2/utilities/atermthread.h"
+#include "dimensionsdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -14,20 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
   m_ui->setupUi(this);
-
-  // Create open/save dialogs
-  m_savedialog = new QFileDialog(this, tr("Export image"), QString(),
-                                 tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm);;"
-                                    "PDF (*.pdf);;"
-                                    "Postscript (*.ps);;"
-                                    "Encapsulated Postscript (*.eps);;"
-                                    "SVG (*.svg);;"
-                                    "LaTeX (*.tex);;"
-                                    "PGF (*.pgf);;"
-                                    ));
-  m_opendialog = new QFileDialog(this, tr("Open file"), QString(),
-                                 tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)"));
-  m_opendialog->setFileMode(QFileDialog::ExistingFile);
 
   // Add graph area
   m_glwidget = new GLWidget(m_graph, m_ui->frame);
@@ -50,15 +35,12 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
   connect(springlayoutui, SIGNAL(runningChanged(bool)), m_ui->actGenerateRandomGraph, SLOT(setDisabled(bool)));
   connect(m_ui->actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
-  connect(springlayoutui, SIGNAL(visibilityChanged(bool)), m_ui->actLayoutControl, SLOT(setChecked(bool)));
   connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
   connect(m_ui->act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
   connect(m_ui->actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
   connect(m_ui->actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
-  connect(m_ui->actOpenFile, SIGNAL(triggered()), m_opendialog, SLOT(exec()));
-  connect(m_opendialog, SIGNAL(fileSelected(QString)), this, SLOT(onOpenFile(const QString&)));
-  connect(m_ui->actExportImage, SIGNAL(triggered()), m_savedialog, SLOT(exec()));
-  connect(m_savedialog, SIGNAL(fileSelected(QString)), this, SLOT(onExportImage(const QString&)));
+  connect(m_ui->actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
+  connect(m_ui->actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
 
   m_anim = 0;
   m_timer->start(40);
@@ -91,13 +73,49 @@ void MainWindow::onTimer()
   m_glwidget->updateGL();
 }
 
-void MainWindow::onOpenFile(const QString& filename)
+void MainWindow::openFile(QString fileName)
 {
-  m_graph.load(filename, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
-  m_glwidget->rebuild();
+  if (!fileName.isNull()) {
+    m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
+    m_glwidget->rebuild();
+  }
 }
 
-void MainWindow::onExportImage(const QString& filename)
+void MainWindow::onOpenFile()
 {
-  m_glwidget->renderToFile(filename, m_savedialog->selectedNameFilter());
+
+  QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
+                                                tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)")));
+
+  openFile(fileName);
+}
+
+void MainWindow::onExportImage()
+{
+  QString selectedFilter = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
+  QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+                                                tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm);;"
+                                                   "PDF (*.pdf);;"
+                                                   "Postscript (*.ps);;"
+                                                   "Encapsulated Postscript (*.eps);;"
+                                                   "SVG (*.svg);;"
+                                                   "LaTeX (*.tex);;"
+                                                   "PGF (*.pgf);;"
+                                                   ),
+                                                &selectedFilter));
+
+  if (!fileName.isNull()) {
+    if (selectedFilter.startsWith("Bitmap images")) {
+      DimensionsDialog dDialog(this);
+      if (dDialog.exec())
+      {
+        m_glwidget->renderToFile(fileName, selectedFilter, dDialog.resultWidth(), dDialog.resultHeight());
+      }
+    }
+    else
+    {
+      m_glwidget->renderToFile(fileName, selectedFilter);
+    }
+  }
+
 }

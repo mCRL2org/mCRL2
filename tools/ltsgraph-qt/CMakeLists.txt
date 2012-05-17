@@ -34,6 +34,7 @@ set(LTSGRAPH_UI_FILES
   mainwindow.ui
   glwidget.ui
   springlayout.ui
+  dimensionsdialog.ui
 )
 qt4_wrap_ui(LTSGRAPH_UI_HEADERS ${LTSGRAPH_UI_FILES})
 
@@ -43,6 +44,7 @@ set(LTSGRAPH_MOC_HEADERS
   glscene.h
   graph.h
   springlayout.h
+  dimensionsdialog.h
 )
 qt4_wrap_cpp(LTSGRAPH_MOC_SOURCES ${LTSGRAPH_MOC_HEADERS})
 
@@ -55,6 +57,7 @@ set(LTSGRAPH_SRC_FILES
   glscene.cpp
   graph.cpp
   springlayout.cpp
+  dimensionsdialog.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${LTSGRAPH_SRC_FILES})
@@ -62,7 +65,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${LTSGRAPH_SRC_FILES})
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${QT_QTMAIN_LIBRARY}
-  mcrl2_aterm
+  #mcrl2_aterm
   mcrl2_core
   mcrl2_data
   mcrl2_lps

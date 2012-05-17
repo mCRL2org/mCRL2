@@ -10,7 +10,7 @@
 ## CPack configuration
 ##---------------------------------------------------
 
-INCLUDE(InstallRequiredSystemLibraries)
+##INCLUDE(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "mcrl2")
 set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")

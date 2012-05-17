@@ -60,7 +60,7 @@ class GLWidget : public QGLWidget
 
     void setDepth(float depth, size_t animation = 1);
     void rebuild();
-    void renderToFile(const QString& filename, const QString& filter);
+    void renderToFile(const QString& filename, const QString& filter, const int w = 1024, const int h = 768);
     void setPaint(const QColor& color);
     void startPaint();
     void endPaint();
@@ -70,7 +70,8 @@ class GLWidget : public QGLWidget
     void widgetResized(const Graph::Coord3D& newsize);
   public slots:
     void resetViewpoint(size_t animation = 1);
-    void toggleLabels(bool show);
+    void toggleStateLabels(bool show);
+    void toggleTransitionLabels(bool show);
 };
 
 namespace Ui

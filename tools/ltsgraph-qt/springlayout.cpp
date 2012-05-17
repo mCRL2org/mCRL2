@@ -141,7 +141,7 @@ namespace Graph
       f = (this->*m_forceCalculation)((m_graph.node(e.to).pos + m_graph.node(e.from).pos) / 2.0, m_graph.handle(n).pos, 0.0);
       m_hforces[n] += f;
 
-      f = (this->*m_forceCalculation)(m_graph.handle(n).pos, m_graph.label(n).pos, 0.0);
+      f = (this->*m_forceCalculation)(m_graph.handle(n).pos, m_graph.transitionLabel(n).pos, 0.0);
       m_lforces[n] += f;
 
       for (size_t m = 0; m < n; ++m)
@@ -152,7 +152,7 @@ namespace Graph
         m_hforces[m] -= f;
 
         // Labels
-        f = repulsionForce(m_graph.label(n).pos, m_graph.label(m).pos, m_repulsion * m_controlPointWeight, m_natLength);
+        f = repulsionForce(m_graph.transitionLabel(n).pos, m_graph.transitionLabel(m).pos, m_repulsion * m_controlPointWeight, m_natLength);
         m_lforces[n] += f;
         m_lforces[m] -= f;
       }
@@ -174,10 +174,10 @@ namespace Graph
         m_graph.handle(n).pos = m_graph.handle(n).pos + m_hforces[n] * m_speed;
         m_graph.handle(n).pos.clip(m_clipMin, m_clipMax);
       }
-      if (!m_graph.label(n).anchored)
+      if (!m_graph.transitionLabel(n).anchored)
       {
-        m_graph.label(n).pos = m_graph.label(n).pos + m_lforces[n] * m_speed;
-        m_graph.label(n).pos.clip(m_clipMin, m_clipMax);
+        m_graph.transitionLabel(n).pos = m_graph.transitionLabel(n).pos + m_lforces[n] * m_speed;
+        m_graph.transitionLabel(n).pos.clip(m_clipMin, m_clipMax);
       }
     }
   }

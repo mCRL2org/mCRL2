@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>100</height>
+    <height>139</height>
    </rect>
   </property>
   <property name="font">
@@ -35,7 +35,7 @@
       <item>
        <widget class="QPushButton" name="btnPaint">
         <property name="text">
-         <string>Start painting</string>
+         <string>Enable painting</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -59,6 +59,40 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="labelRadius">
+        <property name="text">
+         <string>State radius:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinRadius">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbTransitionLabels">
+      <property name="text">
+       <string>Show transition labels</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QCheckBox" name="cbStateLabels">

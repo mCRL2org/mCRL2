@@ -27,12 +27,18 @@ namespace Graph
         virtual bool is_tau(size_t labelindex) const = 0;
         virtual ~GraphImplBase() {}
         std::vector<NodeNode> nodes;
-        std::vector<LabelNode> labelnodes;
         std::vector<Node> handles;
         std::vector<EdgeExtra> edges;
-        std::vector<QString> labels;
+        std::vector<QString> transitionLabels;
+        std::vector<LabelNode> transitionLabelnodes;
+        std::vector<QString> stateLabels;
         template <typename label_t>
-        QString label(const label_t& label)
+        QString transitionLabel(const label_t& label)
+        {
+          return QString::fromStdString(label);
+        }
+        template <typename label_t>
+        QString stateLabel(const label_t& label)
         {
           return QString::fromStdString(label);
         }
@@ -58,19 +64,28 @@ namespace Graph
           m_graph.load(filename.toUtf8().constData());
 
           // Resize all auxiliary data vectors
-          labels.resize(m_graph.num_action_labels());
           nodes.resize(m_graph.num_states());
           edges.resize(m_graph.num_transitions());
           handles.resize(m_graph.num_transitions());
-          labelnodes.resize(m_graph.num_transitions());
+          transitionLabels.resize(m_graph.num_action_labels());
+          transitionLabelnodes.resize(m_graph.num_transitions());
+          stateLabels.resize(m_graph.num_states());
 
           // Store string representations of labels
           for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
           {
             if (m_graph.is_tau(i))
-              labels[i] = QChar(0x03C4);
+              transitionLabels[i] = QChar(0x03C4);
             else
-              labels[i] = label(m_graph.action_label(i));
+              transitionLabels[i] = transitionLabel(m_graph.action_label(i));
+          }
+
+          for (size_t i = 0; i < m_graph.num_states(); ++i)
+          {
+            if (!m_graph.num_state_labels())
+              stateLabels[i] = QString::number(i);
+            else
+              stateLabels[i] = stateLabel(m_graph.state_label(i));
           }
 
           // Position nodes randomly
@@ -93,22 +108,41 @@ namespace Graph
             handles[i].locked = false;
             handles[i].anchored = false;
             handles[i].selected = 0.0;
-            labelnodes[i].pos = (nodes[t.from()].pos + nodes[t.to()].pos) / 2.0;
-            labelnodes[i].locked = false;
-            labelnodes[i].anchored = false;
-            labelnodes[i].selected = 0.0;
-            labelnodes[i].labelindex = t.label();
+            transitionLabelnodes[i].pos = (nodes[t.from()].pos + nodes[t.to()].pos) / 2.0;
+            transitionLabelnodes[i].locked = false;
+            transitionLabelnodes[i].anchored = false;
+            transitionLabelnodes[i].selected = 0.0;
+            transitionLabelnodes[i].labelindex = t.label();
           }
         }
     };
 
 
     template <>
-    QString GraphImplBase::label<mcrl2::lts::detail::action_label_lts>(const mcrl2::lts::detail::action_label_lts& label)
+    QString GraphImplBase::transitionLabel<mcrl2::lts::detail::action_label_lts>(const mcrl2::lts::detail::action_label_lts& label)
     {
       return QString::fromStdString(mcrl2::lts::detail::pp(label));
     }
-
+    template <>
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_lts>(const mcrl2::lts::detail::state_label_lts& label)
+    {
+      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+    }
+    template <>
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& label)
+    {
+      return QString("");
+    }
+    template <>
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_dot>(const mcrl2::lts::detail::state_label_dot& label)
+    {
+      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+    }
+    template <>
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_fsm>(const mcrl2::lts::detail::state_label_fsm& label)
+    {
+      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+    }
 
   }
 
@@ -132,9 +166,14 @@ namespace Graph
     return m_impl->nodes.size();
   }
 
-  size_t Graph::labelCount() const
+  size_t Graph::transitionLabelCount() const
   {
-    return m_impl->labels.size();
+    return m_impl->transitionLabels.size();
+  }
+
+  size_t Graph::stateLabelCount() const
+  {
+    return m_impl->stateLabels.size();
   }
 
   bool Graph::isTau(size_t labelindex) const
@@ -182,14 +221,19 @@ namespace Graph
     return m_impl->handles[edge];
   }
 
-  LabelNode& Graph::label(size_t edge) const
+  LabelNode& Graph::transitionLabel(size_t edge) const
   {
-    return m_impl->labelnodes[edge];
+    return m_impl->transitionLabelnodes[edge];
   }
 
-  const QString& Graph::labelstring(size_t labelindex) const
+  const QString& Graph::transitionLabelstring(size_t labelindex) const
   {
-    return m_impl->labels[labelindex];
+    return m_impl->transitionLabels[labelindex];
+  }
+
+  const QString& Graph::stateLabelstring(size_t labelindex) const
+  {
+    return m_impl->stateLabels[labelindex];
   }
 
   void Graph::selectEdge(size_t index, float amount)
@@ -201,7 +245,7 @@ namespace Graph
   {
     for (std::vector<NodeNode>::iterator it = m_impl->nodes.begin(); it != m_impl->nodes.end(); ++it)
       it->pos.clip(min, max);
-    for (std::vector<LabelNode>::iterator it = m_impl->labelnodes.begin(); it != m_impl->labelnodes.end(); ++it)
+    for (std::vector<LabelNode>::iterator it = m_impl->transitionLabelnodes.begin(); it != m_impl->transitionLabelnodes.end(); ++it)
       it->pos.clip(min, max);
     for (std::vector<Node>::iterator it = m_impl->handles.begin(); it != m_impl->handles.end(); ++it)
       it->pos.clip(min, max);

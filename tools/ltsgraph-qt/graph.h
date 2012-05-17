@@ -158,15 +158,18 @@ namespace Graph
       Edge edge(size_t index) const;
       NodeNode& node(size_t index) const;
       Node& handle(size_t edge) const;
-      LabelNode& label(size_t edge) const;
+      LabelNode& transitionLabel(size_t edge) const;
       bool isTau(size_t labelindex) const;
-      const QString& labelstring(size_t labelindex) const;
-      const std::map<size_t, QString*>::iterator labels() const;
+      const QString& transitionLabelstring(size_t labelindex) const;
+      const QString& stateLabelstring(size_t labelindex) const;
+      const std::map<size_t, QString*>::iterator transitionLabels() const;
+      const std::map<size_t, QString*>::iterator stateLabels() const;
       void clip(const Coord3D& min, const Coord3D& max);
       void selectEdge(size_t index, float amount);
       size_t edgeCount() const;
       size_t nodeCount() const;
-      size_t labelCount() const;
+      size_t transitionLabelCount() const;
+      size_t stateLabelCount() const;
       void load(const QString& filename, const Coord3D& min, const Coord3D& max);
   };
 
