@@ -1371,7 +1371,15 @@ string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, at
 static string calc_inner_appl_head(size_t arity)
 {
   stringstream ss;
-  if (arity <= 5)
+  if (arity == 1)
+  {
+    ss << "makeAppl1";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
+  }
+  else if (arity == 2)
+  {
+    ss << "makeAppl2";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
+  }
+  else if (arity <= 5)
   {
     ss << "atermpp::aterm_appl";
   }
@@ -1646,9 +1654,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-      ss << "atermpp::aterm_appl((atermpp::detail::_aterm*) " << (void*) &*get_rewrappl_value(static_cast<aterm_int>(t).value()) << ")";
-      /* set_rewrappl_value(static_cast<aterm_int>(t).value());
-      ss << "mcrl2::data::detail::get_rewrappl_value_without_check(" << static_cast<aterm_int>(t).value() << ")"; */
+      /* ss << "atermpp::aterm_appl((atermpp::detail::_aterm*) " << (void*) &*get_rewrappl_value(static_cast<aterm_int>(t).value()) << ")"; */
+      set_rewrappl_value(static_cast<aterm_int>(t).value());
+      ss << "mcrl2::data::detail::get_rewrappl_value_without_check(" << static_cast<aterm_int>(t).value() << ")"; 
     }
     return pair<bool,string>(
              rewr || b,
@@ -2022,6 +2030,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cu
     }
     else
     {
+// NOT EFFICIENT>>
       fprintf(f,"%sif (isAppl(%s%i(%i)) && atermpp::aterm_appl(%s%i(%i))(0)==atermpp::aterm((atermpp::detail::_aterm*) %p)) // F\n"
               "%s{\n"
               "%s  atermpp::aterm_appl t%i (%s%i(%i));\n",
@@ -2163,13 +2172,13 @@ static void finish_function(FILE* f, size_t arity, int opid, const std::vector<b
 {
   if (arity == 0)
   {
-    fprintf(f,  "  return (atermpp::aterm_appl((atermpp::detail::_aterm*) %p)",
+    /* fprintf(f,  "  return (atermpp::aterm_appl((atermpp::detail::_aterm*) %p)",
             (void*)&*get_rewrappl_value(opid)
-           ); 
-    /* set_rewrappl_value(opid);
+           );  */
+    set_rewrappl_value(opid);
     fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%i",
             opid
-           ); */
+           ); 
   }
   else
   {
