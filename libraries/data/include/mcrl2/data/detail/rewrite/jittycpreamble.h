@@ -22,9 +22,10 @@ extern "C" {
   DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl &t);
 }
 
+
 static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
 
-static inline atermpp::aterm_appl makeAppl0(AFun a, atermpp::aterm h) 
+/* static inline atermpp::aterm_appl makeAppl0(AFun a, atermpp::aterm h) 
               { return ATmakeAppl1(a,(ATerm)h); }
 static inline atermpp::aterm_appl makeAppl1(AFun a, atermpp::aterm h, atermpp::aterm_appl t1) 
               { return ATmakeAppl2(a,(ATerm)h,(ATerm)(ATermAppl) t1); }
@@ -35,6 +36,6 @@ static inline atermpp::aterm_appl makeAppl3(AFun a, atermpp::aterm h, atermpp::a
 static inline atermpp::aterm_appl makeAppl4(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2, atermpp::aterm_appl t3, atermpp::aterm_appl t4) 
               { return ATmakeAppl5(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3, (ATerm)(ATermAppl) t4); }
 static inline atermpp::aterm_appl makeAppl5(AFun a, atermpp::aterm h, atermpp::aterm_appl t1, atermpp::aterm_appl t2, atermpp::aterm_appl t3, atermpp::aterm_appl t4, atermpp::aterm_appl t5) 
-              { return ATmakeAppl6(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3, (ATerm)(ATermAppl) t4, (ATerm)(ATermAppl) t5); }
+              { return ATmakeAppl6(a,(ATerm)h,(ATerm)(ATermAppl) t1, (ATerm)(ATermAppl) t2, (ATerm)(ATermAppl) t3, (ATerm)(ATermAppl) t4, (ATerm)(ATermAppl) t5); } */
 
 
