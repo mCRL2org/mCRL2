@@ -159,6 +159,7 @@ namespace Graph
       NodeNode& node(size_t index) const;
       Node& handle(size_t edge) const;
       LabelNode& transitionLabel(size_t edge) const;
+      LabelNode& stateLabel(size_t edge) const;
       bool isTau(size_t labelindex) const;
       const QString& transitionLabelstring(size_t labelindex) const;
       const QString& stateLabelstring(size_t labelindex) const;
@@ -170,6 +171,7 @@ namespace Graph
       size_t nodeCount() const;
       size_t transitionLabelCount() const;
       size_t stateLabelCount() const;
+      size_t initialState() const;
       void load(const QString& filename, const Coord3D& min, const Coord3D& max);
   };
 

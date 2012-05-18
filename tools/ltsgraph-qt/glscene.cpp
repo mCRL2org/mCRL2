@@ -23,7 +23,6 @@
 #define RES_NODE_STACK  4
 
 #define SIZE_HANDLE     8
-#define SIZE_NODE      20
 #define SIZE_ARROWHEAD 12
 
 typedef Graph::Coord3D Coord3D;
@@ -193,10 +192,10 @@ struct VertexData
       delete[] state_labels;
     }
 
-    void generate(const TextureData& textures, float pixelsize)
+    void generate(const TextureData& textures, float pixelsize, float size_node)
     {
       float handlesize = SIZE_HANDLE * pixelsize,
-          nodesize = SIZE_NODE * pixelsize,
+          nodesize = size_node * pixelsize,
           arrowheadsize = SIZE_ARROWHEAD * pixelsize;
 
       // Delete old data
@@ -234,7 +233,7 @@ struct VertexData
                              cos(stack));
       }
       for (size_t i = 0; i < n; ++i)
-        node[i] *= 0.5 * pixelsize * SIZE_NODE;
+        node[i] *= 0.5 * nodesize;
 
       // Generate vertices for handle (border + fill, both squares)
       handle = new Coord3D[4];
@@ -694,8 +693,8 @@ void GLScene::renderNode(size_t i)
 
 void GLScene::renderTransitionLabel(size_t i)
 {
+  glStartName(so_label, i);
   Graph::LabelNode& label = m_graph.transitionLabel(i);
-
   if (gl2ps())
   {
     Coord3D pos = label.pos;
@@ -709,7 +708,6 @@ void GLScene::renderTransitionLabel(size_t i)
   }
   else
   {
-    glStartName(so_label, i);
     glPushMatrix();
 
     glColor3f(label.selected, 0.0, 0.0);
@@ -717,33 +715,33 @@ void GLScene::renderTransitionLabel(size_t i)
     drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
     glPopMatrix();
-    glEndName();
   }
+  glEndName();
 }
 
 void GLScene::renderStateLabel(size_t i)
 {
-  Graph::NodeNode& node = m_graph.node(i);
+  glStartName(so_slabel, i);
+  Graph::LabelNode& label = m_graph.stateLabel(i);
   if (gl2ps())
   {
-    Coord3D pos = node.pos;
-    pos.x -= m_camera->pixelsize * m_texturedata->state_widths[i] / 2;
-    pos.y -= m_camera->pixelsize * m_texturedata->state_heights[i] / 2;
+    Coord3D pos = label.pos;
+    pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex] / 2;
+    pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex] / 2;
     glRasterPos3fv(pos);
-    gl2psText(m_graph.stateLabelstring(i).toUtf8(), "", 10);
+    gl2psText(m_graph.stateLabelstring(label.labelindex).toUtf8(), "", 10);
   }
   else
   {
-    glStartName(so_label, i);
     glPushMatrix();
 
-    glColor3f(node.selected, 0.0, 0.0);
-    m_camera->billboard_cylindrical(node.pos);
-    drawStateLabel(*m_vertexdata, *m_texturedata, i);
+    glColor3f(label.selected, 0.0, 0.0);
+    m_camera->billboard_cylindrical(label.pos);
+    drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
     glPopMatrix();
-    glEndName();
   }
+  glEndName();
 }
 
 void GLScene::renderHandle(size_t i)
@@ -774,7 +772,7 @@ void GLScene::renderHandle(size_t i)
 //
 
 GLScene::GLScene(Graph::Graph &g)
-  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(true)
+  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(true), m_size_node(20)
 {
   m_camera = new CameraAnimation();
   m_texturedata = new TextureData;
@@ -821,7 +819,7 @@ void GLScene::init(const QColor& clear)
   glEnableClientState(GL_VERTEX_ARRAY);
   // Load textures and shapes
   m_texturedata->generate(m_graph);
-  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize);
+  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize, m_size_node);
   // Initialise projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -877,7 +875,7 @@ void GLScene::updateLabels()
 
 void GLScene::updateShapes()
 {
-  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize);
+  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize, m_size_node);
 }
 
 Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)

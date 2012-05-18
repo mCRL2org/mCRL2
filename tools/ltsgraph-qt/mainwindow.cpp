@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "springlayout.h"
+#include "information.h"
 #include "glwidget.h"
 #include "mcrl2/lts/lts_lts.h"
 #include <QFileDialog>
@@ -24,9 +25,17 @@ MainWindow::MainWindow(QWidget *parent) :
   Graph::SpringLayoutUi* springlayoutui = m_layout->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
   springlayoutui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+
+  // Create GLWidget UI
   GLWidgetUi* glwidgetui = m_glwidget->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, glwidgetui);
   glwidgetui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+
+  // Add information UI
+  m_information = new Graph::Information(m_graph);
+  Graph::InformationUi* informationui = m_information->ui(this);
+  addDockWidget(Qt::RightDockWidgetArea, informationui);
+  informationui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
   // Create timer for rendering (at 25fps)
   m_timer = new QTimer(this);
@@ -50,6 +59,7 @@ MainWindow::~MainWindow()
 {
   delete m_timer;
   delete m_layout;
+  delete m_information;
   delete m_ui;
   delete m_glwidget;
 }
@@ -78,6 +88,7 @@ void MainWindow::openFile(QString fileName)
   if (!fileName.isNull()) {
     m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
     m_glwidget->rebuild();
+    m_information->update();
   }
 }
 

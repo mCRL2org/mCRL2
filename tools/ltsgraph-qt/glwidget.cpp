@@ -37,6 +37,14 @@ struct LabelMoveRecord : public MoveRecord {
     }
 };
 
+struct StateLabelMoveRecord : public MoveRecord {
+    void grab(Graph::Graph &graph, size_t index)
+    {
+      node = &graph.stateLabel(index);
+      node->anchored = true;
+    }
+};
+
 struct HandleMoveRecord : public MoveRecord
 {
     LabelMoveRecord label;
@@ -59,6 +67,7 @@ struct HandleMoveRecord : public MoveRecord
 
 struct NodeMoveRecord : public MoveRecord
 {
+    StateLabelMoveRecord label;
     std::vector<HandleMoveRecord> edges;
     std::vector<Graph::Node*> endpoints;
     void grab(Graph::Graph& graph, size_t index)
@@ -83,6 +92,7 @@ struct NodeMoveRecord : public MoveRecord
           edges[nlabels++].grab(graph, i);
         }
       }
+      label.grab(graph, index);
     }
     void release(bool toggleLocked)
     {
@@ -91,6 +101,7 @@ struct NodeMoveRecord : public MoveRecord
       {
         edges[i].release(toggleLocked);
       }
+      label.release(toggleLocked);
     }
     void move(const Graph::Coord3D &pos)
     {
@@ -99,6 +110,7 @@ struct NodeMoveRecord : public MoveRecord
       {
         edges[i].move((pos + endpoints[i]->pos) / 2.0);
       }
+      label.move(pos);
     }
 };
 
@@ -124,6 +136,8 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
   {
     case GLScene::so_label:
       return &g.transitionLabel(s.index);
+    case GLScene::so_slabel:
+      return &g.stateLabel(s.index);
     case GLScene::so_handle:
       return &g.handle(s.index);
     case GLScene::so_node:
@@ -169,7 +183,7 @@ void GLWidget::updateSelection()
     selnode = select_object(s, m_graph);
     if (selnode->selected <= 0)
       m_selections.push_back(s);
-    selnode->selected = 0.5;
+    selnode->selected = 0.5f;
   }
 }
 
@@ -231,6 +245,9 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
           break;
         case GLScene::so_label:
           m_dragnode = new LabelMoveRecord;
+          break;
+        case GLScene::so_slabel:
+          m_dragnode = new StateLabelMoveRecord;
           break;
         default:
           m_dragnode = NULL;
@@ -392,6 +409,17 @@ void GLWidget::toggleTransitionLabels(bool show)
   m_scene->setDrawTransitionLabels(show);
 }
 
+void GLWidget::setNodeSize(int size)
+{
+  m_scene->setNodeSize(size);
+  m_scene->updateShapes();
+}
+
+size_t GLWidget::nodeSize()
+{
+  return m_scene->nodeSize();
+}
+
 GLWidgetUi* GLWidget::ui(QWidget *parent)
 {
   if (!m_ui)
@@ -406,12 +434,14 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   m_ui->setupUi(this);
   m_colordialog = new QColorDialog(initialcolor, this);
   selectColor(initialcolor);
+  m_ui->spinRadius->setValue(m_widget.nodeSize());
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui->btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
   connect(m_ui->btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
   connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
   connect(m_ui->cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
+  connect(m_ui->spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
 }
 
 GLWidgetUi::~GLWidgetUi()

@@ -26,12 +26,15 @@ namespace Graph
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
         virtual bool is_tau(size_t labelindex) const = 0;
         virtual ~GraphImplBase() {}
+        GraphImplBase() : initialState(0) {}
         std::vector<NodeNode> nodes;
         std::vector<Node> handles;
         std::vector<EdgeExtra> edges;
         std::vector<QString> transitionLabels;
         std::vector<LabelNode> transitionLabelnodes;
         std::vector<QString> stateLabels;
+        std::vector<LabelNode> stateLabelnodes;
+        size_t initialState;
         template <typename label_t>
         QString transitionLabel(const label_t& label)
         {
@@ -70,6 +73,7 @@ namespace Graph
           transitionLabels.resize(m_graph.num_action_labels());
           transitionLabelnodes.resize(m_graph.num_transitions());
           stateLabels.resize(m_graph.num_states());
+          stateLabelnodes.resize(m_graph.num_states());
 
           // Store string representations of labels
           for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
@@ -82,7 +86,7 @@ namespace Graph
 
           for (size_t i = 0; i < m_graph.num_states(); ++i)
           {
-            if (!m_graph.num_state_labels())
+            if (!m_graph.num_state_labels()) //No labels - just number them
               stateLabels[i] = QString::number(i);
             else
               stateLabels[i] = stateLabel(m_graph.state_label(i));
@@ -98,6 +102,11 @@ namespace Graph
             nodes[i].color[0] = 0.0;
             nodes[i].color[1] = 0.0;
             nodes[i].color[2] = 0.0;
+            stateLabelnodes[i].pos = nodes[i].pos;
+            stateLabelnodes[i].locked = false;
+            stateLabelnodes[i].anchored = false;
+            stateLabelnodes[i].selected = 0.0;
+            stateLabelnodes[i].labelindex = i;
           }
 
           // Assign and position edge handles, position edge labels
@@ -114,6 +123,8 @@ namespace Graph
             transitionLabelnodes[i].selected = 0.0;
             transitionLabelnodes[i].labelindex = t.label();
           }
+
+          initialState = m_graph.initial_state();
         }
     };
 
@@ -176,6 +187,11 @@ namespace Graph
     return m_impl->stateLabels.size();
   }
 
+  size_t Graph::initialState() const
+  {
+    return m_impl->initialState;
+  }
+
   bool Graph::isTau(size_t labelindex) const
   {
     return m_impl->is_tau(labelindex);
@@ -224,6 +240,11 @@ namespace Graph
   LabelNode& Graph::transitionLabel(size_t edge) const
   {
     return m_impl->transitionLabelnodes[edge];
+  }
+
+  LabelNode& Graph::stateLabel(size_t edge) const
+  {
+    return m_impl->stateLabelnodes[edge];
   }
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const

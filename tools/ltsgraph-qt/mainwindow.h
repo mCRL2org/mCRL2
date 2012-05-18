@@ -5,6 +5,7 @@
 #include "graph.h"
 #include "glwidget.h"
 #include "springlayout.h"
+#include "information.h"
 
 namespace Ui {
   class MainWindow;
@@ -29,6 +30,7 @@ class MainWindow : public QMainWindow
     GLWidget* m_glwidget;
     Graph::Graph m_graph;
     Graph::SpringLayout* m_layout;
+    Graph::Information* m_information;
     QTimer* m_timer;
 
     float m_dXRot, m_dYRot, m_dDepth, m_targetDepth;

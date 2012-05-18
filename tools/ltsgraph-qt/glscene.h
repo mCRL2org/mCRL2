@@ -27,6 +27,7 @@ class GLScene
 
     bool m_drawstatelabels;          ///< State labels are only drawn if this field is true.
     bool m_drawtransitionlabels;          ///< Transition labels are only drawn if this field is true.
+    size_t m_size_node;            ///< Variable node size
 
     /**
      * @brief Renders a single edge.
@@ -69,7 +70,8 @@ class GLScene
       so_edge,     ///< An edge was selected.
       so_label,    ///< An edge label was selected.
       so_handle,   ///< An edge handle was selected.
-      so_node      ///< A node was selected.
+      so_node,     ///< A node was selected.
+      so_slabel    ///< An edge label was selected.
     };
 
     /**
@@ -230,8 +232,11 @@ class GLScene
 
     bool drawStateLabels() const { return m_drawstatelabels; }
     bool drawTransitionLabels() const { return m_drawtransitionlabels; }
+    size_t  nodeSize() const { return m_size_node; }
     void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
     void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
+    void setNodeSize(size_t size) { m_size_node = size; }
+
 };
 
 #endif // GLSCENE_H

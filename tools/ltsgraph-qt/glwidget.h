@@ -66,12 +66,15 @@ class GLWidget : public QGLWidget
     void endPaint();
     Graph::Coord3D size3();
     GLWidgetUi* ui(QWidget* parent = 0);
+
+    size_t nodeSize();
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
   public slots:
     void resetViewpoint(size_t animation = 1);
     void toggleStateLabels(bool show);
     void toggleTransitionLabels(bool show);
+    void setNodeSize(int size);
 };
 
 namespace Ui

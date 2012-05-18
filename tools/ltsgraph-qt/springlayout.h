@@ -6,7 +6,7 @@
 
 namespace Ui
 {
-  class DockWidget;
+  class DockWidgetLayout;
 }
 
 namespace Graph
@@ -27,7 +27,7 @@ namespace Graph
       float m_repulsion;
       float m_natLength;
       float m_controlPointWeight;
-      std::vector<Coord3D> m_nforces, m_hforces, m_lforces;
+      std::vector<Coord3D> m_nforces, m_hforces, m_lforces, m_sforces;
       Coord3D m_clipMin;
       Coord3D m_clipMax;
       Coord3D (SpringLayout::*m_forceCalculation)(const Coord3D&, const Coord3D&, float);
@@ -64,7 +64,7 @@ namespace Graph
       Q_OBJECT
     private:
       SpringLayout& m_layout;
-      Ui::DockWidget* m_ui;
+      Ui::DockWidgetLayout* m_ui;
       QThread* m_thread;
     public:
       SpringLayoutUi(SpringLayout& layout, QWidget* parent=0);

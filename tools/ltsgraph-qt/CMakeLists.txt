@@ -34,6 +34,7 @@ set(LTSGRAPH_UI_FILES
   mainwindow.ui
   glwidget.ui
   springlayout.ui
+  information.ui
   dimensionsdialog.ui
 )
 qt4_wrap_ui(LTSGRAPH_UI_HEADERS ${LTSGRAPH_UI_FILES})
@@ -44,6 +45,7 @@ set(LTSGRAPH_MOC_HEADERS
   glscene.h
   graph.h
   springlayout.h
+  information.h
   dimensionsdialog.h
 )
 qt4_wrap_cpp(LTSGRAPH_MOC_SOURCES ${LTSGRAPH_MOC_HEADERS})
@@ -57,6 +59,7 @@ set(LTSGRAPH_SRC_FILES
   glscene.cpp
   graph.cpp
   springlayout.cpp
+  information.cpp
   dimensionsdialog.cpp
 )
 

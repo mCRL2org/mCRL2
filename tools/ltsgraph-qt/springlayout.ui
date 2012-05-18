@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DockWidget</class>
- <widget class="QDockWidget" name="DockWidget">
+ <class>DockWidgetLayout</class>
+ <widget class="QDockWidget" name="DockWidgetLayout">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -142,7 +142,7 @@
   <connection>
    <sender>sldAttraction</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onAttractionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -158,7 +158,7 @@
   <connection>
    <sender>sldHandleWeight</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onHandleWeightChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -174,7 +174,7 @@
   <connection>
    <sender>sldNatLength</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onNatLengthChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -190,7 +190,7 @@
   <connection>
    <sender>sldRepulsion</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onRepulsionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -206,7 +206,7 @@
   <connection>
    <sender>sldSpeed</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onSpeedChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -222,7 +222,7 @@
   <connection>
    <sender>cmbForceCalculation</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onForceCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -238,7 +238,7 @@
   <connection>
    <sender>btnStartStop</sender>
    <signal>clicked()</signal>
-   <receiver>DockWidget</receiver>
+   <receiver>DockWidgetLayout</receiver>
    <slot>onStartStop()</slot>
    <hints>
     <hint type="sourcelabel">

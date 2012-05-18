@@ -108,6 +108,7 @@ namespace Graph
     m_nforces.resize(m_graph.nodeCount());
     m_hforces.resize(m_graph.edgeCount());
     m_lforces.resize(m_graph.edgeCount());
+    m_sforces.resize(m_graph.edgeCount());
 
     for (size_t n = 0; n < m_graph.nodeCount(); ++n)
     {
@@ -118,6 +119,7 @@ namespace Graph
         m_nforces[n] += diff;
         m_nforces[m] -= diff;
       }
+      m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos, m_graph.stateLabel(n).pos, 0.0);
     }
 
     for (size_t n = 0; n < m_graph.edgeCount(); ++n)
@@ -164,6 +166,11 @@ namespace Graph
       {
         m_graph.node(n).pos = m_graph.node(n).pos + m_nforces[n] * m_speed;
         m_graph.node(n).pos.clip(m_clipMin, m_clipMax);
+      }
+      if (!m_graph.stateLabel(n).anchored)
+      {
+        m_graph.stateLabel(n).pos = m_graph.stateLabel(n).pos + m_sforces[n] * m_speed;
+        m_graph.stateLabel(n).pos.clip(m_clipMin, m_clipMax);
       }
     }
 
@@ -235,7 +242,7 @@ namespace Graph
   };
 
   SpringLayoutUi::SpringLayoutUi(SpringLayout &layout, QWidget *parent)
-    : QDockWidget(parent), m_layout(layout), m_ui(new Ui::DockWidget), m_thread(NULL)
+    : QDockWidget(parent), m_layout(layout), m_ui(new Ui::DockWidgetLayout), m_thread(NULL)
   {
     m_ui->setupUi(this);
     m_ui->sldAttraction->setValue(m_layout.attraction());
