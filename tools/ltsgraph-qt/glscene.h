@@ -62,16 +62,16 @@ class GLScene
 
     /**
      * @brief An enumeration that identifies the types of objects that
-              can be selected.
+              can be selected. The order determines priority during selection.
      */
     enum SelectableObject
     {
       so_none,     ///< Nothing was selected.
       so_edge,     ///< An edge was selected.
       so_label,    ///< An edge label was selected.
+      so_slabel,    ///< An edge label was selected.
       so_handle,   ///< An edge handle was selected.
-      so_node,     ///< A node was selected.
-      so_slabel    ///< An edge label was selected.
+      so_node     ///< A node was selected.
     };
 
     /**
