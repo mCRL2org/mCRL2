@@ -118,7 +118,8 @@ int CSureadATerm(CompressedStream* cs, ATerm* term)
   }
 }
 
-int CSreadString(CompressedStream* cs, char** str)
+// int CSreadString(CompressedStream* cs, char** str)
+int CSreadString(CompressedStream* cs, std::string &str)
 {
   ATerm term;
 
@@ -126,7 +127,7 @@ int CSreadString(CompressedStream* cs, char** str)
   if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
       !ATisQuoted(ATgetAFun((ATermAppl)term)))
   {
-    *str =ATgetName(ATgetAFun((ATermAppl)term));
+    str =ATgetName(ATgetAFun((ATermAppl)term));
     return 1;
   }
   else

@@ -55,7 +55,7 @@ const function_symbol AS_EMPTY_LIST("[]", 0);
 
 /*{{{  function declarations */
 
-static ShortHashNumber AT_hashAFun(const char* name, const size_t arity);
+static ShortHashNumber AT_hashAFun(const std::string &name, const size_t arity);
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);
@@ -119,7 +119,7 @@ size_t AT_printAFun(const size_t fun, FILE* f)
 {
   assert(fun<function_symbol::at_lookup_table.size());
   _SymEntry* entry = function_symbol::at_lookup_table[fun];
-  char* id = entry->name;
+  std::string::const_iterator id = entry->name.begin();
   size_t size = 0;
 
   if (entry->is_quoted())
@@ -127,7 +127,7 @@ size_t AT_printAFun(const size_t fun, FILE* f)
     /* This function symbol needs quotes */
     fputc('"', f);
     size++;
-    while (*id)
+    while (id!=entry->name.end())
     {
       /* We need to escape special characters */
       switch (*id)
@@ -165,8 +165,8 @@ size_t AT_printAFun(const size_t fun, FILE* f)
   }
   else
   {
-    fputs(id, f);
-    size += strlen(id);
+    fputs(entry->name.c_str(), f);
+    size += entry->name.size();
   }
   return size;
 }
@@ -178,13 +178,13 @@ std::string ATwriteAFunToString(const function_symbol &fun)
   std::ostringstream oss;
   assert(fun.number()<function_symbol::at_lookup_table.size());
   _SymEntry* entry = function_symbol::at_lookup_table[fun.number()];
-  char* id = entry->name;
+  std::string::const_iterator id = entry->name.begin();
 
   if (entry->is_quoted())
   {
     /* This function symbol needs quotes */
     oss << "\"";
-    while (*id)
+    while (id!=entry->name.end())
     {
       /* We need to escape special characters */
       switch (*id)
@@ -212,26 +212,24 @@ std::string ATwriteAFunToString(const function_symbol &fun)
   }
   else
   {
-    oss << std::string(id);
+    oss << entry->name;
   }
 
   return oss.str();
 }
 
-/*{{{  ShortHashNumber AT_hashAFun(const char *name, int arity) */
 
 /**
  * Calculate the hash value of a symbol.
  */
 
-static ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
+static ShortHashNumber AT_hashAFun(const std::string &name, const size_t arity)
 {
-  ShortHashNumber hnr;
-  const char* walk = name;
+  ShortHashNumber hnr = arity*3;
 
-  for (hnr = arity*3; *walk; walk++)
+  for (std::string::const_iterator i=name.begin(); i!=name.end(); i++)
   {
-    hnr = 251 * hnr + *walk;
+    hnr = 251 * hnr + *i;
   }
 
   return hnr*MAGIC_PRIME;
@@ -242,7 +240,7 @@ static ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 
 /*{{{  function_symbol ATmakeAFun(const char *name, int arity, ATbool quoted) */
 
-function_symbol::function_symbol(const char* name, const size_t arity, const bool quoted)
+function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
 {
   const ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
@@ -255,7 +253,7 @@ function_symbol::function_symbol(const char* name, const size_t arity, const boo
   size_t cur = afun_hashtable[hnr];
   while (cur!=size_t(-1) && !(at_lookup_table[cur]->arity()==arity &&
                               at_lookup_table[cur]->is_quoted()==quoted &&
-                              streq(at_lookup_table[cur]->name, name)))
+                              at_lookup_table[cur]->name==name))
   {
     cur = at_lookup_table[cur]->next;
   }
@@ -286,11 +284,7 @@ function_symbol::function_symbol(const char* name, const size_t arity, const boo
     }
 
 
-    at_lookup_table[cur]->name = _strdup(name);
-    if (at_lookup_table[cur]->name == NULL)
-    {
-      throw std::runtime_error("Construct function_symbol: no room for name of length " + to_string(strlen(name)));
-    }
+    at_lookup_table[cur]->name = name;
 
     at_lookup_table[cur]->next = afun_hashtable[hnr];
     afun_hashtable[hnr] = cur;
@@ -315,7 +309,7 @@ void at_free_afun(const size_t n)
 {
   _SymEntry* sym=function_symbol::at_lookup_table[n];
   
-  assert(sym->name);
+  assert(!sym->name.empty());
   assert(sym->id==n);
 
   /* Calculate hashnumber */
@@ -336,10 +330,6 @@ void at_free_afun(const size_t n)
     }
     function_symbol::at_lookup_table[prev]->next = function_symbol::at_lookup_table[cur]->next;
   }
-
-  /* Free symbol name */
-  free(sym->name);
-  sym->name = NULL;
 
   assert(n<function_symbol::at_lookup_table.size());
   function_symbol::at_lookup_table[n]->id = function_symbol::first_free;

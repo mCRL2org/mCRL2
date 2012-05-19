@@ -29,7 +29,7 @@ struct _SymEntry
     size_t next;
     size_t reference_count;
     size_t id;
-    char*  name;
+    std::string name;
     size_t count;  /* used in bafio.c */
     size_t index;  /* used in bafio.c */
 
@@ -38,7 +38,7 @@ struct _SymEntry
         next(size_t(-1)),
         reference_count(0),
         id(i),
-        name(NULL),
+        // name(NULL),
         count(c),
         index(in)
     { 
@@ -85,7 +85,7 @@ class function_symbol
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
 #endif
         assert(n<at_lookup_table.size());
         if (CHECK) assert(at_lookup_table[n]->reference_count>0);
@@ -98,7 +98,7 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name);
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
 #endif
         assert(n<at_lookup_table.size());
         assert(at_lookup_table[n]->reference_count>0);
@@ -120,7 +120,7 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     /// \param name A string
     /// \param arity The arity of the function.
     /// \param quoted True if the function symbol is a quoted string.
-    function_symbol(const char* name, const size_t arity, const bool quoted = false);
+    function_symbol(const std::string &name, const size_t arity, const bool quoted = false);
     
     /// \brief default constructor
     /// \param n The number of an function_symbol

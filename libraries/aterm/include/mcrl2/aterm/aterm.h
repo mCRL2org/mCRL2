@@ -39,9 +39,9 @@ typedef aterm_int ATermInt;
 
 /* AFun related functions */
 inline
-char* ATgetName(const AFun &sym)
+const char* ATgetName(const AFun &sym)
 {
-  return AFun::at_lookup_table[sym.number()]->name;
+  return sym.name().c_str();
 }
 
 inline

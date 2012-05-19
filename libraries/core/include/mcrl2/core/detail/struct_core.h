@@ -2839,7 +2839,7 @@ bool gsIsString(ATermAppl term)
 }
 
 inline
-char* gsATermAppl2String(ATermAppl term)
+std::string gsATermAppl2String(ATermAppl term)
 //Ret: string s, if term is a quoted constant s
 //     NULL, otherwise
 {
@@ -2854,20 +2854,17 @@ char* gsATermAppl2String(ATermAppl term)
 }
 
 inline
-bool gsIsNumericString(const char* s)
+// bool gsIsNumericString(const char* s)
+bool gsIsNumericString(std::string s)
 //Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
 {
-  if (s == NULL)
-  {
-    return false;
-  }
-  if (s[0] == '\0')
+  if (s.empty())
   {
     return false;
   }
   if (s[0] == '-')
   {
-    ++s;
+    s=s.substr(1);
   }
   if (s[0] == '\0')
   {
@@ -2875,7 +2872,7 @@ bool gsIsNumericString(const char* s)
   }
   if (s[0] == '0')
   {
-    ++s;
+    s=s.substr(1);
     if (s[0] == '\0')
     {
       return true;
@@ -2885,8 +2882,8 @@ bool gsIsNumericString(const char* s)
       return false;
     }
   }
-  for (; s[0] != '\0'; ++s)
-    if (!isdigit(s[0]))
+  for (std::string::const_iterator i=s.begin(); i != s.end(); ++i)
+    if (!isdigit(*i))
     {
       return false;
     }

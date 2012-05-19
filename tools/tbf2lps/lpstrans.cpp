@@ -211,9 +211,9 @@ static ATermList get_substs(ATermList ids)
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
   {
-    char s[100], *t;
-
-    t = ATgetName(ATgetAFun(ATAgetFirst(ids)));
+    char s[100], t1[100], *t;
+    t=&t1[0];
+    strncpy(t,ATgetName(ATgetAFun(ATAgetFirst(ids))),100);
     if ((t[0] >= '0' && t[0] <= '9') || t[0] == '\'')
     {
       s[0] = '_';

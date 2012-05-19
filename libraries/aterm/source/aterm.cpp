@@ -196,20 +196,22 @@ writeToStream(const ATerm &t, std::ostream& os)
   ATermAppl appl;
   AFun sym;
   size_t i, arity;
-  char* name;
 
   switch (ATgetType(t))
   {
     case AT_INT:
+    {
       os << ATgetInt((ATermInt) t);
       break;
+    }
     case AT_APPL:
+    {
       appl = (ATermAppl) t;
       sym = ATgetAFun(appl);
       arity = ATgetArity(sym);
-      name = ATgetName(sym);
+      const std::string name = ATgetName(sym);
       os << ATwriteAFunToString(sym);
-      if (arity > 0 || (!ATisQuoted(sym) && *name == '\0'))
+      if (arity > 0 || (!ATisQuoted(sym) && !name.empty()))
       {
         os << "(";
         if (arity > 0)
@@ -224,8 +226,9 @@ writeToStream(const ATerm &t, std::ostream& os)
         os << ")";
       }
       break;
-
+    }
     case AT_LIST:
+    {
       list = (ATermList) t;
       if (!ATisEmpty(list))
       {
@@ -239,6 +242,7 @@ writeToStream(const ATerm &t, std::ostream& os)
         }
       }
       break;
+    }
   }
 }
 
