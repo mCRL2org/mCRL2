@@ -289,6 +289,7 @@ namespace Graph
   void SpringLayoutUi::onNatLengthChanged(int value)
   {
     m_layout.setNaturalTransitionLength(value);
+    m_ui->lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
   }
 
   void SpringLayoutUi::onForceCalculationChanged(int value)

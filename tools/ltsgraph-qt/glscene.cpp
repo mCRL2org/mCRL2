@@ -542,11 +542,19 @@ void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill
 }
 
 inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill)
+void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark)
 {
   glPushAttrib(GL_LINE_BIT);
-  glLineWidth(2.0);
-  gl2psLineWidth(0.25);
+  if (mark)
+  {
+    glLineWidth(5.0);
+    gl2psLineWidth(1);
+  }
+  else
+  {
+    glLineWidth(2.0);
+    gl2psLineWidth(0.25);
+  }
   glVertexPointer(3, GL_FLOAT, 0, data.node);
   glColor3fv(fill);   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
   glDepthMask(GL_FALSE);
@@ -642,7 +650,7 @@ void GLScene::renderEdge(size_t i)
   glStartName(so_edge, i);
   glPushMatrix();
 
-  glColor3f(edge.selected, 0.0, 0.0);
+  glColor3f(m_graph.handle(i).selected, 0.0, 0.0);
 
   // Draw the arc
   drawArc(ctrl);
@@ -685,7 +693,7 @@ void GLScene::renderNode(size_t i)
   glPushMatrix();
 
   m_camera->billboard_spherical(node.pos);
-  drawNode(*m_vertexdata, line, fill);
+  drawNode(*m_vertexdata, line, fill, (m_graph.initialState() == i) && m_drawinitialmarking);
 
   glPopMatrix();
   glEndName();
@@ -693,55 +701,59 @@ void GLScene::renderNode(size_t i)
 
 void GLScene::renderTransitionLabel(size_t i)
 {
-  glStartName(so_label, i);
   Graph::LabelNode& label = m_graph.transitionLabel(i);
-  if (gl2ps())
-  {
-    Coord3D pos = label.pos;
-    pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex] / 2;
-    pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex] / 2;
-    glRasterPos3fv(pos);
-    if (!m_graph.isTau(label.labelindex))
-      gl2psText(m_graph.transitionLabelstring(label.labelindex).toUtf8(), "", 10);
+  if (!m_graph.transitionLabelstring(label.labelindex).isEmpty()) {
+    glStartName(so_label, i);
+    if (gl2ps())
+    {
+      Coord3D pos = label.pos;
+      pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex] / 2;
+      pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex] / 2;
+      glRasterPos3fv(pos);
+      if (!m_graph.isTau(label.labelindex))
+        gl2psText(m_graph.transitionLabelstring(label.labelindex).toUtf8(), "", 10);
+      else
+        gl2psText("t", "Symbol", 10);
+    }
     else
-      gl2psText("t", "Symbol", 10);
-  }
-  else
-  {
-    glPushMatrix();
+    {
+      glPushMatrix();
 
-    glColor3f(label.selected, 0.0, 0.0);
-    m_camera->billboard_cylindrical(label.pos);
-    drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+      glColor3f(label.selected, 0.0, 0.0);
+      m_camera->billboard_cylindrical(label.pos);
+      drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
-    glPopMatrix();
+      glPopMatrix();
+    }
+    glEndName();
   }
-  glEndName();
 }
 
 void GLScene::renderStateLabel(size_t i)
 {
-  glStartName(so_slabel, i);
   Graph::LabelNode& label = m_graph.stateLabel(i);
-  if (gl2ps())
-  {
-    Coord3D pos = label.pos;
-    pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex] / 2;
-    pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex] / 2;
-    glRasterPos3fv(pos);
-    gl2psText(m_graph.stateLabelstring(label.labelindex).toUtf8(), "", 10);
-  }
-  else
-  {
-    glPushMatrix();
+  if (!m_graph.stateLabelstring(label.labelindex).isEmpty()) {
+    glStartName(so_slabel, i);
+    if (gl2ps())
+    {
+      Coord3D pos = label.pos;
+      pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex] / 2;
+      pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex] / 2;
+      glRasterPos3fv(pos);
+      gl2psText(m_graph.stateLabelstring(label.labelindex).toUtf8(), "", 10);
+    }
+    else
+    {
+      glPushMatrix();
 
-    glColor3f(label.selected, 0.0, 0.0);
-    m_camera->billboard_cylindrical(label.pos);
-    drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+      glColor3f(label.selected, 0.0, 0.0);
+      m_camera->billboard_cylindrical(label.pos);
+      drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
-    glPopMatrix();
+      glPopMatrix();
+    }
+    glEndName();
   }
-  glEndName();
 }
 
 void GLScene::renderHandle(size_t i)
@@ -772,7 +784,7 @@ void GLScene::renderHandle(size_t i)
 //
 
 GLScene::GLScene(Graph::Graph &g)
-  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(true), m_size_node(20)
+  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawinitialmarking(true), m_size_node(20)
 {
   m_camera = new CameraAnimation();
   m_texturedata = new TextureData;
@@ -846,12 +858,12 @@ void GLScene::render()
     renderEdge(i);
   }
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDepthMask(GL_FALSE);
   for (size_t i = 0; i < m_graph.nodeCount(); ++i)
   {
     if (m_drawstatelabels)
       renderStateLabel(i);
   }
-  glDepthMask(GL_FALSE);
   for (size_t i = 0; i < m_graph.edgeCount(); ++i)
   {
     if (m_drawtransitionlabels)

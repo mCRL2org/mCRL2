@@ -26,7 +26,8 @@ namespace Graph
       QString m_initialstring;
       int m_nodes;
       int m_edges;
-      int m_labels;
+      int m_slabels;
+      int m_tlabels;
       void update();
   };
 

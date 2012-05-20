@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>137</height>
+    <width>204</width>
+    <height>150</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>179</width>
-    <height>137</height>
+    <width>204</width>
+    <height>150</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -55,52 +55,59 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="1" column="1">
        <widget class="QLabel" name="lblStatesValue">
         <property name="text">
          <string>0</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="lblStates">
         <property name="text">
          <string>Number of states:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="lblTransitions">
         <property name="text">
          <string>Number of transitions:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="QLabel" name="lblTransitionsValue">
         <property name="text">
          <string>0</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lblLabels">
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblStateLabels">
         <property name="text">
-         <string>Number of labels:</string>
+         <string>Number of state labels:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLabel" name="lblLabelsValue">
+      <item row="3" column="1">
+       <widget class="QLabel" name="lblStateLabelsValue">
         <property name="text">
          <string>0</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="lblInitialString">
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblTransitionLabels">
         <property name="text">
-         <string/>
+         <string>Number of transition labels:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="lblTransitionLabelsValue">
+        <property name="text">
+         <string>0</string>
         </property>
        </widget>
       </item>

@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui->actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
   connect(m_ui->actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
   connect(m_ui->actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
+  connect(m_ui->actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
+  connect(m_ui->actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
 
   m_anim = 0;
   m_timer->start(40);
@@ -85,10 +87,12 @@ void MainWindow::onTimer()
 
 void MainWindow::openFile(QString fileName)
 {
-  if (!fileName.isNull()) {
+  if (!fileName.isNull())
+  {
     m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
     m_glwidget->rebuild();
     m_information->update();
+    m_glwidget->updateGL();
   }
 }
 
@@ -115,8 +119,10 @@ void MainWindow::onExportImage()
                                                    ),
                                                 &selectedFilter));
 
-  if (!fileName.isNull()) {
-    if (selectedFilter.startsWith("Bitmap images")) {
+  if (!fileName.isNull())
+  {
+    if (selectedFilter.startsWith("Bitmap images"))
+    {
       DimensionsDialog dDialog(this);
       if (dDialog.exec())
       {
@@ -129,4 +135,27 @@ void MainWindow::onExportImage()
     }
   }
 
+}
+
+void MainWindow::onImportXML()
+{
+  QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
+                                                tr("XML Graph (*.xml)")));
+
+  if (!fileName.isNull())
+  {
+    m_graph.loadXML(fileName);
+  }
+
+}
+
+void MainWindow::onExportXML()
+{
+  QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+                                                tr("XML Graph (*.xml)")));
+
+  if (!fileName.isNull())
+  {
+    m_graph.saveXML(fileName);
+  }
 }

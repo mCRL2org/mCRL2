@@ -72,8 +72,10 @@ class GLWidget : public QGLWidget
     void widgetResized(const Graph::Coord3D& newsize);
   public slots:
     void resetViewpoint(size_t animation = 1);
-    void toggleStateLabels(bool show);
     void toggleTransitionLabels(bool show);
+    void toggleStateLabels(bool show);
+    void toggleStateNumbers(bool show);
+    void toggleInitialMarking(bool show);
     void setNodeSize(int size);
 };
 

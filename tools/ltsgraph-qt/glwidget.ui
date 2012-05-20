@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>139</height>
+    <height>192</height>
    </rect>
   </property>
   <property name="font">
@@ -98,6 +98,23 @@
      <widget class="QCheckBox" name="cbStateLabels">
       <property name="text">
        <string>Show state labels</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbStateNumbers">
+      <property name="text">
+       <string>Show state numbers</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbInitial">
+      <property name="text">
+       <string>Mark Initial state</string>
       </property>
       <property name="checked">
        <bool>true</bool>

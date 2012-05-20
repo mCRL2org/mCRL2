@@ -63,6 +63,9 @@
     </property>
     <addaction name="actOpenFile"/>
     <addaction name="actExportImage"/>
+    <addaction name="separator"/>
+    <addaction name="actImport_XML"/>
+    <addaction name="actExport_XML"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -170,6 +173,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actImport_XML">
+   <property name="text">
+    <string>Import XML</string>
+   </property>
+  </action>
+  <action name="actExport_XML">
+   <property name="text">
+    <string>Export XML</string>
    </property>
   </action>
  </widget>

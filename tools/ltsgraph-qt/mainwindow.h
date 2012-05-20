@@ -22,6 +22,8 @@ class MainWindow : public QMainWindow
   private slots:
     void onOpenFile();
     void onExportImage();
+    void onImportXML();
+    void onExportXML();
     void onWidgetResized(const Graph::Coord3D& newsize);
     void on3DChanged(bool enabled);
     void onTimer();

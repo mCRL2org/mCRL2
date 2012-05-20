@@ -1,3 +1,5 @@
+#include <QDomDocument>
+
 #include "graph.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/lts_io.h"
@@ -15,22 +17,17 @@ namespace Graph
       return ((float)qrand() / RAND_MAX) * (max - min) + min;
     }
 
-    struct EdgeExtra {
-        float selected;
-    };
-
     class GraphImplBase
     {
       public:
-        virtual std::vector<mcrl2::lts::transition>& transitions() = 0;
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
         virtual bool is_tau(size_t labelindex) const = 0;
         virtual ~GraphImplBase() {}
         GraphImplBase() : initialState(0) {}
         std::vector<NodeNode> nodes;
         std::vector<Node> handles;
-        std::vector<EdgeExtra> edges;
-        std::vector<QString> transitionLabels;
+        std::vector<Edge> edges;
+        std::vector<LabelString> transitionLabels;
         std::vector<LabelNode> transitionLabelnodes;
         std::vector<QString> stateLabels;
         std::vector<LabelNode> stateLabelnodes;
@@ -53,13 +50,9 @@ namespace Graph
       private:
         graph_t m_graph;
       public:
-        virtual std::vector<mcrl2::lts::transition>& transitions()
-        {
-          return m_graph.get_transitions();
-        }
         virtual bool is_tau(size_t labelindex) const
         {
-          return m_graph.is_tau(labelindex);
+          return transitionLabels[labelindex].isTau;
         }
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
         {
@@ -70,24 +63,17 @@ namespace Graph
           nodes.resize(m_graph.num_states());
           edges.resize(m_graph.num_transitions());
           handles.resize(m_graph.num_transitions());
+
           transitionLabels.resize(m_graph.num_action_labels());
           transitionLabelnodes.resize(m_graph.num_transitions());
+
           stateLabels.resize(m_graph.num_states());
           stateLabelnodes.resize(m_graph.num_states());
 
-          // Store string representations of labels
-          for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
-          {
-            if (m_graph.is_tau(i))
-              transitionLabels[i] = QChar(0x03C4);
-            else
-              transitionLabels[i] = transitionLabel(m_graph.action_label(i));
-          }
-
           for (size_t i = 0; i < m_graph.num_states(); ++i)
           {
-            if (!m_graph.num_state_labels()) //No labels - just number them
-              stateLabels[i] = QString::number(i);
+            if (!m_graph.num_state_labels()) //No labels - create empty ones
+              stateLabels[i] = QString("");
             else
               stateLabels[i] = stateLabel(m_graph.state_label(i));
           }
@@ -109,10 +95,22 @@ namespace Graph
             stateLabelnodes[i].labelindex = i;
           }
 
+          // Store string representations of labels
+          for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
+          {
+            if (m_graph.is_tau(i))
+              transitionLabels[i].label = QChar(0x03C4);
+            else
+              transitionLabels[i].label = transitionLabel(m_graph.action_label(i));
+            transitionLabels[i].isTau = m_graph.is_tau(i);
+          }
+
           // Assign and position edge handles, position edge labels
           for (size_t i = 0; i < m_graph.num_transitions(); ++i)
           {
             mcrl2::lts::transition& t = m_graph.get_transitions()[i];
+            edges[i].from = t.from();
+            edges[i].to = t.to();
             handles[i].pos = (nodes[t.from()].pos + nodes[t.to()].pos) / 2.0;
             handles[i].locked = false;
             handles[i].anchored = false;
@@ -159,6 +157,7 @@ namespace Graph
 
   Graph::Graph()
   {
+    m_type = mcrl2::lts::lts_lts;
     m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
   }
 
@@ -197,34 +196,225 @@ namespace Graph
     return m_impl->is_tau(labelindex);
   }
 
-  void Graph::load(const QString &filename, const Coord3D& min, const Coord3D& max)
+  void Graph::createImpl(mcrl2::lts::lts_type itype)
   {
-    mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
-    delete m_impl;
-    switch (guess)
+    switch (itype)
     {
       case mcrl2::lts::lts_aut:
+        m_type = mcrl2::lts::lts_aut;
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_aut_t>;
         break;
       case mcrl2::lts::lts_dot:
+        m_type = mcrl2::lts::lts_dot;
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_dot_t>;
         break;
       case mcrl2::lts::lts_fsm:
+        m_type = mcrl2::lts::lts_fsm;
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_fsm_t>;
         break;
       case mcrl2::lts::lts_lts:
       default:
+        m_type = mcrl2::lts::lts_lts;
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
         break;
     }
+  }
+
+  void Graph::load(const QString &filename, const Coord3D& min, const Coord3D& max)
+  {
+    mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
+    delete m_impl;
+    createImpl(guess);
     m_impl->load(filename, min, max);
+  }
+
+  void Graph::loadXML(const QString& filename)
+  {
+    QDomDocument xml;
+    QFile file(filename);
+    if(!file.open( QFile::ReadOnly ))
+    {
+      mCRL2log(mcrl2::log::error) << "Could not open XML file: " << filename.toStdString();
+      return;
+    }
+    QString errorMsg;
+    if(!xml.setContent(&file, false, &errorMsg))
+    {
+      file.close();
+      mCRL2log(mcrl2::log::error) << "Could not parse XML file: " << errorMsg.toStdString();
+      return;
+    }
+    file.close();
+
+    QDomElement root = xml.documentElement();
+    if(root.tagName() != "Graph")
+    {
+      mCRL2log(mcrl2::log::error) << "XML contains no valid graph";
+      return;
+    }
+
+    delete m_impl;
+    mcrl2::lts::lts_type itype = (mcrl2::lts::lts_type) root.attribute("type").toInt();
+    createImpl(itype);
+
+    m_impl->nodes.resize(root.attribute("states").toInt());
+    m_impl->edges.resize(root.attribute("transitions").toInt());
+    m_impl->handles.resize(root.attribute("transitions").toInt());
+
+    m_impl->transitionLabels.resize(root.attribute("transitionlabels").toInt());
+    m_impl->transitionLabelnodes.resize(root.attribute("transitions").toInt());
+
+    m_impl->stateLabels.resize(root.attribute("statelabels").toInt());
+    m_impl->stateLabelnodes.resize(root.attribute("states").toInt());
+
+    QDomNode node = root.firstChild();
+    while (!node.isNull()) {
+      QDomElement e = node.toElement();
+
+      if (e.tagName() == "StateLabel") {
+        m_impl->stateLabels[e.attribute("value").toInt()] = e.attribute("label");
+      }
+      if (e.tagName() == "State") {
+        NodeNode *n = &m_impl->nodes[e.attribute("value").toInt()];
+        n->pos.x = e.attribute("x").toFloat();
+        n->pos.y = e.attribute("y").toFloat();
+        n->pos.z = e.attribute("z").toFloat();
+        n->locked = e.attribute("locked").toInt();
+        n->anchored = false;
+        n->selected = 0.0f;
+        if (e.attribute("isInitial").toInt())
+          m_impl->initialState = e.attribute("value").toInt();
+        n->color[0] = e.attribute("red").toFloat();
+        n->color[1] = e.attribute("green").toFloat();
+        n->color[2] = e.attribute("blue").toFloat();
+      }
+      if (e.tagName() == "StateLabelNode") {
+        LabelNode *n = &m_impl->stateLabelnodes[e.attribute("value").toInt()];
+        n->labelindex = e.attribute("labelindex").toInt();
+        n->pos.x = e.attribute("x").toFloat();
+        n->pos.y = e.attribute("y").toFloat();
+        n->pos.z = e.attribute("z").toFloat();
+        n->locked = e.attribute("locked").toInt();
+        n->anchored = false;
+        n->selected = 0.0f;
+      }
+
+      if (e.tagName() == "TransitionLabel") {
+        LabelString *n = &m_impl->transitionLabels[e.attribute("value").toInt()];
+        n->label = e.attribute("label");
+        n->isTau = e.attribute("isTau").toInt();
+      }
+      if (e.tagName() == "Transition") {
+        Edge *n = &m_impl->edges[e.attribute("value").toInt()];
+        Node *h = &m_impl->handles[e.attribute("value").toInt()];
+        n->from = e.attribute("from").toInt();
+        n->to = e.attribute("to").toInt();
+        h->pos.x = e.attribute("x").toFloat();
+        h->pos.y = e.attribute("y").toFloat();
+        h->pos.z = e.attribute("z").toFloat();
+        h->locked = e.attribute("locked").toInt();
+        h->anchored = false;
+        h->selected = 0.0f;
+      }
+      if (e.tagName() == "TransitionLabelNode") {
+        LabelNode *n = &m_impl->transitionLabelnodes[e.attribute("value").toInt()];
+        n->labelindex = e.attribute("labelindex").toInt();
+        n->pos.x = e.attribute("x").toFloat();
+        n->pos.y = e.attribute("y").toFloat();
+        n->pos.z = e.attribute("z").toFloat();
+        n->locked = e.attribute("locked").toInt();
+        n->anchored = false;
+        n->selected = 0.0f;
+      }
+
+      node = node.nextSibling();
+    }
+
+  }
+
+  void Graph::saveXML(const QString& filename)
+  {
+    QDomDocument xml;
+    QDomElement root = xml.createElement("Graph");
+    root.setAttribute("type", (int)m_type);
+    root.setAttribute("states", nodeCount());
+    root.setAttribute("transitions", edgeCount());
+    root.setAttribute("statelabels", stateLabelCount());
+    root.setAttribute("transitionlabels", transitionLabelCount());
+    xml.appendChild(root);
+
+    for (size_t i = 0; i < stateLabelCount(); ++i)
+    {
+      QDomElement stateL = xml.createElement("StateLabel");
+      stateL.setAttribute("value", i);
+      stateL.setAttribute("label", stateLabelstring(i));
+      root.appendChild(stateL);
+    }
+
+    for (size_t i = 0; i < nodeCount(); ++i)
+    {
+      QDomElement state = xml.createElement("State");
+      state.setAttribute("value", i);
+      state.setAttribute("x", node(i).pos.x);
+      state.setAttribute("y", node(i).pos.y);
+      state.setAttribute("z", node(i).pos.z);
+      state.setAttribute("locked", node(i).locked);
+      state.setAttribute("isInitial", i == initialState());
+      state.setAttribute("red", node(i).color[0]);
+      state.setAttribute("green", node(i).color[1]);
+      state.setAttribute("blue", node(i).color[2]);
+      root.appendChild(state);
+
+      QDomElement stateL = xml.createElement("StateLabelNode");
+      stateL.setAttribute("value", i);
+      stateL.setAttribute("labelindex", stateLabel(i).labelindex);
+      stateL.setAttribute("x", stateLabel(i).pos.x);
+      stateL.setAttribute("y", stateLabel(i).pos.y);
+      stateL.setAttribute("z", stateLabel(i).pos.z);
+      stateL.setAttribute("locked", stateLabel(i).locked);
+      root.appendChild(stateL);
+    }
+
+    for (size_t i = 0; i < transitionLabelCount(); ++i)
+    {
+      QDomElement edgL = xml.createElement("TransitionLabel");
+      edgL.setAttribute("value", i);
+      edgL.setAttribute("label", transitionLabelstring(i));
+      root.appendChild(edgL);
+    }
+
+    for (size_t i = 0; i < edgeCount(); ++i)
+    {
+      QDomElement edg = xml.createElement("Transition");
+      edg.setAttribute("value", i);
+      edg.setAttribute("from", edge(i).from);
+      edg.setAttribute("to", edge(i).to);
+      edg.setAttribute("x", handle(i).pos.x);
+      edg.setAttribute("y", handle(i).pos.y);
+      edg.setAttribute("z", handle(i).pos.z);
+      edg.setAttribute("locked", handle(i).locked);
+      root.appendChild(edg);
+
+      QDomElement edgL = xml.createElement("TransitionLabelNode");
+      edgL.setAttribute("value", i);
+      edgL.setAttribute("labelindex", transitionLabel(i).labelindex);
+      edgL.setAttribute("x", transitionLabel(i).pos.x);
+      edgL.setAttribute("y", transitionLabel(i).pos.y);
+      edgL.setAttribute("z", transitionLabel(i).pos.z);
+      edgL.setAttribute("locked", transitionLabel(i).locked);
+      root.appendChild(edgL);
+    }
+
+    QFile data(filename);
+    if (data.open(QFile::WriteOnly | QFile::Truncate)) {
+        QTextStream out(&data);
+        xml.save(out, 2);
+    }
   }
 
   Edge Graph::edge(size_t index) const
   {
-    mcrl2::lts::transition& t = m_impl->transitions()[index];
-    detail::EdgeExtra& e = m_impl->edges[index];
-    return Edge(t.from(), t.to(), e.selected);
+    return m_impl->edges[index];
   }
 
   NodeNode& Graph::node(size_t index) const
@@ -249,17 +439,12 @@ namespace Graph
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const
   {
-    return m_impl->transitionLabels[labelindex];
+    return m_impl->transitionLabels[labelindex].label;
   }
 
   const QString& Graph::stateLabelstring(size_t labelindex) const
   {
     return m_impl->stateLabels[labelindex];
-  }
-
-  void Graph::selectEdge(size_t index, float amount)
-  {
-    m_impl->edges[index].selected = amount;
   }
 
   void Graph::clip(const Coord3D& min, const Coord3D& max)

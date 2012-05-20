@@ -1,7 +1,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <QString>
+#include "mcrl2/lts/lts.h"
+
 #include <QtOpenGL>
 
 namespace Graph
@@ -114,9 +115,6 @@ namespace Graph
   {
       size_t from;
       size_t to;
-      float selected;
-      Edge (size_t from, size_t to, float selected)
-        : from(from), to(to), selected(selected) {}
   };
 
   struct Node
@@ -125,6 +123,12 @@ namespace Graph
       unsigned anchored : 1;
       unsigned locked : 1;
       float selected;
+  };
+
+  struct LabelString
+  {
+      unsigned isTau : 1;
+      QString label;
   };
 
   struct LabelNode : public Node
@@ -152,6 +156,7 @@ namespace Graph
   class Graph{
     private:
       detail::GraphImplBase* m_impl;
+      mcrl2::lts::lts_type m_type;
     public:
       Graph();
       ~Graph();
@@ -163,16 +168,16 @@ namespace Graph
       bool isTau(size_t labelindex) const;
       const QString& transitionLabelstring(size_t labelindex) const;
       const QString& stateLabelstring(size_t labelindex) const;
-      const std::map<size_t, QString*>::iterator transitionLabels() const;
-      const std::map<size_t, QString*>::iterator stateLabels() const;
       void clip(const Coord3D& min, const Coord3D& max);
-      void selectEdge(size_t index, float amount);
       size_t edgeCount() const;
       size_t nodeCount() const;
       size_t transitionLabelCount() const;
       size_t stateLabelCount() const;
       size_t initialState() const;
+      void createImpl(mcrl2::lts::lts_type itype);
       void load(const QString& filename, const Coord3D& min, const Coord3D& max);
+      void loadXML(const QString& filename);
+      void saveXML(const QString& filename);
   };
 
 }

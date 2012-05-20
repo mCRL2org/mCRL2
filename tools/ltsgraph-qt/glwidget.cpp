@@ -394,9 +394,14 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter, cons
             else
             {
               m_scene->resize(w, h);
-              qDebug() << renderPixmap(w, h).save(filename);
+              renderPixmap(w, h).save(filename);
               m_scene->resize(width(), height());
             }
+}
+
+void GLWidget::toggleTransitionLabels(bool show)
+{
+  m_scene->setDrawTransitionLabels(show);
 }
 
 void GLWidget::toggleStateLabels(bool show)
@@ -404,9 +409,14 @@ void GLWidget::toggleStateLabels(bool show)
   m_scene->setDrawStateLabels(show);
 }
 
-void GLWidget::toggleTransitionLabels(bool show)
+void GLWidget::toggleStateNumbers(bool show)
 {
-  m_scene->setDrawTransitionLabels(show);
+  m_scene->setDrawStateNumbers(show);
+}
+
+void GLWidget::toggleInitialMarking(bool show)
+{
+  m_scene->setDrawInitialMarking(show);
 }
 
 void GLWidget::setNodeSize(int size)
@@ -439,8 +449,10 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui->btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
   connect(m_ui->btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
-  connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
   connect(m_ui->cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
+  connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
+  connect(m_ui->cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
+  connect(m_ui->cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
   connect(m_ui->spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
 }
 
