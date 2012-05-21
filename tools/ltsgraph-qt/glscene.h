@@ -60,6 +60,12 @@ class GLScene
      * @param i The index of the state of the label to render.
      */
     void renderStateLabel(size_t i);
+
+    /**
+     * @brief Renders a single state number.
+     * @param i The index of the state of the number to render.
+     */
+    void renderStateNumber(size_t i);
   public:
 
     /**

@@ -92,7 +92,6 @@ void MainWindow::openFile(QString fileName)
     m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
     m_glwidget->rebuild();
     m_information->update();
-    m_glwidget->updateGL();
   }
 }
 
@@ -145,6 +144,8 @@ void MainWindow::onImportXML()
   if (!fileName.isNull())
   {
     m_graph.loadXML(fileName);
+    m_glwidget->rebuild();
+    m_information->update();
   }
 
 }

@@ -280,7 +280,7 @@ namespace Graph
         n->pos.y = e.attribute("y").toFloat();
         n->pos.z = e.attribute("z").toFloat();
         n->locked = e.attribute("locked").toInt();
-        n->anchored = false;
+        n->anchored = n->locked;
         n->selected = 0.0f;
         if (e.attribute("isInitial").toInt())
           m_impl->initialState = e.attribute("value").toInt();
@@ -295,7 +295,7 @@ namespace Graph
         n->pos.y = e.attribute("y").toFloat();
         n->pos.z = e.attribute("z").toFloat();
         n->locked = e.attribute("locked").toInt();
-        n->anchored = false;
+        n->anchored = n->locked;
         n->selected = 0.0f;
       }
 
@@ -313,7 +313,7 @@ namespace Graph
         h->pos.y = e.attribute("y").toFloat();
         h->pos.z = e.attribute("z").toFloat();
         h->locked = e.attribute("locked").toInt();
-        h->anchored = false;
+        h->anchored = h->locked;
         h->selected = 0.0f;
       }
       if (e.tagName() == "TransitionLabelNode") {
@@ -323,7 +323,7 @@ namespace Graph
         n->pos.y = e.attribute("y").toFloat();
         n->pos.z = e.attribute("z").toFloat();
         n->locked = e.attribute("locked").toInt();
-        n->anchored = false;
+        n->anchored = n->locked;
         n->selected = 0.0f;
       }
 
