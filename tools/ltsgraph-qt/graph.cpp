@@ -337,16 +337,16 @@ namespace Graph
     QDomDocument xml;
     QDomElement root = xml.createElement("Graph");
     root.setAttribute("type", (int)m_type);
-    root.setAttribute("states", nodeCount());
-    root.setAttribute("transitions", edgeCount());
-    root.setAttribute("statelabels", stateLabelCount());
-    root.setAttribute("transitionlabels", transitionLabelCount());
+    root.setAttribute("states", (int)nodeCount());
+    root.setAttribute("transitions", (int)edgeCount());
+    root.setAttribute("statelabels", (int)stateLabelCount());
+    root.setAttribute("transitionlabels", (int)transitionLabelCount());
     xml.appendChild(root);
 
     for (size_t i = 0; i < stateLabelCount(); ++i)
     {
       QDomElement stateL = xml.createElement("StateLabel");
-      stateL.setAttribute("value", i);
+      stateL.setAttribute("value", (int)i);
       stateL.setAttribute("label", stateLabelstring(i));
       root.appendChild(stateL);
     }
@@ -354,20 +354,20 @@ namespace Graph
     for (size_t i = 0; i < nodeCount(); ++i)
     {
       QDomElement state = xml.createElement("State");
-      state.setAttribute("value", i);
+      state.setAttribute("value", (int)i);
       state.setAttribute("x", node(i).pos.x);
       state.setAttribute("y", node(i).pos.y);
       state.setAttribute("z", node(i).pos.z);
       state.setAttribute("locked", node(i).locked);
-      state.setAttribute("isInitial", i == initialState());
+      state.setAttribute("isInitial", (int)(i == initialState()));
       state.setAttribute("red", node(i).color[0]);
       state.setAttribute("green", node(i).color[1]);
       state.setAttribute("blue", node(i).color[2]);
       root.appendChild(state);
 
       QDomElement stateL = xml.createElement("StateLabelNode");
-      stateL.setAttribute("value", i);
-      stateL.setAttribute("labelindex", stateLabel(i).labelindex);
+      stateL.setAttribute("value", (int)i);
+      stateL.setAttribute("labelindex", (int)stateLabel(i).labelindex);
       stateL.setAttribute("x", stateLabel(i).pos.x);
       stateL.setAttribute("y", stateLabel(i).pos.y);
       stateL.setAttribute("z", stateLabel(i).pos.z);
@@ -378,7 +378,7 @@ namespace Graph
     for (size_t i = 0; i < transitionLabelCount(); ++i)
     {
       QDomElement edgL = xml.createElement("TransitionLabel");
-      edgL.setAttribute("value", i);
+      edgL.setAttribute("value", (int)i);
       edgL.setAttribute("label", transitionLabelstring(i));
       root.appendChild(edgL);
     }
@@ -386,9 +386,9 @@ namespace Graph
     for (size_t i = 0; i < edgeCount(); ++i)
     {
       QDomElement edg = xml.createElement("Transition");
-      edg.setAttribute("value", i);
-      edg.setAttribute("from", edge(i).from);
-      edg.setAttribute("to", edge(i).to);
+      edg.setAttribute("value", (int)i);
+      edg.setAttribute("from", (int)edge(i).from);
+      edg.setAttribute("to", (int)edge(i).to);
       edg.setAttribute("x", handle(i).pos.x);
       edg.setAttribute("y", handle(i).pos.y);
       edg.setAttribute("z", handle(i).pos.z);
@@ -396,8 +396,8 @@ namespace Graph
       root.appendChild(edg);
 
       QDomElement edgL = xml.createElement("TransitionLabelNode");
-      edgL.setAttribute("value", i);
-      edgL.setAttribute("labelindex", transitionLabel(i).labelindex);
+      edgL.setAttribute("value", (int)i);
+      edgL.setAttribute("labelindex", (int)transitionLabel(i).labelindex);
       edgL.setAttribute("x", transitionLabel(i).pos.x);
       edgL.setAttribute("y", transitionLabel(i).pos.y);
       edgL.setAttribute("z", transitionLabel(i).pos.z);
