@@ -26,6 +26,11 @@ struct _SymEntry
 {
   public:
     size_t header;
+/*  Onderstaande is een suggestie van Sjoerd, om van expliciete shifts af te komen,
+    en de code helderder te krijgen.
+    size_t arity: 63; XXXX
+    size_t quoted: 1; */
+
     size_t next;
     size_t reference_count;
     size_t id;

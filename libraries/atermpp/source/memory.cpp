@@ -37,7 +37,7 @@ std::vector <detail::_aterm*> aterm::hashtable(AT_TABLE_SIZE(INITIAL_TERM_TABLE_
  * Calculate the size (in words) of a term.
  */
 
-static size_t term_size(const detail::_aterm *t)
+size_t detail::term_size(const detail::_aterm *t)
 {
   if (t->m_function_symbol.number()==AS_INT.number())
   { 
@@ -50,27 +50,17 @@ static size_t term_size(const detail::_aterm *t)
 
 /*{{{  static HashNumber hash_number(aterm t, size_t size) */
 
-static HashNumber hash_number(const detail::_aterm *t, const size_t size)
+HashNumber detail::hash_number(const detail::_aterm *t, const size_t size)
 {
   HashNumber hnr;
 
   hnr = START(t->m_function_symbol.number());
-
   for (size_t i=ARG_OFFSET; i<size; i++)
   {
     hnr = COMBINE(hnr, *(reinterpret_cast<const MachineWord *>(t) + i));
   }
 
   return FINISH(hnr);
-}
-
-
-/*}}}  */
-/*{{{  HashNumber AT_hashnumber(aterm t) */
-
-HashNumber AT_hashnumber(const detail::_aterm *t)
-{
-  return hash_number(t, term_size(t));
 }
 
 /*}}}  */
@@ -81,7 +71,7 @@ HashNumber AT_hashnumber(const detail::_aterm *t)
  * Resize the hashtable
  */
 
-static void resize_hashtable()
+void aterm::resize_hashtable()
 {
   HashNumber oldsize;
 
@@ -127,7 +117,7 @@ static void resize_hashtable()
 
 }
 
-
+#ifndef NDEBUG
 static bool check_that_all_objects_are_free()
 {
   return true;
@@ -163,6 +153,7 @@ static bool check_that_all_objects_are_free()
 
   return result;
 }
+#endif
 
 /*}}}  */
 /*{{{  static void allocate_block(size_t size)  */
@@ -194,12 +185,9 @@ static void allocate_block(size_t size)
   assert(ti->at_freelist == NULL);
 }
 
-/*}}}  */
 
 
-/*{{{  aterm AT_allocate(size_t size)  */
-
-detail::_aterm* AT_allocate(const size_t size)
+detail::_aterm* aterm::allocate_term(const size_t size)
 {
   if (size >= terminfo.size())
   {
@@ -252,7 +240,7 @@ detail::_aterm* AT_allocate(const size_t size)
  * Remove a term from the hashtable.
  */
 
-static void AT_freeTerm(detail::_aterm *t)
+void aterm::remove_from_hashtable(detail::_aterm *t)
 {
   // fprintf(stderr,"Remove term from hashtable %p\n",t);
   detail::_aterm *prev=NULL, *cur;
@@ -265,7 +253,8 @@ static void AT_freeTerm(detail::_aterm *t)
   {
     if (!cur)
     {
-        throw std::runtime_error("AT_freeTerm: cannot find term in hashtable at pos " + to_string(hnr) + " function_symbol=" + to_string(t->m_function_symbol.number()));
+      throw std::runtime_error("free_term: cannot find term in hashtable at pos " + mcrl2::utilities::to_string(hnr) + 
+                                 " function_symbol=" + mcrl2::utilities::to_string(t->m_function_symbol.number()));
     }
     if (cur == t)
     {
@@ -288,9 +277,8 @@ static void AT_freeTerm(detail::_aterm *t)
 
 /*}}}  */
 
-void at_reduce_reference_count(detail::_aterm *t);
 
-void at_free_term(detail::_aterm *t)
+void aterm::free_term(detail::_aterm *t)
 {
 #ifndef NDEBUG
   if (t->m_function_symbol==AS_EMPTY_LIST) // When destroying ATempty, it appears that all other terms have been removed.
@@ -302,14 +290,14 @@ void at_free_term(detail::_aterm *t)
 
   assert(t->reference_count==0);
   const size_t size=term_size(t);
-  AT_freeTerm(t);  // Remove from hash_table
+  remove_from_hashtable(t);  // Remove from hash_table
 
   for(size_t i=0; i<t->m_function_symbol.arity(); ++i)
   {
 #ifndef NDEBUG
     reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]=aterm();
 #else
-    at_reduce_reference_count(reinterpret_cast<detail::_aterm*>(&*reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]));
+    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
 #endif
   }
   t->m_function_symbol=function_symbol(); // AFun::decrease_reference_count(afun_number);
@@ -319,15 +307,6 @@ void at_free_term(detail::_aterm *t)
   ti->at_freelist = t; 
 }
           
-void at_reduce_reference_count(detail::_aterm *t)
-{
-  assert(t->reference_count>0);
-  if (0== --t->reference_count)
-  {
-    at_free_term(t);
-  }
-}
-
 aterm::aterm(const function_symbol &sym)
 {
   detail::_aterm *cur, *prev, **hashspot;
@@ -362,8 +341,8 @@ aterm::aterm(const function_symbol &sym)
     cur = cur->next;
   }
 
-  cur = AT_allocate(TERM_SIZE_APPL(0));
-  /* Delay masking until after AT_allocate */
+  cur = allocate_term(TERM_SIZE_APPL(0));
+  /* Delay masking until after allocate */
   hnr &= table_mask;
   cur->m_function_symbol = sym;
   cur->next = &*aterm::hashtable[hnr];
@@ -407,8 +386,8 @@ aterm_int::aterm_int(int val)
 
   if (!cur)
   {
-    cur = AT_allocate(TERM_SIZE_INT);
-    /* Delay masking until after AT_allocate */
+    cur = allocate_term(TERM_SIZE_INT);
+    /* Delay masking until after allocate */
     hnr &= table_mask;
     cur->m_function_symbol = AS_INT;
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;

@@ -25,22 +25,23 @@
 namespace atermpp
 {
 
-/**
- * These are the types of ATerms there are. \see ATgetType().
- */
-
-extern void at_free_term(detail::_aterm* t);
-
 class aterm
 {
   public:
     template < typename T >
     friend class term_appl;
 
-    static std::vector <detail::_aterm*> hashtable;
+    template < typename T >
+    friend class term_list;
 
   protected:
+    static std::vector <detail::_aterm*> hashtable;
     detail::_aterm *m_term;
+
+    void resize_hashtable();
+    detail::_aterm* allocate_term(const size_t size);
+    void remove_from_hashtable(detail::_aterm *t);
+    void free_term(detail::_aterm *t);
 
     void decrease_reference_count()
     {
@@ -52,7 +53,7 @@ fprintf(stderr,"decrease reference count %ld  %p\n",m_term->reference_count,m_te
         assert(m_term->reference_count>0);
         if (0== --m_term->reference_count)
         {
-          at_free_term(m_term);
+          free_term(m_term);
           return;
         }
       }
@@ -85,6 +86,19 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     /// \param sym A function symbol.
     aterm(const function_symbol &sym);
 
+  public:  // Functions below should become protected.
+    detail::_aterm & operator *() const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      return *m_term;
+    }
+
+    detail::_aterm * operator ->() const
+    {
+      assert(m_term==NULL || m_term->reference_count>0);
+      return m_term;
+    }
+
   public:
 
     aterm ():m_term(NULL)
@@ -113,18 +127,6 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       decrease_reference_count();
     }
 
-    detail::_aterm & operator *() const
-    {
-      assert(m_term==NULL || m_term->reference_count>0);
-      return *m_term;
-    }
-
-    detail::_aterm * operator ->() const
-    {
-      assert(m_term==NULL || m_term->reference_count>0);
-      return m_term;
-    }
-
     /// \brief Returns the function symbol belonging to a term.
     /// \return The function symbol of this term.
     const function_symbol &function() const
@@ -148,9 +150,6 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     /// \brief Writes the term to a string.
     /// \return A string representation of the term.
     std::string to_string() const;
-    /* {
-      return ATwriteToString(m_term);
-    } */
 
     bool operator ==(const aterm &t) const
     {
@@ -198,7 +197,7 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
     bool is_defined() const
     {
       assert(m_term==NULL || m_term->reference_count>0);
-      return m_term!=NULL;
+      return m_term!=NULL && m_term->reference_count>0;
     }
 };
 

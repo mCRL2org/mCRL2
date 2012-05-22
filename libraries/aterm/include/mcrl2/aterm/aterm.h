@@ -171,7 +171,7 @@ const ATerm ATgetArgument(const ATermAppl &appl, const size_t idx)
 }
 
 inline
-ATermAppl ATsetArgument(const ATermAppl &appl, const ATerm &arg, const size_t n)
+ATermAppl ATsetArgument(ATermAppl appl, const ATerm &arg, const size_t n)
 {
   return appl.set_argument(arg,n);
 }

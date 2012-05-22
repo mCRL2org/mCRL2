@@ -50,6 +50,13 @@ class term_appl:public aterm
       return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
+    /// \brief Constructor.
+    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
+    {
+      // assert((boost::is_base_of<Term, aterm>::value));
+      assert(sizeof(Term)==sizeof(size_t));
+    }
+    
   public:
     /// The type of object, T stored in the term_appl.
     typedef Term value_type;
@@ -79,13 +86,6 @@ class term_appl:public aterm
     term_appl():aterm()
     {}
 
-    /// \brief Constructor.
-    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
-    {
-      // assert((boost::is_base_of<Term, aterm>::value));
-      assert(sizeof(Term)==sizeof(size_t));
-    }
-    
     /// \brief Copy constructor from an aterm_appl.
     /// \param t The aterm.
     term_appl (const term_appl &t):aterm(t)
@@ -224,7 +224,7 @@ class term_appl:public aterm
     /// \param arg The new i-th argument
     /// \param i A positive integer
     /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(const Term &arg, const size_type i) const;
+    term_appl<Term> set_argument(const Term &arg, const size_type i);
 
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
