@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -130,6 +131,70 @@ bool is_pfnf(const T& x)
   is_pfnf_traverser f;
   f(x);
   return f.result;
+}
+
+/// \brief Splits a conjunction into a sequence of operands
+/// Given a pbes expression of the form p1 && p2 && ... && pn, this will yield a
+/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a && as main
+/// function symbol.
+/// \param expr A PBES expression
+/// \return A sequence of operands
+inline
+void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result)
+{
+  using namespace accessors;
+  utilities::detail::split(expr, std::back_inserter(result), is_and, left, right);
+}
+
+/// \brief Splits a conjunction into a sequence of operands
+/// Given a pbes expression of the form p1 || p2 || ... || pn, this will yield a
+/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a || as main
+/// function symbol.
+/// \param expr A PBES expression
+/// \return A sequence of operands
+inline
+void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result)
+{
+  using namespace accessors;
+  utilities::detail::split(expr, std::back_inserter(result), is_or, left, right);
+}
+
+// returns the implications /\_{i in I} x_i
+// \pre x is in PFNF format
+inline
+std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
+{
+  pbes_expression y = x;
+
+  // strip the quantifiers
+  while (is_forall(y) || is_exists(y))
+  {
+    if (is_forall(y))
+    {
+      y = forall(y).body();
+    }
+    else if (is_forall(y))
+    {
+      y = exists(y).body();
+    }
+  }
+
+  // strip the h /\ part
+  if (is_and(y))
+  {
+    if (!is_pfnf_inner_and(and_(y).left()))
+    {
+      y = and_(y).right();
+    }
+    else if (!is_pfnf_inner_and(and_(y).right()))
+    {
+      y = and_(y).left();
+    }
+  }
+
+  std::vector<pbes_expression> result;
+  split_and(y, result);
+  return result;
 }
 
 } // namespace detail

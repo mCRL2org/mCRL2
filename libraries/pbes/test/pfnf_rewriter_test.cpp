@@ -222,6 +222,12 @@ void test_is_pfnf()
   BOOST_CHECK(!pbes_system::detail::is_pfnf_or(x));
   BOOST_CHECK(!pbes_system::detail::is_pfnf_imp(x));
   BOOST_CHECK(!pbes_system::detail::is_pfnf(x));
+  std::vector<pbes_expression> v = pbes_system::detail::pfnf_implications(x);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(pbes_system::pp(v[0]) == "Y(0) || X(1)");
+  BOOST_CHECK(pbes_system::pp(v[1]) == "X(2)");
+  std::cout << "v[0] = " << pbes_system::pp(v[0]) << std::endl;
+  std::cout << "v[1] = " << pbes_system::pp(v[1]) << std::endl;
 
   x = p.equations()[2].formula();
   BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
