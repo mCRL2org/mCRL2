@@ -7,12 +7,12 @@
 namespace atermpp
 {
 
-typedef size_t ShortHashNumber;
-typedef size_t MachineWord;
+// typedef size_t ShortHashNumber;
+// typedef size_t MachineWord;
 typedef size_t HashNumber;
 /* Although atypes.h defines MachineWord, it wasn't used here:
  *    typedef unsigned long header_type; */
-typedef MachineWord header_type;
+// typedef MachineWord header_type;
 
 
 /* The largest size_t is used as an indicator that an element does not exist.
@@ -46,7 +46,7 @@ typedef int ssize_t;
 #define _strdup strdup
 #endif
 
-#ifdef AT_64BIT
+/* #ifdef AT_64BIT
 inline
 ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 {
@@ -67,18 +67,18 @@ HashNumber ADDR_TO_HNR(const void* a)
 {
   return ((HashNumber)(a)) >> 2;
 }
-
+*/
 
 static const size_t MAX_HEADER_BITS = 64;
 
 inline
-MachineWord AT_TABLE_SIZE(const size_t table_class)
+size_t AT_TABLE_SIZE(const size_t table_class)
 {
   return (size_t)1<<(table_class);
 }
 
 inline
-MachineWord AT_TABLE_MASK(const size_t table_class)
+size_t AT_TABLE_MASK(const size_t table_class)
 {
   return AT_TABLE_SIZE(table_class)-1;
 }

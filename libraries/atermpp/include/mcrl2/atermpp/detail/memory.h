@@ -16,14 +16,9 @@ const size_t TERM_SIZE_APPL(const size_t arity)
   return (sizeof(detail::_aterm)/sizeof(size_t))+arity;
 }
 
-static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
-
 /* The constants below are not static to prevent some compiler warnings */
 const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
 const size_t INITIAL_MAX_TERM_SIZE = 256;
-
-
-// static const size_t MAX_INLINE_ARITY = ((size_t)1 << ARITY_BITS)-(size_t)2;
 
 
 /* To change the block size, modify BLOCK_SHIFT only! */
@@ -31,56 +26,23 @@ static const size_t BLOCK_SHIFT = 13;
 
 static const size_t BLOCK_SIZE = 1<<BLOCK_SHIFT;
 
-// static const size_t BLOCK_TABLE_SIZE = 4099; /* nextprime(4096) */
-
-
-template <typename T>
-inline HashNumber HN(const T i)
-{
-  return (HashNumber)(i);
-}
-
-template <class POINTER>
-inline HashNumber HN(const POINTER *i)
-{
-  return (HashNumber)(i);
-}
-
-#ifdef AT_64BIT
-inline
-size_t FOLD(const MachineWord w)
-{
-  return HN(w)^(HN(w) >> 32);
-}
-
-#endif // AT_64BIT
-
-#ifdef AT_32BIT
-inline
-size_t FOLD(const MachineWord w)
-{
-  return HN(w);
-}
-
-#endif // AT_32BIT
-
 typedef struct Block
 {
   /* We need platform alignment for this data block! */
-  header_type data[BLOCK_SIZE];
+  size_t data[BLOCK_SIZE];
 
   size_t size;
+#ifndef NDEBUG
   struct Block* next_by_size;
-  struct Block* next_before;
-  struct Block* next_after;
+#endif
 
-  header_type* end;
+  size_t* end;
 } Block;
 
 typedef struct TermInfo
 {
   Block*       at_block;
-  header_type* top_at_blocks;
+  size_t* top_at_blocks;
   detail::_aterm*       at_freelist;
 
   TermInfo():at_block(NULL),top_at_blocks(NULL),at_freelist(NULL)
@@ -90,32 +52,24 @@ typedef struct TermInfo
 
 extern std::vector<TermInfo> terminfo;
 
-extern Block* at_freeblocklist;
-extern size_t at_freeblocklist_size;
-
-inline size_t SIZE_TO_BYTES(const size_t size)
-{
-  return size*sizeof(header_type);
-}
-
-HashNumber AT_hashnumber(const detail::_aterm* t);
-detail::_aterm* allocate_term(const size_t size);
-void  AT_freeTerm(const size_t size, const detail::_aterm *t);
-
-/*{{{  defines */
-
 static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 
 inline
-size_t START(const MachineWord w)
+size_t START(const size_t w)
 {
-  return FOLD(w);
+  return w;
 }
 
 inline
-size_t COMBINE(const HashNumber hnr, const MachineWord w)
+size_t COMBINE(const HashNumber hnr, const size_t w)
 {
-  return ((hnr)<<1 ^(hnr)>>1 ^ HN(FOLD(w)));
+  return ((hnr)<<1 ^(hnr)>>1 ^ w);
+}
+
+inline
+size_t COMBINE(const HashNumber hnr, const aterm &w)
+{
+  return COMBINE(hnr,reinterpret_cast<size_t>(&*w));
 }
 
 inline
@@ -125,39 +79,60 @@ HashNumber FINISH(const HashNumber hnr)
 }
 
 inline
-void CHECK_TERM(const detail::_aterm *t)
+void CHECK_TERM(const aterm &t)
 {
-  assert(t != NULL);
+  assert(t != aterm());
   assert(t->reference_count>0);
   assert(t->m_function_symbol.name().size()!=0);
 }
 
-/*}}}  */
-
 extern HashNumber table_mask;
+
+inline size_t detail::term_size(const detail::_aterm *t)
+{
+  if (t->m_function_symbol==AS_INT)
+  {
+    return TERM_SIZE_INT;
+  }
+  return TERM_SIZE_APPL(t->m_function_symbol.arity());
+}
+
+inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size)
+{
+  HashNumber hnr;
+
+  hnr = START(t->m_function_symbol.number());
+  for (size_t i=TERM_SIZE_APPL(0); i<size; i++)
+  {
+    hnr = COMBINE(hnr, *(reinterpret_cast<const size_t *>(t) + i));
+  }
+
+  return FINISH(hnr);
+}
+
 
 template <class Term>
 template <class ForwardIterator, class ATermConverter>
-term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, ForwardIterator end, ATermConverter convert_to_aterm)
+term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end, ATermConverter convert_to_aterm)
 {
   const size_t arity = sym.arity();
 
   HashNumber hnr = START(sym.number());
   std::vector <aterm> arguments(arity);
-  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity); // This usage leads to crashes with -DNDEBUG. 
+  
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
     arguments[j]=convert_to_aterm(*i);
-    detail::_aterm* arg = &*arguments[j];
+    const aterm &arg = arguments[j];
     CHECK_TERM(arg);
-    hnr = COMBINE(hnr, HN(arg));
+    hnr = COMBINE(hnr, arg);
   }
   assert(j==arity);
   hnr = FINISH(hnr);
 
-  detail::_aterm* cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = detail::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==sym)
@@ -181,7 +156,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
 
   if (!cur)
   {
-    cur = (detail::_aterm_appl<Term>*) allocate_term(TERM_SIZE_APPL(arity));
+    cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = sym;
@@ -190,8 +165,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
     {
       new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
     }
-    cur->next = &*aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
   
   m_term=cur;
@@ -201,8 +176,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
 
 template <class Term>
 template <class ForwardIterator>
-term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, ForwardIterator end)
-                     /*      typename boost::enable_if<
+term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
+                     /*    typename boost::enable_if<
                            typename boost::is_convertible< typename boost::iterator_traversal< ForwardIterator >::type,
                            boost::forward_traversal_tag >::type >::type* / * = 0* /) */
 {
@@ -214,14 +189,14 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
   {
     assert(j<arity);
     arguments[j]=&* *i; 
-    detail::_aterm* arg = arguments[j];
+    const aterm &arg = arguments[j];
     CHECK_TERM(arg);
-    hnr = COMBINE(hnr, HN(arg));
+    hnr = COMBINE(hnr, arg);
   }
   assert(j==arity);
   hnr = FINISH(hnr);
 
-  detail::_aterm* cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = detail::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==sym)
@@ -245,7 +220,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
 
   if (!cur)
   {
-    cur = (detail::_aterm_appl<Term>*) allocate_term(TERM_SIZE_APPL(arity));
+    cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = sym;
@@ -254,8 +229,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, ForwardIterator begin, Fo
     {
       new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
     }
-    cur->next = &*aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
   
   m_term=cur;
@@ -270,17 +245,16 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
 {
   detail::_aterm* cur, *prev, **hashspot;
-  HashNumber hnr;
 
   assert(sym.arity()==1);
-  CHECK_TERM(&*arg0);
+  CHECK_TERM(arg0);
 
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
   hnr = FINISH(hnr);
 
   prev = NULL;
-  hashspot = &(aterm::hashtable[hnr & table_mask]);
+  hashspot = &(detail::hashtable[hnr & table_mask]);
 
   cur = *hashspot;
   while (cur)
@@ -303,13 +277,13 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
     cur = cur->next;
   }
 
-  cur = allocate_term(TERM_SIZE_APPL(1));
+  cur = detail::allocate_term(TERM_SIZE_APPL(1));
   /* Delay masking until after allocate_term */
   hnr &= table_mask;
   cur->m_function_symbol = sym;
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0])) Term(arg0);
-  cur->next = aterm::hashtable[hnr];
-  aterm::hashtable[hnr] = cur;
+  cur->next = detail::hashtable[hnr];
+  detail::hashtable[hnr] = cur;
 
   m_term=cur;
   increase_reference_count<false>(m_term);
@@ -324,19 +298,18 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1)
 {
   detail::_aterm* cur, *prev, **hashspot;
-  HashNumber hnr;
 
   assert(sym.arity()==2);
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
+  CHECK_TERM(arg0);
+  CHECK_TERM(arg1);
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
+  hnr = COMBINE(hnr, arg1);
   hnr = FINISH(hnr);
 
   prev = NULL;
-  hashspot = &(aterm::hashtable[hnr & table_mask]);
+  hashspot = &(detail::hashtable[hnr & table_mask]);
 
   cur = *hashspot;
   while (cur)
@@ -360,15 +333,15 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     cur = cur->next;
   }
 
-  cur = allocate_term(TERM_SIZE_APPL(2));
+  cur = detail::allocate_term(TERM_SIZE_APPL(2));
   /* Delay masking until after allocate_term */
   hnr &= table_mask;
   cur->m_function_symbol = sym;
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0])) Term(arg0);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1])) Term(arg1);
 
-  cur->next = aterm::hashtable[hnr];
-  aterm::hashtable[hnr] = cur;
+  cur->next = detail::hashtable[hnr];
+  detail::hashtable[hnr] = cur;
 
   m_term=cur;
   increase_reference_count<false>(m_term);
@@ -381,21 +354,19 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2)
 {
-  detail::_aterm *cur;
-  HashNumber hnr;
 
   assert(sym.arity()==3);
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
+  CHECK_TERM(arg0);
+  CHECK_TERM(arg1);
+  CHECK_TERM(arg2);
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
+  hnr = COMBINE(hnr, arg1);
+  hnr = COMBINE(hnr, arg2);
   hnr = FINISH(hnr);
 
-  cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm *cur = detail::hashtable[hnr & table_mask];
   while (cur && (cur->m_function_symbol!=sym ||
     reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0] != arg0 ||
     reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1] != arg1 ||
@@ -406,7 +377,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 
   if (!cur)
   {
-    cur = allocate_term(TERM_SIZE_APPL(3));
+    cur = detail::allocate_term(TERM_SIZE_APPL(3));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol=sym;
@@ -414,8 +385,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1])) Term(arg1);
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[2])) Term(arg2);
 
-    cur->next = aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
 
   m_term=cur;
@@ -432,23 +403,21 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2, const Term &arg3)
 {
-  detail::_aterm* cur;
-  HashNumber hnr;
 
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
+  CHECK_TERM(arg0);
+  CHECK_TERM(arg1);
+  CHECK_TERM(arg2);
+  CHECK_TERM(arg3);
   assert(sym.arity()==4);
 
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
+  hnr = COMBINE(hnr, arg1);
+  hnr = COMBINE(hnr, arg2);
+  hnr = COMBINE(hnr, arg3);
   hnr = FINISH(hnr);
 
-  cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = detail::hashtable[hnr & table_mask];
   while (cur && (cur->m_function_symbol!=sym ||
      reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0] != arg0 ||
      reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1] != arg1 ||
@@ -460,7 +429,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 
   if (!cur)
   {
-    cur = allocate_term(TERM_SIZE_APPL(4));
+    cur = detail::allocate_term(TERM_SIZE_APPL(4));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = sym;
@@ -469,8 +438,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[2])) Term(arg2);
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[3])) Term(arg3);
 
-    cur->next = aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
 
   m_term=cur;
@@ -485,25 +454,23 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4)
 {
-  detail::_aterm *cur;
-  HashNumber hnr;
 
   assert(sym.arity()==5);
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
+  CHECK_TERM(arg0);
+  CHECK_TERM(arg1);
+  CHECK_TERM(arg2);
+  CHECK_TERM(arg3);
 
 
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
-  hnr = COMBINE(hnr, HN(&*arg4));
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
+  hnr = COMBINE(hnr, arg1);
+  hnr = COMBINE(hnr, arg2);
+  hnr = COMBINE(hnr, arg3);
+  hnr = COMBINE(hnr, arg4);
   hnr = FINISH(hnr);
 
-  cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm *cur = detail::hashtable[hnr & table_mask];
   while (cur && (cur->m_function_symbol!=sym ||
      reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0] != arg0 ||
      reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1] != arg1 ||
@@ -516,7 +483,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 
   if (!cur)
   {
-    cur = allocate_term(TERM_SIZE_APPL(5));
+    cur = detail::allocate_term(TERM_SIZE_APPL(5));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = sym;
@@ -526,8 +493,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[3])) Term(arg3);
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[4])) Term(arg4);
 
-    cur->next = aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
 
   m_term=cur;
@@ -542,27 +509,24 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4, const Term &arg5)
 {
-  detail::_aterm* cur;
-  HashNumber hnr;
-
   assert(sym.arity()==6);
-  CHECK_TERM(&*arg0);
-  CHECK_TERM(&*arg1);
-  CHECK_TERM(&*arg2);
-  CHECK_TERM(&*arg3);
-  CHECK_TERM(&*arg4);
-  CHECK_TERM(&*arg5);
+  CHECK_TERM(arg0);
+  CHECK_TERM(arg1);
+  CHECK_TERM(arg2);
+  CHECK_TERM(arg3);
+  CHECK_TERM(arg4);
+  CHECK_TERM(arg5);
 
-  hnr = START(sym.number());
-  hnr = COMBINE(hnr, HN(&*arg0));
-  hnr = COMBINE(hnr, HN(&*arg1));
-  hnr = COMBINE(hnr, HN(&*arg2));
-  hnr = COMBINE(hnr, HN(&*arg3));
-  hnr = COMBINE(hnr, HN(&*arg4));
-  hnr = COMBINE(hnr, HN(&*arg5));
+  HashNumber hnr = START(sym.number());
+  hnr = COMBINE(hnr, arg0);
+  hnr = COMBINE(hnr, arg1);
+  hnr = COMBINE(hnr, arg2);
+  hnr = COMBINE(hnr, arg3);
+  hnr = COMBINE(hnr, arg4);
+  hnr = COMBINE(hnr, arg5);
   hnr = FINISH(hnr);
 
-  cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm* cur = detail::hashtable[hnr & table_mask];
   while (cur && (cur->m_function_symbol!=sym ||
   reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[0] != arg0 ||
   reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[1] != arg1 ||
@@ -576,7 +540,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
 
   if (!cur)
   {
-    cur = allocate_term(TERM_SIZE_APPL(6));
+    cur = detail::allocate_term(TERM_SIZE_APPL(6));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = sym;
@@ -587,8 +551,8 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[4])) Term(arg4);
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[5])) Term(arg5);
 
-    cur->next =aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next =detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
 
   m_term=cur;
@@ -611,17 +575,17 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   {
     if (i!=n)
     {
-      hnr = COMBINE(hnr, (HashNumber)&*((*this)->arg[i]));
+      hnr = COMBINE(hnr, ((*this)->arg[i]));
     }
     else
     {
-      hnr = COMBINE(hnr, (HashNumber)&*arg);
+      hnr = COMBINE(hnr, arg);
     }
   }
 
   hnr = FINISH(hnr);
 
-  detail::_aterm *cur = aterm::hashtable[hnr & table_mask];
+  detail::_aterm *cur = detail::hashtable[hnr & table_mask];
   while (cur)
   {
     if (cur->m_function_symbol==(*this)->m_function_symbol)
@@ -656,7 +620,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
 
   if (!cur)
   {
-    cur = allocate_term(TERM_SIZE_APPL(arity));
+    cur = detail::allocate_term(TERM_SIZE_APPL(arity));
     /* Delay masking until after allocate_term */
     hnr &= table_mask;
     cur->m_function_symbol = (*this)->m_function_symbol;
@@ -671,8 +635,8 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
         new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arg);
       }
     }
-    cur->next = aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
+    cur->next = detail::hashtable[hnr];
+    detail::hashtable[hnr] = cur;
   }
 
   return reinterpret_cast<detail::_aterm_appl<Term>*>(cur);
@@ -683,39 +647,6 @@ template <class Term>
 term_list<Term> push_front(const term_list<Term> &tail, const Term &el)
 {
   return static_cast<term_list<Term> > (term_appl<aterm> (AS_LIST,el,tail));
-  /* HashNumber hnr;
-
-  assert(tail.type() == AT_LIST);
-
-  hnr = START(AS_LIST.number());
-  hnr = COMBINE(hnr, HN(&*el));
-  hnr = COMBINE(hnr, HN(&*tail));
-  hnr = FINISH(hnr);
-
-  detail::_aterm_list<Term>* cur =reinterpret_cast<detail::_aterm_list<Term>*>(aterm::hashtable[hnr & table_mask]);
-  while (cur && (cur->m_function_symbol!=AS_LIST
-                      || cur->head != el
-                      || cur->tail != tail))
-  {
-    cur = reinterpret_cast<detail::_aterm_list<Term>*>(cur->next);
-  }
-
-  if (!cur)
-  {
-    cur = reinterpret_cast<detail::_aterm_list<Term>*>(allocate_term(detail::TERM_SIZE_LIST));
-    / * Hashtable might be resized, so delay masking until after allocate_term * /
-    hnr &= table_mask;
-    cur->m_function_symbol = AS_LIST;
-    // el->reference_count++;
-    new (&cur->head)  Term(el);
-    // tail->reference_count++;
-    new (&cur->tail) term_list<Term>(tail);
-    cur->next = aterm::hashtable[hnr];
-    aterm::hashtable[hnr] = cur;
-  }
-
-  return term_list<Term>(cur); */
-  // increase_reference_count<false>(m_term);
 }
 
 

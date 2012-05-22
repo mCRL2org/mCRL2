@@ -35,7 +35,7 @@ static const size_t MAGIC_PRIME = 7;
 char afun_id[] = "$Id$";
 
 static size_t afun_table_class = INITIAL_AFUN_TABLE_CLASS;
-static MachineWord afun_table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
+static size_t afun_table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
 static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static std::vector < size_t > afun_hashtable(afun_table_size,size_t(-1));
@@ -55,7 +55,7 @@ const function_symbol AS_EMPTY_LIST("[]", 0);
 
 /*{{{  function declarations */
 
-static ShortHashNumber AT_hashAFun(const std::string &name, const size_t arity);
+static HashNumber AT_hashAFun(const std::string &name, const size_t arity);
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);
@@ -99,7 +99,7 @@ fprintf(stderr,"resize_afun_hashtable to class %ld\n",afun_table_class);
     _SymEntry* entry = function_symbol::at_lookup_table[i];
     if (entry->reference_count>0)
     {
-      ShortHashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
+      HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
       hnr &= afun_table_mask;
       entry->next = afun_hashtable[hnr];
       afun_hashtable[hnr] = i;
@@ -223,9 +223,9 @@ std::string ATwriteAFunToString(const function_symbol &fun)
  * Calculate the hash value of a symbol.
  */
 
-static ShortHashNumber AT_hashAFun(const std::string &name, const size_t arity)
+static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
 {
-  ShortHashNumber hnr = arity*3;
+  HashNumber hnr = arity*3;
 
   for (std::string::const_iterator i=name.begin(); i!=name.end(); i++)
   {
@@ -242,7 +242,7 @@ static ShortHashNumber AT_hashAFun(const std::string &name, const size_t arity)
 
 function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
 {
-  const ShortHashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
+  const HashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
   /* if (arity >= MAX_ARITY)
   {
@@ -313,7 +313,7 @@ void at_free_afun(const size_t n)
   assert(sym->id==n);
 
   /* Calculate hashnumber */
-  const ShortHashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & afun_table_mask;
+  const HashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & afun_table_mask;
 
   /* Update hashtable */
   if (afun_hashtable[hnr] == n)

@@ -2019,8 +2019,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cu
   {
     if (level == 0)
     {
-      // TODO: if parent was also an F of the same level we can omit isAppl
-      fprintf(f,"%sif (arg%i(0)==atermpp::aterm((atermpp::detail::_aterm*) %p)) // F\n"
+      fprintf(f,"%sif (&*(arg%i(0))==reinterpret_cast<atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n",
               whitespace(d*2),
               cur_arg,
@@ -2030,8 +2029,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cu
     }
     else
     {
-// NOT EFFICIENT>>
-      fprintf(f,"%sif (isAppl(%s%i(%i)) && atermpp::aterm_appl(%s%i(%i))(0)==atermpp::aterm((atermpp::detail::_aterm*) %p)) // F\n"
+      fprintf(f,"%sif (isAppl(%s%i(%i)) && &*(reinterpret_cast<const atermpp::aterm_appl &>(%s%i(%i))(0))==reinterpret_cast<atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n"
               "%s  atermpp::aterm_appl t%i (%s%i(%i));\n",
               whitespace(d*2),

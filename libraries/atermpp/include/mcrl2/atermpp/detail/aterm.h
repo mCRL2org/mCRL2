@@ -38,12 +38,16 @@ struct _aterm
     {
       return m_function_symbol;
     }
+
 };
 
 
-// extern void at_free_term(detail::_aterm* t);
-extern size_t term_size(const detail::_aterm *t);
-HashNumber hash_number(const detail::_aterm *t, const size_t size);
+extern std::vector <detail::_aterm*> hashtable;
+detail::_aterm* allocate_term(const size_t size);
+void free_term(detail::_aterm *t);
+
+inline size_t term_size(const detail::_aterm *t);
+inline HashNumber hash_number(const detail::_aterm *t, const size_t size);
 
 } // namespace detail
 } // namespace atermpp

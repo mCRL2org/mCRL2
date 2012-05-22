@@ -1031,7 +1031,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
   if (info.summands.size() == 0)
   {
     enumerated_variables=variable_list();
-    valuations = info.get_sols(ATmakeList0(),(ATerm)(ATermAppl)info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
+    valuations = info.get_sols(ATmakeList0(),info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
   }
   else
   {

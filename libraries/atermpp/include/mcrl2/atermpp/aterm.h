@@ -28,20 +28,14 @@ namespace atermpp
 class aterm
 {
   public:
-    template < typename T >
+    /* template < typename T >
     friend class term_appl;
 
     template < typename T >
-    friend class term_list;
+    friend class term_list; */
 
   protected:
-    static std::vector <detail::_aterm*> hashtable;
     detail::_aterm *m_term;
-
-    void resize_hashtable();
-    detail::_aterm* allocate_term(const size_t size);
-    void remove_from_hashtable(detail::_aterm *t);
-    void free_term(detail::_aterm *t);
 
     void decrease_reference_count()
     {
@@ -53,7 +47,7 @@ fprintf(stderr,"decrease reference count %ld  %p\n",m_term->reference_count,m_te
         assert(m_term->reference_count>0);
         if (0== --m_term->reference_count)
         {
-          free_term(m_term);
+          detail::free_term(m_term);
           return;
         }
       }
