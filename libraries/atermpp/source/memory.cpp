@@ -25,7 +25,7 @@ char memory_id[] = "$Id$";
 
 std::vector<TermInfo> terminfo(INITIAL_MAX_TERM_SIZE);
 
-static size_t total_nodes = 0;
+size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
@@ -197,73 +197,6 @@ detail::_aterm* detail::allocate_term(const size_t size)
   return at;
 } 
 
-/**
- * Remove a term from the hashtable.
- */
-
-static void remove_from_hashtable(detail::_aterm *t)
-{
-  // fprintf(stderr,"Remove term from hashtable %p\n",t);
-  detail::_aterm *prev=NULL, *cur;
-
-  /* Remove the node from the hashtable */
-  const HashNumber hnr = hash_number(t, term_size(t)) & table_mask;
-  cur = detail::hashtable[hnr];
-
-  do
-  {
-    if (!cur)
-    {
-      throw std::runtime_error("free_term: cannot find term in hashtable at pos " + mcrl2::utilities::to_string(hnr) + 
-                                 " function_symbol=" + mcrl2::utilities::to_string(t->m_function_symbol.number()));
-    }
-    if (cur == t)
-    {
-      if (prev)
-      {
-        prev->next = cur->next;
-      }
-      else
-      {
-        detail::hashtable[hnr] = cur->next;
-      }
-      /* Put the node in the appropriate free list */
-      total_nodes--;
-      return;
-    }
-  }
-  while (((prev=cur), (cur=cur->next)));
-  assert(0);
-}
-
-/*}}}  */
-
-
-void detail::free_term(detail::_aterm *t)
-{
-#ifndef NDEBUG
-  if (t->m_function_symbol==AS_EMPTY_LIST) // When destroying ATempty, it appears that all other terms have been removed.
-  {
-    check_that_all_objects_are_free();
-    return;
-  }
-#endif
-
-  assert(t->reference_count==0);
-  const size_t size=term_size(t);
-  remove_from_hashtable(t);  // Remove from hash_table
-
-  for(size_t i=0; i<t->m_function_symbol.arity(); ++i)
-  {
-    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]=aterm();
-  }
-  t->m_function_symbol=function_symbol(); 
-
-  TermInfo &ti = terminfo[size];
-  t->next  = ti.at_freelist;
-  ti.at_freelist = t; 
-}
-          
 aterm::aterm(const function_symbol &sym)
 {
   detail::_aterm *cur, *prev, **hashspot;

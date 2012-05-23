@@ -90,8 +90,8 @@ void aterm_init()
   /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
   /* This check might break on perfectly valid architectures */
   /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-  assert(sizeof(header_type) == sizeof(aterm*));
-  assert(sizeof(header_type) >= 4);
+  assert(sizeof(size_t) == sizeof(aterm*));
+  assert(sizeof(size_t) >= 4);
 
 #ifdef WIN32
   if (_setmode(_fileno(stdin), _O_BINARY) == -1)

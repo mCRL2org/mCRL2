@@ -1,6 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "mcrl2/exception.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/architecture.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -11,7 +12,7 @@ namespace atermpp
 {
 
 inline
-const size_t TERM_SIZE_APPL(const size_t arity)
+size_t TERM_SIZE_APPL(const size_t arity)
 {
   return (sizeof(detail::_aterm)/sizeof(size_t))+arity;
 }
@@ -25,6 +26,8 @@ const size_t INITIAL_MAX_TERM_SIZE = 256;
 static const size_t BLOCK_SHIFT = 13;
 
 static const size_t BLOCK_SIZE = 1<<BLOCK_SHIFT;
+
+extern size_t total_nodes;
 
 typedef struct Block
 {
@@ -110,6 +113,69 @@ inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size
   return FINISH(hnr);
 }
 
+
+
+static void remove_from_hashtable(detail::_aterm *t)
+{
+  // fprintf(stderr,"Remove term from hashtable %p\n",t);
+  detail::_aterm *prev=NULL, *cur;
+
+  /* Remove the node from the hashtable */
+  const HashNumber hnr = hash_number(t, term_size(t)) & table_mask;
+  cur = detail::hashtable[hnr];
+
+  do
+  {
+    if (!cur)
+    {
+      throw mcrl2::runtime_error("free_term: cannot find term in hashtable."); // If only occurs if the internal administration is in error.
+    }
+    if (cur == t)
+    {
+      if (prev)
+      {
+        prev->next = cur->next;
+      }
+      else
+      {
+        detail::hashtable[hnr] = cur->next;
+      }
+      /* Put the node in the appropriate free list */
+      total_nodes--;
+      return;
+    }
+  }
+  while (((prev=cur), (cur=cur->next)));
+  assert(0);
+}
+
+/*}}}  */
+
+
+inline void detail::free_term(detail::_aterm *t)
+{
+#ifndef NDEBUG
+  if (t->m_function_symbol==AS_EMPTY_LIST) // When destroying ATempty, it appears that all other terms have been removed.
+  {
+    check_that_all_objects_are_free();
+    return;
+  }
+#endif
+
+  assert(t->reference_count==0);
+  const size_t size=term_size(t);
+  remove_from_hashtable(t);  // Remove from hash_table
+
+  for(size_t i=0; i<t->m_function_symbol.arity(); ++i)
+  {
+    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]=aterm();
+  }
+  t->m_function_symbol=function_symbol(); 
+
+  TermInfo &ti = terminfo[size];
+  t->next  = ti.at_freelist;
+  ti.at_freelist = t; 
+}
 
 template <class Term>
 template <class ForwardIterator, class ATermConverter>
