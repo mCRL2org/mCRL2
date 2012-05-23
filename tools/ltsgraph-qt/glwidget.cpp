@@ -99,7 +99,7 @@ struct NodeMoveRecord : public MoveRecord
       MoveRecord::release(toggleLocked);
       for (size_t i = 0; i < edges.size(); ++i)
       {
-        edges[i].release(toggleLocked);
+        edges[i].release(false); // Do not toggle the edges around this node
       }
       label.release(toggleLocked);
     }
@@ -227,6 +227,8 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
     {
       if (e->button() == Qt::RightButton && m_scene->size().z > 1)
         m_dragmode = dm_rotate;
+      else if (e->button() == Qt::RightButton)
+        m_dragmode = dm_rotate_2d;
       else if (e->button() == Qt::MidButton)
         m_dragmode = dm_zoom;
       else if (e->button() == Qt::LeftButton)
@@ -273,7 +275,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e)
 
 void GLWidget::wheelEvent(QWheelEvent *e)
 {
-  m_scene->zoom(pow(1.0005f, (float)e->delta()));
+  m_scene->zoom(pow(1.0005f, e->delta()));
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *e)
@@ -297,9 +299,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         }
         break;
       case dm_rotate:
-        m_scene->rotate(Graph::Coord3D(360.0 * vec.y() / height(),
-                                       360.0 * vec.x() / width(),
-                                       0.0));
+        m_scene->rotate(Graph::Coord3D(360.0f * vec.y() / height(),
+                                       360.0f * vec.x() / width(),
+                                       0.0f));
+        break;
+      case dm_rotate_2d:
+        m_scene->rotate(Graph::Coord3D(0.0f,
+                                       0.0f,
+                                       -360.0f * vec.y() / height()));
         break;
       case dm_translate:
         m_scene->translate(vec3);
@@ -308,7 +315,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
         break;
       case dm_zoom:
-        m_scene->zoom(pow(1.0005f, (float)vec.y()));
+        m_scene->zoom(pow(1.0005f, vec.y()));
         break;
       default:
         break;
@@ -419,6 +426,11 @@ void GLWidget::toggleInitialMarking(bool show)
   m_scene->setDrawInitialMarking(show);
 }
 
+void GLWidget::toggleFog(bool show)
+{
+  m_scene->setDrawFog(show);
+}
+
 void GLWidget::setNodeSize(int size)
 {
   m_scene->setNodeSize(size);
@@ -429,6 +441,17 @@ size_t GLWidget::nodeSize()
 {
   return m_scene->nodeSize();
 }
+
+void GLWidget::setFogDistance(int dist)
+{
+  m_scene->setFogDistance(dist);
+}
+
+float GLWidget::fogDistance()
+{
+  return m_scene->fogDistance();
+}
+
 
 GLWidgetUi* GLWidget::ui(QWidget *parent)
 {
@@ -445,6 +468,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   m_colordialog = new QColorDialog(initialcolor, this);
   selectColor(initialcolor);
   m_ui->spinRadius->setValue(m_widget.nodeSize());
+  m_ui->spinFog->setValue(m_widget.fogDistance());
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui->btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
@@ -453,7 +477,9 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
   connect(m_ui->cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
   connect(m_ui->cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
+  connect(m_ui->cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
   connect(m_ui->spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
+  connect(m_ui->spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDistance(int)));
 }
 
 GLWidgetUi::~GLWidgetUi()

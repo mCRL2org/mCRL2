@@ -157,6 +157,7 @@ namespace Graph
     private:
       detail::GraphImplBase* m_impl;
       mcrl2::lts::lts_type m_type;
+      QString m_empty;
     public:
       Graph();
       ~Graph();

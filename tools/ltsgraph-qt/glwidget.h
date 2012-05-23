@@ -11,7 +11,7 @@ class GLWidgetImpl;
 
 class GLWidgetUi;
 
-class MoveRecord;
+struct MoveRecord;
 
 class GLWidget : public QGLWidget
 {
@@ -22,6 +22,7 @@ class GLWidget : public QGLWidget
       dm_none,
       dm_dragnode,
       dm_rotate,
+      dm_rotate_2d,
       dm_translate,
       dm_zoom,
       dm_paint
@@ -68,6 +69,7 @@ class GLWidget : public QGLWidget
     GLWidgetUi* ui(QWidget* parent = 0);
 
     size_t nodeSize();
+    float fogDistance();
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
   public slots:
@@ -76,7 +78,9 @@ class GLWidget : public QGLWidget
     void toggleStateLabels(bool show);
     void toggleStateNumbers(bool show);
     void toggleInitialMarking(bool show);
+    void toggleFog(bool show);
     void setNodeSize(int size);
+    void setFogDistance(int dist);
 };
 
 namespace Ui

@@ -67,15 +67,12 @@ namespace Graph
           transitionLabels.resize(m_graph.num_action_labels());
           transitionLabelnodes.resize(m_graph.num_transitions());
 
-          stateLabels.resize(m_graph.num_states());
+          stateLabels.resize(m_graph.num_state_labels());
           stateLabelnodes.resize(m_graph.num_states());
 
-          for (size_t i = 0; i < m_graph.num_states(); ++i)
+          for (size_t i = 0; i < m_graph.num_state_labels(); ++i)
           {
-            if (!m_graph.num_state_labels()) //No labels - create empty ones
-              stateLabels[i] = QString("");
-            else
-              stateLabels[i] = stateLabel(m_graph.state_label(i));
+            stateLabels[i] = stateLabel(m_graph.state_label(i));
           }
 
           // Position nodes randomly
@@ -159,6 +156,7 @@ namespace Graph
   {
     m_type = mcrl2::lts::lts_lts;
     m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
+    m_empty = QString("");
   }
 
   Graph::~Graph()
@@ -439,11 +437,15 @@ namespace Graph
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const
   {
+    if (labelindex >= m_impl->transitionLabels.size())
+      return m_empty;
     return m_impl->transitionLabels[labelindex].label;
   }
 
   const QString& Graph::stateLabelstring(size_t labelindex) const
   {
+    if (labelindex >= m_impl->stateLabels.size())
+      return m_empty;
     return m_impl->stateLabels[labelindex];
   }
 

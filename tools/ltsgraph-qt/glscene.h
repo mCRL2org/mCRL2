@@ -29,7 +29,10 @@ class GLScene
     bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
     bool m_drawstatenumbers;       ///< State numbers are only drawn if this field is true.
     bool m_drawinitialmarking;     ///< The initial state is marked if this field is true.
-    size_t m_size_node;            ///< Variable node size
+    size_t m_size_node;            ///< Variable node size.
+
+    bool m_drawfog;                ///< Fog is rendered only if this field is true.
+    float m_fogdistance;           ///< The distance at which the fog starts
 
     /**
      * @brief Renders a single edge.
@@ -101,6 +104,12 @@ class GLScene
      * @brief Destructor.
      */
     ~GLScene();
+
+    /**
+     * @brief Applies the current fog settings. Call when the
+     *        fog settings have changed.
+     */
+    void updateFog();
 
     /**
      * @brief Rebuilds the textures used to render labels. Call when the
@@ -241,11 +250,14 @@ class GLScene
     bool drawStateLabels() const { return m_drawstatelabels; }
     bool drawTransitionLabels() const { return m_drawtransitionlabels; }
     size_t  nodeSize() const { return m_size_node; }
+    float  fogDistance() const { return m_fogdistance; }
     void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
     void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
     void setDrawStateNumbers(bool drawLabels) { m_drawstatenumbers = drawLabels; }
     void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
+    void setDrawFog(bool drawFog) { m_drawfog = drawFog; updateFog(); }
     void setNodeSize(size_t size) { m_size_node = size; }
+    void setFogDistance(float dist) { m_fogdistance = dist; updateFog(); }
 
 };
 

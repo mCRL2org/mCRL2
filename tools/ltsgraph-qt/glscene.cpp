@@ -50,18 +50,21 @@ struct TextureData
     size_t* transition_heights;
     GLuint* transition_textures;
     size_t transition_count;
+
     size_t* state_widths;
     size_t* state_heights;
     GLuint* state_textures;
+    size_t state_count;
+
     size_t* number_widths;
     size_t* number_heights;
     GLuint* number_textures;
-    size_t state_count;
+    size_t statenr_count;
 
     TextureData()
       : transition_widths(NULL), transition_heights(NULL), transition_textures(NULL), transition_count(0),
         state_widths(NULL), state_heights(NULL), state_textures(NULL),
-        number_widths(NULL), number_heights(NULL), number_textures(NULL), state_count(0)
+        number_widths(NULL), number_heights(NULL), number_textures(NULL), state_count(0), statenr_count(0)
     { }
 
     ~TextureData()
@@ -74,7 +77,7 @@ struct TextureData
       delete[] state_widths;
       delete[] state_heights;
       delete[] state_textures;
-      glDeleteTextures(state_count, number_textures);
+      glDeleteTextures(statenr_count, number_textures);
       delete[] number_widths;
       delete[] number_heights;
       delete[] number_textures;
@@ -82,6 +85,11 @@ struct TextureData
 
     void createTexture(QFont font, QString labelstring, GLuint texture, size_t *widths, size_t *heights)
     {
+      if (labelstring.isEmpty()) {
+        *widths = 0;
+        *heights = 0;
+        return;
+      }
       QFontMetrics metrics(font);
       QPainter p;
       QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
@@ -118,6 +126,7 @@ struct TextureData
 
     void generate(const Graph::Graph& g)
     {
+
       QFont font;
 
       glDeleteTextures(transition_count, transition_textures);
@@ -128,7 +137,7 @@ struct TextureData
       delete[] state_widths;
       delete[] state_heights;
       delete[] state_textures;
-      glDeleteTextures(state_count, number_textures);
+      glDeleteTextures(statenr_count, number_textures);
       delete[] number_widths;
       delete[] number_heights;
       delete[] number_textures;
@@ -150,19 +159,28 @@ struct TextureData
       state_textures = new GLuint[state_count];
       state_widths = new size_t[state_count];
       state_heights = new size_t[state_count];
-      number_textures = new GLuint[state_count];
-      number_widths = new size_t[state_count];
-      number_heights = new size_t[state_count];
 
       glGenTextures(state_count, state_textures);
-      glGenTextures(state_count, number_textures);
 
       for (size_t i = 0; i < state_count; ++i)
       {
         createTexture(font, g.stateLabelstring(i), state_textures[i], &state_widths[i], &state_heights[i]);
+        assert(glGetError() == 0);
+      }
+
+      statenr_count = g.nodeCount();
+      number_textures = new GLuint[statenr_count];
+      number_widths = new size_t[statenr_count];
+      number_heights = new size_t[statenr_count];
+
+      glGenTextures(statenr_count, number_textures);
+
+      for (size_t i = 0; i < statenr_count; ++i)
+      {
         createTexture(font, QString::number(i), number_textures[i], &number_widths[i], &number_heights[i]);
         assert(glGetError() == 0);
       }
+
     }
 };
 
@@ -186,6 +204,7 @@ struct VertexData
 
     void generate(const TextureData& textures, float pixelsize, float size_node)
     {
+
       float handlesize = SIZE_HANDLE * pixelsize,
           nodesize = size_node * pixelsize,
           arrowheadsize = SIZE_ARROWHEAD * pixelsize;
@@ -262,25 +281,30 @@ struct VertexData
 
       // Generate quads for state labels
       state_labels = new Coord3D[4 * textures.state_count];
-      number_labels = new Coord3D[4 * textures.state_count];
       n = 0;
-      size_t m = 0;
       for (size_t i = 0; i < textures.state_count; ++i)
       {
         state_labels[n++] = Coord3D(-int(textures.state_widths[i]), -int(textures.state_heights[i]), 0.0f);
         state_labels[n++] = Coord3D(     textures.state_widths[i],  -int(textures.state_heights[i]), 0.0f);
         state_labels[n++] = Coord3D(     textures.state_widths[i],       textures.state_heights[i],  0.0f);
         state_labels[n++] = Coord3D(-int(textures.state_widths[i]),      textures.state_heights[i],  0.0f);
-        number_labels[m++] = Coord3D(-int(textures.number_widths[i]), -int(textures.number_heights[i]), 0.0f);
-        number_labels[m++] = Coord3D(     textures.number_widths[i],  -int(textures.number_heights[i]), 0.0f);
-        number_labels[m++] = Coord3D(     textures.number_widths[i],       textures.number_heights[i],  0.0f);
-        number_labels[m++] = Coord3D(-int(textures.number_widths[i]),      textures.number_heights[i],  0.0f);
       }
       for (size_t i = 0; i < n; ++i)
-      {
         state_labels[i] *= pixelsize / 2.0;
-        number_labels[i] *= pixelsize / 2.0;
+
+      // Generate quads for number labels
+      number_labels = new Coord3D[4 * textures.statenr_count];
+      n = 0;
+      for (size_t i = 0; i < textures.statenr_count; ++i)
+      {
+        number_labels[n++] = Coord3D(-int(textures.number_widths[i]), -int(textures.number_heights[i]), 0.0f);
+        number_labels[n++] = Coord3D(     textures.number_widths[i],  -int(textures.number_heights[i]), 0.0f);
+        number_labels[n++] = Coord3D(     textures.number_widths[i],       textures.number_heights[i],  0.0f);
+        number_labels[n++] = Coord3D(-int(textures.number_widths[i]),      textures.number_heights[i],  0.0f);
       }
+      for (size_t i = 0; i < n; ++i)
+        number_labels[i] *= pixelsize / 2.0;
+
     }
 };
 
@@ -336,13 +360,14 @@ struct CameraView
 
     /**
      *  Implements "fake" billboarding, by moving to @e pos and aligning
-     *  the X and Y axes to those of the projection plane.
+     *  the X, Y and Z axes to those of the projection plane.
      *
      *  @param pos The position of the billboard.
      */
     void billboard_cylindrical(const Coord3D &pos)
     {
       glTranslatef(pos.x, pos.y, pos.z);
+      glRotatef(-rotation.z, 0, 0, 1);
       glRotatef(-rotation.y, 0, 1, 0);
       glRotatef(-rotation.x, 1, 0, 0);
     }
@@ -373,6 +398,7 @@ struct CameraView
     {
       glRotatef(rotation.x, 1, 0, 0);
       glRotatef(rotation.y, 0, 1, 0);
+      glRotatef(rotation.z, 0, 0, 1);
     }
 };
 
@@ -703,16 +729,27 @@ void GLScene::renderNode(size_t i)
   Color3f fill;
   Color3f line(node.color);
 
-  if (node.locked)
-    fill = Color3f(1.0f - 0.2f * node.selected, 0.8f, 0.8f);
-  else
-    fill = Color3f(1.0f, 1.0f - 0.2f * node.selected, 1.0f - 0.2f * node.selected);
+  bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
+  if (mark) // Initial node (green or dark green) => selected (red or darker red)
+  {
+    if (node.locked)
+      fill = Color3f(0.1f + 0.9f * node.selected, 0.7f - 0.4f * node.selected,  0.1f + 0.2f * node.selected );
+    else
+      fill = Color3f(0.1f + 0.9f * node.selected, 1.0f - 0.5f * node.selected,  0.1f + 0.4f * node.selected );
+  }
+  else // Normal node (white or gray) => selected (red or darker red)
+  {
+    if (node.locked)
+      fill = Color3f(0.7f + 0.3f * node.selected, 0.7f - 0.2f * node.selected,  0.7f - 0.2f * node.selected );
+    else
+      fill = Color3f(1.0f,                        1.0f - 0.3f * node.selected,  1.0f - 0.3f * node.selected );
+  }
 
   glStartName(so_node, i);
   glPushMatrix();
 
   m_camera->billboard_spherical(node.pos);
-  drawNode(*m_vertexdata, line, fill, (m_graph.initialState() == i) && m_drawinitialmarking);
+  drawNode(*m_vertexdata, line, fill, mark);
 
   glPopMatrix();
   glEndName();
@@ -784,8 +821,9 @@ void GLScene::renderStateNumber(size_t i)
     Coord3D pos = node.pos;
     pos.x -= m_camera->pixelsize * m_texturedata->number_widths[i] / 2;
     pos.y -= m_camera->pixelsize * m_texturedata->number_heights[i] / 2;
+    pos.z += m_size_node*m_camera->pixelsize;
     glRasterPos3fv(pos);
-    gl2psText(m_graph.stateLabelstring(i).toUtf8(), "", 10);
+    gl2psText(QString::number(i).toUtf8(), "", 10);
   }
   else
   {
@@ -793,7 +831,7 @@ void GLScene::renderStateNumber(size_t i)
 
     glColor3f(node.selected, 0.0, 0.0);
     m_camera->billboard_spherical(node.pos);
-    glTranslatef(0, 0, m_size_node);
+    glTranslatef(0, 0, m_size_node*m_camera->pixelsize);
     drawNumber(*m_vertexdata, *m_texturedata, i);
 
     glPopMatrix();
@@ -829,7 +867,9 @@ void GLScene::renderHandle(size_t i)
 //
 
 GLScene::GLScene(Graph::Graph &g)
-  : m_graph(g), m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawinitialmarking(true), m_size_node(20)
+  : m_graph(g),
+    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawinitialmarking(true),
+    m_size_node(20), m_drawfog(true), m_fogdistance(1000.0)
 {
   m_camera = new CameraAnimation();
   m_texturedata = new TextureData;
@@ -846,7 +886,7 @@ GLScene::~GLScene()
 void GLScene::init(const QColor& clear)
 {
   // Set clear color to desired color
-  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 0.0);
+  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 0.0f);
   // Enable anti-aliasing for all primitives
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POINT_SMOOTH);
@@ -857,17 +897,14 @@ void GLScene::init(const QColor& clear)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  // Get some fog in. This should probably be made custumizable for people
-  // who don't like fog...
-  GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 0.0};
+  GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 0.0f};
   glFogf(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 1);
-  glFogf(GL_FOG_START, 1000.0);
+  glFogfv(GL_FOG_COLOR, fog_color);
   if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-  glFogf(GL_FOG_END, 2500.0);
-  glFogfv(GL_FOG_COLOR, fog_color);
-  glEnable(GL_FOG);
+  updateFog();
+
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   glEnable(GL_DEPTH_TEST);
@@ -881,6 +918,20 @@ void GLScene::init(const QColor& clear)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   m_camera->applyFrustum();
+}
+
+void GLScene::updateFog()
+{
+  if (m_drawfog)
+  {
+    glFogf(GL_FOG_START, m_fogdistance);
+    glFogf(GL_FOG_END, m_fogdistance+1500.0f);
+    glEnable(GL_FOG);
+  }
+  else
+  {
+    glDisable(GL_FOG);
+  }
 }
 
 void GLScene::render()
@@ -925,7 +976,6 @@ void GLScene::render()
 void GLScene::resize(size_t width, size_t height)
 {
   m_camera->viewport(width, height);
-  updateShapes();
 }
 
 void GLScene::updateLabels()
@@ -1043,6 +1093,7 @@ bool GLScene::resizing()
 void GLScene::setZoom(float factor, size_t animation)
 {
   m_camera->setZoom(factor, animation);
+  updateShapes();
 }
 
 void GLScene::setRotation(const Graph::Coord3D& rotation, size_t animation)

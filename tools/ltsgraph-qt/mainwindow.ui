@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>LTSGraph</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -73,6 +73,9 @@
     </property>
     <addaction name="act3D"/>
     <addaction name="actLayoutControl"/>
+    <addaction name="actVisualization"/>
+    <addaction name="actInformation"/>
+    <addaction name="actOutput"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -104,17 +107,6 @@
    </attribute>
    <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
-  <action name="actGenerateRandomGraph">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Generate &amp;random graph</string>
-   </property>
-   <property name="shortcut">
-    <string>F12</string>
-   </property>
-  </action>
   <action name="actLayoutControl">
    <property name="checkable">
     <bool>true</bool>
@@ -183,6 +175,36 @@
   <action name="actExport_XML">
    <property name="text">
     <string>Export XML</string>
+   </property>
+  </action>
+  <action name="actVisualization">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Visualization</string>
+   </property>
+  </action>
+  <action name="actInformation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Information</string>
+   </property>
+  </action>
+  <action name="actOutput">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>mCRL2 Output</string>
    </property>
   </action>
  </widget>

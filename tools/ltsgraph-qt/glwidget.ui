@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>192</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="font">
@@ -79,6 +79,33 @@
         </property>
         <property name="value">
          <number>10</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="cbFog">
+        <property name="text">
+         <string>Show fog at:</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinFog">
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>1000</number>
         </property>
        </widget>
       </item>

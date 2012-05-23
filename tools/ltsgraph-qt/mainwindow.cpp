@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
   m_ui->setupUi(this);
+  m_ui->dockOutput->setVisible(false);
 
   // Add graph area
   m_glwidget = new GLWidget(m_graph, m_ui->frame);
@@ -42,8 +43,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
-  connect(springlayoutui, SIGNAL(runningChanged(bool)), m_ui->actGenerateRandomGraph, SLOT(setDisabled(bool)));
   connect(m_ui->actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
+  connect(m_ui->actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
+  connect(m_ui->actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
+  connect(m_ui->actOutput, SIGNAL(toggled(bool)), m_ui->dockOutput, SLOT(setVisible(bool)));
   connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
   connect(m_ui->act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
   connect(m_ui->actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
@@ -89,6 +92,8 @@ void MainWindow::openFile(QString fileName)
 {
   if (!fileName.isNull())
   {
+    m_layout->ui()->setActive(false);
+    m_glwidget->resetViewpoint(0);
     m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
     m_glwidget->rebuild();
     m_information->update();
@@ -143,6 +148,8 @@ void MainWindow::onImportXML()
 
   if (!fileName.isNull())
   {
+    m_layout->ui()->setActive(false);
+    m_glwidget->resetViewpoint(0);
     m_graph.loadXML(fileName);
     m_glwidget->rebuild();
     m_information->update();

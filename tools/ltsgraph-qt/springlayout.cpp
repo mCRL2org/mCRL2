@@ -35,7 +35,7 @@ namespace Graph
   SpringLayout::SpringLayout(Graph &graph)
     : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
       m_clipMin(Coord3D(0.0f, 0.0f, 0.0f)), m_clipMax(Coord3D(1000.0f, 1000.0f, 1000.0f)),
-      m_forceCalculation(&SpringLayout::forceLinearSprings), m_graph(graph), m_ui(NULL)
+      m_forceCalculation(&SpringLayout::forceLTSGraph), m_graph(graph), m_ui(NULL)
   {
     srand(time(NULL));
   }
@@ -191,6 +191,19 @@ namespace Graph
 
   void SpringLayout::setClipRegion(const Coord3D& min, const Coord3D& max)
   {
+    if (min.z < m_clipMin.z || max.z > m_clipMax.z) //Depth is increased, add random z values to improve spring movement in z direction
+    {
+      float change = (std::min)(m_clipMin.z-min.z, max.z-m_clipMax.z)/100.0f; //Add at most 1/100th of the change
+      for (size_t n = 0; n < m_graph.nodeCount(); ++n)
+      {
+        if (!m_graph.node(n).anchored)
+        {
+          m_graph.node(n).pos.z = m_graph.node(n).pos.z + frand(-change, change);
+        }
+
+      }
+    }
+
     m_clipMin = min;
     m_clipMax = max;
   }
@@ -332,6 +345,7 @@ namespace Graph
     else
     {
       static_cast<WorkerThread*>(m_thread)->stop();
+      m_thread->wait();
       m_thread = NULL;
     }
   }
