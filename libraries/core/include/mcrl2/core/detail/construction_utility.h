@@ -28,7 +28,7 @@ namespace detail
 /// \param[in] original the expression that is used to initialise the variable
 /// \ return a reference to original
 template < typename Expression >
-Expression const& initialise_static_expression(Expression& target, Expression const& original)
+Expression const& initialise_static_expression(Expression& /*target*/, Expression const& original)
 {
   // TODO: This function is deprecated and should be removed from all the generated code.
   // target = original;
