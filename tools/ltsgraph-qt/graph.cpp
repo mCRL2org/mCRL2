@@ -20,23 +20,46 @@ namespace Graph
     class GraphImplBase
     {
       public:
-        virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
-        virtual bool is_tau(size_t labelindex) const = 0;
-        virtual ~GraphImplBase() {}
+
+        /**
+         * @brief Constructor.
+         */
         GraphImplBase() : initialState(0) {}
-        std::vector<NodeNode> nodes;
-        std::vector<Node> handles;
-        std::vector<Edge> edges;
-        std::vector<LabelString> transitionLabels;
-        std::vector<LabelNode> transitionLabelnodes;
-        std::vector<QString> stateLabels;
-        std::vector<LabelNode> stateLabelnodes;
-        size_t initialState;
+
+        /**
+         * @brief Destructor.
+         */
+        virtual ~GraphImplBase() {}
+
+        /**
+         * @brief Loads a graph with random positioning for the nodes.
+         * @param filename The file which contains the graph.
+         * @param min The minimum coordinates for any node.
+         * @param max The maximum coordinates for any node.
+         */
+        virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
+
+        /**
+         * @brief Returns true if the label is tau.
+         * @param labelindex The index of the label.
+         */
+        virtual bool is_tau(size_t labelindex) const = 0;
+
+        std::vector<NodeNode> nodes;                  ///< Vector containing all graph nodes.
+        std::vector<Node> handles;                    ///< Vector containing all handles.
+        std::vector<Edge> edges;                      ///< Vector containing all edges.
+        std::vector<LabelString> transitionLabels;    ///< Vector containing all transition label strings.
+        std::vector<LabelNode> transitionLabelnodes;  ///< Vector containing all transition label nodes.
+        std::vector<QString> stateLabels;             ///< Vector containing all state label strings.
+        std::vector<LabelNode> stateLabelnodes;       ///< Vector containing all state label nodes.
+        size_t initialState;                          ///< Index of the initial state.
+
         template <typename label_t>
         QString transitionLabel(const label_t& label)
         {
           return QString::fromStdString(label);
         }
+
         template <typename label_t>
         QString stateLabel(const label_t& label)
         {
@@ -162,36 +185,6 @@ namespace Graph
   Graph::~Graph()
   {
     delete m_impl;
-  }
-
-  size_t Graph::edgeCount() const
-  {
-    return m_impl->edges.size();
-  }
-
-  size_t Graph::nodeCount() const
-  {
-    return m_impl->nodes.size();
-  }
-
-  size_t Graph::transitionLabelCount() const
-  {
-    return m_impl->transitionLabels.size();
-  }
-
-  size_t Graph::stateLabelCount() const
-  {
-    return m_impl->stateLabels.size();
-  }
-
-  size_t Graph::initialState() const
-  {
-    return m_impl->initialState;
-  }
-
-  bool Graph::isTau(size_t labelindex) const
-  {
-    return m_impl->is_tau(labelindex);
   }
 
   void Graph::createImpl(mcrl2::lts::lts_type itype)
@@ -408,31 +401,6 @@ namespace Graph
         QTextStream out(&data);
         xml.save(out, 2);
     }
-  }
-
-  Edge Graph::edge(size_t index) const
-  {
-    return m_impl->edges[index];
-  }
-
-  NodeNode& Graph::node(size_t index) const
-  {
-    return m_impl->nodes[index];
-  }
-
-  Node& Graph::handle(size_t edge) const
-  {
-    return m_impl->handles[edge];
-  }
-
-  LabelNode& Graph::transitionLabel(size_t edge) const
-  {
-    return m_impl->transitionLabelnodes[edge];
-  }
-
-  LabelNode& Graph::stateLabel(size_t edge) const
-  {
-    return m_impl->stateLabelnodes[edge];
   }
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const

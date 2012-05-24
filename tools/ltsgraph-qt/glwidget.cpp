@@ -406,53 +406,6 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter, cons
             }
 }
 
-void GLWidget::toggleTransitionLabels(bool show)
-{
-  m_scene->setDrawTransitionLabels(show);
-}
-
-void GLWidget::toggleStateLabels(bool show)
-{
-  m_scene->setDrawStateLabels(show);
-}
-
-void GLWidget::toggleStateNumbers(bool show)
-{
-  m_scene->setDrawStateNumbers(show);
-}
-
-void GLWidget::toggleInitialMarking(bool show)
-{
-  m_scene->setDrawInitialMarking(show);
-}
-
-void GLWidget::toggleFog(bool show)
-{
-  m_scene->setDrawFog(show);
-}
-
-void GLWidget::setNodeSize(int size)
-{
-  m_scene->setNodeSize(size);
-  m_scene->updateShapes();
-}
-
-size_t GLWidget::nodeSize()
-{
-  return m_scene->nodeSize();
-}
-
-void GLWidget::setFogDistance(int dist)
-{
-  m_scene->setFogDistance(dist);
-}
-
-float GLWidget::fogDistance()
-{
-  return m_scene->fogDistance();
-}
-
-
 GLWidgetUi* GLWidget::ui(QWidget *parent)
 {
   if (!m_ui)

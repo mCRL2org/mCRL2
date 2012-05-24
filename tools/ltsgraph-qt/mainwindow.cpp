@@ -56,7 +56,6 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui->actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
   connect(m_ui->actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
 
-  m_anim = 0;
   m_timer->start(40);
 }
 

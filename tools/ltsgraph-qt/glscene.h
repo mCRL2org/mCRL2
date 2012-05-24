@@ -1,11 +1,21 @@
+// Author(s): Rimco Boudewijns and Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 /**
 
   @file glscene.h
-  @author S. Cranen
+  @author S. Cranen, R. Boudewijns
 
   This file contains an interface to the OpenGL renderer used by LTSGraph.
 
 */
+
 #ifndef GLSCENE_H
 #define GLSCENE_H
 
@@ -66,7 +76,7 @@ class GLScene
 
     /**
      * @brief Renders a single state number.
-     * @param i The index of the state of the number to render.
+     * @param i The index of the state number to render.
      */
     void renderStateNumber(size_t i);
   public:
@@ -80,7 +90,7 @@ class GLScene
       so_none,     ///< Nothing was selected.
       so_edge,     ///< An edge was selected.
       so_label,    ///< An edge label was selected.
-      so_slabel,   ///< An edge label was selected.
+      so_slabel,   ///< An state label was selected.
       so_handle,   ///< An edge handle was selected.
       so_node      ///< A node was selected.
     };
@@ -120,15 +130,13 @@ class GLScene
     /**
      * @brief Rebuilds the shapes for nodes, handles, arrowheads and labels.
      *        Call whenever the size of a pixel in world coordinates changes.
-     * @todo This construction is not very nice, and should be replaced by
-     *       a simple scaling transform based on the pixel size.
      */
     void updateShapes();
 
     /**
      * @brief Initialises the OpenGL context.
      * @param clear The colour to use as a background colour. This colour is
-     *              also used for the fog in 3D mode.
+     *              also used for the fog in 3D mode if enabled.
      */
     void init(const QColor& clear);
 
@@ -247,6 +255,7 @@ class GLScene
      */
     void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
 
+    //Getters and setters
     bool drawStateLabels() const { return m_drawstatelabels; }
     bool drawTransitionLabels() const { return m_drawtransitionlabels; }
     size_t  nodeSize() const { return m_size_node; }
