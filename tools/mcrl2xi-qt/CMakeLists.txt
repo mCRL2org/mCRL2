@@ -20,6 +20,7 @@ set(UI_FILES
   mainwindow.ui
   documentmanager.ui
   documentwidget.ui
+  findreplacedialog.ui
 )
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 

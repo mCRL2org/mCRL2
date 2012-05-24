@@ -15,6 +15,7 @@
 #include "threadparent.h"
 #include "rewriter.h"
 #include "solver.h"
+#include "findreplacedialog.h"
 
 #include "mcrl2/utilities/logger.h"
 
