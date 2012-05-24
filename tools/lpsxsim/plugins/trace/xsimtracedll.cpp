@@ -21,11 +21,9 @@
 #endif
 
 #include <sstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "simbasegui.h"
 #include "xsimtracedll.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 
 using namespace std;
 using namespace mcrl2::core;
@@ -163,7 +161,7 @@ void XSimTraceDLL::AddState(const mcrl2::lps::multi_action Transition, const mcr
 
 void XSimTraceDLL::StateChanged(
                   const mcrl2::lps::state,
-                  atermpp::vector < mcrl2::lps::multi_action >,
+                  std::vector < mcrl2::lps::multi_action >,
                   std::vector < mcrl2::lps::state >)
 {
   // Do not do anything.
@@ -172,7 +170,7 @@ void XSimTraceDLL::StateChanged(
 void XSimTraceDLL::StateChanged(
                   mcrl2::lps::multi_action Transition,
                   const mcrl2::lps::state State,
-                  atermpp::vector < mcrl2::lps::multi_action >,
+                  std::vector < mcrl2::lps::multi_action >,
                   std::vector < mcrl2::lps::state >)
 {
   size_t l = traceview->GetItemCount()-1;

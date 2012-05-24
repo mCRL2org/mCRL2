@@ -157,7 +157,7 @@ void XSimTrace::AddState(const multi_action Transition, const state &State, bool
 
 void XSimTrace::StateChanged(
                   mcrl2::lps::state , 
-                  atermpp::vector<mcrl2::lps::multi_action>, 
+                  std::vector<mcrl2::lps::multi_action>,
                   std::vector<mcrl2::lps::state>)
 {
 }
@@ -165,7 +165,7 @@ void XSimTrace::StateChanged(
 void XSimTrace::StateChanged(
                   mcrl2::lps::multi_action Transition, 
                   mcrl2::lps::state State, 
-                  atermpp::vector<mcrl2::lps::multi_action>, 
+                  std::vector<mcrl2::lps::multi_action>,
                   std::vector<mcrl2::lps::state>)
 {
   size_t l = traceview->GetItemCount()-1;

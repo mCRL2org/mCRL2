@@ -11,6 +11,7 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
@@ -18,24 +19,11 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::lts;
 
-/*
- * TODO:
- * - make enumeration caching and summand pruning user-configurable
- * - add state tree-storage option
- * - debug and enable used equation selection
- * - optimize action-detect by computing for each summand whether it should be detected or not
- * - optimize divergence-detect by keeping a separate next state generator
- * - clean up options struct
- */
-
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* options)
 {
   m_options = *options;
 
   assert(!(m_options.bithashing && m_options.outformat != lts_aut && m_options.outformat != lts_none));
-
-  bool use_enumeration_caching = true;
-  bool use_summand_pruning = true;
 
   if (m_options.bithashing)
   {
@@ -79,30 +67,43 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   lps::specification specification(m_options.specification);
 
-  mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
-  std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
-
-  if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
+  if (m_options.usedummies)
   {
-    extra_function_symbols.insert(data::greater(data::sort_nat::nat()));
-    extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
+    mCRL2log(verbose) << "replacing free variables with dummy values." << std::endl;
+    lps::detail::instantiate_global_variables(specification);
   }
-  data::rewriter rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
 
+  data::rewriter rewriter;
+  if (m_options.removeunused)
+  {
+    mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
+    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
+
+    if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
+    {
+      extra_function_symbols.insert(data::greater(data::sort_nat::nat()));
+      extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
+    }
+
+    rewriter = data::rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
+  }
+  else
+  {
+    rewriter = data::rewriter(specification.data(), m_options.strat);
+  }
+
+  action_summand_vector prioritised_summands;
+  action_summand_vector nonprioritised_summands;
   if (m_options.priority_action != "")
   {
     mCRL2log(verbose) << "applying confluence reduction with tau action '" << m_options.priority_action << "'..." << std::endl;
 
-    action_summand_vector prioritised_summands;
-    action_summand_vector nonprioritised_summands;
     for (action_summand_vector::iterator i = specification.process().action_summands().begin(); i != specification.process().action_summands().end(); i++)
     {
       if ((m_options.priority_action == "tau" && i->is_tau()) ||
           (i->multi_action().actions().size() == 1 && m_options.priority_action == (std::string)i->multi_action().actions().front().label().name()))
       {
-        action_summand summand(*i);
-        summand.multi_action().actions() = action_list();
-        prioritised_summands.push_back(summand);
+        prioritised_summands.push_back(*i);
       }
       else
       {
@@ -110,17 +111,14 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
       }
     }
 
-    lps::specification prioritised_specification(specification);
-    prioritised_specification.process().action_summands() = prioritised_summands;
-    specification.process().action_summands() = nonprioritised_summands;
-
-    m_confluence_generator = new next_state_generator(prioritised_specification, rewriter, use_enumeration_caching, use_summand_pruning);
+    m_use_confluence_reduction = true;
   }
   else
   {
-    m_confluence_generator = 0;
+    m_use_confluence_reduction = false;
   }
 
+  action_summand_vector tau_summands;
   if (m_options.detect_divergence)
   {
     mCRL2log(verbose) << "Detect divergences with tau action is `tau'.\n";
@@ -128,8 +126,26 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     {
       if (specification.process().action_summands()[i].is_tau())
       {
-        m_tau_summands.push_back(i);
+        tau_summands.push_back(specification.process().action_summands()[i]);
       }
+    }
+  }
+
+  if (m_options.detect_action)
+  {
+    m_detected_action_summands.reserve(specification.process().action_summands().size());
+    for (size_t i = 0; i < specification.process().action_summands().size(); i++)
+    {
+      bool found = false;
+      for (action_list::iterator j = specification.process().action_summands()[i].multi_action().actions().begin(); j != specification.process().action_summands()[i].multi_action().actions().end(); j++)
+      {
+        if (m_options.trace_actions.count(j->label().name()) > 0)
+        {
+          found = true;
+          break;
+        }
+      }
+      m_detected_action_summands.push_back(found);
     }
   }
 
@@ -142,7 +158,23 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     }
   }
 
-  m_generator = new next_state_generator(specification, rewriter, use_enumeration_caching, use_summand_pruning);
+  m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
+
+  if (!prioritised_summands.empty())
+  {
+    m_nonprioritized_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
+    m_prioritized_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
+    m_main_subset = &m_nonprioritized_subset;
+  }
+  else
+  {
+    m_main_subset = &m_generator->full_subset();
+  }
+
+  if (m_options.detect_divergence)
+  {
+    m_tau_summands = next_state_generator::summand_subset_t(m_generator, tau_summands, m_options.use_summand_pruning);
+  }
 
   if (m_options.detect_deadlock)
   {
@@ -154,19 +186,19 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
 bool lps2lts_algorithm::generate_lts()
 {
-  state_t initial_state = m_generator->internal_initial_state();
-  if (m_confluence_generator != 0)
+  generator_state_t initial_state = m_generator->internal_initial_state();
+  if (m_use_confluence_reduction != 0)
   {
     initial_state = get_prioritised_representative(initial_state);
   }
 
   if (m_options.bithashing)
   {
-    m_bit_hash_table.add_state(initial_state);
+    m_bit_hash_table.add_state(storage_state(initial_state));
   }
   else
   {
-    m_state_numbers.put(initial_state);
+    m_state_numbers.put(storage_state(initial_state));
   }
 
   if (m_options.outformat == lts_aut)
@@ -196,7 +228,7 @@ bool lps2lts_algorithm::generate_lts()
     }
     else
     {
-      generate_lts_breadth(initial_state);
+      generate_lts_breadth();
     }
 
     mCRL2log(verbose) << "done with state space generation ("
@@ -285,17 +317,42 @@ bool lps2lts_algorithm::finalise_lts_generation()
   return true;
 }
 
+lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(lps2lts_algorithm::storage_state_t storage_state)
+{
+  if (m_options.stateformat == lps::GS_STATE_VECTOR)
+  {
+    return static_cast<generator_state_t>(storage_state);
+  }
+  else
+  {
+    atermpp::term_balanced_tree<atermpp::aterm_appl> tree(storage_state);
+    return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
+  }
+}
+
+lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(lps2lts_algorithm::generator_state_t generator_state)
+{
+  if (m_options.stateformat == lps::GS_STATE_VECTOR)
+  {
+    return generator_state;
+  }
+  else
+  {
+    return atermpp::term_balanced_tree<atermpp::aterm_appl>(generator_state.begin(), generator_state.end());
+  }
+}
+
 // Confluence reduction based on S.C.C. Blom, Partial tau-confluence for
 // Efficient State Space Generation, Technical Report SEN-R0123, CWI, Amsterdam, 2001
 
-lps2lts_algorithm::state_t lps2lts_algorithm::get_prioritised_representative(lps2lts_algorithm::state_t state)
+lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_representative(lps2lts_algorithm::generator_state_t state)
 {
-  assert(m_confluence_generator != 0);
+  assert(m_use_confluence_reduction);
 
-  std::map<state_t, size_t> number;
-  std::map<state_t, size_t> low;
-  std::map<state_t, std::list<state_t> > next;
-  std::map<state_t, state_t> back;
+  std::map<generator_state_t, size_t> number;
+  std::map<generator_state_t, size_t> low;
+  std::map<generator_state_t, std::list<generator_state_t> > next;
+  std::map<generator_state_t, generator_state_t> back;
   size_t count = 0;
   number[state] = 0;
 
@@ -307,9 +364,9 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_prioritised_representative(lps
       count++;
       number[state] = count;
       low[state] = count;
-      next[state] = std::list<state_t>();
+      next[state] = std::list<generator_state_t>();
 
-      for (next_state_generator::iterator i = m_confluence_generator->begin(state, &m_substitution); i != m_confluence_generator->end(); i++)
+      for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_prioritized_subset); i; i++)
       {
         next[state].push_back(i->internal_state());
         if (number.count(i->internal_state()) == 0)
@@ -327,13 +384,13 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_prioritised_representative(lps
         return state;
       }
       assert(back.count(state) > 0);
-      state_t back_state = back[state];
+      generator_state_t back_state = back[state];
       low[back_state] = low[back_state] < low[state] ? low[back_state] : low[state];
       state = back_state;
     }
     else
     {
-      state_t next_state = next[state].front();
+      generator_state_t next_state = next[state].front();
       next[state].pop_front();
       if (number[next_state] == 0)
       {
@@ -414,26 +471,26 @@ void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transit
   }
 }
 
-bool lps2lts_algorithm::save_trace(lps2lts_algorithm::state_t state, std::string filename)
+bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, std::string filename)
 {
-  std::deque<state_t> states;
-  std::map<state_t, state_t>::iterator source;
-  while ((source = m_backpointers.find(state)) != m_backpointers.end())
+  std::deque<generator_state_t> states;
+  std::map<storage_state_t, storage_state_t>::iterator source;
+  while ((source = m_backpointers.find(storage_state(state))) != m_backpointers.end())
   {
     states.push_front(state);
-    state = source->second;
+    state = generator_state(source->second);
   }
 
   mcrl2::trace::Trace trace;
   trace.setState(m_generator->get_state(state));
-  for (std::deque<state_t>::iterator i = states.begin(); i != states.end(); i++)
+  for (std::deque<generator_state_t>::iterator i = states.begin(); i != states.end(); i++)
   {
     bool found = false;
     for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
     {
       if (get_prioritised_representative(j->internal_state()) == *i)
       {
-        trace.addAction(lps::detail::multi_action_to_aterm(j->action()));
+        trace.addAction(j->action());
         found = true;
         break;
       }
@@ -456,29 +513,26 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::state_t state, std::string
   }
 }
 
-bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::state_t state, std::set<lps2lts_algorithm::state_t> &current_path, std::set<lps2lts_algorithm::state_t> &visited)
+bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t state, std::set<lps2lts_algorithm::generator_state_t> &current_path, std::set<lps2lts_algorithm::generator_state_t> &visited)
 {
   current_path.insert(state);
 
-  std::vector<state_t> new_states;
-  for (std::vector<size_t>::iterator i = m_tau_summands.begin(); i != m_tau_summands.end(); i++)
+  std::vector<generator_state_t> new_states;
+  for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution, m_tau_summands); j != m_generator->end(); j++)
   {
-    for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution, *i); j != m_generator->end(); j++)
-    {
-      assert(j->action().actions().size() == 0);
+    assert(j->action().actions().size() == 0);
 
-      if (visited.insert(j->internal_state()).second)
-      {
-        new_states.push_back(j->internal_state());
-      }
-      else if (visited.count(j->internal_state()) != 0)
-      {
-        return true;
-      }
+    if (visited.insert(j->internal_state()).second)
+    {
+      new_states.push_back(j->internal_state());
+    }
+    else if (visited.count(j->internal_state()) != 0)
+    {
+      return true;
     }
   }
 
-  for (std::vector<state_t>::iterator i = new_states.begin(); i != new_states.end(); i++)
+  for (std::vector<generator_state_t>::iterator i = new_states.begin(); i != new_states.end(); i++)
   {
     if (search_divergence(*i, current_path, visited))
     {
@@ -490,10 +544,10 @@ bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::state_t state, std:
   return false;
 }
 
-void lps2lts_algorithm::check_divergence(lps2lts_algorithm::state_t state)
+void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t state)
 {
-  std::set<state_t> visited;
-  std::set<state_t> current_path;
+  std::set<generator_state_t> visited;
+  std::set<generator_state_t> current_path;
   visited.insert(state);
 
   if (search_divergence(state, current_path, visited))
@@ -522,13 +576,13 @@ void lps2lts_algorithm::check_divergence(lps2lts_algorithm::state_t state)
   }
 }
 
-void lps2lts_algorithm::check_action(lps2lts_algorithm::state_t state, next_state_generator::transition_t &transition)
+void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state, const next_state_generator::transition_t &transition)
 {
   for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
   {
     if (m_options.trace_actions.count(i->label().name()) > 0)
     {
-      size_t state_number = m_state_numbers.index(state);
+      size_t state_number = m_state_numbers.index(storage_state(state));
       if (m_options.trace && m_traces_saved < m_options.max_traces)
       {
         std::ostringstream reason;
@@ -556,9 +610,9 @@ void lps2lts_algorithm::check_action(lps2lts_algorithm::state_t state, next_stat
   }
 }
 
-void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::state_t state)
+void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::generator_state_t state)
 {
-  size_t state_number = m_state_numbers.index(state);
+  size_t state_number = m_state_numbers.index(storage_state(state));
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
     std::ostringstream reason;
@@ -581,7 +635,7 @@ void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::state_t state)
   }
 }
 
-void lps2lts_algorithm::save_error(lps2lts_algorithm::state_t state)
+void lps2lts_algorithm::save_error(lps2lts_algorithm::generator_state_t state)
 {
   if (m_options.save_error_trace)
   {
@@ -597,44 +651,46 @@ void lps2lts_algorithm::save_error(lps2lts_algorithm::state_t state)
   }
 }
 
-bool lps2lts_algorithm::add_transition(lps2lts_algorithm::state_t state, next_state_generator::transition_t &transition)
+bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t state, next_state_generator::transition_t &transition)
 {
-  size_t from_state_number = m_state_numbers[state];
-  std::pair<size_t, bool> to_state_number;
+  storage_state_t source = storage_state(state);
+  storage_state_t destination = storage_state(transition.internal_state());
+
+  size_t source_state_number = m_state_numbers[source];
+  std::pair<size_t, bool> destination_state_number;
   if (m_options.bithashing)
   {
-    to_state_number = m_bit_hash_table.add_state(transition.internal_state());
+    destination_state_number = m_bit_hash_table.add_state(destination);
   }
   else
   {
-    to_state_number = m_state_numbers.put(transition.internal_state());
+    destination_state_number = m_state_numbers.put(destination);
   }
-  if (to_state_number.second)
+  if (destination_state_number.second)
   {
     m_num_states++;
     if (m_maintain_traces)
     {
-      assert(m_backpointers.count(transition.internal_state()) == 0);
-      m_backpointers[transition.internal_state()] = state;
+      assert(m_backpointers.count(destination) == 0);
+      m_backpointers[destination] = source;
     }
 
     if (m_options.outformat != lts_none && m_options.outformat != lts_aut)
     {
       assert(!m_options.bithashing);
       size_t state_number = m_output_lts.add_state(transition.state());
-      assert(state_number == to_state_number.first);
+      assert(state_number == destination_state_number.first);
       static_cast <void>(state_number);
     }
   }
 
   if (m_options.outformat == lts_aut)
   {
-    m_aut_file << "(" << from_state_number << ",\"" << lps::pp(transition.action()) << "\"," << to_state_number.first << ")" << std::endl;
+    m_aut_file << "(" << source_state_number << ",\"" << lps::pp(transition.action()) << "\"," << destination_state_number.first << ")" << std::endl;
   }
   else if (m_options.outformat != lts_none)
   {
-    atermpp::aterm_appl action_label_term = lps::detail::multi_action_to_aterm(transition.action());
-    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(action_label_term);
+    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(lps::detail::multi_action_to_aterm(transition.action()));
     if (action_label_number.second)
     {
       size_t action_number = m_output_lts.add_action(transition.action(), transition.action().actions().size() == 0);
@@ -642,20 +698,15 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::state_t state, next_st
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }
 
-    m_output_lts.add_transition(mcrl2::lts::transition(from_state_number, action_label_number.first, to_state_number.first));
+    m_output_lts.add_transition(mcrl2::lts::transition(source_state_number, action_label_number.first, destination_state_number.first));
   }
 
   m_num_transitions++;
 
-  if (m_options.detect_action)
-  {
-    check_action(state, transition);
-  }
-
-  return to_state_number.second;
+  return destination_state_number.second;
 }
 
-std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(lps2lts_algorithm::state_t state)
+std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(lps2lts_algorithm::generator_state_t state)
 {
   if (m_options.detect_divergence)
   {
@@ -665,10 +716,16 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
   std::list<next_state_generator::transition_t> transitions;
   try
   {
-    next_state_generator::iterator it(m_generator->begin(state, &m_substitution));
+    next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
     while (it)
     {
       transitions.push_back(*it);
+
+      if (m_options.detect_action && m_detected_action_summands[it->summand_index()])
+      {
+        save_actions(state, *it);
+      }
+
       it++;
     }
     //transitions = std::list<next_state_generator::transition_t>(m_generator->begin(state), m_generator->end());
@@ -690,7 +747,7 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
     save_deadlock(state);
   }
 
-  if (m_confluence_generator != 0)
+  if (m_use_confluence_reduction)
   {
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
@@ -701,7 +758,7 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
   return transitions;
 }
 
-void lps2lts_algorithm::generate_lts_breadth(state_t initial_state)
+void lps2lts_algorithm::generate_lts_breadth()
 {
   size_t current_state = 0;
 
@@ -711,7 +768,7 @@ void lps2lts_algorithm::generate_lts_breadth(state_t initial_state)
 
   while (!m_must_abort && (current_state < m_state_numbers.size()) && (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    state_t state (m_state_numbers.get(current_state));
+    generator_state_t state = generator_state(m_state_numbers.get(current_state));
     std::list<next_state_generator::transition_t> transitions = get_transitions(state);
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
@@ -747,7 +804,7 @@ void lps2lts_algorithm::generate_lts_breadth(state_t initial_state)
   }
 }
 
-void lps2lts_algorithm::generate_lts_breadth_bithashing(state_t initial_state)
+void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initial_state)
 {
   size_t current_state = 0;
 
@@ -755,22 +812,22 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(state_t initial_state)
   size_t start_level_explored = 0;
   size_t start_level_transitions = 0;
 
-  queue<state_t> state_queue;
+  queue<storage_state_t> state_queue;
   state_queue.set_max_size(m_options.max_states < m_options.todo_max ? m_options.max_states : m_options.todo_max);
-  state_queue.add_to_queue(initial_state);
+  state_queue.add_to_queue(storage_state(initial_state));
   state_queue.swap_queues();
 
   while (!m_must_abort && (state_queue.remaining() > 0) && (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    state_t state = state_queue.get_from_queue();
+    generator_state_t state = generator_state(state_queue.get_from_queue());
     std::list<next_state_generator::transition_t> transitions = get_transitions(state);
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       if (add_transition(state, *i))
       {
-        state_t removed = state_queue.add_to_queue(i->internal_state());
-        if (removed != state_t())
+        storage_state_t removed = state_queue.add_to_queue(storage_state(i->internal_state()));
+        if (removed != storage_state_t())
         {
           m_bit_hash_table.remove_state_from_bithash(removed);
           m_num_states--;
@@ -811,50 +868,41 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(state_t initial_state)
   }
 }
 
-void lps2lts_algorithm::generate_lts_depth(state_t initial_state)
+void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
 {
-  std::list<state_info> stack;
-
-  state_info initial_state_info;
-  initial_state_info.state = initial_state;
-  initial_state_info.transitions = get_transitions(initial_state_info.state);
-  stack.push_back(initial_state_info);
+  std::list<storage_state_t> stack;
+  stack.push_back(storage_state(initial_state));
 
   size_t current_state = 0;
 
   while (!m_must_abort && (!stack.empty()) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    if (stack.back().transitions.empty())
+    generator_state_t state = generator_state(stack.back());
+    stack.pop_back();
+    std::list<next_state_generator::transition_t> transitions = get_transitions(state);
+
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
-      stack.pop_back();
-      continue;
+      if (add_transition(state, *i) && (current_state + stack.size() < m_options.max_states) && (stack.size() < m_options.todo_max))
+      {
+        stack.push_back(storage_state(i->internal_state()));
+      }
     }
 
-    next_state_generator::transition_t transition = stack.back().transitions.front();
-    stack.back().transitions.pop_front();
-
-    if (add_transition(stack.back().state, transition) && (current_state < m_options.max_states) && (stack.size() < m_options.todo_max))
+    current_state++;
+    if (!m_options.suppress_progress_messages && ((current_state % 1000) == 0))
     {
-      state_info info;
-      info.state = transition.internal_state();
-      info.transitions = get_transitions(info.state);
-      stack.push_back(info);
-
-      current_state++;
-      if (!m_options.suppress_progress_messages && ((current_state % 1000) == 0))
-      {
-        mCRL2log(verbose) << "monitor: currently explored "
-                          << current_state << " state" << ((current_state==1)?"":"s")
-                          << " and " << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
-                          << " (stacksize is " << stack.size() << ")" << std::endl;
-      }
+      mCRL2log(verbose) << "monitor: currently explored "
+                        << current_state << " state" << ((current_state==1)?"":"s")
+                        << " and " << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
+                        << " (stacksize is " << stack.size() << ")" << std::endl;
     }
   }
 }
 
-void lps2lts_algorithm::generate_lts_random(state_t initial_state)
+void lps2lts_algorithm::generate_lts_random(generator_state_t initial_state)
 {
-  state_t state = initial_state;
+  generator_state_t state = initial_state;
 
   size_t current_state = 0;
 
@@ -868,7 +916,7 @@ void lps2lts_algorithm::generate_lts_random(state_t initial_state)
     }
 
     size_t index = rand() % transitions.size();
-    state_t new_state;
+    generator_state_t new_state;
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {

@@ -18,7 +18,6 @@
 #include "mcrl2/core/detail/struct_core.h"        // ATerm building blocks.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -37,7 +36,7 @@ using namespace std;
 
 data::sort_expression grape::mcrl2gen::convert_numeric_sorts_to_real(data::sort_expression sort_expr)
 {
-  atermpp::map<data::basic_sort, data::sort_expression> substitution;
+  std::map<data::basic_sort, data::sort_expression> substitution;
   substitution[data::sort_pos::pos()] = data::sort_real::real_();
   substitution[data::sort_nat::nat()] = data::sort_real::real_();
   substitution[data::sort_int::int_()] = data::sort_real::real_();

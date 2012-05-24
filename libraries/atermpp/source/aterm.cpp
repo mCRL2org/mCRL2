@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string>
+#include <cstring>
 #include <assert.h>
 #include <stdexcept>
 #include <stack>
@@ -225,7 +226,7 @@ bool write_to_named_text_file(aterm t, const std::string& filename)
   FILE*  f;
   bool result;
 
-  if (!strcmp(filename.c_str(), "-"))
+  if (filename == "-")
   {
     return ATwriteToTextFile(t, stdout);
   }

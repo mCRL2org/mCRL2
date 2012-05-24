@@ -34,6 +34,7 @@ enum log_level_t
   error,
   warning,
   info,
+  status,
   verbose,
   debug,
   debug1,
@@ -48,7 +49,7 @@ enum log_level_t
 inline
 std::string log_level_to_string(const log_level_t level)
 {
-  static const char* const buffer[] = {"quiet", "error", "warning", "info", "verbose", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
+  static const char* const buffer[] = {"quiet", "error", "warning", "info", "status", "verbose", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
   return buffer[level];
 }
 
@@ -71,6 +72,10 @@ log_level_t log_level_from_string(const std::string& s)
   else if (s == "info")
   {
     return info;
+  }
+  else if (s == "status")
+  {
+    return status;
   }
   else if (s == "verbose")
   {
@@ -323,6 +328,34 @@ protected:
     return m_last_message_ended_with_newline;
   }
 
+  static
+  bool& last_message_was_status()
+  {
+    static bool m_last_message_was_status = false;
+    return m_last_message_was_status;
+  }
+
+  static
+  std::string& last_hint()
+  {
+    static std::string m_last_hint;
+    return m_last_hint;
+  }
+
+  static
+  size_t& caret_pos()
+  {
+    static size_t m_caret_pos = 0;
+    return m_caret_pos;
+  }
+
+  static
+  size_t& last_caret_pos()
+  {
+    static size_t m_last_caret_pos = 0;
+    return m_last_caret_pos;
+  }
+
 public:
   /// \brief Prefix each line in s with some extra information.
   /// The things that are added are:
@@ -339,34 +372,83 @@ public:
                   << std::string(8 - log_level_to_string(level).size(), ' ');
 
     bool msg_ends_with_newline = false;
+    bool overwrite = false;
     if (msg.size() > 0)
     {
       msg_ends_with_newline = (msg[msg.size()-1] == '\n');
     }
 
-    std::string result = msg;
-    // Avoid adding spurious start of line after the last line in the log.
-    if(msg_ends_with_newline)
-    {
-      result.erase(result.end()-1);
-    }
+    std::stringstream result;
 
-    // Prepend if a newline was added
+    if (last_message_was_status())
+    {
+      if (level == status && hint == last_hint())
+      {
+        if (last_message_ended_with_newline())
+        {
+          result << "\r" << start_of_line.str();
+          overwrite = true;
+        }
+      }
+      else
+      {
+        result << "\n" << start_of_line.str();
+      }
+    }
+    else
     if (last_message_ended_with_newline())
     {
-      result = start_of_line.str() + result;
+      result << start_of_line.str();
     }
 
-    result = mcrl2::utilities::regex_replace("\n", std::string("\n") + start_of_line.str(), result);
+    for (std::string::const_iterator it = msg.begin(); it != msg.end(); )
+    {
+      if (*it != '\n')
+      {
+        result << *it++;
+        ++caret_pos();
+      }
+      else if (++it != msg.end())
+      {
+        result << "\n" << start_of_line.str() << *it++;
+        caret_pos() = 1;
+        last_caret_pos() = 0;
+      }
+    }
+
+    if (msg_ends_with_newline && overwrite && caret_pos() < last_caret_pos())
+    {
+      for (size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
+      {
+        result << ' ';
+      }
+    }
 
     if(msg_ends_with_newline)
     {
-      result += "\n";
+      if (level == status)
+      {
+        last_caret_pos() = caret_pos();
+        caret_pos() = 0;
+      }
+      else
+      {
+        result << "\n";
+      }
     }
 
     last_message_ended_with_newline() = msg_ends_with_newline;
+    if (level == status)
+    {
+      last_message_was_status() = true;
+      last_hint() = hint;
+    }
+    else
+    {
+      last_message_was_status() = false;
+    }
 
-    return result;
+    return result.str();
   }
 };
 

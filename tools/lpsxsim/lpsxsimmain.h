@@ -14,7 +14,6 @@
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <tooltipListView.h>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "mcrl2/lps/simbase.h"
 #include "simulatorgui.h"
@@ -71,11 +70,11 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     virtual void StateChanged(
                      mcrl2::lps::multi_action, 
                      const mcrl2::lps::state, 
-                     atermpp::vector<mcrl2::lps::multi_action>, 
+                     std::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
     virtual void StateChanged(
                      const mcrl2::lps::state, 
-                     atermpp::vector<mcrl2::lps::multi_action>, 
+                     std::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
     virtual void Reset(mcrl2::lps::state State);
     virtual void Undo(size_t Count);
@@ -166,7 +165,7 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
   private:
     void SetCurrentState(mcrl2::lps::state s, bool showchange = false);
     void UpdateTransitions(
-               const atermpp::vector<mcrl2::lps::multi_action>& next_actions, 
+               const std::vector<mcrl2::lps::multi_action>& next_actions,
                const std::vector<mcrl2::lps::state>& next_states);
 
   private:

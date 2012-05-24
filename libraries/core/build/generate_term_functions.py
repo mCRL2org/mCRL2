@@ -12,7 +12,6 @@ LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
 const atermpp::function_symbol& function_symbol_%(name)s()
 {
-//  static atermpp::function_symbol function_symbol_%(name)s = core::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
   static atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }

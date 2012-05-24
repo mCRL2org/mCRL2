@@ -12,9 +12,6 @@
 #ifndef MCRL2_LPSREALELM_REALELM_H
 #define MCRL2_LPSREALELM_REALELM_H
 
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
-
 #include "mcrl2/data/rewriter.h"
 
 #include "mcrl2/lps/specification.h"
@@ -46,9 +43,6 @@ class real_representing_variable
      mcrl2::data::data_expression lb,
      mcrl2::data::data_expression ub)
     {
-      variable.protect();
-      lowerbound.protect();
-      upperbound.protect();
       variable=v;
       lowerbound=lb;
       upperbound=ub;
@@ -57,11 +51,7 @@ class real_representing_variable
 
     /*  The code below gives rise to garbage collection problems. */
     ~real_representing_variable()
-    {
-      variable.unprotect();
-      lowerbound.unprotect();
-      upperbound.unprotect();
-    }
+    {}
 
     real_representing_variable& operator = (const real_representing_variable& other)
     {
@@ -73,9 +63,6 @@ class real_representing_variable
 
     real_representing_variable(const real_representing_variable& other)
     {
-      variable.protect();
-      lowerbound.protect();
-      upperbound.protect();
       variable=other.variable;
       lowerbound=other.lowerbound;
       upperbound=other.upperbound;
@@ -108,7 +95,7 @@ class summand_information
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
     std::vector < linear_inequality > summand_real_conditions;
-    mutable_map_substitution< atermpp::map<variable, data_expression> > summand_real_nextstate_map;
+    mutable_map_substitution< std::map<variable, data_expression> > summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
@@ -125,7 +112,7 @@ class summand_information
       variable_list rsv,
       variable_list nrsv,
       std::vector < linear_inequality > src,
-      mutable_map_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> > srnm
+      mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> > srnm
     ):
       smd(s),
       real_summation_variables(rsv),
@@ -140,17 +127,11 @@ class summand_information
       nextstate_context_combinations(1,src)
       // residual_inequalities(1,vector < linear_inequality >()),
     {
-      smd.protect();
-      real_summation_variables.protect();
-      non_real_summation_variables.protect();
       // mCRL2log(debug) << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
     }
 
     summand_information(const summand_information& s)
     {
-      smd.protect();
-      real_summation_variables.protect();
-      non_real_summation_variables.protect();
       smd=s.smd;
       real_summation_variables=s.real_summation_variables;
       non_real_summation_variables=s.non_real_summation_variables;
@@ -161,12 +142,7 @@ class summand_information
     }
 
     ~summand_information()
-    {
-      smd.unprotect();
-      real_summation_variables.unprotect();
-      non_real_summation_variables.unprotect();
-
-    }
+    {}
 
     mcrl2::lps::deprecated::summand get_summand() const
     {
@@ -193,7 +169,7 @@ class summand_information
       return summand_real_conditions.end();
     }
 
-    mutable_map_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> >
+    mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >
                           &get_summand_real_nextstate_map()
     {
       return summand_real_nextstate_map;

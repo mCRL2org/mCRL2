@@ -18,7 +18,6 @@
 
 #include <algorithm>
 
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
@@ -56,7 +55,7 @@ class linear_inequality
   public:
     enum comparison_t { equal, less, less_eq };
 
-    class lhs_t:public atermpp::map < variable, data_expression >
+    class lhs_t:public std::map < variable, data_expression >
     {
       private:
         // TODO: the meta operations below insert variables with constant 0, which should
@@ -252,22 +251,18 @@ class linear_inequality
     /// \brief Constructor yielding an inconsistent inequality.
     linear_inequality():m_lhs(),m_comparison(less)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
     }
 
     linear_inequality(const linear_inequality& l)
     {
-      m_rhs.protect();
       m_rhs=l.m_rhs;
       m_lhs=l.m_lhs;
       m_comparison=l.m_comparison;
     }
 
     ~linear_inequality()
-    {
-      m_rhs.unprotect();
-    }
+    {}
 
     linear_inequality& operator=(const linear_inequality& l)
     {
@@ -288,7 +283,6 @@ class linear_inequality
                       const rewriter& r)
       :m_lhs(),m_comparison(less)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
 
 
@@ -332,7 +326,6 @@ class linear_inequality
                       const comparison_t cmp,
                       const rewriter& r):m_lhs(),m_comparison(cmp)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
 
       parse_and_store_expression(lhs,r);
@@ -579,21 +572,18 @@ std::string string(const linear_inequality& l)
 static data_expression init_real_zero(data_expression& real_zero)
 {
   real_zero=sort_real::real_("0");
-  real_zero.protect();
   return real_zero;
 }
 
 static data_expression init_real_one(data_expression& real_one)
 {
   real_one=sort_real::real_("1");
-  real_one.protect();
   return real_one;
 }
 
 static data_expression init_real_minus_one(data_expression& real_minus_one)
 {
   real_minus_one=sort_real::real_("-1");
-  real_minus_one.protect();
   return real_minus_one;
 }
 
@@ -1112,8 +1102,8 @@ static void pivot_and_update(
   const variable xj,  // a non basic variable
   const data_expression v,
   const data_expression v_delta_correction,
-  atermpp::map < variable,data_expression > &beta,
-  atermpp::map < variable,data_expression > &beta_delta_correction,
+  std::map < variable,data_expression > &beta,
+  std::map < variable,data_expression > &beta_delta_correction,
   std::set < variable > &basic_variables,
   std::map < variable, linear_inequality::lhs_t > &working_equalities,
   const rewriter& r)
@@ -1178,7 +1168,7 @@ static void pivot_and_update(
   // mCRL2log(debug) << "End pivoting " << pp(xj) << "\n";
   if (mCRL2logEnabled(log::debug))
   {
-    for (atermpp::map < variable,data_expression >::const_iterator i=beta.begin();
+    for (std::map < variable,data_expression >::const_iterator i=beta.begin();
          i!=beta.end(); ++i)
     {
       // mCRL2log(debug) << "beta[" << pp(i->first) << "]= " << pp(beta[i->first]) << "+ delta* " <<
@@ -1222,12 +1212,12 @@ inline bool is_inconsistent(
   mCRL2log(log::debug) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
 
   // The required data structures
-  atermpp::map < variable,data_expression > lowerbounds;
-  atermpp::map < variable,data_expression > upperbounds;
-  atermpp::map < variable,data_expression > beta;
-  atermpp::map < variable,data_expression > lowerbounds_delta_correction;
-  atermpp::map < variable,data_expression > upperbounds_delta_correction;
-  atermpp::map < variable,data_expression > beta_delta_correction;
+  std::map < variable,data_expression > lowerbounds;
+  std::map < variable,data_expression > upperbounds;
+  std::map < variable,data_expression > beta;
+  std::map < variable,data_expression > lowerbounds_delta_correction;
+  std::map < variable,data_expression > upperbounds_delta_correction;
+  std::map < variable,data_expression > beta_delta_correction;
   std::set < variable > non_basic_variables;
   std::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
@@ -1444,7 +1434,7 @@ inline bool is_inconsistent(
       if (mCRL2logEnabled(log::debug))
       {
         mCRL2log(log::debug) << "Consistent while pivoting\n";
-        /* for(atermpp::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
+        /* for(std::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
                       i!=lowerbounds.end(); ++i)
         { variable v=i->first;
           if (lowerbounds.count(v)>0)
@@ -1743,8 +1733,8 @@ std::set < variable >  gauss_elimination(
 inline data_expression rewrite_with_memory(
   const data_expression t,const rewriter& r)
 {
-  static atermpp::map < data_expression, data_expression > rewrite_hash_table;
-  atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
+  static std::map < data_expression, data_expression > rewrite_hash_table;
+  std::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
   if (i==rewrite_hash_table.end())
   {
     data_expression t1=r(t);

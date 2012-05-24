@@ -17,8 +17,6 @@
 #include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -41,7 +39,7 @@ namespace mcrl2
 namespace bes
 {
 
-template <typename Container = atermpp::vector<boolean_equation> >
+template <typename Container = std::vector<boolean_equation> >
 class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 {
   public:
@@ -242,7 +240,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
         ++statecount;
         transitioncount += m_bes.equations().size();
       }
-      unsigned int initial_state = indices[m_bes.initial_state()];
+      unsigned int initial_state = indices[static_cast<boolean_variable>(m_bes.initial_state())];
 
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
@@ -267,7 +265,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           label << "self:block(" << info.first << "),op(" << info.second << ")";
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::ATERM_NON_EXISTING_POSITION)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
@@ -325,7 +323,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           size_t to = indices[*j];
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::ATERM_NON_EXISTING_POSITION)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
@@ -404,11 +402,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       // Build formulas
       size_t cur_state = 0;
       std::vector<lts::transition>::const_iterator i = transitions.begin();
-      atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
+      std::map<size_t, std::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())
       {
-        atermpp::vector<boolean_variable> variables;
+        std::vector<boolean_variable> variables;
         size_t block = 0;
         boolean_operand_t op = BOOL_VAR;
         cur_state = i->from();
@@ -491,10 +489,10 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
         blocks[block].push_back(eq);
       }
 
-      atermpp::vector<boolean_equation> eqns;
+      std::vector<boolean_equation> eqns;
       for (size_t i = 0; i <= blocks.size(); ++i)
       {
-        atermpp::map<size_t, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+        std::map<size_t, std::vector<boolean_equation> >::const_iterator j = blocks.find(i);
         if (j != blocks.end())
         {
           eqns.insert(eqns.end(), j->second.begin(), j->second.end());
@@ -671,7 +669,7 @@ class besconvert_tool: public super
       }
 
       mCRL2log(verbose) << "done" << std::endl;
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
+      bes_reduction_algorithm<std::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
       save_bes(b, output_filename(), bes_output_format());
 
       return true;
@@ -681,7 +679,5 @@ class besconvert_tool: public super
 
 int main(int argc, char* argv[])
 {
-  aterm_init();
-
   return besconvert_tool().execute(argc, argv);
 }

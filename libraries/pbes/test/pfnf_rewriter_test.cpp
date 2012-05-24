@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
+#include "mcrl2/pbes/detail/is_pfnf.h"
 
 #define MCRL2_USE_PBESPGSOLVE
 // N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
@@ -191,6 +192,56 @@ void test_pfnf_rewriter2()
   test_pfnf_rewriter2(text);
 }
 
+void test_is_pfnf()
+{
+  std::string text =
+    "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
+    "     nu Y(n: Nat) = Y(0) || X(1) && X(2);   \n"
+    "     nu Z(n: Nat) = true => (X(0) || X(1)); \n"
+    "     nu X1(n: Nat) = true;                  \n"
+    "     nu X2(n: Nat) = val(true);             \n"
+    "     nu X3(n: Nat) = (true => (X(0) || X(1))) && val(true) && X(0); \n"
+    "     nu X4(n: Nat) = (forall b:Bool. true) && (true => (X(0) || X(1))) && val(true) && X(0); \n"
+    "init X(0);                                  \n"
+    ;
+  pbes<> p = txt2pbes(text, false);
+  pbes_expression x;
+
+  x = p.equations()[0].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+
+  x = p.equations()[1].formula();
+  BOOST_CHECK(!pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(!pbes_system::detail::is_pfnf_imp(x));
+  BOOST_CHECK(!pbes_system::detail::is_pfnf(x));
+  std::vector<pbes_expression> v = pbes_system::detail::pfnf_implications(x);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(pbes_system::pp(v[0]) == "Y(0) || X(1)");
+  BOOST_CHECK(pbes_system::pp(v[1]) == "X(2)");
+  std::cout << "v[0] = " << pbes_system::pp(v[0]) << std::endl;
+  std::cout << "v[1] = " << pbes_system::pp(v[1]) << std::endl;
+
+  x = p.equations()[2].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+
+  x = p.equations()[3].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+
+  x = p.equations()[4].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+
+  x = p.equations()[5].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_inner_and(x));
+
+  x = p.equations()[6].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+
+  BOOST_CHECK(!pbes_system::detail::is_pfnf(p));
+}
+
 int test_main(int argc, char** argv)
 {
   atermpp::aterm_init();
@@ -198,6 +249,7 @@ int test_main(int argc, char** argv)
   test_pfnf_visitor();
   test_pfnf_rewriter();
   test_pfnf_rewriter2();
+  test_is_pfnf();
 
   return 0;
 }

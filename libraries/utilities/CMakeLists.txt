@@ -78,4 +78,66 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 
+
+find_package(Qt4 4.6 COMPONENTS QtCore QtGui)
+if (QT4_FOUND)
+
+# ##############################
+# ##    mcrl2_utilities_qt    ##
+# ##############################
+
+project(mcrl2_utilities_qt)
+cmake_minimum_required(VERSION 2.6)
+
+
+set(mcrl2_utilities_qt_ui
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.ui
+)
+qt4_wrap_ui(mcrl2_utilities_qt_ui_h ${mcrl2_utilities_qt_ui})
+
+set(mcrl2_utilities_qt_h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/atermthread.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/logwidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/qt_tool.h
+)
+qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
+
+set(mcrl2_utilities_qt_src
+  ${mcrl2_utilities_qt_ui_h}
+  ${mcrl2_utilities_qt_h_moc}
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/atermthread.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
+)
+
+#set(mcrl2_utilities_qt_src ${mcrl2_utilities_qt_src} PARENT_SCOPE)
+
+# Don't forget to include output directory, otherwise
+# the UI file won't be wrapped!
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${QT_INCLUDES})
+
+add_library(${PROJECT_NAME}
+  ${mcrl2_utilities_qt_src}
+)
+
+target_link_libraries(${PROJECT_NAME}
+  ${QT_QTCORE_LIBRARY}
+  ${QT_QTGUI_LIBRARY}
+)
+
+# add install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+
+
+endif(QT4_FOUND)
+
+
 endif(MCRL2_ENABLE_GUI_TOOLS)
