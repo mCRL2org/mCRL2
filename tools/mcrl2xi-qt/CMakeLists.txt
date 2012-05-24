@@ -27,6 +27,7 @@ qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 set(MOC_HEADERS
   mainwindow.h
   highlighter.h
+  findreplacedialog.h
 
   documentmanager.h
   documentwidget.h
@@ -42,7 +43,7 @@ set(SRC_FILES
   main.cpp
   mainwindow.cpp
   highlighter.cpp
-
+  findreplacedialog.cpp
   documentmanager.cpp
   documentwidget.cpp
   parser.cpp
