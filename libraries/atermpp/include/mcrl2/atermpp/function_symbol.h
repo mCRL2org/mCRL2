@@ -246,6 +246,7 @@ bool AT_isValidAFun(const size_t sym)
 {
   return (sym != size_t(-1) && 
           sym < function_symbol::at_lookup_table.size() && 
+          function_symbol::at_lookup_table[sym] != NULL &&
           function_symbol::at_lookup_table[sym]->reference_count>0);
 }
 

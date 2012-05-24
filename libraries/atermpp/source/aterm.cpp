@@ -15,9 +15,11 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/safio.h"
 
 /*}}}  */
@@ -114,6 +116,7 @@ void aterm_init()
   // atexit(AT_cleanupMemory);
 }
 
+static inline
 bool ATisInitialized()
 {
   return initialized;
@@ -712,7 +715,7 @@ readFromTextFile(int* c, FILE* file)
  * Read a term from a text file.
  */
 
-aterm
+static aterm
 ATreadFromTextFile(FILE* file)
 {
   int c;

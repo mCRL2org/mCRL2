@@ -21,9 +21,10 @@ namespace atermpp
 /// \brief Initialize the ATerm++ Library. The specified argument t is used to mark the
 /// the bottom of the program stack.
 
-inline
-void aterm_init()
-{}
+//inline
+// implemented in atermp.cpp
+void aterm_init();
+//{}
 
 } // namespace atermpp
 
