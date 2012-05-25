@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Find and Replace</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="mcrl2xi.qrc">
+    <normaloff>:/mcrl2xi/icons/mcrl2xi.ico</normaloff>:/mcrl2xi/icons/mcrl2xi.ico</iconset>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -171,6 +175,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="mcrl2xi.qrc"/>
+ </resources>
  <connections/>
 </ui>

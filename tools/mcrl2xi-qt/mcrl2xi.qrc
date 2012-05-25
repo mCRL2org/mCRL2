@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/mcrl2xi/icons">
+        <file>mcrl2xi.ico</file>
+    </qresource>
+</RCC>

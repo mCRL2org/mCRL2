@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>mCRL2xi</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="mcrl2xi.qrc">
+    <normaloff>:/mcrl2xi/icons/mcrl2xi.ico</normaloff>:/mcrl2xi/icons/mcrl2xi.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="margin">
@@ -436,7 +440,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="mcrl2xi.qrc"/>
+ </resources>
  <connections/>
  <slots>
   <slot>onResetClicked()</slot>

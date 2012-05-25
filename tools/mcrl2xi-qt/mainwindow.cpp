@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
   m_findReplaceDialog = new FindReplaceDialog(this);
   m_findReplaceDialog->setModal(false);
 
+  m_current_rewriter = "jitty";
+
   m_ui.setupUi(this);
   m_parser = new Parser();
 
@@ -96,6 +98,20 @@ void MainWindow::openDocument(QString fileName)
   }
 }
 
+void MainWindow::setRewriter(QString name)
+{
+  m_current_rewriter = name;
+  for (int i = 0; i < m_ui.documentManager->documentCount(); i++) {
+    DocumentWidget *document = m_ui.documentManager->getDocument(i);
+
+    ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
+    QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
+
+    ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
+    QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
+  }
+}
+
 
 void MainWindow::formatDocument(DocumentWidget *document)
 {
@@ -115,14 +131,14 @@ void MainWindow::formatDocument(DocumentWidget *document)
   font.setWeight(QFont::Light);
 
   editor->setFont(font);
-  Highlighter *highlighter = new Highlighter(editor->document());
+  new Highlighter(editor->document());
 
   ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
-  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
   connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
 
   ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
-  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, QString("jitty")));
+  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
   connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
   connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
 

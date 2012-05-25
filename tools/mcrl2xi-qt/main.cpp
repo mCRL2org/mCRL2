@@ -15,14 +15,15 @@
 using namespace mcrl2::utilities;
 
 typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > mcrl2xi_base;
+
 class mcrl2xi_tool : public mcrl2xi_base
 {
   public:
     mcrl2xi_tool():
       mcrl2xi_base("mCRL2xi",
-                   "Rimco Boudewijns",
+                   "Rimco Boudewijns and Frank Stappers",
+                   "graphical mCRL2 data specification editor",
                    "A graphical mCRL2 data specification editor.",
-                   "A graphical mCRL2 data specification editor. If INFILE is supplied it will be loaded into the editor.",
                    "A graphical mCRL2 data specification editor.",
                    "http://mcrl2.org/release/user_manual/tools/mcrl2xi.html")
     {}
@@ -30,6 +31,8 @@ class mcrl2xi_tool : public mcrl2xi_base
     bool run()
     {
       MainWindow *window = new MainWindow();
+
+      window->setRewriter(QString::fromStdString(pp(m_rewrite_strategy)));
 
       if (!m_input_filename.empty())
       {

@@ -7,14 +7,19 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(mcrl2xi_qt)
+project(mcrl2xi-qt)
 cmake_minimum_required(VERSION 2.6)
 
 if (MCRL2_ENABLE_GUI_TOOLS)
+
 find_package(Qt4)
 
 if (QT4_FOUND)
 include(${QT_USE_FILE})
+
+set(RCC_SRCS mcrl2xi.qrc)
+
+qt4_add_resources(RC_FILES ${RCC_SRCS})
 
 set(UI_FILES
   mainwindow.ui
@@ -38,6 +43,7 @@ set(MOC_HEADERS
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
 set(SRC_FILES
+  ${RC_FILES}
   ${UI_HEADERS}
   ${MOC_SOURCES}
   main.cpp
@@ -52,7 +58,16 @@ set(SRC_FILES
   findreplacedialog.cpp
 )
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+
+# ######### Create Windows Icon ##########
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRC_FILES ${SRC_FILES} mcrl2xi-qt.rc)
+ENDIF(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
@@ -81,6 +96,15 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 else(QT4_FOUND)
   message(STATUS "Could NOT find Qt4, not building mcrl2xi-qt.")

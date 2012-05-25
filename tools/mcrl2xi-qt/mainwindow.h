@@ -40,6 +40,8 @@ class MainWindow : public QMainWindow
     bool saveDocument(DocumentWidget *document);
     void openDocument(QString fileName);
 
+    void setRewriter(QString name);
+
   public slots:
     // Slots that receive the signals of the DocumentManager
     void formatDocument(DocumentWidget *document);
@@ -64,6 +66,9 @@ class MainWindow : public QMainWindow
 
     // Find and Replace dialog object pointer
     FindReplaceDialog *m_findReplaceDialog;
+
+    // Current rewiter
+    QString m_current_rewriter;
 
   private slots:
     // Slots for all menu items
