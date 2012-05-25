@@ -106,9 +106,9 @@ multi_action parse_multi_action(std::stringstream& in, const lps::action_label_l
   complete_multi_action(result, action_decls, data_spec);
   return result;
 }
-/// \brief Parses a linear process specification from a string
+
 /// \brief Parses a multi_action from a string
-/// \param text An input stream containing a multi_action
+/// \param text A string containing a multi_action
 /// \param[in] action_decls A list of allowed action labels that is used for type checking.
 /// \param[in] data_spec The data specification that is used for type checking.
 /// \return The parsed multi_action
@@ -118,6 +118,43 @@ multi_action parse_multi_action(const std::string& text, const lps::action_label
 {
   std::stringstream ma_stream(text);
   return parse_multi_action(ma_stream, action_decls, data_spec);
+}
+
+/// \brief Parses an action declaration from a string
+/// \param text A string containing an action declaration
+/// \param[in] data_spec A data specification used for sort normalization
+/// \return A list of action labels
+/// \exception mcrl2::runtime_error when the input does not match the syntax of an action declaration.
+inline
+lps::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("ActDecl");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  action_label_vector result;
+  action_actions(parser_tables_mcrl2).callback_ActDecl(node, result);
+  p.destroy_parse_node(node);
+  lps::action_label_list v(result.begin(), result.end());
+  v = lps::normalize_sorts(v, data_spec);
+  return v;
+}
+
+/// \brief Parses an action from a string
+/// \param text A string containing an action
+/// \param action_decls An action declaration
+/// \param[in] data_spec A data specification used for sort normalization
+/// \return An action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of an action.
+inline
+action parse_action(const std::string& text, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  multi_action result = parse_multi_action(text, action_decls, data_spec);
+  if (result.actions().size() != 1)
+  {
+    throw mcrl2::runtime_error("cannot parse '" + text + " as an action!");
+  }
+  return result.actions().front();
 }
 
 } // namespace lps
