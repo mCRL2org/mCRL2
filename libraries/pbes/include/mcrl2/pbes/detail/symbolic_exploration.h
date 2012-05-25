@@ -136,7 +136,7 @@ class symbolic_exploration_algorithm
       {
         pbes_expression phi = forall(x).body();
         data::variable_list d = forall(x).variables();
-        return and_(forall(d, expr_or(phi)), forall(d, imp(not_(expr_or(phi)), F_or(phi))));
+        return and_(forall(d, expr_or(phi)), forall(d, imp(not_(expr_or(phi)), F(phi))));
       }
       else if (is_exists(x))
       {
@@ -205,7 +205,7 @@ class symbolic_exploration_algorithm
       {
         pbes_expression phi = exists(x).body();
         data::variable_list d = exists(x).variables();
-        return or_(exists(d, expr_or(phi)), exists(d, and_(expr_and(phi), F_and(phi))));
+        return or_(exists(d, expr_or(phi)), exists(d, and_(expr_and(phi), F(phi))));
       }
       else if (is_forall(x))
       {
@@ -249,6 +249,18 @@ class symbolic_exploration_algorithm
       return pbes_expression();
     }
 
+    pbes_expression F(const pbes_expression& x)
+    {
+      if (is_conjunctive(x))
+      {
+        return F_and(x);
+      }
+      else
+      {
+        return F_or(x);
+      }
+    }
+
   public:
 
     void run(pbes<>& p)
@@ -256,14 +268,7 @@ class symbolic_exploration_algorithm
       atermpp::vector<pbes_equation>& equations = p.equations();
       for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
       {
-        if (is_conjunctive(i->formula()))
-        {
-          i->formula() = F_and(i->formula());
-        }
-        else
-        {
-          i->formula() = F_or(i->formula());
-        }
+        i->formula() = F(i->formula());
       }
     }
 };
