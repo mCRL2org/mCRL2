@@ -90,13 +90,13 @@ void label::set_actions_text(const wxString& p_actions)
   if (a_parsed_multi_action!=atermpp::aterm_appl())
   {
     // get list of ParamId's from MultAct
-    atermpp::aterm_list al(a_parsed_multi_action.argument(0));
+    atermpp::aterm_list al(a_parsed_multi_action(0));
     // loop through list of ParamId's
     for (atermpp::aterm_list::const_iterator i = al.begin(); i != al.end(); ++i)
     {
       action action;
-      action.set_name(wxString(mcrl2::core::pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
-      action.set_parameters_text(atermpp::aterm_appl(*i).argument(1));
+      action.set_name(wxString(mcrl2::core::pp(atermpp::aterm_appl(*i)(0)).c_str(), wxConvLocal));
+      action.set_parameters_text(mcrl2::data::data_expression_list(atermpp::aterm_appl(*i)(1)));
       m_actions.Add(action);
     }
   }

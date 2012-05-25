@@ -89,7 +89,7 @@ class function_symbol
     {
       if (n!=size_t(-1))
       {
-#ifdef PRINT_GC_INFO
+#ifdef PRINT_GC_FUN_INFO
 fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
 #endif
         assert(n<at_lookup_table.size());
@@ -102,7 +102,7 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     { 
       if (n!=size_t(-1))
       {
-#ifdef PRINT_GC_INFO
+#ifdef PRINT_GC_FUN_INFO
 fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
 #endif
         assert(n<at_lookup_table.size());

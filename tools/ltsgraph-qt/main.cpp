@@ -1,11 +1,10 @@
 #include <QtGui/QApplication>
 #include "mainwindow.h"
-#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 int main(int argc, char *argv[])
 {
-    aterm::ATerm stack;
-    aterm::ATinit(&stack);
+    atermpp::aterm_init();
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

@@ -19,7 +19,7 @@
 #include "libgrape/decl.h"
 #include "libgrape/varupdate.h"
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/data/sort_expression.h"
 
@@ -34,6 +34,7 @@
 #define SPEC_ERROR                      25
 
 using namespace grape::libgrape;
+using namespace aterm_deprecated;
 
 namespace grape
 {

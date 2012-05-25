@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string>
+#include <string.h>
 #include <assert.h>
 #include <stdexcept>
 #include <stack>
@@ -702,27 +702,6 @@ readFromTextFile(int* c, FILE* file)
   }
 
   return term;
-}
-
-/*}}}  */
-/*{{{  aterm ATreadFromTextFile(FILE *file) */
-
-/**
- * Read a term from a text file.
- */
-
-aterm
-ATreadFromTextFile(FILE* file)
-{
-  int c;
-
-  line = 0;
-  col = 0;
-  error_idx = 0;
-  memset(error_buf, 0, ERROR_SIZE);
-
-  fnext_char(&c, file);
-  return readFromTextFile(&c, file);
 }
 
 /*}}}  */

@@ -80,9 +80,8 @@ static void resize_hashtable()
 }
 
 #ifndef NDEBUG
-static bool check_that_all_objects_are_free()
+bool check_that_all_objects_are_free()
 {
-  return true;
   bool result=true;
 
   for(size_t size=0; size<terminfo.size(); ++size)

@@ -28,11 +28,11 @@ namespace atermpp
 class aterm
 {
   public:
-    /* template < typename T >
-    friend class term_appl;
+    template < typename T >
+    friend class term_appl; 
 
     template < typename T >
-    friend class term_list; */
+    friend class term_list; 
 
   protected:
     detail::_aterm *m_term;

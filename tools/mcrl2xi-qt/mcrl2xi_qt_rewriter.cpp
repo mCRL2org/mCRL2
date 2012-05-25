@@ -101,7 +101,7 @@ void RewriteThread::run()
       mCRL2log(info) << "Rewriting data expression: \"" << m_dataExpression << "\"" << std::endl;
 
       mcrl2::data::rewriter rewr(data_spec, m_rewrite_strategy);
-      mcrl2::data::mutable_map_substitution < atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
+      mcrl2::data::mutable_map_substitution < std::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
 
       mCRL2log(info) << "Result: \"" << mcrl2::data::pp(rewr(term,assignments)) << "\"" << std::endl;
 

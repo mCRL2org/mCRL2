@@ -149,19 +149,17 @@ static void remove_from_hashtable(detail::_aterm *t)
   assert(0);
 }
 
-/*}}}  */
-
+#ifndef NDEBUG
+  bool check_that_all_objects_are_free();
+#endif
 
 inline void detail::free_term(detail::_aterm *t)
 {
-#ifndef NDEBUG
-  if (t->m_function_symbol==AS_EMPTY_LIST) // When destroying ATempty, it appears that all other terms have been removed.
+  const size_t function_symbol_index=t->m_function_symbol.number();
+  if (function_symbol_index==AS_EMPTY_LIST.number())
   {
-    check_that_all_objects_are_free();
     return;
   }
-#endif
-
   assert(t->reference_count==0);
   const size_t size=term_size(t);
   remove_from_hashtable(t);  // Remove from hash_table
@@ -175,6 +173,12 @@ inline void detail::free_term(detail::_aterm *t)
   TermInfo &ti = terminfo[size];
   t->next  = ti.at_freelist;
   ti.at_freelist = t; 
+
+  if (function_symbol_index==AS_INT.number()) // When destroying ATempty, it appears that all other terms have been removed.
+  {
+    assert(check_that_all_objects_are_free());
+    return;
+  }
 }
 
 template <class Term>
