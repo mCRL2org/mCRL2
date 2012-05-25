@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/pfnf_print.h"
 
 #define MCRL2_USE_PBESPGSOLVE
 // N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
@@ -105,6 +106,7 @@ void test_pfnf(const std::string& pbes_spec)
   pbes_rewrite(p, R);
   std::cerr << "- after:" << std::endl;
   std::cerr << pbes_system::pp(p) << std::endl;
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
   std::cerr << "-----------------" << std::endl;
   core::garbage_collect();
 }
@@ -205,10 +207,15 @@ void test_is_pfnf()
     "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
     "     nu Y(n: Nat) = Y(0) || X(1) && X(2);   \n"
     "     nu Z(n: Nat) = true => (X(0) || X(1)); \n"
-    "     nu X1(n: Nat) = true;                  \n"
-    "     nu X2(n: Nat) = val(true);             \n"
-    "     nu X3(n: Nat) = (true => (X(0) || X(1))) && val(true) && X(0); \n"
-    "     nu X4(n: Nat) = (forall b:Bool. true) && (true => (X(0) || X(1))) && val(true) && X(0); \n"
+    "     nu X3(n: Nat) = true;                  \n"
+    "     nu X4(n: Nat) = val(true);             \n"
+    "     nu X5(n: Nat) = (true => (X(0) || X(1))) && val(true) && X(0); \n"
+    "     nu X6(n: Nat) = (forall b:Bool. true) && (true => (X(0) || X(1))) && val(true) && X(0); \n"
+    "     nu X7(n: Nat) = false;                 \n"
+    "     nu X8(n: Nat) = val(false);            \n"
+    "     nu X9(n: Nat) = X(0);                  \n"
+    "     nu X10(n:Nat) = (X(0) || X(1)) && X(0);\n"
+    "     nu X11(b: Bool) = val(b) && (X11(b) || X11(!b)) && (X11(b) || X11(!!b)); \n"
     "init X(0);                                  \n"
     ;
   pbes<> p = txt2pbes(text, false);
@@ -221,16 +228,13 @@ void test_is_pfnf()
   x = p.equations()[1].formula();
   BOOST_CHECK(!pbes_system::detail::is_pfnf_or(x));
   BOOST_CHECK(!pbes_system::detail::is_pfnf_imp(x));
-  BOOST_CHECK(!pbes_system::detail::is_pfnf(x));
-  std::vector<pbes_expression> v = pbes_system::detail::pfnf_implications(x);
-  BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(pbes_system::pp(v[0]) == "Y(0) || X(1)");
-  BOOST_CHECK(pbes_system::pp(v[1]) == "X(2)");
-  std::cout << "v[0] = " << pbes_system::pp(v[0]) << std::endl;
-  std::cout << "v[1] = " << pbes_system::pp(v[1]) << std::endl;
+  BOOST_CHECK(pbes_system::detail::is_pfnf(x));
 
   x = p.equations()[2].formula();
   BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+  std::vector<pbes_expression> v = pbes_system::detail::pfnf_implications(x);
+  BOOST_CHECK(v.size() == 1);
+  BOOST_CHECK(pbes_system::pp(v[0]) == "true => X(0) || X(1)");
 
   x = p.equations()[3].formula();
   BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));
@@ -246,7 +250,80 @@ void test_is_pfnf()
   x = p.equations()[6].formula();
   BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
 
-  BOOST_CHECK(!pbes_system::detail::is_pfnf(p));
+  x = p.equations()[7].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_inner_and(x));
+
+  x = p.equations()[8].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_inner_and(x));
+
+  x = p.equations()[9].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_inner_and(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+
+  x = p.equations()[10].formula();
+  BOOST_CHECK(!pbes_system::detail::is_pfnf_or(x));
+  BOOST_CHECK(!pbes_system::detail::is_pfnf_imp(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_inner_and(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+
+  x = p.equations()[11].formula();
+  BOOST_CHECK(pbes_system::detail::is_pfnf(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_outer_and(x));
+  BOOST_CHECK(pbes_system::detail::is_pfnf_expression(x));
+
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  text =
+    "pbes nu X0(m: Nat) =                                                            \n"
+    "  exists u2: Nat. forall v: Nat. forall u1: Nat. forall u: Nat. val(!(u2 < 3)); \n"
+    "mu X1 =                                                                         \n"
+    "  true;                                                                         \n"
+    "mu X2 =                                                                         \n"
+    "  false;                                                                        \n"
+    "                                                                                \n"
+    "init X0(0);                                                                     \n"
+    ;
+  p = txt2pbes(text, false);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  text =
+    "pbes nu X0(m: Nat) =                                                            \n"
+    "  val(false);                                                                   \n"
+    "                                                                                \n"
+    "init X0(0);                                                                     \n"
+    ;
+  p = txt2pbes(text, false);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  text =
+    "pbes nu X(b: Bool) =                                  \n"
+    "       val(b) && (X(b) || X(!b)) && (X(b) || X(!!b)); \n"
+    "                                                      \n"
+    "init X(true);                                         \n"
+    ;
+  p = txt2pbes(text, false);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+}
+
+void test_pfnf_print()
+{
+  std::string text =
+    "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
+    "     nu Y(n: Nat) = forall c:Bool. forall b:Bool. (X(0) || X(1) && X(0)) && (val(n > 0) => (X(2) || X(3))); \n"
+    "init X(0);                                  \n"
+    ;
+  pbes<> p = txt2pbes(text);
+  pfnf_rewriter R;
+  pbes_rewrite(p, R);
+  std::cout << "--- pfnf print ---" << std::endl;
+  std::cout << pp(p) << std::endl;
+  std::cout << "---" << std::endl;
+  std::cout << pfnf_pp(p) << std::endl;
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 }
 
 int test_main(int argc, char** argv)
@@ -257,6 +334,7 @@ int test_main(int argc, char** argv)
   test_pfnf_rewriter();
   test_pfnf_rewriter2();
   test_is_pfnf();
+  test_pfnf_print();
 
   return 0;
 }

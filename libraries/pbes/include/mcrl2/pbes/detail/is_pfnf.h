@@ -23,69 +23,133 @@ namespace pbes_system {
 
 namespace detail {
 
+/// \brief Splits a conjunction into a sequence of operands
+/// Given a pbes expression of the form p1 && p2 && ... && pn, this will yield a
+/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a && as main
+/// function symbol.
+/// \param expr A PBES expression
+/// \return A sequence of operands
+inline
+void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result)
+{
+  using namespace accessors;
+  utilities::detail::split(expr, std::back_inserter(result), is_and, left, right);
+}
+
+/// \brief Splits a conjunction into a sequence of operands
+/// Given a pbes expression of the form p1 || p2 || ... || pn, this will yield a
+/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a || as main
+/// function symbol.
+/// \param expr A PBES expression
+/// \return A sequence of operands
+inline
+void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result)
+{
+  using namespace accessors;
+  utilities::detail::split(expr, std::back_inserter(result), is_or, left, right);
+}
+
+inline
+bool is_pfnf_simple_expression(const pbes_expression& x)
+{
+  return is_simple_expression(x) || data::is_data_expression(x);
+}
+
+inline
+bool is_pfnf_data_expression(const pbes_expression& x)
+{
+  return is_true(x) || is_false(x) || data::is_data_expression(x);
+}
+
 inline
 bool is_pfnf_or_expression(const pbes_expression& x)
 {
+  bool result;
   if (is_or(x))
   {
-    return is_pfnf_or_expression(or_(x).left()) && is_pfnf_or_expression(or_(x).right());
+    result = is_pfnf_or_expression(or_(x).left()) && is_pfnf_or_expression(or_(x).right());
   }
   else
   {
-    return is_propositional_variable_instantiation(x);
+    result = is_propositional_variable_instantiation(x);
   }
+  return result;
 }
 
 // Determines if an expression has the format \/_{j in Ji} Xj(ej)
 inline
 bool is_pfnf_or(const pbes_expression& x)
 {
-  return is_true(x) || is_pfnf_or_expression(x);
+  bool result = is_true(x) || is_pfnf_or_expression(x);
+  return result;
+  //return is_true(x) || is_pfnf_or_expression(x);
 }
 
 // Determines if an expression has the format g_i => x with is_pfnf_or(x)
 inline
 bool is_pfnf_imp(const pbes_expression& x)
 {
-  if (is_imp(x))
+  bool result;
+  if (is_pfnf_simple_expression(x))
   {
-    return  (is_simple_expression(imp(x).left()) && is_pfnf_or(imp(x).right()))
-         || (is_simple_expression(imp(x).right()) && is_pfnf_or(imp(x).left()));
+    result = true;
+  }
+  else if (is_imp(x))
+  {
+    result = is_pfnf_simple_expression(imp(x).left()) && is_pfnf_or(imp(x).right());
   }
   else
   {
-    return is_pfnf_or(x);
+    result = is_pfnf_or(x);
   }
+  return result;
 }
 
 // Determines if an expression has the format /\_{i in I} x_i with is_pfnf_imp(x_i)
 inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
+  bool result = true;
   atermpp::set<pbes_expression> terms = pbes_expr::split_and(x);
   for (atermpp::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
   {
     if (!is_pfnf_imp(*i))
     {
-      return false;
+      result = false;
     }
   }
-  return true;
+  return result;
 }
 
 // Determines if an expression has the format h /\ x with is_pfnf_inner_and(x), where the 'h /\' part is optional
 inline
 bool is_pfnf_outer_and(const pbes_expression& x)
 {
-  if (is_and(x))
+  bool result = true;
+
+  std::vector<pbes_expression> v;
+  split_and(x, v);
+  std::size_t simple_count = 0;
+  for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
   {
-    return (is_simple_expression(and_(x).left()) && is_pfnf_inner_and(and_(x).right()))
-        || (is_simple_expression(and_(x).right()) && is_pfnf_inner_and(and_(x).left()));
+    if (is_pfnf_inner_and(x))
+    {
+      continue;
+    }
+    else if (is_pfnf_simple_expression(x))
+    {
+      simple_count++;
+      if (simple_count > 1)
+      {
+        result = false;
+      }
+    }
+    else
+    {
+      result = false;
+    }
   }
-  else
-  {
-    return is_pfnf_inner_and(x);
-  }
+  return result;
 }
 
 // Determines if an expression is in pfnf format
@@ -133,32 +197,6 @@ bool is_pfnf(const T& x)
   return f.result;
 }
 
-/// \brief Splits a conjunction into a sequence of operands
-/// Given a pbes expression of the form p1 && p2 && ... && pn, this will yield a
-/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a && as main
-/// function symbol.
-/// \param expr A PBES expression
-/// \return A sequence of operands
-inline
-void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result)
-{
-  using namespace accessors;
-  utilities::detail::split(expr, std::back_inserter(result), is_and, left, right);
-}
-
-/// \brief Splits a conjunction into a sequence of operands
-/// Given a pbes expression of the form p1 || p2 || ... || pn, this will yield a
-/// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a || as main
-/// function symbol.
-/// \param expr A PBES expression
-/// \return A sequence of operands
-inline
-void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result)
-{
-  using namespace accessors;
-  utilities::detail::split(expr, std::back_inserter(result), is_or, left, right);
-}
-
 // returns the implications /\_{i in I} x_i
 // \pre x is in PFNF format
 inline
@@ -179,21 +217,12 @@ std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
     }
   }
 
-  // strip the h /\ part
-  if (is_and(y))
-  {
-    if (!is_pfnf_inner_and(and_(y).left()))
-    {
-      y = and_(y).right();
-    }
-    else if (!is_pfnf_inner_and(and_(y).right()))
-    {
-      y = and_(y).left();
-    }
-  }
-
   std::vector<pbes_expression> result;
   split_and(y, result);
+
+  // eliminate simple expressions from result
+  result.erase(std::remove_if(result.begin(), result.end(), &is_pfnf_simple_expression), result.end());
+
   return result;
 }
 
