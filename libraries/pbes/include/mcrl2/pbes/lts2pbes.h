@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_LTS2PBES_H
 #define MCRL2_PBES_LTS2PBES_H
 
+#include <map>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -22,14 +23,53 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+namespace detail {
+
+// custom LTS type that maps states to a multimap of outgoing edges
+class edge_map_lts
+{
+  public:
+    typedef std::size_t state_type;
+    typedef std::size_t label_type;
+
+    typedef std::map<state_type, std::multimap<label_type, state_type> > lts_type;
+    typedef std::multimap<label_type, state_type> edge_map_type;
+
+  protected:
+    std::map<state_type, std::multimap<label_type, state_type> > m_map;
+
+  public:
+    edge_map_lts(const lts::lts_lts_t& lts0)
+    {
+      const std::vector<lts::transition>& transitions = lts0.get_transitions();
+      for( std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      {
+        state_type s = i->from();
+        label_type a = i->label();
+        state_type t = i->to();
+        m_map[s].insert(std::make_pair(a, t));
+      }
+    }
+
+    const edge_map_type& edge_map(state_type s) const
+    {
+      lts_type::const_iterator i = m_map.find(s);
+      return i->second;
+    }
+};
+
+} // namespace detail
+
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
 class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 {
   public:
     typedef lts::lts_lts_t::states_size_type state_type;
+    typedef pbes_system::detail::edge_map_lts::edge_map_type edge_map_type;
 
   protected:
     const lts::lts_lts_t& lts0;
+    pbes_system::detail::edge_map_lts lts1;
     state_formulas::state_formula f0;
 
     core::identifier_string make_identifier(const core::identifier_string& name, state_type s)
@@ -88,6 +128,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
+#ifndef MCRL2_NEW_LTS2PBES
         const std::vector<lts::transition> &trans=lts0.get_transitions();
         for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
@@ -98,6 +139,15 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
             v.push_back(imp(sat_top(a, alpha), RHS(phi, t)));
           }
         }
+#else
+        const edge_map_type& m = lts1.edge_map(s);
+        for (edge_map_type::const_iterator i = m.begin(); i != m.end(); ++i)
+        {
+          state_type t = i->second;
+          lts::detail::action_label_lts a = lts0.action_label(i->first);
+          v.push_back(imp(sat_top(a, alpha), RHS(phi, t)));
+        }
+#endif
         result = z::join_and(v.begin(), v.end());
       }
       else if (sf::is_may(f))
@@ -107,6 +157,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         state_formulas::state_formula phi(af::arg(f));
 
         // traverse all transitions s --a--> t
+#ifndef MCRL2_NEW_LTS2PBES
         const std::vector<lts::transition> &trans=lts0.get_transitions();
         for( std::vector<lts::transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
@@ -117,6 +168,15 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
             v.push_back(and_(sat_top(a, alpha), RHS(phi, t)));
           }
         }
+#else
+        const edge_map_type& m = lts1.edge_map(s);
+        for (edge_map_type::const_iterator i = m.begin(); i != m.end(); ++i)
+        {
+          state_type t = i->second;
+          lts::detail::action_label_lts a = lts0.action_label(i->first);
+          v.push_back(and_(sat_top(a, alpha), RHS(phi, t)));
+        }
+#endif
         result = z::join_or(v.begin(), v.end());
       }
       else if (sf::is_variable(f))
@@ -225,7 +285,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
   public:
     /// \brief Constructor.
     lts2pbes_algorithm(const lts::lts_lts_t& l)
-      : lts0(l)
+      : lts0(l), lts1(l)
     {}
 
     /// \brief Runs the translation algorithm
