@@ -14,6 +14,7 @@
 
 #include "mcrl2/exception.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
@@ -23,7 +24,7 @@ namespace pbes_system {
 
 namespace detail {
 
-class symbolic_exploration
+class symbolic_exploration_algorithm
 {
   protected:
     /// \brief Concatenates two variable lists
@@ -35,6 +36,11 @@ class symbolic_exploration
       std::vector<data::variable> v(x.begin(), x.end());
       v.insert(v.end(), y.begin(), y.end());
       return data::variable_list(v.begin(), v.end());
+    }
+
+    bool is_conjunctive(const pbes_expression& x) const
+    {
+      return is_forall(x) || is_and(x);
     }
 
     pbes_expression expr_or(const pbes_expression& x)
@@ -242,8 +248,42 @@ class symbolic_exploration
       throw mcrl2::runtime_error("unknown pbes expression encountered in F_and: " + pbes_system::pp(x));
       return pbes_expression();
     }
+
+  public:
+
+    void run(pbes<>& p)
+    {
+      atermpp::vector<pbes_equation>& equations = p.equations();
+      for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
+      {
+        if (is_conjunctive(i->formula()))
+        {
+          i->formula() = F_and(i->formula());
+        }
+        else
+        {
+          i->formula() = F_or(i->formula());
+        }
+      }
+    }
 };
 
+inline
+void symbolic_exploration(const std::string& input_filename,
+                          const std::string& output_filename
+                         )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // apply the algorithm
+  symbolic_exploration_algorithm algorithm;
+  algorithm.run(p);
+
+  // save the result
+  p.save(output_filename);
+}
 
 } // namespace detail
 
