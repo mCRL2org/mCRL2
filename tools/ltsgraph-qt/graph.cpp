@@ -187,6 +187,36 @@ namespace Graph
     delete m_impl;
   }
 
+  size_t Graph::edgeCount() const
+  {
+    return m_impl->edges.size();
+  }
+
+  size_t Graph::nodeCount() const
+  {
+    return m_impl->nodes.size();
+  }
+
+  size_t Graph::transitionLabelCount() const
+  {
+    return m_impl->transitionLabels.size();
+  }
+
+  size_t Graph::stateLabelCount() const
+  {
+    return m_impl->stateLabels.size();
+  }
+
+  size_t Graph::initialState() const
+  {
+    return m_impl->initialState;
+  }
+
+  bool Graph::isTau(size_t labelindex) const
+  {
+    return m_impl->is_tau(labelindex);
+  }
+
   void Graph::createImpl(mcrl2::lts::lts_type itype)
   {
     switch (itype)
@@ -401,6 +431,31 @@ namespace Graph
         QTextStream out(&data);
         xml.save(out, 2);
     }
+  }
+
+  Edge Graph::edge(size_t index) const
+  {
+    return m_impl->edges[index];
+  }
+
+  NodeNode& Graph::node(size_t index) const
+  {
+    return m_impl->nodes[index];
+  }
+
+  Node& Graph::handle(size_t edge) const
+  {
+    return m_impl->handles[edge];
+  }
+
+  LabelNode& Graph::transitionLabel(size_t edge) const
+  {
+    return m_impl->transitionLabelnodes[edge];
+  }
+
+  LabelNode& Graph::stateLabel(size_t edge) const
+  {
+    return m_impl->stateLabelnodes[edge];
   }
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const

@@ -250,18 +250,18 @@ namespace Graph
       void clip(const Coord3D& min, const Coord3D& max);
 
       // Getters and setters
-      Edge edge(size_t index) const { return m_impl->edges[index]; }
-      NodeNode& node(size_t index) const { return m_impl->nodes[index]; }
-      Node& handle(size_t edge) const { return m_impl->handles[edge]; }
-      LabelNode& transitionLabel(size_t edge) const { return m_impl->transitionLabelnodes[edge]; }
-      LabelNode& stateLabel(size_t edge) const { return m_impl->stateLabelnodes[edge]; }
-      bool isTau(size_t labelindex) const { return m_impl->is_tau(labelindex); }
+      Edge edge(size_t index) const;
+      NodeNode& node(size_t index) const;
+      Node& handle(size_t edge) const;
+      LabelNode& transitionLabel(size_t edge) const;
+      LabelNode& stateLabel(size_t edge) const;
+      bool isTau(size_t labelindex) const;
 
-      size_t edgeCount() const { return m_impl->edges.size(); }
-      size_t nodeCount() const { return m_impl->nodes.size(); }
-      size_t transitionLabelCount() const { return m_impl->transitionLabels.size(); }
-      size_t stateLabelCount() const { return m_impl->stateLabels.size(); }
-      size_t initialState() const { return m_impl->initialState; }
+      size_t edgeCount() const;
+      size_t nodeCount() const;
+      size_t transitionLabelCount() const;
+      size_t stateLabelCount() const;
+      size_t initialState() const;
   };
 
 }
