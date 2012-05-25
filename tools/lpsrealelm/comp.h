@@ -80,7 +80,12 @@ class comp_struct:public mcrl2::data::structured_sort
     }
 
     ~comp_struct()
-    {}
+    { 
+      c_smaller().unprotect();
+      c_equal().unprotect();
+      c_larger().unprotect();
+      comp_sort().unprotect();
+    }
 
     sort_expression sort() const
     {

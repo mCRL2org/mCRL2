@@ -55,26 +55,6 @@ BOOST_AUTO_TEST_CASE(pbes_print)
   pbes_system::pp(p);
 }
 
-BOOST_AUTO_TEST_CASE(pbes_val)
-{
-  std::string PBES =
-    "pbes mu X(d: Pos) = val(d > 0); \n"
-    "init X(1);                      \n"
-   ;
-
-  std::string expected_result =
-    "pbes mu X(d: Pos) =\n"
-    "       val(d > 0);\n"
-    "\n"
-    "init X(1);\n"
-    ;
-
-  pbes<> p;
-  p = txt2pbes(PBES);
-  std::string result = pbes_system::pp(p);
-  BOOST_CHECK(result == expected_result);
-}
-
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

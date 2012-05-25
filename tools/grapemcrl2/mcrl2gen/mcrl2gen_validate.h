@@ -19,6 +19,7 @@
 #include "libgrape/decl.h"
 #include "libgrape/varupdate.h"
 
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/data/sort_expression.h"
 
@@ -108,33 +109,33 @@ WX_DECLARE_OBJARRAY(renamed, arr_renamed);
  * Identifier parse function.
  * This function converts the wxString and gives it to the mcrl2 library identifier parser.
  * @param p_identifier The wxString with an identifier.
- * @return atermpp::aterm_appl containing the parsed identifier or 0 if it could not be parsed.
+ * @return ATermAppl containing the parsed identifier or 0 if it could not be parsed.
  */
-atermpp::aterm_appl parse_identifier(wxString p_identifier);
+ATermAppl parse_identifier(wxString p_identifier);
 
 /**
  * Sort expression parse function.
  * This function converts the wxString and gives it to the mcrl2 library sort expression parser.
  * @param p_sort_expression The wxString with a sort expression.
- * @return atermpp::aterm_appl containing the parsed sort expression or 0 if it could not be parsed.
+ * @return ATermAppl containing the parsed sort expression or 0 if it could not be parsed.
  */
-atermpp::aterm_appl parse_sort_expr(wxString p_sort_expression);
+ATermAppl parse_sort_expr(wxString p_sort_expression);
 
 /**
  * Data expression parse function.
  * This function converts the wxString and gives it to the mcrl2 library data expression parser.
  * @param p_data_expression The wxString with a data expression.
- * @return atermpp::aterm_appl containing the parsed data expression or 0 if it could not be parsed.
+ * @return ATermAppl containing the parsed data expression or 0 if it could not be parsed.
  */
-atermpp::aterm_appl parse_data_expr(wxString p_data_expression);
+ATermAppl parse_data_expr(wxString p_data_expression);
 
 /**
  * Process specification parse function.
  * This function converts the wxString and gives it to the mcrl2 library process specification parser.
  * @param p_proc_spec The wxString with a process specification.
- * @return atermpp::aterm_appl containing the parsed process specification or 0 if it could not be parsed.
+ * @return ATermAppl containing the parsed process specification or 0 if it could not be parsed.
  */
-atermpp::aterm_appl parse_proc_spec(wxString p_proc_spec);
+ATermAppl parse_proc_spec(wxString p_proc_spec);
 
 /**
  * Convert numeric sorts in a sort expression to sort Real
@@ -201,7 +202,7 @@ wxXmlNode* get_diagram(wxXmlNode* p_doc_root, wxString& p_diagram_id);
  * @param datatype_spec The datatype specification.
  * @return A table with the variables of the provided lists.
  */
-atermpp::table get_variable_table(list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, list_of_decl& p_trans_var_decls, atermpp::aterm_appl& datatype_spec);
+atermpp::table get_variable_table(list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, list_of_decl& p_trans_var_decls, ATermAppl& datatype_spec);
 
 /**
  * Architecture diagram visibles retrieval function.
@@ -213,7 +214,7 @@ atermpp::table get_variable_table(list_of_decl& p_preamble_parameter_decls, list
  * @pre p_architecture_diagram is a valid XML architecture diagram.
  * @post A list of actions containing the names and types of the retrieved visibles.
  */
-list_of_action get_architecture_visibles(wxXmlNode* p_doc_root, wxString& p_diagram_id, atermpp::aterm_appl& datatype_spec);
+list_of_action get_architecture_visibles(wxXmlNode* p_doc_root, wxString& p_diagram_id, ATermAppl& datatype_spec);
 
 /**
  * Architecture diagram visible channels retrieval function.
@@ -226,7 +227,7 @@ list_of_action get_architecture_visibles(wxXmlNode* p_doc_root, wxString& p_diag
  * @pre p_diagram_name is a valid architecture diagram name.
  * @post A list of actions containing the names and types of the retrieved visible channels.
  */
-list_of_action get_architecture_visible_channels(wxXmlNode* p_doc_root, wxString& p_diagram_name, wxXmlNode* p_objects, atermpp::aterm_appl& datatype_spec);
+list_of_action get_architecture_visible_channels(wxXmlNode* p_doc_root, wxString& p_diagram_name, wxXmlNode* p_objects, ATermAppl& datatype_spec);
 
 /**
  * Architecture diagram visible channel communications retrieval function.
@@ -239,7 +240,7 @@ list_of_action get_architecture_visible_channels(wxXmlNode* p_doc_root, wxString
  * @pre p_diagram_name is a valid architecture diagram name.
  * @post A list of actions containing the names and types of the retrieved visible channel communications.
  */
-list_of_action get_architecture_visible_channel_communications(wxXmlNode* p_doc_root, wxString& p_diagram_name, wxXmlNode* p_objects, atermpp::aterm_appl& datatype_spec);
+list_of_action get_architecture_visible_channel_communications(wxXmlNode* p_doc_root, wxString& p_diagram_name, wxXmlNode* p_objects, ATermAppl& datatype_spec);
 
 /**
  * Process diagram actions retrieval function.
@@ -251,7 +252,7 @@ list_of_action get_architecture_visible_channel_communications(wxXmlNode* p_doc_
  * @pre p_doc_root is a valid pointer to an XML specification and p_diagram_id is a valid reference to a diagram identifier.
  * @post The actions occuring in this diagram and any contained process references are returned or an empty list is returned and error messages are produced.
  */
-list_of_action get_process_actions(wxXmlNode* p_doc_root, wxString& p_diagram_id, atermpp::aterm_appl& datatype_spec);
+list_of_action get_process_actions(wxXmlNode* p_doc_root, wxString& p_diagram_id, ATermAppl& datatype_spec);
 
 /**
  * Action list compacting function.
@@ -293,7 +294,7 @@ bool validate_datatype_specification(wxXmlDocument& p_spec);
  * @pre p_doc_root is a valid pointer to an XML specification.
  * @post True is returned if the datatype specification is valid, false otherwise and error messages are produced.
  */
-bool validate_datatype_specification(wxXmlNode* p_doc_root, atermpp::aterm_appl& datatype_spec);
+bool validate_datatype_specification(wxXmlNode* p_doc_root, ATermAppl& datatype_spec);
 
 /**
  * XML process diagram validation function.
@@ -316,7 +317,7 @@ bool validate_process_diagram(wxXmlDocument& p_spec, wxString& p_diagram_id);
  * @pre p_doc_root is a valid reference to a GraPE XML specification and p_process_diagram is a valid reference to an XML process diagram contained in p_doc_root.
  * @post The process diagram is validated and error messages are produced if necessary.
  */
-bool validate_process_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, atermpp::aterm_appl& datatype_spec);
+bool validate_process_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, ATermAppl& datatype_spec);
 
 /**
  * XML process diagram preamble validation function.
@@ -329,7 +330,7 @@ bool validate_process_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagra
  * @pre p_process_diagram is a valid XML process diagram.
  * @post p_preamble_parameter_decls contains the parameter declarations present in the preamble and p_preamble_local_var_decls contains the local variable declarations present in the preamble or error messages are produced.
  */
-bool validate_preamble(wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, atermpp::aterm_appl& datatype_spec);
+bool validate_preamble(wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * XML process diagram preamble local variables validation function.
@@ -342,7 +343,7 @@ bool validate_preamble(wxXmlNode* p_process_diagram, list_of_decl& p_preamble_pa
  * @pre p_process_diagram is a valid XML process diagram and p_preamble_local_var_decls is empty.
  * @post p_preamble_local_var_decls contains the local variable declarations present in the preamble or error messages are produced.
  */
-bool validate_preamble_local_variables(wxXmlNode* p_preamble, wxString& p_diagram_name, list_of_decl_init& p_preamble_local_var_decls, atermpp::aterm_appl& datatype_spec);
+bool validate_preamble_local_variables(wxXmlNode* p_preamble, wxString& p_diagram_name, list_of_decl_init& p_preamble_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * XML process diagram preamble parameters validation function.
@@ -355,7 +356,7 @@ bool validate_preamble_local_variables(wxXmlNode* p_preamble, wxString& p_diagra
  * @pre p_process_diagram is a valid XML process diagram and p_preamble_parameter_decls is empty.
  * @post p_preamble_parameter_decls contains the parameter declarations present in the preamble or error messages are produced.
  */
-bool validate_preamble_parameters(wxXmlNode* p_preamble, wxString& p_diagram_name, list_of_decl& p_preamble_parameter_decls, atermpp::aterm_appl& datatype_spec);
+bool validate_preamble_parameters(wxXmlNode* p_preamble, wxString& p_diagram_name, list_of_decl& p_preamble_parameter_decls, ATermAppl& datatype_spec);
 
 /**
  * Initial designator list validation function.
@@ -380,7 +381,7 @@ bool validate_initial_designator_list(wxXmlNode* p_doc_root, wxXmlNode* p_proces
  * @pre p_doc_root is a valid pointer the the XML GraPE specification containing the list of reference states and p_ref_state_list is a valid pointer to an XML list of reference states.
  * @post The validity of the list of reference states is returned and error messages are produced if necessary.
  */
-bool validate_reference_state_list(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, wxXmlNode* p_ref_state_list, atermpp::aterm_appl& datatype_spec);
+bool validate_reference_state_list(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, wxXmlNode* p_ref_state_list, ATermAppl& datatype_spec);
 
 /**
  * Parameter initialisation validation function.
@@ -394,7 +395,7 @@ bool validate_reference_state_list(wxXmlNode* p_doc_root, wxXmlNode* p_process_d
  * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
  * @post p_parameter_initialisation contains the list of paramter initialisations and error messages are produced if necessary.
  */
-bool validate_reference_parameters(wxXmlNode* p_doc_root, wxXmlNode* p_reference, wxXmlNode* p_diagram_id, list_of_varupdate& p_parameter_initialisation, atermpp::aterm_appl& datatype_spec);
+bool validate_reference_parameters(wxXmlNode* p_doc_root, wxXmlNode* p_reference, wxXmlNode* p_diagram_id, list_of_varupdate& p_parameter_initialisation, ATermAppl& datatype_spec);
 
 /**
  * Parameter initialisation validation function.
@@ -452,7 +453,7 @@ bool validate_state_connection(wxXmlNode* p_process_diagram, wxString& p_transit
  * @pre p_process_diagram is a valid pointer to an XML process diagram containing the list of terminating transitions and p_term_trans_list is a valid pointer to an XML list of terminating transitions.
  * @post The validity of the list of terminating transitions is returned and error messages are produced if necessary.
  */
-bool validate_terminating_transition_list(wxXmlNode* p_process_diagram, wxXmlNode* p_term_trans_list, list_of_decl& p_preamble_parameters, list_of_decl_init& p_preamble_variables, atermpp::aterm_appl& datatype_spec);
+bool validate_terminating_transition_list(wxXmlNode* p_process_diagram, wxXmlNode* p_term_trans_list, list_of_decl& p_preamble_parameters, list_of_decl_init& p_preamble_variables, ATermAppl& datatype_spec);
 
 /**
  * Non-terminating transition list validation function.
@@ -466,7 +467,7 @@ bool validate_terminating_transition_list(wxXmlNode* p_process_diagram, wxXmlNod
  * @pre p_process_diagram is a valid pointer to an XML process diagram containing the list of non-terminating transitions and p_trans_list is a valid pointer to an XML list of non-terminating transitions.
  * @post The validity of the list of non-terminating transitions is returned and error messages are produced if necessary.
  */
-bool validate_nonterminating_transition_list(wxXmlNode* p_process_diagram, wxXmlNode* p_trans_list, list_of_decl& p_preamble_parameters, list_of_decl_init& p_preamble_variables, atermpp::aterm_appl& datatype_spec);
+bool validate_nonterminating_transition_list(wxXmlNode* p_process_diagram, wxXmlNode* p_trans_list, list_of_decl& p_preamble_parameters, list_of_decl_init& p_preamble_variables, ATermAppl& datatype_spec);
 
 /**
  * Transition label validation function.
@@ -481,7 +482,7 @@ bool validate_nonterminating_transition_list(wxXmlNode* p_process_diagram, wxXml
  * @pre p_process_diagram is a valid pointer to an XML process diagram containing the transition label and p_trans_label is empty.
  * @post The validity of the transition label is returned and p_trans_label contains the valid label and error messages are produced if necessary.
  */
-bool validate_transition_label(wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, label& p_trans_label, wxString p_diagram_name, atermpp::aterm_appl& datatype_spec);
+bool validate_transition_label(wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, label& p_trans_label, wxString p_diagram_name, ATermAppl& datatype_spec);
 
 /**
  * Transition label variable declarations validation function.
@@ -494,7 +495,7 @@ bool validate_transition_label(wxXmlNode* p_process_diagram, list_of_decl& p_pre
  * @pre p_transition_label is a valid pointer to an XML transition label and p_local_var_decls is empty.
  * @post The validity of the transition label variable declarations is returned and p_local_var_decls contains the valid label variable declarations and error messages are produced if necessary.
  */
-bool validate_transition_label_variable_declarations(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_decl& p_local_var_decls, atermpp::aterm_appl& datatype_spec);
+bool validate_transition_label_variable_declarations(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_decl& p_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * Transition label condition validation function.
@@ -508,7 +509,7 @@ bool validate_transition_label_variable_declarations(wxXmlNode* p_transition_lab
  * @pre p_transition_label is a valid pointer to an XML transition label and p_condition is empty.
  * @post The validity of the transition label condition is returned and p_condition contains the valid label condition and error messages are produced if necessary.
  */
-bool validate_transition_label_condition(wxXmlNode* p_transition_label, wxString& p_diagram_name, wxString& p_condition, atermpp::aterm_appl& datatype_spec, atermpp::table& vars);
+bool validate_transition_label_condition(wxXmlNode* p_transition_label, wxString& p_diagram_name, wxString& p_condition, ATermAppl& datatype_spec, atermpp::table& vars);
 
 /**
  * Transition label actions validation function.
@@ -522,7 +523,7 @@ bool validate_transition_label_condition(wxXmlNode* p_transition_label, wxString
  * @pre p_transition_label is a valid pointer to an XML transition label and p_actions is empty.
  * @post The validity of the transition label actions is returned and p_actions contains the valid label actions and error messages are produced if necessary.
  */
-bool validate_transition_label_actions(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_action& p_actions, atermpp::aterm_appl& datatype_spec, atermpp::table& vars);
+bool validate_transition_label_actions(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_action& p_actions, ATermAppl& datatype_spec, atermpp::table& vars);
 
 /**
  * Transition label timestamp validation function.
@@ -536,7 +537,7 @@ bool validate_transition_label_actions(wxXmlNode* p_transition_label, wxString& 
  * @pre p_transition_label is a valid pointer to an XML transition label and p_timestamp is empty.
  * @post The validity of the transition label timestamp is returned and p_timestamp contains the valid label timestamp and error messages are produced if necessary.
  */
-bool validate_transition_label_timestamp(wxXmlNode* p_transition_label, wxString& p_diagram_name, wxString& p_timestamp, atermpp::aterm_appl& datatype_spec, atermpp::table& vars);
+bool validate_transition_label_timestamp(wxXmlNode* p_transition_label, wxString& p_diagram_name, wxString& p_timestamp, ATermAppl& datatype_spec, atermpp::table& vars);
 
 /**
  * Transition label variable updates validation function.
@@ -550,7 +551,7 @@ bool validate_transition_label_timestamp(wxXmlNode* p_transition_label, wxString
  * @pre p_transition_label is a valid pointer to an XML transition label and p_variable_updates is empty.
  * @post The validity of the transition label variable updates is returned and p_variable_updates contains the valid label variable updates and error messages are produced if necessary.
  */
-bool validate_transition_label_variable_updates(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_varupdate& p_variable_updates, atermpp::aterm_appl& datatype_spec, atermpp::table& vars);
+bool validate_transition_label_variable_updates(wxXmlNode* p_transition_label, wxString& p_diagram_name, list_of_varupdate& p_variable_updates, ATermAppl& datatype_spec, atermpp::table& vars);
 
 /**
  * XML architecture diagram validation function.
@@ -573,7 +574,7 @@ bool validate_architecture_diagram(wxXmlDocument& p_spec, wxString& p_diagram_id
  * @pre p_doc_root is a valid pointer to a GraPE XML specification and p_architecture_diagram is a valid reference to an XML architecture diagram contained in p_doc_root.
  * @post The architecture diagram is validated and error messages are produced if necessary.
  */
-bool validate_architecture_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, atermpp::aterm_appl& datatype_spec);
+bool validate_architecture_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, ATermAppl& datatype_spec);
 
 /**
  * Architecture reference list validation function.
@@ -586,7 +587,7 @@ bool validate_architecture_diagram(wxXmlNode* p_doc_root, wxXmlNode* p_architect
  * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of architecture references, p_architecture_diagram is a valid pointer to the XML architecture diagram containing the list of architecture references and p_reference_list is a valid pointer to an XML list of architecture references.
  * @post The validity of the list of architecture references is returned and error messages are produced if necessary.
  */
-bool validate_architecture_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_reference_list, atermpp::aterm_appl& datatype_spec);
+bool validate_architecture_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_reference_list, ATermAppl& datatype_spec);
 
 /**
  * Process reference list validation function.
@@ -599,7 +600,7 @@ bool validate_architecture_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_ar
  * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of process references, p_architecture_diagram is a valid pointer to the XML architecture diagram containing the list of process references and p_reference_list is a valid pointer to an XML list of process references.
  * @post The validity of the list of process references is returned and error messages are produced if necessary.
  */
-bool validate_process_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_reference_list, atermpp::aterm_appl& datatype_spec);
+bool validate_process_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_reference_list, ATermAppl& datatype_spec);
 
 /**
  * Channel communication list validation function.
@@ -612,7 +613,7 @@ bool validate_process_reference_list(wxXmlNode* p_doc_root, wxXmlNode* p_archite
  * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of channels, p_architecture_diagram is a valid pointer to an XML architecture diagram containing the list of channel communications and p_channel_communication_list is a valid pointer to an XML list of channel communications.
  * @post The validity of the list of channel communications is returned and error messages are produced if necessary.
  */
-bool validate_channel_communication_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_channel_communication_list, atermpp::aterm_appl& datatype_spec);
+bool validate_channel_communication_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_channel_communication_list, ATermAppl& datatype_spec);
 
 /**
  * Channel list validation function.
@@ -625,7 +626,7 @@ bool validate_channel_communication_list(wxXmlNode* p_doc_root, wxXmlNode* p_arc
  * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of channels, p_architecture_diagram is a valid pointer to an XML architecture diagram containing the list of channels and p_channel_list is a valid pointer to an XML list of channels.
  * @post The validity of the list of channels is returned and error messages are produced if necessary.
  */
-bool validate_channel_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_channel_list, atermpp::aterm_appl& datatype_spec);
+bool validate_channel_list(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxXmlNode* p_channel_list, ATermAppl& datatype_spec);
 
 /**
  * Diagram name validation function.

@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
@@ -31,8 +32,8 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/lps/next_state_generator_old.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 // For backwards compatibility
 //using namespace mcrl2::log;
@@ -72,7 +73,7 @@ class pins_data_type
 {
   protected:
     atermpp::indexed_set m_indexed_set;
-    lps::next_state_generator& m_generator;
+    lps::old::next_state_generator& m_generator;
     bool m_is_bounded;
 
   public:
@@ -119,7 +120,7 @@ class pins_data_type
     };
 
     /// \brief Constructor
-    pins_data_type(lps::next_state_generator& generator, bool is_bounded = false)
+    pins_data_type(lps::old::next_state_generator& generator, bool is_bounded = false)
       : m_generator(generator),
         m_is_bounded(is_bounded)
     {}
@@ -187,12 +188,6 @@ class pins_data_type
       return m_indexed_set[x];
     }
 
-    /// \brief Returns the value at index i
-    atermpp::aterm get(size_t i)
-    {
-      return m_indexed_set.get(i);
-    }
-
     /// \brief Returns the indexed_set holding the values
     atermpp::indexed_set& indexed_set()
     {
@@ -215,16 +210,16 @@ class state_data_type: public pins_data_type
 
     std::size_t expression2index(const data::data_expression& x)
     {
-      return m_indexed_set[m_generator.get_internal_state_argument(x)];
+      return m_indexed_set[m_generator.expression2aterm(x)];
     }
 
     data::data_expression index2expression(std::size_t i) const
     {
-      return m_generator.get_state_argument(m_indexed_set.get(i));
+      return m_generator.aterm2expression(m_indexed_set.get(i));
     }
 
   public:
-    state_data_type(lps::next_state_generator& generator, const data::sort_expression& sort)
+    state_data_type(lps::old::next_state_generator& generator, const data::sort_expression& sort)
       : pins_data_type(generator, generator.get_specification().data().is_certainly_finite(sort)),
         m_sort(sort)
     {
@@ -238,7 +233,9 @@ class state_data_type: public pins_data_type
 
     std::size_t deserialize(const std::string& s)
     {
-      return expression2index(data::data_expression(atermpp::read_from_string(s)));
+      atermpp::aterm t = atermpp::read_from_string(s);
+      data::data_expression d = atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(t));
+      return expression2index(d);
     }
 
     std::string print(int i) const
@@ -248,7 +245,8 @@ class state_data_type: public pins_data_type
 
     std::size_t parse(const std::string& s)
     {
-      return expression2index(data::parse_data_expression(s, m_generator.get_specification().data()));
+      data::data_expression e = data::parse_data_expression(s, m_generator.get_specification().data());
+      return expression2index(e);
     }
 
     const std::string& name() const
@@ -268,8 +266,21 @@ class action_label_data_type: public pins_data_type
   protected:
     std::string m_name;
 
+    std::size_t expression2index(const lps::multi_action& x)
+    {
+      atermpp::aterm_appl a = lps::detail::multi_action_to_aterm(x);
+      return m_indexed_set[a];
+    }
+
+    lps::multi_action index2expression(std::size_t i) const
+    {
+      atermpp::aterm a = m_indexed_set.get(i);
+      atermpp::aterm_appl t = static_cast<atermpp::aterm_appl>(a);
+      return t;
+    }
+
   public:
-    action_label_data_type(lps::next_state_generator& generator)
+    action_label_data_type(lps::old::next_state_generator& generator)
       : pins_data_type(generator, false)
     {
       m_name = "action_labels";
@@ -277,23 +288,26 @@ class action_label_data_type: public pins_data_type
 
     std::string serialize(int i) const
     {
-      return m_indexed_set.get(i).to_string();
+      atermpp::aterm_appl a = lps::detail::multi_action_to_aterm(index2expression(i));
+      return a.to_string();
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      return m_indexed_set[atermpp::read_from_string(s)];
+      atermpp::aterm a = atermpp::read_from_string(s);
+      atermpp::aterm_appl t = static_cast<atermpp::aterm_appl>(a);
+      return expression2index(t);
     }
 
     std::string print(int i) const
     {
-      return lps::pp(lps::multi_action(atermpp::aterm_appl(m_indexed_set.get(i))));
+      return lps::pp(index2expression(i));
     }
 
     std::size_t parse(const std::string& s)
     {
       lps::multi_action m = lps::parse_multi_action(s, m_generator.get_specification().action_labels(), m_generator.get_specification().data());
-      return m_indexed_set[detail::multi_action_to_aterm(m)];
+      return expression2index(m);
     }
 
     const std::string& name() const
@@ -312,15 +326,15 @@ class pins
 {
   public:
     typedef int* ltsmin_state_type; /**< the state type used by LTSMin */
+    typedef lps::old::next_state_generator::state_type next_state_type; /**< the state type used by the next state generator */
 
   protected:
     size_t m_group_count;
     size_t m_state_length; /**< the number of process parameters */
     std::vector<std::vector<size_t> > m_read_group;
     std::vector<std::vector<size_t> > m_write_group;
-    lps::specification m_specification;
-    lps::next_state_generator m_generator;
-    lps::next_state_generator::substitution_t m_substitution;
+    lps::old::next_state_generator m_generator;
+    atermpp::function_symbol m_state_fun; /**< the function symbol used for 'next states' */
     std::vector<std::string> m_process_parameter_names;
 
     // The type mappings
@@ -460,6 +474,39 @@ class pins
       }
     }
 
+    /// \brief Converts state component represented as integers into aterms (in the next state format).
+    /// It is used in the function initial_state, to avoid creating a temporary aterm_appl object.
+    template <typename DataTypeMapIter>
+    struct state_component_converter: public std::unary_function<int, atermpp::aterm>
+    {
+      DataTypeMapIter& iter;
+
+      state_component_converter(DataTypeMapIter& iter_)
+        : iter(iter_)
+      {}
+
+      atermpp::aterm operator()(int i) const
+      {
+        return (*iter++)->indexed_set().get(i);
+      }
+    };
+
+    template <typename DataTypeMapIter>
+    state_component_converter<DataTypeMapIter> make_state_component_converter(DataTypeMapIter& i) const
+    {
+      return state_component_converter<DataTypeMapIter>(i);
+    }
+
+    /// \brief Converts an ltsmin_state to the corresponding aterm.
+    atermpp::aterm_appl initial_state(ltsmin_state_type const& src, std::size_t nparams) const
+    {
+      std::vector<pins_data_type*>::const_iterator i = m_data_types.begin();
+      return atermpp::aterm_appl(m_state_fun,
+                                 boost::make_transform_iterator(src, make_state_component_converter(i)),
+                                 boost::make_transform_iterator(src + nparams, make_state_component_converter(i))
+                                );
+    }
+
   public:
     typedef std::size_t datatype_index; /**< the index type for datatype maps */
 
@@ -475,21 +522,16 @@ class pins
       return m_generator.get_specification().process().action_summands().size();
     }
 
-    static lps::specification load_specification(const std::string& filename)
-    {
-      lps::specification specification;
-      specification.load(filename);
-      return specification;
-    }
-
     /// \brief Constructor
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
-      : m_specification(load_specification(filename)),
-        m_generator(m_specification, data::rewriter(m_specification.data(), data::parse_rewrite_strategy(rewriter_strategy)))
+      : m_generator(filename, data::parse_rewrite_strategy(rewriter_strategy))
     {
       initialize_read_write_groups();
+
+      // TODO: this is ugly, is there a better way to create states?
+      m_state_fun = atermpp::function_symbol("STATE", process_parameter_count(), false);
 
       // store the process parameter names in a vector, to have random access to them
       data::variable_list params = m_generator.get_specification().process().process_parameters();
@@ -613,10 +655,11 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      lps::next_state_generator::internal_state_t initial_state = m_generator.internal_initial_state();
-      for (size_t i = 0; i < m_state_length; i++)
-      {
-        s[i] = state_type_map(i)[initial_state(i)];
+      atermpp::aterm a = m_generator.initial_state();
+      atermpp::aterm_appl init(static_cast<atermpp::aterm_appl>(a));
+	    for (size_t i = 0; i < m_state_length; ++i)
+	    {
+	      s[i] = state_type_map(i)[init(i)];
       }
     }
 
@@ -652,21 +695,16 @@ class pins
     void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
-      for (size_t i = 0; i < nparams; i++)
+      atermpp::aterm_appl init = initial_state(src, nparams);
+      old::next_state_generator::iterator i = m_generator.begin(init);
+      while (++i)
       {
-        state_arguments[i] = state_type_map(i).get(src[i]);
-      }
-      lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
-
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution); i; i++)
-      {
-        lps::next_state_generator::internal_state_t destination = i->internal_state();
-        for (size_t j = 0; j < nparams; j++)
+        const lps::old::next_state_generator::state_type& s = *i;
+        for (size_t i = 0; i < nparams; ++i)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
         f(dest, labels);
       }
     }
@@ -692,22 +730,17 @@ class pins
     void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
-      for (size_t i = 0; i < nparams; i++)
+      atermpp::aterm_appl init = initial_state(src, nparams);
+      old::next_state_generator::iterator i = m_generator.begin(init, group);
+      while (++i)
       {
-        state_arguments[i] = state_type_map(i).get(src[i]);
-      }
-      lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
-
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution, group); i; i++)
-      {
-        lps::next_state_generator::internal_state_t destination = i->internal_state();
-        for (size_t j = 0; j < nparams; j++)
+        const lps::old::next_state_generator::state_type& s = *i;
+        for (size_t i = 0; i < nparams; ++i)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[i] = state_type_map(i)[s[i]];
         }
-        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
-        f(dest, labels);
+        labels[0] = action_label_type_map()[detail::multi_action_to_aterm(s.label())];
+        f(dest, labels, group);
       }
     }
 

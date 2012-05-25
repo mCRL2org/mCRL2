@@ -84,6 +84,8 @@ XSimMain::XSimMain(wxWindow* parent, wxWindowID id, const wxString& title,
   Connect(id, wxEVT_SIZE, wxSizeEventHandler(XSimMain::OnResize), 0, this);
   Connect(id, wxEVT_MAXIMIZE, wxMaximizeEventHandler(XSimMain::OnMaximize), 0, this);
 
+  state_varnames.protect();
+
   simulator = new StandardSimulatorGUI(this);
   simulator->Register(this);
 
@@ -117,6 +119,8 @@ XSimMain::~XSimMain()
   simulator->Unregister(this);
 
   delete tracewin;
+
+  state_varnames.unprotect();
 
 #if wxCHECK_VERSION(2, 9, 0)
   this->PopEventHandler(true);
@@ -411,7 +415,7 @@ void XSimMain::Initialise(const variable_list Pars)
 
 void XSimMain::StateChanged(
                      mcrl2::lps::state State,
-                     std::vector<mcrl2::lps::multi_action> NextActions,
+                     atermpp::vector<mcrl2::lps::multi_action> NextActions,
                      std::vector<mcrl2::lps::state> NextStates)
 {
   try
@@ -444,7 +448,7 @@ void XSimMain::StateChanged(
  void XSimMain::StateChanged(
                      mcrl2::lps::multi_action,
                      mcrl2::lps::state State,
-                     std::vector<mcrl2::lps::multi_action> NextActions,
+                     atermpp::vector<mcrl2::lps::multi_action> NextActions,
                      std::vector<mcrl2::lps::state> NextStates)
 { 
   StateChanged(State, NextActions, NextStates);
@@ -903,7 +907,7 @@ static void sort_transitions(wxArrayString& actions, wxArrayString& statechanges
   }
 }
 
-void XSimMain::UpdateTransitions(const std::vector < multi_action > &next_actions, const std::vector < state > &next_states)
+void XSimMain::UpdateTransitions(const atermpp::vector < multi_action > &next_actions, const std::vector < state > &next_states)
 {
   wxArrayString actions;
   wxArrayString statechanges;

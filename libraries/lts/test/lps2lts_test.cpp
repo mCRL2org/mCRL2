@@ -17,6 +17,8 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
@@ -33,7 +35,26 @@ using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
+// Get filename based on timestamp
+// Warning: is prone to race conditions
+static std::string temporary_filename(std::string const& prefix = "")
+{
+  time_t now = time(NULL);
+  std::stringstream now_s;
+  now_s << now;
 
+  std::string basename(prefix + now_s.str());
+  boost::filesystem::path result(basename);
+  int suffix = 0;
+  while (boost::filesystem::exists(result))
+  {
+    std::stringstream suffix_s;
+    suffix_s << suffix;
+    result = boost::filesystem::path(basename + suffix_s.str());
+    ++suffix;
+  }
+  return result.string();
+}
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
@@ -53,7 +74,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   options.expl_strat = strategy;
   options.stateformat = format;
 
-  options.lts = utilities::temporary_filename("lps2lts_test_file");
+  options.lts = temporary_filename("lps2lts_test_file");
 
   LTS_TYPE result;
   options.outformat = result.type();

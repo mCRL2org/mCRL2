@@ -157,7 +157,7 @@ inline void detail::free_term(detail::_aterm *t)
 #ifndef NDEBUG
   if (t->m_function_symbol==AS_EMPTY_LIST) // When destroying ATempty, it appears that all other terms have been removed.
   {
-    //check_that_all_objects_are_free();
+    check_that_all_objects_are_free();
     return;
   }
 #endif

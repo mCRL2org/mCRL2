@@ -1,4 +1,4 @@
-# Authors: Frank Stappers, Aad Mathijssen and Rimco Boudewijns
+# Authors: Frank Stappers and Aad Mathijssen
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -10,8 +10,8 @@
 project(ltsgraph-qt)
 cmake_minimum_required(VERSION 2.6)
 
-if (MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
+
 
 IF(APPLE)
    INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
@@ -20,72 +20,59 @@ IF(APPLE)
    MARK_AS_ADVANCED (GLUT_LIBRARY
                      OpenGL_LIBRARY)
    SET(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
-ELSEIF(WIN32)
-   SET(MCRL2gl GLU32)
 ELSE(APPLE)
    SET(MCRL2gl GLU )
-ENDIF(APPLE)
+ENDIF (APPLE)
 
+if (MCRL2_ENABLE_GUI_TOOLS)
 if (QT4_FOUND)
+
 set(QT_USE_QTOPENGL TRUE)
-SET(QT_USE_QTXML TRUE)
 include(${QT_USE_FILE})
 
-set(LTSGRAPH_UI_FILES
+set(UI_FILES
   mainwindow.ui
-  glwidget.ui
   springlayout.ui
-  information.ui
-  dimensionsdialog.ui
+  glwidget.ui
 )
-qt4_wrap_ui(LTSGRAPH_UI_HEADERS ${LTSGRAPH_UI_FILES})
+qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
-set(LTSGRAPH_MOC_HEADERS
+set(MOC_HEADERS
   mainwindow.h
   glwidget.h
-  glscene.h
-  graph.h
   springlayout.h
-  information.h
-  dimensionsdialog.h
 )
-qt4_wrap_cpp(LTSGRAPH_MOC_SOURCES ${LTSGRAPH_MOC_HEADERS})
+qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
-set(LTSGRAPH_SRC_FILES
-  ${LTSGRAPH_UI_HEADERS}
-  ${LTSGRAPH_MOC_SOURCES}
+set(SRC_FILES
+  ${UI_HEADERS}
+  ${MOC_SOURCES}
+  glscene.cpp
+  glwidget.cpp
+  graph.cpp
   main.cpp
   mainwindow.cpp
-  glwidget.cpp
-  glscene.cpp
-  graph.cpp
   springlayout.cpp
-  information.cpp
-  dimensionsdialog.cpp
 )
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${LTSGRAPH_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} 
   ${QT_LIBRARIES}
-  ${QT_QTMAIN_LIBRARY}
-  #mcrl2_aterm
-  mcrl2_core
-  mcrl2_data
-  mcrl2_lps
   mcrl2_lts
+  mcrl2_core
+  mcrl2_aterm
+  mcrl2_data
   mcrl2_utilities
-  mcrl2_utilities_qt
+  mcrl2_lps
   svc
-  gl2ps
   ${MCRL2gl}
+  gl2ps
 )
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-# For promoted widgets
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

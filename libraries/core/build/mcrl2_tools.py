@@ -179,9 +179,3 @@ def run_bessolve(filename, strategy = 'spm', timeout = 10):
 def run_pbesrewr(pbesfile1, pbesfile2, timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
     timeout_command('pbesrewr',  '%s %s' % (pbesfile1, pbesfile2), timeout)
-
-def run_mcrl22lps(mcrl2file, lpsfile, timeout = 10):
-    timeout_command('mcrl22lps',  '%s %s' % (mcrl2file, lpsfile), timeout)
-
-def run_lps2lts(lpsfile, destfile, options, timeout = 10):
-    timeout_command('lps2lts',  '%s %s %s' % (options, lpsfile, destfile), timeout)

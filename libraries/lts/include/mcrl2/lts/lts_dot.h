@@ -127,12 +127,11 @@ class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_stri
      *  \param[in] filename Name of the file from which this lts is read.
      */
     void load(const std::string& filename);
-    void loadnew(const std::string& filename);
-    
+
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is written to stdout.
      *  \param[in] filename Name of the file to which this lts is written.
-     */   
+     */
     void save(const std::string& filename) const;
 };
 

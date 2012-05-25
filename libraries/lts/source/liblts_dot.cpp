@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/parse.h"
 #include "liblts_dotparser.h"
+
 
 using namespace mcrl2::core;
 
@@ -44,28 +44,6 @@ void lts_dot_t::load(const string& filename)
   }
   set_initial_state(0);
 
-}
-
-void lts_dot_t::loadnew(const std::string& filename)
-{
-  if (filename.empty())
-  {
-    parse_dot_specification(std::cin, *this);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (!in)
-    {
-      throw mcrl2::runtime_error("Cannot open .dot file " + filename + ".");
-    }
-    parse_dot_specification(in, *this);
-  }
-  if (num_states() == 0)
-  {
-    add_state();
-  }
-  set_initial_state(0);
 }
 
 void lts_dot_t::save(const string& filename) const
@@ -109,7 +87,7 @@ void lts_dot_t::save(const string& filename) const
     }
   }
   const std::vector<transition> &trans=get_transitions();
-  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
+  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t) 
   {
     if (has_state_info())
     {

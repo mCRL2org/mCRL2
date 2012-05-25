@@ -12,7 +12,6 @@
 #ifndef MCRL2_LTS_PARSE_H
 #define MCRL2_LTS_PARSE_H
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "mcrl2/core/parse.h"
@@ -228,7 +227,7 @@ struct fsm_actions: public core::default_parser_actions
     {
       result = "Nat";
     }
-    return boost::algorithm::trim_copy(result);
+    return result;
   }
 
   std::string parse_DomainCardinality(const core::parse_node& node)
@@ -368,13 +367,6 @@ void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
   p.destroy_parse_node(node);
 }
 
-inline
-void parse_fsm_specification(std::istream& in, lts_fsm_t& result)
-{
-  std::string text = utilities::read_text(in);
-  parse_fsm_specification(text, result);
-}
-
 struct dot_actions: public core::default_parser_actions
 {
   dot_actions(const core::parser_table& table_, lts_dot_t& dot_)
@@ -439,18 +431,18 @@ struct dot_actions: public core::default_parser_actions
 
   std::string parse_ID(const core::parse_node& node)
   {
-    std::string result = node.string();
-    if (result.size() >= 2 && result[0] == '"')
-    {
-      result = result.substr(1, result.size() - 2);
-    }
-    return result;
+    return node.string();
   }
 
   void parse_graph(const core::parse_node& node)
   {
-    std::string id = parse_ID(node.child(2));
-    parse_stmt_list(node.child(4));
+    std::string id = parse_ID(node.child(4));
+    parse_stmt_list(node.child(6));
+  }
+
+  void parse_stmt_list(const core::parse_node& node)
+  {
+    traverse(node, make_visitor(table, "stmt", boost::bind(&dot_actions::parse_stmt, this, _1)));
   }
 
   void parse_stmt(const core::parse_node& node)
@@ -460,45 +452,29 @@ struct dot_actions: public core::default_parser_actions
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attr_stmt")) { } // ignore !?!?
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ID") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "ID")) { } // ignore !?!?
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph")) { } // ignore !?!?
-    else
-    {
-      report_unexpected_node(node);
-    }
+    report_unexpected_node(node);
   }
 
-  void parse_stmt_list(const core::parse_node& node)
+  std::string parse_attr_list (const core::parse_node& node)
   {
-    traverse(node, make_visitor(table, "stmt", boost::bind(&dot_actions::parse_stmt, this, _1)));
-  }
-
-  std::string parse_attr_list(const core::parse_node& node)
-  {
-    std::string s1;
-    if (node.child(1))
-    {
-      s1 = parse_a_list(node.child(1).child(0));
-    }
-    std::string s3;
-    if (node.child(3).child(0))
-    {
-      s3 = parse_attr_list(node.child(3).child(0));
-    }
+    std::string s1 = node.child(1).string();
+    std::string s3 = node.child(3).string();
     return s1.empty() ? s3 : s1;
   }
 
   // TODO: check if this is the correct way of handling an a_list
-  std::string parse_a_list(const core::parse_node& node)
+  std::string parse_a_list (const core::parse_node& node)
   {
     std::string s0 = parse_ID(node.child(0));
     std::string s1;
-    if (node.child(1).child(0))
+    if (node.child(1))
     {
-      s1 = parse_ID(node.child(1).child(0).child(1));
+      s1 = node.child(1).child(1).string();
     }
     std::string s3;
-    if (node.child(3).child(0))
+    if (node.child(3))
     {
-      s3 = parse_a_list(node.child(3).child(0));
+      s3 = parse_a_list(node.child(3));
     }
     if (s0 == "label")
     {
@@ -515,22 +491,14 @@ struct dot_actions: public core::default_parser_actions
   {
     state_sequence.clear();
     traverse(node, make_visitor(table, "node_id", boost::bind(&dot_actions::parse_node_id, this, _1)));
-    std::string label;
-    if (node.child(2).child(0))
-    {
-      label = parse_attr_list(node.child(2).child(0));
-    }
+    std::string label = node.child(3).string();
     add_transitions(state_sequence, label);
   }
 
   void parse_node_stmt(const core::parse_node& node)
   {
     parse_node_id(node.child(0));
-    std::string label;
-    if (node.child(1).child(0))
-    {
-      label = parse_attr_list(node.child(1).child(0));
-    }
+    std::string label = node.child(1).string();
     dot_state(state_sequence.back(), label);
   }
 
@@ -543,20 +511,12 @@ struct dot_actions: public core::default_parser_actions
 inline
 void parse_dot_specification(const std::string& text, lts_dot_t& result)
 {
-  result = lts_dot_t();
   core::parser p(parser_tables_dot);
-  unsigned int start_symbol_index = p.start_symbol_index("dot");
+  unsigned int start_symbol_index = p.start_symbol_index("graph");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   dot_actions(parser_tables_dot, result).parse_graph(node);
   p.destroy_parse_node(node);
-}
-
-inline
-void parse_dot_specification(std::istream& in, lts_dot_t& result)
-{
-  std::string text = utilities::read_text(in);
-  parse_dot_specification(text, result);
 }
 
 } // namespace lts

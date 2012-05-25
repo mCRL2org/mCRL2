@@ -169,6 +169,9 @@ atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
   return core::detail::gsMakeBooleanEquation(eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
+/// \brief Read-only singly linked list of boolean equations
+typedef atermpp::term_list<boolean_equation> boolean_equation_list;
+
 } // namespace bes
 
 } // namespace mcrl2

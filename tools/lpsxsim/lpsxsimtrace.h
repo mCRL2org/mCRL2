@@ -13,6 +13,7 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/lps/simbase.h"
 
 //----------------------------------------------------------------------------
@@ -36,11 +37,11 @@ class XSimTrace: public wxFrame, public SimulatorViewInterface
     virtual void StateChanged(
                      mcrl2::lps::multi_action,
                      const mcrl2::lps::state,
-                     std::vector<mcrl2::lps::multi_action>,
+                     atermpp::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
      virtual void StateChanged(
                      const mcrl2::lps::state,
-                     std::vector<mcrl2::lps::multi_action>,
+                     atermpp::vector<mcrl2::lps::multi_action>,
                      std::vector<mcrl2::lps::state>);
     virtual void Reset(mcrl2::lps::state State);
     virtual void Undo(size_t Count);

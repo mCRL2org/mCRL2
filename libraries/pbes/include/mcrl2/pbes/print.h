@@ -113,16 +113,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived()(x.variable());
     // TODO: change the weird convention of putting the rhs of an equation on a new line
     derived().print(" =\n       ");
-    bool print_val = data::is_data_expression(x.formula());
-    if (print_val)
-    {
-      derived().print("val(");
-    }
     derived()(x.formula());
-    if (print_val)
-    {
-      derived().print(")");
-    }
     derived().print(";");
     derived().leave(x);
   }

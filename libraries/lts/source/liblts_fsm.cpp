@@ -16,7 +16,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/parse.h"
 #include "liblts_fsmparser.h"
 
 using namespace mcrl2::core;
@@ -137,28 +136,6 @@ void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
     is.close();
   }
   if (num_states()==0)
-  {
-    add_state();
-  }
-  set_initial_state(0);
-}
-
-void mcrl2::lts::lts_fsm_t::loadnew(const std::string& filename)
-{
-  if (filename.empty())
-  {
-    parse_fsm_specification(std::cin, *this);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (!in)
-    {
-      throw mcrl2::runtime_error("Cannot open .fsm file " + filename + ".");
-    }
-    parse_fsm_specification(in, *this);
-  }
-  if (num_states() == 0)
   {
     add_state();
   }

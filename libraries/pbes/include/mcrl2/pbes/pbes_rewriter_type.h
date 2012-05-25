@@ -90,10 +90,6 @@ std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
       return "prover";
     case pfnf:
       return "pfnf";
-    case ppg:
-      return "ppg";
-    case bqnf_quantifier:
-      return "bqnf-quantifier";
     default:
     return "unknown pbes rewriter";
   }
@@ -118,9 +114,9 @@ std::string description(const pbes_rewriter_type type)
     case pfnf              :
       return "for rewriting into PFNF normal form";
     case ppg               :
-      return "for rewriting into Parameterised Parity Game form";
+      return "  'ppg' for rewriting into Parameterised Parity Game form";
     case bqnf_quantifier   :
-      return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
+      return "  'bqnf-quantifier' for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }
   throw mcrl2::runtime_error("unknown pbes rewriter");
 }

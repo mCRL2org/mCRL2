@@ -42,11 +42,11 @@ class XSimTraceDLL: public wxFrame, public SimulatorViewDLLInterface
     virtual void StateChanged(
                   mcrl2::lps::multi_action Transition,
                   const mcrl2::lps::state State,
-                  std::vector < mcrl2::lps::multi_action > next_actions,
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
                   std::vector < mcrl2::lps::state > next_states);
     virtual void StateChanged(
                   const mcrl2::lps::state State,
-                  std::vector < mcrl2::lps::multi_action > next_actions,
+                  atermpp::vector < mcrl2::lps::multi_action > next_actions,
                   std::vector < mcrl2::lps::state > next_states);
     virtual void Reset(mcrl2::lps::state  State);
     virtual void Undo(size_t Count);

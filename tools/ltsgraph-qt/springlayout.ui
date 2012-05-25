@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DockWidgetLayout</class>
- <widget class="QDockWidget" name="DockWidgetLayout">
+ <class>DockWidget</class>
+ <widget class="QDockWidget" name="DockWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -70,12 +70,6 @@
     </item>
     <item>
      <widget class="QSlider" name="sldNatLength">
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>100</number>
-      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -148,7 +142,7 @@
   <connection>
    <sender>sldAttraction</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onAttractionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -164,7 +158,7 @@
   <connection>
    <sender>sldHandleWeight</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onHandleWeightChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -180,7 +174,7 @@
   <connection>
    <sender>sldNatLength</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onNatLengthChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -196,7 +190,7 @@
   <connection>
    <sender>sldRepulsion</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onRepulsionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -212,7 +206,7 @@
   <connection>
    <sender>sldSpeed</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onSpeedChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -228,7 +222,7 @@
   <connection>
    <sender>cmbForceCalculation</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onForceCalculationChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -244,7 +238,7 @@
   <connection>
    <sender>btnStartStop</sender>
    <signal>clicked()</signal>
-   <receiver>DockWidgetLayout</receiver>
+   <receiver>DockWidget</receiver>
    <slot>onStartStop()</slot>
    <hints>
     <hint type="sourcelabel">

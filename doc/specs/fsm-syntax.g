@@ -25,7 +25,7 @@ ParameterName: Id ;
 
 DomainCardinality : '(' Number  ')' ;
 
-SortExpr: "[a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*" $term -1 ;
+SortExpr: "[a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*" ;
 
 DomainValueList : DomainValue* ;
 

@@ -69,7 +69,7 @@ wxArrayString get_process_references(wxXmlNode* p_diagram);
  * @pre p_doc_root is a valid pointer to an XML specification, p_architecture_diagram is a valid pointer to an XML architecture diagram, p_reference_id is a valid reference to an identifier of a process reference and p_reference_name is a valid reference to a name of a process reference.
  * @post A list containing the parameter declarations and initialisations of the inferred process reference is returned or error messages are produced.
  */
-list_of_varupdate get_process_reference_initialisation(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxString& p_reference_id, wxString& p_reference_name, atermpp::aterm_appl& datatype_spec);
+list_of_varupdate get_process_reference_initialisation(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, wxString& p_reference_id, wxString& p_reference_name, ATermAppl& datatype_spec);
 
 /**
  * Architecture reference inference function.
@@ -103,7 +103,7 @@ wxString get_state_name(wxXmlNode* p_process_diagram, wxString& p_id, bool& p_is
  * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_reference_id is a valid reference to a reference identifier.
  * @post An array containing the names and identifiers of all channels of the given reference is returned or error messages are produced.
  */
-arr_channel_id get_reference_channels(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, action_reference& p_reference, atermpp::aterm_appl& datatype_spec);
+arr_channel_id get_reference_channels(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, action_reference& p_reference, ATermAppl& datatype_spec);
 
 /**
  * Channels inference function.
@@ -235,7 +235,7 @@ wxString datatype_specification_mcrl2(wxXmlNode* p_doc_root);
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid architecture diagram and p_refs is a valid reference to an array of references (may be empty).
  * @post A string containing the mCRL2 specification for the converted architecture diagram is returned and p_refs, p_renameds and p_channel_comms are updated according to the diagram or error messages are produced and the empty string is returned.
  */
-void architecture_diagram_mcrl2(wxXmlNode* p_doc_root, wxString& p_diagram_id, arr_action_reference& p_refs, arr_renamed& p_renameds, arr_channel_comm& p_channel_comms, wxArrayString& p_specs, atermpp::aterm_appl& datatype_spec, bool p_verbose);
+void architecture_diagram_mcrl2(wxXmlNode* p_doc_root, wxString& p_diagram_id, arr_action_reference& p_refs, arr_renamed& p_renameds, arr_channel_comm& p_channel_comms, wxArrayString& p_specs, ATermAppl& datatype_spec, bool p_verbose);
 
 /**
  * XML process diagram to mCRL2 convertor function.
@@ -251,7 +251,7 @@ void architecture_diagram_mcrl2(wxXmlNode* p_doc_root, wxString& p_diagram_id, a
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid process diagram, p_sort_expressions is a valid reference to an array of sort expressions, p_actions is a valid reference to an array of actions, p_internal_specs is a valid reference to an array of internal specifications and p_specs is a valid reference to an array of specifications.
  * @post The XML process diagram is converted to mCRL2 and p_sort_expressions, p_actions, p_internal_specs and p_specs are updated accordingly or error messages are produced.
  */
-void process_diagram_mcrl2(wxXmlNode* p_doc_root, wxString& p_diagram_id, wxArrayString& p_sort_expressions, list_of_action& p_actions, wxArrayString& p_internal_specs, wxArrayString& p_specs, atermpp::aterm_appl& datatype_spec, bool p_verbose);
+void process_diagram_mcrl2(wxXmlNode* p_doc_root, wxString& p_diagram_id, wxArrayString& p_sort_expressions, list_of_action& p_actions, wxArrayString& p_internal_specs, wxArrayString& p_specs, ATermAppl& datatype_spec, bool p_verbose);
 
 /**
  * XML process diagram to mCRL2 sort expression convertor function.
@@ -277,7 +277,7 @@ wxString process_diagram_mcrl2_sort(wxXmlNode* p_process_diagram);
  * @pre p_doc_root is a valid pointer to an XML node, p_process_diagram is a valid pointer to an XML process diagram, p_preamble_parameter_decls is a valid reference to a parameter declaration and p_preamble_local_var_decls is a valid reference to a local variable declaration.
  * @post The internal process specification is returned or the empty string is returned and error messages are produced.
  */
-wxString process_diagram_mcrl2_internal_proc(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, atermpp::aterm_appl& datatype_spec);
+wxString process_diagram_mcrl2_internal_proc(wxXmlNode* p_doc_root, wxXmlNode* p_process_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * XML process diagram to mCRL2 process specification convertor function.
@@ -307,7 +307,7 @@ wxString process_diagram_mcrl2_proc(wxXmlNode* p_process_diagram, list_of_decl& 
  * @pre p_process_diagram is a valid pointer to an XML process diagram, p_transition is a valid pointer to an XML transition, p_declaration is a valid reference to an mCRL2 process definition, p_diagram_name is a valid process diagram name, p_preamble_parameter_decls is a valid reference to a parameter declaration and p_preamble_local_var_decls is a valid reference to a local variable declaration.
  * @post The transition is parsed and the results are appended to p_declaration or error messages are produced.
  */
-wxString transition_mcrl2(wxXmlNode* p_process_diagram, wxXmlNode* p_transition, bool p_alternative, wxString& p_diagram_name, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, atermpp::aterm_appl& datatype_spec);
+wxString transition_mcrl2(wxXmlNode* p_process_diagram, wxXmlNode* p_transition, bool p_alternative, wxString& p_diagram_name, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * XML process reference transition parsing function.
@@ -323,7 +323,7 @@ wxString transition_mcrl2(wxXmlNode* p_process_diagram, wxXmlNode* p_transition,
  * @pre p_doc_root is a valid pointer to an XML node, p_reference_state is a valid pointer to an XML reference state, p_diagram name is a valid process diagram name, p_declarations is a valid reference to an mCRL2 process definition, p_preamble_parameter_decls is a valid reference to a parameter declaration, p_preamble_local_var_decls is a valid reference to a loval variable declaration.
  * @post The hidden transition of the process reference is parsed and the results are appended to p_declarations or error messages are produced.
  */
-wxString transition_reference_mcrl2(wxXmlNode* p_doc_root, wxXmlNode* p_reference_state, bool p_alternative, wxXmlNode* p_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, atermpp::aterm_appl& datatype_spec);
+wxString transition_reference_mcrl2(wxXmlNode* p_doc_root, wxXmlNode* p_reference_state, bool p_alternative, wxXmlNode* p_diagram, list_of_decl& p_preamble_parameter_decls, list_of_decl_init& p_preamble_local_var_decls, ATermAppl& datatype_spec);
 
 /**
  * XML initial designator inference function.
@@ -359,7 +359,7 @@ wxString process_diagram_mcrl2_init(wxXmlNode* p_doc_root,
  * @pre p_doc_root is a valid pointer to an XML specification, p_architecture_diagram is a valid pointer to an XML architecture diagram and p_possibles is a valid reference to an array of actions.
  * @post All possible actions in this architecture diagram are stored in p_possibles, sorted by reference.
  */
-void architecture_diagram_mcrl2_actions(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, arr_action_reference& p_possibles, atermpp::aterm_appl& datatype_spec);
+void architecture_diagram_mcrl2_actions(wxXmlNode* p_doc_root, wxXmlNode* p_architecture_diagram, arr_action_reference& p_possibles, ATermAppl& datatype_spec);
 
 /**
  * XML architecture diagram to mCRL2 initial process specification convertor function.

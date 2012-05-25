@@ -45,7 +45,6 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/simulator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/simbase.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/simulation.cpp
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 

@@ -5,35 +5,31 @@
 #include "graph.h"
 #include "glwidget.h"
 #include "springlayout.h"
-#include "information.h"
 
 namespace Ui {
-  class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-  public:
+public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void openFile(QString fileName);
-
-  private slots:
-    void onOpenFile();
-    void onExportImage();
-    void onImportXML();
-    void onExportXML();
+private slots:
+    void onOpenFile(const QString& filename);
+    void onExportImage(const QString& filename);
     void onWidgetResized(const Graph::Coord3D& newsize);
     void on3DChanged(bool enabled);
     void onTimer();
-  private:
+private:
     Ui::MainWindow *m_ui;
     GLWidget* m_glwidget;
     Graph::Graph m_graph;
     Graph::SpringLayout* m_layout;
-    Graph::Information* m_information;
     QTimer* m_timer;
+    QFileDialog* m_savedialog;
+    QFileDialog* m_opendialog;
 
     float m_dXRot, m_dYRot, m_dDepth, m_targetDepth;
     int m_anim;

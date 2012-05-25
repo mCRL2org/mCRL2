@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>LTSGraph</string>
+   <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>738</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -63,9 +63,6 @@
     </property>
     <addaction name="actOpenFile"/>
     <addaction name="actExportImage"/>
-    <addaction name="separator"/>
-    <addaction name="actImport_XML"/>
-    <addaction name="actExport_XML"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -73,9 +70,6 @@
     </property>
     <addaction name="act3D"/>
     <addaction name="actLayoutControl"/>
-    <addaction name="actVisualization"/>
-    <addaction name="actInformation"/>
-    <addaction name="actOutput"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -89,24 +83,17 @@
    <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockOutput">
-   <property name="minimumSize">
-    <size>
-     <width>200</width>
-     <height>100</height>
-    </size>
+  <action name="actGenerateRandomGraph">
+   <property name="enabled">
+    <bool>true</bool>
    </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   <property name="text">
+    <string>Generate &amp;random graph</string>
    </property>
-   <property name="windowTitle">
-    <string/>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
-  </widget>
+  </action>
   <action name="actLayoutControl">
    <property name="checkable">
     <bool>true</bool>
@@ -124,9 +111,6 @@
   <action name="actOpenFile">
    <property name="text">
     <string>&amp;Open</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="act3D">
@@ -163,59 +147,9 @@
    <property name="text">
     <string>&amp;Export image...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
-   </property>
-  </action>
-  <action name="actImport_XML">
-   <property name="text">
-    <string>Import XML</string>
-   </property>
-  </action>
-  <action name="actExport_XML">
-   <property name="text">
-    <string>Export XML</string>
-   </property>
-  </action>
-  <action name="actVisualization">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Visualization</string>
-   </property>
-  </action>
-  <action name="actInformation">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Information</string>
-   </property>
-  </action>
-  <action name="actOutput">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>mCRL2 Output</string>
-   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>mcrl2::utilities::qt::LogWidget</class>
-   <extends>QWidget</extends>
-   <header>mcrl2/utilities/logwidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
  <slots>

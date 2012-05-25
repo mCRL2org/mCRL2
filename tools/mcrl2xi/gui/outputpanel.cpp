@@ -97,7 +97,7 @@ class message_relay
 
     ~message_relay()
     {
-      mcrl2::log::mcrl2_logger::unregister_output_policy(m_output_policy);
+      mcrl2::log::mcrl2_logger::register_output_policy(m_output_policy);
 
       delete std::cerr.rdbuf(m_error_stream);
     }

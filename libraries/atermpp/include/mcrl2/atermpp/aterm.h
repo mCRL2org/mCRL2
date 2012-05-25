@@ -74,16 +74,13 @@ fprintf(stderr,"increase reference count %ld  %p\n",t->reference_count,t);
       m_term=t;
     }
 
-public:  // Functions below should become protected.
     /// \brief Constructor.
     /// \detail The function symbol must have arity 0. This function
     /// is for internal use only. Use term_appl(sym) in applications.
-    /// \note Since this constructor is called in aterm_list, it cannot be protected.
-    ///       See e.g. the explanation at
-    ///       http://stackoverflow.com/questions/2393325/one-question-about-protected-constructor
     /// \param sym A function symbol.
     aterm(const function_symbol &sym);
 
+  public:  // Functions below should become protected.
     detail::_aterm & operator *() const
     {
       assert(m_term==NULL || m_term->reference_count>0);

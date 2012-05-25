@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERM_ATERM_H
 #define MCRL2_ATERM_ATERM_H
 
-#include <cstdarg> // va_start and friends
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"

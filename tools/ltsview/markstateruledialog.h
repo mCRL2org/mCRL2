@@ -13,10 +13,11 @@
 #define MARKSTATERULEDIALOG_H
 
 #include <map>
-#include <set>
 #include <vector>
 #include <wx/wx.h>
 
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/utilities/colorbutton.h"
 
 class LTS;

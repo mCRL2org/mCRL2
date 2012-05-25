@@ -11,28 +11,25 @@ class GLWidgetImpl;
 
 class GLWidgetUi;
 
-struct MoveRecord;
-
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
-  public:
+public:
     enum DragMode
     {
-      dm_none,
-      dm_dragnode,
-      dm_rotate,
-      dm_rotate_2d,
-      dm_translate,
-      dm_zoom,
-      dm_paint
+        dm_none,
+        dm_dragnode,
+        dm_rotate,
+        dm_translate,
+        dm_zoom,
+        dm_paint
     };
-  private:
+private:
     GLWidgetUi* m_ui;
     Graph::Graph& m_graph;
     GLScene::Selection m_hover;
     DragMode m_dragmode;
-    MoveRecord* m_dragnode;
+    Graph::Node* m_dragnode;
     QPoint m_dragstart;
     QColor m_paintcolor;
     bool m_painting;
@@ -47,7 +44,7 @@ class GLWidget : public QGLWidget
     void resetMatrices(bool selectionmode);
     void updateSelection();
     void billboardAt(const Graph::Coord3D& pos);
-  public:
+public:
     explicit GLWidget(Graph::Graph& graph, QWidget *parent = 0);
     virtual ~GLWidget();
 
@@ -61,44 +58,35 @@ class GLWidget : public QGLWidget
 
     void setDepth(float depth, size_t animation = 1);
     void rebuild();
-    void renderToFile(const QString& filename, const QString& filter, const int w = 1024, const int h = 768);
+    void renderToFile(const QString& filename, const QString& filter);
     void setPaint(const QColor& color);
     void startPaint();
     void endPaint();
     Graph::Coord3D size3();
     GLWidgetUi* ui(QWidget* parent = 0);
-
-    size_t nodeSize();
-    float fogDistance();
-  signals:
+signals:
     void widgetResized(const Graph::Coord3D& newsize);
-  public slots:
+public slots:
     void resetViewpoint(size_t animation = 1);
-    void toggleTransitionLabels(bool show);
-    void toggleStateLabels(bool show);
-    void toggleStateNumbers(bool show);
-    void toggleInitialMarking(bool show);
-    void toggleFog(bool show);
-    void setNodeSize(int size);
-    void setFogDistance(int dist);
+    void toggleLabels(bool show);
 };
 
 namespace Ui
 {
-  class GLWidget;
+    class GLWidget;
 }
 
 class GLWidgetUi : public QDockWidget
 {
     Q_OBJECT
-  private:
+private:
     GLWidget& m_widget;
     Ui::GLWidget* m_ui;
     QColorDialog* m_colordialog;
-  public:
+public:
     GLWidgetUi(GLWidget& widget, QWidget *parent = 0);
     ~GLWidgetUi();
-  public slots:
+public slots:
     void selectColor(const QColor& color);
     void togglePaintMode(bool paint);
 };

@@ -4,13 +4,13 @@ lps2lts
 Time
 ^^^^
 
-``default``
-"""""""""""
+``-rinnerc``
+""""""""""""
 
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/default/recent/time.svg
+.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rinnerc/recent/time.svg
    :align: center
    
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/default/all/time.svg>`__
+   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rinnerc/all/time.svg>`__
 
 ``-rjittyc``
 """"""""""""
@@ -19,25 +19,33 @@ Time
    :align: center
    
    `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc/all/time.svg>`__
-   
-``-rjittyc --alternative``
-""""""""""""""""""""""""""
 
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative/recent/time.svg
+``default``
+"""""""""""
+
+.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/default/recent/time.svg
    :align: center
    
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative/all/time.svg>`__
-   
-``-rjittyc --alternative --cached --prune``
-"""""""""""""""""""""""""""""""""""""""""""
-
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative__--cached__--prune/recent/time.svg
-   :align: center
-   
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative__--cached__--prune/all/time.svg>`__      
+   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/default/all/time.svg>`__
 
 Memory
 ^^^^^^
+
+``-rinnerc``
+""""""""""""
+
+.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rinnerc/recent/memory.svg
+   :align: center
+   
+   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rinnerc/all/memory.svg>`__
+
+``-rjittyc``
+""""""""""""
+
+.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc/recent/memory.svg
+   :align: center
+   
+   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc/all/memory.svg>`__
 
 ``default``
 """""""""""
@@ -46,27 +54,3 @@ Memory
    :align: center
    
    `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/default/all/memory.svg>`__
-   
-``-rjittyc``
-""""""""""""
-
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc/recent/memory.svg
-   :align: center
-   
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc/all/memory.svg>`__
-   
-``-rjittyc --alternative``
-""""""""""""""""""""""""""
-
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative/recent/memory.svg
-   :align: center
-   
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative/all/memory.svg>`__
-   
-``-rjittyc --alternative --cached --prune``
-"""""""""""""""""""""""""""""""""""""""""""
-
-.. figure:: http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative__--cached__--prune/recent/memory.svg
-   :align: center
-   
-   `Show plot of all measurements <http://www.mcrl2.org/performance/plots/tools/lps2lts/-rjittyc__--alternative__--cached__--prune/all/memory.svg>`__     
