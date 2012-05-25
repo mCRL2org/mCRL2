@@ -168,12 +168,12 @@ class symbolic_exploration_algorithm
           }
           else
           {
-            return exists(d, and_(expr_and(phi), F_or(phi)));
+            return exists(d, and_(expr_and(phi), F(phi))); // otherwise
           }
         }
         else
         {
-          return exists(d, and_(expr_and(phi), F_or(phi)));
+          return exists(d, and_(expr_and(phi), F(phi))); // otherwise
         }
       }
       throw mcrl2::runtime_error("unknown pbes expression encountered in F_or: " + pbes_system::pp(x));
@@ -237,12 +237,12 @@ class symbolic_exploration_algorithm
           }
           else
           {
-            return forall(d, imp(not_(expr_or(phi)), F_and(phi)));
+            return forall(d, imp(not_(expr_or(phi)), F(phi))); // otherwise
           }
         }
         else
         {
-          return forall(d, imp(not_(expr_or(phi)), F_and(phi)));
+          return forall(d, imp(not_(expr_or(phi)), F(phi))); // otherwise
         }
       }
       throw mcrl2::runtime_error("unknown pbes expression encountered in F_and: " + pbes_system::pp(x));
