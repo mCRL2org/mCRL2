@@ -187,8 +187,8 @@ static data_expression else_part(const data_expression e)
 
 static void split_condition(
   const data_expression e,
-  atermpp::vector < data_expression_list > &real_conditions,
-  atermpp::vector < data_expression_list > &non_real_conditions,
+  std::vector < data_expression_list > &real_conditions,
+  std::vector < data_expression_list > &non_real_conditions,
   const bool negate=false)
 {
   // mCRL2log(debug) << "Split condition " << data::pp(e) << "\n";
@@ -197,17 +197,17 @@ static void split_condition(
 
   if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
   {
-    atermpp::vector < data_expression_list >
+    std::vector < data_expression_list >
     real_conditions_aux1, non_real_conditions_aux1;
     split_condition(application(e).left(),real_conditions_aux1,non_real_conditions_aux1,negate);
-    atermpp::vector < data_expression_list >
+    std::vector < data_expression_list >
     real_conditions_aux2, non_real_conditions_aux2;
     split_condition(application(e).right(),real_conditions_aux2,non_real_conditions_aux2,negate);
-    for (atermpp::vector < data_expression_list >::const_iterator
+    for (std::vector < data_expression_list >::const_iterator
          i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
          i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
     {
-      for (atermpp::vector < data_expression_list >::const_iterator
+      for (std::vector < data_expression_list >::const_iterator
            i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
            i2r!=real_conditions_aux2.end(); ++i2r, ++i2n)
       {
@@ -219,10 +219,10 @@ static void split_condition(
   else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
   {
     split_condition(application(e).left(),real_conditions,non_real_conditions,negate);
-    atermpp::vector < data_expression_list >
+    std::vector < data_expression_list >
     real_conditions_aux, non_real_conditions_aux;
     split_condition(application(e).right(),real_conditions_aux,non_real_conditions_aux,negate);
-    for (atermpp::vector < data_expression_list >::const_iterator
+    for (std::vector < data_expression_list >::const_iterator
          i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
          i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
     {
@@ -311,12 +311,12 @@ static void normalize_specification(
   // summand_list sl;
   for (lps::deprecated::summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
-    atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
+    std::vector <data_expression_list> real_conditions, non_real_conditions;
     // mCRL2log(debug) << "SUMMANDNORM: " << lps::pp(*i) << "\n";
     // mCRL2log(debug) << "Condition in: " << data::pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
-    for (atermpp::vector <data_expression_list>::const_iterator
+    for (std::vector <data_expression_list>::const_iterator
          j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
          j_r!=real_conditions.end(); ++j_r, ++j_n)
     {
@@ -395,7 +395,7 @@ static void normalize_specification(
           }
 
           // Construct replacements to contain the nextstate values for real variables in a map
-          atermpp::map<variable, data_expression> replacements;
+          std::map<variable, data_expression> replacements;
           for (assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
           {
             if (j->lhs().sort() == sort_real::real_())
@@ -428,8 +428,8 @@ static void normalize_specification(
 /// \ret true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
   const std::vector < size_t > &inequalities_to_add_lhs_size,
-  const atermpp::vector < data_expression > &inequalities_to_add_lhs,
-  const atermpp::vector < data_expression > &inequalities_to_add_rhs,
+  const std::vector < data_expression > &inequalities_to_add_lhs,
+  const std::vector < data_expression > &inequalities_to_add_rhs,
   std::vector < summand_information > &summand_info,
   context_type& context,
   const rewriter& r,
@@ -473,8 +473,8 @@ static void add_postponed_inequalities_to_context(
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
   std::vector < size_t > &inequalities_to_add_lhs_size,
-  atermpp::vector < data_expression > &inequalities_to_add_lhs,
-  atermpp::vector < data_expression > &inequalities_to_add_rhs,
+  std::vector < data_expression > &inequalities_to_add_lhs,
+  std::vector < data_expression > &inequalities_to_add_rhs,
   std::vector < linear_inequality > &l,
   context_type& context,
   const rewriter& r)
@@ -554,7 +554,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
                          const bool is_may_summand=false)
 {
   // mCRL2log(debug) << "SUMMAND " << lps::pp(summand_info.get_summand()) << "\nCOND " << data::pp(new_condition) << "\n";
-  static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
+  static std::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
   // Used to recall which may actions labels have been
   // introduced, in order to re-use them.
@@ -633,9 +633,10 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
 
   nextstate = reverse(nextstate);
 
-  action_list new_actions=s.actions();
+  action_list new_actions;
   if ((!s.is_delta()) && is_may_summand)
   {
+    new_actions=s.actions();
     action_list resulting_actions;
     for (action_list::const_iterator i=new_actions.begin();
          i!=new_actions.end(); i++)
@@ -686,7 +687,7 @@ assignment_list determine_process_initialization(
 {
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
-  mutable_map_substitution< atermpp::map<variable, data_expression> > replacements;
+  mutable_map_substitution< std::map<variable, data_expression> > replacements;
   for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
   {
     replacements[i->lhs()] = i->rhs();
@@ -775,8 +776,8 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   context_type context; // Contains introduced variables
 
   std::vector < size_t > new_inequalities_sizes;
-  atermpp::vector < data_expression > new_inequalities_lhss;
-  atermpp::vector < data_expression > new_inequalities_rhss;
+  std::vector < data_expression > new_inequalities_lhss;
+  std::vector < data_expression > new_inequalities_rhss;
   int iteration = 0;
   do
   {
@@ -868,7 +869,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
 
   /* Generate the new summand list */
-  // atermpp::vector < data_expression_list > nextstate_context_combinations;
+  // std::vector < data_expression_list > nextstate_context_combinations;
   lps::deprecated::summand_list summands;
   action_label_list new_act_declarations;
   for (std::vector < summand_information >::iterator i = summand_info.begin();
@@ -878,7 +879,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
     // Construct the real time condition for summand in terms of xi variables.
 
-    /* atermpp::vector < data_expression_list >::const_iterator
+    /* std::vector < data_expression_list >::const_iterator
                          nextstate_value=i->nextstate_value_combinations_begin(); */
 
     for (std::vector < std::vector < linear_inequality > >::iterator

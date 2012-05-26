@@ -169,7 +169,10 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     /// \return The number of the function symbol.
     size_t number() const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      // First check below is a trick, function symbols with small numbers may
+      // be referred to, while the data structures containing the data about these
+      // functions may already have destroyed.
+      assert(m_number<=2 || m_number==size_t(-1) || AT_isValidAFun(m_number));
       return m_number;
     }
 

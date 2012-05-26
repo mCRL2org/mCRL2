@@ -168,13 +168,14 @@ inline void detail::free_term(detail::_aterm *t)
   {
     reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i]=aterm();
   }
+  size_t ref_count=function_symbol::at_lookup_table[function_symbol_index]->reference_count;
   t->m_function_symbol=function_symbol(); 
 
   TermInfo &ti = terminfo[size];
   t->next  = ti.at_freelist;
   ti.at_freelist = t; 
 
-  if (function_symbol_index==AS_INT.number()) // When destroying ATempty, it appears that all other terms have been removed.
+  if (function_symbol_index==AS_INT.number() && ref_count==1) // When destroying ATempty, it appears that all other terms have been removed.
   {
     assert(check_that_all_objects_are_free());
     return;
