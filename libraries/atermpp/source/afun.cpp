@@ -17,15 +17,9 @@
 namespace atermpp
 {
 
-#ifndef streq
-#  define streq(s,t)  (!(strcmp(s,t)))
-#endif
-
-
 /*{{{  defines */
 
 static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
-static const size_t SYMBOL_HASH_SIZE = 65353; /* nextprime(65335) */
 
 static const size_t MAGIC_PRIME = 7;
 
@@ -68,42 +62,22 @@ extern char* _strdup(const char* s);
 static void resize_table()
 {
   afun_table_class = afun_table_class+1;
-fprintf(stderr,"resize_afun_hashtable to class %ld\n",afun_table_class);
-#ifdef AT_32BIT
-  if (afun_table_class>=23) // In 32 bit mode only 22 bits are reserved for function symbols.
-  {
-    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^22 (= 4.194.304) different afuns on a 32 bit machine.");
-  }
-#endif
-#ifdef AT_64BIT
-  if (afun_table_class>=31)
-  {
-    throw std::runtime_error("afun.c:resize_table - cannot allocate space for more than 2^30 (= 1.073.741.824) different afuns on a 64 bit machine.");
-  }
-#endif
 
   afun_table_size  = AT_TABLE_SIZE(afun_table_class);
   afun_table_mask  = AT_TABLE_MASK(afun_table_class);
 
   afun_hashtable.clear();
   afun_hashtable.resize(afun_table_size,size_t(-1));
-  // afun_hashtable = (_SymEntry**)AT_realloc(afun_hashtable, new_size*sizeof(_SymEntry*));
-  /* if (!afun_hashtable)
-  {
-    throw std::runtime_error("afun.c:resize_table - could not allocate space for hashtable of " + to_string(new_size) + " afuns");
-  }
-  memset(afun_hashtable, 0, new_size*sizeof(_SymEntry*)); */
 
   for (size_t i=0; i<function_symbol::at_lookup_table.size(); i++)
   {
     _SymEntry* entry = function_symbol::at_lookup_table[i];
-    if (entry->reference_count>0)
-    {
-      HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
-      hnr &= afun_table_mask;
-      entry->next = afun_hashtable[hnr];
-      afun_hashtable[hnr] = i;
-    }
+    assert(entry->reference_count>0);
+    
+    HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
+    hnr &= afun_table_mask;
+    entry->next = afun_hashtable[hnr];
+    afun_hashtable[hnr] = i;
   }
 }
 
@@ -244,11 +218,6 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
 {
   const HashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
 
-  /* if (arity >= MAX_ARITY)
-  {
-    throw std::runtime_error("cannot handle symbols with arity " + to_string(arity) + "(max=" + to_string(MAX_ARITY-1) + ")");
-  } */
-
   /* Find symbol in table */
   size_t cur = afun_hashtable[hnr];
   while (cur!=size_t(-1) && !(at_lookup_table[cur]->arity()==arity &&
@@ -290,12 +259,13 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
     afun_hashtable[hnr] = cur;
   }
 
+  m_number=cur;
+  increase_reference_count<false>(m_number);
+
   if (at_lookup_table.size()>=afun_table_size) 
   {
     resize_table();
   }
-  m_number=cur;
-  increase_reference_count<false>(m_number);
 }
 
 /*}}}  */
