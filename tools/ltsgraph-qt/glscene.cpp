@@ -1,3 +1,12 @@
+// Author(s): Rimco Boudewijns and Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #include <QtOpenGL>
 #include <assert.h>
 #include <cstdio>
@@ -63,8 +72,8 @@ struct TextureData
 
     TextureData()
       : transition_widths(NULL), transition_heights(NULL), transition_textures(NULL), transition_count(0),
-        state_widths(NULL), state_heights(NULL), state_textures(NULL),
-        number_widths(NULL), number_heights(NULL), number_textures(NULL), state_count(0), statenr_count(0)
+        state_widths(NULL), state_heights(NULL), state_textures(NULL), state_count(0),
+        number_widths(NULL), number_heights(NULL), number_textures(NULL), statenr_count(0)
     { }
 
     ~TextureData()
@@ -897,7 +906,7 @@ void GLScene::init(const QColor& clear)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  GLfloat fog_color[4] = {clear.redF(), clear.greenF(), clear.blueF(), 0.0f};
+  GLfloat fog_color[4] = {float(clear.redF()), float(clear.greenF()), float(clear.blueF()), 0.0f};
   glFogf(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 1);
   glFogfv(GL_FOG_COLOR, fog_color);

@@ -6,8 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file highlighter.h
-/// \brief Highlicher class that implements syntax highlighting for a QTextEdit
+
+/**
+
+  @file highlighter.h
+  @author R. Boudewijns and F. Stappers
+
+  Highlicher class that implements syntax highlighting for a QTextEdit
+
+*/
 
 #ifndef MCRL2XI_HIGHLIGHTER_H
 #define MCRL2XI_HIGHLIGHTER_H
@@ -24,11 +31,16 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 
   public:
-    // Constructor
+    /**
+     * @brief Constructor
+     * @param parent The QTextDocument on which the highlighter should operate
+     */
     Highlighter(QTextDocument *parent = 0);
 
   protected:
-    // Highlight a single block of text
+    /**
+     * @brief Highlights a single block of text
+     */
     void highlightBlock(const QString &text);
 
   private:

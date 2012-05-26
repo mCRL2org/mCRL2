@@ -10,26 +10,27 @@
 project(mcrl2xi-qt)
 cmake_minimum_required(VERSION 2.6)
 
-if (MCRL2_ENABLE_GUI_TOOLS)
-
+if(MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
 
-if (QT4_FOUND)
+if(QT4_FOUND)
+
 include(${QT_USE_FILE})
 
-set(RCC_SRCS mcrl2xi.qrc)
+set(MCRL2XI_RCC_SRCS mcrl2xi.qrc)
 
-qt4_add_resources(RC_FILES ${RCC_SRCS})
+qt4_add_resources(MCRL2XI_RC_FILES ${MCRL2XI_RCC_SRCS})
 
-set(UI_FILES
+set(MCRL2XI_UI_FILES
   mainwindow.ui
   documentmanager.ui
   documentwidget.ui
   findreplacedialog.ui
 )
-qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
-set(MOC_HEADERS
+qt4_wrap_ui(MCRL2XI_UI_HEADERS ${MCRL2XI_UI_FILES})
+
+set(MCRL2XI_MOC_HEADERS
   mainwindow.h
   highlighter.h
 
@@ -40,12 +41,12 @@ set(MOC_HEADERS
   solver.h
   findreplacedialog.h
 )
-qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
+qt4_wrap_cpp(MCRL2XI_MOC_SOURCES ${MCRL2XI_MOC_HEADERS})
 
-set(SRC_FILES
-  ${RC_FILES}
-  ${UI_HEADERS}
-  ${MOC_SOURCES}
+set(MCRL2XI_SRC_FILES
+  ${MCRL2XI_RC_FILES}
+  ${MCRL2XI_UI_HEADERS}
+  ${MCRL2XI_MOC_SOURCES}
   main.cpp
   mainwindow.cpp
   highlighter.cpp
@@ -62,19 +63,19 @@ set(SRC_FILES
 include(MCRL2MacOSXBundleInformation)
 
 # ######### Create Windows Icon ##########
-IF(WIN32)
+if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  SET(SRC_FILES ${SRC_FILES} mcrl2xi-qt.rc)
-ENDIF(WIN32)
+  set(MCRL2XI_SRC_FILES ${MCRL2XI_SRC_FILES} mcrl2xi-qt.rc)
+endif(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2XI_SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${QT_QTMAIN_LIBRARY}
-  mcrl2_aterm
   mcrl2_core
   mcrl2_data
+  mcrl2_aterm
   mcrl2_lps
   mcrl2_utilities
   mcrl2_utilities_qt
@@ -95,6 +96,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # install target:

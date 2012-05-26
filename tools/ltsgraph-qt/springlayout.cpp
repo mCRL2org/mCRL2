@@ -1,3 +1,12 @@
+// Author(s): Rimco Boudewijns and Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #include "springlayout.h"
 #include "ui_springlayout.h"
 #include <QThread>
@@ -35,7 +44,7 @@ namespace Graph
   SpringLayout::SpringLayout(Graph &graph)
     : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
       m_clipMin(Coord3D(0.0f, 0.0f, 0.0f)), m_clipMax(Coord3D(1000.0f, 1000.0f, 1000.0f)),
-      m_forceCalculation(&SpringLayout::forceLTSGraph), m_graph(graph), m_ui(NULL)
+      m_graph(graph), m_ui(NULL), m_forceCalculation(&SpringLayout::forceLTSGraph)
   {
     srand(time(NULL));
   }

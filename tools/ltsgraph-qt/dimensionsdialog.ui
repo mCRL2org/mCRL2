@@ -25,6 +25,10 @@
   <property name="windowTitle">
    <string>Specify Dimensions</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="ltsgraph.qrc">
+    <normaloff>:/ltsgraph/icons/ltsgraph.ico</normaloff>:/ltsgraph/icons/ltsgraph.ico</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
@@ -101,7 +105,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="ltsgraph.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

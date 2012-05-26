@@ -6,8 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file solver.h
-/// \brief A solver object that moves itself to the aTerm Thread upon construction
+
+/**
+
+  @file solver.h
+  @author R. Boudewijns
+
+  A solver object that moves itself to the aTerm Thread upon construction
+
+*/
 
 #ifndef MCRL2XI_SOLVER_H
 #define MCRL2XI_SOLVER_H
@@ -20,40 +27,52 @@ class Solver : public QObject
 {
     Q_OBJECT
   public:
-    // Constuctor
+    /**
+     * @brief Constructor
+     */
     Solver();
 
-    // Extra variable to save the className that was needed for FindChild (see mainwindow.cpp)
-    static const std::string className;
+    static const std::string className;  ///< The className that was needed for FindChild (see mainwindow.cpp)
 
   signals:
-    // Signal to indicate a part was solved (new output)
+    /**
+     * @brief Signal to indicate the solving process produced new output
+     * @param output The output of the solving process
+     */
     void solvedPart(QString output);
-    // Signal to indicate that the complete problem was solved
+    /**
+     * @brief Signal to indicate that the complete problem was solved
+     */
     void solved();
-    // Signal to indicate an expression error
+    /**
+     * @brief Signal to indicate an expression error
+     */
     void exprError();
     
   public slots:
-    // Slots to set-up, start and stop the solving process
+    /**
+     * @brief Changes the rewriter to the given @e rewriter
+     * @param rewriter The new rewriter
+     */
     void setRewriter(QString rewriter);
+    /**
+     * @brief Starts the solving process
+     * @param specification The specification used during the solving process
+     * @param dataExpression The expression that should be solved
+     */
     void solve(QString specification, QString dataExpression);
+    /**
+     * @brief Aborts the currently running solving process
+     */
     void abort();
     
   private:
-    // Variables to save the rewrite stategy, specification and variables
-    mcrl2::data::rewrite_strategy m_rewrite_strategy;
-    mcrl2::data::data_specification m_data_spec;
-    atermpp::set <mcrl2::data::variable > m_vars;
-
-    // Bool that is set when the solving should be aborted as quickly as possible
-    bool m_abort;
-
-    // Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
-    bool m_parsed;
-
-    // String containing the last specification that was parsed
-    QString m_specification;
+    mcrl2::data::rewrite_strategy m_rewrite_strategy;   ///< The currently used rewriter
+    mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
+    atermpp::set <mcrl2::data::variable > m_vars;       ///< The variables used in the last rewrite process
+    bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
+    QString m_specification;                            ///< String containing the last specification that was parsed
+    bool m_abort;                                       ///< Boolean indicating that the solving should be aborted as quickly as possible
 };
 
 #endif // MCRL2XI_SOLVER_H

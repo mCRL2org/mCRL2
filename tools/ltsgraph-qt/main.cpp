@@ -15,15 +15,15 @@
 
 using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > ltsgraph_base;
+typedef qt::qt_tool<tools::input_tool> ltsgraph_base;
 class ltsgraph_tool : public ltsgraph_base
 {
   public:
     ltsgraph_tool():
       ltsgraph_base("LTSGraph",
-                   "Rimco Boudewijns",
-                   "Draws a labelled transition system (LTS). A convential graph drawing is provided either in 2D or 3D.",
-                   "Draws a labelled transition system (LTS). If INFILE is supplied it will be loaded into the viewer.",
+                   "Rimco Boudewijns and Sjoerd Cranen",
+                   "visualise an LTS as a graph and manipulate its layout in 2D and 3D",
+                   "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
                    "Draws a labelled transition system (LTS). A convential graph drawing is provided either in 2D or 3D.",
                    "http://mcrl2.org/release/user_manual/tools/ltsgraph.html")
     {}

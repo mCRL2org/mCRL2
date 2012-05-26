@@ -6,8 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewriter.h
-/// \brief A rewriter object that moves itself to the aTerm Thread upon construction
+
+/**
+
+  @file rewriter.h
+  @author R. Boudewijns
+
+  A rewriter object that moves itself to the aTerm Thread upon construction
+
+*/
 
 #ifndef MCRL2XI_REWRITER_H
 #define MCRL2XI_REWRITER_H
@@ -20,34 +27,43 @@ class Rewriter : public QObject
 {
     Q_OBJECT
   public:
-    // Constructor
+    /**
+     * @brief Constructor
+     */
     Rewriter();
 
-    // Extra variable to save the className that was needed for FindChild (see mainwindow.cpp)
-    static const std::string className;
+    static const std::string className;  ///< The className that was needed for FindChild (see mainwindow.cpp)
 
   signals:
-    // Signal to indicate the rewrite process is finished
+    /**
+     * @brief Signal to indicate the rewrite process is finished
+     * @param output The output of the rewrite process
+     */
     void rewritten(QString output);
-    // Signal to indicate an epression error
+    /**
+     * @brief Signal to indicate an epression error
+     */
     void exprError();
     
   public slots:
-    // Slots to set-up and start the rewriting process
+    /**
+     * @brief Changes the rewriter to the given @e rewriter
+     * @param rewriter The new rewriter
+     */
     void setRewriter(QString rewriter);
+    /**
+     * @brief Starts the rewriting process
+     * @param specification The specification used during the rewrite process
+     * @param dataExpression The expression that should be rewritten
+     */
     void rewrite(QString specification, QString dataExpression);
     
   private:
-    // Variables to save the rewrite stategy, specification and variables
-    mcrl2::data::rewrite_strategy m_rewrite_strategy;
-    mcrl2::data::data_specification m_data_spec;
-    atermpp::set <mcrl2::data::variable > m_vars;
-
-    // Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
-    bool m_parsed;
-
-    // String containing the last specification that was parsed
-    QString m_specification;
+    mcrl2::data::rewrite_strategy m_rewrite_strategy;   ///< The currently used rewriter
+    mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
+    atermpp::set <mcrl2::data::variable > m_vars;       ///< The variables used in the last rewrite process
+    bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
+    QString m_specification;                            ///< String containing the last specification that was parsed
 };
 
 #endif // MCRL2XI_REWRITER_H

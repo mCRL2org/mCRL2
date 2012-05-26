@@ -10,26 +10,29 @@
 project(ltsgraph-qt)
 cmake_minimum_required(VERSION 2.6)
 
-if (MCRL2_ENABLE_GUI_TOOLS)
+if(MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
 
-IF(APPLE)
-   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
-   FIND_LIBRARY(GLUT_LIBRARY GLUT )
-   FIND_LIBRARY(OpenGL_LIBRARY OpenGL )
-   MARK_AS_ADVANCED (GLUT_LIBRARY
-                     OpenGL_LIBRARY)
-   SET(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
-ELSEIF(WIN32)
-   SET(MCRL2gl GLU32)
-ELSE(APPLE)
-   SET(MCRL2gl GLU )
-ENDIF(APPLE)
-
-if (QT4_FOUND)
+if(QT4_FOUND)
 set(QT_USE_QTOPENGL TRUE)
-SET(QT_USE_QTXML TRUE)
+set(QT_USE_QTXML TRUE)
 include(${QT_USE_FILE})
+
+if(APPLE)
+   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
+   find_library(GLUT_LIBRARY GLUT )
+   find_library(OpenGL_LIBRARY OpenGL )
+   mark_as_advanced (GLUT_LIBRARY OpenGL_LIBRARY)
+   set(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
+elseif(WIN32)
+   set(MCRL2gl GLU32)
+else(APPLE)
+   set(MCRL2gl GLU )
+endif(APPLE)
+
+set(LTSGRAPH_RCC_SRCS ltsgraph.qrc)
+
+qt4_add_resources(LTSGRAPH_RC_FILES ${LTSGRAPH_RCC_SRCS})
 
 set(LTSGRAPH_UI_FILES
   mainwindow.ui
@@ -49,9 +52,11 @@ set(LTSGRAPH_MOC_HEADERS
   information.h
   dimensionsdialog.h
 )
+
 qt4_wrap_cpp(LTSGRAPH_MOC_SOURCES ${LTSGRAPH_MOC_HEADERS})
 
 set(LTSGRAPH_SRC_FILES
+  ${LTSGRAPH_RC_FILES}
   ${LTSGRAPH_UI_HEADERS}
   ${LTSGRAPH_MOC_SOURCES}
   main.cpp
@@ -64,12 +69,20 @@ set(LTSGRAPH_SRC_FILES
   dimensionsdialog.cpp
 )
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${LTSGRAPH_SRC_FILES})
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+
+# ######### Create Windows Icon ##########
+if(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  set(LTSGRAPH_SRC_FILES ${LTSGRAPH_SRC_FILES} ltsgraph-qt.rc)
+endif(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${LTSGRAPH_SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${QT_QTMAIN_LIBRARY}
-  #mcrl2_aterm
   mcrl2_core
   mcrl2_data
   mcrl2_lps
@@ -99,6 +112,15 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
+
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 else(QT4_FOUND)
   message(STATUS "Could NOT find Qt4, not building ltsgraph-qt.")
