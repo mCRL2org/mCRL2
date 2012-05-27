@@ -17,7 +17,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "../lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -74,7 +73,7 @@ int test_main(int argc, char* argv[])
 
     /* Return */
 
-    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
+    std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
     lpsparunfold lpsparunfold(s0, &unfold_cache);
     specification s1 = lpsparunfold.algorithm(0);
     variable_list p1 = s1.process().process_parameters();

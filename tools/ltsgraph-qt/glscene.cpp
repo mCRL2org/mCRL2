@@ -5,6 +5,10 @@
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#else
+#ifndef _MSC_VER
+#include <GL/glu.h>
+#endif
 #endif
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
