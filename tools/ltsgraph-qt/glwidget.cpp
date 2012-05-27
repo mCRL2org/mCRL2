@@ -112,7 +112,7 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
         {
             if (e->button() == Qt::RightButton && m_scene->size().z > 1)
                 m_dragmode = dm_rotate;
-            else if (e->button() == Qt::MiddleButton)
+            else if (e->button() == Qt::MidButton)
                 m_dragmode = dm_zoom;
             else if (e->button() == Qt::LeftButton)
                 m_dragmode = dm_translate;
