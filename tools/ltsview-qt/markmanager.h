@@ -23,6 +23,7 @@
 #include <string>
 
 #include "enums.h"
+#include "ltsmanager.h"
 
 class Cluster;
 class LTS;
@@ -72,7 +73,7 @@ class MarkManager : public QObject
   Q_OBJECT
 
   public:
-    MarkManager();
+    MarkManager(LtsManager *ltsManager);
 
     LTS *lts() const { return m_lts; }
     MarkStyle markStyle() const { return m_markStyle; }
@@ -126,6 +127,7 @@ class MarkManager : public QObject
     void marksChanged();
 
   private:
+    LtsManager *m_ltsManager;
     LTS* m_lts;
     MarkStyle m_markStyle;
     MatchStyle m_clusterMatchStyle;

@@ -15,7 +15,6 @@
 #include "fsm_state_positioner.h"
 #include "lts.h"
 #include "mathutils.h"
-#include "simulation.h"
 #include "sp_state_positioner.h"
 #include "state.h"
 #include "transition.h"
@@ -142,10 +141,7 @@ bool State_iterator::is_end()
 LTS::LTS()
 {
   deadlockCount = -1;
-  simulation = new Simulation(this);
   initialState = NULL;
-  selectedState = NULL;
-  selectedCluster = NULL;
   lastCluster = NULL;
   previousLevel = NULL;
   lastWasAbove = false;
@@ -153,17 +149,12 @@ LTS::LTS()
   // mcrl2_lts = NULL;
 }
 
-LTS::LTS(LTS* parent, bool fromAbove)
+LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
 {
   // Copied/initial information
   lastWasAbove = fromAbove;
   previousLevel  = parent;
-  selectedState = NULL;
   zoomLevel = previousLevel->getZoomLevel() + 1;
-  selectedCluster = previousLevel->getSelectedCluster();
-
-  // simulation = new Simulation();
-  simulation = previousLevel->getSimulation();
 
   // mcrl2_lts = previousLevel->getmCRL2LTS();
 
@@ -171,10 +162,10 @@ LTS::LTS(LTS* parent, bool fromAbove)
   {
     initialState = previousLevel->getInitialState();
 
-    lastCluster = selectedCluster;
+    lastCluster = target;
 
     Cluster* child = NULL;
-    Cluster* parent = selectedCluster;
+    Cluster* parent = target;
 
     do
     {
@@ -195,8 +186,8 @@ LTS::LTS(LTS* parent, bool fromAbove)
   }
   else
   {
-    initialState = selectedCluster->getState(0);
-    addClusterAndBelow(selectedCluster);
+    initialState = target->getState(0);
+    addClusterAndBelow(target);
   }
 }
 
@@ -223,8 +214,6 @@ LTS::~LTS()
     }
     clustersInRank.clear();
 
-    simulation->stop();
-    delete simulation;
     /* if (mcrl2_lts != NULL)
     {
       delete mcrl2_lts;
@@ -295,7 +284,6 @@ bool LTS::readFromFile(const std::string& filename)
   }
 
   initialState = states[mcrl2_lts.initial_state()];
-  simulation->setInitialState(initialState);
 
   const std::vector<transition> &trans=mcrl2_lts.get_transitions();
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
@@ -314,58 +302,6 @@ bool LTS::readFromFile(const std::string& filename)
     }
   }
   return true;
-}
-
-State* LTS::selectStateByID(int id)
-{
-  State* state = states[id];
-  if (state)
-  {
-    state->select();
-    // For fast deselection
-    selectedCluster = NULL;
-    selectedState = state;
-
-    // If we are simulating, see if this is a state we can select.
-    if ((simulation != NULL) && (simulation->getStarted()))
-    {
-      vector< Transition* > posTrans = simulation->getPosTrans();
-      for (size_t i = 0; i < posTrans.size(); ++i)
-      {
-        if (posTrans[i]->getEndState()->getID() == selectedState->getID())
-        {
-          simulation->chooseTrans(static_cast<int>(i));
-        }
-      }
-    }
-  }
-  return selectedState;
-}
-
-Cluster* LTS::selectCluster(const int rank, const int pos)
-{
-  clustersInRank[rank][pos]->select();
-
-  // For fast deselection.
-  selectedState = NULL;
-  selectedCluster = clustersInRank[rank][pos];
-  return selectedCluster;
-}
-
-void LTS::deselect()
-{
-  if (selectedState != NULL)
-  {
-    selectedState->deselect();
-    simulation->setInitialState(initialState);
-    selectedState = NULL;
-  }
-
-  if (selectedCluster != NULL)
-  {
-    selectedCluster->deselect();
-    selectedCluster = NULL;
-  }
 }
 
 int LTS::getNumLabels()
@@ -748,30 +684,14 @@ void LTS::positionStates(bool multiPass)
   delete state_positioner;
 }
 
-LTS* LTS::zoomIntoAbove()
+LTS* LTS::zoomIntoAbove(Cluster *target)
 {
-  if (selectedCluster != NULL)
-  {
-    LTS* newLTS = new LTS(this, true);
-    return newLTS;
-  }
-  else
-  {
-    return this;
-  }
+  return new LTS(this, target, true);
 }
 
-LTS* LTS::zoomIntoBelow()
+LTS* LTS::zoomIntoBelow(Cluster *target)
 {
-  if (selectedCluster != NULL)
-  {
-    LTS* newLTS = new LTS(this, false);
-    return newLTS;
-  }
-  else
-  {
-    return this;
-  }
+  return new LTS(this, target, false);
 }
 
 LTS* LTS::zoomOut()
@@ -829,16 +749,6 @@ void LTS::fromAbove()
   lastWasAbove = true;
 }
 
-Simulation* LTS::getSimulation() const
-{
-  return simulation;
-}
-
-Cluster* LTS::getSelectedCluster() const
-{
-  return selectedCluster;
-}
-
 int LTS::getZoomLevel() const
 {
   return zoomLevel;
@@ -847,178 +757,4 @@ int LTS::getZoomLevel() const
 void LTS::setZoomLevel(const int level)
 {
   zoomLevel = level;
-}
-
-void LTS::visit(State* s)
-{
-  if (!s->isSelected())
-  {
-    s->select();
-    for (int i = 0; i < s->getNumOutTransitions(); ++i)
-    {
-      visit(s->getOutTransition(i)->getEndState());
-    }
-  }
-}
-
-void LTS::loadTrace(std::string const& path)
-{
-  Trace tr;
-  try
-  {
-    tr.load(path);
-  }
-  catch (...)
-  {
-    mCRL2log(mcrl2::log::error) << "Error loading file: " << path;
-    return;
-  }
-
-  try{
-  if (tr.number_of_states()==0)
-  {
-    throw mcrl2::runtime_error("The trace in " + path + " has no state information, which is currently not allowed by ltsview.\nThis typically occurs with traces generated by ltscompare, which can currently not be used in ltsview. ");
-  }
-
-  if (tr.number_of_states()>0 && !mcrl2_lts.has_state_info())
-  {
-    throw mcrl2::runtime_error("The trace in " + path + " has state information but the labelled transition system does not have it, which is currently not allowed by ltsview.");
-  }
-
-  Simulation sim(this);
-  // Initialize simulation with initial state of the LTS;
-  State* initState;
-  LTS* topLevel = this;
-
-  // Find the initial state of the entire, zoomed out structure
-  while (topLevel->getPreviousLevel() != NULL)
-  {
-    topLevel = topLevel->getPreviousLevel();
-  }
-  initState = topLevel->getInitialState();
-
-  if (tr.number_of_states()>0 && tr.currentState().size()!=mcrl2_lts.state_label(initState->getID()).size())
-  {
-    throw mcrl2::runtime_error("The trace in " + path + " and the labelled transition system have state information of unequal lengths.");
-  }
-  sim.setInitialState(initState);
-  sim.start();
-
-  // Get the first state of the trace 
-  mcrl2::lps::state currState = tr.currentState();
-  // Now, currState ~ initState.
-  //
-  // In currState, free variables can occur, instantiate this with the values
-  // of the initial state in the simulation.
-  //
-  // Assumption: The ith parameter in currState is equal to the ith parameter
-  // in initState.
-  for (size_t i = 0; i < currState.size(); ++i)
-  {
-    string value = mcrl2::data::pp(currState[i]);
-
-    std::string paramValue = getStateParameterValueStr(initState,i);
-  }
-
-  // Load the rest of the trace.
-
-  while (tr.getPosition() != tr.number_of_actions())
-  {
-    std::string action = pp(tr.currentAction());
-    tr.increasePosition();
-
-    std::vector<Transition*> posTrans = sim.getPosTrans();
-    int possibilities = 0;
-    int toChoose = -1;
-
-    for (size_t i = 0; i < posTrans.size(); ++i)
-    {
-      if (action == mcrl2_lts.action_label(posTrans[i]->getLabel()))
-      {
-        ++possibilities;
-        toChoose = static_cast<int>(i);
-      }
-    }
-
-    if (possibilities > 1)
-    {
-      // More than one possibility, meaning that choosing on action name is
-      // ambiguous. Solve disambiguation by looking at states
-
-      currState = tr.currentState();
-
-
-      // Match is the score keeping track of how well a state matches an LPS
-      // state. The (unique) state with the maximum match will be chosen.
-      // The value of this match should be the number of variables which have
-      // the same value as in the LPS, minus the number of free variables (
-      // which are undetectable).
-      int maxmatch = -1;
-
-      for (size_t j = 0; j < posTrans.size(); ++j)
-      {
-        State* s = posTrans[j]->getEndState();
-        int match = 0;
-
-        for (size_t i = 0; i < currState.size(); ++i)
-        {
-
-          std::string currVal = mcrl2::data::pp(currState[i]);
-
-          std::map<std::string, std::string>::iterator it;
-
-          if (currVal == getStateParameterValueStr(s,i))
-          {
-            ++match;
-          }
-
-        }
-
-        if (match > maxmatch)
-        {
-          maxmatch = match;
-          toChoose = static_cast<int>(j);
-        }
-      }
-    }
-    else if (possibilities == 1)
-    {
-      // Exactly one possibility, so skip
-    }
-    else
-    {
-      // This cannot occur, unless there was some mismatch between lps and lts
-      mCRL2log(mcrl2::log::error) << "Could not regenerate trace, does it belong to the loaded LTS?";
-      toChoose = -1;
-      return;
-    }
-
-    sim.chooseTrans(toChoose);
-    sim.followTrans();
-  }
-
-
-  // Set simulation to the LTS
-  *simulation = sim;
-  }
-  catch( mcrl2::runtime_error &e )
-  {
-    mCRL2log(mcrl2::log::error) << e.what();
-    return;
-  }
-}
-
-void LTS::generateBackTrace()
-{
-  State* initState;
-  LTS* topLevel = this;
-
-  // Find the initial state of the entire, zoomed out structure
-  while (topLevel->getPreviousLevel() != NULL)
-  {
-    topLevel = topLevel->getPreviousLevel();
-  }
-  initState = topLevel->getInitialState();
-
-  simulation->traceBack(initState);
 }

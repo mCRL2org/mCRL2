@@ -107,11 +107,6 @@ class Cluster
     void addBranchVisObject(int vo);
     void clearBranchVisObjects();
 
-    // Methods for selection
-    void select();
-    void deselect();
-    bool isSelected() const;
-
   private:
     std::map< int, int > actionLabelCounts;
     Cluster* ancestor;
@@ -132,7 +127,6 @@ class Cluster
     float bc_height; // height of the bounding cylinder that contains this cluster's subtree
     int visObject;
     std::vector< int > branchVisObjects;
-    bool selected;
     std::set< MarkRuleIndex > matchedRules;
 };
 

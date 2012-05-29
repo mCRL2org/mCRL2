@@ -15,11 +15,10 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include "enums.h"
+#include "ltsmanager.h"
 #include "settings.h"
-#include "simulation.h"
 #include "vectors.h"
 
-class Mediator;
 class Visualizer;
 
 class GLCanvas: public QObject, public wxGLCanvas
@@ -27,12 +26,13 @@ class GLCanvas: public QObject, public wxGLCanvas
   Q_OBJECT
 
   public:
-    GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
+    GLCanvas(wxWindow* parent,Settings* ss,LtsManager* ltsManager_,
              const wxSize& size=wxDefaultSize, int* attribList=NULL);
     ~GLCanvas() {}
 
   public slots:
     void display(bool coll_caller=false, bool selecting=false);
+    void resetView();
 
   public:
     void enableDisplay();
@@ -40,7 +40,6 @@ class GLCanvas: public QObject, public wxGLCanvas
     void getMaxViewportDims(int* w,int* h);
     unsigned char* getPictureData(int res_x,int res_y);
     void initialize();
-    void resetView();
     void reshape();
     void setActiveTool(int t);
     void setVisualizer(Visualizer* vis);
@@ -59,9 +58,10 @@ class GLCanvas: public QObject, public wxGLCanvas
 
   public slots:
     void setBackground(QColor value);
-    void setSim(Simulation *sim);
-    void refresh();
-    void selChange();
+
+  signals:
+    void renderingStarted();
+    void renderingFinished();
 
   private:
     int activeTool;
@@ -74,16 +74,14 @@ class GLCanvas: public QObject, public wxGLCanvas
     float farPlane;
     float farPlaneDefault;
     bool lightRenderMode;
-    Mediator* mediator;
     Vector3D moveVector;
     float nearPlane;
     int oldMouseX;
     int oldMouseY;
     Settings* settings;
-    bool simulating;
+    LtsManager *ltsManager;
     Visualizer* visualizer;
     PickState selectedType;
-    Simulation *sim;
 
     void determineCurrentTool(wxMouseEvent& event);
     void setMouseCursor();

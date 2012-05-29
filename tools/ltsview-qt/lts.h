@@ -22,7 +22,6 @@
 class LTS;
 class State;
 class Cluster;
-class Simulation;
 
 class Cluster_iterator
 {
@@ -71,6 +70,9 @@ class LTS
     LTS();
     ~LTS();
 
+    State *state(int id) const { return states[id]; }
+    Cluster *cluster(int rank, int position) const { return clustersInRank[rank][position]; }
+
     void addCluster(Cluster* c);
     void addClusterAndBelow(Cluster* c);
     void clearStatePositions();
@@ -89,6 +91,7 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
+    bool hasStateInfo() const { return mcrl2_lts.has_state_info(); }
     size_t getNumParameters() const;
     const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts.state_element_values(parindex); }
     std::string getParameterName(size_t parindex) ;
@@ -97,9 +100,6 @@ class LTS
                                           size_t param);
     std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
 
-    State* selectStateByID(int id);
-    Cluster* selectCluster(const int rank, const int pos);
-    void deselect();
     void positionClusters(bool fsmstyle);
     void positionStates(bool multiPass);
     void rankStates(bool cyclic);
@@ -108,12 +108,10 @@ class LTS
 
     int getZoomLevel() const;
     void setZoomLevel(const int level);
-    // Zooms into the structure starting from the initial cluster/state
-    // and upto selectedCluster, if any.
-    LTS* zoomIntoAbove();
-    // Zooms into the structure starting from the selectedCluster, upto
-    // the end of the structure.
-    LTS* zoomIntoBelow();
+    // Zooms into the structure starting from the initial cluster/state and upto target.
+    LTS* zoomIntoAbove(Cluster *target);
+    // Zooms into the structure starting from the target, upto the end of the structure.
+    LTS* zoomIntoBelow(Cluster *target);
     // Zooms out to the previous level.
     LTS* zoomOut();
     // Returns the maximal rank of the structure, that is, the highest
@@ -124,20 +122,7 @@ class LTS
     LTS* getPreviousLevel() const;
     void fromAbove();
 
-    // Method for simulation
-    Simulation* getSimulation() const;
-
-    // Methods getting information from parents while zooming in
-    Cluster* getSelectedCluster() const;
-
-    // Loads a trace stored in location path and constructs a simulation
-    // from it.
-    void loadTrace(std::string const& path);
-
-    void generateBackTrace();
-
   private:
-    Simulation* simulation;
     mcrl2::lts::lts_fsm_t mcrl2_lts;
 
     bool lastWasAbove;
@@ -145,8 +130,6 @@ class LTS
     int deadlockCount;
     LTS* previousLevel;
     State* initialState;
-    State* selectedState;
-    Cluster* selectedCluster;
     Cluster* lastCluster;
     std::vector< State* > states;
     std::vector< std::vector< Cluster* > > clustersInRank;
@@ -156,12 +139,10 @@ class LTS
     std::map<std::string, std::string> freeVars;
 
     // Constructor for zooming
-    LTS(LTS* parent, bool fromAbove);
+    LTS(LTS* parent, Cluster *target, bool fromAbove);
 
     void clearRanksAndClusters();
     void clusterTree(State* s,Cluster* c,bool cyclic);
-
-    void visit(State* s);
 
     friend class Cluster_iterator;
     friend class Reverse_cluster_iterator;

@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "infodialog.h"
+#include "cluster.h"
 #include <QTableWidget>
 #include <QTableWidgetItem>
 
@@ -35,77 +36,89 @@ static void initTable(QTableWidget *table)
   }
 }
 
-InfoDialog::InfoDialog(QWidget *parent):
-  QDialog(parent)
+InfoDialog::InfoDialog(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager):
+  QDialog(parent),
+  m_ltsManager(ltsManager),
+  m_markManager(markManager)
 {
   m_ui.setupUi(this);
 
   initTable(m_ui.ltsTable);
   initTable(m_ui.clusterTable);
   initTable(m_ui.stateTable);
+
+  connect(m_ltsManager, SIGNAL(ltsChanged(LTS *)), this, SLOT(ltsChanged()));
+  connect(m_ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(ltsChanged()));
+  connect(m_markManager, SIGNAL(statisticsChanged()), this, SLOT(markStatisticsChanged()));
+  connect(m_ltsManager, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
 }
 
-void InfoDialog::setLTSInfo(int states, int transitions, int clusters, int ranks)
+void InfoDialog::ltsChanged()
 {
-  m_ui.ltsTable->item(0, 1)->setText(QString::number(states));
-  m_ui.ltsTable->item(1, 1)->setText(QString::number(transitions));
-  m_ui.ltsTable->item(2, 1)->setText(QString::number(clusters));
-  m_ui.ltsTable->item(3, 1)->setText(QString::number(ranks));
+  m_ui.ltsTable->item(0, 1)->setText(QString::number(m_ltsManager->lts()->getNumStates()));
+  m_ui.ltsTable->item(1, 1)->setText(QString::number(m_ltsManager->lts()->getNumTransitions()));
+  m_ui.ltsTable->item(2, 1)->setText(QString::number(m_ltsManager->lts()->getNumClusters()));
+  m_ui.ltsTable->item(3, 1)->setText(QString::number(m_ltsManager->lts()->getNumRanks()));
 }
 
-void InfoDialog::setNumMarkedStates(int markedStates)
+void InfoDialog::markStatisticsChanged()
 {
-  m_ui.ltsTable->item(4, 1)->setText(QString::number(markedStates));
+  m_ui.ltsTable->item(4, 1)->setText(QString::number(m_markManager->markedStates()));
+  m_ui.ltsTable->item(5, 1)->setText(QString::number(m_markManager->markedTransitions()));
 }
 
-void InfoDialog::setNumMarkedTransitions(int markedTransitions)
+void InfoDialog::selectionChanged()
 {
-  m_ui.ltsTable->item(5, 1)->setText(QString::number(markedTransitions));
-}
+  LTS *lts = m_ltsManager->lts();
+  int parameters = lts->getNumParameters();
+  m_ui.clusterTable->setRowCount(parameters + 3);
+  m_ui.stateTable->setRowCount(parameters);
+  Cluster *cluster = m_ltsManager->selectedCluster();
+  State *state = m_ltsManager->selectedState();
 
-void InfoDialog::setParameterNames(QStringList names)
-{
-  m_ui.clusterTable->setRowCount(names.size() + 3);
-  m_ui.stateTable->setRowCount(names.size());
-  for (int i = 0; i < names.size(); i++)
+  QString statesInCluster;
+  if (cluster)
   {
+    statesInCluster = QString::number(cluster->getNumStates());
+  }
+  m_ui.clusterTable->item(0, 1)->setText(statesInCluster);
+
+  for (int i = 0; i < parameters; i++)
+  {
+    QString parameterName = QString::fromStdString(lts->getParameterName(i));
+    QString values;
+    if (cluster)
+    {
+      std::set<std::string> valueSet = lts->getClusterParameterValues(cluster, i);
+      bool first = true;
+      values += "{ ";
+      for (std::set<std::string>::iterator j = valueSet.begin(); j != valueSet.end(); j++)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          values += ", ";
+        }
+        values += QString::fromStdString(*j);
+      }
+      values += " }";
+    }
+    QString value;
+    if (state)
+    {
+      value = QString::fromStdString(lts->getStateParameterValueStr(state, i));
+    }
+
     m_ui.clusterTable->setItem(i + 3, 0, item());
+    m_ui.clusterTable->item(i + 3, 0)->setText(parameterName);
     m_ui.clusterTable->setItem(i + 3, 1, item());
-    m_ui.clusterTable->item(i + 3, 0)->setText(names[i]);
-
+    m_ui.clusterTable->item(i + 3, 1)->setText(values);
     m_ui.stateTable->setItem(i, 0, item());
+    m_ui.stateTable->item(i, 0)->setText(parameterName);
     m_ui.stateTable->setItem(i, 1, item());
-    m_ui.stateTable->item(i, 0)->setText(names[i]);
+    m_ui.stateTable->item(i, 1)->setText(value);
   }
 }
-
-void InfoDialog::setParameterValue(int parameter, QString value)
-{
-  m_ui.stateTable->item(parameter, 1)->setText(value);
-}
-
-void InfoDialog::setParameterValues(int parameter, QStringList values)
-{
-  m_ui.clusterTable->item(parameter + 3, 1)->setText(QString("{") + values.join(", ") + QString("}"));
-}
-
-void InfoDialog::setStatesInCluster(int states)
-{
-  m_ui.clusterTable->item(0, 1)->setText(QString::number(states));
-}
-
-void InfoDialog::resetParameterNames()
-{
-  m_ui.clusterTable->setRowCount(3);
-  m_ui.stateTable->setRowCount(0);
-}
-
-void InfoDialog::resetParameterValues()
-{
-  for (int i = 0; i < m_ui.stateTable->rowCount(); i++)
-  {
-    m_ui.clusterTable->item(i + 3, 1)->setText("");
-    m_ui.stateTable->item(i, 1)->setText("");
-  }
-}
-

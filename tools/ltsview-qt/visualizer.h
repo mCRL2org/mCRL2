@@ -9,11 +9,13 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include <QList>
 #include <QObject>
 
 #include <string>
 #include <vector>
 #include "enums.h"
+#include "ltsmanager.h"
 #include "markmanager.h"
 #include "settings.h"
 
@@ -30,20 +32,19 @@ class Visualizer: public QObject
   Q_OBJECT
 
   public:
-    Visualizer(Settings* ss, MarkManager* manager);
+    Visualizer(Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_);
     ~Visualizer();
 
     void computeBoundsInfo(float& bcw,float& bch);
     float getHalfStructureHeight() const;
-    void setLTS(LTS* l,bool compute_ratio);
 
     void drawStates(bool simulating);
-    void drawSimStates(std::vector<State*> historicStates, State*
+    void drawSimStates(QList<State*> historicStates, State*
                        currState, Transition* chosenTrans);
 
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp,
-                            std::vector<Transition*> historicTrans, std::vector<Transition*>
+                            QList<Transition*> historicTrans, QList<Transition*>
                             posTrans, Transition* chosenTrans);
 
     void drawStructure();
@@ -51,27 +52,30 @@ class Visualizer: public QObject
     void exportToText(std::string filename);
 
   public slots:
-    void dirtyPositions() { update_abs = true; }
-    void dirtyMatrices() { update_matrices = true; dirtyPositions(); }
-    void dirtyColors() { update_colors = true; }
+    void setClusterHeight();
+    void branchTiltChanged(int value);
+    void dirtyObjects() { update_objects = true; emit dirtied(); }
+    void dirtyMatrices() { update_matrices = true; emit dirtied(); }
+    void dirtyPositions() { update_positions = true; emit dirtied(); }
+    void dirtyColors() { update_colors = true; emit dirtied(); }
     void dirtyColorsMark() { if (markManager->markStyle() != NO_MARKS) dirtyColors(); }
     void dirtyColorsNoMark() { if (markManager->markStyle() == NO_MARKS) dirtyColors(); }
-    void branchTiltChanged(int value);
-    void markStyleChanged() { dirtyColors(); }
-    void visualizationStyleChanged() { traverseTree(true); }
+
+  signals:
+    void dirtied();
 
   private:
+    Settings* settings;
+    LtsManager *ltsManager;
+    MarkManager* markManager;
+    VisObjectFactory* visObjectFactory;
+    PrimitiveFactory* primitiveFactory;
     float cos_obt;
     float sin_obt;
-    LTS* lts;
-    VisObjectFactory* visObjectFactory;
-    MarkManager* markManager;
-    PrimitiveFactory* primitiveFactory;
-    Settings* settings;
-    bool create_objects;
-    bool update_colors;
+    bool update_objects;
     bool update_matrices;
-    bool update_abs;
+    bool update_colors;
+    bool update_positions;
 
     void computeAbsPos();
     void computeStateAbsPos(Cluster* root,int rot);
@@ -83,7 +87,7 @@ class Visualizer: public QObject
     void drawStates(Cluster* root,bool simulating);
     void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
 
-    void traverseTree(bool co);
+    void traverseTree();
     void traverseTreeC(Cluster* root, bool topClosed, int rot);
     void traverseTreeT(Cluster* root, bool topClosed, int rot);
     void updateColors();

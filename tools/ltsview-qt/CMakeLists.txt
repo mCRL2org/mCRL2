@@ -38,6 +38,7 @@ qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 set(MOC_HEADERS
   glcanvas.h
   infodialog.h
+  ltsmanager.h
   ltsview.h
   markdialog.h
   mainframe.h
@@ -64,6 +65,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   glcanvas.cpp
   infodialog.cpp
   lts.cpp
+  ltsmanager.cpp
   ltsview.cpp
   mainframe.cpp
   markdialog.cpp

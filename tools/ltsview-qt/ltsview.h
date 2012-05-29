@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "enums.h"
-#include "mediator.h"
+#include "ltsmanager.h"
 #include "settings.h"
 
 class LogMessenger;
@@ -36,8 +36,7 @@ class Visualizer;
 
 class LTSView :
   public QObject,
-  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::input_tool >,
-  public Mediator
+  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::input_tool >
 {
   Q_OBJECT
 
@@ -46,22 +45,7 @@ class LTSView :
 
   private:
     LogMessenger* log;
-    LTS* lts;
-    GLCanvas* glCanvas;
     MainFrame* mainFrame;
-    Settings* settings;
-    Visualizer* visualizer;
-    MarkManager* markManager;
-
-    void zoomOutTillTop();
-
-  private slots:
-    void simulationStarted();
-    void setFSMStyle();
-    void setRankStyle();
-    void setStatePosStyle();
-    void setVisStyle();
-    void applyMarkStyle();
 
   public:
 
@@ -69,21 +53,6 @@ class LTSView :
     ~LTSView();
     virtual bool run();
     bool parse_command_line(int argc, wxChar** argv);
-    void exportToText(std::string filename);
-    std::string getVersionString();
-    void notifyRenderingFinished();
-    void notifyRenderingStarted();
-    void openFile(std::string fileName);
-    void selectStateByID(const int id);
-    void selectCluster(const int rank, const int pos);
-    void deselect();
-    int getNumberOfObjects();
-
-    void zoomInBelow();
-    void zoomInAbove();
-    void zoomOut();
-
-    void loadTrace(std::string const& path);
 
     void printHelp(std::string const& name);
     void printVersion();

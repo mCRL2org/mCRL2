@@ -16,7 +16,6 @@ enum PickState
 {
   STATE,
   CLUSTER,
-  SIMSTATE,
   PICKNONE
 };
 

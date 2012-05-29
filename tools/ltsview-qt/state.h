@@ -26,7 +26,6 @@ class State
     void addLoop(Transition* trans);
     void addOutTransition(Transition* trans);
     void center();
-    void deselect();
 
     Cluster* getCluster() const;
     int getID();
@@ -45,10 +44,9 @@ class State
     Vector3D getLoopControl1() const;
     Vector3D getLoopControl2() const;
     int getRank() const;
-    bool isSimulated() const;
+    bool isSimulated() const { return simulationCount > 0; }
     bool isCentered() const;
     bool isDeadlock() const;
-    bool isSelected() const;
     bool hasTextures() const;
 
     bool addMatchedRule(MarkRuleIndex index);
@@ -56,7 +54,6 @@ class State
     const std::set<MarkRuleIndex> &getMatchedRules() const { return matchedRules; }
     void clearMatchedRules() { matchedRules.clear(); }
 
-    void select();
     void setCluster(Cluster* c);
     void setPositionAngle(float a);
     void setPositionRadius(float r);
@@ -67,7 +64,8 @@ class State
     void setLoopControl2(Vector3D p);
     void setID(int id);
     void setRank(int r);
-    void setSimulated(bool simulated);
+    void increaseSimulation() { simulationCount++; }
+    void decreaseSimulation() { simulationCount--; }
 
     void setZoomLevel(const int i);
     int getZoomLevel() const;
@@ -88,8 +86,7 @@ class State
     Vector3D loopControl1;
     Vector3D loopControl2;
     int rank;
-    bool simulated;
-    bool selected;
+    int simulationCount;
 };
 
 #endif //STATE_H

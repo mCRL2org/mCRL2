@@ -12,7 +12,7 @@
 #include <QDialog>
 #include "ui_simdialog.h"
 
-#include "mediator.h"
+#include "ltsmanager.h"
 #include "simulation.h"
 #include "state.h"
 #include "transition.h"
@@ -22,10 +22,9 @@ class SimDialog : public QDialog
   Q_OBJECT
 
   public:
-    SimDialog(QWidget *parent);
+    SimDialog(QWidget *parent, LtsManager *ltsManager);
 
   public slots:
-    void setSimulation(Simulation *simulation);
     void changed();
     void selectionChanged();
 
@@ -40,7 +39,7 @@ class SimDialog : public QDialog
 
   private:
     Ui::SimDialog m_ui;
-    Simulation *m_simulation;
+    LtsManager *m_ltsManager;
 };
 
 #endif

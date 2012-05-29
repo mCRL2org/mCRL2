@@ -47,7 +47,6 @@ Cluster::Cluster(int r)
   visObject = -1;
   numMarkedTransitions = 0;
   rank = r;
-  selected = false;
   severedDescendantsC = 0;
   bc_radius = 0.0f;
   bc_height = 0.0f;
@@ -568,21 +567,6 @@ void Cluster::addBranchVisObject(int vo)
 void Cluster::clearBranchVisObjects()
 {
   branchVisObjects.clear();
-}
-
-void Cluster::select()
-{
-  selected = true;
-}
-
-void Cluster::deselect()
-{
-  selected = false;
-}
-
-bool Cluster::isSelected() const
-{
-  return selected;
 }
 
 int Cluster::getNumMarkedTransitions()

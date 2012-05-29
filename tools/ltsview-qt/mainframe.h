@@ -16,6 +16,9 @@
 #include <QString>
 #include <QStringList>
 
+#include "ltsmanager.h"
+#include "visualizer.h"
+
 #include <string>
 #include <vector>
 #include <wx/wx.h>
@@ -28,9 +31,7 @@ class SimDialog;
 class MarkDialog;
 class SettingsDialog;
 class GLCanvas;
-class Mediator;
 class Settings;
-class Simulation;
 class MarkManager;
 
 class MainFrame : public QObject, public wxFrame
@@ -38,8 +39,7 @@ class MainFrame : public QObject, public wxFrame
   Q_OBJECT
 
   public:
-    MainFrame(Mediator* owner, Settings* ss, MarkManager *manager);
-    void createProgressDialog(const std::string& title,const std::string& text);
+    MainFrame();
     GLCanvas* getGLCanvas() const;
     void loadTitle();
 
@@ -68,21 +68,25 @@ class MainFrame : public QObject, public wxFrame
     void onStopForceDirected(wxCommandEvent& event);
     void onResetStatePositions(wxCommandEvent& event);
 
-    void setSim(Simulation* sim);
     void setFileInfo(wxFileName fn);
-    void setMarkedStatesInfo(int number);
-    void setMarkedTransitionsInfo(int number);
-    void setNumberInfo(int ns,int nt,int nc,int nr);
     void showMessage(std::string title,std::string text);
-    void startRendering();
-    void stopRendering();
+
+    void createProgressDialog(const std::string& title,const std::string& text);
     void updateProgressDialog(int val,std::string msg);
 
-    void setParameterNames(QStringList parameters);
-    void setParameterValue(int parameter, QString value);
-    void setParameterValues(int parameter, QStringList values);
-    void setStatesInCluster(int n);
-    void resetParameterValues();
+  public slots:
+    void startRendering();
+    void stopRendering();
+    void createProgressDialog(QString title) { createProgressDialog(title.toStdString(), title.toStdString()); }
+  protected slots:
+    void loadingLts() { ensureProgressDialog(); updateProgressDialog(0, "Loading file"); }
+    void rankingStates() { ensureProgressDialog(); updateProgressDialog(17, "Ranking states"); }
+    void clusteringStates() { ensureProgressDialog(); updateProgressDialog(33, "Clustering states"); }
+    void computingClusterInfo() { ensureProgressDialog(); updateProgressDialog(50, "Setting cluster info"); }
+    void positioningClusters() { ensureProgressDialog(); updateProgressDialog(67, "Positioning clusters"); }
+    void positioningStates() { ensureProgressDialog(); updateProgressDialog(83, "Positioning states"); }
+    void hideProgressDialog() { ensureProgressDialog(); updateProgressDialog(100, ""); }
+    void ensureProgressDialog() { if (progDialog == NULL) createProgressDialog("Structuring LTS"); }
 
   private slots:
     void setStatusBar(QString message) { GetStatusBar()->SetStatusText(wxString(message.toStdString().c_str(), wxConvUTF8)); GetStatusBar()->Update(); }
@@ -99,7 +103,6 @@ class MainFrame : public QObject, public wxFrame
     wxRadioButton*    markStatesRadio;
     wxCheckListBox*   markTransitionsListBox;
     wxRadioButton*    markTransitionsRadio;
-    Mediator*         mediator;
     wxRadioButton*    nomarksRadio;
     wxProgressDialog* progDialog;
     SettingsDialog*   settingsDialog;
@@ -107,6 +110,9 @@ class MainFrame : public QObject, public wxFrame
     MarkDialog*       markDialog;
     SimDialog*        simDialog;
     Settings*         settings;
+    LtsManager*       ltsManager;
+    MarkManager*      markManager;
+    Visualizer*       visualizer;
     wxFlexGridSizer*  selSizer;
     wxMenu*           toolMenu;
 

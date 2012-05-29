@@ -21,7 +21,6 @@
 #include "icons/pan_cursor_mask.xpm"
 #include "icons/rotate_cursor.xpm"
 #include "icons/rotate_cursor_mask.xpm"
-#include "mediator.h"
 #include "settings.h"
 #include "tr/tr.h"
 #include "visualizer.h"
@@ -44,13 +43,13 @@ BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
   EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
+GLCanvas::GLCanvas(wxWindow* parent,Settings* ss,LtsManager* ltsManager_,
                    const wxSize& size,int* attribList)
   : QObject(0), wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
                wxT(""),attribList)
 {
-  mediator = owner;
   settings = ss;
+  ltsManager = ltsManager_;
   displayAllowed = false;
   collectingData = false;
   angleX = 0.0f;
@@ -60,31 +59,16 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   farPlane = 0.0f;
   nearPlane = 1.0f;
   lightRenderMode = false;
-  simulating = false;
   setActiveTool(myID_SELECT);
   selectedType = PICKNONE;
-  sim = NULL;
 
   connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(setBackground(QColor)));
-
-  connect(&settings->stateSize, SIGNAL(changed(float)), this, SLOT(display()));
-  connect(&settings->clusterHeight, SIGNAL(changed(float)), this, SLOT(display()));
-  connect(&settings->branchRotation, SIGNAL(changed(int)), this, SLOT(display()));
-  connect(&settings->branchTilt, SIGNAL(changed(int)), this, SLOT(display()));
-  connect(&settings->quality, SIGNAL(changed(int)), this, SLOT(display()));
-  connect(&settings->transparency, SIGNAL(changed(int)), this, SLOT(display()));
   connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->stateColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->downEdgeColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->upEdgeColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->markedColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->clusterColorTop, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->clusterColorBottom, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->longInterpolation, SIGNAL(changed(bool)), this, SLOT(display()));
-  connect(&settings->simPrevColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->simCurrColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->simSelColor, SIGNAL(changed(QColor)), this, SLOT(display()));
-  connect(&settings->simPosColor, SIGNAL(changed(QColor)), this, SLOT(display()));
+
+  connect(&settings->stateRankStyleCyclic, SIGNAL(changed(bool)), this, SLOT(resetView()));
+  connect(&settings->fsmStyle, SIGNAL(changed(bool)), this, SLOT(resetView()));
+
+  connect(ltsManager, SIGNAL(simulationChanged()), this, SLOT(display()));
 }
 
 void GLCanvas::initialize()
@@ -151,6 +135,7 @@ void GLCanvas::resetView()
 void GLCanvas::setVisualizer(Visualizer* vis)
 {
   visualizer = vis;
+  connect(visualizer, SIGNAL(dirtied()), this, SLOT(display()));
 }
 
 void GLCanvas::disableDisplay()
@@ -187,7 +172,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
     displayAllowed = false;
     if (!collectingData)
     {
-      mediator->notifyRenderingStarted();
+      emit renderingStarted();
     }
 
     if (!selecting)
@@ -247,10 +232,10 @@ void GLCanvas::display(bool coll_caller, bool selecting)
     float halfHeight = visualizer->getHalfStructureHeight();
     glTranslatef(0.0f,0.0f,-halfHeight);
 
-    if (simulating)
+    if (ltsManager->currentSimulationState() != 0)
     {
-      visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(),
-                                sim->getChosenTrans());
+      glPushName(STATE);
+      visualizer->drawSimStates(ltsManager->simulationStateHistory(), ltsManager->currentSimulationState(), ltsManager->currentSimulationTransition());
     }
     if (!lightRenderMode || settings->navShowStates.value())
     {
@@ -259,7 +244,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       {
         // Identify that we are drawing states
         glPushName(STATE);
-        visualizer->drawStates(simulating);
+        visualizer->drawStates(ltsManager->currentSimulationState() != 0);
         glPopName();
       }
     }
@@ -276,7 +261,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       settings->displayBackpointers.value()
       && (!lightRenderMode || settings->navShowBackpointers.value()));
 
-    if (simulating)
+    if (ltsManager->currentSimulationState() != 0)
     {
       // Draw transitions followed during simulation and the possible
       // transitions going out of the current state.
@@ -284,7 +269,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       visualizer->drawSimTransitions(
         !lightRenderMode || settings->navShowTransitions.value(),
         !lightRenderMode || settings->navShowBackpointers.value(),
-        sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
+        ltsManager->simulationTransitionHistory(), ltsManager->simulationAvailableTransitions(), ltsManager->currentSimulationTransition());
     }
 
     // Enable lighting again, if required
@@ -340,7 +325,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
 
     if (!collectingData)
     {
-      mediator->notifyRenderingFinished();
+      emit renderingFinished();
     }
     displayAllowed = true;
   }
@@ -594,61 +579,6 @@ void GLCanvas::setBackground(QColor value)
   glClearColor(value.red() / 255.0f, value.green() / 255.0f, value.blue() / 255.0f, 1.0f);
 }
 
-void GLCanvas::setSim(Simulation *simulation)
-{
-  sim = simulation;
-  connect(sim, SIGNAL(changed()), this, SLOT(refresh()));
-  connect(sim, SIGNAL(selectionChanged()), this, SLOT(selChange()));
-}
-
-void GLCanvas::refresh()
-{
-  if (sim != NULL)
-  {
-    if (sim->getStarted())
-    {
-
-      if (selectedType != SIMSTATE)
-      {
-        // Removed all selections that are not states of the simulation.
-        mediator->deselect();
-      }
-
-      simulating = true;
-      display();
-    }
-    else
-    {
-      if (selectedType == SIMSTATE)
-      {
-        // Remove selections made in simulation
-        mediator->deselect();
-      }
-
-      simulating = false;
-      display();
-    }
-  }
-}
-
-void GLCanvas::selChange()
-{
-  if (sim != NULL)
-  {
-    if (sim->getStarted())
-    {
-      simulating = true;
-      display();
-    }
-    else
-    {
-      simulating = false;
-      display();
-    }
-  }
-}
-
-
 void GLCanvas::processHits(const GLint hits, GLuint* buffer, bool doubleC)
 {
   // This method selects the object clicked.
@@ -686,18 +616,16 @@ void GLCanvas::processHits(const GLint hits, GLuint* buffer, bool doubleC)
 
     for (unsigned int k = 0; k < names; k++)
     {
-      if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
-                                     objType == SIMSTATE))
+      if (minDepth < curMinDepth && (!stateSelected || objType == STATE))
       {
         selectedObject[k] = *buffer;
       }
       buffer++;
     }
 
-    if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
-                                   objType == SIMSTATE) && names > 0)
+    if (minDepth < curMinDepth && (!stateSelected || objType == STATE) && names > 0)
     {
-      stateSelected = objType == STATE || objType == SIMSTATE;
+      stateSelected = objType == STATE;
       curMinDepth = minDepth;
     }
 
@@ -706,23 +634,20 @@ void GLCanvas::processHits(const GLint hits, GLuint* buffer, bool doubleC)
 
   selectedType = static_cast<PickState>(selectedObject[0]);
 
-  mediator->deselect();
+  ltsManager->unselect();
   switch (selectedType)
   {
     case STATE:
-      mediator->selectStateByID(selectedObject[1]);
+      if (ltsManager->lts())
+      {
+        ltsManager->selectState(ltsManager->lts()->state(selectedObject[1]));
+        ltsManager->simulateState(ltsManager->selectedState());
+      }
       break;
     case CLUSTER:
-      mediator->selectCluster(selectedObject[1], selectedObject[2]);
-      break;
-
-    case SIMSTATE:
-      mediator->selectStateByID(selectedObject[1]);
-      // As part of selectStateByID, a simulation follow-up state was selected
-      // if we caught a double click, follow to this state.
-      if (doubleC)
+      if (ltsManager->lts())
       {
-        sim->followTrans();
+        ltsManager->selectCluster(ltsManager->lts()->cluster(selectedObject[1], selectedObject[2]));
       }
       break;
     default:
@@ -735,14 +660,15 @@ void GLCanvas::processHits(const GLint hits, GLuint* buffer, bool doubleC)
 
 void GLCanvas::pickObjects(int x, int y, bool doubleC)
 {
-  // In the worst case, all the objects in the frame are hit. These objects are
-  // given by the mediator. For each hit, the following needs to be recorded:
+  // In the worst case, all the objects in the frame are hit.
+  // For each hit, the following needs to be recorded:
   // * The number of names on the stack
   // * The minimal depth of the hit object
   // * The maximal depth of the hit object
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
-  GLsizei bufsize = mediator->getNumberOfObjects() * 6;
+  int objects = (ltsManager->lts() ? ltsManager->lts()->getNumClusters() + ltsManager->lts()->getNumStates() : 0);
+  GLsizei bufsize = objects * 6;
   if (GetContext())
   {
     GLuint* selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
@@ -780,7 +706,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
     hits = glRenderMode(GL_RENDER);
     reshape();
     display();
-    mediator->deselect();
+    ltsManager->unselect();
     processHits(hits, selectBuf, doubleC);
     free(selectBuf);
   }

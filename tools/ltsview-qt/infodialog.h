@@ -11,27 +11,25 @@
 
 #include <QDialog>
 #include "ui_infodialog.h"
+#include "ltsmanager.h"
+#include "markmanager.h"
 
 class InfoDialog : public QDialog
 {
   Q_OBJECT
 
   public:
-    InfoDialog(QWidget *parent);
+    InfoDialog(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager);
 
-  public slots:
-    void setLTSInfo(int states, int transitions, int clusters, int ranks);
-    void setNumMarkedStates(int markedStates);
-    void setNumMarkedTransitions(int markedTransitions);
-    void setParameterNames(QStringList names);
-    void setParameterValue(int parameter, QString value);
-    void setParameterValues(int parameter, QStringList values);
-    void setStatesInCluster(int states);
-    void resetParameterNames();
-    void resetParameterValues();
+  protected slots:
+    void ltsChanged();
+    void markStatisticsChanged();
+    void selectionChanged();
 
   private:
     Ui::InfoDialog m_ui;
+    LtsManager *m_ltsManager;
+    MarkManager *m_markManager;
 };
 
 #endif

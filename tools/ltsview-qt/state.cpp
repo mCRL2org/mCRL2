@@ -20,8 +20,7 @@ State::State(int aid):
   positionAngle(-1.0f),
   positionRadius(0.0f),
   rank(0),
-  simulated(false),
-  selected(false)
+  simulationCount(0)
 {}
 
 State::~State()
@@ -66,21 +65,6 @@ bool State::removeMatchedRule(MarkRuleIndex index)
 bool State::isDeadlock() const
 {
   return (outTransitions.size() + loops.size() == 0);
-}
-
-bool State::isSelected() const
-{
-  return selected;
-}
-
-void State::select()
-{
-  selected = true;
-}
-
-void State::deselect()
-{
-  selected = false;
 }
 
 int State::getID()
@@ -222,16 +206,6 @@ Transition* State::getLoop(int i) const
 int State::getNumLoops() const
 {
   return static_cast<int>(loops.size());
-}
-
-void State::setSimulated(bool simulated)
-{
-  this->simulated = simulated;
-}
-
-bool State::isSimulated() const
-{
-  return simulated;
 }
 
 int State::getZoomLevel() const

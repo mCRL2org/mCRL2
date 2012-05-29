@@ -18,7 +18,8 @@
 
 using namespace std;
 
-MarkManager::MarkManager():
+MarkManager::MarkManager(LtsManager *ltsManager):
+  m_ltsManager(ltsManager),
   m_lts(0),
   m_markStyle(NO_MARKS),
   m_clusterMatchStyle(MATCH_ANY),
@@ -28,6 +29,9 @@ MarkManager::MarkManager():
   m_markedTransitions(0),
   m_activeMarkRules(0)
 {
+  connect(ltsManager, SIGNAL(ltsChanged(LTS *)), this, SLOT(setLts(LTS *)));
+  connect(ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(setRelatedLts(LTS *)));
+  connect(ltsManager, SIGNAL(clustersChanged()), this, SLOT(flushClusters()));
 }
 
 QList<MarkRuleIndex> MarkManager::markRules()

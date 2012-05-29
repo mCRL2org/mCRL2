@@ -19,6 +19,7 @@
 #include "markdialog.h"
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
+#include "settings.h"
 #include "settingsdialog.h"
 #include "simdialog.h"
 
@@ -33,8 +34,6 @@
 #include "glcanvas.h"
 #include "icons/main_window.xpm"
 #include "ids.h"
-#include "mediator.h"
-#include "settings.h"
 
 using namespace std;
 using namespace IDs;
@@ -68,18 +67,29 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CLOSE(MainFrame::onClose)
 END_EVENT_TABLE()
 
-MainFrame::MainFrame(Mediator* owner, Settings* ss, MarkManager *manager)
+MainFrame::MainFrame()
   : wxFrame(NULL,wxID_ANY,wxT("LTSView"))
 {
 //  previousTime = 0.0;
 //  frameCount = 0;
-  mediator = owner;
-  settings = ss;
+  settings = new Settings();
+  ltsManager = new LtsManager(settings);
+  markManager = new MarkManager(ltsManager);
   progDialog = NULL;
   settingsDialog = new SettingsDialog(0, settings); // TODO: s/0/this/
-  infoDialog = new InfoDialog(0); // TODO: s/0/this/
-  simDialog = new SimDialog(0); // TODO: s/0/this/
-  markDialog = new MarkDialog(0, manager); // TODO: s/0/this/
+  infoDialog = new InfoDialog(0, ltsManager, markManager); // TODO: s/0/this/
+  simDialog = new SimDialog(0, ltsManager); // TODO: s/0/this/
+  markDialog = new MarkDialog(0, markManager); // TODO: s/0/this/
+  visualizer = new Visualizer(settings, ltsManager, markManager);
+
+  connect(ltsManager, SIGNAL(loadingLts()), this, SLOT(loadingLts()));
+  connect(ltsManager, SIGNAL(rankingStates()), this, SLOT(rankingStates()));
+  connect(ltsManager, SIGNAL(clusteringStates()), this, SLOT(clusteringStates()));
+  connect(ltsManager, SIGNAL(computingClusterInfo()), this, SLOT(computingClusterInfo()));
+  connect(ltsManager, SIGNAL(positioningClusters()), this, SLOT(positioningClusters()));
+  connect(ltsManager, SIGNAL(positioningStates()), this, SLOT(positioningStates()));
+  connect(ltsManager, SIGNAL(ltsStructured()), this, SLOT(hideProgressDialog()));
+  connect(ltsManager, SIGNAL(errorLoadingLts()), this, SLOT(hideProgressDialog()));
 
   SetIcon(wxIcon(main_window));
 
@@ -87,14 +97,16 @@ MainFrame::MainFrame(Mediator* owner, Settings* ss, MarkManager *manager)
   setupMenuBar();
   setupMainArea();
 
+  glCanvas->setVisualizer(visualizer);
+  connect(glCanvas, SIGNAL(renderingStarted()), this, SLOT(startRendering()));
+  connect(glCanvas, SIGNAL(renderingFinished()), this, SLOT(stopRendering()));
+
   SetSize(800,600);
   CentreOnScreen();
-}
 
-void MainFrame::setSim(Simulation* sim)
-{
-  //this->sim = sim;
-  simDialog->setSimulation(sim);
+  Show(true);
+  glCanvas->initialize();
+  Layout();
 }
 
 void MainFrame::setupMenuBar()
@@ -182,7 +194,7 @@ void MainFrame::setupMainArea()
   mainSizer->AddGrowableRow(0);
 
   int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0 };
-  glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
+  glCanvas = new GLCanvas(this,settings,ltsManager,wxDefaultSize,attribList);
 
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
 
@@ -215,20 +227,29 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
   if (dialog.ShowModal() == wxID_OK)
   {
     filename.Assign(dialog.GetPath());
-    mediator->openFile(string(filename.GetFullPath().mb_str(wxConvUTF8)));
+    createProgressDialog("Opening file");
+    if (ltsManager->openLts(QString::fromStdString(std::string(filename.GetFullPath().mb_str(wxConvUTF8)))))
+    {
+      glCanvas->resetView();
+
+      loadTitle();
+    }
   }
 }
 
 void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 {
-  wxString filemask = wxT("Traces (*.trc)|*.trc|All files (*.*)|*.*");
-  wxFileDialog dialog(this, wxT("Open Trace"),
-                      filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
-  dialog.CentreOnParent();
-  if (dialog.ShowModal() == wxID_OK)
+  if (ltsManager->lts())
   {
-    std::string path(dialog.GetPath().mb_str());
-    mediator->loadTrace(path);
+    wxString filemask = wxT("Traces (*.trc)|*.trc|All files (*.*)|*.*");
+    wxFileDialog dialog(this, wxT("Open Trace"),
+                        filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
+    dialog.CentreOnParent();
+    if (dialog.ShowModal() == wxID_OK)
+    {
+      std::string path(dialog.GetPath().mb_str());
+      ltsManager->loadTrace(QString::fromStdString(path));
+    }
   }
 }
 
@@ -313,7 +334,7 @@ void MainFrame::onSaveText(wxCommandEvent& /*event*/)
                                      wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty())
   {
-    mediator->exportToText(static_cast<std::string>(new_file.mb_str(wxConvUTF8)));
+    visualizer->exportToText(static_cast<std::string>(new_file.mb_str(wxConvUTF8)));
   }
 }
 
@@ -392,20 +413,34 @@ void MainFrame::onSim(wxCommandEvent& /*event*/)
 
 void MainFrame::onZoomInBelow(wxCommandEvent& /*event*/)
 {
-  mediator->zoomInBelow();
-  glCanvas->display();
+  if (ltsManager->lts())
+  {
+    Cluster *cluster = ltsManager->selectedCluster();
+    if (cluster)
+    {
+      ltsManager->zoomInBelow(cluster);
+    }
+  }
 }
 
 void MainFrame::onZoomInAbove(wxCommandEvent& /*event*/)
 {
-  mediator->zoomInAbove();
-  glCanvas->display();
+  if (ltsManager->lts())
+  {
+    Cluster *cluster = ltsManager->selectedCluster();
+    if (cluster)
+    {
+      ltsManager->zoomInAbove(cluster);
+    }
+  }
 }
 
 void MainFrame::onZoomOut(wxCommandEvent& /*event*/)
 {
-  mediator->zoomOut();
-  glCanvas->display();
+  if (ltsManager->lts())
+  {
+    ltsManager->zoomOut();
+  }
 }
 
 void MainFrame::createProgressDialog(const string& title,const string& text)
@@ -457,21 +492,6 @@ void MainFrame::loadTitle()
   }
 }
 
-void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr)
-{
-  infoDialog->setLTSInfo(ns,nt,nc,nr);
-}
-
-void MainFrame::setMarkedStatesInfo(int number)
-{
-  infoDialog->setNumMarkedStates(number);
-}
-
-void MainFrame::setMarkedTransitionsInfo(int number)
-{
-  infoDialog->setNumMarkedTransitions(number);
-}
-
 void MainFrame::startRendering()
 {
   SetStatusText(wxT("Rendering..."),0);
@@ -491,29 +511,3 @@ void MainFrame::stopRendering()
   SetStatusText(wxT(""),0);
   GetStatusBar()->Update();
 }
-
-void MainFrame::resetParameterValues()
-{
-  infoDialog->resetParameterValues();
-}
-
-void MainFrame::setParameterNames(QStringList parameters)
-{
-  infoDialog->setParameterNames(parameters);
-}
-
-void MainFrame::setParameterValue(int parameter, QString value)
-{
-  infoDialog->setParameterValue(parameter, value);
-}
-
-void MainFrame::setParameterValues(int parameters, QStringList values)
-{
-  infoDialog->setParameterValues(parameters, values);
-}
-
-void MainFrame::setStatesInCluster(int n)
-{
-  infoDialog->setStatesInCluster(n);
-}
-

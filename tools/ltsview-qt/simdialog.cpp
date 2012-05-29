@@ -9,9 +9,9 @@
 #include "simdialog.h"
 #include <QList>
 
-SimDialog::SimDialog(QWidget *parent)
+SimDialog::SimDialog(QWidget *parent, LtsManager *ltsManager)
   : QDialog(parent),
-    m_simulation(0)
+    m_ltsManager(ltsManager)
 {
   m_ui.setupUi(this);
 
@@ -24,14 +24,8 @@ SimDialog::SimDialog(QWidget *parent)
   connect(m_ui.transitionTable, SIGNAL(itemSelectionChanged()), this, SLOT(select()));
   connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(trigger()));
 
-  changed();
-}
+  connect(m_ltsManager, SIGNAL(simulationChanged()), this, SLOT(changed()));
 
-void SimDialog::setSimulation(Simulation *simulation)
-{
-  m_simulation = simulation;
-  connect(m_simulation, SIGNAL(changed()), this, SLOT(changed()));
-  connect(m_simulation, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
   changed();
 }
 
@@ -44,7 +38,8 @@ static inline QTableWidgetItem *item()
 
 void SimDialog::changed()
 {
-  if (!m_simulation)
+  Simulation *simulation = m_ltsManager->simulation();
+  if (!simulation)
   {
     m_ui.start->setEnabled(false);
     m_ui.stop->setEnabled(false);
@@ -53,7 +48,7 @@ void SimDialog::changed()
     m_ui.undo->setEnabled(false);
     m_ui.transitionTable->setRowCount(0);
   }
-  else if (!m_simulation->getStarted())
+  else if (!simulation->isStarted())
   {
     m_ui.start->setEnabled(true);
     m_ui.stop->setEnabled(false);
@@ -68,88 +63,95 @@ void SimDialog::changed()
     m_ui.stop->setEnabled(true);
     m_ui.backtrace->setEnabled(true);
     m_ui.reset->setEnabled(true);
-    m_ui.undo->setEnabled(!m_simulation->getTransHis().empty());
+    m_ui.undo->setEnabled(simulation->canUndo());
+
+    QList<Transition *> transitions = simulation->availableTransitions();
+    State *currentState = simulation->currentState();
 
     m_ui.transitionTable->setRowCount(0);
-    m_ui.transitionTable->setRowCount(m_simulation->getPosTrans().size());
-    State *state = m_simulation->getCurrState();
-    for (size_t i = 0; i < m_simulation->getPosTrans().size(); i++)
+    m_ui.transitionTable->setRowCount(transitions.size());
+    for (int i = 0; i < transitions.size(); i++)
     {
       m_ui.transitionTable->setItem(i, 0, item());
       m_ui.transitionTable->setItem(i, 1, item());
-      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(m_simulation->getLTS()->getLabel(m_simulation->getPosTrans()[i]->getLabel())));
+      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(simulation->lts()->getLabel(transitions[i]->getLabel())));
 
-      State *destination = m_simulation->getPosTrans()[i]->getEndState();
+      State *destination = transitions[i]->getEndState();
       QStringList assignments;
-      for (size_t j = 0; j < m_simulation->getLTS()->getNumParameters(); j++)
+      for (size_t j = 0; j < simulation->lts()->getNumParameters(); j++)
       {
-        if (m_simulation->getLTS()->getStateParameterValue(state, j) != m_simulation->getLTS()->getStateParameterValue(destination, j))
+        if (simulation->lts()->getStateParameterValue(currentState, j) != simulation->lts()->getStateParameterValue(destination, j))
         {
-          assignments += QString::fromStdString(m_simulation->getLTS()->getParameterName(j)) + QString(":=") + QString::fromStdString(m_simulation->getLTS()->getStateParameterValueStr(destination, j));
+          assignments += QString::fromStdString(simulation->lts()->getParameterName(j)) + QString(":=") + QString::fromStdString(simulation->lts()->getStateParameterValueStr(destination, j));
         }
       }
       m_ui.transitionTable->item(i, 1)->setText(assignments.join(", "));
     }
-
+    selectionChanged();
   }
-
-  selectionChanged();
 }
 
 void SimDialog::selectionChanged()
 {
-  if (!m_simulation)
+  if (m_ltsManager->simulation() && m_ltsManager->simulation()->isStarted())
   {
-    m_ui.trigger->setEnabled(false);
-  }
-  else if (!m_simulation->getStarted())
-  {
-    m_ui.trigger->setEnabled(false);
+    m_ui.trigger->setEnabled(true);
+    QList<Transition *> transitions = m_ltsManager->simulation()->availableTransitions();
+    for (int i = 0; i < transitions.size(); i++)
+    {
+      if (transitions[i] == m_ltsManager->simulation()->currentTransition())
+      {
+        m_ui.transitionTable->setRangeSelected(QTableWidgetSelectionRange(i, 0, i, 1), true);
+      }
+    }
   }
   else
   {
-    m_ui.transitionTable->setRangeSelected(QTableWidgetSelectionRange(0, 0, m_ui.transitionTable->rowCount() - 1, 1), false);
-    int selectedTransition = m_simulation->getChosenTransi();
-    if (selectedTransition == -1)
-    {
-      m_ui.trigger->setEnabled(false);
-    }
-    else
-    {
-      m_ui.transitionTable->setRangeSelected(QTableWidgetSelectionRange(selectedTransition, 0, selectedTransition, 1), true);
-      m_ui.trigger->setEnabled(true);
-    }
+    m_ui.trigger->setEnabled(false);
   }
 }
 
 void SimDialog::start()
 {
-  m_simulation->start();
+  m_ltsManager->simulation()->start();
 }
 
 void SimDialog::stop()
 {
-  m_simulation->stop();
+  m_ltsManager->simulation()->stop();
 }
 
 void SimDialog::backtrace()
 {
-  m_simulation->getLTS()->generateBackTrace();
+  m_ltsManager->simulation()->traceback();
 }
 
 void SimDialog::reset()
 {
-  m_simulation->resetSim();
+  m_ltsManager->simulation()->stop();
+  m_ltsManager->simulation()->start();
 }
 
 void SimDialog::trigger()
 {
-  m_simulation->followTrans();
+  Transition *transition = m_ltsManager->simulation()->currentTransition();
+  if (!transition)
+  {
+    QList<Transition *> transitions = m_ltsManager->simulation()->availableTransitions();
+    if (!transitions.isEmpty())
+    {
+      transition = transitions[0];
+    }
+  }
+  if (transition)
+  {
+    m_ltsManager->simulation()->followTransition(transition);
+  }
 }
 
 void SimDialog::undo()
 {
-  m_simulation->undoStep();
+  m_ltsManager->simulation()->undo();
 }
 
 void SimDialog::select()
@@ -157,6 +159,6 @@ void SimDialog::select()
   QList<QTableWidgetSelectionRange> selection = m_ui.transitionTable->selectedRanges();
   if (selection.size() > 0)
   {
-    m_simulation->chooseTrans(selection[0].topRow());
+    m_ltsManager->simulation()->selectTransition(m_ltsManager->simulation()->availableTransitions()[selection[0].topRow()]);
   }
 }
