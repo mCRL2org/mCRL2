@@ -1157,7 +1157,8 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
      bool opt_precompile_pbes,
      mcrl2::data::detail::legacy_rewriter& R,
      mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
-     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal,
+     const bool convert_data_to_pbes = true)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
@@ -1321,33 +1322,35 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     if (opt_precompile_pbes)
     {
       atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
-      if (d==R.get_rewriter().internal_true)
+      result = d;
+
+      if (convert_data_to_pbes)
       {
-        result = pbes_expr::true_();
-      }
-      else if (d==R.get_rewriter().internal_false)
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
+        if (d==R.get_rewriter().internal_true)
+        {
+          result = pbes_expr::true_();
+        }
+        else if (d==R.get_rewriter().internal_false)
+        {
+          result = pbes_expr::false_();
+        }
       }
     }
     else
     {
       data::data_expression d(R(p,sigma));
-      if (d == data::sort_bool::true_())
+      result = d;
+
+      if (convert_data_to_pbes)
       {
-        result = pbes_expr::true_();
-      }
-      else if (d == data::sort_bool::false_())
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
+        if (d == data::sort_bool::true_())
+        {
+          result = pbes_expr::true_();
+        }
+        else if (d == data::sort_bool::false_())
+        {
+          result = pbes_expr::false_();
+        }
       }
     }
   }

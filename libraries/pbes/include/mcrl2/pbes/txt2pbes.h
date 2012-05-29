@@ -28,18 +28,21 @@ namespace pbes_system
 /// \param spec_stream A stream from which can be read
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(std::istream& spec_stream)
+pbes<> txt2pbes(std::istream& spec_stream, bool normalize = true)
 {
   pbes<> result;
   spec_stream >> result;
-  try
+  if (normalize)
   {
-    mCRL2log(log::verbose) << "checking monotonicity..." << std::endl;
-    pbes_system::normalize(result);
-  }
-  catch (std::exception& /* e */)
-  {
-    throw mcrl2::runtime_error("PBES is not monotonic");
+    try
+    {
+      mCRL2log(log::verbose) << "checking monotonicity..." << std::endl;
+      pbes_system::normalize(result);
+    }
+    catch (std::exception& /* e */)
+    {
+      throw mcrl2::runtime_error("PBES is not monotonic");
+    }
   }
   return result;
 }
@@ -48,10 +51,10 @@ pbes<> txt2pbes(std::istream& spec_stream)
 /// \param text A string
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(const std::string& text)
+pbes<> txt2pbes(const std::string& text, bool normalize = true)
 {
   std::stringstream from(text);
-  return txt2pbes(from);
+  return txt2pbes(from, normalize);
 }
 
 } // namespace pbes_system

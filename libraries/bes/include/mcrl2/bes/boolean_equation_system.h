@@ -63,10 +63,13 @@ class boolean_equation_system
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      // boolean_equation_list eqn = static_cast<boolean_equation_list>(*i++);
       atermpp::term_list<atermpp::aterm_appl> eqn = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
       m_initial_state = boolean_expression(*i);
-      m_equations = Container(eqn.begin(), eqn.end());
+      m_equations.reserve(eqn.size());
+      for (atermpp::term_list<atermpp::aterm_appl>::const_iterator j = eqn.begin(); j != eqn.end(); ++j)
+      {
+        m_equations.push_back(boolean_equation(*j));
+      }
     }
 
   public:
@@ -160,7 +163,7 @@ class boolean_equation_system
     /// \return An ATerm representation of the boolean equation system
     operator atermpp::aterm_appl() const
     {
-      boolean_equation_list equations(m_equations.begin(), m_equations.end());
+      atermpp::aterm_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakeBES(equations, m_initial_state);
     }
 

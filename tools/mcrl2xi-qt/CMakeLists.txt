@@ -1,4 +1,4 @@
-# Authors: Frank Stappers and Aad Mathijssen
+# Authors: Frank Stappers, Aad Mathijssen and Rimco Boudewijns
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -7,58 +7,78 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(mcrl2xi_qt)
+project(mcrl2xi-qt)
 cmake_minimum_required(VERSION 2.6)
 
+if(MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
 
-if (MCRL2_ENABLE_GUI_TOOLS)
-if (QT4_FOUND)
+if(QT4_FOUND)
 
-set(QT_USE_QTOPENGL TRUE)
 include(${QT_USE_FILE})
 
-set(UI_FILES
-  mcrl2xi_qt_mainwindow.ui
-  mcrl2xi_qt_rewriter.ui
-  mcrl2xi_qt_solver.ui
-  mcrl2xi_qt_parse_and_typecheck.ui
-)
-qt4_wrap_ui(UI_HEADERS ${UI_FILES})
+set(MCRL2XI_RCC_SRCS mcrl2xi.qrc)
 
-set(MOC_HEADERS
-  mcrl2xi_qt_mainwindow.h
-  mcrl2xi_qt_highlighter.h
-  mcrl2xi_qt_rewriter.h
-  mcrl2xi_qt_solver.h
-  mcrl2xi_qt_parse_and_typecheck.h
-)
-qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
+qt4_add_resources(MCRL2XI_RC_FILES ${MCRL2XI_RCC_SRCS})
 
-set(SRC_FILES
-  ${UI_HEADERS}
-  ${MOC_SOURCES}
-  mcrl2xi_qt_main.cpp
-  mcrl2xi_qt_mainwindow.cpp
-  mcrl2xi_qt_highlighter.cpp
-  mcrl2xi_qt_rewriter.cpp
-  mcrl2xi_qt_solver.cpp
-  mcrl2xi_qt_parse_and_typecheck.cpp
+set(MCRL2XI_UI_FILES
+  mainwindow.ui
+  documentmanager.ui
+  documentwidget.ui
+  findreplacedialog.ui
 )
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
+qt4_wrap_ui(MCRL2XI_UI_HEADERS ${MCRL2XI_UI_FILES})
 
-target_link_libraries(${PROJECT_NAME} 
+set(MCRL2XI_MOC_HEADERS
+  mainwindow.h
+  highlighter.h
+
+  documentmanager.h
+  documentwidget.h
+  parser.h
+  rewriter.h
+  solver.h
+  findreplacedialog.h
+)
+qt4_wrap_cpp(MCRL2XI_MOC_SOURCES ${MCRL2XI_MOC_HEADERS})
+
+set(MCRL2XI_SRC_FILES
+  ${MCRL2XI_RC_FILES}
+  ${MCRL2XI_UI_HEADERS}
+  ${MCRL2XI_MOC_SOURCES}
+  main.cpp
+  mainwindow.cpp
+  highlighter.cpp
+
+  documentmanager.cpp
+  documentwidget.cpp
+  parser.cpp
+  rewriter.cpp
+  solver.cpp
+  findreplacedialog.cpp
+)
+
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+
+# ######### Create Windows Icon ##########
+if(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  set(MCRL2XI_SRC_FILES ${MCRL2XI_SRC_FILES} mcrl2xi-qt.rc)
+endif(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2XI_SRC_FILES})
+
+target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  mcrl2_lts
+  ${QT_QTMAIN_LIBRARY}
   mcrl2_core
-  mcrl2_aterm
   mcrl2_data
-  mcrl2_utilities
+  mcrl2_aterm
   mcrl2_lps
-
-  mcrl2_process
-  dparser
+  mcrl2_utilities
+  mcrl2_utilities_qt
 )
 
 # Don't forget to include output directory, otherwise
@@ -66,27 +86,29 @@ target_link_libraries(${PROJECT_NAME}
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # For promoted widgets
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-#include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 else(QT4_FOUND)
-  message(STATUS "Could NOT find Qt4, not building ltsgraph-qt.")
+  message(STATUS "Could NOT find Qt4, not building mcrl2xi-qt.")
 endif(QT4_FOUND)
 endif ( MCRL2_ENABLE_GUI_TOOLS )

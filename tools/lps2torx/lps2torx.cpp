@@ -22,28 +22,26 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <deque>
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
-#include "mcrl2/lps/multi_action.h"
-
-#include "mcrl2/lps/simulator.h"
-
-using namespace mcrl2::utilities;
-using namespace mcrl2::utilities::tools;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
+using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 
 class torx_tool : public rewriter_tool< input_tool >
 {
-
     typedef rewriter_tool<input_tool> super;
 
   protected:
@@ -72,34 +70,30 @@ class torx_tool : public rewriter_tool< input_tool >
       }
     }
 
-    std::set< mcrl2::lps::state >     visited_states;
-    std::map<int,mcrl2::lps::state> int_to_seenstate_mapping;
-    std::map<mcrl2::lps::state,int> seenstate_to_int_mapping;
-
     /* Multi-actions:  a_1(d^1_1,...,d^1_m)|...|a_n(n^1_1, ..., d^n_m)
      * are printed as: a_1!d^1_1!...!d^1_m!...!a_n!n^1_1!...!d^n_m
      * */
-    std::string print_torx_transtion( multi_action ma )
+    std::string print_torx_action(multi_action ma)
     {
-      if( ma.actions().empty() )
+      if (ma.actions().empty())
       {
         return "tau";
       }
 
       std::string result;
-      for (action_list::const_iterator i=ma.actions().begin(); i!=ma.actions().end(); ++i)
+      for (action_list::const_iterator i = ma.actions().begin(); i != ma.actions().end(); i++)
       {
-        result = result+mcrl2::lps::pp(i->label());
-        for (mcrl2::data::data_expression_list::const_iterator arg=i->arguments().begin(); arg!=i->arguments().end(); ++arg)
+        result += lps::pp(i->label());
+        for (data::data_expression_list::const_iterator j = i->arguments().begin(); j != i->arguments().end(); j++)
         {
-          result = result+"!"+mcrl2::data::pp( *arg );
+          result += "!" + data::pp(*j);
         }
 
-        action_list::const_iterator i_next=i;
-        i_next++;
-        if (i_next!=ma.actions().end())
+        action_list::const_iterator next = i;
+        next++;
+        if (next != ma.actions().end())
         {
-          result=result+"!";
+          result += "!";
         }
       }
       return result;
@@ -119,20 +113,15 @@ class torx_tool : public rewriter_tool< input_tool >
 
     bool run()
     {
-      mcrl2::lps::specification lps_specification;
-
+      specification lps_specification;
       lps_specification.load(m_input_filename);
 
-      StandardSimulator simulator;
-      simulator.rewr_strat = rewrite_strategy();
-      simulator.use_dummies = m_use_dummies;
-      simulator.LoadSpec(lps_specification);
+      next_state_generator generator(lps_specification, data::rewriter(lps_specification.data(), rewrite_strategy()));
+      next_state_generator::substitution_t substitution;
 
-      visited_states.clear();
-      int_to_seenstate_mapping.clear();
-      seenstate_to_int_mapping.clear();
-
-      int max_state = 0;
+      state current = generator.initial_state();
+      std::deque<state> states;
+      std::map<state, int> state_numbers;
 
       bool notdone = true;
       while (notdone)
@@ -172,13 +161,12 @@ class torx_tool : public rewriter_tool< input_tool >
           {
             // R event TAB solved TAB preds TAB freevars TAB identical
             std::cout << "R 0\t1\t\t\t" << std::endl;
-            visited_states.clear();
-            visited_states.insert( simulator.GetState() );
 
-            int_to_seenstate_mapping.clear();
-            int_to_seenstate_mapping[ 0 ] = simulator.GetState();
+            states.clear();
+            states.push_back(current);
 
-            max_state=0;
+            state_numbers.clear();
+            state_numbers[current] = 0;
 
             break;
           }
@@ -190,10 +178,8 @@ class torx_tool : public rewriter_tool< input_tool >
               break;
             }
 
-            int index = atoi(s.substr(1, s.size()-1 ).c_str());
-            std::map<int,state>::iterator it = int_to_seenstate_mapping.find( index );
-
-            if (it == int_to_seenstate_mapping.end())
+            size_t index = atoi(s.substr(1, s.size()-1 ).c_str());
+            if (index >= states.size())
             {
               std::cout << "E0 value " << index << " not valid" << std::endl;
               break;
@@ -201,36 +187,28 @@ class torx_tool : public rewriter_tool< input_tool >
 
             try
             {
-              simulator.Reset( it->second );
-              std::vector < state > next_states=simulator.GetNextStates();
-              std::vector < multi_action > next_actions=simulator.GetNextActions();
-
-              visited_states.insert( simulator.GetState() );
-
               std::cout << "EB" << std::endl;
-              for (size_t i=0; i<next_states.size(); ++i) 
+              current = states[index];
+
+              for (next_state_generator::iterator i = generator.begin(current, &substitution); i != generator.end(); i++)
               {
-                max_state++;
-
-                const multi_action ma = next_actions[i];
-                const state NewState = next_states[i]; 
-
-                int is_tau = ma.actions().empty()?0:1;
-
                 /* Rebuild transition string in Torx format*/
-                std::cout << "Ee " << max_state << "\t" << is_tau << "\t" << 1 << "\t" << print_torx_transtion(ma) << "\t\t\t";
-                int_to_seenstate_mapping[max_state] = NewState;
+                std::cout << "Ee " << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";
+
+                state next = i->state();
 
                 /* Print optional first-encounted visited state */
-                if(seenstate_to_int_mapping.find(NewState) == seenstate_to_int_mapping.end())
+                if(state_numbers.count(next) == 0)
                 {
-                  seenstate_to_int_mapping[ NewState ] = max_state;
+                  state_numbers[next] = states.size();
                 }
                 else
                 {
-                  std::cout << seenstate_to_int_mapping.find(NewState)->second;
+                  std::cout << state_numbers[next];
                 }
                 std::cout << std::endl;
+
+                states.push_back(next);
               }
               std::cout << "EE" << std::endl;
 

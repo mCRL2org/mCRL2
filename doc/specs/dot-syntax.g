@@ -10,11 +10,24 @@
 /// \brief dparser grammar of the GraphViz Dot format
 /// See also http://www.graphviz.org/doc/info/lang.html
 
-${declare longest_match}
+//${declare tokenize}
+//${declare longest_match}
 
 //--- Dot syntax
 
-graph : 'strict/i'? ('graph/i' | 'digraph/i') ID? '{' stmt_list '}' ;
+dot : strict? (graph | digraph) ID? '{' stmt_list '}' ;
+
+strict: "[sS][tT][rR][iI][cC][tT]" ;
+
+graph: "[gG][rR][aA][pP][hH]" ;
+
+subgraph: "[sS][uU][bB][gG][rR][aA][pP][hH]" ;
+
+digraph: "[dD][iI][gG][rR][aA][pP][hH]" ;
+
+node: "[nN][oO][dD][eE]" ;
+
+edge: "[eE][dD][gG][eE]" ;
 
 stmt_list : (stmt ';'? stmt_list?)? ;
 
@@ -26,7 +39,7 @@ stmt
 	| subgraph
 	;
 
-attr_stmt	:	('graph/i' | 'node/i' | 'edge/i') attr_list ;
+attr_stmt	:	(graph | node | edge) attr_list ;
 
 attr_list :	'[' a_list? ']' attr_list? ;
 
@@ -45,7 +58,7 @@ port
   | ':' compass_pt
   ;
 
-subgraph : ('subgraph/i' ID?)? '{' stmt_list '}' ;
+subgraph : (subgraph ID?)? '{' stmt_list '}' ;
 
 compass_pt : 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw' | 'c' | '_' ;
 
@@ -63,7 +76,9 @@ ID
   ;
 
 quoted : "\"[^\"]*\"" ;
-name : "[a-zA-Z_][a-zA-Z0-9_]*" ;
+
+name : "[A-Za-z_][A-Za-z_0-9]*" ;
+
 number : "[-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))" ;
 
 //--- Whitespace

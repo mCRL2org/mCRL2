@@ -3,7 +3,7 @@
 
 #include <boost/config.hpp>
 
-#if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN)
+#if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN) || defined(_MSC_VER)
 # include <cassert>
 # include <cmath>
 # include <cstdio>

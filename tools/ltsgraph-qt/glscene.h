@@ -1,11 +1,21 @@
+// Author(s): Rimco Boudewijns and Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 /**
 
   @file glscene.h
-  @author S. Cranen
+  @author S. Cranen, R. Boudewijns
 
   This file contains an interface to the OpenGL renderer used by LTSGraph.
 
 */
+
 #ifndef GLSCENE_H
 #define GLSCENE_H
 
@@ -19,13 +29,20 @@ struct CameraAnimation;
 
 class GLScene
 {
-private:
+  private:
     Graph::Graph& m_graph;      ///< The graph that is being visualised.
     VertexData *m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
     TextureData *m_texturedata; ///< Implementation details storing labels as textures.
     CameraAnimation *m_camera;  ///< Implementation details of the OpenGL camera handling.
 
-    bool m_drawlabels;          ///< Labels are only drawn if this field is true.
+    bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
+    bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
+    bool m_drawstatenumbers;       ///< State numbers are only drawn if this field is true.
+    bool m_drawinitialmarking;     ///< The initial state is marked if this field is true.
+    size_t m_size_node;            ///< Variable node size.
+
+    bool m_drawfog;                ///< Fog is rendered only if this field is true.
+    float m_fogdistance;           ///< The distance at which the fog starts
 
     /**
      * @brief Renders a single edge.
@@ -49,20 +66,33 @@ private:
      * @brief Renders a single edge label.
      * @param i The index of the edge of the label to render.
      */
-    void renderLabel(size_t i);
-public:
+    void renderTransitionLabel(size_t i);
+
+    /**
+     * @brief Renders a single state label.
+     * @param i The index of the state of the label to render.
+     */
+    void renderStateLabel(size_t i);
+
+    /**
+     * @brief Renders a single state number.
+     * @param i The index of the state number to render.
+     */
+    void renderStateNumber(size_t i);
+  public:
 
     /**
      * @brief An enumeration that identifies the types of objects that
-              can be selected.
+              can be selected. The order determines priority during selection.
      */
     enum SelectableObject
     {
-        so_none,     ///< Nothing was selected.
-        so_edge,     ///< An edge was selected.
-        so_label,    ///< An edge label was selected.
-        so_handle,   ///< An edge handle was selected.
-        so_node      ///< A node was selected.
+      so_none,     ///< Nothing was selected.
+      so_edge,     ///< An edge was selected.
+      so_label,    ///< An edge label was selected.
+      so_slabel,   ///< An state label was selected.
+      so_handle,   ///< An edge handle was selected.
+      so_node      ///< A node was selected.
     };
 
     /**
@@ -86,6 +116,12 @@ public:
     ~GLScene();
 
     /**
+     * @brief Applies the current fog settings. Call when the
+     *        fog settings have changed.
+     */
+    void updateFog();
+
+    /**
      * @brief Rebuilds the textures used to render labels. Call when the
      *        graph has changed.
      */
@@ -94,15 +130,13 @@ public:
     /**
      * @brief Rebuilds the shapes for nodes, handles, arrowheads and labels.
      *        Call whenever the size of a pixel in world coordinates changes.
-     * @todo This construction is not very nice, and should be replaced by
-     *       a simple scaling transform based on the pixel size.
      */
     void updateShapes();
 
     /**
      * @brief Initialises the OpenGL context.
      * @param clear The colour to use as a background colour. This colour is
-     *              also used for the fog in 3D mode.
+     *              also used for the fog in 3D mode if enabled.
      */
     void init(const QColor& clear);
 
@@ -221,8 +255,19 @@ public:
      */
     void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
 
-    bool drawLabels() const { return m_drawlabels; }
-    void setDrawLabels(bool drawLabels) { m_drawlabels = drawLabels; }
+    //Getters and setters
+    bool drawStateLabels() const { return m_drawstatelabels; }
+    bool drawTransitionLabels() const { return m_drawtransitionlabels; }
+    size_t  nodeSize() const { return m_size_node; }
+    float  fogDistance() const { return m_fogdistance; }
+    void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
+    void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
+    void setDrawStateNumbers(bool drawLabels) { m_drawstatenumbers = drawLabels; }
+    void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
+    void setDrawFog(bool drawFog) { m_drawfog = drawFog; updateFog(); }
+    void setNodeSize(size_t size) { m_size_node = size; }
+    void setFogDistance(float dist) { m_fogdistance = dist; updateFog(); }
+
 };
 
 #endif // GLSCENE_H

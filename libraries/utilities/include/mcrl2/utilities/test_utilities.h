@@ -12,7 +12,11 @@
 #ifndef MCRL2_UTILITIES_TEST_UTILITIES_H
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
+#include <string>
+#include <sstream>
 #include <vector>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
@@ -60,6 +64,27 @@ const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const boo
 {
   static std::vector<data::rewrite_strategy> rewrite_strategies = initialise_test_rewrite_strategies(with_prover);
   return rewrite_strategies;
+}
+
+/// \brief Get filename based on timestamp
+/// \warning is prone to race conditions
+std::string temporary_filename(std::string const& prefix = "")
+{
+  time_t now = time(NULL);
+  std::stringstream now_s;
+  now_s << now;
+
+  std::string basename(prefix + now_s.str());
+  boost::filesystem::path result(basename);
+  int suffix = 0;
+  while (boost::filesystem::exists(result))
+  {
+    std::stringstream suffix_s;
+    suffix_s << suffix;
+    result = boost::filesystem::path(basename + suffix_s.str());
+    ++suffix;
+  }
+  return result.string();
 }
 
 }

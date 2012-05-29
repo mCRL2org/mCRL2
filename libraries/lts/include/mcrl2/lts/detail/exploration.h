@@ -32,22 +32,20 @@ namespace lts
 
 class lps2lts_algorithm: public lps2lts_algorithm_base
 {
+  private:
   typedef lps::next_state_generator next_state_generator;
-  typedef next_state_generator::internal_state_t state_t;
-  typedef lps::multi_action action_label_t;
-
-  struct state_info
-  {
-    state_t state;
-    std::list<next_state_generator::transition_t> transitions;
-  };
-  friend struct atermpp::aterm_traits<state_info>;
+  typedef next_state_generator::internal_state_t generator_state_t;
+  typedef atermpp::aterm storage_state_t;
 
   private:
     lts_generation_options m_options;
     next_state_generator *m_generator;
-    next_state_generator *m_confluence_generator;
     next_state_generator::substitution_t m_substitution;
+    next_state_generator::summand_subset_t *m_main_subset;
+
+    bool m_use_confluence_reduction;
+    next_state_generator::summand_subset_t m_nonprioritized_subset;
+    next_state_generator::summand_subset_t m_prioritized_subset;
 
     atermpp::indexed_set m_state_numbers;
     bit_hash_table m_bit_hash_table;
@@ -59,9 +57,11 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     bool m_maintain_traces;
     bool m_value_prioritize;
 
-    std::vector<size_t> m_tau_summands;
+    next_state_generator::summand_subset_t m_tau_summands;
 
-    std::map<state_t, state_t> m_backpointers;
+    std::vector<bool> m_detected_action_summands;
+
+    std::map<storage_state_t, storage_state_t> m_backpointers;
     size_t m_traces_saved;
 
     size_t m_num_states;
@@ -73,7 +73,6 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
   public:
     lps2lts_algorithm() :
       m_generator(0),
-      m_confluence_generator(0),
       m_must_abort(false)
     {
     }
@@ -81,7 +80,6 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     virtual ~lps2lts_algorithm()
     {
       delete m_generator;
-      delete m_confluence_generator;
     }
 
     virtual bool initialise_lts_generation(lts_generation_options* options);
@@ -100,32 +98,27 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     }
 
   private:
-    state_t get_prioritised_representative(state_t state);
+    generator_state_t generator_state(const storage_state_t storage_state);
+    storage_state_t storage_state(const generator_state_t generator_state);
+    generator_state_t get_prioritised_representative(generator_state_t state);
     void value_prioritize(std::list<next_state_generator::transition_t> &transitions);
-    bool save_trace(state_t state, std::string filename);
-    bool search_divergence(state_t state, std::set<state_t> &current_path, std::set<state_t> &visited);
-    void check_divergence(state_t state);
-    void check_action(state_t state, next_state_generator::transition_t &transition);
-    void save_deadlock(state_t state);
-    void save_error(state_t state);
-    bool add_transition(state_t state, next_state_generator::transition_t &transition);
-    std::list<next_state_generator::transition_t> get_transitions(state_t state);
+    bool save_trace(generator_state_t state, std::string filename);
+    bool search_divergence(generator_state_t state, std::set<generator_state_t> &current_path, std::set<generator_state_t> &visited);
+    void check_divergence(generator_state_t state);
+    void save_actions(generator_state_t state, const next_state_generator::transition_t &transition);
+    void save_deadlock(generator_state_t state);
+    void save_error(generator_state_t state);
+    bool add_transition(generator_state_t state, next_state_generator::transition_t &transition);
+    std::list<next_state_generator::transition_t> get_transitions(generator_state_t state);
 
-    void generate_lts_breadth(state_t initial_state);
-    void generate_lts_breadth_bithashing(state_t initial_state);
-    void generate_lts_depth(state_t initial_state);
-    void generate_lts_random(state_t initial_state);
+    void generate_lts_breadth();
+    void generate_lts_breadth_bithashing(generator_state_t initial_state);
+    void generate_lts_depth(generator_state_t initial_state);
+    void generate_lts_random(generator_state_t initial_state);
 };
 
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-  template<> struct aterm_traits<mcrl2::lts::lps2lts_algorithm::state_info>
-  {
-  };
-}
 
 #endif // MCRL2_LTS_DETAIL_EXPLORATION_H

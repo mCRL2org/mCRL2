@@ -196,6 +196,7 @@ class InternalFormatManipulator
 
       // v_result is NULL if not found; Therefore type aterm.
       std::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
+
       if (it!=f_orient.end())   // found
       {
         return it->second;

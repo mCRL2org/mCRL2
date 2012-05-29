@@ -215,10 +215,12 @@ public:
     pbes_expression rewrite_and_simplify(
            const pbes_expression& e,
            data::detail::legacy_rewriter::substitution_type &sigma,
-           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal,
+           const bool convert_data_to_pbes = true)
     {
-      return ::bes::pbes_expression_rewrite_and_simplify(e, m_precompile_pbes, datar_internal,sigma,sigma_internal);
+      return ::bes::pbes_expression_rewrite_and_simplify(e, m_precompile_pbes, datar_internal,sigma,sigma_internal, convert_data_to_pbes);
     }
+
 protected:
     /// \brief Substitute and rewrite e.
     pbes_expression substitute_and_rewrite(
