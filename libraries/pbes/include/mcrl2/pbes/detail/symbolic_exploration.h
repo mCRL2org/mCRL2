@@ -273,10 +273,20 @@ class symbolic_exploration_algorithm
 
     void run(pbes<>& p)
     {
+      namespace z = pbes_expr_optimized;
+
       atermpp::vector<pbes_equation>& equations = p.equations();
       for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
       {
-        i->formula() = F(i->formula());
+        pbes_expression phi = i->formula();
+        if (is_conjunctive(phi))
+        {
+          i->formula() = z::and_(expr_and(phi), F_and(phi));
+        }
+        else
+        {
+          i->formula() = z::or_(expr_or(phi), F_or(phi));
+        }
       }
     }
 };
