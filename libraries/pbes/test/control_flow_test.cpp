@@ -36,7 +36,7 @@ void test_control_flow()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  atermpp::aterm_init();
 
   test_control_flow();
 

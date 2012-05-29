@@ -102,8 +102,8 @@ class pbes_control_flow_algorithm
 
     propositional_variable find_propvar(const pbes<>& p, const core::identifier_string& X) const
     {
-      const atermpp::vector<pbes_equation>& equations = p.equations();
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      const std::vector<pbes_equation>& equations = p.equations();
+      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         if (i->variable().name() == X)
         {
@@ -143,10 +143,10 @@ class pbes_control_flow_algorithm
     /// \pre p is in PFNF format
     void run(pbes<>& P)
     {
-      const atermpp::vector<pbes_equation>& equations = P.equations();
+      const std::vector<pbes_equation>& equations = P.equations();
 
       // compute the vertices of the control graph
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         core::identifier_string X = i->variable().name();
         data::variable_list Xparams = i->variable().parameters();
@@ -157,7 +157,7 @@ class pbes_control_flow_algorithm
       }
 
       // compute the edges of the control graph
-      for (atermpp::vector<pbes_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<pbes_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         // we are considering the equation X(d_X) = phi
         propositional_variable X = k->variable();
