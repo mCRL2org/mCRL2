@@ -300,8 +300,8 @@ PbesExpr
   | 'forall' VarsDeclList '.' PbesExpr                           $unary_right  0
   | 'exists' VarsDeclList '.' PbesExpr                           $unary_right  0
   | PbesExpr ('=>' $binary_op_right 2) PbesExpr
-  | PbesExpr ('&&' $binary_op_right 3) PbesExpr
-  | PbesExpr ('||' $binary_op_right 4) PbesExpr
+  | PbesExpr ('||' $binary_op_right 3) PbesExpr
+  | PbesExpr ('&&' $binary_op_right 4) PbesExpr
   | '!' PbesExpr                                                 $unary_right  5
   | '(' PbesExpr ')'
   | PropVarInst
