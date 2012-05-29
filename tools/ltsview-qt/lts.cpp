@@ -258,11 +258,6 @@ string LTS::getParameterName(size_t parindex)
   return mcrl2_lts.process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
 }
 
-std::vector<std::string> LTS::getParameterDomain(size_t parindex)
-{
-  return mcrl2_lts.state_element_values(parindex);
-}
-
 size_t LTS::getStateParameterValue(State* state,size_t param)
 {
   return mcrl2_lts.state_label(state->getID())[param];

@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,7 +13,10 @@
 #define MARKMANAGER_H
 
 #include <QColor>
+#include <QLinkedList>
 #include <QObject>
+#include <QSet>
+#include <QVector>
 
 #include <vector>
 #include <set>
@@ -27,64 +30,113 @@ struct MarkRule;
 class State;
 class Transition;
 
+enum MarkStyle
+{
+  NO_MARKS,
+  MARK_DEADLOCKS,
+  MARK_STATES,
+  MARK_TRANSITIONS
+};
+
+enum MatchStyle
+{
+  MATCH_ANY,
+  MATCH_ALL,
+  MATCH_MULTI
+};
+
+struct MarkRule
+{
+  bool active;
+  QColor color;
+  int parameter;
+  bool negated;
+  QSet<int> values;
+
+  bool operator==(const MarkRule &other)
+  {
+    return active == other.active &&
+           color == other.color &&
+           parameter == other.parameter &&
+           negated == other.negated &&
+           values == other.values;
+  }
+  bool operator!=(const MarkRule &other) { return !(*this == other); }
+};
+
+typedef QLinkedList<MarkRule>::iterator MarkRuleIndex;
+inline bool operator<(const MarkRuleIndex &index1, const MarkRuleIndex &index2) { return &*index1 < &*index2; }
+
 class MarkManager : public QObject
 {
   Q_OBJECT
 
   public:
     MarkManager();
-    ~MarkManager();
 
-    /* Mark rules */
-    int createMarkRule(int param,bool neg,QColor col, const std::set<std::string> &vals);
-    void removeMarkRule(int mr);
-    int getMarkRuleParam(int mr);
-    bool getMarkRuleActivated(int mr);
-    bool getMarkRuleNegated(int mr);
-    QColor getMarkRuleColor(int mr);
-    std::set<std::string> getMarkRuleValues(int mr);
-    void setMarkRuleData(int mr,int param,bool neg,QColor col, const std::set<std::string> &vals);
-    void setMarkRuleActivated(int mr,bool act);
+    LTS *lts() const { return m_lts; }
+    MarkStyle markStyle() const { return m_markStyle; }
+    MatchStyle clusterMatchStyle() const { return m_clusterMatchStyle; }
+    MatchStyle stateMatchStyle() const { return m_stateMatchStyle; }
+    QList<MarkRuleIndex> markRules();
+    MarkRule markRule(MarkRuleIndex index) const { return *index; }
+    QVector<bool> markedActions() const { return m_markedActions; }
+    bool isActionMarked(int action) const { return m_markedActions[action]; }
+    int markedStates() const;
+    int markedTransitions() const { return markStyle() == MARK_TRANSITIONS ? m_markedTransitions : 0; }
 
-    void setMatchStyle(MatchStyle ms);
-    MatchStyle getMatchStyle();
-    void setMatchStyleClusters(MatchStyle ms);
-    MatchStyle getMatchStyleClusters();
+    bool isMarked(State *state);
+    bool isMarked(Cluster *cluster);
+    bool isMarked(Transition *transition);
 
-    int getNumMarkedStates();
-    int getNumMarkedTransitions();
-    LTS *getLTS() { return lts; }
-    void setLTS(LTS* l,bool need_reset);
-    void setMarkStyle(MarkStyle ms);
-    MarkStyle getMarkStyle();
-    void setActionMark(int l,bool b);
-    void markClusters();
+    QList<QColor> markColors(State *state);
+    QList<QColor> markColors(Cluster *cluster);
 
-    bool isMarked(State* s);
-    bool isMarked(Cluster* s);
-    bool isMarked(Transition* t);
+  public slots:
+    void setLts(LTS *lts);
+    void setRelatedLts(LTS *lts);
+    void setMarkStyle(MarkStyle style);
+    void setClusterMatchStyle(MatchStyle style);
+    void setStateMatchStyle(MatchStyle style);
+    MarkRuleIndex addMarkRule(MarkRule rule);
+    void setMarkRule(MarkRuleIndex index, MarkRule rule);
+    void removeMarkRule(MarkRuleIndex index);
+    void setActionMarked(int action, bool marked);
+    void flushClusters();
+
+  protected slots:
+    void flushMarkedStateNumbers();
+    void cleanLts();
+    void applyRule(MarkRuleIndex index);
+    void unapplyRule(MarkRuleIndex index);
+
+  protected:
+    bool matchesRule(State *state, const MarkRule &rule) const;
 
   signals:
-    void changed();
+    void ltsChanged();
+    void markStyleChanged(MarkStyle style);
+    void clusterMatchStyleChanged(MatchStyle style);
+    void stateMatchStyleChanged(MatchStyle style);
+    void markRuleAdded(MarkRuleIndex index);
+    void markRuleChanged(MarkRuleIndex index);
+    void markRuleRemoved(MarkRuleIndex index);
+    void actionMarked(int action, bool marked);
+    void statisticsChanged();
+    void marksChanged();
 
   private:
-    std::vector< MarkRule* > mark_rules;
-    std::vector< bool* > label_marks;
-    std::vector< MarkRule* >::iterator first_free_mark_rule;
-    MatchStyle match_style;
-    MatchStyle match_style_clusters;
-    MarkStyle mark_style;
-    int num_marked_states_any;
-    int num_marked_states_all;
-    int num_marked_transitions;
-    int num_active_mark_rules;
-    LTS* lts;
+    LTS* m_lts;
+    MarkStyle m_markStyle;
+    MatchStyle m_clusterMatchStyle;
+    MatchStyle m_stateMatchStyle;
+    QLinkedList<MarkRule> m_markRules;
+    QVector<bool> m_markedActions;
 
-    void activateMarkRule(int mr);
-    void deactivateMarkRule(int mr);
-    bool matchesRule(State* s,int mr);
-    void recomputeMarkedStateNumbers();
-    void reset();
+    int m_markedStatesAny;
+    int m_markedStatesAll;
+    int m_markedTransitions;
+    int m_activeMarkRules;
 };
 
 #endif

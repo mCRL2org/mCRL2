@@ -52,25 +52,15 @@ void State::addLoop(Transition* trans)
   loops.push_back(trans);
 }
 
-void State::addMatchedRule(int mr)
+bool State::addMatchedRule(MarkRuleIndex index)
 {
-  matchedRules.insert(mr);
+  matchedRules.insert(index);
+  return matchedRules.size() == 1;
 }
 
-//returns true iff an element has actually been removed
-bool State::removeMatchedRule(int mr)
+bool State::removeMatchedRule(MarkRuleIndex index)
 {
-  return (matchedRules.erase(mr) > 0);
-}
-
-void State::getMatchedRules(std::vector< int > &mrs)
-{
-  mrs.assign(matchedRules.begin(),matchedRules.end());
-}
-
-int State::getNumMatchedRules()
-{
-  return static_cast<int>(matchedRules.size());
+  return matchedRules.erase(index) > 0;
 }
 
 bool State::isDeadlock() const

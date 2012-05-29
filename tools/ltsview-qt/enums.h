@@ -12,21 +12,6 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum MarkStyle
-{
-  NO_MARKS,
-  MARK_DEADLOCKS,
-  MARK_STATES,
-  MARK_TRANSITIONS
-};
-
-enum MatchStyle
-{
-  MATCH_ANY,
-  MATCH_ALL,
-  MATCH_MULTI
-};
-
 enum PickState
 {
   STATE,

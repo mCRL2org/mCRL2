@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -18,507 +18,426 @@
 
 using namespace std;
 
-struct MarkRule
+MarkManager::MarkManager():
+  m_lts(0),
+  m_markStyle(NO_MARKS),
+  m_clusterMatchStyle(MATCH_ANY),
+  m_stateMatchStyle(MATCH_ANY),
+  m_markedStatesAny(0),
+  m_markedStatesAll(0),
+  m_markedTransitions(0),
+  m_activeMarkRules(0)
 {
-  int param_index;
-  bool is_activated;
-  bool is_negated;
-  QColor color; // Colour asociated with this mark rule.
-  std::set< std::string > value_set;
-};
-
-MarkManager::MarkManager()
-{
-  lts = NULL;
-  first_free_mark_rule = mark_rules.end();
-  match_style = MATCH_ANY;
-  match_style_clusters = MATCH_ANY;
-  mark_style = NO_MARKS;
-  num_active_mark_rules = 0;
-  num_marked_states_all = 0;
-  num_marked_states_any = 0;
-  num_marked_transitions = 0;
 }
 
-MarkManager::~MarkManager()
+QList<MarkRuleIndex> MarkManager::markRules()
 {
-  reset();
-}
-
-void MarkManager::reset()
-{
-  //marked_states.clear();
-  //unmarked_states.clear();
-  //active_mark_rules.clear();
-  for (unsigned int i = 0; i < mark_rules.size(); ++i)
+  QList<MarkRuleIndex> output;
+  for (MarkRuleIndex i = m_markRules.begin(); i != m_markRules.end(); i++)
   {
-    delete mark_rules[i];
+    output += i;
   }
-  mark_rules.clear();
-  for (unsigned int i = 0; i < label_marks.size(); ++i)
-  {
-    delete label_marks[i];
-  }
-  label_marks.clear();
-  first_free_mark_rule = mark_rules.end();
-  num_active_mark_rules = 0;
-  num_marked_states_all = 0;
-  num_marked_states_any = 0;
-  num_marked_transitions = 0;
-  emit changed();
+  return output;
 }
 
-void MarkManager::setLTS(LTS* l,bool need_reset)
+int MarkManager::markedStates() const
 {
-  lts = l;
-  if (need_reset)
+  if (markStyle() == MARK_DEADLOCKS)
   {
-    reset();
-    // set the label marks
-    label_marks.assign(lts->getNumLabels(),static_cast<bool*>(NULL));
-    State* s;
-    Transition* t;
-    int i;
-    for (State_iterator si = lts->getStateIterator(); !si.is_end(); ++si)
+    return m_lts->getNumDeadlocks();
+  }
+  else if (markStyle() == MARK_STATES)
+  {
+    if (stateMatchStyle() == MATCH_ALL)
     {
-      s = *si;
-      for (i = 0; i < s->getNumOutTransitions(); ++i)
-      {
-        t = s->getOutTransition(i);
-        if (label_marks[t->getLabel()] == NULL)
-        {
-          label_marks[t->getLabel()] = new bool(false);
-        }
-        t->setMarkedPointer(label_marks[t->getLabel()]);
-      }
-      for (i = 0; i < s->getNumLoops(); ++i)
-      {
-        t = s->getLoop(i);
-        if (label_marks[t->getLabel()] == NULL)
-        {
-          label_marks[t->getLabel()] = new bool(false);
-        }
-        t->setMarkedPointer(label_marks[t->getLabel()]);
-      }
+      return m_markedStatesAll;
     }
-    markClusters();
+    else
+    {
+      return m_markedStatesAny;
+    }
   }
   else
   {
-    recomputeMarkedStateNumbers();
+    return 0;
   }
-  emit changed();
 }
 
-int MarkManager::createMarkRule(int param, bool neg, QColor col, const std::set<std::string> &vals)
+bool MarkManager::isMarked(State *state)
 {
-  MarkRule* m = new MarkRule;
-  m->param_index = param;
-  m->is_activated = true;
-  m->is_negated = neg;
-  m->color = col;
-  m->value_set = vals;
-  int retval;
-  if (first_free_mark_rule == mark_rules.end())
+  if (markStyle() == MARK_DEADLOCKS)
   {
-    retval = static_cast<int>(mark_rules.size());
-    mark_rules.push_back(m);
-    first_free_mark_rule = mark_rules.end();
+    return state->isDeadlock();
+  }
+  else if (markStyle() == MARK_STATES)
+  {
+    if (stateMatchStyle() == MATCH_ALL)
+    {
+      return (state->getMatchedRules().size() == (size_t)m_activeMarkRules);
+    }
+    else
+    {
+      return (!state->getMatchedRules().empty());
+    }
   }
   else
-  {
-    *first_free_mark_rule = m;
-    retval = first_free_mark_rule - mark_rules.begin();
-    first_free_mark_rule = find(first_free_mark_rule,mark_rules.end(),
-                                static_cast<MarkRule*>(NULL));
-  }
-  activateMarkRule(retval);
-  emit changed();
-  return retval;
-}
-
-void MarkManager::removeMarkRule(int mr)
-{
-  bool isChanged = false;
-  if (mark_rules[mr]->is_activated)
-  {
-    deactivateMarkRule(mr);
-    isChanged = true;
-  }
-  if (mr < first_free_mark_rule - mark_rules.begin())
-  {
-    first_free_mark_rule = mark_rules.begin() + mr;
-  }
-  delete mark_rules[mr];
-  mark_rules[mr] = NULL;
-  if (isChanged)
-  {
-    emit changed();
-  }
-}
-
-int MarkManager::getMarkRuleParam(int mr)
-{
-  return mark_rules[mr]->param_index;
-}
-
-bool MarkManager::getMarkRuleActivated(int mr)
-{
-  return mark_rules[mr]->is_activated;
-}
-
-bool MarkManager::getMarkRuleNegated(int mr)
-{
-  return mark_rules[mr]->is_negated;
-}
-
-QColor MarkManager::getMarkRuleColor(int mr)
-{
-  return mark_rules[mr]->color;
-}
-
-std::set<std::string> MarkManager::getMarkRuleValues(int mr)
-{
-  return mark_rules[mr]->value_set;
-}
-
-void MarkManager::setMarkRuleData(int mr,int param,bool neg,
-                                  QColor col,const std::set<std::string> &vals)
-{
-  bool isChanged = (param != mark_rules[mr]->param_index)
-                   || (neg != mark_rules[mr]->is_negated)
-                   || (vals != mark_rules[mr]->value_set);
-
-  if (isChanged && mark_rules[mr]->is_activated)
-  {
-    deactivateMarkRule(mr);
-  }
-  mark_rules[mr]->param_index = param;
-  mark_rules[mr]->is_negated = neg;
-  mark_rules[mr]->color = col;
-  mark_rules[mr]->value_set = vals;
-  if (isChanged && mark_rules[mr]->is_activated)
-  {
-    activateMarkRule(mr);
-    emit changed();
-  }
-}
-
-void MarkManager::setMarkRuleActivated(int mr,bool act)
-{
-  if (act != mark_rules[mr]->is_activated)
-  {
-    if (act)
-    {
-      activateMarkRule(mr);
-    }
-    else
-    {
-      deactivateMarkRule(mr);
-    }
-    mark_rules[mr]->is_activated = act;
-    emit changed();
-  }
-}
-
-int MarkManager::getNumMarkedStates()
-{
-  if (mark_style == MARK_STATES)
-  {
-    if (match_style == MATCH_ALL)
-    {
-      return num_marked_states_all;
-    }
-    else
-    {
-      return num_marked_states_any;
-    }
-  }
-  if (mark_style == MARK_DEADLOCKS)
-  {
-    return lts->getNumDeadlocks();
-  }
-  return 0;
-}
-
-int MarkManager::getNumMarkedTransitions()
-{
-  if (mark_style == MARK_TRANSITIONS)
-  {
-    return num_marked_transitions;
-  }
-  return 0;
-}
-
-void MarkManager::setActionMark(int l,bool b)
-{
-  *(label_marks[l]) = b;
-  num_marked_transitions = 0;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
-       ++ci)
-  {
-    num_marked_transitions += (**ci).setActionMark(l,b);
-  }
-  emit changed();
-}
-
-void MarkManager::setMatchStyle(MatchStyle ms)
-{
-  if (match_style != ms)
-  {
-    match_style = ms;
-    emit changed();
-  }
-}
-
-MatchStyle MarkManager::getMatchStyle()
-{
-  return match_style;
-}
-
-void MarkManager::setMatchStyleClusters(MatchStyle ms)
-{
-  if (ms != MATCH_MULTI && match_style_clusters != ms)
-  {
-    match_style_clusters = ms;
-    emit changed();
-  }
-}
-
-MatchStyle MarkManager::getMatchStyleClusters()
-{
-  return match_style_clusters;
-}
-
-void MarkManager::setMarkStyle(MarkStyle ms)
-{
-  if (ms != mark_style)
-  {
-    mark_style = ms;
-    emit changed();
-  }
-}
-
-MarkStyle MarkManager::getMarkStyle()
-{
-  return mark_style;
-}
-
-void MarkManager::markClusters()
-{
-  vector<bool> rules_matched;
-  vector<int> state_rules;
-  int num_all,num_any;
-  num_marked_states_all = 0;
-  num_marked_states_any = 0;
-  Cluster* c;
-  State* s;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci)
-  {
-    c = *ci;
-    num_all = 0;
-    num_any = 0;
-    rules_matched.assign(mark_rules.size(),false);
-    for (int i = 0; i < c->getNumStates(); ++i)
-    {
-      s = c->getState(i);
-      s->getMatchedRules(state_rules);
-      if (state_rules.size() > 0)
-      {
-        ++num_any;
-      }
-      if (state_rules.size() == (unsigned int)(num_active_mark_rules))
-      {
-        ++num_all;
-      }
-      for (unsigned int j = 0; j < state_rules.size(); ++j)
-      {
-        rules_matched[state_rules[j]] = true;
-      }
-    }
-    for (unsigned int j = 0; j < rules_matched.size(); ++j)
-    {
-      if (rules_matched[j])
-      {
-        c->addMatchedRule(j);
-      }
-    }
-    c->setNumMarkedStatesAll(num_all);
-    c->setNumMarkedStatesAny(num_any);
-    num_marked_states_all += num_all;
-    num_marked_states_any += num_any;
-  }
-}
-
-void MarkManager::activateMarkRule(int mr)
-{
-  Cluster* c;
-  State* s;
-  bool add_to_c;
-  int num_all,num_any;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci)
-  {
-    c = *ci;
-    // indicates whether this rule also has to be added to c's matched rules
-    add_to_c = false;
-    num_all = c->getNumMarkedStatesAll();
-    num_any = c->getNumMarkedStatesAny();
-    for (int i = 0; i < c->getNumStates(); ++i)
-    {
-      s = c->getState(i);
-      if (matchesRule(s,mr))
-      {
-        if (s->getNumMatchedRules() == 0)
-        {
-          // state did not match any rule yet, so increase num_any counters
-          ++num_any;
-          ++num_marked_states_any;
-        }
-        // add this rule to the matched rules of s
-        s->addMatchedRule(mr);
-        add_to_c = true;
-      }
-      else
-      {
-        if (s->getNumMatchedRules() == num_active_mark_rules)
-        {
-          // state matched all rules up until now, so decrease num_all counters
-          --num_all;
-          --num_marked_states_all;
-        }
-      }
-    }
-    if (add_to_c)
-    {
-      c->addMatchedRule(mr);
-    }
-    c->setNumMarkedStatesAll(num_all);
-    c->setNumMarkedStatesAny(num_any);
-  }
-  ++num_active_mark_rules;
-}
-
-void MarkManager::deactivateMarkRule(int mr)
-{
-  Cluster* c;
-  State* s;
-  int num_all,num_any;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci)
-  {
-    c = *ci;
-    num_all = c->getNumMarkedStatesAll();
-    num_any = c->getNumMarkedStatesAny();
-    for (int i = 0; i < c->getNumStates(); ++i)
-    {
-      s = c->getState(i);
-      if (s->removeMatchedRule(mr))
-      {
-        if (s->getNumMatchedRules() == 0)
-        {
-          --num_any;
-          --num_marked_states_any;
-        }
-      }
-      else
-      {
-        if (s->getNumMatchedRules() == num_active_mark_rules-1)
-        {
-          ++num_all;
-          ++num_marked_states_all;
-        }
-      }
-    }
-    c->removeMatchedRule(mr);
-    c->setNumMarkedStatesAll(num_all);
-    c->setNumMarkedStatesAny(num_any);
-  }
-  --num_active_mark_rules;
-}
-
-bool MarkManager::matchesRule(State* s,int mr)
-{
-  MarkRule* rule = mark_rules[mr];
-  bool in_set = rule->value_set.find(lts->getStateParameterValueStr(s,
-                                     rule->param_index)) != rule->value_set.end();
-  if (rule->is_negated)
-  {
-    return !in_set;
-  }
-  return in_set;
-}
-
-bool MarkManager::isMarked(State* s)
-{
-  if (mark_style == MARK_STATES)
-  {
-    if (match_style == MATCH_ALL)
-    {
-      return (s->getNumMatchedRules() == num_active_mark_rules);
-    }
-    else
-    {
-      return (s->getNumMatchedRules() > 0);
-    }
-  }
-  if (mark_style == MARK_DEADLOCKS)
-  {
-    return s->isDeadlock();
-  }
-  return false;
-}
-
-bool MarkManager::isMarked(Cluster* c)
-{
-  if (c == NULL)
   {
     return false;
   }
+}
 
-  int limit = 1;
-  if (match_style_clusters == MATCH_ALL)
+bool MarkManager::isMarked(Cluster *cluster)
+{
+  if (markStyle() == MARK_DEADLOCKS)
   {
-    limit = c->getNumStates();
+    return cluster->getNumDeadlocks() > 0;
+  }
+  else if (markStyle() == MARK_STATES)
+  {
+    int marked = (stateMatchStyle() == MATCH_ALL) ? cluster->getNumMarkedStatesAll() : cluster->getNumMarkedStatesAny();
+    int required = (clusterMatchStyle() == MATCH_ALL) ? cluster->getNumStates() : 1;
+    return marked >= required;
+  }
+  else if (markStyle() == MARK_TRANSITIONS)
+  {
+    return cluster->hasMarkedTransition();
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool MarkManager::isMarked(Transition *transition)
+{
+  return markStyle() == MARK_TRANSITIONS && m_markedActions[transition->getLabel()];
+}
+
+QList<QColor> MarkManager::markColors(State *state)
+{
+  QList<QColor> output;
+  for (std::set<MarkRuleIndex>::iterator i = state->getMatchedRules().begin(); i != state->getMatchedRules().end(); i++)
+  {
+    output += (*i)->color;
+  }
+  return output;
+}
+
+QList<QColor> MarkManager::markColors(Cluster *cluster)
+{
+  QList<QColor> output;
+  for (std::set<MarkRuleIndex>::iterator i = cluster->getMatchedRules().begin(); i != cluster->getMatchedRules().end(); i++)
+  {
+    output += (*i)->color;
+  }
+  return output;
+}
+
+void MarkManager::setLts(LTS *lts)
+{
+  setMarkStyle(NO_MARKS);
+  setClusterMatchStyle(MATCH_ANY);
+  setStateMatchStyle(MATCH_ANY);
+
+  cleanLts();
+  m_lts = lts;
+
+  m_markedActions.clear();
+  m_markedActions.resize(m_lts->getNumLabels());
+
+  m_markRules.clear();
+
+  m_markedStatesAny = 0;
+  m_markedStatesAll = 0;
+  m_markedTransitions = 0;
+  m_activeMarkRules = 0;
+
+  for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
+  {
+    int states = (*i)->getNumStates();
+    (*i)->setNumMarkedStatesAll((*i)->getNumStates());
+    m_markedStatesAll += states;
   }
 
-  bool result;
-  switch (mark_style)
+  emit ltsChanged();
+  emit statisticsChanged();
+  emit marksChanged();
+}
+
+void MarkManager::setRelatedLts(LTS *lts)
+{
+  m_lts = lts;
+  flushMarkedStateNumbers();
+  emit statisticsChanged();
+}
+
+void MarkManager::setMarkStyle(MarkStyle style)
+{
+  if (m_markStyle != style)
   {
-    case MARK_STATES:
-      if (match_style == MATCH_ALL)
+    m_markStyle = style;
+    emit markStyleChanged(style);
+    emit marksChanged();
+  }
+}
+
+void MarkManager::setClusterMatchStyle(MatchStyle style)
+{
+  assert(style != MATCH_MULTI);
+  if (m_clusterMatchStyle != style)
+  {
+    m_clusterMatchStyle = style;
+    emit clusterMatchStyleChanged(style);
+    if (markStyle() == MARK_STATES)
+    {
+      emit marksChanged();
+    }
+  }
+}
+
+void MarkManager::setStateMatchStyle(MatchStyle style)
+{
+  if (m_stateMatchStyle != style)
+  {
+    m_stateMatchStyle = style;
+    emit stateMatchStyleChanged(style);
+    if (markStyle() == MARK_STATES)
+    {
+      emit marksChanged();
+    }
+  }
+}
+
+MarkRuleIndex MarkManager::addMarkRule(MarkRule rule)
+{
+  bool changed = false;
+  MarkRuleIndex index = m_markRules.insert(m_markRules.end(), rule);
+  if (rule.active)
+  {
+    applyRule(index);
+    changed = true;
+  }
+  emit markRuleAdded(index);
+  if (changed)
+  {
+    emit statisticsChanged();
+    if (markStyle() == MARK_STATES)
+    {
+      emit marksChanged();
+    }
+  }
+  return index;
+}
+
+void MarkManager::setMarkRule(MarkRuleIndex index, MarkRule rule)
+{
+  if (*index != rule)
+  {
+    bool changed = false;
+    if (index->active)
+    {
+      unapplyRule(index);
+      changed = true;
+    }
+    *index = rule;
+    if (index->active)
+    {
+      applyRule(index);
+      changed = true;
+    }
+    emit markRuleChanged(index);
+    if (changed)
+    {
+      emit statisticsChanged();
+      if (markStyle() == MARK_STATES)
       {
-        result = (c->getNumMarkedStatesAll() >= limit);
+        emit marksChanged();
+      }
+    }
+  }
+}
+
+void MarkManager::removeMarkRule(MarkRuleIndex index)
+{
+  bool changed = false;
+  if (index->active)
+  {
+    unapplyRule(index);
+    changed = true;
+  }
+  emit markRuleRemoved(index);
+  m_markRules.erase(index);
+  if (changed)
+  {
+    emit statisticsChanged();
+    if (markStyle() == MARK_STATES)
+    {
+      emit marksChanged();
+    }
+  }
+}
+
+void MarkManager::setActionMarked(int action, bool marked)
+{
+  if (m_markedActions[action] != marked)
+  {
+    m_markedActions[action] = marked;
+
+    m_markedTransitions = 0;
+    for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
+    {
+      (*i)->setActionMark(action, marked);
+      m_markedTransitions += (*i)->getNumMarkedTransitions();
+    }
+
+    emit actionMarked(action, marked);
+    emit statisticsChanged();
+    if (markStyle() == MARK_TRANSITIONS)
+    {
+      emit marksChanged();
+    }
+  }
+}
+
+void MarkManager::flushClusters()
+{
+  for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
+  {
+    Cluster *cluster = *i;
+
+    int anyAdded = 0;
+    int allAdded = 0;
+    for (int j = 0; j < cluster->getNumStates(); j++)
+    {
+      State *state = cluster->getState(j);
+      if (state->getMatchedRules().empty())
+      {
+        anyAdded++;
+      }
+      if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+      {
+        allAdded++;
+      }
+      for (std::set<MarkRuleIndex>::iterator k = state->getMatchedRules().begin(); k != state->getMatchedRules().end(); k++)
+      {
+        cluster->addMatchedRule(*k);
+      }
+    }
+    cluster->setNumMarkedStatesAny(anyAdded);
+    cluster->setNumMarkedStatesAll(allAdded);
+
+    cluster->resetActionMarks();
+    for (int j = 0; j < m_markedActions.size(); j++)
+    {
+      if (m_markedActions[j])
+      {
+        cluster->setActionMark(j, true);
+      }
+    }
+  }
+}
+
+void MarkManager::flushMarkedStateNumbers()
+{
+  m_markedStatesAll = 0;
+  m_markedStatesAny = 0;
+  for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
+  {
+    m_markedStatesAll += (*i)->getNumMarkedStatesAll();
+    m_markedStatesAny += (*i)->getNumMarkedStatesAny();
+  }
+}
+
+void MarkManager::cleanLts()
+{
+  if (m_lts)
+  {
+    for (State_iterator i = m_lts->getStateIterator(); !i.is_end(); i++)
+    {
+      (*i)->clearMatchedRules();
+    }
+  }
+}
+
+void MarkManager::applyRule(MarkRuleIndex index)
+{
+  for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
+  {
+    Cluster *cluster = *i;
+    bool matched = false;
+    int anyAdded = 0;
+    int allRemoved = 0;
+    for (int j = 0; j < cluster->getNumStates(); j++)
+    {
+      State *state = cluster->getState(j);
+      if (matchesRule(state, *index))
+      {
+        if (state->addMatchedRule(index))
+        {
+          anyAdded++;
+        }
+        matched = true;
       }
       else
       {
-        result = (c->getNumMarkedStatesAny() >= limit);
+        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+        {
+          allRemoved++;
+        }
       }
-      break;
-    case MARK_DEADLOCKS:
-      result = (c->getNumDeadlocks() >= limit);
-      break;
-    case MARK_TRANSITIONS:
-      result = c->hasMarkedTransition();
-      break;
-    default:
-      result = false;
+    }
+    if (matched)
+    {
+      cluster->addMatchedRule(index);
+    }
+    cluster->setNumMarkedStatesAny(cluster->getNumMarkedStatesAny() + anyAdded);
+    cluster->setNumMarkedStatesAll(cluster->getNumMarkedStatesAll() - allRemoved);
+    m_markedStatesAny += anyAdded;
+    m_markedStatesAll -= allRemoved;
   }
-  return result;
+  m_activeMarkRules++;
 }
 
-bool MarkManager::isMarked(Transition* t)
+void MarkManager::unapplyRule(MarkRuleIndex index)
 {
-  return mark_style == MARK_TRANSITIONS && t->isMarked();
-}
-
-void MarkManager::recomputeMarkedStateNumbers()
-{
-  num_marked_states_all = 0;
-  num_marked_states_any = 0;
-  Cluster* c;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci)
+  m_activeMarkRules--;
+  for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
   {
-    c = *ci;
-    num_marked_states_all += c->getNumMarkedStatesAll();
-    num_marked_states_any += c->getNumMarkedStatesAny();
+    Cluster *cluster = *i;
+    bool matched = false;
+    int allAdded = 0;
+    int anyRemoved = 0;
+    for (int j = 0; j < cluster->getNumStates(); j++)
+    {
+      State *state = cluster->getState(j);
+      if (state->removeMatchedRule(index))
+      {
+        if (state->getMatchedRules().empty())
+        {
+          anyRemoved++;
+        }
+        matched = true;
+      }
+      else
+      {
+        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+        {
+          allAdded++;
+        }
+      }
+    }
+    if (matched)
+    {
+      cluster->removeMatchedRule(index);
+    }
+    cluster->setNumMarkedStatesAny(cluster->getNumMarkedStatesAny() - anyRemoved);
+    cluster->setNumMarkedStatesAll(cluster->getNumMarkedStatesAll() + allAdded);
+    m_markedStatesAny -= anyRemoved;
+    m_markedStatesAll += allAdded;
   }
+}
+
+bool MarkManager::matchesRule(State *state, const MarkRule &rule) const
+{
+  return rule.negated ^ rule.values.contains(m_lts->getStateParameterValue(state, rule.parameter));
 }

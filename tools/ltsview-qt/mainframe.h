@@ -69,8 +69,6 @@ class MainFrame : public QObject, public wxFrame
     void onResetStatePositions(wxCommandEvent& event);
 
     void setSim(Simulation* sim);
-    void resetMarkRules();
-    void setActionLabels(std::vector< std::string > &labels);
     void setFileInfo(wxFileName fn);
     void setMarkedStatesInfo(int number);
     void setMarkedTransitionsInfo(int number);

@@ -160,7 +160,7 @@ void Visualizer::drawStructure()
     update_colors = false;
   }
   visObjectFactory->drawObjects(primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
-                                markManager->getMatchStyle() == MATCH_MULTI);
+                                markManager->stateMatchStyle() == MATCH_MULTI);
 }
 
 void Visualizer::traverseTree(bool co)
@@ -523,7 +523,7 @@ void Visualizer::updateColors()
 {
   Cluster* cl;
   QColor c;
-  if (markManager->getMarkStyle() == NO_MARKS)
+  if (markManager->markStyle() == NO_MARKS)
   {
     QColor from = settings->clusterColorTop.value();
     QColor to = settings->clusterColorBottom.value();
@@ -603,7 +603,7 @@ void Visualizer::updateColors()
       }
     }
   }
-  else // markManager->getMarkStyle() != NO_MARKS
+  else // markManager->markStyle() != NO_MARKS
   {
     for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
          ++ci)
@@ -614,16 +614,12 @@ void Visualizer::updateColors()
       c = QColor(255, 255, 255);
       if (markManager->isMarked(cl))
       {
-        if (markManager->getMarkStyle() == MARK_STATES &&
-            markManager->getMatchStyle() == MATCH_MULTI)
+        if (markManager->markStyle() == MARK_STATES &&
+            markManager->stateMatchStyle() == MATCH_MULTI)
         {
-          vector<int> cluster_rules;
-          cl->getMatchedRules(cluster_rules);
-          for (size_t i = 0; i <  cluster_rules.size(); ++i)
-          {
-            rule_colours.push_back(
-              markManager->getMarkRuleColor(cluster_rules[i]));
-          }
+          QList<QColor> colors = markManager->markColors(cl);
+          rule_colours.reserve(colors.size());
+          rule_colours.insert(rule_colours.end(), colors.begin(), colors.end());
         }
         else
         {
@@ -975,33 +971,27 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
         }
         else
         {
-          if (markManager->getMatchStyle() != MATCH_MULTI)
+          if (markManager->stateMatchStyle() != MATCH_MULTI)
           {
             c = settings->markedColor.value();
           }
           else
           {
             c = settings->stateColor.value();
-            vector< int > state_rules;
-            s->getMatchedRules(state_rules);
 
-            size_t n_colours = 1;
-            size_t n_rules = state_rules.size();
+            QList<QColor> colors = markManager->markColors(s);
 
-            while (n_colours < n_rules)
+            int n_colours = 1;
+            while (n_colours < colors.size())
             {
               n_colours = n_colours << 1;
             }
-
-
             GLubyte* texture = (GLubyte*)malloc(4 * n_colours *
                                                 sizeof(GLubyte));
 
-            for (size_t i = 0; i < n_colours; ++i)
+            for (int i = 0; i < n_colours; ++i)
             {
-              size_t j = i % n_rules;
-
-              QColor c1 = markManager->getMarkRuleColor(state_rules[j]);
+              QColor c1 = colors[i % colors.size()];
               texture[4*i]   = (GLubyte) c1.red();
               texture[4*i+1] = (GLubyte) c1.green();
               texture[4*i+2] = (GLubyte) c1.blue();

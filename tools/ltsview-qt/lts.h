@@ -30,6 +30,7 @@ class Cluster_iterator
     Cluster_iterator(LTS* l);
     virtual ~Cluster_iterator() {}
     void operator++();
+    void operator++(int) { ++*this; }
     Cluster* operator*();
     virtual bool is_end();
   protected:
@@ -56,6 +57,7 @@ class State_iterator
     State_iterator(LTS* l);
     ~State_iterator();
     void operator++();
+    void operator++(int) { ++*this; }
     State* operator*();
     bool is_end();
   private:
@@ -88,7 +90,7 @@ class LTS
     int getNumTransitions() const;
 
     size_t getNumParameters() const;
-    std::vector<std::string> getParameterDomain(size_t parindex);
+    const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts.state_element_values(parindex); }
     std::string getParameterName(size_t parindex) ;
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,

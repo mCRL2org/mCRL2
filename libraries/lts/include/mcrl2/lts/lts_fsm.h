@@ -110,7 +110,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
         \return A vector containing strings representing the possible values
                 that this parameter can have.
     */
-    std::vector < std::string > state_element_values(size_t idx) const
+    const std::vector < std::string >& state_element_values(size_t idx) const
     {
       assert(idx<m_state_element_values.size());
       return m_state_element_values[idx];

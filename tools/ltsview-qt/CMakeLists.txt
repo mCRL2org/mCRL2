@@ -26,6 +26,7 @@ ENDIF(WIN32)
 
 set(UI_FILES
   infodialog.ui
+  markdialog.ui
   markstateruledialog.ui
   savepicturedialog.ui
   savevectordialog.ui
@@ -38,6 +39,7 @@ set(MOC_HEADERS
   glcanvas.h
   infodialog.h
   ltsview.h
+  markdialog.h
   mainframe.h
   markmanager.h
   markstateruledialog.h
@@ -64,7 +66,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   lts.cpp
   ltsview.cpp
   mainframe.cpp
-  markdialog_old.cpp
+  markdialog.cpp
   markmanager.cpp
   markstateruledialog.cpp
   primitivefactory.cpp

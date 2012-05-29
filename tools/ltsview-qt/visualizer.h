@@ -54,8 +54,8 @@ class Visualizer: public QObject
     void dirtyPositions() { update_abs = true; }
     void dirtyMatrices() { update_matrices = true; dirtyPositions(); }
     void dirtyColors() { update_colors = true; }
-    void dirtyColorsMark() { if (markManager->getMarkStyle() != NO_MARKS) dirtyColors(); }
-    void dirtyColorsNoMark() { if (markManager->getMarkStyle() == NO_MARKS) dirtyColors(); }
+    void dirtyColorsMark() { if (markManager->markStyle() != NO_MARKS) dirtyColors(); }
+    void dirtyColorsNoMark() { if (markManager->markStyle() == NO_MARKS) dirtyColors(); }
     void branchTiltChanged(int value);
     void markStyleChanged() { dirtyColors(); }
     void visualizationStyleChanged() { traverseTree(true); }

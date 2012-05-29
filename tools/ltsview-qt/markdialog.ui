@@ -64,20 +64,6 @@
       </layout>
      </item>
      <item>
-      <widget class="QComboBox" name="clusterMarkStyle">
-       <item>
-        <property name="text">
-         <string>Mark cluster if any state is marked</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Mark cluster if all states are marked</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
         <string>Mark states</string>
@@ -86,7 +72,21 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QComboBox" name="matchStateType">
+           <widget class="QComboBox" name="clusterMatchStyle">
+            <item>
+             <property name="text">
+              <string>Mark cluster if any state is marked</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Mark cluster if all states are marked</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="stateMatchStyle">
             <item>
              <property name="text">
               <string>Match any of the following</string>
@@ -105,7 +105,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="startRuleList"/>
+           <widget class="QListWidget" name="markRuleList"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -150,7 +150,7 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QListWidget" name="markedTransitionList"/>
+         <widget class="QListWidget" name="markedActionList"/>
         </item>
        </layout>
       </widget>

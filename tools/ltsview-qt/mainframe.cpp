@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QString>
 #include "infodialog.h"
+#include "markdialog.h"
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
 #include "settingsdialog.h"
@@ -32,7 +33,6 @@
 #include "glcanvas.h"
 #include "icons/main_window.xpm"
 #include "ids.h"
-#include "markdialog_old.h"
 #include "mediator.h"
 #include "settings.h"
 
@@ -79,7 +79,7 @@ MainFrame::MainFrame(Mediator* owner, Settings* ss, MarkManager *manager)
   settingsDialog = new SettingsDialog(0, settings); // TODO: s/0/this/
   infoDialog = new InfoDialog(0); // TODO: s/0/this/
   simDialog = new SimDialog(0); // TODO: s/0/this/
-  markDialog = new MarkDialog(this, manager);
+  markDialog = new MarkDialog(0, manager); // TODO: s/0/this/
 
   SetIcon(wxIcon(main_window));
 
@@ -331,7 +331,7 @@ void MainFrame::onClose(wxCloseEvent& event)
   }
   infoDialog->hide();
   simDialog->hide();
-  markDialog->Destroy();
+  markDialog->hide();
   event.Skip();
 }
 
@@ -382,7 +382,7 @@ void MainFrame::onInfo(wxCommandEvent& /*event*/)
 
 void MainFrame::onMark(wxCommandEvent& /*event*/)
 {
-  markDialog->Show();
+  markDialog->show();
 }
 
 void MainFrame::onSim(wxCommandEvent& /*event*/)
@@ -470,16 +470,6 @@ void MainFrame::setMarkedStatesInfo(int number)
 void MainFrame::setMarkedTransitionsInfo(int number)
 {
   infoDialog->setNumMarkedTransitions(number);
-}
-
-void MainFrame::resetMarkRules()
-{
-  markDialog->resetMarkRules();
-}
-
-void MainFrame::setActionLabels(vector< string > &labels)
-{
-  markDialog->setActionLabels(labels);
 }
 
 void MainFrame::startRendering()

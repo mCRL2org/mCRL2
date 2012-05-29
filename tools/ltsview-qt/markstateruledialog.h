@@ -21,15 +21,13 @@ class MarkStateRuleDialog : public QDialog
   Q_OBJECT
 
   public:
-    MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color);
-    MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, const std::set<std::string> &values);
+    MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, QSet<int> values);
     QColor color() { return m_color; }
     int parameter() { return m_currentParameter; }
     bool negated() { return m_ui.relationList->item(1)->isSelected(); }
-    std::set<std::string> values();
+    QSet<int> values();
 
   protected slots:
-    void init();
     void colorClicked();
     void setColor(QColor color);
     void parameterSelected();

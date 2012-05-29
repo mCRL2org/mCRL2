@@ -132,7 +132,7 @@ bool LTSView::run()
   connect(&settings->statePosStyleMultiPass, SIGNAL(changed(bool)), this, SLOT(setStatePosStyle()));
   connect(&settings->clusterVisStyleTubes, SIGNAL(changed(bool)), this, SLOT(setVisStyle()));
   markManager = new MarkManager();
-  connect(markManager, SIGNAL(changed()), this, SLOT(applyMarkStyle()));
+  connect(markManager, SIGNAL(marksChanged()), this, SLOT(applyMarkStyle()));
   mainFrame = new MainFrame(this, settings, markManager);
   visualizer = new Visualizer(settings, markManager);
   glCanvas = mainFrame->getGLCanvas();
@@ -208,7 +208,7 @@ void LTSView::openFile(string fileName)
     mainFrame->updateProgressDialog(67,"Positioning clusters");
     lts->positionClusters(settings->fsmStyle.value());
 
-    markManager->setLTS(lts,true);
+    markManager->setLts(lts);
     visualizer->setLTS(lts,true);
 
     mainFrame->updateProgressDialog(83,"Positioning states");
@@ -230,14 +230,8 @@ void LTSView::openFile(string fileName)
       parameters += QString::fromStdString(lts->getParameterName(i));
     }
     mainFrame->setParameterNames(parameters);
-    mainFrame->resetMarkRules();
-
-    vector< string > ls;
-    lts->getActionLabels(ls);
 
     mainFrame->setSim(lts->getSimulation());
-    mainFrame->setActionLabels(ls);
-
     glCanvas->setSim(lts->getSimulation());
 
     mainFrame->setMarkedStatesInfo(0);
@@ -274,7 +268,7 @@ void LTSView::setRankStyle()
 
     mainFrame->updateProgressDialog(40,"Setting cluster info");
     lts->computeClusterInfo();
-    markManager->markClusters();
+    markManager->flushClusters();
 
     mainFrame->updateProgressDialog(60,"Positioning clusters");
     lts->positionClusters(settings->fsmStyle.value());
@@ -330,20 +324,19 @@ void LTSView::applyMarkStyle()
     return;
   }
 
-  switch (markManager->getMarkStyle())
+  switch (markManager->markStyle())
   {
     case MARK_DEADLOCKS:
       mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
       mainFrame->setMarkedTransitionsInfo(0);
       break;
     case MARK_STATES:
-      mainFrame->setMarkedStatesInfo(markManager->getNumMarkedStates());
+      mainFrame->setMarkedStatesInfo(markManager->markedStates());
       mainFrame->setMarkedTransitionsInfo(0);
       break;
     case MARK_TRANSITIONS:
       mainFrame->setMarkedStatesInfo(0);
-      mainFrame->setMarkedTransitionsInfo(
-        markManager->getNumMarkedTransitions());
+      mainFrame->setMarkedTransitionsInfo(markManager->markedTransitions());
       break;
     case NO_MARKS:
     default:
@@ -435,7 +428,7 @@ void LTSView::zoomInBelow()
   LTS* newLTS = lts->zoomIntoBelow();
   deselect();
   lts = newLTS;
-  markManager->setLTS(lts,false);
+  markManager->setRelatedLts(lts);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
                            lts->getNumTransitions(),lts->getNumClusters(),
@@ -450,7 +443,7 @@ void LTSView::zoomInAbove()
   LTS* newLTS = lts->zoomIntoAbove();
   deselect();
   lts = newLTS;
-  markManager->setLTS(lts,false);
+  markManager->setRelatedLts(lts);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
                            lts->getNumTransitions(),lts->getNumClusters(),
@@ -476,7 +469,7 @@ void LTSView::zoomOut()
   LTS* oldLTS = lts;
   lts = oldLTS->zoomOut();
   oldLTS->deselect();
-  markManager->setLTS(lts,false);
+  markManager->setRelatedLts(lts);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
                            lts->getNumTransitions(),lts->getNumClusters(),

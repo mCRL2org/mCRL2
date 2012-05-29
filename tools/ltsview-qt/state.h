@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <set>
+#include "markmanager.h"
 #include "vectors.h"
 
 class Transition;
@@ -50,10 +51,10 @@ class State
     bool isSelected() const;
     bool hasTextures() const;
 
-    void addMatchedRule(int mr);
-    bool removeMatchedRule(int mr);
-    void getMatchedRules(std::vector< int > &mrs);
-    int getNumMatchedRules();
+    bool addMatchedRule(MarkRuleIndex index);
+    bool removeMatchedRule(MarkRuleIndex index);
+    const std::set<MarkRuleIndex> &getMatchedRules() const { return matchedRules; }
+    void clearMatchedRules() { matchedRules.clear(); }
 
     void select();
     void setCluster(Cluster* c);
@@ -78,7 +79,7 @@ class State
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
     std::vector< Transition* > outTransitions;
-    std::set< int > matchedRules;
+    std::set< MarkRuleIndex > matchedRules;
     float positionAngle;
     float positionRadius;
     Vector3D positionAbs;

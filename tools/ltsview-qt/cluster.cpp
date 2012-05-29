@@ -503,20 +503,14 @@ bool Cluster::hasMarkedTransition() const
   return (numMarkedTransitions > 0);
 }
 
-void Cluster::addMatchedRule(int mr)
+void Cluster::addMatchedRule(MarkRuleIndex index)
 {
-  matchedRules.insert(mr);
+  matchedRules.insert(index);
 }
 
-void Cluster::removeMatchedRule(int mr)
+void Cluster::removeMatchedRule(MarkRuleIndex index)
 {
-  matchedRules.erase(mr);
-}
-
-
-void Cluster::getMatchedRules(std::vector< int > &mrs)
-{
-  mrs.assign(matchedRules.begin(),matchedRules.end());
+  matchedRules.erase(index);
 }
 
 int Cluster::setActionMark(int l,bool b)
