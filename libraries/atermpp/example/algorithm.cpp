@@ -44,7 +44,7 @@ struct is_a_or_b
 
 void test_find()
 {
-  aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl a(make_term("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
   assert(t == make_term("f(y)"));
@@ -57,8 +57,8 @@ void test_find()
 
 void test_replace()
 {
-  aterm_appl a = make_term("f(f(x))");
-  aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
+  aterm_appl a (make_term("f(f(x))"));
+  aterm_appl b = replace(a, aterm_appl(make_term("f(x)")), aterm_appl(make_term("x")));
   assert(b == make_term("f(x)"));
 }
 

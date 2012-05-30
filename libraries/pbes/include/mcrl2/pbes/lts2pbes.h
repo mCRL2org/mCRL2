@@ -101,9 +101,10 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
     {
       if (m_recursion_level == 1)
       {
-        if ((n % (N / 100) == 0) || n == N)
+        // if ((n % (N / 100) == 0) || n == N) Old formula, which leads to division by 0.
+        if (((N/100==0?0:n % N / 100) == 0) || n == N)
         {
-          std::size_t percentage = n / (N / 100);
+          std::size_t percentage = (N/100==0?100:n / (N / 100));
           if (percentage > 0)
           {
             mCRL2log(log::status) << percentage << " percent completed" << std::endl;
