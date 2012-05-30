@@ -55,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${QT_QTMAIN_LIBRARY}
   mcrl2_core
+  mcrl2_aterm
   mcrl2_utilities
   mcrl2_utilities_qt
 )
@@ -66,6 +67,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
