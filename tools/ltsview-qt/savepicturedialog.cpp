@@ -10,7 +10,7 @@
 #include <QImage>
 #include <QImageWriter>
 
-SavePictureDialog::SavePictureDialog(QWidget *parent, GLCanvas *canvas, QString filename):
+SavePictureDialog::SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString filename):
   QDialog(parent),
   m_canvas(canvas),
   m_filename(filename),
@@ -18,11 +18,8 @@ SavePictureDialog::SavePictureDialog(QWidget *parent, GLCanvas *canvas, QString 
 {
   m_ui.setupUi(this);
 
-  int width;
-  int height;
-  canvas->GetClientSize(&width, &height);
-  m_width = width;
-  m_height = height;
+  m_width = canvas->viewWidth();
+  m_height = canvas->viewHeight();
   m_ui.width->setValue(m_width);
   m_ui.height->setValue(m_height);
 
@@ -64,14 +61,10 @@ void SavePictureDialog::heightChanged(int value)
 
 void SavePictureDialog::save()
 {
-  m_canvas->display();
-
   int width = m_ui.width->value();
   int height = m_ui.height->value();
 
-  emit statusMessage("Rendering image...");
-  unsigned char* imageData = m_canvas->getPictureData(width, height);
-  QImage image = QImage(imageData, width, height, QImage::Format_ARGB32).mirrored();
+  QImage image = m_canvas->renderImage(width, height);
 
   emit statusMessage("Saving image...");
   QImageWriter writer(m_filename);
@@ -84,6 +77,5 @@ void SavePictureDialog::save()
     emit statusMessage("Saving image failed.");
   }
 
-  free(imageData);
   accept();
 }

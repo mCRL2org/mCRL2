@@ -12,7 +12,8 @@
 #include "state.h"
 #include "transition.h"
 
-LtsManager::LtsManager(Settings *settings):
+LtsManager::LtsManager(QObject *parent, Settings *settings):
+  QObject(parent),
   m_settings(settings),
   m_lts(0),
   m_simulation(0),

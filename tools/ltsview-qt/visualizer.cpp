@@ -11,15 +11,12 @@
 #include <cstdlib>
 #include <fstream>
 #include "cluster.h"
-#include "enums.h"
 #include "lts.h"
 #include "mathutils.h"
-#include "primitivefactory.h"
 #include "settings.h"
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
-#include "visobjectfactory.h"
 
 #include <QtOpenGL>
 
@@ -28,12 +25,13 @@ using namespace MathUtils;
 
 #define SELECT_BLEND 0.3f
 
-Visualizer::Visualizer(Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_)
+Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_):
+  QObject(parent),
+  settings(settings_),
+  ltsManager(ltsManager_),
+  markManager(markManager_),
+  primitiveFactory(settings)
 {
-  settings = settings_;
-  ltsManager = ltsManager_;
-  markManager = markManager_;
-
   connect(&settings->stateSize, SIGNAL(changed(float)), this, SIGNAL(dirtied()));
   connect(&settings->clusterHeight, SIGNAL(changed(float)), this, SLOT(dirtyMatrices()));
   connect(&settings->branchRotation, SIGNAL(changed(int)), this, SLOT(dirtyMatrices()));
@@ -58,11 +56,11 @@ Visualizer::Visualizer(Settings* settings_, LtsManager *ltsManager_, MarkManager
   connect(ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(dirtyObjects()));
   connect(ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(dirtyMatrices()));
   connect(ltsManager, SIGNAL(statePositionsChanged()), this, SLOT(dirtyPositions()));
+  connect(ltsManager, SIGNAL(selectionChanged()), this, SLOT(dirtyColors()));
+  connect(ltsManager, SIGNAL(simulationChanged()), this, SLOT(dirtyColors()));
 
-  connect(markManager, SIGNAL(markStyleChanged(MarkStyle)), this, SLOT(dirtyColors()));
+  connect(markManager, SIGNAL(marksChanged()), this, SLOT(dirtyColors()));
 
-  visObjectFactory = new VisObjectFactory();
-  primitiveFactory = new PrimitiveFactory(settings);
   sin_obt = float(sin(deg_to_rad(settings->branchTilt.value())));
   cos_obt = float(cos(deg_to_rad(settings->branchTilt.value())));
 
@@ -70,12 +68,6 @@ Visualizer::Visualizer(Settings* settings_, LtsManager *ltsManager_, MarkManager
   update_matrices = false;
   update_colors = false;
   update_positions = false;
-}
-
-Visualizer::~Visualizer()
-{
-  delete visObjectFactory;
-  delete primitiveFactory;
 }
 
 float Visualizer::getHalfStructureHeight() const
@@ -169,7 +161,7 @@ void Visualizer::drawStructure()
   {
     updateColors();
   }
-  visObjectFactory->drawObjects(primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
+  visObjectFactory.drawObjects(&primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
                                 markManager->stateMatchStyle() == MATCH_MULTI);
 }
 
@@ -177,7 +169,7 @@ void Visualizer::traverseTree()
 {
   if (update_objects)
   {
-    visObjectFactory->clear();
+    visObjectFactory.clear();
     update_colors = true;
   }
   glPushMatrix();
@@ -209,12 +201,12 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
     ids.push_back(root->getPositionInRank());
     if (update_objects)
     {
-      root->setVisObject(visObjectFactory->makeObject(
-                           primitiveFactory->makeSphere(),ids));
+      root->setVisObject(visObjectFactory.makeObject(
+                           primitiveFactory.makeSphere(),ids));
     }
     else
     {
-      visObjectFactory->updateObjectMatrix(root->getVisObject());
+      visObjectFactory.updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
@@ -277,14 +269,14 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
 
       if (update_objects)
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeTruncatedCone(r,topClosed,
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeTruncatedCone(r,topClosed,
                                  root->getNumDescendants() > 1 || root->hasSeveredDescendants()),
                              ids));
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
@@ -299,14 +291,14 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
 
       if (update_objects)
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeTruncatedCone(r,
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeTruncatedCone(r,
                                  root->getNumDescendants() > 1 || root->hasSeveredDescendants(),
                                  topClosed), ids));
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
@@ -331,18 +323,18 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
       if (root == ltsManager->lts()->getInitialState()->getCluster())
       {
         // exception: draw root as a sphere if it is the initial cluster
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeSphere(), ids));
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeSphere(), ids));
       }
       else
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeHemisphere(),ids));
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeHemisphere(),ids));
       }
     }
     else
     {
-      visObjectFactory->updateObjectMatrix(root->getVisObject());
+      visObjectFactory.updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
@@ -416,13 +408,13 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
             vector<int> ids;
             ids.push_back(root->getRank());
             ids.push_back(root->getPositionInRank());
-            root->addBranchVisObject(visObjectFactory->makeObject(
-                                       primitiveFactory->makeObliqueCone(alpha,
+            root->addBranchVisObject(visObjectFactory.makeObject(
+                                       primitiveFactory.makeObliqueCone(alpha,
                                            desc->getTopRadius()/sz,sign),ids));
           }
           else
           {
-            visObjectFactory->updateObjectMatrix(root->getBranchVisObject(i));
+            visObjectFactory.updateObjectMatrix(root->getBranchVisObject(i));
           }
           glPopMatrix();
 
@@ -453,18 +445,18 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
         if (root == ltsManager->lts()->getInitialState()->getCluster())
         {
           // exception: draw root as a sphere if it is the initial cluster
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeSphere(), ids));
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeSphere(), ids));
         }
         else
         {
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeHemisphere(), ids));
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeHemisphere(), ids));
         }
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopMatrix();
     }
@@ -488,13 +480,13 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
           vector<int> ids;
           ids.push_back(root->getRank());
           ids.push_back(root->getPositionInRank());
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeTruncatedCone(r,topClosed,
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeTruncatedCone(r,topClosed,
                                    root->hasSeveredDescendants()), ids));
         }
         else
         {
-          visObjectFactory->updateObjectMatrix(root->getVisObject());
+          visObjectFactory.updateObjectMatrix(root->getVisObject());
         }
       }
       else
@@ -506,13 +498,13 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
           vector<int> ids;
           ids.push_back(root->getRank());
           ids.push_back(root->getPositionInRank());
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeTruncatedCone(r,
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeTruncatedCone(r,
                                    root->hasSeveredDescendants(),topClosed),ids));
         }
         else
         {
-          visObjectFactory->updateObjectMatrix(root->getVisObject());
+          visObjectFactory.updateObjectMatrix(root->getVisObject());
         }
       }
       glPopMatrix();
@@ -600,13 +592,13 @@ void Visualizer::updateColors()
         c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
       // set color of cluster cl
-      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+      visObjectFactory.updateObjectColor(cl->getVisObject(),c);
       // and its branches
       for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
       {
         if (cl->getBranchVisObject(i) != -1)
         {
-          visObjectFactory->updateObjectColor(
+          visObjectFactory.updateObjectColor(
             cl->getBranchVisObject(i),c);
         }
       }
@@ -641,17 +633,17 @@ void Visualizer::updateColors()
         c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
 
-      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-      visObjectFactory->updateObjectTexture(cl->getVisObject(),
+      visObjectFactory.updateObjectColor(cl->getVisObject(),c);
+      visObjectFactory.updateObjectTexture(cl->getVisObject(),
                                             rule_colours);
 
       for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
       {
         if (cl->getBranchVisObject(i) != -1)
         {
-          visObjectFactory->updateObjectColor(
+          visObjectFactory.updateObjectColor(
             cl->getBranchVisObject(i),c);
-          visObjectFactory->updateObjectTexture(
+          visObjectFactory.updateObjectTexture(
             cl->getBranchVisObject(i),rule_colours);
         }
       }
@@ -662,7 +654,7 @@ void Visualizer::updateColors()
 
 void Visualizer::sortClusters(Vector3D viewpoint)
 {
-  visObjectFactory->sortObjects(viewpoint);
+  visObjectFactory.sortObjects(viewpoint);
 }
 
 // ------------- STATES --------------------------------------------------------
@@ -725,7 +717,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
     // Make the current state a bit larger, to make it easier to find it in the
     // simulation
     glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
-    primitiveFactory->drawSimpleSphere();
+    primitiveFactory.drawSimpleSphere();
     glPopMatrix();
 
     glPopName();
@@ -773,7 +765,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
       {
         glScalef(ns, ns, ns);
       }
-      primitiveFactory->drawSimpleSphere();
+      primitiveFactory.drawSimpleSphere();
       glPopMatrix();
 
       glPopName();
@@ -813,7 +805,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
       glPushMatrix();
       glTranslatef(p.x(), p.y(), p.z());
       glScalef(ns, ns, ns);
-      primitiveFactory->drawSimpleSphere();
+      primitiveFactory.drawSimpleSphere();
       glPopMatrix();
 
       glPopName();
@@ -1040,7 +1032,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
 
         glPushName(s->getID());
 
-        primitiveFactory->drawSimpleSphere();
+        primitiveFactory.drawSimpleSphere();
         glPopName();
         glPopMatrix();
 

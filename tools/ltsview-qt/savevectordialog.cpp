@@ -11,7 +11,7 @@
 #include <gl2ps.h>
 #include <stdio.h>
 
-SaveVectorDialog::SaveVectorDialog(QWidget *parent, GLCanvas *canvas, QString filename, GLint format):
+SaveVectorDialog::SaveVectorDialog(QWidget *parent, LtsCanvas *canvas, QString filename, GLint format):
   QDialog(parent),
   m_canvas(canvas),
   m_filename(filename),
@@ -65,6 +65,7 @@ void SaveVectorDialog::save()
     options |= GL2PS_TIGHT_BOUNDING_BOX;
   }
 
+  m_canvas->renderVectorStart();
   GLint buffsize = 0;
   bool success;
   while (true)
@@ -78,7 +79,7 @@ void SaveVectorDialog::save()
       success = false;
       break;
     }
-    m_canvas->display();
+    m_canvas->renderVectorPage();
     GLint state = gl2psEndPage();
     if (state == GL2PS_ERROR)
     {
@@ -91,6 +92,7 @@ void SaveVectorDialog::save()
       break;
     }
   }
+  m_canvas->renderVectorFinish();
 
   fclose(file);
 

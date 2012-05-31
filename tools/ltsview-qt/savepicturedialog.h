@@ -10,17 +10,16 @@
 #define SAVEPICTUREDIALOG_H
 
 #include "ui_savepicturedialog.h"
-
 #include <QDialog>
 
-#include "glcanvas.h"
+#include "ltscanvas.h"
 
 class SavePictureDialog : public QDialog
 {
   Q_OBJECT
 
   public:
-    SavePictureDialog(QWidget *parent, GLCanvas *canvas, QString filename);
+    SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString filename);
 
   signals:
     void statusMessage(QString message);
@@ -32,7 +31,7 @@ class SavePictureDialog : public QDialog
 
   private:
     Ui::SavePictureDialog m_ui;
-    GLCanvas *m_canvas;
+    LtsCanvas *m_canvas;
     QString m_filename;
     float m_width;
     float m_height;

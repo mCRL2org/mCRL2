@@ -18,7 +18,8 @@
 
 using namespace std;
 
-MarkManager::MarkManager(LtsManager *ltsManager):
+MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
+  QObject(parent),
   m_ltsManager(ltsManager),
   m_lts(0),
   m_markStyle(NO_MARKS),

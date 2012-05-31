@@ -107,9 +107,9 @@ struct Settings
   SettingBool navSmoothShading;
   SettingBool navLighting;
   SettingBool navTransparency;
-  SettingBool displayBackpointers;
   SettingBool displayStates;
   SettingBool displayTransitions;
+  SettingBool displayBackpointers;
   SettingBool displayWireframe;
 
   Settings():
@@ -141,9 +141,9 @@ struct Settings
     navSmoothShading(true),
     navLighting(true),
     navTransparency(true),
-    displayBackpointers(false),
     displayStates(false),
     displayTransitions(false),
+    displayBackpointers(false),
     displayWireframe(false)
   {}
 };

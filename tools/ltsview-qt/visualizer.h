@@ -14,10 +14,11 @@
 
 #include <string>
 #include <vector>
-#include "enums.h"
 #include "ltsmanager.h"
 #include "markmanager.h"
+#include "primitivefactory.h"
 #include "settings.h"
+#include "visobjectfactory.h"
 
 class PrimitiveFactory;
 class LTS;
@@ -32,8 +33,7 @@ class Visualizer: public QObject
   Q_OBJECT
 
   public:
-    Visualizer(Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_);
-    ~Visualizer();
+    Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_);
 
     void computeBoundsInfo(float& bcw,float& bch);
     float getHalfStructureHeight() const;
@@ -68,8 +68,8 @@ class Visualizer: public QObject
     Settings* settings;
     LtsManager *ltsManager;
     MarkManager* markManager;
-    VisObjectFactory* visObjectFactory;
-    PrimitiveFactory* primitiveFactory;
+    VisObjectFactory visObjectFactory;
+    PrimitiveFactory primitiveFactory;
     float cos_obt;
     float sin_obt;
     bool update_objects;
