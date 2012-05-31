@@ -493,6 +493,7 @@ struct CameraAnimation : public CameraView
       CameraView::viewport(width, height);
       m_target.world.x = world.x;
       m_target.world.y = world.y;
+      m_target.pixelsize = pixelsize;
     }
 
     bool resizing()
