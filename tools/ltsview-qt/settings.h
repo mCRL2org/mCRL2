@@ -113,7 +113,7 @@ struct Settings
   SettingBool displayWireframe;
 
   Settings():
-    stateSize(1.0f),
+    stateSize(0.1f),
     clusterHeight(0.0f),
     branchRotation(0),
     branchTilt(30),
