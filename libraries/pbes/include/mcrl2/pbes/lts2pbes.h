@@ -23,6 +23,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
+#include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/utilities/progress_meter.h"
 
@@ -317,19 +318,24 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
-      // wrap the formula inside a 'nu' if needed
-      if (!sf::is_mu(formula) && !sf::is_nu(formula))
+      f0 = formula;
+
+      // remove occurrences of ! and =>
+      if (!state_formulas::is_normalized(f0))
       {
-        data::set_identifier_generator generator;
-        generator.add_identifiers(state_formulas::find_identifiers(formula));
-        core::identifier_string X = generator("X");
-        f0 = sf::nu(X, data::assignment_list(), formula);
-      }
-      else
-      {
-        f0 = formula;
+        f0 = state_formulas::normalize(f0);
       }
 
+      // wrap the formula inside a 'nu' if needed
+      if (!sf::is_mu(f0) && !sf::is_nu(f0))
+      {
+        data::set_identifier_generator generator;
+        generator.add_identifiers(state_formulas::find_identifiers(f0));
+        core::identifier_string X = generator("X");
+        f0 = sf::nu(X, data::assignment_list(), f0);
+      }
+
+      // initialize progress meter
       std::size_t num_fixpoints = state_formulas::count_fixpoints(f0);
       std::size_t num_steps = num_fixpoints * lts1.state_count();
       m_progress_meter.set_size(num_steps);
