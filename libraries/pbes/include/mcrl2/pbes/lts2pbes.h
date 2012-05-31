@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_LTS2PBES_H
 #define MCRL2_PBES_LTS2PBES_H
 
-#define MCRL2_NEW_LTS2PBES
+//#define MCRL2_LTS2PBES_DEBUG
 
 #include <map>
 #include <boost/lexical_cast.hpp>
@@ -99,17 +99,17 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 
     void log_progress(std::size_t n, std::size_t N) const
     {
-      if (m_recursion_level == 1)
-      {
-        if ((n % (N / 100) == 0) || n == N)
-        {
-          std::size_t percentage = n / (N / 100);
-          if (percentage > 0)
-          {
-            mCRL2log(log::status) << percentage << " percent completed" << std::endl;
-          }
-        }
-      }
+//      if (m_recursion_level == 1)
+//      {
+//        if ((n % (N / 100) == 0) || n == N)
+//        {
+//          std::size_t percentage = n / (N / 100);
+//          if (percentage > 0)
+//          {
+//            mCRL2log(log::status) << percentage << " percent completed" << std::endl;
+//          }
+//        }
+//      }
     }
 
     core::identifier_string make_identifier(const core::identifier_string& name, state_type s)
@@ -195,15 +195,17 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_variable(f))
       {
-        core::identifier_string X = make_identifier(af::name(f), s);
+        core::identifier_string X = af::name(f);
+        core::identifier_string X_s = make_identifier(X, s);
         data::data_expression_list d = af::param(f);
-        result = propositional_variable_instantiation(X, d + Par(X, data::variable_list(), f0));
+        result = propositional_variable_instantiation(X_s, d + Par(X, data::variable_list(), f0));
       }
       else if (sf::is_mu(f) || (sf::is_nu(f)))
       {
-        core::identifier_string X = make_identifier(af::name(f), s);
+        core::identifier_string X = af::name(f);
+        core::identifier_string X_s = make_identifier(X, s);
         data::data_expression_list e = detail::mu_expressions(f);
-        result = propositional_variable_instantiation(X, e + Par(X, data::variable_list(), f0));
+        result = propositional_variable_instantiation(X_s, e + Par(X, data::variable_list(), f0));
       }
       else
       {
@@ -282,8 +284,9 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         for (state_type s = 0; s < lts1.state_count(); s++)
         {
           log_progress(s, lts1.state_count());
-          core::identifier_string X = make_identifier(af::name(f), s);
-          propositional_variable Xs(X, d + Par(X, data::variable_list(), f0));
+          core::identifier_string X = af::name(f);
+          core::identifier_string X_s = make_identifier(X, s);
+          propositional_variable Xs(X_s, d + Par(X, data::variable_list(), f0));
           v.push_back(pbes_equation(sigma, Xs, RHS(af::arg(f), s)));
         }
         result = v + E(af::arg(f));
