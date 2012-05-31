@@ -10,6 +10,12 @@
 #include "ltscanvas.h"
 #include "tr/tr.h"
 
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
+
 #include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"
 #include "icons/rotate_cursor.xpm"
