@@ -22,11 +22,6 @@
 
 #include "icons/main_window.xpm"
 
-/*
- * TODO:
- * - fix visualizer object creation bug
- */
-
 MainWindow::MainWindow():
   m_messenger(this)
 {
