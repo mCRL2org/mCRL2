@@ -54,7 +54,7 @@ Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsMana
   connect(ltsManager, SIGNAL(ltsChanged(LTS *)), this, SLOT(setClusterHeight()));
   connect(ltsManager, SIGNAL(clustersChanged()), this, SLOT(dirtyObjects()));
   connect(ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(dirtyObjects()));
-  connect(ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(dirtyMatrices()));
+  connect(ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(dirtyObjects()));
   connect(ltsManager, SIGNAL(statePositionsChanged()), this, SLOT(dirtyPositions()));
   connect(ltsManager, SIGNAL(selectionChanged()), this, SLOT(dirtyColors()));
   connect(ltsManager, SIGNAL(simulationChanged()), this, SLOT(dirtyColors()));
