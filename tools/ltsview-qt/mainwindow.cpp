@@ -6,13 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <QDebug>
-
 #include <QActionGroup>
 #include <QApplication>
 #include <QFileDialog>
 #include <QImageWriter>
 #include <QMessageBox>
+#include <QPixmap>
 #include <QString>
 #include <gl2ps.h>
 
@@ -21,16 +20,19 @@
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
 
+#include "icons/main_window.xpm"
+
 /*
  * TODO:
  * - fix visualizer object creation bug
- * - fix markmanager STATE bug
  */
 
 MainWindow::MainWindow():
   m_messenger(this)
 {
   m_ui.setupUi(this);
+
+  setWindowIcon(QPixmap(main_window));
 
   m_ltsManager = new LtsManager(this, &m_settings);
   m_markManager = new MarkManager(this, m_ltsManager);

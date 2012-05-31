@@ -315,7 +315,7 @@ void MarkManager::flushClusters()
     for (int j = 0; j < cluster->getNumStates(); j++)
     {
       State *state = cluster->getState(j);
-      if (state->getMatchedRules().empty())
+      if (!state->getMatchedRules().empty())
       {
         anyAdded++;
       }

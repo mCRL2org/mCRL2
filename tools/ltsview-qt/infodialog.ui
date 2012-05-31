@@ -32,16 +32,10 @@
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
-         <attribute name="horizontalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
          <attribute name="verticalHeaderVisible">
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="horizontalHeaderVisible">
           <bool>false</bool>
          </attribute>
          <row>
@@ -76,12 +70,12 @@
          </row>
          <column>
           <property name="text">
-           <string>New Column</string>
+           <string>Property</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>New Column</string>
+           <string>Value</string>
           </property>
          </column>
          <item row="0" column="0">
@@ -135,16 +129,16 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QTableWidget" name="clusterTable">
-         <attribute name="horizontalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
          <attribute name="verticalHeaderVisible">
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="horizontalHeaderVisible">
           <bool>false</bool>
          </attribute>
          <row>
@@ -164,7 +158,7 @@
          </row>
          <column>
           <property name="text">
-           <string>Key</string>
+           <string>Parameter</string>
           </property>
          </column>
          <column>

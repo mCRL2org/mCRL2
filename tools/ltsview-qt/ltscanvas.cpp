@@ -39,6 +39,10 @@ LtsCanvas::LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager
   connect(m_ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(clusterPositionsChanged()));
   connect(m_ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(resetView()));
   connect(&m_settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&m_settings->displayStates, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&m_settings->displayTransitions, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&m_settings->displayBackpointers, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&m_settings->displayWireframe, SIGNAL(changed(bool)), this, SLOT(update()));
 
   clusterPositionsChanged();
   resetView();
