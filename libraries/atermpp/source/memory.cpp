@@ -35,9 +35,6 @@ std::vector <detail::_aterm*> detail::hashtable(AT_TABLE_SIZE(INITIAL_TERM_TABLE
 
 static void resize_hashtable()
 {
-  HashNumber oldsize;
-
-  oldsize = table_size;
   table_class++;
   table_size = ((HashNumber)1)<<table_class;
   table_mask = table_size-1;
