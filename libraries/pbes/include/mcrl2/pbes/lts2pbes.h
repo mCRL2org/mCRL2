@@ -45,7 +45,7 @@ class lts2pbes_lts
 
   protected:
     lts_type m_map;
-    atermpp::vector<lps::multi_action> m_action_labels;
+    std::vector<lps::multi_action> m_action_labels;
     std::size_t m_state_count;
     edge_list m_empty_edge_list;
 
@@ -83,7 +83,7 @@ class lts2pbes_lts
       }
     }
 
-    const atermpp::vector<lps::multi_action>& action_labels() const
+    const std::vector<lps::multi_action>& action_labels() const
     {
       return m_action_labels;
     }
@@ -160,7 +160,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_must(f))
       {
-        atermpp::vector<pbes_expression> v;
+        std::vector<pbes_expression> v;
         action_formulas::action_formula alpha(af::act(f));
         state_formulas::state_formula phi(af::arg(f));
 
@@ -176,7 +176,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_may(f))
       {
-        atermpp::vector<pbes_expression> v;
+        std::vector<pbes_expression> v;
         action_formulas::action_formula alpha(af::act(f));
         state_formulas::state_formula phi(af::arg(f));
 
@@ -218,7 +218,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 
     /// \brief The \p E function of the translation
     /// \param f A modal formula
-    atermpp::vector<pbes_equation> E(const state_formulas::state_formula& f)
+    std::vector<pbes_equation> E(const state_formulas::state_formula& f)
     {
 #ifdef MCRL2_LTS2PBES_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<E>" << state_formulas::pp(f) << std::flush;
@@ -227,7 +227,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
 
-      atermpp::vector<pbes_equation> result;
+      std::vector<pbes_equation> result;
 
       if (data::is_data_expression(f))
       {
@@ -273,7 +273,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       {
         data::variable_list d = detail::mu_variables(f);
         fixpoint_symbol sigma = sf::is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
-        atermpp::vector<pbes_equation> v;
+        std::vector<pbes_equation> v;
 
         // traverse all states of the LTS
         for (state_type s = 0; s < lts1.state_count(); s++)
@@ -342,7 +342,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      atermpp::vector<pbes_equation> eqn = E(f0);
+      std::vector<pbes_equation> eqn = E(f0);
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
@@ -350,7 +350,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
+      pbes<> result = pbes<>(lts0.data(), eqn, std::set<data::variable>(), init);
       return result;
     }
 };
