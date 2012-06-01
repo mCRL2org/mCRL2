@@ -18,7 +18,8 @@
 
 using namespace std;
 
-MarkManager::MarkManager(LtsManager *ltsManager):
+MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
+  QObject(parent),
   m_ltsManager(ltsManager),
   m_lts(0),
   m_markStyle(NO_MARKS),
@@ -314,7 +315,7 @@ void MarkManager::flushClusters()
     for (int j = 0; j < cluster->getNumStates(); j++)
     {
       State *state = cluster->getState(j);
-      if (state->getMatchedRules().empty())
+      if (!state->getMatchedRules().empty())
       {
         anyAdded++;
       }

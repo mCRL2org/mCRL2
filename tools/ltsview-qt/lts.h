@@ -17,7 +17,6 @@
 #include <map>
 
 #include "mcrl2/lts/lts_fsm.h"
-#include "enums.h"
 
 class LTS;
 class State;

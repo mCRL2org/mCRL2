@@ -15,16 +15,9 @@
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
-#include "GL/glu.h" // Needed for compilation on Ubuntu 12.04
+#include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
 #endif
-
-#ifdef WIN32
-#include "glext.h"
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 M_PI/2
-#endif
+#include "workarounds.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -266,7 +259,7 @@ struct VertexData
       // Generate vertices for arrowhead (a triangle fan drawing a cone)
       arrowhead = new Coord3D[RES_ARROWHEAD + 1];
       arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
-      float diff = M_PI / 20, t = 0;
+      float diff = M_PI / 20.0f, t = 0;
       for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
         arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
                                0.3 * arrowheadsize * sin(t),
@@ -333,7 +326,7 @@ struct CameraView
     void viewport(size_t width, size_t height)
     {
       glViewport(0, 0, width, height);
-      pixelsize = 1000.0 / (width > height ? height : width);
+      pixelsize = 1000.0 / (width < height ? height : width);
       world.x = width * pixelsize;
       world.y = height * pixelsize;
     }
@@ -500,6 +493,7 @@ struct CameraAnimation : public CameraView
       CameraView::viewport(width, height);
       m_target.world.x = world.x;
       m_target.world.y = world.y;
+      m_target.pixelsize = pixelsize;
     }
 
     bool resizing()
@@ -851,10 +845,12 @@ void GLScene::renderStateNumber(size_t i)
 void GLScene::renderHandle(size_t i)
 {
   Graph::Node& handle = m_graph.handle(i);
-  if (handle.selected > 0.1)
+  if (handle.selected > 0.1 || handle.locked)
   {
-    Color3f line(2 * handle.selected - 1.0, 0.0, 0.0);
-    Color3f fill(1.0, 1.0, 1.0);
+    Color3f line(2 * handle.selected - 1.0f, 0.0f, 0.0f);
+    Color3f fill(1.0f, 1.0f, 1.0f);
+    if (handle.locked)
+      fill = Color3f(0.7f, 0.7f, 0.7f);
 
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -985,6 +981,7 @@ void GLScene::render()
 void GLScene::resize(size_t width, size_t height)
 {
   m_camera->viewport(width, height);
+  updateShapes();
 }
 
 void GLScene::updateLabels()

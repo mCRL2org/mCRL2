@@ -33,6 +33,109 @@ namespace mcrl2 {
     return buffer;
   }
 
+  std::string formatter::format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  {
+    // Construct the message header
+    std::stringstream start_of_line;
+    start_of_line << "[" << format_time(&timestamp) << " " << hint
+                  << (hint == std::string()?"":"::")
+                  << log_level_to_string(level) << "]"
+                  << std::string(8 - log_level_to_string(level).size(), ' ');
+
+    // Check if message is finished. We
+    bool msg_ends_with_newline = false;
+    if (msg.size() > 0)
+    {
+      msg_ends_with_newline = (msg[msg.size()-1] == '\n');
+    }
+
+    std::stringstream result;
+
+    // Determine whether the last line should be overwritten (by inserting a
+    // carriage return).
+    bool overwrite = false;
+    if (last_message_was_status())
+    {
+      if (level == status && hint == last_hint())
+      {
+        if (last_message_ended_with_newline())
+        {
+          result << "\r" << start_of_line.str();
+          overwrite = true;
+        }
+      }
+      else
+      {
+        result << "\n" << start_of_line.str();
+      }
+    }
+    else
+    if (last_message_ended_with_newline())
+    {
+      result << start_of_line.str();
+    }
+
+    // Copy the message to result, keeping track of the caret position and
+    // inserting message headers at newlines. A trailing newline is ignored.
+    for (std::string::const_iterator it = msg.begin(); it != msg.end(); )
+    {
+      if (*it != '\n')
+      {
+        result << *it++;
+        ++caret_pos();
+      }
+      else
+      {
+        if (++it != msg.end())
+        {
+          result << "\n" << start_of_line.str();
+          caret_pos() = 0;
+          last_caret_pos() = 0;
+        }
+      }
+    }
+
+    // Pad message with spaces when overwriting a previous line
+    if (msg_ends_with_newline && overwrite && caret_pos() < last_caret_pos())
+    {
+      for (size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
+      {
+        result << ' ';
+      }
+    }
+
+    // If this is a finished status message, remember the caret position
+    // so the next line can overwrite properly. If this is a finished message
+    // of another type, restore the trailing newline.
+    if(msg_ends_with_newline)
+    {
+      if (level == status)
+      {
+        last_caret_pos() = caret_pos();
+      }
+      else
+      {
+        result << "\n";
+      }
+      caret_pos() = 0;
+    }
+
+    // Store information about this message so next time we can determine
+    // whether we should overwrite the last line or not.
+    last_message_ended_with_newline() = msg_ends_with_newline;
+    if (level == status)
+    {
+      last_message_was_status() = true;
+      last_hint() = hint;
+    }
+    else
+    {
+      last_message_was_status() = false;
+    }
+
+    return result.str();
+  }
+
 #if 0
 // Implementation of now_time; platform specific.
 // used to print timestamps in front of debug messages.

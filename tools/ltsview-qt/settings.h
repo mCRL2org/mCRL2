@@ -107,13 +107,13 @@ struct Settings
   SettingBool navSmoothShading;
   SettingBool navLighting;
   SettingBool navTransparency;
-  SettingBool displayBackpointers;
   SettingBool displayStates;
   SettingBool displayTransitions;
+  SettingBool displayBackpointers;
   SettingBool displayWireframe;
 
   Settings():
-    stateSize(1.0f),
+    stateSize(0.1f),
     clusterHeight(0.0f),
     branchRotation(0),
     branchTilt(30),
@@ -141,9 +141,9 @@ struct Settings
     navSmoothShading(true),
     navLighting(true),
     navTransparency(true),
-    displayBackpointers(false),
     displayStates(false),
     displayTransitions(false),
+    displayBackpointers(false),
     displayWireframe(false)
   {}
 };

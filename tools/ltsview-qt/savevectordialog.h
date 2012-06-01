@@ -10,17 +10,16 @@
 #define SAVEVECTORDIALOG_H
 
 #include "ui_savevectordialog.h"
-
 #include <QDialog>
 
-#include "glcanvas.h"
+#include "ltscanvas.h"
 
 class SaveVectorDialog : public QDialog
 {
   Q_OBJECT
 
   public:
-    SaveVectorDialog(QWidget *parent, GLCanvas *canvas, QString filename, GLint format);
+    SaveVectorDialog(QWidget *parent, LtsCanvas *canvas, QString filename, GLint format);
 
   signals:
     void statusMessage(QString message);
@@ -30,7 +29,7 @@ class SaveVectorDialog : public QDialog
 
   private:
     Ui::SaveVectorDialog m_ui;
-    GLCanvas *m_canvas;
+    LtsCanvas *m_canvas;
     QString m_filename;
     GLint m_format;
 };

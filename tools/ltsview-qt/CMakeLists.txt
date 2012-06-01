@@ -26,6 +26,7 @@ ENDIF(WIN32)
 
 set(UI_FILES
   infodialog.ui
+  mainwindow.ui
   markdialog.ui
   markstateruledialog.ui
   savepicturedialog.ui
@@ -36,12 +37,11 @@ set(UI_FILES
 qt4_wrap_ui(UI_HEADERS ${UI_FILES})
 
 set(MOC_HEADERS
-  glcanvas.h
   infodialog.h
+  ltscanvas.h
   ltsmanager.h
-  ltsview.h
   markdialog.h
-  mainframe.h
+  mainwindow.h
   markmanager.h
   markstateruledialog.h
   primitivefactory.h
@@ -55,19 +55,18 @@ set(MOC_HEADERS
 )
 qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
 
-# Sources:
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   ${UI_HEADERS}
   ${MOC_SOURCES}
   cluster.cpp
   conedb.cpp
   fsm_state_positioner.cpp
-  glcanvas.cpp
   infodialog.cpp
   lts.cpp
+  ltscanvas.cpp
   ltsmanager.cpp
-  ltsview.cpp
-  mainframe.cpp
+  main.cpp
+  mainwindow.cpp
   markdialog.cpp
   markmanager.cpp
   markstateruledialog.cpp
@@ -109,6 +108,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${QT_INCLUDES})
 if(GL2PS_FOUND)
@@ -122,10 +122,9 @@ target_link_libraries(${PROJECT_NAME}
   ${QT_QTCORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
   ${QT_QTOPENGL_LIBRARY}
-  ${wxWidgets_LIBRARIES}
   mcrl2_lts
   mcrl2_utilities
-  mcrl2_utilities_wx
+  mcrl2_utilities_qt
   mcrl2_syntax
   dparser
   tr

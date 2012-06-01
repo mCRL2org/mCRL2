@@ -14,10 +14,6 @@
 #include <QtOpenGL>
 #include <map>
 
-#ifdef WIN32
-#include "glext.h"
-#endif
-
 struct MoveRecord
 {
     Graph::Node* node;
@@ -232,41 +228,47 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
   else
   {
     m_dragstart = e->pos();
-    if (m_hover.selectionType == GLScene::so_none)
+    if ((e->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
     {
-      if (e->button() == Qt::RightButton && m_scene->size().z > 1)
-        m_dragmode = dm_rotate;
-      else if (e->button() == Qt::RightButton)
-        m_dragmode = dm_rotate_2d;
-      else if (e->button() == Qt::MidButton)
-        m_dragmode = dm_zoom;
-      else if (e->button() == Qt::LeftButton)
+      if (e->button() == Qt::LeftButton)
         m_dragmode = dm_translate;
     }
     else
     {
-      m_dragmode = dm_dragnode;
-      switch (m_hover.selectionType)
+      if (m_hover.selectionType == GLScene::so_none)
       {
-        case GLScene::so_node:
-          m_dragnode = new NodeMoveRecord;
-          break;
-        case GLScene::so_handle:
-          m_dragnode = new HandleMoveRecord;
-          break;
-        case GLScene::so_label:
-          m_dragnode = new LabelMoveRecord;
-          break;
-        case GLScene::so_slabel:
-          m_dragnode = new StateLabelMoveRecord;
-          break;
-        default:
-          m_dragnode = NULL;
-          m_dragmode = dm_none;
-          break;
+        if (e->button() == Qt::RightButton && m_scene->size().z > 1)
+          m_dragmode = dm_rotate;
+        else if (e->button() == Qt::RightButton)
+          m_dragmode = dm_rotate_2d;
+        else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton)))
+          m_dragmode = dm_zoom;
       }
-      if (m_dragnode)
-        m_dragnode->grab(m_graph, m_hover.index);
+      else
+      {
+        m_dragmode = dm_dragnode;
+        switch (m_hover.selectionType)
+        {
+          case GLScene::so_node:
+            m_dragnode = new NodeMoveRecord;
+            break;
+          case GLScene::so_handle:
+            m_dragnode = new HandleMoveRecord;
+            break;
+          case GLScene::so_label:
+            m_dragnode = new LabelMoveRecord;
+            break;
+          case GLScene::so_slabel:
+            m_dragnode = new StateLabelMoveRecord;
+            break;
+          default:
+            m_dragnode = NULL;
+            m_dragmode = dm_none;
+            break;
+        }
+        if (m_dragnode)
+          m_dragnode->grab(m_graph, m_hover.index);
+      }
     }
   }
 }
@@ -308,14 +310,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         }
         break;
       case dm_rotate:
+      case dm_rotate_2d:
         m_scene->rotate(Graph::Coord3D(360.0f * vec.y() / height(),
                                        360.0f * vec.x() / width(),
                                        0.0f));
-        break;
-      case dm_rotate_2d:
-        m_scene->rotate(Graph::Coord3D(0.0f,
-                                       0.0f,
-                                       -360.0f * vec.y() / height()));
         break;
       case dm_translate:
         m_scene->translate(vec3);

@@ -21,13 +21,14 @@ class LtsManager : public QObject
   Q_OBJECT
 
   public:
-    LtsManager(Settings *settings);
+    LtsManager(QObject *parent, Settings *settings);
     LTS *lts() const { return m_lts; }
 
     State *selectedState() const { return m_selectedState; }
     Cluster *selectedCluster() const { return m_selectedCluster; }
 
     Simulation *simulation() const { return m_simulation; }
+    bool simulationActive() const { return m_simulation && m_simulation->isStarted(); }
     State *currentSimulationState() const;
     Transition *currentSimulationTransition() const;
     QList<Transition *> simulationAvailableTransitions() const;
@@ -37,7 +38,9 @@ class LtsManager : public QObject
   public slots:
     bool openLts(QString filename);
     void zoomInBelow(Cluster *cluster);
+    void zoomInBelow() { if (selectedCluster()) zoomInBelow(selectedCluster()); }
     void zoomInAbove(Cluster *cluster);
+    void zoomInAbove() { if (selectedCluster()) zoomInAbove(selectedCluster()); }
     bool zoomOut();
     void unselect();
     void selectState(State *state);

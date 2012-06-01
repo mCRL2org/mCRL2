@@ -50,10 +50,22 @@ inline double round(double d)
 #  define M_PI 3.141592653589793238462643383280
 # endif
 # ifndef M_PI_2
-#  define M_PI_2 2*M_PI
+#  define M_PI_2 (M_PI/2)
 # endif
 # ifndef M_PI_4
-#  define M_PI_4 4*M_PI
+#  define M_PI_4 (M_PI/4)
+# endif
+# ifndef GL_BGRA
+#  define GL_BGRA 0x80E1
+# endif
+# ifndef GL_UNSIGNED_INT_8_8_8_8_REV
+#  define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
+# endif
+# ifndef GL_FOG_COORD_SRC
+#  define GL_FOG_COORD_SRC 0x8450
+# endif
+# ifndef GL_FRAGMENT_DEPTH
+#  define GL_FRAGMENT_DEPTH 0x8452
 # endif
 #elif defined(__CYGWIN__) || defined(__MINGW32__)
 # include <cassert>

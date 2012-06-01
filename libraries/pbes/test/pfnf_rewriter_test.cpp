@@ -198,7 +198,7 @@ void test_is_pfnf()
 {
   std::string text =
     "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
-    "     nu Y(n: Nat) = Y(0) || X(1) && X(2);   \n"
+    "     nu Y(n: Nat) = (Y(0) || X(1)) && X(2); \n"
     "     nu Z(n: Nat) = true => (X(0) || X(1)); \n"
     "     nu X3(n: Nat) = true;                  \n"
     "     nu X4(n: Nat) = val(true);             \n"

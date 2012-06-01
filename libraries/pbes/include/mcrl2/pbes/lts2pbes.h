@@ -12,14 +12,20 @@
 #ifndef MCRL2_PBES_LTS2PBES_H
 #define MCRL2_PBES_LTS2PBES_H
 
-#define MCRL2_NEW_LTS2PBES
+//#define MCRL2_LTS2PBES_DEBUG
+#ifdef MCRL2_LTS2PBES_DEBUG
+#define MCRL2_PBES_TRANSLATE_DEBUG
+#endif
 
 #include <map>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
+#include "mcrl2/modal_formula/count_fixpoints.h"
+#include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/pbes/pbes_translate.h"
+#include "mcrl2/utilities/progress_meter.h"
 
 namespace mcrl2 {
 
@@ -39,8 +45,9 @@ class lts2pbes_lts
 
   protected:
     lts_type m_map;
-    std::vector<lps::multi_action> m_action_labels;
+    atermpp::vector<lps::multi_action> m_action_labels;
     std::size_t m_state_count;
+    edge_list m_empty_edge_list;
 
   public:
     lts2pbes_lts(const lts::lts_lts_t& lts0)
@@ -66,10 +73,17 @@ class lts2pbes_lts
     const edge_list& edges(state_type s) const
     {
       lts_type::const_iterator i = m_map.find(s);
-      return i->second;
+      if (i == m_map.end())
+      {
+        return m_empty_edge_list;
+      }
+      else
+      {
+        return i->second;
+      }
     }
 
-    const std::vector<lps::multi_action>& action_labels() const
+    const atermpp::vector<lps::multi_action>& action_labels() const
     {
       return m_action_labels;
     }
@@ -93,25 +107,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
     const lts::lts_lts_t& lts0;
     pbes_system::detail::lts2pbes_lts lts1;
     state_formulas::state_formula f0;
-
-    // used for measuring progress
-    std::size_t m_recursion_level;
-
-    void log_progress(std::size_t n, std::size_t N) const
-    {
-      if (m_recursion_level == 1)
-      {
-        // if ((n % (N / 100) == 0) || n == N) Old formula, which leads to division by 0.
-        if (((N/100==0?0:n % N / 100) == 0) || n == N)
-        {
-          std::size_t percentage = (N/100==0?100:n / (N / 100));
-          if (percentage > 0)
-          {
-            mCRL2log(log::status) << percentage << " percent completed" << std::endl;
-          }
-        }
-      }
-    }
+    utilities::progress_meter m_progress_meter;
 
     core::identifier_string make_identifier(const core::identifier_string& name, state_type s)
     {
@@ -164,7 +160,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_must(f))
       {
-        std::vector<pbes_expression> v;
+        atermpp::vector<pbes_expression> v;
         action_formulas::action_formula alpha(af::act(f));
         state_formulas::state_formula phi(af::arg(f));
 
@@ -180,7 +176,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_may(f))
       {
-        std::vector<pbes_expression> v;
+        atermpp::vector<pbes_expression> v;
         action_formulas::action_formula alpha(af::act(f));
         state_formulas::state_formula phi(af::arg(f));
 
@@ -196,15 +192,17 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
       else if (sf::is_variable(f))
       {
-        core::identifier_string X = make_identifier(af::name(f), s);
+        core::identifier_string X = af::name(f);
+        core::identifier_string X_s = make_identifier(X, s);
         data::data_expression_list d = af::param(f);
-        result = propositional_variable_instantiation(X, d + Par(X, data::variable_list(), f0));
+        result = propositional_variable_instantiation(X_s, d + Par(X, data::variable_list(), f0));
       }
       else if (sf::is_mu(f) || (sf::is_nu(f)))
       {
-        core::identifier_string X = make_identifier(af::name(f), s);
+        core::identifier_string X = af::name(f);
+        core::identifier_string X_s = make_identifier(X, s);
         data::data_expression_list e = detail::mu_expressions(f);
-        result = propositional_variable_instantiation(X, e + Par(X, data::variable_list(), f0));
+        result = propositional_variable_instantiation(X_s, e + Par(X, data::variable_list(), f0));
       }
       else
       {
@@ -220,10 +218,8 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 
     /// \brief The \p E function of the translation
     /// \param f A modal formula
-    std::vector<pbes_equation> E(const state_formulas::state_formula& f)
+    atermpp::vector<pbes_equation> E(const state_formulas::state_formula& f)
     {
-      m_recursion_level++; // used for measuring progress
-
 #ifdef MCRL2_LTS2PBES_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<E>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
@@ -231,7 +227,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
 
-      std::vector<pbes_equation> result;
+      atermpp::vector<pbes_equation> result;
 
       if (data::is_data_expression(f))
       {
@@ -277,15 +273,16 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       {
         data::variable_list d = detail::mu_variables(f);
         fixpoint_symbol sigma = sf::is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
-        std::vector<pbes_equation> v;
+        atermpp::vector<pbes_equation> v;
 
         // traverse all states of the LTS
         for (state_type s = 0; s < lts1.state_count(); s++)
         {
-          log_progress(s, lts1.state_count());
-          core::identifier_string X = make_identifier(af::name(f), s);
-          propositional_variable Xs(X, d + Par(X, data::variable_list(), f0));
+          core::identifier_string X = af::name(f);
+          core::identifier_string X_s = make_identifier(X, s);
+          propositional_variable Xs(X_s, d + Par(X, data::variable_list(), f0));
           v.push_back(pbes_equation(sigma, Xs, RHS(af::arg(f), s)));
+          m_progress_meter.step();
         }
         result = v + E(af::arg(f));
       }
@@ -295,17 +292,16 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       }
 #ifdef MCRL2_LTS2PBES_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << pbes_system::pp(result) << std::flush;
 #endif
 
-      m_recursion_level--;
       return result;
     }
 
   public:
     /// \brief Constructor.
     lts2pbes_algorithm(const lts::lts_lts_t& l)
-      : lts0(l), lts1(l), m_recursion_level(0)
+      : lts0(l), lts1(l)
     {}
 
     /// \brief Runs the translation algorithm
@@ -322,21 +318,31 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
-      // wrap the formula inside a 'nu' if needed
-      if (!sf::is_mu(formula) && !sf::is_nu(formula))
+      f0 = formula;
+
+      // remove occurrences of ! and =>
+      if (!state_formulas::is_normalized(f0))
       {
-        data::set_identifier_generator generator;
-        generator.add_identifiers(state_formulas::find_identifiers(formula));
-        core::identifier_string X = generator("X");
-        f0 = sf::nu(X, data::assignment_list(), formula);
-      }
-      else
-      {
-        f0 = formula;
+        f0 = state_formulas::normalize(f0);
       }
 
+      // wrap the formula inside a 'nu' if needed
+      if (!sf::is_mu(f0) && !sf::is_nu(f0))
+      {
+        data::set_identifier_generator generator;
+        generator.add_identifiers(state_formulas::find_identifiers(f0));
+        core::identifier_string X = generator("X");
+        f0 = sf::nu(X, data::assignment_list(), f0);
+      }
+
+      // initialize progress meter
+      std::size_t num_fixpoints = state_formulas::count_fixpoints(f0);
+      std::size_t num_steps = num_fixpoints * lts1.state_count();
+      m_progress_meter.set_size(num_steps);
+      mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
+
       // compute the equations
-      std::vector<pbes_equation> eqn = E(f0);
+      atermpp::vector<pbes_equation> eqn = E(f0);
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
@@ -344,15 +350,15 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      pbes<> result = pbes<>(lts0.data(), eqn, std::set<data::variable>(), init);
+      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
       return result;
     }
 };
 
 /// \brief Translates an LTS and a modal formula into a PBES that represents the corresponding
 /// model checking problem.
+/// \param l A labelled transition system
 /// \param f A modal formula
-/// \param s A state of an LTS
 inline
 pbes<> lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
 {

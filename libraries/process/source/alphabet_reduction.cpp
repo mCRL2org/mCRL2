@@ -15,7 +15,7 @@
 #include <sstream>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/process/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/alphabet_reduction.h"
 #include "mcrl2/process/action_name_multiset.h"
@@ -1321,10 +1321,10 @@ namespace mcrl2
           if (non_recursive_set.count(pn)>0 && pCRL_set.count(pn)>0)
           {
             mCRL2log(warning) << "an allow operation allowing only the (multi-)action(s) from " 
-              << pp(process_expression_list(detail::transform_list_back(V))) << std::endl
+              << pp(detail::transform_list_back(V)) << std::endl
               << "is applied to sequential non-directly-recursive process " << pp(pn) << "." << std::endl
               << "This disallows (multi-)action(s) " 
-              << pp(process_expression_list(detail::transform_list_back(detail::list_minus(untypeMAL(ll),V)))) 
+              << pp(detail::transform_list_back(detail::list_minus(untypeMAL(ll),V)))
               << "of this process." << std::endl
               << "This warning could also indicate a forgotten (multi-)action in this allow operation." << std::endl << std::endl;
           }
