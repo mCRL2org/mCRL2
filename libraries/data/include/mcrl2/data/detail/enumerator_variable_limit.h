@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_ENUMERATOR_VARIABLE_LIMIT_H
 #define MCRL2_DATA_DETAIL_ENUMERATOR_VARIABLE_LIMIT_H
 
+#include <cstddef>
+
 namespace mcrl2 {
 
 namespace data {
@@ -22,23 +24,23 @@ namespace detail {
 template <class T> // note, T is only a dummy
 struct enumerator_variable_limit
 {
-  static size_t max_enumerator_variables;
+  static std::size_t max_enumerator_variables;
 };
 
 // Initialization
 template <class T>
-size_t enumerator_variable_limit<T>::max_enumerator_variables = 1000;
+std::size_t enumerator_variable_limit<T>::max_enumerator_variables = 1000;
 
 inline
-void set_enumerator_variable_limit(size_t size)
+void set_enumerator_variable_limit(std::size_t size)
 {
   enumerator_variable_limit<size_t>::max_enumerator_variables = size;
 }
 
 inline
-size_t get_enumerator_variable_limit()
+std::size_t get_enumerator_variable_limit()
 {
-  return enumerator_variable_limit<size_t>::max_enumerator_variables;
+  return enumerator_variable_limit<std::size_t>::max_enumerator_variables;
 }
 
 } // namespace detail
