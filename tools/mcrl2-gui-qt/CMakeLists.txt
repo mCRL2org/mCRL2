@@ -14,6 +14,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 find_package(Qt4)
 
 if(QT4_FOUND)
+set(QT_USE_QTXML TRUE)
 
 include(${QT_USE_FILE})
 
@@ -29,6 +30,10 @@ qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
 
 set(MCRL2_GUI_MOC_HEADERS
   mainwindow.h
+
+  toolaction.h
+  toolcatalog.h
+  toolinformation.h
 )
 qt4_wrap_cpp(MCRL2_GUI_MOC_SOURCES ${MCRL2_GUI_MOC_HEADERS})
 
@@ -38,7 +43,26 @@ set(MCRL2_GUI_SRC_FILES
   ${MCRL2_GUI_MOC_SOURCES}
   main.cpp
   mainwindow.cpp
+
+  toolaction.cpp
+  toolcatalog.cpp
+  toolinformation.cpp
 )
+
+# ######### Copy extra files ##########
+if(NOT APPLE)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
+
+  if( UNIX )
+    # Install desktop icons
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications)
+  endif( UNIX )
+
+else(NOT APPLE)
+  # Copy directly into application
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
+endif(NOT APPLE)
 
 # ########## Create MacOSX Bundle Information #########
 include(MCRL2MacOSXBundleInformation)
