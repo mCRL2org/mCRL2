@@ -118,9 +118,9 @@ class RewriterCompilingJitty: public Rewriter
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
     void calcTerm(FILE* f, atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, 
+    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, const size_t arity, 
                const std::vector<bool> &used, atermpp::aterm_list nnfvars);
-    void implement_tree(FILE* f, atermpp::aterm_appl tree, int arity, int d, int opid, const std::vector<bool> &used);
+    void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, int d, int opid, const std::vector<bool> &used);
     void implement_strategy(FILE* f, atermpp::aterm_list strat, int arity, int d, int opid, size_t nf_args);
     void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();

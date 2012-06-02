@@ -1671,14 +1671,19 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "(aterm_appl)";
     } */
-    bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
+    assert(nnfvars!=NULL);
+    bool b = (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
     if (rewr && b)
     {
       ss << "rewrite(arg_not_nf" << startarg << ")";
     }
-    else
+    else if (b)
     {
       ss << "arg_not_nf" << startarg;    
+    }
+    else
+    {
+      ss << "arg" << startarg;    
     }
     return pair<bool,string>(rewr || !b, ss.str());
 
@@ -1945,7 +1950,7 @@ static int peekn_st(int n)
 #else
 #define IT_DEBUG_FILE stderr,
 #endif
-void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, 
+void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, const size_t arity, 
       const std::vector<bool> &used, aterm_list nnfvars)
 // Print code representing tree to f.
 //
@@ -2095,7 +2100,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cu
       cur_arg = peekn_st(2*level-1);
     }
     calcTerm(f,add_args(ATgetArgument(tree,0),arity-cur_arg-1),get_startarg(ATgetArgument(tree,0),cur_arg+1),nnfvars);
-    fprintf(f,"; // R\n");
+    fprintf(f,"; // R1\n");
     return;
   }
   else
@@ -2104,13 +2109,18 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, int cu
   }
 }
 
-void RewriterCompilingJitty::implement_tree(FILE* f, aterm_appl tree, int arity, int d, int /* opid */, 
+void RewriterCompilingJitty::implement_tree(
+            FILE* f, 
+            aterm_appl tree, 
+            const size_t arity, 
+            int d, 
+            int /* opid */, 
             const std::vector<bool> &used)
 {
   int l = 0;
 
   aterm_list nnfvars = ATmakeList0();
-  for (int i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     if (!used[i])
     {
@@ -2149,9 +2159,20 @@ void RewriterCompilingJitty::implement_tree(FILE* f, aterm_appl tree, int arity,
   }
   if (isR(tree))
   {
-    fprintf(f,"%sreturn ",whitespace(d*2));
-    calcTerm(f,add_args(ATgetArgument(tree,0),arity),get_startarg(ATgetArgument(tree,0),0),nnfvars);
-    fprintf(f,"; // R\n");
+    if (arity==0)
+    { // return a reference to an aterm_appl
+      fprintf(f,"%sstatic aterm_appl static_term(",whitespace(d*2));
+      calcTerm(f,add_args(ATgetArgument(tree,0),arity),get_startarg(ATgetArgument(tree,0),0),nnfvars);
+      fprintf(f,"); \n");
+      fprintf(f,"%sreturn static_term",whitespace(d*2));
+      fprintf(f,"; // R2a\n");
+    }
+    else
+    { // arity>0
+      fprintf(f,"%sreturn ",whitespace(d*2));
+      calcTerm(f,add_args(ATgetArgument(tree,0),arity),get_startarg(ATgetArgument(tree,0),0),nnfvars);
+      fprintf(f,"; // R2b\n");
+    }
   }
   else
   {
