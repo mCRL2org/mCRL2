@@ -156,6 +156,18 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     {
       specification.process().action_summands()[i].multi_action().actions() = action_list();
     }
+
+    if (m_use_confluence_reduction)
+    {
+      for (size_t i = 0; i < nonprioritised_summands.size(); i++)
+      {
+        nonprioritised_summands[i].multi_action().actions() = action_list();
+      }
+      for (size_t i = 0; i < prioritised_summands.size(); i++)
+      {
+        prioritised_summands[i].multi_action().actions() = action_list();
+      }
+    }
   }
 
   m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
