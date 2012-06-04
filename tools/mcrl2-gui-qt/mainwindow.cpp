@@ -7,12 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <QFileSystemModel>
-
 #include "mainwindow.h"
 #include "mcrl2/utilities/logger.h"
 #include <QMessageBox>
 #include "toolaction.h"
+#include "toolinstance.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
@@ -20,26 +19,15 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.setupUi(this);
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
 
   m_catalog.load();
-  initFileBrowser();
 
   createToolMenu();
 }
 
-void MainWindow::initFileBrowser()
+MainWindow::~MainWindow()
 {
-  QFileSystemModel *model = new QFileSystemModel(m_ui.treeFiles);
-  model->setRootPath(QDir::rootPath());
-
-  m_ui.treeFiles->setModel(model);
-
-  m_ui.treeFiles->sortByColumn(0, Qt::AscendingOrder);
-  m_ui.treeFiles->setColumnHidden( 1, true );
-  m_ui.treeFiles->setColumnHidden( 2, true );
-  m_ui.treeFiles->setColumnHidden( 3, true );
-
-  //m_ui.treeFiles->setCurrentIndex(model->index(QDir::currentPath()));
 }
 
 void MainWindow::createToolMenu()
@@ -65,9 +53,11 @@ void MainWindow::createToolMenu()
   m_ui.mnuMain->addMenu(menuTools);
 }
 
-MainWindow::~MainWindow()
+void MainWindow::createToolInstance(QString filename, ToolInformation info)
 {
-
+  ToolInstance* toolInstance = new ToolInstance(filename, info, m_ui.tabInstances);
+  m_ui.tabInstances->addTab(toolInstance, info.getName());
+  connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
 }
 
 void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
@@ -80,10 +70,25 @@ void MainWindow::onToolInfo()
   ToolAction* act = dynamic_cast<ToolAction*>(QObject::sender());
   QString message;
   message += "<h1>" + act->getInformation().getName() + "</h1>";
-  message += "<p>" + act->getInformation().getDescription().replace("\n", "<br>") + "</p>";
+  message += "<p>" + act->getInformation().getDescription() + "</p>";
   message += "<p>Written by " + act->getInformation().getAuthor()  + "</p>";
   QMessageBox::information(this, "Tool Information", message);
+  createToolInstance("TEST", act->getInformation());
 }
 
+void MainWindow::onTabTitleChanged(QString title)
+{
+  ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(QObject::sender());
+  int index = m_ui.tabInstances->indexOf(toolInstance);
+  if (index > -1)
+  {
+    m_ui.tabInstances->setTabText(index, title);
+  }
+}
 
+void MainWindow::onTabCloseRequest(int index)
+{
+  ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(m_ui.tabInstances->widget(index));
+  delete toolInstance;
+}
 

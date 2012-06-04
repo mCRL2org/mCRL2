@@ -31,10 +31,9 @@ class ToolInformation
     QString getOutput() { return m_output; }
     QString getDescription() { return m_desc; }
     QString getAuthor() { return m_author; }
+    QDomDocument getXML() { return m_xml; }
     bool hasOutput() { return !m_output.isEmpty(); }
     bool isValid() { return m_valid; }
-
-    QWidget* newUI(QObject *parent, QString inputFile);
 
   private:
     QString m_name, m_input, m_output, m_desc, m_author;

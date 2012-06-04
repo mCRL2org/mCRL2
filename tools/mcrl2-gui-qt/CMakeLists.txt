@@ -24,6 +24,7 @@ qt4_add_resources(MCRL2_GUI_RC_FILES ${MCRL2_GUI_RCC_SRCS})
 
 set(MCRL2_GUI_UI_FILES
   mainwindow.ui
+  toolinstance.ui
 )
 
 qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
@@ -31,9 +32,9 @@ qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
 set(MCRL2_GUI_MOC_HEADERS
   mainwindow.h
 
+  filebrowser.h
   toolaction.h
-  toolcatalog.h
-  toolinformation.h
+  toolinstance.h
 )
 qt4_wrap_cpp(MCRL2_GUI_MOC_SOURCES ${MCRL2_GUI_MOC_HEADERS})
 
@@ -44,7 +45,9 @@ set(MCRL2_GUI_SRC_FILES
   main.cpp
   mainwindow.cpp
 
+  filebrowser.cpp
   toolaction.cpp
+  toolinstance.cpp
   toolcatalog.cpp
   toolinformation.cpp
 )

@@ -9,6 +9,7 @@
 
 #include "toolinformation.h"
 #include "mcrl2/utilities/logger.h"
+#include <QTextStream>
 
 ToolInformation::ToolInformation(QString name, QString input, QString output)
   : m_name(name), m_input(input), m_output(output), m_valid(false)
@@ -60,7 +61,10 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
   while (!node.isNull()) {
     QDomElement e = node.toElement();
     if (e.tagName() == "description") {
-      m_desc = e.text();
+      QByteArray data;
+      QTextStream out(&data);
+      e.save(out, 2);
+      m_desc = QString(data);
     }
     if (e.tagName() == "author") {
       m_author = e.text();
@@ -68,19 +72,17 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
     node = node.nextSibling();
   }
 
-  //  QByteArray data;
-  //  QTextStream out(&data);
-  //  m_xml.save(out, 2);
+  appDir.mkdir("xml");
 
-  //  qDebug() << data;
-}
+  if (!appDir.exists("xml/"+m_name+".xml"))
+  {
+    QFile data(appDir.absoluteFilePath("xml/"+m_name+".xml"));
+    if (data.open(QFile::WriteOnly | QFile::Truncate)) {
+        QTextStream out(&data);
+        m_xml.save(out, 2);
+    }
+  }
 
-QWidget* ToolInformation::newUI(QObject *parent, QString inputFile)
-{
-  if (!m_valid)
-    return NULL;
-
-  return NULL;
 }
 
 

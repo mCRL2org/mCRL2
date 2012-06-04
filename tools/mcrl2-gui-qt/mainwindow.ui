@@ -29,30 +29,14 @@
      <number>0</number>
     </property>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+     <widget class="QTabWidget" name="tabInstances">
+      <property name="currentIndex">
+       <number>-1</number>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
+      <property name="tabsClosable">
+       <bool>true</bool>
       </property>
-     </spacer>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -139,7 +123,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="treeFiles">
+      <widget class="FileBrowser" name="treeFiles">
        <property name="minimumSize">
         <size>
          <width>300</width>
@@ -232,6 +216,11 @@
    <class>mcrl2::utilities::qt::LogWidget</class>
    <extends>QWidget</extends>
    <header>mcrl2/utilities/logwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FileBrowser</class>
+   <extends>QTreeView</extends>
+   <header>filebrowser.h</header>
   </customwidget>
  </customwidgets>
  <resources>
