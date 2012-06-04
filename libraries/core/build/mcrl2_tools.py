@@ -104,7 +104,7 @@ def run_pbes2bool(filename, timeout = 3):
 # returns True, False or None if a timeout occurs
 def run_pbespgsolve(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbespgsolve', filename, timeout)
+    text, dummy = timeout_command('pbespgsolve', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
@@ -113,6 +113,10 @@ def run_pbespgsolve(filename, timeout = 3):
 def run_txt2pbes(txtfile, pbesfile):
     add_temporary_files(txtfile, pbesfile)
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+
+def run_txt2bes(txtfile, besfile):
+    add_temporary_files(txtfile, besfile)
+    run_program('txt2bes', '%s %s' % (txtfile, besfile))
 
 def run_pbesabsinthe(pbesfile1, pbesfile2, strategy, abstraction_file = None):
     add_temporary_files(pbesfile1, pbesfile2)
