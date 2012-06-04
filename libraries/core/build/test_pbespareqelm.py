@@ -15,7 +15,7 @@ def test_pbespareqelm(p, filename):
     run_pbespareqelm(pbesfile1, pbesfile2)
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
-    print filename, answer1, answer2   
+    print filename, answer1, answer2
     if answer1 == None or answer2 == None:
       return True
     return answer1 == answer2
@@ -27,8 +27,8 @@ def main():
         atom_count = 2
         propvar_count = 2
         use_quantifiers = True
-        
-        for i in range(10000):
+
+        for i in range(options.iterations):
             filename = 'pbes_pareqelm'
             p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
             if not test_pbespareqelm(p, filename):

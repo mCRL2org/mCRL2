@@ -11,7 +11,7 @@ def last_word(line):
     words = line.strip().split()
     return words[len(words) - 1]
 
-def test_bes(filename, equation_count, term_size = 2, error_file = 'bes_errors.txt'):
+def test_bes(filename, equation_count, term_size = 2):
     txtfile = filename + '.txt'
     besfile = filename + '.bes'
     answerfile = 'temp.answer'
@@ -45,7 +45,7 @@ def main():
         equation_count = 4
         term_size = 3
 
-        for i in range(10000):
+        for i in range(options.iterations):
             filename = 'bessolve'
             p = make_bes(equation_count, term_size)
             if not test_bessolve(p, filename):
@@ -57,7 +57,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-for i in range(10000):
-    test_bes('%02d' % i, 4, 3, error_file)

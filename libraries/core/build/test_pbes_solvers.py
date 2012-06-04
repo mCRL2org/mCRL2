@@ -26,7 +26,7 @@ def main():
         propvar_count = 3
         use_quantifiers = True
 
-        for i in range(10000):
+        for i in range(options.iterations):
             filename = 'pbes_solvers'
             p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
             if not test_pbes_solvers(p, filename):
