@@ -152,16 +152,20 @@ inline
 ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
 {
   va_list args;
-  size_t arity = sym.arity();
+  const size_t arity = sym.arity();
+std::cerr << "FUNC  " << sym.number() << " NAME " << sym.name() << " ARITY " << arity << "\n";
+  
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);
 
   va_start(args, sym);
   for (size_t i=0; i<arity; i++)
   {
     detail::_aterm* arg = va_arg(args, detail::_aterm *);
+std::cerr << "TERM  " << i << " TXT  " << atermpp::aterm(arg) << "\n";
     CHECK_TERM(arg);
     buffer[i] = arg;
   }
+  va_end(args);
   return aterm_appl(sym,buffer,buffer+arity);
 }
 

@@ -1385,7 +1385,7 @@ static string calc_inner_appl_head(size_t arity)
   }
   else
   {
-    ss << "ATmakeAppl_varargs";
+    ss << "make_term_with_many_arguments";
   }
   ss << "(" << ((long int) get_appl_afun_value(arity+1)) << ",";    // YYYY
   return ss.str();
@@ -1667,9 +1667,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (gsIsNil((aterm_appl) t))
   {
     stringstream ss;
-    /* if (total_arity>5)
+    /* if (total_arity>5)  XXXXXXXXXXXXXXXXXXXXXXXX
     {
-      ss << "(aterm_appl)";
+      ss << "&*";
     } */
     assert(nnfvars!=NULL);
     bool b = (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
@@ -2203,9 +2203,9 @@ static void finish_function(FILE* f, size_t arity, int opid, const std::vector<b
   {
     if (arity > 5)
     {
-      fprintf(f,  "  return ATmakeAppl_varargs("
+      fprintf(f,  "  return make_term_with_many_arguments("
               "%li,"
-              "&*(atermpp::detail::_aterm*)%p",
+              "(atermpp::detail::_aterm*)%p",
               (long int) get_appl_afun_value(arity+1),  
               (void*)get_int2aterm_value(opid)
              );
@@ -2224,22 +2224,22 @@ static void finish_function(FILE* f, size_t arity, int opid, const std::vector<b
   {
     if (used[i])
     {
-      if (arity > 5)
+      /* if (arity > 5)
       {
         fprintf(f,                 ",(atermpp::detail::_aterm*)&*arg%zu",i);
       }
-      else
+      else */
       {
         fprintf(f,                 ", arg%zu",i); 
       }
     }
     else
     {
-      if (arity > 5)
+      /* if (arity > 5)
       {
         fprintf(f,                 ",(atermpp::detail::_aterm*)&*rewrite(arg_not_nf%zu)",i);
       }
-      else
+      else */
       {
         fprintf(f,                 ", rewrite(arg_not_nf%zu)",i);
       }
@@ -2799,6 +2799,28 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
+
+  // Make functions that construct applications with arity n where 5< n <= max_arity.
+  for (size_t i=5; i<=max_arity; ++i)
+  {
+    fprintf(f,
+            "static atermpp::aterm_appl make_term_with_many_arguments(const function_symbol &f");
+    for (size_t j=0; j<=i; ++j)
+    {
+      fprintf(f, ", const atermpp::aterm &arg%zu",j);
+    }
+    fprintf(f, ")\n"
+            "{\n");
+    fprintf(f,
+            "  return ATmakeAppl_varargs(f");
+    for (size_t j=0; j<i; ++j)
+    {
+      fprintf(f, ", &*arg%zu",j);
+    }
+    fprintf(f, ");\n"
+            "}\n\n");
+  }
+
 
   //
   // "build" functions
