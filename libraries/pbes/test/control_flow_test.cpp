@@ -34,11 +34,38 @@ void test_control_flow()
   algorithm.print_graph();
 }
 
+void test_simplify()
+{
+  std::string ptext =
+    "pbes nu X0(b: Bool, n: Nat) = val(b) => val(n == 0);  \n"
+    "init X0(true, 0);                                     \n"
+    ;
+  pbes<> p = txt2pbes(ptext, false);
+
+  std::string qtext =
+    "pbes nu X0(b: Bool, n: Nat) = !val(b) || val(n == 0); \n"
+    "init X0(true, 0);                                     \n"
+    ;
+  pbes<> q = txt2pbes(qtext, false);
+  detail::pbes_control_flow_algorithm algorithm;
+
+  for (std::size_t i = 0; i < p.equations().size(); i++)
+  {
+    pbes_expression x = algorithm.simplify(p.equations()[i].formula());
+    pbes_expression y = q.equations()[i].formula();
+    std::cout << "--- simplify case " << i << std::endl;
+    std::cout << " x = " << pbes_system::pp(x) << std::endl;
+    std::cout << " y = " << pbes_system::pp(y) << std::endl;
+    BOOST_CHECK(x == y);
+  }
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_control_flow();
+  test_simplify();
 
   return 0;
 }
