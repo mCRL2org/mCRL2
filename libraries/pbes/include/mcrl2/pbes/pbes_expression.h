@@ -23,11 +23,12 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 namespace mcrl2
 {
@@ -892,7 +893,7 @@ using pbes_expr::split_or;
 inline
 pbes_expression not_(const pbes_expression& p)
 {
-  return utilities::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_not(p);
 }
 
 /// \brief Make a conjunction
@@ -902,7 +903,7 @@ pbes_expression not_(const pbes_expression& p)
 inline
 pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_and(p, q);
 }
 
 /// \brief Make a disjunction
@@ -912,7 +913,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_or(p, q);
 }
 
 /// \brief Make an implication
@@ -922,7 +923,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_imp(p, q);
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -1297,6 +1298,15 @@ struct term_traits<pbes_system::pbes_expression>
     return pbes_system::accessors::right(t);
   }
 
+  /// \brief Returns the argument of a term of type not
+  /// \param t A term
+  static inline
+  term_type not_arg(const term_type& t)
+  {
+    assert(is_pbes_not(t));
+    return atermpp::arg1(t);
+  }
+
   /// \brief Returns the quantifier variables of a quantifier expression
   /// \param t A term
   /// \return The requested argument. Doesn't work for data terms
@@ -1376,6 +1386,16 @@ struct term_traits<pbes_system::pbes_expression>
   data_term_type term2dataterm(const term_type& t)
   {
     return t;
+  }
+
+  /// \brief Returns the difference of two unordered sets of variables
+  /// \param v A sequence of data variables
+  /// \param w A sequence of data variables
+  /// \return The difference of two sets.
+  static inline
+  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
+  {
+    return term_traits<data::data_expression>::set_intersection(v, w);
   }
 
   /// \brief Test if a term is constant

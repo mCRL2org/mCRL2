@@ -282,7 +282,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term has the value true. Also works for data terms
   static inline
-  bool is_true(term_type t)
+  bool is_true(const term_type& t)
   {
     return tr::is_true(t);
   }
@@ -291,7 +291,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term has the value false. Also works for data terms
   static inline
-  bool is_false(term_type t)
+  bool is_false(const term_type& t)
   {
     return tr::is_false(t);
   }
@@ -300,7 +300,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is of type and. Also works for data terms
   static inline
-  bool is_not(term_type t)
+  bool is_not(const term_type& t)
   {
     return tr::is_not(t);
   }
@@ -309,7 +309,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is of type and. Also works for data terms
   static inline
-  bool is_and(term_type t)
+  bool is_and(const term_type& t)
   {
     return tr::is_and(t);
   }
@@ -318,7 +318,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is of type or. Also works for data terms
   static inline
-  bool is_or(term_type t)
+  bool is_or(const term_type& t)
   {
     return tr::is_or(t);
   }
@@ -327,7 +327,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is an implication. Also works for data terms
   static inline
-  bool is_imp(term_type t)
+  bool is_imp(const term_type& t)
   {
     return tr::is_imp(t);
   }
@@ -336,7 +336,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is an universal quantification. Also works for data terms
   static inline
-  bool is_forall(term_type t)
+  bool is_forall(const term_type& t)
   {
     return tr::is_forall(t);
   }
@@ -345,7 +345,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is an existential quantification. Also works for data terms
   static inline
-  bool is_exists(term_type t)
+  bool is_exists(const term_type& t)
   {
     return tr::is_exists(t);
   }
@@ -354,7 +354,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is a data term
   static inline
-  bool is_data(term_type t)
+  bool is_data(const term_type& t)
   {
     return tr::is_data(t);
   }
@@ -363,7 +363,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is a propositional variable instantiation
   static inline
-  bool is_prop_var(term_type t)
+  bool is_prop_var(const term_type& t)
   {
     return tr::is_prop_var(t);
   }
@@ -372,7 +372,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The requested argument. Partially works for data terms
   static inline
-  term_type arg(term_type t)
+  term_type arg(const term_type& t)
   {
     return tr::arg(t);
   }
@@ -381,7 +381,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The right argument of the term. Also works for data terms
   static inline
-  term_type left(term_type t)
+  term_type left(const term_type& t)
   {
     return tr::left(t);
   }
@@ -390,16 +390,24 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The requested argument. Doesn't work for data terms
   static inline
-  term_type right(term_type t)
+  term_type right(const term_type& t)
   {
     return tr::right(t);
+  }
+
+  /// \brief Returns the argument of a term of type not
+  /// \param t A term
+  static inline
+  term_type not_arg(const term_type& t)
+  {
+    return tr::not_arg(t);
   }
 
   /// \brief Returns the quantifier variables of a quantifier expression
   /// \param t A term
   /// \return The requested argument. Doesn't work for data terms
   static inline
-  variable_sequence_type var(term_type t)
+  variable_sequence_type var(const term_type& t)
   {
     return tr::var(t);
   }
@@ -408,7 +416,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The name of the propositional variable instantiation
   static inline
-  string_type name(term_type t)
+  string_type name(const term_type& t)
   {
     return tr::name(t);
   }
@@ -417,7 +425,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The parameter list of the propositional variable instantiation
   static inline
-  data_term_sequence_type param(term_type t)
+  data_term_sequence_type param(const term_type& t)
   {
     return tr::param(t);
   }
@@ -435,7 +443,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return True if the term is a variable
   static inline
-  bool is_variable(term_type t)
+  bool is_variable(const term_type& t)
   {
     return tr::is_variable(t);
   }
@@ -444,7 +452,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The free variables of a term
   static inline
-  variable_sequence_type free_variables(term_type t)
+  variable_sequence_type free_variables(const term_type& t)
   {
     return t.variables();
   }
@@ -453,7 +461,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A data term
   /// \return The converted term
   static inline
-  term_type dataterm2term(data_term_type t)
+  term_type dataterm2term(const data_term_type& t)
   {
     return term_type(t, t.variables());
   }
@@ -462,9 +470,19 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return The converted term
   static inline
-  data_term_type term2dataterm(term_type t)
+  data_term_type term2dataterm(const term_type& t)
   {
     return tr::term2dataterm(t);
+  }
+
+  /// \brief Returns the difference of two unordered sets of variables
+  /// \param v A sequence of data variables
+  /// \param w A sequence of data variables
+  /// \return The difference of two sets.
+  static inline
+  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
+  {
+    return term_traits<data::data_expression>::set_intersection(v, w);
   }
 
   /// \brief Test if a term is constant
@@ -480,7 +498,7 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   /// \param t A term
   /// \return A pretty print representation of the term
   static inline
-  std::string pp(term_type t)
+  std::string pp(const term_type& t)
   {
     return pbes_system::pp(static_cast<const pbes_system::pbes_expression&>(t)) + " variables: " + data::pp(t.variables()) + " propositional variables: " + pbes_system::pp(t.propositional_variables());
   }
