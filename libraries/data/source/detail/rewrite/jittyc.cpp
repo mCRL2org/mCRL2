@@ -2813,7 +2813,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "{\n");
     fprintf(f,
             "  return ATmakeAppl_varargs(f");
-    for (size_t j=0; j<i; ++j)
+    for (size_t j=0; j<=i; ++j)
     {
       fprintf(f, ", &*arg%zu",j);
     }

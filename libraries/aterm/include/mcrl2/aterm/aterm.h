@@ -153,7 +153,6 @@ ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
 {
   va_list args;
   const size_t arity = sym.arity();
-// std::cerr << "FUNC  " << sym.number() << " NAME " << sym.name() << " ARITY " << arity << "\n";
   
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);
 
@@ -161,7 +160,6 @@ ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
   for (size_t i=0; i<arity; i++)
   {
     detail::_aterm* arg = va_arg(args, detail::_aterm *);
-// std::cerr << "TERM  " << i << " TXT  " << atermpp::aterm(arg) << "\n";
     CHECK_TERM(arg);
     buffer[i] = arg;
   }
