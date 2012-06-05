@@ -36,7 +36,7 @@ void test_control_flow()
   algorithm.print_graph();
 }
 
-void test_sources()
+void test_source_dest1()
 {
   std::string text =
     "sort D = struct d1 | d2 | d3;\n"
@@ -53,6 +53,48 @@ void test_sources()
   pbes<> p = txt2pbes(text, false);
   pfnf_rewriter R;
   pbes_rewrite(p, R);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  detail::pbes_control_flow_algorithm algorithm;
+  algorithm.run(p);
+}
+
+void test_source_dest2()
+{
+  std::string text =
+    "sort D = struct d1 | d2 | d3;                                                \n"
+    "                                                                             \n"
+    "map match: Pos # D -> Bool;                                                  \n"
+    "                                                                             \n"
+    "pbes                                                                         \n"
+    "                                                                             \n"
+    "nu Y(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 1 && match(1, d1))                  => X(2, d1, s2, e2))  \n"
+    "     && (val(s1 == 1 && !match(1, d1))                 => X(1, d1, s2, e2))  \n"
+    "     && (val(s1 == 2 && s2 == 1 && match(2, e1))       => Y(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => Y(1, d1, 1, d1))   \n"
+    "     && (val(s2 == 2)                                  => Y(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => Y(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => Y(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "mu X(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 2 && s2 == 1 && match(2, e1))       => X(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => X(1, d1, 1, d1))   \n"
+    "     && (val(e2 != d1 && s2 == 2)                      => X(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => X(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => X(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "init Y(1, d1, 1, d1);                                                        \n"
+    ;
+  pbes<> p = txt2pbes(text, false);
+//  pfnf_rewriter R;
+//  pbes_rewrite(p, R);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm;
@@ -99,7 +141,9 @@ int test_main(int argc, char** argv)
 
   test_control_flow();
   test_simplify();
-  test_sources();
+  test_source_dest1();
+  test_source_dest2();
+  //BOOST_CHECK(false);
 
   return 0;
 }
