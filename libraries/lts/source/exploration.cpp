@@ -77,7 +77,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   if (m_options.removeunused)
   {
     mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
-    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
+    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(specification);
 
     if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
     {
