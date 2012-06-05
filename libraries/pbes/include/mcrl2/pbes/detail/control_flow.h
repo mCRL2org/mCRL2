@@ -49,6 +49,11 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
     : simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction>(rewr)
   { }
 
+  bool is_data_not(const pbes_expression& x) const
+  {
+    return data::is_data_expression(x) && data::sort_bool::is_not_application(x);
+  }
+
   // replace !(y || z) by !y && !z
   // replace !(y && z) by !y || !z
   // replace !(y => z) by y || !z
@@ -76,6 +81,11 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
         term_type y = tr::left(t);
         term_type z = utilities::optimized_not(tr::right(t));
         result = utilities::optimized_or(y, z);
+      }
+      else if (is_data_not(t)) // x = !val(!y)
+      {
+        term_type y = data::application(t).arguments().front();
+        result = y;
       }
     }
     else if (tr::is_imp(x)) // x = y => z
@@ -231,6 +241,14 @@ class pbes_control_flow_algorithm
       }
     }
 
+    // simplify and rewrite the expression x
+    pbes_expression simplify(const pbes_expression& x) const
+    {
+      data::detail::simplify_rewriter r;
+      control_flow_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
+      return R(x);
+    }
+
   protected:
     std::vector<vertex> m_vertices;
     std::vector<edge> m_edges;
@@ -285,17 +303,106 @@ class pbes_control_flow_algorithm
       return result;
     }
 
-    /// \brief Splits a conjunction into a sequence of operands
-    /// Given a pbes expression of the form p1 && p2 && ... && pn, this will yield a
-    /// vector of the form [ p1, p2, ..., pn ], assuming that pi does not have a && as main
-    /// function symbol. Both the 'data &&' and the 'pbes &&' are considered.
-    /// \param expr A PBES expression
-    /// \return A sequence of operands
-    inline
-    void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result)
+    void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
     {
-      using namespace accessors;
-      utilities::detail::split(expr, std::back_inserter(result), data_is_and, left, right);
+      namespace a = combined_access;
+      utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
+    }
+
+    pbes_expression implication_guard(const pbes_expression& x) const
+    {
+      if (is_imp(x))
+      {
+        return imp(x).left();
+      }
+      else if (is_pfnf_simple_expression(x))
+      {
+        return x;
+      }
+      else
+      {
+        return true_();
+      }
+    }
+
+    // Simplifies the pbes expression x, and extracts all conjuncts d[i] == e from it, for some i in 0 ... d.size(), and with e a constant.
+    // The conjuncts are added to the substitution sigma.
+    void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, data::mutable_map_substitution<>& sigma) const
+    {
+      typedef core::term_traits<data::data_expression> tr;
+
+      std::vector<data::data_expression> result;
+
+      pbes_expression y = simplify(x);
+      std::vector<pbes_expression> v;
+      split_and(y, v);
+      for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        if (data::is_data_expression(*i))
+        {
+          data::data_expression v_i = *i;
+          if (data::is_equal_to_application(v_i))
+          {
+            data::data_expression left = data::application(v_i).left();
+            data::data_expression right = data::application(v_i).right();
+            if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && tr::is_constant(right))
+            {
+              sigma[left] = right;
+            }
+            else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && tr::is_constant(left))
+            {
+              sigma[right] = left;
+            }
+          }
+          // TODO: handle conjuncts b and !b, with b a variable with sort Bool
+          //else if (data::is_variable(v_i) && sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
+          //{
+          //  sigma[data::variable(v_i)] = sort_bool::true_();
+          //}
+        }
+      }
+    }
+
+    // result[i] contains the source parameters of g_i, represented in the form of a substitution
+    void compute_sources(const pbes<>& p, std::vector<data::mutable_map_substitution<> >& result) const
+    {
+      const atermpp::vector<pbes_equation>& equations = p.equations();
+      for (atermpp::vector<pbes_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        // we are considering the equation X(d_X) = phi
+        propositional_variable X = k->variable();
+        std::vector<data::variable> d_X(X.parameters().begin(), X.parameters().end());
+        pbes_expression phi = k->formula();
+
+        pbes_expression h;
+        std::vector<pbes_expression> g;
+        split_pfnf_expression(phi, h, g);
+
+        data::mutable_map_substitution<> sigma_h;
+        find_equality_conjuncts(h, d_X, sigma_h);
+
+        for (std::vector<pbes_expression>::iterator i = g.begin(); i != g.end(); ++i)
+        {
+          data::mutable_map_substitution<> sigma = sigma_h;
+          find_equality_conjuncts(implication_guard(*i), d_X, sigma);
+          result.push_back(sigma);
+        }
+      }
+    }
+
+    void print_sources(const pbes<>& p) const
+    {
+      const atermpp::vector<pbes_equation>& equations = p.equations();
+      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      {
+        std::cout << "--- predicate variable " << pbes_system::pp(i->variable()) << std::endl;
+        std::vector<data::mutable_map_substitution<> > src;
+        compute_sources(p, src);
+        for (std::vector<data::mutable_map_substitution<> >::const_iterator j = src.begin(); j != src.end(); ++j)
+        {
+          std::cout << "(" << (j - src.begin()) << ") " << data::print_substitution(*j) << std::endl;
+        }
+      }
     }
 
   public:
@@ -353,14 +460,8 @@ class pbes_control_flow_algorithm
           }
         }
       }
-    }
 
-    // simplify and rewrite the expression x
-    pbes_expression simplify(const pbes_expression& x) const
-    {
-      data::detail::simplify_rewriter r;
-      control_flow_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
-      return R(x);
+      print_sources(P);
     }
 };
 

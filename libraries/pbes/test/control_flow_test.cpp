@@ -11,6 +11,8 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/control_flow.h"
@@ -34,16 +36,47 @@ void test_control_flow()
   algorithm.print_graph();
 }
 
+void test_sources()
+{
+  std::string text =
+    "sort D = struct d1 | d2 | d3;\n"
+    "\n"
+    "map  match: Pos # D -> Bool;\n"
+    "\n"
+    "pbes nu Y(s3_Filter: Pos, d_Filter: D, s2_Filter: Pos, d_Filter1: D) =\n"
+    "       (forall d5_Filter1: D. val(!(d5_Filter1 == d1)) || val(!(s3_Filter == 1 && match(1, d5_Filter1))) || X(2, d5_Filter1, s2_Filter, d_Filter1)) && (forall d4_Filter1: D. val(!(d4_Filter1 == d1)) || val(!(s3_Filter == 1 && !match(1, d4_Filter1))) || X(1, d1, s2_Filter, d_Filter1)) && (val(!(s3_Filter == 2 && s2_Filter == 1 && match(2, d_Filter))) || Y(1, d1, 2, d_Filter)) && (val(!(s3_Filter == 2 && s2_Filter == 1 && !match(2, d_Filter))) || Y(1, d1, 1, d1)) && (val(!(s2_Filter == 2)) || Y(s3_Filter, d_Filter, 1, d1)) && (forall d5_Filter: D. val(!(s3_Filter == 1 && match(1, d5_Filter))) || Y(2, d5_Filter, s2_Filter, d_Filter1)) && (forall d4_Filter: D. val(!(s3_Filter == 1 && !match(1, d4_Filter))) || Y(1, d1, s2_Filter, d_Filter1));\n"
+    "     mu X(s3_Filter: Pos, d_Filter: D, s2_Filter: Pos, d_Filter1: D) =\n"
+    "       (val(s3_Filter == 2 && s2_Filter == 1 && match(2, d_Filter)) || val(s3_Filter == 2 && s2_Filter == 1 && !match(2, d_Filter)) || val(s2_Filter == 2) || (exists d5_Filter1: D. val(s3_Filter == 1 && match(1, d5_Filter1))) || (exists d4_Filter1: D. val(s3_Filter == 1 && !match(1, d4_Filter1)))) && (val(!(s3_Filter == 2 && s2_Filter == 1 && match(2, d_Filter))) || X(1, d1, 2, d_Filter)) && (val(!(s3_Filter == 2 && s2_Filter == 1 && !match(2, d_Filter))) || X(1, d1, 1, d1)) && (val(d_Filter1 == d1) || val(!(s2_Filter == 2)) || X(s3_Filter, d_Filter, 1, d1)) && (forall d5_Filter: D. val(!(s3_Filter == 1 && match(1, d5_Filter))) || X(2, d5_Filter, s2_Filter, d_Filter1)) && (forall d4_Filter: D. val(!(s3_Filter == 1 && !match(1, d4_Filter))) || X(1, d1, s2_Filter, d_Filter1));\n"
+    "\n"
+    "init Y(1, d1, 1, d1);\n"
+    ;
+  pbes<> p = txt2pbes(text, false);
+  pfnf_rewriter R;
+  pbes_rewrite(p, R);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  detail::pbes_control_flow_algorithm algorithm;
+  algorithm.run(p);
+}
+
 void test_simplify()
 {
   std::string ptext =
-    "pbes nu X0(b: Bool, n: Nat) = val(b) => val(n == 0);  \n"
+    "pbes                                                  \n"
+    "  nu X0(b: Bool, n: Nat)  = val(b) => val(n == 0);    \n"
+    "  nu X1(b: Bool, c: Bool) = val(b != c);              \n"
+    "  nu X2(b: Bool, c: Bool) = !(val(b) => val(b != c)); \n"
+    "  nu X3(n:Nat)            = !(val(!(n == 1)));        \n"
     "init X0(true, 0);                                     \n"
     ;
   pbes<> p = txt2pbes(ptext, false);
 
   std::string qtext =
-    "pbes nu X0(b: Bool, n: Nat) = !val(b) || val(n == 0); \n"
+    "pbes                                                  \n"
+    "  nu X0(b: Bool, n: Nat) = !val(b) || val(n == 0);    \n"
+    "  nu X1(b: Bool, c: Bool) = !val(b == c);             \n"
+    "  nu X2(b: Bool, c: Bool) = val(b) || val(b == c);    \n"
+    "  nu X3(n:Nat)            = val(n == 1);              \n"
     "init X0(true, 0);                                     \n"
     ;
   pbes<> q = txt2pbes(qtext, false);
@@ -66,6 +99,7 @@ int test_main(int argc, char** argv)
 
   test_control_flow();
   test_simplify();
+  test_sources();
 
   return 0;
 }
