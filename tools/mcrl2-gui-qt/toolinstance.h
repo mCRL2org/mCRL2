@@ -25,7 +25,7 @@ class ToolInstance : public QWidget
     explicit ToolInstance(QString filename, ToolInformation information, QWidget *parent = 0);
     ~ToolInstance();
 
-    ToolInformation getInformation() { return m_info; }
+    ToolInformation information() { return m_info; }
 
   private:
     QString m_filename;

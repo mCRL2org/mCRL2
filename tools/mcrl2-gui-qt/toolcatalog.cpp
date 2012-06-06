@@ -10,6 +10,8 @@
 #include "toolcatalog.h"
 #include "mcrl2/utilities/logger.h"
 
+#include <QDebug>
+
 ToolCatalog::ToolCatalog()
 {
   generateFileTypes();
@@ -17,11 +19,11 @@ ToolCatalog::ToolCatalog()
 
 void ToolCatalog::generateFileTypes()
 {
-  m_filetypes.insert("mcrl2", "mcrl2");
+//  m_filetypes.insert("mcrl2", "mcrl2");
 
-  m_filetypes.insert("lps",   "lps");
+//  m_filetypes.insert("lps",   "lps");
 
-  m_filetypes.insert("lts",   "lts");
+//  m_filetypes.insert("lts",   "lts");
   m_filetypes.insert("fsm",   "lts");
   m_filetypes.insert("aut",   "lts");
   m_filetypes.insert("dot",   "lts");
@@ -29,27 +31,27 @@ void ToolCatalog::generateFileTypes()
 #ifdef USE_BCG
   m_filetypes.insert("bcg",   "lts");
 #endif
-  m_filetypes.insert("bes",   "bes");
+//  m_filetypes.insert("bes",   "bes");
   m_filetypes.insert("gm",    "bes");
   m_filetypes.insert("cwi",   "bes");
   m_filetypes.insert("pbes",  "bes");
 
-  m_filetypes.insert("pbes",  "pbes");
+//  m_filetypes.insert("pbes",  "pbes");
 
-  m_filetypes.insert("tbf",   "tbf");
+//  m_filetypes.insert("tbf",   "tbf");
 
-  m_filetypes.insert("gra",   "gra");
+//  m_filetypes.insert("gra",   "gra");
 
-  m_filetypes.insert("mcf",   "mcf");
+//  m_filetypes.insert("mcf",   "mcf");
 
-  m_filetypes.insert("trc",   "trc");
+//  m_filetypes.insert("trc",   "trc");
 
-  m_filetypes.insert("txt",   "txt");
+//  m_filetypes.insert("txt",   "txt");
 }
 
 QString ToolCatalog::fileType(QString extension)
 {
-  return m_filetypes.value(extension, "unknown");
+  return m_filetypes.value(extension, extension);
 }
 
 void ToolCatalog::load()
@@ -96,26 +98,27 @@ void ToolCatalog::load()
   }
 }
 
-QStringList ToolCatalog::getCategories()
+QStringList ToolCatalog::categories()
 {
   return m_categories.keys();
 }
 
-QList<ToolInformation> ToolCatalog::getTools(QString category)
+QList<ToolInformation> ToolCatalog::tools(QString category)
 {
   return m_categories.value(category).values();
 }
 
-QList<ToolInformation> ToolCatalog::getTools(QString category, QString extension)
+QList<ToolInformation> ToolCatalog::tools(QString category, QString extension)
 {
   QString inputType = fileType(extension);
-  QList<ToolInformation> result = getTools(category);
-  for (int i = 0; i < result.count(); i++)
+  QList<ToolInformation> all = tools(category);
+  QList<ToolInformation> ret;
+  for (int i = 0; i < all.count(); i++)
   {
-    ToolInformation tool = result.at(i);
-    if (tool.getInput() != inputType) {
-      result.removeAt(i);
+    ToolInformation tool = all.at(i);
+    if (tool.input == inputType) {
+      ret.append(tool);
     }
   }
-  return result;
+  return ret;
 }

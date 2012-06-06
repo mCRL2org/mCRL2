@@ -12,7 +12,7 @@
 #include <QTextStream>
 
 ToolInformation::ToolInformation(QString name, QString input, QString output)
-  : m_name(name), m_input(input), m_output(output), m_valid(false)
+  : name(name), input(input), output(output), valid(false)
 {
   QProcess *toolProcess = new QProcess();
 
@@ -23,18 +23,18 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
   appDir.cdUp();
 #endif
 
-  QString executable = appDir.absoluteFilePath(m_name);
+  QString executable = appDir.absoluteFilePath(name);
 #ifdef _WIN32
   executable.append(".exe");
 #endif
 #ifdef __APPLE__
-  executable.append(".app/Contents/MacOS/"+ m_name);
+  executable.append(".app/Contents/MacOS/"+ name);
 #endif
 
   toolProcess->start(executable, QStringList("--generate-xml"), QIODevice::ReadOnly);
   if (!toolProcess->waitForFinished(3000))
   {
-    mCRL2log(mcrl2::log::error) << toolProcess->errorString().toStdString() << " (" << m_name.toStdString() << ")" << std::endl;
+    mCRL2log(mcrl2::log::error) << toolProcess->errorString().toStdString() << " (" << name.toStdString() << ")" << std::endl;
     delete toolProcess;
     return;
   }
@@ -42,20 +42,21 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
   delete toolProcess;
 
   QString errorMsg;
-  if(!m_xml.setContent(xmlText, false, &errorMsg))
+  QDomDocument xml;
+  if(!xml.setContent(xmlText, false, &errorMsg))
   {
-    mCRL2log(mcrl2::log::error) << "Could not parse XML output of " << m_name.toStdString() << ": " << errorMsg.toStdString() << std::endl;
+    mCRL2log(mcrl2::log::error) << "Could not parse XML output of " << name.toStdString() << ": " << errorMsg.toStdString() << std::endl;
     return;
   }
 
-  QDomElement root = m_xml.documentElement();
+  QDomElement root = xml.documentElement();
   if(root.tagName() != "tool")
   {
-    mCRL2log(mcrl2::log::error) << "XML output of " << m_name.toStdString() << " contains no valid tool information" << std::endl;
+    mCRL2log(mcrl2::log::error) << "XML output of " << name.toStdString() << " contains no valid tool information" << std::endl;
     return;
   }
 
-  m_valid = true;
+  valid = true;
 
   QDomNode node = root.firstChild();
   while (!node.isNull()) {
@@ -64,22 +65,22 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
       QByteArray data;
       QTextStream out(&data);
       e.save(out, 2);
-      m_desc = QString(data);
+      desc = QString(data);
     }
     if (e.tagName() == "author") {
-      m_author = e.text();
+      author = e.text();
     }
     node = node.nextSibling();
   }
 
   appDir.mkdir("xml");
 
-  if (!appDir.exists("xml/"+m_name+".xml"))
+  if (!appDir.exists("xml/"+name+".xml"))
   {
-    QFile data(appDir.absoluteFilePath("xml/"+m_name+".xml"));
+    QFile data(appDir.absoluteFilePath("xml/"+name+".xml"));
     if (data.open(QFile::WriteOnly | QFile::Truncate)) {
         QTextStream out(&data);
-        m_xml.save(out, 2);
+        xml.save(out, 2);
     }
   }
 

@@ -12,7 +12,7 @@
 ToolAction::ToolAction(ToolInformation information, QObject *parent) :
   QAction(parent), m_info(information)
 {
-  setText(m_info.getName());
-  setToolTip(m_info.getDescription());
+  setText(m_info.name);
+  setToolTip(m_info.desc);
 }
 

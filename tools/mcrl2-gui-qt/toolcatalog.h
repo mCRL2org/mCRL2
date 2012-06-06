@@ -28,10 +28,10 @@ class ToolCatalog
 
     void load();
 
-    QStringList getCategories();
+    QStringList categories();
 
-    QList<ToolInformation> getTools(QString category);
-    QList<ToolInformation> getTools(QString category, QString extension);
+    QList<ToolInformation> tools(QString category);
+    QList<ToolInformation> tools(QString category, QString extension);
 
   private:
     void generateFileTypes();

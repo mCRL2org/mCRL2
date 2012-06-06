@@ -25,6 +25,7 @@ qt4_add_resources(MCRL2_GUI_RC_FILES ${MCRL2_GUI_RCC_SRCS})
 set(MCRL2_GUI_UI_FILES
   mainwindow.ui
   toolinstance.ui
+  copydialog.ui
 )
 
 qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
@@ -35,6 +36,8 @@ set(MCRL2_GUI_MOC_HEADERS
   filebrowser.h
   toolaction.h
   toolinstance.h
+  copydialog.h
+  copythread.h
 )
 qt4_wrap_cpp(MCRL2_GUI_MOC_SOURCES ${MCRL2_GUI_MOC_HEADERS})
 
@@ -50,6 +53,8 @@ set(MCRL2_GUI_SRC_FILES
   toolinstance.cpp
   toolcatalog.cpp
   toolinformation.cpp
+  copydialog.cpp
+  copythread.cpp
 )
 
 # ######### Copy extra files ##########

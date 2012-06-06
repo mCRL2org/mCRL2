@@ -18,7 +18,7 @@ class ToolAction : public QAction
     Q_OBJECT
 public:
     explicit ToolAction(ToolInformation information, QObject *parent = 0);
-    ToolInformation getInformation() { return m_info; }
+    ToolInformation information() { return m_info; }
 private:
     ToolInformation m_info;
 };

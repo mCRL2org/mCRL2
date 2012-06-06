@@ -19,26 +19,14 @@
 #include <QDir>
 #include <QDomDocument>
 
-class ToolAction;
-
-class ToolInformation
+struct ToolInformation
 {
-  public:
     ToolInformation(QString name, QString input, QString output);
 
-    QString getName() { return m_name; }
-    QString getInput() { return m_input; }
-    QString getOutput() { return m_output; }
-    QString getDescription() { return m_desc; }
-    QString getAuthor() { return m_author; }
-    QDomDocument getXML() { return m_xml; }
-    bool hasOutput() { return !m_output.isEmpty(); }
-    bool isValid() { return m_valid; }
+    bool hasOutput() { return !output.isEmpty(); }
 
-  private:
-    QString m_name, m_input, m_output, m_desc, m_author;
-    QDomDocument m_xml;
-    bool m_valid;
+    QString name, input, output, desc, author;
+    bool valid;
 };
 
 #endif // TOOLINFORMATION_H

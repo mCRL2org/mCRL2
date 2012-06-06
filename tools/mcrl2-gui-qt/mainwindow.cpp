@@ -20,8 +20,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
   connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
+  connect(m_ui.treeFiles, SIGNAL(openToolInstance(QString, ToolInformation)), this, SLOT(createToolInstance(QString, ToolInformation)));
 
   m_catalog.load();
+  m_ui.treeFiles->setCatalog(m_catalog);
 
   createToolMenu();
 }
@@ -35,13 +37,13 @@ void MainWindow::createToolMenu()
   QMenu *menuTools = new QMenu(m_ui.mnuMain);
   menuTools->setTitle("&Tool Information");
 
-  QStringList cats = m_catalog.getCategories();
+  QStringList cats = m_catalog.categories();
   for (int i = 0; i < cats.size(); i++)
   {
     QMenu *menuCat = new QMenu(menuTools);
     menuCat->setTitle(cats.at(i));
     menuTools->addMenu(menuCat);
-    QList<ToolInformation> tools = m_catalog.getTools(cats.at(i));
+    QList<ToolInformation> tools = m_catalog.tools(cats.at(i));
     for (int i = 0; i < tools.count(); i++)
     {
       ToolInformation tool = tools.at(i);
@@ -56,7 +58,7 @@ void MainWindow::createToolMenu()
 void MainWindow::createToolInstance(QString filename, ToolInformation info)
 {
   ToolInstance* toolInstance = new ToolInstance(filename, info, m_ui.tabInstances);
-  m_ui.tabInstances->addTab(toolInstance, info.getName());
+  m_ui.tabInstances->addTab(toolInstance, info.name);
   connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
 }
 
@@ -69,11 +71,10 @@ void MainWindow::onToolInfo()
 {
   ToolAction* act = dynamic_cast<ToolAction*>(QObject::sender());
   QString message;
-  message += "<h1>" + act->getInformation().getName() + "</h1>";
-  message += "<p>" + act->getInformation().getDescription() + "</p>";
-  message += "<p>Written by " + act->getInformation().getAuthor()  + "</p>";
+  message += "<h1>" + act->information().name + "</h1>";
+  message += "<p>" + act->information().desc + "</p>";
+  message += "<p>Written by " + act->information().author  + "</p>";
   QMessageBox::information(this, "Tool Information", message);
-  createToolInstance("TEST", act->getInformation());
 }
 
 void MainWindow::onTabTitleChanged(QString title)
