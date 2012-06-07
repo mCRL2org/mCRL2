@@ -698,6 +698,11 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
     }
   }
 
+  if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])
+  {
+    save_actions(state, transition);
+  }
+
   if (m_options.outformat == lts_aut)
   {
     m_aut_file << "(" << source_state_number << ",\"" << lps::pp(transition.action()) << "\"," << destination_state_number.first << ")" << std::endl;
@@ -733,14 +738,7 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
     next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
     while (it)
     {
-      transitions.push_back(*it);
-
-      if (m_options.detect_action && m_detected_action_summands[it->summand_index()])
-      {
-        save_actions(state, *it);
-      }
-
-      it++;
+      transitions.push_back(*it++);
     }
     //transitions = atermpp::list<next_state_generator::transition_t>(m_generator->begin(state), m_generator->end());
   }
