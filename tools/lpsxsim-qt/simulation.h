@@ -62,7 +62,6 @@ class Simulation : public QObject
 
   signals:
     void traceChanged(unsigned int firstChangedState);
-    void error(QString message);
 
   private:
     QString m_filename;
