@@ -120,7 +120,7 @@ bool ATwriteToSAFFile(const aterm &aTerm, FILE* file);
 
 aterm ATreadFromSAFFile(FILE* file);
 
-bool ATwriteToNamedSAFFile(const aterm &aTerm, const char* filename);
+bool ATwriteToNamedSAFFile(const aterm& aterm, const char* filename);
 
 aterm ATreadFromNamedSAFFile(const char* filename);
 

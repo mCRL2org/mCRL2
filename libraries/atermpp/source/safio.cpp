@@ -7,6 +7,7 @@
 #include "mcrl2/atermpp/detail/util.h"
 #include "mcrl2/atermpp/detail/safio.h"
 #include "mcrl2/atermpp/detail/byteencoding.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
@@ -1145,7 +1146,7 @@ bool ATwriteToSAFFile(const aterm &aTerm, FILE* file)
 /**
  * Writes the given aterm in SAF format to the file with the given name.
  */
-bool ATwriteToNamedSAFFile(const aterm aTerm, const char* filename)
+bool ATwriteToNamedSAFFile(const aterm& aTerm, const char* filename)
 {
   bool result;
   FILE* file;
@@ -1298,7 +1299,7 @@ typedef struct _BufferNode
  * Since the string will contain \0 bytes, the value the length parameter has after this function returns will specify the number of bytes that were written.
  * Note that the resulting string has been malloced and will need to be freed by the user.
  */
-char* ATwriteToSAFString(const aterm aTerm, size_t* length)
+char* ATwriteToSAFString(const aterm& aTerm, size_t* length)
 {
   char* result;
   size_t totalBytesWritten = 0;

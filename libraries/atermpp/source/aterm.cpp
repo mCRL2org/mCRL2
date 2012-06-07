@@ -14,10 +14,11 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/detail/safio.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 /*}}}  */
 
@@ -78,7 +79,6 @@ static aterm    sparse_term(int* c, char** s);
  */
 
 bool ATwriteToTextFile(const aterm &t, FILE* f);
-aterm ATreadFromBinaryFile(FILE* file);
 
 void aterm_init()
 {
@@ -111,11 +111,6 @@ void aterm_init()
   initialized = true;
 
   // atexit(AT_cleanupMemory);
-}
-
-bool ATisInitialized()
-{
-  return initialized;
 }
 
 /*}}}  */
