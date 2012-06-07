@@ -642,64 +642,13 @@ readFromTextFile(int* c, FILE* file)
 }
 
 /*}}}  */
-/*{{{  ATerm ATreadFromTextFile(FILE *file) */
-
-/**
- * Read a term from a text file.
- */
-
-ATerm
-ATreadFromTextFile(FILE* file)
-{
-  int c;
-
-  line = 0;
-  col = 0;
-  error_idx = 0;
-  memset(error_buf, 0, ERROR_SIZE);
-
-  fnext_char(&c, file);
-  return readFromTextFile(&c, file);
-}
-
-/*}}}  */
-/*{{{  ATerm ATreadFromNamedFile(char *name) */
-
-/**
- * Read an ATerm from a named file
- */
-
-ATerm ATreadFromNamedFile(const char* name)
-{
-  FILE*  f;
-  ATerm t;
-
-  if (!strcmp(name, "-"))
-  {
-    return ATreadFromFile(stdin);
-  }
-
-  if (!(f = fopen(name, "rb")))
-  {
-    return ATerm();
-  }
-
-  t = ATreadFromFile(f);
-  fclose(f);
-
-  return t;
-}
-
-/*}}}  */
-
-inline
+static inline
 void snext_char(int* c, char** s)
 {
   *c = (unsigned char)*(*s)++;
 }
-//#define snext_char(c,s) ((*c) = ((unsigned char)*(*s)++))
 
-inline
+static inline
 void sskip_layout(int* c, char** s)
 {
   while (isspace(*c))
@@ -707,9 +656,8 @@ void sskip_layout(int* c, char** s)
     snext_char(c,s);
   }
 }
-//#define sskip_layout(c,s) while(isspace(*c)) snext_char(c,s)
 
-inline
+static inline
 void snext_skip_layout(int* c, char** s)
 {
   do
@@ -718,7 +666,6 @@ void snext_skip_layout(int* c, char** s)
   }
   while (isspace(*c));
 }
-//#define snext_skip_layout(c,s) do { snext_char(c, s); } while(isspace(*c))
 
 /*{{{  static ATermList sparse_terms(int *c, char **s) */
 
