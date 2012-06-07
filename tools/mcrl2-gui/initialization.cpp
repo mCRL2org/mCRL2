@@ -38,29 +38,7 @@ using namespace std;
 
 Initialization::Initialization()
 {
-  /* extension (first) is dealt with "formalism" (second) */
-  m_extention_tool_mapping.insert(pair<string, string> ("mcrl2", "mcrl2"));
-  m_extention_tool_mapping.insert(pair<string, string> ("lps", "lps"));
 
-  m_extention_tool_mapping.insert(pair<string, string> ("lts", "lts"));
-  m_extention_tool_mapping.insert(pair<string, string> ("fsm", "lts"));
-  m_extention_tool_mapping.insert(pair<string, string> ("aut", "lts"));
-  m_extention_tool_mapping.insert(pair<string, string> ("dot", "lts"));
-  m_extention_tool_mapping.insert(pair<string, string> ("svc", "lts"));
-#ifdef USE_BCG
-  m_extention_tool_mapping.insert(pair<string, string> ("bcg", "lts"));
-#endif
-  m_extention_tool_mapping.insert(pair<string, string> ("pbes", "pbes"));
-  m_extention_tool_mapping.insert(pair<string, string> ("txt", "txt"));
-  m_extention_tool_mapping.insert(pair<string, string> ("tbf", "tbf"));
-  m_extention_tool_mapping.insert(pair<string, string> ("gra", "gra"));
-  m_extention_tool_mapping.insert(pair<string, string> ("bes", "bes"));
-
-  m_extention_tool_mapping.insert(pair<string, string> ("mcf", "mcf"));
-  m_extention_tool_mapping.insert(pair<string, string> ("trc", "trc"));
-  m_extention_tool_mapping.insert(pair<string, string> ("gm", "bes"));
-  m_extention_tool_mapping.insert(pair<string, string> ("cwi", "bes"));
-  m_extention_tool_mapping.insert(pair<string, string> ("pbes", "bes"));
 
   mcrl2::utilities::basename basename;
   m_executable_basename = basename.get_executable_basename();

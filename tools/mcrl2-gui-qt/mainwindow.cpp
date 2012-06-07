@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include "toolaction.h"
 #include "toolinstance.h"
+#include "fileinformation.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
@@ -21,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
   connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
   connect(m_ui.treeFiles, SIGNAL(openToolInstance(QString, ToolInformation)), this, SLOT(createToolInstance(QString, ToolInformation)));
+  connect(m_ui.treeFiles, SIGNAL(openProperties(QString)), this, SLOT(createFileInformation(QString)));
 
   m_catalog.load();
   m_ui.treeFiles->setCatalog(m_catalog);
@@ -58,8 +60,18 @@ void MainWindow::createToolMenu()
 void MainWindow::createToolInstance(QString filename, ToolInformation info)
 {
   ToolInstance* toolInstance = new ToolInstance(filename, info, m_ui.tabInstances);
-  m_ui.tabInstances->addTab(toolInstance, info.name);
+  int index = m_ui.tabInstances->addTab(toolInstance, info.name);
   connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
+  m_ui.tabInstances->setCurrentIndex(index);
+}
+
+void MainWindow::createFileInformation(QString filename)
+{
+  QFileInfo info = QFileInfo(filename);
+  QString title = (info.isRoot() ? info.absolutePath() : info.fileName());
+  FileInformation* fileInformation = new FileInformation(filename, m_ui.tabInstances);
+  int index = m_ui.tabInstances->addTab(fileInformation, title);
+  m_ui.tabInstances->setCurrentIndex(index);
 }
 
 void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
@@ -91,5 +103,7 @@ void MainWindow::onTabCloseRequest(int index)
 {
   ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(m_ui.tabInstances->widget(index));
   delete toolInstance;
+  FileInformation* fileInformation = dynamic_cast<FileInformation*>(m_ui.tabInstances->widget(index));
+  delete fileInformation;
 }
 

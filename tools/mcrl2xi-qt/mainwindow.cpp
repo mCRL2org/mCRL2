@@ -163,7 +163,7 @@ bool MainWindow::onCloseRequest(int index)
     return true;
   }
 
-  int ret = QMessageBox::question ( this, tr("Specification modified"), tr("Do you want to save your modifications?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+  QMessageBox::StandardButton ret = QMessageBox::question ( this, tr("Specification modified"), tr("Do you want to save your modifications?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
   switch(ret)
   {
     case QMessageBox::Yes:

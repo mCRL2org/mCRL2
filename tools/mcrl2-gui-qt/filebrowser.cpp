@@ -166,8 +166,9 @@ void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
           QString newName = QDir(m_model.filePath(currentIndex())).absoluteFilePath(m_model.fileName(m_pastefile));
           if (m_cut)
           {
-            if (askOverwrite(newName))
+            if (askRemove(newName, true))
             {
+              QFile::remove(newName);
               if (!QFile::rename(m_model.filePath(m_pastefile), newName)) // Quick rename failed
                 copyDirectory(m_model.filePath(m_pastefile), newName, true);
               m_cut = false;
@@ -176,16 +177,9 @@ void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
           }
           else if (m_copy)
           {
-            if (askOverwrite(newName))
+            if (askRemove(newName, true))
             {
-              if (QFileInfo(m_model.filePath(m_pastefile)).isFile())
-              {
-                QFile::copy(m_model.filePath(m_pastefile), newName);
-              }
-              else
-              {
-                copyDirectory(m_model.filePath(m_pastefile), newName);
-              }
+              copyDirectory(m_model.filePath(m_pastefile), newName);
             }
           }
         }
@@ -196,8 +190,12 @@ void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
       }
       if (act->text() == "Delete")
       {
-        qDebug() << "Delete";
+        askRemove(m_model.filePath(currentIndex()));
         m_model.remove(currentIndex());
+      }
+      if (act->text() == "Properties")
+      {
+        emit(openProperties(m_model.filePath(currentIndex())));
       }
     }
   }
@@ -238,19 +236,15 @@ void FileBrowser::onRemoveRequested(QString filename)
   }
 }
 
-bool FileBrowser::askOverwrite(QString filename)
+bool FileBrowser::askRemove(QString filename, bool copy)
 {
   if (QFile::exists(filename))
   {
-    QString message = (QFileInfo(filename).isDir() ? tr("Do you want to overwrite all files in %1?") : tr("Do you want to overwrite %1?"));
+    QString message(QFileInfo(filename).isDir() ? tr("Do you want to %1 all files in %2?") : tr("Do you want to %1 %2?"));
+    message = message.arg(copy ? "overwrite" : "delete");
 
-    QMessageBox::StandardButton ret = QMessageBox::question ( this, tr("File Exists"), message.arg(filename), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-    if (ret == QMessageBox::Yes)
-    {
-      QFile::remove(filename);
-      return true;
-    }
-    return false;
+    QMessageBox::StandardButton ret = QMessageBox::question ( this, tr("Are you sure?"), message.arg(filename), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    return (ret == QMessageBox::Yes);
   }
   return true;
 }

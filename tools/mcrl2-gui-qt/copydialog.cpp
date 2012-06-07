@@ -31,7 +31,7 @@ void CopyDialog::init(int count, bool move)
 
 void CopyDialog::setFile(int num, QString filename)
 {
-  QString caption = (m_move ? "Moving: %1" : "Copying: %1");
+  QString caption = (m_move ? tr("Moving: '%1'") : tr("Copying: '%1'"));
   if (0 < num && num <= m_count)
     ui->pbFiles->setValue(100*num/m_count);
   ui->lblCopy->setText(caption.arg(filename));

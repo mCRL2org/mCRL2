@@ -38,6 +38,7 @@ class FileBrowser : public QTreeView
 
   signals:
     void openToolInstance(QString filename, ToolInformation tool);
+    void openProperties(QString filename);
 
   protected:
     void contextMenuEvent(QContextMenuEvent *event);
@@ -46,7 +47,7 @@ class FileBrowser : public QTreeView
   private:
     void createContextMenu(QFileInfo info);
     void copyDirectory(QString oldPath, QString newPath, bool move = false);
-    bool askOverwrite(QString filename);
+    bool askRemove(QString filename, bool copy = false);
 
 
     QFileSystemModel m_model;
