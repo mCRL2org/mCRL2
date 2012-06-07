@@ -143,7 +143,7 @@ void simulation::load(const std::string &filename)
   initial.source_state = m_generator.initial_state();
   if (!initial_state.empty())
   {
-    if (initial_state != initial.source_state)
+    if (!match(initial_state, initial.source_state))
     {
       throw mcrl2::runtime_error("The initial state of the trace is not equal to the initial state of this specification");
     }
@@ -267,7 +267,7 @@ std::deque<simulation::state_t> simulation::match_trace(std::deque<simulation::s
   for (size_t i = 0; i < base_state.transitions.size(); i++)
   {
     if (base_state.transitions[i].action == transitions[transition_number].action &&
-      (transitions[transition_number].destination.empty() || base_state.transitions[i].destination == transitions[transition_number].destination))
+      (transitions[transition_number].destination.empty() || match(base_state.transitions[i].destination, transitions[transition_number].destination)))
     {
       base_state.transition_number = i;
       state_t s;
@@ -290,4 +290,17 @@ std::deque<simulation::state_t> simulation::match_trace(std::deque<simulation::s
     }
   }
   return best_trace;
+}
+
+bool simulation::match(const state &left, const state &right)
+{
+  assert(left.size() == right.size());
+  for (size_t i = 0; i < left.size(); i++)
+  {
+    if (!is_variable(left[i]) && !is_variable(right[i]) && left[i] != right[i])
+    {
+      return false;
+    }
+  }
+  return true;
 }

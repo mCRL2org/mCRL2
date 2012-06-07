@@ -197,10 +197,8 @@ bool is_pfnf(const T& x)
   return f.result;
 }
 
-// returns the implications /\_{i in I} x_i
-// \pre x is in PFNF format
 inline
-std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
+pbes_expression remove_quantifiers(const pbes_expression& x)
 {
   pbes_expression y = x;
 
@@ -211,11 +209,20 @@ std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
     {
       y = forall(y).body();
     }
-    else if (is_forall(y))
+    else if (is_exists(y))
     {
       y = exists(y).body();
     }
   }
+  return y;
+}
+
+// returns the implications /\_{i in I} x_i
+// \pre x is in PFNF format
+inline
+std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
+{
+  pbes_expression y = remove_quantifiers(x);
 
   std::vector<pbes_expression> result;
   split_and(y, result);
@@ -224,6 +231,27 @@ std::vector<pbes_expression> pfnf_implications(const pbes_expression& x)
   result.erase(std::remove_if(result.begin(), result.end(), &is_pfnf_simple_expression), result.end());
 
   return result;
+}
+
+// extracts the guards h and [g_i | i in I] from a pbes expression in PFNF format
+inline
+void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::vector<pbes_expression>& g)
+{
+  pbes_expression x = remove_quantifiers(phi);
+  std::vector<pbes_expression> v;
+  split_and(x, v);
+  h = true_();
+  for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    if (is_pfnf_simple_expression(*i))
+    {
+      h = utilities::optimized_and(h, *i);
+    }
+    else
+    {
+      g.push_back(*i);
+    }
+  }
 }
 
 } // namespace detail

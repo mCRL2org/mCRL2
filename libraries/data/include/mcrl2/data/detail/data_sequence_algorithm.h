@@ -70,6 +70,29 @@ variable_list set_intersection(variable_list x, variable_list y)
   return remove_elements(x, to_be_removed);
 }
 
+/// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.
+/// \param x A sequence of data variables
+/// \param y A sequence of data variables
+/// \return The difference of two sets.
+inline
+variable_list set_difference(const variable_list& x, const variable_list& y)
+{
+  if (x == y)
+  {
+    return variable_list();
+  }
+
+  std::vector<variable> result;
+  for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (std::find(y.begin(), y.end(), *i) == y.end())
+    {
+      result.push_back(*i);
+    }
+  }
+  return variable_list(result.begin(), result.end());
+}
+
 } // namespace detail
 
 } // namespace data

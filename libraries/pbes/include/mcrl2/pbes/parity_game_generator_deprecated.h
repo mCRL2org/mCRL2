@@ -351,6 +351,8 @@ protected:
 #endif
     }
 
+    virtual ~parity_game_generator_deprecated() {}
+
 };
 
 } // namespace pbes_system

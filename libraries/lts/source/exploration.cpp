@@ -77,7 +77,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   if (m_options.removeunused)
   {
     mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
-    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(m_options.specification);
+    std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(specification);
 
     if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
     {
@@ -155,6 +155,18 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
     for (size_t i = 0; i < specification.process().action_summands().size(); i++)
     {
       specification.process().action_summands()[i].multi_action().actions() = action_list();
+    }
+
+    if (m_use_confluence_reduction)
+    {
+      for (size_t i = 0; i < nonprioritised_summands.size(); i++)
+      {
+        nonprioritised_summands[i].multi_action().actions() = action_list();
+      }
+      for (size_t i = 0; i < prioritised_summands.size(); i++)
+      {
+        prioritised_summands[i].multi_action().actions() = action_list();
+      }
     }
   }
 
@@ -657,14 +669,16 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
   storage_state_t source = storage_state(state);
   storage_state_t destination = storage_state(transition.internal_state());
 
-  size_t source_state_number = m_state_numbers[source];
+  size_t source_state_number;
   std::pair<size_t, bool> destination_state_number;
   if (m_options.bithashing)
   {
+    source_state_number = m_bit_hash_table.add_state(source).first;
     destination_state_number = m_bit_hash_table.add_state(destination);
   }
   else
   {
+    source_state_number = m_state_numbers[source];
     destination_state_number = m_state_numbers.put(destination);
   }
   if (destination_state_number.second)
@@ -683,6 +697,11 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
       assert(state_number == destination_state_number.first);
       static_cast <void>(state_number);
     }
+  }
+
+  if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])
+  {
+    save_actions(state, transition);
   }
 
   if (m_options.outformat == lts_aut)
@@ -720,14 +739,7 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
     next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
     while (it)
     {
-      transitions.push_back(*it);
-
-      if (m_options.detect_action && m_detected_action_summands[it->summand_index()])
-      {
-        save_actions(state, *it);
-      }
-
-      it++;
+      transitions.push_back(*it++);
     }
     //transitions = std::list<next_state_generator::transition_t>(m_generator->begin(state), m_generator->end());
   }

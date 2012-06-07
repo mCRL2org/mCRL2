@@ -16,6 +16,8 @@
 
 struct MoveRecord
 {
+    virtual ~MoveRecord() {}
+
     Graph::Node* node;
     virtual void move(const Graph::Coord3D& pos)
     {

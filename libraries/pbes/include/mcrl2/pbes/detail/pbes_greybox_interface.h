@@ -43,6 +43,8 @@ namespace detail {
       initialize_generation();
     }
 
+    virtual ~pbes_greybox_interface() {}
+
     /// \brief Returns the initial state, rewritten and simplified.
     /// \return the initial state.
     propositional_variable_instantiation get_initial_state()

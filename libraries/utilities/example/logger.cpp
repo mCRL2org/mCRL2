@@ -25,7 +25,7 @@ std::string my_algorithm()
   return "my_algorithm";
 }
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   mcrl2_logger::set_reporting_level(debug3);
 
@@ -38,9 +38,9 @@ int main(int argc, char** argv)
   {
     throw std::runtime_error("Cannot open logfile for writing");
   }
-  mcrl2_logger::output_policy_t::set_stream(plogfile, "my_algorithm");
+  file_output::set_stream(plogfile, "my_algorithm");
   mcrl2_logger::set_reporting_level(debug3, "my_algorithm");
-  
+
   // Execute algorithm
   my_algorithm();
 

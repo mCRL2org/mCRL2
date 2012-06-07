@@ -12,6 +12,10 @@
 #ifndef MCRL2_UTILITIES_PROGRESS_METER_H
 #define MCRL2_UTILITIES_PROGRESS_METER_H
 
+#include <cstddef>
+#include <iostream>
+#include "mcrl2/utilities/logger.h"
+
 namespace mcrl2 {
 
 namespace utilities {

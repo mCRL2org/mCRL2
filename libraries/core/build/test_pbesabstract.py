@@ -15,7 +15,7 @@ def test_pbesabstract(p, filename, abstraction_value):
     run_pbesabstract(pbesfile1, pbesfile2, abstraction_value)
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
-    print filename, answer1, answer2, 'abstraction value =', abstraction_value  
+    print filename, answer1, answer2, 'abstraction value =', abstraction_value
     if answer1 == None or answer2 == None:
       return True
     if abstraction_value != answer2:
@@ -29,8 +29,8 @@ def main():
         atom_count = 2
         propvar_count = 2
         use_quantifiers = True
-        
-        for i in range(10000):
+
+        for i in range(options.iterations):
             filename = 'pbes_abstract'
             p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
             abstraction_value = i % 2 == 0

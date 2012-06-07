@@ -88,7 +88,7 @@ def test_sets(filename, index):
 def main():
     options = parse_command_line()
     try:
-        for i in range(10000):
+        for i in range(options.iterations):
             filename = 'sets_and_bags'
             test_sets(filename, i)
     finally:

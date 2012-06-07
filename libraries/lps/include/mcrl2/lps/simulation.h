@@ -69,6 +69,7 @@ class simulation
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
     std::deque<state_t> match_trace(std::deque<state_t> trace, const std::vector<transition_t> &transitions, size_t transition_number);
+    bool match(const state &left, const state &right);
 
   private:
     specification m_specification;

@@ -17,8 +17,10 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/abstraction.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -82,6 +84,36 @@ struct term_traits<data::data_expression>
   term_type or_(term_type p, term_type q)
   {
     return data::sort_bool::or_(p, q);
+  }
+
+  /// \brief Operator imp
+  /// \param p A term
+  /// \param q A term
+  /// \return Operator or applied to p and q
+  static inline
+  term_type imp(term_type p, term_type q)
+  {
+    return data::sort_bool::implies(p, q);
+  }
+
+  /// \brief Operator forall
+  /// \param d A sequence of variables
+  /// \param p A term
+  /// \return Operator forall applied to d and p
+  static inline
+  term_type forall(variable_sequence_type d, term_type p)
+  {
+    return data::forall(d, p);
+  }
+
+  /// \brief Operator exists
+  /// \param d A sequence of variables
+  /// \param p A term
+  /// \return Operator exists applied to d and p
+  static inline
+  term_type exists(variable_sequence_type d, term_type p)
+  {
+    return data::exists(d, p);
   }
 
   /// \brief Test for value true
@@ -203,6 +235,16 @@ struct term_traits<data::data_expression>
     return data::detail::set_intersection(v, w);
   }
 
+  /// \brief Returns the difference of two unordered sets of variables
+  /// \param v A sequence of data variables
+  /// \param w A sequence of data variables
+  /// \return The difference of two sets.
+  static inline
+  variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
+  {
+    return data::detail::set_difference(v, w);
+  }
+
   /// \brief Test if a term is constant
   /// \param t A term
   /// \return True if the term is constant. N.B. It is unknown if the current implementation
@@ -225,6 +267,12 @@ struct term_traits<data::data_expression>
     return data::application(t).right();
   }
 
+  static inline
+  term_type not_arg(term_type t)
+  {
+    assert(is_not(t));
+    return data::application(t).arguments().front();
+  }
 
   /// \brief Pretty print function
   /// \param t A term

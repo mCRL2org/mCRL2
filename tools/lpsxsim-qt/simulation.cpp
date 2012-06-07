@@ -9,6 +9,7 @@
 #include "simulation.h"
 #include <QMetaObject>
 #include "mcrl2/utilities/atermthread.h"
+#include "mcrl2/utilities/logger.h"
 
 Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy)
   : m_filename(filename),
@@ -29,12 +30,12 @@ void Simulation::init()
   }
   catch (mcrl2::runtime_error& e)
   {
-    emit error(e.what());
+    mCRL2log(mcrl2::log::error) << "Error loading LPS: " << e.what() << std::endl;
     return;
   }
   catch (...)
   {
-    emit error("Unknown error");
+    mCRL2log(mcrl2::log::error) << "Error loading LPS: unknown error" << std::endl;
     return;
   }
 
@@ -96,11 +97,13 @@ void Simulation::load(QString filename)
   }
   catch (mcrl2::runtime_error& e)
   {
-    emit error(e.what());
+    mCRL2log(mcrl2::log::error) << "Error loading trace: " << e.what() << std::endl;
+    return;
   }
   catch (...)
   {
-    emit error("Unknown error");
+    mCRL2log(mcrl2::log::error) << "Error loading trace: unknown error" << std::endl;
+    return;
   }
 
   updateTrace(0);
@@ -114,10 +117,10 @@ void Simulation::save(QString filename)
   }
   catch (mcrl2::runtime_error& e)
   {
-    emit error(e.what());
+    mCRL2log(mcrl2::log::error) << "Error saving trace: " << e.what() << std::endl;
   }
   catch (...)
   {
-    emit error("Unknown error");
+    mCRL2log(mcrl2::log::error) << "Error saving trace: unknown error" << std::endl;
   }
 }

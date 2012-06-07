@@ -23,7 +23,7 @@ DocumentManager::DocumentManager(QWidget *parent) :
   connect(m_ui.tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
 }
 
-void DocumentManager::showEvent(QShowEvent *event)
+void DocumentManager::showEvent(QShowEvent* /*event*/)
 {
   // This cannot be done in the constructor because
   // the documentCreated signal is fired before the connection can be made

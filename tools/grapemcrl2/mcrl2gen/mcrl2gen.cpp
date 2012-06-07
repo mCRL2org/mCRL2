@@ -35,7 +35,7 @@ WX_DEFINE_OBJARRAY(arr_action_reference)
 WX_DEFINE_OBJARRAY(arr_channel_comm)
 WX_DEFINE_OBJARRAY(arr_renamed)
 
-void grape::mcrl2gen::init_mcrl2libs(int p_argc, char** p_argv)
+void grape::mcrl2gen::init_mcrl2libs(int /*p_argc*/, char** p_argv)
 {
   // initialize ATerm library and set verbose messaging
   MCRL2_ATERMPP_INIT(p_argc, p_argv);

@@ -30,7 +30,7 @@ class LogMessenger : public mcrl2::log::output_policy
   public:
     LogMessenger(QWidget *parent): m_parent(parent) { mcrl2::log::logger::register_output_policy(*this); }
     ~LogMessenger() { mcrl2::log::logger::unregister_output_policy(*this); }
-    void output(const mcrl2::log::log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+    void output(const mcrl2::log::log_level_t level, const std::string& /*hint*/, const time_t /*timestamp*/, const std::string& msg)
     {
       if (level == mcrl2::log::error)
       {

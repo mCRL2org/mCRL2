@@ -167,7 +167,7 @@ namespace Graph
       return QString::fromStdString(mcrl2::lts::detail::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& /*label*/)
     {
       return QString("");
     }
@@ -264,14 +264,14 @@ namespace Graph
     QFile file(filename);
     if(!file.open( QFile::ReadOnly ))
     {
-      mCRL2log(mcrl2::log::error) << "Could not open XML file: " << filename.toStdString();
+      mCRL2log(mcrl2::log::error) << "Could not open XML file: " << filename.toStdString() << std::endl;
       return;
     }
     QString errorMsg;
     if(!xml.setContent(&file, false, &errorMsg))
     {
       file.close();
-      mCRL2log(mcrl2::log::error) << "Could not parse XML file: " << errorMsg.toStdString();
+      mCRL2log(mcrl2::log::error) << "Could not parse XML file: " << errorMsg.toStdString() << std::endl;
       return;
     }
     file.close();
@@ -279,7 +279,7 @@ namespace Graph
     QDomElement root = xml.documentElement();
     if(root.tagName() != "Graph")
     {
-      mCRL2log(mcrl2::log::error) << "XML contains no valid graph";
+      mCRL2log(mcrl2::log::error) << "XML contains no valid graph" << std::endl;
       return;
     }
 

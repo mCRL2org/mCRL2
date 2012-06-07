@@ -29,30 +29,14 @@
      <number>0</number>
     </property>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+     <widget class="QTabWidget" name="tabInstances">
+      <property name="currentIndex">
+       <number>-1</number>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
+      <property name="tabsClosable">
+       <bool>true</bool>
       </property>
-     </spacer>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -65,9 +49,39 @@
      <height>21</height>
     </rect>
    </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
-   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_File"/>
+    <addaction name="actionNew_Folder"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_File"/>
+    <addaction name="actionCopy_File"/>
+    <addaction name="actionRename_File"/>
+    <addaction name="actionDelete_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Output</string>
+    </property>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionReset_perspective"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockOutput">
@@ -79,9 +93,6 @@
    </property>
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="windowTitle">
-    <string>Executed Commands</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -110,7 +121,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="treeFiles">
+      <widget class="FileBrowser" name="treeFiles">
        <property name="minimumSize">
         <size>
          <width>300</width>
@@ -131,6 +142,66 @@
     </layout>
    </widget>
   </widget>
+  <action name="actionNew_File">
+   <property name="text">
+    <string>New File</string>
+   </property>
+  </action>
+  <action name="actionNew_Folder">
+   <property name="text">
+    <string>New Folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_File">
+   <property name="text">
+    <string>Open File</string>
+   </property>
+  </action>
+  <action name="actionCopy_File">
+   <property name="text">
+    <string>Copy File</string>
+   </property>
+  </action>
+  <action name="actionRename_File">
+   <property name="text">
+    <string>Rename File</string>
+   </property>
+  </action>
+  <action name="actionDelete_File">
+   <property name="text">
+    <string>Delete File</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionReset_perspective">
+   <property name="text">
+    <string>Reset Perspective</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -138,6 +209,11 @@
    <class>mcrl2::utilities::qt::LogWidget</class>
    <extends>QWidget</extends>
    <header>mcrl2/utilities/logwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FileBrowser</class>
+   <extends>QTreeView</extends>
+   <header>filebrowser.h</header>
   </customwidget>
  </customwidgets>
  <resources>

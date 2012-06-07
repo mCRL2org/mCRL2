@@ -322,6 +322,8 @@ class parity_game_generator
       detail::instantiate_global_variables(p);
     }
 
+    virtual ~parity_game_generator() {}
+
     /// \brief Returns the (rewritten) initial state.
     /// \return the initial state rewritten by R
     virtual propositional_variable_instantiation get_initial_state()

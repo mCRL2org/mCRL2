@@ -507,7 +507,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term has the value true
   static inline
-  bool is_true(term_type t)
+  bool is_true(const term_type& t)
   {
     return core::detail::gsIsBooleanTrue(t);
   }
@@ -516,7 +516,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term has the value false
   static inline
-  bool is_false(term_type t)
+  bool is_false(const term_type& t)
   {
     return core::detail::gsIsBooleanFalse(t);
   }
@@ -525,7 +525,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_not(term_type t)
+  bool is_not(const term_type& t)
   {
     return core::detail::gsIsBooleanNot(t);
   }
@@ -534,7 +534,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_and(term_type t)
+  bool is_and(const term_type& t)
   {
     return core::detail::gsIsBooleanAnd(t);
   }
@@ -543,7 +543,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type or
   static inline
-  bool is_or(term_type t)
+  bool is_or(const term_type& t)
   {
     return core::detail::gsIsBooleanOr(t);
   }
@@ -552,7 +552,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is an implication
   static inline
-  bool is_imp(term_type t)
+  bool is_imp(const term_type& t)
   {
     return core::detail::gsIsBooleanImp(t);
   }
@@ -561,7 +561,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is a boolean variable
   static inline
-  bool is_variable(term_type t)
+  bool is_variable(const term_type& t)
   {
     return core::detail::gsIsBooleanVariable(t);
   }
@@ -570,7 +570,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is a propositional variable
   static inline
-  bool is_prop_var(term_type t)
+  bool is_prop_var(const term_type& t)
   {
     return is_variable(t);
   }
@@ -579,7 +579,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The requested argument
   static inline
-  term_type arg(term_type t)
+  term_type arg(const term_type& t)
   {
     assert(is_not(t));
     return atermpp::arg1(t);
@@ -589,7 +589,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The left argument of the term
   static inline
-  term_type left(term_type t)
+  term_type left(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
     return atermpp::arg1(t);
@@ -599,17 +599,26 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The right argument of the term
   static inline
-  term_type right(term_type t)
+  term_type right(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
     return atermpp::arg2(t);
+  }
+
+  /// \brief Returns the argument of a term of type not
+  /// \param t A term
+  static inline
+  term_type not_arg(const term_type& t)
+  {
+    assert(is_not(t));
+    return atermpp::arg1(t);
   }
 
   /// \brief Returns the name of a boolean variable
   /// \param t A term
   /// \return The name of the boolean variable
   static inline
-  string_type name(term_type t)
+  string_type name(const term_type& t)
   {
     assert(is_variable(t));
     return atermpp::arg1(t);
@@ -628,7 +637,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t a term
   /// \returns The converted term
   static inline
-  variable_type term2variable(term_type t)
+  variable_type term2variable(const term_type& t)
   {
     return variable_type(t);
   }
@@ -637,7 +646,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return Returns a pretty print representation of the term
   static inline
-  std::string pp(term_type t)
+  std::string pp(const term_type& t)
   {
     return bes::pp(t);
   }
