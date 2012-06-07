@@ -14,8 +14,8 @@ using namespace mcrl2::log;
 namespace mcrl2xi_qt
 {
 
-static
-  void parse_mcrl2_specification(const std::string input)
+inline
+void parse_mcrl2_specification(const std::string input)
 {
     log_level_t old_level = mcrl2_logger::get_reporting_level();
     std::streambuf *old = std::cerr.rdbuf();
@@ -55,43 +55,43 @@ static
     }
 }
 
-static
-    bool parse_mcrl2_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+inline
+bool parse_mcrl2_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+{
+  log_level_t old_level = mcrl2_logger::get_reporting_level();
+  std::streambuf *old = std::cerr.rdbuf();
+  try
+  {
+    mcrl2_logger::set_reporting_level(quiet);
+
+    // Dirty hack: redirect cerr such that is becomes silent and parse errors are ignored.
+
+    std::stringstream ss;
+    std::cerr.rdbuf (ss.rdbuf());
+    data_spec = mcrl2::data::parse_data_specification(s);
+
+    //Restore cerr such that parse errors become visible.
+    std::cerr.rdbuf (old);
+    mcrl2_logger::set_reporting_level(old_level);
+  }
+  catch(mcrl2::runtime_error& )
+  {
+    std::cerr.rdbuf (old);
+    mcrl2_logger::set_reporting_level(old_level);
+    mcrl2::process::process_specification spec;
+    try
     {
-      log_level_t old_level = mcrl2_logger::get_reporting_level();
-      std::streambuf *old = std::cerr.rdbuf();
-      try
-      {
-        mcrl2_logger::set_reporting_level(quiet);
-
-        // Dirty hack: redirect cerr such that is becomes silent and parse errors are ignored.
-
-        std::stringstream ss;
-        std::cerr.rdbuf (ss.rdbuf());
-        data_spec = mcrl2::data::parse_data_specification(s);
-
-        //Restore cerr such that parse errors become visible.
-        std::cerr.rdbuf (old);
-        mcrl2_logger::set_reporting_level(old_level);
-      }
-      catch(mcrl2::runtime_error& )
-      {
-        std::cerr.rdbuf (old);
-        mcrl2_logger::set_reporting_level(old_level);
-        mcrl2::process::process_specification spec;
-        try
-        {
-           spec = mcrl2::process::parse_process_specification(s);
-           data_spec = spec.data();
-           vars = spec.global_variables();
-        }
-        catch(mcrl2::runtime_error& e)
-        {
-          mCRL2log(error) << e.what() << std::endl;
-          return false;
-        }
-      }
-      return true;
+       spec = mcrl2::process::parse_process_specification(s);
+       data_spec = spec.data();
+       vars = spec.global_variables();
     }
+    catch(mcrl2::runtime_error& e)
+    {
+      mCRL2log(error) << e.what() << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
 }
 #endif // PARSING_H

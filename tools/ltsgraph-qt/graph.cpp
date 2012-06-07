@@ -167,7 +167,7 @@ namespace Graph
       return QString::fromStdString(mcrl2::lts::detail::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& /*label*/)
     {
       return QString("");
     }

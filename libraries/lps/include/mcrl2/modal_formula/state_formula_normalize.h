@@ -80,7 +80,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  state_formula operator()(const true_& x)
+  state_formula operator()(const true_& /*x*/)
   {
     if (negated)
     {
@@ -92,7 +92,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const false_& x)
+  state_formula operator()(const false_& /*x*/)
   {
     if (negated)
     {
@@ -166,7 +166,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     else
     {
       return forall(x.variables(), body);
-    }    
+    }
   }
 
   state_formula operator()(const exists& x)
@@ -179,7 +179,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     else
     {
       return exists(x.variables(), body);
-    }    
+    }
   }
 
   state_formula operator()(const variable& x)

@@ -46,8 +46,8 @@ qt4_wrap_ui(LTSGRAPH_UI_HEADERS ${LTSGRAPH_UI_FILES})
 set(LTSGRAPH_MOC_HEADERS
   mainwindow.h
   glwidget.h
-  glscene.h
-  graph.h
+  #glscene.h
+  #graph.h
   springlayout.h
   information.h
   dimensionsdialog.h

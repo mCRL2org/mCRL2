@@ -62,7 +62,7 @@ void MainWindow::createToolInstance(QString filename, ToolInformation info)
   connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
 }
 
-void MainWindow::onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage)
+void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
 {
   m_ui.statusBar->showMessage(formattedMessage, 5000);
 }
