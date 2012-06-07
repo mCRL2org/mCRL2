@@ -23,6 +23,7 @@
 #ifndef __COMPRESS_H
 #define __COMPRESS_H
 
+#include <string>
 #include "huffman.h"
 
 
@@ -41,7 +42,7 @@
   int   CSreadATerm(CompressedStream*, aterm_deprecated::ATerm*);
   int   CSreadIndex(CompressedStream*, aterm_deprecated::ATerm*);
   int   CSureadATerm(CompressedStream*, aterm_deprecated::ATerm*);
-  int   CSreadString(CompressedStream*, char**);
+  int   CSreadString(CompressedStream*, std::string&);
   int   CSureadString(CompressedStream*, char**);
   int CSreadInt(CompressedStream*, long*);
   int CSureadInt(CompressedStream*, long*);
