@@ -40,28 +40,25 @@ class comp_struct:public mcrl2::data::structured_sort
 
     static structured_sort_constructor& c_smaller()
     {
-      static structured_sort_constructor c_smaller =
-                    core::detail::initialise_static_expression(c_smaller,structured_sort_constructor("smaller", "is_smaller"));
+      static structured_sort_constructor c_smaller = structured_sort_constructor("smaller", "is_smaller");
       return c_smaller;
     }
 
     static structured_sort_constructor& c_equal()
     {
-      static structured_sort_constructor c_equal =
-                    core::detail::initialise_static_expression(c_equal,structured_sort_constructor("equal", "is_equal"));
+      static structured_sort_constructor c_equal = structured_sort_constructor("equal", "is_equal");
       return c_equal;
     }
 
     static structured_sort_constructor& c_larger()
     {
-      static structured_sort_constructor c_larger =
-                    core::detail::initialise_static_expression(c_larger,structured_sort_constructor("larger", "is_larger"));
+      static structured_sort_constructor c_larger = structured_sort_constructor("larger", "is_larger");
       return c_larger;
     }
 
     static basic_sort& comp_sort() 
     {
-      static basic_sort comp_sort = core::detail::initialise_static_expression(comp_sort,basic_sort("Comp"));
+      static basic_sort comp_sort = basic_sort("Comp");
       return comp_sort;
     }
 

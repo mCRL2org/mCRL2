@@ -317,7 +317,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      core::identifier_string const& %s_name()\n" % (name)
         code += "      {\n"
-        code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (name, name, fullname)
+        code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (name, fullname)
         code += "        return %s_name;\n" % (name)
         code += "      }\n\n"
         return code
@@ -339,7 +339,7 @@ class function_declaration_list():
         else:
           code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
           code += "      {\n"
-          code += "        static function_symbol %s = core::detail::initialise_static_expression(%s, function_symbol(%s_name(), %s));\n" % (name, name, name, sort)
+          code += "        static function_symbol %s = function_symbol(%s_name(), %s);\n" % (name, name, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n\n"
         return code
@@ -1402,7 +1402,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, id)
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, id)
     code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
@@ -1412,8 +1412,8 @@ class sort_declaration():
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, label)
-    code += "        return %s_name;\n" % (label.__str__())
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, label)
+    code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
 
@@ -1425,7 +1425,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      basic_sort const& %s()\n" % (label)
     code += "      {\n"
-    code += "        static basic_sort %s = core::detail::initialise_static_expression(%s, basic_sort(%s_name()));\n" % (label, label, label)
+    code += "        static basic_sort %s = basic_sort(%s_name());\n" % (label, label)
     code += "        return %s;\n" % (label)
     code += "      }\n\n"
 

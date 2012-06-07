@@ -40,7 +40,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& real_name()
       {
-        static core::identifier_string real_name = core::detail::initialise_static_expression(real_name, core::identifier_string("Real"));
+        static core::identifier_string real_name = core::identifier_string("Real");
         return real_name;
       }
 
@@ -49,7 +49,7 @@ namespace mcrl2 {
       inline
       basic_sort const& real_()
       {
-        static basic_sort real_ = core::detail::initialise_static_expression(real_, basic_sort(real_name()));
+        static basic_sort real_ = basic_sort(real_name());
         return real_;
       }
 
@@ -79,7 +79,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& creal_name()
       {
-        static core::identifier_string creal_name = core::detail::initialise_static_expression(creal_name, core::identifier_string("@cReal"));
+        static core::identifier_string creal_name = core::identifier_string("@cReal");
         return creal_name;
       }
 
@@ -88,7 +88,7 @@ namespace mcrl2 {
       inline
       function_symbol const& creal()
       {
-        static function_symbol creal = core::detail::initialise_static_expression(creal, function_symbol(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_())));
+        static function_symbol creal = function_symbol(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_()));
         return creal;
       }
 
@@ -135,7 +135,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pos2real_name()
       {
-        static core::identifier_string pos2real_name = core::detail::initialise_static_expression(pos2real_name, core::identifier_string("Pos2Real"));
+        static core::identifier_string pos2real_name = core::identifier_string("Pos2Real");
         return pos2real_name;
       }
 
@@ -144,7 +144,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos2real()
       {
-        static function_symbol pos2real = core::detail::initialise_static_expression(pos2real, function_symbol(pos2real_name(), make_function_sort(sort_pos::pos(), real_())));
+        static function_symbol pos2real = function_symbol(pos2real_name(), make_function_sort(sort_pos::pos(), real_()));
         return pos2real;
       }
 
@@ -190,7 +190,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& nat2real_name()
       {
-        static core::identifier_string nat2real_name = core::detail::initialise_static_expression(nat2real_name, core::identifier_string("Nat2Real"));
+        static core::identifier_string nat2real_name = core::identifier_string("Nat2Real");
         return nat2real_name;
       }
 
@@ -199,7 +199,7 @@ namespace mcrl2 {
       inline
       function_symbol const& nat2real()
       {
-        static function_symbol nat2real = core::detail::initialise_static_expression(nat2real, function_symbol(nat2real_name(), make_function_sort(sort_nat::nat(), real_())));
+        static function_symbol nat2real = function_symbol(nat2real_name(), make_function_sort(sort_nat::nat(), real_()));
         return nat2real;
       }
 
@@ -245,7 +245,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& int2real_name()
       {
-        static core::identifier_string int2real_name = core::detail::initialise_static_expression(int2real_name, core::identifier_string("Int2Real"));
+        static core::identifier_string int2real_name = core::identifier_string("Int2Real");
         return int2real_name;
       }
 
@@ -254,7 +254,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2real()
       {
-        static function_symbol int2real = core::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), make_function_sort(sort_int::int_(), real_())));
+        static function_symbol int2real = function_symbol(int2real_name(), make_function_sort(sort_int::int_(), real_()));
         return int2real;
       }
 
@@ -300,7 +300,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& real2pos_name()
       {
-        static core::identifier_string real2pos_name = core::detail::initialise_static_expression(real2pos_name, core::identifier_string("Real2Pos"));
+        static core::identifier_string real2pos_name = core::identifier_string("Real2Pos");
         return real2pos_name;
       }
 
@@ -309,7 +309,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2pos()
       {
-        static function_symbol real2pos = core::detail::initialise_static_expression(real2pos, function_symbol(real2pos_name(), make_function_sort(real_(), sort_pos::pos())));
+        static function_symbol real2pos = function_symbol(real2pos_name(), make_function_sort(real_(), sort_pos::pos()));
         return real2pos;
       }
 
@@ -355,7 +355,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& real2nat_name()
       {
-        static core::identifier_string real2nat_name = core::detail::initialise_static_expression(real2nat_name, core::identifier_string("Real2Nat"));
+        static core::identifier_string real2nat_name = core::identifier_string("Real2Nat");
         return real2nat_name;
       }
 
@@ -364,7 +364,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2nat()
       {
-        static function_symbol real2nat = core::detail::initialise_static_expression(real2nat, function_symbol(real2nat_name(), make_function_sort(real_(), sort_nat::nat())));
+        static function_symbol real2nat = function_symbol(real2nat_name(), make_function_sort(real_(), sort_nat::nat()));
         return real2nat;
       }
 
@@ -410,7 +410,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& real2int_name()
       {
-        static core::identifier_string real2int_name = core::detail::initialise_static_expression(real2int_name, core::identifier_string("Real2Int"));
+        static core::identifier_string real2int_name = core::identifier_string("Real2Int");
         return real2int_name;
       }
 
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2int()
       {
-        static function_symbol real2int = core::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), make_function_sort(real_(), sort_int::int_())));
+        static function_symbol real2int = function_symbol(real2int_name(), make_function_sort(real_(), sort_int::int_()));
         return real2int;
       }
 
@@ -465,7 +465,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& maximum_name()
       {
-        static core::identifier_string maximum_name = core::detail::initialise_static_expression(maximum_name, core::identifier_string("max"));
+        static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
       }
 
@@ -569,7 +569,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& minimum_name()
       {
-        static core::identifier_string minimum_name = core::detail::initialise_static_expression(minimum_name, core::identifier_string("min"));
+        static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
       }
 
@@ -649,7 +649,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& abs_name()
       {
-        static core::identifier_string abs_name = core::detail::initialise_static_expression(abs_name, core::identifier_string("abs"));
+        static core::identifier_string abs_name = core::identifier_string("abs");
         return abs_name;
       }
 
@@ -719,7 +719,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& negate_name()
       {
-        static core::identifier_string negate_name = core::detail::initialise_static_expression(negate_name, core::identifier_string("-"));
+        static core::identifier_string negate_name = core::identifier_string("-");
         return negate_name;
       }
 
@@ -797,7 +797,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& succ_name()
       {
-        static core::identifier_string succ_name = core::detail::initialise_static_expression(succ_name, core::identifier_string("succ"));
+        static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
       }
 
@@ -875,7 +875,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pred_name()
       {
-        static core::identifier_string pred_name = core::detail::initialise_static_expression(pred_name, core::identifier_string("pred"));
+        static core::identifier_string pred_name = core::identifier_string("pred");
         return pred_name;
       }
 
@@ -953,7 +953,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& plus_name()
       {
-        static core::identifier_string plus_name = core::detail::initialise_static_expression(plus_name, core::identifier_string("+"));
+        static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
       }
 
@@ -1041,7 +1041,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& minus_name()
       {
-        static core::identifier_string minus_name = core::detail::initialise_static_expression(minus_name, core::identifier_string("-"));
+        static core::identifier_string minus_name = core::identifier_string("-");
         return minus_name;
       }
 
@@ -1121,7 +1121,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& times_name()
       {
-        static core::identifier_string times_name = core::detail::initialise_static_expression(times_name, core::identifier_string("*"));
+        static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
       }
 
@@ -1201,7 +1201,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& exp_name()
       {
-        static core::identifier_string exp_name = core::detail::initialise_static_expression(exp_name, core::identifier_string("exp"));
+        static core::identifier_string exp_name = core::identifier_string("exp");
         return exp_name;
       }
 
@@ -1281,7 +1281,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& divides_name()
       {
-        static core::identifier_string divides_name = core::detail::initialise_static_expression(divides_name, core::identifier_string("/"));
+        static core::identifier_string divides_name = core::identifier_string("/");
         return divides_name;
       }
 
@@ -1341,7 +1341,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& floor_name()
       {
-        static core::identifier_string floor_name = core::detail::initialise_static_expression(floor_name, core::identifier_string("floor"));
+        static core::identifier_string floor_name = core::identifier_string("floor");
         return floor_name;
       }
 
@@ -1350,7 +1350,7 @@ namespace mcrl2 {
       inline
       function_symbol const& floor()
       {
-        static function_symbol floor = core::detail::initialise_static_expression(floor, function_symbol(floor_name(), make_function_sort(real_(), sort_int::int_())));
+        static function_symbol floor = function_symbol(floor_name(), make_function_sort(real_(), sort_int::int_()));
         return floor;
       }
 
@@ -1396,7 +1396,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& ceil_name()
       {
-        static core::identifier_string ceil_name = core::detail::initialise_static_expression(ceil_name, core::identifier_string("ceil"));
+        static core::identifier_string ceil_name = core::identifier_string("ceil");
         return ceil_name;
       }
 
@@ -1405,7 +1405,7 @@ namespace mcrl2 {
       inline
       function_symbol const& ceil()
       {
-        static function_symbol ceil = core::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), make_function_sort(real_(), sort_int::int_())));
+        static function_symbol ceil = function_symbol(ceil_name(), make_function_sort(real_(), sort_int::int_()));
         return ceil;
       }
 
@@ -1451,7 +1451,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& round_name()
       {
-        static core::identifier_string round_name = core::detail::initialise_static_expression(round_name, core::identifier_string("round"));
+        static core::identifier_string round_name = core::identifier_string("round");
         return round_name;
       }
 
@@ -1460,7 +1460,7 @@ namespace mcrl2 {
       inline
       function_symbol const& round()
       {
-        static function_symbol round = core::detail::initialise_static_expression(round, function_symbol(round_name(), make_function_sort(real_(), sort_int::int_())));
+        static function_symbol round = function_symbol(round_name(), make_function_sort(real_(), sort_int::int_()));
         return round;
       }
 
@@ -1506,7 +1506,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& reduce_fraction_name()
       {
-        static core::identifier_string reduce_fraction_name = core::detail::initialise_static_expression(reduce_fraction_name, core::identifier_string("@redfrac"));
+        static core::identifier_string reduce_fraction_name = core::identifier_string("@redfrac");
         return reduce_fraction_name;
       }
 
@@ -1515,7 +1515,7 @@ namespace mcrl2 {
       inline
       function_symbol const& reduce_fraction()
       {
-        static function_symbol reduce_fraction = core::detail::initialise_static_expression(reduce_fraction, function_symbol(reduce_fraction_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_())));
+        static function_symbol reduce_fraction = function_symbol(reduce_fraction_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_()));
         return reduce_fraction;
       }
 
@@ -1562,7 +1562,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& reduce_fraction_where_name()
       {
-        static core::identifier_string reduce_fraction_where_name = core::detail::initialise_static_expression(reduce_fraction_where_name, core::identifier_string("@redfracwhr"));
+        static core::identifier_string reduce_fraction_where_name = core::identifier_string("@redfracwhr");
         return reduce_fraction_where_name;
       }
 
@@ -1571,7 +1571,7 @@ namespace mcrl2 {
       inline
       function_symbol const& reduce_fraction_where()
       {
-        static function_symbol reduce_fraction_where = core::detail::initialise_static_expression(reduce_fraction_where, function_symbol(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_())));
+        static function_symbol reduce_fraction_where = function_symbol(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
         return reduce_fraction_where;
       }
 
@@ -1619,7 +1619,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& reduce_fraction_helper_name()
       {
-        static core::identifier_string reduce_fraction_helper_name = core::detail::initialise_static_expression(reduce_fraction_helper_name, core::identifier_string("@redfrachlp"));
+        static core::identifier_string reduce_fraction_helper_name = core::identifier_string("@redfrachlp");
         return reduce_fraction_helper_name;
       }
 
@@ -1628,7 +1628,7 @@ namespace mcrl2 {
       inline
       function_symbol const& reduce_fraction_helper()
       {
-        static function_symbol reduce_fraction_helper = core::detail::initialise_static_expression(reduce_fraction_helper, function_symbol(reduce_fraction_helper_name(), make_function_sort(real_(), sort_int::int_(), real_())));
+        static function_symbol reduce_fraction_helper = function_symbol(reduce_fraction_helper_name(), make_function_sort(real_(), sort_int::int_(), real_()));
         return reduce_fraction_helper;
       }
 

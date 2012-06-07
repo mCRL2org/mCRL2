@@ -98,7 +98,7 @@ variable_list get_nonreal_variables(const variable_list& l)
 
 static data::function_symbol& negate_function_symbol(const sort_expression s)
 {
-  static data::function_symbol f = core::detail::initialise_static_expression(f,data::function_symbol("negate",data::make_function_sort(s,s)));
+  static data::function_symbol f = data::function_symbol("negate",data::make_function_sort(s,s));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
 }

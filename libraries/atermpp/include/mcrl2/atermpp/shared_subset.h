@@ -42,19 +42,19 @@ class shared_subset
   protected:
     static atermpp::aterm_string &get_true()
     {
-      static atermpp::aterm_string true_ = mcrl2::core::detail::initialise_static_expression(true_, atermpp::aterm_string("true"));
+      static atermpp::aterm_string true_ = atermpp::aterm_string("true");
       return true_;
     }
 
     static atermpp::aterm_string &get_false()
     {
-      static atermpp::aterm_string false_ = mcrl2::core::detail::initialise_static_expression(false_, atermpp::aterm_string("false"));
+      static atermpp::aterm_string false_ = atermpp::aterm_string("false");
       return false_;
     }
 
     static atermpp::function_symbol &get_node()
     {
-      static atermpp::function_symbol node_ = mcrl2::core::detail::initialise_static_expression(node_, atermpp::function_symbol("node", 3));
+      static atermpp::function_symbol node_ = atermpp::function_symbol("node", 3);
       return node_;
     }
 

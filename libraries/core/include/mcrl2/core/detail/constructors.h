@@ -27,7 +27,7 @@ namespace detail
 inline
 const atermpp::aterm_appl& constructString()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(gsString2ATermAppl("@NoValue")));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(gsString2ATermAppl("@NoValue"));
   return t;
 }
 
@@ -35,7 +35,7 @@ const atermpp::aterm_appl& constructString()
 inline
 const atermpp::aterm_list& constructList()
 {
-  static atermpp::aterm_list t = core::detail::initialise_static_expression(t, atermpp::aterm_list(ATmakeList0()));
+  static atermpp::aterm_list t = atermpp::aterm_list(ATmakeList0());
   return t;
 }
 

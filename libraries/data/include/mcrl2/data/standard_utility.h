@@ -513,7 +513,7 @@ application list(const sort_expression& s,
 inline
 core::identifier_string const& list_enumeration_name()
 {
-  static core::identifier_string list_enumeration_name = core::detail::initialise_static_expression(list_enumeration_name, core::identifier_string("@ListEnum"));
+  static core::identifier_string list_enumeration_name = core::identifier_string("@ListEnum");
   return list_enumeration_name;
 }
 
@@ -606,7 +606,7 @@ namespace sort_set
 inline
 core::identifier_string const& set_enumeration_name()
 {
-  static core::identifier_string set_enumeration_name = core::detail::initialise_static_expression(set_enumeration_name, core::identifier_string("@SetEnum"));
+  static core::identifier_string set_enumeration_name = core::identifier_string("@SetEnum");
   return set_enumeration_name;
 }
 
@@ -742,7 +742,7 @@ namespace sort_bag
 inline
 core::identifier_string const& bag_enumeration_name()
 {
-  static core::identifier_string bag_enumeration_name = core::detail::initialise_static_expression(bag_enumeration_name, core::identifier_string("@BagEnum"));
+  static core::identifier_string bag_enumeration_name = core::identifier_string("@BagEnum");
   return bag_enumeration_name;
 }
 

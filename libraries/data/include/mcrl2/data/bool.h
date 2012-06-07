@@ -36,7 +36,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bool_name()
       {
-        static core::identifier_string bool_name = core::detail::initialise_static_expression(bool_name, core::identifier_string("Bool"));
+        static core::identifier_string bool_name = core::identifier_string("Bool");
         return bool_name;
       }
 
@@ -45,7 +45,7 @@ namespace mcrl2 {
       inline
       basic_sort const& bool_()
       {
-        static basic_sort bool_ = core::detail::initialise_static_expression(bool_, basic_sort(bool_name()));
+        static basic_sort bool_ = basic_sort(bool_name());
         return bool_;
       }
 
@@ -67,7 +67,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& true_name()
       {
-        static core::identifier_string true_name = core::detail::initialise_static_expression(true_name, core::identifier_string("true"));
+        static core::identifier_string true_name = core::identifier_string("true");
         return true_name;
       }
 
@@ -76,7 +76,7 @@ namespace mcrl2 {
       inline
       function_symbol const& true_()
       {
-        static function_symbol true_ = core::detail::initialise_static_expression(true_, function_symbol(true_name(), bool_()));
+        static function_symbol true_ = function_symbol(true_name(), bool_());
         return true_;
       }
 
@@ -99,7 +99,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& false_name()
       {
-        static core::identifier_string false_name = core::detail::initialise_static_expression(false_name, core::identifier_string("false"));
+        static core::identifier_string false_name = core::identifier_string("false");
         return false_name;
       }
 
@@ -108,7 +108,7 @@ namespace mcrl2 {
       inline
       function_symbol const& false_()
       {
-        static function_symbol false_ = core::detail::initialise_static_expression(false_, function_symbol(false_name(), bool_()));
+        static function_symbol false_ = function_symbol(false_name(), bool_());
         return false_;
       }
 
@@ -142,7 +142,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& not_name()
       {
-        static core::identifier_string not_name = core::detail::initialise_static_expression(not_name, core::identifier_string("!"));
+        static core::identifier_string not_name = core::identifier_string("!");
         return not_name;
       }
 
@@ -151,7 +151,7 @@ namespace mcrl2 {
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = core::detail::initialise_static_expression(not_, function_symbol(not_name(), make_function_sort(bool_(), bool_())));
+        static function_symbol not_ = function_symbol(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
       }
 
@@ -197,7 +197,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& and_name()
       {
-        static core::identifier_string and_name = core::detail::initialise_static_expression(and_name, core::identifier_string("&&"));
+        static core::identifier_string and_name = core::identifier_string("&&");
         return and_name;
       }
 
@@ -206,7 +206,7 @@ namespace mcrl2 {
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = core::detail::initialise_static_expression(and_, function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol and_ = function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
 
@@ -253,7 +253,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& or_name()
       {
-        static core::identifier_string or_name = core::detail::initialise_static_expression(or_name, core::identifier_string("||"));
+        static core::identifier_string or_name = core::identifier_string("||");
         return or_name;
       }
 
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = core::detail::initialise_static_expression(or_, function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol or_ = function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
 
@@ -309,7 +309,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& implies_name()
       {
-        static core::identifier_string implies_name = core::detail::initialise_static_expression(implies_name, core::identifier_string("=>"));
+        static core::identifier_string implies_name = core::identifier_string("=>");
         return implies_name;
       }
 
@@ -318,7 +318,7 @@ namespace mcrl2 {
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = core::detail::initialise_static_expression(implies, function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol implies = function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
 
