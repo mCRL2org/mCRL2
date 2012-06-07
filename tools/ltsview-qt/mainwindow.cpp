@@ -202,6 +202,7 @@ void MainWindow::exportVector()
   else
   {
     QMessageBox::critical(this, "Error writing file", "Saving picture failed: unsupported file format.");
+    return;
   }
 
   SaveVectorDialog dialog(this, m_ltsCanvas, filename, format);
