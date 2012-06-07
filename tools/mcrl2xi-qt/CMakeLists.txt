@@ -11,10 +11,9 @@ project(mcrl2xi-qt)
 cmake_minimum_required(VERSION 2.6)
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-find_package(Qt4)
 
+find_package(Qt4 COMPONENTS QtCore QtGui)
 if(QT4_FOUND)
-
 include(${QT_USE_FILE})
 
 set(MCRL2XI_RCC_SRCS mcrl2xi.qrc)
@@ -33,7 +32,6 @@ qt4_wrap_ui(MCRL2XI_UI_HEADERS ${MCRL2XI_UI_FILES})
 set(MCRL2XI_MOC_HEADERS
   mainwindow.h
   highlighter.h
-
   documentmanager.h
   documentwidget.h
   parser.h
@@ -50,7 +48,6 @@ set(MCRL2XI_SRC_FILES
   main.cpp
   mainwindow.cpp
   highlighter.cpp
-
   documentmanager.cpp
   documentwidget.cpp
   parser.cpp
@@ -72,10 +69,9 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  ${QT_QTMAIN_LIBRARY}
+  mcrl2_aterm
   mcrl2_core
   mcrl2_data
-  mcrl2_aterm
   mcrl2_lps
   mcrl2_utilities
   mcrl2_utilities_qt
@@ -86,15 +82,15 @@ target_link_libraries(${PROJECT_NAME}
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # For promoted widgets
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)

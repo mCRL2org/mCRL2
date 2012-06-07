@@ -11,11 +11,9 @@ project(mcrl2-gui-qt)
 cmake_minimum_required(VERSION 2.6)
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-find_package(Qt4)
 
+find_package(Qt4 COMPONENTS QtCore QtGui QtXml)
 if(QT4_FOUND)
-set(QT_USE_QTXML TRUE)
-
 include(${QT_USE_FILE})
 
 set(MCRL2_GUI_RCC_SRCS mcrl2-gui.qrc)
@@ -85,7 +83,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  ${QT_QTMAIN_LIBRARY}
   mcrl2_core
   mcrl2_utilities
   mcrl2_utilities_qt

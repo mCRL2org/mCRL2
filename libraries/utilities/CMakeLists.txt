@@ -79,7 +79,7 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 
 
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui)
+find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtMain)
 if (QT4_FOUND)
 
 # ##############################
@@ -131,6 +131,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${QT_QTCORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
+  ${QT_QTMAIN_LIBRARY}
   mcrl2_aterm
 )
 
