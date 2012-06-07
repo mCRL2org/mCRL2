@@ -180,6 +180,10 @@ bool MainWindow::onCloseRequest(int index)
     case QMessageBox::Cancel:
       return false;
       break;
+    default:
+      // Should not occur, but leaving default out triggers
+      // -Wswitch warnings.
+      throw mcrl2::runtime_error("Unhandled answer in message box");
   }
 
   return true;

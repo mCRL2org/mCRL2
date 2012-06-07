@@ -48,6 +48,7 @@ MainWindow::~MainWindow()
   }
 }
 
+static
 QTableWidgetItem *item()
 {
   QTableWidgetItem *item = new QTableWidgetItem();
