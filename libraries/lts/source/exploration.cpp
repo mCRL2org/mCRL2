@@ -668,14 +668,16 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
   storage_state_t source = storage_state(state);
   storage_state_t destination = storage_state(transition.internal_state());
 
-  size_t source_state_number = m_state_numbers[source];
+  size_t source_state_number;
   std::pair<size_t, bool> destination_state_number;
   if (m_options.bithashing)
   {
+    source_state_number = m_bit_hash_table.add_state(source).first;
     destination_state_number = m_bit_hash_table.add_state(destination);
   }
   else
   {
+    source_state_number = m_state_numbers[source];
     destination_state_number = m_state_numbers.put(destination);
   }
   if (destination_state_number.second)
