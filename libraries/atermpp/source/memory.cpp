@@ -31,7 +31,16 @@ static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
-std::vector <detail::_aterm*> detail::hashtable(AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS),NULL);
+namespace detail
+{
+std::vector <detail::_aterm*>& hashtable()
+{
+  static std::vector <detail::_aterm*> hashtable = std::vector <detail::_aterm*>(AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS),NULL);
+  return hashtable;
+}
+}
+
+
 
 static void resize_hashtable()
 {
@@ -56,7 +65,7 @@ static void resize_hashtable()
   
   /*  Rehash all old elements */
 
-  for (std::vector < detail::_aterm*>::const_iterator p=detail::hashtable.begin(); p !=detail::hashtable.end(); p++)
+  for (std::vector < detail::_aterm*>::const_iterator p=detail::hashtable().begin(); p !=detail::hashtable().end(); p++)
   {
     detail::_aterm* aterm_walker=*p;
 
@@ -72,7 +81,7 @@ static void resize_hashtable()
       aterm_walker = next;
     }
   }
-  new_hashtable.swap(detail::hashtable);
+  new_hashtable.swap(detail::hashtable());
 
 }
 
@@ -204,7 +213,7 @@ aterm::aterm(const function_symbol &sym)
   hnr = FINISH(START(sym.number()));
 
   prev = NULL;
-  hashspot = &(detail::hashtable[hnr & table_mask]);
+  hashspot = &(detail::hashtable()[hnr & table_mask]);
 
   cur = *hashspot;
   while (cur)
@@ -231,8 +240,8 @@ aterm::aterm(const function_symbol &sym)
   /* Delay masking until after allocate */
   hnr &= table_mask;
   cur->m_function_symbol = sym;
-  cur->next = &*detail::hashtable[hnr];
-  detail::hashtable[hnr] = cur;
+  cur->next = &*detail::hashtable()[hnr];
+  detail::hashtable()[hnr] = cur;
 
   m_term=cur;
   increase_reference_count<false>(m_term);
@@ -264,7 +273,7 @@ aterm_int::aterm_int(int val)
   hnr = COMBINE(hnr, _val.reserved);
   hnr = FINISH(hnr);
 
-  cur = detail::hashtable[hnr & table_mask];
+  cur = detail::hashtable()[hnr & table_mask];
   while (cur && (cur->m_function_symbol!=AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
   {
     cur = cur->next;
@@ -279,8 +288,8 @@ aterm_int::aterm_int(int val)
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
     // reinterpret_cast<detail::_aterm_int*>(cur)->value = _val.value;
 
-    cur->next = detail::hashtable[hnr];
-    detail::hashtable[hnr] = cur;
+    cur->next = detail::hashtable()[hnr];
+    detail::hashtable()[hnr] = cur;
   }
 
   assert((hnr & table_mask) == (hash_number(cur, TERM_SIZE_INT) & table_mask));

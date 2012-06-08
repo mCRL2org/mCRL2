@@ -42,7 +42,7 @@ struct _aterm
 };
 
 
-extern std::vector <detail::_aterm*> hashtable;
+extern std::vector <detail::_aterm*>& hashtable();
 detail::_aterm* allocate_term(const size_t size);
 void free_term(detail::_aterm *t);
 
