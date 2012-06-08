@@ -87,7 +87,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   }
 
 
-  aterm_list rules=ATempty;
+  aterm_list rules=aterm_list();
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
     rules = ATinsert(rules,ATmakeList4(static_cast<aterm_list>(j->variables()),

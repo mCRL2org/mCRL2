@@ -199,12 +199,10 @@ ATermList ATgetNext(const ATermList &l)
   return static_cast<ATermList>(l->tail);
 }
 
-const ATermList ATempty = aterm_list();
-
 inline
 bool ATisEmpty(const ATermList &l)
 {
-  return l == ATempty;
+  return l == aterm_list();
 }
 
 ATermList ATgetTail(const ATermList &list, const int &start);
@@ -337,7 +335,7 @@ ATermList ATgetArguments(const ATermAppl &appl)
 {
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
-  ATermList result = ATempty;
+  ATermList result = aterm_list();
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
   for (i=0; i<len; i++)

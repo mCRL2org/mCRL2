@@ -30,7 +30,7 @@ class term_list:public aterm
 {
   protected:
 
-    static term_list<Term> empty_list() 
+    static const term_list<Term>& empty_list()
     { 
       static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST));
       return m_empty_list;

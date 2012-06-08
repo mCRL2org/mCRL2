@@ -345,7 +345,7 @@ fparse_terms(int* c, FILE* f)
     return ATermList();
   }
 
-  list = ATinsert(ATempty, el);
+  list = ATinsert(aterm_list(), el);
 
   while (*c == ',')
   {
@@ -372,7 +372,7 @@ static ATerm
 fparse_quoted_appl(int* c, FILE* f)
 {
   assert(string_buffer.empty());
-  ATermList       args = ATempty;
+  ATermList       args = aterm_list();
   AFun          sym;
   char*           name;
 
@@ -433,7 +433,7 @@ fparse_quoted_appl(int* c, FILE* f)
     }
     else
     {
-      args = ATempty;
+      args = aterm_list();
     }
     if (args == ATerm() || *c != ')')
     {
@@ -460,7 +460,7 @@ fparse_unquoted_appl(int* c, FILE* f)
 {
   assert(string_buffer.empty());
   AFun sym;
-  ATermList args = ATempty;
+  ATermList args = aterm_list();
   char* name = NULL;
 
   if (*c != '(')
@@ -492,7 +492,7 @@ fparse_unquoted_appl(int* c, FILE* f)
     }
     else
     {
-      args = ATempty;
+      args = aterm_list();
     }
     if (args == ATerm() || *c != ')')
     {
@@ -567,7 +567,7 @@ fparse_term(int* c, FILE* f)
       fnext_skip_layout(c, f);
       if (*c == ']')
       {
-        result = ATempty;
+        result = aterm_list();
       }
       else
       {
@@ -604,44 +604,6 @@ fparse_term(int* c, FILE* f)
 
 /*}}}  */
 
-/*{{{  ATerm readFromTextFile(FILE *file) */
-
-/**
- * Read a term from a text file. The first character has been read.
- */
-
-static ATerm
-readFromTextFile(int* c, FILE* file)
-{
-  ATerm term;
-  fskip_layout(c, file);
-
-  term = fparse_term(c, file);
-
-  if (&*term)
-  {
-    ungetc(*c, file);
-  }
-  else
-  {
-    int i;
-    mCRL2log(mcrl2::log::error) << "readFromTextFile: parse error at line " << line
-                                << ", col " << col << ((line||col)?":\n":"");
-    for (i = 0; i < ERROR_SIZE; ++i)
-    {
-      char c = error_buf[(i + error_idx) % ERROR_SIZE];
-      if (c)
-      {
-        mCRL2log(mcrl2::log::error) << c;
-      }
-    }
-    mCRL2log(mcrl2::log::error) << std::endl;
-  }
-
-  return term;
-}
-
-/*}}}  */
 static inline
 void snext_char(int* c, char** s)
 {
@@ -682,7 +644,7 @@ sparse_terms(int* c, char** s)
     return ATermList();
   }
 
-  ATermList list = ATinsert(ATempty, el);
+  ATermList list = ATinsert(aterm_list(), el);
 
   while (*c == ',')
   {
@@ -708,7 +670,7 @@ static ATerm
 sparse_quoted_appl(int* c, char** s)
 {
   assert(string_buffer.empty());
-  ATermList       args = ATempty;
+  ATermList       args = aterm_list();
   AFun          sym;
   char*           name;
 
@@ -774,7 +736,7 @@ sparse_quoted_appl(int* c, char** s)
     }
     else
     {
-      args = ATempty;
+      args = aterm_list();
     }
     if (args == ATermList() || *c != ')')
     {
@@ -801,7 +763,7 @@ sparse_unquoted_appl(int* c, char** s)
 {
   assert(string_buffer.empty());
   AFun sym;
-  ATermList args = ATempty;
+  ATermList args = aterm_list();
   char* name = NULL;
 
   if (*c != '(')
@@ -833,7 +795,7 @@ sparse_unquoted_appl(int* c, char** s)
     }
     else
     {
-      args = ATempty;
+      args = aterm_list();
     }
     if (args == ATerm() || *c != ')')
     {
@@ -902,7 +864,7 @@ sparse_term(int* c, char** s)
       snext_skip_layout(c, s);
       if (*c == ']')
       {
-        result = ATempty;
+        result = aterm_list();
       }
       else
       {

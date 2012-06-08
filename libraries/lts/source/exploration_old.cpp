@@ -1042,8 +1042,8 @@ bool lps2lts_algorithm::generate_lts()
           }
           else
           {
-            tmp_trans=atermpp::term_list < action_list >(ATempty);
-            tmp_states=ATempty;
+            tmp_trans=atermpp::term_list < action_list >(aterm_list());
+            tmp_states=aterm_list();
           }
         }
         catch (mcrl2::runtime_error& e)

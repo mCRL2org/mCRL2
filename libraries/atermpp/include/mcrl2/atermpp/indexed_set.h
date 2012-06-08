@@ -79,7 +79,10 @@ class indexed_set
       if (result == (std::size_t) -1)
       {
         std::pair<size_t, bool> p=put(elem);
-        assert(p.second);
+        if(!p.second)
+        {
+          throw mcrl2::runtime_error("failed to add element to indexed set");
+        }
       }
       return result;
     }

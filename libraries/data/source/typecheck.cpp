@@ -579,7 +579,7 @@ ATermList type_check_mult_actions(
   // ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
   //XXX read-in from spec (not finished)
-  ATermList result=ATempty;
+  ATermList result=aterm_list();
   if (gstcReadInSorts(sorts)
       && gstcReadInConstructors()
       && gstcReadInFuncs(constructors,mappings)
@@ -1530,7 +1530,7 @@ static bool gstcReadInSorts(ATermList Sorts)
   // This is forbidden.
 
   ATermList sort_aliases=ATtableKeys(context.defined_sorts);
-  for (; sort_aliases!=ATempty ; sort_aliases=ATgetNext(sort_aliases))
+  for (; sort_aliases!=aterm_list() ; sort_aliases=ATgetNext(sort_aliases))
   {
     std::set < basic_sort > visited;
     const basic_sort s(core::identifier_string((ATermAppl)ATgetFirst(sort_aliases)));
@@ -1582,7 +1582,7 @@ std::map < data::sort_expression, data::basic_sort > construct_normalised_aliase
   // Fill normalised_aliases. Simple aliases are stored from left to
   // right. If the right hand side is non trivial (struct, list, set or bag)
   // the alias is stored from right to left.
-  for (ATermList sort_walker=ATtableKeys(context.defined_sorts);  sort_walker!=ATempty; sort_walker=ATgetNext(sort_walker))
+  for (ATermList sort_walker=ATtableKeys(context.defined_sorts);  sort_walker!=aterm_list(); sort_walker=ATgetNext(sort_walker))
   {
     const core::identifier_string sort_name(ATAgetFirst(sort_walker));
     const data::basic_sort first(sort_name);
@@ -1679,7 +1679,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
     ATermList defined_sorts=ATtableKeys(context.defined_sorts);
     std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
     std::set< sort_expression > all_sorts;
-    for (; defined_sorts!=ATempty; defined_sorts=ATgetNext(defined_sorts))
+    for (; defined_sorts!=aterm_list(); defined_sorts=ATgetNext(defined_sorts))
     {
       const basic_sort s(core::identifier_string(gstcUnwindType(ATAgetFirst(defined_sorts))));
       ATermAppl reference=ATAtableGet(context.defined_sorts,static_cast<ATermAppl>(s.name()));
@@ -1713,7 +1713,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
 
     std::set < sort_expression > possibly_empty_constructor_sorts;
     for (ATermList constructor_list_walker=constructor_list;
-         constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
+         constructor_list_walker!=aterm_list(); constructor_list_walker=ATgetNext(constructor_list_walker))
     {
       const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
       if (is_function_sort(s))
@@ -1729,7 +1729,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
     {
       stable=true;
       for (ATermList constructor_list_walker=constructor_list;
-           constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
+           constructor_list_walker!=aterm_list(); constructor_list_walker=ATgetNext(constructor_list_walker))
       {
         const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
         if (!is_function_sort(s))
@@ -2581,7 +2581,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
   else // domain.size()>0
   {
     ATermList L=ATLtableGet(gssystem.functions, Name);
-    for (; L!=ATerm() && L!=ATempty ; L=ATgetNext(L))
+    for (; L!=ATerm() && L!=aterm_list() ; L=ATgetNext(L))
     {
       if (gstcTypeMatchA(Sort,(ATermAppl)ATgetFirst(L))!=ATerm())
       {
@@ -3495,7 +3495,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
-      if (VarDecls != ATempty)
+      if (VarDecls != aterm_list())
       {
         mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
         return NULL;

@@ -1950,7 +1950,7 @@ void PrintDataExpr(std::ostream& OutStream,
                                       pp_format, ShowSorts, 0, NULL, ", ");
         OutStream <<  "}";
       }
-      else if (gsIsIdFuncUpdate(Head) && Args != ATempty)
+      else if (gsIsIdFuncUpdate(Head) && Args != aterm_list())
       {
         //print function update
         mCRL2log(log::debug2, "pretty printer") << "printing function update" << std::endl;
