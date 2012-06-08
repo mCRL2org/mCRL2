@@ -535,14 +535,12 @@ ATermAppl type_check_mult_act(
         o=gstcTraverseActProcVarConstP(Vars,o);
         if (!&*o)
         {
-          goto done;
+          gstcDataDestroy();
+          return NULL;
         }
         r=ATinsert(r,o);
       }
       Result=ATsetArgument(mult_act,ATreverse(r),0);
-
-done:
-      ATtableDestroy(Vars);
     }
     else
     {
@@ -599,7 +597,6 @@ ATermList type_check_mult_actions(
         o=gstcTraverseActProcVarConstP(Vars,o);
         if (!&*o)
         {
-          ATtableDestroy(Vars);
           throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp_deprecated(ATAgetFirst(l)));
         }
         r=ATinsert(r,o);
@@ -675,7 +672,6 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 
         ATermTable Vars=ATtableCreate(63,50);
         Result=gstcTraverseStateFrm(Vars,Vars,state_frm);
-        ATtableDestroy(Vars);
       }
       else
       {
@@ -841,8 +837,6 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
 
           NewRules=ATinsert(NewRules,gsMakeActionRenameRule(VarList,Cond,Left,Right));
         }
-        ATtableDestroy(FreeVars);
-        ATtableDestroy(DeclaredVars);
         if (!b)
         {
           Result = NULL;
@@ -869,7 +863,6 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
   }
 
 finally:
-  ATtableDestroy(actions_from_lps);
   gstcDataDestroy();
   return Result;
 }
@@ -991,11 +984,9 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
     ATermTable NewVars;
     if (!gstcAddVars2Table(Vars,data_vars,NewVars))
     {
-      ATtableDestroy(Vars);
       mCRL2log(error) << "type error while typechecking data variables" << std::endl;
       return NULL;
     }
-    ATtableDestroy(Vars);
   }
   else
   {
@@ -1087,12 +1078,12 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
     if (gsIsSortId(RHS) || gsIsSortArrow(RHS))
     {
       //add forward substitution
-      ATtablePut(Substs, LHS, RHS);
+      Substs.put( LHS, RHS);
     }
     else
     {
       //add backward substitution
-      ATtablePut(Substs, RHS, LHS);
+      Substs.put( RHS, LHS);
     }
     l = ATgetNext(l);
   }
@@ -1105,7 +1096,6 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
     NewSpec = (ATermAppl) gsSubstValuesTable(Substs, Spec, true);
   }
   while (!ATisEqual(NewSpec, Spec));
-  ATtableDestroy(Substs);
 
   //add the removed sort references back to Spec
   Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
@@ -1331,19 +1321,7 @@ void gstcDataInit(void)
 
 void gstcDataDestroy(void)
 {
-  ATtableDestroy(gssystem.constants);
-  ATtableDestroy(gssystem.functions);
   ATindexedSetDestroy(context.basic_sorts);
-  ATtableDestroy(context.defined_sorts);
-  ATtableDestroy(context.constants);
-  ATtableDestroy(context.functions);
-  ATtableDestroy(context.actions);
-  ATtableDestroy(context.processes);
-  ATtableDestroy(context.PBs);
-  ATtableDestroy(context.glob_vars);
-  ATtableDestroy(body.proc_pars);
-  ATtableDestroy(body.proc_bodies);
-  // ATunprotectList(&body.equations);
 }
 
 static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
@@ -1516,7 +1494,7 @@ static bool gstcReadInSorts(ATermList Sorts)
     }
     else if (gsIsSortRef(Sort))
     {
-      ATtablePut(context.defined_sorts, SortName, ATAgetArgument(Sort,1));
+      context.defined_sorts.put(SortName, ATAgetArgument(Sort,1));
       mCRL2log(debug) << "Add sort alias " << core::pp_deprecated(SortName) << "  " << core::pp_deprecated(ATAgetArgument(Sort,1)) << "" << std::endl;
     }
     else
@@ -1912,7 +1890,7 @@ static bool gstcReadInActs(ATermList Acts)
         Types=ATappend(Types,ActType);
       }
     }
-    ATtablePut(context.actions,ActName,Types);
+    context.actions.put(ActName,Types);
   }
 
   return Result;
@@ -1959,7 +1937,7 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
         Types=ATappend(Types,ProcType);
       }
     }
-    ATtablePut(context.processes,ProcName,Types);
+    context.processes.put(ProcName,Types);
 
     //check that all formal parameters of the process are unique.
     ATermList ProcVars=ATLgetArgument(Proc,1);
@@ -1969,11 +1947,11 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
       return false;
     }
 
-    ATtablePut(body.proc_pars,ATAgetArgument(Proc,0),ATLgetArgument(Proc,1));
-    ATtablePut(body.proc_bodies,ATAgetArgument(Proc,0),ATAgetArgument(Proc,2));
+    body.proc_pars.put(ATAgetArgument(Proc,0),ATLgetArgument(Proc,1));
+    body.proc_bodies.put(ATAgetArgument(Proc,0),ATAgetArgument(Proc,2));
   }
-  ATtablePut(body.proc_pars,INIT_KEY(),ATmakeList0());
-  ATtablePut(body.proc_bodies,INIT_KEY(),Init);
+  body.proc_pars.put(INIT_KEY(),ATmakeList0());
+  body.proc_bodies.put(INIT_KEY(),Init);
 
   return Result;
 }
@@ -2027,20 +2005,20 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
         Types=ATappend(Types,PBType);
       }
     }
-    ATtablePut(context.PBs,PBName,Types);
+    context.PBs.put(PBName,Types);
 
     //check that all formal parameters of the PBES are unique.
     //if(!gstcVarsUnique(ATconcat(PBVars,PBFreeVars))){ gsErrorMsg("the formal and/or global variables in PBES %P are not unique\n",PBEqn); return ATfalse;}
 
     //This is a fake ProcVarId (There is no PBVarId)
     ATermAppl Index=gsMakeProcVarId(PBName,PBType);
-    //ATtablePut(body.proc_freevars,Index,PBFreeVars);
-    ATtablePut(body.proc_pars,Index,PBVars);
-    ATtablePut(body.proc_bodies,Index,ATAgetArgument(PBEqn,2));
+    //body.proc_freevars.put(Index,PBFreeVars);
+    body.proc_pars.put(Index,PBVars);
+    body.proc_bodies.put(Index,ATAgetArgument(PBEqn,2));
   }
-  //ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)PBFreeVars);
-  ATtablePut(body.proc_pars,INIT_KEY(),ATmakeList0());
-  ATtablePut(body.proc_bodies,INIT_KEY(),ATAgetArgument(PBInit,0));
+  //body.proc_freevars.put((ATerm)INIT_KEY(),(ATerm)PBFreeVars);
+  body.proc_pars.put(INIT_KEY(),ATmakeList0());
+  body.proc_bodies.put(INIT_KEY(),ATAgetArgument(PBInit,0));
 
   return Result;
 }
@@ -2165,7 +2143,7 @@ static bool gstcTransformVarConsTypeData(void)
         break;
       }
       Left=ATAgetArgument(Eqn,2);
-      ATtableReset(FreeVars);
+      FreeVars.reset();
       LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
       if (!&*LeftType)
       {
@@ -2200,7 +2178,7 @@ static bool gstcTransformVarConsTypeData(void)
         break;
       }
     }
-    ATtableReset(DeclaredVars);
+    DeclaredVars.reset();
     NewEqns=ATinsert(NewEqns,gsMakeDataEqn(VarList,Cond,Left,Right));
   }
   if (b)
@@ -2208,8 +2186,6 @@ static bool gstcTransformVarConsTypeData(void)
     body.equations=ATreverse(NewEqns);
   }
 
-  ATtableDestroy(FreeVars);
-  ATtableDestroy(DeclaredVars);
   return b?Result:false;
 }
 
@@ -2222,7 +2198,7 @@ static bool gstcTransformActProcVarConst(void)
   for (ATermList ProcVars=ATtableKeys(body.proc_pars); !ATisEmpty(ProcVars); ProcVars=ATgetNext(ProcVars))
   {
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
-    ATtableReset(Vars);
+    Vars.reset();
     gstcATermTableCopy(context.glob_vars,Vars);
 
     ATermTable NewVars;
@@ -2242,10 +2218,9 @@ static bool gstcTransformActProcVarConst(void)
       Result = false;
       break;
     }
-    ATtablePut(body.proc_bodies,ProcVar,NewProcTerm);
+    body.proc_bodies.put(ProcVar,NewProcTerm);
   }
 
-  ATtableDestroy(Vars);
   return Result;
 }
 
@@ -2258,7 +2233,7 @@ static bool gstcTransformPBESVarConst(void)
   for (ATermList PBVars=ATtableKeys(body.proc_pars); !ATisEmpty(PBVars); PBVars=ATgetNext(PBVars))
   {
     ATermAppl PBVar=ATAgetFirst(PBVars);
-    ATtableReset(Vars);
+    Vars.reset();
     gstcATermTableCopy(context.glob_vars,Vars);
 
     ATermTable NewVars;
@@ -2278,10 +2253,9 @@ static bool gstcTransformPBESVarConst(void)
       Result = false;
       break;
     }
-    ATtablePut(body.proc_bodies,PBVar,NewPBTerm);
+    body.proc_bodies.put(PBVar,NewPBTerm);
   }
 
-  ATtableDestroy(Vars);
   return Result;
 }
 
@@ -2552,7 +2526,7 @@ static bool gstcAddConstant(ATermAppl OpId, const char* msg)
     return false;
   }
 
-  ATtablePut(context.constants, Name, Sort);
+  context.constants.put( Name, Sort);
   return Result;
 }
 
@@ -2611,7 +2585,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
       Types=ATmakeList0();
     }
     Types=ATappend(Types,Sort);
-    ATtablePut(context.functions,Name,Types);
+    context.functions.put(Name,Types);
   }
   mCRL2log(debug) << "Read-in " << msg << " " << core::pp_deprecated(Name) << ". Type " << core::pp_deprecated(Types) << "" << std::endl;
   return Result;
@@ -2632,7 +2606,7 @@ static void gstcAddSystemConstant(ATermAppl OpId)
     Types=ATmakeList0();
   }
   Types=ATappend(Types,Type);
-  ATtablePut(gssystem.constants,OpIdName,Types);
+  gssystem.constants.put(OpIdName,Types);
 }
 
 static void gstcAddSystemFunction(ATermAppl OpId)
@@ -2651,7 +2625,7 @@ static void gstcAddSystemFunction(ATermAppl OpId)
     Types=ATmakeList0();
   }
   Types=ATappend(Types,Type);  // TODO: Avoid ATappend!!!! But the order is essential.
-  ATtablePut(gssystem.functions,OpIdName,Types);
+  gssystem.functions.put(OpIdName,Types);
 }
 
 static void gstcATermTableCopy(const ATermTable &Orig, ATermTable &Copy)
@@ -2659,7 +2633,7 @@ static void gstcATermTableCopy(const ATermTable &Orig, ATermTable &Copy)
   for (ATermList Keys=ATtableKeys(Orig); !ATisEmpty(Keys); Keys=ATgetNext(Keys))
   {
     ATerm Key=ATgetFirst(Keys);
-    ATtablePut(Copy,Key,ATtableGet(Orig,Key));
+    Copy.put(Key,ATtableGet(Orig,Key));
   }
 }
 
@@ -2704,7 +2678,7 @@ static bool gstcAddVars2Table(ATermTable &Vars, ATermList VarDecls, ATermTable &
 
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
-    ATtablePut(Vars, VarName, VarType);
+    Vars.put( VarName, VarType);
   }
   result=Vars;
   return true;
@@ -2718,7 +2692,7 @@ static ATermTable gstcRemoveVars(ATermTable &Vars, ATermList VarDecls)
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
     //ATermAppl VarType=ATAgetArgument(VarDecl,1);
 
-    ATtableRemove(Vars, VarName);
+    Vars.remove(VarName);
   }
 
   return Vars;
@@ -2914,7 +2888,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       ATerm existing_rhs = ATtableGet(As,ATAgetArgument(a,0));
       if (&*existing_rhs == NULL) // An assignment of the shape x:=t does not yet exist, this is OK.
       {
-        ATtablePut(As,ATAgetArgument(a,0),ATAgetArgument(a,1));
+        As.put(ATAgetArgument(a,0),ATAgetArgument(a,1));
       }
       else
       {
@@ -2957,7 +2931,6 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
 
       if (ATisEmpty(ParList))
       {
-        ATtableDestroy(As);
         mCRL2log(error) << "no process " << core::pp_deprecated(Name) << " containing all assignments in "
                         << core::pp_deprecated(ProcTerm) << "." << std::endl
                         << "Problematic variable is " << core::pp_deprecated(Culprit) << "." << std::endl;
@@ -2965,7 +2938,6 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       }
       if (!ATisEmpty(ATgetNext(ParList)))
       {
-        ATtableDestroy(As);
         mCRL2log(error) << "ambiguous process " << core::pp_deprecated(Name) << " containing all assignments in " << core::pp_deprecated(ProcTerm) << "." << std::endl;
         return NULL;
       }
@@ -2992,13 +2964,12 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     ATermAppl TypeCheckedProcTerm=gstcRewrActProc(Vars, gsMakeParamId(Name,ActualPars));
     if (!&*TypeCheckedProcTerm)
     {
-      ATtableDestroy(As);
       mCRL2log(error) << "type error occurred while typechecking the process call with short-hand assignments " << core::pp_deprecated(ProcTerm) << std::endl;
       return NULL;
     }
 
     //reverse the assignments
-    ATtableReset(As);
+    As.reset();
     for (ATermList l=ATLgetArgument(TypeCheckedProcTerm,1),m=FormalPars; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m))
     {
       ATermAppl act_par=ATAgetFirst(l);
@@ -3007,7 +2978,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       {
         continue;  //parameter does not change
       }
-      ATtablePut(As,ATAgetArgument(form_par,0),gsMakeDataVarIdInit(form_par,act_par));
+      As.put(ATAgetArgument(form_par,0),gsMakeDataVarIdInit(form_par,act_par));
     }
 
     ATermList TypedAssignments=ATmakeList0();
@@ -3022,8 +2993,6 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       TypedAssignments=ATinsert(TypedAssignments,a);
     }
     TypedAssignments=ATreverse(TypedAssignments);
-
-    ATtableDestroy(As);
 
     TypeCheckedProcTerm=gsMakeProcessAssignment(ATAgetArgument(TypeCheckedProcTerm,0),TypedAssignments);
 
@@ -3354,12 +3323,10 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     ATermTable NewVars;
     if (!gstcAddVars2Table(CopyVars,ATLgetArgument(ProcTerm,0),NewVars))
     {
-      ATtableDestroy(CopyVars);
       mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
       return NULL;
     }
     ATermAppl NewProc=gstcTraverseActProcVarConstP(NewVars,ATAgetArgument(ProcTerm,1));
-    ATtableDestroy(CopyVars);
     if (!&*NewProc)
     {
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
@@ -3424,12 +3391,10 @@ static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &Vars, ATermAppl PB
     ATermTable NewVars;
     if (!gstcAddVars2Table(CopyVars,ATLgetArgument(PBESTerm,0),NewVars))
     {
-      ATtableDestroy(CopyVars);
       mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
       return NULL;
     }
     ATermAppl NewPBES=gstcTraversePBESVarConstPB(NewVars,ATAgetArgument(PBESTerm,1));
-    ATtableDestroy(CopyVars);
     if (!&*NewPBES)
     {
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
@@ -3506,22 +3471,16 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermTable NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
       ATermTable NewDeclaredVars;
       if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
       ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
-      ATtableDestroy(CopyAllowedVars);
-      ATtableDestroy(CopyDeclaredVars);
 
       if (!&*ResType)
       {
@@ -3571,28 +3530,20 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermTable NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
       ATermTable NewDeclaredVars;
       if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
 
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
       if (!&*gstcTypeMatchA(sort_bool::bool_(),PosType))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
       ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
-      ATtableDestroy(CopyAllowedVars);
-      ATtableDestroy(CopyDeclaredVars);
 
       if (!&*NewType)
       {
@@ -3617,15 +3568,11 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermTable NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
       ATermTable NewDeclaredVars;
       if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         return NULL;
       }
 
@@ -3633,8 +3580,6 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
       if (!&*NewType)
       {
-        ATtableDestroy(CopyAllowedVars);
-        ATtableDestroy(CopyDeclaredVars);
         mCRL2log(error) << "no functions with arguments " << core::pp_deprecated(ArgTypes) << " among " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
         return NULL;
       }
@@ -3643,9 +3588,6 @@ static ATermAppl gstcTraverseVarConsTypeD(
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
       mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
-
-      ATtableDestroy(CopyAllowedVars);
-      ATtableDestroy(CopyDeclaredVars);
 
       // if (FreeVars)
       {
@@ -3700,22 +3642,16 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermTable NewAllowedVars;
     if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
     {
-      ATtableDestroy(CopyAllowedVars);
-      ATtableDestroy(CopyDeclaredVars);
       return NULL;
     }
     ATermTable NewDeclaredVars;
     if (!gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars))
     {
-      ATtableDestroy(CopyAllowedVars);
-      ATtableDestroy(CopyDeclaredVars);
       return NULL;
     }
 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
-    ATtableDestroy(CopyAllowedVars);
-    ATtableDestroy(CopyDeclaredVars);
 
     if (!&*NewType)
     {
@@ -4200,7 +4136,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       //Add to free variables list
       // if (FreeVars)
       {
-        ATtablePut(FreeVars, Name, Type);
+        FreeVars.put( Name, Type);
       }
 
       return Type;
@@ -4340,7 +4276,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         //Add to free variables list
         // if (FreeVars)
         {
-          ATtablePut(FreeVars, Name, Type);
+          FreeVars.put( Name, Type);
         }
       }
       else
@@ -6554,7 +6490,6 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     ATermTable NewVars;
     if (!gstcAddVars2Table(CopyVars,VarList,NewVars))
     {
-      ATtableDestroy(CopyVars);
       return NULL;
     }
 
@@ -6563,7 +6498,6 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     {
       return NULL;
     }
-    ATtableDestroy(CopyVars);
 
     return ATsetArgument(StateFrm,NewArg2,1);
   }
@@ -6690,7 +6624,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
         break;
       }
 
-      ATtablePut(FormPars,VarName, VarType);
+      FormPars.put(VarName, VarType);
 
       ATermAppl VarInit=ATAgetArgument(o,1);
       ATermAppl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
@@ -6719,8 +6653,6 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
 
     if (!success)
     {
-      ATtableDestroy(CopyStateVars);
-      ATtableDestroy(FormPars);
       return NULL;
     }
 
@@ -6728,12 +6660,9 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     ATermTable CopyVars=ATtableCreate(63,50);
     gstcATermTableCopy(Vars,CopyVars);
     gstcATermTableCopy(FormPars,CopyVars);
-    ATtableDestroy(FormPars);
 
-    ATtablePut(CopyStateVars,ATAgetArgument(StateFrm,0),ATreverse(t));
+    CopyStateVars.put(ATAgetArgument(StateFrm,0),ATreverse(t));
     ATermAppl NewArg=gstcTraverseStateFrm(CopyVars,CopyStateVars,ATAgetArgument(StateFrm,2));
-    ATtableDestroy(CopyStateVars);
-    ATtableDestroy(CopyVars);
     if (!&*NewArg)
     {
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(StateFrm) << std::endl;
@@ -6841,7 +6770,6 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
     ATermTable NewVars;
     if (!gstcAddVars2Table(CopyVars,VarList,NewVars))
     {
-      ATtableDestroy(CopyVars);
       return NULL;
     }
 
@@ -6850,7 +6778,6 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
     {
       return NULL;
     }
-    ATtableDestroy(CopyVars);
 
     return ATsetArgument(ActFrm,NewArg2,1);
   }

@@ -24,14 +24,6 @@ std::string to_string(const aterm t)
   return oss.str();
 } 
 
-#ifndef MIN
-#  define MIN(a,b)  ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)  ((a) > (b) ? (a) : (b))
-#endif
-
 
 } // namespace atermpp
 

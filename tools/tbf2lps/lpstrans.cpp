@@ -176,7 +176,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
-    }\
+    }
 
     return application(mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
   }

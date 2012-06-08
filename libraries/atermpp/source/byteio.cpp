@@ -19,7 +19,7 @@ static void resize_buffer(byte_writer* writer, size_t delta)
   size_needed = writer->u.string_data.cur_size + delta;
   if (size_needed >= writer->u.string_data.max_size)
   {
-    new_size = MAX(size_needed, writer->u.string_data.max_size*2);
+    new_size = (std::max)(size_needed, writer->u.string_data.max_size*2);
     writer->u.string_data.buf = (unsigned char*)realloc(writer->u.string_data.buf, new_size);
     if (!writer->u.string_data.buf)
     {

@@ -1196,7 +1196,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
             ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
             if (ATtableGet(VarDeclTable, VarDeclName) == ATerm())
             {
-              ATtablePut(VarDeclTable, VarDeclName, VarDecl);
+              VarDeclTable.put(VarDeclName, VarDecl);
             }
           }
           i++;
@@ -1207,7 +1207,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           //declarations of Eqns starting at StartPrefix. Print this prefixa and
           //the corresponding equations,and if necessary, update StartPrefix and
           //reset VarDeclTable.
-          ATermList VarDecls = ATtableValues(VarDeclTable);
+          ATermList VarDecls = VarDeclTable.values();
           if (ATgetLength(VarDecls) > 0)
           {
             OutStream <<  "var  ";
@@ -1232,12 +1232,11 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           {
             OutStream <<  "\n";
             StartPrefix = i;
-            ATtableReset(VarDeclTable);
+            VarDeclTable.reset();
           }
         }
       }
-      //finalisation after printing all (>0) equations
-      ATtableDestroy(VarDeclTable);
+      //finalisation after printing all (>0) equations      
     }
   }
 }
@@ -2982,7 +2981,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
       ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
       ATermList CorDecls = ATLtableGet(SortDeclsTable, DeclSort);
-      ATtablePut(SortDeclsTable, DeclSort,
+      SortDeclsTable.put(DeclSort,
                  (CorDecls == ATerm())
                  ?ATmakeList1(Decl)
                  :ATinsert(CorDecls, Decl)
@@ -2999,7 +2998,6 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
                  Result);
       DeclSorts = ATgetNext(DeclSorts);
     }
-    ATtableDestroy(SortDeclsTable);
     return ATreverse(Result);
   }
   else

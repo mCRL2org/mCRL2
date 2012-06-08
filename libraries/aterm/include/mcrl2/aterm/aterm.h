@@ -149,25 +149,6 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList args)
 }
 
 inline
-ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
-{
-  va_list args;
-  const size_t arity = sym.arity();
-  
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);
-
-  va_start(args, sym);
-  for (size_t i=0; i<arity; i++)
-  {
-    detail::_aterm* arg = va_arg(args, detail::_aterm *);
-    CHECK_TERM(arg);
-    buffer[i] = arg;
-  }
-  va_end(args);
-  return aterm_appl(sym,buffer,buffer+arity);
-}
-
-inline
 const ATerm ATgetArgument(const ATermAppl &appl, const size_t idx)
 {
   return appl(idx);
@@ -426,44 +407,15 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 }
 
 inline
-void       ATtableDestroy(const ATermTable &)
-{
-}
-
-inline
-void       ATtableReset(ATermTable &table)
-{
-  table.reset();
-}
-
-inline
-void       ATtablePut(ATermTable &table, const ATerm &key, const ATerm &value)
-{
-  table.put(key,value);
-}
-
-inline
 ATerm      ATtableGet(const ATermTable &table, const ATerm &key)
 {
   return table.get(key);
 }
 
 inline
-bool     ATtableRemove(ATermTable &table, const ATerm &key) /* Returns true if removal was successful. */
-{
-  return table.remove(key);
-}
-
-inline
 ATermList  ATtableKeys(const ATermTable &table)
 {
   return table.keys();
-} 
-
-inline
-ATermList  ATtableValues(const ATermTable &table)
-{
-  return table.values();
 } 
 
 typedef indexed_set ATermIndexedSet;
@@ -602,16 +554,6 @@ inline const ATermAppl ATAelementAt(const ATermList &List, const size_t Index)
   const ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
   return static_cast<const ATermAppl>(Result);
-}
-
-/**
- * \brief Gets an ATermList at a specified position in a list
- **/
-inline ATermList ATLelementAt(const ATermList List, const size_t Index)
-{
-  ATerm Result = ATelementAt(List, Index);
-  assert(ATisListOrNull(Result));
-  return (ATermList) Result;
 }
 
 /**
