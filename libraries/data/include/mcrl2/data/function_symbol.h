@@ -39,7 +39,7 @@ class function_symbol: public data_expression
     function_symbol(const aterm& term)
       : data_expression(term)
     {
-      assert(term->reference_count>0);
+      assert(term->reference_count()>0);
       assert(core::detail::check_term_OpId(m_term));
     }
 

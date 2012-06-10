@@ -36,7 +36,7 @@ void type_check(sort_expression& sort_expr, const data_specification& data_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   atermpp::aterm_appl t = sort_expr;
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
-  if (!&*t)
+  if (t==atermpp::aterm())
   {
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(sort_expr));
   }
@@ -73,8 +73,8 @@ void type_check(data_expression& data_expr,
 
   // The typechecker replaces untyped identifiers by typed identifiers (when typechecking
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-  t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
-  if (t == 0)
+  t = core::type_check_data_expr(t, atermpp::aterm_appl(), mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
+  if (t == atermpp::aterm())
   {
     data_expr = data_expression();
     throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(data_expr));
@@ -111,7 +111,7 @@ void type_check(data_specification& data_spec)
   // TODO: replace all this nonsense code by a proper type check implementation
   atermpp::aterm_appl t = detail::data_specification_to_aterm_data_spec(data_spec);
   t = core::type_check_data_spec(t);
-  if (!&*t)
+  if (t==atermpp::aterm())
   {
     throw mcrl2::runtime_error("could not type check data specification " + core::pp_deprecated(data::detail::data_specification_to_aterm_data_spec(data_spec)));
   }

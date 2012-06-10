@@ -372,7 +372,7 @@ inline
 atermpp::aterm_appl type_check_action_rename_specification(const atermpp::aterm_appl &ar_spec, const atermpp::aterm_appl &spec)
 {
   atermpp::aterm_appl result = core::type_check_action_rename_spec(ar_spec, spec);
-  if (result == NULL)
+  if (result == atermpp::aterm())
   {
     throw runtime_error("type check error");
   }

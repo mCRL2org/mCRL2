@@ -37,7 +37,6 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
   function_symbol sym;
   aterm_list list;
 
-  // if (IS_MARKED(t->header))
   if (visited.count(t)>0)
   {
     return 0;
@@ -67,20 +66,18 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
 
     case AT_LIST:
       list = static_cast<aterm_list>(t);
-      while (list!=aterm_list() && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
+      while (list!=aterm_list() && visited.count(list)==0)
       {
-        // SET_MARK(list->header);
         visited.insert(list);
         if (!function_symbol::at_lookup_table[AS_LIST.number()]->count++)
         {
           nr_unique++;
         }
-        nr_unique += calcUniqueAFuns(list.head(),visited);
+        nr_unique += calcUniqueAFuns(list.front(),visited);
         list = list.tail();
       }
-      if (list==aterm_list() && visited.count(list)==0 /* !IS_MARKED(list->header)*/ )
+      if (list==aterm_list() && visited.count(list)==0)
       {
-        // SET_MARK(list->header);
         visited.insert(list);
         if (!function_symbol::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
         {
@@ -91,7 +88,6 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
   }
 
   visited.insert(t);
-  // SET_MARK(t->header);
 
   return nr_unique;
 }
@@ -169,7 +165,7 @@ class sym_entry
     size_t arity;
 
     size_t nr_terms;
-    trm_bucket* terms;
+    std::vector <trm_bucket> terms;
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
 
@@ -631,11 +627,6 @@ static void gather_top_symbols(sym_entry* cur_entry,
   tss = &cur_entry->top_symbols[cur_arg];
   tss->nr_symbols = total_top_symbols;
   tss->symbols = std::vector<top_symbol>(total_top_symbols);
-  /* tss->symbols = (top_symbol*) calloc(total_top_symbols, sizeof(top_symbol));
-  if (!tss->symbols)
-  {
-    throw std::runtime_error("build_arg_tables: out of memory (top_symbols: " + to_string(total_top_symbols) + ")");
-  } */
   tss->toptable_size = (total_top_symbols*5)/4;
   tss->toptable = (top_symbol**) calloc(tss->toptable_size,
                   sizeof(top_symbol*));
@@ -685,11 +676,6 @@ static void build_arg_tables()
     else */
     {
       cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
-      /* cur_entry->top_symbols = (top_symbols_t*)calloc(arity, sizeof(top_symbols_t));
-      if (!cur_entry->top_symbols)
-      {
-        throw std::runtime_error("build_arg_tables: out of memory (arity: " + to_string(arity) + ")");
-      } */
     }
 
     for (cur_arg=0; cur_arg<arity; cur_arg++)
@@ -699,7 +685,7 @@ static void build_arg_tables()
       for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
       {
         aterm term = cur_entry->terms[cur_trm].t;
-        aterm arg = NULL;
+        aterm arg;
         switch (term.type())
         {
           case AT_LIST:
@@ -709,7 +695,7 @@ static void build_arg_tables()
             assert(arity == 2);
             if (cur_arg == 0)
             {
-              arg = list.head();
+              arg = list.front();
             }
             else
             {
@@ -765,7 +751,6 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
   function_symbol sym;
   sym_entry* entry;
 
-// ATfprintf(stderr,"COLLECT %t\n",&*t);
   if (visited.count(t)==0)
   {
     switch (t.type())
@@ -783,7 +768,7 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
         else
         {
           sym = AS_LIST;
-          collect_terms(list.head(),visited);
+          collect_terms(list.front(),visited);
           collect_terms((aterm)(list.tail()),visited);
         }
       }
@@ -877,7 +862,7 @@ static size_t find_term(sym_entry* entry, const aterm t)
     assert(cur);
   }
 
-  return cur - entry->terms;
+  return cur - &entry->terms[0];
 }
 
 /*}}}  */
@@ -977,7 +962,7 @@ static bool write_term(const aterm t, byte_writer* writer)
         else
         {
           trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_LIST.number()]->index];
-          if (!write_arg(trm_sym, list.head(), 0, writer))
+          if (!write_arg(trm_sym, list.front(), 0, writer))
           {
             return false;
           }
@@ -1036,8 +1021,8 @@ static void free_write_space()
   {
     sym_entry* entry = &sym_entries[i];
 
-    free(entry->terms);
-    entry->terms = NULL;
+    // free(entry->terms);
+    // entry->terms = NULL;
     free(entry->termtable);
     entry->termtable = NULL;
 
@@ -1094,11 +1079,6 @@ write_baf(const aterm &t, byte_writer* writer)
   nr_unique_symbols = AT_calcUniqueAFuns(t);
 
   sym_entries = std::vector<sym_entry>(nr_unique_symbols);
-  /* sym_entries = (sym_entry*) calloc(nr_unique_symbols, sizeof(sym_entry));
-  if (!sym_entries)
-  {
-    std::runtime_error("write_baf: out of memory (" + to_string(nr_unique_symbols) + " unique symbols!");
-  } */
 
   /*{{{  Collect all unique symbols in the input term */
 
@@ -1114,12 +1094,7 @@ write_baf(const aterm &t, byte_writer* writer)
       sym_entries[cur].id = lcv;
       sym_entries[cur].arity = function_symbol(lcv).arity();
       sym_entries[cur].nr_terms = entry->count;
-      sym_entries[cur].terms = (trm_bucket*) calloc(entry->count,
-                               sizeof(trm_bucket));
-      if (!sym_entries[cur].terms)
-      {
-        std::runtime_error("write_baf: out of memory (sym: " + ATwriteAFunToString(lcv) + ", terms: " + to_string(entry->count) + ")");
-      }
+      sym_entries[cur].terms.resize(entry->count);
       sym_entries[cur].termtable_size = (entry->count*5)/4;
       sym_entries[cur].termtable =
         (trm_bucket**) calloc(sym_entries[cur].termtable_size,
@@ -1452,29 +1427,29 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
   {
     if (readBits(&val, sym->sym_width[i], reader) < 0)
     {
-      return NULL;
+      return aterm();
     }
     if (val >= sym->nr_topsyms[i])
     {
-      return NULL;
+      return aterm();
     }
     arg_sym = &read_symbols[sym->topsyms[i][val]];
 
     if (readBits(&val, arg_sym->term_width, reader) < 0)
     {
-      return NULL;
+      return aterm();
     }
 
     if (val >= arg_sym->nr_terms)
     {
-      return NULL;
+      return aterm();
     }
-    if (!&*arg_sym->terms[val])
+    if (arg_sym->terms[val]==aterm())
     {
       arg_sym->terms[val] = read_term(arg_sym, reader);
-      if (!&*arg_sym->terms[val])
+      if (arg_sym->terms[val]==aterm())
       {
-        return NULL;
+        return aterm();
       }
     }
 
@@ -1487,7 +1462,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
 
     if (readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
     {
-      return NULL;
+      return aterm();
     }
 
     result = aterm_int((int)val);
@@ -1568,7 +1543,7 @@ static
 aterm read_baf(byte_reader* reader)
 {
   size_t val, nr_unique_terms;
-  aterm result = NULL;
+  aterm result;
 
   /* Initialize bit buffer */
   bit_buffer     = '\0';
@@ -1578,43 +1553,43 @@ aterm read_baf(byte_reader* reader)
 
   if (readInt(&val, reader) < 0)
   {
-    return NULL;
+    return aterm();
   }
 
   if (val == 0)
   {
     if (readInt(&val, reader) < 0)
     {
-      return NULL;
+      return aterm();
     }
   }
 
   if (val != BAF_MAGIC)
   {
     mCRL2log(mcrl2::log::error) << "read_baf: input is not in BAF!" << std::endl;
-    return NULL;
+    return aterm();
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return NULL;
+    return aterm();
   }
 
   if (val != BAF_VERSION)
   {
     mCRL2log(mcrl2::log::error) << "read_baf: wrong BAF version, giving up!" << std::endl;
-    return NULL;
+    return aterm();
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return NULL;
+    return aterm();
   }
   nr_unique_symbols = val;
 
   if (readInt(&nr_unique_terms, reader) < 0)
   {
-    return NULL;
+    return aterm();
   }
 
   /*}}}  */
@@ -1631,12 +1606,12 @@ aterm read_baf(byte_reader* reader)
 
   if (!read_all_symbols(reader))
   {
-    return NULL;
+    return aterm();
   }
 
   if (readInt(&val, reader) < 0)
   {
-    return NULL;
+    return aterm();
   }
 
   result = read_term(&read_symbols[val], reader);

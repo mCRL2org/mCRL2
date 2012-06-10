@@ -131,7 +131,7 @@ writeToTextFile(const aterm &t, FILE* f)
   aterm_list      list;
   std::string     name;
 
-  assert(t->reference_count>0);
+  assert(t->reference_count()>0);
   switch (t.type())
   {
     case AT_INT:
@@ -169,13 +169,13 @@ writeToTextFile(const aterm &t, FILE* f)
       list = (aterm_list) t;
       if (!list.empty())
       {
-        ATwriteToTextFile(list.head(), f);
+        ATwriteToTextFile(list.front(), f);
         list = list.tail();
       }
       while (!list.empty())
       {
         fputc(',', f);
-        ATwriteToTextFile(list.head(), f);
+        ATwriteToTextFile(list.front(), f);
         list = list.tail();
       }
 
@@ -282,12 +282,12 @@ writeToStream(const aterm &t, std::ostream& os)
       list = (aterm_list) t;
       if (!list.empty())
       {
-        topWriteToStream(list.head(), os);
+        topWriteToStream(list.front(), os);
         list = list.tail();
         while (!list.empty())
         {
           os << ",";
-          topWriteToStream(list.head(), os);
+          topWriteToStream(list.front(), os);
           list = list.tail();
         }
       }

@@ -120,14 +120,14 @@ class queue
 
       queue_put.push_back(state);
 
-      return NULL;
+      return aterm();
     }
 
     ATerm get_from_queue()
     {
       if (queue_get.size()==0)
       {
-        return NULL;
+        return aterm();
       }
       else
       {

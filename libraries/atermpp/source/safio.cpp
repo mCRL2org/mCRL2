@@ -244,7 +244,7 @@ static aterm getNextTerm(BinaryWriter binaryWriter)
     else if (type == AT_LIST)
     {
       aterm_list nextList = current->nextPartOfList;
-      next = nextList.head();
+      next = nextList.front();
       current->nextPartOfList = nextList.tail();
 
       current->subTermIndex++;

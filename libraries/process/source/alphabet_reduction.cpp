@@ -1481,7 +1481,7 @@ namespace mcrl2
 
         V = detail::optimize_allow_list(V,untypeMAL(l));
         a = allow(detail::transform_list_back(V),a);
-        assert(l!=NULL);
+        assert(l!=aterm());
         alphas[a]=l;
         return a;
       }

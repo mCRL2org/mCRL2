@@ -219,7 +219,7 @@ ATermAppl NextState::getStateArgument(ATerm state, size_t index)
     case GS_STATE_TREE:
       return info.m_rewriter.convert_from(atermpp::aterm_appl(getTreeElement(state,index)));
     default:
-      return NULL;
+      return aterm_appl();
   }
 }
 
@@ -365,7 +365,7 @@ ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state m
     }
   }
 
-  return NULL;
+  return aterm();
 }
 
 ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
@@ -388,7 +388,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
         valid = false;
         break;
       }
-      if ((match != NULL) && !statearg_match(
+      if ((match != aterm()) && !statearg_match(
                                  data_expression(stateargs[i]),
                                  data_expression(getStateArgument(match,i))))
       {
@@ -414,7 +414,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
     }
   }
 
-  return NULL;
+  return aterm();
 }
 
 ATerm NextState::SetVars(ATerm a, ATermList free_vars)
@@ -579,7 +579,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   info.stateformat = state_format;
   info.pairAFun = AFun("@STATE_PAIR@",2,false);
 
-  info.nil = NULL;
   info.nil = gsMakeNil();
 
   // Declare all constructors to the rewriter to prevent unnecessary compilation.
@@ -615,7 +614,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
-  pars = NULL;
   pars = spec.process().process_parameters();
 
   info.statelen = ATgetLength(pars);
@@ -629,7 +627,6 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     stateAFun_made = false;
   }
 
-  info.procvars = NULL;
   info.procvars = spec.process().process_parameters();
 
   stateargs = std::vector<ATerm>(info.statelen); 
@@ -684,7 +681,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     if (!set)
     {
       mCRL2log(error) << "Parameter '" << atermpp::aterm(ATgetArgument(ATAgetFirst(l),0)) << "' does not have an initial value." << std::endl;
-      initial_state = NULL;
+      initial_state = aterm_appl();
       return;
     }
   }
@@ -698,7 +695,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i],dummy);
   }
 
-  initial_state = NULL;
+  initial_state = aterm_appl();
 
   switch (info.stateformat)
   {
@@ -965,9 +962,9 @@ NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identi
   id = identifier;
   single_summand = SingleSummand;
 
-  cur_state = NULL;
-  cur_act = NULL;
-  cur_nextstate = NULL;
+  cur_state = aterm_appl();
+  cur_act = aterm_appl();
+  cur_nextstate = aterm_list(aterm());
 
   stateargs = std::vector <ATerm>(info.statelen);
 
@@ -1138,7 +1135,7 @@ bool NextStateGenerator::next(mcrl2::lps::multi_action &Transition, ATerm* State
   else
   {
     Transition = mcrl2::lps::multi_action();
-    *State = NULL;
+    *State = aterm_appl();
   }
 
   return false;

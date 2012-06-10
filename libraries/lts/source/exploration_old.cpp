@@ -762,7 +762,7 @@ bool lps2lts_algorithm::generate_lts()
           //
           // First find the lowest index.
 
-          ATermAppl lowest_first_action_parameter=NULL;
+          ATermAppl lowest_first_action_parameter;
 
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
@@ -778,7 +778,7 @@ bool lps2lts_algorithm::generate_lts()
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
-                  if (lowest_first_action_parameter==NULL)
+                  if (lowest_first_action_parameter==atermpp::aterm_appl())
                   {
                     lowest_first_action_parameter=first_argument;
                   }
@@ -940,7 +940,7 @@ bool lps2lts_algorithm::generate_lts()
           //
           // First find the lowest index.
 
-          ATermAppl lowest_first_action_parameter=NULL;
+          ATermAppl lowest_first_action_parameter;
 
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
@@ -956,7 +956,7 @@ bool lps2lts_algorithm::generate_lts()
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
-                  if (lowest_first_action_parameter==NULL)
+                  if (lowest_first_action_parameter==atermpp::aterm_appl())
                   {
                     lowest_first_action_parameter=first_argument;
                   }

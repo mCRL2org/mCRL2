@@ -63,7 +63,7 @@ aterm load_aterm(const std::string& filename)
   {
     fclose(stream);
   }
-  if (term == NULL)
+  if (term == aterm())
   {
     throw mcrl2::runtime_error("could not read a valid ATerm from " + ((stream == stdin)?"stdin":("'" + filename + "'")));
   }

@@ -115,7 +115,7 @@ class data_equation: public atermpp::aterm_appl
     /// \brief Returns the variables of the data equation.
     variable_list variables() const
     {
-      return variable_list(atermpp::list_arg1(appl()));
+      return variable_list(atermpp::list_arg1(*this));
     }
 
     /// \brief Returns the condition of the data equation.

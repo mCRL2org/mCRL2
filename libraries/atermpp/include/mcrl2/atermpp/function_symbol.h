@@ -43,7 +43,6 @@ struct _SymEntry
         next(size_t(-1)),
         reference_count(0),
         id(i),
-        // name(NULL),
         count(c),
         index(in)
     { 
@@ -159,10 +158,10 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
-    std::string name() const
+    const std::string &name() const
     {
       assert(AT_isValidAFun(m_number));
-      return std::string(at_lookup_table[m_number]->name);
+      return at_lookup_table[m_number]->name;
     }
     
     /// \brief Return the number of the function_symbol.
@@ -192,6 +191,10 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return at_lookup_table[m_number]->is_quoted();
     }
     
+    /// \brief Equality test.
+    /// \detail This operator compares the indices of the function symbols. This means
+    ///         that this operation takes constant time.
+    /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -199,6 +202,9 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return m_number==f.m_number;
     }
 
+    /// \brief Inequality test.
+    /// \detail This operator takes constant time.
+    /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -206,6 +212,9 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return m_number!=f.m_number;
     }
 
+    /// \brief Comparison operation.
+    /// \detail This operator takes constant time.
+    /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -213,6 +222,9 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return m_number<f.m_number;
     }
 
+    /// \brief Comparison operation.
+    /// \detail This operator takes constant time.
+    /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -220,6 +232,9 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return m_number>f.m_number;
     }
 
+    /// \brief Comparison operation.
+    /// \detail This operator takes constant time.
+    /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -227,6 +242,9 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       return m_number<=f.m_number;
     }
 
+    /// \brief Comparison operation.
+    /// \detail This operator takes constant time.
+    /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol &f) const
     {
       assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
@@ -235,13 +253,16 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     }
 };
 
-
-// The following afuns are used in bafio.
-
-
+extern const function_symbol AS_UNDEFINED;
 extern const function_symbol AS_INT;
 extern const function_symbol AS_LIST;
 extern const function_symbol AS_EMPTY_LIST;
+
+inline
+std::ostream& operator<<(std::ostream& out, const function_symbol& t)
+{
+  return out << t.name();
+}
 
 
 inline

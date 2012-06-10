@@ -262,7 +262,7 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const size_t i)
     jitty_strat.resize(i+1);
     for( ; oldsize<jitty_strat.size(); ++oldsize)
     {
-      jitty_strat[oldsize]=NULL;
+      jitty_strat[oldsize]=aterm_list(aterm());
     }
   }
 }
@@ -320,7 +320,7 @@ RewriterJitty::RewriterJitty(
     make_jitty_strat_sufficiently_larger(i.value());
     if (it == jitty_eqns.end() )
     {
-      jitty_strat[i.value()] = NULL;
+      jitty_strat[i.value()] = aterm_list(aterm());
     }
     else
     {
@@ -360,7 +360,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
   n = push_front(n,rule);
   jitty_eqns[lhs_head_index] = n;
   make_jitty_strat_sufficiently_larger(lhs_head_index.value());
-  jitty_strat[lhs_head_index.value()] = NULL; //create_strategy(n);
+  jitty_strat[lhs_head_index.value()] = aterm_list(aterm()); //create_strategy(n);
   need_rebuild = true;
 
   return true;
@@ -383,12 +383,12 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
   if (n.empty())
   {
     jitty_eqns.erase( it );
-    jitty_strat[lhs_head_index.value()] = NULL;
+    jitty_strat[lhs_head_index.value()] = aterm_list(aterm());
   }
   else
   {
     jitty_eqns[lhs_head_index] = n;
-    jitty_strat[lhs_head_index.value()] = NULL;//create_strategy(n);
+    jitty_strat[lhs_head_index.value()] = aterm_list(aterm());//create_strategy(n);
     need_rebuild = true;
   }
 
@@ -686,7 +686,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
 
-  aterm_list strat=NULL;
+  aterm_list strat=aterm_list(aterm());
   const size_t arity=term.size();
 
   // MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
@@ -701,7 +701,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   }
 
   make_jitty_strat_sufficiently_larger(op.value());
-  if ((strat = jitty_strat[op.value()])!=NULL)
+  if ((strat = jitty_strat[op.value()])!=aterm())
   {
     std::vector <variable> vars;
     std::vector <atermpp::aterm> vals;
@@ -833,7 +833,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
     {
       const size_t j=opids->first.value();
       make_jitty_strat_sufficiently_larger(j);
-      if (jitty_strat[j]==NULL)
+      if (jitty_strat[j]==aterm())
       {
         jitty_strat[j] = create_strategy(opids->second, this);
       }

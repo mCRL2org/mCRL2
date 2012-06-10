@@ -39,16 +39,14 @@ class term_list:public aterm
   public: // Should become protected.
     detail::_aterm_list<Term> & operator *() const
     {
-      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
-      // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
+      assert(m_term!=NULL && m_term->reference_count()>0);
       return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
     }
 
     detail::_aterm_list<Term> *operator ->() const
     {
       assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
+      assert(m_term->reference_count()>0);
       return reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
     }
 
@@ -87,7 +85,7 @@ class term_list:public aterm
     /// \param l A list.
     term_list(const term_list<Term> &t):aterm(reinterpret_cast<detail::_aterm *>(&*t))
     {
-      assert(m_term==NULL || type() == AT_LIST); // term list can be NULL.
+      assert(m_term==&*aterm() || type() == AT_LIST); // term list can be NULL.
     }
 
     /// \brief Constructor from _aterm_list*.
@@ -96,7 +94,7 @@ class term_list:public aterm
     {
       assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(Term)==sizeof(size_t));
-      assert(t==NULL || type() == AT_LIST); // term list can be NULL. This is generally used to indicate a faulty
+      assert(t==&*aterm() || type() == AT_LIST); // term list can be the undefined aterm(). This is generally used to indicate a faulty
                                             // situation. This used should be discouraged.
     }
 
@@ -120,7 +118,7 @@ class term_list:public aterm
     {
       assert((boost::is_base_of<aterm, Term>::value));
       assert(sizeof(Term)==sizeof(size_t));
-      assert(m_term==NULL || t.type()==AT_LIST); // Term list can be NULL; Generally, this is used to indicate a faulty situation.
+      assert(m_term==&*aterm() || t.type()==AT_LIST); // Term list can be the undefined aterm(); Generally, this is used to indicate a faulty situation.
                                                  // This use should be discouraged.
     }
 
@@ -193,12 +191,11 @@ class term_list:public aterm
       return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
-    /// \brief Returns the head of the list.
+    /// \brief Returns the first element of the list.
     /// \return The term at the head of the list.
-    const Term &head() const
+    const Term &front() const
     {
       return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
-      // return Term(static_cast<detail::_aterm_list<Term>*>(m_term)->head);
     }
 
     /// \brief Returns the size of the term_list.
@@ -220,13 +217,6 @@ class term_list:public aterm
     bool empty() const
     {
       return m_term==reinterpret_cast<detail::_aterm*>(&*empty_list());
-    }
-
-    /// \brief Returns the first element.
-    /// \return The first element of the list.
-    Term front() const
-    {
-      return Term(static_cast<aterm>(static_cast<detail::_aterm_list<Term>*>(m_term)->head));
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -279,7 +269,7 @@ template <typename Term>
 inline
 const Term &front(const term_list<Term> &l)
 {
-  return l.head(); 
+  return l.front(); 
 }
 
 /// \brief Returns the list obtained by inserting a new element at the beginning.
@@ -306,7 +296,7 @@ term_list<Term> push_back(term_list<Term> list, const Term &elem)
   /* Collect all elements of list in buffer */
   for (size_t i=0; i<len; i++)
   {
-    buffer[i] = &*list.head();
+    buffer[i] = &*list.front();
     list = list.tail();
   }
 
@@ -341,7 +331,7 @@ term_list<Term> reverse(term_list<Term> l)
   term_list<Term> result;
   while (!l.empty())
   {
-    result = push_front(result, l.head());
+    result = push_front(result, l.front());
     l = l.tail(); 
   }
   return result;
@@ -360,11 +350,11 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 
   while (l!=term_list<Term>())
   {
-    if (l.head()==t)
+    if (l.front()==t)
     {
       break;
     }
-    buffer[i++] = &*l.head();
+    buffer[i++] = &*l.front();
     l = l.tail();
   }
 
@@ -429,7 +419,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   term_list<Term> list1=l;
   for (size_t i=0; i<len; i++)
   {
-    buffer[i] = &*list1.head();
+    buffer[i] = &*list1.front();
     list1 = list1.tail();
   }
 

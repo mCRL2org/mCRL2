@@ -95,7 +95,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
 ATerm gsSubstValuesTable(const ATermTable &Substs, ATerm Term, const bool Recursive)
 {
   ATerm Result = ATtableGet(Substs, Term);
-  if (&*Result != NULL)
+  if (Result != aterm())
   {
     return Result;
   }

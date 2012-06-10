@@ -604,7 +604,7 @@ void parse_variables(std::istream& in,
   // Parse the variables list.
   std::string text = utilities::read_text(in);
   variable_list data_vars = parse_variables_new(text);
-  aterm_deprecated::ATermList temporary_data_vars = data_vars;
+  atermpp::aterm_list temporary_data_vars = data_vars;
 
   // Type check the variable list.
   /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
@@ -613,7 +613,7 @@ void parse_variables(std::istream& in,
 
   temporary_data_vars = core::type_check_data_vars(data_vars, d);
 
-  if (temporary_data_vars == 0)
+  if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
   {
     throw mcrl2::runtime_error("Error while type checking data variable declarations.");
   }

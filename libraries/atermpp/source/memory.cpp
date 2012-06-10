@@ -71,13 +71,13 @@ static void resize_hashtable()
 
     while (aterm_walker)
     {
-      assert(aterm_walker->reference_count>0);
-      detail::_aterm* next = aterm_walker->next;
+      assert(aterm_walker->reference_count()>0);
+      detail::_aterm* next = aterm_walker->next();
       const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & table_mask;
       assert(hnr<new_hashtable.size());
-      aterm_walker->next = new_hashtable[hnr];
+      aterm_walker->next() = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
-      assert(aterm_walker->next!=aterm_walker);
+      assert(aterm_walker->next()!=aterm_walker);
       aterm_walker = next;
     }
   }
@@ -97,10 +97,10 @@ bool check_that_all_objects_are_free()
     {
       for(detail::_aterm* p=(detail::_aterm*)b->data; p!=NULL && ((b==ti->at_block && p<(detail::_aterm*)ti->top_at_blocks) || p<(detail::_aterm*)b->end); p=p + size)
       {
-        if (p->reference_count!=0 && p->m_function_symbol!=AS_EMPTY_LIST)
+        if (p->reference_count()!=0 && p->function()!=AS_EMPTY_LIST)
         {
           fprintf(stderr,"CHECK: Non free term %p (size %lu). ",&*p,size);
-          fprintf(stderr,"Reference count %ld\n",p->reference_count);
+          fprintf(stderr,"Reference count %ld\n",p->reference_count());
           result=false;
         }
       }
@@ -146,8 +146,6 @@ static void allocate_block(size_t size)
   ti.at_block = newblock;
   ti.top_at_blocks = newblock->data;
   assert(ti.at_block != NULL);
-  assert(((size_t)ti.top_at_blocks % MAX(sizeof(double), sizeof(void*))) == 0);
-
   assert(ti.at_freelist == NULL);
 }
 
@@ -175,17 +173,17 @@ detail::_aterm* detail::allocate_term(const size_t size)
     /* the first block is not full: allocate a cell */
     at = (detail::_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
-    at->reference_count=0;
-    new (&at->m_function_symbol) function_symbol;  // placement new, as the memory calloc'ed.
+    at->reference_count()=0;
+    new (&at->function()) function_symbol;  // placement new, as the memory calloc'ed.
   }
   else if (ti.at_freelist)
   {
     /* the freelist is not empty: allocate a cell */
     at = ti.at_freelist;
-    ti.at_freelist = ti.at_freelist->next;
+    ti.at_freelist = ti.at_freelist->next();
     assert(ti.at_block != NULL);
     assert(ti.top_at_blocks == ti.at_block->end);
-    assert(at->reference_count==0);
+    assert(at->reference_count()==0);
   }
   else
   {
@@ -194,8 +192,8 @@ detail::_aterm* detail::allocate_term(const size_t size)
     assert(ti.at_block != NULL);
     at = (detail::_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
-    at->reference_count=0;
-    new (&at->m_function_symbol) function_symbol;  // placement new, as the memory calloc'ed.
+    at->reference_count()=0;
+    new (&at->function()) function_symbol;  // placement new, as the memory calloc'ed.
   }
 
   total_nodes++;
@@ -218,13 +216,13 @@ aterm::aterm(const function_symbol &sym)
   cur = *hashspot;
   while (cur)
   {
-    if (cur->m_function_symbol==sym)
+    if (cur->function()==sym)
     {
       /* Promote current entry to front of hashtable */
       if (prev!=NULL)
       {
-        prev->next = cur->next;
-        cur->next = (detail::_aterm*) &**hashspot;
+        prev->next() = cur->next();
+        cur->next() = (detail::_aterm*) &**hashspot;
         *hashspot = cur;
       }
 
@@ -233,14 +231,14 @@ aterm::aterm(const function_symbol &sym)
       return;
     }
     prev = cur;
-    cur = cur->next;
+    cur = cur->next();
   }
 
   cur = detail::allocate_term(TERM_SIZE_APPL(0));
   /* Delay masking until after allocate */
   hnr &= table_mask;
-  cur->m_function_symbol = sym;
-  cur->next = &*detail::hashtable()[hnr];
+  cur->function() = sym;
+  cur->next() = &*detail::hashtable()[hnr];
   detail::hashtable()[hnr] = cur;
 
   m_term=cur;
@@ -274,9 +272,9 @@ aterm_int::aterm_int(int val)
   hnr = FINISH(hnr);
 
   cur = detail::hashtable()[hnr & table_mask];
-  while (cur && (cur->m_function_symbol!=AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
+  while (cur && (cur->function()!=AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
   {
-    cur = cur->next;
+    cur = cur->next();
   }
 
   if (!cur)
@@ -284,11 +282,11 @@ aterm_int::aterm_int(int val)
     cur = detail::allocate_term(TERM_SIZE_INT);
     /* Delay masking until after allocate */
     hnr &= table_mask;
-    cur->m_function_symbol = AS_INT;
+    cur->function() = AS_INT;
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
     // reinterpret_cast<detail::_aterm_int*>(cur)->value = _val.value;
 
-    cur->next = detail::hashtable()[hnr];
+    cur->next() = detail::hashtable()[hnr];
     detail::hashtable()[hnr] = cur;
   }
 

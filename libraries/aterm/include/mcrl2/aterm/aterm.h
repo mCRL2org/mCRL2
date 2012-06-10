@@ -148,6 +148,25 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList args)
   return term_appl<aterm>(sym,args.begin(), args.end());
 }
 
+inline 
+ATermAppl ATmakeAppl_varargs(const AFun &sym, ...) 
+{ 
+  va_list args; 
+  const size_t arity = sym.arity(); 
+   
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity); 
+ 
+  va_start(args, sym); 
+  for (size_t i=0; i<arity; i++) 
+  { 
+    detail::_aterm* arg = va_arg(args, detail::_aterm *); 
+    CHECK_TERM(arg); 
+    buffer[i] = arg; 
+  } 
+  va_end(args); 
+  return aterm_appl(sym,buffer,buffer+arity); 
+} 
+
 inline
 const ATerm ATgetArgument(const ATermAppl &appl, const size_t idx)
 {
@@ -529,7 +548,7 @@ inline bool ATisInt(const ATerm &t)
 /**
  * \brief Condition on an Aterm
  * \param[in] t an ATerm
- * \return t is NULL or an ATermAppl
+ * \return t is the undefined ATerm or an ATermAppl
  **/
 inline bool ATisApplOrNull(const ATerm &t)
 {
@@ -539,7 +558,7 @@ inline bool ATisApplOrNull(const ATerm &t)
 /**
  * \brief Condition on an Aterm
  * \param[in] t an ATerm
- * \return t is NULL or an ATermList
+ * \return t is the undefined ATerm or an ATermList
  **/
 inline bool ATisListOrNull(const ATerm &t)
 {

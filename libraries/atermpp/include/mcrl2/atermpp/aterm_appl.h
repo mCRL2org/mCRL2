@@ -27,27 +27,19 @@ namespace atermpp
 template <class Term>
 class term_appl:public aterm
 {
-  protected:
-    /// \brief Conversion operator.
-    /// \return The wrapped aterm.
-    detail::_aterm_appl<Term>* appl() const
-    {
-      return static_cast<detail::_aterm_appl<Term>*>(m_term);
-    }
-
   public: // Should become protected.
     detail::_aterm_appl<Term> & operator *() const
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
       // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
+      assert(m_term->reference_count()>0);
       return *reinterpret_cast<detail::_aterm_appl<Term>*>(m_term); 
     }
 
     detail::_aterm_appl<Term> *operator ->() const
     {
       assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
+      assert(m_term->reference_count()>0);
       return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
@@ -177,7 +169,7 @@ class term_appl:public aterm
     /// \param t6 The sixth argument.
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6);
 
-    /// \brief assignment operator
+    /// \brief The assignment operator
     /// \param t The assigned term
     term_appl &operator=(const term_appl &t)
     {
@@ -189,14 +181,14 @@ class term_appl:public aterm
     /// \return The number of arguments of this term.
     size_type size() const
     {
-      return m_term->m_function_symbol.arity();
+      return m_term->function().arity();
     }
 
     /// \brief Returns true if the term has no arguments.
     /// \return True if this term has no arguments.
     bool empty() const
     {
-      return m_term->m_function_symbol.arity()==0;
+      return size()==0;
     }
 
     /// \brief Returns an iterator pointing to the first argument.

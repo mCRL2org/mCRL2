@@ -25,14 +25,14 @@ class aterm_int:public aterm
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
       // which is done quite commonly.
-      assert(m_term==NULL || m_term->reference_count>0);
+      assert(m_term->reference_count()>0);
       return *reinterpret_cast<detail::_aterm_int*>(m_term); 
     }
 
     detail::_aterm_int *operator ->() const
     {
       assert(m_term!=NULL);
-      assert(m_term->reference_count>0);
+      assert(m_term->reference_count()>0);
       return reinterpret_cast<detail::_aterm_int*>(m_term);
     }
 

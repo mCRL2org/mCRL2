@@ -38,6 +38,7 @@ size_t function_symbol::first_free = size_t(-1);
 
 std::vector < _SymEntry* > function_symbol::at_lookup_table;
 
+const function_symbol AS_UNDEFINED("<undefined>", 0);
 const function_symbol AS_INT("<int>", 0);
 const function_symbol AS_LIST("[_,_]", 2);
 const function_symbol AS_EMPTY_LIST("[]", 0);

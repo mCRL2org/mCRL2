@@ -63,9 +63,9 @@ class state_label_lts : public atermpp::aterm_appl
     {
       if (arity>=vector_templates.size())
       {
-        vector_templates.resize(arity+1,NULL);
+        vector_templates.resize(arity+1);
       }
-      if (vector_templates[arity]==NULL)
+      if (vector_templates[arity]==atermpp::aterm_appl())
       {
         atermpp::aterm_appl stub(atermpp::function_symbol("STUB",0,false));
         atermpp::aterm_list l;

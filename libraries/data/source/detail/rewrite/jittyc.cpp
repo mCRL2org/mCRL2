@@ -594,12 +594,12 @@ static aterm_appl build_tree(build_pars pars, int i)
       m = push_front<aterm>(m,ATgetNext(e));
     }
 
-    aterm_appl r = NULL;
+    aterm_appl r;
     aterm_list readies = ATmakeList0();
 
     pars.stack = add_to_stack(pars.stack,m,&r,&readies);
 
-    if (r==NULL)
+    if (r==aterm_appl())
     {
       aterm_appl tree;
 
@@ -647,14 +647,14 @@ static aterm_appl build_tree(build_pars pars, int i)
     pars.Mlist = m;
 
     aterm_appl true_tree,false_tree;
-    aterm_appl r = NULL;
+    aterm_appl r ;
     aterm_list readies = ATmakeList0();
 
     aterm_list newstack = add_to_stack(pars.stack,l,&r,&readies);
 
     false_tree = build_tree(pars,i);
 
-    if (r==NULL)
+    if (r==aterm_appl())
     {
       pars.stack = newstack;
       true_tree = build_tree(pars,i);
@@ -720,7 +720,7 @@ static aterm_appl build_tree(build_pars pars, int i)
   {
     aterm_list l;
 
-    aterm_appl r = NULL;
+    aterm_appl r;
     aterm_list readies = ATmakeList0();
 
     pars.stack = push_front<aterm>(pars.stack,ATmakeList0());
@@ -729,7 +729,7 @@ static aterm_appl build_tree(build_pars pars, int i)
     add_to_build_pars(&pars,l,&r,&readies);
 
 
-    if (r==NULL)
+    if (r==aterm_appl())
     {
       aterm_appl t = build_tree(pars,i);
 
@@ -765,14 +765,14 @@ static aterm_appl build_tree(build_pars pars, int i)
     else
     {
       aterm_list l = ATLgetFirst(pars.stack);
-      aterm_appl r = NULL;
+      aterm_appl r ;
       aterm_list readies = ATmakeList0();
 
       pars.stack = push_front<aterm>(ATgetNext(pars.stack),ATmakeList0());
       add_to_build_pars(&pars,l,&r,&readies);
 
       aterm_appl tree;
-      if (r==NULL)
+      if (r==aterm_appl())
       {
         tree = build_tree(pars,i);
         for (; !readies.empty(); readies=ATgetNext(readies))
@@ -818,14 +818,14 @@ static aterm_appl create_tree(const data_equation_list &rules, int /*opid*/, int
 
   // Generate initial parameters for built_tree
   build_pars init_pars;
-  aterm_appl r = NULL;
+  aterm_appl r;
   aterm_list readies = ATmakeList0();
 
   initialise_build_pars(&init_pars);
   add_to_build_pars(&init_pars,rule_seqs,&r,&readies);
 
   aterm_appl tree;
-  if (r==NULL)
+  if (r==aterm_appl())
   {
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
     treevars_usedcnt = a;
@@ -1334,12 +1334,12 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   }
   else if (/*ATisAppl(t) && */ gsIsNil((aterm_appl) t))
   {
-    return (nnfvars==NULL) || (ATindexOf(nnfvars, ATmakeInt(startarg)) == ATERM_NON_EXISTING_POSITION);
+    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars, ATmakeInt(startarg)) == ATERM_NON_EXISTING_POSITION);
   }
   else if (/* ATisAppl(t) && */ gsIsDataVarId((aterm_appl) t))
   {
     assert(ATisAppl(t) && gsIsDataVarId((aterm_appl) t));
-    return (nnfvars==NULL) || (ATindexOf(nnfvars,t) == ATERM_NON_EXISTING_POSITION);
+    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars,t) == ATERM_NON_EXISTING_POSITION);
   }
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
@@ -1613,7 +1613,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         ss << ":";
         bool c = rewr;
-        if (rewr && (nnfvars!=NULL) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION))
+        if (rewr && (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION))
         {
           ss << "rewrite(";
           c = false;
@@ -1671,7 +1671,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "&*";
     } */
-    assert(nnfvars!=NULL);
+    assert(nnfvars!=aterm_list(aterm()));
     bool b = (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
     if (rewr && b)
     {
@@ -1696,7 +1696,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "(aterm_appl)";
     } */
-    const bool b = (nnfvars!=NULL) && (ATindexOf(nnfvars,t) != ATERM_NON_EXISTING_POSITION);
+    const bool b = (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars,t) != ATERM_NON_EXISTING_POSITION);
     const variable v=variable((aterm_appl)t);
     string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
@@ -2505,7 +2505,7 @@ static aterm toInner_list_odd(const data_expression &t)
                      (aterm_list)reverse(translated_assignments));
   }
   assert(0);
-  return NULL;
+  return aterm();
 }
 
 

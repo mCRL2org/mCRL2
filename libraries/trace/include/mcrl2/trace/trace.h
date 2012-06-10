@@ -648,7 +648,7 @@ class Trace
       is.clear();
 
       atermpp::aterm t = atermpp::ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
-      if (t == NULL)
+      if (t == atermpp::aterm())
       {
         throw runtime_error("failed to read aterm from stream");
       }
@@ -676,7 +676,7 @@ class Trace
       for (; !trace.empty(); trace=trace.tail())
       {
         using namespace mcrl2::lps;
-        atermpp::aterm e = trace.head();
+        atermpp::aterm e = trace.front();
 
         if (e.type()==atermpp::AT_APPL && core::detail::gsIsMultAct(static_cast<atermpp::aterm_appl>(e)))   // To be compatible with old untimed version
         {
@@ -701,7 +701,7 @@ class Trace
           mcrl2::lps::state s;
           for( ; !l.empty() ; l=l.tail())
           {
-            s.push_back(mcrl2::data::data_expression(l.head()));
+            s.push_back(mcrl2::data::data_expression(l.front()));
           }
           setState(s);
         }

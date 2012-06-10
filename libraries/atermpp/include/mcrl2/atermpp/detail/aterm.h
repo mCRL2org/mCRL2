@@ -15,11 +15,38 @@ static const size_t AT_LIST = 3;
 namespace detail
 {
 
-struct _aterm
+class _aterm
 {
-    function_symbol    m_function_symbol;
-    size_t  reference_count;
-    _aterm* next;
+  protected:
+    function_symbol m_function_symbol;
+    size_t  m_reference_count;
+    _aterm* m_next;
+
+  public:
+    function_symbol &function() 
+    {
+      return m_function_symbol;
+    }
+
+    const function_symbol &function() const
+    {
+      return m_function_symbol;
+    }
+
+    size_t &reference_count()
+    {
+      return m_reference_count;
+    }
+
+    const size_t &reference_count() const 
+    {
+      return m_reference_count;
+    }
+
+    _aterm* &next()
+    {
+      return m_next;
+    }
 
     size_t type() const
     {
@@ -34,17 +61,12 @@ struct _aterm
       return AT_APPL;
     }
 
-    const function_symbol function() const
-    {
-      return m_function_symbol;
-    }
-
 };
 
 
 extern std::vector <detail::_aterm*>& hashtable();
 detail::_aterm* allocate_term(const size_t size);
-void free_term(detail::_aterm *t);
+// void free_term(detail::_aterm *t);
 
 inline size_t term_size(const detail::_aterm *t);
 inline HashNumber hash_number(const detail::_aterm *t, const size_t size);
