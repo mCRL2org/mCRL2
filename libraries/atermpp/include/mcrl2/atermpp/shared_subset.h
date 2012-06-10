@@ -191,17 +191,25 @@ class shared_subset
 
             while (true)
             {
+              bdd_node start;
+              size_t bit;
+
               if (path_stack_index == 0)
               {
-                m_index = -1;
-                return;
+                start = m_subset->m_bdd_root;
+                bit = m_subset->m_bits;
+              }
+              else
+              {
+                start = node;
+                bit = path_stack[path_stack_index - 1].bit();
               }
 
-              size_t bit = path_stack[path_stack_index - 1].bit();
-              if (!node.is_false())
+              if (!start.is_false())
               {
+                assert(start.is_node());
                 bool found = false;
-                for (size_t i = node.bit() + 1; i < bit; i++)
+                for (size_t i = start.bit() + 1; i < bit; i++)
                 {
                   if (!(m_index & (1UL << i)))
                   {
@@ -217,12 +225,20 @@ class shared_subset
                 }
               }
 
-              node = path_stack[--path_stack_index];
-              if (!(m_index & (1UL << bit)) && !node.true_node().is_false())
+              if (path_stack_index == 0)
               {
-                m_index |= (1UL << bit);
-                m_index &= ~((1UL << bit) - 1);
-                break;
+                m_index = -1;
+                return;
+              }
+              else
+              {
+                node = path_stack[--path_stack_index];
+                if (!(m_index & (1UL << bit)) && !node.true_node().is_false())
+                {
+                  m_index |= (1UL << bit);
+                  m_index &= ~((1UL << bit) - 1);
+                  break;
+                }
               }
             }
           }
@@ -245,6 +261,15 @@ class shared_subset
       {
         m_bits++;
       }
+
+#ifndef NDEBUG
+      size_t index = 0;
+      for (iterator i = begin(); i != end(); i++)
+      {
+        assert(i.index() == index++);
+      }
+      assert(index == m_set->size());
+#endif
     }
 
     template <class Predicate>
@@ -339,6 +364,26 @@ class shared_subset
       }
 
       m_bdd_root = trees[m_bits];
+
+#ifndef NDEBUG
+      iterator i = set.begin();
+      iterator j = begin();
+      while (i != set.end() && !p(*i))
+      {
+        i++;
+      }
+      while (i != set.end() && j != end())
+      {
+        assert (&*i == &*j);
+        i++;
+        j++;
+        while (i != set.end() && !p(*i))
+        {
+          i++;
+        }
+      }
+      assert (i == set.end() && j == end());
+#endif
     }
 
     iterator begin() const
