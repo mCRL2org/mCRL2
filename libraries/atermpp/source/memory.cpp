@@ -97,7 +97,7 @@ bool check_that_all_objects_are_free()
     {
       for(detail::_aterm* p=(detail::_aterm*)b->data; p!=NULL && ((b==ti->at_block && p<(detail::_aterm*)ti->top_at_blocks) || p<(detail::_aterm*)b->end); p=p + size)
       {
-        if (p->reference_count()!=0 && p->function()!=AS_EMPTY_LIST)
+        if (p->reference_count()!=0 && p->function()!=AS_EMPTY_LIST())
         {
           fprintf(stderr,"CHECK: Non free term %p (size %lu). ",&*p,size);
           fprintf(stderr,"Reference count %ld\n",p->reference_count());
@@ -109,7 +109,7 @@ bool check_that_all_objects_are_free()
 
   for(size_t i=0; i<function_symbol::at_lookup_table.size(); ++i)
   {
-    if (i!=AS_EMPTY_LIST.number() && function_symbol::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=AS_EMPTY_LIST().number() && function_symbol::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
@@ -267,12 +267,12 @@ aterm_int::aterm_int(int val)
   _val.value = val;
 
   // header_type header = INT_HEADER;
-  HashNumber hnr = START(AS_INT.number());
+  HashNumber hnr = START(AS_INT().number());
   hnr = COMBINE(hnr, _val.reserved);
   hnr = FINISH(hnr);
 
   cur = detail::hashtable()[hnr & table_mask];
-  while (cur && (cur->function()!=AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
+  while (cur && (cur->function()!=AS_INT() || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
   {
     cur = cur->next();
   }
@@ -282,7 +282,7 @@ aterm_int::aterm_int(int val)
     cur = detail::allocate_term(TERM_SIZE_INT);
     /* Delay masking until after allocate */
     hnr &= table_mask;
-    cur->function() = AS_INT;
+    cur->function() = AS_INT();
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
     // reinterpret_cast<detail::_aterm_int*>(cur)->value = _val.value;
 

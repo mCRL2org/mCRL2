@@ -32,7 +32,7 @@ class term_list:public aterm
 
     static const term_list<Term>& empty_list()
     { 
-      static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST));
+      static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST()));
       return m_empty_list;
     } 
 
@@ -79,6 +79,7 @@ class term_list:public aterm
     /// Default constructor. Creates an empty list.
     term_list ():aterm(reinterpret_cast<detail::_aterm*>(&*empty_list()))
     {
+      *this != aterm();
     }
 
     /// \brief Copy construction.

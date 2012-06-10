@@ -73,7 +73,7 @@ class aterm
   
     static const aterm &undefined_aterm()
     {
-      static const aterm t(AS_UNDEFINED);
+      static const aterm t(AS_DEFAULT());
       return t;
     }
     
@@ -95,7 +95,7 @@ class aterm
   public:
 
     /// \brief Default constructor
-    aterm ():m_term(&*undefined_aterm())
+    aterm ():m_term(undefined_aterm().m_term)
     {
       increase_reference_count<false>(m_term);
     }

@@ -82,7 +82,11 @@ HashNumber FINISH(const HashNumber hnr)
 }
 
 inline
-void CHECK_TERM(const aterm &t)
+void CHECK_TERM(const aterm &
+#ifndef NDEBUG 
+t
+#endif
+)
 {
   assert(t != aterm());
   assert(t->reference_count()>0);
@@ -93,7 +97,7 @@ extern HashNumber table_mask;
 
 inline size_t detail::term_size(const detail::_aterm *t)
 {
-  if (t->function()==AS_INT)
+  if (t->function()==AS_INT())
   {
     return TERM_SIZE_INT;
   }
@@ -152,6 +156,12 @@ void aterm::free_term()
 {
   detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
+  if (function().number()<2) // The default term and the empty list are not removed,
+                             // as the datastructures may not exist anymore when this 
+                             // happens.
+  {
+    return;
+  } 
   remove_from_hashtable(t);  // Remove from hash_table
 
   for(size_t i=0; i<function().arity(); ++i)
@@ -171,7 +181,7 @@ void aterm::free_term()
   ti.at_freelist = t; 
 
 #ifndef NDEBUG
-  if (function_symbol_index==AS_INT.number() && ref_count==1) // When destroying ATempty, it appears that all other terms have been removed.
+  if (function_symbol_index==AS_INT().number() && ref_count==1) // When destroying ATempty, it appears that all other terms have been removed.
   {
     assert(check_that_all_objects_are_free());
     return;
@@ -313,7 +323,6 @@ template <class Term>
 term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
 {
   detail::_aterm* cur, *prev, **hashspot;
-
   assert(sym.arity()==1);
   CHECK_TERM(arg0);
 
@@ -714,7 +723,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
 template <class Term>
 term_list<Term> push_front(const term_list<Term> &tail, const Term &el)
 {
-  return static_cast<term_list<Term> > (term_appl<aterm> (AS_LIST,el,tail));
+  return static_cast<term_list<Term> > (term_appl<aterm> (AS_LIST(),el,tail));
 }
 
 

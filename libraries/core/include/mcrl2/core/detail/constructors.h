@@ -35,7 +35,7 @@ const atermpp::aterm_appl& constructString()
 inline
 const atermpp::aterm_list& constructList()
 {
-  static atermpp::aterm_list t = atermpp::aterm_list(ATmakeList0());
+  static atermpp::aterm_list t = atermpp::aterm_list();
   return t;
 }
 

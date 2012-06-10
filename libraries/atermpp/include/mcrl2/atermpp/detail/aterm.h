@@ -50,11 +50,11 @@ class _aterm
 
     size_t type() const
     {
-      if (m_function_symbol.number()==AS_LIST.number() || m_function_symbol.number()==AS_EMPTY_LIST.number())
+      if (m_function_symbol.number()==AS_LIST().number() || m_function_symbol.number()==AS_EMPTY_LIST().number())
       {
         return AT_LIST;
       }
-      else if (m_function_symbol.number()==AS_INT.number())
+      else if (m_function_symbol.number()==AS_INT().number())
       {
         return AT_INT;
       }

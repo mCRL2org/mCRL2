@@ -45,7 +45,7 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
   switch (t.type())
   {
     case AT_INT:
-      if (!function_symbol::at_lookup_table[AS_INT.number()]->count++)
+      if (!function_symbol::at_lookup_table[AS_INT().number()]->count++)
       {
         nr_unique = 1;
       }
@@ -69,7 +69,7 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
       while (list!=aterm_list() && visited.count(list)==0)
       {
         visited.insert(list);
-        if (!function_symbol::at_lookup_table[AS_LIST.number()]->count++)
+        if (!function_symbol::at_lookup_table[AS_LIST().number()]->count++)
         {
           nr_unique++;
         }
@@ -79,7 +79,7 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
       if (list==aterm_list() && visited.count(list)==0)
       {
         visited.insert(list);
-        if (!function_symbol::at_lookup_table[AS_EMPTY_LIST.number()]->count++)
+        if (!function_symbol::at_lookup_table[AS_EMPTY_LIST().number()]->count++)
         {
           nr_unique++;
         }
@@ -182,7 +182,6 @@ class sym_entry
     sym_entry():
       arity(0),
       nr_terms(0),
-      terms(NULL),
       top_symbols(0),
       termtable_size(0),
       termtable(NULL),
@@ -568,10 +567,10 @@ static sym_entry* get_top_symbol(const aterm t)
   switch (t.type())
   {
     case AT_INT:
-      sym = AS_INT;
+      sym = AS_INT();
       break;
     case AT_LIST:
-      sym = (t==aterm_list() ? AS_EMPTY_LIST : AS_LIST);
+      sym = (t==aterm_list() ? AS_EMPTY_LIST() : AS_LIST());
       break;
     case AT_APPL:
       sym = t.function();
@@ -756,18 +755,18 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
     switch (t.type())
     {
       case AT_INT:
-        sym = AS_INT;
+        sym = AS_INT();
         break;
       case AT_LIST:
       {
         aterm_list list(t);
         if (list==aterm_list())
         {
-          sym = AS_EMPTY_LIST;
+          sym = AS_EMPTY_LIST();
         }
         else
         {
-          sym = AS_LIST;
+          sym = AS_LIST();
           collect_terms(list.front(),visited);
           collect_terms((aterm)(list.tail()),visited);
         }
@@ -950,18 +949,18 @@ static bool write_term(const aterm t, byte_writer* writer)
         {
           return false;
         }
-        trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_INT.number()]->index];
+        trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_INT().number()]->index];
         break;
       case AT_LIST:
       {
         aterm_list list (t);
         if (list==aterm_list())
         {
-          trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_EMPTY_LIST.number()]->index];
+          trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_EMPTY_LIST().number()]->index];
         }
         else
         {
-          trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_LIST.number()]->index];
+          trm_sym = &sym_entries[function_symbol::at_lookup_table[AS_LIST().number()]->index];
           if (!write_arg(trm_sym, list.front(), 0, writer))
           {
             return false;
@@ -1456,7 +1455,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
     args[i] = arg_sym->terms[val];
   }
 
-  if (sym->sym==AS_INT)
+  if (sym->sym==AS_INT())
   {
     /*{{{  Read an integer */
 
@@ -1469,11 +1468,11 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
 
       /*}}}  */
   }
-  else if (sym->sym==AS_LIST)
+  else if (sym->sym==AS_LIST())
   {
       result = push_front((aterm_list)args[1], args[0]);
   }
-  else if (sym->sym==AS_EMPTY_LIST)
+  else if (sym->sym==AS_EMPTY_LIST())
   {
     result = aterm_list();
   }

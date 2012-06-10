@@ -70,7 +70,6 @@ void at_free_afun(const size_t n);
 inline
 bool AT_isValidAFun(const size_t sym);
 
-
 class function_symbol
 {
   protected:
@@ -153,6 +152,7 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     /// \brief Destructor
     ~function_symbol()
     {
+if (this->number()!=size_t(-1)) fprintf(stderr,"DESTROY FUN %ld  %s\n",this->number(),this->name().c_str());
       decrease_reference_count(m_number);
     }
 
@@ -253,14 +253,38 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     }
 };
 
-extern const function_symbol AS_UNDEFINED;
-extern const function_symbol AS_INT;
-extern const function_symbol AS_LIST;
-extern const function_symbol AS_EMPTY_LIST;
+// Intentionally use a pointer below to avoid destruction.
+static const function_symbol &AS_DEFAULT()
+{
+  static const function_symbol *fun=new function_symbol("-+$+-", 0);
+  return *fun;
+}
+
+static const function_symbol &AS_INT()
+{
+  static const function_symbol *fun= new function_symbol("<int>", 0);
+  return *fun;
+}
+
+static const function_symbol &AS_LIST()
+{
+  static const function_symbol *fun=new function_symbol("[_,_]", 2);
+  return *fun;
+}
+
+static const function_symbol &AS_EMPTY_LIST()
+{
+  static const function_symbol *fun=new function_symbol("[]", 0);
+  return *fun;
+}
 
 inline
 std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 {
+  if (t==function_symbol())
+  {
+    return out << std::string("UNDEFINED");
+  }
   return out << t.name();
 }
 

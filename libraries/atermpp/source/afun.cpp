@@ -23,30 +23,21 @@ static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
 
 static const size_t MAGIC_PRIME = 7;
 
-/*}}}  */
-/*{{{  globals */
-
 char afun_id[] = "$Id$";
 
 static size_t afun_table_class = INITIAL_AFUN_TABLE_CLASS;
 static size_t afun_table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
 static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
-static std::vector < size_t > afun_hashtable(afun_table_size,size_t(-1));
+static std::vector < size_t > &afun_hashtable()
+{
+  static std::vector < size_t > hashtable(afun_table_size,size_t(-1));
+  return hashtable;
+}
 
 size_t function_symbol::first_free = size_t(-1);
 
 std::vector < _SymEntry* > function_symbol::at_lookup_table;
-
-const function_symbol AS_UNDEFINED("<undefined>", 0);
-const function_symbol AS_INT("<int>", 0);
-const function_symbol AS_LIST("[_,_]", 2);
-const function_symbol AS_EMPTY_LIST("[]", 0);
-
-// static std::multiset < function_symbol > protected_symbols;
-
-
-/*}}}  */
 
 /*{{{  function declarations */
 
@@ -67,8 +58,8 @@ static void resize_table()
   afun_table_size  = AT_TABLE_SIZE(afun_table_class);
   afun_table_mask  = AT_TABLE_MASK(afun_table_class);
 
-  afun_hashtable.clear();
-  afun_hashtable.resize(afun_table_size,size_t(-1));
+  afun_hashtable().clear();
+  afun_hashtable().resize(afun_table_size,size_t(-1));
 
   for (size_t i=0; i<function_symbol::at_lookup_table.size(); i++)
   {
@@ -77,8 +68,8 @@ static void resize_table()
     
     HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
     hnr &= afun_table_mask;
-    entry->next = afun_hashtable[hnr];
-    afun_hashtable[hnr] = i;
+    entry->next = afun_hashtable()[hnr];
+    afun_hashtable()[hnr] = i;
   }
 }
 
@@ -218,9 +209,8 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
 function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
 {
   const HashNumber hnr = AT_hashAFun(name, arity) & afun_table_mask;
-
   /* Find symbol in table */
-  size_t cur = afun_hashtable[hnr];
+  size_t cur = afun_hashtable()[hnr];
   while (cur!=size_t(-1) && !(at_lookup_table[cur]->arity()==arity &&
                               at_lookup_table[cur]->is_quoted()==quoted &&
                               at_lookup_table[cur]->name==name))
@@ -256,8 +246,8 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
 
     at_lookup_table[cur]->name = name;
 
-    at_lookup_table[cur]->next = afun_hashtable[hnr];
-    afun_hashtable[hnr] = cur;
+    at_lookup_table[cur]->next = afun_hashtable()[hnr];
+    afun_hashtable()[hnr] = cur;
   }
 
   m_number=cur;
@@ -287,14 +277,14 @@ void at_free_afun(const size_t n)
   const HashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & afun_table_mask;
 
   /* Update hashtable */
-  if (afun_hashtable[hnr] == n)
+  if (afun_hashtable()[hnr] == n)
   {
-    afun_hashtable[hnr] = sym->next;
+    afun_hashtable()[hnr] = sym->next;
   }
   else
   {
     size_t cur;
-    size_t prev = afun_hashtable[hnr];
+    size_t prev = afun_hashtable()[hnr];
     for (cur = function_symbol::at_lookup_table[prev]->next; cur != n; prev = cur, cur = function_symbol::at_lookup_table[cur]->next)
     {
       assert(cur != size_t(-1));
