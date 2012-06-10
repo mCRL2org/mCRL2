@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include <iostream>
 #include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2 {
@@ -62,7 +63,23 @@ class pfnf_implication
     {
       split_pfnf_implication(x, m_g, m_v);
     }
+
+    const pbes_expression& g() const
+    {
+      return m_g;
+    }
+
+    const std::vector<propositional_variable_instantiation>& variables() const
+    {
+      return m_v;
+    }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const pfnf_implication& x)
+{
+  return out << pbes_system::pp(imp(x.g(), pbes_expr::join_or(x.variables().begin(), x.variables().end())));
+}
 
 // represents forall d:D or exists d:D
 class pfnf_quantifier
@@ -75,6 +92,16 @@ class pfnf_quantifier
     pfnf_quantifier(bool is_forall, const data::variable_list& variables)
       : m_is_forall(is_forall), m_variables(variables)
     {}
+
+    bool is_forall() const
+    {
+      return m_is_forall;
+    }
+
+    const data::variable_list& variables() const
+    {
+      return m_variables;
+    }
 };
 
 // represents Qq: Q. h /\ implications
@@ -123,6 +150,31 @@ class pfnf_equation
         m_implications.push_back(pfnf_implication(*i));
       }
     }
+
+    const core::identifier_string& name() const
+    {
+      return m_name;
+    }
+
+    const std::vector<data::variable>& parameters() const
+    {
+      return m_parameters;
+    }
+
+    const std::vector<pfnf_quantifier>& quantifiers() const
+    {
+      return m_quantifiers;
+    }
+
+    const pbes_expression& h() const
+    {
+      return m_h;
+    }
+
+    const std::vector<pfnf_implication>& implications() const
+    {
+      return m_implications;
+    }
 };
 
 // explicit representation of a pbes in PFNF format
@@ -131,10 +183,10 @@ class pfnf_pbes
   protected:
     const pbes<>& m_pbes; // store a reference to the original pbes, to indicate that it should not be destroyed
     std::vector<pfnf_equation> m_equations;
-    pbes_expression m_initial_state;
-
 
   public:
+    /// \brief Constructor
+    /// \pre The pbes p must be in PFNF format
     pfnf_pbes(const pbes<>& p)
       : m_pbes(p)
     {
@@ -143,8 +195,6 @@ class pfnf_pbes
       {
         m_equations.push_back(pfnf_equation(*i));
       }
-
-      m_initial_state = p.initial_state();
     }
 
     const std::vector<pfnf_equation>& equations() const
@@ -154,7 +204,12 @@ class pfnf_pbes
 
     const pbes_expression& initial_state() const
     {
-      return m_initial_state;
+      return m_pbes.initial_state();
+    }
+    
+    const data::data_specification& data() const
+    {
+      return m_pbes.data();
     }
 };
 

@@ -31,8 +31,8 @@ void test_control_flow()
   pbes<> p = txt2pbes(text, false);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
-  detail::pbes_control_flow_algorithm algorithm;
-  algorithm.run(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  algorithm.run();
   algorithm.print_graph();
 }
 
@@ -55,8 +55,8 @@ void test_source_dest1()
   pbes_rewrite(p, R);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
-  detail::pbes_control_flow_algorithm algorithm;
-  algorithm.run(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  algorithm.run();
 }
 
 void test_source_dest2()
@@ -97,8 +97,8 @@ void test_source_dest2()
 //  pbes_rewrite(p, R);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
-  detail::pbes_control_flow_algorithm algorithm;
-  algorithm.run(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  algorithm.run();
 }
 
 void test_simplify()
@@ -122,7 +122,7 @@ void test_simplify()
     "init X0(true, 0);                                     \n"
     ;
   pbes<> q = txt2pbes(qtext, false);
-  detail::pbes_control_flow_algorithm algorithm;
+  detail::pbes_control_flow_algorithm algorithm(q);
 
   for (std::size_t i = 0; i < p.equations().size(); i++)
   {

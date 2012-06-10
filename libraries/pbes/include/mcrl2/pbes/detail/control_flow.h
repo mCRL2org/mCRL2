@@ -22,6 +22,7 @@
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/pfnf_pbes.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -191,6 +192,9 @@ class control_flow_simplifying_rewriter
 class pbes_control_flow_algorithm
 {
   public:
+    typedef atermpp::vector<data::data_expression> destination_array; // N.B. data_expression() represents a non-existent value in this vector
+    typedef std::map<propositional_variable_instantiation, destination_array> destination_map;
+
     struct vertex
     {
       core::identifier_string X;
@@ -227,6 +231,10 @@ class pbes_control_flow_algorithm
       {}
     };
 
+    pbes_control_flow_algorithm(const pbes<>& p)
+      : m_pbes(p)
+    {}
+
     void print_graph() const
     {
       std::cout << "--- vertices ---\n";
@@ -254,6 +262,14 @@ class pbes_control_flow_algorithm
     std::vector<vertex> m_vertices;
     std::vector<edge> m_edges;
 
+    // maps X[i] to the corresponding source
+    std::vector<std::vector<data::mutable_map_substitution<> > > m_source;
+
+    // maps X[i] to the corresponding destination
+    std::vector<std::vector<destination_map> > m_destination;
+
+    pfnf_pbes m_pbes;
+
     // very inefficient
     std::vector<vertex>::const_iterator find_vertex(const core::identifier_string& X, const data::variable& v) const
     {
@@ -266,6 +282,19 @@ class pbes_control_flow_algorithm
       }
       std::cout << "<error>" << core::pp(X) << " " << data::pp(v) << std::endl;
       return m_vertices.end();
+    }
+
+    std::vector<pfnf_equation>::const_iterator find_equation(const pfnf_pbes& p, const core::identifier_string& X) const
+    {
+      const std::vector<pfnf_equation>& equations = p.equations();
+      for (std::vector<pfnf_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      {
+        if (i->name() == X)
+        {
+          return i;
+        }
+      }
+      return equations.end();
     }
 
     propositional_variable find_propvar(const pbes<>& p, const core::identifier_string& X) const
@@ -364,43 +393,41 @@ class pbes_control_flow_algorithm
       }
     }
 
-    void compute_vertices(const pbes<>& p)
+    void compute_vertices(const pfnf_pbes& p)
     {
       // compute the vertices of the control graph
-      const atermpp::vector<pbes_equation>& equations = p.equations();
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      const std::vector<pfnf_equation>& equations = p.equations();
+      for (std::vector<pfnf_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
-        core::identifier_string X = i->variable().name();
-        data::variable_list Xparams = i->variable().parameters();
-        for (data::variable_list::const_iterator j = Xparams.begin(); j != Xparams.end(); ++j)
+        core::identifier_string X = i->name();
+        const std::vector<data::variable>& Xparams = i->parameters();
+        for (std::vector<data::variable>::const_iterator j = Xparams.begin(); j != Xparams.end(); ++j)
         {
           m_vertices.push_back(vertex(X, *j));
         }
       }
     }
 
-    void compute_edges(const pbes<>& P)
+    void compute_edges(const pfnf_pbes& P)
     {
-      const atermpp::vector<pbes_equation>& equations = P.equations();
+      const std::vector<pfnf_equation>& equations = P.equations();
 
       // compute the edges of the control graph
-      for (atermpp::vector<pbes_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        // we are considering the equation X(d_X) = phi
-        propositional_variable X = k->variable();
-        std::vector<data::variable> d_X(X.parameters().begin(), X.parameters().end());
-        pbes_expression phi = k->formula();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<pfnf_implication>& implications = k->implications();
+        const core::identifier_string Xname = k->name();
 
-        std::vector<pbes_expression> implications = detail::pfnf_implications(phi);
         for (std::size_t i = 0; i < implications.size(); i++)
         {
-          std::vector<propositional_variable_instantiation> propvars = find_propositional_variables(implications[i]);
+          const std::vector<propositional_variable_instantiation>& propvars = implications[i].variables();
           for (std::size_t j = 0; j < propvars.size(); j++)
           {
-            propositional_variable_instantiation Y = propvars[j];
+            const propositional_variable_instantiation& Y = propvars[j];
             std::vector<data::data_expression> Yparameters(Y.parameters().begin(), Y.parameters().end());
-            propositional_variable Yvar = find_propvar(P, Y.name());
-            std::vector<data::variable> d_Y(Yvar.parameters().begin(), Yvar.parameters().end());
+            const pfnf_equation& eqn = *find_equation(P, Y.name());
+            const std::vector<data::variable> d_Y = eqn.parameters();
             for (std::size_t p = 0; p < Yparameters.size(); p++)
             {
               std::set<data::variable> freevars = pbes_system::find_free_variables(Yparameters[p]);
@@ -408,7 +435,7 @@ class pbes_control_flow_algorithm
               {
                 if (std::find(freevars.begin(), freevars.end(), d_X[m]) != freevars.end())
                 {
-                  std::vector<vertex>::const_iterator source = find_vertex(X.name(), d_X[m]);
+                  std::vector<vertex>::const_iterator source = find_vertex(Xname, d_X[m]);
                   std::vector<vertex>::const_iterator target = find_vertex(Y.name(), d_Y[p]);
                   edge e(i, j, &(*source), &(*target));
                   m_edges.push_back(e);
@@ -420,38 +447,35 @@ class pbes_control_flow_algorithm
       }
     }
 
-    typedef atermpp::vector<data::data_expression> destination_array; // N.B. data_expression() represents a non-existent value in this vector
-    typedef std::map<propositional_variable_instantiation, destination_array> destination_map;
-
     // computes the source and the destination function for a pbes equation
     // source[i] contains the source parameters of g_i, represented in the form of a substitution
     // dest[i] maps X_ij(f_ij) to a vector of data expressions
     template <typename DataRewriter>
-    void compute_source_destination(const pbes_equation& eqn, std::vector<data::mutable_map_substitution<> >& source, std::vector<destination_map>& dest, DataRewriter rewr) const
+    void compute_source_destination(const pfnf_equation& eqn,
+                                    std::vector<data::mutable_map_substitution<> >& source,
+                                    std::vector<destination_map>& dest, DataRewriter rewr
+                                   ) const
     {
       typedef core::term_traits<pbes_expression> tr;
       typedef core::term_traits<data::data_expression> tt;
 
-      // we are considering the equation X(d_X) = phi
-      propositional_variable X = eqn.variable();
-      std::vector<data::variable> d_X(X.parameters().begin(), X.parameters().end());
-      pbes_expression phi = eqn.formula();
-
-      pbes_expression h;
-      std::vector<pbes_expression> g;
-      split_pfnf_expression(phi, h, g);
+      const std::vector<data::variable>& d_X = eqn.parameters();
+      const pbes_expression& h = eqn.h();
+      const std::vector<pfnf_implication>& g = eqn.implications();
 
       data::mutable_map_substitution<> sigma_h;
       find_equality_conjuncts(h, d_X, sigma_h);
 
-      for (std::vector<pbes_expression>::iterator i = g.begin(); i != g.end(); ++i)
+      for (std::vector<pfnf_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
+        // compute source
         data::mutable_map_substitution<> sigma = sigma_h;
-        find_equality_conjuncts(implication_guard(*i), d_X, sigma);
+        find_equality_conjuncts(i->g(), d_X, sigma);
         source.push_back(sigma);
 
+        // compute destination
         destination_map dmap;
-        std::vector<propositional_variable_instantiation> propvars = find_propositional_variables(*i);
+        const std::vector<propositional_variable_instantiation> propvars = i->variables();
         for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
           const propositional_variable_instantiation& Xij = *j;
@@ -496,21 +520,19 @@ class pbes_control_flow_algorithm
       std::cout << "]" << std::endl;
     }
 
-    void print_source_destination(const pbes_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src, const std::vector<destination_map>& dest) const
+    void print_source_destination(const pfnf_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src, const std::vector<destination_map>& dest) const
     {
-      std::cout << "- predicate variable " << pbes_system::pp(eqn.variable()) << std::endl;
+      propositional_variable X(eqn.name(), data::variable_list(eqn.parameters().begin(), eqn.parameters().end()));
+      std::cout << "- predicate variable " << pbes_system::pp(X) << std::endl;
 
-      pbes_expression phi = eqn.formula();
-      pbes_expression h;
-      std::vector<pbes_expression> g;
-      split_pfnf_expression(phi, h, g);
+      std::cout << "h     = " << pbes_system::pp(eqn.h()) << std::endl;
 
-      std::cout << "h     = " << pbes_system::pp(h) << std::endl;
+      const std::vector<pfnf_implication>& g = eqn.implications();
       for (std::size_t i = 0; i < src.size(); i++)
       {
         const data::mutable_map_substitution<>& sigma = src[i];
         const destination_map& dmap = dest[i];
-        std::cout << "g[" << std::setw(2) << (i + 1) << "] = " << pbes_system::pp(g[i]) << std::endl;
+        std::cout << "g[" << std::setw(2) << (i + 1) << "] = " << g[i] << std::endl;
         std::cout << "        source = " << data::print_substitution(sigma) << std::endl;
         for (destination_map::const_iterator j = dmap.begin(); j != dmap.end(); ++j)
         {
@@ -520,30 +542,114 @@ class pbes_control_flow_algorithm
       }
     }
 
-    void compute_source_destination(const pbes<>& p) const
+    void compute_source_destination(const pfnf_pbes& p)
     {
       data::rewriter rewr(p.data());
-      const atermpp::vector<pbes_equation>& equations = p.equations();
+      const std::vector<pfnf_equation>& equations = p.equations();
 
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (std::vector<pfnf_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         std::vector<data::mutable_map_substitution<> > source;
         std::vector<destination_map> dest;
         compute_source_destination(*i, source, dest, rewr);
-        print_source_destination(*i, source, dest);
+        m_source.push_back(source);
+        m_destination.push_back(dest);
       }
     }
 
+    void print_source_destination(const pfnf_pbes& p) const
+    {
+      std::size_t N = p.equations().size();
+      for (std::size_t i = 0; i < N; i++)
+      {
+        print_source_destination(p.equations()[i], m_source[i], m_destination[i]);
+      }
+    }
+
+    data::data_expression source(std::size_t k, std::size_t i, std::size_t n) const
+    {
+      const data::mutable_map_substitution<>& sigma = m_source[k][i];
+      data::variable d_n = m_pbes.equations()[k].parameters()[n];
+      data::data_expression x = sigma(d_n);
+      if (x == d_n)
+      {
+        return data::data_expression();
+      }
+      else
+      {
+        return x;
+      }
+    }
+
+    data::data_expression destination(std::size_t k, std::size_t i, std::size_t j, std::size_t n) const
+    {
+      const propositional_variable_instantiation& Xij = m_pbes.equations()[k].implications()[i].variables()[j];
+      const destination_map& dmap = m_destination[k][i];
+      destination_map::const_iterator q = dmap.find(Xij);
+      assert (q != dmap.end());
+      return q->second[n];
+    }
+
+    // returns true if parameter n of X[k] rules conjunct i
+    bool rules(std::size_t k, std::size_t n, std::size_t i) const
+    {
+      const pfnf_equation& eqn = m_pbes.equations()[k];
+      const pfnf_implication& g = eqn.implications()[i];
+      const data::variable d_n = eqn.parameters()[n];
+      if (source(k, i, n) == data::data_expression())
+      {
+        return false;
+      }
+      for (std::size_t j = 0; j < g.variables().size(); ++j)
+      {
+        if (destination(k, i, j, n) == data::data_expression())
+        {
+          return false;
+        }
+      }
+      std::cout << "parameter " << data::pp(d_n) << " rules conjunct " << i << std::endl;
+      return true;
+    }
+
+//    // rule_parameters[k] contains the conjuncts ruled by parameter k
+//    void compute_rule_parameters(const pbes_equation& eqn,
+//                                 const std::vector<data::mutable_map_substitution<> >& source,
+//                                 const std::vector<destination_map>& dest, DataRewriter rewr,
+//                                 std::vector<std::vector<pbes_expression> >& rule_parameters
+//                                )
+//    {
+//      // we are considering the equation X(d_X) = phi
+//      propositional_variable X = eqn.variable();
+//      std::vector<data::variable> d_X(X.parameters().begin(), X.parameters().end());
+//      pbes_expression phi = eqn.formula();
+//
+//      for (std::vector<data::mutable_map_substitution<> >::const_iterator j = source.begin(); j != source.end(); ++j)
+//      {
+//
+//      }
+//
+//      // compute rule parameters
+//      for (std::vector<data::variable>::iterator k = d_X.begin(); k != d_X.end(); ++k)
+//      {
+//        std::vector<pbes_expression> conjuncts;
+//        if (sigma[*k] != *k) // *k is a source parameter
+//        {
+//          for (
+//        }
+//        rule_parameters.push_back(conjuncts);
+//        }
+//
+//        for (data::mutable_map_substitution<>::const_iterator i =
+
   public:
 
-    /// \brief Runs the control_flow algorithm. The pbes \p is modified by the algorithm
-    /// \param p A pbes
-    /// \pre p is in PFNF format
-    void run(const pbes<>& p)
+    /// \brief Runs the control_flow algorithm
+    void run()
     {
-      compute_vertices(p);
-      compute_edges(p);
-      compute_source_destination(p);
+      compute_vertices(m_pbes);
+      compute_edges(m_pbes);
+      compute_source_destination(m_pbes);
+      print_source_destination(m_pbes);
     }
 };
 
