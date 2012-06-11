@@ -31,8 +31,11 @@ static size_t afun_table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static std::vector < size_t > &afun_hashtable()
 {
-  static std::vector < size_t > hashtable(afun_table_size,size_t(-1));
-  return hashtable;
+  // Construction below prevents the hashtable to be destroyed, which can cause a problem,
+  // as some statically declared function symbols may be destroyed after the hash table on exit
+  // of the program.
+  static std::vector < size_t > *hashtable =new std::vector < size_t >(afun_table_size,size_t(-1));
+  return *hashtable;
 }
 
 size_t function_symbol::first_free = size_t(-1);

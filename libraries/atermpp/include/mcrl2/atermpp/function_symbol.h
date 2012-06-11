@@ -152,7 +152,6 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     /// \brief Destructor
     ~function_symbol()
     {
-if (this->number()!=size_t(-1)) fprintf(stderr,"DESTROY FUN %ld  %s\n",this->number(),this->name().c_str());
       decrease_reference_count(m_number);
     }
 

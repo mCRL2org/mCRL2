@@ -79,7 +79,6 @@ class term_list:public aterm
     /// Default constructor. Creates an empty list.
     term_list ():aterm(reinterpret_cast<detail::_aterm*>(&*empty_list()))
     {
-      *this != aterm();
     }
 
     /// \brief Copy construction.

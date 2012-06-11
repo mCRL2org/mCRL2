@@ -35,8 +35,9 @@ namespace detail
 {
 std::vector <detail::_aterm*>& hashtable()
 {
-  static std::vector <detail::_aterm*> hashtable = std::vector <detail::_aterm*>(AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS),NULL);
-  return hashtable;
+  // The new below prevents the hashtable from prematurely being garbage collected.
+  static std::vector <detail::_aterm*> *hashtable = new std::vector <detail::_aterm*>(AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS),NULL);
+  return *hashtable;
 }
 }
 
