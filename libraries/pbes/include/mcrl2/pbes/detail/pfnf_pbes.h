@@ -69,6 +69,11 @@ class pfnf_implication
       return m_g;
     }
 
+    pbes_expression& g()
+    {
+      return m_g;
+    }
+
     const std::vector<propositional_variable_instantiation>& variables() const
     {
       return m_v;
@@ -109,7 +114,7 @@ class pfnf_equation
 {
   protected:
     // left hand side
-    core::identifier_string m_name;
+    propositional_variable m_X;
     std::vector<data::variable> m_parameters;
 
     // right hand side
@@ -124,7 +129,7 @@ class pfnf_equation
       pbes_expression phi = eqn.formula();
 
       // left hand side
-      m_name = X.name();
+      m_X = X;
       data::variable_list d = X.parameters();
       m_parameters = std::vector<data::variable>(d.begin(), d.end());
 
@@ -151,9 +156,9 @@ class pfnf_equation
       }
     }
 
-    const core::identifier_string& name() const
+    const propositional_variable& variable() const
     {
-      return m_name;
+      return m_X;
     }
 
     const std::vector<data::variable>& parameters() const
@@ -171,7 +176,17 @@ class pfnf_equation
       return m_h;
     }
 
+    pbes_expression& h()
+    {
+      return m_h;
+    }
+
     const std::vector<pfnf_implication>& implications() const
+    {
+      return m_implications;
+    }
+
+    std::vector<pfnf_implication>& implications()
     {
       return m_implications;
     }
@@ -202,11 +217,16 @@ class pfnf_pbes
       return m_equations;
     }
 
+    std::vector<pfnf_equation>& equations()
+    {
+      return m_equations;
+    }
+
     const pbes_expression& initial_state() const
     {
       return m_pbes.initial_state();
     }
-    
+
     const data::data_specification& data() const
     {
       return m_pbes.data();
