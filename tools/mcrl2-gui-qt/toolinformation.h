@@ -11,6 +11,7 @@
 #define TOOLINFORMATION_H
 
 #include <QString>
+#include <QList>
 #include <QObject>
 #include <QProcess>
 #include <QWidget>
@@ -19,14 +20,83 @@
 #include <QDir>
 #include <QDomDocument>
 
-struct ToolInformation
+enum ArgumentType
 {
+  StringArgument,
+  EnumArgument,
+  FileArgument,
+  IntegerArgument,
+  RealArgument,
+  BooleanArgument,
+  UnknownArgument
+};
+
+struct ToolValue
+{
+    ToolValue()
+    {}
+    ToolValue(QString nameShort, QString nameLong, QString description) :
+      nameShort(nameShort),
+      nameLong(nameLong),
+      description(description)
+    {}
+    QString nameShort, nameLong, description;
+};
+
+struct ToolArgument
+{
+    ToolArgument() :
+      optional(true),
+      type(UnknownArgument)
+    {}
+    ToolArgument(bool optional, ArgumentType type, QString name) :
+      optional(optional),
+      type(type),
+      name(name)
+    {}
+
+    bool optional;
+    ArgumentType type;
+    QString name;
+
+    QList<ToolValue> values;
+};
+
+struct ToolOption
+{
+    ToolOption() :
+      standard(false)
+    {}
+    ToolOption(bool standard, QString nameShort, QString nameLong, QString description) :
+      standard(standard),
+      nameShort(nameShort),
+      nameLong(nameLong),
+      description(description)
+    {}
+
+    bool standard;
+    QString nameShort, nameLong, description;
+
+    ToolArgument argument;
+
+};
+
+class ToolInformation
+{
+  public:
     ToolInformation(QString name, QString input, QString output);
 
+    void load();
     bool hasOutput() { return !output.isEmpty(); }
 
     QString name, input, output, desc, author;
     bool valid;
+
+    QList<ToolOption> options;
+
+  private:
+    void parseOptions(QDomElement optionsElement);
+    ArgumentType guessType(QString type, QString name);
 };
 
 #endif // TOOLINFORMATION_H

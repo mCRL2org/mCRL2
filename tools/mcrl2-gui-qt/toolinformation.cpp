@@ -13,6 +13,9 @@
 
 ToolInformation::ToolInformation(QString name, QString input, QString output)
   : name(name), input(input), output(output), valid(false)
+{}
+
+void ToolInformation::load()
 {
   QProcess *toolProcess = new QProcess();
 
@@ -58,20 +61,40 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
 
   valid = true;
 
-  QDomNode node = root.firstChild();
-  while (!node.isNull()) {
-    QDomElement e = node.toElement();
-    if (e.tagName() == "description") {
-      QByteArray data;
-      QTextStream out(&data);
-      e.save(out, 2);
-      desc = QString(data);
-    }
-    if (e.tagName() == "author") {
-      author = e.text();
-    }
-    node = node.nextSibling();
+  QDomElement descElement = root.firstChildElement("description");
+  QDomElement authorElement = root.firstChildElement("author");
+  QDomElement optionsElement = root.firstChildElement("options");
+
+  if (!descElement.isNull())
+  {
+    QByteArray data;
+    QTextStream out(&data);
+    descElement.save(out, 2);
+    desc = QString(data);
   }
+  else
+  {
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no description element" << std::endl;
+  }
+
+  if (!authorElement.isNull())
+  {
+    author = authorElement.text();
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no author element" << std::endl;
+  }
+
+  if (!optionsElement.isNull())
+  {
+    parseOptions(optionsElement);
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no options element" << std::endl;
+  }
+
 
   appDir.mkdir("xml");
 
@@ -83,12 +106,43 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
         xml.save(out, 2);
     }
   }
+}
+
+void ToolInformation::parseOptions(QDomElement optionsElement)
+{
+  QDomElement optionElement = optionsElement.firstChildElement("option");
+
+  while (!optionElement.isNull())
+  {
+    bool standard = (optionElement.attribute("standard") == "yes");
+    QString optshort = optionElement.firstChildElement("short").text();
+    QString optlong = optionElement.firstChildElement("long").text();
+    QString optdescription = optionElement.firstChildElement("description").text();
+    ToolOption option(standard, optshort, optlong, optdescription);
+
+    QDomElement argElement = optionElement.firstChildElement("option_argument");
+
+    if (!argElement.isNull())
+    {
+      bool optional = (argElement.attribute("optional") == "yes");
+      QString typeStr = argElement.attribute("type");
+      QString name = argElement.firstChildElement("name").text();
+
+
+      ToolArgument argument(optional, guessType(typeStr, name), name);
+      option.argument = argument;
+    }
+
+    options.append(option);
+    optionElement = optionElement.nextSiblingElement("option");
+  }
 
 }
 
-
-
-
+ArgumentType ToolInformation::guessType(QString type, QString name)
+{
+  return UnknownArgument;
+}
 
 
 

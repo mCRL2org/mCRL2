@@ -56,7 +56,11 @@ QString ToolCatalog::fileType(QString extension)
 
 void ToolCatalog::load()
 {
-  QString catalogFilename = QCoreApplication::applicationDirPath().append("/share/mcrl2/tool_catalog.xml") ;
+  QDir toolsetDir = QDir(QCoreApplication::applicationDirPath());
+  if (toolsetDir.dirName().toLower() == "bin")
+    toolsetDir.cdUp();
+
+  QString catalogFilename = toolsetDir.filePath("share/mcrl2/tool_catalog.xml");
 
   QFile file(catalogFilename);
   if(!file.open( QFile::ReadOnly ))
@@ -90,7 +94,9 @@ void ToolCatalog::load()
         m_categories.insert(cat, QMap<QString, ToolInformation>());
 
       QMap<QString, ToolInformation> tools = m_categories.value(cat);
-      tools.insert(e.attribute("name"), ToolInformation(e.attribute("name"), e.attribute("input_format"), e.attribute("output_format", "")));
+      ToolInformation toolinfo(e.attribute("name"), e.attribute("input_format"), e.attribute("output_format", ""));
+      toolinfo.load();
+      tools.insert(e.attribute("name"), toolinfo);
       m_categories.insert(cat, tools);
     }
 
