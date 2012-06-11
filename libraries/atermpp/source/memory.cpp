@@ -108,13 +108,13 @@ bool check_that_all_objects_are_free()
     }
   }
 
-  for(size_t i=0; i<function_symbol::at_lookup_table.size(); ++i)
+  for(size_t i=0; i<function_symbol::at_lookup_table().size(); ++i)
   {
-    if (i!=AS_EMPTY_LIST().number() && function_symbol::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=AS_EMPTY_LIST().number() && function_symbol::at_lookup_table()[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                function_symbol::at_lookup_table[i]->name.c_str(),function_symbol::at_lookup_table[i]->id,function_symbol::at_lookup_table[i]->reference_count);
+                function_symbol::at_lookup_table()[i]->name.c_str(),function_symbol::at_lookup_table()[i]->id,function_symbol::at_lookup_table()[i]->reference_count);
     }
 
   }

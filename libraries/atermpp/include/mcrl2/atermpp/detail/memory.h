@@ -170,7 +170,7 @@ void aterm::free_term()
   }
 #ifndef NDEBUG
   const size_t function_symbol_index=function().number();
-  size_t ref_count=function_symbol::at_lookup_table[function_symbol_index]->reference_count;
+  size_t ref_count=function_symbol::at_lookup_table()[function_symbol_index]->reference_count;
 #endif
   const size_t size=term_size(t);
 

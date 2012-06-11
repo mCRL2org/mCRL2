@@ -77,9 +77,7 @@ class function_symbol
 
   public:
     static size_t first_free;
-    static std::vector < _SymEntry* > at_lookup_table; // As safio uses stable pointers to _SymEntries,
-                                                       // we cannot use a vector of _SymEntry, as these
-                                                       // are relocated. 
+    static std::vector < _SymEntry* >& at_lookup_table();
 
   protected:
     template <bool CHECK>
@@ -88,11 +86,11 @@ class function_symbol
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table()[n]->reference_count,at_lookup_table()[n]->name.c_str());
 #endif
-        assert(n<at_lookup_table.size());
-        if (CHECK) assert(at_lookup_table[n]->reference_count>0);
-        at_lookup_table[n]->reference_count++;
+        assert(n<at_lookup_table().size());
+        if (CHECK) assert(at_lookup_table()[n]->reference_count>0);
+        at_lookup_table()[n]->reference_count++;
       }
     }
 
@@ -101,12 +99,12 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n]->reference_count,at_lookup_table[n]->name.c_str());
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table()[n]->reference_count,at_lookup_table()[n]->name.c_str());
 #endif
-        assert(n<at_lookup_table.size());
-        assert(at_lookup_table[n]->reference_count>0);
+        assert(n<at_lookup_table().size());
+        assert(at_lookup_table()[n]->reference_count>0);
 
-        if (--at_lookup_table[n]->reference_count==0)
+        if (--at_lookup_table()[n]->reference_count==0)
         {
           at_free_afun(n);
         }
@@ -160,7 +158,7 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     const std::string &name() const
     {
       assert(AT_isValidAFun(m_number));
-      return at_lookup_table[m_number]->name;
+      return at_lookup_table()[m_number]->name;
     }
     
     /// \brief Return the number of the function_symbol.
@@ -179,7 +177,7 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     size_t arity() const
     {
       assert(AT_isValidAFun(m_number));
-      return at_lookup_table[m_number]->arity();
+      return at_lookup_table()[m_number]->arity();
     }
 
     /// \brief Determine if the function symbol (function_symbol) is quoted or not.
@@ -187,7 +185,7 @@ fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table
     bool is_quoted() const
     {
       assert(AT_isValidAFun(m_number));
-      return at_lookup_table[m_number]->is_quoted();
+      return at_lookup_table()[m_number]->is_quoted();
     }
     
     /// \brief Equality test.
@@ -292,8 +290,8 @@ inline
 bool AT_isValidAFun(const size_t sym)
 {
   return (sym != size_t(-1) && 
-          sym < function_symbol::at_lookup_table.size() && 
-          function_symbol::at_lookup_table[sym]->reference_count>0);
+          sym < function_symbol::at_lookup_table().size() && 
+          function_symbol::at_lookup_table()[sym]->reference_count>0);
 }
 
 
