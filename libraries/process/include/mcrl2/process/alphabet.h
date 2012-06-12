@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 #include "mcrl2/process/traverser.h"
 
 namespace mcrl2 {
@@ -36,6 +37,38 @@ typedef atermpp::multiset<core::identifier_string> multi_action_name;
 typedef atermpp::set<multi_action_name> aset;
 
 inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (i != x.begin())
+    {
+      out << " | ";
+    }
+    out << core::pp(*i);
+  }
+  return out.str();
+}
+
+inline
+std::string pp(const aset& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
+}
+
+inline
 aset make_aset(const action_name_multiset_list& v)
 {
   aset result;
@@ -45,6 +78,14 @@ aset make_aset(const action_name_multiset_list& v)
     result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;
+}
+
+inline
+aset make_aset(const multi_action_name& a)
+{
+  aset s;
+  s.insert(a);
+  return s;
 }
 
 inline
@@ -258,13 +299,6 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
     return result_stack.back();
   }
 
-  aset make_aset(const multi_action_name& a) const
-  {
-    aset s;
-    s.insert(a);
-    return s;
-  }
-
   // N.B. tau is represented by the empty set!
   multi_action_name tau() const
   {
@@ -283,7 +317,6 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   void leave(const lps::action& x)
   {
     multi_action_name a = name(x);
-    const aset& A = top();
     if (A.find(a) == A.end())
     {
       push(aset());
@@ -317,7 +350,6 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   // tau
   void leave(const process::tau& x)
   {
-    const aset& A = top();
     multi_action_name tau;
     if (A.find(tau) == A.end())
     {
@@ -447,6 +479,13 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
     aset AV = set_intersection(A, V);
     push(alphabet_nabla(x, AV));
   }
+
+//  void operator()(const process::process_expression& x)
+//  {
+//    std::cout << "<visit>" << process::pp(x) << std::endl;
+//    super::operator()(x);
+//    std::cout << "<top>" << pp(result_stack.back()) << std::endl;
+//  }
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -458,16 +497,19 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::name;
   using super::top;
   using super::push;
-  using super::make_aset;
   using super::join;
   using super::A;
 
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
+
+  // Constructor
+  alphabet_sub_traverser(const aset& A)
+    : super(A)
+  {}
 
   // a(e1, ..., en)
   void leave(const lps::action& x)
@@ -562,16 +604,38 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   }
 };
 
+// apply a traverser with one additional template argument
+template <template <class> class Traverser>
+struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Traverser> >
+{
+  typedef Traverser<apply_alphabet_traverser<Traverser> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  apply_alphabet_traverser(const aset& A)
+    : super(A)
+  {}
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
 inline
 aset alphabet_nabla(const process_expression& x, const aset& A)
 {
-  return aset();
+  apply_alphabet_traverser<alphabet_nabla_traverser> f(A);
+  f(x);
+  return f.result_stack.back();
 }
 
 inline
 aset alphabet_sub(const process_expression& x, const aset& A)
 {
-  return aset();
+  apply_alphabet_traverser<alphabet_sub_traverser> f(A);
+  f(x);
+  return f.result_stack.back();
 }
 
 inline

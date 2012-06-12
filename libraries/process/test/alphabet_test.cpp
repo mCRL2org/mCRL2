@@ -46,36 +46,6 @@ aset parse_aset(const std::string& text, const lps::action_label_list& action_de
   return result;
 }
 
-std::string pp(const multi_action_name& x)
-{
-  std::ostringstream out;
-  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
-  {
-    if (i != x.begin())
-    {
-      out << " | ";
-    }
-    out << core::pp(*i);
-  }
-  return out.str();
-}
-
-std::string pp(const aset& A)
-{
-  std::ostringstream out;
-  out << "{";
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    if (i != A.begin())
-    {
-      out << ", ";
-    }
-    out << pp(*i);
-  }
-  out << "}";
-  return out.str();
-}
-
 void test_alphabet_nabla()
 {
   std::string procspec =
@@ -91,7 +61,7 @@ void test_alphabet_nabla()
   std::cout << "B = " << pp(B) << std::endl;
   aset C = parse_aset("{a, b, a | c}", action_decls);
   std::cout << "C = " << pp(C) << std::endl;
-  //BOOST_CHECK(pp(B) == pp(C));
+  BOOST_CHECK(pp(B) == pp(C));
 }
 
 int test_main(int argc, char* argv[])
