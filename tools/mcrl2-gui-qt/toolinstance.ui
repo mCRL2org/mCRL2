@@ -130,6 +130,27 @@
                </property>
               </widget>
              </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblFileOut">
+               <property name="text">
+                <string>Output file:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="lytFileOut">
+               <item>
+                <widget class="QLineEdit" name="edtFileOut"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnFileOutBrowse">
+                 <property name="text">
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </item>
            <item>
@@ -144,20 +165,9 @@
              <property name="fieldGrowthPolicy">
               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
              </property>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="checkBox">
-               <property name="text">
-                <string>CheckBox</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
+             <property name="verticalSpacing">
+              <number>20</number>
+             </property>
             </layout>
            </item>
            <item>
@@ -185,7 +195,14 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPlainTextEdit" name="editOutput"/>
+        <widget class="QPlainTextEdit" name="edtOutput">
+         <property name="tabChangesFocus">
+          <bool>true</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">

@@ -115,10 +115,10 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
   while (!optionElement.isNull())
   {
     bool standard = (optionElement.attribute("standard") == "yes");
-    QString optshort = optionElement.firstChildElement("short").text();
-    QString optlong = optionElement.firstChildElement("long").text();
-    QString optdescription = optionElement.firstChildElement("description").text();
-    ToolOption option(standard, optshort, optlong, optdescription);
+    QString optShort = optionElement.firstChildElement("short").text();
+    QString optLong = optionElement.firstChildElement("long").text();
+    QString optDescription = optionElement.firstChildElement("description").text();
+    ToolOption option(standard, optShort, optLong, optDescription);
 
     QDomElement argElement = optionElement.firstChildElement("option_argument");
 
@@ -130,6 +130,24 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
 
 
       ToolArgument argument(optional, guessType(typeStr, name), name);
+
+      QDomElement argvalsElement = argElement.firstChildElement("values");
+      if (!argvalsElement.isNull() && argument.type == EnumArgument)
+      {
+        QDomElement valueElement = argvalsElement.firstChildElement("value");
+        while (!valueElement.isNull())
+        {
+          bool valStandard = (valueElement.attribute("default") == "yes");
+          QString valShort = valueElement.firstChildElement("short").text();
+          QString valLong = valueElement.firstChildElement("long").text();
+          QString valDescription = valueElement.firstChildElement("description").text();
+          ToolValue toolValue(valStandard, valShort, valLong, valDescription);
+          argument.values.append(toolValue);
+
+          valueElement = valueElement.nextSiblingElement("value");
+        }
+      }
+
       option.argument = argument;
     }
 
@@ -141,6 +159,46 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
 
 ArgumentType ToolInformation::guessType(QString type, QString name)
 {
+  type = type.toLower();
+  name = name.toLower();
+
+  if (type == "enum")
+  {
+    return EnumArgument;
+  }
+  else if (type == "file")
+  {
+    return FileArgument;
+  }
+  else if (type == "int")                             // New type
+  {
+    return IntegerArgument;
+  }
+  else if (type == "real")                            // New type
+  {
+    return RealArgument;
+  }
+  else if (type == "bool")                            // New type
+  {
+    return BooleanArgument;
+  }
+  else if (type == "mandatory" || type == "optional") // TODO: remove these types
+  {
+    if (name == "file")
+    {
+      return FileArgument;
+    }
+    else if (name == "num")
+    {
+      return IntegerArgument;
+    }
+    else if (name == "bool")
+    {
+      return BooleanArgument;
+    }
+    return StringArgument;
+  }
+
   return UnknownArgument;
 }
 

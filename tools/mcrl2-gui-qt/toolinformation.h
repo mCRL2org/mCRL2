@@ -33,13 +33,16 @@ enum ArgumentType
 
 struct ToolValue
 {
-    ToolValue()
+    ToolValue() :
+      standard(false)
     {}
-    ToolValue(QString nameShort, QString nameLong, QString description) :
+    ToolValue(bool standard, QString nameShort, QString nameLong, QString description) :
+      standard(standard),
       nameShort(nameShort),
       nameLong(nameLong),
       description(description)
     {}
+    bool standard;
     QString nameShort, nameLong, description;
 };
 
@@ -73,6 +76,8 @@ struct ToolOption
       nameLong(nameLong),
       description(description)
     {}
+
+    bool hasArgument() { return (argument.type != UnknownArgument); }
 
     bool standard;
     QString nameShort, nameLong, description;
