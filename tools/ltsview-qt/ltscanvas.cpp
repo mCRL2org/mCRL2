@@ -65,6 +65,9 @@ void LtsCanvas::clusterPositionsChanged()
   m_nearPlane = 1.0f;
   m_baseDepth = 0.866f * height + width + m_nearPlane;
   m_farPlane = m_baseDepth * 2 * width;
+  // Hack to ensure that m_nearPlane < m_farPlane
+  if (m_farPlane < m_nearPlane)
+      m_farPlane = 1000.0f;
   update();
 }
 
@@ -116,6 +119,7 @@ void LtsCanvas::initializeGL()
   glCullFace(GL_BACK);
 
   glClearDepth(1.0);
+
 }
 
 void LtsCanvas::resizeGL(int width, int height)
@@ -140,6 +144,7 @@ void LtsCanvas::paintGL()
 void LtsCanvas::render(bool light)
 {
   glEnable(GL_DEPTH_TEST);
+
   glDepthFunc(GL_LESS);
 
   glClearColor(
@@ -287,7 +292,7 @@ void LtsCanvas::render(bool light)
   GLenum error = glGetError();
   if (error != GL_NO_ERROR)
   {
-    mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
+     mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
   }
 }
 
