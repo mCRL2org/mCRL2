@@ -1323,7 +1323,7 @@ namespace mcrl2
               << "is applied to sequential non-directly-recursive process " << pp(pn) << "." << std::endl
               << "This disallows (multi-)action(s) " 
               << pp(detail::transform_list_back(detail::list_minus(untypeMAL(ll),V)))
-              << "of this process." << std::endl
+              << " of this process." << std::endl
               << "This warning could also indicate a forgotten (multi-)action in this allow operation." << std::endl << std::endl;
           }
 
