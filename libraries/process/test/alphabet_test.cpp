@@ -52,12 +52,14 @@ void test_alphabet_nabla()
     "act a, b, c, d; \n"
     "init delta;  \n"
     ;
+
+  process_specification P = parse_process_specification(procspec);
   lps::action_label_list action_decls = lps::parse_action_declaration("a, b, c, d;");
   process_expression p = parse_process_expression("a || b . c", procspec);
   BOOST_CHECK(process::pp(p) == "a || b . c");
   aset A = parse_aset("{a, b, d, a|d, a|c}", action_decls);
   std::cout << "A = " << pp(A) << std::endl;
-  aset B = alphabet_nabla(p, A);
+  aset B = alphabet_nabla(p, A, P);
   std::cout << "B = " << pp(B) << std::endl;
   aset C = parse_aset("{a, b, a | c}", action_decls);
   std::cout << "C = " << pp(C) << std::endl;
