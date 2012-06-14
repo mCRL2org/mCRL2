@@ -199,7 +199,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 bool lps2lts_algorithm::generate_lts()
 {
   generator_state_t initial_state = m_generator->internal_initial_state();
-  if (m_use_confluence_reduction != 0)
+  if (m_use_confluence_reduction)
   {
     initial_state = get_prioritised_representative(initial_state);
   }
@@ -500,7 +500,12 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
     bool found = false;
     for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
     {
-      if (get_prioritised_representative(j->internal_state()) == *i)
+      generator_state_t destination = j->internal_state();
+      if (m_use_confluence_reduction)
+      {
+        destination = get_prioritised_representative(destination);
+      }
+      if (destination == *i)
       {
         trace.addAction(j->action());
         found = true;
@@ -564,7 +569,7 @@ void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t st
 
   if (search_divergence(state, current_path, visited))
   {
-    size_t state_number = m_state_numbers.index(state);
+    size_t state_number = m_state_numbers.index(storage_state(state));
     if (m_options.trace && m_traces_saved < m_options.max_traces)
     {
       std::ostringstream reason;
