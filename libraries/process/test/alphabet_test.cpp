@@ -59,7 +59,7 @@ void test_alphabet_nabla()
   BOOST_CHECK(process::pp(p) == "a || b . c");
   aset A = parse_aset("{a, b, d, a|d, a|c}", action_decls);
   std::cout << "A = " << pp(A) << std::endl;
-  aset B = alphabet_nabla(p, A, P);
+  aset B = alphabet_nabla(p, A, false, P);
   std::cout << "B = " << pp(B) << std::endl;
   aset C = parse_aset("{a, b, a | c}", action_decls);
   std::cout << "C = " << pp(C) << std::endl;

@@ -249,9 +249,9 @@ aset subset_intersection(const aset& A, const aset& B)
 }
 
 // prototype declarations
-aset alphabet_nabla(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
-aset alphabet_sub(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
-aset alphabet_super(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
+aset alphabet_nabla(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
+aset alphabet_sub(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
+aset alphabet_super(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
 
 template <typename Derived>
 struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
@@ -265,7 +265,15 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
   const aset& A;
+
+  // if true, A represents the set of all multi action names
+  bool A_is_all;
 
   // maps processes to their corresponding bodies
   const atermpp::map<process_identifier, process_expression>& process_bodies;
@@ -286,8 +294,8 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   }
 
   // Constructor
-  alphabet_nabla_traverser(const aset& A_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
-    : A(A_), process_bodies(process_bodies_)
+  alphabet_nabla_traverser(const aset& A_, bool A_is_all_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
+    : A(A_), A_is_all(A_is_all_), process_bodies(process_bodies_)
   {}
 
   // Push x to result_stack
@@ -324,30 +332,43 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
     push(set_union(left, right));
   }
 
+  // pushes intersect(A, {a})
+  void push_A_intersection(const multi_action_name& a)
+  {
+    if (A_is_all)
+    {
+      push(make_aset(a));
+    }
+    else
+    {
+      if (A.find(a) == A.end())
+      {
+        push(aset());
+      }
+      else
+      {
+        push(make_aset(a));
+      }
+    }
+  }
+
   // a(e1, ..., en)
   void leave(const lps::action& x)
   {
     multi_action_name a = name(x);
-    if (A.find(a) == A.end())
-    {
-      push(aset());
-    }
-    else
-    {
-      push(make_aset(a));
-    }
+    push_A_intersection(a);
   }
 
   // P(e1, ..., en)
   void operator()(const process::process_instance& x)
   {
-    push(alphabet_nabla(process_body(x.identifier()), A, process_bodies));
+    push(alphabet_nabla(process_body(x.identifier()), A, A_is_all, process_bodies));
   }
 
   // P(d1 = e1, ..., dn = en)
   void leave(const process::process_instance_assignment& x)
   {
-    push(alphabet_nabla(process_body(x.identifier()), A, process_bodies));
+    push(alphabet_nabla(process_body(x.identifier()), A, A_is_all, process_bodies));
   }
 
   // delta
@@ -360,14 +381,7 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   void leave(const process::tau& x)
   {
     multi_action_name tau;
-    if (A.find(tau) == A.end())
-    {
-      push(aset());
-    }
-    else
-    {
-      push(make_aset(tau));
-    }
+    push_A_intersection(tau);
   }
 
   // p1 + p2
@@ -403,41 +417,58 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   // p1 || p2
   void operator()(const process::merge& x) // use operator() here, since we don't want to go into the default recursion
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset AA1 = left_arrow(A, A1);
-    aset AAA1 = set_union(A, AA1);
-    aset A2 = alphabet_nabla(x.right(), AAA1, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    aset AA1A2A1xA2 = set_intersection(A, A1A2A1xA2);
-    push(AA1A2A1xA2);
+    if (A_is_all)
+    {
+      aset A1 = alphabet_sub(x.left(), A, true, process_bodies);
+      aset A2 = alphabet_nabla(x.right(), A, true, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      push(A1xA2);
+    }
+    else
+    {
+      aset A1 = alphabet_sub(x.left(), A, false, process_bodies);
+      aset AA1 = left_arrow(A, A1);
+      aset AAA1 = set_union(A, AA1);
+      aset A2 = alphabet_nabla(x.right(), AAA1, false, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      aset A2A1xA2 = set_union(A2, A1xA2);
+      aset A1A2A1xA2 = set_union(A1, A2A1xA2);
+      aset AA1A2A1xA2 = set_intersection(A, A1A2A1xA2);
+      push(AA1A2A1xA2);
+    }
   }
 
   // p1 ||_ p2
   void operator()(const process::left_merge& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset AA1 = left_arrow(A, A1);
-    aset AAA1 = set_union(A, AA1);
-    aset A2 = alphabet_nabla(x.right(), AAA1, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    aset AA1A2A1xA2 = set_intersection(A, A1A2A1xA2);
-    push(AA1A2A1xA2);
+    // implement it using p1 || p2
+    merge y(x.left(), x.right());
+    derived()(y);
   }
 
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset AA1 = left_arrow(A, A1);
-    aset AAA1 = set_union(A, AA1);
-    aset A2 = alphabet_nabla(x.right(), AAA1, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset AA1xA2 = set_intersection(A, A1xA2);
-    push(AA1xA2);
+    if (A_is_all)
+    {
+      aset A1 = alphabet_sub(x.left(), A, true, process_bodies);
+      aset A2 = alphabet_nabla(x.right(), A, true, process_bodies);
+      aset AA1 = left_arrow(A, A1);
+      aset AAA1 = set_union(A, AA1);
+      aset A1xA2 = times(A1, A2);
+      aset AA1xA2 = set_intersection(A, A1xA2);
+      push(AA1xA2);
+    }
+    else
+    {
+      aset A1 = alphabet_sub(x.left(), A, false, process_bodies);
+      aset AA1 = left_arrow(A, A1);
+      aset AAA1 = set_union(A, AA1);
+      aset A2 = alphabet_nabla(x.right(), AAA1, false, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      aset AA1xA2 = set_intersection(A, A1xA2);
+      push(AA1xA2);
+    }
   }
 
   // block(B, p)
@@ -471,12 +502,21 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    aset CinverseA = apply_communication_inverse(C, A);
-    aset ACinverseA = set_union(A, CinverseA);
-    aset Aprime = alphabet_nabla(x, ACinverseA, process_bodies);
-    aset CAprime = apply_communication(C, Aprime);
-    aset ACAprime = set_intersection(A, CAprime);
-    push(ACAprime);
+    if (A_is_all)
+    {
+      aset Aprime = alphabet_nabla(x, A, true, process_bodies);
+      aset CAprime = apply_communication(C, Aprime);
+      push(CAprime);
+    }
+    else
+    {
+      aset CinverseA = apply_communication_inverse(C, A);
+      aset ACinverseA = set_union(A, CinverseA);
+      aset Aprime = alphabet_nabla(x, ACinverseA, false, process_bodies);
+      aset CAprime = apply_communication(C, Aprime);
+      aset ACAprime = set_intersection(A, CAprime);
+      push(ACAprime);
+    }
   }
 
   // allow(A, p)
@@ -485,8 +525,21 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
     aset V = make_aset(x.allow_set());
     multi_action_name tau;
     V.insert(tau);
-    aset AV = set_intersection(A, V);
-    push(alphabet_nabla(x, AV, process_bodies));
+    if (A_is_all)
+    {
+      push(alphabet_nabla(x, V, true, process_bodies));
+    }
+    else
+    {
+      aset AV = set_intersection(A, V);
+      push(alphabet_nabla(x, AV, false, process_bodies));
+    }
+  }
+
+  // p @ t
+  void operator()(const process::at& x)
+  {
+    // skip
   }
 
 //  void operator()(const process::process_expression& x)
@@ -510,6 +563,7 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   using super::push;
   using super::join;
   using super::A;
+  using super::A_is_all;
   using super::process_bodies;
 
 #if BOOST_MSVC
@@ -517,15 +571,22 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
 #endif
 
   // Constructor
-  alphabet_sub_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, process_bodies)
+  alphabet_sub_traverser(const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
+    : super(A, A_is_all, process_bodies)
   {}
 
   // a(e1, ..., en)
   void leave(const lps::action& x)
   {
     aset B = make_aset(name(x));
-    push(subset_intersection(A, B));
+    if (A_is_all)
+    {
+      push(B);
+    }
+    else
+    {
+      push(subset_intersection(A, B));
+    }
   }
 
   // tau
@@ -533,41 +594,58 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   {
     multi_action_name tau;
     aset B = make_aset(tau);
-    push(subset_intersection(A, B));
+    if (A_is_all)
+    {
+      push(B);
+    }
+    else
+    {
+      push(subset_intersection(A, B));
+    }
   }
 
   // p1 || p2
   void operator()(const process::merge& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_sub(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    aset AA1A2A1xA2 = subset_intersection(A, A1A2A1xA2);
-    push(AA1A2A1xA2);
-  }
-
-  // p1 ||_ p2
-  void operator()(const process::left_merge& x)
-  {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_sub(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    aset AA1A2A1xA2 = subset_intersection(A, A1A2A1xA2);
-    push(AA1A2A1xA2);
+    if (A_is_all)
+    {
+      aset A1 = alphabet_sub(x.left(), A, true, process_bodies);
+      aset A2 = alphabet_sub(x.right(), A, true, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      aset A2A1xA2 = set_union(A2, A1xA2);
+      aset A1A2A1xA2 = set_union(A1, A2A1xA2);
+      push(A1A2A1xA2);
+    }
+    else
+    {
+      aset A1 = alphabet_sub(x.left(), A, false, process_bodies);
+      aset A2 = alphabet_sub(x.right(), A, false, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      aset A2A1xA2 = set_union(A2, A1xA2);
+      aset A1A2A1xA2 = set_union(A1, A2A1xA2);
+      aset AA1A2A1xA2 = subset_intersection(A, A1A2A1xA2);
+      push(AA1A2A1xA2);
+    }
   }
 
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_sub(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset AA1xA2 = subset_intersection(A, A1xA2);
-    push(AA1xA2);
+    if (A_is_all)
+    {
+      aset A1 = alphabet_sub(x.left(), A, true, process_bodies);
+      aset A2 = alphabet_sub(x.right(), A, true, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      push(A1xA2);
+    }
+    else
+    {
+      aset A1 = alphabet_sub(x.left(), A, false, process_bodies);
+      aset A2 = alphabet_sub(x.right(), A, false, process_bodies);
+      aset A1xA2 = times(A1, A2);
+      aset AA1xA2 = subset_intersection(A, A1xA2);
+      push(AA1xA2);
+    }
   }
 
   // block(B, p)
@@ -595,12 +673,21 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    aset CinverseA = apply_communication_inverse(C, A);
-    aset ACinverseA = set_union(A, CinverseA);
-    aset Aprime = alphabet_nabla(x, ACinverseA, process_bodies);
-    aset CAprime = apply_communication(C, Aprime);
-    aset ACAprime = subset_intersection(A, CAprime);
-    push(ACAprime);
+    if (A_is_all)
+    {
+      aset Aprime = alphabet_nabla(x, A, true, process_bodies);
+      aset CAprime = apply_communication(C, Aprime);
+      push(CAprime);
+    }
+    else
+    {
+      aset CinverseA = apply_communication_inverse(C, A);
+      aset ACinverseA = set_union(A, CinverseA);
+      aset Aprime = alphabet_nabla(x, ACinverseA, false, process_bodies);
+      aset CAprime = apply_communication(C, Aprime);
+      aset ACAprime = subset_intersection(A, CAprime);
+      push(ACAprime);
+    }
   }
 
   // allow(A, p)
@@ -609,8 +696,15 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
     aset V = make_aset(x.allow_set());
     multi_action_name tau;
     V.insert(tau);
-    aset AV = subset_intersection(A, V);
-    push(alphabet_nabla(x, AV, process_bodies));
+    if (A_is_all)
+    {
+      push(alphabet_nabla(x, V, true, process_bodies));
+    }
+    else
+    {
+      aset AV = subset_intersection(A, V);
+      push(alphabet_nabla(x, AV, false, process_bodies));
+    }
   }
 };
 
@@ -622,8 +716,8 @@ struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Trave
   using super::leave;
   using super::operator();
 
-  apply_alphabet_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, process_bodies)
+  apply_alphabet_traverser(const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
+    : super(A, A_is_all, process_bodies)
   {}
 
 #ifdef BOOST_MSVC
@@ -632,15 +726,15 @@ struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Trave
 };
 
 inline
-aset alphabet_nabla(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
+aset alphabet_nabla(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
 {
-  apply_alphabet_traverser<alphabet_nabla_traverser> f(A, process_bodies);
+  apply_alphabet_traverser<alphabet_nabla_traverser> f(A, A_is_all, process_bodies);
   f(x);
   return f.result_stack.back();
 }
 
 inline
-aset alphabet_nabla(const process_expression& x, const aset& A, const process_specification& procspec)
+aset alphabet_nabla(const process_expression& x, const aset& A, bool A_is_all, const process_specification& procspec)
 {
   atermpp::map<process_identifier, process_expression> process_bodies;
   const atermpp::vector<process_equation>& equations = procspec.equations();
@@ -648,19 +742,19 @@ aset alphabet_nabla(const process_expression& x, const aset& A, const process_sp
   {
     process_bodies[i->identifier()] = i->expression();
   }
-  return alphabet_nabla(x, A, process_bodies);
+  return alphabet_nabla(x, A, A_is_all, process_bodies);
 }
 
 inline
-aset alphabet_sub(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
+aset alphabet_sub(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
 {
-  apply_alphabet_traverser<alphabet_sub_traverser> f(A, process_bodies);
+  apply_alphabet_traverser<alphabet_sub_traverser> f(A, A_is_all, process_bodies);
   f(x);
   return f.result_stack.back();
 }
 
 inline
-aset alphabet_sub(const process_expression& x, const aset& A, const process_specification& procspec)
+aset alphabet_sub(const process_expression& x, const aset& A, bool A_is_all, const process_specification& procspec)
 {
   atermpp::map<process_identifier, process_expression> process_bodies;
   const atermpp::vector<process_equation>& equations = procspec.equations();
@@ -668,11 +762,11 @@ aset alphabet_sub(const process_expression& x, const aset& A, const process_spec
   {
     process_bodies[i->identifier()] = i->expression();
   }
-  return alphabet_sub(x, A, process_bodies);
+  return alphabet_sub(x, A, A_is_all, process_bodies);
 }
 
 inline
-aset alphabet_super(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
+aset alphabet_super(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
 {
   return aset();
 }
