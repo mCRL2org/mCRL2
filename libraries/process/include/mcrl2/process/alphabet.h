@@ -298,6 +298,88 @@ aset apply_block(const core::identifier_string_list& B, const aset& A)
   return result;
 }
 
+inline
+aset apply_hide(const core::identifier_string_list& I, const aset& A)
+{
+  multi_action_name m(I.begin(), I.end());
+  aset result;
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(set_difference(*i, m));
+  }
+  return result;
+}
+
+inline
+core::identifier_string apply_rename(const rename_expression_list& R, const core::identifier_string& x)
+{
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  {
+    if (x == i->source())
+    {
+      return i->target();
+    }
+  }
+  return x;
+}
+
+inline
+multi_action_name apply_rename(const rename_expression_list& R, const multi_action_name& a)
+{
+  multi_action_name result;
+  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    result.insert(apply_rename(R, *i));
+  }
+  return result;
+}
+
+inline
+aset apply_rename(const rename_expression_list& R, const aset& A)
+{
+  aset result;
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(apply_rename(R, *i));
+  }
+  return result;
+}
+
+inline
+core::identifier_string apply_rename_inverse(const rename_expression_list& R, const core::identifier_string& x)
+{
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  {
+    if (x == i->target())
+    {
+      return i->source();
+    }
+  }
+  return x;
+}
+
+inline
+multi_action_name apply_rename_inverse(const rename_expression_list& R, const multi_action_name& a)
+{
+  multi_action_name result;
+  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    result.insert(apply_rename_inverse(R, *i));
+  }
+  return result;
+}
+
+inline
+aset apply_rename_inverse(const rename_expression_list& R, const aset& A)
+{
+  aset result;
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(apply_rename_inverse(R, *i));
+  }
+  return result;
+}
+
 // returns all elements of B that are subset of an element in A
 inline
 aset subset_intersection(const aset& A, const aset& B)
@@ -556,17 +638,37 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   }
 
   // hide(I, p)
-  void leave(const process::hide& x)
+  void operator()(const process::hide& x)
   {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    aset A1 = alphabet_nabla(x.operand(), A, true, process_bodies);
+    aset A2 = apply_hide(x.hide_set(), A1);
+    if (A_is_all)
+    {
+      aset AA2 = set_intersection(A, A2);
+      push(AA2);
+    }
+    else
+    {
+      push(A2);
+    }
   }
 
   // rename(R, p)
-  void leave(const process::rename& x)
+  void operator()(const process::rename& x)
   {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    rename_expression_list R = x.rename_set();
+    if (A_is_all)
+    {
+      // TODO: solve this problematic case
+      throw std::runtime_error("alphabet_nabla_traverser: cannot implement infinite sets!");
+    }
+    else
+    {
+      aset RinverseA = apply_rename_inverse(R, A);
+      aset A1 = alphabet_nabla(x.operand(), RinverseA, false, process_bodies);
+      aset RA1 = apply_rename(R, A1);
+      push(RA1);
+    }
   }
 
   // comm(C, p)
@@ -720,24 +822,28 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   }
 
   // block(B, p)
-  void leave(const process::block& x)
+  void operator()(const process::block& x)
   {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    core::identifier_string_list B = x.block_set();
+    if (A_is_all)
+    {
+      // TODO: solve this problematic case
+      throw std::runtime_error("alphabet_sub_traverser: cannot implement infinite sets!");
+    }
+    else
+    {
+      aset A1 = apply_block(B, A);
+      aset A2 = alphabet_block(x.operand(), A1, false, process_bodies);
+      push(A2);
+    }
   }
 
   // hide(I, p)
-  void leave(const process::hide& x)
+  void operator()(const process::hide& x)
   {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
-  }
-
-  // rename(, p)
-  void leave(const process::rename& x)
-  {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    aset A1 = alphabet_nabla(x.operand(), A, true, process_bodies);
+    aset A2 = apply_hide(x.hide_set(), A1);
+    push(A2);
   }
 
   // comm(A, p)
@@ -839,15 +945,9 @@ struct alphabet_block_traverser: public alphabet_nabla_traverser<Derived>
   // hide(I, p)
   void leave(const process::hide& x)
   {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
-  }
-
-  // rename(, p)
-  void leave(const process::rename& x)
-  {
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    aset A1 = alphabet_nabla(x.operand(), A, true, process_bodies);
+    aset A2 = apply_hide(x.hide_set(), A1);
+    push(A2);
   }
 
   // comm(A, p)
