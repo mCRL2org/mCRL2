@@ -78,6 +78,11 @@ class pfnf_implication
     {
       return m_v;
     }
+
+    std::vector<propositional_variable_instantiation>& variables()
+    {
+      return m_v;
+    }
 };
 
 inline

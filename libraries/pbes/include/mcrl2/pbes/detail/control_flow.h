@@ -260,6 +260,31 @@ class pbes_control_flow_algorithm
       }
     }
 
+    // rewrite the parameters of the propositional variables, using the substitutions of the source function
+    void rewrite_propositional_variables()
+    {
+      data::rewriter r(m_pbes.data());
+      pbes_system::data_rewriter<pbes_expression, data::rewriter> R(r);
+
+      std::vector<pfnf_equation>& equations = m_pbes.equations();
+      for (std::size_t k = 0; k < equations.size(); k++)
+      {
+        const std::vector<data::mutable_map_substitution<> >& src = m_source[k];
+        std::vector<pfnf_implication>& implications = equations[k].implications();
+
+        for (std::size_t i = 0; i < implications.size(); i++)
+        {
+          const data::mutable_map_substitution<>& sigma = src[i];
+          std::vector<propositional_variable_instantiation>& v = implications[i].variables();
+          for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
+          {
+            propositional_variable_instantiation& Xij = *j;
+            Xij = pbes_system::rewrite(Xij, R, sigma);
+          }
+        }
+      }
+    }
+
     pbes_control_flow_algorithm(const pbes<>& p)
       : m_pbes(p)
     {
@@ -364,22 +389,6 @@ class pbes_control_flow_algorithm
     {
       namespace a = combined_access;
       utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
-    }
-
-    pbes_expression implication_guard(const pbes_expression& x) const
-    {
-      if (is_imp(x))
-      {
-        return imp(x).left();
-      }
-      else if (is_pfnf_simple_expression(x))
-      {
-        return x;
-      }
-      else
-      {
-        return true_();
-      }
     }
 
     // Simplifies the pbes expression x, and extracts all conjuncts d[i] == e from it, for some i in 0 ... d.size(), and with e a constant.
@@ -705,6 +714,7 @@ class pbes_control_flow_algorithm
 
     void compute_control_flow_parameters()
     {
+      rewrite_propositional_variables();
       const std::vector<pfnf_equation>& equations = m_pbes.equations();
 
       // initialize all control flow parameters to true
@@ -714,8 +724,6 @@ class pbes_control_flow_algorithm
         const std::vector<data::variable>& d_X = k->parameters();
         m_is_control_flow[X.name()] = std::vector<bool>(d_X.size(), true);
       }
-
-      print_control_flow_parameters();
 
       for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
@@ -746,7 +754,7 @@ class pbes_control_flow_algorithm
                 }
                 else
                 {
-                  if (X.name() == Xij.name() && (found - d_X.begin() != index))
+                  if (X.name() == Xij.name() && (found != d_X.begin() + index))
                   {
                     m_is_control_flow[Xij.name()][index] = false;
                     std::cout << "equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
