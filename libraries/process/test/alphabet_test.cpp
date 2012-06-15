@@ -46,7 +46,7 @@ aset parse_aset(const std::string& text, const lps::action_label_list& action_de
   return result;
 }
 
-void test_alphabet_nabla()
+void test_alphabet_allow()
 {
   std::string procspec =
     "act a, b, c, d; \n"
@@ -59,7 +59,7 @@ void test_alphabet_nabla()
   BOOST_CHECK(process::pp(p) == "a || b . c");
   aset A = parse_aset("{a, b, d, a|d, a|c}", action_decls);
   std::cout << "A = " << pp(A) << std::endl;
-  aset B = alphabet_nabla(p, A, false, P);
+  aset B = alphabet_allow(p, A, false, P);
   std::cout << "B = " << pp(B) << std::endl;
   aset C = parse_aset("{a, b, a | c}", action_decls);
   std::cout << "C = " << pp(C) << std::endl;
@@ -71,7 +71,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_action_parse();
-  test_alphabet_nabla();
+  test_alphabet_allow();
 
   return EXIT_SUCCESS;
 }
