@@ -68,24 +68,26 @@ std::string pp(const aset& A)
   return out.str();
 }
 
-inline
-aset make_aset(const action_name_multiset_list& v)
+// checks if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
+template <typename InputIterator1, typename InputIterator2>
+bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
 {
-  aset result;
-  for (action_name_multiset_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  while (first1 != last1 && first2 != last2)
   {
-    core::identifier_string_list names = i->names();
-    result.insert(multi_action_name(names.begin(), names.end()));
+    if (*first1 < *first2)
+    {
+      ++first1;
+    }
+    else if (*first2 < *first1)
+    {
+      ++first2;
+    }
+    else
+    {
+      return false;
+    }
   }
-  return result;
-}
-
-inline
-aset make_aset(const multi_action_name& a)
-{
-  aset s;
-  s.insert(a);
-  return s;
+  return true;
 }
 
 inline
@@ -106,6 +108,59 @@ multi_action_name name(const lps::multi_action& x)
     result.insert(i->label().name());
   }
   return result;
+}
+
+inline
+multi_action_name name(const core::identifier_string& x)
+{
+  multi_action_name result;
+  result.insert(x);
+  return result;
+}
+
+inline
+aset make_aset(const action_name_multiset_list& v)
+{
+  aset result;
+  for (action_name_multiset_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    core::identifier_string_list names = i->names();
+    result.insert(multi_action_name(names.begin(), names.end()));
+  }
+  return result;
+}
+
+inline
+aset make_aset(const core::identifier_string_list& v)
+{
+  aset result;
+  for (core::identifier_string_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    multi_action_name a = name(*i);
+    result.insert(a);
+  }
+  return result;
+}
+
+inline
+aset make_aset(const multi_action_name& a)
+{
+  aset s;
+  s.insert(a);
+  return s;
+}
+
+inline
+core::identifier_string_list make_block_set(const aset& A)
+{
+  std::vector<core::identifier_string> tmp;
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    const multi_action_name& a = *i;
+    assert(a.size() == 1);
+    tmp.push_back(*a.begin());
+  }
+  return core::identifier_string_list(tmp.begin(), tmp.end());
 }
 
 inline
@@ -228,6 +283,21 @@ aset apply_communication_inverse(const communication_expression_list& C, const a
   return result;
 }
 
+inline
+aset apply_block(const core::identifier_string_list& B, const aset& A)
+{
+  std::set<core::identifier_string> S(B.begin(), B.end());
+  aset result;
+  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (has_empty_intersection(S.begin(), S.end(), i->begin(), i->end()))
+    {
+      result.insert(*i);
+    }
+  }
+  return result;
+}
+
 // returns all elements of B that are subset of an element in A
 inline
 aset subset_intersection(const aset& A, const aset& B)
@@ -251,7 +321,7 @@ aset subset_intersection(const aset& A, const aset& B)
 // prototype declarations
 aset alphabet_nabla(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
 aset alphabet_sub(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
-aset alphabet_super(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
+aset alphabet_block(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
 
 template <typename Derived>
 struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
@@ -472,16 +542,17 @@ struct alphabet_nabla_traverser: public process_expression_traverser<Derived>
   }
 
   // block(B, p)
-  void leave(const process::block& x)
+  void operator()(const process::block& x)
   {
-    //if (is_all(A))
-    //{
-    //  core::identifier_string_list b = x.block_set();
-    //  multi_action_name B(b.begin(), b.end());
-    //  A = B;
-    //}
-    // TODO: not implemented yet
-    throw std::runtime_error("not implemented yet");
+    core::identifier_string_list B = x.block_set();
+    if (A_is_all)
+    {
+      push(alphabet_block(x.operand(), make_aset(B), false, process_bodies));
+    }
+    else
+    {
+      push(apply_block(B, alphabet_nabla(x.operand(), A, false, process_bodies)));
+    }
   }
 
   // hide(I, p)
@@ -708,6 +779,101 @@ struct alphabet_sub_traverser: public alphabet_nabla_traverser<Derived>
   }
 };
 
+template <typename Derived>
+struct alphabet_block_traverser: public alphabet_nabla_traverser<Derived>
+{
+  typedef alphabet_nabla_traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::top;
+  using super::push;
+  using super::join;
+  using super::A;
+  using super::A_is_all;
+  using super::process_bodies;
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  // Constructor
+  alphabet_block_traverser(const aset& A, bool /* A_is_all */, const atermpp::map<process_identifier, process_expression>& process_bodies)
+    : super(A, false, process_bodies)
+  {}
+
+  // tau
+  void leave(const process::tau& x)
+  {
+    multi_action_name tau;
+    push(make_aset(tau));
+  }
+
+  // p1 || p2
+  void operator()(const process::merge& x)
+  {
+    aset A1 = alphabet_block(x.left(), A, false, process_bodies);
+    aset A2 = alphabet_block(x.right(), A, false, process_bodies);
+    aset A1xA2 = times(A1, A2);
+    aset A2A1xA2 = set_union(A2, A1xA2);
+    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
+    push(A1A2A1xA2);
+  }
+
+  // p1 | p2
+  void operator()(const process::sync& x)
+  {
+    aset A1 = alphabet_sub(x.left(), A, false, process_bodies);
+    aset A2 = alphabet_block(x.right(), A, false, process_bodies);
+    aset A1xA2 = times(A1, A2);
+    push(A1xA2);
+  }
+
+  // block(B, p)
+  void operator()(const process::block& x)
+  {
+    core::identifier_string_list B = x.block_set();
+    push(set_intersection(make_aset(B), A));
+  }
+
+  // hide(I, p)
+  void leave(const process::hide& x)
+  {
+    // TODO: not implemented yet
+    throw std::runtime_error("not implemented yet");
+  }
+
+  // rename(, p)
+  void leave(const process::rename& x)
+  {
+    // TODO: not implemented yet
+    throw std::runtime_error("not implemented yet");
+  }
+
+  // comm(A, p)
+  void operator()(const process::comm& x)
+  {
+    communication_expression_list C = x.comm_set();
+    aset A1 = apply_communication_inverse(C, A);
+    aset Aprime = alphabet_nabla(x, A1, false, process_bodies);
+    aset CAprime = apply_communication(C, Aprime);
+    core::identifier_string_list B = make_block_set(A);
+    aset BCAprime = apply_block(B, CAprime);
+    push(BCAprime);
+  }
+
+  // allow(A, p)
+  void operator()(const process::allow& x)
+  {
+    aset V = make_aset(x.allow_set());
+    multi_action_name tau;
+    core::identifier_string_list B = make_block_set(A);
+    aset dBV = apply_block(B, V);
+    dBV.insert(tau);
+    push(alphabet_nabla(x, dBV, false, process_bodies));
+  }
+};
+
 template <template <class> class Traverser>
 struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Traverser> >
 {
@@ -766,9 +932,21 @@ aset alphabet_sub(const process_expression& x, const aset& A, bool A_is_all, con
 }
 
 inline
-aset alphabet_super(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
+aset alphabet_block(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
 {
   return aset();
+}
+
+inline
+aset alphabet_block(const process_expression& x, const aset& A, bool A_is_all, const process_specification& procspec)
+{
+  atermpp::map<process_identifier, process_expression> process_bodies;
+  const atermpp::vector<process_equation>& equations = procspec.equations();
+  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  {
+    process_bodies[i->identifier()] = i->expression();
+  }
+  return alphabet_block(x, A, A_is_all, process_bodies);
 }
 
 } // namespace process
