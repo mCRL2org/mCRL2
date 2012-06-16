@@ -24,6 +24,7 @@ set(MCRL2_GUI_UI_FILES
   mainwindow.ui
   toolinstance.ui
   fileinformation.ui
+  filepicker.ui
   copydialog.ui
 )
 
@@ -36,6 +37,7 @@ set(MCRL2_GUI_MOC_HEADERS
   toolaction.h
   toolinstance.h
   fileinformation.h
+  filepicker.h
   copydialog.h
   copythread.h
 )
@@ -54,8 +56,10 @@ set(MCRL2_GUI_SRC_FILES
   toolcatalog.cpp
   toolinformation.cpp
   fileinformation.cpp
+  filepicker.cpp
   copydialog.cpp
   copythread.cpp
+  optionvalue.cpp
 )
 
 # ######### Copy extra files ##########

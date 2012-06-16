@@ -170,6 +170,10 @@ ArgumentType ToolInformation::guessType(QString type, QString name)
   {
     return FileArgument;
   }
+  else if (type == "level")                           // New type
+  {
+    return LevelArgument;
+  }
   else if (type == "int")                             // New type
   {
     return IntegerArgument;
@@ -195,6 +199,10 @@ ArgumentType ToolInformation::guessType(QString type, QString name)
     else if (name == "bool")
     {
       return BooleanArgument;
+    }
+    else if (name == "level")
+    {
+      return LevelArgument;
     }
     return StringArgument;
   }

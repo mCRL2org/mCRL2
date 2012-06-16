@@ -12,6 +12,7 @@
 
 #include <QWidget>
 #include "toolinformation.h"
+#include "optionvalue.h"
 
 namespace Ui {
   class ToolInstance;
@@ -31,6 +32,8 @@ class ToolInstance : public QWidget
     QString m_filename;
     ToolInformation m_info;
     Ui::ToolInstance *ui;
+
+    QList<OptionValue> m_optionValues;
 
   signals:
     void titleChanged(QString title);

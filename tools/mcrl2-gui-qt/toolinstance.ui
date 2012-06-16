@@ -138,18 +138,7 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <layout class="QHBoxLayout" name="lytFileOut">
-               <item>
-                <widget class="QLineEdit" name="edtFileOut"/>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnFileOutBrowse">
-                 <property name="text">
-                  <string>Browse</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="FilePicker" name="pckFileOut" native="true"/>
              </item>
             </layout>
            </item>
@@ -234,6 +223,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FilePicker</class>
+   <extends>QWidget</extends>
+   <header>filepicker.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

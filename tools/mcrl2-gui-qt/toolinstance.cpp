@@ -10,6 +10,9 @@
 #include "toolinstance.h"
 #include "ui_toolinstance.h"
 
+#include "filepicker.h"
+
+#include <limits>
 #include <QDebug>
 #include <QCheckBox>
 #include <QRadioButton>
@@ -47,13 +50,12 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
       filenr++;
       newfile = fileInfo.baseName().append("_%1.out").arg(filenr);
     }
-    ui->edtFileOut->setText(newfile);
+    ui->pckFileOut->setText(newfile);
   }
   else
   {
     ui->lblFileOut->setVisible(false);
-    ui->btnFileOutBrowse->setVisible(false);
-    ui->edtFileOut->setVisible(false);
+    ui->pckFileOut->setVisible(false);
   }
 
   for (int i = 0; i < m_info.options.count(); i++)
@@ -76,9 +78,12 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 
       lytOpt->addWidget(lblOpt);
 
+      QLabel *lblReq = new QLabel("*", this);
+
       switch (option.argument.type)
       {
         case StringArgument:
+        case LevelArgument:
         case IntegerArgument:
         case RealArgument:
         case BooleanArgument:
@@ -94,14 +99,25 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 
             switch (option.argument.type)
             {
+              case LevelArgument:
+                edtArg = new QLineEdit("verbose", this);
+                break;
               case IntegerArgument:
-                edtArg = new QSpinBox(this);
+                {
+                  QSpinBox *edtSpb = new QSpinBox(this);
+                  edtSpb->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+                  edtArg = edtSpb;
+                }
                 break;
               case RealArgument:
-                edtArg = new QDoubleSpinBox(this);
+                {
+                  QDoubleSpinBox *edtSpb = new QDoubleSpinBox(this);
+                  edtSpb->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+                  edtArg = edtSpb;
+                }
                 break;
               case BooleanArgument:
-                edtArg = new QCheckBox("Enabled", this);
+                edtArg = new QCheckBox("Yes", this);
                 break;
               case StringArgument:
               default:
@@ -109,7 +125,20 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
                 break;
             }
             edtArg->setMinimumWidth(300);
+
+
+            if (option.argument.optional && (option.argument.type == IntegerArgument || option.argument.type == RealArgument))
+            {
+              QCheckBox *cbOptional = new QCheckBox(this);
+              lytArg->addWidget(cbOptional);
+            }
+
             lytArg->addWidget(edtArg);
+
+            if (!option.argument.optional && option.argument.type != BooleanArgument)
+            {
+              lytArg->addWidget(lblReq);
+            }
 
             QSpacerItem *spacer = new QSpacerItem(100, 20, QSizePolicy::Expanding);
             lytArg->addItem(spacer);
@@ -125,17 +154,19 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
             lblArg->setMinimumWidth(100);
             lytArg->addWidget(lblArg);
 
-            QLineEdit *edtArg = new QLineEdit(this);
-            edtArg->setMinimumWidth(300);
+            FilePicker *edtArg = new FilePicker(this);
             lytArg->addWidget(edtArg);
 
-            QPushButton *btnArg = new QPushButton("Browse", this);
-            lytArg->addWidget(btnArg);
+            if (!option.argument.optional)
+            {
+              lytArg->addWidget(lblReq);
+            }
 
             QSpacerItem *spacer = new QSpacerItem(100, 20, QSizePolicy::Expanding);
             lytArg->addItem(spacer);
             lytOpt->addLayout(lytArg);
           }
+          break;
         case EnumArgument:
           {
             QFormLayout *lytValues = new QFormLayout();
@@ -150,17 +181,18 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
               rbVal->setChecked(val.standard);
               grpValues->addButton(rbVal);
 
-              QLabel *lblVal = new QLabel(val.description);
+              QLabel *lblVal = new QLabel(val.description, this);
+              lblVal->setWordWrap(true);
 
               lytValues->addRow(rbVal, lblVal);
             }
 
             lytOpt->addLayout(lytValues);
           }
+          break;
         default:
           break;
       }
-
       ui->frmOptions->addRow(cbOpt, lytOpt);
     }
   }

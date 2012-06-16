@@ -23,6 +23,7 @@
 enum ArgumentType
 {
   StringArgument,
+  LevelArgument,
   EnumArgument,
   FileArgument,
   IntegerArgument,
