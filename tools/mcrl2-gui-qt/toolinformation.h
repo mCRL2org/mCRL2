@@ -29,7 +29,7 @@ enum ArgumentType
   IntegerArgument,
   RealArgument,
   BooleanArgument,
-  UnknownArgument
+  InvalidArgument
 };
 
 struct ToolValue
@@ -51,7 +51,7 @@ struct ToolArgument
 {
     ToolArgument() :
       optional(true),
-      type(UnknownArgument)
+      type(InvalidArgument)
     {}
     ToolArgument(bool optional, ArgumentType type, QString name) :
       optional(optional),
@@ -78,7 +78,7 @@ struct ToolOption
       description(description)
     {}
 
-    bool hasArgument() { return (argument.type != UnknownArgument); }
+    bool hasArgument() { return (argument.type != InvalidArgument); }
 
     bool standard;
     QString nameShort, nameLong, description;
@@ -95,7 +95,7 @@ class ToolInformation
     void load();
     bool hasOutput() { return !output.isEmpty(); }
 
-    QString name, input, output, desc, author;
+    QString path, name, input, output, desc, author;
     bool valid;
 
     QList<ToolOption> options;

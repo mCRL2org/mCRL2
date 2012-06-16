@@ -35,7 +35,7 @@ OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argV
 {
   assert(option.hasArgument());
   assert(option.argument.type == IntegerArgument);
-  assert(option.argument.optional);
+  assert((argEnabled == NULL) != option.argument.optional);
 }
 
 OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled) :
@@ -43,7 +43,7 @@ OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox
 {
   assert(option.hasArgument());
   assert(option.argument.type == RealArgument);
-  assert(option.argument.optional);
+  assert((argEnabled == NULL) != option.argument.optional);
 }
 
 OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue) :

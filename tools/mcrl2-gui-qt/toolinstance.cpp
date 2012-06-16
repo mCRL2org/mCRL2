@@ -25,7 +25,7 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QSpacerItem>
-
+#include "mcrl2/utilities/logger.h"
 
 ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidget *parent) :
   QWidget(parent),
@@ -35,8 +35,14 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 {
   ui->setupUi(this);
 
+  connect(&m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
+  connect(&m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(onStandardOutput()));
+  connect(ui->btnRun, SIGNAL(clicked()), this, SLOT(onRun()));
+  connect(ui->btnAbort, SIGNAL(clicked()), this, SLOT(onAbort()));
+
   QFileInfo fileInfo(filename);
 
+  m_process.setWorkingDirectory(fileInfo.absoluteDir().absolutePath());
   ui->lblDirectoryValue->setText(fileInfo.absoluteDir().absolutePath());
   ui->lblFileValue->setText(fileInfo.fileName());
 
@@ -70,6 +76,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
     if (!option.hasArgument())
     {
       ui->frmOptions->addRow(cbOpt, lblOpt);
+      m_optionValues.append(OptionValue(option, cbOpt));
     }
     else
     {
@@ -77,8 +84,6 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
       lytOpt->setSpacing(10);
 
       lytOpt->addWidget(lblOpt);
-
-      QLabel *lblReq = new QLabel("*", this);
 
       switch (option.argument.type)
       {
@@ -100,12 +105,26 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
             switch (option.argument.type)
             {
               case LevelArgument:
-                edtArg = new QLineEdit("verbose", this);
+                {
+                  QLineEdit *edtLdt = new QLineEdit("verbose", this);
+                  m_optionValues.append(OptionValue(option, cbOpt, edtLdt));
+                  edtArg = edtLdt;
+                }
                 break;
               case IntegerArgument:
                 {
                   QSpinBox *edtSpb = new QSpinBox(this);
                   edtSpb->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+                  if (option.argument.optional)
+                  {
+                    QCheckBox *cbOptional = new QCheckBox(this);
+                    lytArg->addWidget(cbOptional);
+                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb, cbOptional));
+                  }
+                  else
+                  {
+                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb));
+                  }
                   edtArg = edtSpb;
                 }
                 break;
@@ -113,30 +132,42 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
                 {
                   QDoubleSpinBox *edtSpb = new QDoubleSpinBox(this);
                   edtSpb->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+                  if (option.argument.optional)
+                  {
+                    QCheckBox *cbOptional = new QCheckBox(this);
+                    lytArg->addWidget(cbOptional);
+                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb, cbOptional));
+                  }
+                  else
+                  {
+                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb));
+                  }
                   edtArg = edtSpb;
                 }
                 break;
               case BooleanArgument:
-                edtArg = new QCheckBox("Yes", this);
+                {
+                  QCheckBox *edtChb = new QCheckBox("Yes", this);
+                  m_optionValues.append(OptionValue(option, cbOpt, edtChb));
+                  edtArg = edtChb;
+                }
                 break;
               case StringArgument:
               default:
-                edtArg = new QLineEdit(this);
+                {
+                  QLineEdit *edtLdt = new QLineEdit(this);
+                  m_optionValues.append(OptionValue(option, cbOpt, edtLdt));
+                  edtArg = edtLdt;
+                }
                 break;
             }
             edtArg->setMinimumWidth(300);
-
-
-            if (option.argument.optional && (option.argument.type == IntegerArgument || option.argument.type == RealArgument))
-            {
-              QCheckBox *cbOptional = new QCheckBox(this);
-              lytArg->addWidget(cbOptional);
-            }
 
             lytArg->addWidget(edtArg);
 
             if (!option.argument.optional && option.argument.type != BooleanArgument)
             {
+              QLabel *lblReq = new QLabel("*", this);
               lytArg->addWidget(lblReq);
             }
 
@@ -156,9 +187,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 
             FilePicker *edtArg = new FilePicker(this);
             lytArg->addWidget(edtArg);
+            m_optionValues.append(OptionValue(option, cbOpt, edtArg));
 
             if (!option.argument.optional)
             {
+              QLabel *lblReq = new QLabel("*", this);
               lytArg->addWidget(lblReq);
             }
 
@@ -186,6 +219,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 
               lytValues->addRow(rbVal, lblVal);
             }
+            m_optionValues.append(OptionValue(option, cbOpt, grpValues));
 
             lytOpt->addLayout(lytValues);
           }
@@ -202,3 +236,108 @@ ToolInstance::~ToolInstance()
 {
   delete ui;
 }
+
+QString ToolInstance::executable()
+{
+  return m_info.path;
+}
+
+QString ToolInstance::arguments()
+{
+  QFileInfo info(m_filename);
+  QString result = info.fileName();
+
+  if (result.contains(" "))
+  {
+    result = QString("\"%1\"").arg(result);
+  }
+
+  QString fileOut = ui->pckFileOut->text();
+  if (!fileOut.isEmpty())
+  {
+    if (fileOut.contains(" "))
+    {
+      fileOut = QString("\"%1\"").arg(fileOut);
+    }
+    result.append(" ").append(fileOut);
+  }
+
+  for (int i = 0; i < m_optionValues.count(); i++)
+  {
+    OptionValue val =  m_optionValues.at(i);
+    if (!val.value().isEmpty())
+    {
+      result.append(" ").append(val.value());
+    }
+  }
+
+  return result;
+}
+
+void ToolInstance::onStateChange(QProcess::ProcessState state)
+{
+  QFileInfo fileInfo(m_filename);
+
+  switch (state)
+  {
+    case QProcess::NotRunning:
+      emit(titleChanged(fileInfo.fileName().append(" [Ready]")));
+      ui->btnAbort->setEnabled(false);
+      ui->btnRun->setEnabled(true);
+      break;
+    case QProcess::Starting:
+      emit(titleChanged(fileInfo.fileName().append(" [Starting]")));
+      ui->btnRun->setEnabled(false);
+      ui->btnAbort->setEnabled(true);
+      break;
+    case QProcess::Running:
+    default:
+      emit(titleChanged(fileInfo.fileName().append(" [Running]")));
+      ui->btnRun->setEnabled(false);
+      ui->btnAbort->setEnabled(true);
+      break;
+  }
+}
+
+void ToolInstance::onStandardOutput()
+{
+  QByteArray outText = m_process.readAllStandardOutput();
+  ui->edtOutput->appendPlainText(QString(outText));
+}
+
+void ToolInstance::onRun()
+{
+  m_process.start(executable().append(" ").append(arguments()), QIODevice::ReadOnly);
+  if (m_process.waitForStarted(1000))
+  {
+    mCRL2log(mcrl2::log::info) << "Started " << executable().append(" ").append(arguments()).toStdString() << std::endl;
+    ui->tabWidget->setCurrentIndex(1);
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString() << " (" << executable().append(" ").append(arguments()).toStdString() << ")" << std::endl;
+  }
+}
+
+void ToolInstance::onAbort()
+{
+  mCRL2log(mcrl2::log::info) << "Attempting to terminate " << executable().toStdString() << std::endl;
+  m_process.terminate();
+
+  if (!m_process.waitForFinished(1000) && m_process.state() == QProcess::Running)
+  {
+    mCRL2log(mcrl2::log::info) << "Killing " << executable().toStdString() << std::endl;
+    m_process.kill();
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

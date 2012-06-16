@@ -13,36 +13,34 @@
 
 ToolInformation::ToolInformation(QString name, QString input, QString output)
   : name(name), input(input), output(output), valid(false)
-{}
+{
+  QDir appDir = QDir(QCoreApplication::applicationDirPath());
+
+  #ifdef __APPLE__
+    appDir.cdUp();
+    appDir.cdUp();
+  #endif
+
+    path = appDir.absoluteFilePath(name);
+  #ifdef _WIN32
+    path.append(".exe");
+  #endif
+  #ifdef __APPLE__
+    path.append(".app/Contents/MacOS/"+ name);
+  #endif
+}
 
 void ToolInformation::load()
 {
-  QProcess *toolProcess = new QProcess();
+  QProcess toolProcess;
 
-  QDir appDir = QDir(QCoreApplication::applicationDirPath());
-
-#ifdef __APPLE__
-  appDir.cdUp();
-  appDir.cdUp();
-#endif
-
-  QString executable = appDir.absoluteFilePath(name);
-#ifdef _WIN32
-  executable.append(".exe");
-#endif
-#ifdef __APPLE__
-  executable.append(".app/Contents/MacOS/"+ name);
-#endif
-
-  toolProcess->start(executable, QStringList("--generate-xml"), QIODevice::ReadOnly);
-  if (!toolProcess->waitForFinished(3000))
+  toolProcess.start(path, QStringList("--generate-xml"), QIODevice::ReadOnly);
+  if (!toolProcess.waitForFinished(3000))
   {
-    mCRL2log(mcrl2::log::error) << toolProcess->errorString().toStdString() << " (" << name.toStdString() << ")" << std::endl;
-    delete toolProcess;
+    mCRL2log(mcrl2::log::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")" << std::endl;
     return;
   }
-  QByteArray xmlText = toolProcess->readAllStandardOutput();
-  delete toolProcess;
+  QByteArray xmlText = toolProcess.readAllStandardOutput();
 
   QString errorMsg;
   QDomDocument xml;
@@ -94,18 +92,6 @@ void ToolInformation::load()
   {
     mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no options element" << std::endl;
   }
-
-
-  appDir.mkdir("xml");
-
-  if (!appDir.exists("xml/"+name+".xml"))
-  {
-    QFile data(appDir.absoluteFilePath("xml/"+name+".xml"));
-    if (data.open(QFile::WriteOnly | QFile::Truncate)) {
-        QTextStream out(&data);
-        xml.save(out, 2);
-    }
-  }
 }
 
 void ToolInformation::parseOptions(QDomElement optionsElement)
@@ -114,7 +100,7 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
 
   while (!optionElement.isNull())
   {
-    bool standard = (optionElement.attribute("standard") == "yes");
+    bool standard = (optionElement.attribute("default") == "yes");
     QString optShort = optionElement.firstChildElement("short").text();
     QString optLong = optionElement.firstChildElement("long").text();
     QString optDescription = optionElement.firstChildElement("description").text();
@@ -207,7 +193,7 @@ ArgumentType ToolInformation::guessType(QString type, QString name)
     return StringArgument;
   }
 
-  return UnknownArgument;
+  return InvalidArgument;
 }
 
 

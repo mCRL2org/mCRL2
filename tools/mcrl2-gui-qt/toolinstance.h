@@ -27,6 +27,14 @@ class ToolInstance : public QWidget
     ~ToolInstance();
 
     ToolInformation information() { return m_info; }
+    QString executable();
+    QString arguments();
+
+  public slots:
+    void onStateChange(QProcess::ProcessState state);
+    void onStandardOutput();
+    void onRun();
+    void onAbort();
 
   private:
     QString m_filename;
@@ -34,6 +42,7 @@ class ToolInstance : public QWidget
     Ui::ToolInstance *ui;
 
     QList<OptionValue> m_optionValues;
+    QProcess m_process;
 
   signals:
     void titleChanged(QString title);
