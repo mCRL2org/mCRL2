@@ -25,6 +25,7 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QSpacerItem>
+#include <QFileDialog>
 #include "mcrl2/utilities/logger.h"
 
 ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidget *parent) :
@@ -37,8 +38,10 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 
   connect(&m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
   connect(&m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(onStandardOutput()));
+  connect(&m_process, SIGNAL(readyReadStandardError()), this, SLOT(onStandardError()));
   connect(ui->btnRun, SIGNAL(clicked()), this, SLOT(onRun()));
   connect(ui->btnAbort, SIGNAL(clicked()), this, SLOT(onAbort()));
+  connect(ui->btnSave, SIGNAL(clicked()), this, SLOT(onSave()));
 
   QFileInfo fileInfo(filename);
 
@@ -305,6 +308,12 @@ void ToolInstance::onStandardOutput()
   ui->edtOutput->appendPlainText(QString(outText));
 }
 
+void ToolInstance::onStandardError()
+{
+  QByteArray outText = m_process.readAllStandardError();
+  ui->edtOutput->appendPlainText(QString(outText));
+}
+
 void ToolInstance::onRun()
 {
   m_process.start(executable().append(" ").append(arguments()), QIODevice::ReadOnly);
@@ -328,6 +337,22 @@ void ToolInstance::onAbort()
   {
     mCRL2log(mcrl2::log::info) << "Killing " << executable().toStdString() << std::endl;
     m_process.kill();
+  }
+}
+
+void ToolInstance::onSave()
+{
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save output"), QString(),
+                                          tr("Text file (*.txt ) ;; All files (*.* )"));
+
+  if (!fileName.isNull()) {
+    QFile file(fileName);
+
+    if (file.open(QFile::WriteOnly | QFile::Text))
+    {
+      file.write((const char *)ui->edtOutput->toPlainText().toAscii().data());
+      file.close();
+    }
   }
 }
 

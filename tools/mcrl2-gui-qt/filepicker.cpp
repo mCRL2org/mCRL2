@@ -29,7 +29,7 @@ FilePicker::~FilePicker()
 void FilePicker::onBrowse()
 {
   QString fileName(QFileDialog::getSaveFileName(parentWidget(), tr("Select file"), QString(),
-                                                tr("All files (*.*)")));
+                                                tr("All files (*.* )")));
   if (!fileName.isNull())
     ui->value->setText(fileName);
 }

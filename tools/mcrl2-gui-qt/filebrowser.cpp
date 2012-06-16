@@ -101,6 +101,70 @@ void FileBrowser::createContextMenu(QFileInfo info)
 
 }
 
+void FileBrowser::onNewFile()
+{
+  if (currentIndex().isValid())
+  {
+    QString file = m_model.filePath(currentIndex());
+    QDir dir = QDir(file);
+    QString newfile("new");
+    int filenr = 0;
+    while(dir.exists(newfile))
+    {
+      filenr++;
+      newfile = QString("new_%1").arg(filenr);
+    }
+    QFile(dir.absoluteFilePath(newfile)).open(QIODevice::WriteOnly);
+
+    QModelIndex index = m_model.index(dir.absoluteFilePath(newfile));
+    setCurrentIndex(index);
+    edit(index);
+  }
+}
+
+void FileBrowser::onNewFolder()
+{
+  if (currentIndex().isValid())
+  {
+    QString file = m_model.filePath(currentIndex());
+    QDir dir = QDir(file);
+    QString newfile("new");
+    int filenr = 0;
+    while(dir.exists(newfile))
+    {
+      filenr++;
+      newfile = QString("new_%1").arg(filenr);
+    }
+    dir.mkdir(newfile);
+
+    QModelIndex index = m_model.index(dir.absoluteFilePath(newfile));
+    setCurrentIndex(index);
+    edit(index);
+  }
+}
+
+void FileBrowser::onOpenFile()
+{
+  if (currentIndex().isValid())
+  {
+    QString file = m_model.filePath(currentIndex());
+    if (QFileInfo(file).isFile())
+    {
+      QDesktopServices::openUrl(QUrl(file));
+    }
+  }
+}
+
+void FileBrowser::onDeleteFile()
+{
+  if (currentIndex().isValid())
+  {
+    QString file = m_model.filePath(currentIndex());
+    askRemove(m_model.filePath(currentIndex()));
+    m_model.remove(currentIndex());
+  }
+}
+
 void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
 {
   if (currentIndex().isValid())
@@ -119,35 +183,11 @@ void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
       }
       if (act->text() == "New File")
       {
-        QDir dir = QDir(file);
-        QString newfile("new");
-        int filenr = 0;
-        while(dir.exists(newfile))
-        {
-          filenr++;
-          newfile = QString("new_%1").arg(filenr);
-        }
-        QFile(dir.absoluteFilePath(newfile)).open(QIODevice::WriteOnly);
-
-        QModelIndex index = m_model.index(dir.absoluteFilePath(newfile));
-        setCurrentIndex(index);
-        edit(index);
+        onNewFile();
       }
       if (act->text() == "New Directory")
       {
-        QDir dir = QDir(file);
-        QString newfile("new");
-        int filenr = 0;
-        while(dir.exists(newfile))
-        {
-          filenr++;
-          newfile = QString("new_%1").arg(filenr);
-        }
-        dir.mkdir(newfile);
-
-        QModelIndex index = m_model.index(dir.absoluteFilePath(newfile));
-        setCurrentIndex(index);
-        edit(index);
+        onNewFolder();
       }
       if (act->text() == "Cut")
       {
@@ -190,8 +230,7 @@ void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
       }
       if (act->text() == "Delete")
       {
-        askRemove(m_model.filePath(currentIndex()));
-        m_model.remove(currentIndex());
+        onDeleteFile();
       }
       if (act->text() == "Properties")
       {
@@ -208,7 +247,7 @@ void FileBrowser::mouseDoubleClickEvent(QMouseEvent *event)
     QString file = m_model.filePath(currentIndex());
     if (QFileInfo(file).isFile())
     {
-      QDesktopServices::openUrl(QUrl(file));
+      onOpenFile();
       event->accept();
     }
     else

@@ -33,8 +33,10 @@ class ToolInstance : public QWidget
   public slots:
     void onStateChange(QProcess::ProcessState state);
     void onStandardOutput();
+    void onStandardError();
     void onRun();
     void onAbort();
+    void onSave();
 
   private:
     QString m_filename;

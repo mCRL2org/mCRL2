@@ -36,6 +36,11 @@ class FileBrowser : public QTreeView
     void onToolSelected();
     void onRemoveRequested(QString filename = QString());
 
+    void onNewFile();
+    void onNewFolder();
+    void onOpenFile();
+    void onDeleteFile();
+
   signals:
     void openToolInstance(QString filename, ToolInformation tool);
     void openProperties(QString filename);

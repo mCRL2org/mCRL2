@@ -19,6 +19,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   m_ui.setupUi(this);
 
+  connect(m_ui.actionNew_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onNewFile()));
+  connect(m_ui.actionNew_Folder, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onNewFile()));
+  connect(m_ui.actionOpen_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onOpenFile()));
+  connect(m_ui.actionDelete_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onDeleteFile()));
+  connect(m_ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
+  connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
+
+
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
   connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
   connect(m_ui.treeFiles, SIGNAL(openToolInstance(QString, ToolInformation)), this, SLOT(createToolInstance(QString, ToolInformation)));
@@ -28,10 +36,16 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.treeFiles->setCatalog(m_catalog);
 
   createToolMenu();
+  m_state = saveState();
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::onResetPerspective()
+{
+  m_state = saveState();
 }
 
 void MainWindow::createToolMenu()
