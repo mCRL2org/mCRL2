@@ -8,6 +8,8 @@
 //
 /// \file ./diagraph.cpp
 
+#include <QApplication>
+
 #include "wx.hpp" // precompiled headers
 
 #define NAME "diagraphica"
@@ -89,12 +91,16 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine)
 
+  QApplication app(0, lpCmdLine);
+
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
+  QApplication app(argc, argv);
 
   return wxEntry(argc, argv);
 }
