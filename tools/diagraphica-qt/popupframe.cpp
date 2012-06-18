@@ -16,7 +16,6 @@
 // -- constructors and desctructor ----------------------------------
 
 
-// ------------------------------
 PopupFrame::PopupFrame(
   Mediator* m,
   wxWindow* parent,
@@ -35,22 +34,17 @@ PopupFrame::PopupFrame(
     wxFRAME_TOOL_WINDOW |
     wxFRAME_NO_TASKBAR),
   Colleague(m)
-// ------------------------------
 {}
 
 
-// ----------------------
 PopupFrame::~PopupFrame()
-// ----------------------
 {}
 
 
 // -- event handlers ------------------------------------------------
 
 
-// --------------------------------------------
 void PopupFrame::OnClose(wxCloseEvent& /*event*/)
-// --------------------------------------------
 {
   mediator->handleCloseFrame(this);
   this->Destroy();

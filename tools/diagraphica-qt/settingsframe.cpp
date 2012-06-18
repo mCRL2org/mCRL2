@@ -16,7 +16,6 @@
 // -- constructors and desctructor ----------------------------------
 
 
-// --------------------------
 SettingsFrame::SettingsFrame(
   Mediator* m,
   wxWindow* parent,
@@ -31,7 +30,6 @@ SettingsFrame::SettingsFrame(
     title,
     position,
     size)
-// --------------------------
 {
   SetMinSize(size);
   SetMaxSize(size);
@@ -40,18 +38,14 @@ SettingsFrame::SettingsFrame(
 }
 
 
-// ----------------------------
 SettingsFrame::~SettingsFrame()
-// ----------------------------
 {}
 
 
 // -- GUI initialization --------------------------------------------
 
 
-// ----------------------------
 void SettingsFrame::initFrame()
-// ----------------------------
 {
   sizerFrame = new wxBoxSizer(wxVERTICAL);
   this->SetSizer(sizerFrame);
@@ -84,9 +78,7 @@ void SettingsFrame::initFrame()
 }
 
 
-// -----------------------------------
 void SettingsFrame::initPanelGeneral()
-// -----------------------------------
 {
   // get settings
   wxColour colBG;
@@ -238,9 +230,7 @@ void SettingsFrame::initPanelGeneral()
 }
 
 
-// -------------------------------------
 void SettingsFrame::initPanelClustTree()
-// -------------------------------------
 {
   // get settings
   bool show;
@@ -376,9 +366,7 @@ void SettingsFrame::initPanelClustTree()
 }
 
 
-// -----------------------------------
 void SettingsFrame::initPanelBarTree()
-// ------------------------------------
 {
   // get settings
   bool   show;
@@ -451,9 +439,7 @@ void SettingsFrame::initPanelBarTree()
 }
 
 
-// --------------------------------------
 void SettingsFrame::initPanelArcDiagram()
-// --------------------------------------
 {
   // get settings
   bool     showNodes;
@@ -584,9 +570,7 @@ void SettingsFrame::initPanelArcDiagram()
 }
 
 
-// -------------------------------------
 void SettingsFrame::initPanelSimulator()
-// -------------------------------------
 {
   int blendType;
   wxString blendVal;
@@ -662,9 +646,7 @@ void SettingsFrame::initPanelSimulator()
 }
 
 
-// ---------------------------------
 void SettingsFrame::initPanelTrace()
-// ---------------------------------
 {
   bool useShading;
   mediator->getSettingsTrace(useShading);
@@ -707,9 +689,7 @@ void SettingsFrame::initPanelTrace()
 }
 
 
-// --------------------------------------
 void SettingsFrame::initPanelDgrmEditor()
-// --------------------------------------
 {
   panelDgrmEditor = new wxScrolledWindow(
     notebook,
@@ -724,57 +704,43 @@ void SettingsFrame::initPanelDgrmEditor()
 // -- set functions -------------------------------------------------
 
 
-// -----------------------------
 void SettingsFrame::setGeneral()
-// -----------------------------
 {
   notebook->SetSelection(0);
 }
 
 
-// -------------------------------
 void SettingsFrame::setClustTree()
-// -------------------------------
 {
   notebook->SetSelection(1);
 }
 
 
-// -----------------------------
 void SettingsFrame::setBarTree()
-// -----------------------------
 {
   notebook->SetSelection(2);
 }
 
 
-// --------------------------------
 void SettingsFrame::setArcDiagram()
-// --------------------------------
 {
   notebook->SetSelection(3);
 }
 
 
-// -------------------------------
 void SettingsFrame::setSimulator()
-// -------------------------------
 {
   notebook->SetSelection(4);
 }
 
 
-// ---------------------------
 void SettingsFrame::setTrace()
-// ---------------------------
 {
   notebook->SetSelection(5);
 }
 
 
-// --------------------------------
 void SettingsFrame::setDgrmEditor()
-// --------------------------------
 {
   notebook->SetSelection(6);
 }
@@ -783,9 +749,7 @@ void SettingsFrame::setDgrmEditor()
 // -- event handlers ------------------------------------------------
 
 
-// ----------------------------------------------
 void SettingsFrame::onButton(wxCommandEvent& e)
-// ----------------------------------------------
 {
   if (e.GetId() == ID_BUTTON_SUBMIT)
   {
@@ -807,9 +771,7 @@ void SettingsFrame::onButton(wxCommandEvent& e)
 }
 
 
-// ------------------------------------------------
 void SettingsFrame::onCheckBox(wxCommandEvent& /*e*/)
-// ------------------------------------------------
 {
   /*if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
       updateSettingsClustTree();
@@ -826,9 +788,7 @@ void SettingsFrame::onCheckBox(wxCommandEvent& /*e*/)
 }
 
 
-// ------------------------------------------------
 void SettingsFrame::onComboBox(wxCommandEvent& /*e*/)
-// ------------------------------------------------
 {
   /*if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
       updateSettingsGeneral();
@@ -839,9 +799,7 @@ void SettingsFrame::onComboBox(wxCommandEvent& /*e*/)
 }
 
 
-// ---------------------------------------------
 void SettingsFrame::onSpinCtrl(wxSpinEvent& /*e*/)
-// ---------------------------------------------
 {
   /*if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )
       updateSettingsGeneral();
@@ -855,9 +813,7 @@ void SettingsFrame::onSpinCtrl(wxSpinEvent& /*e*/)
 // -- utility functions -----------------------------------------
 
 
-// ----------------------------------------
 void SettingsFrame::updateSettingsGeneral()
-// ----------------------------------------
 {
   wxColour colClr = buttonColorBG->GetBackgroundColour();
   wxColour colTxt = buttonColorTxt->GetBackgroundColour();
@@ -868,9 +824,7 @@ void SettingsFrame::updateSettingsGeneral()
 }
 
 
-// ------------------------------------------
 void SettingsFrame::updateSettingsClustTree()
-// ------------------------------------------
 {
   bool     show     = checkBoxShowCT->GetValue();
   bool     annotate = checkBoxAnnotateCT->GetValue();
@@ -914,9 +868,7 @@ void SettingsFrame::updateSettingsClustTree()
 }
 
 
-// ----------------------------------------
 void SettingsFrame::updateSettingsBarTree()
-// ----------------------------------------
 {
   bool   show = checkBoxShowBT->GetValue();
   double magn = spinCtrlMagnBT->GetValue();
@@ -925,9 +877,7 @@ void SettingsFrame::updateSettingsBarTree()
 }
 
 
-// -------------------------------------------
 void SettingsFrame::updateSettingsArcDiagram()
-// -------------------------------------------
 {
   bool     showNodes = checkBoxShowNodes->GetValue();
   bool     showArcs  = checkBoxShowArcs->GetValue();
@@ -942,9 +892,7 @@ void SettingsFrame::updateSettingsArcDiagram()
 }
 
 
-// ------------------------------------------
 void SettingsFrame::updateSettingsSimulator()
-// ------------------------------------------
 {
   wxString blendVal;
   int blendType;
@@ -976,9 +924,7 @@ void SettingsFrame::updateSettingsSimulator()
 }
 
 
-// --------------------------------------
 void SettingsFrame::updateSettingsTrace()
-// --------------------------------------
 {
   /*bool useShading;
   useShading = checkBoxUseShading->GetValue();
@@ -986,9 +932,7 @@ void SettingsFrame::updateSettingsTrace()
 }
 
 
-// -------------------------------------------
 void SettingsFrame::updateSettingsDgrmEditor()
-// -------------------------------------------
 {}
 
 

@@ -16,13 +16,11 @@
 
 using namespace std;
 
-// ----------------------------
 DistrPlot::DistrPlot(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ----------------------------
 {
   maxNumber    =  0;
   minHgtHintPx =  4;
@@ -34,9 +32,7 @@ DistrPlot::DistrPlot(
 }
 
 
-// --------------------
 DistrPlot::~DistrPlot()
-// --------------------
 {
   clearValues();
   diagram = NULL;
@@ -46,11 +42,9 @@ DistrPlot::~DistrPlot()
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------
 void DistrPlot::setValues(
   const size_t& idx,
   const vector< size_t > &num)
-// ---------------------------
 {
   clearValues();
 
@@ -61,9 +55,7 @@ void DistrPlot::setValues(
 }
 
 
-// --------------------------
 void DistrPlot::clearValues()
-// --------------------------
 {
   number.clear();
   attrIdx    = 0;
@@ -73,9 +65,7 @@ void DistrPlot::clearValues()
 }
 
 
-// ----------------------------------------
 void DistrPlot::setDiagram(Diagram* dgrm)
-// ----------------------------------------
 {
   diagram = dgrm;
 }
@@ -84,9 +74,7 @@ void DistrPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-// --------------------------------------------------
 void DistrPlot::visualize(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -133,9 +121,7 @@ void DistrPlot::visualize(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------
 void DistrPlot::drawAxes(const bool& inSelectMode)
-// -------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -167,9 +153,7 @@ void DistrPlot::drawAxes(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
-// ---------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -207,9 +191,7 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
 }
 
 
-// -------------------------------------------------
 void DistrPlot::drawPlot(const bool& inSelectMode)
-// -------------------------------------------------
 {
 
   double hCanv = canvas->getHeight();
@@ -261,9 +243,7 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void DistrPlot::drawDiagram(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode != true)
   {
@@ -304,11 +284,9 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-// ------------------------------------
 void DistrPlot::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -319,24 +297,18 @@ void DistrPlot::handleMouseMotionEvent(
 }
 
 /*
-// ------------------------------------
 void DistrPlot::handleMouseEnterEvent()
-// ------------------------------------
 {}
 */
 /*
-// ------------------------------------
 void DistrPlot::handleMouseLeaveEvent()
-// ------------------------------------
 {}
 */
 
 // -- utility data functions ------------------------------------
 
 
-// ----------------------------
 void DistrPlot::calcMaxNumber()
-// ----------------------------
 {
   maxNumber = 0;
   for (size_t i = 0; i < number.size(); ++i)
@@ -353,17 +325,13 @@ void DistrPlot::calcMaxNumber()
 
 // ***
 /*
-// --------------------
 void DistrPlot::clear()
-// --------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// -------------------------------
 void DistrPlot::setScalingTransf()
-// -------------------------------
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -377,9 +345,7 @@ void DistrPlot::setScalingTransf()
 }
 
 
-// ----------------------------------------------
 void DistrPlot::displTooltip(const size_t& posIdx)
-// ----------------------------------------------
 {
   if (posIdx < number.size())
   {
@@ -450,9 +416,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
 }
 
 
-// ----------------------------
 void DistrPlot::calcPositions()
-// ----------------------------
 {
   // update flag
   geomChanged = false;
@@ -518,9 +482,7 @@ void DistrPlot::calcPositions()
 }
 
 
-// -----------------------------
 void DistrPlot::clearPositions()
-// -----------------------------
 {
   positions.clear();
   width = 0.0;
@@ -530,11 +492,9 @@ void DistrPlot::clearPositions()
 // -- hit detection -------------------------------------------------
 
 
-// -------------------------
 void DistrPlot::processHits(
   GLint hits,
   GLuint buffer[])
-// -------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;

@@ -16,7 +16,6 @@
 
 using namespace std;
 
-// -----------------------
 AttrConti::AttrConti(
   Mediator* m,
   const string& nam,
@@ -29,17 +28,14 @@ AttrConti::AttrConti(
     nam,
     typ,
     idx)
-// -----------------------
 {
   lowerBound = lwrBnd;
   upperBound = uprBnd;
 }
 
 
-// ------------------------------------------
 AttrConti::AttrConti(const AttrConti& attr)
   :Attribute(attr)
-// ------------------------------------------
 {
   for (size_t i = 0; i < attr.curValues.size(); ++i)
   {
@@ -62,9 +58,7 @@ AttrConti::AttrConti(const AttrConti& attr)
 }
 
 
-// --------------------
 AttrConti::~AttrConti()
-// --------------------
 {
   deleteCurValues();
   deleteCurMap();
@@ -74,11 +68,9 @@ AttrConti::~AttrConti()
 // -- set functions -------------------------------------------------
 
 
-// ------------------------------
 void AttrConti::clusterValues(
   const vector< int > &indices,
   const string& newValue)
-// ------------------------------
 {
   // variables
   bool          valid;
@@ -163,11 +155,9 @@ void AttrConti::clusterValues(
 }
 
 
-// -----------------------
 void AttrConti::moveValue(
   const size_t& idxFr,
   const size_t& idxTo)
-// -----------------------
 {
   if ((idxFr < curValues.size()) &&
       (idxTo < curValues.size()))
@@ -205,9 +195,7 @@ void AttrConti::moveValue(
 }
 
 
-// --------------------------------------------------------
 void AttrConti::classifyEqualIntervals(const size_t& number)
-// --------------------------------------------------------
 {
   if (number == 0)
   {
@@ -252,9 +240,7 @@ void AttrConti::classifyEqualIntervals(const size_t& number)
 }
 
 
-// ---------------------------------------------------
 void AttrConti::classifyQuantiles(const size_t& number)
-// ---------------------------------------------------
 {
   if (number == 0)
   {
@@ -300,9 +286,7 @@ void AttrConti::classifyQuantiles(const size_t& number)
 }
 
 
-// ---------------------------------------------------------------
 void AttrConti::classifyMeanStandardDeviation(const size_t& number)
-// ---------------------------------------------------------------
 {
   if (number == 0)
   {
@@ -374,9 +358,7 @@ void AttrConti::classifyMeanStandardDeviation(const size_t& number)
 }
 
 
-// -----------------------------------
 void AttrConti::removeClassification()
-// -----------------------------------
 {
   // remove partitions
   deleteCurValues();
@@ -384,17 +366,13 @@ void AttrConti::removeClassification()
 }
 
 
-// --------------------------------------------------
 void AttrConti::setLowerBound(const double& lwrBnd)
-// --------------------------------------------------
 {
   lowerBound = lwrBnd;
 }
 
 
-// --------------------------------------------------
 void AttrConti::setUpperBound(const double& uprBnd)
-// --------------------------------------------------
 {
   upperBound = uprBnd;
 }
@@ -403,52 +381,40 @@ void AttrConti::setUpperBound(const double& uprBnd)
 // -- get functions -------------------------------------------------
 
 
-// ------------------------
 int AttrConti::getAttrType()
-// -------------------------
 {
   return ATTR_TYPE_CONTI;
 }
 
 
-// ------------------------------
 double AttrConti::getLowerBound()
-// ------------------------------
 {
   return lowerBound;
 }
 
 
-// ------------------------------
 double AttrConti::getUpperBound()
-// ------------------------------
 {
   return upperBound;
 }
 
 
-// --------------------------------
 void AttrConti::getRangeOrigValues(
   double& lwrBnd,
   double& uprBnd)
-// --------------------------------
 {
   lwrBnd = lowerBound;
   uprBnd = upperBound;
 }
 
 
-// ------------------------------
 size_t AttrConti::getSizeCurValues()
-// ------------------------------
 {
   return curValues.size();
 }
 
 
-// -------------------------------------
 Value* AttrConti::getCurValue(size_t idx)
-// -------------------------------------
 {
   Value* result = NULL;
   if (idx != NON_EXISTING && idx < curValues.size())
@@ -459,17 +425,13 @@ Value* AttrConti::getCurValue(size_t idx)
 }
 
 
-// ------------------------
 size_t AttrConti::getSizeMap()
-// ------------------------
 {
   return curMap.size();
 }
 
 
-// ---------------------------------------
 Value* AttrConti::mapToValue(double key)
-// ---------------------------------------
 {
   Value* result = NULL;
 
@@ -487,18 +449,14 @@ Value* AttrConti::mapToValue(double key)
 // -- clear functions -----------------------------------------------
 
 
-// ----------------------------
 void AttrConti::clearClusters()
-// ----------------------------
 {}
 
 
 // -- private utility functions -------------------------------------
 
 
-// ------------------------------
 void AttrConti::deleteCurValues()
-// ------------------------------
 {
   for (size_t i = 0; i < curValues.size(); ++i)
   {
@@ -509,9 +467,7 @@ void AttrConti::deleteCurValues()
 }
 
 
-// ---------------------------
 void AttrConti::deleteCurMap()
-// ---------------------------
 {
   map< double, Value* >::iterator it;
   for (it = curMap.begin(); it != curMap.end(); ++it)

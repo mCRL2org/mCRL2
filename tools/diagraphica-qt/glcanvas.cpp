@@ -28,7 +28,6 @@ int attribList[11] =
 // -- constructors and desctructor ----------------------------------
 
 
-// ----------------------------------
 GLCanvas::GLCanvas(
   Mediator* m,
   wxWindow* parent,
@@ -43,7 +42,6 @@ GLCanvas::GLCanvas(
     wxString(wxT("")),
     attribList),
   Colleague(m)
-// ----------------------------------
 {
   // want to intercept arrow keys
   // IMPORTANT can only set style once, otherwise its overridden
@@ -62,57 +60,43 @@ GLCanvas::GLCanvas(
 }
 
 
-// ------------------
 GLCanvas::~GLCanvas()
-// ------------------
 {}
 
 
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------------------------
 void GLCanvas::setScaleFactor(const double& f)
-// ---------------------------------------------
-// ------------------------------------------------------------------
 // Size(viewport)  = Size(world)*scaleFactor
 // So, Size(world) = Size(viewport)/scaleFactor
-// ------------------------------------------------------------------
 {
   scaleFactor = f;
 }
 
 
-// ----------------------------------------------
 void GLCanvas::setXTranslation(const double& x)
-// ----------------------------------------------
 {
   xTranslation = x;
 }
 
 
-// ----------------------------------------------
 void GLCanvas::setYTranslation(const double& y)
-// ----------------------------------------------
 {
   yTranslation = y;
 }
 
 
-// ---------------------------
 void GLCanvas::setTranslation(
   const double& x,
   const double& y)
-// ---------------------------
 {
   setXTranslation(x);
   setYTranslation(y);
 }
 
 
-// -------------------------------
 void GLCanvas::enableMouseMotion()
-// -------------------------------
 {
   handleMouseMotion = true;
 }
@@ -121,35 +105,27 @@ void GLCanvas::enableMouseMotion()
 // -- Get functions -------------------------------------------------
 
 
-// ------------------------------
 double GLCanvas::getScaleFactor()
-// ------------------------------
 {
   return scaleFactor;
 }
 
 
-// -------------------------------
 double GLCanvas::getXTranslation()
-// -------------------------------
 {
   return xTranslation;
 }
 
 
-// -------------------------------
 double GLCanvas::getYTranslation()
-// -------------------------------
 {
   return yTranslation;
 }
 
 
-// ---------------------------
 void GLCanvas::getTranslation(
   double& x,
   double& y)
-// ---------------------------
 {
   x = getXTranslation();
   y = getYTranslation();
@@ -157,21 +133,15 @@ void GLCanvas::getTranslation(
 
 
 
-// --------------------------------
 void GLCanvas::disableMouseMotion()
-// --------------------------------
 {
   handleMouseMotion = false;
 }
 
 
-// ------------------------
 double GLCanvas::getWidth()
-// ------------------------
-// ------------------------------------------------------------------
 // Return viewport width in WORLD coordinates.  For more details, see
 // GLCanvas::getSize().
-// ------------------------------------------------------------------
 {
   double result = 0;
   double width;
@@ -186,13 +156,9 @@ double GLCanvas::getWidth()
 }
 
 
-// -------------------------
 double GLCanvas::getHeight()
-// -------------------------
-// ------------------------------------------------------------------
 // Return viewport height in WORLD coordinates. For more details, see
 // GLCanvas::getSize().
-// ------------------------------------------------------------------
 {
   double result;
   double width;
@@ -207,12 +173,9 @@ double GLCanvas::getHeight()
 }
 
 
-// -----------------------
 void GLCanvas::getSize(
   double& width,
   double& height)
-// -----------------------
-// ------------------------------------------------------------------
 // Return viewport width and height in WORLD coordinates. Before
 // scaling, the viewport is set up such that the shortest side has
 // length 2 in world coordinates. Let ratio = width/height be the
@@ -229,7 +192,6 @@ void GLCanvas::getSize(
 //     So, the starting width was 2:
 //     world width      = 2 / scaleFactor;
 //     world height     = ( aspect*2 ) / scaleFactor
-// ------------------------------------------------------------------
 {
   int widthViewPort;
   int heightViewPort;
@@ -259,15 +221,11 @@ void GLCanvas::getSize(
 }
 
 
-// ----------------------------
 double GLCanvas::getPixelSize()
-// ----------------------------
-// ------------------------------------------------------------------
 // Return distance in WORLD coordinates of 1 pixel.
 // Now, d(1 pixel in world)/w(world) = d(1 pixel)/w(in pixels)
 // So,  d(1 pixel in world)          = w(world)*
 //                                     ( d(1 pixel)/w(in pixels) )
-// ------------------------------------------------------------------
 {
   double result = 0.0;
 
@@ -291,13 +249,11 @@ double GLCanvas::getPixelSize()
 }
 
 
-// ---------------------------
 void GLCanvas::getWorldCoords(
   const double& deviceX,
   const double& deviceY,
   double& worldX,
   double& worldY)
-// ---------------------------
 {
   if (IsShown() &&
       GetParent()->IsShown())
@@ -331,13 +287,9 @@ void GLCanvas::getWorldCoords(
 // -- drawing and interaction functions -----------------------------
 
 
-// -------------------
 void GLCanvas::clear()
-// -------------------
-// ------------------------------------------------------------------
 // Default clear function, called by mediator if no visualizer has
 // been assigned to the canvas.
-// ------------------------------------------------------------------
 {
   if (IsShown() &&
       GetParent()->IsShown() && GetContext())
@@ -351,10 +303,7 @@ void GLCanvas::clear()
 }
 
 
-// ---------------------
 void GLCanvas::display()
-// ---------------------
-// ------------------------------------------------------------------
 // Set up and draw to the OpenGL canvas. The viewport window is set
 // up such that the origin (0, 0) is at the center and such that the
 // shortest side has a length of 2 in WORLD coordinates.
@@ -375,7 +324,6 @@ void GLCanvas::display()
 //                   right  = 1
 //                   bottom = (1/aspect)*(-1)
 //                   top    = (1/apsect)*1
-// ------------------------------------------------------------------
 {
   if (!GetContext())
   {
@@ -431,17 +379,13 @@ void GLCanvas::display()
 }
 
 
-// --------------------------------------------
 void GLCanvas::showToolTip(const string& msg)
-// --------------------------------------------
 {
   tooltip = wxString(msg.c_str(), wxConvLocal);
 }
 
 
-// --------------------------
 void GLCanvas::clearToolTip()
-// --------------------------
 {
   if (tooltip.IsEmpty() != true)
   {
@@ -450,13 +394,9 @@ void GLCanvas::clearToolTip()
 }
 
 
-// ---------------------------------------------
 void GLCanvas::onEvtPaint(wxPaintEvent& /*event*/)
-// ---------------------------------------------
-// ------------------------------------------------------------------
 // Get the device context for that part of the screen that needs to
 // be repainted and redraw.
-// ------------------------------------------------------------------
 {
   if (IsShown() && GetContext())
   {
@@ -470,13 +410,9 @@ void GLCanvas::onEvtPaint(wxPaintEvent& /*event*/)
 }
 
 
-// -------------------------------------------
 void GLCanvas::onEvtSize(wxSizeEvent& /*event*/)
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Ensure that the viewport is adjusted to match the canvas when it
 // is resized.
-// ------------------------------------------------------------------
 {
   // set this as current context
   if (GetParent()->IsShown())
@@ -501,19 +437,13 @@ void GLCanvas::onEvtSize(wxSizeEvent& /*event*/)
 }
 
 
-// ----------------------------------------------------
 void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/)
-// ----------------------------------------------------
-// ------------------------------------------------------------------
 // This function inherited from 'wxGLCanvas' must be overridden to
 // allow flicker free repaints of the canvas.
-// ------------------------------------------------------------------
 {}
 
 
-// -------------------------------------------------
 void GLCanvas::onLftMouseDown(wxMouseEvent& event)
-// -------------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseLftDownEvent(
@@ -526,9 +456,7 @@ void GLCanvas::onLftMouseDown(wxMouseEvent& event)
 }
 
 
-// -----------------------------------------------
 void GLCanvas::onLftMouseUp(wxMouseEvent& event)
-// -----------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseLftUpEvent(
@@ -541,9 +469,7 @@ void GLCanvas::onLftMouseUp(wxMouseEvent& event)
 }
 
 
-// ---------------------------------------------------
 void GLCanvas::onLftMouseDClick(wxMouseEvent& event)
-// ---------------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseLftDClickEvent(
@@ -554,9 +480,7 @@ void GLCanvas::onLftMouseDClick(wxMouseEvent& event)
 }
 
 
-// -------------------------------------------------
 void GLCanvas::onRgtMouseDown(wxMouseEvent& event)
-// -------------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseRgtDownEvent(
@@ -567,9 +491,7 @@ void GLCanvas::onRgtMouseDown(wxMouseEvent& event)
 }
 
 
-// -----------------------------------------------
 void GLCanvas::onRgtMouseUp(wxMouseEvent& event)
-// -----------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseRgtUpEvent(
@@ -580,9 +502,7 @@ void GLCanvas::onRgtMouseUp(wxMouseEvent& event)
 }
 
 
-// ---------------------------------------------------
 void GLCanvas::onRgtMouseDClick(wxMouseEvent& event)
-// ---------------------------------------------------
 {
   SetCurrent();
   mediator->handleMouseRgtDClickEvent(
@@ -593,9 +513,7 @@ void GLCanvas::onRgtMouseDClick(wxMouseEvent& event)
 }
 
 
-// ------------------------------------------------
 void GLCanvas::onMouseMotion(wxMouseEvent& event)
-// ------------------------------------------------
 {
   if (handleMouseMotion == true)
   {
@@ -614,9 +532,7 @@ void GLCanvas::onMouseMotion(wxMouseEvent& event)
 }
 
 
-// -----------------------------------------------
 void GLCanvas::onMouseWheel(wxMouseEvent& event)
-// -----------------------------------------------
 {
   // this is current context
   SetCurrent();
@@ -642,13 +558,9 @@ void GLCanvas::onMouseWheel(wxMouseEvent& event)
 }
 
 
-// ------------------------------------------------
 void GLCanvas:: onEnterMouse(wxMouseEvent& /*event*/)
-// ------------------------------------------------
-// -------------------------------------------------------------------
 // This function simply sets the focus to this canvas. This allows key
 // events to be caught and handled.
-// -------------------------------------------------------------------
 {
   // this is current context
   SetCurrent();
@@ -659,12 +571,8 @@ void GLCanvas:: onEnterMouse(wxMouseEvent& /*event*/)
 }
 
 
-// ------------------------------------------------
 void GLCanvas:: onLeaveMouse(wxMouseEvent& /*event*/)
-// ------------------------------------------------
-// -------------------------------------------------------------------
 // This function simply sets resets cursor to the default icon.
-// -------------------------------------------------------------------
 {
   // this is current context
   SetCurrent();
@@ -674,14 +582,10 @@ void GLCanvas:: onLeaveMouse(wxMouseEvent& /*event*/)
 }
 
 
-// ------------------------------------------
 void GLCanvas::onKeyDown(wxKeyEvent& event)
-// ------------------------------------------
-// ------------------------------------------------------------------
 // In order to catch key events, this canvas must have the focus.
 // This is achieved by having 'Canvas::onEnterMouse()' first setting
 // the focus to this canvas.
-// ------------------------------------------------------------------
 {
   SetCurrent();
   mediator->handleKeyDownEvent(
@@ -694,14 +598,10 @@ void GLCanvas::onKeyDown(wxKeyEvent& event)
 }
 
 
-// ----------------------------------------
 void GLCanvas::onKeyUp(wxKeyEvent& event)
-// ----------------------------------------
-// ------------------------------------------------------------------
 // In order to catch key events, this canvas must have the focus.
 // This is achieved by having 'Canvas::onEnterMouse()' first setting
 // the focus to this canvas.
-// ------------------------------------------------------------------
 {
   // this is current context
   SetCurrent();

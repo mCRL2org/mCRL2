@@ -17,9 +17,7 @@
 
 using namespace std;
 
-// -------------
 Bundle::Bundle()
-// -------------
 {
   index = NON_EXISTING;
   parent = NULL;
@@ -28,9 +26,7 @@ Bundle::Bundle()
 }
 
 
-// -----------------------------
 Bundle::Bundle(const size_t& idx)
-// -----------------------------
 {
   index      = idx;
   parent     = NULL;
@@ -39,9 +35,7 @@ Bundle::Bundle(const size_t& idx)
 }
 
 
-// --------------------------------
 Bundle::Bundle(const Bundle& bdl)
-// --------------------------------
 {
   index      = bdl.index;
   parent     = bdl.parent;
@@ -53,9 +47,7 @@ Bundle::Bundle(const Bundle& bdl)
 }
 
 
-// --------------
 Bundle::~Bundle()
-// --------------
 {
   clearParent();
   clearChildren();
@@ -68,49 +60,37 @@ Bundle::~Bundle()
 // -- set functions -------------------------------------------------
 
 
-// ------------------------------------
 void Bundle::setIndex(const size_t& idx)
-// ------------------------------------
 {
   index = idx;
 }
 
 
-// --------------------------------
 void Bundle::setParent(Bundle* p)
-// --------------------------------
 {
   parent = p;
 }
 
 
-// -------------------------------
 void Bundle::addChild(Bundle* c)
-// -------------------------------
 {
   children.push_back(c);
 }
 
 
-// -------------------------------------
 void Bundle::setInCluster(Cluster* in)
-// -------------------------------------
 {
   inCluster = in;
 }
 
 
-// ---------------------------------------
 void Bundle::setOutCluster(Cluster* out)
-// ---------------------------------------
 {
   outCluster = out;
 }
 
 
-// ----------------------------
 void Bundle::addEdge(Edge* e)
-// ----------------------------
 {
   edges.push_back(e);
 
@@ -118,9 +98,7 @@ void Bundle::addEdge(Edge* e)
 }
 
 
-// ----------------------------------------------
 void Bundle::setEdges(const vector< Edge* > &e)
-// ----------------------------------------------
 {
   clearEdges();
   edges = e;
@@ -133,11 +111,9 @@ void Bundle::setEdges(const vector< Edge* > &e)
 }
 
 
-// -----------------------
 void Bundle::updateLabel(
   const string& lbl,
   const string& status)
-// -----------------------
 {
   labels[lbl] = status;
 }
@@ -146,33 +122,25 @@ void Bundle::updateLabel(
 // -- get functions -------------------------------------------------
 
 
-// -------------------
 size_t Bundle::getIndex()
-// -------------------
 {
   return index;
 }
 
 
-// ------------------------
 Bundle* Bundle::getParent()
-// ------------------------
 {
   return parent;
 }
 
 
-// --------------------------
 size_t Bundle::getSizeChildren()
-// --------------------------
 {
   return children.size();
 }
 
 
-// ---------------------------------------
 Bundle* Bundle::getChild(const size_t& idx)
-// ---------------------------------------
 {
   Bundle* result = NULL;
   if (idx < children.size())
@@ -183,33 +151,25 @@ Bundle* Bundle::getChild(const size_t& idx)
 }
 
 
-// ----------------------------
 Cluster* Bundle::getInCluster()
-// ----------------------------
 {
   return inCluster;
 }
 
 
-// -----------------------------
 Cluster* Bundle::getOutCluster()
-// -----------------------------
 {
   return outCluster;
 }
 
 
-// -----------------------
 size_t Bundle::getSizeEdges()
-// -----------------------
 {
   return edges.size();
 }
 
 
-// ------------------------------------
 Edge* Bundle::getEdge(const size_t& idx)
-// ------------------------------------
 {
   if (idx < edges.size())
   {
@@ -223,9 +183,7 @@ Edge* Bundle::getEdge(const size_t& idx)
 }
 
 
-// ---------------------------------------------
 void Bundle::getLabels(vector< string > &lbls)
-// ---------------------------------------------
 {
   lbls.clear();
 
@@ -239,11 +197,9 @@ void Bundle::getLabels(vector< string > &lbls)
 }
 
 
-// ---------------------------
 void Bundle::getLabels(
   vector< string > &lbls,
   vector< string > &status)
-// ---------------------------
 {
   lbls.clear();
   status.clear();
@@ -257,11 +213,9 @@ void Bundle::getLabels(
 }
 
 
-// --------------------
 void Bundle::getLabels(
   string& separator,
   string& lbls)
-// --------------------
 {
   lbls = "";
 
@@ -288,17 +242,13 @@ void Bundle::getLabels(
 // -- clear functions -----------------------------------------------
 
 
-// -----------------------
 void Bundle::clearParent()
-// -----------------------
 {
   parent = NULL;
 }
 
 
-// -------------------------
 void Bundle::clearChildren()
-// -------------------------
 {
   for (size_t i = 0; i < children.size(); ++i)
   {
@@ -308,25 +258,19 @@ void Bundle::clearChildren()
 }
 
 
-// --------------------------
 void Bundle::clearInCluster()
-// --------------------------
 {
   inCluster = NULL;
 }
 
 
-// ---------------------------
 void Bundle::clearOutCluster()
-// ---------------------------
 {
   outCluster = NULL;
 }
 
 
-// ----------------------
 void Bundle::clearEdges()
-// ----------------------
 {
   for (size_t i = 0; i < edges.size(); ++i)
   {

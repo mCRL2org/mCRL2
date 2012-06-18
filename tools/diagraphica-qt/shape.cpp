@@ -37,14 +37,12 @@ ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 // -- constructors and destructor -----------------------------------
 
 
-// -------------------------------------
 Shape::Shape(
   Mediator* m,      const size_t& idx,
   const double& xC, const double& yC,
   const double& xD, const double& yD,
   const double& aC, const int& typ)
   : Colleague(m)
-// -------------------------------------
 {
   // geometery
   index  = idx;
@@ -75,13 +73,9 @@ Shape::Shape(
 }
 
 
-// -------------------------------
 Shape::Shape(const Shape& shape)
   : Colleague(shape.mediator)
-// -------------------------------
-// ------------------------------------------------------------------
 // Copy constructor.
-// ------------------------------------------------------------------
 {
   index  = shape.index;
 
@@ -125,9 +119,7 @@ Shape::Shape(const Shape& shape)
 }
 
 
-// ------------
 Shape::~Shape()
-// ------------
 {
   clearDOF();
 }
@@ -136,26 +128,20 @@ Shape::~Shape()
 // -- set functions ---------------------------------------------
 
 
-// -----------------------------------
 void Shape::setIndex(const size_t& idx)
-// -----------------------------------
 {
   index = idx;
 }
 
 
-// -----------------------------------
 void Shape::setCheckedId(const int& id)
-// -----------------------------------
 {
   checkedVariableId = id;
   texturesGenerated = false;
 }
 
 
-// ------------------------------------------
 void Shape::setVariable(const string& msg)
-// ------------------------------------------
 {
   variable = "";
   variable.append(msg);
@@ -163,9 +149,7 @@ void Shape::setVariable(const string& msg)
 }
 
 
-// ------------------------------------------
 void Shape::setVariableName(const string& msg)
-// ------------------------------------------
 {
   variableName = "";
   variableName.append(msg);
@@ -173,9 +157,7 @@ void Shape::setVariableName(const string& msg)
 }
 
 
-// ------------------------------------------
 void Shape::setNote(const string& msg)
-// ------------------------------------------
 {
   note = "";
   note.append(msg);
@@ -183,18 +165,14 @@ void Shape::setNote(const string& msg)
 }
 
 
-// ------------------------------------------
 void Shape::setTextSize(const size_t& size)
-// ------------------------------------------
 {
   szeTxt = size;
   texturesGenerated = false;
 }
 
 
-// --------------------------------------------------------
 void Shape::setCenter(const double& xC, const double& yC)
-// --------------------------------------------------------
 {
   double xLeft, xRight, yTop, yBottom;
   mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
@@ -225,43 +203,33 @@ void Shape::setCenter(const double& xC, const double& yC)
 }
 
 
-// -----------------------------------------------------
 void Shape::setDFC(const double& xD, const double& yD)
-// -----------------------------------------------------
 {
   xDFC = xD;
   yDFC = yD;
 }
 
 
-// ---------------------------------------
 void Shape::setAngleCtr(const double& a)
-// ---------------------------------------
 {
   aglCtr = a;
 }
 
 
-// -------------------------------------------------------
 void Shape::setHinge(const double& xH, const double& yH)
-// -------------------------------------------------------
 {
   xHge = xH;
   yHge = yH;
 }
 
 
-// -------------------------------------------
 void Shape::addDOFColYValue(const double& y)
-// -------------------------------------------
 {
   colYValues.push_back(y);
 }
 
 
-// -----------------------------------------------------------
 void Shape::setDOFColYValue(const size_t& idx, const double& y)
-// -----------------------------------------------------------
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < colYValues.size())
   {
@@ -270,9 +238,7 @@ void Shape::setDOFColYValue(const size_t& idx, const double& y)
 }
 
 
-// --------------------------------------------
 void Shape::clearDOFColYValue(const size_t& idx)
-// --------------------------------------------
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < colYValues.size())
   {
@@ -281,17 +247,13 @@ void Shape::clearDOFColYValue(const size_t& idx)
 }
 
 
-// -------------------------------------------
 void Shape::addDOFOpaYValue(const double& y)
-// -------------------------------------------
 {
   opaYValues.push_back(y);
 }
 
 
-// -----------------------------------------------------------
 void Shape::setDOFOpaYValue(const size_t& idx, const double& y)
-// -----------------------------------------------------------
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < opaYValues.size())
   {
@@ -300,9 +262,7 @@ void Shape::setDOFOpaYValue(const size_t& idx, const double& y)
 }
 
 
-// --------------------------------------------
 void Shape::clearDOFOpaYValue(const size_t& idx)
-// --------------------------------------------
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < opaYValues.size())
   {
@@ -311,9 +271,7 @@ void Shape::clearDOFOpaYValue(const size_t& idx)
 }
 
 
-// ----------------------------------
 void Shape::setType(const int& /*typ*/)
-// ----------------------------------
 {
   if (type == TYPE_LINE)
   {
@@ -342,57 +300,43 @@ void Shape::setType(const int& /*typ*/)
 }
 
 
-// ----------------------
 void Shape::setTypeNote()
-// ----------------------
 {
   type = TYPE_NOTE;
 }
 
 
-// ----------------------
 void Shape::setTypeLine()
-// ----------------------
 {
   type = TYPE_LINE;
 }
 
 
-// ----------------------
 void Shape::setTypeRect()
-// ----------------------
 {
   type = TYPE_RECT;
 }
 
 
-// -------------------------
 void Shape::setTypeEllipse()
-// -------------------------
 {
   type = TYPE_ELLIPSE;
 }
 
 
-// -----------------------
 void Shape::setTypeArrow()
-// -----------------------
 {
   type = TYPE_ARROW;
 }
 
 
-// ------------------------
 void Shape::setTypeDArrow()
-// ------------------------
 {
   type = TYPE_DARROW;
 }
 
 
-// ----------------------------------
 void Shape::setMode(const int& mde)
-// ----------------------------------
 {
   if (mde == MODE_NORMAL)
   {
@@ -437,109 +381,83 @@ void Shape::setMode(const int& mde)
 }
 
 
-// ------------------------
 void Shape::setModeNormal()
-// ------------------------
 {
   mode = MODE_NORMAL;
 }
 
 
-// ----------------------
 void Shape::setModeEdit()
-// ----------------------
 {
   mode = MODE_EDIT;
 }
 
 
-// ----------------------------
 void Shape::setModeEdtDOFXCtr()
-// ----------------------------
 {
   mode = MODE_EDT_DOF_XCTR;
 }
 
 
-// ----------------------------
 void Shape::setModeEdtDOFYCtr()
-// ----------------------------
 {
   mode = MODE_EDT_DOF_YCTR;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFHgt()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_HGT;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFWth()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_WTH;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFAgl()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_AGL;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFCol()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_COL;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFOpa()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_OPA;
 }
 
 
-// ---------------------------
 void Shape::setModeEdtDOFText()
-// ---------------------------
 {
   mode = MODE_EDT_DOF_TEXT;
 }
 
 
-// ----------------------------------------
 void Shape::setLineWidth(const double& w)
-// ----------------------------------------
 {
   linWth = w;
 }
 
 
-// ------------------------------------------
 void Shape::setLineColor(const ColorRGB& c)
-// ------------------------------------------
 {
   colLin = c;
 }
 
 
-// ----------------------
 void Shape::setLineColor(
   const double& r,
   const double& g,
   const double& b,
   const double& a)
-// ----------------------
 {
   colLin.r = r;
   colLin.g = g;
@@ -548,29 +466,23 @@ void Shape::setLineColor(
 }
 
 
-// -----------------------------------------
 void Shape::setLineTransp(const double& a)
-// -----------------------------------------
 {
   colLin.a = a;
 }
 
 
-// ------------------------------------------
 void Shape::setFillColor(const ColorRGB& c)
-// ------------------------------------------
 {
   colFil = c;
 }
 
 
-// ----------------------
 void Shape::setFillColor(
   const double& r,
   const double& g,
   const double& b,
   const double& a)
-// ----------------------
 {
   colFil.r = r;
   colFil.g = g;
@@ -579,25 +491,19 @@ void Shape::setFillColor(
 }
 
 
-// -----------------------------------------
 void Shape::setFillTransp(const double& a)
-// -----------------------------------------
 {
   colFil.a = a;
 }
 
 
-// -----------------------------------------
 void Shape::setHandleSize(const double& s)
-// -----------------------------------------
 {
   hdlSze = s;
 }
 
 
-// -----------------------------------------
 void Shape::setTextures(const bool& generated)
-// -----------------------------------------
 {
   texturesGenerated = generated;
 }
@@ -606,172 +512,130 @@ void Shape::setTextures(const bool& generated)
 // -- get functions -------------------------------------------------
 
 
-// ------------------
 size_t Shape::getIndex()
-// ------------------
 {
   return index;
 }
 
 
-// ------------------
 int Shape::getCheckedId()
-// ------------------
 {
   return checkedVariableId;
 }
 
 
-// ------------------
 string Shape::getNote()
-// ------------------
 {
   return note;
 }
 
 
-// ------------------
 string Shape::getVariable()
-// ------------------
 {
   return variable;
 }
 
 
-// ------------------
 string Shape::getVariableName()
-// ------------------
 {
   return variableName;
 }
 
 
-// ------------------
 size_t Shape::getTextSize()
-// ------------------
 {
   return szeTxt;
 }
 
 
-// ------------------------------------------
 void Shape::getCenter(double& x, double& y)
-// ------------------------------------------
 {
   x = xCtr;
   y = yCtr;
 }
 
 
-// --------------------
 double Shape::getXCtr()
-// --------------------
 {
   return xCtr;
 }
 
 
-// --------------------
 double Shape::getYCtr()
-// --------------------
 {
   return yCtr;
 }
 
 
-// ---------------------------------------
 void Shape::getDFC(double& x, double& y)
-// ---------------------------------------
 {
   x = xDFC;
   y = yDFC;
 }
 
 
-// --------------------
 double Shape::getXDFC()
-// --------------------
 {
   return xDFC;
 }
 
 
-// --------------------
 double Shape::getYDFC()
-// --------------------
 {
   return yDFC;
 }
 
 
-// ------------------------
 double Shape::getAngleCtr()
-// ------------------------
 {
   return aglCtr;
 }
 
 
-// -----------------------------------------
 void Shape::getHinge(double& x, double& y)
-// -----------------------------------------
 {
   x = xHge;
   y = yHge;
 }
 
 
-// ----------------------
 double Shape::getXHinge()
-// ----------------------
 {
   return xHge;
 }
 
 
-// ----------------------
 double Shape::getYHinge()
-// ----------------------
 {
   return yHge;
 }
 
 
-// -----------------
 int Shape::getType()
-// -----------------
 {
   return type;
 }
 
 
-// -----------------
 int Shape::getMode()
-// -----------------
 {
   return mode;
 }
 
 
-// -------------------------
 double Shape::getLineWidth()
-// -------------------------
 {
   return linWth;
 }
 
 
-// ------------------------------------
 void Shape::getLineColor(ColorRGB& c)
-// ------------------------------------
 {
   c = colLin;
 }
 
 
-// -------------------------------------------------------------------
 void Shape::getLineColor(double& r, double& g, double& b, double& a)
-// -------------------------------------------------------------------
 {
   r = colLin.r;
   g = colLin.g;
@@ -780,25 +644,19 @@ void Shape::getLineColor(double& r, double& g, double& b, double& a)
 }
 
 
-// --------------------------
 double Shape::getLineTransp()
-// --------------------------
 {
   return colFil.a;
 }
 
 
-// ------------------------------------
 void Shape::getFillColor(ColorRGB& c)
-// ------------------------------------
 {
   c = colFil;
 }
 
 
-// -------------------------------------------------------------------
 void Shape::getFillColor(double& r, double& g, double& b, double& a)
-// -------------------------------------------------------------------
 {
   r = colFil.r;
   g = colFil.g;
@@ -807,110 +665,82 @@ void Shape::getFillColor(double& r, double& g, double& b, double& a)
 }
 
 
-// --------------------------
 double Shape::getFillTransp()
-// --------------------------
 {
   return colFil.a;
 }
 
 
-// --------------------------
 double Shape::getHandleSize()
-// --------------------------
 {
   return hdlSze;
 }
 
 
-// ---------------------
 DOF* Shape::getDOFXCtr()
-// ---------------------
 {
   return xCtrDOF;
 }
 
 
-// ---------------------
 DOF* Shape::getDOFYCtr()
-// ---------------------
 {
   return yCtrDOF;
 }
 
 
-// --------------------
 DOF* Shape::getDOFWth()
-// --------------------
 {
   return wthDOF;
 }
 
 
-// --------------------
 DOF* Shape::getDOFHgt()
-// --------------------
 {
   return hgtDOF;
 }
 
 
-// --------------------
 DOF* Shape::getDOFAgl()
-// --------------------
 {
   return aglDOF;
 }
 
 
-// --------------------
 DOF* Shape::getDOFCol()
-// --------------------
 {
   return colDOF;
 }
 
 
-// --------------------
 DOF* Shape::getDOFText()
-// --------------------
 {
   return textDOF;
 }
 
 
-// ----------------------------------------------------
 void Shape::getDOFColYValues(vector< double > &yVals)
-// ----------------------------------------------------
 {
   yVals = colYValues;
 }
 
 
-// --------------------
 DOF* Shape::getDOFOpa()
-// --------------------
 {
   return opaDOF;
 }
 
 
-// ----------------------------------------------------
 void Shape::getDOFOpaYValues(vector< double > &yVals)
-// ----------------------------------------------------
 {
   yVals = opaYValues;
 }
 
 
-// ---------------------------------------------------
 void Shape::getDOFAttrs(vector< Attribute* > &attrs)
-// ---------------------------------------------------
-// ------------------------------------------------------------------
 // This function returns a vector of pointers to all attributes
 // to which DOF's have been linked. This vector contains no
 // duplicates.
-// ------------------------------------------------------------------
 {
   set< Attribute* > tempSet;
   Attribute*        tempAttr;
@@ -975,11 +805,9 @@ void Shape::getDOFAttrs(vector< Attribute* > &attrs)
 // -- visualization ---------------------------------------------
 
 
-// ----------------------------------------------
 void Shape::visualize(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ----------------------------------------------
 {
   // set up transf
   glPushMatrix();
@@ -1004,12 +832,10 @@ void Shape::visualize(
 }
 
 
-// ----------------------------------
 void Shape::visualize(
   GLCanvas* canvas,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs)
-// ----------------------------------
 {
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
@@ -1225,13 +1051,11 @@ void Shape::visualize(
 }
 
 
-// ----------------------------------
 void Shape::visualize(
   GLCanvas* canvas,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs,
   const double& pixel)
-// ----------------------------------
 {
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
@@ -1446,14 +1270,12 @@ void Shape::visualize(
 }
 
 
-// ----------------------------------
 void Shape::visualize(
   GLCanvas* canvas,
   const double& opacity,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs
 )
-// ----------------------------------
 {
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
@@ -1683,9 +1505,7 @@ void Shape::visualize(
 }
 
 
-// --------------------
 void Shape::setTransf()
-// --------------------
 {
   // set up transf
   VisUtils::setTransf(
@@ -1696,9 +1516,7 @@ void Shape::setTransf()
 }
 
 
-// --------------------
 void Shape::clrTransf()
-// --------------------
 {
   // clear transf
   VisUtils::clrTransf();
@@ -1708,9 +1526,7 @@ void Shape::clrTransf()
 // -- event handlers --------------------------------------------
 
 
-// ---------------------------------------
 void Shape::handleHit(const size_t& hdlIdx)
-// ---------------------------------------
 {
   if (mode == MODE_EDT_DOF_AGL)
   {
@@ -1722,9 +1538,7 @@ void Shape::handleHit(const size_t& hdlIdx)
 // -- private utility functions -------------------------------------
 
 
-// ------------------
 void Shape::initDOF()
-// ------------------
 {
   xCtrDOF = new DOF(0, "X-position");
   yCtrDOF = new DOF(1, "Y-position");
@@ -1748,9 +1562,7 @@ void Shape::initDOF()
 }
 
 
-// -------------------
 void Shape::clearDOF()
-// -------------------
 {
   // composition
   if (xCtrDOF != NULL)
@@ -1803,9 +1615,7 @@ void Shape::clearDOF()
 }
 
 
-// ------------------------------------------------
 void Shape::handleHitEdtDOFAgl(const size_t& hdlIdx)
-// ------------------------------------------------
 {
   if (hdlIdx == ID_HDL_DIR)
   {
@@ -1817,11 +1627,9 @@ void Shape::handleHitEdtDOFAgl(const size_t& hdlIdx)
 // -- private visualization functions -------------------------------
 
 
-// -----------------------------------------------
 void Shape::drawNormal(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// -----------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -1948,9 +1756,7 @@ void Shape::drawNormal(
 }
 
 
-// ---------------------------------------------
 void Shape::drawText(GLCanvas* canvas)
-// ---------------------------------------------
 {
   string text = note;
   if (text != "")
@@ -1976,9 +1782,7 @@ void Shape::drawText(GLCanvas* canvas)
 }
 
 
-// ---------------------------------------------
 void Shape::drawText(GLCanvas* canvas, double pix)
-// ---------------------------------------------
 {
   string text = note;
   if (!text.empty())
@@ -2010,11 +1814,9 @@ void Shape::drawText(GLCanvas* canvas, double pix)
 }
 
 
-// ---------------------------------------------
 void Shape::drawEdit(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ---------------------------------------------
 {
   double pix      = canvas->getPixelSize();
   double hdlDelta = hdlSze*pix;
@@ -2190,11 +1992,9 @@ void Shape::drawEdit(
 }
 
 
-// ------------------------------------------------
 void Shape::drawEditDOF(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2359,11 +2159,9 @@ void Shape::drawEditDOF(
 }
 
 
-// ------------------------------------------------
 void Shape::drawDOFXCtr(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -2485,11 +2283,9 @@ void Shape::drawDOFXCtr(
 }
 
 
-// ----------------------------------------------------
 void Shape::drawEditDOFXCtr(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ----------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -2661,11 +2457,9 @@ void Shape::drawEditDOFXCtr(
 }
 
 
-// ------------------------------------------------
 void Shape::drawDOFYCtr(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -2786,11 +2580,9 @@ void Shape::drawDOFYCtr(
 }
 
 
-// ----------------------------------------------------
 void Shape::drawEditDOFYCtr(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ----------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -2961,11 +2753,9 @@ void Shape::drawEditDOFYCtr(
 }
 
 
-// ---------------------------------------------------
 void Shape::drawEditDOFWth(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ---------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -3152,11 +2942,9 @@ void Shape::drawEditDOFWth(
 }
 
 
-// -----------------------------------------------
 void Shape::drawDOFWth(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// -----------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -3298,11 +3086,9 @@ void Shape::drawDOFWth(
 }
 
 
-// ---------------------------------------------------
 void Shape::drawEditDOFHgt(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ---------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -3489,11 +3275,9 @@ void Shape::drawEditDOFHgt(
 }
 
 
-// -----------------------------------------------
 void Shape::drawDOFHgt(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// -----------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -3635,11 +3419,9 @@ void Shape::drawDOFHgt(
 }
 
 
-// ---------------------------------------------------
 void Shape::drawEditDOFAgl(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ---------------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;
@@ -3973,11 +3755,9 @@ void Shape::drawEditDOFAgl(
 }
 
 
-// -----------------------------------------------
 void Shape::drawDOFAgl(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// -----------------------------------------------
 {
   double pix    = canvas->getPixelSize();
   double hdlDOF = hdlSze*pix;

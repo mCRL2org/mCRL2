@@ -23,13 +23,11 @@ int DiagramEditor::szeTxt = 12;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------------
 DiagramEditor::DiagramEditor(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// --------------------------
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
@@ -51,9 +49,7 @@ DiagramEditor::DiagramEditor(
 }
 
 
-// ----------------------------
 DiagramEditor::~DiagramEditor()
-// ----------------------------
 {
   if (diagram != NULL)
   {
@@ -72,18 +68,14 @@ DiagramEditor::~DiagramEditor()
 // -- set data functions --------------------------------------------
 
 
-// --------------------------------------------
 void DiagramEditor::setDiagram(Diagram* dgrm)
-// --------------------------------------------
 {
   delete diagram;
   diagram = dgrm;
 }
 
 
-// ------------------------------------
 void DiagramEditor::setEditModeSelect()
-// ------------------------------------
 {
   editMode = EDIT_MODE_SELECT;
 
@@ -99,9 +91,7 @@ void DiagramEditor::setEditModeSelect()
 }
 
 
-// ------------------------------------
 void DiagramEditor::setEditModeNote()
-// ------------------------------------
 {
   editMode = EDIT_MODE_NOTE;
   deselectAll();
@@ -109,9 +99,7 @@ void DiagramEditor::setEditModeNote()
 }
 
 
-// ---------------------------------
 void DiagramEditor::setEditModeDOF()
-// ---------------------------------
 {
   editMode = EDIT_MODE_DOF;
   deselectAll();
@@ -119,9 +107,7 @@ void DiagramEditor::setEditModeDOF()
 }
 
 
-// ----------------------------------
 void DiagramEditor::setEditModeRect()
-// ----------------------------------
 {
   editMode = EDIT_MODE_RECT;
   deselectAll();
@@ -129,9 +115,7 @@ void DiagramEditor::setEditModeRect()
 }
 
 
-// -------------------------------------
 void DiagramEditor::setEditModeEllipse()
-// -------------------------------------
 {
   editMode = EDIT_MODE_ELLIPSE;
   deselectAll();
@@ -139,9 +123,7 @@ void DiagramEditor::setEditModeEllipse()
 }
 
 
-// ----------------------------------
 void DiagramEditor::setEditModeLine()
-// ----------------------------------
 {
   editMode = EDIT_MODE_LINE;
   deselectAll();
@@ -149,9 +131,7 @@ void DiagramEditor::setEditModeLine()
 }
 
 
-// -----------------------------------
 void DiagramEditor::setEditModeArrow()
-// -----------------------------------
 {
   editMode = EDIT_MODE_ARROW;
   deselectAll();
@@ -159,9 +139,7 @@ void DiagramEditor::setEditModeArrow()
 }
 
 
-// ------------------------------------
 void DiagramEditor::setEditModeDArrow()
-// ------------------------------------
 {
   editMode = EDIT_MODE_DARROW;
   deselectAll();
@@ -169,27 +147,21 @@ void DiagramEditor::setEditModeDArrow()
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::setShowGrid(const bool& flag)
-// ------------------------------------------------
 {
   diagram->setShowGrid(flag);
   canvas->Refresh();
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::setSnapGrid(const bool& flag)
-// ------------------------------------------------
 {
   diagram->setSnapGrid(flag);
   canvas->Refresh();
 }
 
 
-// -----------------------------
 void DiagramEditor::setFillCol()
-// -----------------------------
 {
   Shape* s = NULL;
 
@@ -218,9 +190,7 @@ void DiagramEditor::setFillCol()
 }
 
 
-// -----------------------------
 void DiagramEditor::setLineCol()
-// -----------------------------
 {
   Shape* s = NULL;
 
@@ -249,9 +219,7 @@ void DiagramEditor::setLineCol()
 }
 
 
-// --------------------------------------------------
 void DiagramEditor::handleIntersection()
-// --------------------------------------------------
 {
   size_t shapeCount = diagram->getSizeShapes();
   Shape* s = NULL;
@@ -281,12 +249,10 @@ void DiagramEditor::handleIntersection()
 }
 
 
-// --------------------------------------------------
 void DiagramEditor::translatePoints(double& x1, double& y1,
                                     double& x2, double& y2,
                                     double givenX1, double givenY1,
                                     double givenX2, double givenY2)
-// --------------------------------------------------
 {
   x1 = givenX1 - givenX2;
   y1 = givenY1 + givenY2;
@@ -308,9 +274,7 @@ void DiagramEditor::translatePoints(double& x1, double& y1,
 }
 
 
-// --------------------------------------------------
 bool DiagramEditor::isAnyShapeSelected()
-// --------------------------------------------------
 {
   if (diagram != NULL)
   {
@@ -328,9 +292,7 @@ bool DiagramEditor::isAnyShapeSelected()
 }
 
 
-// --------------------------------------------------
 void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
-// --------------------------------------------------
 {
   Shape* s = NULL;
 
@@ -408,11 +370,9 @@ void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
 }
 
 
-// ----------------------------------------
 void DiagramEditor::handleDOFSetTextStatus(
   const size_t& DOFIdx,
   const int& status)
-// ----------------------------------------
 {
   Shape* s = NULL;
   size_t sizeShapes = diagram->getSizeShapes();
@@ -472,9 +432,7 @@ void DiagramEditor::handleDOFSetTextStatus(
 }
 
 
-// -----------------------------------------------------------
 int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
-// -----------------------------------------------------------
 {
   int result = -1;
 
@@ -537,11 +495,9 @@ int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
 }
 
 
-// ---------------------------------
 void DiagramEditor::handleDOFColAdd(
   const double& hue,
   const double& y)
-// ---------------------------------
 {
   Shape* s = NULL;
 
@@ -576,12 +532,10 @@ void DiagramEditor::handleDOFColAdd(
 }
 
 
-// ------------------------------------
 void DiagramEditor::handleDOFColUpdate(
   const size_t& idx,
   const double& hue,
   const double& y)
-// ------------------------------------
 {
   Shape* s = NULL;
 
@@ -605,10 +559,8 @@ void DiagramEditor::handleDOFColUpdate(
 }
 
 
-// -----------------------------------
 void DiagramEditor::handleDOFColClear(
   const size_t& idx)
-// -----------------------------------
 {
   Shape* s = NULL;
 
@@ -643,11 +595,9 @@ void DiagramEditor::handleDOFColClear(
 }
 
 
-// ---------------------------------
 void DiagramEditor::handleDOFOpaAdd(
   const double& hue,
   const double& y)
-// ---------------------------------
 {
   Shape* s = NULL;
 
@@ -682,12 +632,10 @@ void DiagramEditor::handleDOFOpaAdd(
 }
 
 
-// ------------------------------------
 void DiagramEditor::handleDOFOpaUpdate(
   const size_t& idx,
   const double& opa,
   const double& y)
-// ------------------------------------
 {
   Shape* s = NULL;
 
@@ -711,10 +659,8 @@ void DiagramEditor::handleDOFOpaUpdate(
 }
 
 
-// -----------------------------------
 void DiagramEditor::handleDOFOpaClear(
   const size_t& idx)
-// -----------------------------------
 {
   Shape* s = NULL;
 
@@ -749,11 +695,9 @@ void DiagramEditor::handleDOFOpaClear(
 }
 
 
-// --------------------------------
 void DiagramEditor::setLinkDOFAttr(
   const size_t& DOFIdx,
   const size_t& attrIdx)
-// --------------------------------
 {
   Shape* s = NULL;
 
@@ -839,9 +783,7 @@ void DiagramEditor::setLinkDOFAttr(
 }
 
 
-// ------------------------------------------------------
 void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
-// ------------------------------------------------------
 {
   Shape* s = NULL;
 
@@ -917,9 +859,7 @@ void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
 }
 
 
-// -------------------------------------------------------
 void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
-// -------------------------------------------------------
 {
   Shape* s        = NULL;
   DOF* dof        = NULL;
@@ -997,17 +937,13 @@ void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
 // -- get functions ---------------------------------------------
 
 
-// ---------------------------------
 Diagram* DiagramEditor::getDiagram()
-// ---------------------------------
 {
   return diagram;
 }
 
 
-// -----------------------------
 int DiagramEditor::getEditMode()
-// -----------------------------
 {
   return editMode;
 }
@@ -1022,9 +958,7 @@ void DiagramEditor::printMouseVariables()
 // -- visualization functions  ----------------------------------
 
 
-// ------------------------------------------------------
 void DiagramEditor::visualize(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   clear();
 
@@ -1146,11 +1080,9 @@ void DiagramEditor::reGenText()
 // -- event handlers --------------------------------------------
 
 
-// -----------------------------------------
 void DiagramEditor::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// -----------------------------------------
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -1161,11 +1093,9 @@ void DiagramEditor::handleMouseLftDownEvent(
 }
 
 
-// ---------------------------------------
 void DiagramEditor::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ---------------------------------------
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -1285,11 +1215,9 @@ void DiagramEditor::handleMouseLftUpEvent(
 }
 
 
-// -------------------------------------------
 void DiagramEditor::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// -------------------------------------------
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -1300,11 +1228,9 @@ void DiagramEditor::handleMouseLftDClickEvent(
 }
 
 
-// -----------------------------------------
 void DiagramEditor::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// -----------------------------------------
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -1315,11 +1241,9 @@ void DiagramEditor::handleMouseRgtDownEvent(
 }
 
 
-// ----------------------------------------
 void DiagramEditor::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -1342,9 +1266,7 @@ void DiagramEditor::handleMouseMotionEvent(
 }
 
 
-// -------------------------------------------------------
 void DiagramEditor::handleKeyDownEvent(const int& keyCode, const int& specialKey)
-// -------------------------------------------------------
 {
   Visualizer::handleKeyDownEvent(keyCode);
   if (editMode == EDIT_MODE_SELECT)
@@ -1370,9 +1292,7 @@ void DiagramEditor::handleKeyDownEvent(const int& keyCode, const int& specialKey
 }
 
 
-// -------------------------------------------------------
 void DiagramEditor::handleKeyUpEvent(const int& keyCode, const int& /*specialKey*/)
-// -------------------------------------------------------
 {
   Visualizer::handleKeyUpEvent(keyCode);
   if (editMode == EDIT_MODE_SELECT)
@@ -1385,9 +1305,7 @@ void DiagramEditor::handleKeyUpEvent(const int& keyCode, const int& /*specialKey
 }
 
 
-// -------------------------------------------------------
 void DiagramEditor::handleHits(const vector< int > &ids)
-// -------------------------------------------------------
 {
 
   // only diagram was hit
@@ -1410,9 +1328,7 @@ void DiagramEditor::handleHits(const vector< int > &ids)
 }
 
 
-// ---------------------------------------
 void DiagramEditor::handleHitDiagramOnly()
-// ---------------------------------------
 {
   if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
   {
@@ -1466,9 +1382,7 @@ void DiagramEditor::handleHitDiagramOnly()
   }
 }
 
-// ------------------------------------------------------
 void DiagramEditor::handleHitShape(const size_t& shapeIdx)
-// ------------------------------------------------------
 {
   size_t sizeShapes = 0;
   if (diagram != NULL)
@@ -1572,11 +1486,9 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
 }
 
 
-// --------------------------------------
 void DiagramEditor::handleHitShapeHandle(
   const size_t& shapeIdx,
   const size_t& handleId)
-// --------------------------------------
 {
   size_t sizeShapes = 0;
   if (diagram != NULL)
@@ -1669,9 +1581,7 @@ void DiagramEditor::handleHitShapeHandle(
 }
 
 
-// -----------------------------
 void DiagramEditor::handleDrag()
-// -----------------------------
 {
   size_t sizeShapes = 0;
   if (diagram != NULL)
@@ -1817,9 +1727,7 @@ void DiagramEditor::handleDrag()
 }
 
 
-// ----------------------------
 void DiagramEditor::handleShowVariable(const string& variable, const int& variableId)
-// ----------------------------
 {
   Shape* selectedShape = NULL;
   if (lastSelectedShapeId != NON_EXISTING)
@@ -1846,9 +1754,7 @@ void DiagramEditor::handleShowVariable(const string& variable, const int& variab
 }
 
 
-// ----------------------------
 void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId)
-// ----------------------------
 {
   Shape* selectedShape = NULL;
   selectedShape = diagram->getShape(shapeId);
@@ -1863,9 +1769,7 @@ void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId
 }
 
 
-// ----------------------------
 void DiagramEditor::handleAddText(string& variable, size_t& shapeId)
-// ----------------------------
 {
   Shape* selectedShape = NULL;
   shapeId = lastSelectedShapeId;
@@ -1875,9 +1779,7 @@ void DiagramEditor::handleAddText(string& variable, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
 {
   Shape* selectedShape = NULL;
   shapeId = lastSelectedShapeId;
@@ -1890,9 +1792,7 @@ void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
 {
 
   Shape* selectedShape = NULL;
@@ -1901,9 +1801,7 @@ void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiagramEditor::handleCut()
-// ----------------------------
 {
   Shape* origShape = NULL;
   Shape* copyShape = NULL;
@@ -1935,9 +1833,7 @@ void DiagramEditor::handleCut()
 }
 
 
-// -----------------------------
 void DiagramEditor::handleCopy()
-// -----------------------------
 {
   Shape* origShape = NULL;
   Shape* copyShape = NULL;
@@ -1966,9 +1862,7 @@ void DiagramEditor::handleCopy()
 }
 
 
-// ------------------------------
 void DiagramEditor::clearClipBoard()
-// ------------------------------
 {
   size_t size = clipBoardList.size();
   for (size_t i = 0; i < size; i++)
@@ -1979,9 +1873,7 @@ void DiagramEditor::clearClipBoard()
 }
 
 
-// ------------------------------
 void DiagramEditor::handlePaste()
-// ------------------------------
 {
   if (clipBoardList.size() > 0)
   {
@@ -2039,9 +1931,7 @@ void DiagramEditor::handlePaste()
 }
 
 
-// -------------------------------
 void DiagramEditor::handleDelete()
-// -------------------------------
 {
   vector< size_t > toDelete;
   // get indices to delete
@@ -2069,9 +1959,7 @@ void DiagramEditor::handleDelete()
 }
 
 
-// -------------------------------
 void DiagramEditor::handleSelectAll()
-// -------------------------------
 {
   for (size_t i = 0; i < diagram->getSizeShapes() ; ++i)
   {
@@ -2080,9 +1968,7 @@ void DiagramEditor::handleSelectAll()
 }
 
 
-// -------------------------------------
 void DiagramEditor::handleBringToFront()
-// -------------------------------------
 {
   Shape* s = NULL;
   for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
@@ -2100,9 +1986,7 @@ void DiagramEditor::handleBringToFront()
 }
 
 
-// -----------------------------------
 void DiagramEditor::handleSendToBack()
-// -----------------------------------
 {
   Shape* s = NULL;
   for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
@@ -2120,9 +2004,7 @@ void DiagramEditor::handleSendToBack()
 }
 
 
-// -------------------------------------
 void DiagramEditor::handleBringForward()
-// -------------------------------------
 {
   Shape* s = NULL;
   for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
@@ -2140,9 +2022,7 @@ void DiagramEditor::handleBringForward()
 }
 
 
-// -------------------------------------
 void DiagramEditor::handleSendBackward()
-// -------------------------------------
 {
   Shape* s = NULL;
   for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
@@ -2160,9 +2040,7 @@ void DiagramEditor::handleSendBackward()
 }
 
 
-// --------------------------------
 void DiagramEditor::handleEditDOF()
-// --------------------------------
 {
   Shape* s = NULL;
   if (lastSelectedShapeId != NON_EXISTING)
@@ -2186,9 +2064,7 @@ void DiagramEditor::handleEditDOF()
 }
 
 
-// --------------------------------
 void DiagramEditor::handleSetDOF(const size_t& attrIdx)   // Link Attribute to the Text DOF of the selected Shape
-// --------------------------------
 {
   Shape* s = NULL;
 
@@ -2218,9 +2094,7 @@ void DiagramEditor::handleSetDOF(const size_t& attrIdx)   // Link Attribute to t
 }
 
 
-// --------------------------------
 void DiagramEditor::handleCheckedVariable(const size_t& idDOF, const int& variableId)
-// --------------------------------
 {
   Shape* selectedShape = NULL;
 
@@ -2242,9 +2116,7 @@ void DiagramEditor::handleCheckedVariable(const size_t& idDOF, const int& variab
 // -- public utility functions --------------------------------------
 
 
-// ------------------------------
 void DiagramEditor::deselectAll()
-// ------------------------------
 {
   size_t sizeShapes = 0;
   if (diagram != NULL)
@@ -2265,9 +2137,7 @@ void DiagramEditor::deselectAll()
 // -- private utility functions -------------------------------------
 
 
-// -------------------------------------------------
 void DiagramEditor::displShapeEdtOptions(Shape* s)
-// -------------------------------------------------
 {
   if (s != NULL)
   {
@@ -2299,9 +2169,7 @@ void DiagramEditor::displShapeEdtOptions(Shape* s)
 }
 
 
-// -----------------------------------------
 void DiagramEditor::displDOFInfo(Shape* s)
-// -----------------------------------------
 {
   if (s != NULL)
   {
@@ -2451,9 +2319,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
-// ------------------------------------------
 {
   double xPrv, yPrv;
   double xCur, yCur;
@@ -2502,9 +2368,7 @@ void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragTopLft(Shape* s)
-// ---------------------------------------------
 {
   double angl;             // shape's rotation angle in radians
   double xCtr, yCtr;       // center of shape
@@ -2553,9 +2417,7 @@ void DiagramEditor::handleDragTopLft(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragLft(Shape* s)
-// ------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -2597,9 +2459,7 @@ void DiagramEditor::handleDragLft(Shape* s)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragBotLft(Shape* s)
-// ---------------------------------------------
 {
   double angl;             // shape's rotation angle in radians
   double xCtr, yCtr;       // center of shape
@@ -2648,9 +2508,7 @@ void DiagramEditor::handleDragBotLft(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragBot(Shape* s)
-// ------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -2691,9 +2549,7 @@ void DiagramEditor::handleDragBot(Shape* s)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragBotRgt(Shape* s)
-// ---------------------------------------------
 {
   double angl;             // shape's rotation angle in radians
   double xCtr, yCtr;       // center of shape
@@ -2741,9 +2597,7 @@ void DiagramEditor::handleDragBotRgt(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragRgt(Shape* s)
-// ------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -2785,9 +2639,7 @@ void DiagramEditor::handleDragRgt(Shape* s)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragTopRgt(Shape* s)
-// ---------------------------------------------
 {
   double angl;             // shape's rotation angle in radians
   double xCtr, yCtr;       // center of shape
@@ -2835,9 +2687,7 @@ void DiagramEditor::handleDragTopRgt(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragTop(Shape* s)
-// ------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -2878,9 +2728,7 @@ void DiagramEditor::handleDragTop(Shape* s)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragRotRgt(Shape* s)
-// ---------------------------------------------
 {
   double aglRd;      // shape's rotation angle in radians
   double aglDg;      // shape's rotation angle in degrees
@@ -2930,9 +2778,7 @@ void DiagramEditor::handleDragRotRgt(Shape* s)
 }
 
 
-// ---------------------------------------------
 void DiagramEditor::handleDragRotTop(Shape* s)
-// ---------------------------------------------
 {
   double aglRd;      // shape's rotation angle in radians
   double aglDg;      // shape's rotation angle in degrees
@@ -2981,9 +2827,7 @@ void DiagramEditor::handleDragRotTop(Shape* s)
 }
 
 
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFXCtrBeg(Shape* s)
-// -------------------------------------------------
 {
   double xCtr, yCtr;    // center of shape
   double xCur, yCur;    // current mouse position
@@ -3008,9 +2852,7 @@ void DiagramEditor::handleDragDOFXCtrBeg(Shape* s)
 }
 
 
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
-// -------------------------------------------------
 {
   double xCtr, yCtr;    // center of shape
   double xCur, yCur;    // current mouse position
@@ -3035,9 +2877,7 @@ void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
 }
 
 
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFYCtrBeg(Shape* s)
-// -------------------------------------------------
 {
   double xCtr, yCtr;    // center of shape
   double xCur, yCur;    // current mouse position
@@ -3062,9 +2902,7 @@ void DiagramEditor::handleDragDOFYCtrBeg(Shape* s)
 }
 
 
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
-// -------------------------------------------------
 {
   double xCtr, yCtr;    // center of shape
   double xCur, yCur;    // current mouse position
@@ -3089,9 +2927,7 @@ void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFWthBeg(Shape* s)
-// ------------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -3128,9 +2964,7 @@ void DiagramEditor::handleDragDOFWthBeg(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFWthEnd(Shape* s)
-// ------------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -3167,9 +3001,7 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
-// ------------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -3205,9 +3037,7 @@ void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
-// ------------------------------------------------
 {
   double angl;          // shape's rotation angle in radians
   double xCtr, yCtr;    // center of shape
@@ -3243,9 +3073,7 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
 }
 
 
-// ------------------------------------------
 void DiagramEditor::handleDragHge(Shape* s)
-// ------------------------------------------
 {
   double xCtr, yCtr;    // center of shape
   double xCur, yCur;    // current mouse position
@@ -3272,9 +3100,7 @@ void DiagramEditor::handleDragHge(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFAglBeg(Shape* s)
-// ------------------------------------------------
 {
   double xHge, yHge, xCtr, yCtr;
   double dstHgeCtr;
@@ -3312,9 +3138,7 @@ void DiagramEditor::handleDragDOFAglBeg(Shape* s)
 }
 
 
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFAglEnd(Shape* s)
-// ------------------------------------------------
 {
   double xHge, yHge, xCtr, yCtr;
   double dstHgeCtr;
@@ -3364,11 +3188,9 @@ void DiagramEditor::handleDragDOFAglEnd(Shape* s)
 // -- hit detection -------------------------------------------------
 
 
-// -----------------------------
 void DiagramEditor::processHits(
   GLint hits,
   GLuint buffer[])
-// -----------------------------
 {
   GLuint* ptr;
   vector< int > ids;

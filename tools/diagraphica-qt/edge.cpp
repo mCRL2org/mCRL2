@@ -17,11 +17,9 @@
 
 using namespace std;
 
-// --------------------
 Edge::Edge(
   const size_t& idx,
   const string& lbl)
-// --------------------
 {
   index   = idx;
   label   = lbl;
@@ -31,9 +29,7 @@ Edge::Edge(
 }
 
 
-// ----------
 Edge::~Edge()
-// ----------
 {
   clearInNode();
   clearOutNode();
@@ -44,25 +40,19 @@ Edge::~Edge()
 // -- set functions -------------------------------------------------
 
 
-// -----------------------------
 void Edge::setInNode(Node* in)
-// -----------------------------
 {
   inNode = in;
 }
 
 
-// -------------------------------
 void Edge::setOutNode(Node* out)
-// -------------------------------
 {
   outNode = out;
 }
 
 
-// ------------------------------
 void Edge::setBundle(Bundle* b)
-// ------------------------------
 {
   bundle = b;
 }
@@ -71,41 +61,31 @@ void Edge::setBundle(Bundle* b)
 // -- get functions -------------------------------------------------
 
 
-// -----------------
 size_t Edge::getIndex()
-// -----------------
 {
   return index;
 }
 
 
-// --------------------
 string Edge::getLabel()
-// --------------------
 {
   return label;
 }
 
 
-// --------------------
 Node* Edge::getInNode()
-// --------------------
 {
   return inNode;
 }
 
 
-// ---------------------
 Node* Edge::getOutNode()
-// ---------------------
 {
   return outNode;
 }
 
 
-// ----------------------
 Bundle* Edge::getBundle()
-// ----------------------
 {
   return bundle;
 }
@@ -114,25 +94,19 @@ Bundle* Edge::getBundle()
 // -- clear functions -----------------------------------------------
 
 
-// ---------------------
 void Edge::clearInNode()
-// ---------------------
 {
   inNode = NULL;
 }
 
 
-// ----------------------
 void Edge::clearOutNode()
-// ----------------------
 {
   outNode = NULL;
 }
 
 
-// ---------------------
 void Edge::clearBundle()
-// ---------------------
 {
   bundle = NULL;
 }

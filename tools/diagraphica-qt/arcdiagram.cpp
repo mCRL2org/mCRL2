@@ -51,13 +51,11 @@ int ArcDiagram::SEGM_HINT_LQ    = 12;
 // -- constructors and destructor -----------------------------------
 
 
-// ------------------------
 ArcDiagram::ArcDiagram(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ------------------------
 {
   idxInitStLeaves    = NON_EXISTING;
 
@@ -68,9 +66,7 @@ ArcDiagram::ArcDiagram(
 }
 
 
-// ----------------------
 ArcDiagram::~ArcDiagram()
-// ----------------------
 {
   diagram = NULL;
   clearSettings();
@@ -83,113 +79,85 @@ ArcDiagram::~ArcDiagram()
 // -- get functions -------------------------------------------------
 
 
-// -------------------------------
 ColorRGB ArcDiagram::getColorClr()
-// -------------------------------
 {
   return colClr;
 }
 
 
-// -------------------------------
 ColorRGB ArcDiagram::getColorTxt()
-// -------------------------------
 {
   return colTxt;
 }
 
 
-// -------------------------
 int ArcDiagram::getSizeTxt()
-// -------------------------
 {
   return szeTxt;
 }
 
 
-// -------------------------------
 double ArcDiagram::getIntervAnim()
-// -------------------------------
 {
   return itvAnim;
 }
 
 
-// ---------------------------
 bool ArcDiagram::getShowTree()
-// ---------------------------
 {
   return showTree;
 }
 
 
-// -------------------------------
 bool ArcDiagram::getAnnotateTree()
-// -------------------------------
 {
   return annotateTree;
 }
 
 
-// --------------------------
 int ArcDiagram::getColorMap()
-// --------------------------
 {
   return colorMap;
 }
 
 
-// ------------------------------
 bool ArcDiagram::getShowBarTree()
-// ------------------------------
 {
   return showBarTree;
 }
 
 
-// --------------------------------
 double ArcDiagram::getMagnBarTree()
-// --------------------------------
 {
   return magnBarTree;
 }
 
 
-// -----------------------------
 bool ArcDiagram::getShowLeaves()
-// -----------------------------
 {
   return showLeaves;
 }
 
 
-// ------------------------------
 bool ArcDiagram::getShowBundles()
-// ------------------------------
 {
   return showBundles;
 }
 
 
-// -----------------------------------
 ColorRGB ArcDiagram::getColorBundles()
-// -----------------------------------
 {
   return colBundles;
 }
 
 
-// --------------------------------
 double ArcDiagram::getTrspBundles()
-// --------------------------------
 {
   return colBundles.a;
 }
 
 
-// -------------------------------------------------
 void ArcDiagram::getAttrsTree(vector< size_t > &idcs)
-// -------------------------------------------------
 {
   idcs.clear();
   for (size_t i = 0; i < attrsTree.size(); ++i)
@@ -202,112 +170,84 @@ void ArcDiagram::getAttrsTree(vector< size_t > &idcs)
 // -- set functions -------------------------------------------------
 
 
-// ------------------------------------------------
 void ArcDiagram::setColorClr(const ColorRGB& col)
-// ------------------------------------------------
 {
   colClr = col;
 }
 
 
-// ------------------------------------------------
 void ArcDiagram::setColorTxt(const ColorRGB& col)
-// ------------------------------------------------
 {
   colTxt = col;
 }
 
 
-// ------------------------------------------
 void ArcDiagram::setSizeTxt(const int& sze)
-// ------------------------------------------
 {
   szeTxt = sze;
 }
 
 
-// ---------------------------------------------
 void ArcDiagram::setIntervAnim(const int& itv)
-// ---------------------------------------------
 {
   itvAnim = itv;
 }
 
-// --------------------------------------------
 void ArcDiagram::setShowTree(const bool& shw)
-// --------------------------------------------
 {
   showTree = shw;
 }
 
 
-// ------------------------------------------------
 void ArcDiagram::setAnnotateTree(const bool& shw)
-// ------------------------------------------------
 {
   annotateTree = shw;
 }
 
 
-// ----------------------------------------------
 void ArcDiagram::setColorMap(const int& colMap)
-// ----------------------------------------------
 {
   colorMap = colMap;
 }
 
 
-// -----------------------------------------------
 void ArcDiagram::setShowBarTree(const bool& shw)
-// -----------------------------------------------
 {
   showBarTree = shw;
 }
 
 
-// -------------------------------------------------
 void ArcDiagram::setMagnBarTree(const double& val)
-// -------------------------------------------------
 {
   magnBarTree = val;
 }
 
 
-// ----------------------------------------------
 void ArcDiagram::setShowLeaves(const bool& shw)
-// ----------------------------------------------
 {
   showLeaves = shw;
 }
 
 
-// -----------------------------------------------
 void ArcDiagram::setShowBundles(const bool& shw)
-// -----------------------------------------------
 {
   showBundles = shw;
 }
 
 
-// ----------------------------------------------------
 void ArcDiagram::setColorBundles(const ColorRGB& col)
-// ----------------------------------------------------
 {
   colBundles = col;
 }
 
 
-// --------------------------------------------------
 void ArcDiagram::setTrspBundles(const double& trsp)
-// --------------------------------------------------
 {
   colBundles.a = trsp;
 }
 
 
-// ------------------------------------------------------
 void ArcDiagram::setAttrsTree(const vector< size_t > idcs)
-// ------------------------------------------------------
 {
   attrsTree.clear();
   for (size_t i = 0; i < idcs.size(); ++i)
@@ -317,17 +257,13 @@ void ArcDiagram::setAttrsTree(const vector< size_t > idcs)
 }
 
 
-// -----------------------------------------
 void ArcDiagram::setDiagram(Diagram* dgrm)
-// -----------------------------------------
 {
   diagram = dgrm;
 }
 
 
-// -------------------------------
 void ArcDiagram::hideAllDiagrams()
-// -------------------------------
 {
   {
     for (size_t i = 0; i < showDgrm.size(); ++i)
@@ -345,11 +281,9 @@ void ArcDiagram::hideAllDiagrams()
 }
 
 
-// -----------------------
 void ArcDiagram::markLeaf(
   const size_t& leafIdx,
   ColorRGB& col)
-// -----------------------
 {
   map< size_t, vector< ColorRGB > >::iterator it;
   it = markLeaves.find(leafIdx);
@@ -366,17 +300,13 @@ void ArcDiagram::markLeaf(
 }
 
 
-// ----------------------------
 void ArcDiagram::unmarkLeaves()
-// ----------------------------
 {
   markLeaves.clear();
 }
 
 
-// ------------------------------------------
 void ArcDiagram::markBundle(const size_t& idx)
-// ------------------------------------------
 {
   if (idx < markBundles.size())
   {
@@ -385,9 +315,7 @@ void ArcDiagram::markBundle(const size_t& idx)
 }
 
 
-// -----------------------------
 void ArcDiagram::unmarkBundles()
-// -----------------------------
 {
   for (size_t i = 0; i < markBundles.size(); ++i)
   {
@@ -396,9 +324,7 @@ void ArcDiagram::unmarkBundles()
 }
 
 
-// ---------------------------------------
 void ArcDiagram::handleSendDgrmSglToSiml()
-// ---------------------------------------
 {
   mediator->initSimulator(
     framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
@@ -406,25 +332,19 @@ void ArcDiagram::handleSendDgrmSglToSiml()
 }
 
 
-// ----------------------------------------
 void ArcDiagram::handleSendDgrmSglToTrace()
-// ----------------------------------------
 {
   mediator->markTimeSeries(this, framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]]);
 }
 
 
-// ----------------------------------------
 void ArcDiagram::handleSendDgrmSetToTrace()
-// ----------------------------------------
 {
   mediator->markTimeSeries(this, framesDgrm[currIdxDgrm]);
 }
 
 
-// ---------------------------------------
 void ArcDiagram::handleSendDgrmSglToExnr()
-// ---------------------------------------
 {
   mediator->addToExaminer(
     framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
@@ -432,9 +352,7 @@ void ArcDiagram::handleSendDgrmSglToExnr()
 }
 
 
-// ---------------------------------------
 void ArcDiagram::handleSendDgrmSetToExnr()
-// ---------------------------------------
 {
   mediator->addToExaminer(
     framesDgrm[currIdxDgrm],
@@ -445,10 +363,8 @@ void ArcDiagram::handleSendDgrmSetToExnr()
 // -- visualization functions  --------------------------------------
 
 
-// ---------------------------------------------------
 
 void ArcDiagram::visualize(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -542,9 +458,7 @@ void ArcDiagram::visualize(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::drawBundles(const bool& inSelectMode)
-// -----------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -682,9 +596,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void ArcDiagram::drawLeaves(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -781,9 +693,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------
 void ArcDiagram::drawTree(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -900,9 +810,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   double wth = canvas->getWidth();
   double pix = canvas->getPixelSize();
@@ -956,9 +864,7 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::drawBarTree(const bool& inSelectMode)
-// -----------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -1074,9 +980,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void ArcDiagram::drawDiagrams(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -1406,9 +1310,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------------
 void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
-// ----------------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -1469,11 +1371,9 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-// --------------------------------------
 void ArcDiagram::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -1484,11 +1384,9 @@ void ArcDiagram::handleMouseLftDownEvent(
 }
 
 
-// ------------------------------------
 void ArcDiagram::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -1501,11 +1399,9 @@ void ArcDiagram::handleMouseLftUpEvent(
 }
 
 
-// ----------------------------------------
 void ArcDiagram::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -1516,11 +1412,9 @@ void ArcDiagram::handleMouseLftDClickEvent(
 }
 
 
-// --------------------------------------
 void ArcDiagram::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -1531,11 +1425,9 @@ void ArcDiagram::handleMouseRgtDownEvent(
 }
 
 
-// ------------------------------------
 void ArcDiagram::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseRgtUpEvent(x, y);
 
@@ -1546,11 +1438,9 @@ void ArcDiagram::handleMouseRgtUpEvent(
 }
 
 
-// -------------------------------------
 void ArcDiagram::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// -------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -1573,9 +1463,7 @@ void ArcDiagram::handleMouseMotionEvent(
 }
 
 
-// ---------------------------------
 void ArcDiagram::updateDiagramData()
-// ---------------------------------
 {
   for (size_t i = 0; i < attrsDgrm.size(); ++i)
   {
@@ -1596,20 +1484,16 @@ void ArcDiagram::updateDiagramData()
 // -- utility drawing functions -------------------------------------
 
 
-// ---------------------
 void ArcDiagram::clear()
-// ---------------------
 {
   VisUtils::clear(colClr);
 }
 
 
-// ------------------------
 void ArcDiagram::calcColor(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& col)
-// ------------------------
 {
   if (colorMap == VisUtils::COL_MAP_QUAL_PAST_1)
     VisUtils::mapColorQualPast1(
@@ -1654,9 +1538,7 @@ void ArcDiagram::calcColor(
 }
 
 
-// -------------------------------------
 void ArcDiagram::calcSettingsGeomBased()
-// -------------------------------------
 {
   // update flag
   geomChanged = false;
@@ -1668,9 +1550,7 @@ void ArcDiagram::calcSettingsGeomBased()
 }
 
 
-// -------------------------------------
 void ArcDiagram::calcSettingsDataBased()
-// -------------------------------------
 {
   // update flag
   dataChanged = false;
@@ -1679,9 +1559,7 @@ void ArcDiagram::calcSettingsDataBased()
 }
 
 
-// ----------------------------------
 void ArcDiagram::calcSettingsLeaves()
-// ----------------------------------
 {
   if (graph->getSizeLeaves() > 0)
   {
@@ -1744,9 +1622,7 @@ void ArcDiagram::calcSettingsLeaves()
 }
 
 
-// -----------------------------------
 void ArcDiagram::calcSettingsBundles()
-// -----------------------------------
 {
   if (graph->getSizeBundles() > 0)
   {
@@ -1832,9 +1708,7 @@ void ArcDiagram::calcSettingsBundles()
 }
 
 
-// --------------------------------
 void ArcDiagram::calcSettingsTree()
-// --------------------------------
 {
   if (graph->getRoot() != NULL)
   {
@@ -1880,12 +1754,10 @@ void ArcDiagram::calcSettingsTree()
 }
 
 
-// --------------------------------
 void ArcDiagram::calcPositionsTree(
   Cluster* c,
   const size_t& maxLvl,
   const double& itvHgt)
-// --------------------------------
 {
   for (size_t i = 0; i < c->getSizeChildren(); ++i)
   {
@@ -1944,9 +1816,7 @@ void ArcDiagram::calcPositionsTree(
 }
 
 
-// -----------------------------------
 void ArcDiagram::calcSettingsBarTree()
-// -----------------------------------
 {
   if (graph->getRoot() != NULL)
   {
@@ -1990,12 +1860,10 @@ void ArcDiagram::calcSettingsBarTree()
 }
 
 
-// -----------------------------------
 void ArcDiagram::calcPositionsBarTree(
   Cluster* c,
   const double& yBot,
   const double& height)
-// -----------------------------------
 {
   for (size_t i = 0; i < c->getSizeChildren(); ++i)
   {
@@ -2036,9 +1904,7 @@ void ArcDiagram::calcPositionsBarTree(
 }
 
 
-// -----------------------------------
 void ArcDiagram::calcSettingsDiagram()
-// -----------------------------------
 {
   clearSettingsDiagram();
   for (size_t i = 0; i < posLeaves.size(); ++i)
@@ -2063,9 +1929,7 @@ void ArcDiagram::calcSettingsDiagram()
 }
 
 
-// ---------------------------------
 void ArcDiagram::updateMarkBundles()
-// ---------------------------------
 {
   for (size_t i = 0; i < markBundles.size(); ++i)
   {
@@ -2116,9 +1980,7 @@ void ArcDiagram::updateMarkBundles()
 }
 
 
-// -----------------------------
 void ArcDiagram::clearSettings()
-// -----------------------------
 {
   clearSettingsBundles();
   clearSettingsLeaves();
@@ -2129,18 +1991,14 @@ void ArcDiagram::clearSettings()
 }
 
 
-// -----------------------------------
 void ArcDiagram::clearSettingsLeaves()
-// -----------------------------------
 {
   posLeaves.clear();
   idxInitStLeaves = NON_EXISTING;
 }
 
 
-// ------------------------------------
 void ArcDiagram::clearSettingsBundles()
-// ------------------------------------
 {
   posBundles.clear();
   radiusBundles.clear();
@@ -2149,9 +2007,7 @@ void ArcDiagram::clearSettingsBundles()
 }
 
 
-// ---------------------------------
 void ArcDiagram::clearSettingsTree()
-// ---------------------------------
 {
   for (size_t i = 0; i < posTreeTopLft.size(); ++i)
   {
@@ -2166,9 +2022,7 @@ void ArcDiagram::clearSettingsTree()
 }
 
 
-// ------------------------------------
 void ArcDiagram::clearSettingsBarTree()
-// ------------------------------------
 {
   for (size_t i = 0; i < posBarTreeTopLft.size(); ++i)
   {
@@ -2181,9 +2035,7 @@ void ArcDiagram::clearSettingsBarTree()
 }
 
 
-// ------------------------------------
 void ArcDiagram::clearSettingsDiagram()
-// ------------------------------------
 {
   showDgrm.clear();
 
@@ -2215,9 +2067,7 @@ void ArcDiagram::clearSettingsDiagram()
 // -- utility event handlers ------------------------------------
 
 
-// ----------------------------------------
 void ArcDiagram::onTimer(wxTimerEvent& /*e*/)
-// ----------------------------------------
 {
   if (timerAnim->GetInterval() != itvAnim)
   {
@@ -2237,9 +2087,7 @@ void ArcDiagram::onTimer(wxTimerEvent& /*e*/)
 }
 
 
-// ----------------------------------------------------
 void ArcDiagram::handleHits(const vector< int > &ids)
-// ----------------------------------------------------
 {
   if (mouseButton == MSE_BUTTON_DOWN)
   {
@@ -2446,11 +2294,9 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 }
 
 
-// ---------------------------------
 void ArcDiagram::handleHoverCluster(
   const size_t& i,
   const size_t& j)
-// ---------------------------------
 {
   if ((i < mapPosToClust.size()) &&
       (j < mapPosToClust[i].size()))
@@ -2485,9 +2331,7 @@ void ArcDiagram::handleHoverCluster(
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handleHoverBundle(const size_t& bndlIdx)
-// -----------------------------------------------------
 {
   if (bndlIdx != NON_EXISTING && bndlIdx < graph->getSizeBundles())
   {
@@ -2501,11 +2345,9 @@ void ArcDiagram::handleHoverBundle(const size_t& bndlIdx)
 }
 
 
-// ---------------------------------
 void ArcDiagram::handleHoverBarTree(
   const int& i,
   const int& j)
-// ---------------------------------
 {
   if ((0 <= i && static_cast <size_t>(i) < mapPosToClust.size()) &&
       (0 <= j && static_cast <size_t>(j) < mapPosToClust[i].size()))
@@ -2522,9 +2364,7 @@ void ArcDiagram::handleHoverBarTree(
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handleShowDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   // diagram doesn't exist, add it
   if (showDgrm[dgrmIdx] != true)
@@ -2543,9 +2383,7 @@ void ArcDiagram::handleShowDiagram(const size_t& dgrmIdx)
 }
 
 
-// ---------------------------------
 void ArcDiagram::handleDragDiagram()
-// ---------------------------------
 {
   if (dragIdxDgrm != NON_EXISTING && static_cast <size_t>(dragIdxDgrm) < posDgrm.size())
   {
@@ -2560,9 +2398,7 @@ void ArcDiagram::handleDragDiagram()
   }
 }
 
-// ---------------------------------
 void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
-// ---------------------------------
 {
   double x1, y1;
   double x2, y2;
@@ -2575,9 +2411,7 @@ void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning())
   {
@@ -2601,9 +2435,7 @@ void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning())
   {
@@ -2632,9 +2464,7 @@ void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (dgrmIdx == animIdxDgrm)
   {
@@ -2662,9 +2492,7 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning())
   {
@@ -2693,9 +2521,7 @@ void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------
 void ArcDiagram::showDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------
 {
   Cluster* clust = graph->getLeaf(dgrmIdx);
 
@@ -2808,9 +2634,7 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------
 void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------
 {
   Cluster* clust = graph->getLeaf(dgrmIdx);
 
@@ -2844,11 +2668,9 @@ void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
 // -- hit detection -------------------------------------------------
 
 
-// --------------------------
 void ArcDiagram::processHits(
   GLint hits,
   GLuint buffer[])
-// --------------------------
 {
   GLuint* ptr;
   vector< int > ids;

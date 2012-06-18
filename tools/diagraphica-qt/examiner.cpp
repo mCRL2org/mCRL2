@@ -30,13 +30,11 @@ int Examiner::hgtHstPix = 80;
 // -- constructors and destructor -----------------------------------
 
 
-// ------------------------
 Examiner::Examiner(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ------------------------
 {
   diagram = NULL;
   frame = NULL;
@@ -47,9 +45,7 @@ Examiner::Examiner(
 }
 
 
-// ------------------
 Examiner::~Examiner()
-// ------------------
 {
   // association
   diagram = NULL;
@@ -82,41 +78,31 @@ Examiner::~Examiner()
 // -- get functions -------------------------------------------------
 
 
-// -----------------------------
 ColorRGB Examiner::getColorClr()
-// -----------------------------
 {
   return colClr;
 }
 
 
-// -----------------------------
 ColorRGB Examiner::getColorTxt()
-// -----------------------------
 {
   return colTxt;
 }
 
 
-// -----------------------
 int Examiner::getSizeTxt()
-// -----------------------
 {
   return szeTxt;
 }
 
 
-// -----------------------------
 ColorRGB Examiner::getColorBdl()
-// -----------------------------
 {
   return colBdl;
 }
 
 
-// -----------------------------
 ColorRGB Examiner::getColorSel()
-// -----------------------------
 {
   ColorRGB col;
   VisUtils::mapColorCoolRed(col);
@@ -124,9 +110,7 @@ ColorRGB Examiner::getColorSel()
 }
 
 
-// --------------------------
 size_t Examiner::getIdxClstSel()
-// --------------------------
 {
   size_t result = NON_EXISTING;
   if (focusFrameIdx < framesHist.size())
@@ -140,52 +124,40 @@ size_t Examiner::getIdxClstSel()
 // -- set functions -------------------------------------------------
 
 
-// ----------------------------------------------
 void Examiner::setColorClr(const ColorRGB& col)
-// ----------------------------------------------
 {
   colClr = col;
 }
 
 
-// ----------------------------------------------
 void Examiner::setColorTxt(const ColorRGB& col)
-// ----------------------------------------------
 {
   colTxt = col;
 }
 
 
-// ----------------------------------------
 void Examiner::setSizeTxt(const int& sze)
-// ----------------------------------------
 {
   szeTxt = sze;
 }
 
 
-// ----------------------------------------------
 void Examiner::setColorBdl(const ColorRGB& col)
-// ----------------------------------------------
 {
   colBdl = col;
 }
 
 
-// ---------------------------------------
 void Examiner::setDiagram(Diagram* dgrm)
-// ---------------------------------------
 {
   diagram = dgrm;
 }
 
 
-// -----------------------------------
 void Examiner::setFrame(
   Cluster* frme,
   const vector< Attribute*> &attrs,
   ColorRGB col)
-// -----------------------------------
 {
   delete frame;
   attributes.clear();
@@ -196,9 +168,7 @@ void Examiner::setFrame(
 }
 
 
-// ----------------------
 void Examiner::clrFrame()
-// ----------------------
 {
   delete frame;
   frame = NULL;
@@ -216,11 +186,9 @@ void Examiner::clrFrame()
 }
 
 
-// ------------------------------------
 void Examiner::addFrameHist(
   Cluster* frme,
   const vector< Attribute* > &attrs)
-// ------------------------------------
 {
   // update flag
   dataChanged = true;
@@ -232,9 +200,7 @@ void Examiner::addFrameHist(
 }
 
 
-// --------------------------
 void Examiner::clrFrameHist()
-// --------------------------
 {
   // update flag
   dataChanged = true;
@@ -264,9 +230,7 @@ void Examiner::clrFrameHist()
 }
 
 
-// -----------------------------
 void Examiner::clrFrameHistCur()
-// -----------------------------
 {
   // update flag
   dataChanged = true;
@@ -290,17 +254,13 @@ void Examiner::clrFrameHistCur()
 }
 
 
-// ------------------------------
 size_t Examiner::getSizeFramesHist()
-// ------------------------------
 {
   return framesHist.size();
 }
 
 
-// -----------------------
 void Examiner::clearData()
-// -----------------------
 {
   clearAttributes();
   clearDiagram();
@@ -308,9 +268,7 @@ void Examiner::clearData()
 }
 
 
-// -------------------------------------
 void Examiner::handleSendDgrmSglToSiml()
-// -------------------------------------
 {
   mediator->initSimulator(
     framesHist[focusFrameIdx],
@@ -318,17 +276,13 @@ void Examiner::handleSendDgrmSglToSiml()
 }
 
 
-// --------------------------------------
 void Examiner::handleSendDgrmSglToTrace()
-// --------------------------------------
 {
   mediator->markTimeSeries(this, frame);
 }
 
 
-// --------------------------------------
 void Examiner::handleSendDgrmSetToTrace()
-// --------------------------------------
 {
   mediator->markTimeSeries(this, framesHist);
 }
@@ -337,9 +291,7 @@ void Examiner::handleSendDgrmSetToTrace()
 // -- visualization functions  --------------------------------------
 
 
-// -------------------------------------------------
 void Examiner::visualize(const bool& inSelectMode)
-// -------------------------------------------------
 {
   clear();
 
@@ -397,9 +349,7 @@ void Examiner::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// -----------------------------
 void Examiner::handleSizeEvent()
-// -----------------------------
 {
   Visualizer::handleSizeEvent();
 
@@ -425,11 +375,9 @@ void Examiner::handleSizeEvent()
 }
 
 
-// ------------------------------------
 void Examiner::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -440,11 +388,9 @@ void Examiner::handleMouseLftDownEvent(
 }
 
 
-// ----------------------------------
 void Examiner::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ----------------------------------
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -455,11 +401,9 @@ void Examiner::handleMouseLftUpEvent(
 }
 
 
-// --------------------------------------
 void Examiner::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -470,11 +414,9 @@ void Examiner::handleMouseLftDClickEvent(
 }
 
 
-// ------------------------------------
 void Examiner::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -485,11 +427,9 @@ void Examiner::handleMouseRgtDownEvent(
 }
 
 
-// ----------------------------------
 void Examiner::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// ----------------------------------
 {
   Visualizer::handleMouseRgtUpEvent(x, y);
 
@@ -500,11 +440,9 @@ void Examiner::handleMouseRgtUpEvent(
 }
 
 
-// -----------------------------------
 void Examiner::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// -----------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -515,9 +453,7 @@ void Examiner::handleMouseMotionEvent(
 }
 
 
-// ----------------------------------------------------
 void Examiner::handleKeyDownEvent(const int& keyCode)
-// ----------------------------------------------------
 {
   Visualizer::handleKeyDownEvent(keyCode);
 
@@ -538,9 +474,7 @@ void Examiner::handleKeyDownEvent(const int& keyCode)
 // -- utility functions ---------------------------------------------
 
 
-// -----------------------------------
 void Examiner::calcSettingsGeomBased()
-// -----------------------------------
 {
   // update flag
   geomChanged = false;
@@ -550,9 +484,7 @@ void Examiner::calcSettingsGeomBased()
 }
 
 
-// -----------------------------------
 void Examiner::calcSettingsDataBased()
-// -----------------------------------
 {
   // update flag
   dataChanged = false;
@@ -562,9 +494,7 @@ void Examiner::calcSettingsDataBased()
 }
 
 
-// --------------------------
 void Examiner::calcPosFrame()
-// --------------------------
 {
   double itvHist = hgtHstPix;
   double bdr     = 10;
@@ -589,9 +519,7 @@ void Examiner::calcPosFrame()
 }
 
 
-// -------------------------------
 void Examiner::calcPosFramesHist()
-// -------------------------------
 {
   double itvHist = hgtHstPix;
   double bdr     = 10;
@@ -629,27 +557,21 @@ void Examiner::calcPosFramesHist()
 }
 
 
-// -----------------------------
 void Examiner::clearAttributes()
-// -----------------------------
 {
   // association
   attributes.clear();
 }
 
 
-// --------------------------
 void Examiner::clearDiagram()
-// --------------------------
 {
   // association
   diagram = NULL;
 }
 
 
-// -------------------------
 void Examiner::clearFrames()
-// -------------------------
 {
   // composition
   delete frame;
@@ -660,9 +582,7 @@ void Examiner::clearFrames()
 // -- hit detection -------------------------------------------------
 
 
-// --------------------------------------------------
 void Examiner::handleHits(const vector< int > &ids)
-// --------------------------------------------------
 {
   if (ids.size() > 0)
   {
@@ -787,9 +707,7 @@ void Examiner::handleHits(const vector< int > &ids)
 }
 
 
-// ----------------------------
 void Examiner::handleIconRwnd()
-// ----------------------------
 {
   if (framesHist.size() > 0)
   {
@@ -811,9 +729,7 @@ void Examiner::handleIconRwnd()
 }
 
 
-// ---------------------------
 void Examiner::handleIconLft()
-// ---------------------------
 {
   double bdr = 12;
 
@@ -865,9 +781,7 @@ void Examiner::handleIconLft()
 }
 
 
-// ---------------------------
 void Examiner::handleIconRgt()
-// ---------------------------
 {
   double bdr = 12;
 
@@ -919,11 +833,9 @@ void Examiner::handleIconRgt()
 }
 
 
-// ------------------------
 void Examiner::processHits(
   GLint hits,
   GLuint buffer[])
-// ------------------------
 {
   GLuint* ptr;
   vector< int > ids;
@@ -974,17 +886,13 @@ void Examiner::processHits(
 // -- utility drawing functions -------------------------------------
 
 
-// -------------------
 void Examiner::clear()
-// -------------------
 {
   VisUtils::clear(colClr);
 }
 
 
-// -------------------------------------------------
 void Examiner::drawFrame(const bool& inSelectMode)
-// -------------------------------------------------
 {
   double pix = canvas->getPixelSize();
 
@@ -1059,9 +967,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void Examiner::drawFramesHist(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -1149,9 +1055,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void Examiner::drawControls(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   double itvHist = hgtHstPix;
 

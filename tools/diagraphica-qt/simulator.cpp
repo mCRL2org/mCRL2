@@ -33,13 +33,11 @@ int Simulator::blendType = VisUtils::BLEND_HARD;
 // -- constructors and destructor -----------------------------------
 
 
-// ------------------------
 Simulator::Simulator(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ------------------------
 {
   diagram   = NULL;
   frameCurr = NULL;
@@ -61,9 +59,7 @@ Simulator::Simulator(
 }
 
 
-// --------------------
 Simulator::~Simulator()
-// --------------------
 {
   graph = NULL;
 
@@ -79,49 +75,37 @@ Simulator::~Simulator()
 // -- get functions ---------------------------------------------
 
 
-// ------------------------------
 ColorRGB Simulator::getColorClr()
-// ------------------------------
 {
   return colClr;
 }
 
 
-// ------------------------------
 ColorRGB Simulator::getColorTxt()
-// ------------------------------
 {
   return colTxt;
 }
 
 
-// ------------------------
 int Simulator::getSizeTxt()
-// ------------------------
 {
   return szeTxt;
 }
 
 
-// ------------------------------
 ColorRGB Simulator::getColorBdl()
-// ------------------------------
 {
   return colBdl;
 }
 
 
-// --------------------------
 int Simulator::getBlendType()
-// --------------------------
 {
   return blendType;
 }
 
 
-// ------------------------------
 ColorRGB Simulator::getColorSel()
-// ------------------------------
 {
   ColorRGB col;
   VisUtils::mapColorCoolGreen(col);
@@ -129,9 +113,7 @@ ColorRGB Simulator::getColorSel()
 }
 
 
-// ---------------------------
 size_t Simulator::getIdxClstSel()
-// ---------------------------
 {
   size_t result = NON_EXISTING;
 
@@ -164,49 +146,37 @@ size_t Simulator::getIdxClstSel()
 // -- set functions ---------------------------------------------
 
 
-// -----------------------------------------------
 void Simulator::setColorClr(const ColorRGB& col)
-// -----------------------------------------------
 {
   colClr = col;
 }
 
 
-// -----------------------------------------------
 void Simulator::setColorTxt(const ColorRGB& col)
-// -----------------------------------------------
 {
   colTxt = col;
 }
 
 
-// -----------------------------------------
 void Simulator::setSizeTxt(const int& sze)
-// -----------------------------------------
 {
   szeTxt = sze;
 }
 
 
-// -----------------------------------------------
 void Simulator::setColorBdl(const ColorRGB& col)
-// -----------------------------------------------
 {
   colBdl = col;
 }
 
 
-// --------------------------------------------
 void Simulator::setBlendType(const int& type)
-// --------------------------------------------
 {
   blendType = type;
 }
 
 
-// ----------------------------------------
 void Simulator::setDiagram(Diagram* dgrm)
-// ----------------------------------------
 {
   clearDiagram();
   diagram = dgrm;
@@ -215,11 +185,9 @@ void Simulator::setDiagram(Diagram* dgrm)
 }
 
 
-// ------------------------------------
 void Simulator::initFrameCurr(
   Cluster* frame,
   const vector< Attribute* > &attrs)
-// ------------------------------------
 {
   // clear previous data
   clearAttributes();
@@ -243,11 +211,9 @@ void Simulator::initFrameCurr(
 }
 
 
-// -----------------------------
 void Simulator::updateFrameCurr(
   Cluster* frame,
   const Position2D& pos)
-// -----------------------------
 {
   // init animation data
   keyFrameFr    = frame;
@@ -284,9 +250,7 @@ void Simulator::updateFrameCurr(
 }
 
 
-// ------------------------
 void Simulator::clearData()
-// ------------------------
 {
   focusDepthIdx  = -1;
   focusFrameIdx  = -1;
@@ -304,9 +268,7 @@ void Simulator::clearData()
 }
 
 
-// --------------------------------------
 void Simulator::handleSendDgrmSglToExnr()
-// --------------------------------------
 {
   if (focusDepthIdx == ID_FRAME_PREV)
   {
@@ -335,9 +297,7 @@ void Simulator::handleSendDgrmSglToExnr()
 // -- visualization functions  --------------------------------------
 
 
-// --------------------------------------------------
 void Simulator::visualize(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -422,11 +382,9 @@ void Simulator::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// -------------------------------------
 void Simulator::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// -------------------------------------
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -437,11 +395,9 @@ void Simulator::handleMouseLftDownEvent(
 }
 
 
-// -----------------------------------
 void Simulator::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// -----------------------------------
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -452,11 +408,9 @@ void Simulator::handleMouseLftUpEvent(
 }
 
 
-// ---------------------------------------
 void Simulator::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// ---------------------------------------
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -467,11 +421,9 @@ void Simulator::handleMouseLftDClickEvent(
 }
 
 
-// -------------------------------------
 void Simulator::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// -------------------------------------
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -482,11 +434,9 @@ void Simulator::handleMouseRgtDownEvent(
 }
 
 
-// -----------------------------------
 void Simulator::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// -----------------------------------
 {
   Visualizer::handleMouseRgtUpEvent(x, y);
 
@@ -497,11 +447,9 @@ void Simulator::handleMouseRgtUpEvent(
 }
 
 
-// ------------------------------------
 void Simulator::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -512,9 +460,7 @@ void Simulator::handleMouseMotionEvent(
 }
 
 
-// ------------------------------------
 void Simulator::handleMouseLeaveEvent()
-// ------------------------------------
 {
   Visualizer::initMouse();
 
@@ -539,9 +485,7 @@ void Simulator::handleMouseLeaveEvent()
 }
 
 
-// -----------------------------------------------------
 void Simulator::handleKeyDownEvent(const int& keyCode)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning() != true)
   {
@@ -591,11 +535,9 @@ void Simulator::handleKeyDownEvent(const int& keyCode)
 }
 
 /*
-// ----------------------------------
 void Simulator::handleMarkFrameClust(
     DiagramChooser* dc,
     const int &idx )
-// ----------------------------------
 {
     if ( dc == chsrCurr )
         mediator->handleMarkCurrFrameClust( idx );
@@ -605,17 +547,13 @@ void Simulator::handleMarkFrameClust(
 // -- utility functions ---------------------------------------------
 
 
-// ----------------------------------------------------------------
 void Simulator::initAttributes(const vector< Attribute* > &attrs)
-// ----------------------------------------------------------------
 {
   attributes = attrs;
 }
 
 
-// ---------------------------------
 void Simulator::initFramesPrevNext()
-// ---------------------------------
 {
   Node*        temp;
   set< Node* > tempPrev;
@@ -683,9 +621,7 @@ void Simulator::initFramesPrevNext()
 }
 
 
-// --------------------------
 void Simulator::initBundles()
-// --------------------------
 {
   Node*    node;
   Cluster* clst;
@@ -907,9 +843,7 @@ void Simulator::initBundles()
 }
 
 
-// ---------------------------------
 void Simulator::sortFramesPrevNext()
-// ---------------------------------
 {
   multimap< int, Cluster* > sorted;
 
@@ -956,9 +890,7 @@ void Simulator::sortFramesPrevNext()
 }
 
 
-// ------------------------------------
 void Simulator::calcSettingsGeomBased()
-// ------------------------------------
 {
   // update flag
   geomChanged = false;
@@ -968,9 +900,7 @@ void Simulator::calcSettingsGeomBased()
 }
 
 
-// ------------------------------------
 void Simulator::calcSettingsDataBased()
-// ------------------------------------
 {
   // update flag
   dataChanged = false;
@@ -980,9 +910,7 @@ void Simulator::calcSettingsDataBased()
 }
 
 
-// ----------------------------
 void Simulator::calcPosFrames()
-// ----------------------------
 {
   Position2D pos;
 
@@ -1026,9 +954,7 @@ void Simulator::calcPosFrames()
 }
 
 
-// -----------------------------
 void Simulator::calcPosBundles()
-// -----------------------------
 {
   Position2D posTopLft, posBotRgt;
 
@@ -1185,9 +1111,7 @@ void Simulator::calcPosBundles()
 }
 
 
-// --------------------------
 void Simulator::handleKeyUp()
-// --------------------------
 {
   if (focusDepthIdx == ID_FRAME_PREV)
   {
@@ -1210,9 +1134,7 @@ void Simulator::handleKeyUp()
 }
 
 
-// ---------------------------
 void Simulator::handleKeyRgt()
-// ---------------------------
 {
   if (focusDepthIdx == -1)
   {
@@ -1288,9 +1210,7 @@ void Simulator::handleKeyRgt()
 }
 
 
-// ---------------------------
 void Simulator::handleKeyDwn()
-// ---------------------------
 {
   if (focusDepthIdx == ID_FRAME_PREV)
   {
@@ -1313,9 +1233,7 @@ void Simulator::handleKeyDwn()
 }
 
 
-// ---------------------------
 void Simulator::handleKeyLft()
-// ---------------------------
 {
   if (focusDepthIdx < 0)
   {
@@ -1391,9 +1309,7 @@ void Simulator::handleKeyLft()
 }
 
 
-// ------------------------------
 void Simulator::markFrameClusts()
-// ------------------------------
 {
   if (focusDepthIdx == ID_FRAME_PREV)
   {
@@ -1449,25 +1365,19 @@ void Simulator::markFrameClusts()
 }
 
 
-// ------------------------------
 void Simulator::clearAttributes()
-// ------------------------------
 {
   attributes.clear();
 }
 
 
-// ---------------------------
 void Simulator::clearDiagram()
-// ---------------------------
 {
   diagram = NULL;
 }
 
 
-// --------------------------
 void Simulator::clearFrames()
-// --------------------------
 {
   if (frameCurr != NULL)
   {
@@ -1496,9 +1406,7 @@ void Simulator::clearFrames()
 }
 
 
-// ---------------------------
 void Simulator::clearBundles()
-// ---------------------------
 {
   {
     for (size_t i = 0; i < bundles.size(); ++i)
@@ -1547,9 +1455,7 @@ void Simulator::clearBundles()
 // -- hit detection ---------------------------------------------
 
 
-// ---------------------------------------------------
 void Simulator::handleHits(const vector< int > &ids)
-// ---------------------------------------------------
 {
   if (ids.size() == 1)
   {
@@ -1740,11 +1646,9 @@ void Simulator::handleHits(const vector< int > &ids)
 }
 
 
-// -------------------------
 void Simulator::processHits(
   GLint hits,
   GLuint buffer[])
-// -------------------------
 {
   GLuint* ptr;
   vector< int > ids;
@@ -1795,20 +1699,16 @@ void Simulator::processHits(
 // -- utility drawing functions ---------------------------------
 
 
-// --------------------
 void Simulator::clear()
-// --------------------
 {
   VisUtils::clear(colClr);
 }
 
 
-// -----------------------
 void Simulator::calcColor(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& col)
-// -----------------------
 {
   VisUtils::mapColorQualPair(
     iter,
@@ -1859,9 +1759,7 @@ void Simulator::calcColor(
 }
 
 
-// ------------------------------------------------------
 void Simulator::drawFrameCurr(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -1972,9 +1870,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------------
 void Simulator::drawFramesPrev(const bool& inSelectMode)
-// -------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2147,9 +2043,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------------
 void Simulator::drawFramesNext(const bool& inSelectMode)
-// -------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2321,9 +2215,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------------
 void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
-// -----------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2515,9 +2407,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------------
 void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
-// -----------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2708,9 +2598,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------------
 void Simulator::drawBundlesPrev(const bool& inSelectMode)
-// --------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2827,9 +2715,7 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------------
 void Simulator::drawBundlesNext(const bool& inSelectMode)
-// --------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2952,9 +2838,7 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------
 void Simulator::drawControls(const bool& inSelectMode)
-// -----------------------------------------------------
 {
   double wth, hgt;
   canvas->getSize(wth, hgt);
@@ -3081,9 +2965,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 }
 
 
-// ----------------------
 void Simulator::animate()
-// ----------------------
 {
   vector< double > valsFrame;
 
@@ -3276,9 +3158,7 @@ void Simulator::animate()
 // -- utility event handlers ------------------------------------
 
 
-// ---------------------------------------
 void Simulator::onTimer(wxTimerEvent& /*e*/)
-// ---------------------------------------
 {
   if (timeAlphaMS >= timeTotalMS)
   {

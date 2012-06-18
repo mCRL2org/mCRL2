@@ -23,31 +23,23 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------------
 Parser::Parser(Mediator* m)
   : Colleague(m)
-// --------------------------
 {
   delims = "() \"";
 }
 
 
-// --------------
 Parser::~Parser()
-// --------------
 {}
 
 
 // -- parsing functions ---------------------------------------------
 
 
-// ------------------------------------------
 int Parser::getFileSize(const string& path)
-// ------------------------------------------
-// ------------------------------------------------------------------
 // This function returns the size of the file identified by 'path' in
 // bytes. Thanks to http://www.cplusplus.com/doc/tutorial/files.html
-// ------------------------------------------------------------------
 {
   int result = 0;
   ifstream file;
@@ -83,17 +75,13 @@ int Parser::getFileSize(const string& path)
 }
 
 
-// -----------------------
 void Parser::parseFile(const string& path, Graph* graph)
-// -----------------------
-// ------------------------------------------------------------------
 // Parse the file identified by 'fileName' by calling:
 //  - Parser::parseStateVarDescr()
 //  - Parser::parseStates()
 //  - Parser::parseTransitions()
 // Also, report to 'mediator' on the current progress: number of bytes
 // already read.
-// ------------------------------------------------------------------
 {
   using namespace mcrl2::lts;
 //using namespace mcrl2::core;
@@ -174,11 +162,9 @@ void Parser::parseFile(const string& path, Graph* graph)
 }
 
 
-// ---------------------------
 void Parser::writeFSMFile(
   const string& path,
   Graph* graph)
-// ---------------------------
 {
   size_t begIdx, endIdx;
   string fileName;
@@ -325,14 +311,12 @@ void Parser::writeFSMFile(
 }
 
 
-// -----------------------------------------------------
 void Parser::parseAttrConfig(
   const string& path,
   Graph* graph,
   map< size_t, size_t > &attrIdxFrTo,
   map< size_t, vector< string > > &attrCurDomains,
   map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains)
-// -----------------------------------------------------
 {
   wxXmlDocument doc;
   if (doc.Load(wxString(path.c_str(), wxConvUTF8)) == true)
@@ -371,11 +355,9 @@ void Parser::parseAttrConfig(
 }
 
 
-// --------------------------
 void Parser::writeAttrConfig(
   const string& path,
   Graph* graph)
-// --------------------------
 {
   try
   {
@@ -491,13 +473,11 @@ void Parser::writeAttrConfig(
 }
 
 
-// -----------------------
 void Parser::parseDiagram(
   const string& path,
   Graph* graph,
   Diagram* dgrmOld,
   Diagram* dgrmNew)
-// -----------------------
 {
   wxXmlDocument doc;
 
@@ -535,12 +515,10 @@ void Parser::parseDiagram(
 }
 
 
-// -----------------------
 void Parser::writeDiagram(
   const string& path,
   Graph* graph,
   Diagram* diagram)
-// -----------------------
 {
   try
   {
@@ -878,15 +856,11 @@ void Parser::writeDiagram(
 // -- private utility functions -------------------------------------
 
 
-// -----------------------------
 void Parser::parseStateVarDescr(
   const string& nextLine,
   Graph* graph)
-// -----------------------------
-// ------------------------------------------------------------------
 // This function is used by Parser::parseFsmFile() to parse the state
 // description (first) part of an fsm file.
-// ------------------------------------------------------------------
 {
   try
   {
@@ -1000,15 +974,11 @@ void Parser::parseStateVarDescr(
 }
 
 
-// ------------------------
 void Parser::parseStates(
   const string& nextLine,
   Graph* graph)
-// ------------------------
-// -----------------------------------------------------------------------
 // This function is used by Parser::ParseFsmFile() to parse the states
 // (second) part of an fsm file.
-// -----------------------------------------------------------------------
 {
   vector< double > stateVector;
   try
@@ -1037,15 +1007,11 @@ void Parser::parseStates(
 }
 
 
-// ---------------------------
 void Parser::parseTransitions(
   const string& nextLine,
   Graph* graph)
-// ---------------------------
-// -----------------------------------------------------------------------
 // This function is used by Parser::ParseFsmFile() to parse the
 // transitions (third) part of an fsm file.
-// -----------------------------------------------------------------------
 {
   //vector< string > params;
   try
@@ -1100,14 +1066,12 @@ void Parser::parseTransitions(
 }
 
 
-// ---------------------------------------------------
 void Parser::parseAttrConfig(
   Graph* graph,
   map< size_t , size_t > &attrIdxFrTo,
   map< size_t, vector< string > > &attrCurDomains,
   map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
   wxXmlNode* curNode)
-// ---------------------------------------------------
 {
   if (curNode != NULL && curNode->GetName() != wxEmptyString)
   {
@@ -1174,14 +1138,12 @@ void Parser::parseAttrConfig(
 }
 
 
-// ----------------------------------------------------
 void Parser::parseAttr(
   Graph* graph,
   map< size_t , size_t > &attrIdxFrTo,
   map< size_t, vector< string > > &attrCurDomains,
   map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
   wxXmlNode* curNode)
-// ----------------------------------------------------
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
@@ -1336,13 +1298,11 @@ void Parser::parseAttr(
 }
 
 
-// ------------------------
 void Parser::parseDiagram(
   Graph* graph,
   Diagram* dgrmOld,
   Diagram* dgrmNew,
   wxXmlNode* curNode)
-// ------------------------
 {
   if (curNode != NULL && curNode->GetName() != wxEmptyString)
   {
@@ -1398,13 +1358,11 @@ void Parser::parseDiagram(
 }
 
 
-// ------------------------
 void Parser::parseShape(
   Graph* graph,
   Diagram* /*dgrmOld*/,
   Diagram* dgrmNew,
   wxXmlNode* curNode)
-// ------------------------
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;

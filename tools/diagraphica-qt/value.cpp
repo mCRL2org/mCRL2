@@ -17,46 +17,36 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------
 Value::Value(
   const size_t& idx,
   const string& val)
-// --------------------
 {
   index = idx;
   value = val;
 }
 
 
-// -----------------------------
 Value::Value(const Value& val)
-// -----------------------------
 {
   index = val.index;
   value = val.value;
 }
 
 
-// ------------
 Value::~Value()
-// ------------
 {}
 
 
 // -- set functions -------------------------------------------------
 
 
-// -----------------------------------
 void Value::setIndex(const size_t& idx)
-// -----------------------------------
 {
   index = idx;
 }
 
 
-// --------------------------------------
 void Value::setValue(const string& val)
-// --------------------------------------
 {
   value = val;
 }
@@ -65,17 +55,13 @@ void Value::setValue(const string& val)
 // -- get functions -------------------------------------------------
 
 
-// ------------------
 size_t Value::getIndex()
-// ------------------
 {
   return index;
 }
 
 
-// ---------------------
 string Value::getValue()
-// ---------------------
 {
   return value;
 }

@@ -16,25 +16,19 @@
 // -- contstructors and destructors ---------------------------------
 
 
-// --------------------------------
 Colleague::Colleague(Mediator* m)
-// --------------------------------
 {
   mediator = m;
 }
 
 
-// -----------------------------------------------
 Colleague::Colleague(const Colleague& colleague)
-// -----------------------------------------------
 {
   mediator = colleague.mediator;
 }
 
 
-// --------------------
 Colleague::~Colleague()
-// --------------------
 {
   mediator = NULL;
 }

@@ -25,18 +25,14 @@ int Graph::PROGRESS_INTERV_HINT = 100;
 // -- constructors and destructors ----------------------------------
 
 
-// ------------------------
 Graph::Graph(Mediator* m)
   : Colleague(m)
-// ------------------------
 {
   initRoot();
 }
 
 
-// ------------
 Graph::~Graph()
-// ------------
 {
   deleteClusters();
   deleteBundles();
@@ -49,21 +45,17 @@ Graph::~Graph()
 // -- set functions -------------------------------------------------
 
 
-// ----------------------------------------
 void Graph::setFileName(const string& fn)
-// ----------------------------------------
 {
   fileName = fn;
 }
 
 /*
-// -------------------------------
 void Graph::addAttribute(
     const string &name,
     const string &type,
     const int &idx,
     const vector< string > &vals )
-// -------------------------------
 {
     Attribute* attribute = new Attribute(
         name,
@@ -75,14 +67,12 @@ void Graph::addAttribute(
 }
 
 
-// -----------------------
 void Graph::addAttribute(
     const string &name,
     const string &type,
     const int &idx,
     const double &lwrBnd,
     const double &uprBnd )
-// -----------------------
 {
     Attribute* attribute = new Attribute(
         name,
@@ -95,13 +85,11 @@ void Graph::addAttribute(
 }
 */
 
-// -------------------------------
 void Graph::addAttrDiscr(
   const string& name,
   const string& type,
   const size_t& idx,
   const vector< string > &vals)
-// -------------------------------
 {
   AttrDiscr* attr = new AttrDiscr(
     mediator,
@@ -114,14 +102,12 @@ void Graph::addAttrDiscr(
 }
 
 
-// ----------------------
 void Graph::addAttrConti(
   const string& name,
   const string& type,
   const size_t& idx,
   const double& lwrBnd,
   const double& uprBnd)
-// ----------------------
 {
   AttrConti* attr = new AttrConti(
     mediator,
@@ -135,11 +121,9 @@ void Graph::addAttrConti(
 }
 
 
-// ------------------------
 void Graph::swapAttributes(
   const size_t& idx1,
   const size_t& idx2)
-// ------------------------
 {
   if ((idx1 < attributes.size()) &&
       (idx2 < attributes.size()))
@@ -166,11 +150,9 @@ void Graph::swapAttributes(
 }
 
 
-// -----------------------
 void Graph::moveAttribute(
   const size_t& idxFr,
   const size_t& idxTo)
-// -----------------------
 {
   if (idxFr < attributes.size() &&
       idxTo < attributes.size())
@@ -219,12 +201,10 @@ void Graph::moveAttribute(
 }
 
 
-// -----------------------------------------------------
 void Graph::configAttributes(
   map< size_t, size_t > &idcsFrTo,
   map< size_t, vector< string > > &attrCurDomains,
   map< size_t, map< size_t , size_t  > > &attrOrigToCurDomains)
-// -----------------------------------------------------
 {
   size_t sizeAttrs = attributes.size();
 
@@ -288,9 +268,7 @@ void Graph::configAttributes(
 }
 
 
-// ----------------------------------------------------
 void Graph::duplAttributes(const vector< size_t > &idcs)
-// ----------------------------------------------------
 {
   size_t insIdx = 0;
   vector< Attribute* > newAttrs;
@@ -348,9 +326,7 @@ void Graph::duplAttributes(const vector< size_t > &idcs)
 }
 
 
-// ------------------------------------------
 void Graph::deleteAttribute(const size_t& idx)
-// ------------------------------------------
 {
   Cluster* clst;
   vector< size_t > idcsCurClust;
@@ -404,9 +380,7 @@ void Graph::deleteAttribute(const size_t& idx)
 }
 
 
-// --------------------------------------------
 void Graph::addNode(const vector< double > &tpl)
-// --------------------------------------------
 {
   Node* n = new Node(
     nodes.size(),
@@ -416,12 +390,10 @@ void Graph::addNode(const vector< double > &tpl)
 }
 
 
-// ------------------------
 void Graph::addEdge(
   const string& lbl,
   const size_t& inNodeIdx,
   const size_t& outNodeIdx)
-// ------------------------
 {
   Edge* e = new Edge(
     edges.size(),
@@ -442,13 +414,9 @@ void Graph::addEdge(
 }
 
 
-// --------------------
 void Graph::initGraph()
-// --------------------
-// ------------------------------------------------------------------
 // This function initializes the graph and should be called after all
 // nodes and edges have been added.
-// ------------------------------------------------------------------
 {
   //initRoot();
   updateLeaves();
@@ -459,25 +427,19 @@ void Graph::initGraph()
 // -- get functions -------------------------------------------------
 
 
-// ------------------------
 string Graph::getFileName()
-// ------------------------
 {
   return fileName;
 }
 
 
-// ---------------------------
 size_t Graph::getSizeAttributes()
-// ---------------------------
 {
   return attributes.size();
 }
 
 
-// ---------------------------------------------
 Attribute* Graph::getAttribute(const size_t& idx)
-// ---------------------------------------------
 {
   if (idx < attributes.size())
   {
@@ -490,9 +452,7 @@ Attribute* Graph::getAttribute(const size_t& idx)
 }
 
 
-// -------------------------------------------------
 Attribute* Graph::getAttribute(const string& name)
-// -------------------------------------------------
 {
   Attribute* result = NULL;
 
@@ -508,17 +468,13 @@ Attribute* Graph::getAttribute(const string& name)
 }
 
 
-// ----------------------
 size_t Graph::getSizeNodes()
-// ----------------------
 {
   return nodes.size();
 }
 
 
-// -----------------------------------
 Node* Graph::getNode(const size_t& idx)
-// -----------------------------------
 {
   if (idx < nodes.size())
   {
@@ -531,17 +487,13 @@ Node* Graph::getNode(const size_t& idx)
 }
 
 
-// ----------------------
 size_t Graph::getSizeEdges()
-// ----------------------
 {
   return edges.size();
 }
 
 
-// -----------------------------------
 Edge* Graph::getEdge(const size_t& idx)
-// -----------------------------------
 {
   if (idx < edges.size())
   {
@@ -554,17 +506,13 @@ Edge* Graph::getEdge(const size_t& idx)
 }
 
 
-// ----------------------
 Cluster* Graph::getRoot()
-// ----------------------
 {
   return root;
 }
 
 
-// ----------------------------------------------------
 Cluster* Graph::getCluster(const vector< size_t > coord)
-// ----------------------------------------------------
 {
   Cluster* result = NULL;
 
@@ -597,9 +545,7 @@ Cluster* Graph::getCluster(const vector< size_t > coord)
 }
 
 
-// --------------------------------------
 Cluster* Graph::getLeaf(const size_t& idx)
-// --------------------------------------
 {
   Cluster* result = NULL;
   if (idx < leaves.size())
@@ -610,17 +556,13 @@ Cluster* Graph::getLeaf(const size_t& idx)
 }
 
 
-// -----------------------
 size_t Graph::getSizeLeaves()
-// -----------------------
 {
   return leaves.size();
 }
 
 
-// ---------------------------------------
 Bundle* Graph::getBundle(const size_t& idx)
-// ---------------------------------------
 {
   Bundle* result = NULL;
   if (idx < bundles.size())
@@ -631,9 +573,7 @@ Bundle* Graph::getBundle(const size_t& idx)
 }
 
 
-// ------------------------
 size_t Graph::getSizeBundles()
-// ------------------------
 {
   return bundles.size();
 }
@@ -642,11 +582,9 @@ size_t Graph::getSizeBundles()
 // -- calculation functions -----------------------------------------
 
 
-// ------------------------
 void Graph::calcAttrDistr(
   const size_t& attrIdx,
   vector< size_t > &distr)
-// ------------------------
 {
   // vars
   Attribute* attribute = NULL;
@@ -682,12 +620,10 @@ void Graph::calcAttrDistr(
 }
 
 
-// -----------------------
 void Graph::calcAttrDistr(
   Cluster* clust,
   const size_t& attrIdx,
   vector< size_t > &distr)
-// -----------------------
 {
   // vars
   Attribute* attribute = NULL;
@@ -728,13 +664,11 @@ void Graph::calcAttrDistr(
 }
 
 
-// -----------------------------------
 void Graph::calcAttrCorrl(
   const size_t& attrIdx1,
   const size_t& attrIdx2,
   vector< vector< size_t > > &corrlMap,
   vector< vector< int > > &number)
-// -----------------------------------
 {
   // vars
   Attribute* attr1 = NULL;
@@ -847,14 +781,12 @@ void Graph::calcAttrCorrl(
 }
 
 
-// -----------------------------------
 void Graph::calcAttrCorrl(
   Cluster* clust,
   const size_t& attrIdx1,
   const size_t& attrIdx2,
   vector< vector< size_t > > &corrlMap,
   vector< vector< int > > &number)
-// -----------------------------------
 {
   // vars
   Attribute* attr1 = NULL;
@@ -969,12 +901,10 @@ void Graph::calcAttrCorrl(
 }
 
 
-// --------------------------------
 void Graph::calcAttrCombn(
   const vector< size_t > &attrIndcs,
   vector< vector< size_t > > &combs,
   vector< size_t > &number)
-// --------------------------------
 {
   if (root != NULL)
   {
@@ -983,13 +913,11 @@ void Graph::calcAttrCombn(
 }
 
 
-// --------------------------------
 void Graph::calcAttrCombn(
   Cluster* clust,
   const vector< size_t > &attrIndcs,
   vector< vector< size_t > > &combs,
   vector< size_t > &number)
-// --------------------------------
 {
   size_t summand     = 0;
   size_t key         = 0;
@@ -1086,11 +1014,9 @@ void Graph::calcAttrCombn(
 }
 
 
-// ---------------------------------
 void Graph::calcAttrCombn(
   const vector< size_t > &attrIndcs,
   vector< vector< size_t > > &combs)
-// ---------------------------------
 {
   if (root != NULL)
   {
@@ -1100,12 +1026,10 @@ void Graph::calcAttrCombn(
 
 
 
-// ---------------------------------
 void Graph::calcAttrCombn(
   Cluster* clust,
   const vector< size_t > &attrIndcs,
   vector< vector< size_t > > &combs)
-// ---------------------------------
 {
   size_t summand     = 0;
   size_t key         = 0;
@@ -1195,12 +1119,10 @@ void Graph::calcAttrCombn(
 }
 
 
-// -----------------------------------
 void Graph::calcAttrCombn(
   Cluster* clust,
   const vector< size_t > &attrIndcs,
   vector< vector< Node* > > &combs)
-// -----------------------------------
 {
   size_t summand     = 0;
   size_t key         = 0;
@@ -1281,12 +1203,10 @@ void Graph::calcAttrCombn(
 }
 
 
-// -----------------------------------
 void Graph::calcAttrCombn(
   Cluster* clust,
   const vector< Attribute* > &attrs,
   vector< Cluster* > &combs)
-// -----------------------------------
 {
   size_t summand     = 0;
   size_t key         = 0;
@@ -1368,15 +1288,11 @@ void Graph::calcAttrCombn(
 }
 
 
-// ---------------------------------
 bool Graph::hasMultAttrCombns(
   Cluster* clust,
   const vector< int > &attrIndcs)
-// ---------------------------------
-// ------------------------------------------------------------------
 // This function returns true as soon as more than 1 state is found
 // with different combinations of values for the attributes specified.
-// ------------------------------------------------------------------
 {
   bool result = false;
   size_t  numAttrs  = 0;
@@ -1454,9 +1370,7 @@ bool Graph::hasMultAttrCombns(
 // -- cluster functions ---------------------------------------------
 
 
-// ----------------------------------------------------------
 void Graph::clustNodesOnAttr(const vector< size_t > &attrIdcs)
-// ----------------------------------------------------------
 {
   size_t combinations   = 0;
   size_t progress       = 0;
@@ -1488,9 +1402,7 @@ void Graph::clustNodesOnAttr(const vector< size_t > &attrIdcs)
 }
 
 
-// -------------------------------------------------------
 void Graph::clearSubClusters(const vector< size_t > &coord)
-// -------------------------------------------------------
 {
   Cluster* clst = NULL;
 
@@ -1507,9 +1419,7 @@ void Graph::clearSubClusters(const vector< size_t > &coord)
 }
 
 
-// -------------------------------------------------------
 size_t Graph::sumNodesInCluster(const vector< size_t > &coord)
-// -------------------------------------------------------
 {
   size_t      sum  = 0;
   Cluster* clst = NULL;
@@ -1527,11 +1437,9 @@ size_t Graph::sumNodesInCluster(const vector< size_t > &coord)
 }
 
 
-// ---------------------------
 void Graph::sumNodesInCluster(
   Cluster* clust,
   size_t& total)
-// ---------------------------
 {
   for (size_t i = 0; i < clust->getSizeChildren(); ++i)
   {
@@ -1543,11 +1451,9 @@ void Graph::sumNodesInCluster(
 }
 
 
-// -------------------------------
 void Graph::getDescNodesInCluster(
   const vector< size_t > &coord,
   vector< Node* > &nodes)
-// -------------------------------
 {
   Cluster* clst = NULL;
 
@@ -1565,11 +1471,9 @@ void Graph::getDescNodesInCluster(
 }
 
 
-// -------------------------------
 void Graph::getDescNodesInCluster(
   Cluster* clust,
   vector< Node* > &nodes)
-// -------------------------------
 {
   // call recursively on all child clusters
   {
@@ -1591,9 +1495,7 @@ void Graph::getDescNodesInCluster(
 }
 
 
-// ---------------------------------------------------------
 size_t Graph::calcMaxNumCombns(const vector< size_t > &attrIdcs)
-// ---------------------------------------------------------
 {
   size_t combinations     = 1;
   Attribute* attribute = NULL;
@@ -1617,9 +1519,7 @@ size_t Graph::calcMaxNumCombns(const vector< size_t > &attrIdcs)
 // -- private utility functions -------------------------------------
 
 
-// ---------------------------
 void Graph::deleteAttributes()
-// ---------------------------
 {
   for (size_t i = 0; i < attributes.size(); ++i)
   {
@@ -1630,9 +1530,7 @@ void Graph::deleteAttributes()
 }
 
 
-// ---------------------------
 void Graph::addNode(Node* n)
-// ---------------------------
 {
   nodes.push_back(n);
 
@@ -1641,9 +1539,7 @@ void Graph::addNode(Node* n)
 }
 
 
-// ----------------------
 void Graph::deleteNodes()
-// ----------------------
 {
   for (size_t i = 0; i < nodes.size(); ++i)
   {
@@ -1654,17 +1550,13 @@ void Graph::deleteNodes()
 }
 
 
-// ---------------------------
 void Graph::addEdge(Edge* e)
-// ---------------------------
 {
   edges.push_back(e);
 }
 
 
-// ----------------------
 void Graph::deleteEdges()
-// ----------------------
 {
   for (size_t i = 0; i < edges.size(); ++i)
   {
@@ -1675,9 +1567,7 @@ void Graph::deleteEdges()
 }
 
 
-// -------------------
 void Graph::initRoot()
-// -------------------
 {
   vector< size_t > rootCoord;
   rootCoord.push_back(0);
@@ -1690,12 +1580,10 @@ void Graph::initRoot()
 }
 
 
-// --------------------------
 void Graph::clustNodesOnAttr(
   Cluster* clust,
   vector< size_t > attrIdcs,
   size_t& progress)
-// --------------------------
 {
   if (attrIdcs.size() > 0)
   {
@@ -1726,11 +1614,9 @@ void Graph::clustNodesOnAttr(
 }
 
 
-// ----------------------------
 void Graph::clustClusterOnAttr(
   const vector< size_t > coord,
   const size_t& attrIdx)
-// ----------------------------
 {
   Cluster* clst = NULL;
 
@@ -1749,11 +1635,9 @@ void Graph::clustClusterOnAttr(
 }
 
 
-// ----------------------------
 void Graph::clustClusterOnAttr(
   Cluster* clust,
   const size_t& attrIdx)
-// ----------------------------
 {
   Attribute*         attr;
   Node*              node;
@@ -1824,9 +1708,7 @@ void Graph::clustClusterOnAttr(
 }
 
 
-// -------------------------------------------
 void Graph::clearSubClusters(Cluster* clust)
-// -------------------------------------------
 {
   if (clust != NULL)
   {
@@ -1853,9 +1735,7 @@ void Graph::clearSubClusters(Cluster* clust)
 }
 
 
-// -----------------------
 void Graph::updateLeaves()
-// -----------------------
 {
   // clear existing leaves
   clearLeaves();
@@ -1870,9 +1750,7 @@ void Graph::updateLeaves()
 }
 
 
-// ---------------------------------------
 void Graph::updateLeaves(Cluster* clust)
-// ---------------------------------------
 {
   if (clust->getSizeChildren() == 0)
   {
@@ -1896,9 +1774,7 @@ void Graph::updateLeaves(Cluster* clust)
 }
 
 /*
-// ---------------------------------------------------
 void Graph::updateLeaves( vector< Cluster* > &clusts )
-// ---------------------------------------------------
 {
     if ( clusts.size() > 0 )
     {
@@ -1933,9 +1809,7 @@ void Graph::updateLeaves( vector< Cluster* > &clusts )
 }
 */
 
-// ----------------------
 void Graph::clearLeaves()
-// ----------------------
 {
   for (size_t i = 0; i < leaves.size(); ++i)
   {
@@ -1945,9 +1819,7 @@ void Graph::clearLeaves()
 }
 
 
-// -------------------------
 void Graph::deleteClusters()
-// -------------------------
 {
   // delete all descendants
   clearSubClusters(root);
@@ -1961,9 +1833,7 @@ void Graph::deleteClusters()
 }
 
 
-// ------------------------
 void Graph::printClusters()
-// ------------------------
 {
   // clusters
   vector< Cluster* > c;
@@ -1998,9 +1868,7 @@ void Graph::printClusters()
 }
 
 
-// ----------------------------------------------------
 void Graph::printClusters(vector< Cluster* > &clusts)
-// ----------------------------------------------------
 {
   if (clusts.size() > 0)
   {
@@ -2067,9 +1935,7 @@ void Graph::printClusters(vector< Cluster* > &clusts)
 }
 
 
-// ---------------------------------------
 void Graph::updateBundles(size_t& progress)
-// ---------------------------------------
 {
   vector< vector< Bundle* > > temp;
 
@@ -2196,9 +2062,7 @@ void Graph::updateBundles(size_t& progress)
 }
 
 
-// ------------------------
 void Graph::updateBundles()
-// ------------------------
 {
   vector< vector< Bundle* > > temp;
 
@@ -2265,9 +2129,7 @@ void Graph::updateBundles()
 }
 
 
-// ------------------------
 void Graph::deleteBundles()
-// ------------------------
 {
   for (size_t i = 0; i < bundles.size(); ++i)
   {
@@ -2278,9 +2140,7 @@ void Graph::deleteBundles()
 }
 
 
-// -----------------------
 void Graph::printBundles()
-// -----------------------
 {
   *mediator << "Bundles:\n";
   for (size_t i = 0; i < bundles.size(); ++i)

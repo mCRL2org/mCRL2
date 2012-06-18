@@ -26,7 +26,6 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// ------------------------
 Frame::Frame(
   Mediator* m,
   wxString title)
@@ -35,7 +34,6 @@ Frame::Frame(
     wxID_ANY,
     wxString(title)),
   Colleague(m)
-// ------------------------
 {
   SetAutoLayout(true);
   initFrame();
@@ -47,9 +45,7 @@ Frame::Frame(
 }
 
 
-// ------------
 Frame::~Frame()
-// ------------
 {
 #if wxCHECK_VERSION(2, 9, 0)
   this->PopEventHandler(true);
@@ -60,9 +56,7 @@ Frame::~Frame()
 // -- set functions ---------------------------------------------
 
 
-// ------------------------------------------
 void Frame::setTitleText(const string& msg)
-// ------------------------------------------
 {
   string titleMsg = "";
   titleMsg.append(msg);
@@ -71,40 +65,30 @@ void Frame::setTitleText(const string& msg)
 }
 
 
-// -------------------------------------------
 void Frame::setStatusText(const string& msg)
-// -------------------------------------------
 {
   SetStatusText(wxString(msg.c_str(), wxConvUTF8));
 }
 
 
-// -------------------------------------------
 void Frame::setOutputText(const string& /*msg*/)
-// -------------------------------------------
 {
   //textCtrl->SetValue( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
 
-// -------------------------------------------
 void Frame::appOutputText(const string& /*msg*/)
-// -------------------------------------------
 {
   //textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
-// -------------------------------------------
 void Frame::enableEditMode(const bool& enable)
 {
   modeMenu->Enable(ID_MENU_ITEM_MODE_EDIT, enable);
 }
-// -------------------------------------------
 
 
-// -------------------------------
 void Frame::setFileOptionsActive()
-// -------------------------------
 {
   fileMenu->Enable(wxID_SAVE, true);
   fileMenu->Enable(wxID_SAVEAS, true);
@@ -115,9 +99,7 @@ void Frame::setFileOptionsActive()
 }
 
 
-// ----------------------------
 void Frame::setEditModeSelect()
-// ----------------------------
 {
   if (toolBarEdit != NULL)
   {
@@ -126,9 +108,7 @@ void Frame::setEditModeSelect()
 }
 
 
-// ----------------------------
 void Frame::setEditModeNote()
-// ----------------------------
 {
   if (toolBarEdit != NULL)
   {
@@ -137,9 +117,7 @@ void Frame::setEditModeNote()
 }
 
 
-// -------------------------
 void Frame::setEditModeDOF()
-// -------------------------
 {
   if (toolBarEdit != NULL)
   {
@@ -148,9 +126,7 @@ void Frame::setEditModeDOF()
 }
 
 
-// -------------------------------------------
 void Frame::setDOFColorSelected()
-// -------------------------------------------
 {
   if (listCtrlDOF != NULL)
   {
@@ -159,9 +135,7 @@ void Frame::setDOFColorSelected()
 }
 
 
-// -------------------------------------------
 void Frame::setDOFOpacitySelected()
-// -------------------------------------------
 {
   if (listCtrlDOF != NULL)
   {
@@ -170,9 +144,7 @@ void Frame::setDOFOpacitySelected()
 }
 
 
-// ----------------------------------------
 void Frame::handleNote(const size_t& shapeId, const string& msg)
-// ----------------------------------------
 {
   currentShapeId = shapeId;
   currentShapeNote = msg;
@@ -180,9 +152,7 @@ void Frame::handleNote(const size_t& shapeId, const string& msg)
 }
 
 
-// ----------------------------------------
 void Frame::handleTextSize(const size_t& shapeId, const size_t& textSize)
-// ----------------------------------------
 {
   currentShapeId = shapeId;
   currentTextSize = textSize;
@@ -190,32 +160,26 @@ void Frame::handleTextSize(const size_t& shapeId, const size_t& textSize)
 }
 
 
-// ----------------------------------------
 void Frame::displNumNodes(const size_t& val)
-// ----------------------------------------
 {
   string lbl = Utils::size_tToStr(val);
   lblNumNodes->SetLabel(wxString(lbl.c_str(), wxConvUTF8));
 }
 
 
-// ----------------------------------------
 void Frame::displNumEdges(const size_t& val)
-// ----------------------------------------
 {
   string lbl = Utils::size_tToStr(val);
   lblNumEdges->SetLabel(wxString(lbl.c_str(), wxConvUTF8));
 }
 
 
-// ---------------------------------
 void Frame::displAttrInfo(
   const vector< size_t > &indices,
   const vector< string > &names,
   const vector< string > &types,
   const vector< size_t > &cards,
   const vector< string > &range)
-// ---------------------------------
 {
   // clear attribute list
   listCtrlAttr->DeleteAllItems();
@@ -268,7 +232,6 @@ void Frame::displAttrInfo(
 }
 
 
-// ------------------------------------
 void Frame::displAttrInfo(
   const size_t& selectIdx,
   const vector< size_t > &indices,
@@ -276,7 +239,6 @@ void Frame::displAttrInfo(
   const vector< string > &types,
   const vector< size_t > &cards,
   const vector< string > &range)
-// ------------------------------------
 {
   displAttrInfo(
     indices,
@@ -293,13 +255,11 @@ void Frame::displAttrInfo(
 }
 
 
-// ---------------------------------
 void Frame::displDomainInfo(
   const vector< size_t > &indices,
   const vector< string > &values,
   const vector< size_t > &number,
   const vector< double > &perc)
-// ---------------------------------
 {
   // clear domain list
   listCtrlDomain->DeleteAllItems();
@@ -345,9 +305,7 @@ void Frame::displDomainInfo(
 }
 
 
-// --------------------------
 void Frame::clearDomainInfo()
-// --------------------------
 {
   listCtrlDomain->DeleteAllItems();
 
@@ -357,13 +315,11 @@ void Frame::clearDomainInfo()
 }
 
 
-// ----------------------------------------
 void Frame::displDOFInfo(
   const vector< size_t > &degsOfFrdmIndcs,
   const vector< string > &degsOfFrdm,
   const vector< string > &attrNames,
   const size_t& selIdx)
-// ----------------------------------------
 {
   // make sure frame exists
   if (frameDOF == NULL)
@@ -430,7 +386,6 @@ void Frame::displDOFInfo(
 }
 
 
-// ---------------------------
 void Frame::displShapeMenu(
   const bool& cut,
   const bool& copy,
@@ -442,7 +397,6 @@ void Frame::displShapeMenu(
   const bool& sendBackward,
   const bool& editDOF,
   const int&  checkedItemId)
-// ---------------------------
 {
   wxMenu menu;
   dofMenu = false;
@@ -618,14 +572,12 @@ void Frame::displClusterMenu()
 }
 
 
-// ----------------------------
 void Frame::displDgrmMenu(
   const bool& sendSglToSiml,
   const bool& sendSglToTrace,
   const bool& sendSetToTrace,
   const bool& sendSglToExnr,
   const bool& sentSetToExnr)
-// ----------------------------
 {
   wxMenu menu;
 
@@ -681,9 +633,7 @@ void Frame::displDgrmMenu(
 }
 
 
-// -----------------------
 void Frame::clearDOFInfo()
-// -----------------------
 {
   if (frameDOF != NULL)
   {
@@ -693,9 +643,7 @@ void Frame::clearDOFInfo()
 }
 
 
-// -------------------------
 void Frame::displClustMenu()
-// -------------------------
 {
   wxMenu menu;
 
@@ -730,11 +678,9 @@ void Frame::displClustMenu()
 }
 
 
-// ---------------------------------
 void Frame::displAttrInfoClust(
   const vector< size_t > &indices,
   const vector< string > &names)
-// ---------------------------------
 {
   if (frameClust != NULL)
   {
@@ -763,13 +709,11 @@ void Frame::displAttrInfoClust(
 }
 
 
-// ---------------------------
 void Frame::displAttrInfoPart(
   string attrName,
   size_t minParts,
   size_t maxParts,
   size_t curParts)
-// ---------------------------
 {
   if (framePartition != NULL)
   {
@@ -783,9 +727,7 @@ void Frame::displAttrInfoPart(
 }
 
 
-// ---------------------------
 void Frame::displSimClearDlg()
-// ---------------------------
 {
   wxString msg(wxT("Are you sure you want to clear the simulator?"));
   wxMessageDialog dialog(
@@ -804,9 +746,7 @@ void Frame::displSimClearDlg()
 }
 
 
-// ----------------------------
 void Frame::displExnrClearDlg()
-// ----------------------------
 {
   wxString msg(wxT("Are you sure you want to clear the examiner history?"));
   wxMessageDialog dialog(
@@ -825,9 +765,7 @@ void Frame::displExnrClearDlg()
 }
 
 
-// ------------------------------------------------
 void Frame::displExnrFrameMenu(const bool& clear)
-// ------------------------------------------------
 {
   wxMenu* menu = new wxMenu();
 
@@ -848,9 +786,7 @@ void Frame::displExnrFrameMenu(const bool& clear)
 }
 
 
-// ------------------------------------------
 void Frame::selectAttribute(const size_t& idx)
-// ------------------------------------------
 {
   if (idx != NON_EXISTING && idx < ((size_t) listCtrlAttr->GetItemCount()))
   {
@@ -870,9 +806,7 @@ void Frame::selectAttribute(const size_t& idx)
 }
 
 
-// ------------------------------------------
 void Frame::selectDomainVal(const size_t& idx)
-// ------------------------------------------
 {
   if (idx != NON_EXISTING && idx < ((size_t) listCtrlDomain->GetItemCount()))
   {
@@ -890,14 +824,12 @@ void Frame::selectDomainVal(const size_t& idx)
 }
 
 
-// ----------------------------
 void Frame::handleDragDrop(
   const int& srcId,
   const int& tgtId,
   const int& tgtX,
   const int& tgtY,
   const vector< int > &data)
-// ----------------------------
 {
   if (srcId == ID_LIST_CTRL_ATTR &&
       tgtId == ID_LIST_CTRL_ATTR)
@@ -960,9 +892,7 @@ void Frame::handleDragDrop(
 }
 
 
-// ---------------------------
 void Frame::closePopupFrames()
-// ---------------------------
 {
   if (frameSettings != NULL)
   {
@@ -996,9 +926,7 @@ void Frame::closePopupFrames()
 }
 
 
-// ------------------------------------------
 void Frame::handleCloseFrame(PopupFrame* f)
-// ------------------------------------------
 {
   if (f == frameSettings)
   {
@@ -1049,81 +977,61 @@ void Frame::handleCloseFrame(PopupFrame* f)
 // -- get functions -------------------------------------------------
 
 
-// -----------------------------
 GLCanvas* Frame::getCanvasArcD()
-// -----------------------------
 {
   return canvasOne;
 }
 
 
-// -----------------------------
 GLCanvas* Frame::getCanvasSiml()
-// -----------------------------
 {
   return canvasTwo;
 }
 
 
-// ------------------------------
 GLCanvas* Frame::getCanvasTrace()
-// ------------------------------
 {
   return canvasTwo;
 }
 
 
-// -----------------------------
 GLCanvas* Frame::getCanvasExnr()
-// -----------------------------
 {
   return canvasThree;
 }
 
 
-// -----------------------------
 GLCanvas* Frame::getCanvasEdit()
-// -----------------------------
 {
   return canvasOne;
 }
 
 
-// ------------------------------
 GLCanvas* Frame::getCanvasDistr()
-// ------------------------------
 {
   return canvasPlot;
 }
 
 
-// ------------------------------
 GLCanvas* Frame::getCanvasCorrl()
-// ------------------------------
 {
   return canvasPlot;
 }
 
 
-// ------------------------------
 GLCanvas* Frame::getCanvasCombn()
-// ------------------------------
 {
   return canvasPlot;
 }
 
 
-// -------------------------------
 GLCanvas* Frame::getCanvasColDOF()
-// -------------------------------
 {
   return canvasColDOF;
 }
 
 
-// ------------------------------
 GLCanvas* Frame::getCanvasOpaDOF()
-// ------------------------------
 {
   return canvasOpaDOF;
 }
@@ -1132,9 +1040,7 @@ GLCanvas* Frame::getCanvasOpaDOF()
 // -- clear functions -----------------------------------------------
 
 
-// ---------------------
 void Frame::clearOuput()
-// ---------------------
 {
   lblNumNodes->SetLabel(wxT(""));
   lblNumEdges->SetLabel(wxT(""));
@@ -1154,9 +1060,7 @@ void Frame::clearOuput()
 // -- overloaded operators ------------------------------------------
 
 
-// ----------------------------------------
 void Frame::operator<<(const string& msg)
-// ----------------------------------------
 {
   appOutputText(msg);
 }
@@ -1165,9 +1069,7 @@ void Frame::operator<<(const string& msg)
 // -- GUI initialization --------------------------------------------
 
 
-// --------------------
 void Frame::initFrame()
-// --------------------
 {
   wxSize maximum_size = wxGetClientDisplayRect().GetSize();
   int hCur;
@@ -1222,9 +1124,7 @@ void Frame::initFrame()
 }
 
 
-// -------------------
 void Frame::initIcon()
-// -------------------
 {
   try
   {
@@ -1238,9 +1138,7 @@ void Frame::initIcon()
 }
 
 
-// ----------------------
 void Frame::initMenuBar()
-// ----------------------
 {
   // menu bar
   menuBar = new wxMenuBar();
@@ -1462,9 +1360,7 @@ void Frame::initMenuBar()
 }
 
 
-// ----------------------------
 void Frame::initSplitterFrame()
-// ----------------------------
 {
   // init splitter window
   splitterFrame = new wxSplitterWindow(
@@ -1488,9 +1384,7 @@ void Frame::initSplitterFrame()
 }
 
 
-// --------------------------
 void Frame::initSplitterLft()
-// --------------------------
 {
   // init splitter window
   splitterLft = new wxSplitterWindow(
@@ -1510,9 +1404,7 @@ void Frame::initSplitterLft()
 }
 
 
-// -----------------------------
 void Frame::initSplitterTopLft()
-// -----------------------------
 {
   // init splitter window
   splitterTopLft = new wxSplitterWindow(
@@ -1532,9 +1424,7 @@ void Frame::initSplitterTopLft()
 }
 
 
-// -----------------------------
 void Frame::initPanelTopTopLft()
-// -----------------------------
 {
   // init panel
   sizerTopTopLft = new wxBoxSizer(wxVERTICAL);
@@ -1557,9 +1447,7 @@ void Frame::initPanelTopTopLft()
 }
 
 
-// ------------------------------
 void Frame::initLabelsGraphInfo()
-// ------------------------------
 {
   // init static box
   wxStaticBoxSizer* box = new wxStaticBoxSizer(
@@ -1641,9 +1529,7 @@ void Frame::initLabelsGraphInfo()
 }
 
 
-// ---------------------------
 void Frame::initListCtrlAttr()
-// ---------------------------
 {
   // label
   wxStaticText* lbl = new wxStaticText(
@@ -1717,9 +1603,7 @@ void Frame::initListCtrlAttr()
 }
 
 
-// --------------------------
 void Frame::initButtonsAttr()
-// --------------------------
 {
   /*
   // init static box
@@ -1769,9 +1653,7 @@ void Frame::initButtonsAttr()
 }
 
 
-// -----------------------------
 void Frame::initPanelBotTopLft()
-// -----------------------------
 {
   // init panel
   sizerBotTopLft = new wxBoxSizer(wxVERTICAL);
@@ -1792,9 +1674,7 @@ void Frame::initPanelBotTopLft()
 }
 
 
-// -----------------------------
 void Frame::initListCtrlDomain()
-// -----------------------------
 {
   // label
   wxStaticText* lbl = new wxStaticText(
@@ -1860,9 +1740,7 @@ void Frame::initListCtrlDomain()
 }
 
 
-// --------------------------
 void Frame::initPanelBotLft()
-// --------------------------
 {
   // init panel
   sizerBotLft = new wxBoxSizer(wxHORIZONTAL);
@@ -1881,9 +1759,7 @@ void Frame::initPanelBotLft()
 }
 
 
-// --------------------------
 void Frame::initCanvasThree()
-// --------------------------
 {
   canvasThree = new GLCanvas(
     mediator,
@@ -1897,9 +1773,7 @@ void Frame::initCanvasThree()
 }
 
 
-// --------------------------
 void Frame::initSplitterRgt()
-// --------------------------
 {
   // init splitter window
   splitterRgt = new wxSplitterWindow(
@@ -1919,9 +1793,7 @@ void Frame::initSplitterRgt()
 }
 
 
-// --------------------------
 void Frame::initPanelTopRgt()
-// --------------------------
 {
   // init panel
   sizerTopRgt = new wxBoxSizer(wxHORIZONTAL);
@@ -1946,9 +1818,7 @@ void Frame::initPanelTopRgt()
 }
 
 
-// ------------------------
 void Frame::initCanvasOne()
-// ------------------------
 {
   canvasOne = new GLCanvas(
     mediator,
@@ -1964,9 +1834,7 @@ void Frame::initCanvasOne()
 }
 
 
-// --------------------------
 void Frame::initToolbarEdit()
-// --------------------------
 {
   // init toolbar
   toolBarEdit = new wxToolBar(
@@ -2032,9 +1900,7 @@ void Frame::initToolbarEdit()
 }
 
 
-// -----------------------------
 void Frame::initPanelBotRgt()
-// -----------------------------
 {
   // init panel
   sizerBotRgt = new wxBoxSizer(wxHORIZONTAL);
@@ -2055,9 +1921,7 @@ void Frame::initPanelBotRgt()
 }
 
 
-// ------------------------
 void Frame::initCanvasTwo()
-// ------------------------
 {
   canvasTwo = new GLCanvas(
     mediator,
@@ -2073,9 +1937,7 @@ void Frame::initCanvasTwo()
     10);
 }
 
-// -----------------------
 void Frame::initTextCtrl()
-// -----------------------
 {
   textCtrl = new wxTextCtrl(
     panelRgtBotRgt,
@@ -2096,9 +1958,7 @@ void Frame::initTextCtrl()
 }
 
 /* commented dead code (jwulp)
-// ----------------------------
 void Frame::initAboutFrameOld()
-// ----------------------------
 {
     frameAbout = new wxFrame(
         this,
@@ -2192,9 +2052,7 @@ void Frame::initAboutFrameOld()
 }
 */
 
-// ----------------------------
 void Frame::initFrameSettings()
-// ----------------------------
 {
   // init frame
   frameSettings = new SettingsFrame(
@@ -2210,13 +2068,11 @@ void Frame::initFrameSettings()
 }
 
 
-// ----------------------------
 void Frame::initFramePartition(
   wxString attrName,
   size_t minParts,
   size_t maxParts,
   size_t curParts)
-// ----------------------------
 {
   // init frame
   framePartition = new PartitionFrame(
@@ -2236,9 +2092,7 @@ void Frame::initFramePartition(
 }
 
 
-// -----------------------
 void Frame::initFrameDOF()
-// -----------------------
 {
   // init frame
   sizerFrameDOF = new wxBoxSizer(wxHORIZONTAL);
@@ -2264,9 +2118,7 @@ void Frame::initFrameDOF()
 }
 
 
-// -----------------------
 void Frame::initFrameNote()
-// -----------------------
 {
   if (frameNote == NULL)
   {
@@ -2311,9 +2163,7 @@ void Frame::initFrameNote()
 }
 
 
-// -----------------------
 void Frame::initFrameTextSize()
-// -----------------------
 {
   if (frameTextSize == NULL)
   {
@@ -2363,9 +2213,7 @@ void Frame::initFrameTextSize()
 }
 
 
-// -----------------------
 void Frame::initPanelDOF()
-// -----------------------
 {
   // init panel
   sizerDOF = new wxBoxSizer(wxVERTICAL);
@@ -2393,9 +2241,7 @@ void Frame::initPanelDOF()
 }
 
 
-// -----------------------
 void Frame::initPanelNote()
-// -----------------------
 {
   // init panel
   sizerNote = new wxBoxSizer(wxHORIZONTAL);
@@ -2424,9 +2270,7 @@ void Frame::initPanelNote()
 }
 
 
-// --------------------------
 void Frame::initListCtrlDOF()
-// --------------------------
 {
   wxSize* size = new wxSize(180,200);
   // init list
@@ -2479,9 +2323,7 @@ void Frame::initListCtrlDOF()
 }
 
 
-// ---------------------------
 void Frame::initCanvasColDOF()
-// ---------------------------
 {
   // label
   wxStaticText* lbl = new wxStaticText(
@@ -2516,9 +2358,7 @@ void Frame::initCanvasColDOF()
 }
 
 
-// ---------------------------
 void Frame::initCanvasOpaDOF()
-// ---------------------------
 {
   // label
   wxStaticText* lbl = new wxStaticText(
@@ -2553,9 +2393,7 @@ void Frame::initCanvasOpaDOF()
 }
 
 
-// ------------------------
 void Frame::initFramePlot()
-// ------------------------
 {
   // init frame
   sizerFramePlot = new wxBoxSizer(wxVERTICAL);
@@ -2579,9 +2417,7 @@ void Frame::initFramePlot()
 }
 
 
-// ------------------------
 void Frame::initPanelPlot()
-// ------------------------
 {
   // init panel
   sizerPlot = new wxBoxSizer(wxVERTICAL);
@@ -2605,9 +2441,7 @@ void Frame::initPanelPlot()
 }
 
 
-// -------------------------
 void Frame::initCanvasPlot()
-// -------------------------
 {
   canvasPlot = new GLCanvas(
     mediator,
@@ -2621,9 +2455,7 @@ void Frame::initCanvasPlot()
 }
 
 
-// -------------------------
 void Frame::initFrameClust()
-// -------------------------
 {
   // init frame
   sizerFrameClust = new wxBoxSizer(wxVERTICAL);
@@ -2647,9 +2479,7 @@ void Frame::initFrameClust()
 }
 
 
-// -------------------------
 void Frame::initPanelClust()
-// -------------------------
 {
   // init panel
   sizerClust = new wxBoxSizer(wxVERTICAL);
@@ -2674,9 +2504,7 @@ void Frame::initPanelClust()
 }
 
 
-// ----------------------------
 void Frame::initListCtrlClust()
-// ----------------------------
 {
   // init list
   listCtrlClust = new wxListCtrl(
@@ -2714,9 +2542,7 @@ void Frame::initListCtrlClust()
 }
 
 
-// ---------------------------
 void Frame::initButtonsClust()
-// ---------------------------
 {
   wxButton* buttonOKClust = new wxButton(
     panelClust,
@@ -2734,9 +2560,7 @@ void Frame::initButtonsClust()
 // -- event handlers --------------------------------------------
 
 
-// ---------------------------------------
 void Frame::onMenuBar(wxCommandEvent& e)
-// ---------------------------------------
 {
   closePopupFrames();
 
@@ -3195,9 +3019,7 @@ void Frame::onMenuBar(wxCommandEvent& e)
 }
 
 
-// -------------------------------------------
 void Frame::onListCtrlSelect(wxListEvent& e)
-// -------------------------------------------
 {
   if (e.GetId() == ID_LIST_CTRL_ATTR)
   {
@@ -3456,9 +3278,7 @@ void Frame::onListCtrlSelect(wxListEvent& e)
 }
 
 
-// ----------------------------------------------
 void Frame::onListCtrlBeginDrag(wxListEvent& e)
-// ----------------------------------------------
 {
   if (e.GetId() == ID_LIST_CTRL_ATTR)
   {
@@ -3510,9 +3330,7 @@ void Frame::onListCtrlBeginDrag(wxListEvent& e)
 }
 
 
-// ---------------------------------------------
 void Frame::onListCtrlRgtClick(wxListEvent& e)
-// ---------------------------------------------
 {
   if (e.GetId() == ID_LIST_CTRL_ATTR)
   {
@@ -3781,9 +3599,7 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
 }
 
 
-// -----------------------------------------
 void Frame::onPopupMenu(wxCommandEvent& e)
-// -----------------------------------------
 {
   if (e.GetId() == ID_MENU_ITEM_ATTR_DISTR_PLOT)
   {
@@ -4376,9 +4192,7 @@ void Frame::onPopupMenu(wxCommandEvent& e)
 }
 
 
-// -----------------------------------------
 void Frame::onClusterMenu(wxCommandEvent& e)
-// -----------------------------------------
 {
   if (clustMenu != NULL)
   {
@@ -4427,9 +4241,7 @@ void Frame::onClusterMenu(wxCommandEvent& e)
 }
 
 
-// ------------------------------------
 void Frame::onTool(wxCommandEvent& e)
-// ------------------------------------
 {
   if (e.GetId() != ID_TOOL_DOF &&
       e.GetId() != ID_TOOL_FILL_COL &&
@@ -4495,9 +4307,7 @@ void Frame::onTool(wxCommandEvent& e)
 }
 
 
-// --------------------------------------
 void Frame::onButton(wxCommandEvent& e)
-// --------------------------------------
 {
   if (e.GetId() == ID_BUTTON_CLUST_ATTR)
   {
@@ -4690,9 +4500,7 @@ void Frame::onButton(wxCommandEvent& e)
 }
 
 /*
-// ----------------------------------------
 void Frame::onRadioBox( wxCommandEvent &e )
-// ----------------------------------------
 {
     if ( e.GetId() == ID_RADIO_BOX_TEXT_DOF )
     {
@@ -4726,9 +4534,7 @@ void Frame::onRadioBox( wxCommandEvent &e )
 */
 
 
-// --------------------------------------
 void Frame::onSplitterDoubleClick(wxSplitterEvent& e)
-// --------------------------------------
 {
   if (e.GetId() == ID_SPLITTER_FRAME)
   {

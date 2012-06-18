@@ -8,12 +8,10 @@
 //
 /// \file ./colleague.h
 
-// ------------------------------------------------------------------
 // This is the BASE CLASS from which all colleagues inherit and
 // provides access to a single Mediator. This allows for the
 // implementation of a MEDIATOR design pattern where an instance of
 // Mediator serves as the mediator or controller.
-// ------------------------------------------------------------------
 
 #ifndef COLLEAGUE_H
 #define COLLEAGUE_H

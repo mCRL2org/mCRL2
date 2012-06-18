@@ -17,13 +17,11 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// ----------------------------
 CorrlPlot::CorrlPlot(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ----------------------------
 {
   minRadHintPx =  5;
   maxRadHintPx = 25;
@@ -35,9 +33,7 @@ CorrlPlot::CorrlPlot(
 }
 
 
-// --------------------
 CorrlPlot::~CorrlPlot()
-// --------------------
 {
   clearValues();
   diagram = NULL;
@@ -47,13 +43,11 @@ CorrlPlot::~CorrlPlot()
 // -- set data functions --------------------------------------------
 
 
-// -------------------------------------
 void CorrlPlot::setValues(
   const size_t& idx1,
   const size_t& idx2,
   const vector< vector< size_t > > &mapXY,
   const vector< vector< int > > &num)
-// -------------------------------------
 {
   clearValues();
   attrIdx1 = idx1;
@@ -66,9 +60,7 @@ void CorrlPlot::setValues(
 }
 
 
-// --------------------------
 void CorrlPlot::clearValues()
-// --------------------------
 {
   attrIdx1  = NON_EXISTING;
   attrIdx2  = NON_EXISTING;
@@ -83,9 +75,7 @@ void CorrlPlot::clearValues()
 }
 
 
-// ----------------------------------------
 void CorrlPlot::setDiagram(Diagram* dgrm)
-// ----------------------------------------
 {
   diagram = dgrm;
 }
@@ -94,9 +84,7 @@ void CorrlPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-// --------------------------------------------------
 void CorrlPlot::visualize(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -147,12 +135,10 @@ void CorrlPlot::visualize(const bool& inSelectMode)
 }
 
 
-// --------------------------
 void CorrlPlot::drawAxes(
   const bool& inSelectMode,
   const string& /*xLbl*/,
   const string& /*yLbl*/)
-// --------------------------
 {
   // get size of sides
   double w, h;
@@ -186,9 +172,7 @@ void CorrlPlot::drawAxes(
 }
 
 
-// ---------------------------------------------------
 void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
-// ---------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -216,9 +200,7 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
 }
 
 
-// -------------------------------------------------
 void CorrlPlot::drawPlot(const bool& inSelectMode)
-// -------------------------------------------------
 {
   // selection mode
   if (inSelectMode == true)
@@ -282,9 +264,7 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void CorrlPlot::drawDiagram(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   double pix = canvas->getPixelSize();
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
@@ -325,11 +305,9 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-// ------------------------------------
 void CorrlPlot::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -340,15 +318,11 @@ void CorrlPlot::handleMouseMotionEvent(
 }
 
 /*
-// ------------------------------------
 void CorrlPlot::handleMouseEnterEvent()
-// ------------------------------------
 {}
 */
 /*
-// ------------------------------------
 void CorrlPlot::handleMouseLeaveEvent()
-// ------------------------------------
 {}
 */
 
@@ -356,9 +330,7 @@ void CorrlPlot::handleMouseLeaveEvent()
 // -- utility data functions ----------------------------------------
 
 
-// -------------------------
 void CorrlPlot::initLabels()
-// -------------------------
 {
   if (attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING)
   {
@@ -373,9 +345,7 @@ void CorrlPlot::initLabels()
 }
 
 
-// ----------------------------
 void CorrlPlot::calcMaxNumber()
-// ----------------------------
 {
   // init max number & totals
   sumMaxNumX = 0;
@@ -444,17 +414,13 @@ void CorrlPlot::calcMaxNumber()
 
 // ***
 /*
-// --------------------
 void CorrlPlot::clear()
-// --------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// -------------------------------
 void CorrlPlot::setScalingTransf()
-// -------------------------------
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -467,11 +433,9 @@ void CorrlPlot::setScalingTransf()
 }
 
 
-// --------------------------
 void CorrlPlot::displTooltip(
   const int& xIdx,
   const int& yIdx)
-// --------------------------
 {
   msgDgrm.clear();
   /*
@@ -534,9 +498,7 @@ void CorrlPlot::displTooltip(
 }
 
 
-// ----------------------------
 void CorrlPlot::calcPositions()
-// ----------------------------
 {
   // update flag
   geomChanged = false;
@@ -637,9 +599,7 @@ void CorrlPlot::calcPositions()
 // -- utility data functions ----------------------------------------
 
 
-// -----------------------------
 void CorrlPlot::clearPositions()
-// -----------------------------
 {
   positions.clear();
   radii.clear();
@@ -649,11 +609,9 @@ void CorrlPlot::clearPositions()
 // -- hit detection -------------------------------------------------
 
 
-// -------------------------
 void CorrlPlot::processHits(
   GLint hits,
   GLuint buffer[])
-// -------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;

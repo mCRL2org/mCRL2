@@ -16,7 +16,6 @@
 // -- constructors and desctructor ------------------------------
 
 
-// ----------------------------
 PartitionFrame::PartitionFrame(
   Mediator* m,
   wxWindow* parent,
@@ -35,7 +34,6 @@ PartitionFrame::PartitionFrame(
     title,
     position,
     size)
-// ----------------------------
 {
   SetMinSize(size);
   SetMaxSize(size);
@@ -44,9 +42,7 @@ PartitionFrame::PartitionFrame(
 }
 
 
-// ------------------------------
 PartitionFrame::~PartitionFrame()
-// ------------------------------
 {}
 
 
@@ -56,9 +52,7 @@ PartitionFrame::~PartitionFrame()
 // -- event handlers --------------------------------------------
 
 
-// -----------------------------------------------
 void PartitionFrame::onButton(wxCommandEvent& e)
-// -----------------------------------------------
 {
   if (e.GetId() == ID_BUTTON_CANCEL)
   {
@@ -88,27 +82,21 @@ void PartitionFrame::onButton(wxCommandEvent& e)
 }
 
 
-// -------------------------------------------------
 void PartitionFrame::onComboBox(wxCommandEvent& e)
-// -------------------------------------------------
 {
   if (e.GetId() == ID_COMBO_BOX_METHOD)
     {}
 }
 
 
-// ----------------------------------------------
 void PartitionFrame::onSpinCtrl(wxSpinEvent& e)
-// ----------------------------------------------
 {
   if (e.GetId() == ID_SPIN_CTRL_NUMBER)
     {}
 }
 
 
-// -----------------------------------------------------
 void PartitionFrame::onSpinCtrlText(wxCommandEvent& e)
-// -----------------------------------------------------
 {
   if (e.GetId() == ID_SPIN_CTRL_NUMBER)
     {}
@@ -121,13 +109,11 @@ void PartitionFrame::onSpinCtrlText(wxCommandEvent& e)
 // -- GUI initialization ----------------------------------------
 
 
-// ----------------------------
 void PartitionFrame::initFrame(
   wxString attrName,
   size_t minParts,
   size_t maxParts,
   size_t curParts)
-// ----------------------------
 {
   sizerFrame = new wxBoxSizer(wxVERTICAL);
   this->SetSizer(sizerFrame);
@@ -151,13 +137,11 @@ void PartitionFrame::initFrame(
 }
 
 
-// ------------------------------
 void PartitionFrame::initWidgets(
   wxString attrName,
   size_t minParts,
   size_t maxParts,
   size_t curParts)
-// ------------------------------
 {
   // init static box
   wxStaticBoxSizer* box = new wxStaticBoxSizer(
@@ -230,9 +214,7 @@ void PartitionFrame::initWidgets(
 }
 
 
-// ------------------------------
 void PartitionFrame::initCanvas()
-// ------------------------------
 {
   canvas = new GLCanvas(mediator, panelFrame, wxID_ANY);
   canvas->SetMinSize(wxSize(150, 100));
@@ -240,9 +222,7 @@ void PartitionFrame::initCanvas()
 }
 
 
-// -------------------------------
 void PartitionFrame::initButtons()
-// -------------------------------
 {
   // init grid sizer
   wxFlexGridSizer* lblSizer = new wxFlexGridSizer(

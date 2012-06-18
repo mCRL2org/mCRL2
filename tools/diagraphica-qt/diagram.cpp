@@ -17,11 +17,9 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// -----------------
 Diagram::Diagram(
   Mediator* m)
   : Colleague(m)
-// -----------------
 {
   showGrid = true;
   snapGrid = true;
@@ -32,9 +30,7 @@ Diagram::Diagram(
 }
 
 
-// ----------------
 Diagram::~Diagram()
-// ----------------
 {
   // composition
   for (size_t i = 0; i < shapes.size(); ++i)
@@ -49,17 +45,13 @@ Diagram::~Diagram()
 // -- set functions -------------------------------------------------
 
 
-// -------------------------------
 void Diagram::addShape(Shape* s)
-// -------------------------------
 {
   shapes.push_back(s);
 }
 
 
-// ---------------------------------------------
 void Diagram::moveShapeToFront(const size_t& idx)
-// ---------------------------------------------
 {
   if (idx < shapes.size())
   {
@@ -76,9 +68,7 @@ void Diagram::moveShapeToFront(const size_t& idx)
 }
 
 
-// --------------------------------------------
 void Diagram::moveShapeToBack(const size_t& idx)
-// --------------------------------------------
 {
   if (idx < shapes.size())
   {
@@ -95,9 +85,7 @@ void Diagram::moveShapeToBack(const size_t& idx)
 }
 
 
-// ---------------------------------------------
 void Diagram::moveShapeForward(const size_t& idx)
-// ---------------------------------------------
 {
   if (0 < idx && idx < shapes.size())
   {
@@ -114,9 +102,7 @@ void Diagram::moveShapeForward(const size_t& idx)
 }
 
 
-// ----------------------------------------------
 void Diagram::moveShapeBackward(const size_t& idx)
-// ----------------------------------------------
 {
   if (idx < shapes.size()-1)
   {
@@ -133,17 +119,13 @@ void Diagram::moveShapeBackward(const size_t& idx)
 }
 
 
-// ------------------------------------------
 void Diagram::setShowGrid(const bool& flag)
-// ------------------------------------------
 {
   showGrid = flag;
 }
 
 
-// ------------------------------------------
 void Diagram::setSnapGrid(const bool& flag)
-// ------------------------------------------
 {
   snapGrid = flag;
 }
@@ -152,17 +134,13 @@ void Diagram::setSnapGrid(const bool& flag)
 // -- get functions -------------------------------------------------
 
 
-// -------------------------
 size_t Diagram::getSizeShapes()
-// -------------------------
 {
   return shapes.size();
 }
 
 
-// ---------------------------------------
 Shape* Diagram::getShape(const size_t& idx)
-// ---------------------------------------
 {
   Shape* result = NULL;
   if (idx < shapes.size())
@@ -173,17 +151,13 @@ Shape* Diagram::getShape(const size_t& idx)
 }
 
 
-// ------------------------
 bool Diagram::getSnapGrid()
-// ------------------------
 {
   return snapGrid;
 }
 
 
-// ------------------------------------------------
 double Diagram::getGridInterval(GLCanvas* canvas)
-// ------------------------------------------------
 {
   double numIntervals = GRID_NUM_INTERV_HINT;
   double sizeInterval;
@@ -198,9 +172,7 @@ double Diagram::getGridInterval(GLCanvas* canvas)
 }
 
 
-// -------------------------------
 double Diagram::getAngleInterval()
-// -------------------------------
 {
   double numIntervals = ANGL_NUM_INTERV_HINT;
   double sizeInterval = 360.0/(double)numIntervals;
@@ -208,9 +180,7 @@ double Diagram::getAngleInterval()
   return sizeInterval;
 }
 
-// -------------------------------
 void Diagram::getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom)
-// -------------------------------
 {
   xLeft = gridXLeft;
   xRight = gridXRight;
@@ -222,9 +192,7 @@ void Diagram::getGridCoordinates(double& xLeft, double& xRight, double& yTop, do
 // -- clear functions -----------------------------------------------
 
 
-// ----------------------------------------
 void Diagram::deleteShape(const size_t& idx)
-// ----------------------------------------
 {
   if (idx < shapes.size())
   {
@@ -245,14 +213,10 @@ void Diagram::deleteShape(const size_t& idx)
 // -- vis functions -------------------------------------------------
 
 
-// ------------------------------------------------
 void Diagram::visualize(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// ------------------------------------------------
-// ------------------------------------------------------------------
 // Used by diagram editor.
-// ------------------------------------------------------------------
 {
   drawBorder(inSelectMode, canvas);
   if (showGrid == true)
@@ -263,16 +227,12 @@ void Diagram::visualize(
 }
 
 
-// ----------------------------------
 void Diagram::visualize(
   const bool& inSelectMode,
   GLCanvas* canvas,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs)
-// ----------------------------------
-// ------------------------------------------------------------------
 // Used by visualizers.
-// ------------------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -289,17 +249,13 @@ void Diagram::visualize(
 }
 
 
-// ----------------------------------
 void Diagram::visualize(
   const bool& inSelectMode,
   GLCanvas* canvas,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs,
   const double& pix)
-// ----------------------------------
-// ------------------------------------------------------------------
 // Used by visualizers.
-// ------------------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -316,17 +272,13 @@ void Diagram::visualize(
 }
 
 
-// ----------------------------------
 void Diagram::visualize(
   const bool& inSelectMode,
   GLCanvas* canvas,
   const double& opacity,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs)
-// ----------------------------------
-// ------------------------------------------------------------------
 // Used by visualizers.
-// ------------------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -346,20 +298,16 @@ void Diagram::visualize(
 // -- private utility functions -------------------------------------
 
 
-// -----------------------------
 void Diagram::initGridSettings()
-// -----------------------------
 {
   showGrid   = true;
   snapGrid   = false;
 }
 
 
-// --------------------------
 void Diagram::drawAxes(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// --------------------------
 {
   if (inSelectMode != true)
   {
@@ -376,11 +324,9 @@ void Diagram::drawAxes(
 }
 
 
-// --------------------------
 void Diagram::drawBorder(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// --------------------------
 {
   if (inSelectMode == true)
   {
@@ -423,11 +369,9 @@ void Diagram::drawBorder(
 }
 
 
-// ---------------------------
 void Diagram::drawBorderFlush(
   const bool& inSelectMode,
   GLCanvas* /*canvas*/)
-// ---------------------------
 {
   if (inSelectMode == true)
   {
@@ -445,12 +389,10 @@ void Diagram::drawBorderFlush(
 }
 
 
-// ---------------------------
 void Diagram::drawBorderFlush(
   const bool& inSelectMode,
   GLCanvas* /*canvas*/,
   const double& opacity)
-// ---------------------------
 {
   if (inSelectMode == true)
   {
@@ -478,11 +420,9 @@ void Diagram::drawBorderFlush(
 }
 
 
-// --------------------------
 void Diagram::drawGrid(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// --------------------------
 {
   if (inSelectMode != true)
   {
@@ -530,11 +470,9 @@ void Diagram::drawGrid(
 }
 
 
-// --------------------------
 void Diagram::drawShapes(
   const bool& inSelectMode,
   GLCanvas* canvas)
-// --------------------------
 {
 
   if (inSelectMode == true)

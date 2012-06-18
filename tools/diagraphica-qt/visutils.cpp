@@ -25,9 +25,7 @@ float   VisUtils::cushDepth =  1.0f;
 // -- clear canvas --------------------------------------------------
 
 
-// ----------------------------------------
 void VisUtils::clear(const ColorRGB& col)
-// ----------------------------------------
 {
   glClearColor(
     col.r,
@@ -44,9 +42,7 @@ void VisUtils::clear(const ColorRGB& col)
 // -- color ---------------------------------------------------------
 
 
-// ----------------------------------------------
 void VisUtils::setColor(const ColorRGB& colRGB)
-// ----------------------------------------------
 {
   glBegin(GL_POINTS);
   glColor4f(colRGB.r, colRGB.g, colRGB.b, colRGB.a);
@@ -54,9 +50,7 @@ void VisUtils::setColor(const ColorRGB& colRGB)
 }
 
 
-// ---------------------------
 void VisUtils::setColorBlack()
-// ---------------------------
 {
   ColorRGB col;
   col.r = 0.0;
@@ -67,9 +61,7 @@ void VisUtils::setColorBlack()
 }
 
 
-// --------------------------
 void VisUtils::setColorBlue()
-// --------------------------
 {
   ColorRGB col;
   col.r = 0.0;
@@ -80,9 +72,7 @@ void VisUtils::setColorBlue()
 }
 
 
-// ------------------------------
 void VisUtils::setColorCoolBlue()
-// ------------------------------
 {
   ColorRGB col;
   col.r = 0.44;
@@ -93,9 +83,7 @@ void VisUtils::setColorCoolBlue()
 }
 
 
-// --------------------------------
 void VisUtils::setColorDkCoolBlue()
-// --------------------------------
 {
   ColorRGB col;
   col.r = 0.00;
@@ -106,9 +94,7 @@ void VisUtils::setColorDkCoolBlue()
 }
 
 
-// ---------------------------
 void VisUtils::setColorGreen()
-// ---------------------------
 {
   ColorRGB col;
   col.r = 0.0;
@@ -119,9 +105,7 @@ void VisUtils::setColorGreen()
 }
 
 
-// -------------------------------
 void VisUtils::setColorCoolGreen()
-// -------------------------------
 {
   ColorRGB col;
   col.r = 0.42;//0.45;
@@ -132,9 +116,7 @@ void VisUtils::setColorCoolGreen()
 }
 
 
-// ---------------------------------
 void VisUtils::setColorLtCoolGreen()
-// ---------------------------------
 {
   ColorRGB col;
   col.r = 0.73;
@@ -145,9 +127,7 @@ void VisUtils::setColorLtCoolGreen()
 }
 
 
-// ------------------------------
 void VisUtils::setColorLtLtGray()
-// ------------------------------
 {
   ColorRGB col;
   col.r = 0.95;
@@ -158,9 +138,7 @@ void VisUtils::setColorLtLtGray()
 }
 
 
-// ----------------------------
 void VisUtils::setColorLtGray()
-// ----------------------------
 {
   ColorRGB col;
   col.r = 0.75;
@@ -171,9 +149,7 @@ void VisUtils::setColorLtGray()
 }
 
 
-// ----------------------------
 void VisUtils::setColorMdGray()
-// ----------------------------
 {
   ColorRGB col;
   col.r = 0.5;
@@ -184,9 +160,7 @@ void VisUtils::setColorMdGray()
 }
 
 
-// ----------------------------
 void VisUtils::setColorDkGray()
-// ----------------------------
 {
   ColorRGB col;
   col.r = 0.25;
@@ -197,9 +171,7 @@ void VisUtils::setColorDkGray()
 }
 
 
-// ----------------------------
 void VisUtils::setColorOrange()
-// ----------------------------
 {
   ColorRGB col;
   col.r = 1.0;
@@ -210,9 +182,7 @@ void VisUtils::setColorOrange()
 }
 
 
-// -------------------------
 void VisUtils::setColorRed()
-// -------------------------
 {
   ColorRGB col;
   col.r = 1.0;
@@ -223,9 +193,7 @@ void VisUtils::setColorRed()
 }
 
 
-// -----------------------------
 void VisUtils::setColorCoolRed()
-// -----------------------------
 {
   ColorRGB col;
   col.r = 0.96;
@@ -236,9 +204,7 @@ void VisUtils::setColorCoolRed()
 }
 
 
-// ---------------------------
 void VisUtils::setColorWhite()
-// ---------------------------
 {
   ColorRGB col;
   col.r = 1.0;
@@ -249,9 +215,7 @@ void VisUtils::setColorWhite()
 }
 
 
-// ----------------------------
 void VisUtils::setColorYellow()
-// ----------------------------
 {
   ColorRGB col;
   col.r = 1.0;
@@ -262,9 +226,7 @@ void VisUtils::setColorYellow()
 }
 
 
-// ----------------------------------------------------
 void VisUtils::setColorBlueYellow(const double& frac)
-// ----------------------------------------------------
 {
   ColorHLS colHLS;
   ColorRGB colRGB;
@@ -286,9 +248,7 @@ void VisUtils::setColorBlueYellow(const double& frac)
 }
 
 
-// ------------------------------------------
 void VisUtils::mapColorBlack(ColorRGB& col)
-// ------------------------------------------
 {
   col.r = 0.0;
   col.g = 0.0;
@@ -297,9 +257,7 @@ void VisUtils::mapColorBlack(ColorRGB& col)
 }
 
 
-// -----------------------------------------
 void VisUtils::mapColorBlue(ColorRGB& col)
-// -----------------------------------------
 {
   col.r = 0.0;
   col.g = 0.0;
@@ -308,9 +266,7 @@ void VisUtils::mapColorBlue(ColorRGB& col)
 }
 
 
-// ---------------------------------------------
 void VisUtils::mapColorCoolBlue(ColorRGB& col)
-// ---------------------------------------------
 {
   col.r = 0.44;
   col.g = 0.59;
@@ -319,9 +275,7 @@ void VisUtils::mapColorCoolBlue(ColorRGB& col)
 }
 
 
-// -----------------------------------------------
 void VisUtils::mapColorDkCoolBlue(ColorRGB& col)
-// -----------------------------------------------
 {
   col.r = 0.00;
   col.g = 0.31;
@@ -330,9 +284,7 @@ void VisUtils::mapColorDkCoolBlue(ColorRGB& col)
 }
 
 
-// ------------------------------------------
 void VisUtils::mapColorGreen(ColorRGB& col)
-// ------------------------------------------
 {
   col.r = 0.0;
   col.g = 1.0;
@@ -341,9 +293,7 @@ void VisUtils::mapColorGreen(ColorRGB& col)
 }
 
 
-// ----------------------------------------------
 void VisUtils::mapColorCoolGreen(ColorRGB& col)
-// ----------------------------------------------
 {
   col.r = 0.42;//0.45;
   col.g = 0.80;//0.85;
@@ -352,9 +302,7 @@ void VisUtils::mapColorCoolGreen(ColorRGB& col)
 }
 
 
-// ------------------------------------------------
 void VisUtils::mapColorLtCoolGreen(ColorRGB& col)
-// ------------------------------------------------
 {
   col.r = 0.73;
   col.g = 0.95;
@@ -363,9 +311,7 @@ void VisUtils::mapColorLtCoolGreen(ColorRGB& col)
 }
 
 
-// ---------------------------------------------
 void VisUtils::mapColorLtLtGray(ColorRGB& col)
-// ---------------------------------------------
 {
   col.r = 0.95;
   col.g = 0.95;
@@ -374,9 +320,7 @@ void VisUtils::mapColorLtLtGray(ColorRGB& col)
 }
 
 
-// -------------------------------------------
 void VisUtils::mapColorLtGray(ColorRGB& col)
-// -------------------------------------------
 {
   col.r = 0.75;
   col.g = 0.75;
@@ -385,9 +329,7 @@ void VisUtils::mapColorLtGray(ColorRGB& col)
 }
 
 
-// -------------------------------------------
 void VisUtils::mapColorMdGray(ColorRGB& col)
-// -------------------------------------------
 {
   col.r = 0.5;
   col.g = 0.5;
@@ -396,9 +338,7 @@ void VisUtils::mapColorMdGray(ColorRGB& col)
 }
 
 
-// -------------------------------------------
 void VisUtils::mapColorDkGray(ColorRGB& col)
-// -------------------------------------------
 {
   col.r = 0.25;
   col.g = 0.25;
@@ -407,9 +347,7 @@ void VisUtils::mapColorDkGray(ColorRGB& col)
 }
 
 
-// -------------------------------------------
 void VisUtils::mapColorOrange(ColorRGB& col)
-// -------------------------------------------
 {
   col.r = 1.0;
   col.g = 0.5;
@@ -418,9 +356,7 @@ void VisUtils::mapColorOrange(ColorRGB& col)
 }
 
 
-// ----------------------------------------
 void VisUtils::mapColorRed(ColorRGB& col)
-// ----------------------------------------
 {
   col.r = 1.0;
   col.g = 0.0;
@@ -429,9 +365,7 @@ void VisUtils::mapColorRed(ColorRGB& col)
 }
 
 
-// --------------------------------------------
 void VisUtils::mapColorCoolRed(ColorRGB& col)
-// --------------------------------------------
 {
   col.r = 0.96;
   col.g = 0.25;
@@ -440,9 +374,7 @@ void VisUtils::mapColorCoolRed(ColorRGB& col)
 }
 
 
-// ------------------------------------------
 void VisUtils::mapColorWhite(ColorRGB& col)
-// ------------------------------------------
 {
   col.r = 1.0;
   col.g = 1.0;
@@ -451,11 +383,9 @@ void VisUtils::mapColorWhite(ColorRGB& col)
 }
 
 
-// -------------------------------
 void VisUtils::mapColorBlueYellow(
   const double& frac,
   ColorRGB& colRGB)
-// -------------------------------
 {
   ColorHLS colHLS;
 
@@ -475,11 +405,9 @@ void VisUtils::mapColorBlueYellow(
 }
 
 
-// ------------------------------
 void VisUtils::mapColorGrayScale(
   const double& frac,
   ColorRGB& colRGB)
-// ------------------------------
 {
   ColorHLS colHLS;
 
@@ -491,11 +419,9 @@ void VisUtils::mapColorGrayScale(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorSpectral(
   const double& frac,
   ColorRGB& colRGB)
-// -----------------------------
 {
   ColorHLS colHLS;
 
@@ -507,15 +433,11 @@ void VisUtils::mapColorSpectral(
 }
 
 
-// ------------------------------
 void VisUtils::mapColorQualPast1(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// ------------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 251, 179, 204, 222, 254, 255, 229, 253, 242 };
@@ -549,15 +471,11 @@ void VisUtils::mapColorQualPast1(
 }
 
 
-// ------------------------------
 void VisUtils::mapColorQualPast2(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// ------------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 8 ref colors
   double red[] = { 179, 253, 203, 244, 230, 255, 241, 204 };
@@ -592,15 +510,11 @@ void VisUtils::mapColorQualPast2(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorQualSet1(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 288,  55,  77, 152, 255, 255, 166, 247, 153 };
@@ -635,15 +549,11 @@ void VisUtils::mapColorQualSet1(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorQualSet2(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 8 ref colors
   double red[] = { 102, 252, 141, 231, 166, 255, 229, 179 };
@@ -678,15 +588,11 @@ void VisUtils::mapColorQualSet2(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorQualSet3(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 12 ref colors
   double red[] = { 141, 255, 190, 251, 128, 253, 179, 252, 217, 188, 204, 255 };
@@ -720,15 +626,11 @@ void VisUtils::mapColorQualSet3(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorQualPair(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 166,  31, 178,  51, 251, 227, 253, 255, 202 };
@@ -762,15 +664,11 @@ void VisUtils::mapColorQualPair(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorQualDark(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 8 ref colors
   double red[] = { 27, 217, 117, 231, 102, 230, 166, 102 };
@@ -804,15 +702,11 @@ void VisUtils::mapColorQualDark(
 }
 
 
-// -------------------------------
 void VisUtils::mapColorQualAccent(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -------------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 8 ref colors
   double red[] = { 127, 190, 253, 255,  56, 240, 191, 102, 153 };
@@ -846,15 +740,11 @@ void VisUtils::mapColorQualAccent(
 }
 
 
-// ----------------------------
 void VisUtils::mapColorSeqOrRd(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// ----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 255, 254, 253, 253, 252, 239, 215, 179, 127 };
@@ -888,15 +778,11 @@ void VisUtils::mapColorSeqOrRd(
 }
 
 
-// ----------------------------
 void VisUtils::mapColorSeqGnBu(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// ----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 247, 224, 204, 168, 123,  78,  43,   8,   8 };
@@ -930,15 +816,11 @@ void VisUtils::mapColorSeqGnBu(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorSeqGreen(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
@@ -972,14 +854,10 @@ void VisUtils::mapColorSeqGreen(
 }
 
 
-// -----------------------------
 void VisUtils::mapColorSeqGreen(
   const double& alpha,
   ColorRGB& colRGB)
-// -----------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
@@ -1003,15 +881,11 @@ void VisUtils::mapColorSeqGreen(
 }
 
 
-// ---------------------------
 void VisUtils::mapColorSeqRed(
   const size_t& iter,
   const size_t& numr,
   ColorRGB& colRGB)
-// ---------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
@@ -1045,14 +919,10 @@ void VisUtils::mapColorSeqRed(
 }
 
 
-// ---------------------------
 void VisUtils::mapColorSeqRed(
   const double& alpha,
   ColorRGB& colRGB)
-// ---------------------------
-// ------------------------------------------------------------------
 // www.colorbrewer.org
-// ------------------------------------------------------------------
 {
   // 9 ref colors
   double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
@@ -1076,17 +946,13 @@ void VisUtils::mapColorSeqRed(
 }
 
 
-// ----------------------------------
 void VisUtils::hlsToRgb(
   ColorHLS& colHLS,
   ColorRGB& colRGB)
-// ----------------------------------
-// ------------------------------------------------------------------
 // Adapted from Foley et al., 1996.
 // In:  h       in [0.0, 360.0]
 //      l, s    in [0, 1]
 // Out: r, g, b in [0, 1]
-// ------------------------------------------------------------------
 {
   if (colHLS.s == 0)
   {
@@ -1117,15 +983,11 @@ void VisUtils::hlsToRgb(
 }
 
 
-// -----------------------
 double VisUtils::hlsValue(
   double var1,
   double var2,
   double hue)
-// -----------------------
-// ------------------------------------------------------------------
 // Adapted from Foley et al., 1996.
-// ------------------------------------------------------------------
 {
   double result = 0.0;
 
@@ -1162,9 +1024,7 @@ double VisUtils::hlsValue(
 // -- anti-aliasing & blending --------------------------------------
 
 
-// ---------------------------------
 void VisUtils::enableLineAntiAlias()
-// ---------------------------------
 {
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_BLEND);
@@ -1172,27 +1032,21 @@ void VisUtils::enableLineAntiAlias()
 }
 
 
-// ----------------------------------
 void VisUtils::disableLineAntiAlias()
-// ----------------------------------
 {
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_BLEND);
 }
 
 
-// ----------------------------
 void VisUtils::enableBlending()
-// ----------------------------
 {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
-// -----------------------------
 void VisUtils::disableBlending()
-// -----------------------------
 {
   glDisable(GL_BLEND);
 }
@@ -1201,9 +1055,7 @@ void VisUtils::disableBlending()
 // -- line width ------------------------------------------------
 
 
-// --------------------------------------------
 void VisUtils::setLineWidth(const double& px)
-// --------------------------------------------
 {
   glLineWidth(px);
 }
@@ -1212,11 +1064,9 @@ void VisUtils::setLineWidth(const double& px)
 // -- drawing functions ---------------------------------------------
 
 
-// ---------------------------------------
 void VisUtils::drawLine(
   const double& xFr, const double& xTo,
   const double& yFr, const double& yTo)
-// ---------------------------------------
 {
   glBegin(GL_LINES);
   glVertex2f(xFr, yFr);
@@ -1225,11 +1075,9 @@ void VisUtils::drawLine(
 }
 
 
-// ---------------------------------------
 void VisUtils::drawLineDashed(
   const double& xFr, const double& xTo,
   const double& yFr, const double& yTo)
-// ---------------------------------------
 {
   glLineStipple(2, 0xAAAA);
   glEnable(GL_LINE_STIPPLE);
@@ -1241,18 +1089,14 @@ void VisUtils::drawLineDashed(
 }
 
 
-// -----------------------------------------------
 void VisUtils::drawArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const int& slices)
-// -----------------------------------------------
-// ------------------------------------------------------------------
 // This function draws a circular arc COUNTER CLOCKWIZE from
 // 'aglBegDg' to 'aglEndDg'. This segment has radius equal to
 // 'radius' and is centered at (xCtr, yCtr). This arc consists of
 // 'slices' segments.
-// ------------------------------------------------------------------
 {
   double slice;
 
@@ -1276,18 +1120,14 @@ void VisUtils::drawArc(
 }
 
 
-// -----------------------------------------------
 void VisUtils::drawArcDashed(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const int& slices)
-// -----------------------------------------------
-// ------------------------------------------------------------------
 // This function draws a circular dashed arc COUNTER CLOCKWIZE from
 // 'aglBegDg' to 'aglEndDg'. This segment has radius equal to
 // 'radius' and is centered at (xCtr, yCtr). This arc consists of
 // 'slices' segments.
-// ------------------------------------------------------------------
 {
   glLineStipple(2, 0xAAAA);
   glEnable(GL_LINE_STIPPLE);
@@ -1299,17 +1139,13 @@ void VisUtils::drawArcDashed(
 }
 
 
-// -----------------------------------------------
 void VisUtils::drawArcCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const int& slices)
-// -----------------------------------------------
-// ------------------------------------------------------------------
 // This function draws a circular arc CLOCKWIZE from 'aglBegDg' to
 // 'aglEndDg'. This segment has radius equal to 'radius' and is
 // centered at (xCtr, yCtr). This arc consists of 'slices' segments.
-// ------------------------------------------------------------------
 {
   double slice;
 
@@ -1334,18 +1170,14 @@ void VisUtils::drawArcCW(
 }
 
 
-// -----------------------------------------------
 void VisUtils::drawArcDashedCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const int& slices)
-// -----------------------------------------------
-// ------------------------------------------------------------------
 // This function draws a circular dashed arc CLOCKWIZE from
 // 'aglBegDg' to 'aglEndDg'. This segment has radius equal to
 // 'radius' and is centered at (xCtr, yCtr). This arc consists of
 // 'slices' segments.
-// ------------------------------------------------------------------
 {
   glLineStipple(2, 0xAAAA);
   glEnable(GL_LINE_STIPPLE);
@@ -1357,13 +1189,11 @@ void VisUtils::drawArcDashedCW(
 }
 
 
-// ------------------------------------------------
 void VisUtils::drawArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
   const double& radius,   const int& slices)
-// ------------------------------------------------
 {
   double slice;
 
@@ -1401,14 +1231,12 @@ void VisUtils::drawArc(
 }
 
 
-// ------------------------------------------------
 void VisUtils::drawArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
   const ColorRGB& colBeg, const ColorRGB& colEnd,
   const double& radius,   const int& slices)
-// ------------------------------------------------
 {
   double slice;
 
@@ -1460,13 +1288,11 @@ void VisUtils::drawArc(
 }
 
 
-// ------------------------------------------------
 void VisUtils::fillArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
   const double& radius,   const int& slices)
-// ------------------------------------------------
 {
   double slice;
 
@@ -1547,12 +1373,10 @@ void VisUtils::fillArc(
   glEnd();
 }
 
-// -------------------------------------
 void VisUtils::drawTriangle(
   const double& x1, const double& y1,
   const double& x2, const double& y2,
   const double& x3, const double& y3)
-// -------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(x1, y1);
@@ -1562,7 +1386,6 @@ void VisUtils::drawTriangle(
 }
 
 
-// --------------------------------------
 void VisUtils::drawTriangle(
   const double&   x1, const double& y1,
   const ColorRGB& col1,
@@ -1570,7 +1393,6 @@ void VisUtils::drawTriangle(
   const ColorRGB& col2,
   const double&   x3, const double& y3,
   const ColorRGB& col3)
-// --------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glColor4f(col1.r, col1.g, col1.b, col1.a);
@@ -1583,12 +1405,10 @@ void VisUtils::drawTriangle(
 }
 
 
-// -------------------------------------
 void VisUtils::fillTriangle(
   const double& x1, const double& y1,
   const double& x2, const double& y2,
   const double& x3, const double& y3)
-// -------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(x1, y1);
@@ -1598,7 +1418,6 @@ void VisUtils::fillTriangle(
 }
 
 
-// --------------------------------------
 void VisUtils::fillTriangle(
   const double&   x1, const double& y1,
   const ColorRGB& col1,
@@ -1606,7 +1425,6 @@ void VisUtils::fillTriangle(
   const ColorRGB& col2,
   const double&   x3, const double& y3,
   const ColorRGB& col3)
-// --------------------------------------
 {
   glBegin(GL_POLYGON);
   glColor4f(col1.r, col1.g, col1.b, col1.a);
@@ -1619,11 +1437,9 @@ void VisUtils::fillTriangle(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawRect(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -1634,13 +1450,11 @@ void VisUtils::drawRect(
 }
 
 
-// -------------------------------------------------
 void VisUtils::drawRect(
   const double& xLft,        const double& xRgt,
   const double& yTop,        const double& yBot,
   const ColorRGB& colTopLft, ColorRGB& colTopRgt,
   const ColorRGB& colBotLft, ColorRGB& colBotRgt)
-// -------------------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glColor4f(colTopLft.r, colTopLft.g, colTopLft.b, colTopLft.a);
@@ -1655,11 +1469,9 @@ void VisUtils::drawRect(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillRect(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_QUADS);
   glVertex2f(xLft, yTop);
@@ -1670,13 +1482,11 @@ void VisUtils::fillRect(
 }
 
 
-// -------------------------------------------------
 void VisUtils::fillRect(
   const double& xLft,        const double& xRgt,
   const double& yTop,        const double& yBot,
   const ColorRGB& colTopLft, ColorRGB& colTopRgt,
   const ColorRGB& colBotLft, ColorRGB& colBotRgt)
-// -------------------------------------------------
 {
   glBegin(GL_POLYGON);
   glColor4f(colTopLft.r, colTopLft.g, colTopLft.b, colTopLft.a);
@@ -1691,12 +1501,10 @@ void VisUtils::fillRect(
 }
 
 
-// ----------------------------------------
 void VisUtils::drawEllipse(
   const double& xCtr, const double& yCtr,
   const double& xDOF, const double& yDOF,
   const int& slices)
-// ----------------------------------------
 {
   double slice = (2*PI)/(double)slices;
 
@@ -1711,12 +1519,10 @@ void VisUtils::drawEllipse(
 }
 
 
-// ----------------------------------------
 void VisUtils::fillEllipse(
   const double& xCtr, const double& yCtr,
   const double& xDOF, const double& yDOF,
   const int& slices)
-// ----------------------------------------
 {
   double slice = (2*PI)/(double)slices;
 
@@ -1731,14 +1537,12 @@ void VisUtils::fillEllipse(
 }
 
 
-// --------------------------------------------------
 void VisUtils::fillEllipse(
   const double&   xCtr,    const double&   yCtr,
   const double&   xDOFIn,  const double&   yDOFIn,
   const double&   xDOFOut, const double&   yDOFOut,
   const double&   slices,  const ColorRGB& cIn,
   const ColorRGB& cOut)
-// --------------------------------------------------
 {
   double slice = (2*PI)/(double)slices;
 
@@ -1771,7 +1575,6 @@ void VisUtils::fillEllipse(
 }
 
 
-// ----------------------------------------------------
 void VisUtils::fillEllipse(
   const double&   xCtr,     const double&   yCtr,
   const double&   xDOFIn,   const double&   yDOFIn,
@@ -1779,7 +1582,6 @@ void VisUtils::fillEllipse(
   const double&   aglBegDg, const double&   aglEndDg,
   const double&   slices,   const ColorRGB& cIn,
   const ColorRGB& cOut)
-// ----------------------------------------------------
 {
   double aglBegRd = Utils::degrToRad(aglBegDg);
 
@@ -1822,12 +1624,10 @@ void VisUtils::fillEllipse(
 }
 
 
-// -------------------------------------------
 void VisUtils::drawArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wHead, const double& lHead)
-// -------------------------------------------
 {
   // calc angle & length of arrow
   double dX   = xTo-xFr;
@@ -1855,12 +1655,10 @@ void VisUtils::drawArrow(
 }
 
 
-// -------------------------------------------
 void VisUtils::fillArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wHead, const double& lHead)
-// -------------------------------------------
 {
   // calc angle & length of arrow
   double dX   = xTo-xFr;
@@ -1888,12 +1686,10 @@ void VisUtils::fillArrow(
 }
 
 
-// -------------------------------------------
 void VisUtils::drawDArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wHead, const double& lHead)
-// -------------------------------------------
 {
   // calc angle & length of arrow
   double dX   = xTo-xFr;
@@ -1922,14 +1718,12 @@ void VisUtils::drawDArrow(
 }
 
 
-// ------------------------------------------
 void VisUtils::drawArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wBase, const double& wHead,
   const double& lHead, const ColorRGB& cFr,
   const ColorRGB& cTo)
-// ------------------------------------------
 {
   ColorRGB cJnc;
 
@@ -1974,13 +1768,11 @@ void VisUtils::drawArrow(
 }
 
 
-// ------------------------------------------
 void VisUtils::fillArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wBase, const double& wHead,
   const double& lHead)
-// ------------------------------------------
 {
   // calc angle & length of arrow
   double dX     = xTo-xFr;
@@ -2011,14 +1803,12 @@ void VisUtils::fillArrow(
 }
 
 
-// ------------------------------------------
 void VisUtils::fillArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wBase, const double& wHead,
   const double& lHead, const ColorRGB& cFr,
   const ColorRGB& cTo)
-// ------------------------------------------
 {
   ColorRGB cJnc;
 
@@ -2068,12 +1858,10 @@ void VisUtils::fillArrow(
 }
 
 
-// -------------------------------------------
 void VisUtils::fillDArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wHead, const double& lHead)
-// -------------------------------------------
 {
   // calc angle & length of arrow
   double dX   = xTo-xFr;
@@ -2102,13 +1890,11 @@ void VisUtils::fillDArrow(
 }
 
 
-// ------------------------------------------------
 void VisUtils::drawArrowArcCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const double& slices,
   const double& wHead,    const double& lHead)
-// ------------------------------------------------
 {
   double xCur = 0.0;
   double yCur = 0.0;
@@ -2147,13 +1933,11 @@ void VisUtils::drawArrowArcCW(
 }
 
 
-// ------------------------------------------------
 void VisUtils::fillArrowArcCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const double& slices,
   const double& wHead,    const double& lHead)
-// ------------------------------------------------
 {
   double xCur = 0.0;
   double yCur = 0.0;
@@ -2192,13 +1976,11 @@ void VisUtils::fillArrowArcCW(
 }
 
 
-// ------------------------------------------------
 void VisUtils::drawArrowArcCCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const double& slices,
   const double& wHead,    const double& lHead)
-// ------------------------------------------------
 {
   double xCur = 0.0;
   double yCur = 0.0;
@@ -2237,13 +2019,11 @@ void VisUtils::drawArrowArcCCW(
 }
 
 
-// ------------------------------------------------
 void VisUtils::fillArrowArcCCW(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& radius,   const double& slices,
   const double& wHead,    const double& lHead)
-// ------------------------------------------------
 {
   double xCur = 0.0;
   double yCur = 0.0;
@@ -2282,11 +2062,9 @@ void VisUtils::fillArrowArcCCW(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawFwrdIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -2321,11 +2099,9 @@ void VisUtils::drawFwrdIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillFwrdIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft, yTop);
@@ -2360,11 +2136,9 @@ void VisUtils::fillFwrdIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawNextIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -2388,11 +2162,9 @@ void VisUtils::drawNextIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillNextIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft, yTop);
@@ -2416,11 +2188,9 @@ void VisUtils::fillNextIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawPauseIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(
@@ -2454,11 +2224,9 @@ void VisUtils::drawPauseIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillPauseIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(
@@ -2492,11 +2260,9 @@ void VisUtils::fillPauseIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawPlayIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -2506,11 +2272,9 @@ void VisUtils::drawPlayIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillPlayIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft, yTop);
@@ -2520,11 +2284,9 @@ void VisUtils::fillPlayIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawStopIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft + 0.125*(xRgt-xLft), yTop);
@@ -2535,11 +2297,9 @@ void VisUtils::drawStopIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillStopIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft + 0.125*(xRgt-xLft), yTop);
@@ -2550,11 +2310,9 @@ void VisUtils::fillStopIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawPrevIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(
@@ -2578,11 +2336,9 @@ void VisUtils::drawPrevIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillPrevIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(
@@ -2606,11 +2362,9 @@ void VisUtils::fillPrevIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawRwndIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -2645,11 +2399,9 @@ void VisUtils::drawRwndIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillRwndIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft, yTop);
@@ -2684,11 +2436,9 @@ void VisUtils::fillRwndIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawCloseIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   double hori = 0.1*(xRgt-xLft);
   double vert = 0.1*(yTop-yBot);
@@ -2726,11 +2476,9 @@ void VisUtils::drawCloseIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillCloseIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   double hori = 0.1*(xRgt-xLft);
   double vert = 0.1*(yTop-yBot);
@@ -2755,11 +2503,9 @@ void VisUtils::fillCloseIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawMoreIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(xLft, yTop);
@@ -2786,11 +2532,9 @@ void VisUtils::drawMoreIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillMoreIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft, yTop);
@@ -2817,11 +2561,9 @@ void VisUtils::fillMoreIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawClearIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_STRIP);
   glVertex2f(xLft + 0.3*(xRgt-xLft), yTop - 0.6*(yTop-yBot));
@@ -2840,11 +2582,9 @@ void VisUtils::drawClearIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillClearIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(xLft + 0.3*(xRgt-xLft), yTop - 0.3*(yTop-yBot));
@@ -2862,11 +2602,9 @@ void VisUtils::fillClearIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawUpIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(
@@ -2894,11 +2632,9 @@ void VisUtils::drawUpIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillUpIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(
@@ -2926,11 +2662,9 @@ void VisUtils::fillUpIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::drawDownIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_LINE_LOOP);
   glVertex2f(
@@ -2958,11 +2692,9 @@ void VisUtils::drawDownIcon(
 }
 
 
-// -----------------------------------------
 void VisUtils::fillDownIcon(
   const double& xLft, const double& xRgt,
   const double& yTop, const double& yBot)
-// -----------------------------------------
 {
   glBegin(GL_POLYGON);
   glVertex2f(
@@ -2993,16 +2725,12 @@ void VisUtils::fillDownIcon(
 // -- transformations -----------------------------------------------
 
 /*
-// -----------------------------------------
 void VisUtils::setTransf(
     const double &xCtr, const double &yCtr,
     const double &xDOF,  const double &yDOF,
     const double &xHge,  const double &yHge,
     const double &aglCtr )
-// -----------------------------------------
-// ------------------------------------------------------------------
 // This function should be used when in edit mode.
-// ------------------------------------------------------------------
 {
     double dX = xCtr-xHge;
     double dY = yCtr-yHge;
@@ -3020,16 +2748,12 @@ void VisUtils::setTransf(
 }
 */
 
-// ---------------------------------------------
 void VisUtils::setTransf(
   const double& xCtr,   const double& yCtr,
   const double& /*xDOF*/,   const double& /*yDOF*/,
   const double& xHge,   const double& yHge,
   const double& aglCtr, const double& aglHge)
-// ---------------------------------------------
-// ------------------------------------------------------------------
 // This function should be used when in analysis mode.
-// ------------------------------------------------------------------
 {
   double dX = xCtr-xHge;
   double dY = yCtr-yHge;
@@ -3048,9 +2772,7 @@ void VisUtils::setTransf(
 }
 
 
-// -----------------------
 void VisUtils::clrTransf()
-// -----------------------
 {
   //glMatrixMode( GL_MODELVIEW );
   glPopMatrix();
@@ -3060,11 +2782,9 @@ void VisUtils::clrTransf()
 // -- text ----------------------------------------------------------
 
 
-// -----------------------------------------------------
 void VisUtils::genCharTextures(
   GLuint texCharId[CHARSETSIZE],
   GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH])
-// -----------------------------------------------------
 {
   // allocate memory
   glGenTextures(CHARSETSIZE, texCharId);
@@ -3109,9 +2829,7 @@ void VisUtils::genCharTextures(
 }
 
 
-// ---------------------------------------
 int VisUtils::getCharIdx(const char& c)
-// ---------------------------------------
 {
   int result = 80;
   int asci = (int) c;
@@ -3245,14 +2963,12 @@ int VisUtils::getCharIdx(const char& c)
 }
 
 
-// -------------------------------
 void VisUtils::drawLabel(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   if (label.size() > 0)
   {
@@ -3302,14 +3018,12 @@ void VisUtils::drawLabel(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelRight(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   drawLabel(
     texCharId,
@@ -3320,14 +3034,12 @@ void VisUtils::drawLabelRight(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelLeft(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   double translate = label.length()*CHARWIDTH*scaling;
   drawLabel(
@@ -3339,14 +3051,12 @@ void VisUtils::drawLabelLeft(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelCenter(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   double translate = 0.5*label.length()*CHARWIDTH*scaling;
   drawLabel(
@@ -3358,14 +3068,12 @@ void VisUtils::drawLabelCenter(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelVert(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   if (label.size() > 0)
   {
@@ -3411,14 +3119,12 @@ void VisUtils::drawLabelVert(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelVertAbove(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   drawLabelVert(
     texCharId,
@@ -3429,14 +3135,12 @@ void VisUtils::drawLabelVertAbove(
 }
 
 
-// -------------------------------
 void VisUtils::drawLabelVertBelow(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// -------------------------------
 {
   double translate = label.length()*CHARWIDTH*scaling;
   drawLabelVert(
@@ -3448,14 +3152,12 @@ void VisUtils::drawLabelVertBelow(
 }
 
 
-// --------------------------------
 void VisUtils::drawLabelVertCenter(
   GLuint texCharId[CHARSETSIZE],
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
-// --------------------------------
 {
   double translate = 0.5*label.length()*CHARWIDTH*scaling;
   drawLabelVert(
@@ -3467,7 +3169,6 @@ void VisUtils::drawLabelVertCenter(
 }
 
 
-// ----------------------------------
 void VisUtils::drawLabelInBoundBox(
   GLuint texCharId[CHARSETSIZE],
   const double& xLft,
@@ -3476,7 +3177,6 @@ void VisUtils::drawLabelInBoundBox(
   const double& yBot,
   const double& scaling,
   const std::string& label)
-// ----------------------------------
 {
   double w = xRgt - xLft;
   double h = yTop - yBot;
@@ -3544,11 +3244,9 @@ void VisUtils::drawLabelInBoundBox(
 // -- cushions ------------------------------------------------------
 
 
-// ----------------------------
 void VisUtils::genCushTextures(
   GLuint& texCushId,
   float texCush[CUSHSIZE])
-// ----------------------------
 {
   glGenTextures(1, &texCushId);
   glBindTexture(GL_TEXTURE_1D, texCushId);
@@ -3580,17 +3278,13 @@ void VisUtils::genCushTextures(
 }
 
 
-// ------------------------------
 float VisUtils::cushionProfile1D(
   const float& x,
   const float& D,
   const float& h,
   const float& alpha,
   const float& l_ratio)
-// ------------------------------
-// ------------------------------------------------------------------
 // Code adapted from Lucian Voinea.
-// ------------------------------------------------------------------
 {
   double pi = 3.1415926535;
   float alphaNew = (float)(pi*alpha)/180;
@@ -3607,14 +3301,12 @@ float VisUtils::cushionProfile1D(
 }
 
 
-// -------------------------
 void VisUtils::drawCushDiag(
   const GLuint& texCushId,
   const double& xLft,
   const double& xRgt,
   const double& yTop,
   const double& yBot)
-// -------------------------
 {
   // enable texture mapping
   glEnable(GL_TEXTURE_1D);
@@ -3638,14 +3330,12 @@ void VisUtils::drawCushDiag(
 }
 
 
-// -------------------------
 void VisUtils::drawCushHori(
   const GLuint& texCushId,
   const double& xLft,
   const double& xRgt,
   const double& yTop,
   const double& yBot)
-// -------------------------
 {
   // enable texture mapping
   glEnable(GL_TEXTURE_1D);
@@ -3669,14 +3359,12 @@ void VisUtils::drawCushHori(
 }
 
 
-// -------------------------
 void VisUtils::drawCushVert(
   const GLuint& texCushId,
   const double& xLft,
   const double& xRgt,
   const double& yTop,
   const double& yBot)
-// -------------------------
 {
   // enable texture mapping
   glEnable(GL_TEXTURE_1D);

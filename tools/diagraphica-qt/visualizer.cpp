@@ -18,13 +18,11 @@
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------
 Visualizer::Visualizer(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Colleague(m)
-// --------------------
 {
   clearColor.r = 1.0;
   clearColor.g = 1.0;
@@ -46,9 +44,7 @@ Visualizer::Visualizer(
 }
 
 
-// ----------------------
 Visualizer::~Visualizer()
-// ----------------------
 {
   graph  = NULL;
   canvas = NULL;
@@ -58,12 +54,10 @@ Visualizer::~Visualizer()
 // -- set functions -------------------------------------------------
 
 
-// ----------------------------
 void Visualizer::setClearColor(
   const double& r,
   const double& g,
   const double& b)
-// ----------------------------
 {
   clearColor.r = r;
   clearColor.g = g;
@@ -110,17 +104,13 @@ void Visualizer::printMouseVariables()
 // -- visualization functions ---------------------------------------
 
 
-// ------------------------------------------------
 void Visualizer::setGeomChanged(const bool& flag)
-// ------------------------------------------------
 {
   geomChanged = flag;
 }
 
 
-// ------------------------------------------------
 void Visualizer::setDataChanged(const bool& flag)
-// ------------------------------------------------
 {
   geomChanged = flag;
   dataChanged = flag;
@@ -130,19 +120,15 @@ void Visualizer::setDataChanged(const bool& flag)
 // -- event handlers ------------------------------------------------
 
 
-// -------------------------------
 void Visualizer::handleSizeEvent()
-// -------------------------------
 {
   geomChanged = true;
 }
 
 
-// --------------------------------------
 void Visualizer::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   mouseButton = MSE_BUTTON_DOWN;
   mouseSide   = MSE_SIDE_LFT;
@@ -159,11 +145,9 @@ void Visualizer::handleMouseLftDownEvent(
 }
 
 
-// ------------------------------------
 void Visualizer::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   mouseButton = MSE_BUTTON_UP;
   mouseSide   = MSE_SIDE_LFT;
@@ -178,11 +162,9 @@ void Visualizer::handleMouseLftUpEvent(
 }
 
 
-// ----------------------------------------
 void Visualizer::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   mouseButton = MSE_BUTTON_DOWN;
   mouseSide   = MSE_SIDE_LFT;
@@ -196,11 +178,9 @@ void Visualizer::handleMouseLftDClickEvent(
 }
 
 
-// --------------------------------------
 void Visualizer::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   mouseButton = MSE_BUTTON_DOWN;
   mouseSide   = MSE_SIDE_RGT;
@@ -214,11 +194,9 @@ void Visualizer::handleMouseRgtDownEvent(
 }
 
 
-// ------------------------------------
 void Visualizer::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   mouseButton = MSE_BUTTON_UP;
   mouseSide   = MSE_SIDE_RGT;
@@ -233,11 +211,9 @@ void Visualizer::handleMouseRgtUpEvent(
 }
 
 
-// ----------------------------------------
 void Visualizer::handleMouseRgtDClickEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   mouseButton = MSE_BUTTON_DOWN;
   mouseSide   = MSE_SIDE_RGT;
@@ -251,11 +227,9 @@ void Visualizer::handleMouseRgtDClickEvent(
 }
 
 
-// -------------------------------------
 void Visualizer::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// -------------------------------------
 {
   if (mouseButton == MSE_BUTTON_DOWN)
   {
@@ -273,47 +247,35 @@ void Visualizer::handleMouseMotionEvent(
 }
 
 
-// ---------------------------------------
 void Visualizer::handleMouseWheelIncEvent(
   const int& /*x*/,
   const int& /*y*/)
-// ---------------------------------------
 {}
 
 
-// ---------------------------------------
 void Visualizer::handleMouseWheelDecEvent(
   const int& /*x*/,
   const int& /*y*/)
-// ---------------------------------------
 {}
 
 
-// -------------------------------------
 void Visualizer::handleMouseEnterEvent()
-// -------------------------------------
 {}
 
 
-// -------------------------------------
 void Visualizer::handleMouseLeaveEvent()
-// -------------------------------------
 {
   initMouse();
 }
 
 
-// ------------------------------------------------------
 void Visualizer::handleKeyDownEvent(const int& keyCode)
-// ------------------------------------------------------
 {
   keyCodeDown = keyCode;
 }
 
 
-// ----------------------------------------------------
 void Visualizer::handleKeyUpEvent(const int& /*keyCode*/)
-// ----------------------------------------------------
 {
   keyCodeDown = -1;
 }
@@ -322,17 +284,13 @@ void Visualizer::handleKeyUpEvent(const int& /*keyCode*/)
 // -- protected utility functions -----------------------------------
 
 
-// ---------------------
 void Visualizer::clear()
-// ---------------------
 {
   VisUtils::clear(clearColor);
 }
 
 
-// -------------------------
 void Visualizer::initMouse()
-// -------------------------
 {
   mouseButton = MSE_BUTTON_UP;
   mouseSide   = MSE_SIDE_LFT;
@@ -346,13 +304,11 @@ void Visualizer::initMouse()
 }
 
 
-// ------------------------------
 void Visualizer::startSelectMode(
   GLint /*hits*/,
   GLuint selectBuf[],
   double pickWth,
   double pickHgt)
-// ------------------------------
 {
   GLint viewport[4];
 
@@ -399,11 +355,9 @@ void Visualizer::startSelectMode(
 }
 
 
-// -------------------------------
 void Visualizer::finishSelectMode(
   GLint hits,
   GLuint selectBuf[])
-// -------------------------------
 {
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -414,9 +368,7 @@ void Visualizer::finishSelectMode(
 }
 
 
-// --------------------------
 void Visualizer::genCharTex()
-// --------------------------
 {
   VisUtils::genCharTextures(
     texCharId,
@@ -425,9 +377,7 @@ void Visualizer::genCharTex()
 }
 
 
-// --------------------------
 void Visualizer::genCushTex()
-// --------------------------
 {
   VisUtils::genCushTextures(
     texCushId,

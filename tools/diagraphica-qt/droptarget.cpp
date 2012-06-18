@@ -17,20 +17,16 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------
 DropTarget::DropTarget(
   wxWindow* ownr,
   Mediator* m)
   : Colleague(m)
-// --------------------
 {
   owner = ownr;
 }
 
 
-// ----------------------
 DropTarget::~DropTarget()
-// ----------------------
 {
   owner = NULL;
 }
@@ -39,12 +35,10 @@ DropTarget::~DropTarget()
 // -- overridden functions from wxTextDropTarget --------------------
 
 
-// -------------------------
 bool DropTarget::OnDropText(
   wxCoord x,
   wxCoord y,
   const wxString& text)
-// -------------------------
 {
   vector< wxString > tokens;
   int    srcId;

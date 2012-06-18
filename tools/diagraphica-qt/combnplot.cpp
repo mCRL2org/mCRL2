@@ -16,13 +16,11 @@
 
 using namespace std;
 
-// ------------------------
 CombnPlot::CombnPlot(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ------------------------
 {
   maxAttrCard      = 0;
   maxNumberPerComb = 0;
@@ -38,9 +36,7 @@ CombnPlot::CombnPlot(
 }
 
 
-// --------------------
 CombnPlot::~CombnPlot()
-// --------------------
 {
   clearValues();
 
@@ -49,9 +45,7 @@ CombnPlot::~CombnPlot()
 }
 
 
-// ----------------------------------------
 void CombnPlot::setDiagram(Diagram* dgrm)
-// ----------------------------------------
 {
   diagram = dgrm;
 }
@@ -60,12 +54,10 @@ void CombnPlot::setDiagram(Diagram* dgrm)
 // -- set data functions --------------------------------------------
 
 
-// --------------------------------
 void CombnPlot::setValues(
   const vector< size_t > &attrIndcs,
   vector< vector< size_t > > &combs,
   vector< size_t > &number)
-// --------------------------------
 {
   attributeIndcs = attrIndcs;
   combinations   = combs;
@@ -78,9 +70,7 @@ void CombnPlot::setValues(
 }
 
 
-// --------------------------
 void CombnPlot::clearValues()
-// --------------------------
 {
   attributeIndcs.clear();
   combinations.clear();
@@ -93,9 +83,7 @@ void CombnPlot::clearValues()
 // -- visualization functions  --------------------------------------
 
 
-// --------------------------------------------------
 void CombnPlot::visualize(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -145,9 +133,7 @@ void CombnPlot::visualize(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------
 void CombnPlot::drawAxes(const bool& inSelectMode)
-// -------------------------------------------------
 {
   // bar chart
   drawAxesBC(inSelectMode);
@@ -156,9 +142,7 @@ void CombnPlot::drawAxes(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void CombnPlot::drawAxesBC(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -198,9 +182,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void CombnPlot::drawAxesCP(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -254,9 +236,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void CombnPlot::drawLabels(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   // bar chart
   drawLabelsBC(inSelectMode);
@@ -265,9 +245,7 @@ void CombnPlot::drawLabels(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------
 void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
-// -----------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -318,9 +296,7 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
 }
 
 
-// -----------------------------------------------------
 void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
-// -----------------------------------------------------
 {
   // get size of sides
   double w, h;
@@ -372,9 +348,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
 }
 
 
-// -------------------------------------------------
 void CombnPlot::drawPlot(const bool& inSelectMode)
-// -------------------------------------------------
 {
   // bar chart
   drawPlotBC(inSelectMode);
@@ -383,9 +357,7 @@ void CombnPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void CombnPlot::drawPlotBC(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   double hCanv = canvas->getHeight();
   double pix = canvas->getPixelSize();
@@ -446,9 +418,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void CombnPlot::drawPlotCP(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   double pix   = canvas->getPixelSize();
 
@@ -510,9 +480,7 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
 }
 
 
-// -----------------------------------------------------
 void CombnPlot::drawMousePos(const bool& inSelectMode)
-// -----------------------------------------------------
 {
   // rendering mode
   if (inSelectMode != true)
@@ -534,9 +502,7 @@ void CombnPlot::drawMousePos(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void CombnPlot::drawDiagram(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode != true)
   {
@@ -578,11 +544,9 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-// ------------------------------------
 void CombnPlot::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -593,18 +557,14 @@ void CombnPlot::handleMouseMotionEvent(
 }
 
 /*
-// ------------------------------------
 void CombnPlot::handleMouseEnterEvent()
-// ------------------------------------
 {
     if ( posLftTop.size() > 0 )
         mouseInside = true;
 }
 
 
-// ------------------------------------
 void CombnPlot::handleMouseLeaveEvent()
-// ------------------------------------
 {
     mouseInside = false;
 }
@@ -613,9 +573,7 @@ void CombnPlot::handleMouseLeaveEvent()
 // -- utility data functions ----------------------------------------
 
 
-// -------------------------
 void CombnPlot::initLabels()
-// -------------------------
 {
   attributeLabels.clear();
   for (size_t i = 0; i < attributeIndcs.size(); ++i)
@@ -624,9 +582,7 @@ void CombnPlot::initLabels()
 }
 
 
-// ------------------------------
 void CombnPlot::calcMaxAttrCard()
-// ------------------------------
 {
   maxAttrCard = 0;
   for (size_t i = 0; i < attributeIndcs.size(); ++i)
@@ -639,9 +595,7 @@ void CombnPlot::calcMaxAttrCard()
 }
 
 
-// -----------------------------------
 void CombnPlot::calcMaxNumberPerComb()
-// -----------------------------------
 {
   maxNumberPerComb = 0;
   for (size_t i = 0; i < numberPerComb.size(); ++i)
@@ -658,17 +612,13 @@ void CombnPlot::calcMaxNumberPerComb()
 
 // ***
 /*
-// --------------------
 void CombnPlot::clear()
-// --------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// -------------------------------
 void CombnPlot::setScalingTransf()
-// -------------------------------
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -681,9 +631,7 @@ void CombnPlot::setScalingTransf()
 }
 
 
-// ----------------------------------------------
 void CombnPlot::displTooltip(const size_t& posIdx)
-// ----------------------------------------------
 {
   if (posIdx < combinations.size())
   {
@@ -759,9 +707,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
 }
 
 
-// ----------------------------
 void CombnPlot::calcPositions()
-// ----------------------------
 {
   // update flag
   geomChanged = false;
@@ -777,9 +723,7 @@ void CombnPlot::calcPositions()
 }
 
 
-// ------------------------
 void CombnPlot::calcPosBC()
-// ------------------------
 {
   // get size of sides & 1 pixel
   double w,h;
@@ -841,9 +785,7 @@ void CombnPlot::calcPosBC()
 }
 
 
-// ------------------------
 void CombnPlot::calcPosCP()
-// ------------------------
 {
   // calc positions
   Attribute* attribute = NULL;
@@ -927,9 +869,7 @@ void CombnPlot::calcPosCP()
 }
 
 
-// -----------------------------
 void CombnPlot::clearPositions()
-// -----------------------------
 {
   posLftTop.clear();
   posRgtBot.clear();
@@ -939,11 +879,9 @@ void CombnPlot::clearPositions()
 // -- hit detection -------------------------------------------------
 
 
-// -------------------------
 void CombnPlot::processHits(
   GLint hits,
   GLuint buffer[])
-// -------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;

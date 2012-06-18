@@ -19,9 +19,7 @@ using namespace std;
 // -- string conversion functions -----------------------------------
 
 
-// --------------------------------------
 string Utils::dblToStr(const double& d)
-// --------------------------------------
 {
   ostringstream oss;
   string result;
@@ -34,9 +32,7 @@ string Utils::dblToStr(const double& d)
 }
 
 
-// -----------------------------------
 string Utils::intToStr(const int& i)
-// -----------------------------------
 {
   ostringstream oss;
   string result;
@@ -47,9 +43,7 @@ string Utils::intToStr(const int& i)
   return result;
 }
 
-// -----------------------------------
 string Utils::size_tToStr(const size_t& i)
-// -----------------------------------
 {
   ostringstream oss;
   string result;
@@ -60,9 +54,7 @@ string Utils::size_tToStr(const size_t& i)
   return result;
 }
 
-// --------------------------------------
 double Utils::strToDbl(const string& s)
-// --------------------------------------
 {
   double result;
   result = atof(s.c_str());
@@ -71,9 +63,7 @@ double Utils::strToDbl(const string& s)
 }
 
 
-// -----------------------------------
 int Utils::strToInt(const string& s)
-// -----------------------------------
 {
   int result;
 
@@ -86,9 +76,7 @@ int Utils::strToInt(const string& s)
 // -- trig functions ------------------------------------------------
 
 
-// ---------------------------------------
 double Utils::radToDegr(const double& r)
-// ---------------------------------------
 {
   double degrees = 0;
   degrees = r * (180.0 / PI);
@@ -96,9 +84,7 @@ double Utils::radToDegr(const double& r)
 }
 
 
-// ---------------------------------------
 double Utils::degrToRad(const double& d)
-// ---------------------------------------
 {
   double radians = 0;
   radians = d * (PI / 180.0);
@@ -106,31 +92,23 @@ double Utils::degrToRad(const double& d)
 }
 
 
-// -----------------------
 double Utils::calcAngleDg(
   const double& x,
   const double& y)
-// -----------------------
-// ------------------------------------------------------------------
 // This function calculates the angle between the x-axis and the line
 // passing through the points (0,0) and (x,y). The result is returned
 // in degrees.
-// ------------------------------------------------------------------
 {
   return Utils::radToDegr(calcAngleRd(x, y));
 }
 
 
-// -----------------------
 double Utils::calcAngleRd(
   const double& x,
   const double& y)
-// -----------------------
-// ------------------------------------------------------------------
 // This function calculates the angle between the x-axis and the line
 // passing through the points (0,0) and (x,y). The result is returned
 // in radians.
-// ------------------------------------------------------------------
 {
   double angleRd;
 
@@ -172,12 +150,8 @@ double Utils::calcAngleRd(
 // -- math functions ------------------------------------------------
 
 
-// -----------------------------------
 int Utils::rndToInt(const double& f)
-// -----------------------------------
-// ------------------------------------------------------------------
 // Code thanks to S.W.C. Ploeger.
-// ------------------------------------------------------------------
 {
   double intpart;
   modf(f + 0.5, &intpart);
@@ -185,14 +159,10 @@ int Utils::rndToInt(const double& f)
 }
 
 
-// ----------------------------
 double Utils::rndToNearestMult(
   const double& value,
   const double& factor)
-// ----------------------------
-// ------------------------------------------------------------------
 // Round value to the nearest multiple of factor.
-// ------------------------------------------------------------------
 {
   double result;
 
@@ -219,11 +189,9 @@ double Utils::rndToNearestMult(
 }
 
 
-// -------------------------------------
 double Utils::dist(
   const double& x1, const double& y1,
   const double& x2, const double& y2)
-// -------------------------------------
 {
   double result;
   result = pow(x1 - x2, 2) + pow(y1 - y2, 2);
@@ -232,9 +200,7 @@ double Utils::dist(
 }
 
 
-// -----------------------------------
 double Utils::abs(const double& val)
-// -----------------------------------
 {
   double result = val;
   if (result < 0.0)
@@ -245,11 +211,9 @@ double Utils::abs(const double& val)
 }
 
 
-// -------------------
 double Utils::maxx(
   const double& d0,
   const double& d1)
-// -------------------
 {
   double result = d0;
   if (d0 < d1)
@@ -260,11 +224,9 @@ double Utils::maxx(
 }
 
 
-// -------------------
 double Utils::minn(
   const double& d0,
   const double& d1)
-// -------------------
 {
   double result = d0;
   if (d1 < d0)
@@ -275,39 +237,31 @@ double Utils::minn(
 }
 
 
-// ------------------
 double Utils::perc(
   const int& numr,
   const int& denm)
-// ------------------
 {
   return Utils::perc(
            (double)numr,
            (double)denm);
 }
 
-// ---------------------
 double Utils::perc(
   const double& numr,
   const double& denm)
-// ---------------------
 {
   return (numr/denm)*100.0;
 }
 
 
-// -------------------
 double Utils::fishEye(
   const double& distortion,
   const double& value)
-// -------------------
-// ------------------------------------------------------------------
 // Graphical Fisheye Function (Sarkar and Brown,1994)
 // In: dist the distortion factor
 //     value in [0, 1]
 // Out: return value in [0, 1]
 // Focus is at 0.
-// ------------------------------------------------------------------
 {
   double result;
   result = ((distortion + 1)*value) / (distortion*value + 1);
@@ -318,9 +272,7 @@ double Utils::fishEye(
 // -- statistics functions --------------------------------------
 
 
-// ----------------------------------------------
 double Utils::mean(const vector< double > vals)
-// ----------------------------------------------
 {
   double result = 0;
   if (vals.size() > 0)
@@ -335,9 +287,7 @@ double Utils::mean(const vector< double > vals)
 }
 
 
-// --------------------------------------------------
 double Utils::variance(const vector< double > vals)
-// --------------------------------------------------
 {
   double result = 0;
   double mean = Utils::mean(vals);
@@ -355,9 +305,7 @@ double Utils::variance(const vector< double > vals)
 }
 
 
-// ------------------------------------------------
 double Utils::stdDev(const vector< double > vals)
-// ------------------------------------------------
 {
   double result = 0;
   result = sqrt(Utils::variance(vals));
@@ -368,13 +316,11 @@ double Utils::stdDev(const vector< double > vals)
 // -- classification (binning ) -------------------------------------
 
 
-// --------------------------------------
 void Utils::classEqualIntervals(
   const size_t& numClasses,
   const vector< double > &values,
   vector< string > &legendClasses,
   map< double, size_t > &valuesToClasses)
-// --------------------------------------
 {
   if ((0 < values.size()) &&
       (0 < numClasses && numClasses < values.size()))
@@ -444,13 +390,11 @@ void Utils::classEqualIntervals(
 }
 
 
-// --------------------------------------
 void Utils::classifyQuantiles(
   const size_t& numClasses,
   set< double > &values,
   vector< string > &legendClasses,
   map< double, size_t > &valuesToClasses)
-// --------------------------------------
 {
   if ((0 < values.size()) &&
       (0 < numClasses && numClasses < values.size()))
@@ -530,13 +474,11 @@ void Utils::classifyQuantiles(
 }
 
 
-// ---------------------------------------
 void Utils::classifyMeanStandardDeviation(
   const size_t& numClasses,
   const vector< double > &values,
   vector< string > &legendClasses,
   map< double, size_t > &valuesToClasses)
-// ---------------------------------------
 {
   if ((0 < values.size()) &&
       (0 < numClasses && numClasses < values.size()))

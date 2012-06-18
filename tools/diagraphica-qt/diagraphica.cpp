@@ -103,9 +103,7 @@ int main(int argc, char** argv)
 
 // -- functions inherited from wxApp --------------------------------
 
-// -------------------
 int DiaGraph::OnExit()
-// -------------------
 {
   if (graph != 0)
   {
@@ -121,9 +119,7 @@ int DiaGraph::OnExit()
 // -- load & save data ----------------------------------------------
 
 
-// ------------------------------------------
 void DiaGraph::openFile(const std::string& path)
-// ------------------------------------------
 {
   Parser* parser   = NULL;
   std::string fileName  = "";
@@ -301,9 +297,7 @@ void DiaGraph::openFile(const std::string& path)
 }
 
 
-// ------------------------------------------
 void DiaGraph::saveFile(const std::string& path)
-// ------------------------------------------
 {
   // init parser
   Parser* parser = new Parser(this);
@@ -326,9 +320,7 @@ void DiaGraph::saveFile(const std::string& path)
 }
 
 
-// ------------------------------------------------------
 void DiaGraph::handleLoadAttrConfig(const std::string& path)
-// ------------------------------------------------------
 {
   // init parser
   Parser* parser = new Parser(this);
@@ -368,9 +360,7 @@ void DiaGraph::handleLoadAttrConfig(const std::string& path)
 }
 
 
-// ------------------------------------------------------
 void DiaGraph::handleSaveAttrConfig(const std::string& path)
-// ------------------------------------------------------
 {
   // init parser
   Parser* parser = new Parser(this);
@@ -393,9 +383,7 @@ void DiaGraph::handleSaveAttrConfig(const std::string& path)
 }
 
 
-// ---------------------------------------------------
 void DiaGraph::handleLoadDiagram(const std::string& path)
-// ---------------------------------------------------
 {
   // init parser
   Parser*  parser  = new Parser(this);
@@ -464,9 +452,7 @@ void DiaGraph::handleLoadDiagram(const std::string& path)
 }
 
 
-// ---------------------------------------------------
 void DiaGraph::handleSaveDiagram(const std::string& path)
-// ---------------------------------------------------
 {
   // init parser
   Parser* parser   = new Parser(this);
@@ -493,12 +479,10 @@ void DiaGraph::handleSaveDiagram(const std::string& path)
 // -- general input & output ------------------------------------
 
 
-// -------------------------
 void DiaGraph::initProgress(
   const std::string& title,
   const std::string& msg,
   const size_t& max)
-// -------------------------
 {
   if (progressDialog != NULL)
   {
@@ -517,9 +501,7 @@ void DiaGraph::initProgress(
 }
 
 
-// --------------------------------------------
 void DiaGraph::updateProgress(const size_t& val)
-// --------------------------------------------
 {
   if (progressDialog != NULL)
   {
@@ -528,9 +510,7 @@ void DiaGraph::updateProgress(const size_t& val)
 }
 
 
-// ---------------------------
 void DiaGraph::closeProgress()
-// ---------------------------
 {
   if (progressDialog != NULL)
   {
@@ -542,65 +522,43 @@ void DiaGraph::closeProgress()
 }
 
 
-// ----------------------------------------------
 void DiaGraph::setOutputText(const std::string& msg)
-// ----------------------------------------------
-// ------------------------------------------------------------------
 // Clear existing text output and display 'msg'.
-// ------------------------------------------------------------------
 {
   frame->appOutputText(msg);
 }
 
 
-// -------------------------------------------
 void DiaGraph::setOutputText(const int& val)
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Clear existing text output and display 'val'.
-// ------------------------------------------------------------------
 {
   std::string msg = Utils::intToStr(val);
   frame->appOutputText(msg);
 }
 
 
-// ----------------------------------------------
 void DiaGraph::appOutputText(const std::string& msg)
-// ----------------------------------------------
-// ------------------------------------------------------------------
 // Append 'msg' to the current text output without clearing it first.
-// ------------------------------------------------------------------
 {
   frame->appOutputText(msg);
 }
 
 
-// -------------------------------------------
 void DiaGraph::appOutputText(const int& val)
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Append 'val' to the current text output without clearing it first.
-// ------------------------------------------------------------------
 {
   std::string msg = Utils::intToStr(val);
   frame->appOutputText(msg);
 }
 
-// -------------------------------------------
 void DiaGraph::appOutputText(const size_t& val)
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Append 'val' to the current text output without clearing it first.
-// ------------------------------------------------------------------
 {
   std::string msg = Utils::size_tToStr(val);
   frame->appOutputText(msg);
 }
 
-// -------------------------------------
 void DiaGraph::getColor(ColorRGB& col)
-// -------------------------------------
 {
   wxColourData   data;
   wxColourDialog dialog(frame, &data);
@@ -617,9 +575,7 @@ void DiaGraph::getColor(ColorRGB& col)
 }
 
 
-// ---------------------------------------------
 void DiaGraph::handleCloseFrame(PopupFrame* f)
-// ---------------------------------------------
 {
   frame->handleCloseFrame(f);
 }
@@ -628,20 +584,16 @@ void DiaGraph::handleCloseFrame(PopupFrame* f)
 // -- interaction with attributes & domains -------------------------
 
 
-// ------------------------------------------------
 void DiaGraph::handleAttributeSel(const size_t& idx)
-// ------------------------------------------------
 {
   // display domain
   displAttrDomain(idx);
 }
 
 
-// ---------------------------
 void DiaGraph::handleMoveAttr(
   const size_t& idxFr,
   const size_t& idxTo)
-// ---------------------------
 {
   if (idxFr != NON_EXISTING && idxFr < graph->getSizeAttributes() &&
       idxTo != NON_EXISTING && idxTo < graph->getSizeAttributes())
@@ -653,9 +605,7 @@ void DiaGraph::handleMoveAttr(
 }
 
 
-// ------------------------------------------------------------------
 void DiaGraph::handleAttributeDuplicate(const vector< size_t > &indcs)
-// ------------------------------------------------------------------
 {
   // duplicate attributes
   graph->duplAttributes(indcs);
@@ -665,9 +615,7 @@ void DiaGraph::handleAttributeDuplicate(const vector< size_t > &indcs)
 }
 
 /*
-// ---------------------------------------------------------------
 void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
-// ---------------------------------------------------------------
 {
     // reset simulator, timeSeries & examiner
     if ( simulator != NULL )
@@ -710,9 +658,7 @@ void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
 }
 */
 
-// ---------------------------------------------------
 void DiaGraph::handleAttributeDelete(const size_t& idx)
-// ---------------------------------------------------
 {
   // reset simulator, timeSeries & examiner
   if (simulator != NULL)
@@ -805,11 +751,9 @@ void DiaGraph::handleAttributeDelete(const size_t& idx)
 }
 
 
-// ----------------------------------
 void DiaGraph::handleAttributeRename(
   const size_t& idx,
   const std::string& name)
-// ----------------------------------
 {
   if (idx != NON_EXISTING && idx < graph->getSizeAttributes())
   {
@@ -819,9 +763,7 @@ void DiaGraph::handleAttributeRename(
 }
 
 
-// ----------------------------------------------------------------
 void DiaGraph::handleAttributeCluster(const vector< size_t > &indcs)
-// ----------------------------------------------------------------
 {
   bool zeroCard = false;
   clustered = true;
@@ -881,9 +823,7 @@ void DiaGraph::handleAttributeCluster(const vector< size_t > &indcs)
 }
 
 
-// -----------------------------------------------------
 void DiaGraph::handleAttrPartition(const size_t& attrIdx)
-// -----------------------------------------------------
 {
   if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
   {
@@ -903,11 +843,9 @@ void DiaGraph::handleAttrPartition(const size_t& attrIdx)
 }
 
 
-// --------------------------------
 void DiaGraph::handleAttrPartition(
   const size_t& numParts,
   const size_t& method)
-// --------------------------------
 {
   if (tempAttr != NULL)
   {
@@ -970,9 +908,7 @@ void DiaGraph::handleAttrPartition(
 }
 
 
-// -------------------------------------------------------
 void DiaGraph::handleAttrDepartition(const size_t& attrIdx)
-// -------------------------------------------------------
 {
   if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
   {
@@ -1021,19 +957,15 @@ void DiaGraph::handleAttrDepartition(const size_t& attrIdx)
   }
 }
 
-// -------------------------------------------
 void DiaGraph::handleAttrPartitionCloseFrame()
-// -------------------------------------------
 {
   tempAttr = NULL;
 }
 
 
-// --------------------------
 void DiaGraph::getAttrValues(
   const size_t& attrIdx,
   vector< double > &vals)
-// --------------------------
 {
   if (0 != NON_EXISTING && attrIdx < graph->getSizeAttributes())
   {
@@ -1049,11 +981,9 @@ void DiaGraph::getAttrValues(
 }
 
 
-// --------------------------
 void DiaGraph::getAttrValues(
   const size_t& attrIdx,
   set< double > &vals)
-// --------------------------
 {
   if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
   {
@@ -1069,12 +999,10 @@ void DiaGraph::getAttrValues(
 }
 
 
-// -----------------------------
 void DiaGraph::handleMoveDomVal(
   const size_t& idxAttr,
   const size_t& idxFr,
   const size_t& idxTo)
-// -----------------------------
 {
   if (idxAttr != NON_EXISTING && idxAttr < graph->getSizeAttributes())
   {
@@ -1109,12 +1037,10 @@ void DiaGraph::handleMoveDomVal(
 }
 
 
-// ------------------------------
 void DiaGraph::handleDomainGroup(
   const size_t& attrIdx,
   const vector< int > domIndcs,
   const std::string& newValue)
-// ------------------------------
 {
   Attribute* attr;
 
@@ -1132,9 +1058,7 @@ void DiaGraph::handleDomainGroup(
 }
 
 
-// -----------------------------------------------------
 void DiaGraph::handleDomainUngroup(const size_t& attrIdx)
-// -----------------------------------------------------
 {
   Attribute* attr;
 
@@ -1152,11 +1076,9 @@ void DiaGraph::handleDomainUngroup(const size_t& attrIdx)
 }
 
 
-// ------------------------------
 void DiaGraph::getAttributeNames(
   const vector< size_t > &indcs,
   vector< wxString > &names)
-// ------------------------------
 {
   names.clear();
   for (size_t i = 0; i < indcs.size(); ++i)
@@ -1170,9 +1092,7 @@ void DiaGraph::getAttributeNames(
 }
 
 
-// ---------------------------------------------
 size_t DiaGraph::getAttributeType(const size_t& idx)
-// ---------------------------------------------
 {
   size_t result = NON_EXISTING;
   if (idx != NON_EXISTING && idx < graph->getSizeAttributes())
@@ -1183,9 +1103,7 @@ size_t DiaGraph::getAttributeType(const size_t& idx)
 }
 
 
-// -------------------------------------------------
 size_t DiaGraph::getAttrSizeCurDomain(const size_t& idx)
-// -------------------------------------------------
 {
   size_t result = 0;
   if (idx != NON_EXISTING && idx < graph->getSizeAttributes())
@@ -1199,9 +1117,7 @@ size_t DiaGraph::getAttrSizeCurDomain(const size_t& idx)
 // -- attribute plots -----------------------------------------------
 
 
-// -------------------------------------------------
 void DiaGraph::handleAttributePlot(const size_t& idx)
-// -------------------------------------------------
 {
   if (canvasDistr == NULL)
   {
@@ -1227,11 +1143,9 @@ void DiaGraph::handleAttributePlot(const size_t& idx)
 }
 
 
-// --------------------------------
 void DiaGraph::handleAttributePlot(
   const size_t& idx1,
   const size_t& idx2)
-// --------------------------------
 {
   if (canvasCorrl == NULL)
   {
@@ -1263,9 +1177,7 @@ void DiaGraph::handleAttributePlot(
 }
 
 
-// -------------------------------------------------------------
 void DiaGraph::handleAttributePlot(const vector< size_t > &indcs)
-// -------------------------------------------------------------
 {
   if (canvasCombn == NULL)
   {
@@ -1326,9 +1238,7 @@ void DiaGraph::handleAttributePlot(const vector< size_t > &indcs)
 }
 
 
-// ------------------------------------
 void DiaGraph::handlePlotFrameDestroy()
-// ------------------------------------
 {
   if (distrPlot != NULL)
   {
@@ -1353,18 +1263,14 @@ void DiaGraph::handlePlotFrameDestroy()
 }
 
 
-// -----------------------------------------
 void DiaGraph::handleEditClust(Cluster* c)
-// -----------------------------------------
 {
   frame->displClustMenu();
   tempClust = c;
 }
 
 
-// -------------------------------------
 void DiaGraph::handleClustFrameDisplay()
-// -------------------------------------
 {
   vector< size_t >    attrIdcs;
   vector< std::string > attrNames;
@@ -1381,9 +1287,7 @@ void DiaGraph::handleClustFrameDisplay()
 }
 
 
-// ---------------------------------------------------------
 void DiaGraph::handleClustPlotFrameDisplay(const size_t& /*idx*/)
-// ---------------------------------------------------------
 {
   if (canvasDistr == NULL)
   {
@@ -1406,11 +1310,9 @@ void DiaGraph::handleClustPlotFrameDisplay(const size_t& /*idx*/)
 }
 
 
-// ----------------------------------------
 void DiaGraph::handleClustPlotFrameDisplay(
   const size_t& idx1,
   const size_t& idx2)
-// ----------------------------------------
 {
   if (canvasCorrl == NULL)
   {
@@ -1443,9 +1345,7 @@ void DiaGraph::handleClustPlotFrameDisplay(
 }
 
 
-// ---------------------------------------------------------------------
 void DiaGraph::handleClustPlotFrameDisplay(const vector< size_t > &indcs)
-// ---------------------------------------------------------------------
 {
   if (canvasCombn == NULL)
   {
@@ -1476,17 +1376,13 @@ void DiaGraph::handleClustPlotFrameDisplay(const vector< size_t > &indcs)
 }
 
 
-// ----------------------------------------
 void DiaGraph::setClustMode(const int& m)
-// ----------------------------------------
 {
   clustMode = m;
 }
 
 
-// -------------------------
 size_t DiaGraph::getClustMode()
-// -------------------------
 {
   return clustMode;
 }
@@ -1495,9 +1391,7 @@ size_t DiaGraph::getClustMode()
 // -- global mode changes -------------------------------------------
 
 
-// -----------------------------------
 void DiaGraph::handleSetModeAnalysis()
-// -----------------------------------
 {
   mode = MODE_ANALYSIS;
   if (editor != NULL)
@@ -1533,9 +1427,7 @@ void DiaGraph::handleSetModeAnalysis()
 }
 
 
-// -------------------------------
 void DiaGraph::handleSetModeEdit()
-// -------------------------------
 {
   mode = MODE_EDIT;
   editor->reGenText();
@@ -1547,17 +1439,13 @@ void DiaGraph::handleSetModeEdit()
 }
 
 
-// --------------------
 int DiaGraph::getMode()
-// --------------------
 {
   return mode;
 }
 
 
-// ------------------------------
 void DiaGraph::handleSetViewSim()
-// ------------------------------
 {
   view = VIEW_SIM;
   if (arcDgrm != NULL)
@@ -1568,9 +1456,7 @@ void DiaGraph::handleSetViewSim()
 }
 
 
-// --------------------------------
 void DiaGraph::handleSetViewTrace()
-// --------------------------------
 {
   view = VIEW_TRACE;
   handleMarkFrameClust(timeSeries);
@@ -1578,17 +1464,13 @@ void DiaGraph::handleSetViewTrace()
 }
 
 
-// --------------------
 int DiaGraph::getView()
-// --------------------
 {
   return view;
 }
 
 
-// --------------------
 bool DiaGraph::getClustered()
-// --------------------
 {
   return clustered;
 }
@@ -1598,25 +1480,19 @@ bool DiaGraph::getClustered()
 // -- diagram editor ------------------------------------------------
 
 
-// ----------------------------------
 void* DiaGraph::getGraph()
-// ----------------------------------
 {
   return graph;
 }
 
 
-// ----------------------------------
 void DiaGraph::handleNote(const size_t& shapeId, const std::string& msg)
-// ----------------------------------
 {
   frame->handleNote(shapeId, msg);
 }
 
 
-// ----------------------------------
 void DiaGraph::handleEditModeSelect()
-// ----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1639,9 +1515,7 @@ void DiaGraph::handleEditModeSelect()
 }
 
 
-// ----------------------------------
 void DiaGraph::handleEditModeNote()
-// ----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1650,9 +1524,7 @@ void DiaGraph::handleEditModeNote()
 }
 
 
-// ---------------------------------------------
 void DiaGraph::handleEditModeDOF(Colleague* c)
-// ---------------------------------------------
 {
   if (c == frame)
   {
@@ -1668,9 +1540,7 @@ void DiaGraph::handleEditModeDOF(Colleague* c)
 }
 
 
-// --------------------------------
 void DiaGraph::handleEditModeRect()
-// --------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1679,9 +1549,7 @@ void DiaGraph::handleEditModeRect()
 }
 
 
-// -----------------------------------
 void DiaGraph::handleEditModeEllipse()
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1690,9 +1558,7 @@ void DiaGraph::handleEditModeEllipse()
 }
 
 
-// --------------------------------
 void DiaGraph::handleEditModeLine()
-// --------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1701,9 +1567,7 @@ void DiaGraph::handleEditModeLine()
 }
 
 
-// ---------------------------------
 void DiaGraph::handleEditModeArrow()
-// ---------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1712,9 +1576,7 @@ void DiaGraph::handleEditModeArrow()
 }
 
 
-// ----------------------------------
 void DiaGraph::handleEditModeDArrow()
-// ----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1723,9 +1585,7 @@ void DiaGraph::handleEditModeDArrow()
 }
 
 
-// -----------------------------------
 void DiaGraph::handleEditModeFillCol()
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1734,9 +1594,7 @@ void DiaGraph::handleEditModeFillCol()
 }
 
 
-// -----------------------------------
 void DiaGraph::handleEditModeLineCol()
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1745,9 +1603,7 @@ void DiaGraph::handleEditModeLineCol()
 }
 
 
-// --------------------------------------------------
 void DiaGraph::handleEditShowGrid(const bool& flag)
-// --------------------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1756,9 +1612,7 @@ void DiaGraph::handleEditShowGrid(const bool& flag)
 }
 
 
-// --------------------------------------------------
 void DiaGraph::handleEditSnapGrid(const bool& flag)
-// --------------------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1767,7 +1621,6 @@ void DiaGraph::handleEditSnapGrid(const bool& flag)
 }
 
 
-// ----------------------------
 void DiaGraph::handleEditShape(
   const bool& cut,
   const bool& copy,
@@ -1779,7 +1632,6 @@ void DiaGraph::handleEditShape(
   const bool& sendBackward,
   const bool& editDOF,
   const int&  checkedItem)
-// ----------------------------
 {
   frame->displShapeMenu(
     cut,
@@ -1795,11 +1647,9 @@ void DiaGraph::handleEditShape(
 }
 
 
-// ----------------------------
 void DiaGraph::handleShowVariable(
   const std::string& variable,
   const int&    variableId)
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1808,9 +1658,7 @@ void DiaGraph::handleShowVariable(
 }
 
 
-// ----------------------------
 void DiaGraph::handleShowNote(const std::string& variable, const size_t& shapeId)
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1819,9 +1667,7 @@ void DiaGraph::handleShowNote(const std::string& variable, const size_t& shapeId
 }
 
 
-// ----------------------------
 void DiaGraph::handleAddText(std::string& variable, size_t& shapeId)
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1830,9 +1676,7 @@ void DiaGraph::handleAddText(std::string& variable, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiaGraph::handleTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1841,9 +1685,7 @@ void DiaGraph::handleTextSize(size_t& textSize, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiaGraph::handleSetTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1852,9 +1694,7 @@ void DiaGraph::handleSetTextSize(size_t& textSize, size_t& shapeId)
 }
 
 
-// ----------------------------
 void DiaGraph::handleCutShape()
-// ----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1863,9 +1703,7 @@ void DiaGraph::handleCutShape()
 }
 
 
-// -----------------------------
 void DiaGraph::handleCopyShape()
-// -----------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1874,9 +1712,7 @@ void DiaGraph::handleCopyShape()
 }
 
 
-// ------------------------------
 void DiaGraph::handlePasteShape()
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1885,9 +1721,7 @@ void DiaGraph::handlePasteShape()
 }
 
 
-// -------------------------------
 void DiaGraph::handleDeleteShape()
-// -------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1896,9 +1730,7 @@ void DiaGraph::handleDeleteShape()
 }
 
 
-// -------------------------------------
 void DiaGraph::handleBringToFrontShape()
-// -------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1907,9 +1739,7 @@ void DiaGraph::handleBringToFrontShape()
 }
 
 
-// -----------------------------------
 void DiaGraph::handleSendToBackShape()
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1918,9 +1748,7 @@ void DiaGraph::handleSendToBackShape()
 }
 
 
-// -------------------------------------
 void DiaGraph::handleBringForwardShape()
-// -------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1929,9 +1757,7 @@ void DiaGraph::handleBringForwardShape()
 }
 
 
-// -------------------------------------
 void DiaGraph::handleSendBackwardShape()
-// -------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1940,9 +1766,7 @@ void DiaGraph::handleSendBackwardShape()
 }
 
 
-// --------------------------------
 void DiaGraph::handleEditDOFShape()
-// --------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1951,9 +1775,7 @@ void DiaGraph::handleEditDOFShape()
 }
 
 
-// --------------------------------
 void DiaGraph::handleSetDOF(const size_t& attrIdx)
-// --------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1962,9 +1784,7 @@ void DiaGraph::handleSetDOF(const size_t& attrIdx)
 }
 
 
-// --------------------------------
 void DiaGraph::handleCheckedVariable(const size_t& idDOF, const int& variableId)
-// --------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -1972,13 +1792,11 @@ void DiaGraph::handleCheckedVariable(const size_t& idDOF, const int& variableId)
   }
 }
 
-// ------------------------------------
 void DiaGraph::handleEditDOF(
   const vector< size_t > &degsOfFrdmIds,
   const vector< std::string > &degsOfFrdm,
   const vector< size_t > &attrIndcs,
   const size_t& selIdx)
-// ------------------------------------
 {
   // init attrIndcs
   vector< std::string > attributes;
@@ -2029,30 +1847,20 @@ void DiaGraph::handleEditDOF(
   canvasOpaChooser->Refresh();
 }
 
-// -------------------------------------------
 void DiaGraph::setDOFColorSelected()
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Select the Color Item in the Edit DOF Menu
-// ------------------------------------------------------------------
 {
   frame->setDOFColorSelected();
 }
 
-// -------------------------------------------
 void DiaGraph::setDOFOpacitySelected()
-// -------------------------------------------
-// ------------------------------------------------------------------
 // Select the Opacity Item in the Edit DOF Menu
-// ------------------------------------------------------------------
 {
   frame->setDOFOpacitySelected();
 }
 
 
-// ---------------------------------------------
 void DiaGraph::handleDOFSel(const size_t& DOFIdx)
-// ---------------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2061,11 +1869,9 @@ void DiaGraph::handleDOFSel(const size_t& DOFIdx)
 }
 
 
-// -----------------------------------
 void DiaGraph::handleSetDOFTextStatus(
   const size_t& DOFIdx,
   const int& status)
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2074,9 +1880,7 @@ void DiaGraph::handleSetDOFTextStatus(
 }
 
 
-// ------------------------------------------------------
 size_t DiaGraph::handleGetDOFTextStatus(const size_t& DOFIdx)
-// ------------------------------------------------------
 {
   size_t result = NON_EXISTING;
   if (mode == MODE_EDIT && editor != NULL)
@@ -2087,9 +1891,7 @@ size_t DiaGraph::handleGetDOFTextStatus(const size_t& DOFIdx)
 }
 
 
-// ----------------------------------
 void DiaGraph::handleDOFColActivate()
-// ----------------------------------
 {
   if (colChooser != NULL)
   {
@@ -2103,9 +1905,7 @@ void DiaGraph::handleDOFColActivate()
 }
 
 
-// ------------------------------------
 void DiaGraph::handleDOFColDeactivate()
-// ------------------------------------
 {
   if (colChooser != NULL)
   {
@@ -2119,11 +1919,9 @@ void DiaGraph::handleDOFColDeactivate()
 }
 
 
-// ------------------------------
 void DiaGraph::handleDOFColAdd(
   const double& hue,
   const double& y)
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2132,12 +1930,10 @@ void DiaGraph::handleDOFColAdd(
 }
 
 
-// -------------------------------
 void DiaGraph::handleDOFColUpdate(
   const size_t& idx,
   const double& hue,
   const double& y)
-// -------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2146,10 +1942,8 @@ void DiaGraph::handleDOFColUpdate(
 }
 
 
-// ------------------------------
 void DiaGraph::handleDOFColClear(
   const size_t& idx)
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2158,11 +1952,9 @@ void DiaGraph::handleDOFColClear(
 }
 
 
-// -------------------------------------
 void DiaGraph::handleDOFColSetValuesEdt(
   const vector< double > &hue,
   const vector< double > &y)
-// -------------------------------------
 {
   if (colChooser != NULL)
   {
@@ -2171,9 +1963,7 @@ void DiaGraph::handleDOFColSetValuesEdt(
 }
 
 
-// ----------------------------------
 void DiaGraph::handleDOFOpaActivate()
-// ----------------------------------
 {
   if (opaChooser != NULL)
   {
@@ -2187,9 +1977,7 @@ void DiaGraph::handleDOFOpaActivate()
 }
 
 
-// ------------------------------------
 void DiaGraph::handleDOFOpaDeactivate()
-// ------------------------------------
 {
   if (opaChooser != NULL)
   {
@@ -2203,11 +1991,9 @@ void DiaGraph::handleDOFOpaDeactivate()
 }
 
 
-// ------------------------------
 void DiaGraph::handleDOFOpaAdd(
   const double& opa,
   const double& y)
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2216,12 +2002,10 @@ void DiaGraph::handleDOFOpaAdd(
 }
 
 
-// -------------------------------
 void DiaGraph::handleDOFOpaUpdate(
   const size_t& idx,
   const double& opa,
   const double& y)
-// -------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2230,10 +2014,8 @@ void DiaGraph::handleDOFOpaUpdate(
 }
 
 
-// ------------------------------
 void DiaGraph::handleDOFOpaClear(
   const size_t& idx)
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2242,11 +2024,9 @@ void DiaGraph::handleDOFOpaClear(
 }
 
 
-// -------------------------------------
 void DiaGraph::handleDOFOpaSetValuesEdt(
   const vector< double > &opa,
   const vector< double > &y)
-// -------------------------------------
 {
   if (opaChooser != NULL)
   {
@@ -2255,11 +2035,9 @@ void DiaGraph::handleDOFOpaSetValuesEdt(
 }
 
 
-// ------------------------------
 void DiaGraph::handleLinkDOFAttr(
   const size_t DOFIdx,
   const size_t attrIdx)
-// ------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2274,9 +2052,7 @@ void DiaGraph::handleLinkDOFAttr(
 }
 
 
-// ---------------------------------------------------
 void DiaGraph::handleUnlinkDOFAttr(const size_t DOFIdx)
-// ---------------------------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2285,9 +2061,7 @@ void DiaGraph::handleUnlinkDOFAttr(const size_t DOFIdx)
 }
 
 
-// -----------------------------------
 void DiaGraph::handleDOFFrameDestroy()
-// -----------------------------------
 {
   if (mode == MODE_EDIT && editor != NULL)
   {
@@ -2308,9 +2082,7 @@ void DiaGraph::handleDOFFrameDestroy()
 }
 
 
-// -------------------------------
 void DiaGraph::handleDOFDeselect()
-// -------------------------------
 {
   frame->clearDOFInfo();
 }
@@ -2319,11 +2091,9 @@ void DiaGraph::handleDOFDeselect()
 // -- simulator, time series & examiner -----------------------------
 
 /*
-// ------------------------------------
 void DiaGraph::handleSetSimCurrFrame(
     Cluster* frame,
     const vector< Attribute* > &attrs )
-// ------------------------------------
 {
     if ( simulator != NULL )
     {
@@ -2341,11 +2111,9 @@ void DiaGraph::handleSetSimCurrFrame(
 }
 */
 
-// ------------------------------------
 void DiaGraph::initSimulator(
   Cluster* currFrame,
   const vector< Attribute* > &attrs)
-// ------------------------------------
 {
   if (simulator != NULL)
   {
@@ -2359,9 +2127,7 @@ void DiaGraph::initSimulator(
 }
 
 
-// ----------------------------------------------------------
 void DiaGraph::initTimeSeries(const vector< size_t > attrIdcs)
-// ----------------------------------------------------------
 {
   if (timeSeries != NULL)
   {
@@ -2375,11 +2141,9 @@ void DiaGraph::initTimeSeries(const vector< size_t > attrIdcs)
 }
 
 
-// ---------------------------
 void DiaGraph::markTimeSeries(
   Colleague* /*sender*/,
   Cluster* currFrame)
-// ---------------------------
 {
   if (timeSeries != NULL)
   {
@@ -2395,11 +2159,9 @@ void DiaGraph::markTimeSeries(
 }
 
 
-// ----------------------------------
 void DiaGraph::markTimeSeries(
   Colleague* /*sender*/,
   const vector< Cluster* > frames)
-// ----------------------------------
 {
   if (timeSeries != NULL)
   {
@@ -2414,11 +2176,9 @@ void DiaGraph::markTimeSeries(
 }
 
 
-// ------------------------------------
 void DiaGraph::addToExaminer(
   Cluster* currFrame,
   const vector< Attribute* > &attrs)
-// ------------------------------------
 {
   if (examiner != NULL)
   {
@@ -2432,11 +2192,9 @@ void DiaGraph::addToExaminer(
 }
 
 
-// ------------------------------------
 void DiaGraph::addToExaminer(
   const vector< Cluster* > frames,
   const vector< Attribute* > &attrs)
-// ------------------------------------
 {
   if (examiner != NULL)
   {
@@ -2459,7 +2217,6 @@ void DiaGraph::handleShowClusterMenu()
 }
 
 
-// ----------------------------
 void DiaGraph::handleSendDgrm(
   Colleague* sender,
   const bool& sendSglToSiml,
@@ -2467,7 +2224,6 @@ void DiaGraph::handleSendDgrm(
   const bool& sendSetToTrace,
   const bool& sendSglToExnr,
   const bool& sendSetToExnr)
-// ----------------------------
 {
   dgrmSender = sender;
 
@@ -2480,9 +2236,7 @@ void DiaGraph::handleSendDgrm(
 }
 
 
-// -------------------------------------
 void DiaGraph::handleSendDgrmSglToSiml()
-// -------------------------------------
 {
   if (dgrmSender == arcDgrm)
   {
@@ -2499,9 +2253,7 @@ void DiaGraph::handleSendDgrmSglToSiml()
 }
 
 
-// --------------------------------------
 void DiaGraph::handleSendDgrmSglToTrace()
-// --------------------------------------
 {
   if (dgrmSender == arcDgrm)
   {
@@ -2514,9 +2266,7 @@ void DiaGraph::handleSendDgrmSglToTrace()
 }
 
 
-// --------------------------------------
 void DiaGraph::handleSendDgrmSetToTrace()
-// --------------------------------------
 {
   if (dgrmSender == arcDgrm)
   {
@@ -2529,9 +2279,7 @@ void DiaGraph::handleSendDgrmSetToTrace()
 }
 
 
-// -------------------------------------
 void DiaGraph::handleSendDgrmSglToExnr()
-// -------------------------------------
 {
   if (dgrmSender == arcDgrm)
   {
@@ -2548,9 +2296,7 @@ void DiaGraph::handleSendDgrmSglToExnr()
 }
 
 
-// -------------------------------------
 void DiaGraph::handleSendDgrmSetToExnr()
-// -------------------------------------
 {
   if (dgrmSender == arcDgrm)
   {
@@ -2559,9 +2305,7 @@ void DiaGraph::handleSendDgrmSetToExnr()
 }
 
 
-// -----------------------------------------------
 void DiaGraph::handleClearSim(Colleague* sender)
-// -----------------------------------------------
 {
   if (sender == simulator)
   {
@@ -2590,9 +2334,7 @@ void DiaGraph::handleClearSim(Colleague* sender)
 }
 
 
-// ------------------------------------------------
 void DiaGraph::handleClearExnr(Colleague* sender)
-// ------------------------------------------------
 {
   if (sender == examiner)
   {
@@ -2621,9 +2363,7 @@ void DiaGraph::handleClearExnr(Colleague* sender)
 }
 
 
-// ---------------------------------------------------
 void DiaGraph::handleClearExnrCur(Colleague* sender)
-// ---------------------------------------------------
 {
   if (sender == examiner)
   {
@@ -2644,9 +2384,7 @@ void DiaGraph::handleClearExnrCur(Colleague* sender)
 }
 
 /*
-// -----------------------------------------------------
 void DiaGraph::handleAnimFrameBundl( Colleague* sender )
-// -----------------------------------------------------
 {
     if ( arcDgrm != NULL && canvasArcD != NULL )
     {
@@ -2668,9 +2406,7 @@ void DiaGraph::handleAnimFrameBundl( Colleague* sender )
 }
 */
 
-// -----------------------------------------------------
 void DiaGraph::handleAnimFrameClust(Colleague* sender)
-// -----------------------------------------------------
 {
   if (arcDgrm != NULL && canvasArcD != NULL)
   {
@@ -2697,9 +2433,7 @@ void DiaGraph::handleAnimFrameClust(Colleague* sender)
 }
 
 
-// ------------------------------------------------------
 void DiaGraph::handleMarkFrameClust(Colleague* sender)
-// ------------------------------------------------------
 {
   if (arcDgrm != NULL)
   {
@@ -2783,9 +2517,7 @@ void DiaGraph::handleMarkFrameClust(Colleague* sender)
 }
 
 
-// --------------------------------------------------------
 void DiaGraph::handleUnmarkFrameClusts(Colleague* sender)
-// --------------------------------------------------------
 {
   if (arcDgrm != NULL)
   {
@@ -2820,12 +2552,10 @@ void DiaGraph::handleUnmarkFrameClusts(Colleague* sender)
   }
 }
 
-// -----------------------------------
 void DiaGraph::handleShowFrame(
   Cluster* frame,
   const vector< Attribute* > &attrs,
   ColorRGB& col)
-// -----------------------------------
 {
   if (examiner != NULL)
   {
@@ -2838,9 +2568,7 @@ void DiaGraph::handleShowFrame(
 }
 
 
-// -------------------------------
 void DiaGraph::handleUnshowFrame()
-// -------------------------------
 {
   if (examiner != NULL)
   {
@@ -2856,13 +2584,11 @@ void DiaGraph::handleUnshowFrame()
 // -- visualization settings ----------------------------------------
 
 
-// -------------------------------
 void DiaGraph::setSettingsGeneral(
   const wxColour& colClr,
   const wxColour& colTxt,
   const int& szeTxt,
   const double& spdAnim)
-// -------------------------------
 {
   ColorRGB colTmp;
 
@@ -2909,12 +2635,10 @@ void DiaGraph::setSettingsGeneral(
 }
 
 
-// ---------------------------------
 void DiaGraph::setSettingsClustTree(
   const bool& show,
   const bool& annotate,
   const int& colMap)
-// ---------------------------------
 {
   if (arcDgrm != NULL)
   {
@@ -2937,11 +2661,9 @@ void DiaGraph::setSettingsClustTree(
 }
 
 
-// -------------------------------
 void DiaGraph::setSettingsBarTree(
   const bool& show,
   const double& magn)
-// -------------------------------
 {
   if (arcDgrm != NULL)
   {
@@ -2962,17 +2684,13 @@ void DiaGraph::setSettingsBarTree(
 }
 
 
-// --------------------------------------------------------
 void DiaGraph::setSettingsSimulator(const int& blendType)
-// --------------------------------------------------------
 {
   Simulator::setBlendType(blendType);
 }
 
 
-// ------------------------------------------------------
 void DiaGraph::setSettingsTrace(const bool& useShading)
-// ------------------------------------------------------
 {
   TimeSeries::setUseShading(useShading);
 
@@ -2983,13 +2701,11 @@ void DiaGraph::setSettingsTrace(const bool& useShading)
 }
 
 
-// ----------------------------------
 void DiaGraph::setSettingsArcDiagram(
   const bool& showNodes,
   const bool& showArcs,
   const wxColour& colArcs,
   const double& trspArcs)
-// ----------------------------------
 {
   if (arcDgrm != NULL)
   {
@@ -3013,13 +2729,11 @@ void DiaGraph::setSettingsArcDiagram(
 }
 
 
-// --------------------------------------------------
 void DiaGraph::getSettingsGeneral(
   wxColour& colClr,
   wxColour& colTxt,
   int& szeTxt,
   double& spdAnim)
-// --------------------------------------------------
 {
   ColorRGB colTmp;
 
@@ -3035,12 +2749,10 @@ void DiaGraph::getSettingsGeneral(
 }
 
 
-// ---------------------------------
 void DiaGraph::getSettingsClustTree(
   bool& show,
   bool& annotate,
   int& colMap)
-// ---------------------------------
 {
   show = ArcDiagram::getShowTree();
   annotate = ArcDiagram::getAnnotateTree();
@@ -3048,40 +2760,32 @@ void DiaGraph::getSettingsClustTree(
 }
 
 
-// -------------------------------
 void DiaGraph::getSettingsBarTree(
   bool& show,
   double& magn)
-// -------------------------------
 {
   show = ArcDiagram::getShowBarTree();
   magn = ArcDiagram::getMagnBarTree();
 }
 
 
-// --------------------------------------------------
 void DiaGraph::getSettingsSimulator(int& blendType)
-// --------------------------------------------------
 {
   blendType = Simulator::getBlendType();
 }
 
 
-// ------------------------------------------------
 void DiaGraph::getSettingsTrace(bool& useShading)
-// ------------------------------------------------
 {
   useShading = TimeSeries::getUseShading();
 }
 
 
-// ----------------------------------
 void DiaGraph::getSettingsArcDiagram(
   bool& showNodes,
   bool& showArcs,
   wxColour& colArcs,
   double& trspArcs)
-// ----------------------------------
 {
   showNodes = ArcDiagram::getShowLeaves();
   showArcs = ArcDiagram::getShowBundles();
@@ -3093,9 +2797,7 @@ void DiaGraph::getSettingsArcDiagram(
 }
 
 
-// -------------------------------
 void DiaGraph::getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom)
-// -------------------------------
 {
   if (editor != NULL)
   {
@@ -3107,9 +2809,7 @@ void DiaGraph::getGridCoordinates(double& xLeft, double& xRight, double& yTop, d
 // -- visualization -------------------------------------------------
 
 
-// -------------------------------------------
 void DiaGraph::handlePaintEvent(GLCanvas* c)
-// -------------------------------------------
 {
   if (critSect != true)
   {
@@ -3173,9 +2873,7 @@ void DiaGraph::handlePaintEvent(GLCanvas* c)
 }
 
 
-// ------------------------------------------
 void DiaGraph::handleSizeEvent(GLCanvas* c)
-// ------------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3220,9 +2918,7 @@ void DiaGraph::handleSizeEvent(GLCanvas* c)
 }
 
 
-// ---------------------------------------------
 void DiaGraph::updateDependancies(GLCanvas* c)
-// ---------------------------------------------
 {
   if (mode == MODE_ANALYSIS)
   {
@@ -3237,14 +2933,12 @@ void DiaGraph::updateDependancies(GLCanvas* c)
 // -- input event handlers --------------------------------------
 
 
-// ----------------------------
 void DiaGraph::handleDragDrop(
   const int& srcWindowId,
   const int& tgtWindowId,
   const int& tgtX,
   const int& tgtY,
   const vector< int > &data)
-// ----------------------------
 {
   frame->handleDragDrop(
     srcWindowId,
@@ -3255,12 +2949,10 @@ void DiaGraph::handleDragDrop(
 }
 
 
-// ------------------------------------
 void DiaGraph::handleMouseLftDownEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// ------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3305,12 +2997,10 @@ void DiaGraph::handleMouseLftDownEvent(
 }
 
 
-// ----------------------------------
 void DiaGraph::handleMouseLftUpEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// ----------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3355,12 +3045,10 @@ void DiaGraph::handleMouseLftUpEvent(
 }
 
 
-// --------------------------------------
 void DiaGraph::handleMouseLftDClickEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// --------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3392,12 +3080,10 @@ void DiaGraph::handleMouseLftDClickEvent(
 }
 
 
-// ------------------------------------
 void DiaGraph::handleMouseRgtDownEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// ------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3436,12 +3122,10 @@ void DiaGraph::handleMouseRgtDownEvent(
 }
 
 
-// ----------------------------------
 void DiaGraph::handleMouseRgtUpEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// ----------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3480,12 +3164,10 @@ void DiaGraph::handleMouseRgtUpEvent(
 }
 
 
-// --------------------------------------
 void DiaGraph::handleMouseRgtDClickEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// --------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3497,12 +3179,10 @@ void DiaGraph::handleMouseRgtDClickEvent(
 }
 
 
-// -----------------------------------
 void DiaGraph::handleMouseMotionEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// -----------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3555,12 +3235,10 @@ void DiaGraph::handleMouseMotionEvent(
 }
 
 
-// -------------------------------------
 void DiaGraph::handleMouseWheelIncEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// -------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3579,12 +3257,10 @@ void DiaGraph::handleMouseWheelIncEvent(
 }
 
 
-// -------------------------------------
 void DiaGraph::handleMouseWheelDecEvent(
   GLCanvas* c,
   const int& x,
   const int& y)
-// -------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3603,9 +3279,7 @@ void DiaGraph::handleMouseWheelDecEvent(
 }
 
 
-// ------------------------------------------------
 void DiaGraph::handleMouseEnterEvent(GLCanvas* c)
-// ------------------------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3617,9 +3291,7 @@ void DiaGraph::handleMouseEnterEvent(GLCanvas* c)
 }
 
 
-// ------------------------------------------------
 void DiaGraph::handleMouseLeaveEvent(GLCanvas* c)
-// ------------------------------------------------
 {
   if (mode == MODE_ANALYSIS)
   {
@@ -3650,12 +3322,10 @@ void DiaGraph::handleMouseLeaveEvent(GLCanvas* c)
 }
 
 
-// -------------------------------
 void DiaGraph::handleKeyDownEvent(
   GLCanvas* c,
   const int& keyCode,
   const int& specialKey)
-// -------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3687,12 +3357,10 @@ void DiaGraph::handleKeyDownEvent(
 }
 
 
-// -------------------------------
 void DiaGraph::handleKeyUpEvent(
   GLCanvas* c,
   const int& keyCode,
   const int& specialKey)
-// -------------------------------
 {
   if (mode == MODE_EDIT)
   {
@@ -3714,24 +3382,18 @@ void DiaGraph::handleKeyUpEvent(
 // -- overloaded operators --------------------------------------
 
 
-// -------------------------------------------
 void DiaGraph::operator<<(const std::string& msg)
-// -------------------------------------------
 {
   this->appOutputText(msg);
 }
 
 
-// ----------------------------------------
 void DiaGraph::operator<<(const int& msg)
-// ----------------------------------------
 {
   this->appOutputText(msg);
 }
 
-// ----------------------------------------
 void DiaGraph::operator<<(const size_t& msg)
-// ----------------------------------------
 {
   this->appOutputText(msg);
 }
@@ -3739,9 +3401,7 @@ void DiaGraph::operator<<(const size_t& msg)
 // -- protected functions inhereted from Mediator -------------------
 
 
-// ----------------------------
 void DiaGraph::initColleagues()
-// ----------------------------
 {
   // init graph
   graph = NULL;
@@ -3793,9 +3453,7 @@ void DiaGraph::initColleagues()
 }
 
 
-// -----------------------------
 void DiaGraph::clearColleagues()
-// -----------------------------
 {
   // composition
   if (graph != NULL)
@@ -3885,9 +3543,7 @@ void DiaGraph::clearColleagues()
 }
 
 
-// -----------------------------
 void DiaGraph::displAttributes()
-// -----------------------------
 {
   Attribute*       attr;
   vector< size_t >    indcs;
@@ -3938,9 +3594,7 @@ void DiaGraph::displAttributes()
 }
 
 
-// ----------------------------------------------------
 void DiaGraph::displAttributes(const size_t& selAttrIdx)
-// ----------------------------------------------------
 {
   Attribute*       attr;
   vector< size_t >    indcs;
@@ -3991,9 +3645,7 @@ void DiaGraph::displAttributes(const size_t& selAttrIdx)
 }
 
 
-// -------------------------------------------------
 void DiaGraph::displAttrDomain(const size_t& attrIdx)
-// -------------------------------------------------
 {
   Attribute* attribute;
   size_t        numValues;
@@ -4035,9 +3687,7 @@ void DiaGraph::displAttrDomain(const size_t& attrIdx)
 }
 
 
-// -----------------------------
 void DiaGraph::clearAttrDomain()
-// -----------------------------
 {}
 
 

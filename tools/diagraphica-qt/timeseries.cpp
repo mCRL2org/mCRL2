@@ -32,13 +32,11 @@ int TimeSeries::itvAnim = 350;
 // -- constructors and destructor -----------------------------------
 
 
-// ----------------------------
 TimeSeries::TimeSeries(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ----------------------------
 {
   critSect = false;
 
@@ -62,9 +60,7 @@ TimeSeries::TimeSeries(
 }
 
 
-// ----------------------
 TimeSeries::~TimeSeries()
-// ----------------------
 {
   clearDiagram();
   clearAttributes();
@@ -77,17 +73,13 @@ TimeSeries::~TimeSeries()
 // -- get functions -------------------------------------------------
 
 
-// -----------------------------
 bool TimeSeries::getUseShading()
-// -----------------------------
 {
   return useShading;
 }
 
 
-// ---------------------------------------------------
 void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
-// ---------------------------------------------------
 {
   idcs.clear();
   set< size_t >::iterator it;
@@ -98,23 +90,19 @@ void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
 }
 
 
-// --------------------------------
 void TimeSeries::getIdcsClstMarked(
   set< size_t > &idcs ,
   ColorRGB& col)
-// --------------------------------
 {
   getIdcsClstMarked(idcs);
   col = colMrk;
 }
 
 
-// ----------------------------
 void TimeSeries::getIdxMseOver(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
   ColorRGB& colLeaf)
-// ----------------------------
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
@@ -132,12 +120,10 @@ void TimeSeries::getIdxMseOver(
 }
 
 
-// ----------------------------
 void TimeSeries::getCurrIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
   ColorRGB& colLeaf)
-// ----------------------------
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
@@ -155,12 +141,10 @@ void TimeSeries::getCurrIdxDgrm(
 }
 
 
-// -----------------------------
 void TimeSeries::getAnimIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
   ColorRGB& colLeaf)
-// -----------------------------
 {
   if (animFrame != itemsMarked.end())
   {
@@ -204,9 +188,7 @@ void TimeSeries::getAnimIdxDgrm(
 }
 
 
-// ------------------------------------------------
 void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
-// ------------------------------------------------
 {
   idcs.clear();
   for (size_t i = 0; i < attributes.size(); ++i)
@@ -219,41 +201,31 @@ void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
 // -- set functions -------------------------------------------------
 
 
-// -------------------------------------------------
 void TimeSeries::setUseShading(const bool& useShd)
-// -------------------------------------------------
 {
   useShading = useShd;
 }
 
 
-// ------------------------------------------------
 void TimeSeries::setColorClr(const ColorRGB& col)
-// ------------------------------------------------
 {
   colClr = col;
 }
 
 
-// ------------------------------------------------
 void TimeSeries::setColorTxt(const ColorRGB& col)
-// ------------------------------------------------
 {
   colTxt = col;
 }
 
 
-// ------------------------------------------
 void TimeSeries::setSizeTxt(const int& sze)
-// ------------------------------------------
 {
   szeTxt = sze;
 }
 
 
-// -----------------------------------------
 void TimeSeries::setDiagram(Diagram* dgrm)
-// -----------------------------------------
 {
   clearDiagram();
   diagram = dgrm;
@@ -262,9 +234,7 @@ void TimeSeries::setDiagram(Diagram* dgrm)
 }
 
 
-// ------------------------------------------------------------
 void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
-// ------------------------------------------------------------
 {
   // clear existing attributes
   clearAttributes();
@@ -279,17 +249,13 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
 }
 
 
-// -------------------------
 void TimeSeries::clearData()
-// -------------------------
 {
   wdwStartIdx = 0;
 }
 
 
-// -----------------------------------------
 void TimeSeries::markItems(Cluster* frame)
-// -----------------------------------------
 {
   if (frame->getSizeNodes() > 0)
   {
@@ -321,9 +287,7 @@ void TimeSeries::markItems(Cluster* frame)
 }
 
 
-// ----------------------------------------------------------
 void TimeSeries::markItems(const vector< Cluster* > frames)
-// ----------------------------------------------------------
 {
   Cluster* frame;
 
@@ -364,9 +328,7 @@ void TimeSeries::markItems(const vector< Cluster* > frames)
 }
 
 
-// ---------------------------------------
 void TimeSeries::handleSendDgrmSglToExnr()
-// ---------------------------------------
 {
   Cluster* frame;
   vector< Attribute* > attrs;
@@ -391,9 +353,7 @@ void TimeSeries::handleSendDgrmSglToExnr()
 // -- visualization functions  --------------------------------------
 
 
-// ---------------------------------------------------
 void TimeSeries::visualize(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   if (critSect != true)
   {
@@ -469,11 +429,9 @@ void TimeSeries::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// --------------------------------------
 void TimeSeries::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -484,11 +442,9 @@ void TimeSeries::handleMouseLftDownEvent(
 }
 
 
-// ------------------------------------
 void TimeSeries::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -499,11 +455,9 @@ void TimeSeries::handleMouseLftUpEvent(
 }
 
 
-// ----------------------------------------
 void TimeSeries::handleMouseLftDClickEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -514,11 +468,9 @@ void TimeSeries::handleMouseLftDClickEvent(
 }
 
 
-// --------------------------------------
 void TimeSeries::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -529,11 +481,9 @@ void TimeSeries::handleMouseRgtDownEvent(
 }
 
 
-// ------------------------------------
 void TimeSeries::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// ------------------------------------
 {
   Visualizer::handleMouseRgtUpEvent(x, y);
 
@@ -544,11 +494,9 @@ void TimeSeries::handleMouseRgtUpEvent(
 }
 
 
-// -------------------------------------
 void TimeSeries::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// -------------------------------------
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -563,11 +511,9 @@ void TimeSeries::handleMouseMotionEvent(
 
 
 
-// ---------------------------------------
 void TimeSeries::handleMouseWheelIncEvent(
   const int& x,
   const int& y)
-// ---------------------------------------
 {
   Visualizer::handleMouseWheelIncEvent(x, y);
 
@@ -608,11 +554,9 @@ void TimeSeries::handleMouseWheelIncEvent(
 }
 
 
-// ---------------------------------------
 void TimeSeries::handleMouseWheelDecEvent(
   const int& x,
   const int& y)
-// ---------------------------------------
 {
   Visualizer::handleMouseWheelDecEvent(x, y);
 
@@ -653,9 +597,7 @@ void TimeSeries::handleMouseWheelDecEvent(
 }
 
 
-// -------------------------------------
 void TimeSeries::handleMouseLeaveEvent()
-// -------------------------------------
 {
   Visualizer::initMouse();
 
@@ -668,9 +610,7 @@ void TimeSeries::handleMouseLeaveEvent()
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleKeyDownEvent(const int& keyCode)
-// -----------------------------------------------------
 {
   Visualizer::handleKeyDownEvent(keyCode);
 
@@ -750,9 +690,7 @@ void TimeSeries::handleKeyDownEvent(const int& keyCode)
 }
 
 
-// ----------------------------------------------------
 void TimeSeries::handleKeyUpEvent(const int& keyCode)
-// ----------------------------------------------------
 {
   Visualizer::handleKeyUpEvent(keyCode);
 
@@ -766,9 +704,7 @@ void TimeSeries::handleKeyUpEvent(const int& keyCode)
 // -- utility functions -----------------------------------------
 
 
-// -------------------------------------
 void TimeSeries::calcSettingsGeomBased()
-// -------------------------------------
 {
   critSect = true;
 
@@ -781,9 +717,7 @@ void TimeSeries::calcSettingsGeomBased()
 }
 
 
-// -------------------------------------
 void TimeSeries::calcSettingsDataBased()
-// -------------------------------------
 {
   critSect = true;
 
@@ -796,9 +730,7 @@ void TimeSeries::calcSettingsDataBased()
 }
 
 
-// -----------------------------
 void TimeSeries::calcPositions()
-// -----------------------------
 {
   double yItv = 0.0;
 
@@ -1002,18 +934,14 @@ void TimeSeries::calcPositions()
 }
 
 
-// ----------------------------
 void TimeSeries::clearDiagram()
-// ----------------------------
 {
   // association
   diagram = NULL;
 }
 
 
-// -------------------------------
 void TimeSeries::clearAttributes()
-// -------------------------------
 {
   // association
   attributes.clear();
@@ -1023,9 +951,7 @@ void TimeSeries::clearAttributes()
 // -- utility event handlers ----------------------------------------
 
 
-// ----------------------------------------
 void TimeSeries::onTimer(wxTimerEvent& /*e*/)
-// ----------------------------------------
 {
   ++animFrame;
   if (animFrame == itemsMarked.end())
@@ -1041,9 +967,7 @@ void TimeSeries::onTimer(wxTimerEvent& /*e*/)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   animFrame = itemsMarked.begin();
 
@@ -1066,9 +990,7 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning())
   {
@@ -1107,9 +1029,7 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (dgrmIdx == animIdxDgrm)
   {
@@ -1146,9 +1066,7 @@ void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleNextDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   if (timerAnim->IsRunning())
   {
@@ -1192,9 +1110,7 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
 // -- hit detection -------------------------------------------------
 
 
-// ----------------------------------------------------
 void TimeSeries::handleHits(const vector< int > &ids)
-// ----------------------------------------------------
 {
   if (ids.size() > 1)
   {
@@ -1385,11 +1301,9 @@ void TimeSeries::handleHits(const vector< int > &ids)
 }
 
 
-// --------------------------
 void TimeSeries::processHits(
   GLint hits,
   GLuint buffer[])
-// --------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;
@@ -1439,17 +1353,13 @@ void TimeSeries::processHits(
 // -- utility drawing functions -------------------------------------
 
 
-// ---------------------
 void TimeSeries::clear()
-// ---------------------
 {
   VisUtils::clear(colClr);
 }
 
 
-// ----------------------------------------------------
 void TimeSeries::drawSlider(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -1655,9 +1565,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void TimeSeries::drawScale(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   if (inSelectMode == true)
     {}
@@ -1718,9 +1626,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------------
 void TimeSeries::drawMarkedItems(const bool& inSelectMode)
-// ---------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -1760,9 +1666,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------
 void TimeSeries::drawAxes(const bool& inSelectMode)
-// --------------------------------------------------
 {
   if (inSelectMode == true)
     {}
@@ -1788,9 +1692,7 @@ void TimeSeries::drawAxes(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void TimeSeries::drawAttrVals(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
     {}
@@ -1963,9 +1865,7 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void TimeSeries::drawDiagrams(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
   {
@@ -2282,9 +2182,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------------
 void TimeSeries::drawMouseOver(const bool& inSelectMode)
-// -------------------------------------------------------
 {
   if (inSelectMode != true)
   {
@@ -2377,9 +2275,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void TimeSeries::drawLabels(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode == true)
     {}
@@ -2456,9 +2352,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
 }
 
 
-// -------------------------------
 void TimeSeries::handleHitSlider()
-// -------------------------------
 {
   double x, y;
   canvas->getWorldCoords(xMouseCur, yMouseCur, x, y);
@@ -2495,9 +2389,7 @@ void TimeSeries::handleHitSlider()
 }
 
 
-// -----------------------------------
 void TimeSeries::handleDragSliderHdl()
-// -----------------------------------
 {
 //    draggingSlider = true;
   dragStatus = DRAG_STATUS_SLDR;
@@ -2541,9 +2433,7 @@ void TimeSeries::handleDragSliderHdl()
 }
 
 
-// --------------------------------------
 void TimeSeries::handleDragSliderHdlLft()
-// --------------------------------------
 {
   double pix  = canvas->getPixelSize();
   double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
@@ -2577,9 +2467,7 @@ void TimeSeries::handleDragSliderHdlLft()
 }
 
 
-// --------------------------------------
 void TimeSeries::handleDragSliderHdlRgt()
-// --------------------------------------
 {
   double pix  = canvas->getPixelSize();
   double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
@@ -2611,9 +2499,7 @@ void TimeSeries::handleDragSliderHdlRgt()
 }
 
 
-// ----------------------------------------------
 void TimeSeries::handleHitItems(const int& idx)
-// ----------------------------------------------
 {
   if (shiftStartIdx < 0)
   {
@@ -2694,9 +2580,7 @@ void TimeSeries::handleHitItems(const int& idx)
 }
 
 
-// -----------------------------------------------
 void TimeSeries::handleDragItems(const int& idx)
-// -----------------------------------------------
 {
   if (dragStartIdx < 0)
   {
@@ -2846,9 +2730,7 @@ void TimeSeries::handleDragItems(const int& idx)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleShowDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   map< size_t, Position2D >::iterator it;
 
@@ -2869,9 +2751,7 @@ void TimeSeries::handleShowDiagram(const int& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleDragDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   double x1, y1;
   double x2, y2;

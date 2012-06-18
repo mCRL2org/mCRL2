@@ -8,13 +8,11 @@
 //
 /// \file ./mediator.h
 
-// ------------------------------------------------------------------
 // This is an ABSTRACT CLASS with a number of PURE VIRUAL FUNCTIONS.
 // This serves as an INTERFACE that that should be implemented by
 // subclasses. This allows for the implementation of a MEDIATOR
 // design pattern where an instance of a subclass serves as the
 // mediator or controller.
-// ------------------------------------------------------------------
 
 #ifndef MEDIATOR_H
 #define MEDIATOR_H

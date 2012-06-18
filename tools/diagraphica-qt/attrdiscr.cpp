@@ -17,7 +17,6 @@
 
 using namespace std;
 
-// -------------------------------
 AttrDiscr::AttrDiscr(
   Mediator* m,
   const string& nam,
@@ -29,7 +28,6 @@ AttrDiscr::AttrDiscr(
     nam,
     typ,
     idx)
-// -------------------------------
 {
   name   = nam;
   type   = typ;
@@ -38,10 +36,8 @@ AttrDiscr::AttrDiscr(
 }
 
 
-// ------------------------------------------
 AttrDiscr::AttrDiscr(const AttrDiscr& attr)
   :Attribute(attr)
-// ------------------------------------------
 {
   {
     for (size_t i = 0; i < attr.origValues.size(); ++i)
@@ -70,9 +66,7 @@ AttrDiscr::AttrDiscr(const AttrDiscr& attr)
 }
 
 
-// --------------------
 AttrDiscr::~AttrDiscr()
-// --------------------
 {
   deleteOrigValues();
   deleteCurValues();
@@ -83,11 +77,9 @@ AttrDiscr::~AttrDiscr()
 // -- set functions -------------------------------------------------
 
 
-// ------------------------------
 void AttrDiscr::clusterValues(
   const vector< int > &indices,
   const string& newValue)
-// ------------------------------
 {
   try
   {
@@ -165,11 +157,9 @@ void AttrDiscr::clusterValues(
 }
 
 
-// -----------------------
 void AttrDiscr::moveValue(
   const size_t& idxFr,
   const size_t& idxTo)
-// -----------------------
 {
   try
   {
@@ -210,11 +200,9 @@ void AttrDiscr::moveValue(
 }
 
 
-// ------------------------------------
 void AttrDiscr::configValues(
   const vector< string > &curDomain,
   map< size_t , size_t  > &origToCurDomain)
-// ------------------------------------
 {
   try
   {
@@ -261,25 +249,19 @@ void AttrDiscr::configValues(
 // -- get functions -------------------------------------------------
 
 
-// -------------------------
 int AttrDiscr::getAttrType()
-// -------------------------
 {
   return ATTR_TYPE_DISCR;
 }
 
 
-// -------------------------------
 size_t AttrDiscr::getSizeOrigValues()
-// -------------------------------
 {
   return origValues.size();
 }
 
 
-// --------------------------------------
 Value* AttrDiscr::getOrigValue(size_t idx)
-// --------------------------------------
 {
   if (idx != NON_EXISTING && idx < origValues.size())
   {
@@ -291,17 +273,13 @@ Value* AttrDiscr::getOrigValue(size_t idx)
 }
 
 
-// ------------------------------
 size_t AttrDiscr::getSizeCurValues()
-// ------------------------------
 {
   return curValues.size();
 }
 
 
-// -------------------------------------
 Value* AttrDiscr::getCurValue(size_t idx)
-// -------------------------------------
 {
   if (idx != NON_EXISTING && idx < curValues.size())
   {
@@ -313,17 +291,13 @@ Value* AttrDiscr::getCurValue(size_t idx)
 }
 
 
-// ------------------------
 size_t AttrDiscr::getSizeMap()
-// ------------------------
 {
   return curMap.size();
 }
 
 
-// ---------------------------------------
 Value* AttrDiscr::mapToValue(double key)
-// ---------------------------------------
 {
   size_t idx = static_cast <size_t>(key);
   if (idx < curMap.size())
@@ -339,9 +313,7 @@ Value* AttrDiscr::mapToValue(double key)
 // -- clear functions -----------------------------------------------
 
 
-// ----------------------------
 void AttrDiscr::clearClusters()
-// ----------------------------
 {
   resetCurValues();
 }
@@ -350,9 +322,7 @@ void AttrDiscr::clearClusters()
 // -- private utility functions -------------------------------------
 
 
-// -------------------------------------------------------
 void AttrDiscr::initValues(const vector< string > &vals)
-// -------------------------------------------------------
 {
   Value*  value0  = NULL;
   Value*  value1  = NULL;
@@ -381,9 +351,7 @@ void AttrDiscr::initValues(const vector< string > &vals)
 }
 
 
-// -----------------------------
 void AttrDiscr::resetCurValues()
-// -----------------------------
 {
   Value* value    = NULL;
   Value** mapping = NULL;
@@ -414,9 +382,7 @@ void AttrDiscr::resetCurValues()
 }
 
 
-// -------------------------------
 void AttrDiscr::deleteOrigValues()
-// -------------------------------
 {
   for (size_t i = 0; i < origValues.size(); ++i)
   {
@@ -427,9 +393,7 @@ void AttrDiscr::deleteOrigValues()
 }
 
 
-// ------------------------------
 void AttrDiscr::deleteCurValues()
-// ------------------------------
 {
   for (size_t i = 0; i < curValues.size(); ++i)
   {
@@ -440,9 +404,7 @@ void AttrDiscr::deleteCurValues()
 }
 
 
-// ---------------------------
 void AttrDiscr::deleteCurMap()
-// ---------------------------
 {
   for (size_t i = 0; i < curMap.size(); ++i)
   {

@@ -23,13 +23,11 @@ double OpacityChooser::hdlSzeHnt =  5.0;
 // -- constructors and destructor -----------------------------------
 
 
-// ----------------------------
 OpacityChooser::OpacityChooser(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ----------------------------
 {
   hdlSize  = hdlSzeHnt;
 
@@ -38,28 +36,22 @@ OpacityChooser::OpacityChooser(
 }
 
 
-// ------------------------------
 OpacityChooser::~OpacityChooser()
-// ------------------------------
 {}
 
 
 // -- set functions -------------------------------------------------
 
 
-// -----------------------------------------------
 void OpacityChooser::setActive(const bool& flag)
-// -----------------------------------------------
 {
   active = flag;
 }
 
 
-// -----------------------------
 void OpacityChooser::setPoints(
   const vector< double > &opa,
   const vector< double > &y)
-// -----------------------------
 {
   positionsX.clear();
   for (size_t i = 0; i < opa.size(); ++i)
@@ -74,9 +66,7 @@ void OpacityChooser::setPoints(
 // -- visualization functions  --------------------------------------
 
 
-// -------------------------------------------------------
 void OpacityChooser::visualize(const bool& inSelectMode)
-// -------------------------------------------------------
 {
   /*
   // check if positions are ok
@@ -114,11 +104,9 @@ void OpacityChooser::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// ------------------------------------------
 void OpacityChooser::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// ------------------------------------------
 {
   mediator->handleDOFOpaActivate();
   mediator->setDOFOpacitySelected();
@@ -162,11 +150,9 @@ void OpacityChooser::handleMouseLftDownEvent(
 }
 
 
-// ----------------------------------------
 void OpacityChooser::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   if (active == true)
   {
@@ -176,11 +162,9 @@ void OpacityChooser::handleMouseLftUpEvent(
 }
 
 
-// ------------------------------------------
 void OpacityChooser::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// ------------------------------------------
 {
   if (active == true)
   {
@@ -194,11 +178,9 @@ void OpacityChooser::handleMouseRgtDownEvent(
 }
 
 
-// ----------------------------------------
 void OpacityChooser::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   if (active == true)
   {
@@ -207,11 +189,9 @@ void OpacityChooser::handleMouseRgtUpEvent(
 }
 
 
-// -----------------------------------------
 void OpacityChooser::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// -----------------------------------------
 {
   if (active == true)
   {
@@ -228,17 +208,13 @@ void OpacityChooser::handleMouseMotionEvent(
 
 // ***
 /*
-// -------------------------
 void OpacityChooser::clear()
-// -------------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// ---------------------------------
 void OpacityChooser::drawGrayScale()
-// ---------------------------------
 {
   double w, h;
   double xLft, xRgt;
@@ -275,9 +251,7 @@ void OpacityChooser::drawGrayScale()
 }
 
 
-// ------------------------------------------------------
 void OpacityChooser::drawPath(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   double w, h;
   double xRgt;
@@ -322,9 +296,7 @@ void OpacityChooser::drawPath(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------------
 void OpacityChooser::drawPoints(const bool& inSelectMode)
-// --------------------------------------------------------
 {
   double w, h;
   double xRgt;
@@ -515,9 +487,7 @@ void OpacityChooser::drawPoints(const bool& inSelectMode)
 // -- utility event handlers ------------------------------------
 
 
-// --------------------------------------------------------
 void OpacityChooser::handleHits(const vector< int > &ids)
-// --------------------------------------------------------
 {
   if (mouseSide == MSE_SIDE_LFT)
   {
@@ -541,9 +511,7 @@ void OpacityChooser::handleHits(const vector< int > &ids)
 }
 
 
-// ------------------------------
 void OpacityChooser::handleDrag()
-// ------------------------------
 {
   if (0 <= dragIdx && static_cast <size_t>(dragIdx) < positionsX.size())
   {
@@ -581,11 +549,9 @@ void OpacityChooser::handleDrag()
 // -- hit detection -------------------------------------------------
 
 
-// ------------------------------
 void OpacityChooser::processHits(
   GLint hits,
   GLuint buffer[])
-// ------------------------------
 {
   GLuint* ptr;
   vector< int > ids;

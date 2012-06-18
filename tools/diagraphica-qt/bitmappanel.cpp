@@ -15,7 +15,6 @@
 // -- constructors and desctructor ----------------------------------
 
 
-// ---------------------------------------
 BitmapPanel::BitmapPanel(
   wxWindow* parent,
   wxSize size,
@@ -23,7 +22,6 @@ BitmapPanel::BitmapPanel(
   : wxPanel(
     parent,
     wxID_ANY)
-// --------------------------------------
 {
   // no resize
   this->SetClientSize(size);
@@ -48,9 +46,7 @@ BitmapPanel::BitmapPanel(
 }
 
 
-// ------------------------
 BitmapPanel::~BitmapPanel()
-// ------------------------
 {
   delete bitmap;
   bitmap = NULL;
@@ -60,9 +56,7 @@ BitmapPanel::~BitmapPanel()
 // -- event handlers ------------------------------------------------
 
 
-// ------------------------------------------------
 void BitmapPanel::onEvtPaint(wxPaintEvent& /*event*/)
-// ------------------------------------------------
 {
   if (bitmap->Ok() == true)
   {

@@ -22,13 +22,11 @@ double ColorChooser::hdlSzeHnt =  5.0;
 // -- constructors and destructor -----------------------------------
 
 
-// ------------------------
 ColorChooser::ColorChooser(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
   : Visualizer(m, g, c)
-// ------------------------
 {
   hdlSize  = hdlSzeHnt;
 
@@ -37,28 +35,22 @@ ColorChooser::ColorChooser(
 }
 
 
-// --------------------------
 ColorChooser::~ColorChooser()
-// --------------------------
 {}
 
 
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------------------------
 void ColorChooser::setActive(const bool& flag)
-// ---------------------------------------------
 {
   active = flag;
 }
 
 
-// -----------------------------
 void ColorChooser::setPoints(
   const vector< double > &hue,
   const vector< double > &y)
-// -----------------------------
 {
   positionsX.clear();
   for (size_t i = 0; i < hue.size(); ++i)
@@ -73,9 +65,7 @@ void ColorChooser::setPoints(
 // -- visualization functions  --------------------------------------
 
 
-// -----------------------------------------------------
 void ColorChooser::visualize(const bool& inSelectMode)
-// -----------------------------------------------------
 {
   /*
   // check if positions are ok
@@ -113,11 +103,9 @@ void ColorChooser::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// ----------------------------------------
 void ColorChooser::handleMouseLftDownEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   mediator->handleDOFColActivate();
   mediator->setDOFColorSelected();
@@ -161,11 +149,9 @@ void ColorChooser::handleMouseLftDownEvent(
 }
 
 
-// --------------------------------------
 void ColorChooser::handleMouseLftUpEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   if (active == true)
   {
@@ -175,11 +161,9 @@ void ColorChooser::handleMouseLftUpEvent(
 }
 
 
-// ----------------------------------------
 void ColorChooser::handleMouseRgtDownEvent(
   const int& x,
   const int& y)
-// ----------------------------------------
 {
   if (active == true)
   {
@@ -193,11 +177,9 @@ void ColorChooser::handleMouseRgtDownEvent(
 }
 
 
-// --------------------------------------
 void ColorChooser::handleMouseRgtUpEvent(
   const int& x,
   const int& y)
-// --------------------------------------
 {
   if (active == true)
   {
@@ -206,11 +188,9 @@ void ColorChooser::handleMouseRgtUpEvent(
 }
 
 
-// ---------------------------------------
 void ColorChooser::handleMouseMotionEvent(
   const int& x,
   const int& y)
-// ---------------------------------------
 {
   if (active == true)
   {
@@ -227,17 +207,13 @@ void ColorChooser::handleMouseMotionEvent(
 
 // ***
 /*
-// -----------------------
 void ColorChooser::clear()
-// -----------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// -----------------------------------
 void ColorChooser::drawColorSpectrum()
-// -----------------------------------
 {
   double w, h;
   double xLft, xRgt;
@@ -268,9 +244,7 @@ void ColorChooser::drawColorSpectrum()
 }
 
 
-// ----------------------------------------------------
 void ColorChooser::drawPath(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   double w, h;
   double xRgt;
@@ -314,9 +288,7 @@ void ColorChooser::drawPath(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void ColorChooser::drawPoints(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   double w, h;
   double xRgt;
@@ -507,9 +479,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 // -- utility event handlers ------------------------------------
 
 
-// ------------------------------------------------------
 void ColorChooser::handleHits(const vector< int > &ids)
-// ------------------------------------------------------
 {
   if (mouseSide == MSE_SIDE_LFT)
   {
@@ -533,9 +503,7 @@ void ColorChooser::handleHits(const vector< int > &ids)
 }
 
 
-// ----------------------------
 void ColorChooser::handleDrag()
-// ----------------------------
 {
   if (dragIdx != NON_EXISTING && static_cast <size_t>(dragIdx) < positionsX.size())
   {
@@ -573,11 +541,9 @@ void ColorChooser::handleDrag()
 // -- hit detection -------------------------------------------------
 
 
-// ----------------------------
 void ColorChooser::processHits(
   GLint hits,
   GLuint buffer[])
-// ----------------------------
 {
   GLuint* ptr;
   vector< int > ids;

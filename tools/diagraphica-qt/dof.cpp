@@ -17,11 +17,9 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------
 DOF::DOF(
   const int& idx,
   const string& lbl)
-// --------------------
 {
   index = idx;
   label = lbl;
@@ -37,12 +35,8 @@ DOF::DOF(
 }
 
 
-// -----------------------
 DOF::DOF(const DOF& dof)
-// -----------------------
-// ------------------------------------------------------------------
 // Copy constructor.
-// ------------------------------------------------------------------
 {
   index = dof.index;    // index in attribute
   label = dof.label;
@@ -57,9 +51,7 @@ DOF::DOF(const DOF& dof)
 }
 
 
-// --------
 DOF::~DOF()
-// --------
 {
   // association
   attr = NULL;
@@ -69,43 +61,33 @@ DOF::~DOF()
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------------
 void DOF::setIndex(const int& idx)
-// ---------------------------------
 {
   index = idx;
 }
 
 
-// ------------------------------------
 void DOF::setLabel(const string& lbl)
-// ------------------------------------
 {
   label = lbl;
 }
 
 
-// ---------------------------------
 void DOF::setMin(const double& m)
-// ---------------------------------
 {
   //min = m;
   values[0] = m;
 }
 
 
-// --------------------------------
 void DOF::setMax(const double& m)
-// --------------------------------
 {
   //max = m;
   values[values.size()-1] = m;
 }
 
 
-// ------------------------------------------------------
 void DOF::setMinMax(const double& mn, const double& mx)
-// ------------------------------------------------------
 {
   /*
   min = mn;
@@ -116,11 +98,9 @@ void DOF::setMinMax(const double& mn, const double& mx)
 }
 
 
-// --------------------
 void DOF::setValue(
   const size_t& idx,
   const double& val)
-// --------------------
 {
   if (idx != NON_EXISTING && idx < values.size())
   {
@@ -129,17 +109,13 @@ void DOF::setValue(
 }
 
 
-// ------------------------------------
 void DOF::addValue(const double& val)
-// ------------------------------------
 {
   values.push_back(val);
 }
 
 
-// -----------------------------------
 void DOF::clearValue(const size_t& idx)
-// -----------------------------------
 {
   if (values.size() > 2 &&
       (idx != NON_EXISTING && static_cast <size_t>(idx) < values.size()))
@@ -149,25 +125,19 @@ void DOF::clearValue(const size_t& idx)
 }
 
 
-// ------------------------------
 void DOF::setDir(const int& dr)
-// ------------------------------
 {
   dir = dr;
 }
 
 
-// -----------------------------------
 void DOF::setAttribute(Attribute* a)
-// -----------------------------------
 {
   attr = a;
 }
 
 
-// -----------------------------------------
 void DOF::setTextStatus(const int& status)
-// -----------------------------------------
 {
   if (status == ID_TEXT_NONE ||
       status == ID_TEXT_ALL  ||
@@ -186,51 +156,39 @@ void DOF::setTextStatus(const int& status)
 // -- get functions -------------------------------------------------
 
 
-// ----------------
 size_t DOF::getIndex()
-// ----------------
 {
   return index;
 }
 
 
-// -------------------
 string DOF::getLabel()
-// -------------------
 {
   return label;
 }
 
 
-// -----------------
 double DOF::getMin()
-// -----------------
 {
   //return min;
   return values[0];
 }
 
 
-// -----------------
 double DOF::getMax()
-// -----------------
 {
   //return max;
   return values[values.size()-1];
 }
 
 
-// ---------------------
 size_t DOF::getSizeValues()
-// ---------------------
 {
   return values.size();
 }
 
 
-// -----------------------------------
 double DOF::getValue(const size_t& idx)
-// -----------------------------------
 {
   double result = -1;
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < values.size())
@@ -241,33 +199,25 @@ double DOF::getValue(const size_t& idx)
 }
 
 
-// ------------------------------------------
 void DOF::getValues(vector< double > &vals)
-// ------------------------------------------
 {
   vals = values;
 }
 
 
-// --------------
 int DOF::getDir()
-// --------------
 {
   return dir;
 }
 
 
-// ---------------------------
 Attribute* DOF::getAttribute()
-// ---------------------------
 {
   return attr;
 }
 
 
-// ---------------------
 int DOF::getTextStatus()
-// ---------------------
 {
   return textStatus;
 }

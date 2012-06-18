@@ -19,20 +19,16 @@
 
 using namespace std;
 
-// -------------------------
 Node::Node(const size_t& idx)
-// -------------------------
 {
   index   = idx;
   cluster = NULL;
 }
 
 
-// ---------------------------
 Node::Node(
   const size_t& idx,
   const vector< double > &tpl)
-// ---------------------------
 {
   index   = idx;
   tuple   = tpl;
@@ -40,9 +36,7 @@ Node::Node(
 }
 
 
-// ----------
 Node::~Node()
-// ----------
 {
   clearInEdges();
   clearOutEdges();
@@ -52,11 +46,9 @@ Node::~Node()
 // -- set functions -------------------------------------------------
 
 
-// ---------------------
 void Node::swapTupleVal(
   const size_t& idx1,
   const size_t& idx2)
-// ---------------------
 {
   if (idx1 < tuple.size() &&
       idx2 < tuple.size())
@@ -72,11 +64,9 @@ void Node::swapTupleVal(
 }
 
 
-// ---------------------
 void Node::moveTupleVal(
   const size_t& idxFr,
   const size_t& idxTo)
-// ---------------------
 {
   if (idxFr < tuple.size() &&
       idxTo < tuple.size())
@@ -112,9 +102,7 @@ void Node::moveTupleVal(
 }
 
 
-// --------------------------------------------------
 void Node::moveTupleVals(map< size_t , size_t > &idcsFrTo)
-// --------------------------------------------------
 {
   if (idcsFrTo.size() == tuple.size())
   {
@@ -155,11 +143,9 @@ void Node::moveTupleVals(map< size_t , size_t > &idcsFrTo)
 }
 
 
-// --------------------
 void Node::addTupleVal(
   const size_t& idx,
   const double& val)
-// --------------------
 {
   tuple.insert(
     tuple.begin() + idx,
@@ -167,51 +153,39 @@ void Node::addTupleVal(
 }
 
 
-// -------------------------------------
 void Node::delTupleVal(const size_t& idx)
-// -------------------------------------
 {
   tuple.erase(tuple.begin() + idx);
 }
 
 
-// -----------------------------
 void Node::addInEdge(Edge* in)
-// -----------------------------
 {
   inEdges.push_back(in);
 }
 
 
-// ---------------------------------------------
 void Node::setInEdges(const vector< Edge* > e)
-// ---------------------------------------------
 {
   clearInEdges();
   inEdges = e;
 }
 
 
-// -------------------------------
 void Node::addOutEdge(Edge* out)
-// -------------------------------
 {
   outEdges.push_back(out);
 }
 
 
-// ----------------------------------------------
 void Node::setOutEdges(const vector< Edge* > e)
-// ----------------------------------------------
 {
   clearOutEdges();
   outEdges = e;
 }
 
 
-// --------------------------------
 void Node::setCluster(Cluster* c)
-// --------------------------------
 {
   cluster = c;
 }
@@ -220,25 +194,19 @@ void Node::setCluster(Cluster* c)
 // -- get functions -------------------------------------------------
 
 
-// -----------------
 size_t Node::getIndex()
-// -----------------
 {
   return index;
 }
 
 
-// ---------------------
 size_t Node::getSizeTuple()
-// ---------------------
 {
   return tuple.size();
 }
 
 
-// ------------------------------------
 double Node::getTupleVal(const size_t& idx)
-// ------------------------------------
 {
   if (idx < tuple.size())
   {
@@ -251,17 +219,13 @@ double Node::getTupleVal(const size_t& idx)
 }
 
 
-// -----------------------
 size_t Node::getSizeInEdges()
-// -----------------------
 {
   return inEdges.size();
 }
 
 
-// ------------------------------------
 Edge* Node::getInEdge(const size_t& idx)
-// ------------------------------------
 {
   if (idx < inEdges.size())
   {
@@ -274,17 +238,13 @@ Edge* Node::getInEdge(const size_t& idx)
 }
 
 
-// ------------------------
 size_t Node::getSizeOutEdges()
-// ------------------------
 {
   return outEdges.size();
 }
 
 
-// -------------------------------------
 Edge* Node::getOutEdge(const size_t& idx)
-// -------------------------------------
 {
   if (idx < outEdges.size())
   {
@@ -297,9 +257,7 @@ Edge* Node::getOutEdge(const size_t& idx)
 }
 
 
-// ------------------------
 Cluster* Node::getCluster()
-// ------------------------
 {
   return cluster;
 }
@@ -308,9 +266,7 @@ Cluster* Node::getCluster()
 // -- clear functions -----------------------------------------------
 
 
-// ----------------------
 void Node::clearInEdges()
-// ----------------------
 {
   for (size_t i = 0; i < inEdges.size(); ++i)
   {
@@ -320,9 +276,7 @@ void Node::clearInEdges()
 }
 
 
-// -----------------------
 void Node::clearOutEdges()
-// -----------------------
 {
   for (size_t i = 0; i < outEdges.size(); ++i)
   {
@@ -332,9 +286,7 @@ void Node::clearOutEdges()
 }
 
 
-// ----------------------
 void Node::clearCluster()
-// ----------------------
 {
   cluster = NULL;
 }

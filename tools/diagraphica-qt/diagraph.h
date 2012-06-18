@@ -12,10 +12,8 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
-// ------------------------------------------------------------------
 // This is the main application class and inherits from wxApp. It
 // also serves as the mediator that controls the program.
-// ------------------------------------------------------------------
 
 #ifndef DIAGRAPH_H
 #define DIAGRAPH_H
