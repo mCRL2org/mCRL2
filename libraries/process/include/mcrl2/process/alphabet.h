@@ -406,7 +406,7 @@ aset alphabet_sub(const process_expression& x, const aset& A, const atermpp::map
 aset alphabet_block(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
 
 template <typename Derived>
-struct alphabet_allow_traverser: public process_expression_traverser<Derived>
+struct default_alphabet_traverser: public process_expression_traverser<Derived>
 {
   typedef process_expression_traverser<Derived> super;
   using super::enter;
@@ -424,9 +424,6 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
 
   const aset& A;
 
-  // if true, A represents the set of all multi action names
-  bool A_is_all;
-
   // maps processes to their corresponding bodies
   const atermpp::map<process_identifier, process_expression>& process_bodies;
 
@@ -439,15 +436,9 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
     return i->second;
   }
 
-  // N.B. the empty aset represents the set of all multi action names
-  bool is_all(const aset& A) const
-  {
-    return A.empty();
-  }
-
   // Constructor
-  alphabet_allow_traverser(const aset& A_, bool A_is_all_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
-    : A(A_), A_is_all(A_is_all_), process_bodies(process_bodies_)
+  default_alphabet_traverser(const aset& A_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
+    : A(A_), process_bodies(process_bodies_)
   {}
 
   // Push x to result_stack
@@ -470,12 +461,6 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
     return result_stack.back();
   }
 
-  // N.B. tau is represented by the empty set!
-  multi_action_name tau() const
-  {
-    return multi_action_name();
-  }
-
   // joins the top two elements of the stack
   void join()
   {
@@ -484,56 +469,22 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
     push(set_union(left, right));
   }
 
-  // pushes intersect(A, {a})
-  void push_A_intersection(const multi_action_name& a)
-  {
-    if (A_is_all)
-    {
-      push(make_aset(a));
-    }
-    else
-    {
-      if (A.find(a) == A.end())
-      {
-        push(aset());
-      }
-      else
-      {
-        push(make_aset(a));
-      }
-    }
-  }
-
-  // a(e1, ..., en)
-  void leave(const lps::action& x)
-  {
-    multi_action_name a = name(x);
-    push_A_intersection(a);
-  }
-
   // P(e1, ..., en)
   void operator()(const process::process_instance& x)
   {
-    push(alphabet_allow(process_body(x.identifier()), A, A_is_all, process_bodies));
+    derived()(process_body(x.identifier()));
   }
 
   // P(d1 = e1, ..., dn = en)
-  void leave(const process::process_instance_assignment& x)
+  void operator()(const process::process_instance_assignment& x)
   {
-    push(alphabet_allow(process_body(x.identifier()), A, A_is_all, process_bodies));
+    derived()(process_body(x.identifier()));
   }
 
   // delta
   void leave(const process::delta& x)
   {
     push(aset());
-  }
-
-  // tau
-  void leave(const process::tau& x)
-  {
-    multi_action_name tau;
-    push_A_intersection(tau);
   }
 
   // p1 + p2
@@ -566,6 +517,86 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
     // skip
   }
 
+  // p1 ||_ p2
+  void operator()(const process::left_merge& x)
+  {
+    // implement it using p1 || p2
+    merge y(x.left(), x.right());
+    derived()(y);
+  }
+
+  // p @ t
+  void operator()(const process::at& x)
+  {
+    // skip
+  }
+};
+
+template <typename Derived>
+struct alphabet_allow_traverser: public default_alphabet_traverser<Derived>
+{
+  typedef default_alphabet_traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::A;
+  using super::push;
+  using super::pop;
+  using super::top;
+  using super::join;
+  using super::process_bodies;
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  // if true, A represents the set of all multi action names
+  bool A_is_all;
+
+  // Constructor
+  alphabet_allow_traverser(const aset& A_, bool A_is_all_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
+    : super(A_, process_bodies_), A_is_all(A_is_all_)
+  {}
+
+  // pushes intersect(A, {a})
+  void push_A_intersection(const multi_action_name& a)
+  {
+    if (A_is_all)
+    {
+      push(make_aset(a));
+    }
+    else
+    {
+      if (A.find(a) == A.end())
+      {
+        push(aset());
+      }
+      else
+      {
+        push(make_aset(a));
+      }
+    }
+  }
+
+  // a(e1, ..., en)
+  void leave(const lps::action& x)
+  {
+    multi_action_name a = name(x);
+    push_A_intersection(a);
+  }
+
+  // tau
+  void leave(const process::tau& x)
+  {
+    multi_action_name tau;
+    push_A_intersection(tau);
+  }
+
   // p1 || p2
   void operator()(const process::merge& x) // use operator() here, since we don't want to go into the default recursion
   {
@@ -588,14 +619,6 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
       aset AA1A2A1xA2 = set_intersection(A, A1A2A1xA2);
       push(AA1A2A1xA2);
     }
-  }
-
-  // p1 ||_ p2
-  void operator()(const process::left_merge& x)
-  {
-    // implement it using p1 || p2
-    merge y(x.left(), x.right());
-    derived()(y);
   }
 
   // p1 | p2
@@ -710,12 +733,6 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
     }
   }
 
-  // p @ t
-  void operator()(const process::at& x)
-  {
-    // skip
-  }
-
 //  void operator()(const process::process_expression& x)
 //  {
 //    std::cout << "<visit>" << process::pp(x) << std::endl;
@@ -727,9 +744,9 @@ struct alphabet_allow_traverser: public process_expression_traverser<Derived>
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename Derived>
-struct alphabet_sub_traverser: public alphabet_allow_traverser<Derived>
+struct alphabet_sub_traverser: public default_alphabet_traverser<Derived>
 {
-  typedef alphabet_allow_traverser<Derived> super;
+  typedef default_alphabet_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -737,7 +754,6 @@ struct alphabet_sub_traverser: public alphabet_allow_traverser<Derived>
   using super::push;
   using super::join;
   using super::A;
-  using super::A_is_all;
   using super::process_bodies;
 
 #if BOOST_MSVC
@@ -746,7 +762,7 @@ struct alphabet_sub_traverser: public alphabet_allow_traverser<Derived>
 
   // Constructor
   alphabet_sub_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, false, process_bodies)
+    : super(A, process_bodies)
   {}
 
   // a(e1, ..., en)
@@ -827,9 +843,9 @@ struct alphabet_sub_traverser: public alphabet_allow_traverser<Derived>
 };
 
 template <typename Derived>
-struct alphabet_block_traverser: public alphabet_allow_traverser<Derived>
+struct alphabet_block_traverser: public default_alphabet_traverser<Derived>
 {
-  typedef alphabet_allow_traverser<Derived> super;
+  typedef default_alphabet_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -837,7 +853,6 @@ struct alphabet_block_traverser: public alphabet_allow_traverser<Derived>
   using super::push;
   using super::join;
   using super::A;
-  using super::A_is_all;
   using super::process_bodies;
 
 #if BOOST_MSVC
@@ -846,7 +861,7 @@ struct alphabet_block_traverser: public alphabet_allow_traverser<Derived>
 
   // Constructor
   alphabet_block_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, false, process_bodies)
+    : super(A, process_bodies)
   {}
 
   // tau
