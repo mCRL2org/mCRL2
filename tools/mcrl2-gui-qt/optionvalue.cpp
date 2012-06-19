@@ -64,7 +64,7 @@ QString OptionValue::value()
 {
   QString output("");
 
-  if (m_enabled->isChecked())
+  if (m_enabled == NULL || m_enabled->isChecked())
   {
     output.append("--").append(m_option.nameLong);
 

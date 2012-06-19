@@ -25,8 +25,14 @@ FileBrowser::FileBrowser(QWidget *parent) :
 
   m_model.setReadOnly(false);
 
+#ifdef Q_OS_WIN32
+  m_model.setRootPath(QString());
+#else
   m_model.setRootPath(QDir::rootPath());
+#endif
+
   m_model.sort(0);
+
   setModel(&m_model);
 
   setColumnHidden( 1, true );
@@ -34,8 +40,9 @@ FileBrowser::FileBrowser(QWidget *parent) :
   setColumnHidden( 3, true );
 
   setSortingEnabled(true);
+  sortByColumn(0, Qt::AscendingOrder);
 
-  //setCurrentIndex(m_model.index(QDir::currentPath()));
+  setCurrentIndex(m_model.index(QDir::currentPath()));
 
 }
 

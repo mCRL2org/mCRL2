@@ -52,12 +52,12 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
   if (m_info.hasOutput())
   {
     QDir dir = fileInfo.absoluteDir();
-    QString newfile(fileInfo.baseName().append(".out"));
+    QString newfile = fileInfo.baseName().append(".%1").arg(m_info.output);
     int filenr = 0;
     while(dir.exists(newfile))
     {
       filenr++;
-      newfile = fileInfo.baseName().append("_%1.out").arg(filenr);
+      newfile = fileInfo.baseName().append("_%1.%2").arg(filenr).arg(m_info.output);
     }
     ui->pckFileOut->setText(newfile);
   }
@@ -70,8 +70,13 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
   for (int i = 0; i < m_info.options.count(); i++)
   {
     ToolOption option = m_info.options.at(i);
-    QCheckBox *cbOpt = new QCheckBox(option.nameLong, this);
-    cbOpt->setChecked(option.standard);
+    QCheckBox *cbOpt = NULL;
+
+    if (option.argument.type != EnumArgument)
+    {
+        cbOpt = new QCheckBox(option.nameLong, this);
+        cbOpt->setChecked(option.standard);
+    }
 
     QLabel *lblOpt = new QLabel(option.description, this);
     lblOpt->setWordWrap(true);
@@ -99,9 +104,9 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
             QHBoxLayout *lytArg = new QHBoxLayout();
             lytArg->setSpacing(6);
 
-            QLabel *lblArg = new QLabel(option.argument.name, this);
-            lblArg->setMinimumWidth(100);
-            lytArg->addWidget(lblArg);
+//            QLabel *lblArg = new QLabel(option.argument.name, this);
+//            lblArg->setMinimumWidth(100);
+//            lytArg->addWidget(lblArg);
 
             QWidget *edtArg = NULL;
 
@@ -184,9 +189,9 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
             QHBoxLayout *lytArg = new QHBoxLayout();
             lytArg->setSpacing(6);
 
-            QLabel *lblArg = new QLabel(option.argument.name, this);
-            lblArg->setMinimumWidth(100);
-            lytArg->addWidget(lblArg);
+//            QLabel *lblArg = new QLabel(option.argument.name, this);
+//            lblArg->setMinimumWidth(100);
+//            lytArg->addWidget(lblArg);
 
             FilePicker *edtArg = new FilePicker(this);
             lytArg->addWidget(edtArg);
@@ -230,7 +235,14 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
         default:
           break;
       }
-      ui->frmOptions->addRow(cbOpt, lytOpt);
+      if (cbOpt != NULL)
+      {
+        ui->frmOptions->addRow(cbOpt, lytOpt);
+      }
+      else
+      {
+        ui->frmOptions->addRow(option.nameLong, lytOpt);
+      }
     }
   }
 }
