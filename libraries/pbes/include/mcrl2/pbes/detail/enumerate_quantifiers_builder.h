@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_ENUMERATE_QUANTIFIERS_BUILDER_H
 #define MCRL2_PBES_DETAIL_ENUMERATE_QUANTIFIERS_BUILDER_H
 
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+
 #include <numeric>
 #include <set>
 #include <utility>
@@ -543,9 +545,13 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// \return The result of visiting the node
   term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+    std::cerr << "<visit_forall>" << tr::pp(x) << std::endl;
+#endif
+    term_type result;
     if (m_enumerate_infinite_sorts)
     {
-      return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(variables, phi, sigma);
+      result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(variables, phi, sigma);
     }
     else
     {
@@ -554,13 +560,17 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        return x;
+        result = utilities::optimized_forall(infinite, visit(phi, sigma));
       }
       else
       {
-        return utilities::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
+        result = utilities::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
       }
     }
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+    std::cerr << "<visit_forall_result>" << tr::pp(result) << std::endl;
+#endif
+    return result;
   }
 
   /// \brief Visit exists node
@@ -587,7 +597,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        result = x;
+        result = utilities::optimized_exists(infinite, visit(phi, sigma));
       }
       else
       {
