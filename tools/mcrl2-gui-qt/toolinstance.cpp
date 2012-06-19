@@ -36,6 +36,8 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, QWidge
 {
   ui->setupUi(this);
 
+  connect(this, SIGNAL(colorChanged(QColor)), this, SLOT(onColorChanged(QColor)));
+
   connect(&m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
   connect(&m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(onStandardOutput()));
   connect(&m_process, SIGNAL(readyReadStandardError()), this, SLOT(onStandardError()));
@@ -296,18 +298,33 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
   switch (state)
   {
     case QProcess::NotRunning:
-      emit(titleChanged(fileInfo.fileName().append(" [Ready]")));
+      if (m_process.exitCode() == 0)
+      {
+        ui->lblState->setText("[Ready]");
+        emit(titleChanged(fileInfo.fileName().append(" [Ready]")));
+        emit(colorChanged(Qt::green));
+      }
+      else
+      {
+        ui->lblState->setText("[Error]");
+        emit(titleChanged(fileInfo.fileName().append(" [Error]")));
+        emit(colorChanged(Qt::red));
+      }
       ui->btnAbort->setEnabled(false);
       ui->btnRun->setEnabled(true);
       break;
     case QProcess::Starting:
+      ui->lblState->setText("[Starting]");
       emit(titleChanged(fileInfo.fileName().append(" [Starting]")));
+      emit(colorChanged(Qt::yellow));
       ui->btnRun->setEnabled(false);
       ui->btnAbort->setEnabled(true);
       break;
     case QProcess::Running:
     default:
+      ui->lblState->setText("[Running]");
       emit(titleChanged(fileInfo.fileName().append(" [Running]")));
+      emit(colorChanged(Qt::yellow));
       ui->btnRun->setEnabled(false);
       ui->btnAbort->setEnabled(true);
       break;
@@ -345,9 +362,9 @@ void ToolInstance::onAbort()
   mCRL2log(mcrl2::log::info) << "Attempting to terminate " << executable().toStdString() << std::endl;
   m_process.terminate();
 
-  if (!m_process.waitForFinished(1000) && m_process.state() == QProcess::Running)
+  if (!m_process.waitForFinished(10000) && m_process.state() == QProcess::Running)
   {
-    mCRL2log(mcrl2::log::info) << "Killing " << executable().toStdString() << std::endl;
+    mCRL2log(mcrl2::log::warning) << "Killing " << executable().toStdString() << std::endl;
     m_process.kill();
   }
 }
@@ -368,6 +385,10 @@ void ToolInstance::onSave()
   }
 }
 
+void ToolInstance::onColorChanged(QColor color)
+{
+  ui->lblState->setStyleSheet(QString("background: %1;").arg(color.name()));
+}
 
 
 

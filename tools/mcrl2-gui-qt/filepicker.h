@@ -31,6 +31,10 @@ class FilePicker : public QWidget
     void onBrowse();
     void setText(QString value) { ui->value->setText(value); }
     
+  protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
+
   private:
     Ui::FilePicker *ui;
 

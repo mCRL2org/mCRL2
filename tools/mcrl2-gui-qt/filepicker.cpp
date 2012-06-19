@@ -10,20 +10,24 @@
 #include "filepicker.h"
 
 #include <QFileDialog>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QList>
+#include <QUrl>
 
 FilePicker::FilePicker(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FilePicker)
+  QWidget(parent),
+  ui(new Ui::FilePicker)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    connect(ui->btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowse()));
-    connect(ui->value, SIGNAL(textChanged(QString)), this, SLOT(onTextChanged(QString)));
+  connect(ui->btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowse()));
+  connect(ui->value, SIGNAL(textChanged(QString)), this, SLOT(onTextChanged(QString)));
 }
 
 FilePicker::~FilePicker()
 {
-    delete ui;
+  delete ui;
 }
 
 void FilePicker::onBrowse()
@@ -32,4 +36,24 @@ void FilePicker::onBrowse()
                                                 tr("All files (*.* )")));
   if (!fileName.isNull())
     ui->value->setText(fileName);
+}
+
+void FilePicker::dragEnterEvent(QDragEnterEvent *event)
+{
+  if (event->mimeData()->hasUrls())
+    event->acceptProposedAction();
+}
+
+void FilePicker::dropEvent(QDropEvent *event)
+{
+  if (event->mimeData()->hasUrls())
+  {
+    QList<QUrl> urls = event->mimeData()->urls();
+
+    if (urls.count() == 1)
+    {
+      ui->value->setText(urls.at(0).toLocalFile());
+      event->accept();
+    }
+  }
 }

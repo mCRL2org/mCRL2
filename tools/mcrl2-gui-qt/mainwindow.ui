@@ -118,6 +118,9 @@
        <property name="editTriggers">
         <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
        </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
        <property name="indentation">
         <number>15</number>
        </property>

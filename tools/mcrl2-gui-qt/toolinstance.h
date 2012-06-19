@@ -38,6 +38,8 @@ class ToolInstance : public QWidget
     void onAbort();
     void onSave();
 
+    void onColorChanged(QColor color);
+
   private:
     QString m_filename;
     ToolInformation m_info;
@@ -48,6 +50,7 @@ class ToolInstance : public QWidget
 
   signals:
     void titleChanged(QString title);
+    void colorChanged(QColor color);
 
 };
 

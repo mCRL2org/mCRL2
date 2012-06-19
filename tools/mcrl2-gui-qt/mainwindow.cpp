@@ -76,6 +76,7 @@ void MainWindow::createToolInstance(QString filename, ToolInformation info)
   ToolInstance* toolInstance = new ToolInstance(filename, info, m_ui.tabInstances);
   int index = m_ui.tabInstances->addTab(toolInstance, info.name);
   connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
+  connect(toolInstance, SIGNAL(colorChanged(QColor)), this, SLOT(onTabColorChanged(QColor)));
   m_ui.tabInstances->setCurrentIndex(index);
 }
 
@@ -110,6 +111,18 @@ void MainWindow::onTabTitleChanged(QString title)
   if (index > -1)
   {
     m_ui.tabInstances->setTabText(index, title);
+  }
+}
+
+void MainWindow::onTabColorChanged(QColor color)
+{
+  ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(QObject::sender());
+  int index = m_ui.tabInstances->indexOf(toolInstance);
+  if (index > -1)
+  {
+    QPixmap pm(12, 12);
+    pm.fill(color);
+    m_ui.tabInstances->setTabIcon(index, pm);
   }
 }
 

@@ -65,6 +65,12 @@ class MainWindow : public QMainWindow
     void onTabTitleChanged(QString title);
 
     /**
+     * @brief Updates the color for the instance
+     * @param color The new color
+     */
+    void onTabColorChanged(QColor color);
+
+    /**
      * @brief Deletes the given instance
      * @param index The instance to be deleted
      */
