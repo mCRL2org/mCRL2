@@ -543,10 +543,10 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// \param phi A term
   /// \param sigma A substitution function
   /// \return The result of visiting the node
-  term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
+  term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_forall>" << tr::pp(x) << std::endl;
+    std::cerr << "<visit_forall>" << tr::pp(forall(variables, phi)) << std::endl;
 #endif
     term_type result;
     if (m_enumerate_infinite_sorts)
@@ -560,7 +560,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_forall(infinite, visit(phi, sigma));
+        result = utilities::optimized_forall(infinite, super::visit(phi, sigma));
       }
       else
       {
@@ -580,10 +580,10 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// \param phi A term
   /// \param sigma A substitution function
   /// \return The result of visiting the node
-  term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
+  term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_exists>" << tr::pp(x) << std::endl;
+    std::cerr << "<visit_exists>" << tr::pp(exists(variables, phi)) << std::endl;
 #endif
     term_type result;
     if (m_enumerate_infinite_sorts)
@@ -597,7 +597,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_exists(infinite, visit(phi, sigma));
+        result = utilities::optimized_exists(infinite, super::visit(phi, sigma));
       }
       else
       {
