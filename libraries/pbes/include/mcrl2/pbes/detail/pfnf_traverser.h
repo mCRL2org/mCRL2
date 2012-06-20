@@ -31,6 +31,10 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 
+#ifdef MCRL2_PFNF_VISITOR_DEBUG
+#include "mcrl2/data/print.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -301,11 +305,20 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     }
     for (atermpp::vector<pfnf_traverser_quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
     {
-      std::set_intersection(left_variables.begin(), left_variables.end(), j->second.begin(), j->second.end(), std::inserter(name_clashes, name_clashes.end()));
+      const data::variable_list& right_variables = j->second;
+      for (data::variable_list::const_iterator k = right_variables.begin(); k != right_variables.end(); ++k)
+      {
+        if (left_variables.find(*k) != left_variables.end())
+        {
+          name_clashes.insert(*k);
+        }
+      }
     }
+
 #ifdef MCRL2_PFNF_VISITOR_DEBUG
 std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes, data::stream_printer()) << std::endl;
 #endif
+
     if (!name_clashes.empty())
     {
       data::set_identifier_generator generator;
