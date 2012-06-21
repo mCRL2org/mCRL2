@@ -17,6 +17,8 @@
 #include <QFileDialog>
 #include "dimensionsdialog.h"
 
+#include "mcrl2/exception.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   m_ui(new Ui::MainWindow)
@@ -100,11 +102,18 @@ void MainWindow::openFile(QString fileName)
 {
   if (!fileName.isNull())
   {
-    m_layout->ui()->setActive(false);
-    m_glwidget->resetViewpoint(0);
-    m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
-    m_glwidget->rebuild();
-    m_information->update();
+    try
+    {
+      m_layout->ui()->setActive(false);
+      m_glwidget->resetViewpoint(0);
+      m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
+      m_glwidget->rebuild();
+      m_information->update();
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      QMessageBox::critical(this, "Error opening file", e.what());
+    }
   }
 }
 

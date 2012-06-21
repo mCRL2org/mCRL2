@@ -54,21 +54,26 @@ struct StateLabelMoveRecord : public MoveRecord {
 
 struct HandleMoveRecord : public MoveRecord
 {
+    bool movingLabel;
     LabelMoveRecord label;
     void grab(Graph::Graph& graph, size_t index)
     {
       node = &graph.handle(index);
       node->anchored = true;
-      label.grab(graph, index);
+      movingLabel = !graph.transitionLabel(index).anchored;
+      if (movingLabel)
+        label.grab(graph, index);
     }
     void release(bool toggleLocked) {
       MoveRecord::release(toggleLocked);
-      label.release(toggleLocked);
+      if (movingLabel)
+        label.release(toggleLocked);
     }
     void move(const Graph::Coord3D &pos)
     {
       MoveRecord::move(pos);
-      label.move(pos);
+      if (movingLabel)
+        label.move(pos);
     }
 };
 
@@ -91,7 +96,7 @@ struct NodeMoveRecord : public MoveRecord
           e.from = e.to;
           e.to = temp;
         }
-        if (e.from == index)
+        if (e.from == index && !graph.handle(i).anchored)
         {
           edges.resize(nlabels + 1);
           endpoints.resize(nlabels + 1);
