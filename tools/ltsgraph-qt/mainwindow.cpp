@@ -126,7 +126,7 @@ void MainWindow::onExportImage()
                                                    "Postscript (*.ps);;"
                                                    "Encapsulated Postscript (*.eps);;"
                                                    "SVG (*.svg);;"
-                                                   "LaTeX (*.tex);;"
+                                                   "LaTeX TikZ Image (*.tex);;"
                                                    "PGF (*.pgf);;"
                                                    ),
                                                 &selectedFilter));

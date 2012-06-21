@@ -1147,3 +1147,97 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
   }
   fclose(outfile);
 }
+
+void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
+{
+  QString tikz_code  = "\\documentclass[10pt, a4paper]{article}\n\n";
+  tikz_code += "\\usepackage{tikz}\n";
+  tikz_code += "\\usetikzlibrary{arrows}\n\n";
+
+  tikz_code += "\\begin{document}\n";
+  tikz_code += "\\begin{tikzpicture}\n";
+  tikz_code += "  [scale=2]\n\n";
+  tikz_code += "   \\tikzstyle{state}=[circle, draw]\n";
+  tikz_code += "   \\tikzstyle{initstate}=[state,fill=green]\n";
+  tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
+
+
+  for (size_t i = 0; i < m_graph.nodeCount(); ++i)
+  {
+    tikz_code += tikzNode(i, aspectRatio);
+  }
+
+  for (size_t i = 0; i < m_graph.edgeCount(); ++i)
+  {
+    tikz_code += tikzEdge(i, aspectRatio);
+  }
+
+  tikz_code += "\n\\end{tikzpicture}\n";
+  tikz_code += "\\end{document}\n";
+
+  QFile file(filename);
+
+  if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+  {
+    file.write(tikz_code.toAscii());
+    file.close();
+  }
+}
+
+QString GLScene::tikzNode(size_t i, float aspectRatio)
+{
+  Graph::NodeNode& node = m_graph.node(i);
+  Color3f line(node.color);
+
+  QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [%6state, draw=currentcolor] (state%7) {%7};\n";
+
+  ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
+  ret = ret.arg(node.pos.x / 10.0f * aspectRatio, 6, 'f').arg(node.pos.y / 10.0f, 6, 'f');
+  ret = ret.arg(m_graph.initialState() == i ? "init" : "");
+  ret = ret.arg(i);
+
+  return ret;
+}
+
+QString GLScene::tikzEdge(size_t i, float aspectRatio)
+{
+  Graph::LabelNode& label = m_graph.transitionLabel(i);
+  Graph::Edge edge = m_graph.edge(i);
+  Coord3D ctrl[4];
+  Coord3D &from = ctrl[0];
+  Coord3D &to = ctrl[3];
+  Coord3D via = m_graph.handle(i).pos;
+  from = m_graph.node(edge.from).pos;
+  to = m_graph.node(edge.to).pos;
+
+  // Calculate control points from handle
+  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
+  ctrl[2] = ctrl[1];
+
+  QString extraControls("");
+
+  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
+  // them in x-y direction.
+  if (edge.from == edge.to)
+  {
+    Coord3D diff = ctrl[1] - ctrl[0];
+    diff = diff.cross(Coord3D(0, 0, 1));
+    diff = diff * ((via - from).size() / (diff.size() * 2.0));
+    ctrl[1] = ctrl[1] + diff;
+    ctrl[2] = ctrl[2] - diff;
+
+    extraControls = QString(" and (%1pt, %2pt)").arg(ctrl[2].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y / 10.0f, 6, 'f');
+  }
+
+  QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
+  ret = ret.arg(edge.from).arg(edge.to);
+  ret = ret.arg(m_graph.transitionLabelstring(label.labelindex));
+  ret = ret.arg(ctrl[1].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y / 10.0f, 6, 'f');
+  ret = ret.arg(extraControls);
+
+  return ret;
+}
+
+
+
+

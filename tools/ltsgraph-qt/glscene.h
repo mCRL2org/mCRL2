@@ -79,6 +79,21 @@ class GLScene
      * @param i The index of the state number to render.
      */
     void renderStateNumber(size_t i);
+
+    /**
+     * @brief Generates TikZ code for a single edge.
+     * @param i The index of the edge to render.
+     * @param aspectRatio The aspect ratio used for placement.
+     */
+    QString tikzEdge(size_t i, float aspectRatio);
+
+    /**
+     * @brief Generates TikZ code for a single node.
+     * @param i The index of the node to render.
+     * @param aspectRatio The aspect ratio used for placement.
+     */
+    QString tikzNode(size_t i, float aspectRatio);
+
   public:
 
     /**
@@ -254,6 +269,12 @@ class GLScene
      * @brief Renders the scene to a file using gl2ps.
      */
     void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
+
+
+    /**
+     * @brief Renders the scene to LaTeX using Tikz.
+     */
+    void renderLatexGraphics(QString filename, float aspectRatio = 1.0f);
 
     //Getters and setters
     bool drawStateLabels() const { return m_drawstatelabels; }

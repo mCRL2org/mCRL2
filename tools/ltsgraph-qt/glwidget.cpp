@@ -400,7 +400,7 @@ void GLWidget::renderToFile(const QString &filename, const QString &filter, cons
         else
           if (filter.startsWith("LaTeX"))
           {
-            m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_TEX);
+            m_scene->renderLatexGraphics(filename);
           }
           else
             if (filter.startsWith("PGF"))
