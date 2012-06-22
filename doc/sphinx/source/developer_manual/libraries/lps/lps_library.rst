@@ -154,6 +154,10 @@ An illustration of it's usage is
 Here ``name`` corresponds with :math:`a_{i}`, and ``arguments`` with :math:`f_i(d,e)` in
 the earlier given formulas.
 
+.. note::
+
+   There is a convention that a linear process without any summands represents the process ``delta @ 0``.
+
 .. warning::
 
    There is still a class ``lps::summand`` in use, but it has been deprecated.
