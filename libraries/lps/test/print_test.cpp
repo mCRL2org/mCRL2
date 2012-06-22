@@ -72,6 +72,14 @@ BOOST_AUTO_TEST_CASE(rational)
   BOOST_CHECK(output.find("@") == std::string::npos);
 }
 
+BOOST_AUTO_TEST_CASE(no_summands)
+{
+  specification spec;
+  std::string s = lps::pp(spec);
+  std::cout << "--- no_summands ---\n" << s << std::endl;
+  BOOST_CHECK(s.find("delta @ 0") != std::string::npos);
+}
+
 #ifdef MCRL2_PRINT_PROBLEM_CASES
 void test_specification(const std::string& spec_text)
 {
@@ -85,14 +93,14 @@ void test_specification(const std::string& spec_text)
     std::clog << "<pp>   " << s1 << std::endl;
     std::clog << "<print>" << s2 << std::endl;
     BOOST_CHECK(s1 == s2);
-  }  
+  }
 }
 
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
   std::string SPEC;
 
-  SPEC = 
+  SPEC =
     "act  a: Bool;         \n"
     "proc P =  a(true) . P;\n"
     "init P;               \n"
