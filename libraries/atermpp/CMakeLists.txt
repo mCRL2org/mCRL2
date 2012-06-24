@@ -25,12 +25,10 @@ add_library(${PROJECT_NAME}
   source/memory.cpp
   source/aterm.cpp
   source/hash.cpp
-#  source/list.cpp
-  source/afun.cpp
+#  source/afun.cpp
   source/safio.cpp
   source/byteencoding.cpp
   source/byteio.cpp
-#  source/aterm_ext.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)

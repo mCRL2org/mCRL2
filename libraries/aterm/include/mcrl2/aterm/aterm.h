@@ -496,8 +496,9 @@ ATerm ATreadFromString(const char* s)
   return read_from_string(std::string(s));
 }
 
-int
+/* int
 ATfprintf(FILE* stream, const char* format,...);
+*/
 
 /* ATerm extensions */
 /**

@@ -28,14 +28,6 @@ namespace atermpp
 template <typename Term>
 class term_list:public aterm
 {
-  protected:
-
-    static const term_list<Term>& empty_list()
-    { 
-      static const term_list<Term> m_empty_list=term_list<Term>(aterm(AS_EMPTY_LIST()));
-      return m_empty_list;
-    } 
-
   public: // Should become protected.
     detail::_aterm_list<Term> & operator *() const
     {
@@ -77,7 +69,7 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
     
     /// Default constructor. Creates an empty list.
-    term_list ():aterm(reinterpret_cast<detail::_aterm*>(&*empty_list()))
+    term_list ():aterm(detail::aterm_administration::empty_aterm_list())
     {
     }
 
@@ -92,8 +84,8 @@ class term_list:public aterm
     /// \param l A list.
     term_list(detail::_aterm_list<Term> *t):aterm(reinterpret_cast<detail::_aterm *>(t))
     {
-      assert((boost::is_base_of<aterm, Term>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
       assert(t==&*aterm() || type() == AT_LIST); // term list can be the undefined aterm(). This is generally used to indicate a faulty
                                             // situation. This used should be discouraged.
     }
@@ -106,9 +98,9 @@ class term_list:public aterm
     template <typename SpecificTerm>
     term_list<Term>(const term_list<SpecificTerm> &t): aterm(t)
     {
-      assert((boost::is_base_of<aterm, Term>::value));
-      assert(sizeof(SpecificTerm)==sizeof(size_t));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(SpecificTerm)==sizeof(aterm));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
     } 
     
 
@@ -116,8 +108,8 @@ class term_list:public aterm
     ///  \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
-      assert((boost::is_base_of<aterm, Term>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
       assert(m_term==&*aterm() || t.type()==AT_LIST); // Term list can be the undefined aterm(); Generally, this is used to indicate a faulty situation.
                                                  // This use should be discouraged.
     }
@@ -130,8 +122,8 @@ class term_list:public aterm
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
               boost::random_access_traversal_tag >::type >::type* = 0)
     {
-      assert((boost::is_base_of<aterm, Term>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
       term_list<Term> result;
       while (first != last)
       {
@@ -150,8 +142,8 @@ class term_list:public aterm
              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
              boost::random_access_traversal_tag >::type >::type* = 0)
     {
-      assert((boost::is_base_of<aterm, Term>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
       std::vector<Term> temporary_store;
       while (first != last)
       {
@@ -205,7 +197,7 @@ class term_list:public aterm
     {
       size_t size=0;
       for(detail::_aterm_list<Term>* m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-                 m_list!=reinterpret_cast<detail::_aterm_list<Term>*>(&*empty_list()); m_list=&*(m_list->tail))
+                 m_list!=reinterpret_cast<detail::_aterm_list<Term>*>(detail::aterm_administration::empty_aterm_list()); m_list=&*(m_list->tail))
       {
         size++;
       }
@@ -216,7 +208,7 @@ class term_list:public aterm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return m_term==reinterpret_cast<detail::_aterm*>(&*empty_list());
+      return m_term==reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list());
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -230,7 +222,7 @@ class term_list:public aterm
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(reinterpret_cast<detail::_aterm*>(&*empty_list()));
+      return const_iterator(reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list()));
     }
 
     /// \brief Returns the largest possible size of the term_list.

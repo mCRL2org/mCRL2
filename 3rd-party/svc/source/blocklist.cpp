@@ -29,7 +29,7 @@
 
 using namespace aterm_deprecated;
 
-void BLdump(FILE*, BList*);
+// void BLdump(FILE*, BList*);
 
 
 
@@ -303,7 +303,7 @@ void Bfree(tBlock* nodeList)
 } */
 
 
-static
+/* static
 void Bdump(FILE* fp, tBlock* block)
 {
   struct HFnode* tmp;
@@ -334,4 +334,4 @@ void BLdump(FILE* fp, BList* blockList)
     Bdump(fp, tmp);
   }
 
-}
+} */

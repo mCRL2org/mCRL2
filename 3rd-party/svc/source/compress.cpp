@@ -142,9 +142,6 @@ int CSureadString(CompressedStream* cs, char** str)
 
   if (BSreadString(cs->bs, buffer))
   {
-    /*
-    ATfprintf(stderr, "Uread %s\n", buffer);
-    */
     *str=buffer;
     return 1;
   }
@@ -238,11 +235,6 @@ int CSuwriteString(CompressedStream* cs, const char* str)
 }
 int CSwriteInt(CompressedStream* cs, long n)
 {
-
-  /*
-  ATfprintf(stderr,"Write int %d\n", n);
-  */
-
   return HFencodeATerm(cs->bs, &cs->tree, ATmakeInt(n));
 }
 int CSuwriteInt(CompressedStream* cs, long n)

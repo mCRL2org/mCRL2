@@ -51,7 +51,7 @@ extern char* _strdup(const char* s);
 
 static ATerm    fparse_term(int* c, FILE* f);
 static ATerm    sparse_term(int* c, char** s);
-int ATvfprintf(FILE* stream, const char* format, va_list args);
+// int ATvfprintf(FILE* stream, const char* format, va_list args);
 
 /*}}}  */
 /*{{{  int ATfprintf(FILE *stream, const char *format, ...) */
@@ -60,7 +60,7 @@ int ATvfprintf(FILE* stream, const char* format, va_list args);
  * Extension of fprintf() with ATerm-support.
  */
 
-int
+/* int
 ATfprintf(FILE* stream, const char* format,...)
 {
   int             result = 0;
@@ -71,11 +71,11 @@ ATfprintf(FILE* stream, const char* format,...)
   va_end(args);
 
   return result;
-}
+} */
 /*}}}  */
 /*{{{  int ATvfprintf(FILE *stream, const char *format, va_list args) */
 
-int ATvfprintf(FILE* stream, const char* format, va_list args)
+/* int ATvfprintf(FILE* stream, const char* format, va_list args)
 {
   const char*     p;
   char*           s;
@@ -91,7 +91,7 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
     }
 
     s = fmt;
-    while (!isalpha((int) *p))  /* parse formats %-20s, etc. */
+    while (!isalpha((int) *p))  / * parse formats %-20s, etc. * /
     {
       *s++ = *p++;
     }
@@ -126,18 +126,18 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
         fprintf(stream, fmt, va_arg(args, char*));
         break;
 
-        /*
+        / *
          * ATerm specifics start here: "%t" to print an ATerm; "%l" to
          * print a list; "%y" to print a AFun; "%n" to print a single
          * ATerm node
-         */
+         * /
       case 't':
         ATwriteToTextFile(va_arg(args, detail::_aterm*), stream);
         break;
       case 'l':
         {
           detail::_aterm_list<aterm>* l = va_arg(args, detail::_aterm_list<aterm>*);
-          fmt[strlen(fmt) - 1] = '\0';  /* Remove 'l' */
+          fmt[strlen(fmt) - 1] = '\0';  / * Remove 'l' * /
           while (!ATisEmpty(l))
           {
             ATwriteToTextFile(ATgetFirst(l), stream);
@@ -159,7 +159,7 @@ int ATvfprintf(FILE* stream, const char* format, va_list args)
     }
   }
   return result;
-}
+} */
 
 
 /* bool ATwriteToNamedTextFile(const ATerm &t, const char* name)

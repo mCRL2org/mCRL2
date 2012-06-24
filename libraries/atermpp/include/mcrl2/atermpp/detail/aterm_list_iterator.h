@@ -69,7 +69,7 @@ class term_list_iterator: public boost::iterator_facade<
     /// \return The value that the iterator references
     const Term &dereference() const
     {
-      assert(m_list->function()==AS_LIST());
+      assert(m_list->function()==detail::function_adm.AS_LIST);
       return m_list->head;
     }
 

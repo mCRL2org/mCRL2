@@ -72,7 +72,7 @@ typedef struct _ATermConstruct
 {
   size_t type;
 
-  _SymEntry* tempTerm;
+  detail::_function_symbol* tempTerm;
   size_t termKey;
 
   size_t nrOfSubTerms;
@@ -90,7 +90,7 @@ typedef struct _BinaryReader
   std::vector<aterm> sharedTerms;
   std::set<function_symbol> protected_afuns;
 
-  _SymEntry** sharedAFuns;
+  detail::_function_symbol** sharedAFuns;
   size_t sharedAFunsSize;
   size_t sharedAFunsIndex;
 

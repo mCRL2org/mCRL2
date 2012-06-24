@@ -7,19 +7,11 @@
 namespace atermpp
 {
 
-// typedef size_t ShortHashNumber;
-// typedef size_t MachineWord;
 typedef size_t HashNumber;
-/* Although atypes.h defines MachineWord, it wasn't used here:
- *    typedef unsigned long header_type; */
-// typedef MachineWord header_type;
-
-
 /* The largest size_t is used as an indicator that an element does not exist.
  *    This is used as a replacement of a negative number as an indicator of non
  *       existence */
 
-/*  #define NON_EXISTING (size_t)(-1) */
 static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
 
 /* Avoid warnings under windows, by renaming all strdup's into _strdup's,
@@ -45,29 +37,6 @@ typedef int ssize_t;
 #else
 #define _strdup strdup
 #endif
-
-/* #ifdef AT_64BIT
-inline
-ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
-{
-  return (ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^(((MachineWord)(a)) >> 34));
-}
-#endif// AT_64BIT
-
-#ifdef AT_32BIT
-inline
-ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
-{
-  return ((ShortHashNumber)(a)) >> 2;
-}
-#endif // AT_32BIT
-
-inline
-HashNumber ADDR_TO_HNR(const void* a)
-{
-  return ((HashNumber)(a)) >> 2;
-}
-*/
 
 static const size_t MAX_HEADER_BITS = 64;
 

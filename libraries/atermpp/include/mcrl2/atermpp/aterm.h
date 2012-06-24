@@ -17,8 +17,11 @@
 #include <cassert>
 #include <vector>
 #include <assert.h>
-#include <iostream>
 
+#include "boost/type_traits/is_base_of.hpp"
+#include "boost/type_traits/is_convertible.hpp"
+#include "boost/static_assert.hpp"
+#include "mcrl2/atermpp/detail/function_symbol_implementation.h"
 #include "mcrl2/atermpp/detail/aterm.h"
 
 /// \brief The main namespace for the aterm++ library.
@@ -65,19 +68,13 @@ class aterm
       m_term=t;
     }
 
+  public: // Should be protected;
     /// \brief Constructor.
     /// \detail The function symbol must have arity 0. This function
     /// is for internal use only. Use term_appl(sym) in applications.
     /// \param sym A function symbol.
     aterm(const function_symbol &sym);
   
-    static const aterm &undefined_aterm()
-    {
-      static const aterm t(AS_DEFAULT());
-      return t;
-    }
-    
-
   public:  // Functions below should become protected.
     detail::_aterm & operator *() const
     {
@@ -95,7 +92,7 @@ class aterm
   public:
 
     /// \brief Default constructor
-    aterm ():m_term(undefined_aterm().m_term)
+    aterm ():m_term(&*detail::aterm_administration::undefined_aterm())
     {
       increase_reference_count<false>(m_term);
     }
@@ -233,7 +230,28 @@ class aterm
       assert(m_term!=NULL && m_term->reference_count()>0);
       return &* *this;
     }
+
+    friend class detail::aterm_administration;
 };
+
+/// \brief A cheap cast from one aterm based type to another
+/// \details When casting one aterm based type into another, generally
+///          a new aterm is constructed, and the old one is destroyed.
+///          This can cause undesired overhead, for instance due to
+///          increasing and decreasing of reference counts. This
+///          cast changes the type, without changing the aterm itself.
+///          It can only be used if the input and output types inherit
+///          from aterms, and contain no additional information than a
+///          single aterm.
+/// \param   A term of a type inheriting from an aterm.
+/// \return  A term of type ATERM_TYPE_OUT.
+template <class ATERM_TYPE_OUT>
+const ATERM_TYPE_OUT &aterm_cast(const aterm &t) 
+{
+  BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
+  BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
+  return (ATERM_TYPE_OUT &)t;
+}
 
 inline
 std::ostream& operator<<(std::ostream& out, const aterm& t)

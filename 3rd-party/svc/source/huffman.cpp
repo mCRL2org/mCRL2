@@ -33,7 +33,7 @@ static struct HFnode* HFadd(HFtree*, ATerm);
 static void          HFwriteCode(BitStream*, struct HFnode*);
 static void          HFfreeLoop(struct HFnode*);
 
-void HFdump(struct HFnode*, int);
+// void HFdump(struct HFnode*, int);
 void HFstats(struct HFnode*, int, long*);
 
 void HFdumpCode(FILE*, struct HFnode*);
@@ -142,7 +142,7 @@ void HFstats(struct HFnode* tree, int level, long* sum)
 
 /* Write 'tree' to stderr */
 
-void HFdump(struct HFnode* tree, int d)
+/* void HFdump(struct HFnode* tree, int d)
 {
   int i;
 
@@ -152,7 +152,7 @@ void HFdump(struct HFnode* tree, int d)
     {
       if (&*(tree->term)==NULL)
       {
-        ATfprintf(stderr," (%d) Term NULL\n", tree->frequency);
+        fprintf(stderr," (%ld) Term NULL\n", tree->frequency);
       }
       else
       {
@@ -177,7 +177,7 @@ void HFdump(struct HFnode* tree, int d)
     }
   }
 
-}
+} */
 
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */

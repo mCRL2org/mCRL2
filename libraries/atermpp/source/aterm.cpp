@@ -68,9 +68,7 @@ extern char* _strdup(const char* s);
 
 static aterm    fparse_term(int* c, FILE* f);
 static aterm    sparse_term(int* c, char** s);
-/* static aterm AT_diff(aterm t1, aterm t2, aterm_list *diffs); */
 
-/*}}}  */
 
 /*{{{  void AT_cleanup() */
 

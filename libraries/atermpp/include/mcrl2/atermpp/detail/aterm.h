@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include "mcrl2/atermpp/detail/atypes.h"
+#include "mcrl2/atermpp/detail/aterm_administration.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
 namespace atermpp
@@ -50,11 +51,11 @@ class _aterm
 
     size_t type() const
     {
-      if (m_function_symbol.number()==AS_LIST().number() || m_function_symbol.number()==AS_EMPTY_LIST().number())
+      if (m_function_symbol.number()==detail::function_adm.AS_LIST.number() || m_function_symbol.number()==detail::function_adm.AS_EMPTY_LIST.number())
       {
         return AT_LIST;
       }
-      else if (m_function_symbol.number()==AS_INT().number())
+      else if (m_function_symbol.number()==detail::function_adm.AS_INT.number())
       {
         return AT_INT;
       }
@@ -64,9 +65,7 @@ class _aterm
 };
 
 
-extern std::vector <detail::_aterm*>& hashtable();
 detail::_aterm* allocate_term(const size_t size);
-// void free_term(detail::_aterm *t);
 
 inline size_t term_size(const detail::_aterm *t);
 inline HashNumber hash_number(const detail::_aterm *t, const size_t size);
