@@ -28,7 +28,6 @@ ENDIF(WIN32)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   arcdiagram.cpp
-  attrconti.cpp
   attrdiscr.cpp
   attribute.cpp
   bitmappanel.cpp
@@ -52,7 +51,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   node.cpp
   opacitychooser.cpp
   parser.cpp
-  partitionframe.cpp
   popupframe.cpp
   settingsframe.cpp
   shape.cpp

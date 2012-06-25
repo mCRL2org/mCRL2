@@ -19,7 +19,6 @@
 #include <vector>
 #include <string>
 #include "attribute.h"
-#include "attrconti.h"
 #include "attrdiscr.h"
 #include "bundle.h"
 #include "cluster.h"
@@ -56,12 +55,6 @@ class Graph : public Colleague
       const std::string& type,
       const size_t& idx,
       const std::vector< std::string > &vals);
-    void addAttrConti(
-      const std::string& name,
-      const std::string& type,
-      const size_t& idx,
-      const double& lwrBnd,
-      const double& uprBnd);
 
     void swapAttributes(
       const size_t& idx1,

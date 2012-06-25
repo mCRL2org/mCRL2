@@ -46,9 +46,6 @@ class AttrDiscr : public Attribute
       const std::vector< std::string > &curDomain,
       std::map< size_t, size_t  > &origToCurDomain);
 
-    // -- get functions ---------------------------------------------
-    int getAttrType();
-
     size_t getSizeOrigValues();
     Value* getOrigValue(size_t idx);
     size_t getSizeCurValues();

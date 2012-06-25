@@ -102,25 +102,6 @@ void Graph::addAttrDiscr(
 }
 
 
-void Graph::addAttrConti(
-  const string& name,
-  const string& type,
-  const size_t& idx,
-  const double& lwrBnd,
-  const double& uprBnd)
-{
-  AttrConti* attr = new AttrConti(
-    mediator,
-    name,
-    type,
-    idx,
-    lwrBnd,
-    uprBnd);
-  attributes.push_back(attr);
-  attr = NULL;
-}
-
-
 void Graph::swapAttributes(
   const size_t& idx1,
   const size_t& idx2)
@@ -291,18 +272,9 @@ void Graph::duplAttributes(const vector< size_t > &idcs)
     {
       // add new attribute
       // -*-
-      if (attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_DISCR)
-      {
-        attributes.insert(
-          attributes.begin() + insIdx + i,
-          new AttrDiscr(*((AttrDiscr*)attributes[ idcs[i] ])));
-      }
-      else if (attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-      {
-        attributes.insert(
-          attributes.begin() + insIdx + i,
-          new AttrConti(*((AttrConti*)attributes[ idcs[i] ])));
-      }
+      attributes.insert(
+        attributes.begin() + insIdx + i,
+        new AttrDiscr(*((AttrDiscr*)attributes[ idcs[i] ])));
 
       attributes[ insIdx + i ]->setIndex(insIdx + i);
       attributes[ insIdx + i ]->setName(

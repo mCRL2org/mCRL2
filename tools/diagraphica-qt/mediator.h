@@ -83,23 +83,6 @@ class Mediator
       const std::string& name) = 0;
     virtual void handleAttributeCluster(const std::vector< size_t > &indcs) = 0;
 
-    // -*- //
-    virtual void handleAttrPartition(const size_t& attrIdx) = 0;
-    virtual void handleAttrPartition(
-      const size_t& numParts,
-      const size_t& method) = 0;
-    virtual void handleAttrDepartition(const size_t& attrIdx) = 0;
-    virtual void handleAttrPartitionCloseFrame() = 0;
-
-    virtual void getAttrValues(
-      const size_t& attrIdx,
-      std::vector< double > &vals) = 0;
-    virtual void getAttrValues(
-      const size_t& attrIdx,
-      std::set< double > &vals) = 0;
-
-    // -*- //
-
     virtual void handleMoveDomVal(
       const size_t& idxAttr,
       const size_t& idxFr,
@@ -113,7 +96,6 @@ class Mediator
     virtual void getAttributeNames(
       const std::vector< size_t > &indcs,
       std::vector< wxString > &names) = 0;
-    virtual size_t getAttributeType(const size_t& idx) = 0;
     virtual size_t getAttrSizeCurDomain(const size_t& idx) = 0;
 
     // -- attribute plots -------------------------------------------

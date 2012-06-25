@@ -862,11 +862,7 @@ void Shape::visualize(
     else
         alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
     */
-    if (attrs[i]->getSizeCurValues() == 0 && attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-    {
-      alpha = (attrValIdcs[i] - attrs[i]->getLowerBound())/(attrs[i]->getUpperBound() - attrs[i]->getLowerBound());
-    }
-    else if (attrs[i]->getSizeCurValues() == 1)
+    if (attrs[i]->getSizeCurValues() == 1)
     {
       alpha = 0.0;
     }
@@ -1082,11 +1078,7 @@ void Shape::visualize(
     else
         alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
     */
-    if (attrs[i]->getSizeCurValues() == 0 && attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-    {
-      alpha = (attrValIdcs[i] - attrs[i]->getLowerBound())/(attrs[i]->getUpperBound() - attrs[i]->getLowerBound());
-    }
-    else if (attrs[i]->getSizeCurValues() == 1)
+    if (attrs[i]->getSizeCurValues() == 1)
     {
       alpha = 0.0;
     }
@@ -1302,31 +1294,13 @@ void Shape::visualize(
     else
         alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
     */
-    if (attrs[i]->getAttrType() == Attribute::ATTR_TYPE_DISCR)
+    if (attrs[i]->getSizeCurValues() == 1)
     {
-      if (attrs[i]->getSizeCurValues() == 1)
-      {
-        alpha = 0.0;
-      }
-      else
-      {
-        alpha = (double)attrValIdcs[i]/((double)attrs[i]->getSizeCurValues() - 1.0);
-      }
+      alpha = 0.0;
     }
-    else if (attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI)
+    else
     {
-      if (attrs[i]->getSizeCurValues() == 0)
-      {
-        alpha = (attrValIdcs[i] - attrs[i]->getLowerBound())/(attrs[i]->getUpperBound() - attrs[i]->getLowerBound());
-      }
-      else if (attrs[i]->getSizeCurValues() == 1)
-      {
-        alpha = 0.0;
-      }
-      else
-      {
-        alpha = (double)attrValIdcs[i]/((double)attrs[i]->getSizeCurValues() - 1.0);
-      }
+      alpha = (double)attrValIdcs[i]/((double)attrs[i]->getSizeCurValues() - 1.0);
     }
 
     if (attrs[i] == xCtrDOF->getAttribute())

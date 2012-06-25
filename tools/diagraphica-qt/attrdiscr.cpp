@@ -249,12 +249,6 @@ void AttrDiscr::configValues(
 // -- get functions -------------------------------------------------
 
 
-int AttrDiscr::getAttrType()
-{
-  return ATTR_TYPE_DISCR;
-}
-
-
 size_t AttrDiscr::getSizeOrigValues()
 {
   return origValues.size();

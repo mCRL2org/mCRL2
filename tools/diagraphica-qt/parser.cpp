@@ -215,27 +215,16 @@ void Parser::writeFSMFile(
     line.append(graph->getAttribute(i)->getType());
     line.append(" ");
 
-    if (graph->getAttribute(i)->getSizeOrigValues() != 0)
+    for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
     {
-      for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
-      {
-        line.append("\"");
-        line.append(graph->getAttribute(i)->getCurValue(j)->getValue());
-        line.append("\"");
+      line.append("\"");
+      line.append(graph->getAttribute(i)->getCurValue(j)->getValue());
+      line.append("\"");
 
-        if (j < graph->getAttribute(i)->getSizeCurValues()-1)
-        {
-          line.append(" ");
-        }
+      if (j < graph->getAttribute(i)->getSizeCurValues()-1)
+      {
+        line.append(" ");
       }
-    }
-    else
-    {
-      line.append("[");
-      line.append(Utils::dblToStr(graph->getAttribute(i)->getLowerBound()));
-      line.append(", ");
-      line.append(Utils::dblToStr(graph->getAttribute(i)->getUpperBound()));
-      line.append("]");
     }
 
     line.append("\n");
@@ -406,23 +395,6 @@ void Parser::writeAttrConfig(
       card = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("OriginalCardinality"));
       attr -> AddChild(card);
       new wxXmlNode(card , wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::intToStr((int) graph->getAttribute(i)->getSizeOrigValues()).c_str(), wxConvUTF8));
-
-      /*
-      // original domain
-      domn = new wxXmlNode( "OriginalDomain" );
-      attr->LinkEndChild( domn );
-      {
-      for ( int j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j )
-      {
-          // value
-          valu = new wxXmlNode( "Value" );
-          domn->LinkEndChild( valu );
-          valu->LinkEndChild(
-              new TiXmlText(
-                  graph->getAttribute(i)->getOrigValue(j)->getValue().c_str() ) );
-      }
-      }
-      */
 
       // current domain
       domn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("CurrentDomain"));
@@ -907,63 +879,27 @@ void Parser::parseStateVarDescr(
       type = token;
     }
 
-    // domain
-    if (card != "0")
+    // all domain values are specified
+    begIdx = nextLine.find_first_not_of(" \"", endIdx);
+    endIdx = nextLine.find_first_of("\"", begIdx);
+
+    while (endIdx != string::npos)
     {
-      // all domain values are specified
+      token = nextLine.substr(begIdx, endIdx-begIdx);
+      if (token != "\n")
+      {
+        values.push_back(token);
+      }
       begIdx = nextLine.find_first_not_of(" \"", endIdx);
       endIdx = nextLine.find_first_of("\"", begIdx);
-
-      while (endIdx != string::npos)
-      {
-        token = nextLine.substr(begIdx, endIdx-begIdx);
-        if (token != "\n")
-        {
-          values.push_back(token);
-        }
-        begIdx = nextLine.find_first_not_of(" \"", endIdx);
-        endIdx = nextLine.find_first_of("\"", begIdx);
-      }
-
-      // add new discrete attribute to graph
-      graph->addAttrDiscr(
-        name,
-        type,
-        graph->getSizeAttributes(),
-        values);
     }
-    else
-    {
-      // range of domain values are specified
-      double lwrBnd = 0.0;
-      double uprBnd = 0.0;
 
-      // lower bound
-      begIdx = nextLine.find_first_not_of(" [", endIdx);
-      endIdx = nextLine.find_first_of(" ,", begIdx);
-      if (endIdx != string::npos)
-      {
-        token  = nextLine.substr(begIdx, endIdx-begIdx);
-        lwrBnd = Utils::strToDbl(token);
-
-        // upper bound
-        begIdx = nextLine.find_first_not_of(" ,", endIdx);
-        endIdx = nextLine.find_first_of("]", begIdx);
-        if (endIdx != string::npos)
-        {
-          token  = nextLine.substr(begIdx, endIdx-begIdx);
-          uprBnd = Utils::strToDbl(token);
-        }
-      }
-
-      // add new continuous attribute to graph
-      graph->addAttrConti(
-        name,
-        type,
-        graph->getSizeAttributes(),
-        lwrBnd,
-        uprBnd);
-    }
+    // add new discrete attribute to graph
+    graph->addAttrDiscr(
+      name,
+      type,
+      graph->getSizeAttributes(),
+      values);
   }
   catch (...)
   {

@@ -51,45 +51,21 @@ class Attribute : public Colleague
       const std::vector< std::string > &curDomain,
       std::map< size_t, size_t  > &origToCurDomain);
 
-    // functions overridden by AttrConti
-    virtual void classifyEqualIntervals(const size_t& number);
-    virtual void classifyQuantiles(const size_t& number);
-    virtual void classifyMeanStandardDeviation(const size_t& number);
-    virtual void removeClassification();
-
     // -- get functions ---------------------------------------------
     size_t getIndex();
     std::string getName();
     std::string getType();
-    virtual int getAttrType() = 0;
 
     // functions overridden by AttrDiscr
     virtual size_t getSizeOrigValues();
     virtual Value* getOrigValue(size_t idx);
     virtual Value* getCurValue(size_t idx);
 
-    // functions overridden by AttrConti
-    virtual double getLowerBound();
-    virtual double getUpperBound();
-    virtual void getRangeOrigValues(
-      double& lwrBnd,
-      double& uprBnd);
-
     virtual size_t getSizeCurValues() = 0;
     virtual Value* mapToValue(double key) = 0;
 
     // -- clear functions -------------------------------------------
     virtual void clearClusters() = 0;
-
-// -- public constants ------------------------------------------
-    enum
-    {
-      ATTR_TYPE_CONTI,
-      ATTR_TYPE_DISCR,
-      PART_METH_EQUAL_INTERVALS,
-      PART_METH_QUANTILES,
-      PART_METH_MEAN_STANDARD_DEVIATION
-    };
 
   protected:
     // -- private utility functions ---------------------------------

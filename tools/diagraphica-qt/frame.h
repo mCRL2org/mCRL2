@@ -30,7 +30,6 @@
 #include "droptarget.h"
 #include "glcanvas.h"
 #include "graph.h"
-#include "partitionframe.h"
 #include "popupframe.h"
 #include "settingsframe.h"
 #include "utils.h"
@@ -195,11 +194,6 @@ class Frame : public wxFrame, public Colleague
 //    void initAboutFrameOld();   // 1
 
     void initFrameSettings();
-    void initFramePartition(
-      wxString attrName,
-      size_t minParts,
-      size_t maxParts,
-      size_t curParts);
 
     void initFrameDOF();
     void initFrameNote();
@@ -294,9 +288,6 @@ class Frame : public wxFrame, public Colleague
 
     // -- settings frame --------------------------------------------
     SettingsFrame*    frameSettings;
-
-    // -- partition frame -------------------------------------------
-    PartitionFrame*   framePartition;
 
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;
@@ -398,7 +389,6 @@ class Frame : public wxFrame, public Colleague
       ID_CANVAS_RGT,
 
       ID_FRAME_SETTINGS,
-      ID_FRAME_PARTITION,
       ID_FRAME_DOF,
       ID_FRAME_NOTE,
       ID_FRAME_TEXT_SIZE,
@@ -423,8 +413,6 @@ class Frame : public wxFrame, public Colleague
       ID_MENU_ITEM_ATTR_DELETE,
       ID_MENU_ITEM_ATTR_CLUST,
       ID_MENU_ITEM_ATTR_TRACE,
-      ID_MENU_ITEM_ATTR_PARTITION,
-      ID_MENU_ITEM_ATTR_DEPARTITION,
       ID_MENU_ITEM_CLUST_DISTR_PLOT,
       ID_MENU_ITEM_CLUST_CORRL_PLOT,
       ID_MENU_ITEM_CLUST_COMBN_PLOT,

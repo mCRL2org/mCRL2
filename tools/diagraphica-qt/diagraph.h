@@ -103,21 +103,6 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
       const std::string& name);
     void handleAttributeCluster(const std::vector< size_t > &indcs);
 
-    // -*- //
-    void handleAttrPartition(const size_t& attrIdx);
-    void handleAttrPartition(
-      const size_t& numParts,
-      const size_t& method);
-    void handleAttrDepartition(const size_t& attrIdx);
-    void handleAttrPartitionCloseFrame();
-
-    void getAttrValues(
-      const size_t& attrIdx,
-      std::vector< double > &vals);
-    void getAttrValues(
-      const size_t& attrIdx,
-      std::set< double > &vals);
-    // -*- //
 
     void handleMoveDomVal(
       const size_t& idxAttr,
@@ -132,7 +117,6 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
     void getAttributeNames(
       const std::vector< size_t > &indcs,
       std::vector< wxString > &names);
-    size_t getAttributeType(const size_t& idx);
     size_t getAttrSizeCurDomain(const size_t& idx);
 
     // -- attribute plots -------------------------------------------

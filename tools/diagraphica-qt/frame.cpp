@@ -227,8 +227,6 @@ void Frame::displAttrInfo(
   attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
   attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
   attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, false);
-  attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-  attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
 }
 
 
@@ -715,15 +713,6 @@ void Frame::displAttrInfoPart(
   size_t maxParts,
   size_t curParts)
 {
-  if (framePartition != NULL)
-  {
-    framePartition->Close();
-  }
-  initFramePartition(
-    wxString(attrName.c_str(), wxConvUTF8),
-    minParts,
-    maxParts,
-    curParts);
 }
 
 
@@ -900,12 +889,6 @@ void Frame::closePopupFrames()
     frameSettings = NULL;
   }
 
-  if (framePartition != NULL)
-  {
-    framePartition->Close();
-    framePartition = NULL;
-  }
-
   if (frameDOF != NULL)
   {
     frameDOF->Close();
@@ -932,13 +915,6 @@ void Frame::handleCloseFrame(PopupFrame* f)
   {
     // clean up ptr
     frameSettings = NULL;
-  }
-  if (f == framePartition)
-  {
-    // clean up references in mediator
-    mediator->handleAttrPartitionCloseFrame();
-    // clean up ptr
-    framePartition = NULL;
   }
   if (f == frameDOF)
   {
@@ -1109,8 +1085,6 @@ void Frame::initFrame()
 
   // settings frame only shown on request
   frameSettings = NULL;
-  // partition frame only shown on request
-  framePartition = NULL;
   // DOF frame only shown on request
   frameDOF = NULL;
   // plot frame only shown on request
@@ -1270,17 +1244,6 @@ void Frame::initMenuBar()
     wxString(wxT("Delete")),
     wxString(wxT("Delete attribute")));
   attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
-  attributeMenu->AppendSeparator();
-  attributeMenu->Append(
-    ID_MENU_ITEM_ATTR_PARTITION,
-    wxString(wxT("Partition")),
-    wxString(wxT("Partition continuous domain into discrete classes")));
-  attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-  attributeMenu->Append(
-    ID_MENU_ITEM_ATTR_DEPARTITION,
-    wxString(wxT("Remove partitioning")),
-    wxString(wxT("Remove current partitioning of continuous domain")));
-  attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
 
   menuBar->Append(
     attributeMenu,
@@ -2068,30 +2031,6 @@ void Frame::initFrameSettings()
 }
 
 
-void Frame::initFramePartition(
-  wxString attrName,
-  size_t minParts,
-  size_t maxParts,
-  size_t curParts)
-{
-  // init frame
-  framePartition = new PartitionFrame(
-    mediator,
-    this,
-    ID_FRAME_PARTITION,
-    wxString(wxT("Partition continuous domain")),
-    wxDefaultPosition,
-    wxDefaultSize,
-    attrName,
-    minParts,
-    maxParts,
-    curParts);
-
-  // show
-  framePartition->Show();
-}
-
-
 void Frame::initFrameDOF()
 {
   // init frame
@@ -2801,8 +2740,6 @@ void Frame::onMenuBar(wxCommandEvent& e)
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
     }
     else if (listCtrlAttr->GetSelectedItemCount() == 1)
     {
@@ -2820,23 +2757,6 @@ void Frame::onMenuBar(wxCommandEvent& e)
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, true);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, true);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, true);
-      if (mediator->getAttributeType(listCtrlAttr->GetItemData(item)) == Attribute::ATTR_TYPE_CONTI)
-      {
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, true);
-        if (mediator->getAttrSizeCurDomain(listCtrlAttr->GetItemData(item)) > 0)
-        {
-          attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, true);
-        }
-        else
-        {
-          attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-        }
-      }
-      else
-      {
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-      }
     }
     else if (listCtrlAttr->GetSelectedItemCount() == 2)
     {
@@ -2847,8 +2767,6 @@ void Frame::onMenuBar(wxCommandEvent& e)
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, true);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
     }
     else
     {
@@ -2859,8 +2777,6 @@ void Frame::onMenuBar(wxCommandEvent& e)
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, true);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
     }
 
     // show 2nd panel (panelBotRgt)
@@ -2904,8 +2820,6 @@ void Frame::onMenuBar(wxCommandEvent& e)
     attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
     attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
     attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, false);
-    attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-    attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
 
     // hide 2nd panel
     int w, h;
@@ -3061,8 +2975,6 @@ void Frame::onListCtrlSelect(wxListEvent& e)
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_RENAME, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
       attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-      attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
     }
     else if (mediator->getMode() == Mediator::MODE_ANALYSIS)
     {
@@ -3085,8 +2997,6 @@ void Frame::onListCtrlSelect(wxListEvent& e)
         attributeMenu->Enable(ID_MENU_ITEM_ATTR_DELETE, false);
         attributeMenu->Enable(ID_MENU_ITEM_ATTR_CLUST, false);
         attributeMenu->Enable(ID_MENU_ITEM_ATTR_TRACE, false);
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
       else if (listCtrlAttr->GetSelectedItemCount() == 1)
       {
@@ -3111,23 +3021,6 @@ void Frame::onListCtrlSelect(wxListEvent& e)
         {
           attributeMenu->Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        if (mediator->getAttributeType(attrIdx) == Attribute::ATTR_TYPE_CONTI)
-        {
-          attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, true);
-          if (mediator->getAttrSizeCurDomain(attrIdx) > 0)
-          {
-            attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, true);
-          }
-          else
-          {
-            attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-          }
-        }
-        else
-        {
-          attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-          attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-        }
       }
       else if (listCtrlAttr->GetSelectedItemCount() == 2)
       {
@@ -3149,8 +3042,6 @@ void Frame::onListCtrlSelect(wxListEvent& e)
         {
           attributeMenu->Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
       else
       {
@@ -3172,8 +3063,6 @@ void Frame::onListCtrlSelect(wxListEvent& e)
         {
           attributeMenu->Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        attributeMenu->Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
     }
   }
@@ -3373,17 +3262,6 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
         ID_MENU_ITEM_ATTR_DELETE,
         wxT("Delete"),
         wxT("Delete attribute"));
-      menu.AppendSeparator();
-      menu.Append(
-        ID_MENU_ITEM_ATTR_PARTITION,
-        wxString(wxT("Partition")),
-        wxString(wxT("Partition continuous domain into discrete classes")));
-      menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-      menu.Append(
-        ID_MENU_ITEM_ATTR_DEPARTITION,
-        wxString(wxT("Remove partitioning")),
-        wxString(wxT("Remove current partitioning of continuous domain")));
-      menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
 
       int selCnt = listCtrlAttr->GetSelectedItemCount();
       if (selCnt == 0)
@@ -3396,8 +3274,6 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
         menu.Enable(ID_MENU_ITEM_ATTR_DELETE, false);
         menu.Enable(ID_MENU_ITEM_ATTR_CLUST, false);
         menu.Enable(ID_MENU_ITEM_ATTR_TRACE, false);
-        menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
       else if (selCnt == 1)
       {
@@ -3423,23 +3299,6 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
         {
           menu.Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        if (mediator->getAttributeType(listCtrlAttr->GetItemData(item)) == Attribute::ATTR_TYPE_CONTI)
-        {
-          menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, true);
-          if (mediator->getAttrSizeCurDomain(listCtrlAttr->GetItemData(item)) > 0)
-          {
-            menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, true);
-          }
-          else
-          {
-            menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-          }
-        }
-        else
-        {
-          menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-          menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
-        }
       }
       else if (selCnt == 2)
       {
@@ -3458,8 +3317,6 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
         {
           menu.Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
       else
       {
@@ -3478,8 +3335,6 @@ void Frame::onListCtrlRgtClick(wxListEvent& e)
         {
           menu.Enable(ID_MENU_ITEM_ATTR_TRACE, false);
         }
-        menu.Enable(ID_MENU_ITEM_ATTR_PARTITION, false);
-        menu.Enable(ID_MENU_ITEM_ATTR_DEPARTITION, false);
       }
 
       PopupMenu(&menu);
@@ -3821,39 +3676,6 @@ void Frame::onPopupMenu(wxCommandEvent& e)
     // handle selections
     mediator->initTimeSeries(indcs);
   }
-  else if (e.GetId() == ID_MENU_ITEM_ATTR_PARTITION)
-  {
-    long   item    = -1;
-    int    attrIdx = -1;
-
-    // get attribute index
-    item = listCtrlAttr->GetNextItem(
-             item,
-             wxLIST_NEXT_ALL,
-             wxLIST_STATE_SELECTED);
-    attrIdx = item;
-
-    mediator->handleAttrPartition(attrIdx);
-  }
-  else if (e.GetId() == ID_MENU_ITEM_ATTR_DEPARTITION)
-  {
-    long   item    = -1;
-    int    attrIdx = -1;
-
-    // get attribute index
-    item = listCtrlAttr->GetNextItem(
-             item,
-             wxLIST_NEXT_ALL,
-             wxLIST_STATE_SELECTED);
-    attrIdx = item;
-
-    mediator->handleAttrDepartition(attrIdx);
-
-    listCtrlAttr->SetItemState(
-      item,
-      wxLIST_STATE_SELECTED,
-      wxLIST_STATE_SELECTED);
-  }
   else if (e.GetId() == ID_MENU_ITEM_DOM_GROUP)
   {
     long   item    = -1;
@@ -3922,14 +3744,7 @@ void Frame::onPopupMenu(wxCommandEvent& e)
 
     if (attrIdx >= 0)
     {
-      if (mediator->getAttributeType(attrIdx) == Attribute::ATTR_TYPE_DISCR)
-      {
-        mediator->handleDomainUngroup(attrIdx);
-      }
-      else if (mediator->getAttributeType(attrIdx) == Attribute::ATTR_TYPE_CONTI)
-      {
-        mediator->handleAttrDepartition(attrIdx);
-      }
+      mediator->handleDomainUngroup(attrIdx);
     }
   }
   else if (e.GetId() == ID_MENU_ITEM_DOM_RENAME)
@@ -4607,8 +4422,6 @@ BEGIN_EVENT_TABLE(Frame, wxFrame)
   EVT_MENU(ID_MENU_ITEM_ATTR_DELETE, Frame::onPopupMenu)
   EVT_MENU(ID_MENU_ITEM_ATTR_CLUST, Frame::onPopupMenu)
   EVT_MENU(ID_MENU_ITEM_ATTR_TRACE, Frame::onPopupMenu)
-  EVT_MENU(ID_MENU_ITEM_ATTR_PARTITION, Frame::onPopupMenu)
-  EVT_MENU(ID_MENU_ITEM_ATTR_DEPARTITION, Frame::onPopupMenu)
   EVT_LIST_ITEM_SELECTED(ID_LIST_CTRL_DOMAIN, Frame::onListCtrlSelect)
   EVT_LIST_BEGIN_DRAG(ID_LIST_CTRL_DOMAIN, Frame::onListCtrlBeginDrag)
   EVT_LIST_ITEM_RIGHT_CLICK(ID_LIST_CTRL_DOMAIN, Frame::onListCtrlRgtClick)

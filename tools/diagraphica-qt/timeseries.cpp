@@ -862,59 +862,23 @@ void TimeSeries::calcPositions()
     attr = attributes[i];
     vector< Position2D > v;
 
-    if (attr->getSizeCurValues() == 0)
+    for (size_t j = 0; j< graph->getSizeNodes(); ++j)
     {
-      double rge;
-      if (attr->getLowerBound() < 0)
+      node = graph->getNode(j);
+
+      double alphaHgt;
+      if (attr->getSizeCurValues() == 1)
       {
-        rge = 2.0*Utils::maxx(Utils::abs(attr->getLowerBound()), Utils::abs(attr->getUpperBound()));
+        alphaHgt = 1.0;
       }
       else
-      {
-        rge = attr->getUpperBound() - attr->getLowerBound();
-      }
-
-      for (size_t j = 0; j< graph->getSizeNodes(); ++j)
-      {
-        node = graph->getNode(j);
-        double alphaHgt;
-        if (attr->getLowerBound() < 0)
-        {
-          alphaHgt = 0.5 + node->getTupleVal(attr->getIndex())/rge;
-        }
-        else
-        {
-          alphaHgt = (node->getTupleVal(attr->getIndex()) - attr->getLowerBound())/rge;
-        }
-
-        pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
-        pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
-
-        v.push_back(pos);
-      }
+        alphaHgt = (double)attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()
+                   /
+                   (double)(attr->getSizeCurValues()-1);
+     pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
+     pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
+     v.push_back(pos);
     }
-    else
-    {
-      for (size_t j = 0; j< graph->getSizeNodes(); ++j)
-      {
-        node = graph->getNode(j);
-
-        double alphaHgt;
-        if (attr->getSizeCurValues() == 1)
-        {
-          alphaHgt = 1.0;
-        }
-        else
-          alphaHgt = (double)attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()
-                     /
-                     (double)(attr->getSizeCurValues()-1);
-        pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
-        pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
-
-        v.push_back(pos);
-      }
-    }
-    posValues.push_back(v);
   }
 
   // diagram scale factor to draw 120 x 120 pix diagram
@@ -1704,138 +1668,39 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
     // draw bars
     for (size_t i = 0; i < posValues.size(); ++i)
     {
-      if (attributes[i]->getSizeCurValues() == 0)
-        // unclustered attribute
+      for (size_t j = 0; j < nodesWdwScale; ++j)
       {
-        double zero;
-        if (attributes[i]->getLowerBound() < 0)
-          // cater for ranges that include negative values
+        if (useShading == true)
         {
-          zero = posAxesBotRgt[i].y + 0.5*(posAxesTopLft[i].y - posAxesBotRgt[i].y);
+          iter = (double)attributes[i]->mapToValue(
+                   graph->getNode(wdwStartIdx+j)->getTupleVal(
+                     attributes[i]->getIndex()))->getIndex();
+          numr = (double)(attributes[i]->getSizeCurValues()-1);
+
+          VisUtils::mapColorSeqGreen(iter/numr, colFill);
+          colFade.r = colFill.r-0.25;
+          colFade.g = colFill.g-0.25;
+          colFade.b = colFill.b-0.25;
+          colFade.a = 1.0;
+
+          VisUtils::fillRect(
+            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
+            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
+            posValues[i][wdwStartIdx+j].y,
+            posAxesBotRgt[i].y,
+            colFill,
+            colFill,
+            colFade,
+            colFade);
         }
         else
         {
-          zero = posAxesBotRgt[i].y;
-        }
-
-        for (size_t j = 0; j < nodesWdwScale; ++j)
-        {
-          double value = graph->getNode(wdwStartIdx+j)->getTupleVal(attributes[i]->getIndex());
-          if (value >= 0)
-          {
-            if (useShading == true)
-            {
-              // positive values
-              if (attributes[i]->getLowerBound() < 0)
-              {
-                iter = value;
-                numr = Utils::maxx(Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));;
-              }
-              else
-              {
-                iter = value - attributes[i]->getLowerBound();
-                numr = attributes[i]->getUpperBound()-attributes[i]->getLowerBound();
-              }
-
-              VisUtils::mapColorSeqGreen(iter/numr, colFill);
-              colFade.r = colFill.r-0.25;
-              colFade.g = colFill.g-0.25;
-              colFade.b = colFill.b-0.25;
-              colFade.a = 1.0;
-
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero,
-                colFill,
-                colFill,
-                colFade,
-                colFade);
-            }
-            else
-            {
-              VisUtils::setColorCoolGreen();
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero);
-            }
-          }
-          else
-          {
-            if (useShading == true)
-            {
-              // negative values
-              iter = value;
-              numr = Utils::maxx(Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));
-
-              VisUtils::mapColorSeqRed(Utils::abs(iter)/Utils::abs(numr), colFill);
-              colFade.r = colFill.r-0.25;
-              colFade.g = colFill.g-0.25;
-              colFade.b = colFill.b-0.25;
-              colFade.a = 1.0;
-
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero,
-                colFade,
-                colFade,
-                colFill,
-                colFill);
-            }
-            else
-            {
-              VisUtils::setColorCoolRed();
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero);
-            }
-          }
-        }
-      }
-      else
-        // clustered attribute
-      {
-        for (size_t j = 0; j < nodesWdwScale; ++j)
-        {
-          if (useShading == true)
-          {
-            iter = (double)attributes[i]->mapToValue(
-                     graph->getNode(wdwStartIdx+j)->getTupleVal(
-                       attributes[i]->getIndex()))->getIndex();
-            numr = (double)(attributes[i]->getSizeCurValues()-1);
-
-            VisUtils::mapColorSeqGreen(iter/numr, colFill);
-            colFade.r = colFill.r-0.25;
-            colFade.g = colFill.g-0.25;
-            colFade.b = colFill.b-0.25;
-            colFade.a = 1.0;
-
-            VisUtils::fillRect(
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].y,
-              posAxesBotRgt[i].y,
-              colFill,
-              colFill,
-              colFade,
-              colFade);
-          }
-          else
-          {
-            VisUtils::setColorCoolGreen();
-            VisUtils::fillRect(
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].y,
-              posAxesBotRgt[i].y);
-          }
+          VisUtils::setColorCoolGreen();
+          VisUtils::fillRect(
+            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
+            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
+            posValues[i][wdwStartIdx+j].y,
+            posAxesBotRgt[i].y);
         }
       }
     }
@@ -2208,20 +2073,13 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
       for (size_t i = 0; i < attributes.size(); ++i)
       {
         string lbl;
-        if (attributes[i]->getSizeCurValues() == 0)
-        {
-          lbl = Utils::dblToStr(graph->getNode(mouseOverIdx)->getTupleVal(attributes[i]->getIndex()));
-        }
-        else
-        {
-          Attribute* attr = attributes[i];
-          Node* node = graph->getNode(mouseOverIdx);
+        Attribute* attr = attributes[i];
+        Node* node = graph->getNode(mouseOverIdx);
 
-          lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
+        lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
 
-          attr = NULL;
-          node = NULL;
-        }
+        attr = NULL;
+        node = NULL;
         lbls.push_back(lbl);
 
         if (lbl.size() > maxLbl)
@@ -2287,18 +2145,8 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
       string lblTop, lblBot;
-      if (attributes[i]->getLowerBound() < 0)
-      {
-        double tmp = Utils::maxx(
-                       Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));
-        lblTop = Utils::dblToStr(tmp);
-        lblBot = Utils::dblToStr(-tmp);
-      }
-      else
-      {
-        lblTop = Utils::dblToStr(attributes[i]->getUpperBound());
-        lblBot = Utils::dblToStr(attributes[i]->getLowerBound());
-      }
+      lblTop = Utils::dblToStr(0);
+      lblBot = Utils::dblToStr(0);
 
       // min
       VisUtils::setColorWhite();

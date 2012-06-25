@@ -829,182 +829,6 @@ void DiaGraph::handleAttributeCluster(const vector< size_t > &indcs)
 }
 
 
-void DiaGraph::handleAttrPartition(const size_t& attrIdx)
-{
-  if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
-  {
-    Attribute* attr  = graph->getAttribute(attrIdx);
-    if (attr != NULL)
-    {
-      tempAttr = attr;
-      frame->displAttrInfoPart(
-        tempAttr->getName(),
-        0,
-        graph->getSizeNodes(),
-        attr->getSizeCurValues());
-
-      attr = NULL;
-    }
-  }
-}
-
-
-void DiaGraph::handleAttrPartition(
-  const size_t& numParts,
-  const size_t& method)
-{
-  if (tempAttr != NULL)
-  {
-    if (tempAttr->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-    {
-      // get attributes currently clustered on
-      vector< size_t > attrsClust;
-
-      size_t posFound = NON_EXISTING;
-      arcDgrm->getAttrsTree(attrsClust);
-      for (size_t i = 0; i < attrsClust.size(); ++i)
-      {
-        if (attrsClust[i] == tempAttr->getIndex())
-        {
-          posFound = i;
-          break;
-        }
-      }
-
-      // get attributes currently in time series
-      vector< size_t > attrsTimeSeries;
-      timeSeries->getAttrIdcs(attrsTimeSeries);
-
-      // perform partitioning
-      if (method == Attribute::PART_METH_EQUAL_INTERVALS)
-      {
-        tempAttr->classifyEqualIntervals(numParts);
-      }
-      else if (method == Attribute::PART_METH_QUANTILES)
-      {
-        tempAttr->classifyQuantiles(numParts);
-      }
-      else if (method == Attribute::PART_METH_MEAN_STANDARD_DEVIATION)
-      {
-        tempAttr->classifyMeanStandardDeviation(numParts);
-      }
-
-      // recluster if necessary
-      if (posFound != NON_EXISTING)
-      {
-        if (tempAttr->getSizeCurValues() == 0)
-        {
-          attrsClust.erase(attrsClust.begin() + posFound);
-        }
-        handleAttributeCluster(attrsClust);
-      }
-
-      // re-initiate time series if necessary
-      if (attrsTimeSeries.size() > 0)
-      {
-        initTimeSeries(attrsTimeSeries);
-      }
-
-      // display results
-      displAttributes(tempAttr->getIndex());
-      displAttrDomain(tempAttr->getIndex());
-    }
-    tempAttr = NULL;
-  }
-}
-
-
-void DiaGraph::handleAttrDepartition(const size_t& attrIdx)
-{
-  if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
-  {
-    Attribute* attr = graph->getAttribute(attrIdx);
-    if (attr->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-    {
-      // get attributes currently clustered on
-      vector< size_t > attrsClust;
-
-      size_t posFound = NON_EXISTING;
-      arcDgrm->getAttrsTree(attrsClust);
-      for (size_t i = 0; i < attrsClust.size(); ++i)
-      {
-        if (attrsClust[i] == attr->getIndex())
-        {
-          posFound = i;
-          break;
-        }
-      }
-
-      // get attributes currently in time series
-      vector< size_t > attrsTimeSeries;
-      timeSeries->getAttrIdcs(attrsTimeSeries);
-
-      // perform departitioning
-      attr->removeClassification();
-
-      // recluster if necessary
-      if (posFound != NON_EXISTING)
-      {
-        attrsClust.erase(attrsClust.begin() + posFound);
-        handleAttributeCluster(attrsClust);
-      }
-
-      // re-initiate time series if necessary
-      if (attrsTimeSeries.size() > 0)
-      {
-        initTimeSeries(attrsTimeSeries);
-      }
-
-      // display results
-      displAttributes();
-      displAttrDomain(attr->getIndex());
-    }
-    attr = NULL;
-  }
-}
-
-void DiaGraph::handleAttrPartitionCloseFrame()
-{
-  tempAttr = NULL;
-}
-
-
-void DiaGraph::getAttrValues(
-  const size_t& attrIdx,
-  vector< double > &vals)
-{
-  if (0 != NON_EXISTING && attrIdx < graph->getSizeAttributes())
-  {
-    vals.clear();
-    Node* node;
-    for (size_t i = 0; i < graph->getSizeNodes(); ++i)
-    {
-      node = graph->getNode(i);
-      vals.push_back(node->getTupleVal(attrIdx));
-    }
-    node = NULL;
-  }
-}
-
-
-void DiaGraph::getAttrValues(
-  const size_t& attrIdx,
-  set< double > &vals)
-{
-  if (attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes())
-  {
-    vals.clear();
-    Node* node;
-    for (size_t i = 0; i < graph->getSizeNodes(); ++i)
-    {
-      node = graph->getNode(i);
-      vals.insert(node->getTupleVal(attrIdx));
-    }
-    node = NULL;
-  }
-}
-
-
 void DiaGraph::handleMoveDomVal(
   const size_t& idxAttr,
   const size_t& idxFr,
@@ -1014,28 +838,12 @@ void DiaGraph::handleMoveDomVal(
   {
     Attribute* attr = graph->getAttribute(idxAttr);
 
-    if (attr->getAttrType() == Attribute::ATTR_TYPE_DISCR)
+    if (idxFr != NON_EXISTING && idxFr < attr->getSizeCurValues() &&
+        idxTo != NON_EXISTING && idxTo < attr->getSizeCurValues())
     {
-      if (idxFr != NON_EXISTING && idxFr < attr->getSizeCurValues() &&
-          idxTo != NON_EXISTING && idxTo < attr->getSizeCurValues())
-      {
-        attr->moveValue(idxFr, idxTo);
-        displAttrDomain(idxAttr);
-        frame->selectDomainVal(idxTo);
-      }
-    }
-    else if (attr->getAttrType() == Attribute::ATTR_TYPE_CONTI)
-    {
-      if (attr->getSizeCurValues() > 0)
-      {
-        if (idxFr != NON_EXISTING && idxFr < attr->getSizeCurValues() &&
-            idxTo != NON_EXISTING && idxTo < attr->getSizeCurValues())
-        {
-          attr->moveValue(idxFr, idxTo);
-          displAttrDomain(idxAttr);
-          frame->selectDomainVal(idxTo);
-        }
-      }
+      attr->moveValue(idxFr, idxTo);
+      displAttrDomain(idxAttr);
+      frame->selectDomainVal(idxTo);
     }
 
     attr = NULL;
@@ -1095,17 +903,6 @@ void DiaGraph::getAttributeNames(
           graph->getAttribute(indcs[i])->getName().c_str(),
           wxConvUTF8));
   }
-}
-
-
-size_t DiaGraph::getAttributeType(const size_t& idx)
-{
-  size_t result = NON_EXISTING;
-  if (idx != NON_EXISTING && idx < graph->getSizeAttributes())
-  {
-    result = graph->getAttribute(idx)->getAttrType();
-  }
-  return result;
 }
 
 
@@ -3565,34 +3362,7 @@ void DiaGraph::displAttributes()
     names.push_back(attr->getName());
     types.push_back(attr->getType());
     cards.push_back(attr->getSizeCurValues());
-    /* -*-
-    if ( attr->getSizeCurValues() != 0 )
-        range.push_back( "" );
-    else
-    {
-    std::string rge = "[";
-        rge += Utils::dblToStr( attr->getLowerBound() );
-        rge += ", ";
-        rge += Utils::dblToStr( attr->getUpperBound() );
-        rge += "]";
-
-        range.push_back( rge );
-    }
-    */
-    if (attr->getAttrType() == Attribute::ATTR_TYPE_DISCR)
-    {
-      range.push_back("");
-    }
-    else
-    {
-      std::string rge = "[";
-      rge += Utils::dblToStr(attr->getLowerBound());
-      rge += ", ";
-      rge += Utils::dblToStr(attr->getUpperBound());
-      rge += "]";
-
-      range.push_back(rge);
-    }
+    range.push_back("");
   }
   frame->displAttrInfo(indcs, names, types, cards, range);
 
@@ -3616,34 +3386,7 @@ void DiaGraph::displAttributes(const size_t& selAttrIdx)
     names.push_back(attr->getName());
     types.push_back(attr->getType());
     cards.push_back(attr->getSizeCurValues());
-    /* -*-
-    if ( attr->getSizeCurValues() != 0 )
-        range.push_back( "" );
-    else
-    {
-    std::string rge = "[";
-        rge += Utils::dblToStr( attr->getLowerBound() );
-        rge += ", ";
-        rge += Utils::dblToStr( attr->getUpperBound() );
-        rge += "]";
-
-        range.push_back( rge );
-    }
-    */
-    if (attr->getAttrType() == Attribute::ATTR_TYPE_DISCR)
-    {
-      range.push_back("");
-    }
-    else
-    {
-      std::string rge = "[";
-      rge += Utils::dblToStr(attr->getLowerBound());
-      rge += ", ";
-      rge += Utils::dblToStr(attr->getUpperBound());
-      rge += "]";
-
-      range.push_back(rge);
-    }
+    range.push_back("");
   }
   frame->displAttrInfo(selAttrIdx, indcs, names, types, cards, range);
 

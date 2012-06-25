@@ -81,22 +81,6 @@ void Attribute::configValues(
 {}
 
 
-void Attribute::classifyEqualIntervals(const size_t& /*number*/)
-{}
-
-
-void Attribute::classifyQuantiles(const size_t& /*number*/)
-{}
-
-
-void Attribute::classifyMeanStandardDeviation(const size_t& /*number*/)
-{}
-
-
-void Attribute::removeClassification()
-{}
-
-
 // -- get functions -------------------------------------------------
 
 
@@ -133,26 +117,6 @@ Value* Attribute::getOrigValue(size_t /*idx*/)
 Value* Attribute::getCurValue(size_t /*idx*/)
 {
   return NULL;
-}
-
-
-double Attribute::getLowerBound()
-{
-  return 0.0;
-}
-
-
-double Attribute::getUpperBound()
-{
-  return 0.0;
-}
-
-
-void Attribute::getRangeOrigValues(
-  double& lwrBnd,
-  double& uprBnd)
-{
-  lwrBnd = uprBnd = 0.0;
 }
 
 
