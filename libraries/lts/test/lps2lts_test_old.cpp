@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/exploration_old.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -58,7 +58,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 
   LTS_TYPE result;
   options.outformat = result.type();
-  lts::lps2lts_algorithm lps2lts;
+  lts::old::lps2lts_algorithm lps2lts;
   core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
   core::garbage_collect();
