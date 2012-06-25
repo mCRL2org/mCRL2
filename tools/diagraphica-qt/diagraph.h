@@ -85,7 +85,7 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
     void appOutputText(const int& msg);
     void appOutputText(const size_t& msg);
 
-    void getColor(ColorRGB& col);
+    QColor getColor(QColor col);
     void handleCloseFrame(PopupFrame* f);
 
     // -- interaction with attributes & domains ---------------------
@@ -290,7 +290,7 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
     void handleShowFrame(
       Cluster* frame,
       const std::vector< Attribute* > &attrs,
-      ColorRGB& col);
+      QColor col);
     void handleUnshowFrame();
 
     // -- visualization settings ------------------------------------

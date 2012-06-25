@@ -313,7 +313,7 @@ void Diagram::drawAxes(
   {
     double pix = canvas->getPixelSize();
 
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       0.0,                 0.0,
       1.0-pix*SIZE_BORDER, -1+pix*SIZE_BORDER);
@@ -360,10 +360,10 @@ void Diagram::drawBorder(
     yBot = -1.0 + pix*SIZE_BORDER;
 
     // draw
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(xLft, xRgt, yTop, yBot);
 
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(xLft, xRgt, yTop, yBot);
   }
 }
@@ -379,10 +379,10 @@ void Diagram::drawBorderFlush(
   }
   else
   {
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
 
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(-1.0, 1.0, 1.0, -1.0);
   }
 
@@ -400,18 +400,11 @@ void Diagram::drawBorderFlush(
   }
   else
   {
-    ColorRGB col;
-
     VisUtils::enableBlending();
+//    VisUtils::setColor(Qt::white, opacity);
+//    VisUtils::fillRect( -1.0, 1.0, 1.0, -1.0 );
 
-    VisUtils::mapColorWhite(col);
-    col.a = opacity;
-    VisUtils::setColor(col);
-//        VisUtils::fillRect( -1.0, 1.0, 1.0, -1.0 );
-
-    VisUtils::mapColorMdGray(col);
-    col.a = opacity;
-    VisUtils::setColor(col);
+    VisUtils::setColor(VisUtils::mediumGray, opacity);
     VisUtils::drawRect(-1.0, 1.0, 1.0, -1.0);
 
     VisUtils::disableBlending();
@@ -447,7 +440,7 @@ void Diagram::drawGrid(
 
     sizeInterval = (2.0-(2.0*pix*SIZE_BORDER)-2.0*pix)/(double)numIntervals;
 
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     // draw inside out
     for (int i = 0; i < numIntervals/2; ++i)
     {

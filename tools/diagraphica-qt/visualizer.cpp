@@ -24,10 +24,7 @@ Visualizer::Visualizer(
   GLCanvas* c)
   : Colleague(m)
 {
-  clearColor.r = 1.0;
-  clearColor.g = 1.0;
-  clearColor.b = 1.0;
-  clearColor.a = 1.0;
+  clearColor = Qt::white;
 
   initMouse();
 
@@ -59,10 +56,7 @@ void Visualizer::setClearColor(
   const double& g,
   const double& b)
 {
-  clearColor.r = r;
-  clearColor.g = g;
-  clearColor.b = b;
-  clearColor.a = 1.0;
+  clearColor = QColor::fromRgbF(r, g, b);
 }
 
 // -- helper functions ----------------------------------------------

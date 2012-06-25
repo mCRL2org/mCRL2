@@ -140,13 +140,13 @@ void DistrPlot::drawAxes(const bool& inSelectMode)
   if (inSelectMode != true)
   {
     // draw guides
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(xLft, xRgt, yTop, yTop);
     VisUtils::drawLine(xLft, xRgt, yMid, yMid);
     VisUtils::drawLine(xRgt, xRgt, yBot, yTop);
 
     // x- & y-axis
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(xLft, xLft, yBot, yTop);
     VisUtils::drawLine(xLft, xRgt, yBot, yBot);
   }
@@ -164,7 +164,7 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
   double scaling = (12*pix)/(double)CHARHEIGHT;
 
   // color
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
 
   // y-axis labels
   double x = -0.5*w+9*pix;
@@ -222,11 +222,8 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
       double yTop = positions[i].y;
-      ColorRGB col;
 
-      VisUtils::mapColorCoolGreen(col);
-      col.a = 0.7;
-      VisUtils::setColor(col);
+      VisUtils::setColor(VisUtils::coolGreen, 0.7);
 
       if (xRgt-xLft < pix)
       {
@@ -260,7 +257,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
     // drop shadow
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::fillRect(
       -1.0 + 4.0*pix/scaleDgrm,
       1.0 + 4.0*pix/scaleDgrm,
@@ -273,7 +270,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
       attrs,
       vals);
 
-    VisUtils::setColorBlack();
+    VisUtils::setColor(Qt::black);
     VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
 
     glPopMatrix();

@@ -156,16 +156,16 @@ void CorrlPlot::drawAxes(
   if (inSelectMode != true)
   {
     // draw guides
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(xLft, xRgt, yTop, yTop);
     VisUtils::drawLine(xRgt, xRgt, yBot, yTop);
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
     VisUtils::drawLine(xLft, xRgt, yBot, yTop);
     VisUtils::disableLineAntiAlias();
 
     // x- & y-axis
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(xLft, xLft, yBot, yTop);
     VisUtils::drawLine(xLft, xRgt, yBot, yBot);
   }
@@ -183,7 +183,7 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
   double scaling = (12*pix)/(double)CHARHEIGHT;
 
   // color
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
 
   if (mapXToY.size() > 0)
   {
@@ -234,12 +234,8 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
         double x   = positions[i][j].x;
         double y   = positions[i][j].y;
         double rad = radii[i][j];
-        ColorRGB col;
 
-        VisUtils::mapColorCoolGreen(col);
-        col.a = 0.35;
-
-        VisUtils::setColor(col);
+        VisUtils::setColor(VisUtils::coolGreen, 0.35);
 
         VisUtils::enableBlending();
         //VisUtils::fillCirc( x, y, rad, 21);
@@ -249,14 +245,12 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
         VisUtils::enableLineAntiAlias();
         //VisUtils::drawCirc( x, y, rad, 21);
         VisUtils::drawEllipse(x, y, rad, rad, 21);
-        VisUtils::mapColorBlack(col);
-        col.a = 0.1;
-        VisUtils::setColor(col);
+        VisUtils::setColor(Qt::black, 0.1);
         //VisUtils::drawCirc( x, y, rad, 21);
         VisUtils::drawEllipse(x, y, rad, rad, 21);
         VisUtils::disableLineAntiAlias();
 
-        VisUtils::setColorBlack();
+        VisUtils::setColor(Qt::black);
         VisUtils::fillRect(x-pix, x+pix, y+pix, y-pix);
       }
     }
@@ -282,7 +276,7 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
   glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
   // drop shadow
-  VisUtils::setColorMdGray();
+  VisUtils::setColor(VisUtils::mediumGray);
   VisUtils::fillRect(
     -1.0 + 4.0*pix/scaleDgrm,
     1.0 + 4.0*pix/scaleDgrm,
@@ -295,7 +289,7 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
     attrs,
     vals);
 
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
   VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
 
   glPopMatrix();

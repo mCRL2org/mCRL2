@@ -22,1003 +22,195 @@ float   VisUtils::cushAngle = 70.0f;
 float   VisUtils::cushDepth =  1.0f;
 
 
+QColor interpolateRgb(QColor from, QColor to, float t)
+{
+  return QColor(
+    from.red() + (int)(to.red() - from.red() * t),
+    from.green() + (int)(to.green() - from.green() * t),
+    from.blue() + (int)(to.blue() - from.blue() * t),
+    from.alpha() + (int)(to.alpha() - from.alpha() * t)
+    );
+}
+
+QColor interpolateHsv(QColor from, QColor to, float t, bool longPath)
+{
+  // TODO
+  return QColor();
+}
+
+
 // -- clear canvas --------------------------------------------------
 
 
-void VisUtils::clear(const ColorRGB& col)
+void VisUtils::clear(QColor col)
 {
-  glClearColor(
-    col.r,
-    col.g,
-    col.b,
-    col.a);
-  glClear(
-    GL_COLOR_BUFFER_BIT |
-    GL_DEPTH_BUFFER_BIT);
-
+  glClearColor(col.redF(), col.greenF(), col.blueF(), col.alphaF());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
 // -- color ---------------------------------------------------------
 
 
-void VisUtils::setColor(const ColorRGB& colRGB)
+QColor VisUtils::BlueYellow::operator()(double fraction) const
 {
-  glBegin(GL_POINTS);
-  glColor4f(colRGB.r, colRGB.g, colRGB.b, colRGB.a);
-  glEnd();
-}
-
-
-void VisUtils::setColorBlack()
-{
-  ColorRGB col;
-  col.r = 0.0;
-  col.g = 0.0;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorBlue()
-{
-  ColorRGB col;
-  col.r = 0.0;
-  col.g = 0.0;
-  col.b = 1.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorCoolBlue()
-{
-  ColorRGB col;
-  col.r = 0.44;
-  col.g = 0.59;
-  col.b = 0.85;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorDkCoolBlue()
-{
-  ColorRGB col;
-  col.r = 0.00;
-  col.g = 0.31;
-  col.b = 0.85;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorGreen()
-{
-  ColorRGB col;
-  col.r = 0.0;
-  col.g = 1.0;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorCoolGreen()
-{
-  ColorRGB col;
-  col.r = 0.42;//0.45;
-  col.g = 0.80;//0.85;
-  col.b = 0.32;//0.35;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorLtCoolGreen()
-{
-  ColorRGB col;
-  col.r = 0.73;
-  col.g = 0.95;
-  col.b = 0.67;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorLtLtGray()
-{
-  ColorRGB col;
-  col.r = 0.95;
-  col.g = 0.95;
-  col.b = 0.95;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorLtGray()
-{
-  ColorRGB col;
-  col.r = 0.75;
-  col.g = 0.75;
-  col.b = 0.75;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorMdGray()
-{
-  ColorRGB col;
-  col.r = 0.5;
-  col.g = 0.5;
-  col.b = 0.5;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorDkGray()
-{
-  ColorRGB col;
-  col.r = 0.25;
-  col.g = 0.25;
-  col.b = 0.25;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorOrange()
-{
-  ColorRGB col;
-  col.r = 1.0;
-  col.g = 0.5;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorRed()
-{
-  ColorRGB col;
-  col.r = 1.0;
-  col.g = 0.0;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorCoolRed()
-{
-  ColorRGB col;
-  col.r = 0.96;
-  col.g = 0.25;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorWhite()
-{
-  ColorRGB col;
-  col.r = 1.0;
-  col.g = 1.0;
-  col.b = 1.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorYellow()
-{
-  ColorRGB col;
-  col.r = 1.0;
-  col.g = 1.0;
-  col.b = 0.0;
-  col.a = 1.0;
-  setColor(col);
-}
-
-
-void VisUtils::setColorBlueYellow(const double& frac)
-{
-  ColorHLS colHLS;
-  ColorRGB colRGB;
-
-  if (frac < 0.5)
+  if (fraction < 0.5)
   {
-    colHLS.h = 240.0;
-    colHLS.s = 1.0 - frac*2.0;
+    return QColor::fromHsvF(4/6.0, 1.0 - fraction * 2.0, 1.0);
   }
   else
   {
-    colHLS.h = 60.0;
-    colHLS.s = frac*2.0 - 1.0;
+    return QColor::fromHsvF(1/6.0, fraction * 2.0 - 1.0, 1.0);
   }
-  colHLS.l = 0.5;
-
-  hlsToRgb(colHLS, colRGB);
-  setColor(colRGB);
 }
 
-
-void VisUtils::mapColorBlack(ColorRGB& col)
+QColor VisUtils::Spectral::operator()(double fraction) const
 {
-  col.r = 0.0;
-  col.g = 0.0;
-  col.b = 0.0;
-  col.a = 1.0;
+  return QColor::fromHsvF(fraction, 1.0, 1.0);
 }
 
-
-void VisUtils::mapColorBlue(ColorRGB& col)
+QColor VisUtils::ListColorMap::operator()(double fraction) const
 {
-  col.r = 0.0;
-  col.g = 0.0;
-  col.b = 1.0;
-  col.a = 1.0;
+  double scaled = fraction * (m_colors.size() - 1);
+  int index = (int)scaled;
+  if (index < 0)
+  {
+    return m_colors.first();
+  }
+  if (index + 1 >= m_colors.size())
+  {
+    return m_colors.last();
+  }
+  return interpolateRgb(m_colors[index], m_colors[index + 1], scaled - index);
 }
 
-
-void VisUtils::mapColorCoolBlue(ColorRGB& col)
+QColor VisUtils::ListColorMap::operator()(int numerator, int denominator) const
 {
-  col.r = 0.44;
-  col.g = 0.59;
-  col.b = 0.85;
-  col.a = 1.0;
+  if (denominator <= m_colors.size())
+  {
+    return m_colors[numerator];
+  }
+  return operator()(numerator / (double)(denominator - 1));
 }
 
-
-void VisUtils::mapColorDkCoolBlue(ColorRGB& col)
-{
-  col.r = 0.00;
-  col.g = 0.31;
-  col.b = 0.85;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorGreen(ColorRGB& col)
-{
-  col.r = 0.0;
-  col.g = 1.0;
-  col.b = 0.0;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorCoolGreen(ColorRGB& col)
-{
-  col.r = 0.42;//0.45;
-  col.g = 0.80;//0.85;
-  col.b = 0.32;//0.35;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorLtCoolGreen(ColorRGB& col)
-{
-  col.r = 0.73;
-  col.g = 0.95;
-  col.b = 0.67;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorLtLtGray(ColorRGB& col)
-{
-  col.r = 0.95;
-  col.g = 0.95;
-  col.b = 0.95;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorLtGray(ColorRGB& col)
-{
-  col.r = 0.75;
-  col.g = 0.75;
-  col.b = 0.75;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorMdGray(ColorRGB& col)
-{
-  col.r = 0.5;
-  col.g = 0.5;
-  col.b = 0.5;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorDkGray(ColorRGB& col)
-{
-  col.r = 0.25;
-  col.g = 0.25;
-  col.b = 0.25;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorOrange(ColorRGB& col)
-{
-  col.r = 1.0;
-  col.g = 0.5;
-  col.b = 0.0;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorRed(ColorRGB& col)
-{
-  col.r = 1.0;
-  col.g = 0.0;
-  col.b = 0.0;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorCoolRed(ColorRGB& col)
-{
-  col.r = 0.96;
-  col.g = 0.25;
-  col.b = 0.0;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorWhite(ColorRGB& col)
-{
-  col.r = 1.0;
-  col.g = 1.0;
-  col.b = 1.0;
-  col.a = 1.0;
-}
-
-
-void VisUtils::mapColorBlueYellow(
-  const double& frac,
-  ColorRGB& colRGB)
-{
-  ColorHLS colHLS;
-
-  if (frac < 0.5)
-  {
-    colHLS.h = 240.0;
-    colHLS.s = 1.0 - frac*2.0;
-  }
-  else
-  {
-    colHLS.h = 60.0;
-    colHLS.s = frac*2.0 - 1.0;
-  }
-  colHLS.l = 0.5;
-
-  hlsToRgb(colHLS, colRGB);
-}
-
-
-void VisUtils::mapColorGrayScale(
-  const double& frac,
-  ColorRGB& colRGB)
-{
-  ColorHLS colHLS;
-
-  colHLS.h = 0.0;      // red, doesn't matter
-  colHLS.s = 0.0;      // totally unsaturated, gray
-  colHLS.l = frac*1.0; // interpolate between black & white
-
-  hlsToRgb(colHLS, colRGB);
-}
-
-
-void VisUtils::mapColorSpectral(
-  const double& frac,
-  ColorRGB& colRGB)
-{
-  ColorHLS colHLS;
-
-  colHLS.h = frac*360.0; // interpolate between hues
-  colHLS.s = 1.0;        // fully saturated, gray
-  colHLS.l = 0.5;        // fully saturated colors have 0.5 lightness
-
-  hlsToRgb(colHLS, colRGB);
-}
-
-
-void VisUtils::mapColorQualPast1(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 251, 179, 204, 222, 254, 255, 229, 253, 242 };
-  double grn[] = { 180, 205, 235, 203, 217, 255, 216, 218, 242 };
-  double blu[] = { 174, 227, 197, 228, 166, 204, 189, 236, 242 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*8.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorQualPast2(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 8 ref colors
-  double red[] = { 179, 253, 203, 244, 230, 255, 241, 204 };
-  double grn[] = { 226, 205, 213, 202, 245, 242, 226, 204 };
-  double blu[] = { 205, 172, 232, 228, 201, 174, 204, 204 };
-
-  if (numr <= 7)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-
-}
-
-
-void VisUtils::mapColorQualSet1(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 288,  55,  77, 152, 255, 255, 166, 247, 153 };
-  double grn[] = {  26, 126, 175,  78, 127, 255,  86, 129, 153 };
-  double blu[] = {  28, 184,  74, 163,   0,  51,  40, 191, 153 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*8.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-
-}
-
-
-void VisUtils::mapColorQualSet2(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 8 ref colors
-  double red[] = { 102, 252, 141, 231, 166, 255, 229, 179 };
-  double grn[] = { 194, 141, 160, 138, 216, 217, 196, 179 };
-  double blu[] = { 165,  98, 203, 195,  84,  47, 148, 179 };
-
-  if (numr <= 7)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-
-}
-
-
-void VisUtils::mapColorQualSet3(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 12 ref colors
-  double red[] = { 141, 255, 190, 251, 128, 253, 179, 252, 217, 188, 204, 255 };
-  double grn[] = { 211, 255, 186, 128, 177, 180, 222, 205, 217, 128, 235, 237 };
-  double blu[] = { 199, 179, 218, 114, 211,  98, 105, 229, 217, 189, 197, 111 };
-
-  if (numr <= 11)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*11.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorQualPair(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 166,  31, 178,  51, 251, 227, 253, 255, 202 };
-  double grn[] = { 206, 120, 223, 160, 154,  26, 191, 127, 178 };
-  double blu[] = { 227, 180, 138,  44, 153,  28, 111,   0, 214 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*8.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorQualDark(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 8 ref colors
-  double red[] = { 27, 217, 117, 231, 102, 230, 166, 102 };
-  double grn[] = { 158, 95, 112,  41, 166, 171, 118, 102 };
-  double blu[] = { 119,  2, 179, 138,  30,   2,  29, 102 };
-
-  if (numr <= 7)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorQualAccent(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 8 ref colors
-  double red[] = { 127, 190, 253, 255,  56, 240, 191, 102, 153 };
-  double grn[] = { 201, 174, 192, 255, 108,   2,  91, 102, 153 };
-  double blu[] = { 127, 212, 134, 153, 176, 127,  23, 102, 153 };
-
-  if (numr <= 7)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqOrRd(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 255, 254, 253, 253, 252, 239, 215, 179, 127 };
-  double grn[] = { 247, 232, 212, 187, 141, 101,  48,   0,   0 };
-  double blu[] = { 236, 200, 158, 132, 89,   72,  31,   0,   0 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqGnBu(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 247, 224, 204, 168, 123,  78,  43,   8,   8 };
-  double grn[] = { 252, 243, 235, 221, 204, 179, 140, 104,  64 };
-  double blu[] = { 240, 219, 197, 181, 196, 211, 190, 172, 129 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqGreen(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
-  double grn[] = { 252, 245, 233, 217, 196, 171, 139, 109,  68 };
-  double blu[] = { 245, 224, 192, 155, 118,  93,  69,  44,  27 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqGreen(
-  const double& alpha,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
-  double grn[] = { 252, 245, 233, 217, 196, 171, 139, 109,  68 };
-  double blu[] = { 245, 224, 192, 155, 118,  93,  69,  44,  27 };
-
-  double frac = alpha;
-  double intPtVal;
-
-  double dblPtVal = modf(frac*7.0, &intPtVal);
-
-  colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-              + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-  colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-              + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-  colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-              + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqRed(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
-  double grn[] = { 245, 224, 187, 146, 106,  59,  24,  15,   0 };
-  double blu[] = { 240, 210, 161, 114,  74,  44,  29,  21,  13 };
-
-  if (numr <= 8)
-  {
-    colRGB.r = red[iter]/255.0;
-    colRGB.g = grn[iter]/255.0;
-    colRGB.b = blu[iter]/255.0;
-  }
-  else
-  {
-    double frac = (double)iter/(double)numr;
-    double intPtVal;
-
-    double dblPtVal = modf(frac*7.0, &intPtVal);
-
-    colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-                + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-    colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-                + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-    colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-                + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::mapColorSeqRed(
-  const double& alpha,
-  ColorRGB& colRGB)
-// www.colorbrewer.org
-{
-  // 9 ref colors
-  double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
-  double grn[] = { 245, 224, 187, 146, 106,  59,  24,  15,   0 };
-  double blu[] = { 240, 210, 161, 114,  74,  44,  29,  21,  13 };
-
-  double frac = alpha;
-  double intPtVal;
-
-  double dblPtVal = modf(frac*7.0, &intPtVal);
-
-  colRGB.r = ((1.0-dblPtVal)*red[(int)intPtVal]
-              + dblPtVal*red[(int)intPtVal+1])/255.0;
-
-  colRGB.g = ((1.0-dblPtVal)*grn[(int)intPtVal]
-              + dblPtVal*grn[(int)intPtVal+1])/255.0;
-
-  colRGB.b = ((1.0-dblPtVal)*blu[(int)intPtVal]
-              + dblPtVal*blu[(int)intPtVal+1])/255.0;
-  colRGB.a = 1.0;
-}
-
-
-void VisUtils::hlsToRgb(
-  ColorHLS& colHLS,
-  ColorRGB& colRGB)
-// Adapted from Foley et al., 1996.
-// In:  h       in [0.0, 360.0]
-//      l, s    in [0, 1]
-// Out: r, g, b in [0, 1]
-{
-  if (colHLS.s == 0)
-  {
-    colRGB.r = colHLS.l;
-    colRGB.g = colHLS.l;
-    colRGB.b = colHLS.l;
-  }
-  else
-  {
-    double var2;
-    if (colHLS.l < 0.5)
-    {
-      var2 = colHLS.l * (colHLS.l+colHLS.s);
-    }
-    else
-    {
-      var2 = (colHLS.l+colHLS.s) - (colHLS.s*colHLS.l);
-    }
-
-    double var1 = 2 * colHLS.l - var2;
-
-    colRGB.r = hlsValue(var1, var2, colHLS.h + 120.0);
-    colRGB.g = hlsValue(var1, var2, colHLS.h);
-    colRGB.b = hlsValue(var1, var2, colHLS.h - 120.0);
-  }
-
-  colRGB.a = 1.0;
-}
-
-
-double VisUtils::hlsValue(
-  double var1,
-  double var2,
-  double hue)
-// Adapted from Foley et al., 1996.
-{
-  double result = 0.0;
-
-  if (hue < 0.0)
-  {
-    hue += 360.0;
-  }
-  if (hue > 360.0)
-  {
-    hue -= 360.0;
-  }
-
-  if (hue < 60.0)
-  {
-    result = var1 + (var2 - var1) * hue/60.0;
-  }
-  else if (hue < 180.0)
-  {
-    result = var2;
-  }
-  else if (hue < 240.0)
-  {
-    result = var1 + (var2 - var1) * (240.0 - hue)/60.0;
-  }
-  else
-  {
-    result = var1;
-  }
-
-  return result;
-}
+const VisUtils::BlueYellow VisUtils::blueYellow;
+const VisUtils::Spectral VisUtils::spectral;
+
+const VisUtils::ListColorMap VisUtils::grayScale(QList<QColor>()
+  << QColor(0, 0, 0)
+  << QColor(255, 255, 255)
+  );
+
+const VisUtils::ListColorMap VisUtils::qualPast1(QList<QColor>()
+  << QColor(251, 180, 174)
+  << QColor(179, 205, 227)
+  << QColor(204, 235, 197)
+  << QColor(222, 203, 228)
+  << QColor(254, 217, 166)
+  << QColor(255, 255, 204)
+  << QColor(229, 216, 189)
+  << QColor(253, 218, 236)
+  << QColor(242, 242, 242)
+  );
+const VisUtils::ListColorMap VisUtils::qualPast2(QList<QColor>()
+  << QColor(179, 226, 205)
+  << QColor(253, 205, 172)
+  << QColor(203, 213, 232)
+  << QColor(244, 202, 228)
+  << QColor(230, 245, 201)
+  << QColor(255, 242, 174)
+  << QColor(241, 226, 204)
+  << QColor(204, 204, 204)
+  );
+const VisUtils::ListColorMap VisUtils::qualSet1(QList<QColor>()
+  << QColor(255, 26, 28)
+  << QColor(55, 126, 184)
+  << QColor(77, 175, 74)
+  << QColor(152, 78, 163)
+  << QColor(255, 127, 0)
+  << QColor(255, 255, 51)
+  << QColor(166, 86, 40)
+  << QColor(247, 129, 191)
+  << QColor(153, 153, 153)
+  );
+const VisUtils::ListColorMap VisUtils::qualSet2(QList<QColor>()
+  << QColor(102, 194, 165)
+  << QColor(252, 141, 98)
+  << QColor(141, 160, 203)
+  << QColor(231, 138, 195)
+  << QColor(166, 216, 84)
+  << QColor(255, 217, 47)
+  << QColor(229, 196, 148)
+  << QColor(179, 179, 179)
+  );
+const VisUtils::ListColorMap VisUtils::qualSet3(QList<QColor>()
+  << QColor(141, 211, 199)
+  << QColor(255, 255, 179)
+  << QColor(190, 186, 218)
+  << QColor(251, 128, 114)
+  << QColor(128, 177, 211)
+  << QColor(253, 180, 98)
+  << QColor(179, 222, 105)
+  << QColor(252, 205, 229)
+  << QColor(217, 217, 217)
+  << QColor(188, 128, 189)
+  << QColor(204, 235, 197)
+  << QColor(255, 237, 111)
+  );
+const VisUtils::ListColorMap VisUtils::qualPair(QList<QColor>()
+  << QColor(166, 206, 227)
+  << QColor(31, 120, 180)
+  << QColor(178, 223, 138)
+  << QColor(51, 160, 44)
+  << QColor(251, 154, 153)
+  << QColor(227, 26, 28)
+  << QColor(253, 191, 111)
+  << QColor(255, 127, 0)
+  << QColor(202, 178, 214)
+  );
+const VisUtils::ListColorMap VisUtils::qualDark(QList<QColor>()
+  << QColor(27, 158, 119)
+  << QColor(217, 95, 2)
+  << QColor(117, 112, 179)
+  << QColor(231, 41, 138)
+  << QColor(102, 166, 30)
+  << QColor(230, 171, 2)
+  << QColor(166, 118, 29)
+  << QColor(102, 102, 102)
+  );
+const VisUtils::ListColorMap VisUtils::qualAccent(QList<QColor>()
+  << QColor(127, 201, 127)
+  << QColor(190, 174, 212)
+  << QColor(253, 192, 134)
+  << QColor(255, 255, 153)
+  << QColor(56, 108, 176)
+  << QColor(240, 2, 127)
+  << QColor(191, 91, 23)
+  << QColor(102, 102, 102)
+  << QColor(153, 153, 153)
+  );
+const VisUtils::ListColorMap VisUtils::seqGreen(QList<QColor>()
+  << QColor(247, 252, 245)
+  << QColor(229, 245, 224)
+  << QColor(199, 233, 192)
+  << QColor(161, 217, 155)
+  << QColor(116, 196, 118)
+  << QColor(65, 171, 93)
+  << QColor(35, 139, 69)
+  << QColor(0, 109, 44)
+  << QColor(0, 68, 27)
+  );
+const VisUtils::ListColorMap VisUtils::seqRed(QList<QColor>()
+  << QColor(255, 245, 240)
+  << QColor(254, 224, 210)
+  << QColor(252, 187, 161)
+  << QColor(252, 146, 114)
+  << QColor(251, 106, 74)
+  << QColor(239, 59, 44)
+  << QColor(203, 24, 29)
+  << QColor(165, 15, 21)
+  << QColor(103, 0, 13)
+  );
 
 
 // -- anti-aliasing & blending --------------------------------------
@@ -1235,7 +427,7 @@ void VisUtils::drawArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
-  const ColorRGB& colBeg, const ColorRGB& colEnd,
+  QColor colBeg,          QColor colEnd,
   const double& radius,   const int& slices)
 {
   double slice;
@@ -1256,12 +448,7 @@ void VisUtils::drawArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      double frac = (double)i/(double)slices;
-      double r = (1-frac)*colBeg.r + frac*colEnd.r;
-      double g = (1-frac)*colBeg.g + frac*colEnd.g;
-      double b = (1-frac)*colBeg.b + frac*colEnd.b;
-      double a = (1-frac)*colBeg.a + frac*colEnd.a;
-      glColor4f(r, g, b, a);
+      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -1272,12 +459,7 @@ void VisUtils::drawArc(
   {
     for (int i = slices; i >= 0; --i)
     {
-      double frac = (double)i/(double)slices;
-      double r = (1-frac)*colBeg.r + frac*colEnd.r;
-      double g = (1-frac)*colBeg.g + frac*colEnd.g;
-      double b = (1-frac)*colBeg.b + frac*colEnd.b;
-      double a = (1-frac)*colBeg.a + frac*colEnd.a;
-      glColor4f(r, g, b, a);
+      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -1331,7 +513,7 @@ void VisUtils::fillArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
-  const ColorRGB& colBeg, const ColorRGB& colEnd,
+  QColor colBeg,          QColor colEnd,
   const double& radius,   const int& slices)
 //-------------------------------------------------
 {
@@ -1352,12 +534,7 @@ void VisUtils::fillArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      double frac = (double)i/(double)slices;
-      double r = (1-frac)*colBeg.r + frac*colEnd.r;
-      double g = (1-frac)*colBeg.g + frac*colEnd.g;
-      double b = (1-frac)*colBeg.b + frac*colEnd.b;
-      double a = (1-frac)*colBeg.a + frac*colEnd.a;
-      glColor4f(r, g, b, a);
+      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       // outside
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
@@ -1387,19 +564,16 @@ void VisUtils::drawTriangle(
 
 
 void VisUtils::drawTriangle(
-  const double&   x1, const double& y1,
-  const ColorRGB& col1,
-  const double&   x2, const double& y2,
-  const ColorRGB& col2,
-  const double&   x3, const double& y3,
-  const ColorRGB& col3)
+  const double&   x1, const double& y1, QColor col1,
+  const double&   x2, const double& y2, QColor col2,
+  const double&   x3, const double& y3, QColor col3)
 {
   glBegin(GL_LINE_LOOP);
-  glColor4f(col1.r, col1.g, col1.b, col1.a);
+  setColor(col1);
   glVertex2f(x1, y1);
-  glColor4f(col2.r, col2.g, col2.b, col2.a);
+  setColor(col2);
   glVertex2f(x2, y2);
-  glColor4f(col3.r, col3.g, col3.b, col3.a);
+  setColor(col3);
   glVertex2f(x3, y3);
   glEnd();
 }
@@ -1419,19 +593,16 @@ void VisUtils::fillTriangle(
 
 
 void VisUtils::fillTriangle(
-  const double&   x1, const double& y1,
-  const ColorRGB& col1,
-  const double&   x2, const double& y2,
-  const ColorRGB& col2,
-  const double&   x3, const double& y3,
-  const ColorRGB& col3)
+  const double&   x1, const double& y1, QColor col1,
+  const double&   x2, const double& y2, QColor col2,
+  const double&   x3, const double& y3, QColor col3)
 {
   glBegin(GL_POLYGON);
-  glColor4f(col1.r, col1.g, col1.b, col1.a);
+  setColor(col1);
   glVertex2f(x1, y1);
-  glColor4f(col2.r, col2.g, col2.b, col2.a);
+  setColor(col2);
   glVertex2f(x2, y2);
-  glColor4f(col3.r, col3.g, col3.b, col3.a);
+  setColor(col3);
   glVertex2f(x3, y3);
   glEnd();
 }
@@ -1451,19 +622,19 @@ void VisUtils::drawRect(
 
 
 void VisUtils::drawRect(
-  const double& xLft,        const double& xRgt,
-  const double& yTop,        const double& yBot,
-  const ColorRGB& colTopLft, ColorRGB& colTopRgt,
-  const ColorRGB& colBotLft, ColorRGB& colBotRgt)
+  const double& xLft, const double& xRgt,
+  const double& yTop, const double& yBot,
+  QColor colTopLft,   QColor colTopRgt,
+  QColor colBotLft,   QColor colBotRgt)
 {
   glBegin(GL_LINE_LOOP);
-  glColor4f(colTopLft.r, colTopLft.g, colTopLft.b, colTopLft.a);
+  setColor(colTopLft);
   glVertex2f(xLft, yTop);
-  glColor4f(colBotLft.r, colBotLft.g, colBotLft.b, colBotLft.a);
+  setColor(colBotLft);
   glVertex2f(xLft, yBot);
-  glColor4f(colBotRgt.r, colBotRgt.g, colBotRgt.b, colBotRgt.a);
+  setColor(colBotRgt);
   glVertex2f(xRgt, yBot);
-  glColor4f(colTopRgt.r, colTopRgt.g, colTopRgt.b, colTopRgt.a);
+  setColor(colTopRgt);
   glVertex2f(xRgt, yTop);
   glEnd();
 }
@@ -1483,19 +654,19 @@ void VisUtils::fillRect(
 
 
 void VisUtils::fillRect(
-  const double& xLft,        const double& xRgt,
-  const double& yTop,        const double& yBot,
-  const ColorRGB& colTopLft, ColorRGB& colTopRgt,
-  const ColorRGB& colBotLft, ColorRGB& colBotRgt)
+  const double& xLft, const double& xRgt,
+  const double& yTop, const double& yBot,
+  QColor colTopLft,   QColor colTopRgt,
+  QColor colBotLft,   QColor colBotRgt)
 {
   glBegin(GL_POLYGON);
-  glColor4f(colTopLft.r, colTopLft.g, colTopLft.b, colTopLft.a);
+  setColor(colTopLft);
   glVertex2f(xLft, yTop);
-  glColor4f(colBotLft.r, colBotLft.g, colBotLft.b, colBotLft.a);
+  setColor(colBotLft);
   glVertex2f(xLft, yBot);
-  glColor4f(colBotRgt.r, colBotRgt.g, colBotRgt.b, colBotRgt.a);
+  setColor(colBotRgt);
   glVertex2f(xRgt, yBot);
-  glColor4f(colTopRgt.r, colTopRgt.g, colTopRgt.b, colTopRgt.a);
+  setColor(colTopRgt);
   glVertex2f(xRgt, yTop);
   glEnd();
 }
@@ -1541,8 +712,7 @@ void VisUtils::fillEllipse(
   const double&   xCtr,    const double&   yCtr,
   const double&   xDOFIn,  const double&   yDOFIn,
   const double&   xDOFOut, const double&   yDOFOut,
-  const double&   slices,  const ColorRGB& cIn,
-  const ColorRGB& cOut)
+  const double&   slices,  QColor cIn, QColor cOut)
 {
   double slice = (2*PI)/(double)slices;
 
@@ -1555,9 +725,9 @@ void VisUtils::fillEllipse(
   {
     glBegin(GL_POLYGON);
 
-    glColor4f(cOut.r, cOut.g, cOut.b, cOut.a);
+    setColor(cOut);
     glVertex2f(xCurOut, yCurOut);
-    glColor4f(cIn.r, cIn.g, cIn.b, cIn.a);
+    setColor(cIn);
     glVertex2f(xCurIn,  yCurIn);
 
     xCurIn  = xCtr + xDOFIn*cos(i*slice);
@@ -1565,9 +735,9 @@ void VisUtils::fillEllipse(
     xCurOut = xCtr + xDOFOut*cos(i*slice);
     yCurOut = yCtr + yDOFOut*sin(i*slice);
 
-    glColor4f(cIn.r, cIn.g, cIn.b, cIn.a);
+    setColor(cIn);
     glVertex2f(xCurIn,  yCurIn);
-    glColor4f(cOut.r, cOut.g, cOut.b, cOut.a);
+    setColor(cOut);
     glVertex2f(xCurOut, yCurOut);
 
     glEnd();
@@ -1580,8 +750,7 @@ void VisUtils::fillEllipse(
   const double&   xDOFIn,   const double&   yDOFIn,
   const double&   xDOFOut,  const double&   yDOFOut,
   const double&   aglBegDg, const double&   aglEndDg,
-  const double&   slices,   const ColorRGB& cIn,
-  const ColorRGB& cOut)
+  const double&   slices,   QColor cIn, QColor cOut)
 {
   double aglBegRd = Utils::degrToRad(aglBegDg);
 
@@ -1604,9 +773,9 @@ void VisUtils::fillEllipse(
   {
     glBegin(GL_POLYGON);
 
-    glColor4f(cOut.r, cOut.g, cOut.b, cOut.a);
+    setColor(cOut);
     glVertex2f(xOutside, yOutside);
-    glColor4f(cIn.r, cIn.g, cIn.b, cIn.a);
+    setColor(cIn);
     glVertex2f(xInside, yInside);
 
     xInside  = xCtr + xDOFIn*cos(aglBegRd + i*sliceRd);
@@ -1614,9 +783,9 @@ void VisUtils::fillEllipse(
     xOutside = xCtr + xDOFOut*cos(aglBegRd + i*sliceRd);
     yOutside = yCtr + yDOFOut*sin(aglBegRd + i*sliceRd);
 
-    glColor4f(cIn.r, cIn.g, cIn.b, cIn.a);
+    setColor(cIn);
     glVertex2f(xInside, yInside);
-    glColor4f(cOut.r, cOut.g, cOut.b, cOut.a);
+    setColor(cOut);
     glVertex2f(xOutside, yOutside);
 
     glEnd();
@@ -1722,11 +891,8 @@ void VisUtils::drawArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wBase, const double& wHead,
-  const double& lHead, const ColorRGB& cFr,
-  const ColorRGB& cTo)
+  const double& lHead, QColor cFr, QColor cTo)
 {
-  ColorRGB cJnc;
-
   // calc angle & length of arrow
   double dX     = xTo-xFr;
   double dY     = yTo-yFr;
@@ -1737,30 +903,23 @@ void VisUtils::drawArrow(
   double lenBase = lenArw-lHead;
 
   // calc junction color
-  double alpha = lenBase/lenArw;
-  cJnc.r = (1.0-alpha)*cFr.r + alpha*cTo.r;
-  cJnc.g = (1.0-alpha)*cFr.g + alpha*cTo.g;
-  cJnc.b = (1.0-alpha)*cFr.b + alpha*cTo.b;
-  cJnc.a = (1.0-alpha)*cFr.a + alpha*cTo.a;
+  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
 
   glPushMatrix();
   glTranslatef(xFr, yFr, 0.0);
   glRotatef(angl, 0.0, 0.0, 1.0);
 
   glBegin(GL_LINE_LOOP);
-  glColor4f(cFr.r, cFr.g, cFr.b, cFr.a);
+  setColor(cFr);
   glVertex2f(0.0, 0.5*wBase);
-  glColor4f(cFr.r, cFr.g, cFr.b, cFr.a);
   glVertex2f(0.0, -0.5*wBase);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
+  setColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wBase);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
   glVertex2f(lenArw-lHead, -0.5*wHead);
-  glColor4f(cTo.r, cTo.g, cTo.b, cTo.a);
+  setColor(cTo);
   glVertex2f(lenArw, 0.0);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
+  setColor(cJnc);
   glVertex2f(lenArw-lHead,  0.5*wHead);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
   glVertex2f(lenArw-lHead,  0.5*wBase);
   glEnd();
 
@@ -1807,11 +966,8 @@ void VisUtils::fillArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
   const double& wBase, const double& wHead,
-  const double& lHead, const ColorRGB& cFr,
-  const ColorRGB& cTo)
+  const double& lHead, QColor cFr, QColor cTo)
 {
-  ColorRGB cJnc;
-
   // calc angle & length of arrow
   double dX     = xTo-xFr;
   double dY     = yTo-yFr;
@@ -1822,11 +978,7 @@ void VisUtils::fillArrow(
   double lenBase = lenArw-lHead;
 
   // calc junction color
-  double alpha = lenBase/lenArw;
-  cJnc.r = (1.0-alpha)*cFr.r + alpha*cTo.r;
-  cJnc.g = (1.0-alpha)*cFr.g + alpha*cTo.g;
-  cJnc.b = (1.0-alpha)*cFr.b + alpha*cTo.b;
-  cJnc.a = (1.0-alpha)*cFr.a + alpha*cTo.a;
+  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
 
   glPushMatrix();
   glTranslatef(xFr, yFr, 0.0);
@@ -1834,23 +986,21 @@ void VisUtils::fillArrow(
 
   // base
   glBegin(GL_POLYGON);
-  glColor4f(cFr.r, cFr.g, cFr.b, cFr.a);
+  setColor(cFr);
   glVertex2f(0.0, 0.5*wBase);
-  glColor4f(cFr.r, cFr.g, cFr.b, cFr.a);
   glVertex2f(0.0, -0.5*wBase);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
+  setColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wBase);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
   glVertex2f(lenArw-lHead,  0.5*wBase);
   glEnd();
 
   // head
   glBegin(GL_POLYGON);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
+  setColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wHead);
-  glColor4f(cTo.r, cTo.g, cTo.b, cTo.a);
+  setColor(cTo);
   glVertex2f(lenArw, 0.0);
-  glColor4f(cJnc.r, cJnc.g, cJnc.b, cJnc.a);
+  setColor(cJnc);
   glVertex2f(lenArw-lHead,  0.5*wHead);
   glEnd();
 

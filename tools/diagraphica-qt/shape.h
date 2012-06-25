@@ -87,19 +87,9 @@ class Shape : public Colleague
     void setModeEdtDOFText();
 
     void setLineWidth(const double& w);
-    void setLineColor(const ColorRGB& c);
-    void setLineColor(
-      const double& r,
-      const double& g,
-      const double& b,
-      const double& a);
+    void setLineColor(QColor c);
     void setLineTransp(const double& a);
-    void setFillColor(const ColorRGB& c);
-    void setFillColor(
-      const double& r,
-      const double& g,
-      const double& b,
-      const double& a);
+    void setFillColor(QColor c);
     void setFillTransp(const double& a);
     void setHandleSize(const double& s);
     void setTextures(const bool& generated);
@@ -126,11 +116,9 @@ class Shape : public Colleague
     int getType();
     int getMode();
     double getLineWidth();
-    void getLineColor(ColorRGB& c);
-    void getLineColor(double& r, double& g, double& b, double& a);
+    QColor getLineColor();
     double getLineTransp();
-    void getFillColor(ColorRGB& c);
-    void getFillColor(double& r, double& g, double& b, double& a);
+    QColor getFillColor();
     double getFillTransp();
     double getHandleSize();
 
@@ -213,7 +201,7 @@ class Shape : public Colleague
     static double hdlSzeHnt;
     static double minSzeHnt;
     static int    segNumHnt;
-    static ColorRGB colTxt;
+    static QColor colTxt;
 
   protected:
     // -- private utility functions ---------------------------------
@@ -279,8 +267,8 @@ class Shape : public Colleague
     int      mode;      // drawing mode
     size_t   szeTxt;  // font size
     double   linWth;    // line width,      pix
-    ColorRGB colLin;    // line color
-    ColorRGB colFil;    // fill color
+    QColor colLin;    // line color
+    QColor colFil;    // fill color
     double   hdlSze;    // handle size,     pix
     int checkedVariableId; // Event id of the variable displayed on the shape;
     std::string  variable;  //variable shown on the shape

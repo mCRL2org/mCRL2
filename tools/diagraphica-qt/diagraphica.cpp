@@ -564,7 +564,7 @@ void DiaGraph::appOutputText(const size_t& val)
   frame->appOutputText(msg);
 }
 
-void DiaGraph::getColor(ColorRGB& col)
+QColor DiaGraph::getColor(QColor col)
 {
   wxColourData   data;
   wxColourDialog dialog(frame, &data);
@@ -574,10 +574,9 @@ void DiaGraph::getColor(ColorRGB& col)
     data   = dialog.GetColourData();
     wxColour colTmp = data.GetColour();
 
-    col.r = colTmp.Red()/255.0;
-    col.g = colTmp.Green()/255.0;
-    col.b = colTmp.Blue()/255.0;
+    return QColor(colTmp.Red(), colTmp.Green(), colTmp.Blue());
   }
+  return col;
 }
 
 
@@ -2196,7 +2195,7 @@ void DiaGraph::handleAnimFrameBundl( Colleague* sender )
         {
             int idx;
             set< int > idcs;
-            ColorRGB col;
+            QColor col;
 
             timeSeries->getAnimIdxDgrm( idxLeaf, idxBndl, col );
 
@@ -2218,7 +2217,7 @@ void DiaGraph::handleAnimFrameClust(Colleague* sender)
     {
       size_t idx;
       set< size_t > idcs;
-      ColorRGB col;
+      QColor col;
 
       timeSeries->getAnimIdxDgrm(idx, idcs, col);
 
@@ -2243,14 +2242,14 @@ void DiaGraph::handleMarkFrameClust(Colleague* sender)
     arcDgrm->unmarkLeaves();
     if (sender == simulator)
     {
-      ColorRGB col = simulator->getColorSel();
+      QColor col = simulator->getColorSel();
       size_t      idx = simulator->getIdxClstSel();
 
       arcDgrm->markLeaf(idx, col);
     }
     else if (sender == timeSeries)
     {
-      ColorRGB col;
+      QColor col;
       set< size_t > idcs;
       size_t idx;
 
@@ -2297,7 +2296,7 @@ void DiaGraph::handleMarkFrameClust(Colleague* sender)
     }
     else if (sender == examiner)
     {
-      ColorRGB col;
+      QColor col;
       size_t      idx;
 
       // trace view
@@ -2327,7 +2326,7 @@ void DiaGraph::handleUnmarkFrameClusts(Colleague* sender)
     arcDgrm->unmarkLeaves();
     if (sender == simulator)
     {
-      ColorRGB col = examiner->getColorSel();
+      QColor col = examiner->getColorSel();
       size_t      idx = examiner->getIdxClstSel();
 
       arcDgrm->markLeaf(idx, col);
@@ -2337,7 +2336,7 @@ void DiaGraph::handleUnmarkFrameClusts(Colleague* sender)
       // trace view
       if (view == VIEW_TRACE)
       {
-        ColorRGB col;
+        QColor col;
         set< size_t > idcs;
         timeSeries->getIdcsClstMarked(idcs, col);
 
@@ -2358,7 +2357,7 @@ void DiaGraph::handleUnmarkFrameClusts(Colleague* sender)
 void DiaGraph::handleShowFrame(
   Cluster* frame,
   const vector< Attribute* > &attrs,
-  ColorRGB& col)
+  QColor col)
 {
   if (examiner != NULL)
   {
@@ -2393,25 +2392,17 @@ void DiaGraph::setSettingsGeneral(
   const int& szeTxt,
   const double& spdAnim)
 {
-  ColorRGB colTmp;
+  QColor fullColClr = QColor(colClr.Red(), colClr.Green(), colClr.Blue());
+  ArcDiagram::setColorClr(fullColClr);
+  Simulator::setColorClr(fullColClr);
+  TimeSeries::setColorClr(fullColClr);
+  Examiner::setColorClr(fullColClr);
 
-  colTmp.r = colClr.Red()/255.0;
-  colTmp.g = colClr.Green()/255.0;
-  colTmp.b = colClr.Blue()/255.0;
-  colTmp.a = 1.0;
-  ArcDiagram::setColorClr(colTmp);
-  Simulator::setColorClr(colTmp);
-  TimeSeries::setColorClr(colTmp);
-  Examiner::setColorClr(colTmp);
-
-  colTmp.r = colTxt.Red()/255.0;
-  colTmp.g = colTxt.Green()/255.0;
-  colTmp.b = colTxt.Blue()/255.0;
-  colTmp.a = 1.0;
-  ArcDiagram::setColorTxt(colTmp);
-  Simulator::setColorTxt(colTmp);
-  TimeSeries::setColorTxt(colTmp);
-  Examiner::setColorTxt(colTmp);
+  QColor fullColTxt = QColor(colTxt.Red(), colTxt.Green(), colTxt.Blue());
+  ArcDiagram::setColorTxt(fullColTxt);
+  Simulator::setColorTxt(fullColTxt);
+  TimeSeries::setColorTxt(fullColTxt);
+  Examiner::setColorTxt(fullColTxt);
 
   ArcDiagram::setSizeTxt(szeTxt);
   Simulator::setSizeTxt(szeTxt);
@@ -2518,12 +2509,7 @@ void DiaGraph::setSettingsArcDiagram(
   ArcDiagram::setShowLeaves(showNodes);
   ArcDiagram::setShowBundles(showArcs);
 
-  ColorRGB colTmp;
-  colTmp.r = colArcs.Red()/255.0;
-  colTmp.g = colArcs.Green()/255.0;
-  colTmp.b = colArcs.Blue()/255.0;
-  colTmp.a = 1.0 - trspArcs;
-  ArcDiagram::setColorBundles(colTmp);
+  ArcDiagram::setColorBundles(QColor(colArcs.Red(), colArcs.Green(), colArcs.Blue(), (int)(255.0 * (1.0 - trspArcs))));
 
   if (canvasArcD != NULL && mode == MODE_ANALYSIS)
   {
@@ -2538,16 +2524,9 @@ void DiaGraph::getSettingsGeneral(
   int& szeTxt,
   double& spdAnim)
 {
-  ColorRGB colTmp;
-
-  colTmp = ArcDiagram::getColorClr();
-  colClr.Set((int)(255*colTmp.r), (int)(255*colTmp.g), (int)(255*colTmp.b));
-
-  colTmp = ArcDiagram::getColorTxt();
-  colTxt.Set((int)(255*colTmp.r), (int)(255*colTmp.g), (int)(255*colTmp.b));
-
+  colClr.Set(ArcDiagram::getColorClr().red(), ArcDiagram::getColorClr().green(), ArcDiagram::getColorClr().blue());
+  colTxt.Set(ArcDiagram::getColorTxt().red(), ArcDiagram::getColorTxt().green(), ArcDiagram::getColorTxt().blue());
   szeTxt = ArcDiagram::getSizeTxt();
-
   spdAnim = 1000.0/ArcDiagram::getIntervAnim();
 }
 
@@ -2593,10 +2572,8 @@ void DiaGraph::getSettingsArcDiagram(
   showNodes = ArcDiagram::getShowLeaves();
   showArcs = ArcDiagram::getShowBundles();
 
-  ColorRGB colTmp;
-  colTmp = ArcDiagram::getColorBundles();
-  colArcs.Set((int)(255*colTmp.r), (int)(255*colTmp.g), (int)(255*colTmp.b));
-  trspArcs = 1.0-colTmp.a;
+  colArcs.Set(ArcDiagram::getColorBundles().red(), ArcDiagram::getColorBundles().green(), ArcDiagram::getColorBundles().blue());
+  trspArcs = 1.0 - ArcDiagram::getColorBundles().alphaF();
 }
 
 

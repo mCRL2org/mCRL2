@@ -140,7 +140,7 @@ class Visualizer : public Colleague
     bool showMenu;
 
     // -- data members ----------------------------------------------
-    ColorRGB  clearColor;
+    QColor clearColor;
 
     Graph*    graph;  // association
     GLCanvas* canvas; // association

@@ -43,25 +43,25 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void getIdcsClstMarked(std::set< size_t > &idcs);
     void getIdcsClstMarked(
       std::set< size_t > &idcs ,
-      ColorRGB& col);
+      QColor& col);
     void getIdxMseOver(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getCurrIdxDgrm(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getAnimIdxDgrm(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getAttrIdcs(std::vector< size_t > &idcs);
 
     // -- set functions ---------------------------------------------
     static void setUseShading(const bool& useShd);
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
+    static void setColorClr(QColor col);
+    static void setColorTxt(QColor col);
     static void setSizeTxt(const int& sze);
 
     void setDiagram(Diagram* dgrm);
@@ -150,10 +150,10 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void handleDragDiagram(const int& dgrmIdx);
 
     // -- static variables ------------------------------------------
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
+    static QColor colClr;
+    static QColor colTxt;
     static int      szeTxt;
-    static ColorRGB colMrk;
+    static QColor colMrk;
     enum
     {
       ID_TIMER,

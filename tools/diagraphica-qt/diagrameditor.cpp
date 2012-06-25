@@ -177,11 +177,7 @@ void DiagramEditor::setFillCol()
 
   if (s != NULL)
   {
-    ColorRGB col;
-    s->getFillColor(col);
-
-    mediator->getColor(col);
-    s->setFillColor(col);
+    s->setFillColor(mediator->getColor(s->getFillColor()));
 
     canvas->Refresh();
   }
@@ -206,11 +202,7 @@ void DiagramEditor::setLineCol()
 
   if (s != NULL)
   {
-    ColorRGB col;
-    s->getLineColor(col);
-
-    mediator->getColor(col);
-    s->setLineColor(col);
+    s->setLineColor(mediator->getColor(s->getLineColor()));
 
     canvas->Refresh();
   }
@@ -1021,7 +1013,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
       xC = x1+0.5*dX;
       yC = y1+0.5*dY;
 
-      VisUtils::setColorDkGray();
+      VisUtils::setColor(VisUtils::darkGray);
       if (editMode == EDIT_MODE_SELECT)
       {
         selectedX1 = xC;

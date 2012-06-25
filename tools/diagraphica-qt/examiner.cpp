@@ -19,11 +19,10 @@ using namespace std;
 // -- static variables ----------------------------------------------
 
 
-//ColorRGB Examiner::colClr = { 1.0, 1.0, 0.93, 1.0 };
-ColorRGB Examiner::colClr = { 1.0, 1.0, 1.0, 1.0 };
-ColorRGB Examiner::colTxt = { 0.0, 0.0, 0.0, 1.0 };
+QColor Examiner::colClr = Qt::white;
+QColor Examiner::colTxt = Qt::black;
 int Examiner::szeTxt = 12;
-ColorRGB Examiner::colBdl = { 0.0, 0.0, 0.0, 0.3 };
+QColor Examiner::colBdl = QColor(0, 0, 0, 76);
 int Examiner::hgtHstPix = 80;
 
 
@@ -38,7 +37,7 @@ Examiner::Examiner(
 {
   diagram = NULL;
   frame = NULL;
-  VisUtils::mapColorMdGray(colFrm);
+  colFrm = VisUtils::mediumGray;
 
   focusFrameIdx = -1;
   offset = 0;
@@ -78,13 +77,13 @@ Examiner::~Examiner()
 // -- get functions -------------------------------------------------
 
 
-ColorRGB Examiner::getColorClr()
+QColor Examiner::getColorClr()
 {
   return colClr;
 }
 
 
-ColorRGB Examiner::getColorTxt()
+QColor Examiner::getColorTxt()
 {
   return colTxt;
 }
@@ -96,17 +95,15 @@ int Examiner::getSizeTxt()
 }
 
 
-ColorRGB Examiner::getColorBdl()
+QColor Examiner::getColorBdl()
 {
   return colBdl;
 }
 
 
-ColorRGB Examiner::getColorSel()
+QColor Examiner::getColorSel()
 {
-  ColorRGB col;
-  VisUtils::mapColorCoolRed(col);
-  return col;
+  return VisUtils::coolRed;
 }
 
 
@@ -124,13 +121,13 @@ size_t Examiner::getIdxClstSel()
 // -- set functions -------------------------------------------------
 
 
-void Examiner::setColorClr(const ColorRGB& col)
+void Examiner::setColorClr(QColor col)
 {
   colClr = col;
 }
 
 
-void Examiner::setColorTxt(const ColorRGB& col)
+void Examiner::setColorTxt(QColor col)
 {
   colTxt = col;
 }
@@ -142,7 +139,7 @@ void Examiner::setSizeTxt(const int& sze)
 }
 
 
-void Examiner::setColorBdl(const ColorRGB& col)
+void Examiner::setColorBdl(QColor col)
 {
   colBdl = col;
 }
@@ -157,7 +154,7 @@ void Examiner::setDiagram(Diagram* dgrm)
 void Examiner::setFrame(
   Cluster* frme,
   const vector< Attribute*> &attrs,
-  ColorRGB col)
+  QColor col)
 {
   delete frame;
   attributes.clear();
@@ -175,13 +172,11 @@ void Examiner::clrFrame()
 
   attributes.clear();
 
-  VisUtils::mapColorMdGray(colFrm);
+  colFrm = VisUtils::mediumGray;
 
   if (focusFrameIdx < framesHist.size())
   {
-    ColorRGB col;
-    VisUtils::mapColorCoolRed(col);
-    setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+    setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
   }
 }
 
@@ -638,9 +633,7 @@ void Examiner::handleHits(const vector< int > &ids)
         {
           focusFrameIdx = ids[1];
 
-          ColorRGB col;
-          VisUtils::mapColorCoolRed(col);
-          setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+          setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
           mediator->handleMarkFrameClust(this);
         }
       }
@@ -696,9 +689,7 @@ void Examiner::handleHits(const vector< int > &ids)
       {
         focusFrameIdx = ids[1];
 
-        ColorRGB col;
-        VisUtils::mapColorCoolRed(col);
-        setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+        setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
         mediator->handleClearExnrCur(this);
       }
@@ -715,9 +706,7 @@ void Examiner::handleIconRwnd()
     offset        = 0;
     geomChanged   = true;
 
-    ColorRGB col;
-    VisUtils::mapColorCoolRed(col);
-    setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+    setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
     mediator->handleMarkFrameClust(this);
   }
@@ -756,9 +745,7 @@ void Examiner::handleIconLft()
         offset += dLft/pix;
       }
 
-      ColorRGB col;
-      VisUtils::mapColorCoolRed(col);
-      setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+      setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
       geomChanged = true;
 
@@ -808,9 +795,7 @@ void Examiner::handleIconRgt()
         offset += dLft/pix;
       }
 
-      ColorRGB col;
-      VisUtils::mapColorCoolRed(col);
-      setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col);
+      setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
       geomChanged = true;
 
@@ -958,7 +943,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     VisUtils::setColor(colFrm);
     VisUtils::fillMoreIcon(-0.98, -0.98+14*pix, -0.98+14*pix, -0.98);
-    VisUtils::setColorLtLtGray();
+    VisUtils::setColor(VisUtils::lightLightGray);
     VisUtils::drawMoreIcon(-0.98, -0.98+14*pix, -0.98+14*pix, -0.98);
     VisUtils::disableLineAntiAlias();
 
@@ -1030,14 +1015,14 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
 
       if (i == focusFrameIdx)
       {
-        VisUtils::setColorCoolRed();
+        VisUtils::setColor(VisUtils::coolRed);
         VisUtils::fillRect(
           -1.0 + 4*pix/scaleFramesHist,  1.0+4*pix/scaleFramesHist,
           1.0 - 4*pix/scaleFramesHist, -1.0-4*pix/scaleFramesHist);
       }
       else
       {
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
           -1.0 + 3*pix/scaleFramesHist,  1.0+3*pix/scaleFramesHist,
           1.0 - 3*pix/scaleFramesHist, -1.0-3*pix/scaleFramesHist);
@@ -1162,9 +1147,9 @@ void Examiner::drawControls(const bool& inSelectMode)
     }
 
     VisUtils::enableLineAntiAlias();
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillClearIcon(x-itvSml, x+itvSml, y+itvSml, y-itvSml);
-    VisUtils::setColorDkGray();
+    VisUtils::setColor(VisUtils::darkGray);
     VisUtils::drawClearIcon(x-itvSml, x+itvSml, y+itvSml, y-itvSml);
     VisUtils::disableLineAntiAlias();
 
@@ -1178,7 +1163,7 @@ void Examiner::drawControls(const bool& inSelectMode)
       -0.5*hgt + itvHist*pix, -0.5*hgt);
 
     // lines
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(
       -0.5*wth + 6.0*pix,     -26.0*pix,
       -0.5*hgt + itvHist*pix, -0.5*hgt + itvHist*pix);
@@ -1203,16 +1188,16 @@ void Examiner::drawControls(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
     {
-      VisUtils::setColorCoolRed();
+      VisUtils::setColor(VisUtils::coolRed);
     }
     else
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
     }
     VisUtils::fillRwndIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
-    VisUtils::setColorLtLtGray();
+    VisUtils::setColor(VisUtils::lightLightGray);
     VisUtils::drawRwndIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -1227,16 +1212,16 @@ void Examiner::drawControls(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
     {
-      VisUtils::setColorCoolRed();
+      VisUtils::setColor(VisUtils::coolRed);
     }
     else
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
     }
     VisUtils::fillPrevIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
-    VisUtils::setColorLtLtGray();
+    VisUtils::setColor(VisUtils::lightLightGray);
     VisUtils::drawPrevIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -1250,11 +1235,11 @@ void Examiner::drawControls(const bool& inSelectMode)
       glPushMatrix();
       glTranslatef(-0.5*wth+6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColorCoolRed();
+      VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillPrevIcon(
         -5.0*pix,  5.0*pix,
         5.0*pix, -5.0*pix);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawPrevIcon(
         -5.0*pix,  5.0*pix,
         5.0*pix, -5.0*pix);
@@ -1267,12 +1252,12 @@ void Examiner::drawControls(const bool& inSelectMode)
     glTranslatef(6*pix, -0.5*hgt + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
-    //VisUtils::setColorCoolRed();
-    VisUtils::setColorMdGray();
+    //VisUtils::setColor(VisUtils::coolRed);
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::fillPlayIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
-    VisUtils::setColorLtLtGray();
+    VisUtils::setColor(VisUtils::lightLightGray);
     VisUtils::drawPlayIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -1287,16 +1272,16 @@ void Examiner::drawControls(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     if (dRgt > 0)
     {
-      VisUtils::setColorCoolRed();
+      VisUtils::setColor(VisUtils::coolRed);
     }
     else
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
     }
     VisUtils::fillNextIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
-    VisUtils::setColorLtLtGray();
+    VisUtils::setColor(VisUtils::lightLightGray);
     VisUtils::drawNextIcon(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -1310,11 +1295,11 @@ void Examiner::drawControls(const bool& inSelectMode)
       glPushMatrix();
       glTranslatef(0.5*wth-6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColorCoolRed();
+      VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillNextIcon(
         -5.0*pix,  5.0*pix,
         5.0*pix, -5.0*pix);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawNextIcon(
         -5.0*pix,  5.0*pix,
         5.0*pix, -5.0*pix);

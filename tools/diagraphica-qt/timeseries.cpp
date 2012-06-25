@@ -20,12 +20,10 @@ using namespace std;
 
 
 bool TimeSeries::useShading = false;
-//ColorRGB TimeSeries::colClr = { 1.0, 1.0, 0.93, 1.0 };
-ColorRGB TimeSeries::colClr = { 1.0, 1.0, 1.0, 1.0 };
-ColorRGB TimeSeries::colTxt = { 0.0, 0.0, 0.0, 1.0 };
+QColor TimeSeries::colClr = Qt::white;
+QColor TimeSeries::colTxt = Qt::black;
 int TimeSeries::szeTxt = 12;
-ColorRGB TimeSeries::colMrk = { 0.73, 0.89, 1.0, 1.0 };
-//ColorRGB TimeSeries::colMrk = { 0.84, 0.93, 1.0, 1.0 };
+QColor TimeSeries::colMrk = QColor(186, 227, 255);
 int TimeSeries::itvAnim = 350;
 
 
@@ -92,7 +90,7 @@ void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
 
 void TimeSeries::getIdcsClstMarked(
   set< size_t > &idcs ,
-  ColorRGB& col)
+  QColor& col)
 {
   getIdcsClstMarked(idcs);
   col = colMrk;
@@ -102,7 +100,7 @@ void TimeSeries::getIdcsClstMarked(
 void TimeSeries::getIdxMseOver(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
+  QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
@@ -116,14 +114,14 @@ void TimeSeries::getIdxMseOver(
     }
     node = NULL;
   }
-  VisUtils::mapColorCoolBlue(colLeaf);
+  colLeaf = VisUtils::coolBlue;
 }
 
 
 void TimeSeries::getCurrIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
+  QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
@@ -137,14 +135,14 @@ void TimeSeries::getCurrIdxDgrm(
     }
     node = NULL;
   }
-  VisUtils::mapColorCoolBlue(colLeaf);
+  colLeaf = VisUtils::coolBlue;
 }
 
 
 void TimeSeries::getAnimIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
+  QColor& colLeaf)
 {
   if (animFrame != itemsMarked.end())
   {
@@ -179,7 +177,7 @@ void TimeSeries::getAnimIdxDgrm(
         }
       }
     }
-    VisUtils::mapColorCoolBlue(colLeaf);
+    colLeaf = VisUtils::coolBlue;
 
     nodeFr = NULL;
     nodeTo = NULL;
@@ -207,13 +205,13 @@ void TimeSeries::setUseShading(const bool& useShd)
 }
 
 
-void TimeSeries::setColorClr(const ColorRGB& col)
+void TimeSeries::setColorClr(QColor col)
 {
   colClr = col;
 }
 
 
-void TimeSeries::setColorTxt(const ColorRGB& col)
+void TimeSeries::setColorTxt(QColor col)
 {
   colTxt = col;
 }
@@ -1162,11 +1160,9 @@ void TimeSeries::handleHits(const vector< int > &ids)
 
         if (currIdxDgrm != NON_EXISTING && timerAnim->IsRunning() != true)
         {
-          ColorRGB col;
           Cluster* frame = new Cluster();
           vector< Attribute* > attrs;
 
-          VisUtils::mapColorCoolBlue(col);
           frame->addNode(graph->getNode(currIdxDgrm));
 
           for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
@@ -1175,7 +1171,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
             attrs.push_back(graph->getAttribute(i));
           }
 
-          mediator->handleShowFrame(frame, attrs, col);
+          mediator->handleShowFrame(frame, attrs, VisUtils::coolBlue);
           mediator->handleMarkFrameClust(this);
 
           delete frame;
@@ -1367,7 +1363,6 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
   else
   {
     double pix = canvas->getPixelSize();
-    ColorRGB colFill, colFade;
 
     // draw marked items on slider
     VisUtils::setColor(colMrk);
@@ -1397,7 +1392,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw positions of diagrams
-    VisUtils::setColorCoolBlue();
+    VisUtils::setColor(VisUtils::coolBlue);
     map< size_t, Position2D >::iterator it;
     for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
     {
@@ -1409,24 +1404,24 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw slider outlines
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       posSliderTopLft.x, posSliderBotRgt.x,
       posSliderTopLft.y, posSliderTopLft.y);
 
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix);
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
@@ -1442,7 +1437,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       {
         if (ctr%10 == 0)
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             pos,
             pos,
@@ -1459,7 +1454,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             pos,
             pos,
@@ -1469,7 +1464,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       }
       else
       {
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawLine(
           pos,
           pos,
@@ -1482,17 +1477,15 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw slider
-    VisUtils::mapColorLtCoolGreen(colFade);
-    VisUtils::mapColorCoolGreen(colFill);
     VisUtils::fillRect(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode,
       posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode,
       posSliderTopLft.y - 2.0*pix,
       posSliderTopLft.y - 2.0*ySpacePxl*pix + 2.0*pix,
-      colFade, colFade, colFill, colFill);
+      VisUtils::lightCoolGreen, VisUtils::lightCoolGreen, VisUtils::coolGreen, VisUtils::coolGreen);
 
     // draw slider handles
-    VisUtils::setColorDkGray();
+    VisUtils::setColor(VisUtils::darkGray);
     VisUtils::fillTriangle(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode - 5*pix,
       posSliderTopLft.y - 2.0*ySpacePxl*pix - 10*pix,
@@ -1508,7 +1501,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode,
       posSliderTopLft.y - 2.0*ySpacePxl*pix);
 
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::enableLineAntiAlias();
     VisUtils::drawTriangle(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode - 5*pix,
@@ -1552,7 +1545,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
       {
         if ((i/nodesItvScale)%10 == 0)
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
@@ -1568,7 +1561,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
@@ -1578,7 +1571,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
       }
       else
       {
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawLine(
           posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
           posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
@@ -1636,10 +1629,6 @@ void TimeSeries::drawAxes(const bool& inSelectMode)
     {}
   else
   {
-    ColorRGB colFill;
-    ColorRGB colFade;
-    VisUtils::mapColorLtGray(colFill);
-    VisUtils::mapColorLtLtGray(colFade);
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
       VisUtils::fillRect(
@@ -1647,10 +1636,10 @@ void TimeSeries::drawAxes(const bool& inSelectMode)
         posAxesBotRgt[i].x,
         posAxesTopLft[i].y,
         posAxesBotRgt[i].y,
-        colFill,
-        colFill,
-        colFade,
-        colFade);
+        VisUtils::lightGray,
+        VisUtils::lightGray,
+        VisUtils::lightLightGray,
+        VisUtils::lightLightGray);
     }
   }
 }
@@ -1663,7 +1652,6 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
   else
   {
     double iter, numr;
-    ColorRGB colFill, colFade;
 
     // draw bars
     for (size_t i = 0; i < posValues.size(); ++i)
@@ -1675,13 +1663,10 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
           iter = (double)attributes[i]->mapToValue(
                    graph->getNode(wdwStartIdx+j)->getTupleVal(
                      attributes[i]->getIndex()))->getIndex();
-          numr = (double)(attributes[i]->getSizeCurValues()-1);
+          numr = (double)(attributes[i]->getSizeCurValues());
 
-          VisUtils::mapColorSeqGreen(iter/numr, colFill);
-          colFade.r = colFill.r-0.25;
-          colFade.g = colFill.g-0.25;
-          colFade.b = colFill.b-0.25;
-          colFade.a = 1.0;
+          QColor colFill = VisUtils::seqGreen(iter, numr);
+          QColor colFade = QColor(std::max(colFill.red() - 64, 0), std::max(colFill.green() - 64, 0), std::max(colFill.blue() - 64, 0));
 
           VisUtils::fillRect(
             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
@@ -1695,7 +1680,7 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
         }
         else
         {
-          VisUtils::setColorCoolGreen();
+          VisUtils::setColor(VisUtils::coolGreen);
           VisUtils::fillRect(
             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
@@ -1713,9 +1698,7 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
       for (size_t j = 0; j < nodesWdwScale; ++j)
       {
         iter = graph->getNode(wdwStartIdx+j)->getTupleVal(attributes[i]->getIndex());
-        VisUtils::mapColorMdGray(colFill);
-
-        glColor3f(colFill.r, colFill.g, colFill.b);
+        VisUtils::setColor(VisUtils::mediumGray);
         glVertex2f(
           posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode,
           posValues[i][wdwStartIdx + j].y);
@@ -1845,7 +1828,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       double dist   = Utils::dist(posPvot.x, posPvot.y, posDgrm.x, posDgrm.y);
 
       // draw vertical line
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(
         posPvot.x,
         posPvot.x,
@@ -1853,7 +1836,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         posScaleTopLft.y - 2.0*ySpacePxl*pix);
 
       // draw connector
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       glPushMatrix();
       glTranslatef(posPvot.x, posPvot.y, 0.0);
       glRotatef(aglDeg-90.0, 0.0, 0.0, 1.0);
@@ -1868,7 +1851,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
       // drop shadow
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillRect(
         -1.0 + 4.0*pix/scaleDgrm,
         1.0 + 4.0*pix/scaleDgrm,
@@ -1903,24 +1886,24 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
 
       VisUtils::enableLineAntiAlias();
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillRwndIcon(0.2, 0.36, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawRwndIcon(0.2, 0.36, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillPrevIcon(0.4, 0.56, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillPauseIcon(0.6, 0.76, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawPauseIcon(0.6, 0.76, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillNextIcon(0.8, 0.96, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawNextIcon(0.8, 0.96, -0.8, -0.98);
 
       VisUtils::disableLineAntiAlias();
@@ -1944,7 +1927,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         double dist   = Utils::dist(posPvot.x, posPvot.y, posDgrm.x, posDgrm.y);
 
         // draw vertical line
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::drawLine(
           posPvot.x,
           posPvot.x,
@@ -1952,7 +1935,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
           posScaleTopLft.y - 2.0*ySpacePxl*pix);
 
         // draw connector
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         glPushMatrix();
         glTranslatef(posPvot.x, posPvot.y, 0.0);
         glRotatef(aglDeg-90.0, 0.0, 0.0, 1.0);
@@ -1967,7 +1950,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
         // drop shadow
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillRect(
           -1.0 + 4.0*pix/scaleDgrm,
           1.0 + 4.0*pix/scaleDgrm,
@@ -2006,36 +1989,36 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         VisUtils::enableLineAntiAlias();
 
         // close icon
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillCloseIcon(0.8, 0.96, 0.96, 0.8);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawCloseIcon(0.8, 0.96, 0.96, 0.8);
         // more icon
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
 
         if (it->first == currIdxDgrm && itemsMarked.size() > 1)
         {
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillRwndIcon(0.2, 0.36, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawRwndIcon(0.2, 0.36, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillPrevIcon(0.4, 0.56, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillPlayIcon(0.6, 0.76, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPlayIcon(0.6, 0.76, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillNextIcon(0.8, 0.96, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawNextIcon(0.8, 0.96, -0.8, -0.98);
         }
 
@@ -2067,7 +2050,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
       double txtScaling = szeTxt*pix/CHARHEIGHT;
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(pos1.x, pos2.x, pos1.y, pos2.y);
 
       for (size_t i = 0; i < attributes.size(); ++i)
@@ -2107,13 +2090,13 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
       for (size_t i = 0; i < posTopLft.size(); ++i)
       {
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
         VisUtils::fillRect(
           posTopLft[i].x,
           posBotRgt[i].x,
           posTopLft[i].y,
           posBotRgt[i].y);
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::drawRect(
           posTopLft[i].x,
           posBotRgt[i].x,
@@ -2149,7 +2132,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
       lblBot = Utils::dblToStr(0);
 
       // min
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
@@ -2165,7 +2148,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         lblBot);
 
       // max
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
@@ -2181,7 +2164,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         lblTop);
 
       // attribute
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabelCenter(
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x) + 1.0*pix,

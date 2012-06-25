@@ -40,19 +40,19 @@ class Examiner : public wxEvtHandler, public Visualizer
     virtual ~Examiner();
 
     // -- get functions ---------------------------------------------
-    static ColorRGB getColorClr();
-    static ColorRGB getColorTxt();
+    static QColor getColorClr();
+    static QColor getColorTxt();
     static int getSizeTxt();
-    static ColorRGB getColorBdl();
+    static QColor getColorBdl();
 
-    ColorRGB getColorSel();
+    QColor getColorSel();
     size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
+    static void setColorClr(QColor col);
+    static void setColorTxt(QColor col);
     static void setSizeTxt(const int& sze);
-    static void setColorBdl(const ColorRGB& col);
+    static void setColorBdl(QColor col);
 
     static void setBlendType(const int& type);
 
@@ -60,7 +60,7 @@ class Examiner : public wxEvtHandler, public Visualizer
     void setFrame(
       Cluster* frme,
       const std::vector< Attribute* > &attrs,
-      ColorRGB col);
+      QColor col);
     void clrFrame();
 
     void addFrameHist(
@@ -143,10 +143,10 @@ class Examiner : public wxEvtHandler, public Visualizer
     */
     // -- static variables ------------------------------------------
 
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
+    static QColor colClr;
+    static QColor colTxt;
     static int      szeTxt;
-    static ColorRGB colBdl;
+    static QColor colBdl;
     static int      hgtHstPix;
 
     enum
@@ -166,7 +166,7 @@ class Examiner : public wxEvtHandler, public Visualizer
     std::vector< Attribute* > attributes; // association
 
     Cluster* frame;                  // composition
-    ColorRGB colFrm;
+    QColor colFrm;
 
     std::vector< Cluster* > framesHist;            // composition
     std::vector< std::vector< Attribute* > > attrsHist; // association

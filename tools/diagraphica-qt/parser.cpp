@@ -501,7 +501,6 @@ void Parser::writeDiagram(
     wxXmlNode*     shpe;
     wxXmlNode*     prop;
     wxXmlNode*     subp;
-    ColorRGB col;
     Attribute*        attr;
 
     // document declaration
@@ -588,44 +587,43 @@ void Parser::writeDiagram(
       prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("LineColor"));
       shpe -> AddChild(prop);
 
-      diagram->getShape(i)->getLineColor(col);
-
+      QColor col = diagram->getShape(i)->getLineColor();
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Red"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.r).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.redF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Green"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.g).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.greenF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Blue"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.b).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.blueF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Alpha"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.a).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
 
       // color fill
       prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("FillColor"));
       shpe -> AddChild(prop);
 
-      diagram->getShape(i)->getFillColor(col);
+      col = diagram->getShape(i)->getFillColor();
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Red"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.r).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.redF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Green"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.g).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.greenF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Blue"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.b).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.blueF()).c_str(), wxConvUTF8));
 
       subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Alpha"));
       prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.a).c_str(), wxConvUTF8));
+      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
 
       // X center DOF
       prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XCenterDOF"));
@@ -636,7 +634,7 @@ void Parser::writeDiagram(
       attr = diagram->getShape(i)->getDOFXCtr()->getAttribute();
       if (attr != NULL)
       {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.a).c_str(), wxConvUTF8));
+        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
       }
       attr = NULL;
 
@@ -1309,8 +1307,8 @@ void Parser::parseShape(
 
   int      type;
   double   lineWth;
-  ColorRGB lineCol;
-  ColorRGB fillCol;
+  QColor lineCol;
+  QColor fillCol;
 
   // x center
   prop = curNode->GetChildren();
@@ -1475,13 +1473,14 @@ void Parser::parseShape(
   if (prop != NULL &&
       prop->GetName() == wxT("LineColor"))
   {
+    double red, green, blue, alpha;
     // red
     subp = prop->GetChildren();
     if (subp != NULL &&
         subp->GetName() == wxT("Red") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      lineCol.r = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      red = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1496,7 +1495,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Green") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      lineCol.g = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      green = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1511,7 +1510,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Blue") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      lineCol.b = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      blue = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1526,7 +1525,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Alpha") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      lineCol.a = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      alpha = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1534,6 +1533,8 @@ void Parser::parseShape(
       subp = NULL;
       throw mcrl2::runtime_error("LineColor: Missing alpha channel.");
     }
+
+    lineCol = QColor::fromRgbF(red, green, blue, alpha);
   }
   else
   {
@@ -1546,13 +1547,14 @@ void Parser::parseShape(
   if (prop != NULL &&
       prop->GetName() == wxT("FillColor"))
   {
+    double red, green, blue, alpha;
     // red
     subp = prop->GetChildren();
     if (subp != NULL &&
         subp->GetName() == wxT("Red") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      fillCol.r = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      red = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1567,7 +1569,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Green") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      fillCol.g = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      green = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1582,7 +1584,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Blue") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      fillCol.b = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      blue = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1597,7 +1599,7 @@ void Parser::parseShape(
         subp->GetName() == wxT("Alpha") &&
         subp->GetNodeContent() != wxEmptyString)
     {
-      fillCol.a = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
+      alpha = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
     }
     else
     {
@@ -1605,6 +1607,8 @@ void Parser::parseShape(
       subp = NULL;
       throw mcrl2::runtime_error("FillColor:Missing alpha channel.");
     }
+
+    fillCol = QColor::fromRgbF(red, green, blue, alpha);
   }
   else
   {

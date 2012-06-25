@@ -219,7 +219,6 @@ void ColorChooser::drawColorSpectrum()
   double xLft, xRgt;
   double yBot, yTop;
   double xItv;
-  ColorRGB col;
 
   // get size of sides
   canvas->getSize(w, h);
@@ -233,10 +232,7 @@ void ColorChooser::drawColorSpectrum()
   xItv = (xRgt-xLft)/255.0;
   for (int i = 0; i < 255; ++i)
   {
-    VisUtils::mapColorSpectral(
-      i/255.0,
-      col);
-    VisUtils::setColor(col);
+    VisUtils::setColor(VisUtils::spectral(i / 255.0));
     VisUtils::fillRect(
       xLft+i*xItv, xLft+(i+1)*xItv,
       yTop,        yBot);
@@ -272,12 +268,12 @@ void ColorChooser::drawPath(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     for (int i = 0; i < size-1; ++i)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLineDashed(
         positionsX[i]*xRgt+pix, positionsX[i+1]*xRgt+pix,
         positionsY[i]*yTop-pix, positionsY[i+1]*yTop-pix);
 
-      VisUtils::setColorLtGray();
+      VisUtils::setColor(VisUtils::lightGray);
       VisUtils::drawLineDashed(
         positionsX[i]*xRgt, positionsX[i+1]*xRgt,
         positionsY[i]*yTop, positionsY[i+1]*yTop);
@@ -362,7 +358,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     for (size_t i = 0; i < size-1; ++i)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
         positionsX[i]*xRgt-4.0*pix, positionsX[i]*xRgt+6.0*pix,
         positionsY[i]*yTop+4.0*pix, positionsY[i]*yTop-6.0*pix);
@@ -372,11 +368,11 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 
       if (active == true)
       {
-        VisUtils::setColorRed();
+        VisUtils::setColor(Qt::red);
       }
       else
       {
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
       }
 
       VisUtils::drawLine(
@@ -389,7 +385,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 
     if (size == 1)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
         positionsX[size-1]*xRgt-4.0*pix, positionsX[size-1]*xRgt+6.0*pix,
         positionsY[size-1]*yTop+4.0*pix, positionsY[size-1]*yTop-6.0*pix);
@@ -400,11 +396,11 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 
       if (active == true)
       {
-        VisUtils::setColorRed();
+        VisUtils::setColor(Qt::red);
       }
       else
       {
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
       }
 
       VisUtils::drawLine(
@@ -428,7 +424,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
@@ -449,18 +445,18 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 
       if (active == true)
       {
-        VisUtils::setColorGreen();
+        VisUtils::setColor(Qt::green);
       }
       else
       {
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
       }
       VisUtils::fillTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
         hdlDOF, 2.0*hdlDOF);
 
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,

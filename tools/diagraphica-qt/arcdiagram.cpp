@@ -21,9 +21,8 @@ using namespace std;
 
 
 // general
-//ColorRGB ArcDiagram::colClr = { 1.0, 1.0, 0.93, 1.0 };
-ColorRGB ArcDiagram::colClr = { 1.0, 1.0, 1.0, 1.0 };
-ColorRGB ArcDiagram::colTxt = { 0.0, 0.0, 0.0, 1.0 };
+QColor ArcDiagram::colClr = Qt::white;
+QColor ArcDiagram::colTxt = Qt::black;
 int ArcDiagram::szeTxt = 12;
 // cluster tree
 bool ArcDiagram::showTree = true;
@@ -35,7 +34,7 @@ double ArcDiagram::magnBarTree = 0.0;
 // arc diagram
 bool ArcDiagram::showLeaves = true;
 bool ArcDiagram::showBundles = true;
-ColorRGB ArcDiagram::colBundles = { 0.0, 0.0, 0.0, 0.3 };
+QColor ArcDiagram::colBundles = QColor(0, 0, 0, 76);
 int ArcDiagram::itvAnim = 100;
 
 
@@ -79,13 +78,13 @@ ArcDiagram::~ArcDiagram()
 // -- get functions -------------------------------------------------
 
 
-ColorRGB ArcDiagram::getColorClr()
+QColor ArcDiagram::getColorClr()
 {
   return colClr;
 }
 
 
-ColorRGB ArcDiagram::getColorTxt()
+QColor ArcDiagram::getColorTxt()
 {
   return colTxt;
 }
@@ -145,7 +144,7 @@ bool ArcDiagram::getShowBundles()
 }
 
 
-ColorRGB ArcDiagram::getColorBundles()
+QColor ArcDiagram::getColorBundles()
 {
   return colBundles;
 }
@@ -153,7 +152,7 @@ ColorRGB ArcDiagram::getColorBundles()
 
 double ArcDiagram::getTrspBundles()
 {
-  return colBundles.a;
+  return colBundles.alphaF();
 }
 
 
@@ -170,13 +169,13 @@ void ArcDiagram::getAttrsTree(vector< size_t > &idcs)
 // -- set functions -------------------------------------------------
 
 
-void ArcDiagram::setColorClr(const ColorRGB& col)
+void ArcDiagram::setColorClr(QColor col)
 {
   colClr = col;
 }
 
 
-void ArcDiagram::setColorTxt(const ColorRGB& col)
+void ArcDiagram::setColorTxt(QColor col)
 {
   colTxt = col;
 }
@@ -235,7 +234,7 @@ void ArcDiagram::setShowBundles(const bool& shw)
 }
 
 
-void ArcDiagram::setColorBundles(const ColorRGB& col)
+void ArcDiagram::setColorBundles(QColor col)
 {
   colBundles = col;
 }
@@ -243,7 +242,7 @@ void ArcDiagram::setColorBundles(const ColorRGB& col)
 
 void ArcDiagram::setTrspBundles(const double& trsp)
 {
-  colBundles.a = trsp;
+  colBundles.setAlphaF(trsp);
 }
 
 
@@ -283,9 +282,9 @@ void ArcDiagram::hideAllDiagrams()
 
 void ArcDiagram::markLeaf(
   const size_t& leafIdx,
-  ColorRGB& col)
+  QColor col)
 {
-  map< size_t, vector< ColorRGB > >::iterator it;
+  map< size_t, vector< QColor > >::iterator it;
   it = markLeaves.find(leafIdx);
   if (it != markLeaves.end())
   {
@@ -293,9 +292,9 @@ void ArcDiagram::markLeaf(
   }
   else
   {
-    vector< ColorRGB > v;
+    vector< QColor > v;
     v.push_back(col);
-    markLeaves.insert(pair< size_t, vector< ColorRGB > >(leafIdx, v));
+    markLeaves.insert(pair< size_t, vector< QColor > >(leafIdx, v));
   }
 }
 
@@ -500,23 +499,6 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
     // render high quality
     if (mouseDrag == MSE_DRAG_FALSE)
     {
-      ColorRGB colFill;
-      ColorRGB colFade;
-      ColorRGB colBrdrFill;
-      ColorRGB colBrdrFade;
-
-      /*
-      colFill       = colBundles;
-      */
-      colFade       = colClr;
-      /*
-      colFade.a     = colFill.a;
-      colBrdrFill   = colBundles;
-      colBrdrFill.a = 1.2*colFill.a;
-      colBrdrFade   = colBundles;
-      colBrdrFade.a = 0.1*colFill.a;
-      */
-
       int segs = SEGM_HINT_HQ;
 
       VisUtils::enableLineAntiAlias();
@@ -524,19 +506,10 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 
       for (size_t i = 0; i < posBundles.size(); ++i)
       {
-        if (markBundles[i] == true)
-        {
-          VisUtils::mapColorDkCoolBlue(colFill);
-        }
-        else
-        {
-          colFill = colBundles;
-        }
-        colFade.a     = colFill.a;
-        colBrdrFill   = colFill;
-        colBrdrFill.a = 1.2*colFill.a;
-        colBrdrFade   = colFill;
-        colBrdrFade.a = 0.1*colFill.a;
+        QColor colFill = markBundles[i] ? VisUtils::darkCoolBlue : colBundles;
+        QColor colFade = alpha(colClr, colFill.alphaF());
+        QColor colBrdrFill = alpha(colFill, std::min(colFill.alphaF() * 1.2, 1.0));
+        QColor colBrdrFade = alpha(colFill, colFill.alphaF() * 0.1);
 
         double x      = posBundles[i].x;
         double y      = posBundles[i].y;
@@ -567,7 +540,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
     // render low quality
     else
     {
-      VisUtils::setColorLtGray();
+      VisUtils::setColor(VisUtils::lightGray);
 
       int segs = SEGM_HINT_HQ;
 
@@ -621,7 +594,6 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
     {
       int segs = SEGM_HINT_HQ;
       Cluster* clust = NULL;
-      ColorRGB colFill;
 
       VisUtils::enableLineAntiAlias();
       for (size_t i = 0; i < posLeaves.size(); ++i)
@@ -634,25 +606,18 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
         //clust   = mapPosToClust[posTreeTopLft.size()-1][i];
         clust = graph->getLeaf(i);
 
-        if (clust != NULL && clust->getAttribute() != NULL)
-          calcColor(
-            clust->getAttrValIdx(),
-            clust->getAttribute()->getSizeCurValues()-1,
-            colFill);
-        else
-        {
-          VisUtils::mapColorWhite(colFill);
-        }
-
         // drop shadow
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
         VisUtils::fillEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
 
         // foreground
-        VisUtils::setColor(colFill);
+        if (clust != NULL && clust->getAttribute() != NULL)
+          VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
+        else
+          VisUtils::setColor(Qt::white);
         VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
-        VisUtils::setColorDkGray();
+        VisUtils::setColor(VisUtils::darkGray);
         VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
       }
 
@@ -662,9 +627,9 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
         double x = posLeaves[idxInitStLeaves].x;
         double y = posLeaves[idxInitStLeaves].y;
 
-        VisUtils::setColorLtGray();
+        VisUtils::setColor(VisUtils::lightGray);
         VisUtils::fillEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
       }
 
@@ -682,10 +647,10 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
         double x = posLeaves[i].x;
         double y = posLeaves[i].y;
 
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
         VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
 
-        VisUtils::setColorDkGray();
+        VisUtils::setColor(VisUtils::darkGray);
         VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
       }
     }
@@ -725,10 +690,6 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
       int segs = SEGM_HINT_HQ;
 
       Cluster* clust = NULL;
-      ColorRGB colFill;
-
-      ColorRGB colFade;
-      VisUtils::mapColorLtLtGray(colFade);
 
       VisUtils::enableLineAntiAlias();
       VisUtils::enableBlending();
@@ -743,37 +704,34 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
           // color
           clust   = mapPosToClust[i][j];
+          QColor colFill;
           if (clust != NULL && clust->getAttribute() != NULL)
           {
-            calcColor(
-              clust->getAttrValIdx(),
-              clust->getAttribute()->getSizeCurValues()-1,
-              colFill);
+            colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
           }
           else
           {
-            VisUtils::mapColorLtGray(colFill);
+            colFill = VisUtils::lightGray;
           }
 
           // triangle
           VisUtils::fillTriangle(
             0.5*(xLft+xRgt), yTop, colFill,
-            xLft,            yBot, colFade,
-            xRgt,            yBot, colFade);
-          VisUtils::setColorLtGray();
+            xLft,            yBot, VisUtils::lightLightGray,
+            xRgt,            yBot, VisUtils::lightLightGray);
+          VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
 
           // drop shadow
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::fillEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
 
           // foreground
-          colFill.a = 1.0;
-          VisUtils::setColor(colFill);
+          VisUtils::setColor(colFill, 1.0);
           VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColorDkGray();
+          VisUtils::setColor(VisUtils::darkGray);
           VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
         }
       }
@@ -794,14 +752,14 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
           double yTop = posTreeTopLft[i][j].y;
           double yBot = posTreeBotRgt[i][j].y;
 
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-          VisUtils::setColorLtGray();
+          VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
 
-          VisUtils::setColorWhite();
+          VisUtils::setColor(Qt::white);
           VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColorDkGray();
+          VisUtils::setColor(VisUtils::darkGray);
           VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
         }
       }
@@ -826,11 +784,6 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
     {
       string lbl;
 
-      ColorRGB colLine;
-      VisUtils::mapColorLtGray(colLine);
-
-      ColorRGB colText = colTxt;
-
       for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
       {
         if (posTreeTopLft[i].size() > 0)
@@ -844,18 +797,18 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
           double xLft = -0.5*wth + radLeaves;
           double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
 
-          VisUtils::setColor(colText);
+          VisUtils::setColor(colTxt);
           VisUtils::drawLabelRight(texCharId, xLft, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
-          VisUtils::setColor(colLine);
+          VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawLine(xLft, xRgt, yLin, yLin);
 
           // right
           xLft = posTreeBotRgt[i][posTreeBotRgt[i].size()-1].x + 2.0*radLeaves;
           xRgt = 0.5*wth - radLeaves;
 
-          VisUtils::setColor(colText);
+          VisUtils::setColor(colTxt);
           VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
-          VisUtils::setColor(colLine);
+          VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawLine(xLft, xRgt, yLin, yLin);
         }
       }
@@ -900,15 +853,6 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
       if (mouseDrag == MSE_DRAG_FALSE)
       {
         Cluster* clust = NULL;;
-        ColorRGB colFill;
-        ColorRGB colFade;
-        ColorRGB colBrdr;
-
-        // fade & border color
-        VisUtils::mapColorLtLtGray(colFade);
-        VisUtils::mapColorLtGray(colBrdr);
-
-        //colFade.a   *= 0.15;
 
         VisUtils::enableLineAntiAlias();
         VisUtils::enableBlending();
@@ -925,14 +869,14 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 
             // fill color
             clust   = mapPosToClust[i][j];
+            QColor colFill;
             if (clust != NULL && clust->getAttribute() != NULL)
-              calcColor(
-                clust->getAttrValIdx(),
-                clust->getAttribute()->getSizeCurValues()-1,
-                colFill);
+            {
+              colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
+            }
             else
             {
-              VisUtils::mapColorLtGray(colFill);
+              colFill = VisUtils::lightGray;
             }
 
             // solid background
@@ -943,11 +887,11 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
             VisUtils::fillRect(
               xLft,    xRgt,
               yTop,    yBot,
-              colFill, colFade,
-              colFill, colFade);
+              colFill, VisUtils::lightLightGray,
+              colFill, VisUtils::lightLightGray);
 
             // border
-            VisUtils::setColor(colBrdr);
+            VisUtils::setColor(VisUtils::lightGray);
             VisUtils::drawRect(xLft, xRgt, yTop, yBot);
           }
         }
@@ -968,9 +912,9 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
             double yTop = posBarTreeTopLft[i][j].y;
             double yBot = posBarTreeBotRgt[i][j].y;
 
-            VisUtils::setColorLtLtGray();
+            VisUtils::setColor(VisUtils::lightLightGray);
             VisUtils::fillRect(xLft, xRgt, yTop, yBot);
-            VisUtils::setColorLtGray();
+            VisUtils::setColor(VisUtils::lightGray);
             VisUtils::drawRect(xLft, xRgt, yTop, yBot);
           }
         }
@@ -1089,11 +1033,11 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         {
           if (i == currIdxDgrm)
           {
-            VisUtils::setColorCoolBlue();
+            VisUtils::setColor(VisUtils::coolBlue);
           }
           else
           {
-            VisUtils::setColorMdGray();
+            VisUtils::setColor(VisUtils::mediumGray);
           }
 
           glPushMatrix();
@@ -1109,7 +1053,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(xL, xD, yL, yD);
         }
 
@@ -1212,52 +1156,52 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
         if (i == currIdxDgrm)
         {
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
         }
         VisUtils::fillCloseIcon(0.8, 0.96, 0.96, 0.8);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawCloseIcon(0.8, 0.96, 0.96, 0.8);
 
         if (i == currIdxDgrm)
         {
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
         }
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
 
         if (framesDgrm[i].size() > 1)
         {
           if (i == currIdxDgrm)
           {
-            VisUtils::setColorCoolBlue();
+            VisUtils::setColor(VisUtils::coolBlue);
           }
           else
           {
-            VisUtils::setColorMdGray();
+            VisUtils::setColor(VisUtils::mediumGray);
           }
           VisUtils::fillRwndIcon(0.2, 0.36, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawRwndIcon(0.2, 0.36, -0.8, -0.98);
 
           if (i == currIdxDgrm)
           {
-            VisUtils::setColorCoolBlue();
+            VisUtils::setColor(VisUtils::coolBlue);
           }
           else
           {
-            VisUtils::setColorMdGray();
+            VisUtils::setColor(VisUtils::mediumGray);
           }
           VisUtils::fillPrevIcon(0.4, 0.56, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
           if (timerAnim->IsRunning() &&
@@ -1265,41 +1209,41 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           {
             if (i == currIdxDgrm)
             {
-              VisUtils::setColorCoolBlue();
+              VisUtils::setColor(VisUtils::coolBlue);
             }
             else
             {
-              VisUtils::setColorMdGray();
+              VisUtils::setColor(VisUtils::mediumGray);
             }
             VisUtils::fillPauseIcon(0.6, 0.76, -0.8, -0.98);
-            VisUtils::setColorLtLtGray();
+            VisUtils::setColor(VisUtils::lightLightGray);
             VisUtils::drawPauseIcon(0.6, 0.76, -0.8, -0.98);
           }
           else
           {
             if (i == currIdxDgrm)
             {
-              VisUtils::setColorCoolBlue();
+              VisUtils::setColor(VisUtils::coolBlue);
             }
             else
             {
-              VisUtils::setColorMdGray();
+              VisUtils::setColor(VisUtils::mediumGray);
             }
             VisUtils::fillPlayIcon(0.6, 0.76, -0.8, -0.98);
-            VisUtils::setColorLtLtGray();
+            VisUtils::setColor(VisUtils::lightLightGray);
             VisUtils::drawPlayIcon(0.6, 0.76, -0.8, -0.98);
           }
 
           if (i == currIdxDgrm)
           {
-            VisUtils::setColorCoolBlue();
+            VisUtils::setColor(VisUtils::coolBlue);
           }
           else
           {
-            VisUtils::setColorMdGray();
+            VisUtils::setColor(VisUtils::mediumGray);
           }
           VisUtils::fillNextIcon(0.8, 0.96, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawNextIcon(0.8, 0.96, -0.8, -0.98);
         }
         VisUtils::disableLineAntiAlias();
@@ -1325,7 +1269,7 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 
       for (size_t i = 0; i < posLeaves.size(); ++i)
       {
-        map< size_t, vector< ColorRGB > >::iterator it;
+        map< size_t, vector< QColor > >::iterator it;
         it = markLeaves.find(i);
 
         if (it != markLeaves.end())
@@ -1339,10 +1283,8 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
             double aglBeg = j*frac*360.0;
             double aglEnd = (j+1)*frac*360.0;
 
-            ColorRGB colIn, colOut;
-            colIn = it->second[j];
-            colOut = colIn;
-            colOut.a = 0.0;
+            QColor colIn = it->second[j];
+            QColor colOut = alpha(colIn, 0.0);
 
             VisUtils::enableLineAntiAlias();
             VisUtils::setColor(colIn);
@@ -1490,51 +1432,26 @@ void ArcDiagram::clear()
 }
 
 
-void ArcDiagram::calcColor(
-  const size_t& iter,
-  const size_t& numr,
-  ColorRGB& col)
+QColor ArcDiagram::calcColor(size_t iter, size_t numr)
 {
   if (colorMap == VisUtils::COL_MAP_QUAL_PAST_1)
-    VisUtils::mapColorQualPast1(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualPast1(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_PAST_2)
-    VisUtils::mapColorQualPast2(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualPast2(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_1)
-    VisUtils::mapColorQualSet1(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualSet1(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_2)
-    VisUtils::mapColorQualSet2(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualSet2(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_3)
-    VisUtils::mapColorQualSet3(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualSet3(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_PAIR)
-    VisUtils::mapColorQualPair(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualPair(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_DARK)
-    VisUtils::mapColorQualDark(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualDark(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_ACCENT)
-    VisUtils::mapColorQualAccent(
-      iter,
-      numr,
-      col);
+    return VisUtils::qualAccent(iter, numr);
+  else
+    assert(false);
 }
 
 
@@ -2281,12 +2198,10 @@ void ArcDiagram::handleHits(const vector< int > &ids)
           currIdxDgrm = ids[2];
           updateMarkBundles();
 
-          ColorRGB col;
-          VisUtils::mapColorCoolBlue(col);
           mediator->handleShowFrame(
             framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
             attrsDgrm[currIdxDgrm],
-            col);
+            VisUtils::coolBlue);
         }
       }
     }
@@ -2424,12 +2339,10 @@ void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
   }
   frameIdxDgrm[dgrmIdx] = 0;
 
-  ColorRGB col;
-  VisUtils::mapColorCoolBlue(col);
   mediator->handleShowFrame(
     framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
     attrsDgrm[currIdxDgrm],
-    col);
+    VisUtils::coolBlue);
 
   updateMarkBundles();
 }
@@ -2453,12 +2366,10 @@ void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
     frameIdxDgrm[dgrmIdx] = static_cast<int>(framesDgrm[dgrmIdx].size()-1);
   }
 
-  ColorRGB col;
-  VisUtils::mapColorCoolBlue(col);
   mediator->handleShowFrame(
     framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
     attrsDgrm[currIdxDgrm],
-    col);
+    VisUtils::coolBlue);
 
   updateMarkBundles();
 }
@@ -2472,12 +2383,10 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
     {
       timerAnim->Stop();
 
-      ColorRGB col;
-      VisUtils::mapColorCoolBlue(col);
       mediator->handleShowFrame(
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm],
-        col);
+        VisUtils::coolBlue);
     }
     else
     {
@@ -2510,12 +2419,10 @@ void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
     frameIdxDgrm[dgrmIdx] = 0;
   }
 
-  ColorRGB col;
-  VisUtils::mapColorCoolBlue(col);
   mediator->handleShowFrame(
     framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
     attrsDgrm[currIdxDgrm],
-    col);
+    VisUtils::coolBlue);
 
   updateMarkBundles();
 }

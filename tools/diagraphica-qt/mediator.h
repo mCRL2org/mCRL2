@@ -65,7 +65,7 @@ class Mediator
     virtual void appOutputText(const std::string& msg) = 0;
     virtual void appOutputText(const int& val) = 0;
 
-    virtual void getColor(ColorRGB& col) = 0;
+    virtual QColor getColor(QColor col) = 0;
     virtual void handleCloseFrame(PopupFrame* f) = 0;
 
     // -- interaction with attributes & domains ---------------------
@@ -268,7 +268,7 @@ class Mediator
     virtual void handleShowFrame(
       Cluster* frame,
       const std::vector< Attribute* > &attrs,
-      ColorRGB& col) = 0;
+      QColor col) = 0;
     virtual void handleUnshowFrame() = 0;
 
     // -- visualization std::settings ------------------------------------

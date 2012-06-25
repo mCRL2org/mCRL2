@@ -41,8 +41,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     virtual ~ArcDiagram();
 
     // -- get functions ---------------------------------------------
-    static ColorRGB getColorClr();
-    static ColorRGB getColorTxt();
+    static QColor getColorClr();
+    static QColor getColorTxt();
     static int getSizeTxt();
     static double getIntervAnim();
     static bool getShowTree();
@@ -52,14 +52,14 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     static double getMagnBarTree();
     static bool getShowLeaves();
     static bool getShowBundles();
-    static ColorRGB getColorBundles();
+    static QColor getColorBundles();
     static double getTrspBundles();
 
     void getAttrsTree(std::vector< size_t > &idcs);
 
     // -- set functions ---------------------------------------------
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
+    static void setColorClr(QColor col);
+    static void setColorTxt(QColor col);
     static void setSizeTxt(const int& sze);
     static void setIntervAnim(const int& itv);
     static void setShowTree(const bool& shw);
@@ -69,7 +69,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     static void setMagnBarTree(const double& val);
     static void setShowLeaves(const bool& shw);
     static void setShowBundles(const bool& shw);
-    static void setColorBundles(const ColorRGB& col);
+    static void setColorBundles(QColor col);
     static void setTrspBundles(const double& trsp);
 
     void setAttrsTree(const std::vector< size_t > idcs);
@@ -79,7 +79,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
 
     void markLeaf(
       const size_t& leafIdx,
-      ColorRGB& col);
+      QColor col);
     void unmarkLeaves();
     void markBundle(const size_t& idx);
     void unmarkBundles();
@@ -125,10 +125,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
   protected:
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& col);
+    QColor calcColor(size_t iter, size_t numr);
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
 
@@ -186,8 +183,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     // -- static variables ------------------------------------------
 
     // general
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
+    static QColor colClr;
+    static QColor colTxt;
     static int      szeTxt;
     // cluster tree
     static bool showTree;
@@ -199,7 +196,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     // arc diagram
     static bool showLeaves;
     static bool showBundles;
-    static ColorRGB colBundles;
+    static QColor colBundles;
 
     // -- data members ----------------------------------------------
 
@@ -240,7 +237,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     size_t prevFrameIdxClust;
     size_t currFrameIdxClust;
     size_t nextFrameIdxClust;
-    std::map< size_t, std::vector< ColorRGB > > markLeaves;
+    std::map< size_t, std::vector< QColor > > markLeaves;
 
     // animation
     wxTimer* timerAnim;

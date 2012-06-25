@@ -31,7 +31,7 @@ using namespace std;
 double Shape::hdlSzeHnt =  5.0;
 double Shape::minSzeHnt =  5.0;
 int Shape::segNumHnt = 24;
-ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
+QColor Shape::colTxt = Qt::black;
 
 
 // -- constructors and destructor -----------------------------------
@@ -64,8 +64,8 @@ Shape::Shape(
   type      = typ;
   mode      = MODE_NORMAL;
   linWth    = 1.0;
-  VisUtils::mapColorMdGray(colLin);
-  VisUtils::mapColorLtGray(colFil);
+  colLin = VisUtils::mediumGray;
+  colFil = VisUtils::lightGray;
   hdlSze    = hdlSzeHnt;
 
   // degrees of freedom
@@ -447,53 +447,27 @@ void Shape::setLineWidth(const double& w)
 }
 
 
-void Shape::setLineColor(const ColorRGB& c)
+void Shape::setLineColor(QColor c)
 {
   colLin = c;
 }
 
 
-void Shape::setLineColor(
-  const double& r,
-  const double& g,
-  const double& b,
-  const double& a)
-{
-  colLin.r = r;
-  colLin.g = g;
-  colLin.b = b;
-  colLin.a = a;
-}
-
-
 void Shape::setLineTransp(const double& a)
 {
-  colLin.a = a;
+  colLin.setAlphaF(a);
 }
 
 
-void Shape::setFillColor(const ColorRGB& c)
+void Shape::setFillColor(QColor c)
 {
   colFil = c;
 }
 
 
-void Shape::setFillColor(
-  const double& r,
-  const double& g,
-  const double& b,
-  const double& a)
-{
-  colFil.r = r;
-  colFil.g = g;
-  colFil.b = b;
-  colFil.a = a;
-}
-
-
 void Shape::setFillTransp(const double& a)
 {
-  colFil.a = a;
+  colFil.setAlphaF(a);
 }
 
 
@@ -629,45 +603,27 @@ double Shape::getLineWidth()
 }
 
 
-void Shape::getLineColor(ColorRGB& c)
+QColor Shape::getLineColor()
 {
-  c = colLin;
-}
-
-
-void Shape::getLineColor(double& r, double& g, double& b, double& a)
-{
-  r = colLin.r;
-  g = colLin.g;
-  b = colLin.b;
-  a = colLin.a;
+  return colLin;
 }
 
 
 double Shape::getLineTransp()
 {
-  return colFil.a;
+  return colFil.alphaF();
 }
 
 
-void Shape::getFillColor(ColorRGB& c)
+QColor Shape::getFillColor()
 {
-  c = colFil;
-}
-
-
-void Shape::getFillColor(double& r, double& g, double& b, double& a)
-{
-  r = colFil.r;
-  g = colFil.g;
-  b = colFil.b;
-  a = colFil.a;
+  return colFil;
 }
 
 
 double Shape::getFillTransp()
 {
-  return colFil.a;
+  return colFil.alphaF();
 }
 
 
@@ -840,8 +796,6 @@ void Shape::visualize(
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
   double aglH;   // rotation about hinge, degrees
-  ColorHLS colHLS;
-  ColorRGB colRGB;
 
   double alpha;
 
@@ -850,9 +804,8 @@ void Shape::visualize(
   xD         = xDFC;
   yD         = yDFC;
   aglH       = 0.0;
-  colRGB     = colFil;
-  colHLS.l   = 0.5;
-  colHLS.s   = 1.0;
+
+  QColor colFill = colFil;
 
   for (size_t i = 0; i < attrs.size(); ++i)
   {
@@ -911,14 +864,13 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(colDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < colDOF->getSizeValues()-1)
-        colHLS.h = ((1.0-dblPtVal)*colDOF->getValue((int)intPtVal)
-                    + dblPtVal*colDOF->getValue((int)intPtVal+1))*360.0;
+      {
+        colFill = QColor::fromHsvF((1.0-dblPtVal) * colDOF->getValue((int)intPtVal) + dblPtVal * colDOF->getValue((int)intPtVal+1), 1.0, 1.0);
+      }
       else
       {
-        colHLS.h = colDOF->getValue((int)intPtVal)*360.0;
+        colFill = QColor::fromHsvF(colDOF->getValue((int)intPtVal), 1.0, 1.0);
       }
-
-      VisUtils::hlsToRgb(colHLS, colRGB);
     }
 
     if (attrs[i] == opaDOF->getAttribute())
@@ -929,11 +881,12 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(opaDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < opaDOF->getSizeValues()-1)
-        colRGB.a = ((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal)
-                    + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      {
+        colFill.setAlphaF((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal) + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      }
       else
       {
-        colRGB.a = opaDOF->getValue((int)intPtVal);
+        colFill.setAlphaF(opaDOF->getValue((int)intPtVal));
       }
     }
 
@@ -961,7 +914,7 @@ void Shape::visualize(
 
   if (type == TYPE_NOTE)
   {
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD,  xD,   // new
       yD, -yD);  // new
@@ -972,8 +925,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_RECT)
   {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD,  xD,   // new
       yD, -yD);  // new
@@ -984,8 +936,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_ELLIPSE)
   {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillEllipse(
       0.0, 0.0,
       xD,  yD,
@@ -998,8 +949,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_LINE)
   {
-    //VisUtils::setColor( colLin );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::drawLine(
       -xD,  xD,
       yD, -yD);
@@ -1008,8 +958,7 @@ void Shape::visualize(
   {
     double pix = canvas->getPixelSize();
 
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillArrow(
       -xD,         xD,
       yD,        -yD,
@@ -1025,8 +974,7 @@ void Shape::visualize(
   {
     double pix = canvas->getPixelSize();
 
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillDArrow(
       -xD,         xD,
       yD,        -yD,
@@ -1056,8 +1004,6 @@ void Shape::visualize(
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
   double aglH;   // rotation about hinge, degrees
-  ColorHLS colHLS;
-  ColorRGB colRGB;
 
   double alpha;
 
@@ -1066,9 +1012,7 @@ void Shape::visualize(
   xD         = xDFC;
   yD         = yDFC;
   aglH       = 0.0;
-  colRGB     = colFil;
-  colHLS.l   = 0.5;
-  colHLS.s   = 1.0;
+  QColor colFill = colFil;
 
   for (size_t i = 0; i < attrs.size(); ++i)
   {
@@ -1127,14 +1071,13 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(colDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < colDOF->getSizeValues()-1)
-        colHLS.h = ((1.0-dblPtVal)*colDOF->getValue((int)intPtVal)
-                    + dblPtVal*colDOF->getValue((int)intPtVal+1))*360.0;
+      {
+        colFill = QColor::fromHsvF((1.0-dblPtVal) * colDOF->getValue((int)intPtVal) + dblPtVal * colDOF->getValue((int)intPtVal+1), 1.0, 1.0);
+      }
       else
       {
-        colHLS.h = colDOF->getValue((int)intPtVal)*360.0;
+        colFill = QColor::fromHsvF(colDOF->getValue((int)intPtVal), 1.0, 1.0);
       }
-
-      VisUtils::hlsToRgb(colHLS, colRGB);
     }
 
     if (attrs[i] == opaDOF->getAttribute())
@@ -1145,11 +1088,12 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(opaDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < opaDOF->getSizeValues()-1)
-        colRGB.a = ((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal)
-                    + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      {
+        colFill.setAlphaF((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal) + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      }
       else
       {
-        colRGB.a = opaDOF->getValue((int)intPtVal);
+        colFill.setAlphaF(opaDOF->getValue((int)intPtVal));
       }
     }
 
@@ -1177,7 +1121,7 @@ void Shape::visualize(
 
   if (type == TYPE_NOTE)
   {
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD,  xD,   // new
       yD, -yD);  // new
@@ -1188,8 +1132,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_RECT)
   {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD,  xD,   // new
       yD, -yD);  // new
@@ -1200,8 +1143,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_ELLIPSE)
   {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillEllipse(
       0.0, 0.0,
       xD,  yD,
@@ -1214,8 +1156,7 @@ void Shape::visualize(
   }
   else if (type == TYPE_LINE)
   {
-    //VisUtils::setColor( colLin );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::drawLine(
       -xD,  xD,
       yD, -yD);
@@ -1224,8 +1165,7 @@ void Shape::visualize(
   {
     double pix = canvas->getPixelSize();
 
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillArrow(
       -xD,         xD,
       yD,        -yD,
@@ -1241,8 +1181,7 @@ void Shape::visualize(
   {
     double pix = canvas->getPixelSize();
 
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colRGB);
+    VisUtils::setColor(colFill);
     VisUtils::fillDArrow(
       -xD,         xD,
       yD,        -yD,
@@ -1272,8 +1211,6 @@ void Shape::visualize(
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
   double aglH;   // rotation about hinge, degrees
-  ColorHLS colHLS;
-  ColorRGB colRGB;
 
   double alpha = 0.0;
 
@@ -1282,9 +1219,7 @@ void Shape::visualize(
   xD         = xDFC;
   yD         = yDFC;
   aglH       = 0.0;
-  colRGB     = colFil;
-  colHLS.l   = 0.5;
-  colHLS.s   = 1.0;
+  QColor colFill = colFil;
 
   for (size_t i = 0; i < attrs.size(); ++i)
   {
@@ -1343,14 +1278,13 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(colDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < colDOF->getSizeValues()-1)
-        colHLS.h = ((1.0-dblPtVal)*colDOF->getValue((int)intPtVal)
-                    + dblPtVal*colDOF->getValue((int)intPtVal+1))*360.0;
+      {
+        colFill = QColor::fromHsvF((1.0-dblPtVal) * colDOF->getValue((int)intPtVal) + dblPtVal * colDOF->getValue((int)intPtVal+1), 1.0, 1.0);
+      }
       else
       {
-        colHLS.h = colDOF->getValue((int)intPtVal)*360.0;
+        colFill = QColor::fromHsvF(colDOF->getValue((int)intPtVal), 1.0, 1.0);
       }
-
-      VisUtils::hlsToRgb(colHLS, colRGB);
     }
 
     if (attrs[i] == opaDOF->getAttribute())
@@ -1361,20 +1295,20 @@ void Shape::visualize(
       dblPtVal = modf(alpha*(opaDOF->getSizeValues()-1), &intPtVal);
 
       if (intPtVal < opaDOF->getSizeValues()-1)
-        colRGB.a = ((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal)
-                    + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      {
+        colFill.setAlphaF((1.0-dblPtVal)*opaDOF->getValue((int)intPtVal) + dblPtVal*opaDOF->getValue((int)intPtVal+1));
+      }
       else
       {
-        colRGB.a = opaDOF->getValue((int)intPtVal);
+        colFill.setAlphaF(opaDOF->getValue((int)intPtVal));
       }
     }
   }
 
-  ColorRGB colFill = colRGB;
-  colFill.a -= opacity;
+  colFill.setAlphaF(std::max(colFill.alphaF() - opacity, 0.0));
 
-  ColorRGB colLine = colLin;
-  colLine.a -= opacity;
+  QColor colLine = colLin;
+  colLine.setAlphaF(std::max(colLine.alphaF() - opacity, 0.0));
 
   // set up transf
   glPushMatrix();
@@ -1852,7 +1786,7 @@ void Shape::drawEdit(
   {
     // draw bounding box
     VisUtils::enableLineAntiAlias();
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(
       -xDFC,  xDFC,
       yDFC, -yDFC);
@@ -1865,7 +1799,7 @@ void Shape::drawEdit(
     VisUtils::enableLineAntiAlias();
 
     // draw top connecting line
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     if (xDFC >= 0)
     {
       VisUtils::drawLine(xDFC+6.0*hdlDelta, xDFC, 0.0, 0.0);
@@ -1875,7 +1809,7 @@ void Shape::drawEdit(
       VisUtils::drawLine(xDFC-6.0*hdlDelta, xDFC, 0.0, 0.0);
     }
     // draw top connecting line
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     if (yDFC >= 0)
     {
       VisUtils::drawLine(0.0, 0.0, yDFC, yDFC+6.0*hdlDelta);
@@ -1886,77 +1820,77 @@ void Shape::drawEdit(
     }
 
     // draw center
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(-hdlDelta, hdlDelta,      0.0,       0.0);
     VisUtils::drawLine(0.0,      0.0, hdlDelta, -hdlDelta);
     // top left
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(-xDFC-hdlDelta, -xDFC+hdlDelta, yDFC+hdlDelta,  yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(-xDFC-hdlDelta, -xDFC+hdlDelta, yDFC+hdlDelta,  yDFC-hdlDelta);
     // left
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(-xDFC-hdlDelta, -xDFC+hdlDelta, 0.0+hdlDelta, 0.0-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(-xDFC-hdlDelta, -xDFC+hdlDelta, 0.0+hdlDelta, 0.0-hdlDelta);
     // bottom left
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(-xDFC-hdlDelta, -xDFC+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(-xDFC-hdlDelta, -xDFC+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
     // bottom
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(0.0-hdlDelta, 0.0+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(0.0-hdlDelta, 0.0+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
     // bottom right
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(xDFC-hdlDelta, xDFC+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(xDFC-hdlDelta, xDFC+hdlDelta, -yDFC+hdlDelta, -yDFC-hdlDelta);
     // right
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(xDFC-hdlDelta, xDFC+hdlDelta, 0.0+hdlDelta, 0.0-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(xDFC-hdlDelta, xDFC+hdlDelta, 0.0+hdlDelta, 0.0-hdlDelta);
     // top right
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(xDFC-hdlDelta, xDFC+hdlDelta, yDFC+hdlDelta, yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(xDFC-hdlDelta, xDFC+hdlDelta, yDFC+hdlDelta, yDFC-hdlDelta);
     // top
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::fillRect(0.0-hdlDelta, 0.0+hdlDelta, yDFC+hdlDelta, yDFC-hdlDelta);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(0.0-hdlDelta, 0.0+hdlDelta, yDFC+hdlDelta, yDFC-hdlDelta);
     // rotation hdl rgt
     if (xDFC >= 0)
     {
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(xDFC+6.0*hdlDelta, 0.0, hdlDelta, hdlDelta, 4);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(xDFC+6.0*hdlDelta, 0.0, hdlDelta, hdlDelta, 4);
     }
     else
     {
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(xDFC-6.0*hdlDelta, 0.0, hdlDelta, hdlDelta, 4);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(xDFC-6.0*hdlDelta, 0.0, hdlDelta, hdlDelta, 4);
     }
     // rotation hdl top
     if (yDFC >= 0)
     {
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(0.0, yDFC+6.0*hdlDelta, hdlDelta, hdlDelta, segNumHnt);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(0.0, yDFC+6.0*hdlDelta, hdlDelta, hdlDelta, segNumHnt);
     }
     else
     {
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(0.0, yDFC-6.0*hdlDelta, hdlDelta, hdlDelta, segNumHnt);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(0.0, yDFC-6.0*hdlDelta, hdlDelta, hdlDelta, segNumHnt);
     }
 
@@ -2049,7 +1983,7 @@ void Shape::drawEditDOF(
   {
     // draw bounding box
     VisUtils::enableLineAntiAlias();
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawRect(
       -xDFC,  xDFC,
       yDFC, -yDFC);
@@ -2150,7 +2084,7 @@ void Shape::drawDOFXCtr(
   else
   {
     /*
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
          0.0,     0.0,
          hdlDOF, -hdlDOF );
@@ -2162,7 +2096,7 @@ void Shape::drawDOFXCtr(
     // pointing right
     if (xEnd < xBeg)
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       if (0.0 < xEnd)
         VisUtils::drawLineDashed(
           0.0,  xEnd,
@@ -2177,11 +2111,11 @@ void Shape::drawDOFXCtr(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
           xBeg-1.5*hdlDOF,  xBeg,
           hdlDOF,          -hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           xBeg-1.5*hdlDOF,  xBeg,
           hdlDOF,          -hdlDOF );
@@ -2191,12 +2125,12 @@ void Shape::drawDOFXCtr(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         xEnd,             0.0,
         xEnd+2.0*hdlDOF, -hdlDOF,
         xEnd+2.0*hdlDOF,  hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xEnd,             0.0,
         xEnd+2.0*hdlDOF, -hdlDOF,
@@ -2208,7 +2142,7 @@ void Shape::drawDOFXCtr(
     // pointing right
     else // ( xBeg <= xEnd )
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       if (0.0 < xBeg)
         VisUtils::drawLineDashed(
           0.0, xBeg,
@@ -2223,11 +2157,11 @@ void Shape::drawDOFXCtr(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
           xBeg,    xBeg+1.5*hdlDOF,
           hdlDOF, -hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           xBeg,    xBeg+1.5*hdlDOF,
           hdlDOF, -hdlDOF );
@@ -2237,12 +2171,12 @@ void Shape::drawDOFXCtr(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         xEnd-2.0*hdlDOF,  hdlDOF,
         xEnd-2.0*hdlDOF, -hdlDOF,
         xEnd,             0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xEnd-2.0*hdlDOF,  hdlDOF,
         xEnd-2.0*hdlDOF, -hdlDOF,
@@ -2316,7 +2250,7 @@ void Shape::drawEditDOFXCtr(
   {
     /*
     // draw center
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
          0.0,     0.0,
          hdlDOF, -hdlDOF );
@@ -2326,7 +2260,7 @@ void Shape::drawEditDOFXCtr(
     */
 
     // draw starting cross
-    VisUtils::setColorRed();
+    VisUtils::setColor(Qt::red);
     VisUtils::drawLine(
       -hdlDOF,  hdlDOF,
       hdlDOF, -hdlDOF);
@@ -2345,17 +2279,17 @@ void Shape::drawEditDOFXCtr(
         VisUtils::drawLineDashed(
           xBeg, 0.0,
           0.0,  0.0);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         xBeg, xEnd,
         0.0,  0.0);
       /*
       // start
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::fillRect(
           xBeg-1.5*hdlDOF,  xBeg,
           hdlDOF,          -hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           xBeg-1.5*hdlDOF,  xBeg,
           hdlDOF,          -hdlDOF );
@@ -2365,12 +2299,12 @@ void Shape::drawEditDOFXCtr(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         xEnd,             0.0,
         xEnd+2.0*hdlDOF, -hdlDOF,
         xEnd+2.0*hdlDOF,  hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xEnd,             0.0,
         xEnd+2.0*hdlDOF, -hdlDOF,
@@ -2390,33 +2324,33 @@ void Shape::drawEditDOFXCtr(
         VisUtils::drawLineDashed(
           xEnd, 0.0,
           0.0,  0.0);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         xBeg, xEnd,
         0.0,  0.0);
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillRect(
           xBeg,    xBeg+1.5*hdlDOF,
           hdlDOF, -hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           xBeg,    xBeg+1.5*hdlDOF,
           hdlDOF, -hdlDOF );
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
           xBeg,        xBeg,
           2.0*hdlDOF, -2.0*hdlDOF );
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         xEnd-2.0*hdlDOF,  hdlDOF,
         xEnd-2.0*hdlDOF, -hdlDOF,
         xEnd,             0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xEnd-2.0*hdlDOF,  hdlDOF,
         xEnd-2.0*hdlDOF, -hdlDOF,
@@ -2449,7 +2383,7 @@ void Shape::drawDOFYCtr(
   {
     /*
     // draw central handle
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
          0.0,     0.0,
          hdlDOF, -hdlDOF );
@@ -2475,11 +2409,11 @@ void Shape::drawDOFYCtr(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
           -hdlDOF, hdlDOF,
            yBeg,   yBeg-1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           -hdlDOF, hdlDOF,
            yBeg,   yBeg-1.5*hdlDOF );
@@ -2489,12 +2423,12 @@ void Shape::drawDOFYCtr(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         -hdlDOF, yEnd+2.0*hdlDOF,
         0.0,    yEnd,
         hdlDOF, yEnd+2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, yEnd+2.0*hdlDOF,
         0.0,    yEnd,
@@ -2520,11 +2454,11 @@ void Shape::drawDOFYCtr(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
           hdlDOF,          -hdlDOF,
           yBeg+1.5*hdlDOF,  yBeg );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           hdlDOF,          -hdlDOF,
           yBeg+1.5*hdlDOF,  yBeg );
@@ -2534,12 +2468,12 @@ void Shape::drawDOFYCtr(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         0.0,    yEnd,
         -hdlDOF, yEnd-2.0*hdlDOF,
         hdlDOF, yEnd-2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,    yEnd,
         -hdlDOF, yEnd-2.0*hdlDOF,
@@ -2611,7 +2545,7 @@ void Shape::drawEditDOFYCtr(
   {
     /*
     // draw center
-    VisUtils::setColorRed();
+    VisUtils::setColor(Qt::red);
     VisUtils::drawLine(
          0.0,     0.0,
          hdlDOF, -hdlDOF );
@@ -2621,7 +2555,7 @@ void Shape::drawEditDOFYCtr(
     */
 
     // draw starting cross
-    VisUtils::setColorRed();
+    VisUtils::setColor(Qt::red);
     VisUtils::drawLine(
       -hdlDOF,  hdlDOF,
       hdlDOF, -hdlDOF);
@@ -2640,18 +2574,18 @@ void Shape::drawEditDOFYCtr(
         VisUtils::drawLineDashed(
           0.0, 0.0,
           0.0, yBeg);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         0.0,  0.0,
         yBeg, yEnd);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillRect(
           -hdlDOF, hdlDOF,
            yBeg,   yBeg-1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           -hdlDOF, hdlDOF,
            yBeg,   yBeg-1.5*hdlDOF );
@@ -2661,12 +2595,12 @@ void Shape::drawEditDOFYCtr(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         -hdlDOF, yEnd+2.0*hdlDOF,
         0.0,    yEnd,
         hdlDOF, yEnd+2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, yEnd+2.0*hdlDOF,
         0.0,    yEnd,
@@ -2686,18 +2620,18 @@ void Shape::drawEditDOFYCtr(
         VisUtils::drawLineDashed(
           0.0, 0.0,
           0.0, yEnd);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         0.0,  0.0,
         yBeg, yEnd);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillRect(
           hdlDOF,          -hdlDOF,
           yBeg+1.5*hdlDOF,  yBeg );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           hdlDOF,          -hdlDOF,
           yBeg+1.5*hdlDOF,  yBeg );
@@ -2707,12 +2641,12 @@ void Shape::drawEditDOFYCtr(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         0.0,    yEnd,
         -hdlDOF, yEnd-2.0*hdlDOF,
         hdlDOF, yEnd-2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,    yEnd,
         -hdlDOF, yEnd-2.0*hdlDOF,
@@ -2784,7 +2718,7 @@ void Shape::drawEditDOFWth(
   else
   {
     // draw center of shape
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       -hdlDOF, hdlDOF,
       0.0,    0.0);
@@ -2796,7 +2730,7 @@ void Shape::drawEditDOFWth(
     if (wBeg <= wEnd)
     {
       // draw cur width
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         xDFC-hdlDOF,  xDFC+hdlDOF,
         hdlDOF,      -hdlDOF);
@@ -2815,19 +2749,19 @@ void Shape::drawEditDOFWth(
           0.0,  0.0);
 
       // draw connector between handles
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         xDFC+wBeg, xDFC+wEnd,
         0.0,       0.0);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillEllipse(
           xDFC+wBeg+hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
           4 );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           xDFC+wBeg+hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
@@ -2838,12 +2772,12 @@ void Shape::drawEditDOFWth(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
         xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
         xDFC+wEnd,             0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
         xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
@@ -2856,7 +2790,7 @@ void Shape::drawEditDOFWth(
     else // ( ( wBeg > wEnd ) )
     {
       // draw cur width
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         xDFC-hdlDOF,  xDFC+hdlDOF,
         hdlDOF,      -hdlDOF);
@@ -2875,19 +2809,19 @@ void Shape::drawEditDOFWth(
           0.0,  0.0);
 
       // draw connector between handles
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         xDFC+wBeg, xDFC+wEnd,
         0.0,       0.0);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillEllipse(
           xDFC+wBeg-hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
           4 );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           xDFC+wBeg-hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
@@ -2898,12 +2832,12 @@ void Shape::drawEditDOFWth(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         xDFC+wEnd,             0.0,
         xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
         xDFC+wEnd+2.0*hdlDOF,  hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xDFC+wEnd,             0.0,
         xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
@@ -2931,7 +2865,7 @@ void Shape::drawDOFWth(
   {
     /*
     // draw center of shape
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
         -hdlDOF, hdlDOF,
          0.0,    0.0  );
@@ -2944,7 +2878,7 @@ void Shape::drawDOFWth(
     if (wBeg <= wEnd)
     {
       // draw cur width
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawLine(
         xDFC-hdlDOF,  xDFC+hdlDOF,
         hdlDOF,      -hdlDOF);
@@ -2968,12 +2902,12 @@ void Shape::drawDOFWth(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(
           xDFC+wBeg+hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
           4 );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           xDFC+wBeg+hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
@@ -2984,12 +2918,12 @@ void Shape::drawDOFWth(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
         xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
         xDFC+wEnd,             0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
         xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
@@ -3002,7 +2936,7 @@ void Shape::drawDOFWth(
     else // ( ( wBeg > wEnd ) )
     {
       // draw cur width
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawLine(
         xDFC-hdlDOF,  xDFC+hdlDOF,
         hdlDOF,      -hdlDOF);
@@ -3026,12 +2960,12 @@ void Shape::drawDOFWth(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawEllipse(
           xDFC+wBeg-hdlDOF,  0.0,
           hdlDOF,            hdlDOF,
           4 );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           xDFC+wBeg-hdlDOF, 0.0,
           hdlDOF,           hdlDOF,
@@ -3042,12 +2976,12 @@ void Shape::drawDOFWth(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         xDFC+wEnd,             0.0,
         xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
         xDFC+wEnd+2.0*hdlDOF,  hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         xDFC+wEnd,             0.0,
         xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
@@ -3117,7 +3051,7 @@ void Shape::drawEditDOFHgt(
   else
   {
     // draw center of shape
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       -hdlDOF, hdlDOF,
       0.0,    0.0);
@@ -3129,7 +3063,7 @@ void Shape::drawEditDOFHgt(
     if (hBeg <= hEnd)
     {
       // draw cur height
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         hdlDOF,      -hdlDOF,
         yDFC+hdlDOF,  yDFC-hdlDOF);
@@ -3148,19 +3082,19 @@ void Shape::drawEditDOFHgt(
           yDFC, yDFC+hEnd);
 
       // draw connector between handles
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         0.0,       0.0,
         yDFC+hBeg, yDFC+hEnd);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillEllipse(
           0.0,    yDFC+hBeg+hdlDOF,
           hdlDOF, hdlDOF,
           segNumHnt );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           0.0,    yDFC+hBeg+hdlDOF,
           hdlDOF, hdlDOF,
@@ -3171,12 +3105,12 @@ void Shape::drawEditDOFHgt(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         0.0,    yDFC+hEnd,
         -hdlDOF, yDFC+hEnd-2.0*hdlDOF,
         hdlDOF, yDFC+hEnd-2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,    yDFC+hEnd,
         -hdlDOF, yDFC+hEnd-2.0*hdlDOF,
@@ -3189,7 +3123,7 @@ void Shape::drawEditDOFHgt(
     else // ( ( wBeg > wEnd ) )
     {
       // draw cur height
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         hdlDOF,      -hdlDOF,
         yDFC+hdlDOF,  yDFC-hdlDOF);
@@ -3208,19 +3142,19 @@ void Shape::drawEditDOFHgt(
           yDFC, yDFC+hEnd);
 
       // draw connector between handles
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLineDashed(
         0.0,       0.0,
         yDFC+hBeg, yDFC+hEnd);
 
       /*
       // start
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillEllipse(
           0.0,    yDFC+hBeg-hdlDOF,
           hdlDOF, hdlDOF,
           segNumHnt );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           0.0,    yDFC+hBeg-hdlDOF,
           hdlDOF, hdlDOF,
@@ -3231,12 +3165,12 @@ void Shape::drawEditDOFHgt(
       */
 
       // stop
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         -hdlDOF, yDFC+hEnd+2.0*hdlDOF,
         0.0,    yDFC+hEnd,
         hdlDOF, yDFC+hEnd+2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, yDFC+hEnd+2.0*hdlDOF,
         0.0,    yDFC+hEnd,
@@ -3264,7 +3198,7 @@ void Shape::drawDOFHgt(
   {
     /*
     // draw center of shape
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
         -hdlDOF, hdlDOF,
          0.0,    0.0  );
@@ -3277,7 +3211,7 @@ void Shape::drawDOFHgt(
     if (hBeg <= hEnd)
     {
       // draw cur height
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawLine(
         hdlDOF,      -hdlDOF,
         yDFC+hdlDOF,  yDFC-hdlDOF);
@@ -3301,12 +3235,12 @@ void Shape::drawDOFHgt(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(
           0.0,    yDFC+hBeg+hdlDOF,
           hdlDOF, hdlDOF,
           segNumHnt );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           0.0,    yDFC+hBeg+hdlDOF,
           hdlDOF, hdlDOF,
@@ -3317,12 +3251,12 @@ void Shape::drawDOFHgt(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         0.0,    yDFC+hEnd,
         -hdlDOF, yDFC+hEnd-2.0*hdlDOF,
         hdlDOF, yDFC+hEnd-2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,    yDFC+hEnd,
         -hdlDOF, yDFC+hEnd-2.0*hdlDOF,
@@ -3335,7 +3269,7 @@ void Shape::drawDOFHgt(
     else // ( ( wBeg > wEnd ) )
     {
       // draw cur height
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawLine(
         hdlDOF,      -hdlDOF,
         yDFC+hdlDOF,  yDFC-hdlDOF);
@@ -3359,12 +3293,12 @@ void Shape::drawDOFHgt(
 
       /*
       // start
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillEllipse(
           0.0,    yDFC+hBeg-hdlDOF,
           hdlDOF, hdlDOF,
           segNumHnt );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawEllipse(
           0.0,    yDFC+hBeg-hdlDOF,
           hdlDOF, hdlDOF,
@@ -3375,12 +3309,12 @@ void Shape::drawDOFHgt(
       */
 
       // stop
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         -hdlDOF, yDFC+hEnd+2.0*hdlDOF,
         0.0,    yDFC+hEnd,
         hdlDOF, yDFC+hEnd+2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, yDFC+hEnd+2.0*hdlDOF,
         0.0,    yDFC+hEnd,
@@ -3548,7 +3482,7 @@ void Shape::drawEditDOFAgl(
     yEnd = yHge+dstHgeHdl*sin(Utils::degrToRad(aglEnd));
 
     // draw center
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       -hdlDOF,  hdlDOF,
       0.0,     0.0);
@@ -3557,12 +3491,12 @@ void Shape::drawEditDOFAgl(
       hdlDOF, -hdlDOF);
 
     // draw hinge
-    VisUtils::setColorGreen();
+    VisUtils::setColor(Qt::green);
     VisUtils::fillEllipse(
       xHge,   yHge,
       hdlDOF, hdlDOF,
       segNumHnt);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawEllipse(
       xHge,   yHge,
       hdlDOF, hdlDOF,
@@ -3584,7 +3518,7 @@ void Shape::drawEditDOFAgl(
       VisUtils::drawLine(
         xHge, xEnd,
         yHge, yEnd);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawArcDashed(
         xHge,      yHge,
         aglBeg,    aglEnd,
@@ -3599,7 +3533,7 @@ void Shape::drawEditDOFAgl(
       VisUtils::fillRect(
           hdlDOF, -hdlDOF,
           0.0,     1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           hdlDOF, -hdlDOF,
           0.0,     1.5*hdlDOF );
@@ -3609,7 +3543,7 @@ void Shape::drawEditDOFAgl(
       */
 
       // draw starting cross
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         -hdlDOF,  hdlDOF,
         hdlDOF, -hdlDOF);
@@ -3617,12 +3551,12 @@ void Shape::drawEditDOFAgl(
         -hdlDOF,  hdlDOF,
         -hdlDOF,  hdlDOF);
 
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         2.0*hdlDOF,  0.0,
         3.0*hdlDOF, -hdlDOF,
         4.0*hdlDOF,  0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         2.0*hdlDOF,  0.0,
         3.0*hdlDOF, -hdlDOF,
@@ -3634,12 +3568,12 @@ void Shape::drawEditDOFAgl(
       glPushMatrix();
       glTranslatef(xEnd, yEnd, 0.0);
       glRotatef(aglEnd, 0.0, 0.0, 1.0);
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         0.0,     0.0,
         hdlDOF, -2.0*hdlDOF,
         -hdlDOF, -2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,     0.0,
         hdlDOF, -2.0*hdlDOF,
@@ -3658,7 +3592,7 @@ void Shape::drawEditDOFAgl(
       VisUtils::drawLine(
         xHge, xEnd,
         yHge, yEnd);
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawArcDashedCW(
         xHge,      yHge,
         aglBeg,    aglEnd,
@@ -3673,7 +3607,7 @@ void Shape::drawEditDOFAgl(
       VisUtils::fillRect(
          -hdlDOF,  hdlDOF,
           0.0,    -1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
          -hdlDOF,  hdlDOF,
           0.0,    -1.5*hdlDOF );
@@ -3683,7 +3617,7 @@ void Shape::drawEditDOFAgl(
       */
 
       // draw starting cross
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawLine(
         -hdlDOF,  hdlDOF,
         hdlDOF, -hdlDOF);
@@ -3691,12 +3625,12 @@ void Shape::drawEditDOFAgl(
         -hdlDOF,  hdlDOF,
         -hdlDOF,  hdlDOF);
 
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         3.0*hdlDOF, hdlDOF,
         2.0*hdlDOF, 0.0,
         4.0*hdlDOF, 0.0);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         3.0*hdlDOF, hdlDOF,
         2.0*hdlDOF, 0.0,
@@ -3708,12 +3642,12 @@ void Shape::drawEditDOFAgl(
       glPushMatrix();
       glTranslatef(xEnd, yEnd, 0.0);
       glRotatef(aglEnd, 0.0, 0.0, 1.0);
-      VisUtils::setColorGreen();
+      VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
         hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
         -hdlDOF, 2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
@@ -3771,7 +3705,7 @@ void Shape::drawDOFAgl(
     yEnd = yHge+dstHgeHdl*sin(Utils::degrToRad(aglEnd));
 
     // draw hinge
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawEllipse(
       xHge,   yHge,
       hdlDOF, hdlDOF,
@@ -3803,11 +3737,11 @@ void Shape::drawDOFAgl(
       glPushMatrix();
       glTranslatef( xBeg, yBeg, 0.0 );
       glRotatef( aglBeg, 0.0, 0.0, 1.0 );
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
           hdlDOF, -hdlDOF,
           0.0,     1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
           hdlDOF, -hdlDOF,
           0.0,     1.5*hdlDOF );
@@ -3821,12 +3755,12 @@ void Shape::drawDOFAgl(
       glPushMatrix();
       glTranslatef(xEnd, yEnd, 0.0);
       glRotatef(aglEnd, 0.0, 0.0, 1.0);
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         0.0,     0.0,
         hdlDOF, -2.0*hdlDOF,
         -hdlDOF, -2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         0.0,     0.0,
         hdlDOF, -2.0*hdlDOF,
@@ -3855,11 +3789,11 @@ void Shape::drawDOFAgl(
       glPushMatrix();
       glTranslatef( xBeg, yBeg, 0.0 );
       glRotatef( aglBeg, 0.0, 0.0, 1.0 );
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillRect(
          -hdlDOF,  hdlDOF,
           0.0,    -1.5*hdlDOF );
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawRect(
          -hdlDOF,  hdlDOF,
           0.0,    -1.5*hdlDOF );
@@ -3873,12 +3807,12 @@ void Shape::drawDOFAgl(
       glPushMatrix();
       glTranslatef(xEnd, yEnd, 0.0);
       glRotatef(aglEnd, 0.0, 0.0, 1.0);
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
         hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
         -hdlDOF, 2.0*hdlDOF);
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,

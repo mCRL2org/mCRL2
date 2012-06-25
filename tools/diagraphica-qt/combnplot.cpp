@@ -170,12 +170,12 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
   if (inSelectMode != true)
   {
     // draw guides
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(xLft, xRgt, yTop, yTop);
     VisUtils::drawLine(xRgt, xRgt, yBot, yTop);
 
     // x- & y-axis
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(xLft, xLft, yBot, yTop);
     VisUtils::drawLine(xLft, xRgt, yBot, yBot);
   }
@@ -209,7 +209,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
   // rendering mode
   if (inSelectMode != true)
   {
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
 
     // draw guides
     VisUtils::drawLine(xLft, xRgt, yTop, yTop);
@@ -222,7 +222,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
     // subdivisions for attributes
     if (posRgtBot.size() > 0 && posRgtBot[0].size() > 1)
     {
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       xLft += pix;
       xRgt -= pix;
       for (size_t i = 0; i < posRgtBot[0].size()-1; ++i)
@@ -258,7 +258,7 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   size_t numAttr = attributeIndcs.size();
 
   // color
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
 
   // y-axis labels
   double xLft = -0.51*w+3*pix;
@@ -309,7 +309,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
   double numAttr = attributeIndcs.size();
 
   // color
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
 
   // x-axis label
   double x =  0.0;
@@ -391,17 +391,13 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   // rendering mode
   else
   {
-    ColorRGB col;
-    VisUtils::mapColorCoolGreen(col);
-    col.a = 0.7;
-
     for (size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = posBC[i].x - 0.5*widthBC;
       double xRgt = posBC[i].x + 0.5*widthBC;
       double yTop = posBC[i].y;
 
-      VisUtils::setColor(col);
+      VisUtils::setColor(VisUtils::coolGreen, 0.7);
 
       if (xRgt-xLft < pix)
       {
@@ -448,19 +444,13 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
     {
       for (size_t j = 0; j < posLftTop[i].size(); ++j)
       {
-        ColorRGB col;
         double xLft = posLftTop[i][j].x;
         double yTop = posLftTop[i][j].y;
 
         double xRgt = posRgtBot[i][j].x;
         double yBot = posRgtBot[i][j].y;
 
-        VisUtils::mapColorQualPair(
-          combinations[i][j],
-          maxAttrCard-1,
-          col);
-        col.a = 0.5;
-        VisUtils::setColor(col);
+        VisUtils::setColor(VisUtils::qualPair(combinations[i][j], maxAttrCard), 0.5);
 
         if (xRgt - xLft > pix)
         {
@@ -495,7 +485,7 @@ void CombnPlot::drawMousePos(const bool& inSelectMode)
       double yBot = posRgtBot[mouseCombnIdx][posRgtBot[mouseCombnIdx].size()-1].y;
 
       // draw
-      VisUtils::setColorRed();
+      VisUtils::setColor(Qt::red);
       VisUtils::drawRect(xLft, xRgt, yTop, yBot);
     }
   }
@@ -520,7 +510,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
     glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
     // drop shadow
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::fillRect(
       -1.0 + 4.0*pix/scaleDgrm,
       1.0 + 4.0*pix/scaleDgrm,
@@ -533,7 +523,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
       attrs,
       attrValIdcsDgrm);
 
-    VisUtils::setColorBlack();
+    VisUtils::setColor(Qt::black);
     VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
 
     glPopMatrix();

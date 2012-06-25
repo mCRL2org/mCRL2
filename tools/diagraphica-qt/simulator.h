@@ -41,21 +41,21 @@ class Simulator : public wxEvtHandler, public Visualizer
     virtual ~Simulator();
 
     // -- get functions ---------------------------------------------
-    static ColorRGB getColorClr();
-    static ColorRGB getColorTxt();
+    static QColor getColorClr();
+    static QColor getColorTxt();
     static int getSizeTxt();
-    static ColorRGB getColorBdl();
+    static QColor getColorBdl();
 
     static int getBlendType();
 
-    ColorRGB getColorSel();
+    QColor getColorSel();
     size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
+    static void setColorClr(QColor col);
+    static void setColorTxt(QColor col);
     static void setSizeTxt(const int& sze);
-    static void setColorBdl(const ColorRGB& col);
+    static void setColorBdl(QColor col);
 
     static void setBlendType(const int& type);
 
@@ -134,10 +134,7 @@ class Simulator : public wxEvtHandler, public Visualizer
 
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& col);
+    QColor calcColor(size_t iter, size_t numr);
 
     void drawFrameCurr(const bool& inSelectMode);
     void drawFramesPrev(const bool& inSelectMode);
@@ -154,10 +151,10 @@ class Simulator : public wxEvtHandler, public Visualizer
 
     // -- static variables ------------------------------------------
 
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
+    static QColor colClr;
+    static QColor colTxt;
     static int      szeTxt;
-    static ColorRGB colBdl;
+    static QColor colBdl;
 
     enum
     {
