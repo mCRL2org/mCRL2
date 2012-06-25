@@ -11,6 +11,9 @@
 #ifndef COLORCHOOSER_H
 #define COLORCHOOSER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

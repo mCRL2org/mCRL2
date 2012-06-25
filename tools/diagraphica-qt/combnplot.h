@@ -11,6 +11,9 @@
 #ifndef COMBNPLOT_H
 #define COMBNPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

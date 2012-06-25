@@ -11,6 +11,9 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

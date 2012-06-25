@@ -11,6 +11,9 @@
 #ifndef DISTRPLOT_H
 #define DISTRPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

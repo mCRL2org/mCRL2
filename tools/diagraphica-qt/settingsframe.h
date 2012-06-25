@@ -11,6 +11,9 @@
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <wx/wx.h>
 #include <wx/notebook.h>
 #include "glcanvas.h"

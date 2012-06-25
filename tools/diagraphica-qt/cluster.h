@@ -11,6 +11,9 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <vector>
 #include "attribute.h"

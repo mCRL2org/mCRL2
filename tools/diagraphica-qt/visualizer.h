@@ -11,6 +11,9 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else

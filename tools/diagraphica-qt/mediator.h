@@ -17,6 +17,9 @@
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <set>
 #include <string>

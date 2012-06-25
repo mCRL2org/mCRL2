@@ -11,6 +11,9 @@
 #ifndef ATTRDISCR_H
 #define ATTRDISCR_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>

@@ -11,6 +11,9 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <map>
 #include <vector>

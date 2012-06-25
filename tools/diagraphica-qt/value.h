@@ -11,6 +11,9 @@
 #ifndef VALUE_H
 #define VALUE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <string>
 

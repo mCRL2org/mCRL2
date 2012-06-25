@@ -11,6 +11,9 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>

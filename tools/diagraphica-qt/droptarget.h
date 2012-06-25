@@ -11,6 +11,9 @@
 #ifndef DROPTARGET_H
 #define DROPTARGET_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <wx/dnd.h>
 #include <wx/listctrl.h>

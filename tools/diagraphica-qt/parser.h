@@ -11,6 +11,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <fstream>
 #include <iostream>

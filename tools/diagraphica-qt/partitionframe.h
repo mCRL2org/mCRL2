@@ -11,6 +11,9 @@
 #ifndef PARTITIONFRAME_H
 #define PARTITIONFRAME_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include "attribute.h"

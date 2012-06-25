@@ -11,6 +11,9 @@
 #ifndef ATTRCONTI_H
 #define ATTRCONTI_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>

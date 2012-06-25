@@ -11,6 +11,9 @@
 #ifndef FRAME_H
 #define FRAME_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <string>
 #include <vector>

@@ -11,6 +11,9 @@
 #ifndef TIMESERIES_H
 #define TIMESERIES_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

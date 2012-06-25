@@ -11,6 +11,9 @@
 #ifndef POPUPFRAME_H
 #define POPUPFRAME_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <wx/wx.h>
 #include "colleague.h"
 #include "mediator.h"

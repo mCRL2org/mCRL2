@@ -11,6 +11,8 @@
 #ifndef VISUTILS_H
 #define VISUTILS_H
 
+#include <QtCore>
+#include <QtGui>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>

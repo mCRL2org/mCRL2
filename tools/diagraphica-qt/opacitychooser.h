@@ -11,6 +11,9 @@
 #ifndef OPACITYCHOOSER_H
 #define OPACITYCHOOSER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

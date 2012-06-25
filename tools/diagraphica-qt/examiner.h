@@ -11,6 +11,9 @@
 #ifndef EXAMINER_H
 #define EXAMINER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

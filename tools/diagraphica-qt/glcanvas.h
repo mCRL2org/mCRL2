@@ -11,6 +11,9 @@
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cmath>
 #include <string>

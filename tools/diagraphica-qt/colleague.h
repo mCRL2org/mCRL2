@@ -16,6 +16,9 @@
 #ifndef COLLEAGUE_H
 #define COLLEAGUE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include "mediator.h"

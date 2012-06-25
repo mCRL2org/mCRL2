@@ -11,6 +11,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

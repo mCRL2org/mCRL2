@@ -18,6 +18,9 @@
 #ifndef DIAGRAPH_H
 #define DIAGRAPH_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <string>
 #include <vector>

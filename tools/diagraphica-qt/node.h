@@ -11,6 +11,9 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <map>
 #include <vector>

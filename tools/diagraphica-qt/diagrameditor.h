@@ -11,6 +11,9 @@
 #ifndef DIAGRAMEDITOR_H
 #define DIAGRAMEDITOR_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

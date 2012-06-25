@@ -15,6 +15,9 @@
 #ifndef ARCDIAGRAM_H
 #define ARCDIAGRAM_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

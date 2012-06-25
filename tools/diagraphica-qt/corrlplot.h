@@ -11,6 +11,9 @@
 #ifndef CORRLPLOT_H
 #define CORRLPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>

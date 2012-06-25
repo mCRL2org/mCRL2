@@ -11,6 +11,9 @@
 #ifndef EDGE_H
 #define EDGE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <string>
 

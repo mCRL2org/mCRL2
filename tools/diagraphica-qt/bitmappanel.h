@@ -11,6 +11,9 @@
 #ifndef BITMAPPANEL_H
 #define BITMAPPANEL_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <wx/wx.h>
 #include <wx/image.h>
 
