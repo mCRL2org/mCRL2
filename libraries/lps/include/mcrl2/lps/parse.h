@@ -182,6 +182,7 @@ specification parse_linear_process_specification(std::istream& spec_stream)
   }
   process::detail::linear_process_conversion_traverser visitor;
   specification result = visitor.convert(pspec);
+  complete_data_specification(result);
   return result;
 }
 /// \brief Parses a linear process specification from a string
