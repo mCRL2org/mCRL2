@@ -82,20 +82,6 @@ bool DiaGraph::run()
 IMPLEMENT_APP_NO_MAIN(DiaGraph_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 
-#ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                              HINSTANCE hPrevInstance,
-                              wxCmdLineArgType lpCmdLine,
-                              int nCmdShow)
-{
-
-  MCRL2_ATERMPP_INIT(0, lpCmdLine)
-
-  QApplication app(0, lpCmdLine);
-
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-}
-#else
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -104,7 +90,7 @@ int main(int argc, char** argv)
 
   return wxEntry(argc, argv);
 }
-#endif
+
 // -- * -------------------------------------------------------------
 
 // -- functions inherited from wxApp --------------------------------
