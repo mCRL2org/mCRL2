@@ -101,6 +101,7 @@ class MainWindow : public QMainWindow
     QByteArray m_state;                       ///< The window state that is used to restore the user interface
     FindReplaceDialog *m_findReplaceDialog;   ///< The Find and Replace dialog used
     QString m_current_rewriter;               ///< The currently selected rewriter
+    QPalette m_palette;
 
   private slots:
     // Slots for all menu items

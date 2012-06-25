@@ -170,9 +170,6 @@
      </item>
      <item>
       <widget class="QPlainTextEdit" name="editRewriteOutput">
-       <property name="styleSheet">
-        <string notr="true">background: #EEE;</string>
-       </property>
        <property name="lineWrapMode">
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>
@@ -230,9 +227,6 @@
       <widget class="QPlainTextEdit" name="editSolveOutput">
        <property name="autoFillBackground">
         <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: #EEE;</string>
        </property>
        <property name="undoRedoEnabled">
         <bool>false</bool>

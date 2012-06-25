@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QMessageBox>
+#include <QPalette>
 
 #include "mainwindow.h"
 #include "threadparent.h"
@@ -19,7 +20,8 @@
 #include "mcrl2/utilities/logger.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-  QMainWindow(parent)
+  QMainWindow(parent),
+  m_palette(QApplication::palette())
 {
   m_findReplaceDialog = new FindReplaceDialog(this);
   m_findReplaceDialog->setModal(false);
@@ -27,6 +29,13 @@ MainWindow::MainWindow(QWidget *parent) :
   m_current_rewriter = "jitty";
 
   m_ui.setupUi(this);
+
+  QColor disabledColor = m_palette.brush(QPalette::Disabled, QPalette::Base).color();
+  m_palette.setColor(QPalette::Base, disabledColor);
+
+  m_ui.editRewriteOutput->setPalette(m_palette);
+  m_ui.editSolveOutput->setPalette(m_palette);
+
   m_parser = new Parser();
 
   //All menu items
@@ -72,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  delete m_findReplaceDialog;
   m_parser->deleteLater();
 }
 
