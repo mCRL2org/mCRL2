@@ -443,6 +443,29 @@ BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
+// The following example illustrates that enumeration can sometimes need
+// a large stack depth.
+// The example was attached to bug #1019, and fails with limited stack,
+// succeeds with unlimited stack.
+BOOST_AUTO_TEST_CASE(test_deep_stack)
+{
+  std::string spec(
+    "sort Packet = struct packet(d0: Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool);\n"
+    "act  Terminate;\n"
+    "proc P(s3: Pos) =\n"
+    "   (s3 == 2) ->\n"
+    "     Terminate .\n"
+    "     P(s3 = 3)\n"
+    " + sum p: Packet.\n"
+    "     (s3 == 1) ->\n"
+    "     tau .\n"
+    "     P(s3 = 2)\n"
+    " + delta;\n"
+    "init P(1);\n"
+  );
+  check_lps2lts_specification(spec, 3, 524289, 2);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
