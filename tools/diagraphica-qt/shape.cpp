@@ -1305,10 +1305,10 @@ void Shape::visualize(
     }
   }
 
-  colFill.setAlphaF(std::max(colFill.alphaF() - opacity, 0.0));
+  colFill.setAlphaF((std::max)(colFill.alphaF() - opacity, 0.0));
 
   QColor colLine = colLin;
-  colLine.setAlphaF(std::max(colLine.alphaF() - opacity, 0.0));
+  colLine.setAlphaF((std::max)(colLine.alphaF() - opacity, 0.0));
 
   // set up transf
   glPushMatrix();
