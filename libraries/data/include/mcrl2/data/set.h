@@ -919,7 +919,6 @@ namespace mcrl2 {
       data_equation_vector set_generate_equations_code(const sort_expression& s)
       {
         variable ve("e",s);
-        variable vd("d",s);
         variable vs("s",sort_fset::fset(s));
         variable vt("t",sort_fset::fset(s));
         variable vf("f",make_function_sort(s, sort_bool::bool_()));

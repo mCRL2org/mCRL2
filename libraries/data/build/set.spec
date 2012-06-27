@@ -32,7 +32,6 @@ map {} <"empty"> : Set(S);
     @or_ <"or_function"> : (S -> Bool) <"left"> # (S -> Bool) <"right"> -> S -> Bool;
 
 var e : S;
-    d : S;
     s : FSet(S);
     t : FSet(S);
     f : S->Bool;

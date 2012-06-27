@@ -649,7 +649,6 @@ namespace mcrl2 {
         variable vc("c",sort_bool::bool_());
         variable vp("p",pos());
         variable vq("q",pos());
-        variable vr("r",pos());
 
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
