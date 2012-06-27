@@ -392,7 +392,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             data::data_expression ci(i->condition());
             lps::multi_action ai = i->multi_action();
             data::assignment_list gi = i->assignments();
-            data::variable_list xp(lps.process_parameters());
+            //data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, T, id_generator);
@@ -429,7 +429,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             data::data_expression ci(i->condition());
             lps::multi_action ai = i->multi_action();
             data::assignment_list gi = i->assignments();
-            data::variable_list xp(lps.process_parameters());
+            //data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, T, id_generator);
@@ -1015,7 +1015,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
             data::data_expression ci(i->condition());
             lps::action_list ai(i->multi_action().actions());
             data::assignment_list gi = i->assignments();
-            data::variable_list xp(lps.process_parameters());
+            //data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, id_generator);
@@ -1043,7 +1043,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
             data::data_expression ci(i->condition());
             lps::action_list ai(i->multi_action().actions());
             data::assignment_list gi = i->assignments();
-            data::variable_list xp(lps.process_parameters());
+            //data::variable_list xp(lps.process_parameters());
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, id_generator);
