@@ -35,6 +35,11 @@ next_state_generator::next_state_generator(
   m_state_function = atermpp::function_symbol("STATE", m_process_parameters.size());
   m_state_function.protect();
 
+  if(m_specification.process().has_time())
+  {
+    mCRL2log(log::warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
+  }
+
   for (action_summand_vector::iterator i = m_specification.process().action_summands().begin(); i != m_specification.process().action_summands().end(); i++)
   {
     summand_t summand;
