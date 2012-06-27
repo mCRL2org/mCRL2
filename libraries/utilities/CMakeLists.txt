@@ -34,6 +34,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.c
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 add_library(${PROJECT_NAME}
   ${mcrl2_utilities_src}
@@ -64,6 +65,7 @@ set(mcrl2_utilities_wx_src ${mcrl2_utilities_wx_src} PARENT_SCOPE)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 add_library(${PROJECT_NAME}
   ${mcrl2_utilities_wx_src}

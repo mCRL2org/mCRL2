@@ -56,8 +56,8 @@ ENDIF (APPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}

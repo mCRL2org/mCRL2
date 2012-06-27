@@ -1903,6 +1903,7 @@ class specification():
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.get_namespace().upper())
     code += "#include \"boost/utility.hpp\"\n\n"
+    code += "#include \"workarounds.h\"\n"
     code += "#include \"mcrl2/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
     code += "#include \"mcrl2/data/function_sort.h\"\n"

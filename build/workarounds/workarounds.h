@@ -3,6 +3,7 @@
 
 #include <boost/config.hpp>
 
+// Windows specific workarounds
 #if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN) || defined(_MSC_VER)
 # include <cassert>
 # include <cmath>
@@ -28,7 +29,7 @@ typedef int pid_t;
 # define STDIN_FILENO  _fileno(stdin)
 # define STDOUT_FILENO _fileno(stdout)
 # define STDERR_FILENO _fileno(stderr)
-#endif
+#endif // STDIN_FILENO
 
 #define WNOHANG 0x00000001
 
@@ -67,6 +68,8 @@ inline double round(double d)
 # ifndef GL_FRAGMENT_DEPTH
 #  define GL_FRAGMENT_DEPTH 0x8452
 # endif
+
+// CYGWIN and MINGW specific
 #elif defined(__CYGWIN__) || defined(__MINGW32__)
 # include <cassert>
 # include <cerrno>
@@ -77,6 +80,14 @@ inline double round(double d)
 # endif
 #endif
 
+// Apple specific
+#if defined(__GNUC__) && defined(__APPLE)
+// Workaround for OS X with Apples patched gcc 4.0.1
+  #undef nil
+#endif
+
+// Code used for all platforms
+
 #include <limits.h>
 
 // Part of C99 but not C++98
@@ -86,4 +97,4 @@ inline double round(double d)
 # define ULLONG_MAX 18446744073709551615ULL
 #endif
 
-#endif
+#endif // WORKAROUNDS_H__

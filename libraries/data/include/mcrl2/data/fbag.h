@@ -17,6 +17,7 @@
 
 #include "boost/utility.hpp"
 
+#include "workarounds.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"

@@ -61,6 +61,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 
