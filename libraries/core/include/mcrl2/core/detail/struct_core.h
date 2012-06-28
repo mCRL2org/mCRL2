@@ -1971,7 +1971,6 @@ ATermAppl gsMakeActionRenameSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATer
 inline
 ATermAppl gsMakeAllow(ATermList MultActName_0, ATermAppl ProcExpr_1)
 {
-  assert(!ATisEmpty(MultActName_0));
   return ATmakeAppl2(function_symbol_Allow(), (ATerm) MultActName_0, (ATerm) ProcExpr_1);
 }
 
