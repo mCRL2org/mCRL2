@@ -38,7 +38,7 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_sim.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"

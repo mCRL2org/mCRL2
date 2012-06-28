@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 

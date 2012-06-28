@@ -10,7 +10,7 @@
 
 #include "mcrl2/core/detail/dparser_functions.h"
 #include "mcrl2/core/dparser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "d.h"
 #include <iostream>

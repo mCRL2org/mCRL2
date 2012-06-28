@@ -17,7 +17,7 @@
 #else
 #include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
 #endif
-#include "workarounds.h"
+#include "mcrl2/utilities/workarounds.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc

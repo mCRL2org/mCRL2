@@ -25,7 +25,7 @@
 #include "mcrl2/lts/detail/queue_old.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
 
-#include "workarounds.h"
+#include "mcrl2/utilities/workarounds.h"
 
 namespace mcrl2
 {

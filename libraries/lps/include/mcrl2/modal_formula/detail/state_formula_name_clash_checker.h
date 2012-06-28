@@ -15,7 +15,7 @@
 #include <vector>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/modal_formula/traverser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

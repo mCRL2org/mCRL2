@@ -20,7 +20,7 @@
 #include <sstream>
 #include <vector>
 #include "dparse.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

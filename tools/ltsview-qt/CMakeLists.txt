@@ -104,7 +104,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)

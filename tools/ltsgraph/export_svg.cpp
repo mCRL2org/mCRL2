@@ -19,7 +19,7 @@
 #include <cmath>
 #include "ltsgraph.h"
 
-#include "workarounds.h" // for M_PI on Windows with MSVC
+#include "mcrl2/utilities/workarounds.h" // for M_PI on Windows with MSVC
 
 ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g)
 {

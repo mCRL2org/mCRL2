@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/confluence_checker.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2::log;
 

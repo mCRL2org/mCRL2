@@ -18,7 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -209,7 +209,7 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
   return string_join(result, "\n");
 }
 
-/// \brief Test if a string is a number. 
+/// \brief Test if a string is a number.
 /// \param s A string of text.
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s)

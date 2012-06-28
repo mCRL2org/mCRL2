@@ -11,11 +11,10 @@ project(mcrl2_lps)
 cmake_minimum_required(VERSION 2.6)
 
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB HEADERS "include/mcrl2/lps/*.h")
-FILE(GLOB DETAIL_HEADERS "include/mcrl2/lps/detail/*.h")
-FILE(GLOB NEXTSTATE_HEADERS "include/mcrl2/lps/nextstate/*.h")
+FILE(GLOB HEADERS "include/mcrl2/*/*.h")
+FILE(GLOB DETAIL_HEADERS "include/mcrl2/*/*/*.h")
 add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS} ${DETAIL_HEADERS} ${NEXTSTATE_HEADERS}
+  SOURCES ${HEADERS} ${DETAIL_HEADERS}
 )
 
 # ######### General setup ##########
@@ -29,7 +28,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 set(mcrl2_lps_src

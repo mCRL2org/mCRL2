@@ -23,7 +23,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data

@@ -20,7 +20,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "diagraph.h"
 
 // windows debug libraries

@@ -39,7 +39,7 @@
 
 #include "mcrl2/utilities/command_line_interface.h"
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

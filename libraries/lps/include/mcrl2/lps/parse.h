@@ -14,7 +14,7 @@
 
 #include <sstream>
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"

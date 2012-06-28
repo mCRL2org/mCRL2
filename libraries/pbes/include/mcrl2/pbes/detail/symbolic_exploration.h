@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 #define MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"

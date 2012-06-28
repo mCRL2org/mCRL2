@@ -20,7 +20,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/text_utility.h"
 

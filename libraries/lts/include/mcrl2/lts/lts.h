@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lts/transition.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 
 namespace mcrl2

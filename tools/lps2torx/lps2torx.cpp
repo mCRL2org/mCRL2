@@ -24,7 +24,7 @@
 #include <cassert>
 #include <deque>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"

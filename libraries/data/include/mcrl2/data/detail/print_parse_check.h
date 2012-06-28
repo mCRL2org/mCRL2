@@ -15,7 +15,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

@@ -14,7 +14,7 @@
 #include "transition.h"
 #include <cmath>
 
-#include "workarounds.h" // for M_PI on Windows with MSVC
+#include "mcrl2/utilities/workarounds.h" // for M_PI on Windows with MSVC
 
 Transition::Transition(State* from, State* to, std::string lbl)
 {

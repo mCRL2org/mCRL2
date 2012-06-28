@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_PBES_EXPR_BUILDER_H
 #define MCRL2_PBES_PBES_EXPR_BUILDER_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"

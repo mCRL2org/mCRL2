@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

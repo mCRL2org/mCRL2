@@ -38,7 +38,7 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

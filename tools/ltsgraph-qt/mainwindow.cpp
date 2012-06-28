@@ -17,7 +17,7 @@
 #include <QFileDialog>
 #include "dimensionsdialog.h"
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),

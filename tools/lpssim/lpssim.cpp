@@ -23,7 +23,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"

@@ -55,7 +55,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data

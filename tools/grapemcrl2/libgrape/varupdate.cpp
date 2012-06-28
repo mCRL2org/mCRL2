@@ -18,7 +18,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include <string>
 

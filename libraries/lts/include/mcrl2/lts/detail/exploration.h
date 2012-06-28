@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/list.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
 
-#include "workarounds.h"
+#include "mcrl2/utilities/workarounds.h"
 
 namespace mcrl2
 {

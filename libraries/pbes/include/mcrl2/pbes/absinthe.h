@@ -42,7 +42,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"

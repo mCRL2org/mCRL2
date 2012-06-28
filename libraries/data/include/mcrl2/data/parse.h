@@ -19,7 +19,7 @@
 #include <fstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"

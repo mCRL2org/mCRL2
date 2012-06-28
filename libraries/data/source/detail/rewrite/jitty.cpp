@@ -23,7 +23,7 @@
 #include "boost/config.hpp"
 
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"

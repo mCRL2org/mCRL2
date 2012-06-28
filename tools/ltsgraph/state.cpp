@@ -13,7 +13,7 @@
 
 #include "state.h"
 #include <cmath>
-#include <workarounds.h> // for M_PI
+#include "mcrl2/utilities/workarounds.h" // for M_PI
 
 State::State(unsigned int _value, bool _isInitialState)
 {

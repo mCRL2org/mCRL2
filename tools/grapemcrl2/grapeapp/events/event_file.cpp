@@ -24,7 +24,7 @@
 #include "event_file.h"
 #include "mcrl2gen/mcrl2gen.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace grape::libgrape;
 using namespace grape::grapeapp;

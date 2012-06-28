@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/constelm.h"

@@ -13,7 +13,7 @@
 #define MCRL2_PBES_PBESINST_STRATEGY_H
 
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

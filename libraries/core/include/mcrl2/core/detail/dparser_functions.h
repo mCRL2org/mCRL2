@@ -13,7 +13,7 @@
 #define MCRL2_CORE_DETAIL_DPARSER_FUNCTIONS_H
 
 #include "mcrl2/core/dparser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

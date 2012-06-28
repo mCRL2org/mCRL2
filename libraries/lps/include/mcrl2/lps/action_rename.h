@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_ACTION_RENAME_H
 #define MCRL2_LPS_ACTION_RENAME_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"

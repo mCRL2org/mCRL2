@@ -18,7 +18,7 @@
 #include <cmath>
 #include <wx/textfile.h>
 
-#include <workarounds.h> // for M_PI
+#include "mcrl2/utilities/workarounds.h" // for M_PI
 
 ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
 {

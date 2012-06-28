@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
-#include "workarounds.h"
+#include "mcrl2/utilities/workarounds.h"
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;

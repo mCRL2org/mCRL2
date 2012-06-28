@@ -26,7 +26,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/bes/boolean_equation.h"
 
 namespace mcrl2

@@ -39,7 +39,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/find.h"
 
 // atermpp includes
