@@ -34,9 +34,9 @@ void test_action_parse()
   BOOST_CHECK(name(a) == A);
 }
 
-aset parse_aset(const std::string& text, const lps::action_label_list& action_decls)
+multi_action_name_set parse_multi_action_name_set(const std::string& text, const lps::action_label_list& action_decls)
 {
-  aset result;
+  multi_action_name_set result;
   std::string s = text.substr(1, text.size() - 2);
   std::vector<std::string> v = utilities::split(s, ",");
   for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
@@ -57,18 +57,21 @@ void test_alphabet_allow()
   lps::action_label_list action_decls = lps::parse_action_declaration("a, b, c, d;");
   process_expression p = parse_process_expression("a || b . c", procspec);
   BOOST_CHECK(process::pp(p) == "a || b . c");
-  aset A = parse_aset("{a, b, d, a|d, a|c}", action_decls);
-  std::cout << "A = " << pp(A) << std::endl;
-  aset B = alphabet_allow(p, A, false, P);
-  std::cout << "B = " << pp(B) << std::endl;
-  aset C = parse_aset("{a, b, a | c}", action_decls);
-  std::cout << "C = " << pp(C) << std::endl;
-  BOOST_CHECK(pp(B) == pp(C));
+  multi_action_name_set A = parse_multi_action_name_set("{a, b, d, a|d, a|c}", action_decls);
+  std::cout << "A = " << lps::pp(A) << std::endl;
+  alphabet_result r = push_allow(p, A, false, P);
+  const multi_action_name_set& B = r.second;
+  std::cout << "B = " << lps::pp(B) << std::endl;
+  multi_action_name_set C = parse_multi_action_name_set("{a, b, a | c}", action_decls);
+  std::cout << "C = " << lps::pp(C) << std::endl;
+  BOOST_CHECK(lps::pp(B) == lps::pp(C));
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
+
+  log::mcrl2_logger::set_reporting_level(log::debug);
 
   test_action_parse();
   test_alphabet_allow();

@@ -15,398 +15,186 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
+#include "mcrl2/process/detail/alphabet_utility.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
 namespace process {
 
-// A multi-action is a set of actions. The special multi-action 'tau' is represented by the
-// empty set of actions.
-
-// A multi-action name is a set of identifiers.
-// Example: the multi-action name of a(1) | b(2) | a(1) is { a, b }
-
-// A set of multi-action names is denoted as 'aset'.
-
-// Let ? be a set of multi-actions. For example { a(1) | b(2), a(2) | c(3) }
-// Let A be a set of multi-action names. For example { {a, b}, {a, c} }
-// Let R be a renaming function. For example ???
-
-typedef atermpp::multiset<core::identifier_string> multi_action_name;
-typedef atermpp::set<multi_action_name> aset;
+typedef std::pair<process_expression, multi_action_name_set> alphabet_result;
 
 inline
-std::string pp(const multi_action_name& x)
+multi_action_name_set remove_tau(const multi_action_name_set& A)
 {
-  std::ostringstream out;
-  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
-  {
-    if (i != x.begin())
-    {
-      out << " | ";
-    }
-    out << core::pp(*i);
-  }
-  return out.str();
+  multi_action_name tau;
+  multi_action_name_set result = A;
+  result.erase(tau);
+  return result;
 }
 
 inline
-std::string pp(const aset& A)
+bool contains_tau(const multi_action_name_set& A)
 {
-  std::ostringstream out;
-  out << "{";
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    if (i != A.begin())
-    {
-      out << ", ";
-    }
-    out << pp(*i);
-  }
-  out << "}";
-  return out.str();
+  multi_action_name tau;
+  return A.find(tau) != A.end();
 }
 
-// checks if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
-template <typename InputIterator1, typename InputIterator2>
-bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
+inline
+process_expression make_allow(const multi_action_name_set& A, const process_expression& x)
 {
-  while (first1 != last1 && first2 != last2)
+  assert(!contains_tau(A));
+
+  // convert A to an action_name_multiset_list B
+  atermpp::vector<action_name_multiset> v;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    if (*first1 < *first2)
+    const multi_action_name& alpha = *i;
+    v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+  }
+  action_name_multiset_list B(v.begin(), v.end());
+  return allow(B, x);
+}
+
+inline
+process_expression make_block(const multi_action_name_set& A, const process_expression& x)
+{
+  std::set<core::identifier_string> v;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    const multi_action_name& alpha = *i;
+    assert(alpha.size() == 1);
+    v.insert(*alpha.begin());
+  }
+  return block(core::identifier_string_list(v.begin(), v.end()), x);
+}
+
+inline
+multi_action_name_set set_intersection(const multi_action_name_set& A, const multi_action_name& a)
+{
+  if (A.find(a) == A.end())
+  {
+    return multi_action_name_set();
+  }
+  else
+  {
+    return make_name_set(a);
+  }
+}
+
+// contains data structures that are used by the alphabet reduction traversers
+struct alphabet_parameters
+{
+  typedef atermpp::vector<process_equation>::iterator equation_iterator;
+
+  // newly generated equations are added to procspec
+  process_specification& procspec;
+
+  // maps proces identifiers to their corresponding equations
+  std::map<process_identifier, equation_iterator> equation_map;
+
+  // used for searching equations
+  std::map<process_identifier, std::map<process_expression, process_identifier> > equation_index;
+
+  // used for generating process identifiers
+  data::set_identifier_generator generator;
+
+  // Searches for an equation corresponding with the given id and right hand side. If it does
+  // not yet exist, a new equation is created.
+  process_identifier find_equation(const process_identifier& id, const process_expression& rhs)
+  {
+    std::map<process_expression, process_identifier>& index = equation_index[id];
+    const process_equation& eqn = *equation_map[id];
+
+    std::map<process_expression, process_identifier>::iterator i = index.find(rhs);
+    if (i == index.end()) // the equation does not yet exist
     {
-      ++first1;
-    }
-    else if (*first2 < *first1)
-    {
-      ++first2;
+      // create new equation
+      std::string prefix = std::string(id.name()) + "_";
+      core::identifier_string X = generator(prefix);
+      process_identifier new_id(X, id.sorts());
+      process_equation new_eqn(new_id, eqn.formal_parameters(), rhs);
+
+      // update data structures
+      procspec.equations().push_back(new_eqn);
+      equation_iterator j = --procspec.equations().end();
+      equation_map[new_id] = j;
+      equation_index[id][rhs] = new_id;
+
+      // return result
+      return new_id;
     }
     else
     {
-      return false;
+      return i->second;
     }
   }
-  return true;
-}
 
-inline
-multi_action_name name(const lps::action& x)
-{
-  multi_action_name result;
-  result.insert(x.label().name());
-  return result;
-}
-
-inline
-multi_action_name name(const lps::multi_action& x)
-{
-  multi_action_name result;
-  lps::action_list a = x.actions();
-  for (lps::action_list::iterator i = a.begin(); i != a.end(); ++i)
+  // returns the body of the process with the given identifier
+  process_expression process_body(const process_identifier& id) const
   {
-    result.insert(i->label().name());
+    std::map<process_identifier, equation_iterator>::const_iterator i = equation_map.find(id);
+    assert (i != equation_map.end());
+    const process_equation& eqn = *i->second;
+    return eqn.expression();
   }
-  return result;
-}
 
-inline
-multi_action_name name(const core::identifier_string& x)
-{
-  multi_action_name result;
-  result.insert(x);
-  return result;
-}
-
-inline
-aset make_aset(const action_name_multiset_list& v)
-{
-  aset result;
-  for (action_name_multiset_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  alphabet_parameters(process_specification& p)
+    : procspec(p)
   {
-    core::identifier_string_list names = i->names();
-    result.insert(multi_action_name(names.begin(), names.end()));
-  }
-  return result;
-}
-
-inline
-aset make_aset(const core::identifier_string_list& v)
-{
-  aset result;
-  for (core::identifier_string_list::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    multi_action_name a = name(*i);
-    result.insert(a);
-  }
-  return result;
-}
-
-inline
-aset make_aset(const multi_action_name& a)
-{
-  aset s;
-  s.insert(a);
-  return s;
-}
-
-inline
-core::identifier_string_list make_block_set(const aset& A)
-{
-  std::vector<core::identifier_string> tmp;
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    const multi_action_name& a = *i;
-    assert(a.size() == 1);
-    tmp.push_back(*a.begin());
-  }
-  return core::identifier_string_list(tmp.begin(), tmp.end());
-}
-
-inline
-multi_action_name set_union(const multi_action_name& alpha, const multi_action_name& beta)
-{
-  multi_action_name result;
-  std::set_union(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
-  return result;
-}
-
-inline
-multi_action_name set_difference(const multi_action_name& alpha, const multi_action_name& beta)
-{
-  multi_action_name result;
-  std::set_difference(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
-  return result;
-}
-
-inline
-aset times(const aset& A1, const aset& A2)
-{
-  aset result;
-  for (aset::const_iterator i = A1.begin(); i != A1.end(); ++i)
-  {
-    const multi_action_name& alpha = *i;
-    for (aset::const_iterator j = A2.begin(); j != A2.end(); ++j)
+    atermpp::vector<process_equation>& equations = p.equations();
+    for (atermpp::vector<process_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
     {
-      const multi_action_name& beta = *j;
-      multi_action_name gamma = set_union(alpha, beta);
-      result.insert(gamma);
+      equation_map[i->identifier()] = i;
+      equation_index[i->identifier()][i->expression()] = i->identifier();
+      generator.add_identifier(i->identifier().name());
     }
   }
-  return result;
-}
+};
 
-inline
-aset left_arrow(const aset& A1, const aset& A2)
+} // namespace process
+
+} // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp
 {
-  aset result;
-  for (aset::const_iterator i = A2.begin(); i != A2.end(); ++i)
+
+template<>
+struct aterm_traits<mcrl2::process::alphabet_result>
+{
+  static void protect(const mcrl2::process::alphabet_result& t)
   {
-    const multi_action_name& beta = *i;
-    for (aset::const_iterator j = A1.begin(); j != A1.end(); ++j)
-    {
-      const multi_action_name& gamma = *j;
-      if (std::includes(gamma.begin(), gamma.end(), beta.begin(), beta.end()))
-      {
-        multi_action_name alpha = set_difference(gamma, beta);
-        result.insert(alpha);
-      }
-    }
+    t.first.protect();
   }
-  return result;
-}
-
-inline
-aset set_union(const aset& A1, const aset& A2)
-{
-  aset result;
-  std::set_union(A1.begin(), A1.end(), A2.begin(), A2.end(), std::inserter(result, result.end()));
-  return result;
-}
-
-inline
-aset set_intersection(const aset& A1, const aset& A2)
-{
-  aset result;
-  std::set_intersection(A1.begin(), A1.end(), A2.begin(), A2.end(), std::inserter(result, result.end()));
-  return result;
-}
-
-inline
-aset apply_communication(const communication_expression_list& C, const aset& A)
-{
-  aset result;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  static void unprotect(const mcrl2::process::alphabet_result& t)
   {
-    core::identifier_string_list names = i->action_name().names();
-    core::identifier_string a = i->name();
-    multi_action_name alpha(names.begin(), names.end());
-    // *i == alpha -> a
-
-    for (aset::const_iterator j = A.begin(); j != A.end(); ++j)
-    {
-      const multi_action_name& gamma = *j;
-      if (std::includes(gamma.begin(), gamma.end(), alpha.begin(), alpha.end()))
-      {
-        multi_action_name beta = set_difference(gamma, alpha);
-        beta.insert(a);
-        result.insert(beta);
-      }
-    }
+    t.first.unprotect();
   }
-  return result;
-}
-
-inline
-aset apply_communication_inverse(const communication_expression_list& C, const aset& A)
-{
-  aset result;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  static void mark(const mcrl2::process::alphabet_result& t)
   {
-    core::identifier_string_list names = i->action_name().names();
-    core::identifier_string a = i->name();
-    multi_action_name alpha(names.begin(), names.end());
-    // *i == alpha -> a
-
-    for (aset::const_iterator j = A.begin(); j != A.end(); ++j)
-    {
-      const multi_action_name& gamma = *j;
-      if (gamma.find(a) != gamma.end())
-      {
-        multi_action_name beta = gamma;
-        beta.erase(beta.find(a));
-        beta.insert(alpha.begin(), alpha.end());
-        result.insert(beta);
-      }
-    }
+    t.first.mark();
   }
-  return result;
-}
+};
 
-inline
-aset apply_block(const core::identifier_string_list& B, const aset& A)
-{
-  std::set<core::identifier_string> S(B.begin(), B.end());
-  aset result;
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    if (has_empty_intersection(S.begin(), S.end(), i->begin(), i->end()))
-    {
-      result.insert(*i);
-    }
-  }
-  return result;
-}
+} // namespace atermpp
+/// \endcond
 
-inline
-aset apply_hide(const core::identifier_string_list& I, const aset& A)
-{
-  multi_action_name m(I.begin(), I.end());
-  aset result;
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(set_difference(*i, m));
-  }
-  return result;
-}
+namespace mcrl2 {
 
-inline
-core::identifier_string apply_rename(const rename_expression_list& R, const core::identifier_string& x)
-{
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    if (x == i->source())
-    {
-      return i->target();
-    }
-  }
-  return x;
-}
-
-inline
-multi_action_name apply_rename(const rename_expression_list& R, const multi_action_name& a)
-{
-  multi_action_name result;
-  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
-  {
-    result.insert(apply_rename(R, *i));
-  }
-  return result;
-}
-
-inline
-aset apply_rename(const rename_expression_list& R, const aset& A)
-{
-  aset result;
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(apply_rename(R, *i));
-  }
-  return result;
-}
-
-inline
-core::identifier_string apply_rename_inverse(const rename_expression_list& R, const core::identifier_string& x)
-{
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    if (x == i->target())
-    {
-      return i->source();
-    }
-  }
-  return x;
-}
-
-inline
-multi_action_name apply_rename_inverse(const rename_expression_list& R, const multi_action_name& a)
-{
-  multi_action_name result;
-  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
-  {
-    result.insert(apply_rename_inverse(R, *i));
-  }
-  return result;
-}
-
-inline
-aset apply_rename_inverse(const rename_expression_list& R, const aset& A)
-{
-  aset result;
-  for (aset::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(apply_rename_inverse(R, *i));
-  }
-  return result;
-}
-
-// returns all elements of B that are subset of an element in A
-inline
-aset subset_intersection(const aset& A, const aset& B)
-{
-  aset result;
-  for (aset::iterator i = B.begin(); i != B.end(); ++i)
-  {
-    const multi_action_name& alpha = *i;
-    for (aset::iterator j = A.begin(); j != A.end(); ++j)
-    {
-      const multi_action_name& beta = *j;
-      if (std::includes(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
-      {
-        result.insert(alpha);
-      }
-    }
-  }
-  return result;
-}
+namespace process {
 
 // prototype declarations
-aset alphabet_allow(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies);
-aset alphabet_sub(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
-aset alphabet_block(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies);
+alphabet_result push_allow(const process_expression& x, const multi_action_name_set& A, bool A_is_Act, alphabet_parameters& parameters);
+alphabet_result push_sub(const process_expression& x, const multi_action_name_set& A, alphabet_parameters& parameters);
+alphabet_result push_block(const process_expression& x, const multi_action_name_set& A, alphabet_parameters& parameters);
 
+// implements alphabet reduction for (most) pCRL expressions
 template <typename Derived>
-struct default_alphabet_traverser: public process_expression_traverser<Derived>
+struct default_push_traverser: public process_expression_traverser<Derived>
 {
   typedef process_expression_traverser<Derived> super;
   using super::enter;
@@ -422,120 +210,174 @@ struct default_alphabet_traverser: public process_expression_traverser<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  const aset& A;
+  // the parameter A
+  const multi_action_name_set& A;
 
-  // maps processes to their corresponding bodies
-  const atermpp::map<process_identifier, process_expression>& process_bodies;
+  // algorithm parameters
+  alphabet_parameters& parameters;
 
-  std::vector<aset> result_stack;
-
-  const process_expression& process_body(const process_identifier& id) const
-  {
-    atermpp::map<process_identifier, process_expression>::const_iterator i = process_bodies.find(id);
-    assert(i != process_bodies.end());
-    return i->second;
-  }
+  // stack with intermediate results
+  typedef std::pair<process_expression, multi_action_name_set> alphabet_result;
+  atermpp::vector<alphabet_result> result_stack;
 
   // Constructor
-  default_alphabet_traverser(const aset& A_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
-    : A(A_), process_bodies(process_bodies_)
+  default_push_traverser(const multi_action_name_set& A_, alphabet_parameters& parameters_)
+    : A(A_), parameters(parameters_)
   {}
 
+  void print(const alphabet_result& r) const
+  {
+    mCRL2log(log::debug) << "p = " << process::pp(r.first) << " A = " << lps::pp(r.second) << std::endl;
+  }
+
+  // prints the top n elements of the stack
+  void print_stack(std::size_t n, const std::string& msg = "") const
+  {
+    mCRL2log(log::debug) << "--- top of stack " << n << " --- " << msg << std::endl;
+    n = (std::min)(n, result_stack.size());
+    for (atermpp::vector<alphabet_result>::const_reverse_iterator i = result_stack.rbegin(); i != result_stack.rbegin() + n; ++i)
+    {
+      print(*i);
+    }
+  }
+
+  // Push (p, A) to result_stack
+  void push(const process_expression& p, const multi_action_name_set& A)
+  {
+    result_stack.push_back(alphabet_result(p, A));
+  }
+
   // Push x to result_stack
-  void push(const aset& x)
+  void push(const alphabet_result& x)
   {
     result_stack.push_back(x);
   }
 
   // Pop the last element of result_stack and return it
-  aset pop()
+  alphabet_result pop()
   {
-    aset result = result_stack.back();
+    alphabet_result result = result_stack.back();
     result_stack.pop_back();
     return result;
   }
 
   // Return the top element of result_stack
-  const aset& top() const
+  alphabet_result& top()
   {
     return result_stack.back();
   }
 
-  // joins the top two elements of the stack
-  void join()
+  // Return the top element of result_stack
+  const alphabet_result& top() const
   {
-    aset right = pop();
-    aset left = pop();
-    push(set_union(left, right));
+    return result_stack.back();
   }
 
-  // P(e1, ..., en)
-  void operator()(const process::process_instance& x)
+  // function that transforms a process expression using the set A
+  // N.B. Override this function in derived classes!
+  process_expression f(const process_expression& x, const multi_action_name_set& A)
   {
-    derived()(process_body(x.identifier()));
+    return x;
   }
 
-  // P(d1 = e1, ..., dn = en)
-  void operator()(const process::process_instance_assignment& x)
+  // Pops two elements (q, Aq) and (p, Ap) from the stack, and pushes back (f(x), union(Ap, Aq))
+  void join(const process_expression& x)
   {
-    derived()(process_body(x.identifier()));
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    push(derived().f(x, A), set_union(left.second, right.second));
   }
 
   // delta
   void leave(const process::delta& x)
   {
-    push(aset());
+    push(x, multi_action_name_set());
+  }
+
+  // P(e1, ..., en)
+  void operator()(const process::process_instance& x)
+  {
+    // apply the algorithm to the body of x
+    process_expression p = parameters.process_body(x.identifier());
+    derived()(p);
+
+    // replace the body by a process_instance
+    process_expression& p1 = top().first;
+    process_identifier id = parameters.find_equation(x.identifier(), p1);
+    process_instance Q(id, x.actual_parameters());
+    top().first = Q;
+    print_stack(1, " process_instance[default]");
+  }
+
+  // P(d1 = e1, ..., dn = en)
+  void operator()(const process::process_instance_assignment& x)
+  {
+    // apply the algorithm to the body of x
+    process_expression p = parameters.process_body(x.identifier());
+    derived()(p);
+
+    // replace the body by a process_instance_assignment
+    process_expression& p1 = top().first;
+    process_identifier id = parameters.find_equation(x.identifier(), p1);
+    process_instance_assignment Q(id, x.assignments());
+    top().first = Q;
+    print_stack(1, " process_instance_assignment[default]");
   }
 
   // p1 + p2
   void leave(const process::choice& x)
   {
-    join();
+    join(x);
+    print_stack(1, " choice[default]");
   }
 
   // p1 . p2
   void leave(const process::seq& x)
   {
-    join();
+    join(x);
+    print_stack(1, " seq[default]");
   }
 
   // c -> p
   void leave(const process::if_then& x)
   {
-    // skip
+    top().first = derived().f(x, A);
+    print_stack(1, " if_then[default]");
   }
 
   // c -> p1 <> p2
   void leave(const process::if_then_else& x)
   {
-    join();
+    join(x);
+    print_stack(1, " if_then_else[default]");
   }
 
   // sum d:D . p
   void leave(const process::sum& x)
   {
-    // skip
-  }
-
-  // p1 ||_ p2
-  void operator()(const process::left_merge& x)
-  {
-    // implement it using p1 || p2
-    merge y(x.left(), x.right());
-    derived()(y);
+    top().first = derived().f(x, A);
+    print_stack(1, " sum[default]");
   }
 
   // p @ t
-  void operator()(const process::at& x)
+  void leave(const process::at& x)
   {
-    // skip
+    top().first = derived().f(x, A);
+    print_stack(1, " at[default]");
+  }
+
+  // p << q
+  void operator()(const process::bounded_init& x)
+  {
+    derived()(x.left());
+    print_stack(1, " bounded_init[default]");
   }
 };
 
 template <typename Derived>
-struct alphabet_allow_traverser: public default_alphabet_traverser<Derived>
+struct push_allow_traverser: public default_push_traverser<Derived>
 {
-  typedef default_alphabet_traverser<Derived> super;
+  typedef default_push_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -543,8 +385,9 @@ struct alphabet_allow_traverser: public default_alphabet_traverser<Derived>
   using super::push;
   using super::pop;
   using super::top;
-  using super::join;
-  using super::process_bodies;
+  using super::parameters;
+  using super::f;
+  using super::print_stack;
 
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
@@ -556,390 +399,564 @@ struct alphabet_allow_traverser: public default_alphabet_traverser<Derived>
   }
 
   // if true, A represents the set of all multi action names
-  bool A_is_all;
+  bool A_is_Act;
 
-  // Constructor
-  alphabet_allow_traverser(const aset& A_, bool A_is_all_, const atermpp::map<process_identifier, process_expression>& process_bodies_)
-    : super(A_, process_bodies_), A_is_all(A_is_all_)
-  {}
-
-  // pushes intersect(A, {a})
-  void push_A_intersection(const multi_action_name& a)
+  // function that transforms a process expression using the set A
+  process_expression f(const process_expression& x, const multi_action_name_set& A)
   {
-    if (A_is_all)
-    {
-      push(make_aset(a));
-    }
-    else
-    {
-      if (A.find(a) == A.end())
-      {
-        push(aset());
-      }
-      else
-      {
-        push(make_aset(a));
-      }
-    }
+    return make_allow(remove_tau(A), x);
   }
 
+  // Constructor
+  push_allow_traverser(const multi_action_name_set& A, bool A_is_Act_, alphabet_parameters& parameters)
+    : super(A, parameters), A_is_Act(A_is_Act_)
+  {}
+
   // a(e1, ..., en)
-  void leave(const lps::action& x)
+  void operator()(const lps::action& x)
   {
+      std::string z = process::pp(x);
     multi_action_name a = name(x);
-    push_A_intersection(a);
+    multi_action_name_set A1 = set_intersection(A, a);
+    push(make_allow(A1, x), A1);
+    print_stack(1, " action[allow]");
   }
 
   // tau
-  void leave(const process::tau& x)
+  void operator()(const process::tau& x)
   {
     multi_action_name tau;
-    push_A_intersection(tau);
+    multi_action_name_set A1 = set_intersection(A, tau);
+    push(make_allow(A, x), A1);
+    print_stack(1, " tau[allow]");
   }
 
   // p1 || p2
-  void operator()(const process::merge& x) // use operator() here, since we don't want to go into the default recursion
+  void operator()(const process::merge& x)
   {
-    if (A_is_all)
+    if (A_is_Act)
     {
-      aset A1 = alphabet_allow(x.left(), A, true, process_bodies);
-      aset A2 = alphabet_allow(x.right(), A, true, process_bodies);
-      aset A1xA2 = times(A1, A2);
-      push(A1xA2);
+      derived()(x.left());
+      derived()(x.right());
+      alphabet_result right = pop();
+      alphabet_result left = pop();
+      const process_expression& p1 = left.first;
+      const multi_action_name_set& Ap1 = left.second;
+      const process_expression& q1 = right.first;
+      const multi_action_name_set& Aq1 = right.second;
+      multi_action_name_set A1 = set_union(Ap1, set_union(Aq1, times(Ap1, Aq1)));
+      push(make_allow(remove_tau(A1), merge(p1, q1)), A1);
     }
     else
     {
-      aset A1 = alphabet_sub(x.left(), A, process_bodies);
-      aset AA1 = left_arrow(A, A1);
-      aset AAA1 = set_union(A, AA1);
-      aset A2 = alphabet_allow(x.right(), AAA1, false, process_bodies);
-      aset A1xA2 = times(A1, A2);
-      aset A2A1xA2 = set_union(A2, A1xA2);
-      aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-      aset AA1A2A1xA2 = set_intersection(A, A1A2A1xA2);
-      push(AA1A2A1xA2);
+      process_expression p = x.left();
+      process_expression q = x.right();
+      alphabet_result r = push_sub(p, A, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      alphabet_result s = push_allow(q, set_union(A, left_arrow(A, Ap1)), false, parameters);
+      const process_expression& q1 = s.first;
+      const multi_action_name_set& Aq1 = s.second;
+      multi_action_name_set A1 = set_intersection(A, set_union(Ap1, set_union(Aq1, times(Ap1, Aq1))));;
+      push(make_allow(remove_tau(A1), merge(p1, q1)), A1);
     }
+    print_stack(1, " merge[allow]");
+  }
+
+  // p1 ||_ p2
+  void operator()(const process::left_merge& x)
+  {
+    if (A_is_Act)
+    {
+      derived()(x.left());
+      derived()(x.right());
+      alphabet_result right = pop();
+      alphabet_result left = pop();
+      const process_expression& p1 = left.first;
+      const multi_action_name_set& Ap1 = left.second;
+      const process_expression& q1 = right.first;
+      const multi_action_name_set& Aq1 = right.second;
+      multi_action_name_set A1 = set_union(Ap1, set_union(Aq1, times(Ap1, Aq1)));
+      push(make_allow(remove_tau(A1), left_merge(p1, q1)), A1);
+    }
+    else
+    {
+      process_expression p = x.left();
+      process_expression q = x.right();
+      alphabet_result r = push_sub(p, A, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      alphabet_result s = push_allow(q, set_union(A, left_arrow(A, Ap1)), false, parameters);
+      const process_expression& q1 = s.first;
+      const multi_action_name_set& Aq1 = s.second;
+      multi_action_name_set A1 = set_intersection(A, set_union(Ap1, set_union(Aq1, times(Ap1, Aq1))));;
+      push(make_allow(remove_tau(A1), left_merge(p1, q1)), A1);
+    }
+    print_stack(1, " left_merge[allow]");
   }
 
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    if (A_is_all)
+    if (A_is_Act)
     {
-      aset A1 = alphabet_allow(x.left(), A, true, process_bodies);
-      aset A2 = alphabet_allow(x.right(), A, true, process_bodies);
-      aset AA1 = left_arrow(A, A1);
-      aset AAA1 = set_union(A, AA1);
-      aset A1xA2 = times(A1, A2);
-      aset AA1xA2 = set_intersection(A, A1xA2);
-      push(AA1xA2);
+      derived()(x.left());
+      derived()(x.right());
+      alphabet_result right = pop();
+      alphabet_result left = pop();
+      process_expression p1 = left.first;
+      multi_action_name_set Ap1 = left.second;
+      process_expression q1 = right.first;
+      multi_action_name_set Aq1 = right.second;
+      multi_action_name_set A1 = times(Ap1, Aq1);
+      push(make_allow(remove_tau(A1), sync(p1, q1)), A1);
     }
     else
     {
-      aset A1 = alphabet_sub(x.left(), A, process_bodies);
-      aset AA1 = left_arrow(A, A1);
-      aset AAA1 = set_union(A, AA1);
-      aset A2 = alphabet_allow(x.right(), AAA1, false, process_bodies);
-      aset A1xA2 = times(A1, A2);
-      aset AA1xA2 = set_intersection(A, A1xA2);
-      push(AA1xA2);
+      process_expression p = x.left();
+      process_expression q = x.right();
+      alphabet_result r = push_sub(p, A, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      alphabet_result s = push_allow(q, set_union(A, left_arrow(A, Ap1)), false, parameters);
+      const process_expression& q1 = s.first;
+      const multi_action_name_set& Aq1 = s.second;
+      multi_action_name_set A1 = set_intersection(A, times(Ap1, Aq1));
+      push(make_allow(remove_tau(A1), sync(p1, q1)), A1);
     }
-  }
-
-  // block(B, p)
-  void operator()(const process::block& x)
-  {
-    core::identifier_string_list B = x.block_set();
-    if (A_is_all)
-    {
-      push(alphabet_block(x.operand(), make_aset(B), process_bodies));
-    }
-    else
-    {
-      push(apply_block(B, alphabet_allow(x.operand(), A, false, process_bodies)));
-    }
-  }
-
-  // hide(I, p)
-  void operator()(const process::hide& x)
-  {
-    aset A1 = alphabet_allow(x.operand(), A, true, process_bodies);
-    aset A2 = apply_hide(x.hide_set(), A1);
-    if (A_is_all)
-    {
-      aset AA2 = set_intersection(A, A2);
-      push(AA2);
-    }
-    else
-    {
-      push(A2);
-    }
+    print_stack(1, " sync[allow]");
   }
 
   // rename(R, p)
   void operator()(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    if (A_is_all)
+    if (A_is_Act)
     {
-      aset A1 = alphabet_allow(x.operand(), A, true, process_bodies);
-      aset RA1 = apply_rename(R, A1);
-      push(RA1);
+      // TODO
+      throw std::runtime_error("not implemented yet");
     }
     else
     {
-      aset RinverseA = apply_rename_inverse(R, A);
-      aset A1 = alphabet_allow(x.operand(), RinverseA, false, process_bodies);
-      aset RA1 = apply_rename(R, A1);
-      push(RA1);
+      process_expression p = x.operand();
+      multi_action_name_set A1 = apply_rename(R, apply_rename_inverse(R, A));
+      push(push_allow(p, A1, false, parameters));
     }
+    print_stack(1, " rename[allow]");
+  }
+
+  // block(B, p)
+  void operator()(const process::block& x)
+  {
+    core::identifier_string_list B = x.block_set();
+    if (A_is_Act)
+    {
+      multi_action_name_set A1 = make_name_set(B);
+      push(push_block(x.operand(), A1, parameters));
+    }
+    else
+    {
+      multi_action_name_set A1 = apply_block(B, A);
+      push(push_allow(x.operand(), A1, false, parameters));
+    }
+    print_stack(1, " block[allow]");
+  }
+
+  // hide(I, p)
+  void operator()(const process::hide& x)
+  {
+    core::identifier_string_list I = x.hide_set();
+    if (A_is_Act)
+    {
+      process_expression p = x.operand();
+      alphabet_result r = push_allow(p, A, true, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      multi_action_name_set A1 = apply_hide(I, Ap1);
+      push(make_allow(remove_tau(A), hide(I, p1)), A1);
+    }
+    else
+    {
+      process_expression p = x.operand();
+      alphabet_result r = push_allow(p, A, true, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      multi_action_name_set A1 = set_intersection(A, apply_hide(I, Ap1));
+      push(make_allow(remove_tau(A), hide(I, p1)), A1);
+    }
+    print_stack(1, " hide[allow]");
   }
 
   // comm(C, p)
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    if (A_is_all)
+    if (A_is_Act)
     {
-      aset Aprime = alphabet_allow(x, A, true, process_bodies);
-      aset CAprime = apply_communication(C, Aprime);
-      push(CAprime);
+      // TODO
+      throw std::runtime_error("not implemented yet");
     }
     else
     {
-      aset CinverseA = apply_communication_inverse(C, A);
-      aset ACinverseA = set_union(A, CinverseA);
-      aset Aprime = alphabet_allow(x, ACinverseA, false, process_bodies);
-      aset CAprime = apply_communication(C, Aprime);
-      aset ACAprime = set_intersection(A, CAprime);
-      push(ACAprime);
+      process_expression p = x.operand();
+      alphabet_result r = push_allow(p, set_union(A, apply_communication_inverse(C, A)), true, parameters);
+      const process_expression& p1 = r.first;
+      const multi_action_name_set& Ap1 = r.second;
+      multi_action_name_set A1 = set_intersection(A, apply_communication(C, Ap1));
+      push(make_allow(remove_tau(A), comm(C, p1)), A1);
     }
+    print_stack(1, " comm[allow]");
   }
 
   // allow(A, p)
   void operator()(const process::allow& x)
   {
-    aset V = make_aset(x.allow_set());
-    multi_action_name tau;
-    V.insert(tau);
-    if (A_is_all)
+    multi_action_name_set V = make_name_set(x.allow_set());
+    process_expression p = x.operand();
+    if (A_is_Act)
     {
-      push(alphabet_allow(x, V, true, process_bodies));
+      push(push_allow(p, V, false, parameters));
     }
     else
     {
-      aset AV = set_intersection(A, V);
-      push(alphabet_allow(x, AV, false, process_bodies));
+      push(push_allow(p, set_intersection(A, V), false, parameters));
     }
+    print_stack(1, " allow[allow]");
   }
-
-//  void operator()(const process::process_expression& x)
-//  {
-//    std::cout << "<visit>" << process::pp(x) << std::endl;
-//    super::operator()(x);
-//    std::cout << "<top>" << pp(result_stack.back()) << std::endl;
-//  }
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
 template <typename Derived>
-struct alphabet_sub_traverser: public default_alphabet_traverser<Derived>
+struct push_sub_traverser: public default_push_traverser<Derived>
 {
-  typedef default_alphabet_traverser<Derived> super;
+  typedef default_push_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::top;
-  using super::push;
-  using super::join;
   using super::A;
-  using super::process_bodies;
+  using super::push;
+  using super::pop;
+  using super::top;
+  using super::parameters;
+  using super::f;
+  using super::print_stack;
 
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  // function that transforms a process expression using the set A
+  process_expression f(const process_expression& x, const multi_action_name_set& A)
+  {
+    return make_allow(remove_tau(A), x);
+  }
+
   // Constructor
-  alphabet_sub_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, process_bodies)
+  push_sub_traverser(const multi_action_name_set& A, alphabet_parameters& parameters)
+    : super(A, parameters)
   {}
 
   // a(e1, ..., en)
-  void leave(const lps::action& x)
+  void operator()(const lps::action& x)
   {
-    aset B = make_aset(name(x));
-    push(subset_intersection(A, B));
+    multi_action_name a = name(x);
+    multi_action_name_set A1 = set_intersection(A, a);
+    push(make_allow(A1, x), A1);
+    print_stack(1, " action[sub]");
   }
 
   // tau
-  void leave(const process::tau& x)
+  void operator()(const process::tau& x)
   {
     multi_action_name tau;
-    aset B = make_aset(tau);
-    push(subset_intersection(A, B));
+    multi_action_name_set A1 = set_intersection(A, tau);
+    push(make_allow(A, x), A1);
+    print_stack(1, " tau[sub]");
   }
 
   // p1 || p2
   void operator()(const process::merge& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_sub(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    aset AA1A2A1xA2 = subset_intersection(A, A1A2A1xA2);
-    push(AA1A2A1xA2);
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    const process_expression& p1 = left.first;
+    const multi_action_name_set& Ap1 = left.second;
+    const process_expression& q1 = right.first;
+    const multi_action_name_set& Aq1 = right.second;
+    multi_action_name_set A1 = subset_intersection(A, set_union(Ap1, set_union(Aq1, times(Ap1, Aq1))));;
+    push(make_allow(remove_tau(A1), merge(p1, q1)), A1);
+    print_stack(1, " merge[sub]");
+  }
+
+  // p1 ||_ p2
+  void operator()(const process::left_merge& x)
+  {
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    const process_expression& p1 = left.first;
+    const multi_action_name_set& Ap1 = left.second;
+    const process_expression& q1 = right.first;
+    const multi_action_name_set& Aq1 = right.second;
+    multi_action_name_set A1 = subset_intersection(A, set_union(Ap1, set_union(Aq1, times(Ap1, Aq1))));;
+    push(make_allow(remove_tau(A1), left_merge(p1, q1)), A1);
+    print_stack(1, " left_merge[sub]");
   }
 
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_sub(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset AA1xA2 = subset_intersection(A, A1xA2);
-    push(AA1xA2);
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    process_expression p1 = left.first;
+    multi_action_name_set Ap1 = left.second;
+    process_expression q1 = right.first;
+    multi_action_name_set Aq1 = right.second;
+    multi_action_name_set A1 = subset_intersection(A, times(Ap1, Aq1));
+    push(make_allow(remove_tau(A1), sync(p1, q1)), A1);
+    print_stack(1, " sync[sub]");
+  }
+
+  // rename(R, p)
+  void operator()(const process::rename& x)
+  {
+    rename_expression_list R = x.rename_set();
+    process_expression p = x.operand();
+    multi_action_name_set A1 = apply_rename(R, apply_rename_inverse(R, A));
+    push(push_sub(p, A1, parameters));
+    print_stack(1, " rename[sub]");
   }
 
   // block(B, p)
   void operator()(const process::block& x)
   {
     core::identifier_string_list B = x.block_set();
-    aset A1 = apply_block(B, A);
-    aset A2 = alphabet_block(x.operand(), A1, process_bodies);
-    push(A2);
+    multi_action_name_set A1 = apply_block(B, A);
+    push(push_allow(x.operand(), A1, false, parameters));
+    print_stack(1, " block[sub]");
   }
 
   // hide(I, p)
   void operator()(const process::hide& x)
   {
-    aset A1 = alphabet_allow(x.operand(), A, true, process_bodies);
-    aset A2 = apply_hide(x.hide_set(), A1);
-    push(A2);
+    process_expression p = x.operand();
+    alphabet_result r = push_allow(p, A, true, parameters);
+    const process_expression& p1 = r.first;
+    const multi_action_name_set& Ap1 = r.second;
+    core::identifier_string_list I = x.hide_set();
+    multi_action_name_set A1 = set_intersection(A, apply_hide(I, Ap1));
+    push(make_allow(remove_tau(A1), hide(I, p1)), A1);
+    print_stack(1, " hide[sub]");
   }
 
-  // comm(A, p)
+  // comm(C, p)
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    aset CinverseA = apply_communication_inverse(C, A);
-    aset ACinverseA = set_union(A, CinverseA);
-    aset Aprime = alphabet_allow(x, ACinverseA, false, process_bodies);
-    aset CAprime = apply_communication(C, Aprime);
-    aset ACAprime = subset_intersection(A, CAprime);
-    push(ACAprime);
+    process_expression p = x.operand();
+    alphabet_result r = push_sub(p, set_union(A, apply_communication_inverse(C, A)), parameters);
+    const process_expression& p1 = r.first;
+    const multi_action_name_set& Ap1 = r.second;
+    multi_action_name_set A1 = set_intersection(A, apply_communication(C, Ap1));
+    multi_action_name_set A2 = subset_intersection(A, apply_communication(C, Ap1));
+    push(make_allow(remove_tau(A1), comm(C, p1)), A2);
+    print_stack(1, " comm[sub]");
   }
 
   // allow(A, p)
   void operator()(const process::allow& x)
   {
-    aset V = make_aset(x.allow_set());
-    multi_action_name tau;
-    V.insert(tau);
-    aset AV = subset_intersection(A, V);
-    push(alphabet_allow(x, AV, false, process_bodies));
+    multi_action_name_set V = make_name_set(x.allow_set());
+    process_expression p = x.operand();
+    multi_action_name_set A1 = subset_intersection(A, V);
+    push(push_sub(p, A1, parameters));
+    print_stack(1, " allow[sub]");
   }
 };
 
 template <typename Derived>
-struct alphabet_block_traverser: public default_alphabet_traverser<Derived>
+struct push_block_traverser: public default_push_traverser<Derived>
 {
-  typedef default_alphabet_traverser<Derived> super;
+  typedef default_push_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::top;
-  using super::push;
-  using super::join;
   using super::A;
-  using super::process_bodies;
+  using super::push;
+  using super::pop;
+  using super::top;
+  using super::parameters;
+  using super::f;
+  using super::print_stack;
 
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  // function that transforms a process expression using the set A
+  process_expression f(const process_expression& x, const multi_action_name_set& A)
+  {
+    return make_block(A, x);
+  }
+
   // Constructor
-  alphabet_block_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, process_bodies)
+  push_block_traverser(const multi_action_name_set& A, alphabet_parameters& parameters)
+    : super(A, parameters)
   {}
 
+  // a(e1, ..., en)
+  void operator()(const lps::action& x)
+  {
+    multi_action_name a = name(x);
+    multi_action_name_set A1 = set_intersection(A, a);
+    push(make_block(A, x), A1);
+    print_stack(1, " action[block]");
+  }
+
   // tau
-  void leave(const process::tau& x)
+  void operator()(const process::tau& x)
   {
     multi_action_name tau;
-    push(make_aset(tau));
+    multi_action_name_set A1;
+    A1.insert(tau);
+    push(x, A1);
+    print_stack(1, " tau[block]");
   }
 
   // p1 || p2
   void operator()(const process::merge& x)
   {
-    aset A1 = alphabet_block(x.left(), A, process_bodies);
-    aset A2 = alphabet_block(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    aset A2A1xA2 = set_union(A2, A1xA2);
-    aset A1A2A1xA2 = set_union(A1, A2A1xA2);
-    push(A1A2A1xA2);
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    const process_expression& p1 = left.first;
+    const multi_action_name_set& Ap1 = left.second;
+    const process_expression& q1 = right.first;
+    const multi_action_name_set& Aq1 = right.second;
+    multi_action_name_set A1 = set_union(Ap1, set_union(Aq1, times(Ap1, Aq1)));
+    push(merge(p1, q1), A1);
+    print_stack(1, " merge[block]");
+  }
+
+  // p1 ||_ p2
+  void operator()(const process::left_merge& x)
+  {
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    const process_expression& p1 = left.first;
+    const multi_action_name_set& Ap1 = left.second;
+    const process_expression& q1 = right.first;
+    const multi_action_name_set& Aq1 = right.second;
+    multi_action_name_set A1 = set_union(Ap1, set_union(Aq1, times(Ap1, Aq1)));
+    push(left_merge(p1, q1), A1);
+    print_stack(1, " left_merge[block]");
   }
 
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    aset A1 = alphabet_sub(x.left(), A, process_bodies);
-    aset A2 = alphabet_block(x.right(), A, process_bodies);
-    aset A1xA2 = times(A1, A2);
-    push(A1xA2);
+    derived()(x.left());
+    derived()(x.right());
+    alphabet_result right = pop();
+    alphabet_result left = pop();
+    process_expression p1 = left.first;
+    multi_action_name_set Ap1 = left.second;
+    process_expression q1 = right.first;
+    multi_action_name_set Aq1 = right.second;
+    multi_action_name_set A1 = times(Ap1, Aq1);
+    push(sync(p1, q1), A1);
+    print_stack(1, " sync[block]");
+  }
+
+  // rename(R, p)
+  void operator()(const process::rename& x)
+  {
+    rename_expression_list R = x.rename_set();
+    process_expression p = x.operand();
+    alphabet_result r = push_sub(p, apply_rename(R, apply_rename_inverse(R, A)), parameters);
+    process_expression p1 = r.first;
+    multi_action_name_set Ap1 = r.second;
+    multi_action_name_set A1 = apply_rename(R, Ap1);
+    push(rename(R, p1), A1);
+    print_stack(1, " rename[block]");
   }
 
   // block(B, p)
   void operator()(const process::block& x)
   {
-    core::identifier_string_list B = x.block_set();
-    push(set_intersection(make_aset(B), A));
+    multi_action_name_set B = make_name_set(x.block_set());
+    multi_action_name_set A1 = set_union(A, B);
+    process_expression p = x.operand();
+    push(push_block(p, A1, parameters));
+    print_stack(1, " block[block]");
   }
 
   // hide(I, p)
-  void leave(const process::hide& x)
+  void operator()(const process::hide& x)
   {
-    aset A1 = alphabet_allow(x.operand(), A, true, process_bodies);
-    aset A2 = apply_hide(x.hide_set(), A1);
-    push(A2);
+    core::identifier_string_list I = x.hide_set();
+    process_expression p = x.operand();
+    alphabet_result r = push_block(p, set_difference(A, make_name_set(I)), parameters);
+    const process_expression& p1 = r.first;
+    const multi_action_name_set& Ap1 = r.second;
+    multi_action_name_set A1 = apply_hide(I, Ap1);
+    push(hide(I, p1), A1);
+    print_stack(1, " hide[block]");
   }
 
-  // comm(A, p)
+  // comm(C, p)
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    aset A1 = apply_communication_inverse(C, A);
-    aset Aprime = alphabet_allow(x, A1, false, process_bodies);
-    aset CAprime = apply_communication(C, Aprime);
-    core::identifier_string_list B = make_block_set(A);
-    aset BCAprime = apply_block(B, CAprime);
-    push(BCAprime);
+    process_expression p = x.operand();
+    multi_action_name_set A2 = apply_communication_bar(C, A);
+    alphabet_result r = push_block(p, set_difference(A, A2), parameters);
+    const process_expression& p1 = r.first;
+    const multi_action_name_set& Ap1 = r.second;
+    multi_action_name_set A1 = apply_block(A, apply_communication(C, Ap1));
+    communication_expression_list C1; // = ???
+    push(make_block(A2, comm(C1, p1)), A1);
+    print_stack(1, " comm[block]");
   }
 
   // allow(A, p)
   void operator()(const process::allow& x)
   {
-    aset V = make_aset(x.allow_set());
-    multi_action_name tau;
-    core::identifier_string_list B = make_block_set(A);
-    aset dBV = apply_block(B, V);
-    dBV.insert(tau);
-    push(alphabet_allow(x, dBV, false, process_bodies));
+    multi_action_name_set V = make_name_set(x.allow_set());
+    process_expression p = x.operand();
+    multi_action_name_set A1 = subset_intersection(A, V);
+    push(push_sub(p, A1, parameters));
+    print_stack(1, " allow[block]");
   }
 };
 
 template <template <class> class Traverser>
-struct apply_alphabet_traverser_all: public Traverser<apply_alphabet_traverser_all<Traverser> >
+struct apply_push_traverser_all: public Traverser<apply_push_traverser_all<Traverser> >
 {
-  typedef Traverser<apply_alphabet_traverser_all<Traverser> > super;
+  typedef Traverser<apply_push_traverser_all<Traverser> > super;
   using super::enter;
   using super::leave;
   using super::operator();
 
-  apply_alphabet_traverser_all(const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, A_is_all, process_bodies)
+  apply_push_traverser_all(const multi_action_name_set& A, bool A_is_Act, alphabet_parameters& parameters)
+    : super(A, A_is_Act, parameters)
   {}
 
 #ifdef BOOST_MSVC
@@ -948,15 +965,15 @@ struct apply_alphabet_traverser_all: public Traverser<apply_alphabet_traverser_a
 };
 
 template <template <class> class Traverser>
-struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Traverser> >
+struct apply_push_traverser: public Traverser<apply_push_traverser<Traverser> >
 {
-  typedef Traverser<apply_alphabet_traverser<Traverser> > super;
+  typedef Traverser<apply_push_traverser<Traverser> > super;
   using super::enter;
   using super::leave;
   using super::operator();
 
-  apply_alphabet_traverser(const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
-    : super(A, process_bodies)
+  apply_push_traverser(const multi_action_name_set& A, alphabet_parameters& parameters)
+    : super(A, parameters)
   {}
 
 #ifdef BOOST_MSVC
@@ -965,63 +982,48 @@ struct apply_alphabet_traverser: public Traverser<apply_alphabet_traverser<Trave
 };
 
 inline
-aset alphabet_allow(const process_expression& x, const aset& A, bool A_is_all, const atermpp::map<process_identifier, process_expression>& process_bodies)
+alphabet_result push_allow(const process_expression& x, const multi_action_name_set& A, bool A_is_Act, alphabet_parameters& parameters)
 {
-  apply_alphabet_traverser_all<alphabet_allow_traverser> f(A, A_is_all, process_bodies);
+  apply_push_traverser_all<push_allow_traverser> f(A, A_is_Act, parameters);
   f(x);
   return f.result_stack.back();
 }
 
 inline
-aset alphabet_allow(const process_expression& x, const aset& A, bool A_is_all, const process_specification& procspec)
+alphabet_result push_allow(const process_expression& x, const multi_action_name_set& A, bool A_is_Act, process_specification& procspec)
 {
-  atermpp::map<process_identifier, process_expression> process_bodies;
-  const atermpp::vector<process_equation>& equations = procspec.equations();
-  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
-  {
-    process_bodies[i->identifier()] = i->expression();
-  }
-  return alphabet_allow(x, A, A_is_all, process_bodies);
+  alphabet_parameters parameters(procspec);
+  return push_allow(x, A, A_is_Act, parameters);
 }
 
 inline
-aset alphabet_sub(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
+alphabet_result push_sub(const process_expression& x, const multi_action_name_set& A, alphabet_parameters& parameters)
 {
-  apply_alphabet_traverser<alphabet_sub_traverser> f(A, process_bodies);
+  apply_push_traverser<push_sub_traverser> f(A, parameters);
   f(x);
   return f.result_stack.back();
 }
 
 inline
-aset alphabet_sub(const process_expression& x, const aset& A, const process_specification& procspec)
+alphabet_result push_sub(const process_expression& x, const multi_action_name_set& A, process_specification& procspec)
 {
-  atermpp::map<process_identifier, process_expression> process_bodies;
-  const atermpp::vector<process_equation>& equations = procspec.equations();
-  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
-  {
-    process_bodies[i->identifier()] = i->expression();
-  }
-  return alphabet_sub(x, A, process_bodies);
+  alphabet_parameters parameters(procspec);
+  return push_sub(x, A, parameters);
 }
 
 inline
-aset alphabet_block(const process_expression& x, const aset& A, const atermpp::map<process_identifier, process_expression>& process_bodies)
+alphabet_result push_block(const process_expression& x, const multi_action_name_set& A, alphabet_parameters& parameters)
 {
-  apply_alphabet_traverser<alphabet_block_traverser> f(A, process_bodies);
+  apply_push_traverser<push_block_traverser> f(A, parameters);
   f(x);
   return f.result_stack.back();
 }
 
 inline
-aset alphabet_block(const process_expression& x, const aset& A, const process_specification& procspec)
+alphabet_result push_block(const process_expression& x, const multi_action_name_set& A, process_specification& procspec)
 {
-  atermpp::map<process_identifier, process_expression> process_bodies;
-  const atermpp::vector<process_equation>& equations = procspec.equations();
-  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
-  {
-    process_bodies[i->identifier()] = i->expression();
-  }
-  return alphabet_block(x, A, process_bodies);
+  alphabet_parameters parameters(procspec);
+  return push_block(x, A, parameters);
 }
 
 } // namespace process

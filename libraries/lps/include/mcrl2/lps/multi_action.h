@@ -432,6 +432,46 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   return result;
 }
 
+/// \brief Represents the name of a multi action
+typedef atermpp::multiset<core::identifier_string> multi_action_name;
+
+/// \brief Represents a set of multi action names
+typedef std::set<multi_action_name> multi_action_name_set;
+
+/// \brief Pretty print function for a multi action name
+inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (i != x.begin())
+    {
+      out << " | ";
+    }
+    out << core::pp(*i);
+  }
+  return out.str();
+}
+
+/// \brief Pretty print function for a set of multi action names
+inline
+std::string pp(const multi_action_name_set& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
+}
+
 } // namespace lps
 
 } // namespace mcrl2
