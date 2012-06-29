@@ -141,15 +141,6 @@ class Shape : public Colleague
       GLCanvas* canvas);
     void visualize(
       GLCanvas* canvas,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs);
-    void visualize(
-      GLCanvas* canvas,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs,
-      const double& pix);
-    void visualize(
-      GLCanvas* canvas,
       const double& opacity,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs);
@@ -218,7 +209,6 @@ class Shape : public Colleague
       const bool& inSelectMode,
       GLCanvas* canvas);
     void drawText(GLCanvas* canvas);
-    void drawText(GLCanvas* canvas, double pix);
     void drawEditDOF(
       const bool& inSelectMode,
       GLCanvas* canvas);

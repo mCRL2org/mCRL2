@@ -243,7 +243,7 @@ void Diagram::visualize(
     drawBorderFlush(inSelectMode, canvas);
     for (size_t i = 0; i < shapes.size(); ++i)
     {
-      shapes[i]->visualize(canvas, attrs, attrValIdcs);
+      shapes[i]->visualize(canvas, 1.0, attrs, attrValIdcs);
     }
   }
 }
@@ -254,30 +254,7 @@ void Diagram::visualize(
   GLCanvas* canvas,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs,
-  const double& pix)
-// Used by visualizers.
-{
-  if (inSelectMode == true)
-  {
-    drawBorderFlush(inSelectMode, canvas);
-  }
-  else
-  {
-    drawBorderFlush(inSelectMode, canvas);
-    for (size_t i = 0; i < shapes.size(); ++i)
-    {
-      shapes[i]->visualize(canvas, attrs, attrValIdcs, pix);
-    }
-  }
-}
-
-
-void Diagram::visualize(
-  const bool& inSelectMode,
-  GLCanvas* canvas,
-  const double& opacity,
-  const vector< Attribute* > attrs,
-  const vector< double > attrValIdcs)
+  double opacity)
 // Used by visualizers.
 {
   if (inSelectMode == true)
@@ -401,10 +378,8 @@ void Diagram::drawBorderFlush(
   else
   {
     VisUtils::enableBlending();
-//    VisUtils::setColor(Qt::white, opacity);
-//    VisUtils::fillRect( -1.0, 1.0, 1.0, -1.0 );
 
-    VisUtils::setColor(VisUtils::mediumGray, opacity);
+    VisUtils::setColor(VisUtils::mediumGray, 1.0 - opacity);
     VisUtils::drawRect(-1.0, 1.0, 1.0, -1.0);
 
     VisUtils::disableBlending();

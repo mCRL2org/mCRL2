@@ -64,13 +64,7 @@ class Diagram : public Colleague
       GLCanvas* canvas,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs,
-      const double& pix);
-    void visualize(
-      const bool& inSelectMode,
-      GLCanvas* canvas,
-      const double& opacity,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs);
+      double opacity);
 
 
   protected:

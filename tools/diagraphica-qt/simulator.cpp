@@ -1791,8 +1791,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
         inSelectMode,
         canvas,
         attributes,
-        valsFrame,
-        pix);
+        valsFrame);
 
       if (focusDepthIdx == ID_FRAME_CURR)
       {
@@ -1906,8 +1905,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
             inSelectMode,
             canvas,
             attributes,
-            valsFrame,
-            pix);
+            valsFrame);
         }
         else
         {
@@ -2077,8 +2075,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
             inSelectMode,
             canvas,
             attributes,
-            valsFrame,
-            pix);
+            valsFrame);
         }
         else
         {
@@ -2139,8 +2136,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           inSelectMode,
           canvas,
           attributes,
-          valsFrame,
-          pix);
+          valsFrame);
 
         VisUtils::enableLineAntiAlias();
         VisUtils::setColor(VisUtils::coolGreen);
@@ -2980,7 +2976,6 @@ void Simulator::animate()
       diagram->visualize(
         false,
         canvas,
-        /*1.0-alphaKeyFrameFr,*/
         attributes,
         valsFrame);
 
@@ -3024,9 +3019,9 @@ void Simulator::animate()
       diagram->visualize(
         false,
         canvas,
-        1.0-opacityKeyFrameTo,
         attributes,
-        valsFrame);
+        valsFrame,
+        opacityKeyFrameTo);
 
       glPopMatrix();
     }

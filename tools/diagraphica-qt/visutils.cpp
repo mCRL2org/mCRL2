@@ -25,10 +25,10 @@ float   VisUtils::cushDepth =  1.0f;
 QColor interpolateRgb(QColor from, QColor to, float t)
 {
   return QColor(
-    from.red() + (int)(to.red() - from.red() * t),
-    from.green() + (int)(to.green() - from.green() * t),
-    from.blue() + (int)(to.blue() - from.blue() * t),
-    from.alpha() + (int)(to.alpha() - from.alpha() * t)
+    from.red() + (int)((to.red() - from.red()) * t),
+    from.green() + (int)((to.green() - from.green()) * t),
+    from.blue() + (int)((to.blue() - from.blue()) * t),
+    from.alpha() + (int)((to.alpha() - from.alpha()) * t)
     );
 }
 
