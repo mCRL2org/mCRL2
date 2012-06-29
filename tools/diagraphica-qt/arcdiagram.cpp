@@ -51,9 +51,9 @@ int ArcDiagram::SEGM_HINT_LQ    = 12;
 
 
 ArcDiagram::ArcDiagram(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
+    Mediator* m,
+    Graph* g,
+    GLCanvas* c)
   : Visualizer(m, g, c)
 {
   idxInitStLeaves    = NON_EXISTING;
@@ -281,8 +281,8 @@ void ArcDiagram::hideAllDiagrams()
 
 
 void ArcDiagram::markLeaf(
-  const size_t& leafIdx,
-  QColor col)
+    const size_t& leafIdx,
+    QColor col)
 {
   map< size_t, vector< QColor > >::iterator it;
   it = markLeaves.find(leafIdx);
@@ -326,8 +326,8 @@ void ArcDiagram::unmarkBundles()
 void ArcDiagram::handleSendDgrmSglToSiml()
 {
   mediator->initSimulator(
-    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-    attrsDgrm[currIdxDgrm]);
+        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+        attrsDgrm[currIdxDgrm]);
 }
 
 
@@ -346,21 +346,20 @@ void ArcDiagram::handleSendDgrmSetToTrace()
 void ArcDiagram::handleSendDgrmSglToExnr()
 {
   mediator->addToExaminer(
-    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-    attrsDgrm[currIdxDgrm]);
+        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+        attrsDgrm[currIdxDgrm]);
 }
 
 
 void ArcDiagram::handleSendDgrmSetToExnr()
 {
   mediator->addToExaminer(
-    framesDgrm[currIdxDgrm],
-    attrsDgrm[currIdxDgrm]);
+        framesDgrm[currIdxDgrm],
+        attrsDgrm[currIdxDgrm]);
 }
 
 
 // -- visualization functions  --------------------------------------
-
 
 
 void ArcDiagram::visualize(const bool& inSelectMode)
@@ -372,17 +371,17 @@ void ArcDiagram::visualize(const bool& inSelectMode)
   }
 
   // check if positions are ok
-  if (geomChanged == true)
+  if (geomChanged)
   {
     calcSettingsGeomBased();
   }
-  if (dataChanged == true)
+  if (dataChanged)
   {
     calcSettingsDataBased();
   }
 
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double wth, hgt;
     canvas->getSize(wth, hgt);
@@ -390,68 +389,60 @@ void ArcDiagram::visualize(const bool& inSelectMode)
     GLint hits = 0;
     GLuint selectBuf[512];
     startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
+          hits,
+          selectBuf,
+          2.0,
+          2.0);
 
     glPushName(ID_CANVAS);
     VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*hgt, -0.5*hgt);
 
-    if (showTree == true)
-    {
-      if (annotateTree == true)
-      {
-        drawTreeLvls(inSelectMode);
-      }
+    visualizeParts(inSelectMode);
 
-      drawTree(inSelectMode);
-    }
-    if (showBarTree == true)
-    {
-      drawBarTree(inSelectMode);
-    }
-    if (showBundles == true)
-    {
-      drawBundles(inSelectMode);
-    }
-    if (showLeaves == true)
-    {
-      drawLeaves(inSelectMode);
-      drawDiagrams(inSelectMode);
-    }
     glPopName();
 
     finishSelectMode(
-      hits,
-      selectBuf);
+          hits,
+          selectBuf);
   }
   // rendering mode
   else
   {
     clear();
-    if (showTree == true)
-    {
-      if (annotateTree == true)
-      {
-        drawTreeLvls(inSelectMode);
-      }
+    visualizeParts(inSelectMode);
+  }
+}
 
-      drawTree(inSelectMode);
-    }
-    if (showBarTree == true)
+
+void ArcDiagram::visualizeParts(const bool& inSelectMode)
+{
+  if (showTree)
+  {
+    if (annotateTree)
     {
-      drawBarTree(inSelectMode);
+      drawTreeLvls(inSelectMode);
     }
-    if (showBundles == true)
+
+    drawTree(inSelectMode);
+  }
+  if (showBarTree)
+  {
+    drawBarTree(inSelectMode);
+  }
+  if (showBundles)
+  {
+    drawBundles(inSelectMode);
+  }
+  if (showLeaves)
+  {
+    drawLeaves(inSelectMode);
+    if (!inSelectMode)
     {
-      drawBundles(inSelectMode);
-    }
-    if (showLeaves == true)
-    {
-      drawLeaves(inSelectMode);
       drawMarkedLeaves(inSelectMode);
     }
+  }
+  if (showLeaves || !inSelectMode)
+  {
     drawDiagrams(inSelectMode);
   }
 }
@@ -460,7 +451,7 @@ void ArcDiagram::visualize(const bool& inSelectMode)
 void ArcDiagram::drawBundles(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     int segs = SEGM_HINT_HQ;
 
@@ -508,7 +499,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
       {
         QColor colFill = markBundles[i] ? VisUtils::darkCoolBlue : colBundles;
         QColor colFade = alpha(colClr, colFill.alphaF());
-        QColor colBrdrFill = alpha(colFill, std::min(colFill.alphaF() * 1.2, 1.0));
+        QColor colBrdrFill = alpha(colFill, (std::min)(colFill.alphaF() * 1.2, 1.0));
         QColor colBrdrFade = alpha(colFill, colFill.alphaF() * 0.1);
 
         double x      = posBundles[i].x;
@@ -572,7 +563,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 void ArcDiagram::drawLeaves(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     glPushName(ID_LEAF_NODE);
     for (size_t i = 0; i < posLeaves.size(); ++i)
@@ -661,7 +652,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 void ArcDiagram::drawTree(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     glPushName(ID_TREE_NODE);
     for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
@@ -716,9 +707,9 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
           // triangle
           VisUtils::fillTriangle(
-            0.5*(xLft+xRgt), yTop, colFill,
-            xLft,            yBot, VisUtils::lightLightGray,
-            xRgt,            yBot, VisUtils::lightLightGray);
+                0.5*(xLft+xRgt), yTop, colFill,
+                xLft,            yBot, VisUtils::lightLightGray,
+                xRgt,            yBot, VisUtils::lightLightGray);
           VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
 
@@ -774,8 +765,8 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
   double pix = canvas->getPixelSize();
 
   // selection mode
-  if (inSelectMode == true)
-    {}
+  if (inSelectMode)
+  {}
   // rendering mode
   else
   {
@@ -820,7 +811,7 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 void ArcDiagram::drawBarTree(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     if (posBarTreeTopLft.size() > 1)
     {
@@ -885,10 +876,10 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 
             // colored foreground
             VisUtils::fillRect(
-              xLft,    xRgt,
-              yTop,    yBot,
-              colFill, VisUtils::lightLightGray,
-              colFill, VisUtils::lightLightGray);
+                  xLft,    xRgt,
+                  yTop,    yBot,
+                  colFill, VisUtils::lightLightGray,
+                  colFill, VisUtils::lightLightGray);
 
             // border
             VisUtils::setColor(VisUtils::lightGray);
@@ -927,7 +918,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     glPushName(ID_DIAGRAM);
     for (size_t i = 0; i < posDgrm.size(); ++i)
@@ -970,10 +961,10 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         node = NULL;
 
         diagram->visualize(
-          inSelectMode,
-          canvas,
-          attrsDgrm[i],
-          vals);
+              inSelectMode,
+              canvas,
+              attrsDgrm[i],
+              vals);
         vals.clear();
 
         // close
@@ -1101,10 +1092,10 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           node = NULL;
 
           diagram->visualize(
-            inSelectMode,
-            canvas,
-            attrsDgrm[i],
-            vals);
+                inSelectMode,
+                canvas,
+                attrsDgrm[i],
+                vals);
           vals.clear();
         }
         else
@@ -1137,10 +1128,10 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           node = NULL;
 
           diagram->visualize(
-            inSelectMode,
-            canvas,
-            attrsDgrm[i],
-            vals);
+                inSelectMode,
+                canvas,
+                attrsDgrm[i],
+                vals);
           vals.clear();
         }
 
@@ -1257,8 +1248,8 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
-    {}
+  if (inSelectMode)
+  {}
   // rendering mode
   else
   {
@@ -1289,16 +1280,16 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
             VisUtils::enableLineAntiAlias();
             VisUtils::setColor(colIn);
             VisUtils::drawArc(
-              x, y,
-              aglBeg, aglEnd,
-              radLeaves+pix, segs);
+                  x, y,
+                  aglBeg, aglEnd,
+                  radLeaves+pix, segs);
             VisUtils::fillEllipse(
-              x, y,
-              radLeaves+pix, radLeaves+pix,
-              radLeaves+15*pix, radLeaves+15*pix,
-              aglBeg, aglEnd,
-              segs,
-              colIn, colOut);
+                  x, y,
+                  radLeaves+pix, radLeaves+pix,
+                  radLeaves+15*pix, radLeaves+15*pix,
+                  aglBeg, aglEnd,
+                  segs,
+                  colIn, colOut);
             VisUtils::disableLineAntiAlias();
 
           }
@@ -1314,8 +1305,8 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 
 
 void ArcDiagram::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseLftDownEvent(x, y);
 
@@ -1327,8 +1318,8 @@ void ArcDiagram::handleMouseLftDownEvent(
 
 
 void ArcDiagram::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseLftUpEvent(x, y);
 
@@ -1342,8 +1333,8 @@ void ArcDiagram::handleMouseLftUpEvent(
 
 
 void ArcDiagram::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseLftDClickEvent(x, y);
 
@@ -1355,8 +1346,8 @@ void ArcDiagram::handleMouseLftDClickEvent(
 
 
 void ArcDiagram::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseRgtDownEvent(x, y);
 
@@ -1368,8 +1359,8 @@ void ArcDiagram::handleMouseRgtDownEvent(
 
 
 void ArcDiagram::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseRgtUpEvent(x, y);
 
@@ -1381,8 +1372,8 @@ void ArcDiagram::handleMouseRgtUpEvent(
 
 
 void ArcDiagram::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
+    const int& x,
+    const int& y)
 {
   Visualizer::handleMouseMotionEvent(x, y);
 
@@ -1672,9 +1663,9 @@ void ArcDiagram::calcSettingsTree()
 
 
 void ArcDiagram::calcPositionsTree(
-  Cluster* c,
-  const size_t& maxLvl,
-  const double& itvHgt)
+    Cluster* c,
+    const size_t& maxLvl,
+    const double& itvHgt)
 {
   for (size_t i = 0; i < c->getSizeChildren(); ++i)
   {
@@ -1772,15 +1763,15 @@ void ArcDiagram::calcSettingsBarTree()
 
     // calc positions
     calcPositionsBarTree(
-      graph->getRoot(), yBot, hght);
+          graph->getRoot(), yBot, hght);
   }
 }
 
 
 void ArcDiagram::calcPositionsBarTree(
-  Cluster* c,
-  const double& yBot,
-  const double& height)
+    Cluster* c,
+    const double& yBot,
+    const double& height)
 {
   for (size_t i = 0; i < c->getSizeChildren(); ++i)
   {
@@ -2171,7 +2162,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         }
         else if (mouseSide   == MSE_SIDE_RGT &&
                  mouseButton == MSE_BUTTON_DOWN /*&&
-          mouseDrag   == MSE_DRAG_FALSE*/)
+                   mouseDrag   == MSE_DRAG_FALSE*/)
         {
           // show menu
           if (mediator->getView() == Mediator::VIEW_SIM)
@@ -2199,9 +2190,9 @@ void ArcDiagram::handleHits(const vector< int > &ids)
           updateMarkBundles();
 
           mediator->handleShowFrame(
-            framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-            attrsDgrm[currIdxDgrm],
-            VisUtils::coolBlue);
+                framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+                attrsDgrm[currIdxDgrm],
+                VisUtils::coolBlue);
         }
       }
     }
@@ -2210,8 +2201,8 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 
 
 void ArcDiagram::handleHoverCluster(
-  const size_t& i,
-  const size_t& j)
+    const size_t& i,
+    const size_t& j)
 {
   if ((i < mapPosToClust.size()) &&
       (j < mapPosToClust[i].size()))
@@ -2261,8 +2252,8 @@ void ArcDiagram::handleHoverBundle(const size_t& bndlIdx)
 
 
 void ArcDiagram::handleHoverBarTree(
-  const int& i,
-  const int& j)
+    const int& i,
+    const int& j)
 {
   if ((0 <= i && static_cast <size_t>(i) < mapPosToClust.size()) &&
       (0 <= j && static_cast <size_t>(j) < mapPosToClust[i].size()))
@@ -2340,9 +2331,9 @@ void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
   frameIdxDgrm[dgrmIdx] = 0;
 
   mediator->handleShowFrame(
-    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-    attrsDgrm[currIdxDgrm],
-    VisUtils::coolBlue);
+        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+        attrsDgrm[currIdxDgrm],
+        VisUtils::coolBlue);
 
   updateMarkBundles();
 }
@@ -2367,9 +2358,9 @@ void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
   }
 
   mediator->handleShowFrame(
-    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-    attrsDgrm[currIdxDgrm],
-    VisUtils::coolBlue);
+        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+        attrsDgrm[currIdxDgrm],
+        VisUtils::coolBlue);
 
   updateMarkBundles();
 }
@@ -2384,9 +2375,9 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
       timerAnim->Stop();
 
       mediator->handleShowFrame(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm],
-        VisUtils::coolBlue);
+            framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+            attrsDgrm[currIdxDgrm],
+            VisUtils::coolBlue);
     }
     else
     {
@@ -2420,9 +2411,9 @@ void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
   }
 
   mediator->handleShowFrame(
-    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-    attrsDgrm[currIdxDgrm],
-    VisUtils::coolBlue);
+        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+        attrsDgrm[currIdxDgrm],
+        VisUtils::coolBlue);
 
   updateMarkBundles();
 }
@@ -2521,9 +2512,9 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
     // update framesDgrm
     clust = graph->getLeaf(dgrmIdx);
     graph->calcAttrCombn(
-      clust,
-      attrsDgrm[dgrmIdx],
-      framesDgrm[dgrmIdx]);
+          clust,
+          attrsDgrm[dgrmIdx],
+          framesDgrm[dgrmIdx]);
 
     // init frameIdxDgrm
     frameIdxDgrm[dgrmIdx] = 0;
@@ -2576,8 +2567,8 @@ void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
 
 
 void ArcDiagram::processHits(
-  GLint hits,
-  GLuint buffer[])
+    GLint hits,
+    GLuint buffer[])
 {
   GLuint* ptr;
   vector< int > ids;
@@ -2625,8 +2616,8 @@ void ArcDiagram::processHits(
 
 
 BEGIN_EVENT_TABLE(ArcDiagram, wxEvtHandler)
-  // menu bar
-  EVT_TIMER(ID_TIMER, ArcDiagram::onTimer)
+// menu bar
+EVT_TIMER(ID_TIMER, ArcDiagram::onTimer)
 END_EVENT_TABLE()
 
 

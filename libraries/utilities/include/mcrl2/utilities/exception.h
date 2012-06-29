@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/exception.h
+/// \file mcrl2/utilities/exception.h
 /// \brief Exception classes for use in libraries and tools
 
 #ifndef __MCRL2_EXCEPTION_H__

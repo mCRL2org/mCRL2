@@ -10,7 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "bundle.h"
 
 // -- constructors and destructors ----------------------------------

@@ -92,6 +92,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
+    void visualizeParts(const bool& inSelectMode);
     void drawBundles(const bool& inSelectMode);
     void drawLeaves(const bool& inSelectMode);
     void drawTree(const bool& inSelectMode);
