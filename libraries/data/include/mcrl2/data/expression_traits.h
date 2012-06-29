@@ -225,7 +225,7 @@ struct term_traits<data::data_expression>
     return variable_sequence_type(v.begin(), v.end());
   }
 
-  /// \brief Returns the difference of two unordered sets of variables
+  /// \brief Returns the intersection of two unordered sets of variables
   /// \param v A sequence of data variables
   /// \param w A sequence of data variables
   /// \return The difference of two sets.

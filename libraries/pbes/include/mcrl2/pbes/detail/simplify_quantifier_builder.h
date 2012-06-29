@@ -185,11 +185,11 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(r));
       if (lv.empty())
       {
-        result = utilities::optimized_or(l, utilities::optimized_forall(rv, r, true, false));
+        result = utilities::optimized_or(l, utilities::optimized_forall_no_empty_domain(rv, r, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(r, utilities::optimized_forall(lv, l, true, false));
+        result = utilities::optimized_or(r, utilities::optimized_forall_no_empty_domain(lv, l, true));
       }
       else
       {
@@ -237,11 +237,11 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(r));
       if (lv.empty())
       {
-        result = utilities::optimized_and(l, utilities::optimized_exists(rv, r, true, false));
+        result = utilities::optimized_and(l, utilities::optimized_exists_no_empty_domain(rv, r, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_and(r, utilities::optimized_exists(lv, l, true, false));
+        result = utilities::optimized_and(r, utilities::optimized_exists_no_empty_domain(lv, l, true));
       }
       else
       {
