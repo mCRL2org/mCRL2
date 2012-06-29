@@ -147,61 +147,39 @@ class VisUtils
       const double& aglBegDg, const double& aglEndDg,
       const double& radius,   const int& slices);
     static void drawArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const double& radius,   const int& slices);
-    static void drawArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      QColor colBeg,          QColor colEnd,
-      const double& radius,   const int& slices);
+      const double& xCtr,       const double& yCtr,
+      const double& aglBegDg,   const double& aglEndDg,
+      const double& wthBeg,     const double& wthEnd,
+      const double& radius,     const int& slices,
+      QColor colBeg = QColor(), QColor colEnd = QColor());
     static void fillArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const double& radius,   const int& slices);
-    static void fillArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      QColor colBeg,          QColor colEnd,
-      const double& radius,   const int& slices);
+      const double& xCtr,       const double& yCtr,
+      const double& aglBegDg,   const double& aglEndDg,
+      const double& wthBeg,     const double& wthEnd,
+      const double& radius,     const int& slices,
+      QColor colBeg = QColor(), QColor colEnd = QColor());
 
     static void drawTriangle(
-      const double& x1, const double& y1,
-      const double& x2, const double& y2,
-      const double& x3, const double& y3);
-    static void drawTriangle(
-      const double&   x1, const double& y1, QColor col1,
-      const double&   x2, const double& y2, QColor col2,
-      const double&   x3, const double& y3, QColor col3);
+      const double&   x1,     const double& y1,
+      const double&   x2,     const double& y2,
+      const double&   x3,     const double& y3,
+      QColor col1 = QColor(), QColor col2 = QColor(), QColor col3 = QColor());
     static void fillTriangle(
-      const double& x1, const double& y1,
-      const double& x2, const double& y2,
-      const double& x3, const double& y3);
-    static void fillTriangle(
-      const double&   x1, const double& y1, QColor col1,
-      const double&   x2, const double& y2, QColor col2,
-      const double&   x3, const double& y3, QColor col3);
+      const double&   x1,     const double& y1,
+      const double&   x2,     const double& y2,
+      const double&   x3,     const double& y3,
+      QColor col1 = QColor(), QColor col2 = QColor(), QColor col3 = QColor());
 
     static void drawRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot);
-    static void drawRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot,
-      QColor colTopLft,   QColor colTopRgt,
-      QColor colBotLft,   QColor colBotRgt);
+      const double& xLft,          const double& xRgt,
+      const double& yTop,          const double& yBot,
+      QColor colTopLft = QColor(), QColor colTopRgt = QColor(),
+      QColor colBotLft = QColor(), QColor colBotRgt = QColor());
     static void fillRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot);
-    static void fillRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot,
-      QColor colTopLft,   QColor colTopRgt,
-      QColor colBotLft,   QColor colBotRgt);
+      const double& xLft,          const double& xRgt,
+      const double& yTop,          const double& yBot,
+      QColor colTopLft = QColor(), QColor colTopRgt = QColor(),
+      QColor colBotLft = QColor(), QColor colBotRgt = QColor());
 
     static void drawEllipse(
       const double& xCtr, const double& yCtr,
@@ -227,25 +205,20 @@ class VisUtils
       const double& xFr,     const double& xTo,
       const double& yFr,     const double& yTo,
       const double& wHead, const double& lHead);
-    static void fillArrow(
-      const double& xFr,     const double& xTo,
-      const double& yFr,     const double& yTo,
-      const double& wHead, const double& lHead);
     static void drawArrow(
       const double& xFr,   const double&   xTo,
       const double& yFr,   const double&   yTo,
       const double& wBase, const double&   wHead,
-      const double& lHead, QColor cFr, QColor cTo);
+      const double& lHead, QColor cFr = QColor(), QColor cTo = QColor());
+    static void fillArrow(
+      const double& xFr,     const double& xTo,
+      const double& yFr,     const double& yTo,
+      const double& wHead, const double& lHead);
     static void fillArrow(
       const double& xFr,   const double& xTo,
       const double& yFr,   const double& yTo,
       const double& wBase, const double& wHead,
-      const double& lHead);
-    static void fillArrow(
-      const double& xFr,   const double& xTo,
-      const double& yFr,   const double& yTo,
-      const double& wBase, const double& wHead,
-      const double& lHead, QColor cFr, QColor cTo);
+      const double& lHead, QColor cFr = QColor(), QColor cTo = QColor());
 
     static void drawDArrow(
       const double& xFr,   const double& xTo,

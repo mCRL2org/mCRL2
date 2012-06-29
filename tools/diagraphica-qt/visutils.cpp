@@ -24,6 +24,10 @@ float   VisUtils::cushDepth =  1.0f;
 
 QColor interpolateRgb(QColor from, QColor to, float t)
 {
+  if (!from.isValid() || !to.isValid())
+  {
+    return QColor();
+  }
   return QColor(
     from.red() + (int)((to.red() - from.red()) * t),
     from.green() + (int)((to.green() - from.green()) * t),
@@ -385,7 +389,8 @@ void VisUtils::drawArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
-  const double& radius,   const int& slices)
+  const double& radius,   const int& slices,
+  QColor colBeg,          QColor colEnd)
 {
   double slice;
 
@@ -405,50 +410,10 @@ void VisUtils::drawArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
-      double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
-    }
-  }
-  // inside
-  {
-    for (int i = slices; i >= 0; --i)
-    {
-      double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
-      double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
-    }
-  }
-  glEnd();
-}
-
-
-void VisUtils::drawArc(
-  const double& xCtr,     const double& yCtr,
-  const double& aglBegDg, const double& aglEndDg,
-  const double& wthBeg,   const double& wthEnd,
-  QColor colBeg,          QColor colEnd,
-  const double& radius,   const int& slices)
-{
-  double slice;
-
-  if (aglBegDg < aglEndDg)
-  {
-    slice = (aglEndDg-aglBegDg)/(double)slices;
-  }
-  else
-  {
-    slice = (360.0-(aglBegDg-aglEndDg))/(double)slices;
-  }
-
-  double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
-
-  glBegin(GL_LINE_LOOP);
-  // outside
-  {
-    for (int i = 0; i <= slices; ++i)
-    {
-      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      if (colBeg.isValid() && colEnd.isValid())
+      {
+        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      }
 
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -459,48 +424,13 @@ void VisUtils::drawArc(
   {
     for (int i = slices; i >= 0; --i)
     {
-      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      if (colBeg.isValid() && colEnd.isValid())
+      {
+        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      }
 
       double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
-    }
-  }
-  glEnd();
-}
-
-
-void VisUtils::fillArc(
-  const double& xCtr,     const double& yCtr,
-  const double& aglBegDg, const double& aglEndDg,
-  const double& wthBeg,   const double& wthEnd,
-  const double& radius,   const int& slices)
-{
-  double slice;
-
-  if (aglBegDg < aglEndDg)
-  {
-    slice = (aglEndDg-aglBegDg)/(double)slices;
-  }
-  else
-  {
-    slice = (360.0-(aglBegDg-aglEndDg))/(double)slices;
-  }
-
-  double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
-
-  glBegin(GL_QUAD_STRIP);
-  {
-    for (int i = 0; i <= slices; ++i)
-    {
-      // outside
-      double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
-      double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
-
-      // inside
-      xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
-      yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
       glVertex2f(xCur, yCur);
     }
   }
@@ -513,8 +443,8 @@ void VisUtils::fillArc(
   const double& xCtr,     const double& yCtr,
   const double& aglBegDg, const double& aglEndDg,
   const double& wthBeg,   const double& wthEnd,
-  QColor colBeg,          QColor colEnd,
-  const double& radius,   const int& slices)
+  const double& radius,   const int& slices,
+  QColor colBeg,          QColor colEnd)
 //-------------------------------------------------
 {
   double slice;
@@ -534,7 +464,10 @@ void VisUtils::fillArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      if (colBeg.isValid() && colEnd.isValid())
+      {
+        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      }
 
       // outside
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
@@ -551,72 +484,34 @@ void VisUtils::fillArc(
 }
 
 void VisUtils::drawTriangle(
-  const double& x1, const double& y1,
-  const double& x2, const double& y2,
-  const double& x3, const double& y3)
+  const double&   x1, const double& y1,
+  const double&   x2, const double& y2,
+  const double&   x3, const double& y3,
+  QColor col1, QColor col2, QColor col3)
 {
   glBegin(GL_LINE_LOOP);
+  if (col1.isValid()) setColor(col1);
   glVertex2f(x1, y1);
+  if (col2.isValid()) setColor(col2);
   glVertex2f(x2, y2);
+  if (col3.isValid()) setColor(col3);
   glVertex2f(x3, y3);
   glEnd();
 }
-
-
-void VisUtils::drawTriangle(
-  const double&   x1, const double& y1, QColor col1,
-  const double&   x2, const double& y2, QColor col2,
-  const double&   x3, const double& y3, QColor col3)
-{
-  glBegin(GL_LINE_LOOP);
-  setColor(col1);
-  glVertex2f(x1, y1);
-  setColor(col2);
-  glVertex2f(x2, y2);
-  setColor(col3);
-  glVertex2f(x3, y3);
-  glEnd();
-}
-
 
 void VisUtils::fillTriangle(
-  const double& x1, const double& y1,
-  const double& x2, const double& y2,
-  const double& x3, const double& y3)
+    const double&   x1, const double& y1,
+    const double&   x2, const double& y2,
+    const double&   x3, const double& y3,
+    QColor col1, QColor col2, QColor col3)
 {
   glBegin(GL_POLYGON);
+  if (col1.isValid()) setColor(col1);
   glVertex2f(x1, y1);
+  if (col2.isValid()) setColor(col2);
   glVertex2f(x2, y2);
+  if (col3.isValid()) setColor(col3);
   glVertex2f(x3, y3);
-  glEnd();
-}
-
-
-void VisUtils::fillTriangle(
-  const double&   x1, const double& y1, QColor col1,
-  const double&   x2, const double& y2, QColor col2,
-  const double&   x3, const double& y3, QColor col3)
-{
-  glBegin(GL_POLYGON);
-  setColor(col1);
-  glVertex2f(x1, y1);
-  setColor(col2);
-  glVertex2f(x2, y2);
-  setColor(col3);
-  glVertex2f(x3, y3);
-  glEnd();
-}
-
-
-void VisUtils::drawRect(
-  const double& xLft, const double& xRgt,
-  const double& yTop, const double& yBot)
-{
-  glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
   glEnd();
 }
 
@@ -628,26 +523,13 @@ void VisUtils::drawRect(
   QColor colBotLft,   QColor colBotRgt)
 {
   glBegin(GL_LINE_LOOP);
-  setColor(colTopLft);
+  if (colTopLft.isValid()) setColor(colTopLft);
   glVertex2f(xLft, yTop);
-  setColor(colBotLft);
+  if (colBotLft.isValid()) setColor(colBotLft);
   glVertex2f(xLft, yBot);
-  setColor(colBotRgt);
+  if (colBotRgt.isValid()) setColor(colBotRgt);
   glVertex2f(xRgt, yBot);
-  setColor(colTopRgt);
-  glVertex2f(xRgt, yTop);
-  glEnd();
-}
-
-
-void VisUtils::fillRect(
-  const double& xLft, const double& xRgt,
-  const double& yTop, const double& yBot)
-{
-  glBegin(GL_QUADS);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(xRgt, yBot);
+  if (colTopRgt.isValid()) setColor(colTopRgt);
   glVertex2f(xRgt, yTop);
   glEnd();
 }
@@ -824,6 +706,46 @@ void VisUtils::drawArrow(
 }
 
 
+void VisUtils::drawArrow(
+  const double& xFr,   const double& xTo,
+  const double& yFr,   const double& yTo,
+  const double& wBase, const double& wHead,
+  const double& lHead, QColor cFr, QColor cTo)
+{
+  // calc angle & length of arrow
+  double dX     = xTo-xFr;
+  double dY     = yTo-yFr;
+  double angl   = Utils::calcAngleDg(dX, dY);
+  double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
+
+  // calc length base
+  double lenBase = lenArw-lHead;
+
+  // calc junction color
+  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
+
+  glPushMatrix();
+  glTranslatef(xFr, yFr, 0.0);
+  glRotatef(angl, 0.0, 0.0, 1.0);
+
+  glBegin(GL_LINE_LOOP);
+  if (cFr.isValid()) setColor(cFr);
+  glVertex2f(0.0, 0.5*wBase);
+  glVertex2f(0.0, -0.5*wBase);
+  if (cJnc.isValid()) setColor(cJnc);
+  glVertex2f(lenArw-lHead, -0.5*wBase);
+  glVertex2f(lenArw-lHead, -0.5*wHead);
+  if (cTo.isValid()) setColor(cTo);
+  glVertex2f(lenArw, 0.0);
+  if (cJnc.isValid()) setColor(cJnc);
+  glVertex2f(lenArw-lHead,  0.5*wHead);
+  glVertex2f(lenArw-lHead,  0.5*wBase);
+  glEnd();
+
+  glPopMatrix();
+}
+
+
 void VisUtils::fillArrow(
   const double& xFr,   const double& xTo,
   const double& yFr,   const double& yTo,
@@ -850,6 +772,52 @@ void VisUtils::fillArrow(
     lenArw,   0.0);
   // arrow base
   drawLine(0.0, lenBase, 0.0, 0.0);
+
+  glPopMatrix();
+}
+
+
+void VisUtils::fillArrow(
+  const double& xFr,   const double& xTo,
+  const double& yFr,   const double& yTo,
+  const double& wBase, const double& wHead,
+  const double& lHead, QColor cFr, QColor cTo)
+{
+  // calc angle & length of arrow
+  double dX     = xTo-xFr;
+  double dY     = yTo-yFr;
+  double angl   = Utils::calcAngleDg(dX, dY);
+  double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
+
+  // calc length base
+  double lenBase = lenArw-lHead;
+
+  // calc junction color
+  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
+
+  glPushMatrix();
+  glTranslatef(xFr, yFr, 0.0);
+  glRotatef(angl, 0.0, 0.0, 1.0);
+
+  // base
+  glBegin(GL_POLYGON);
+  if (cFr.isValid()) setColor(cFr);
+  glVertex2f(0.0, 0.5*wBase);
+  glVertex2f(0.0, -0.5*wBase);
+  if (cJnc.isValid()) setColor(cJnc);
+  glVertex2f(lenArw-lHead, -0.5*wBase);
+  glVertex2f(lenArw-lHead,  0.5*wBase);
+  glEnd();
+
+  // head
+  glBegin(GL_POLYGON);
+  if (cJnc.isValid()) setColor(cJnc);
+  glVertex2f(lenArw-lHead, -0.5*wHead);
+  if (cTo.isValid()) setColor(cTo);
+  glVertex2f(lenArw, 0.0);
+  if (cJnc.isValid()) setColor(cJnc);
+  glVertex2f(lenArw-lHead,  0.5*wHead);
+  glEnd();
 
   glPopMatrix();
 }
@@ -882,127 +850,6 @@ void VisUtils::drawDArrow(
     lenArw,          0.0);
   // arrow base
   drawLine(lHead, lenArw-lHead, 0.0, 0.0);
-
-  glPopMatrix();
-}
-
-
-void VisUtils::drawArrow(
-  const double& xFr,   const double& xTo,
-  const double& yFr,   const double& yTo,
-  const double& wBase, const double& wHead,
-  const double& lHead, QColor cFr, QColor cTo)
-{
-  // calc angle & length of arrow
-  double dX     = xTo-xFr;
-  double dY     = yTo-yFr;
-  double angl   = Utils::calcAngleDg(dX, dY);
-  double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
-
-  // calc length base
-  double lenBase = lenArw-lHead;
-
-  // calc junction color
-  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
-
-  glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
-
-  glBegin(GL_LINE_LOOP);
-  setColor(cFr);
-  glVertex2f(0.0, 0.5*wBase);
-  glVertex2f(0.0, -0.5*wBase);
-  setColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wBase);
-  glVertex2f(lenArw-lHead, -0.5*wHead);
-  setColor(cTo);
-  glVertex2f(lenArw, 0.0);
-  setColor(cJnc);
-  glVertex2f(lenArw-lHead,  0.5*wHead);
-  glVertex2f(lenArw-lHead,  0.5*wBase);
-  glEnd();
-
-  glPopMatrix();
-}
-
-
-void VisUtils::fillArrow(
-  const double& xFr,   const double& xTo,
-  const double& yFr,   const double& yTo,
-  const double& wBase, const double& wHead,
-  const double& lHead)
-{
-  // calc angle & length of arrow
-  double dX     = xTo-xFr;
-  double dY     = yTo-yFr;
-  double angl   = Utils::calcAngleDg(dX, dY);
-  double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
-
-  glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
-
-  // base
-  glBegin(GL_POLYGON);
-  glVertex2f(0.0, 0.5*wBase);
-  glVertex2f(0.0, -0.5*wBase);
-  glVertex2f(lenArw-lHead, -0.5*wBase);
-  glVertex2f(lenArw-lHead,  0.5*wBase);
-  glEnd();
-
-  // head
-  glBegin(GL_POLYGON);
-  glVertex2f(lenArw-lHead, -0.5*wHead);
-  glVertex2f(lenArw, 0.0);
-  glVertex2f(lenArw-lHead,  0.5*wHead);
-  glEnd();
-
-  glPopMatrix();
-}
-
-
-void VisUtils::fillArrow(
-  const double& xFr,   const double& xTo,
-  const double& yFr,   const double& yTo,
-  const double& wBase, const double& wHead,
-  const double& lHead, QColor cFr, QColor cTo)
-{
-  // calc angle & length of arrow
-  double dX     = xTo-xFr;
-  double dY     = yTo-yFr;
-  double angl   = Utils::calcAngleDg(dX, dY);
-  double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
-
-  // calc length base
-  double lenBase = lenArw-lHead;
-
-  // calc junction color
-  QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
-
-  glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
-
-  // base
-  glBegin(GL_POLYGON);
-  setColor(cFr);
-  glVertex2f(0.0, 0.5*wBase);
-  glVertex2f(0.0, -0.5*wBase);
-  setColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wBase);
-  glVertex2f(lenArw-lHead,  0.5*wBase);
-  glEnd();
-
-  // head
-  glBegin(GL_POLYGON);
-  setColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wHead);
-  setColor(cTo);
-  glVertex2f(lenArw, 0.0);
-  setColor(cJnc);
-  glVertex2f(lenArw-lHead,  0.5*wHead);
-  glEnd();
 
   glPopMatrix();
 }

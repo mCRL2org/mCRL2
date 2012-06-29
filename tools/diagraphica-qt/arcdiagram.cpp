@@ -510,18 +510,18 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 
         if (orient < 0)
         {
-          VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, colFill,     colFade,     rad, segs);
-          VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, colBrdrFill, colBrdrFade, rad, segs);
+          VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colFill,     colFade);
+          VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
         }
         else if (orient > 0)
         {
-          VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, colFill,     colFade,     rad, segs);
-          VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, colBrdrFill, colBrdrFade, rad, segs);
+          VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colFill,     colFade);
+          VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
         }
         else
         {
-          VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, colFill,     colFade,     rad, 2*segs);
-          VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, colBrdrFill, colBrdrFade, rad, 2*segs);
+          VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colFill,     colFade);
+          VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colBrdrFill, colBrdrFade);
         }
       }
 
@@ -707,9 +707,10 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
           // triangle
           VisUtils::fillTriangle(
-                0.5*(xLft+xRgt), yTop, colFill,
-                xLft,            yBot, VisUtils::lightLightGray,
-                xRgt,            yBot, VisUtils::lightLightGray);
+                0.5*(xLft+xRgt), yTop,
+                xLft,            yBot,
+                xRgt,            yBot,
+                colFill, VisUtils::lightLightGray, VisUtils::lightLightGray);
           VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
 
