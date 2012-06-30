@@ -30,47 +30,56 @@
 #include "visualizer.h"
 #include "visutils.h"
 
+
+enum RenderMode
+{
+  HQRender,
+  LQRender,
+  HitRender
+};
+
 class ArcDiagram : public wxEvtHandler, public Visualizer
 {
   public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+        Mediator* m,
+        Graph* g,
+        GLCanvas* c);
     virtual ~ArcDiagram();
 
     // -- get functions ---------------------------------------------
-    static QColor getColorClr();
-    static QColor getColorTxt();
-    static int getSizeTxt();
-    static double getIntervAnim();
-    static bool getShowTree();
-    static bool getAnnotateTree();
-    static int getColorMap();
-    static bool getShowBarTree();
-    static double getMagnBarTree();
-    static bool getShowLeaves();
-    static bool getShowBundles();
-    static QColor getColorBundles();
-    static double getTrspBundles();
+    static QColor getColorClr() { return colClr; }
+    static QColor getColorTxt() { return colTxt; }
+    static int getSizeTxt() { return szeTxt; }
+    static double getIntervAnim() { return itvAnim; }
+    static bool getShowTree() { return showTree; }
+    static bool getAnnotateTree() { return annotateTree; }
+    static int getColorMap() {  return colorMap; }
+    static bool getShowBarTree() { return showBarTree; }
+    static double getMagnBarTree() { return magnBarTree; }
+    static bool getShowLeaves() { return showLeaves; }
+    static bool getShowBundles() { return showBundles; }
+    static QColor getColorBundles() { return colBundles; }
+    static double getTrspBundles() { return colBundles.alphaF(); }
 
     void getAttrsTree(std::vector< size_t > &idcs);
 
+
     // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col);
-    static void setColorTxt(QColor col);
-    static void setSizeTxt(const int& sze);
-    static void setIntervAnim(const int& itv);
-    static void setShowTree(const bool& shw);
-    static void setAnnotateTree(const bool& shw);
-    static void setColorMap(const int& colMap);
-    static void setShowBarTree(const bool& shw);
-    static void setMagnBarTree(const double& val);
-    static void setShowLeaves(const bool& shw);
-    static void setShowBundles(const bool& shw);
-    static void setColorBundles(QColor col);
-    static void setTrspBundles(const double& trsp);
+    static void setColorClr(QColor col) { colClr = col; }
+    static void setColorTxt(QColor col) { colTxt = col; }
+    static void setSizeTxt(const int& sze) { szeTxt = sze; }
+    static void setIntervAnim(const int& itv) { itvAnim = itv; }
+    static void setShowTree(const bool& shw) { showTree = shw; }
+    static void setAnnotateTree(const bool& shw) { annotateTree = shw; }
+    static void setColorMap(const int& colMap) { colorMap = colMap; }
+    static void setShowBarTree(const bool& shw) { showBarTree = shw; }
+    static void setMagnBarTree(const double& val) { magnBarTree = val; }
+    static void setShowLeaves(const bool& shw) { showLeaves = shw; }
+    static void setShowBundles(const bool& shw) { showBundles = shw; }
+    static void setColorBundles(QColor col) { colBundles = col; }
+    static void setTrspBundles(const double& trsp) { colBundles.setAlphaF(trsp); }
 
     void setAttrsTree(const std::vector< size_t > idcs);
 
@@ -78,8 +87,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void hideAllDiagrams();
 
     void markLeaf(
-      const size_t& leafIdx,
-      QColor col);
+        const size_t& leafIdx,
+        QColor col);
     void unmarkLeaves();
     void markBundle(const size_t& idx);
     void unmarkBundles();
@@ -103,23 +112,23 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
 
     // -- input event handlers --------------------------------------
     void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
     void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
     void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
     void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
     void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
     void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
+        const int& x,
+        const int& y);
 
     void updateDiagramData();
 
@@ -134,14 +143,14 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void calcSettingsBundles();
     void calcSettingsTree();
     void calcPositionsTree(
-      Cluster* c,
-      const size_t& maxLvl,
-      const double& itvHgt);
+        Cluster* c,
+        const size_t& maxLvl,
+        const double& itvHgt);
     void calcSettingsBarTree();
     void calcPositionsBarTree(
-      Cluster* c,
-      const double& yBot,
-      const double& height);
+        Cluster* c,
+        const double& yBot,
+        const double& height);
     void calcSettingsDiagram();
     void updateMarkBundles();
 
@@ -158,12 +167,12 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(
-      const size_t& i,
-      const size_t& j);
+        const size_t& i,
+        const size_t& j);
     void handleHoverBundle(const size_t& bndlIdx);
     void handleHoverBarTree(
-      const int& i,
-      const int& j);
+        const int& i,
+        const int& j);
 
     void handleShowDiagram(const size_t& dgrmIdx);
     void handleDragDiagram();
@@ -178,8 +187,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
 
     // -- hit detection ---------------------------------------------
     void processHits(
-      GLint hits,
-      GLuint buffer[]);
+        GLint hits,
+        GLuint buffer[]);
 
     // -- static variables ------------------------------------------
 

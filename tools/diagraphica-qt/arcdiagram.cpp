@@ -78,84 +78,6 @@ ArcDiagram::~ArcDiagram()
 // -- get functions -------------------------------------------------
 
 
-QColor ArcDiagram::getColorClr()
-{
-  return colClr;
-}
-
-
-QColor ArcDiagram::getColorTxt()
-{
-  return colTxt;
-}
-
-
-int ArcDiagram::getSizeTxt()
-{
-  return szeTxt;
-}
-
-
-double ArcDiagram::getIntervAnim()
-{
-  return itvAnim;
-}
-
-
-bool ArcDiagram::getShowTree()
-{
-  return showTree;
-}
-
-
-bool ArcDiagram::getAnnotateTree()
-{
-  return annotateTree;
-}
-
-
-int ArcDiagram::getColorMap()
-{
-  return colorMap;
-}
-
-
-bool ArcDiagram::getShowBarTree()
-{
-  return showBarTree;
-}
-
-
-double ArcDiagram::getMagnBarTree()
-{
-  return magnBarTree;
-}
-
-
-bool ArcDiagram::getShowLeaves()
-{
-  return showLeaves;
-}
-
-
-bool ArcDiagram::getShowBundles()
-{
-  return showBundles;
-}
-
-
-QColor ArcDiagram::getColorBundles()
-{
-  return colBundles;
-}
-
-
-double ArcDiagram::getTrspBundles()
-{
-  return colBundles.alphaF();
-}
-
-
 void ArcDiagram::getAttrsTree(vector< size_t > &idcs)
 {
   idcs.clear();
@@ -167,83 +89,6 @@ void ArcDiagram::getAttrsTree(vector< size_t > &idcs)
 
 
 // -- set functions -------------------------------------------------
-
-
-void ArcDiagram::setColorClr(QColor col)
-{
-  colClr = col;
-}
-
-
-void ArcDiagram::setColorTxt(QColor col)
-{
-  colTxt = col;
-}
-
-
-void ArcDiagram::setSizeTxt(const int& sze)
-{
-  szeTxt = sze;
-}
-
-
-void ArcDiagram::setIntervAnim(const int& itv)
-{
-  itvAnim = itv;
-}
-
-void ArcDiagram::setShowTree(const bool& shw)
-{
-  showTree = shw;
-}
-
-
-void ArcDiagram::setAnnotateTree(const bool& shw)
-{
-  annotateTree = shw;
-}
-
-
-void ArcDiagram::setColorMap(const int& colMap)
-{
-  colorMap = colMap;
-}
-
-
-void ArcDiagram::setShowBarTree(const bool& shw)
-{
-  showBarTree = shw;
-}
-
-
-void ArcDiagram::setMagnBarTree(const double& val)
-{
-  magnBarTree = val;
-}
-
-
-void ArcDiagram::setShowLeaves(const bool& shw)
-{
-  showLeaves = shw;
-}
-
-
-void ArcDiagram::setShowBundles(const bool& shw)
-{
-  showBundles = shw;
-}
-
-
-void ArcDiagram::setColorBundles(QColor col)
-{
-  colBundles = col;
-}
-
-
-void ArcDiagram::setTrspBundles(const double& trsp)
-{
-  colBundles.setAlphaF(trsp);
-}
 
 
 void ArcDiagram::setAttrsTree(const vector< size_t > idcs)
@@ -450,359 +295,276 @@ void ArcDiagram::visualizeParts(const bool& inSelectMode)
 
 void ArcDiagram::drawBundles(const bool& inSelectMode)
 {
-  // selection mode
-  if (inSelectMode)
+  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+
+  if (render == HQRender)
   {
-    int segs = SEGM_HINT_HQ;
+    VisUtils::enableLineAntiAlias();
+    VisUtils::enableBlending();
+  }
+  else if (render == LQRender)
+  {
+    VisUtils::setColor(VisUtils::lightGray);
+  }
 
-    glPushName(ID_BUNDLES);
-    for (size_t i = 0; i < posBundles.size(); ++i)
+  QColor colFill = QColor();
+  QColor colFade = QColor();
+  QColor colBrdrFill = QColor();
+  QColor colBrdrFade = QColor();
+
+  glPushName(ID_BUNDLES);
+  for (size_t i = 0; i < posBundles.size(); ++i)
+  {
+
+    if (render == HQRender)
     {
-      double x      = posBundles[i].x;
-      double y      = posBundles[i].y;
-      double rad    = radiusBundles[i];
-      double orient = orientBundles[i];
-      double wth    = widthBundles[i];
+      colFill = markBundles[i] ? VisUtils::darkCoolBlue : colBundles;
+      colFade = alpha(colClr, colFill.alphaF());
+      colBrdrFill = alpha(colFill, (std::min)(colFill.alphaF() * 1.2, 1.0));
+      colBrdrFade = alpha(colFill, colFill.alphaF() * 0.1);
+    }
 
-      glPushName((GLuint) i);
+    double x      = posBundles[i].x;
+    double y      = posBundles[i].y;
+    double rad    = radiusBundles[i];
+    double orient = orientBundles[i];
+    double wth    = widthBundles[i];
+
+    glPushName((GLuint) i);
+    if (render = LQRender)
+    {
       if (orient < 0)
       {
-        VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs);
-        VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs);
+        VisUtils::drawArc(x, y, 180.0, 0.0, rad, segs);
       }
       else if (orient > 0)
       {
-        VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs);
-        VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs);
+        VisUtils::drawArc(x, y, 0.0, 180.0, rad, segs);
       }
       else
       {
-        VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs);
-        VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs);
+        VisUtils::drawArc(x, y, 180.0, 540.0, rad, 2*segs);
       }
-      glPopName();
+    }
+    else
+    {
+      if (orient < 0)
+      {
+        VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colFill,     colFade);
+        VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
+      }
+      else if (orient > 0)
+      {
+        VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colFill,     colFade);
+        VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
+      }
+      else
+      {
+        VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colFill,     colFade);
+        VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colBrdrFill, colBrdrFade);
+      }
     }
     glPopName();
   }
-  // rendering mode
-  else
+  glPopName();
+
+  if (render == HQRender)
   {
-    // render high quality
-    if (mouseDrag == MSE_DRAG_FALSE)
-    {
-      int segs = SEGM_HINT_HQ;
-
-      VisUtils::enableLineAntiAlias();
-      VisUtils::enableBlending();
-
-      for (size_t i = 0; i < posBundles.size(); ++i)
-      {
-        QColor colFill = markBundles[i] ? VisUtils::darkCoolBlue : colBundles;
-        QColor colFade = alpha(colClr, colFill.alphaF());
-        QColor colBrdrFill = alpha(colFill, (std::min)(colFill.alphaF() * 1.2, 1.0));
-        QColor colBrdrFade = alpha(colFill, colFill.alphaF() * 0.1);
-
-        double x      = posBundles[i].x;
-        double y      = posBundles[i].y;
-        double rad    = radiusBundles[i];
-        double orient = orientBundles[i];
-        double wth    = widthBundles[i];
-
-        if (orient < 0)
-        {
-          VisUtils::fillArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colFill,     colFade);
-          VisUtils::drawArc(x, y, 180.0, 0.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
-        }
-        else if (orient > 0)
-        {
-          VisUtils::fillArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colFill,     colFade);
-          VisUtils::drawArc(x, y, 0.0, 180.0, wth, 0.0, rad, segs, colBrdrFill, colBrdrFade);
-        }
-        else
-        {
-          VisUtils::fillArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colFill,     colFade);
-          VisUtils::drawArc(x, y, 180.0, 540.0, wth, 0.0, rad, 2*segs, colBrdrFill, colBrdrFade);
-        }
-      }
-
-      VisUtils::disableLineAntiAlias();
-      VisUtils::disableBlending();
-    }
-    // render low quality
-    else
-    {
-      VisUtils::setColor(VisUtils::lightGray);
-
-      int segs = SEGM_HINT_HQ;
-
-      for (size_t i = 0; i < posBundles.size(); ++i)
-      {
-        double x      = posBundles[i].x;
-        double y      = posBundles[i].y;
-        double rad    = radiusBundles[i];
-        double orient = orientBundles[i];
-
-        if (orient < 0)
-        {
-          VisUtils::drawArc(x, y, 180.0, 0.0, rad, segs);
-        }
-        else if (orient > 0)
-        {
-          VisUtils::drawArc(x, y, 0.0, 180.0, rad, segs);
-        }
-        else
-        {
-          VisUtils::drawArc(x, y, 180.0, 540.0, rad, 2*segs);
-        }
-      }
-    }
+    VisUtils::disableLineAntiAlias();
+    VisUtils::disableBlending();
   }
 }
 
 
 void ArcDiagram::drawLeaves(const bool& inSelectMode)
 {
-  // selection mode
-  if (inSelectMode)
-  {
-    glPushName(ID_LEAF_NODE);
-    for (size_t i = 0; i < posLeaves.size(); ++i)
-    {
-      double x = posLeaves[i].x;
-      double y = posLeaves[i].y;
+  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+  Cluster* clust = NULL;
 
-      glPushName((GLuint) i);
-      VisUtils::fillEllipse(x, y, radLeaves, radLeaves, 24);
-      glPopName();
+  if (render == HQRender)
+  {
+    VisUtils::enableLineAntiAlias();
+  }
+
+  glPushName(ID_LEAF_NODE);
+  for (size_t i = 0; i < posLeaves.size(); ++i)
+  {
+    glPushName((GLuint) i);
+
+    double x = posLeaves[i].x;
+    double y = posLeaves[i].y;
+
+    if (render = HQRender)
+    {
+      clust = graph->getLeaf(i);
+
+      // drop shadow
+      VisUtils::setColor(VisUtils::mediumGray);
+      VisUtils::drawEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
+      VisUtils::fillEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
     }
+
+    if (clust != NULL && clust->getAttribute() != NULL)
+      VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
+    else if (render != HitRender)
+      VisUtils::setColor(Qt::white);
+
+    VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
+    if (render != HitRender) VisUtils::setColor(VisUtils::darkGray);
+    VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
+
     glPopName();
   }
-  // rendering mode
-  else
+  glPopName();
+
+  if (render == HQRender)
   {
-    // render high quality
-    if (mouseDrag == MSE_DRAG_FALSE)
+    // mark cluster with initial state
+    if (idxInitStLeaves != NON_EXISTING)
     {
-      int segs = SEGM_HINT_HQ;
-      Cluster* clust = NULL;
+      double x = posLeaves[idxInitStLeaves].x;
+      double y = posLeaves[idxInitStLeaves].y;
 
-      VisUtils::enableLineAntiAlias();
-      for (size_t i = 0; i < posLeaves.size(); ++i)
-      {
-        // position
-        double x = posLeaves[i].x;
-        double y = posLeaves[i].y;
-
-        // color
-        //clust   = mapPosToClust[posTreeTopLft.size()-1][i];
-        clust = graph->getLeaf(i);
-
-        // drop shadow
-        VisUtils::setColor(VisUtils::mediumGray);
-        VisUtils::drawEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
-        VisUtils::fillEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
-
-        // foreground
-        if (clust != NULL && clust->getAttribute() != NULL)
-          VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
-        else
-          VisUtils::setColor(Qt::white);
-        VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
-        VisUtils::setColor(VisUtils::darkGray);
-        VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
-      }
-
-      // mark cluster with initial state
-      if (idxInitStLeaves != NON_EXISTING)
-      {
-        double x = posLeaves[idxInitStLeaves].x;
-        double y = posLeaves[idxInitStLeaves].y;
-
-        VisUtils::setColor(VisUtils::lightGray);
-        VisUtils::fillEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
-        VisUtils::setColor(VisUtils::mediumGray);
-        VisUtils::drawEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
-      }
-
-      VisUtils::disableLineAntiAlias();
-
-      clust = NULL;
+      VisUtils::setColor(VisUtils::lightGray);
+      VisUtils::fillEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
+      VisUtils::setColor(VisUtils::mediumGray);
+      VisUtils::drawEllipse(x, y, 0.5*radLeaves, 0.5*radLeaves, segs);
     }
-    // render low quality
-    else
-    {
-      int segs = SEGM_HINT_LQ;
 
-      for (size_t i = 0; i < posLeaves.size(); ++i)
-      {
-        double x = posLeaves[i].x;
-        double y = posLeaves[i].y;
-
-        VisUtils::setColor(Qt::white);
-        VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
-
-        VisUtils::setColor(VisUtils::darkGray);
-        VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
-      }
-    }
+    VisUtils::disableLineAntiAlias();
+    clust = NULL;
   }
 }
 
 
 void ArcDiagram::drawTree(const bool& inSelectMode)
 {
-  // selection mode
-  if (inSelectMode)
-  {
-    glPushName(ID_TREE_NODE);
-    for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
-    {
-      glPushName((GLuint) i);
-      for (size_t j = 0; j < posTreeTopLft[i].size(); ++j)
-      {
-        double xLft = posTreeTopLft[i][j].x;
-        double xRgt = posTreeBotRgt[i][j].x;
-        double yTop = posTreeTopLft[i][j].y;
+  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+  Cluster* clust = NULL;
+  QColor colFill = Qt::white;
 
-        glPushName((GLuint) j);
-        VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, 24);
-        glPopName();
+  if (render == HQRender)
+  {
+    VisUtils::enableLineAntiAlias();
+    VisUtils::enableBlending();
+  }
+
+  glPushName(ID_TREE_NODE);
+  for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
+  {
+    glPushName((GLuint) i);
+    for (size_t j = 0; j < posTreeTopLft[i].size(); ++j)
+    {
+      glPushName((GLuint) j);
+
+      double xLft = posTreeTopLft[i][j].x;
+      double xRgt = posTreeBotRgt[i][j].x;
+      double yTop = posTreeTopLft[i][j].y;
+      double yBot = posTreeBotRgt[i][j].y;
+
+      if (render == HQRender)
+      {
+        // color
+        clust   = mapPosToClust[i][j];
+        colFill = VisUtils::lightGray;
+
+        if (clust != NULL && clust->getAttribute() != NULL)
+        {
+          colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
+        }
+        // triangle
+        VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot, colFill, VisUtils::lightLightGray, VisUtils::lightLightGray);
+      }
+
+      if (render == LQRender)
+      {
+        VisUtils::setColor(VisUtils::lightLightGray);
+        VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
+      }
+
+      if (render != HitRender)
+      {
+        VisUtils::setColor(VisUtils::lightGray);
+        VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
+      }
+
+      if (render == HQRender)
+      {
+        // drop shadow
+        VisUtils::setColor(VisUtils::mediumGray);
+        VisUtils::drawEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
+        VisUtils::setColor(VisUtils::mediumGray);
+        VisUtils::fillEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
+
+      }
+
+      if (render != HitRender)
+      {
+        // foreground
+        VisUtils::setColor(colFill);
+      }
+
+      VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
+
+      if (render != HitRender)
+      {
+        VisUtils::setColor(VisUtils::darkGray);
+        VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
       }
       glPopName();
     }
     glPopName();
   }
-  // rendering mode
-  else
+  glPopName();
+
+  if (render == HQRender)
   {
-    // render high quality
-    if (mouseDrag == MSE_DRAG_FALSE)
-    {
-      int segs = SEGM_HINT_HQ;
-
-      Cluster* clust = NULL;
-
-      VisUtils::enableLineAntiAlias();
-      VisUtils::enableBlending();
-      for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
-      {
-        for (size_t j = 0; j < posTreeTopLft[i].size(); ++j)
-        {
-          double xLft = posTreeTopLft[i][j].x;
-          double xRgt = posTreeBotRgt[i][j].x;
-          double yTop = posTreeTopLft[i][j].y;
-          double yBot = posTreeBotRgt[i][j].y;
-
-          // color
-          clust   = mapPosToClust[i][j];
-          QColor colFill;
-          if (clust != NULL && clust->getAttribute() != NULL)
-          {
-            colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
-          }
-          else
-          {
-            colFill = VisUtils::lightGray;
-          }
-
-          // triangle
-          VisUtils::fillTriangle(
-                0.5*(xLft+xRgt), yTop,
-                xLft,            yBot,
-                xRgt,            yBot,
-                colFill, VisUtils::lightLightGray, VisUtils::lightLightGray);
-          VisUtils::setColor(VisUtils::lightGray);
-          VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-
-          // drop shadow
-          VisUtils::setColor(VisUtils::mediumGray);
-          VisUtils::drawEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColor(VisUtils::mediumGray);
-          VisUtils::fillEllipse(0.5*(xLft+xRgt)+0.1*radLeaves, yTop-0.1*radLeaves, 0.75*radLeaves, 0.75*radLeaves, segs);
-
-          // foreground
-          VisUtils::setColor(colFill, 1.0);
-          VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColor(VisUtils::darkGray);
-          VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-        }
-      }
-      VisUtils::disableBlending();
-      VisUtils::disableLineAntiAlias();
-    }
-    // render low quality
-    else
-    {
-      int segs = SEGM_HINT_LQ;
-
-      for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
-      {
-        for (size_t j = 0; j < posTreeTopLft[i].size(); ++j)
-        {
-          double xLft = posTreeTopLft[i][j].x;
-          double xRgt = posTreeBotRgt[i][j].x;
-          double yTop = posTreeTopLft[i][j].y;
-          double yBot = posTreeBotRgt[i][j].y;
-
-          VisUtils::setColor(VisUtils::lightLightGray);
-          VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-          VisUtils::setColor(VisUtils::lightGray);
-          VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
-
-          VisUtils::setColor(Qt::white);
-          VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-          VisUtils::setColor(VisUtils::darkGray);
-          VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
-        }
-      }
-    }
+    VisUtils::disableBlending();
+    VisUtils::disableLineAntiAlias();
   }
 }
 
 
 void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 {
-  double wth = canvas->getWidth();
-  double pix = canvas->getPixelSize();
+  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
 
-  // selection mode
-  if (inSelectMode)
-  {}
-  // rendering mode
-  else
+  if (render = HQRender)
   {
-    // render high quality
-    if (mouseDrag == MSE_DRAG_FALSE)
+    double wth = canvas->getWidth();
+    double pix = canvas->getPixelSize();
+
+    string lbl;
+
+    for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
     {
-      string lbl;
-
-      for (size_t i = 0; i < posTreeTopLft.size()-1; ++i)
+      if (posTreeTopLft[i].size() > 0)
       {
-        if (posTreeTopLft[i].size() > 0)
-        {
-          lbl = mapPosToClust[i+1][0]->getAttribute()->getName();
+        lbl = mapPosToClust[i+1][0]->getAttribute()->getName();
 
-          double yLin =  posTreeBotRgt[i][0].y;
-          double yTxt =  yLin + 0.5*szeTxt*pix + pix;
+        double yLin =  posTreeBotRgt[i][0].y;
+        double yTxt =  yLin + 0.5*szeTxt*pix + pix;
 
-          // left
-          double xLft = -0.5*wth + radLeaves;
-          double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
+        // left
+        double xLft = -0.5*wth + radLeaves;
+        double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
 
-          VisUtils::setColor(colTxt);
-          VisUtils::drawLabelRight(texCharId, xLft, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
-          VisUtils::setColor(VisUtils::lightGray);
-          VisUtils::drawLine(xLft, xRgt, yLin, yLin);
+        VisUtils::setColor(colTxt);
+        VisUtils::drawLabelRight(texCharId, xLft, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
+        VisUtils::setColor(VisUtils::lightGray);
+        VisUtils::drawLine(xLft, xRgt, yLin, yLin);
 
-          // right
-          xLft = posTreeBotRgt[i][posTreeBotRgt[i].size()-1].x + 2.0*radLeaves;
-          xRgt = 0.5*wth - radLeaves;
+        // right
+        xLft = posTreeBotRgt[i][posTreeBotRgt[i].size()-1].x + 2.0*radLeaves;
+        xRgt = 0.5*wth - radLeaves;
 
-          VisUtils::setColor(colTxt);
-          VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
-          VisUtils::setColor(VisUtils::lightGray);
-          VisUtils::drawLine(xLft, xRgt, yLin, yLin);
-        }
+        VisUtils::setColor(colTxt);
+        VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
+        VisUtils::setColor(VisUtils::lightGray);
+        VisUtils::drawLine(xLft, xRgt, yLin, yLin);
       }
     }
   }
@@ -811,106 +573,81 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 
 void ArcDiagram::drawBarTree(const bool& inSelectMode)
 {
-  // selection mode
-  if (inSelectMode)
+  if (posBarTreeTopLft.size() > 1)
   {
-    if (posBarTreeTopLft.size() > 1)
-    {
-      glPushName(ID_BAR_TREE);
-      for (size_t i = 0; i < posBarTreeTopLft.size(); ++i)
-      {
-        glPushName((GLuint) i);
-        for (size_t j = 0; j < posBarTreeTopLft[i].size(); ++j)
-        {
-          double xLft = posBarTreeTopLft[i][j].x;
-          double xRgt = posBarTreeBotRgt[i][j].x;
-          double yTop = posBarTreeTopLft[i][j].y;
-          double yBot = posBarTreeBotRgt[i][j].y;
 
-          glPushName((GLuint) j);
+    RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+    Cluster* clust = NULL;
+    QColor colFill = Qt::lightGray;
+
+    if (render == HQRender)
+    {
+      VisUtils::enableLineAntiAlias();
+      VisUtils::enableBlending();
+    }
+
+    glPushName(ID_BAR_TREE);
+    for (size_t i = 0; i < posBarTreeTopLft.size(); ++i)
+    {
+      glPushName((GLuint) i);
+      for (size_t j = 0; j < posBarTreeTopLft[i].size(); ++j)
+      {
+        glPushName((GLuint) j);
+
+        double xLft = posBarTreeTopLft[i][j].x;
+        double xRgt = posBarTreeBotRgt[i][j].x;
+        double yTop = posBarTreeTopLft[i][j].y;
+        double yBot = posBarTreeBotRgt[i][j].y;
+
+        if (render == HQRender)
+        {
+          // fill color
+          clust   = mapPosToClust[i][j];
+          if (clust != NULL && clust->getAttribute() != NULL)
+          {
+            colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
+          }
+
+          // solid background
+          VisUtils::setColor(colClr);
           VisUtils::fillRect(xLft, xRgt, yTop, yBot);
-          glPopName();
+
+          // colored foreground
+          VisUtils::fillRect(
+                xLft,    xRgt,
+                yTop,    yBot,
+                colFill, VisUtils::lightLightGray,
+                colFill, VisUtils::lightLightGray);
+
+          // border
+          VisUtils::setColor(VisUtils::lightGray);
+          VisUtils::drawRect(xLft, xRgt, yTop, yBot);
         }
+
+        if (render == LQRender)
+        {
+          VisUtils::setColor(VisUtils::lightLightGray);
+          VisUtils::fillRect(xLft, xRgt, yTop, yBot);
+          VisUtils::setColor(VisUtils::lightGray);
+          VisUtils::drawRect(xLft, xRgt, yTop, yBot);
+        }
+
+        if (render == HitRender)
+        {
+          VisUtils::fillRect(xLft, xRgt, yTop, yBot);
+        }
+
         glPopName();
       }
       glPopName();
     }
-  }
-  // rendering mode
-  else
-  {
-    if (posBarTreeTopLft.size() > 1)
+    glPopName();
+
+    if (render == HQRender)
     {
-      // render high quality
-      if (mouseDrag == MSE_DRAG_FALSE)
-      {
-        Cluster* clust = NULL;;
-
-        VisUtils::enableLineAntiAlias();
-        VisUtils::enableBlending();
-
-        for (size_t i = 0; i < posBarTreeTopLft.size(); ++i)
-        {
-          for (size_t j = 0; j < posBarTreeTopLft[i].size(); ++j)
-          {
-            // position
-            double xLft = posBarTreeTopLft[i][j].x;
-            double xRgt = posBarTreeBotRgt[i][j].x;
-            double yTop = posBarTreeTopLft[i][j].y;
-            double yBot = posBarTreeBotRgt[i][j].y;
-
-            // fill color
-            clust   = mapPosToClust[i][j];
-            QColor colFill;
-            if (clust != NULL && clust->getAttribute() != NULL)
-            {
-              colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
-            }
-            else
-            {
-              colFill = VisUtils::lightGray;
-            }
-
-            // solid background
-            VisUtils::setColor(colClr);
-            VisUtils::fillRect(xLft, xRgt, yTop, yBot);
-
-            // colored foreground
-            VisUtils::fillRect(
-                  xLft,    xRgt,
-                  yTop,    yBot,
-                  colFill, VisUtils::lightLightGray,
-                  colFill, VisUtils::lightLightGray);
-
-            // border
-            VisUtils::setColor(VisUtils::lightGray);
-            VisUtils::drawRect(xLft, xRgt, yTop, yBot);
-          }
-        }
-        VisUtils::disableBlending();
-        VisUtils::disableLineAntiAlias();
-
-        clust = NULL;
-      }
-      // render low quality
-      else
-      {
-        for (size_t i = 0; i < posBarTreeTopLft.size(); ++i)
-        {
-          for (size_t j = 0; j < posBarTreeTopLft[i].size(); ++j)
-          {
-            double xLft = posBarTreeTopLft[i][j].x;
-            double xRgt = posBarTreeBotRgt[i][j].x;
-            double yTop = posBarTreeTopLft[i][j].y;
-            double yBot = posBarTreeBotRgt[i][j].y;
-
-            VisUtils::setColor(VisUtils::lightLightGray);
-            VisUtils::fillRect(xLft, xRgt, yTop, yBot);
-            VisUtils::setColor(VisUtils::lightGray);
-            VisUtils::drawRect(xLft, xRgt, yTop, yBot);
-          }
-        }
-      }
+      VisUtils::disableBlending();
+      VisUtils::disableLineAntiAlias();
+      clust = NULL;
     }
   }
 }
@@ -918,8 +655,10 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 
 void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 {
+  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+
   // selection mode
-  if (inSelectMode)
+  if (render == HitRender)
   {
     glPushName(ID_DIAGRAM);
     for (size_t i = 0; i < posDgrm.size(); ++i)
@@ -1006,8 +745,6 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
   // rendering mode
   else
   {
-    string msg;
-
     for (size_t i = 0; i < posDgrm.size(); ++i)
     {
       if (showDgrm[i] == true)
@@ -1136,13 +873,10 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           vals.clear();
         }
 
-        msg  = "";
-        msg += Utils::dblToStr(frameIdxDgrm[i]+1);
-        msg += "/";
-        msg += Utils::dblToStr(framesDgrm[i].size());
+        QString msg = QString("%1/%2").arg(int(frameIdxDgrm[i]+1)).arg(int(framesDgrm[i].size()));
 
         VisUtils::setColor(colTxt);
-        VisUtils::drawLabelRight(texCharId, -0.76, -0.89, 5*szeTxt*pix/CHARHEIGHT, msg);
+        VisUtils::drawLabelRight(texCharId, -0.76, -0.89, 5*szeTxt*pix/CHARHEIGHT, msg.toStdString());
 
         VisUtils::enableLineAntiAlias();
 
@@ -1248,16 +982,15 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
 void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 {
-  // selection mode
-  if (inSelectMode)
-  {}
-  // rendering mode
-  else
+  if (markLeaves.size() > 0)
   {
-    if (mouseDrag == MSE_DRAG_FALSE && markLeaves.size() > 0)
+    RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+    int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
+
+    if (render = HQRender)
     {
+      VisUtils::enableLineAntiAlias();
       double pix  = canvas->getPixelSize();
-      int segs = SEGM_HINT_HQ;
 
       for (size_t i = 0; i < posLeaves.size(); ++i)
       {
@@ -1268,8 +1001,8 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
         {
           double x = posLeaves[i].x;
           double y = posLeaves[i].y;
-
           double frac = 1.0/(double)it->second.size();
+
           for (size_t j = 0; j < it->second.size(); ++j)
           {
             double aglBeg = j*frac*360.0;
@@ -1278,7 +1011,6 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
             QColor colIn = it->second[j];
             QColor colOut = alpha(colIn, 0.0);
 
-            VisUtils::enableLineAntiAlias();
             VisUtils::setColor(colIn);
             VisUtils::drawArc(
                   x, y,
@@ -1291,13 +1023,13 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
                   aglBeg, aglEnd,
                   segs,
                   colIn, colOut);
-            VisUtils::disableLineAntiAlias();
 
           }
         }
       }
-    }
 
+      VisUtils::disableLineAntiAlias();
+    }
   }
 }
 
@@ -2163,7 +1895,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         }
         else if (mouseSide   == MSE_SIDE_RGT &&
                  mouseButton == MSE_BUTTON_DOWN /*&&
-                   mouseDrag   == MSE_DRAG_FALSE*/)
+                            mouseDrag   == MSE_DRAG_FALSE*/)
         {
           // show menu
           if (mediator->getView() == Mediator::VIEW_SIM)

@@ -424,10 +424,7 @@ void VisUtils::drawArc(
   {
     for (int i = slices; i >= 0; --i)
     {
-      if (colBeg.isValid() && colEnd.isValid())
-      {
-        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
-      }
+      if (colBeg.isValid() && colEnd.isValid()) setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -464,10 +461,7 @@ void VisUtils::fillArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      if (colBeg.isValid() && colEnd.isValid())
-      {
-        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
-      }
+      if (colBeg.isValid() && colEnd.isValid()) setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       // outside
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
