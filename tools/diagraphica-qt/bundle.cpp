@@ -60,36 +60,6 @@ Bundle::~Bundle()
 // -- set functions -------------------------------------------------
 
 
-void Bundle::setIndex(const size_t& idx)
-{
-  index = idx;
-}
-
-
-void Bundle::setParent(Bundle* p)
-{
-  parent = p;
-}
-
-
-void Bundle::addChild(Bundle* c)
-{
-  children.push_back(c);
-}
-
-
-void Bundle::setInCluster(Cluster* in)
-{
-  inCluster = in;
-}
-
-
-void Bundle::setOutCluster(Cluster* out)
-{
-  outCluster = out;
-}
-
-
 void Bundle::addEdge(Edge* e)
 {
   edges.push_back(e);
@@ -111,75 +81,22 @@ void Bundle::setEdges(const vector< Edge* > &e)
 }
 
 
-void Bundle::updateLabel(
-  const string& lbl,
-  const string& status)
-{
-  labels[lbl] = status;
-}
-
-
 // -- get functions -------------------------------------------------
-
-
-size_t Bundle::getIndex()
-{
-  return index;
-}
-
-
-Bundle* Bundle::getParent()
-{
-  return parent;
-}
-
-
-size_t Bundle::getSizeChildren()
-{
-  return children.size();
-}
 
 
 Bundle* Bundle::getChild(const size_t& idx)
 {
-  Bundle* result = NULL;
-  if (idx < children.size())
-  {
-    result = children[idx];
-  }
-  return result;
-}
-
-
-Cluster* Bundle::getInCluster()
-{
-  return inCluster;
-}
-
-
-Cluster* Bundle::getOutCluster()
-{
-  return outCluster;
-}
-
-
-size_t Bundle::getSizeEdges()
-{
-  return edges.size();
+  if (idx >= children.size())
+    return NULL;
+  return children[idx];
 }
 
 
 Edge* Bundle::getEdge(const size_t& idx)
 {
-  if (idx < edges.size())
-  {
-    return edges[idx];
-  }
-  else
-  {
+  if (idx >= children.size())
     throw mcrl2::runtime_error("Error retrieving bundle edge.");
-  }
-
+  return edges[idx];
 }
 
 
@@ -191,7 +108,6 @@ void Bundle::getLabels(vector< string > &lbls)
   for (it = labels.begin(); it != labels.end(); ++it)
   {
     lbls.push_back(it->first);
-    //status.push_back( it.second );
   }
 
 }
@@ -242,12 +158,6 @@ void Bundle::getLabels(
 // -- clear functions -----------------------------------------------
 
 
-void Bundle::clearParent()
-{
-  parent = NULL;
-}
-
-
 void Bundle::clearChildren()
 {
   for (size_t i = 0; i < children.size(); ++i)
@@ -255,18 +165,6 @@ void Bundle::clearChildren()
     children[i] = NULL;
   }
   children.clear();
-}
-
-
-void Bundle::clearInCluster()
-{
-  inCluster = NULL;
-}
-
-
-void Bundle::clearOutCluster()
-{
-  outCluster = NULL;
 }
 
 
