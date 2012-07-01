@@ -61,98 +61,7 @@ Cluster::~Cluster()
 }
 
 
-// -- set functions -------------------------------------------------
-
-
-void Cluster::setCoord(const vector< size_t > &crd)
-{
-  coord = crd;
-}
-
-
-void Cluster::setIndex(const size_t& idx)
-{
-  index = idx;
-}
-
-
-void Cluster::setParent(Cluster* p)
-{
-  parent = p;
-}
-
-
-void Cluster::addChild(Cluster* c)
-{
-  children.push_back(c);
-}
-
-
-void Cluster::setChildren(const vector< Cluster* > &c)
-{
-  clearChildren();
-  children = c;
-}
-
-
-void Cluster::addNode(Node* n)
-{
-  nodes.push_back(n);
-}
-
-
-void Cluster::setNodes(const vector< Node* > &n)
-{
-  clearNodes();
-  nodes = n;
-}
-
-
-void Cluster::setAttribute(Attribute* attr)
-{
-  attribute = attr;
-}
-
-
-void Cluster::setAttrValIdx(const size_t& idx)
-{
-  attrValIdx = idx;
-}
-
-
-void Cluster::addInBundle(Bundle* b)
-{
-  inBundles.push_back(b);
-}
-
-
-void Cluster::setInBundles(const vector< Bundle* > b)
-{
-  clearInBundles();
-  inBundles = b;
-}
-
-
-void Cluster::addOutBundle(Bundle* b)
-{
-  outBundles.push_back(b);
-}
-
-
-void Cluster::setOutBundles(const vector< Bundle* > b)
-{
-  clearOutBundles();
-  outBundles = b;
-}
-
-
 // -- get functions -------------------------------------------------
-
-
-size_t Cluster::getSizeCoord()
-{
-  return coord.size();
-}
 
 
 size_t Cluster::getCoord(const size_t& idx)
@@ -166,30 +75,6 @@ size_t Cluster::getCoord(const size_t& idx)
 }
 
 
-void Cluster::getCoord(vector< size_t > &crd)
-{
-  crd = coord;
-}
-
-
-size_t Cluster::getIndex()
-{
-  return index;
-}
-
-
-Cluster* Cluster::getParent()
-{
-  return parent;
-}
-
-
-size_t Cluster::getSizeChildren()
-{
-  return children.size();
-}
-
-
 Cluster* Cluster::getChild(const size_t& idx)
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < children.size())
@@ -199,19 +84,6 @@ Cluster* Cluster::getChild(const size_t& idx)
   else
   {
     throw mcrl2::runtime_error("Error retrieving cluster child.");
-  }
-}
-
-
-size_t Cluster::getSizeNodes()
-{
-  if (this != NULL)
-  {
-    return nodes.size();
-  }
-  else
-  {
-    return 0;
   }
 }
 
@@ -237,24 +109,6 @@ size_t Cluster::getSizeDescNodes()
 }
 
 
-Attribute* Cluster::getAttribute()
-{
-  return attribute;
-}
-
-
-size_t Cluster::getAttrValIdx()
-{
-  return attrValIdx;
-}
-
-
-size_t Cluster::getSizeInBundles()
-{
-  return inBundles.size();
-}
-
-
 Bundle* Cluster::getInBundle(const size_t& idx)
 {
   if (idx != NON_EXISTING && static_cast <size_t>(idx) < inBundles.size())
@@ -265,12 +119,6 @@ Bundle* Cluster::getInBundle(const size_t& idx)
   {
     throw mcrl2::runtime_error("Error retrieving cluster incoming bundle.");
   }
-}
-
-
-size_t Cluster::getSizeOutBundles()
-{
-  return outBundles.size();
 }
 
 
@@ -288,12 +136,6 @@ Bundle* Cluster::getOutBundle(const size_t& idx)
 
 
 // -- clear functions -----------------------------------------------
-
-
-void Cluster::clearParent()
-{
-  parent = NULL;
-}
 
 
 void Cluster::clearChildren()
