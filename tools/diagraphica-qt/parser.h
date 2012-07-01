@@ -45,7 +45,6 @@ class Parser : public Colleague
     virtual ~Parser();
 
     // -- parsing functions -----------------------------------------
-    int getFileSize(const std::string& path);
 
     // fsm files
     void parseFile(

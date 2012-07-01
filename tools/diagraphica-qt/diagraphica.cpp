@@ -9,6 +9,8 @@
 /// \file ./diagraph.cpp
 
 #include <QApplication>
+#include <QString>
+#include <QFileInfo>
 
 #include "wx.hpp" // precompiled headers
 
@@ -113,37 +115,11 @@ int DiaGraph::OnExit()
 
 void DiaGraph::openFile(const std::string& path)
 {
-  Parser* parser   = NULL;
-  std::string fileName  = "";
-  std::string delims    = "\\/";
-  std::string::size_type begIdx;
-  std::string::size_type endIdx;
-  int    fileSize  = 0;
+  QFileInfo fileInfo(QString::fromStdString(path));
 
-  // get filename
-  begIdx = path.find_last_of(delims);
-  if (begIdx == std::string::npos)
-  {
-    begIdx = 0;
-  }
-  else
-  {
-    begIdx += 1;
-  }
-  endIdx   = path.size();
-  fileName = path.substr(begIdx, endIdx-begIdx);
-
-  // init parser
-  parser = new Parser(this);
-  try
-  {
-    // get file size
-    fileSize = parser->getFileSize(path);
-  }
-  catch (const mcrl2::runtime_error& e)
-  {
-    wxLogError(wxString(e.what(), wxConvUTF8));
-  }
+  Parser parser(this);
+  std::string fileName = fileInfo.fileName().toStdString();
+  int fileSize = fileInfo.size();
 
   try
   {
@@ -206,7 +182,7 @@ void DiaGraph::openFile(const std::string& path)
       "Opening file",
       "Opening " + fileName,
       fileSize);
-    parser->parseFile(
+    parser.parseFile(
       path,
       graph);
     closeProgress();
@@ -277,10 +253,6 @@ void DiaGraph::openFile(const std::string& path)
     critSect = false;
   }
 
-  // delete parser
-  delete parser;
-  parser = NULL;
-
   // clear status msg
   frame->setStatusText("");
 
@@ -292,12 +264,12 @@ void DiaGraph::openFile(const std::string& path)
 void DiaGraph::saveFile(const std::string& path)
 {
   // init parser
-  Parser* parser = new Parser(this);
+  Parser parser(this);
 
   // do parsing
   try
   {
-    parser->writeFSMFile(
+    parser.writeFSMFile(
       path,
       graph);
   }
@@ -305,17 +277,13 @@ void DiaGraph::saveFile(const std::string& path)
   {
     wxLogError(wxString(e.what(), wxConvUTF8));
   }
-
-  // delete parser
-  delete parser;
-  parser = NULL;
 }
 
 
 void DiaGraph::handleLoadAttrConfig(const std::string& path)
 {
   // init parser
-  Parser* parser = new Parser(this);
+  Parser parser(this);
 
   // do parsing
   try
@@ -324,7 +292,7 @@ void DiaGraph::handleLoadAttrConfig(const std::string& path)
     map< size_t , vector< std::string > > attrCurDomains;
     map< size_t , map< size_t, size_t  > > attrOrigToCurDomains;
 
-    parser->parseAttrConfig(
+    parser.parseAttrConfig(
       path,
       graph,
       attrIdxFrTo,
@@ -345,22 +313,18 @@ void DiaGraph::handleLoadAttrConfig(const std::string& path)
   {
     wxLogError(wxString(e.what(), wxConvUTF8));
   }
-
-  // delete parser
-  delete parser;
-  parser = NULL;
 }
 
 
 void DiaGraph::handleSaveAttrConfig(const std::string& path)
 {
   // init parser
-  Parser* parser = new Parser(this);
+  Parser parser(this);
 
   // do parsing
   try
   {
-    parser->writeAttrConfig(
+    parser.writeAttrConfig(
       path,
       graph);
   }
@@ -368,17 +332,13 @@ void DiaGraph::handleSaveAttrConfig(const std::string& path)
   {
     wxLogError(wxString(e.what(), wxConvUTF8));
   }
-
-  // delete parser
-  delete parser;
-  parser = NULL;
 }
 
 
 void DiaGraph::handleLoadDiagram(const std::string& path)
 {
   // init parser
-  Parser*  parser  = new Parser(this);
+  Parser parser(this);
   // init diagrams
   Diagram* dgrmOld = editor->getDiagram();
   Diagram* dgrmNew = new Diagram(this/*, canvasEdit*/);
@@ -386,7 +346,7 @@ void DiaGraph::handleLoadDiagram(const std::string& path)
   // do parsing
   try
   {
-    parser->parseDiagram(
+    parser.parseDiagram(
       path,
       graph,
       dgrmOld,
@@ -435,10 +395,6 @@ void DiaGraph::handleLoadDiagram(const std::string& path)
     wxLogError(wxString(e.what(), wxConvUTF8));
   }
 
-  // delete parser
-  delete parser;
-  parser = NULL;
-
   dgrmOld = NULL;
   dgrmNew = NULL;
 }
@@ -447,12 +403,12 @@ void DiaGraph::handleLoadDiagram(const std::string& path)
 void DiaGraph::handleSaveDiagram(const std::string& path)
 {
   // init parser
-  Parser* parser   = new Parser(this);
+  Parser parser(this);
 
   // do parsing
   try
   {
-    parser->writeDiagram(
+    parser.writeDiagram(
       path,
       graph,
       editor->getDiagram());
@@ -461,10 +417,6 @@ void DiaGraph::handleSaveDiagram(const std::string& path)
   {
     wxLogError(wxString(e.what(), wxConvUTF8));
   }
-
-  // delete parser
-  delete parser;
-  parser = NULL;
 }
 
 

@@ -8,6 +8,7 @@
 //
 /// \file ./parser.cpp
 
+#include <QFileInfo>
 #include "wx.hpp" // precompiled headers
 
 #include "parser.h"
@@ -35,45 +36,6 @@ Parser::~Parser()
 
 
 // -- parsing functions ---------------------------------------------
-
-
-int Parser::getFileSize(const string& path)
-// This function returns the size of the file identified by 'path' in
-// bytes. Thanks to http://www.cplusplus.com/doc/tutorial/files.html
-{
-  int result = 0;
-  ifstream file;
-
-  int begin  = 0;
-  int end    = 0;
-
-  file.open(path.c_str());
-  if (!file.is_open())
-  {
-    throw mcrl2::runtime_error("Error opening file for computing file size.");
-  }
-
-  try
-  {
-    // get starting position
-    begin = file.tellg();
-
-    // seek and set current position to 'EOF'
-    file.seekg(0, ios::end);
-    end = file.tellg();
-
-    // calc size
-    result = end - begin;
-  }
-  catch (...)
-  {
-    throw mcrl2::runtime_error("Error computing file size.");
-  }
-  file.close();
-
-  return result;
-}
-
 
 void Parser::parseFile(const string& path, Graph* graph)
 // Parse the file identified by 'fileName' by calling:
@@ -166,9 +128,8 @@ void Parser::writeFSMFile(
   const string& path,
   Graph* graph)
 {
-  size_t begIdx, endIdx;
-  string fileName;
-  string delims    = "\\/";
+  QFileInfo fileInfo(QString::fromStdString(path));
+  string fileName = fileInfo.fileName().toStdString();
 
   ofstream file;
   string line = "";
@@ -181,19 +142,6 @@ void Parser::writeFSMFile(
   {
     throw mcrl2::runtime_error("Error opening file for writing.");
   }
-
-  // get filename
-  begIdx = path.find_last_of(delims);
-  if (begIdx == string::npos)
-  {
-    begIdx = 0;
-  }
-  else
-  {
-    begIdx += 1;
-  }
-  endIdx   = path.size();
-  fileName = path.substr(begIdx, endIdx-begIdx);
 
   // init progress
   lineCnt = 0;
