@@ -40,23 +40,23 @@ class Examiner : public wxEvtHandler, public Visualizer
     virtual ~Examiner();
 
     // -- get functions ---------------------------------------------
-    static QColor getColorClr();
-    static QColor getColorTxt();
-    static int getSizeTxt();
-    static QColor getColorBdl();
+    static QColor getColorClr() { return colClr; }
+    static QColor getColorTxt() { return colTxt; }
+    static int getSizeTxt() { return szeTxt; }
+    static QColor getColorBdl() { return colBdl; }
 
-    QColor getColorSel();
+    QColor getColorSel() { return VisUtils::coolRed; }
     size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col);
-    static void setColorTxt(QColor col);
-    static void setSizeTxt(const int& sze);
-    static void setColorBdl(QColor col);
+    static void setColorClr(QColor col) { colClr = col; }
+    static void setColorTxt(QColor col) { colTxt = col; }
+    static void setSizeTxt(const int& sze) { szeTxt = sze; }
+    static void setColorBdl(QColor col) { colBdl = col; }
 
     static void setBlendType(const int& type);
 
-    void setDiagram(Diagram* dgrm);
+    void setDiagram(Diagram* dgrm) { diagram = dgrm; }
     void setFrame(
       Cluster* frme,
       const std::vector< Attribute* > &attrs,

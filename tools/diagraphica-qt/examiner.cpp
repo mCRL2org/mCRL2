@@ -77,36 +77,6 @@ Examiner::~Examiner()
 // -- get functions -------------------------------------------------
 
 
-QColor Examiner::getColorClr()
-{
-  return colClr;
-}
-
-
-QColor Examiner::getColorTxt()
-{
-  return colTxt;
-}
-
-
-int Examiner::getSizeTxt()
-{
-  return szeTxt;
-}
-
-
-QColor Examiner::getColorBdl()
-{
-  return colBdl;
-}
-
-
-QColor Examiner::getColorSel()
-{
-  return VisUtils::coolRed;
-}
-
-
 size_t Examiner::getIdxClstSel()
 {
   size_t result = NON_EXISTING;
@@ -119,36 +89,6 @@ size_t Examiner::getIdxClstSel()
 
 
 // -- set functions -------------------------------------------------
-
-
-void Examiner::setColorClr(QColor col)
-{
-  colClr = col;
-}
-
-
-void Examiner::setColorTxt(QColor col)
-{
-  colTxt = col;
-}
-
-
-void Examiner::setSizeTxt(const int& sze)
-{
-  szeTxt = sze;
-}
-
-
-void Examiner::setColorBdl(QColor col)
-{
-  colBdl = col;
-}
-
-
-void Examiner::setDiagram(Diagram* dgrm)
-{
-  diagram = dgrm;
-}
 
 
 void Examiner::setFrame(
