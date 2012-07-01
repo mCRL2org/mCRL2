@@ -30,21 +30,21 @@ class Edge
     virtual ~Edge();
 
     // -- set functions ---------------------------------------------
-    void setInNode(Node* in);
-    void setOutNode(Node* out);
-    void setBundle(Bundle* b);
+    void setInNode(Node* in) { inNode = in; }
+    void setOutNode(Node* out) { outNode = out; }
+    void setBundle(Bundle* b) { bundle = b; }
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
-    std::string getLabel();
-    Node* getInNode();
-    Node* getOutNode();
-    Bundle* getBundle();
+    size_t getIndex() { return index; }
+    std::string getLabel() { return label; }
+    Node* getInNode() { return inNode; }
+    Node* getOutNode() { return outNode; }
+    Bundle* getBundle() { return bundle; }
 
     // -- clear functions -------------------------------------------
-    void clearInNode();
-    void clearOutNode();
-    void clearBundle();
+    void clearInNode() { inNode = NULL; }
+    void clearOutNode() { outNode = NULL; }
+    void clearBundle() { bundle = NULL; }
 
   protected:
     // -- data members ----------------------------------------------
