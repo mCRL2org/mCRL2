@@ -30,7 +30,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   arcdiagram.cpp
   attrdiscr.cpp
   attribute.cpp
-  bitmappanel.cpp
   bundle.cpp
   cluster.cpp
   colleague.cpp

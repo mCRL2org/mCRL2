@@ -1175,7 +1175,7 @@ QColor ArcDiagram::calcColor(size_t iter, size_t numr)
   else if (colorMap == VisUtils::COL_MAP_QUAL_ACCENT)
     return VisUtils::qualAccent(iter, numr);
   else
-    assert(false);
+    return QColor();
 }
 
 

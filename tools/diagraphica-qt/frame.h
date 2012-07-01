@@ -24,7 +24,6 @@
 #include <wx/toolbar.h>
 #include <wx/splitter.h>
 #include "attribute.h"
-#include "bitmappanel.h"
 #include "colleague.h"
 #include "dof.h"
 #include "droptarget.h"
