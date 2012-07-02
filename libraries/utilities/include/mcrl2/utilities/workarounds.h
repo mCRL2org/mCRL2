@@ -81,10 +81,10 @@ inline double round(double d)
 #endif
 
 // Apple specific
-#if defined(__APPLE)
+// #if defined(__APPLE) // This test does not work to determine a 32bit apple gcc compiler.
 // Workaround for OS X with Apples patched gcc 4.0.1
-  #undef nil
-#endif
+#undef nil
+// #endif
 
 // Code used for all platforms
 
