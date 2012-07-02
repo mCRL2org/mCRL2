@@ -46,22 +46,15 @@ void Parser::parseFile(const string& path, Graph* graph)
 // already read.
 {
   using namespace mcrl2::lts;
-//using namespace mcrl2::core;
 
-  //ifstream file;
   string line = "";
-  //int sect = 0;
-  //int lineCnt = 0;
-  //int byteCnt = 0;
-
-  ////////////////////////////////////////////////////
-
   mcrl2::lts::lts_fsm_t l;
+
   load_lts_as_fsm_file(path,l);
 
   const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
-  for (unsigned int i = 0; i < process_parameters.size(); ++i, ++parameter)
+  for (size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
   {
     line.clear();
     // line.append(l.state_parameter_name_str(i));
@@ -129,46 +122,38 @@ void Parser::writeFSMFile(
   Graph* graph)
 {
   QFileInfo fileInfo(QString::fromStdString(path));
-  string fileName = fileInfo.fileName().toStdString();
+  QString fileName = fileInfo.fileName();
+  QFile file(fileInfo.absolutePath());
 
-  ofstream file;
-  string line = "";
-
-  int lineCnt = 0;
-  size_t lineTot = 0;
-
-  file.open(path.c_str());
-  if (!file.is_open())
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
   {
     throw mcrl2::runtime_error("Error opening file for writing.");
   }
 
+  QString line = "";
+  int lineCnt = 0;
+  size_t lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
+
   // init progress
-  lineCnt = 0;
-  lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
   mediator->initProgress(
     "Saving file",
-    "Writing " + fileName,
+    "Writing " + fileName.toStdString(),
     lineTot);
 
 
   // write state variable description
   for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
   {
-    line  = "";
-    line.append(graph->getAttribute(i)->getName());
-    line.append("(");
-    line.append(Utils::intToStr((int) graph->getAttribute(i)->getSizeOrigValues()));
-    line.append(") ");
-    line.append(graph->getAttribute(i)->getType());
-    line.append(" ");
+    QString name = QString::fromStdString(graph->getAttribute(i)->getName());
+    QString sizeOrigValues = QString::number(int(graph->getAttribute(i)->getSizeOrigValues()));
+    QString type = QString::fromStdString(graph->getAttribute(i)->getType());
+
+    line = QString("%1(%2) %3 ").arg(name, sizeOrigValues, type);
 
     for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
     {
-      line.append("\"");
-      line.append(graph->getAttribute(i)->getCurValue(j)->getValue());
-      line.append("\"");
-
+      QString value = QString::fromStdString(graph->getAttribute(i)->getCurValue(j)->getValue());
+      line.append(QString("\"%1\"").arg(value));
       if (j < graph->getAttribute(i)->getSizeCurValues()-1)
       {
         line.append(" ");
@@ -177,7 +162,7 @@ void Parser::writeFSMFile(
 
     line.append("\n");
 
-    file << line;
+    file.write(line.toAscii());
 
     if (lineCnt % 1000 == 0)
     {
@@ -187,8 +172,7 @@ void Parser::writeFSMFile(
   }
 
   // write state vectors
-  line = "---\n";
-  file << line;
+  file.write("---\n");
 
   for (size_t i = 0; i < graph->getSizeNodes(); ++i)
   {
@@ -196,7 +180,7 @@ void Parser::writeFSMFile(
 
     for (size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j)
     {
-      line.append(Utils::dblToStr(graph->getNode(i)->getTupleVal(j)));
+      line.append(QString::number(graph->getNode(i)->getTupleVal(j), 'f'));
 
       if (j < graph->getNode(i)->getSizeTuple()-1)
       {
@@ -206,7 +190,7 @@ void Parser::writeFSMFile(
 
     line.append("\n");
 
-    file << line;
+    file.write(line.toAscii());
 
     if (lineCnt % 1000 == 0)
     {
@@ -216,23 +200,16 @@ void Parser::writeFSMFile(
   }
 
   // write transitions
-  line = "---\n";
-  file << line;
+  file.write("---\n");
 
   for (size_t i = 0; i < graph->getSizeEdges(); ++i)
   {
-    line = "";
+    QString inNode = QString::number(int(graph->getEdge(i)->getInNode()->getIndex()+1));
+    QString outNode = QString::number(int(graph->getEdge(i)->getOutNode()->getIndex()+1));
+    QString label = QString::fromStdString(graph->getEdge(i)->getLabel());
 
-    line.append(Utils::size_tToStr(graph->getEdge(i)->getInNode()->getIndex()+1));
-    line.append(" ");
-    line.append(Utils::size_tToStr(graph->getEdge(i)->getOutNode()->getIndex()+1));
-    line.append(" \"");
-    line.append(graph->getEdge(i)->getLabel());
-    line.append("\"");
-
-    line.append("\n");
-
-    file << line;
+    line = QString("%1 %2 \"%3\"\n").arg(inNode, outNode, label);
+    file.write(line.toAscii());
 
     if (lineCnt % 1000 == 0)
     {
