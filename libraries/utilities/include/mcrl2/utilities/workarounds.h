@@ -81,7 +81,7 @@ inline double round(double d)
 #endif
 
 // Apple specific
-#if defined(__GNUC__) && defined(__APPLE)
+#if defined(__APPLE)
 // Workaround for OS X with Apples patched gcc 4.0.1
   #undef nil
 #endif
