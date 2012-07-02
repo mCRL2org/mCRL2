@@ -20,13 +20,28 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_control_flow()
+void test_control_flow1()
 {
   std::string text =
     "pbes nu X(n: Nat)  = X(0) || X(n) || X(2);   \n"
     "     nu Y(m: Nat)  = Y(m) || X(1) || X(m);   \n"
     "     nu Z(p: Nat) = (forall b:Bool. true) && (true => (X(p) || X(1))) && val(true) && Y(p); \n"
     "init X(0);                                  \n"
+    ;
+  pbes<> p = txt2pbes(text, false);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  detail::pbes_control_flow_algorithm algorithm(p);
+  algorithm.run();
+  algorithm.print_graph();
+}
+
+void test_control_flow2()
+{
+  std::string text =
+    "pbes nu X(n: Nat)  = X(2) || X(n) || Y(1); \n"
+    "     nu Y(m: Nat)  = X(3);                 \n"
+    "init X(0);                                 \n"
     ;
   pbes<> p = txt2pbes(text, false);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
@@ -139,10 +154,11 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_control_flow();
   test_simplify();
   test_source_dest1();
   test_source_dest2();
+  test_control_flow1();
+  test_control_flow2();
   //BOOST_CHECK(false);
 
   return 0;
