@@ -80,10 +80,10 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
   }
 }
 
+#ifndef MCRL2_SKIP_LONG_TESTS
 // The test case below went wrong due to a lambda expression
 // that was applied to an empty list of arguments, which was not
 // properly dealt with.
-
 BOOST_AUTO_TEST_CASE(test_lambda_expressions)
 {
   const std::string spec =
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expressions)
 
   run_linearisation_test_case(spec);
 }
-
+#endif // MCRL2_SKIP_LONG_TESTS
 
 // The testcase below is added because the typechecker could not deal with this
 // case. The three options for the action a caused it to become confused.
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_action_types)
      "\n"
      "proc P = a(FALSE) . delta;\n"
      "init P;\n";
- 
+
   run_linearisation_test_case(spec);
 }
 
