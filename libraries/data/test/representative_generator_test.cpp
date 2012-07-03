@@ -59,7 +59,7 @@ void test_representative_generator()
   BOOST_CHECK(default_expression_generator(sort_nat::nat()) == sort_nat::c0());
 
   // Should be nil, since constants are preferred to other constructors or mappings
-  BOOST_CHECK(default_expression_generator(sort_list::list(sort_bool::bool_())) == sort_list::nil(sort_bool::bool_()));
+  BOOST_CHECK(default_expression_generator(sort_list::list(sort_bool::bool_())) == sort_list::empty(sort_bool::bool_()));
 
   // Should be e(0), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==

@@ -348,7 +348,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       data_expression lhs, rhs;
       if (cs.container_name() == list_container())
       {
-        lhs = make_application(determine_function , sort_list::nil(element_sort));
+        lhs = make_application(determine_function , sort_list::empty(element_sort));
       }
       else
       {

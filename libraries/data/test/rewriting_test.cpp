@@ -347,8 +347,8 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
     std::cerr << "  Strategy6: " << data::pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    data_expression empty(R(nil(bool_())));
-    data_expression head_true(cons_(bool_(), true_(), empty));
+    data_expression empty_(R(empty(bool_())));
+    data_expression head_true(cons_(bool_(), true_(), empty_));
 
     data_rewrite_test(R, in(bool_(), true_(), head_true), true_());
     data_rewrite_test(R, in(bool_(), false_(), head_true), false_());
@@ -358,8 +358,8 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
     data_rewrite_test(R, element_at(bool_(), head_true, sort_nat::nat(0)), true_());
     data_rewrite_test(R, head(bool_(), head_true), true_());
     data_rewrite_test(R, rhead(bool_(), head_true), true_());
-    data_rewrite_test(R, rtail(bool_(), head_true), empty);
-    data_rewrite_test(R, tail(bool_(), head_true), empty);
+    data_rewrite_test(R, rtail(bool_(), head_true), empty_);
+    data_rewrite_test(R, tail(bool_(), head_true), empty_);
   }
 }
 

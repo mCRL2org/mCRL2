@@ -452,7 +452,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       x = sort_list::right(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   bool is_snoc_list(data_expression x) const
@@ -461,7 +461,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       x = sort_list::left(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   bool is_fset_cons_list(data_expression x)

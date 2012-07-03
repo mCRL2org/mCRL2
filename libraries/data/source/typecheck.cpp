@@ -1281,7 +1281,7 @@ void gstcDataInit(void)
   gstcAddSystemFunction(sort_real::ceil());
   gstcAddSystemFunction(sort_real::round());
   //Lists
-  gstcAddSystemConstant(sort_list::nil(data::unknown_sort()));
+  gstcAddSystemConstant(sort_list::empty(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::cons_(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::count(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::snoc(data::unknown_sort()));
