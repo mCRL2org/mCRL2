@@ -232,7 +232,7 @@ void AT_initMemory()
   hashtable = (ATerm*)AT_calloc(table_size, sizeof(ATerm));
   if (!hashtable)
   {
-    std::runtime_error("AT_initMemory: cannot allocate term table of size " + to_string(table_size));
+    throw std::runtime_error("AT_initMemory: cannot allocate term table of size " + to_string(table_size));
   }
 
   for (size_t i=0; i<BLOCK_TABLE_SIZE; i++)
@@ -304,7 +304,7 @@ static void allocate_block(size_t size)
     newblock = (Block*)AT_calloc(1, sizeof(Block));
     if (newblock == NULL)
     {
-      std::runtime_error("allocate_block: out of memory!");
+      throw std::runtime_error("allocate_block: out of memory!");
     }
     init = true;
     min_heap_address = MIN(min_heap_address,(newblock->data));
@@ -378,7 +378,7 @@ static void AT_growMaxTermSize(size_t neededsize)
   }
   if (!newterminfo)
   {
-    std::runtime_error("AT_growMaxTermSize: cannot allocate " + to_string(newsize-maxTermSize) + " extra TermInfo elements.");
+    throw std::runtime_error("AT_growMaxTermSize: cannot allocate " + to_string(newsize-maxTermSize) + " extra TermInfo elements.");
   }
 
   /* Clear new area */
@@ -466,7 +466,7 @@ void AT_freeTerm(const size_t size, const ATerm t)
   {
     if (!cur)
     {
-      std::runtime_error("AT_freeTerm: cannot find term " + ATwriteToString(t) + " at " + to_string(t) + " in hashtable at pos " + to_string(hnr) + " header=" + to_string(t->header));
+      throw std::runtime_error("AT_freeTerm: cannot find term " + ATwriteToString(t) + " at " + to_string(t) + " in hashtable at pos " + to_string(hnr) + " header=" + to_string(t->header));
     }
     if (cur == t)
     {

@@ -201,7 +201,7 @@ static void insertKeyValue(ATermIndexedSet s,
                                   sizeof(ATerm*)*nr_tables*2);
     if (s->keys==NULL)
     {
-      std::runtime_error("insertKeyValue: Cannot extend key table");
+      throw std::runtime_error("insertKeyValue: Cannot extend key table");
     }
     memset((void*)&s->keys[nr_tables], 0, sizeof(ATerm*)*nr_tables);
 
@@ -211,7 +211,7 @@ static void insertKeyValue(ATermIndexedSet s,
                                       sizeof(ATerm*)*nr_tables*2);
       if (s->values == NULL)
       {
-        std::runtime_error("insertKeyValue: Cannot extend value table");
+        throw std::runtime_error("insertKeyValue: Cannot extend value table");
       }
       memset((void*)&s->values[nr_tables], 0, sizeof(ATerm*)*nr_tables);
     }
@@ -227,7 +227,7 @@ static void insertKeyValue(ATermIndexedSet s,
     s->keys[x] = keytable;
     if (keytable == NULL)
     {
-      std::runtime_error("insertKeyValue: Cannot create new key table");
+      throw std::runtime_error("insertKeyValue: Cannot create new key table");
     }
 
     if (s->values != NULL)
@@ -236,7 +236,7 @@ static void insertKeyValue(ATermIndexedSet s,
       s->values[x] = valuetable;
       if (valuetable == NULL)
       {
-        std::runtime_error("insertKeyValue: Cannot create new value table");
+        throw std::runtime_error("insertKeyValue: Cannot create new value table");
       }
     }
   }
@@ -314,7 +314,7 @@ static void hashResizeSet(ATermIndexedSet s)
 #endif
     if (s->nr_entries-s->nr_deletions+2>=s->sizeMinus1)
     {
-      std::runtime_error("hashResizeSet: Hashtable of indexed set is full");
+      throw std::runtime_error("hashResizeSet: Hashtable of indexed set is full");
     }
 
     /* I do not know whether the bound below is very optimal,
@@ -372,7 +372,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   hashset = (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
   if (hashset==NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot allocate new ATermIndexedSet");
+    throw std::runtime_error("ATindexedSetCreate: cannot allocate new ATermIndexedSet");
   }
   hashset->sizeMinus1 = approximatepowerof2(initial_size);
   hashset->nr_entries = 0;
@@ -383,7 +383,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
     (size_t*)AT_malloc(sizeof(size_t)*(1+hashset->sizeMinus1));
   if (hashset->hashtable==NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot allocate ATermIndexedSet "
+    throw std::runtime_error("ATindexedSetCreate: cannot allocate ATermIndexedSet "
                        "of " + to_string(initial_size) + " entries");
   }
   for (i=0 ; i<=hashset->sizeMinus1 ; i++)
@@ -396,7 +396,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot create key index table");
+    throw std::runtime_error("ATindexedSetCreate: cannot create key index table");
   }
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
@@ -405,7 +405,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
                                           hashset->nr_free_tables);
   if (hashset->free_table == NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot allocate table to store deleted elements");
+    throw std::runtime_error("ATindexedSetCreate: cannot allocate table to store deleted elements");
   }
 
   hashset->values = NULL;
@@ -576,7 +576,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
   if (hashtable->values == NULL)
   {
-    std::runtime_error("ATtableCreate: cannot create value index table");
+    throw std::runtime_error("ATtableCreate: cannot create value index table");
   }
 
   return hashtable;
@@ -716,7 +716,7 @@ bool ATtableRemove(ATermTable table, ATerm key)
                         sizeof(size_t)*table->nr_free_tables*2);
     if (table->free_table==NULL)
     {
-      std::runtime_error("ATtableRemove: Cannot allocate memory for free table index");
+      throw std::runtime_error("ATtableRemove: Cannot allocate memory for free table index");
     }
 
     memset((void*)&table->free_table[table->nr_free_tables], 0, table->nr_free_tables);
@@ -732,7 +732,7 @@ bool ATtableRemove(ATermTable table, ATerm key)
     table->free_table[x] = ltable;
     if (ltable == NULL)
     {
-      std::runtime_error("ATtableRemove: Cannot create new free table");
+      throw std::runtime_error("ATtableRemove: Cannot create new free table");
     }
   }
 

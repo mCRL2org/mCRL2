@@ -1187,9 +1187,9 @@ bool ATwriteToNamedBinaryFile(ATerm t, const char* name)
 static AFun read_symbol(byte_reader* reader)
 {
   size_t arity, quoted;
-  size_t len;
+  size_t len = readString(reader);
 
-  if ((len = readString(reader)) == ATERM_NON_EXISTING_POSITION)
+  if (len == ATERM_NON_EXISTING_POSITION)
   {
     return ATERM_NON_EXISTING_POSITION;
   }

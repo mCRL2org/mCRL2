@@ -81,9 +81,8 @@ size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
 int read_byte(byte_reader* reader)
 {
   size_t index;
-  int c;
+  int c(EOF);
 
-  c = EOF;
   switch (reader->type)
   {
     case STRING_READER:
@@ -115,9 +114,8 @@ int read_byte(byte_reader* reader)
 size_t read_bytes(char* buf, size_t count, byte_reader* reader)
 {
   size_t index, size, left;
-  size_t result;
+  size_t result(0);
 
-  result = 0;
   switch (reader->type)
   {
     case STRING_READER:
