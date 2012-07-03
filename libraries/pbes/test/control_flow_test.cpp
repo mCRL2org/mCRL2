@@ -33,14 +33,13 @@ void test_control_flow1()
 
   detail::pbes_control_flow_algorithm algorithm(p);
   algorithm.run();
-  algorithm.print_graph();
 }
 
 void test_control_flow2()
 {
   std::string text =
     "pbes nu X(n: Nat)  = X(2) || X(n) || Y(1); \n"
-    "     nu Y(m: Nat)  = X(3);                 \n"
+    "     nu Y(m: Nat)  = X(m) || Y(4);         \n"
     "init X(0);                                 \n"
     ;
   pbes<> p = txt2pbes(text, false);
@@ -48,7 +47,6 @@ void test_control_flow2()
 
   detail::pbes_control_flow_algorithm algorithm(p);
   algorithm.run();
-  algorithm.print_graph();
 }
 
 void test_source_dest1()
