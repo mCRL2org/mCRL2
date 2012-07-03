@@ -495,7 +495,7 @@ application list(const sort_expression& s,
                  Sequence const& range,
                  typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
 {
-  data_expression                list_expression(nil(s));
+  data_expression                list_expression(sort_list::nil(s));
   atermpp::vector< data_expression > elements(range.begin(), range.end());
 
   for (atermpp::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
