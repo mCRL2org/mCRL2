@@ -904,8 +904,8 @@ class pbes_control_flow_algorithm
           {
             propositional_variable_instantiation Xij = project(*j);
             propositional_variable_instantiation Y = apply_substitution(Xij, sigma);
-            vertex_iterator j = m_control_vertices.find(Y);
-            if (j == m_control_vertices.end())
+            vertex_iterator q = m_control_vertices.find(Y);
+            if (q == m_control_vertices.end())
             {
               // vertex Y does not yet exist
               std::cout << "discovered " << pbes_system::pp(Y) << std::endl;
@@ -916,7 +916,7 @@ class pbes_control_flow_algorithm
             }
             else
             {
-              v.edges.insert(&(j->second));
+              v.edges.insert(&(q->second));
             }
           }
         }
