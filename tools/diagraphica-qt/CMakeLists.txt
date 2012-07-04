@@ -16,17 +16,26 @@ find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtOpenGL)
 if (QT4_FOUND)
 include(${QT_USE_FILE})
 
-# ########## Create MacOSX Bundle Information ######### 
-include(MCRL2MacOSXBundleInformation)
 
-# ######### General setup ##########
+#set(DIAGRAPHICA_RCC_SRCS diagraphica.qrc)
 
-IF(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  SET(SRCS ${SRCS} diagraphica.rc)
-ENDIF(WIN32)
+qt4_add_resources(DIAGRAPHICA_RC_FILES ${DIAGRAPHICA_RCC_SRCS})
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
+set(DIAGRAPHICA_UI_FILES
+#  mainwindow.ui
+)
+
+qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
+
+set(DIAGRAPHICA_MOC_HEADERS
+  simulator.h
+)
+qt4_wrap_cpp(DIAGRAPHICA_MOC_SOURCES ${DIAGRAPHICA_MOC_HEADERS})
+
+set(DIAGRAPHICA_SRC_FILES
+  ${DIAGRAPHICA_RC_FILES}
+  ${DIAGRAPHICA_UI_HEADERS}
+  ${DIAGRAPHICA_MOC_SOURCES}
   arcdiagram.cpp
   attrdiscr.cpp
   attribute.cpp
@@ -59,14 +68,29 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   value.cpp
   visualizer.cpp
   visutils.cpp
-
-  ${MACOSX_BUNDLE_ICON_FILE}
-  ${SRCS}
 )
 
-IF (APPLE)
- SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ENDIF (APPLE)
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+
+# ######### Create Windows Icon ##########
+if(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  set(DIAGRAPHICA_SRC_FILES ${DIAGRAPHICA_SRC_FILES} diagraphica-qt.rc)
+endif(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${DIAGRAPHICA_SRC_FILES})
+
+target_link_libraries(${PROJECT_NAME}
+  ${QT_LIBRARIES}
+  ${wxWidgets_LIBRARIES}
+  mcrl2_lts
+  mcrl2_syntax
+  dparser
+  mcrl2_utilities
+  mcrl2_utilities_qt
+  mcrl2_utilities_wx
+)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -81,17 +105,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-target_link_libraries(${PROJECT_NAME}
-  ${QT_LIBRARIES}
-  ${wxWidgets_LIBRARIES}
-  mcrl2_lts
-  mcrl2_syntax
-  dparser
-  mcrl2_utilities
-  mcrl2_utilities_qt
-  mcrl2_utilities_wx
-)
-
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
@@ -102,6 +115,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 else(QT4_FOUND)
-  message(STATUS "Could NOT find Qt4, not building ltsview-qt.")
+  message(STATUS "Could NOT find Qt4, not building diagraphica-qt.")
 endif(QT4_FOUND)
 endif ( MCRL2_ENABLE_GUI_TOOLS )

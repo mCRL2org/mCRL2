@@ -35,8 +35,10 @@ int Simulator::blendType = VisUtils::BLEND_HARD;
 Simulator::Simulator(
   Mediator* m,
   Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  GLCanvas* c,
+  QObject* parent)
+  : Visualizer(m, g, c),
+    QObject(parent)
 {
   diagram   = NULL;
   frameCurr = NULL;
@@ -51,10 +53,8 @@ Simulator::Simulator(
   fcsLblPrevIdx  = -1;
   fcsLblNextIdx  = -1;
 
-  animating = false;
-
-  timerAnim = new wxTimer();
-  timerAnim->SetOwner(this, ID_TIMER);
+  connect(&timerAnim, SIGNAL(timeout()), this, SLOT(onTimer()));
+  timerAnim.start(itvTmrMS);
 }
 
 
@@ -66,48 +66,10 @@ Simulator::~Simulator()
   clearFrames();
   clearBundles();
 
-  delete timerAnim;
-  timerAnim = NULL;
 }
 
 
 // -- get functions ---------------------------------------------
-
-
-QColor Simulator::getColorClr()
-{
-  return colClr;
-}
-
-
-QColor Simulator::getColorTxt()
-{
-  return colTxt;
-}
-
-
-int Simulator::getSizeTxt()
-{
-  return szeTxt;
-}
-
-
-QColor Simulator::getColorBdl()
-{
-  return colBdl;
-}
-
-
-int Simulator::getBlendType()
-{
-  return blendType;
-}
-
-
-QColor Simulator::getColorSel()
-{
-  return VisUtils::coolGreen;
-}
 
 
 size_t Simulator::getIdxClstSel()
@@ -141,36 +103,6 @@ size_t Simulator::getIdxClstSel()
 
 
 // -- set functions ---------------------------------------------
-
-
-void Simulator::setColorClr(QColor col)
-{
-  colClr = col;
-}
-
-
-void Simulator::setColorTxt(QColor col)
-{
-  colTxt = col;
-}
-
-
-void Simulator::setSizeTxt(const int& sze)
-{
-  szeTxt = sze;
-}
-
-
-void Simulator::setColorBdl(QColor col)
-{
-  colBdl = col;
-}
-
-
-void Simulator::setBlendType(const int& type)
-{
-  blendType = type;
-}
 
 
 void Simulator::setDiagram(Diagram* dgrm)
@@ -242,7 +174,7 @@ void Simulator::updateFrameCurr(
   focusFrameIdxPrevLast = -1;
   focusFrameIdxNextLast = -1;
 
-  timerAnim->Start(itvTmrMS);
+  timerAnim.start(itvTmrMS);
   canvas->disableMouseMotion();
 }
 
@@ -297,7 +229,7 @@ void Simulator::handleSendDgrmSglToExnr()
 void Simulator::visualize(const bool& inSelectMode)
 {
   // have textures been generated
-  if (texCharOK != true)
+  if (!texCharOK)
   {
     genCharTex();
   }
@@ -305,18 +237,18 @@ void Simulator::visualize(const bool& inSelectMode)
   clear();
 
   // check if positions are ok
-  if (geomChanged == true)
+  if (geomChanged)
   {
     calcSettingsGeomBased();
   }
-  if (dataChanged == true)
+  if (dataChanged)
   {
     calcSettingsDataBased();
   }
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
-    if (timerAnim->IsRunning() != true)
+    if (!timerAnim.isActive())
     {
       double wth, hgt;
       canvas->getSize(wth, hgt);
@@ -353,7 +285,7 @@ void Simulator::visualize(const bool& inSelectMode)
   }
   else
   {
-    if (timerAnim->IsRunning() == true)
+    if (timerAnim.isActive())
     {
       animate();
       drawControls(inSelectMode);
@@ -461,7 +393,7 @@ void Simulator::handleMouseLeaveEvent()
 {
   Visualizer::initMouse();
 
-  if (showMenu != true)
+  if (!showMenu)
   {
     focusDepthIdx = -1;
     focusFrameIdx = -1;
@@ -484,7 +416,7 @@ void Simulator::handleMouseLeaveEvent()
 
 void Simulator::handleKeyDownEvent(const int& keyCode)
 {
-  if (timerAnim->IsRunning() != true)
+  if (timerAnim.isActive())
   {
     Visualizer::handleKeyDownEvent(keyCode);
 
@@ -1704,7 +1636,7 @@ QColor Simulator::calcColor(size_t iter, size_t numr)
 
 void Simulator::drawFrameCurr(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     if (frameCurr != NULL)
     {
@@ -1814,7 +1746,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 
 void Simulator::drawFramesPrev(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     glPushName(ID_FRAME_PREV);
     for (size_t i = 0; i < posFramesPrev.size(); ++i)
@@ -1986,7 +1918,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 
 void Simulator::drawFramesNext(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     glPushName(ID_FRAME_NEXT);
     for (size_t i = 0; i < posFramesNext.size(); ++i)
@@ -2156,7 +2088,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 
 void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double pix = canvas->getPixelSize();;
     string lbl;
@@ -2342,7 +2274,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
 void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double pix = canvas->getPixelSize();;
 
@@ -2527,7 +2459,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
 void Simulator::drawBundlesPrev(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double pix = canvas->getPixelSize();
 
@@ -2618,7 +2550,7 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
 
 void Simulator::drawBundlesNext(const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double pix = canvas->getPixelSize();
     double arrowItv;
@@ -2724,7 +2656,7 @@ void Simulator::drawControls(const bool& inSelectMode)
   double itvSml = 6.0*pix;
   double itvLrg = 9.0*pix;
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // clear icon
     double x = 0.5*wth - itvSml - pix;
@@ -3034,7 +2966,7 @@ void Simulator::animate()
 // -- utility event handlers ------------------------------------
 
 
-void Simulator::onTimer(wxTimerEvent& /*e*/)
+void Simulator::onTimer()
 {
   if (timeAlphaMS >= timeTotalMS)
   {
@@ -3055,7 +2987,7 @@ void Simulator::onTimer(wxTimerEvent& /*e*/)
       }
       else
       {
-        timerAnim->Stop();
+        timerAnim.stop();
         canvas->enableMouseMotion();
         animPhase = ANIM_NONE;
 
@@ -3077,7 +3009,7 @@ void Simulator::onTimer(wxTimerEvent& /*e*/)
     }
     else if (animPhase == ANIM_BLEND)
     {
-      timerAnim->Stop();
+      timerAnim.stop();
       canvas->enableMouseMotion();
       animPhase = ANIM_NONE;
 
@@ -3136,14 +3068,5 @@ void Simulator::onTimer(wxTimerEvent& /*e*/)
     canvas->Update();
   }
 }
-
-
-// -- implement event table -----------------------------------------
-
-
-BEGIN_EVENT_TABLE(Simulator, wxEvtHandler)
-  EVT_TIMER(ID_TIMER, Simulator::onTimer)
-END_EVENT_TABLE()
-
 
 // -- end -----------------------------------------------------------

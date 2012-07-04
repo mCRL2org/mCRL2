@@ -30,34 +30,38 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Simulator : public wxEvtHandler, public Visualizer
+class Simulator : public QObject, public Visualizer
 {
+  Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     Simulator(
       Mediator* m,
       Graph* g,
-      GLCanvas* c);
+      GLCanvas* c,
+      QObject* parent = 0);
     virtual ~Simulator();
 
+
     // -- get functions ---------------------------------------------
-    static QColor getColorClr();
-    static QColor getColorTxt();
-    static int getSizeTxt();
-    static QColor getColorBdl();
+    static QColor getColorClr() { return colClr; }
+    static QColor getColorTxt() { return colTxt; }
+    static int getSizeTxt() { return szeTxt; }
+    static QColor getColorBdl() { return colBdl; }
 
-    static int getBlendType();
+    static int getBlendType() { return blendType; }
 
-    QColor getColorSel();
+    QColor getColorSel() { return VisUtils::coolGreen; }
     size_t getIdxClstSel();
 
-    // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col);
-    static void setColorTxt(QColor col);
-    static void setSizeTxt(const int& sze);
-    static void setColorBdl(QColor col);
 
-    static void setBlendType(const int& type);
+    // -- set functions ---------------------------------------------
+    static void setColorClr(QColor col) { colClr = col; }
+    static void setColorTxt(QColor col) { colTxt = col; }
+    static void setSizeTxt(const int& sze) { szeTxt = sze; }
+    static void setColorBdl(QColor col) { colBdl = col; }
+
+    static void setBlendType(const int& type) { blendType = type; }
 
     void setDiagram(Diagram* dgrm);
     void initFrameCurr(
@@ -100,6 +104,11 @@ class Simulator : public wxEvtHandler, public Visualizer
         DiagramChooser* dc,
         const int &idx );
     */
+
+  public slots:
+
+    // -- utility event handlers ------------------------------------
+    void onTimer();
 
   protected:
     // -- utility functions -----------------------------------------
@@ -145,9 +154,6 @@ class Simulator : public wxEvtHandler, public Visualizer
     void drawBundlesNext(const bool& inSelectMode);
     void drawControls(const bool& inSelectMode);
     void animate();
-
-    // -- utility event handlers ------------------------------------
-    void onTimer(wxTimerEvent& e);
 
     // -- static variables ------------------------------------------
 
@@ -225,8 +231,7 @@ class Simulator : public wxEvtHandler, public Visualizer
     double timeAlphaMS;
     int animPhase;
 
-    wxTimer* timerAnim;
-    bool animating;
+    QTimer timerAnim;
 
     Cluster* keyFrameFr;
     Cluster* keyFrameTo;
@@ -238,8 +243,6 @@ class Simulator : public wxEvtHandler, public Visualizer
     double opacityKeyFrameFr;
     double opacityKeyFrameTo;
 
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif
