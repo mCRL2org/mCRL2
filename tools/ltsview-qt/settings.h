@@ -12,73 +12,15 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QColor>
-
-/*
- * Unfortunately, MOC doesn't understand templates or macros, or this would be a whole lot cleaner.
- */
-class SettingInt : public QObject
-{
-  Q_OBJECT
-  public:
-    SettingInt(int value): m_value(value), m_default(value) {}
-    int value() { return m_value; }
-  public slots:
-    void reset() { setValue(m_default); }
-    void setValue(int value) { if (value != m_value) { m_value = value; emit changed(value); } }
-  signals:
-    void changed(int value);
-  private:
-    int m_value, m_default;
-};
-
-class SettingBool : public QObject
-{
-  Q_OBJECT
-  public:
-    SettingBool(bool value): m_value(value), m_default(value) {}
-    bool value() { return m_value; }
-  public slots:
-    void reset() { setValue(m_default); }
-    void setValue(bool value) { if (value != m_value) { m_value = value; emit changed(value); } }
-  signals:
-    void changed(bool value);
-  private:
-    bool m_value, m_default;
-};
-
-class SettingFloat : public QObject
-{
-  Q_OBJECT
-  public:
-    SettingFloat(float value): m_value(value), m_default(value) {}
-    float value() { return m_value; }
-  public slots:
-    void reset() { setValue(m_default); }
-    void setValue(float value) { if (value != m_value) { m_value = value; emit changed(value); } }
-  signals:
-    void changed(float value);
-  private:
-    float m_value, m_default;
-};
-
-class SettingColor : public QObject
-{
-  Q_OBJECT
-  public:
-    SettingColor(QColor value): m_value(value), m_default(value) {}
-    QColor value() { return m_value; }
-  public slots:
-    void reset() { setValue(m_default); }
-    void setValue(QColor value) { if (value != m_value) { m_value = value; emit changed(value); } }
-  signals:
-    void changed(QColor value);
-  private:
-    QColor m_value, m_default;
-};
+#include "mcrl2/utilities/setting.h"
 
 struct Settings
 {
+  typedef mcrl2::utilities::qt::SettingInt SettingInt;
+  typedef mcrl2::utilities::qt::SettingFloat SettingFloat;
+  typedef mcrl2::utilities::qt::SettingBool SettingBool;
+  typedef mcrl2::utilities::qt::SettingColor SettingColor;
+
   SettingFloat stateSize;
   SettingFloat clusterHeight;
   SettingInt branchRotation;

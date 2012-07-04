@@ -101,6 +101,7 @@ set(mcrl2_utilities_qt_h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/atermthread.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/logwidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/qt_tool.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/setting.h
 )
 qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
 

@@ -9,7 +9,7 @@
 #include "settingsdialog.h"
 #include <QColorDialog>
 
-ColorButtonHandler::ColorButtonHandler(QPushButton *button, SettingColor &setting):
+ColorButtonHandler::ColorButtonHandler(QPushButton *button, Settings::SettingColor &setting):
   QObject(button),
   m_button(button),
   m_setting(&setting)
@@ -36,7 +36,7 @@ void ColorButtonHandler::setColor()
   m_button->setStyleSheet(QString("background-color: ") + colorString + "; color: " + colorString + ";");
 }
 
-ComboboxHandler::ComboboxHandler(QComboBox *combobox, SettingBool &setting):
+ComboboxHandler::ComboboxHandler(QComboBox *combobox, Settings::SettingBool &setting):
   QObject(combobox),
   m_combobox(combobox),
   m_setting(&setting)
@@ -128,14 +128,14 @@ void SettingsDialog::setAccuracy(int value)
   m_ui.accuracy->setValue(value / 2);
 }
 
-void SettingsDialog::setupSpinbox(QSpinBox *spinbox, SettingInt &setting)
+void SettingsDialog::setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting)
 {
   connect(spinbox, SIGNAL(valueChanged(int)), &setting, SLOT(setValue(int)));
   connect(&setting, SIGNAL(changed(int)), spinbox, SLOT(setValue(int)));
   spinbox->setValue(setting.value());
 }
 
-void SettingsDialog::setupCheckbox(QCheckBox *checkbox, SettingBool &setting)
+void SettingsDialog::setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting)
 {
   connect(checkbox, SIGNAL(toggled(bool)), &setting, SLOT(setValue(bool)));
   connect(&setting, SIGNAL(changed(bool)), checkbox, SLOT(setChecked(bool)));

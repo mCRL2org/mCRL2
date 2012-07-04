@@ -19,7 +19,7 @@ class ColorButtonHandler : public QObject
   Q_OBJECT
 
   public:
-    ColorButtonHandler(QPushButton *button, SettingColor &setting);
+    ColorButtonHandler(QPushButton *button, Settings::SettingColor &setting);
 
   protected slots:
     void clicked();
@@ -27,7 +27,7 @@ class ColorButtonHandler : public QObject
 
   private:
     QPushButton *m_button;
-    SettingColor *m_setting;
+    Settings::SettingColor *m_setting;
 };
 
 class ComboboxHandler : public QObject
@@ -35,7 +35,7 @@ class ComboboxHandler : public QObject
   Q_OBJECT
 
   public:
-    ComboboxHandler(QComboBox *combobox, SettingBool &setting);
+    ComboboxHandler(QComboBox *combobox, Settings::SettingBool &setting);
 
   protected slots:
     void stateChanged(int state);
@@ -43,7 +43,7 @@ class ComboboxHandler : public QObject
 
   private:
     QComboBox *m_combobox;
-    SettingBool *m_setting;
+    Settings::SettingBool *m_setting;
 };
 
 class SettingsDialog : public QDialog
@@ -62,9 +62,9 @@ class SettingsDialog : public QDialog
     void setAccuracy(int value);
 
   private:
-    void setupSpinbox(QSpinBox *spinbox, SettingInt &setting);
-    void setupCheckbox(QCheckBox *checkbox, SettingBool &setting);
-    void setupCombobox(QComboBox *combobox, SettingBool &setting);
+    void setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting);
+    void setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting);
+    void setupCombobox(QComboBox *combobox, Settings::SettingBool &setting);
 
   private:
     Ui::SettingsDialog m_ui;

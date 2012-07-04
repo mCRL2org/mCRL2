@@ -48,7 +48,6 @@ set(MOC_HEADERS
   primitivefactory.h
   savepicturedialog.h
   savevectordialog.h
-  settings.h
   settingsdialog.h
   simdialog.h
   simulation.h
