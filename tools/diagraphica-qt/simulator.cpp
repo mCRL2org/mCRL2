@@ -17,16 +17,17 @@ using namespace std;
 // -- static variables ----------------------------------------------
 
 
-QColor Simulator::colClr = Qt::white;
-QColor Simulator::colTxt = Qt::black;
-int Simulator::szeTxt = 12;
-QColor Simulator::colBdl = QColor(0, 0, 0, 76);
-int Simulator::itvLblPixVert = 40;
+QColor  Simulator::m_clearColor   = Qt::white;
+QColor  Simulator::m_textColor    = Qt::black;
+int     Simulator::m_textSize     = 12;
+QColor  Simulator::m_selectColor  = VisUtils::coolGreen;
 
-int Simulator::itvTmrMS = 10;
-double Simulator::pixPerMS =  1.0;
+int     Simulator::m_blendType      = VisUtils::BLEND_HARD;
 
-int Simulator::blendType = VisUtils::BLEND_HARD;
+int     Simulator::itvLblPixVert  = 40;
+int     Simulator::itvTmrMS       = 10;
+double  Simulator::pixPerMS       = 1.0;
+
 
 
 // -- constructors and destructor -----------------------------------
@@ -72,7 +73,7 @@ Simulator::~Simulator()
 // -- get functions ---------------------------------------------
 
 
-size_t Simulator::getIdxClstSel()
+size_t Simulator::SelectedClusterIndex()
 {
   size_t result = NON_EXISTING;
 
@@ -1252,7 +1253,7 @@ void Simulator::markFrameClusts()
       mediator->handleShowFrame(
         framesPrev[focusFrameIdx],
         attributes,
-        VisUtils::coolGreen);
+        m_selectColor);
     }
   }
   else if (focusDepthIdx == ID_FRAME_CURR)
@@ -1267,7 +1268,7 @@ void Simulator::markFrameClusts()
       mediator->handleShowFrame(
         frameCurr,
         attributes,
-        VisUtils::coolGreen);
+        m_selectColor);
     }
   }
   else if (focusDepthIdx == ID_FRAME_NEXT)
@@ -1282,7 +1283,7 @@ void Simulator::markFrameClusts()
       mediator->handleShowFrame(
         framesNext[focusFrameIdx],
         attributes,
-        VisUtils::coolGreen);
+        m_selectColor);
     }
   }
 }
@@ -1624,7 +1625,7 @@ void Simulator::processHits(
 
 void Simulator::clear()
 {
-  VisUtils::clear(colClr);
+  VisUtils::clear(m_clearColor);
 }
 
 
@@ -1707,7 +1708,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 
       if (focusDepthIdx == ID_FRAME_CURR)
       {
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
           -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
           1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
@@ -1727,9 +1728,9 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 
       if (focusDepthIdx == ID_FRAME_CURR)
       {
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::enableLineAntiAlias();
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
         VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
@@ -1890,7 +1891,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           0.0);
         glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
 
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
           -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
           1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
@@ -1901,7 +1902,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           valsFrame);
 
         VisUtils::enableLineAntiAlias();
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
         VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
@@ -2060,7 +2061,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           0.0);
         glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
 
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
           -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
           1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
@@ -2071,7 +2072,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           valsFrame);
 
         VisUtils::enableLineAntiAlias();
-        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::setColor(m_selectColor);
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
         VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
@@ -2108,8 +2109,8 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(szeTxt*pix/CHARHEIGHT),
-        0.5*szeTxt*pix, -0.5*szeTxt*pix);
+        0.0, (lbl.size()+1)*CHARWIDTH*(m_textSize*pix/CHARHEIGHT),
+        0.5*m_textSize*pix, -0.5*m_textSize*pix);
 
       glPopMatrix();
 
@@ -2121,8 +2122,8 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(szeTxt*pix/CHARHEIGHT)),  0.0,
-        0.5*szeTxt*pix,                                     -0.5*szeTxt*pix);
+        -((lbl.size()+1)*CHARWIDTH*(m_textSize*pix/CHARHEIGHT)),  0.0,
+        0.5*m_textSize*pix,                                     -0.5*m_textSize*pix);
 
       glPopMatrix();
 
@@ -2151,7 +2152,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       {
         string lbl = bundlesPrevByLbl[i]->getChild(0)->getEdge(0)->getLabel();
 
-        double txt = szeTxt;
+        double txt = m_textSize;
 
         glPushMatrix();
         glTranslatef(
@@ -2160,7 +2161,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(m_textColor);
         VisUtils::drawLabel(
           texCharId,
           0.0 + 3*pix,
@@ -2177,7 +2178,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(m_textColor);
         VisUtils::drawLabelLeft(
           texCharId,
           0.0 - 3*pix,
@@ -2200,7 +2201,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     {
       string lbl = bundlesPrevByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
-      double txt = szeTxt;
+      double txt = m_textSize;
       txt += 1;
 
       QColor colLne = calcColor(bundlesPrevByLbl[idxHiLite]->getParent()->getIndex(), bundlesByLbl.size() - 1);
@@ -2213,7 +2214,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColor(colClr);
+      VisUtils::setColor(m_clearColor);
       VisUtils::fillRect(
         0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
@@ -2223,7 +2224,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(m_textColor);
       VisUtils::drawLabel(
         texCharId,
         0.0 + 3*pix,
@@ -2241,7 +2242,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColor(colClr);
+      VisUtils::setColor(m_clearColor);
       VisUtils::fillRect(
         -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
@@ -2251,7 +2252,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(m_textColor);
       VisUtils::drawLabelLeft(
         texCharId,
         0.0 - 3*pix,
@@ -2293,8 +2294,8 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(szeTxt*pix/CHARHEIGHT),
-        0.5*szeTxt*pix, -0.5*szeTxt*pix);
+        0.0, (lbl.size()+1)*CHARWIDTH*(m_textSize*pix/CHARHEIGHT),
+        0.5*m_textSize*pix, -0.5*m_textSize*pix);
 
       glPopMatrix();
 
@@ -2306,8 +2307,8 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(szeTxt*pix/CHARHEIGHT)), 0.0,
-        0.5*szeTxt*pix,                                    -0.5*szeTxt*pix);
+        -((lbl.size()+1)*CHARWIDTH*(m_textSize*pix/CHARHEIGHT)), 0.0,
+        0.5*m_textSize*pix,                                    -0.5*m_textSize*pix);
 
       glPopMatrix();
 
@@ -2336,7 +2337,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       {
         string lbl = bundlesNextByLbl[i]->getChild(0)->getEdge(0)->getLabel();
 
-        double txt = szeTxt;
+        double txt = m_textSize;
 
         glPushMatrix();
         glTranslatef(
@@ -2345,7 +2346,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(m_textColor);
         VisUtils::drawLabel(
           texCharId,
           0.0 + 3*pix,
@@ -2362,7 +2363,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(m_textColor);
         VisUtils::drawLabelLeft(
           texCharId,
           0.0 - 3*pix,
@@ -2385,7 +2386,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     {
       string lbl = bundlesNextByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
-      double txt = szeTxt;
+      double txt = m_textSize;
       txt += 1;
 
       QColor colLne = calcColor(bundlesNextByLbl[idxHiLite]->getParent()->getIndex(), bundlesByLbl.size());
@@ -2398,7 +2399,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColor(colClr);
+      VisUtils::setColor(m_clearColor);
       VisUtils::fillRect(
         0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
@@ -2408,7 +2409,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(m_textColor);
       VisUtils::drawLabel(
         texCharId,
         0.0 + 3*pix,
@@ -2426,7 +2427,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
-      VisUtils::setColor(colClr);
+      VisUtils::setColor(m_clearColor);
       VisUtils::fillRect(
         -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
@@ -2436,7 +2437,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(m_textColor);
       VisUtils::drawLabelLeft(
         texCharId,
         0.0 - 3*pix,
@@ -2975,7 +2976,7 @@ void Simulator::onTimer()
       posTweenFrame.x = posKeyFrameTo.x;
       posTweenFrame.y = posKeyFrameTo.y;
 
-      if (blendType != VisUtils::BLEND_HARD)
+      if (m_blendType != VisUtils::BLEND_HARD)
       {
         animPhase = ANIM_BLEND;
 
@@ -3040,22 +3041,22 @@ void Simulator::onTimer()
     }
     else if (animPhase == ANIM_BLEND)
     {
-      if (blendType == VisUtils::BLEND_LINEAR)
+      if (m_blendType == VisUtils::BLEND_LINEAR)
       {
         opacityKeyFrameFr = (1-a)*0.0 + a*1.0;
         opacityKeyFrameTo = (1-a)*1.0 + a*0.0;
       }
-      else if (blendType == VisUtils::BLEND_CONCAVE)
+      else if (m_blendType == VisUtils::BLEND_CONCAVE)
       {
         opacityKeyFrameFr = (a*1.0) * (a*1.0);
         opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;
       }
-      else if (blendType == VisUtils::BLEND_CONVEX)
+      else if (m_blendType == VisUtils::BLEND_CONVEX)
       {
         opacityKeyFrameFr = sin(a*(PI/2.0));
         opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;
       }
-      else if (blendType == VisUtils::BLEND_OSCILLATE)
+      else if (m_blendType == VisUtils::BLEND_OSCILLATE)
       {
         opacityKeyFrameFr = (-1.0*(cos(a*3.0*PI)/2.0) + 0.5);
         opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;

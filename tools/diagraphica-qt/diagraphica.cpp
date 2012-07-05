@@ -2180,8 +2180,8 @@ void DiaGraph::handleMarkFrameClust(Colleague* sender)
     arcDgrm->unmarkLeaves();
     if (sender == simulator)
     {
-      QColor col = simulator->getColorSel();
-      size_t      idx = simulator->getIdxClstSel();
+      QColor col = simulator->SelectColor();
+      size_t      idx = simulator->SelectedClusterIndex();
 
       arcDgrm->markLeaf(idx, col);
     }
@@ -2332,18 +2332,18 @@ void DiaGraph::setSettingsGeneral(
 {
   QColor fullColClr = QColor(colClr.Red(), colClr.Green(), colClr.Blue());
   ArcDiagram::setColorClr(fullColClr);
-  Simulator::setColorClr(fullColClr);
+  Simulator::setClearColor(fullColClr);
   TimeSeries::setColorClr(fullColClr);
   Examiner::setColorClr(fullColClr);
 
   QColor fullColTxt = QColor(colTxt.Red(), colTxt.Green(), colTxt.Blue());
   ArcDiagram::setColorTxt(fullColTxt);
-  Simulator::setColorTxt(fullColTxt);
+  Simulator::setTextColor(fullColTxt);
   TimeSeries::setColorTxt(fullColTxt);
   Examiner::setColorTxt(fullColTxt);
 
   ArcDiagram::setSizeTxt(szeTxt);
-  Simulator::setSizeTxt(szeTxt);
+  Simulator::setTextSize(szeTxt);
   TimeSeries::setSizeTxt(szeTxt);
   Examiner::setSizeTxt(szeTxt);
 
@@ -2491,7 +2491,7 @@ void DiaGraph::getSettingsBarTree(
 
 void DiaGraph::getSettingsSimulator(int& blendType)
 {
-  blendType = Simulator::getBlendType();
+  blendType = Simulator::BlendType();
 }
 
 

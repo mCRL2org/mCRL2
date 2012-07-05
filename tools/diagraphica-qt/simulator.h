@@ -44,24 +44,21 @@ class Simulator : public QObject, public Visualizer
 
 
     // -- get functions ---------------------------------------------
-    static QColor getColorClr() { return colClr; }
-    static QColor getColorTxt() { return colTxt; }
-    static int getSizeTxt() { return szeTxt; }
-    static QColor getColorBdl() { return colBdl; }
+    static QColor ClearColor()  { return m_clearColor; }
+    static QColor TextColor()   { return m_textColor; }
+    static int TextSize()       { return m_textSize; }
+    static QColor SelectColor() { return m_selectColor; }
+    static int BlendType()      { return m_blendType; }
 
-    static int getBlendType() { return blendType; }
-
-    QColor getColorSel() { return VisUtils::coolGreen; }
-    size_t getIdxClstSel();
+    size_t SelectedClusterIndex();
 
 
     // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col) { colClr = col; }
-    static void setColorTxt(QColor col) { colTxt = col; }
-    static void setSizeTxt(const int& sze) { szeTxt = sze; }
-    static void setColorBdl(QColor col) { colBdl = col; }
-
-    static void setBlendType(const int& type) { blendType = type; }
+    static void setClearColor(QColor color)   { m_clearColor = color; }
+    static void setTextColor(QColor color)    { m_textColor = color; }
+    static void setTextSize(int size)         { m_textSize = size; }
+    static void setSelectColor(QColor color)  { m_selectColor = color; }
+    static void setBlendType(int type)        { m_blendType = type; }
 
     void setDiagram(Diagram* dgrm);
     void initFrameCurr(
@@ -157,10 +154,10 @@ class Simulator : public QObject, public Visualizer
 
     // -- static variables ------------------------------------------
 
-    static QColor colClr;
-    static QColor colTxt;
-    static int      szeTxt;
-    static QColor colBdl;
+    static QColor m_clearColor;
+    static QColor m_textColor;
+    static int    m_textSize;
+    static QColor m_selectColor;
 
     enum
     {
@@ -176,12 +173,10 @@ class Simulator : public QObject, public Visualizer
       ID_BUNDLE_PREV,
       ID_BUNDLE_NEXT,
       ID_BUNDLE_LBL,
-      ID_TIMER,
+      ID_DIAGRAM_MORE,
       ANIM_NONE,
       ANIM_POS,
-      ANIM_BLEND,
-      ID_CLEAR,
-      ID_DIAGRAM_MORE
+      ANIM_BLEND
     };
 
     // -- data members ----------------------------------------------
@@ -225,6 +220,8 @@ class Simulator : public QObject, public Visualizer
     std::vector< std::vector< Position2D > > posBundlesNextBotRgt;
 
     // animation
+    static int m_blendType;
+
     static int itvTmrMS;
     static double pixPerMS;
     double timeTotalMS;
@@ -239,7 +236,6 @@ class Simulator : public QObject, public Visualizer
     Position2D posKeyFrameTo;
     Position2D posTweenFrame;
 
-    static int blendType;
     double opacityKeyFrameFr;
     double opacityKeyFrameTo;
 
