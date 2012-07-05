@@ -61,6 +61,8 @@ class Simulator : public QObject, public Visualizer
     static void setBlendType(int type)        { m_blendType = type; }
 
     void setDiagram(Diagram* dgrm);
+
+
     void initFrameCurr(
       Cluster* frame,
       const std::vector< Attribute* > &attrs);
@@ -109,7 +111,6 @@ class Simulator : public QObject, public Visualizer
 
   protected:
     // -- utility functions -----------------------------------------
-    void initAttributes(const std::vector< Attribute* > &attrs);
     void initFramesPrevNext();
     void initBundles();
     void sortFramesPrevNext();
@@ -158,6 +159,9 @@ class Simulator : public QObject, public Visualizer
     static QColor m_textColor;
     static int    m_textSize;
     static QColor m_selectColor;
+    static int    m_labelHeight;
+    static int    m_timerInterval;
+    static double m_animationPixelsPerMS;
 
     enum
     {
@@ -180,64 +184,60 @@ class Simulator : public QObject, public Visualizer
     };
 
     // -- data members ----------------------------------------------
-    Diagram* diagram;                // association
-    std::vector< Attribute* > attributes; // association
+    Diagram* m_diagram;                      // Diagram used for each frame
+    std::vector< Attribute* > m_attributes;  // Attributes for the frames
 
-    Cluster* frameCurr;            // composition
-    std::vector< Cluster* > framesPrev; // composition
-    std::vector< Cluster* > framesNext; // composition
-    std::vector< Bundle* >  bundles;    // composition
+    Cluster* m_currentFrame;            // composition
+    std::vector< Cluster* > m_previousFrames; // composition
+    std::vector< Cluster* > m_nextFrames; // composition
+    std::vector< Bundle* >  m_bundles;    // composition
 
-    std::vector< Bundle* >  bundlesByLbl;
-    std::vector< Bundle* >  bundlesPrevByLbl;
-    std::vector< Bundle* >  bundlesNextByLbl;
+    std::vector< Bundle* >  m_bundlesByLabel;
+    std::vector< Bundle* >  m_bundlesPreviousByLabel;
+    std::vector< Bundle* >  m_bundlesNextByLabel;
 
-    static int itvLblPixVert;
-    double scaleDgrmHori;
-    double scaleDgrmVert;
+    double m_horizontalFrameScale;
+    double m_verticalFrameScale;
 
-    int focusDepthIdx;
-    int focusFrameIdx;
-    int focusDepthIdxLast;
-    int focusFrameIdxPrevLast;
-    int focusFrameIdxNextLast;
+    int m_currentSelection;
+    int m_currentSelectionIndex;
+    int m_lastSelection;
+    int m_lastSelectionIndexPrevious;
+    int m_lastSelectionIndexNext;
 
-    size_t fcsLblPrevIdx;
-    size_t fcsLblNextIdx;
+    size_t m_previousBundleFocusIndex;
+    size_t m_nextBundleFocusIndex;
 
-    Position2D posFrameCurr;
-    std::vector< Position2D > posFramesPrev;
-    std::vector< Position2D > posFramesNext;
+    Position2D m_currentFramePosition;
+    std::vector< Position2D > m_previousFramePositions;
+    std::vector< Position2D > m_nextFramePositions;
 
-    std::vector< Position2D > posBdlLblGridPrevTopLft;
-    std::vector< Position2D > posBdlLblGridPrevBotRgt;
-    std::vector< Position2D > posBdlLblGridNextTopLft;
-    std::vector< Position2D > posBdlLblGridNextBotRgt;
+    std::vector< Position2D > m_previousBundleLabelPositionTL;
+    std::vector< Position2D > m_previousBundleLabelPositionBR;
+    std::vector< Position2D > m_nextBundleLabelPositionTL;
+    std::vector< Position2D > m_nextBundleLabelPositionBR;
 
-    std::vector< std::vector< Position2D > > posBundlesPrevTopLft;
-    std::vector< std::vector< Position2D > > posBundlesPrevBotRgt;
-    std::vector< std::vector< Position2D > > posBundlesNextTopLft;
-    std::vector< std::vector< Position2D > > posBundlesNextBotRgt;
+    std::vector< std::vector< Position2D > > m_previousBundlePositionTL;
+    std::vector< std::vector< Position2D > > m_previousBundlePositionBR;
+    std::vector< std::vector< Position2D > > m_nextBundlePositionTL;
+    std::vector< std::vector< Position2D > > m_nextBundlePositionBR;
 
     // animation
     static int m_blendType;
+    double m_totalAnimationTime;
+    double m_totalBlendTime;
+    int m_currentAnimationPhase;
 
-    static int itvTmrMS;
-    static double pixPerMS;
-    double timeTotalMS;
-    double timeAlphaMS;
-    int animPhase;
+    QTimer m_animationTimer;
 
-    QTimer timerAnim;
+    Cluster* m_animationOldFrame;
+    Cluster* m_animationNewFrame;
+    Position2D m_animationStartPosition;
+    Position2D m_animationEndPosition;
+    Position2D m_animationCurrentPosition;
 
-    Cluster* keyFrameFr;
-    Cluster* keyFrameTo;
-    Position2D posKeyFrameFr;
-    Position2D posKeyFrameTo;
-    Position2D posTweenFrame;
-
-    double opacityKeyFrameFr;
-    double opacityKeyFrameTo;
+    double m_animationOldFrameOpacity;
+    double m_animationNewFrameOpacity;
 
 };
 

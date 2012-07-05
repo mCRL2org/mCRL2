@@ -17,16 +17,16 @@ using namespace std;
 // -- static variables ----------------------------------------------
 
 
-QColor  Simulator::m_clearColor   = Qt::white;
-QColor  Simulator::m_textColor    = Qt::black;
-int     Simulator::m_textSize     = 12;
-QColor  Simulator::m_selectColor  = VisUtils::coolGreen;
+QColor  Simulator::m_clearColor             = Qt::white;
+QColor  Simulator::m_textColor              = Qt::black;
+int     Simulator::m_textSize               = 12;
+QColor  Simulator::m_selectColor            = VisUtils::coolGreen;
 
-int     Simulator::m_blendType      = VisUtils::BLEND_HARD;
+int     Simulator::m_blendType              = VisUtils::BLEND_HARD;
 
-int     Simulator::itvLblPixVert  = 40;
-int     Simulator::itvTmrMS       = 10;
-double  Simulator::pixPerMS       = 1.0;
+int     Simulator::m_labelHeight            = 40;
+int     Simulator::m_timerInterval          = 10;
+double  Simulator::m_animationPixelsPerMS   = 1.0;
 
 
 
@@ -41,21 +41,21 @@ Simulator::Simulator(
   : Visualizer(m, g, c),
     QObject(parent)
 {
-  diagram   = NULL;
-  frameCurr = NULL;
+  m_diagram   = NULL;
+  m_currentFrame = NULL;
 
-  focusDepthIdx = -1;
-  focusFrameIdx = -1;
+  m_currentSelection = -1;
+  m_currentSelectionIndex = -1;
 
-  focusDepthIdxLast     = -1;
-  focusFrameIdxPrevLast = -1;
-  focusFrameIdxNextLast = -1;
+  m_lastSelection     = -1;
+  m_lastSelectionIndexPrevious = -1;
+  m_lastSelectionIndexNext = -1;
 
-  fcsLblPrevIdx  = -1;
-  fcsLblNextIdx  = -1;
+  m_previousBundleFocusIndex  = -1;
+  m_nextBundleFocusIndex  = -1;
 
-  connect(&timerAnim, SIGNAL(timeout()), this, SLOT(onTimer()));
-  timerAnim.start(itvTmrMS);
+  connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
+  m_animationTimer.start(m_timerInterval);
 }
 
 
@@ -77,25 +77,25 @@ size_t Simulator::SelectedClusterIndex()
 {
   size_t result = NON_EXISTING;
 
-  if (focusDepthIdx == ID_FRAME_PREV)
+  if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesPrev.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
-      result = framesPrev[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
+      result = m_previousFrames[m_currentSelectionIndex]->getNode(0)->getCluster()->getIndex();
     }
   }
-  else if (focusDepthIdx == ID_FRAME_CURR)
+  else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (frameCurr != NULL)
+    if (m_currentFrame != NULL)
     {
-      result = frameCurr->getNode(0)->getCluster()->getIndex();
+      result = m_currentFrame->getNode(0)->getCluster()->getIndex();
     }
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesNext.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
-      result = framesNext[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
+      result = m_nextFrames[m_currentSelectionIndex]->getNode(0)->getCluster()->getIndex();
     }
   }
 
@@ -109,7 +109,7 @@ size_t Simulator::SelectedClusterIndex()
 void Simulator::setDiagram(Diagram* dgrm)
 {
   clearDiagram();
-  diagram = dgrm;
+  m_diagram = dgrm;
 
   dataChanged = true;
 }
@@ -124,13 +124,13 @@ void Simulator::initFrameCurr(
   clearFrames();
   clearBundles();
 
-  focusDepthIdxLast     = ID_FRAME_CURR;
-  focusFrameIdxPrevLast = -1;
-  focusFrameIdxNextLast = -1;
+  m_lastSelection     = ID_FRAME_CURR;
+  m_lastSelectionIndexPrevious = -1;
+  m_lastSelectionIndexNext = -1;
 
   // update new data
-  initAttributes(attrs);
-  frameCurr = new Cluster(*frame);
+  m_attributes = attrs;
+  m_currentFrame = new Cluster(*frame);
   initFramesPrevNext();
   initBundles();
   sortFramesPrevNext();
@@ -146,51 +146,51 @@ void Simulator::updateFrameCurr(
   const Position2D& pos)
 {
   // init animation data
-  keyFrameFr    = frame;
-  posKeyFrameFr = pos;
+  m_animationOldFrame    = frame;
+  m_animationStartPosition = pos;
 
-  keyFrameTo    = new Cluster(*frameCurr);
-  posKeyFrameTo = posFrameCurr;
+  m_animationNewFrame    = new Cluster(*m_currentFrame);
+  m_animationEndPosition = m_currentFramePosition;
 
-  posTweenFrame = posKeyFrameFr;
+  m_animationCurrentPosition = m_animationStartPosition;
 
   // calc animation parameters
   double xTo, yTo, xFr, yFr;
-  xTo = posKeyFrameTo.x;
-  yTo = posKeyFrameTo.y;
-  xFr = posKeyFrameFr.x;
-  yFr = posKeyFrameFr.y;
+  xTo = m_animationEndPosition.x;
+  yTo = m_animationEndPosition.y;
+  xFr = m_animationStartPosition.x;
+  yFr = m_animationStartPosition.y;
 
   double distPix = Utils::dist(xTo, yTo, xFr, yFr) / canvas->getPixelSize();
-  timeTotalMS = distPix/pixPerMS;
-  timeAlphaMS = 0.0;
+  m_totalAnimationTime = distPix/m_animationPixelsPerMS;
+  m_totalBlendTime = 0.0;
 
-  animPhase = ANIM_POS;
+  m_currentAnimationPhase = ANIM_POS;
 
   // clear previous data
   clearFrames();
   clearBundles();
 
-  focusDepthIdxLast     = ID_FRAME_CURR;
-  focusFrameIdxPrevLast = -1;
-  focusFrameIdxNextLast = -1;
+  m_lastSelection     = ID_FRAME_CURR;
+  m_lastSelectionIndexPrevious = -1;
+  m_lastSelectionIndexNext = -1;
 
-  timerAnim.start(itvTmrMS);
+  m_animationTimer.start(m_timerInterval);
   canvas->disableMouseMotion();
 }
 
 
 void Simulator::clearData()
 {
-  focusDepthIdx  = -1;
-  focusFrameIdx  = -1;
+  m_currentSelection  = -1;
+  m_currentSelectionIndex  = -1;
 
-  focusDepthIdxLast     = -1;
-  focusFrameIdxPrevLast = -1;
-  focusFrameIdxPrevLast = -1;
+  m_lastSelection     = -1;
+  m_lastSelectionIndexPrevious = -1;
+  m_lastSelectionIndexPrevious = -1;
 
-  fcsLblPrevIdx  = -1;
-  fcsLblNextIdx  = -1;
+  m_previousBundleFocusIndex  = -1;
+  m_nextBundleFocusIndex  = -1;
 
   clearAttributes();
   clearFrames();
@@ -200,26 +200,26 @@ void Simulator::clearData()
 
 void Simulator::handleSendDgrmSglToExnr()
 {
-  if (focusDepthIdx == ID_FRAME_PREV)
+  if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesPrev.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
       mediator->addToExaminer(
-        framesPrev[focusFrameIdx],
-        attributes);
+        m_previousFrames[m_currentSelectionIndex],
+        m_attributes);
   }
-  else if (focusDepthIdx == ID_FRAME_CURR)
+  else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (focusFrameIdx == 0)
+    if (m_currentSelectionIndex == 0)
       mediator->addToExaminer(
-        frameCurr,
-        attributes);
+        m_currentFrame,
+        m_attributes);
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesNext.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
       mediator->addToExaminer(
-        framesNext[focusFrameIdx],
-        attributes);
+        m_nextFrames[m_currentSelectionIndex],
+        m_attributes);
   }
 }
 
@@ -249,7 +249,7 @@ void Simulator::visualize(const bool& inSelectMode)
 
   if (inSelectMode)
   {
-    if (!timerAnim.isActive())
+    if (!m_animationTimer.isActive())
     {
       double wth, hgt;
       canvas->getSize(wth, hgt);
@@ -272,7 +272,7 @@ void Simulator::visualize(const bool& inSelectMode)
       drawFrameCurr(inSelectMode);
       drawFramesPrev(inSelectMode);
       drawFramesNext(inSelectMode);
-      if (framesPrev.size() > 0 || frameCurr != NULL || framesNext.size() > 0)
+      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
       {
         drawControls(inSelectMode);
       }
@@ -286,7 +286,7 @@ void Simulator::visualize(const bool& inSelectMode)
   }
   else
   {
-    if (timerAnim.isActive())
+    if (m_animationTimer.isActive())
     {
       animate();
       drawControls(inSelectMode);
@@ -300,7 +300,7 @@ void Simulator::visualize(const bool& inSelectMode)
       drawFrameCurr(inSelectMode);
       drawFramesPrev(inSelectMode);
       drawFramesNext(inSelectMode);
-      if (framesPrev.size() > 0 || frameCurr != NULL || framesNext.size() > 0)
+      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
       {
         drawControls(inSelectMode);
       }
@@ -396,11 +396,11 @@ void Simulator::handleMouseLeaveEvent()
 
   if (!showMenu)
   {
-    focusDepthIdx = -1;
-    focusFrameIdx = -1;
+    m_currentSelection = -1;
+    m_currentSelectionIndex = -1;
 
-    fcsLblPrevIdx = -1;
-    fcsLblNextIdx = -1;
+    m_previousBundleFocusIndex = -1;
+    m_nextBundleFocusIndex = -1;
 
     mediator->handleUnmarkFrameClusts(this);
     mediator->handleUnshowFrame();
@@ -417,7 +417,7 @@ void Simulator::handleMouseLeaveEvent()
 
 void Simulator::handleKeyDownEvent(const int& keyCode)
 {
-  if (timerAnim.isActive())
+  if (m_animationTimer.isActive())
   {
     Visualizer::handleKeyDownEvent(keyCode);
 
@@ -439,19 +439,19 @@ void Simulator::handleKeyDownEvent(const int& keyCode)
     }
     else if (keyCodeDown == WXK_ESCAPE)
     {
-      focusDepthIdxLast = focusDepthIdx;
+      m_lastSelection = m_currentSelection;
 
-      if (focusDepthIdx == ID_FRAME_PREV)
+      if (m_currentSelection == ID_FRAME_PREV)
       {
-        focusFrameIdxPrevLast = focusFrameIdx;
+        m_lastSelectionIndexPrevious = m_currentSelectionIndex;
       }
-      else if (focusDepthIdx == ID_FRAME_NEXT)
+      else if (m_currentSelection == ID_FRAME_NEXT)
       {
-        focusFrameIdxNextLast = focusFrameIdx;
+        m_lastSelectionIndexNext = m_currentSelectionIndex;
       }
 
-      focusDepthIdx = -1;
-      focusFrameIdx = -1;
+      m_currentSelection = -1;
+      m_currentSelectionIndex = -1;
 
       mediator->handleUnmarkFrameClusts(this);
       mediator->handleUnshowFrame();
@@ -476,13 +476,6 @@ void Simulator::handleMarkFrameClust(
 
 // -- utility functions ---------------------------------------------
 
-
-void Simulator::initAttributes(const vector< Attribute* > &attrs)
-{
-  attributes = attrs;
-}
-
-
 void Simulator::initFramesPrevNext()
 {
   Node*        temp;
@@ -492,9 +485,9 @@ void Simulator::initFramesPrevNext()
   Cluster*     nodesNext;
 
   // get nodes leading to & from current frame
-  for (size_t i = 0; i < frameCurr->getSizeNodes(); ++i)
+  for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
   {
-    temp = frameCurr->getNode(i);
+    temp = m_currentFrame->getNode(i);
 
     // incoming nodes
     {
@@ -533,12 +526,12 @@ void Simulator::initFramesPrevNext()
   // calculate prev & next frames
   graph->calcAttrCombn(
     nodesPrev,
-    attributes,
-    framesPrev);
+    m_attributes,
+    m_previousFrames);
   graph->calcAttrCombn(
     nodesNext,
-    attributes,
-    framesNext);
+    m_attributes,
+    m_nextFrames);
 
   // clear memory
   temp = NULL;
@@ -564,20 +557,20 @@ void Simulator::initBundles()
 
   // get nodes in current frame
   {
-    for (size_t i = 0; i < frameCurr->getSizeNodes(); ++i)
+    for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
     {
-      currNodes.insert(frameCurr->getNode(i));
+      currNodes.insert(m_currentFrame->getNode(i));
     }
   }
 
   // get all edges from previous frames to current frame
   lbls.clear();
   {
-    for (size_t i = 0; i < framesPrev.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       bdls.clear();
 
-      clst = framesPrev[i];
+      clst = m_previousFrames[i];
       for (size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
@@ -605,16 +598,16 @@ void Simulator::initBundles()
             pos = bdls.find(edge->getLabel());
             if (pos == bdls.end())
             {
-              bdl = new Bundle(bundles.size());
-              bundles.push_back(bdl);
+              bdl = new Bundle(m_bundles.size());
+              m_bundles.push_back(bdl);
 
               bdls.insert(pair< string, Bundle* >(edge->getLabel(), bdl));
 
               clst->addOutBundle(bdl);
-              frameCurr->addInBundle(bdl);
+              m_currentFrame->addInBundle(bdl);
 
               bdl->setInCluster(clst);
-              bdl->setOutCluster(frameCurr);
+              bdl->setOutCluster(m_currentFrame);
 
               bdl->setParent(bdlLbls);
               bdlLbls->addChild(bdl);
@@ -634,17 +627,17 @@ void Simulator::initBundles()
   for (it = lbls.begin(); it != lbls.end(); ++it)
   {
     bdlLbls = it->second;
-    bdlLbls->setIndex(bundlesPrevByLbl.size());
-    bundlesPrevByLbl.push_back(bdlLbls);
+    bdlLbls->setIndex(m_bundlesPreviousByLabel.size());
+    m_bundlesPreviousByLabel.push_back(bdlLbls);
   }
 
   // get all edges from current frame to next frames
   lbls.clear();
   {
-    for (size_t i = 0; i < framesNext.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); ++i)
     {
       bdls.clear();
-      clst = framesNext[i];
+      clst = m_nextFrames[i];
       for (size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
@@ -672,14 +665,14 @@ void Simulator::initBundles()
             if (pos == bdls.end())
             {
               bdl = new Bundle();
-              bundles.push_back(bdl);
+              m_bundles.push_back(bdl);
 
               bdls.insert(pair< string, Bundle* >(edge->getLabel(), bdl));
 
-              frameCurr->addOutBundle(bdl);
+              m_currentFrame->addOutBundle(bdl);
               clst->addInBundle(bdl);
 
-              bdl->setInCluster(frameCurr);
+              bdl->setInCluster(m_currentFrame);
               bdl->setOutCluster(clst);
 
               bdl->setParent(bdlLbls);
@@ -699,15 +692,15 @@ void Simulator::initBundles()
   for (it = lbls.begin(); it != lbls.end(); ++it)
   {
     bdlLbls = it->second;
-    bdlLbls->setIndex(bundlesNextByLbl.size());
-    bundlesNextByLbl.push_back(bdlLbls);
+    bdlLbls->setIndex(m_bundlesNextByLabel.size());
+    m_bundlesNextByLabel.push_back(bdlLbls);
   }
 
   lbls.clear();
   {
-    for (size_t i = 0; i < bundlesPrevByLbl.size(); ++i)
+    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
     {
-      bdl = bundlesPrevByLbl[i];
+      bdl = m_bundlesPreviousByLabel[i];
 
       map< string, Bundle* >::iterator pos;
       pos = lbls.find(bdl->getChild(0)->getEdge(0)->getLabel());
@@ -730,9 +723,9 @@ void Simulator::initBundles()
   }
 
   {
-    for (size_t i = 0; i < bundlesNextByLbl.size(); ++i)
+    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
     {
-      bdl = bundlesNextByLbl[i];
+      bdl = m_bundlesNextByLabel[i];
 
       map< string, Bundle* >::iterator pos;
       pos = lbls.find(bdl->getChild(0)->getEdge(0)->getLabel());
@@ -757,8 +750,8 @@ void Simulator::initBundles()
   for (it = lbls.begin(); it != lbls.end(); ++it)
   {
     bdlLbls = it->second;
-    bdlLbls->setIndex(bundlesByLbl.size());
-    bundlesByLbl.push_back(bdlLbls);
+    bdlLbls->setIndex(m_bundlesByLabel.size());
+    m_bundlesByLabel.push_back(bdlLbls);
   }
 
   // clear memory
@@ -779,42 +772,42 @@ void Simulator::sortFramesPrevNext()
 
   // sort previous frames
   {
-    for (size_t i = 0; i < framesPrev.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       int key = 0;
-      for (size_t j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j)
+      for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
       {
-        key += (int)pow(10.0, (int) framesPrev[i]->getOutBundle(j)->getParent()->getIndex());
+        key += (int)pow(10.0, (int) m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex());
       }
 
-      sorted.insert(pair< int, Cluster* >(key, framesPrev[i]));
+      sorted.insert(pair< int, Cluster* >(key, m_previousFrames[i]));
     }
   }
 
-  framesPrev.clear();
+  m_previousFrames.clear();
   multimap< int, Cluster* >::iterator it;
   for (it = sorted.begin(); it != sorted.end(); ++it)
   {
-    framesPrev.push_back(it->second);
+    m_previousFrames.push_back(it->second);
   }
   sorted.clear();
 
   // sort previous frames
-  for (size_t i = 0; i < framesNext.size(); ++i)
+  for (size_t i = 0; i < m_nextFrames.size(); ++i)
   {
     int key = 0;
-    for (size_t j = 0; j < framesNext[i]->getSizeInBundles(); ++j)
+    for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
     {
-      key += (int)pow(10.0, (int) framesNext[i]->getInBundle(j)->getParent()->getIndex());
+      key += (int)pow(10.0, (int) m_nextFrames[i]->getInBundle(j)->getParent()->getIndex());
     }
 
-    sorted.insert(pair< int, Cluster* >(key, framesNext[i]));
+    sorted.insert(pair< int, Cluster* >(key, m_nextFrames[i]));
   }
 
-  framesNext.clear();
+  m_nextFrames.clear();
   for (it = sorted.begin(); it != sorted.end(); ++it)
   {
-    framesNext.push_back(it->second);
+    m_nextFrames.push_back(it->second);
   }
   sorted.clear();
 }
@@ -845,39 +838,39 @@ void Simulator::calcPosFrames()
   Position2D pos;
 
   // clear previous positions
-  posFramesPrev.clear();
-  posFramesNext.clear();
+  m_previousFramePositions.clear();
+  m_nextFramePositions.clear();
 
   // get canvas info & calc intervals
   double wthCvs, hgtCvs;
   canvas->getSize(wthCvs, hgtCvs);
   double pix = canvas->getPixelSize();
   double itvHori = wthCvs/6;
-  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(framesPrev.size(), framesNext.size()));
-  scaleDgrmHori = 0.5*itvHori;
-  scaleDgrmVert = Utils::minn(scaleDgrmHori, 0.45*itvVert);
+  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
+  m_horizontalFrameScale = 0.5*itvHori;
+  m_verticalFrameScale = Utils::minn(m_horizontalFrameScale, 0.45*itvVert);
 
   // calc new positions
   pos.x = 0;
   pos.y = 0;
-  posFrameCurr = pos;
+  m_currentFramePosition = pos;
 
   pos.x = -0.5*wthCvs + 0.5*itvHori + 4.0*pix;
-  pos.y = 0.5*framesPrev.size()*itvVert - 0.5*itvVert;
+  pos.y = 0.5*m_previousFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < framesPrev.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); ++i)
     {
-      posFramesPrev.push_back(pos);
+      m_previousFramePositions.push_back(pos);
       pos.y -= itvVert;
     }
   }
 
   pos.x = 0.5*wthCvs - 0.5*itvHori - 4.0*pix;
-  pos.y = 0.5*framesNext.size()*itvVert - 0.5*itvVert;
+  pos.y = 0.5*m_nextFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < framesNext.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); ++i)
     {
-      posFramesNext.push_back(pos);
+      m_nextFramePositions.push_back(pos);
       pos.y -= itvVert;
     }
   }
@@ -889,75 +882,75 @@ void Simulator::calcPosBundles()
   Position2D posTopLft, posBotRgt;
 
   // clear previous positions
-  posBdlLblGridPrevTopLft.clear();
-  posBdlLblGridPrevBotRgt.clear();
-  posBdlLblGridNextTopLft.clear();
-  posBdlLblGridNextBotRgt.clear();
+  m_previousBundleLabelPositionTL.clear();
+  m_previousBundleLabelPositionBR.clear();
+  m_nextBundleLabelPositionTL.clear();
+  m_nextBundleLabelPositionBR.clear();
 
-  posBundlesPrevTopLft.clear();
-  posBundlesPrevBotRgt.clear();
-  posBundlesNextTopLft.clear();
-  posBundlesNextBotRgt.clear();
+  m_previousBundlePositionTL.clear();
+  m_previousBundlePositionBR.clear();
+  m_nextBundlePositionTL.clear();
+  m_nextBundlePositionBR.clear();
 
   // get canvas info & calc intervals
   double wthCvs, hgtCvs;
   canvas->getSize(wthCvs, hgtCvs);
   double pix = canvas->getPixelSize();
   double itvHori = wthCvs/6;
-  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(framesPrev.size(), framesNext.size()));
+  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
 
   // calc new positions
-  if (posFramesPrev.size() > 0 && bundlesPrevByLbl.size() > 0)
+  if (m_previousFramePositions.size() > 0 && m_bundlesPreviousByLabel.size() > 0)
   {
     // grid prev
-    if (posFramesPrev.size() >= posFramesNext.size())
+    if (m_previousFramePositions.size() >= m_nextFramePositions.size())
     {
-      posTopLft.y = posFramesPrev[0].y + 1.0*scaleDgrmVert + 0.125*itvVert;
-      posBotRgt.y = posFramesPrev[posFramesPrev.size()-1].y - 1.0*scaleDgrmVert - 0.125*itvVert;
+      posTopLft.y = m_previousFramePositions[0].y + 1.0*m_verticalFrameScale + 0.125*itvVert;
+      posBotRgt.y = m_previousFramePositions[m_previousFramePositions.size()-1].y - 1.0*m_verticalFrameScale - 0.125*itvVert;
     }
     else
     {
-      posTopLft.y = posFramesNext[0].y + 1.0*scaleDgrmVert + 0.125*itvVert;
-      posBotRgt.y = posFramesNext[posFramesNext.size()-1].y - 1.0*scaleDgrmVert - 0.125*itvVert;
+      posTopLft.y = m_nextFramePositions[0].y + 1.0*m_verticalFrameScale + 0.125*itvVert;
+      posBotRgt.y = m_nextFramePositions[m_nextFramePositions.size()-1].y - 1.0*m_verticalFrameScale - 0.125*itvVert;
     }
 
-    double itvGrid = (1.5*itvHori)/(bundlesPrevByLbl.size()+1);
+    double itvGrid = (1.5*itvHori)/(m_bundlesPreviousByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < bundlesPrevByLbl.size(); ++i)
+      for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
       {
         posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
-        posTopLft.y =  0.5*hgtCvs - itvLblPixVert*pix;
+        posTopLft.y =  0.5*hgtCvs - m_labelHeight*pix;
         posBotRgt.x =  posTopLft.x;
-        posBotRgt.y = -0.5*hgtCvs + itvLblPixVert*pix;
+        posBotRgt.y = -0.5*hgtCvs + m_labelHeight*pix;
 
-        posBdlLblGridPrevTopLft.push_back(posTopLft);
-        posBdlLblGridPrevBotRgt.push_back(posBotRgt);
+        m_previousBundleLabelPositionTL.push_back(posTopLft);
+        m_previousBundleLabelPositionBR.push_back(posBotRgt);
       }
     }
 
     // bundles prev
     {
-      for (size_t i = 0; i < framesPrev.size(); ++i)
+      for (size_t i = 0; i < m_previousFrames.size(); ++i)
       {
         vector< Position2D > v;
 
-        posBundlesPrevTopLft.push_back(v);
-        posBundlesPrevBotRgt.push_back(v);
+        m_previousBundlePositionTL.push_back(v);
+        m_previousBundlePositionBR.push_back(v);
 
         // incoming bundles
-        double itv = 2.0/bundlesPrevByLbl.size();
+        double itv = 2.0/m_bundlesPreviousByLabel.size();
         {
-          for (size_t j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j)
+          for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
           {
             ///*
-            posTopLft.x = posFramesPrev[i].x + 1.0*scaleDgrmVert + 3.0*pix;
-            posTopLft.y = posFramesPrev[i].y
-                          + 1.0*scaleDgrmVert
-                          - 0.5*itv*scaleDgrmVert
-                          - framesPrev[i]->getOutBundle(j)->getParent()->getIndex()*itv*scaleDgrmVert;
+            posTopLft.x = m_previousFramePositions[i].x + 1.0*m_verticalFrameScale + 3.0*pix;
+            posTopLft.y = m_previousFramePositions[i].y
+                          + 1.0*m_verticalFrameScale
+                          - 0.5*itv*m_verticalFrameScale
+                          - m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex()*itv*m_verticalFrameScale;
 
-            posBotRgt.x = posBdlLblGridPrevTopLft[ framesPrev[i]->getOutBundle(j)->getParent()->getIndex() ].x;
+            posBotRgt.x = m_previousBundleLabelPositionTL[ m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex() ].x;
             posBotRgt.y = posTopLft.y;
             //*/
             /*
@@ -970,69 +963,69 @@ void Simulator::calcPosBundles()
             posBotRgt.x = posFrameCurr.x - 1.0*scaleDgrmHori - 3.0*pix;
             posBotRgt.y = posTopLft.y;
             */
-            posBundlesPrevTopLft[i].push_back(posTopLft);
-            posBundlesPrevBotRgt[i].push_back(posBotRgt);
+            m_previousBundlePositionTL[i].push_back(posTopLft);
+            m_previousBundlePositionBR[i].push_back(posBotRgt);
           }
         }
       }
     }
   }
 
-  if (posFramesNext.size() > 0 && bundlesNextByLbl.size() > 0)
+  if (m_nextFramePositions.size() > 0 && m_bundlesNextByLabel.size() > 0)
   {
     // grid prev
-    if (posFramesPrev.size() >= posFramesNext.size())
+    if (m_previousFramePositions.size() >= m_nextFramePositions.size())
     {
-      posTopLft.y = posFramesPrev[0].y + 1.0*scaleDgrmVert + 0.125*itvVert;
-      posBotRgt.y = posFramesPrev[posFramesPrev.size()-1].y - 1.0*scaleDgrmVert - 0.125*itvVert;
+      posTopLft.y = m_previousFramePositions[0].y + 1.0*m_verticalFrameScale + 0.125*itvVert;
+      posBotRgt.y = m_previousFramePositions[m_previousFramePositions.size()-1].y - 1.0*m_verticalFrameScale - 0.125*itvVert;
     }
     else
     {
-      posTopLft.y = posFramesNext[0].y + 1.0*scaleDgrmVert + 0.125*itvVert;
-      posBotRgt.y = posFramesNext[posFramesNext.size()-1].y - 1.0*scaleDgrmVert - 0.125*itvVert;
+      posTopLft.y = m_nextFramePositions[0].y + 1.0*m_verticalFrameScale + 0.125*itvVert;
+      posBotRgt.y = m_nextFramePositions[m_nextFramePositions.size()-1].y - 1.0*m_verticalFrameScale - 0.125*itvVert;
     }
 
     // grid next
-    double itvGrid = (1.5*itvHori)/(bundlesNextByLbl.size()+1);
+    double itvGrid = (1.5*itvHori)/(m_bundlesNextByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < bundlesNextByLbl.size(); ++i)
+      for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
       {
-        posTopLft.x = 2.0*itvHori - (bundlesNextByLbl.size()-i)*itvGrid;
-        posTopLft.y =  0.5*hgtCvs - itvLblPixVert*pix;
+        posTopLft.x = 2.0*itvHori - (m_bundlesNextByLabel.size()-i)*itvGrid;
+        posTopLft.y =  0.5*hgtCvs - m_labelHeight*pix;
         posBotRgt.x = posTopLft.x;
-        posBotRgt.y = -0.5*hgtCvs + itvLblPixVert*pix;
+        posBotRgt.y = -0.5*hgtCvs + m_labelHeight*pix;
 
-        posBdlLblGridNextTopLft.push_back(posTopLft);
-        posBdlLblGridNextBotRgt.push_back(posBotRgt);
+        m_nextBundleLabelPositionTL.push_back(posTopLft);
+        m_nextBundleLabelPositionBR.push_back(posBotRgt);
       }
     }
 
     // bundles next
     {
-      for (size_t i = 0; i < framesNext.size(); ++i)
+      for (size_t i = 0; i < m_nextFrames.size(); ++i)
       {
         vector< Position2D > v;
 
-        posBundlesNextTopLft.push_back(v);
-        posBundlesNextBotRgt.push_back(v);
+        m_nextBundlePositionTL.push_back(v);
+        m_nextBundlePositionBR.push_back(v);
 
         // outgoing bundles
-        double itv = 2.0/bundlesNextByLbl.size();
+        double itv = 2.0/m_bundlesNextByLabel.size();
         {
-          for (size_t j = 0; j < framesNext[i]->getSizeInBundles(); ++j)
+          for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
           {
-            posTopLft.x = posBdlLblGridNextTopLft[ framesNext[i]->getInBundle(j)->getParent()->getIndex() ].x + 1.0*pix;
-            posTopLft.y = posBotRgt.y = posFramesNext[i].y
-                                        + 1.0*scaleDgrmVert
-                                        - 0.5*itv*scaleDgrmVert
-                                        - framesNext[i]->getInBundle(j)->getParent()->getIndex()*itv*scaleDgrmVert;
+            posTopLft.x = m_nextBundleLabelPositionTL[ m_nextFrames[i]->getInBundle(j)->getParent()->getIndex() ].x + 1.0*pix;
+            posTopLft.y = posBotRgt.y = m_nextFramePositions[i].y
+                                        + 1.0*m_verticalFrameScale
+                                        - 0.5*itv*m_verticalFrameScale
+                                        - m_nextFrames[i]->getInBundle(j)->getParent()->getIndex()*itv*m_verticalFrameScale;
 
-            posBotRgt.x = posFramesNext[i].x - 1.0*scaleDgrmVert - 3.0*pix;
+            posBotRgt.x = m_nextFramePositions[i].x - 1.0*m_verticalFrameScale - 3.0*pix;
             posBotRgt.y = posTopLft.y;
 
-            posBundlesNextTopLft[i].push_back(posTopLft);
-            posBundlesNextBotRgt[i].push_back(posBotRgt);
+            m_nextBundlePositionTL[i].push_back(posTopLft);
+            m_nextBundlePositionBR[i].push_back(posBotRgt);
           }
         }
       }
@@ -1043,207 +1036,207 @@ void Simulator::calcPosBundles()
 
 void Simulator::handleKeyUp()
 {
-  if (focusDepthIdx == ID_FRAME_PREV)
+  if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 < focusFrameIdx)
+    if (0 < m_currentSelectionIndex)
     {
-      --focusFrameIdx;
+      --m_currentSelectionIndex;
     }
 
-    focusFrameIdxPrevLast = focusFrameIdx;
+    m_lastSelectionIndexPrevious = m_currentSelectionIndex;
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 < focusFrameIdx)
+    if (0 < m_currentSelectionIndex)
     {
-      --focusFrameIdx;
+      --m_currentSelectionIndex;
     }
 
-    focusFrameIdxNextLast = focusFrameIdx;
+    m_lastSelectionIndexNext = m_currentSelectionIndex;
   }
 }
 
 
 void Simulator::handleKeyRgt()
 {
-  if (focusDepthIdx == -1)
+  if (m_currentSelection == -1)
   {
-    if (focusDepthIdxLast != -1)
+    if (m_lastSelection != -1)
     {
-      focusDepthIdx = focusDepthIdxLast;
+      m_currentSelection = m_lastSelection;
 
-      if (focusDepthIdx == ID_FRAME_PREV)
+      if (m_currentSelection == ID_FRAME_PREV)
       {
-        if (0 <= focusFrameIdxPrevLast && static_cast <size_t>(focusFrameIdxPrevLast) < framesPrev.size())
+        if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
         {
-          focusFrameIdx = focusFrameIdxPrevLast;
+          m_currentSelectionIndex = m_lastSelectionIndexPrevious;
         }
         else
         {
-          focusFrameIdx = 0;
+          m_currentSelectionIndex = 0;
         }
       }
-      else if (focusDepthIdx == ID_FRAME_CURR)
+      else if (m_currentSelection == ID_FRAME_CURR)
       {
-        focusFrameIdx = 0;
+        m_currentSelectionIndex = 0;
       }
-      else if (focusDepthIdx == ID_FRAME_NEXT)
+      else if (m_currentSelection == ID_FRAME_NEXT)
       {
-        if (0 <= focusFrameIdxNextLast && static_cast <size_t>(focusFrameIdxNextLast) < framesNext.size())
+        if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
         {
-          focusFrameIdx = focusFrameIdxNextLast;
+          m_currentSelectionIndex = m_lastSelectionIndexNext;
         }
         else
         {
-          focusFrameIdx = 0;
+          m_currentSelectionIndex = 0;
         }
       }
     }
     else
     {
-      focusDepthIdx = ID_FRAME_CURR;
-      focusFrameIdx = 0;
+      m_currentSelection = ID_FRAME_CURR;
+      m_currentSelectionIndex = 0;
     }
   }
-  else if (focusDepthIdx == ID_FRAME_PREV)
+  else if (m_currentSelection == ID_FRAME_PREV)
   {
-    focusDepthIdx = ID_FRAME_CURR;
-    focusFrameIdx = 0;
+    m_currentSelection = ID_FRAME_CURR;
+    m_currentSelectionIndex = 0;
   }
-  else if (focusDepthIdx == ID_FRAME_CURR)
+  else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (framesNext.size() > 0)
+    if (m_nextFrames.size() > 0)
     {
-      focusDepthIdx = ID_FRAME_NEXT;
+      m_currentSelection = ID_FRAME_NEXT;
 
-      if (0 <= focusFrameIdxNextLast && static_cast <size_t>(focusFrameIdxNextLast) < framesNext.size())
+      if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
       {
-        focusFrameIdx = focusFrameIdxNextLast;
+        m_currentSelectionIndex = m_lastSelectionIndexNext;
       }
       else
       {
-        focusFrameIdx = 0;
+        m_currentSelectionIndex = 0;
       }
 
-      focusFrameIdxNextLast = focusFrameIdx;
+      m_lastSelectionIndexNext = m_currentSelectionIndex;
     }
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
     updateFrameCurr(
-      new Cluster(*framesNext[focusFrameIdx]),
-      posFramesNext[focusFrameIdx]);
+      new Cluster(*m_nextFrames[m_currentSelectionIndex]),
+      m_nextFramePositions[m_currentSelectionIndex]);
 
-    focusDepthIdx = ID_FRAME_CURR;
-    focusFrameIdx = 0;
+    m_currentSelection = ID_FRAME_CURR;
+    m_currentSelectionIndex = 0;
   }
 }
 
 
 void Simulator::handleKeyDwn()
 {
-  if (focusDepthIdx == ID_FRAME_PREV)
+  if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (static_cast <size_t>(focusFrameIdx) < framesPrev.size()-1)
+    if (static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size()-1)
     {
-      ++focusFrameIdx;
+      ++m_currentSelectionIndex;
     }
 
-    focusFrameIdxPrevLast = focusFrameIdx;
+    m_lastSelectionIndexPrevious = m_currentSelectionIndex;
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (static_cast <size_t>(focusFrameIdx) < framesNext.size()-1)
+    if (static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size()-1)
     {
-      ++focusFrameIdx;
+      ++m_currentSelectionIndex;
     }
 
-    focusFrameIdxNextLast = focusFrameIdx;
+    m_lastSelectionIndexNext = m_currentSelectionIndex;
   }
 }
 
 
 void Simulator::handleKeyLft()
 {
-  if (focusDepthIdx < 0)
+  if (m_currentSelection < 0)
   {
-    if (focusDepthIdxLast >= 0)
+    if (m_lastSelection >= 0)
     {
-      focusDepthIdx = focusDepthIdxLast;
+      m_currentSelection = m_lastSelection;
 
-      if (focusDepthIdx == ID_FRAME_PREV)
+      if (m_currentSelection == ID_FRAME_PREV)
       {
-        if (0 <= focusFrameIdxPrevLast && static_cast <size_t>(focusFrameIdxPrevLast) < framesPrev.size())
+        if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
         {
-          focusFrameIdx = focusFrameIdxPrevLast;
+          m_currentSelectionIndex = m_lastSelectionIndexPrevious;
         }
         else
         {
-          focusFrameIdx = 0;
+          m_currentSelectionIndex = 0;
         }
       }
-      else if (focusDepthIdx == ID_FRAME_CURR)
+      else if (m_currentSelection == ID_FRAME_CURR)
       {
-        focusFrameIdx = 0;
+        m_currentSelectionIndex = 0;
       }
-      else if (focusDepthIdx == ID_FRAME_NEXT)
+      else if (m_currentSelection == ID_FRAME_NEXT)
       {
-        if (0 <= focusFrameIdxNextLast && static_cast <size_t>(focusFrameIdxNextLast) < framesNext.size())
+        if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
         {
-          focusFrameIdx = focusFrameIdxNextLast;
+          m_currentSelectionIndex = m_lastSelectionIndexNext;
         }
         else
         {
-          focusFrameIdx = 0;
+          m_currentSelectionIndex = 0;
         }
       }
     }
     else
     {
-      focusDepthIdx = ID_FRAME_CURR;
-      focusFrameIdx = 0;
+      m_currentSelection = ID_FRAME_CURR;
+      m_currentSelectionIndex = 0;
     }
   }
-  else if (focusDepthIdx == ID_FRAME_PREV)
+  else if (m_currentSelection == ID_FRAME_PREV)
   {
     updateFrameCurr(
-      new Cluster(*framesPrev[focusFrameIdx]),
-      posFramesPrev[focusFrameIdx]);
+      new Cluster(*m_previousFrames[m_currentSelectionIndex]),
+      m_previousFramePositions[m_currentSelectionIndex]);
 
-    focusDepthIdx = ID_FRAME_CURR;
-    focusFrameIdx = 0;
+    m_currentSelection = ID_FRAME_CURR;
+    m_currentSelectionIndex = 0;
   }
-  else if (focusDepthIdx == ID_FRAME_CURR)
+  else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (framesPrev.size() > 0)
+    if (m_previousFrames.size() > 0)
     {
-      focusDepthIdx = ID_FRAME_PREV;
+      m_currentSelection = ID_FRAME_PREV;
 
-      if (0 <= focusFrameIdxPrevLast && static_cast <size_t>(focusFrameIdxPrevLast) < framesPrev.size())
+      if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
       {
-        focusFrameIdx = focusFrameIdxPrevLast;
+        m_currentSelectionIndex = m_lastSelectionIndexPrevious;
       }
       else
       {
-        focusFrameIdx = 0;
+        m_currentSelectionIndex = 0;
       }
 
-      focusFrameIdxPrevLast = focusFrameIdx;
+      m_lastSelectionIndexPrevious = m_currentSelectionIndex;
     }
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    focusDepthIdx = ID_FRAME_CURR;
-    focusFrameIdx = 0;
+    m_currentSelection = ID_FRAME_CURR;
+    m_currentSelectionIndex = 0;
   }
 }
 
 
 void Simulator::markFrameClusts()
 {
-  if (focusDepthIdx == ID_FRAME_PREV)
+  if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesPrev.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
       /*
       mediator->handleUnmarkFrameClusts();
@@ -1251,14 +1244,14 @@ void Simulator::markFrameClusts()
       mediator->handleMarkFrameClust(this);
 
       mediator->handleShowFrame(
-        framesPrev[focusFrameIdx],
-        attributes,
+        m_previousFrames[m_currentSelectionIndex],
+        m_attributes,
         m_selectColor);
     }
   }
-  else if (focusDepthIdx == ID_FRAME_CURR)
+  else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (frameCurr != NULL)
+    if (m_currentFrame != NULL)
     {
       /*
       mediator->handleUnmarkFrameClusts();
@@ -1266,14 +1259,14 @@ void Simulator::markFrameClusts()
       mediator->handleMarkFrameClust(this);
 
       mediator->handleShowFrame(
-        frameCurr,
-        attributes,
+        m_currentFrame,
+        m_attributes,
         m_selectColor);
     }
   }
-  else if (focusDepthIdx == ID_FRAME_NEXT)
+  else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 <= focusFrameIdx && static_cast <size_t>(focusFrameIdx) < framesNext.size())
+    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
       /*
       mediator->handleUnmarkFrameClusts();
@@ -1281,8 +1274,8 @@ void Simulator::markFrameClusts()
       mediator->handleMarkFrameClust(this);
 
       mediator->handleShowFrame(
-        framesNext[focusFrameIdx],
-        attributes,
+        m_nextFrames[m_currentSelectionIndex],
+        m_attributes,
         m_selectColor);
     }
   }
@@ -1291,88 +1284,88 @@ void Simulator::markFrameClusts()
 
 void Simulator::clearAttributes()
 {
-  attributes.clear();
+  m_attributes.clear();
 }
 
 
 void Simulator::clearDiagram()
 {
-  diagram = NULL;
+  m_diagram = NULL;
 }
 
 
 void Simulator::clearFrames()
 {
-  if (frameCurr != NULL)
+  if (m_currentFrame != NULL)
   {
-    delete frameCurr;
-    frameCurr = NULL;
+    delete m_currentFrame;
+    m_currentFrame = NULL;
   }
 
   {
-    for (size_t i = 0; i < framesPrev.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); ++i)
     {
-      delete framesPrev[i];
+      delete m_previousFrames[i];
     }
   }
-  framesPrev.clear();
+  m_previousFrames.clear();
 
   {
-    for (size_t i = 0; i < framesNext.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); ++i)
     {
-      delete framesNext[i];
+      delete m_nextFrames[i];
     }
   }
-  framesNext.clear();
+  m_nextFrames.clear();
 
-  posFramesPrev.clear();
-  posFramesNext.clear();
+  m_previousFramePositions.clear();
+  m_nextFramePositions.clear();
 }
 
 
 void Simulator::clearBundles()
 {
   {
-    for (size_t i = 0; i < bundles.size(); ++i)
+    for (size_t i = 0; i < m_bundles.size(); ++i)
     {
-      delete bundles[i];
+      delete m_bundles[i];
     }
-    bundles.clear();
+    m_bundles.clear();
   }
 
   {
-    for (size_t i = 0; i < bundlesPrevByLbl.size(); ++i)
+    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
     {
-      delete bundlesPrevByLbl[i];
+      delete m_bundlesPreviousByLabel[i];
     }
   }
-  bundlesPrevByLbl.clear();
+  m_bundlesPreviousByLabel.clear();
 
   {
-    for (size_t i = 0; i < bundlesNextByLbl.size(); ++i)
+    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
     {
-      delete bundlesNextByLbl[i];
+      delete m_bundlesNextByLabel[i];
     }
   }
-  bundlesNextByLbl.clear();
+  m_bundlesNextByLabel.clear();
 
   {
-    for (size_t i = 0; i < bundlesByLbl.size(); ++i)
+    for (size_t i = 0; i < m_bundlesByLabel.size(); ++i)
     {
-      delete bundlesByLbl[i];
+      delete m_bundlesByLabel[i];
     }
   }
-  bundlesByLbl.clear();
+  m_bundlesByLabel.clear();
 
-  posBdlLblGridPrevTopLft.clear();
-  posBdlLblGridPrevBotRgt.clear();
-  posBdlLblGridNextTopLft.clear();
-  posBdlLblGridNextBotRgt.clear();
+  m_previousBundleLabelPositionTL.clear();
+  m_previousBundleLabelPositionBR.clear();
+  m_nextBundleLabelPositionTL.clear();
+  m_nextBundleLabelPositionBR.clear();
 
-  posBundlesPrevTopLft.clear();
-  posBundlesPrevBotRgt.clear();
-  posBundlesNextTopLft.clear();
-  posBundlesNextBotRgt.clear();
+  m_previousBundlePositionTL.clear();
+  m_previousBundlePositionBR.clear();
+  m_nextBundlePositionTL.clear();
+  m_nextBundlePositionBR.clear();
 }
 
 
@@ -1385,17 +1378,17 @@ void Simulator::handleHits(const vector< int > &ids)
   {
     if (ids[0] == ID_CANVAS)
     {
-      if (focusDepthIdx != -1 || focusFrameIdx != -1)
+      if (m_currentSelection != -1 || m_currentSelectionIndex != -1)
       {
-        focusDepthIdx = -1;
-        focusFrameIdx = -1;
+        m_currentSelection = -1;
+        m_currentSelectionIndex = -1;
 
         mediator->handleUnmarkFrameClusts(this);
         mediator->handleUnshowFrame();
       }
 
-      fcsLblPrevIdx = -1;
-      fcsLblNextIdx = -1;
+      m_previousBundleFocusIndex = -1;
+      m_nextBundleFocusIndex = -1;
     }
   }
   else if (ids.size() > 1)
@@ -1403,7 +1396,7 @@ void Simulator::handleHits(const vector< int > &ids)
     if (ids[1] == ID_ICON_CLEAR &&
         (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
     {
-      if (framesPrev.size() > 0 || frameCurr != NULL || framesNext.size() > 0)
+      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
       {
         mediator->handleClearSim(this);
       }
@@ -1430,9 +1423,9 @@ void Simulator::handleHits(const vector< int > &ids)
     }
     else if (ids[1] == ID_FRAME_CURR)
     {
-      focusDepthIdx     = ID_FRAME_CURR;
-      focusDepthIdxLast = focusDepthIdx;
-      focusFrameIdx     = ids[2];
+      m_currentSelection     = ID_FRAME_CURR;
+      m_lastSelection = m_currentSelection;
+      m_currentSelectionIndex     = ids[2];
 
       if (ids.size() > 3 &&
           (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
@@ -1469,10 +1462,10 @@ void Simulator::handleHits(const vector< int > &ids)
     }
     else if (ids[1] == ID_FRAME_PREV)
     {
-      focusDepthIdx         = ID_FRAME_PREV;
-      focusDepthIdxLast     = focusDepthIdx;
-      focusFrameIdx         = ids[2];
-      focusFrameIdxPrevLast = focusFrameIdx;
+      m_currentSelection         = ID_FRAME_PREV;
+      m_lastSelection     = m_currentSelection;
+      m_currentSelectionIndex         = ids[2];
+      m_lastSelectionIndexPrevious = m_currentSelectionIndex;
 
       if (ids.size() > 3 &&
           (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
@@ -1509,10 +1502,10 @@ void Simulator::handleHits(const vector< int > &ids)
     }
     else if (ids[1] == ID_FRAME_NEXT)
     {
-      focusDepthIdx         = ID_FRAME_NEXT;
-      focusDepthIdxLast     = focusDepthIdx;
-      focusFrameIdx         = ids[2];
-      focusFrameIdxNextLast = focusFrameIdx;
+      m_currentSelection         = ID_FRAME_NEXT;
+      m_lastSelection     = m_currentSelection;
+      m_currentSelectionIndex         = ids[2];
+      m_lastSelectionIndexNext = m_currentSelectionIndex;
 
       if (ids.size() > 3 &&
           (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
@@ -1549,20 +1542,20 @@ void Simulator::handleHits(const vector< int > &ids)
     }
     else if (ids[1] == ID_BUNDLE_LBL)
     {
-      fcsLblPrevIdx = ids[2];
-      fcsLblNextIdx = ids[2];
+      m_previousBundleFocusIndex = ids[2];
+      m_nextBundleFocusIndex = ids[2];
     }
 
     if (mouseButton == MSE_BUTTON_DOWN && mouseClick == MSE_CLICK_DOUBLE)
     {
       if (ids[1] == ID_FRAME_PREV)
         updateFrameCurr(
-          new Cluster(*framesPrev[ids[2]]),
-          posFramesPrev[ids[2]]);
+          new Cluster(*m_previousFrames[ids[2]]),
+          m_previousFramePositions[ids[2]]);
       else if (ids[1] == ID_FRAME_NEXT)
         updateFrameCurr(
-          new Cluster(*framesNext[ids[2]]),
-          posFramesNext[ids[2]]);
+          new Cluster(*m_nextFrames[ids[2]]),
+          m_nextFramePositions[ids[2]]);
     }
 
     markFrameClusts();
@@ -1639,21 +1632,21 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    if (frameCurr != NULL)
+    if (m_currentFrame != NULL)
     {
-      double x = posFrameCurr.x;
-      double y = posFrameCurr.y;
+      double x = m_currentFramePosition.x;
+      double y = m_currentFramePosition.y;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
       glPushName(ID_FRAME_CURR);
 
       glPushName(0);
       VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
 
-      if (focusDepthIdx == ID_FRAME_CURR && focusFrameIdx == 0)
+      if (m_currentSelection == ID_FRAME_CURR && m_currentSelectionIndex == 0)
       {
         glPushName(ID_DIAGRAM_MORE);
         VisUtils::fillRect(-0.98, -0.8, -0.8, -0.98);
@@ -1672,10 +1665,10 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
     double pix = canvas->getPixelSize();
     vector< double > valsFrame;
 
-    if (frameCurr != NULL)
+    if (m_currentFrame != NULL)
     {
-      double x = posFrameCurr.x;
-      double y = posFrameCurr.y;
+      double x = m_currentFramePosition.x;
+      double y = m_currentFramePosition.y;
       /*
       for ( int j = 0; j < attributes.size(); ++j )
           valsFrame.push_back(
@@ -1685,10 +1678,10 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); ++j)
       {
-        attr = attributes[j];
-        node = frameCurr->getNode(0);
+        attr = m_attributes[j];
+        node = m_currentFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
           valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -1704,29 +1697,29 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      if (focusDepthIdx == ID_FRAME_CURR)
+      if (m_currentSelection == ID_FRAME_CURR)
       {
         VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
-          -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
-          1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
+          -1.0+4*pix/m_horizontalFrameScale,  1.0+4*pix/m_horizontalFrameScale,
+          1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
       }
       else
       {
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
-          -1.0+3*pix/scaleDgrmHori,  1.0+3*pix/scaleDgrmHori,
-          1.0-3*pix/scaleDgrmHori, -1.0-3*pix/scaleDgrmHori);
+          -1.0+3*pix/m_horizontalFrameScale,  1.0+3*pix/m_horizontalFrameScale,
+          1.0-3*pix/m_horizontalFrameScale, -1.0-3*pix/m_horizontalFrameScale);
       }
-      diagram->visualize(
+      m_diagram->visualize(
         inSelectMode,
         canvas,
-        attributes,
+        m_attributes,
         valsFrame);
 
-      if (focusDepthIdx == ID_FRAME_CURR)
+      if (m_currentSelection == ID_FRAME_CURR)
       {
         VisUtils::setColor(m_selectColor);
         VisUtils::enableLineAntiAlias();
@@ -1750,21 +1743,21 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_PREV);
-    for (size_t i = 0; i < posFramesPrev.size(); ++i)
+    for (size_t i = 0; i < m_previousFramePositions.size(); ++i)
     {
-      double x = posFramesPrev[i].x;
-      double y = posFramesPrev[i].y;
+      double x = m_previousFramePositions[i].x;
+      double y = m_previousFramePositions[i].y;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
 
-      if (focusDepthIdx == ID_FRAME_PREV &&  static_cast <size_t>(focusFrameIdx) == i)
+      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <size_t>(m_currentSelectionIndex) == i)
       {
-        glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
       }
       else
       {
-        glScalef(scaleDgrmVert, scaleDgrmVert, scaleDgrmVert);
+        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
       }
 
       glPushName((GLuint) i);
@@ -1772,7 +1765,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         -1.0,  1.0,
         1.0, -1.0);
 
-      if (focusDepthIdx == ID_FRAME_PREV &&  static_cast <size_t>(focusFrameIdx) == i)
+      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <size_t>(m_currentSelectionIndex) == i)
       {
         glPushName(ID_DIAGRAM_MORE);
         VisUtils::fillRect(-0.98, -0.8, -0.8, -0.98);
@@ -1790,23 +1783,23 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
     double pix = canvas->getPixelSize();
     vector< double > valsFrame;
 
-    for (int i = 0; i < (int) posFramesPrev.size(); ++i)
+    for (int i = 0; i < (int) m_previousFramePositions.size(); ++i)
     {
-      if (focusDepthIdx != ID_FRAME_PREV ||  i != focusFrameIdx)
+      if (m_currentSelection != ID_FRAME_PREV ||  i != m_currentSelectionIndex)
       {
-        double x = posFramesPrev[i].x;
-        double y = posFramesPrev[i].y;
+        double x = m_previousFramePositions[i].x;
+        double y = m_previousFramePositions[i].y;
 
         glPushMatrix();
         glTranslatef(x, y, 0.0);
-        glScalef(scaleDgrmVert, scaleDgrmVert, scaleDgrmVert);
+        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
 
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
-          -1.0+3*pix/scaleDgrmVert,  1.0+3*pix/scaleDgrmVert,
-          1.0-3*pix/scaleDgrmVert, -1.0-3*pix/scaleDgrmVert);
+          -1.0+3*pix/m_verticalFrameScale,  1.0+3*pix/m_verticalFrameScale,
+          1.0-3*pix/m_verticalFrameScale, -1.0-3*pix/m_verticalFrameScale);
 
-        if (2.0*scaleDgrmVert > 30.0*pix)
+        if (2.0*m_verticalFrameScale > 30.0*pix)
         {
           /*
           for ( int j = 0; j < attributes.size(); ++j )
@@ -1817,10 +1810,10 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < attributes.size(); ++j)
+          for (size_t j = 0; j < m_attributes.size(); ++j)
           {
-            attr = attributes[j];
-            node = framesPrev[i]->getNode(0);
+            attr = m_attributes[j];
+            node = m_previousFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
               valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -1834,10 +1827,10 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           attr = NULL;
           node = NULL;
 
-          diagram->visualize(
+          m_diagram->visualize(
             inSelectMode,
             canvas,
-            attributes,
+            m_attributes,
             valsFrame);
         }
         else
@@ -1854,9 +1847,9 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
       }
     }
 
-    if (focusDepthIdx == ID_FRAME_PREV)
+    if (m_currentSelection == ID_FRAME_PREV)
     {
-      if (0 <= focusFrameIdx &&  static_cast <size_t>(focusFrameIdx) < posFramesPrev.size())
+      if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_previousFramePositions.size())
       {
         /*
         for ( int j = 0; j < attributes.size(); ++j )
@@ -1867,10 +1860,10 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < attributes.size(); ++j)
+        for (size_t j = 0; j < m_attributes.size(); ++j)
         {
-          attr = attributes[j];
-          node = framesPrev[focusFrameIdx]->getNode(0);
+          attr = m_attributes[j];
+          node = m_previousFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
             valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -1886,19 +1879,19 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 
         glPushMatrix();
         glTranslatef(
-          posFramesPrev[focusFrameIdx].x,
-          posFramesPrev[focusFrameIdx].y,
+          m_previousFramePositions[m_currentSelectionIndex].x,
+          m_previousFramePositions[m_currentSelectionIndex].y,
           0.0);
-        glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
         VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
-          -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
-          1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
-        diagram->visualize(
+          -1.0+4*pix/m_horizontalFrameScale,  1.0+4*pix/m_horizontalFrameScale,
+          1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
+        m_diagram->visualize(
           inSelectMode,
           canvas,
-          attributes,
+          m_attributes,
           valsFrame);
 
         VisUtils::enableLineAntiAlias();
@@ -1922,27 +1915,27 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_NEXT);
-    for (size_t i = 0; i < posFramesNext.size(); ++i)
+    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
-      double x = posFramesNext[i].x;
-      double y = posFramesNext[i].y;
+      double x = m_nextFramePositions[i].x;
+      double y = m_nextFramePositions[i].y;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
 
-      if (focusDepthIdx == ID_FRAME_NEXT &&  static_cast <size_t>(focusFrameIdx) == i)
+      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <size_t>(m_currentSelectionIndex) == i)
       {
-        glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
       }
       else
       {
-        glScalef(scaleDgrmVert, scaleDgrmVert, scaleDgrmVert);
+        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
       }
 
       glPushName((GLuint) i);
       VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
 
-      if (focusDepthIdx == ID_FRAME_NEXT &&  static_cast <size_t>(focusFrameIdx) == i)
+      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <size_t>(m_currentSelectionIndex) == i)
       {
         glPushName(ID_DIAGRAM_MORE);
         VisUtils::fillRect(-0.98, -0.8, -0.8, -0.98);
@@ -1960,23 +1953,23 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
     double pix = canvas->getPixelSize();
     vector< double > valsFrame;
 
-    for (size_t i = 0; i < posFramesNext.size(); ++i)
+    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
-      if (focusDepthIdx != ID_FRAME_NEXT || i !=  static_cast <size_t>(focusFrameIdx))
+      if (m_currentSelection != ID_FRAME_NEXT || i !=  static_cast <size_t>(m_currentSelectionIndex))
       {
-        double x = posFramesNext[i].x;
-        double y = posFramesNext[i].y;
+        double x = m_nextFramePositions[i].x;
+        double y = m_nextFramePositions[i].y;
 
         glPushMatrix();
         glTranslatef(x, y, 0.0);
-        glScalef(scaleDgrmVert, scaleDgrmVert, scaleDgrmVert);
+        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
 
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
-          -1.0+3*pix/scaleDgrmVert,  1.0+3*pix/scaleDgrmVert,
-          1.0-3*pix/scaleDgrmVert, -1.0-3*pix/scaleDgrmVert);
+          -1.0+3*pix/m_verticalFrameScale,  1.0+3*pix/m_verticalFrameScale,
+          1.0-3*pix/m_verticalFrameScale, -1.0-3*pix/m_verticalFrameScale);
 
-        if (2.0*scaleDgrmVert > 30.0*pix)
+        if (2.0*m_verticalFrameScale > 30.0*pix)
         {
           /*
           for ( int j = 0; j < attributes.size(); ++j )
@@ -1987,10 +1980,10 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < attributes.size(); ++j)
+          for (size_t j = 0; j < m_attributes.size(); ++j)
           {
-            attr = attributes[j];
-            node = framesNext[i]->getNode(0);
+            attr = m_attributes[j];
+            node = m_nextFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
               valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2004,10 +1997,10 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           attr = NULL;
           node = NULL;
 
-          diagram->visualize(
+          m_diagram->visualize(
             inSelectMode,
             canvas,
-            attributes,
+            m_attributes,
             valsFrame);
         }
         else
@@ -2024,9 +2017,9 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
       }
     }
 
-    if (focusDepthIdx == ID_FRAME_NEXT)
+    if (m_currentSelection == ID_FRAME_NEXT)
     {
-      if (0 <= focusFrameIdx &&  static_cast <size_t>(focusFrameIdx) < posFramesNext.size())
+      if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_nextFramePositions.size())
       {
         /*
         for ( int j = 0; j < attributes.size(); ++j )
@@ -2037,10 +2030,10 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < attributes.size(); ++j)
+        for (size_t j = 0; j < m_attributes.size(); ++j)
         {
-          attr = attributes[j];
-          node = framesNext[focusFrameIdx]->getNode(0);
+          attr = m_attributes[j];
+          node = m_nextFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
             valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2056,19 +2049,19 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 
         glPushMatrix();
         glTranslatef(
-          posFramesNext[focusFrameIdx].x,
-          posFramesNext[focusFrameIdx].y,
+          m_nextFramePositions[m_currentSelectionIndex].x,
+          m_nextFramePositions[m_currentSelectionIndex].y,
           0.0);
-        glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
         VisUtils::setColor(m_selectColor);
         VisUtils::fillRect(
-          -1.0+4*pix/scaleDgrmHori,  1.0+4*pix/scaleDgrmHori,
-          1.0-4*pix/scaleDgrmHori, -1.0-4*pix/scaleDgrmHori);
-        diagram->visualize(
+          -1.0+4*pix/m_horizontalFrameScale,  1.0+4*pix/m_horizontalFrameScale,
+          1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
+        m_diagram->visualize(
           inSelectMode,
           canvas,
-          attributes,
+          m_attributes,
           valsFrame);
 
         VisUtils::enableLineAntiAlias();
@@ -2095,16 +2088,16 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     string lbl;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < posBdlLblGridPrevTopLft.size(); ++i)
+    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
     {
-      lbl = bundlesPrevByLbl[i]->getChild(0)->getEdge(0)->getLabel();
+      lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
-      glPushName((GLuint) bundlesPrevByLbl[i]->getParent()->getIndex());
+      glPushName((GLuint) m_bundlesPreviousByLabel[i]->getParent()->getIndex());
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridPrevTopLft[i].x,
-        posBdlLblGridPrevTopLft[i].y,
+        m_previousBundleLabelPositionTL[i].x,
+        m_previousBundleLabelPositionTL[i].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2116,8 +2109,8 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridPrevBotRgt[i].x,
-        posBdlLblGridPrevBotRgt[i].y,
+        m_previousBundleLabelPositionBR[i].x,
+        m_previousBundleLabelPositionBR[i].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2128,10 +2121,10 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       glPopMatrix();
 
       VisUtils::drawLine(
-        posBdlLblGridPrevTopLft[i].x,
-        posBdlLblGridPrevBotRgt[i].x,
-        posBdlLblGridPrevTopLft[i].y,
-        posBdlLblGridPrevBotRgt[i].y);
+        m_previousBundleLabelPositionTL[i].x,
+        m_previousBundleLabelPositionBR[i].x,
+        m_previousBundleLabelPositionTL[i].y,
+        m_previousBundleLabelPositionBR[i].y);
 
       glPopName();
     }
@@ -2142,22 +2135,22 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     double pix = canvas->getPixelSize();
     size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < posBdlLblGridPrevTopLft.size(); ++i)
+    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
     {
-      if (bundlesPrevByLbl[i]->getParent()->getIndex() == fcsLblPrevIdx)
+      if (m_bundlesPreviousByLabel[i]->getParent()->getIndex() == m_previousBundleFocusIndex)
       {
         idxHiLite = i;
       }
       else
       {
-        string lbl = bundlesPrevByLbl[i]->getChild(0)->getEdge(0)->getLabel();
+        string lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
         double txt = m_textSize;
 
         glPushMatrix();
         glTranslatef(
-          posBdlLblGridPrevTopLft[i].x,
-          posBdlLblGridPrevTopLft[i].y,
+          m_previousBundleLabelPositionTL[i].x,
+          m_previousBundleLabelPositionTL[i].y,
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2173,8 +2166,8 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
         glPushMatrix();
         glTranslatef(
-          posBdlLblGridPrevBotRgt[i].x,
-          posBdlLblGridPrevBotRgt[i].y,
+          m_previousBundleLabelPositionBR[i].x,
+          m_previousBundleLabelPositionBR[i].y,
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2190,26 +2183,26 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(
-          posBdlLblGridPrevTopLft[i].x,
-          posBdlLblGridPrevBotRgt[i].x,
-          posBdlLblGridPrevTopLft[i].y,
-          posBdlLblGridPrevBotRgt[i].y);
+          m_previousBundleLabelPositionTL[i].x,
+          m_previousBundleLabelPositionBR[i].x,
+          m_previousBundleLabelPositionTL[i].y,
+          m_previousBundleLabelPositionBR[i].y);
       }
     }
 
-    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < posBdlLblGridPrevTopLft.size())
+    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_previousBundleLabelPositionTL.size())
     {
-      string lbl = bundlesPrevByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
+      string lbl = m_bundlesPreviousByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
       double txt = m_textSize;
       txt += 1;
 
-      QColor colLne = calcColor(bundlesPrevByLbl[idxHiLite]->getParent()->getIndex(), bundlesByLbl.size() - 1);
+      QColor colLne = calcColor(m_bundlesPreviousByLabel[idxHiLite]->getParent()->getIndex(), m_bundlesByLabel.size() - 1);
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridPrevTopLft[idxHiLite].x,
-        posBdlLblGridPrevTopLft[idxHiLite].y,
+        m_previousBundleLabelPositionTL[idxHiLite].x,
+        m_previousBundleLabelPositionTL[idxHiLite].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2236,8 +2229,8 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridPrevBotRgt[idxHiLite].x,
-        posBdlLblGridPrevBotRgt[idxHiLite].y,
+        m_previousBundleLabelPositionBR[idxHiLite].x,
+        m_previousBundleLabelPositionBR[idxHiLite].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2264,10 +2257,10 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 
       VisUtils::setColor(colLne);
       VisUtils::drawLine(
-        posBdlLblGridPrevTopLft[idxHiLite].x,
-        posBdlLblGridPrevBotRgt[idxHiLite].x,
-        posBdlLblGridPrevTopLft[idxHiLite].y,
-        posBdlLblGridPrevBotRgt[idxHiLite].y);
+        m_previousBundleLabelPositionTL[idxHiLite].x,
+        m_previousBundleLabelPositionBR[idxHiLite].x,
+        m_previousBundleLabelPositionTL[idxHiLite].y,
+        m_previousBundleLabelPositionBR[idxHiLite].y);
     }
   }
 }
@@ -2280,16 +2273,16 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     double pix = canvas->getPixelSize();;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < posBdlLblGridNextTopLft.size(); ++i)
+    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
     {
-      string lbl = bundlesNextByLbl[i]->getChild(0)->getEdge(0)->getLabel();
+      string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
-      glPushName((GLuint) bundlesNextByLbl[i]->getParent()->getIndex());
+      glPushName((GLuint) m_bundlesNextByLabel[i]->getParent()->getIndex());
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridNextTopLft[i].x,
-        posBdlLblGridNextTopLft[i].y,
+        m_nextBundleLabelPositionTL[i].x,
+        m_nextBundleLabelPositionTL[i].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2301,8 +2294,8 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridNextBotRgt[i].x,
-        posBdlLblGridNextBotRgt[i].y,
+        m_nextBundleLabelPositionBR[i].x,
+        m_nextBundleLabelPositionBR[i].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2313,10 +2306,10 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       glPopMatrix();
 
       VisUtils::drawLine(
-        posBdlLblGridNextTopLft[i].x,
-        posBdlLblGridNextBotRgt[i].x,
-        posBdlLblGridNextTopLft[i].y,
-        posBdlLblGridNextBotRgt[i].y);
+        m_nextBundleLabelPositionTL[i].x,
+        m_nextBundleLabelPositionBR[i].x,
+        m_nextBundleLabelPositionTL[i].y,
+        m_nextBundleLabelPositionBR[i].y);
 
       glPopName();
     }
@@ -2327,22 +2320,22 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     double pix = canvas->getPixelSize();;
     size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < posBdlLblGridNextTopLft.size(); ++i)
+    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
     {
-      if (bundlesNextByLbl[i]->getParent()->getIndex() == fcsLblNextIdx)
+      if (m_bundlesNextByLabel[i]->getParent()->getIndex() == m_nextBundleFocusIndex)
       {
         idxHiLite = i;
       }
       else
       {
-        string lbl = bundlesNextByLbl[i]->getChild(0)->getEdge(0)->getLabel();
+        string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
         double txt = m_textSize;
 
         glPushMatrix();
         glTranslatef(
-          posBdlLblGridNextTopLft[i].x,
-          posBdlLblGridNextTopLft[i].y,
+          m_nextBundleLabelPositionTL[i].x,
+          m_nextBundleLabelPositionTL[i].y,
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2358,8 +2351,8 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
         glPushMatrix();
         glTranslatef(
-          posBdlLblGridNextBotRgt[i].x,
-          posBdlLblGridNextBotRgt[i].y,
+          m_nextBundleLabelPositionBR[i].x,
+          m_nextBundleLabelPositionBR[i].y,
           0.0);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2375,26 +2368,26 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(
-          posBdlLblGridNextTopLft[i].x,
-          posBdlLblGridNextBotRgt[i].x,
-          posBdlLblGridNextTopLft[i].y,
-          posBdlLblGridNextBotRgt[i].y);
+          m_nextBundleLabelPositionTL[i].x,
+          m_nextBundleLabelPositionBR[i].x,
+          m_nextBundleLabelPositionTL[i].y,
+          m_nextBundleLabelPositionBR[i].y);
       }
     }
 
-    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < posBdlLblGridNextTopLft.size())
+    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_nextBundleLabelPositionTL.size())
     {
-      string lbl = bundlesNextByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
+      string lbl = m_bundlesNextByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
       double txt = m_textSize;
       txt += 1;
 
-      QColor colLne = calcColor(bundlesNextByLbl[idxHiLite]->getParent()->getIndex(), bundlesByLbl.size());
+      QColor colLne = calcColor(m_bundlesNextByLabel[idxHiLite]->getParent()->getIndex(), m_bundlesByLabel.size());
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridNextTopLft[idxHiLite].x,
-        posBdlLblGridNextTopLft[idxHiLite].y,
+        m_nextBundleLabelPositionTL[idxHiLite].x,
+        m_nextBundleLabelPositionTL[idxHiLite].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2421,8 +2414,8 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
       glPushMatrix();
       glTranslatef(
-        posBdlLblGridNextBotRgt[idxHiLite].x,
-        posBdlLblGridNextBotRgt[idxHiLite].y,
+        m_nextBundleLabelPositionBR[idxHiLite].x,
+        m_nextBundleLabelPositionBR[idxHiLite].y,
         0.0);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
@@ -2449,10 +2442,10 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 
       VisUtils::setColor(colLne);
       VisUtils::drawLine(
-        posBdlLblGridNextTopLft[idxHiLite].x,
-        posBdlLblGridNextBotRgt[idxHiLite].x,
-        posBdlLblGridNextTopLft[idxHiLite].y,
-        posBdlLblGridNextBotRgt[idxHiLite].y);
+        m_nextBundleLabelPositionTL[idxHiLite].x,
+        m_nextBundleLabelPositionBR[idxHiLite].x,
+        m_nextBundleLabelPositionTL[idxHiLite].y,
+        m_nextBundleLabelPositionBR[idxHiLite].y);
     }
   }
 }
@@ -2465,18 +2458,18 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
     double pix = canvas->getPixelSize();
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < posBundlesPrevTopLft.size(); ++i)
+    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
     {
-      for (size_t j = 0; j < posBundlesPrevBotRgt[i].size(); ++j)
+      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
       {
-        glPushName((GLuint) framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex());
+        glPushName((GLuint) m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
         double arrowItv = 3;
 
         // draw
         VisUtils::fillArrow(
-          posBundlesPrevTopLft[i][j].x, posBundlesPrevBotRgt[i][j].x,
-          posBundlesPrevTopLft[i][j].y, posBundlesPrevBotRgt[i][j].y,
+          m_previousBundlePositionTL[i][j].x, m_previousBundlePositionBR[i][j].x,
+          m_previousBundlePositionTL[i][j].y, m_previousBundlePositionBR[i][j].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix);
 
         glPopName();
@@ -2492,13 +2485,13 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < posBundlesPrevTopLft.size(); ++i)
+    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
     {
       idxHiLite = -1;
-      for (size_t j = 0; j < posBundlesPrevBotRgt[i].size(); ++j)
+      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
       {
         // fade color
-        if (framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex() == fcsLblPrevIdx)
+        if (m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex() == m_previousBundleFocusIndex)
         {
           idxHiLite = j;
         }
@@ -2507,38 +2500,38 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
           // arrow interval
           double arrowItv = 3;
 
-          QColor colFill = calcColor(framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex(), bundlesByLbl.size());
+          QColor colFill = calcColor(m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
           // draw
           VisUtils::fillArrow(
-            posBundlesPrevTopLft[i][j].x, posBundlesPrevBotRgt[i][j].x,
-            posBundlesPrevTopLft[i][j].y, posBundlesPrevBotRgt[i][j].y,
+            m_previousBundlePositionTL[i][j].x, m_previousBundlePositionBR[i][j].x,
+            m_previousBundlePositionTL[i][j].y, m_previousBundlePositionBR[i][j].y,
             arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
             alpha(colFill, 0.2), colFill);
           VisUtils::drawArrow(
-            posBundlesPrevTopLft[i][j].x, posBundlesPrevBotRgt[i][j].x,
-            posBundlesPrevTopLft[i][j].y, posBundlesPrevBotRgt[i][j].y,
+            m_previousBundlePositionTL[i][j].x, m_previousBundlePositionBR[i][j].x,
+            m_previousBundlePositionTL[i][j].y, m_previousBundlePositionBR[i][j].y,
             arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
             alpha(VisUtils::mediumGray, 0.2), VisUtils::mediumGray);
         }
       }
 
-      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < posBundlesPrevBotRgt[i].size())
+      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_previousBundlePositionBR[i].size())
       {
         // fill color
-        QColor colFill = calcColor(framesPrev[i]->getOutBundle(idxHiLite)->getParent()->getParent()->getIndex(), bundlesByLbl.size());
+        QColor colFill = calcColor(m_previousFrames[i]->getOutBundle(idxHiLite)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
         // arrow interva
         double arrowItv = 3;
         arrowItv += 1;
 
         // draw
         VisUtils::fillArrow(
-          posBundlesPrevTopLft[i][idxHiLite].x, posBundlesPrevBotRgt[i][idxHiLite].x,
-          posBundlesPrevTopLft[i][idxHiLite].y, posBundlesPrevBotRgt[i][idxHiLite].y,
+          m_previousBundlePositionTL[i][idxHiLite].x, m_previousBundlePositionBR[i][idxHiLite].x,
+          m_previousBundlePositionTL[i][idxHiLite].y, m_previousBundlePositionBR[i][idxHiLite].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
           colFill, colFill);
         VisUtils::drawArrow(
-          posBundlesPrevTopLft[i][idxHiLite].x, posBundlesPrevBotRgt[i][idxHiLite].x,
-          posBundlesPrevTopLft[i][idxHiLite].y, posBundlesPrevBotRgt[i][idxHiLite].y,
+          m_previousBundlePositionTL[i][idxHiLite].x, m_previousBundlePositionBR[i][idxHiLite].x,
+          m_previousBundlePositionTL[i][idxHiLite].y, m_previousBundlePositionBR[i][idxHiLite].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
           VisUtils::mediumGray, VisUtils::mediumGray);
       }
@@ -2557,18 +2550,18 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
     double arrowItv;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < posBundlesNextTopLft.size(); ++i)
+    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
     {
-      for (size_t j = 0; j < posBundlesNextBotRgt[i].size(); ++j)
+      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
       {
-        glPushName((GLuint) framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex());
+        glPushName((GLuint) m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
         arrowItv = 3;
 
         // draw
         VisUtils::fillArrow(
-          posBundlesNextTopLft[i][j].x, posBundlesNextBotRgt[i][j].x,
-          posBundlesNextTopLft[i][j].y, posBundlesNextBotRgt[i][j].y,
+          m_nextBundlePositionTL[i][j].x, m_nextBundlePositionBR[i][j].x,
+          m_nextBundlePositionTL[i][j].y, m_nextBundlePositionBR[i][j].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix);
 
         glPopName();
@@ -2584,47 +2577,47 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < posBundlesNextTopLft.size(); ++i)
+    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
     {
       idxHiLite = -1;
 
-      for (size_t j = 0; j < posBundlesNextBotRgt[i].size(); ++j)
+      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
       {
         // fade color
-        if (framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex() == fcsLblNextIdx)
+        if (m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex() == m_nextBundleFocusIndex)
         {
           idxHiLite = j;
         }
         else
         {
           // fill color
-          QColor colFill = calcColor(framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex(), bundlesByLbl.size());
+          QColor colFill = calcColor(m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
 
           // arrow interva
           double arrowItv = 3;
-          if (framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex() == fcsLblNextIdx)
+          if (m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex() == m_nextBundleFocusIndex)
           {
             arrowItv += 1;
           }
 
           // draw
           VisUtils::fillArrow(
-            posBundlesNextTopLft[i][j].x-pix, posBundlesNextBotRgt[i][j].x,
-            posBundlesNextTopLft[i][j].y, posBundlesNextBotRgt[i][j].y,
+            m_nextBundlePositionTL[i][j].x-pix, m_nextBundlePositionBR[i][j].x,
+            m_nextBundlePositionTL[i][j].y, m_nextBundlePositionBR[i][j].y,
             arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
             alpha(colFill, 0.2), colFill);
           VisUtils::drawArrow(
-            posBundlesNextTopLft[i][j].x-pix, posBundlesNextBotRgt[i][j].x,
-            posBundlesNextTopLft[i][j].y, posBundlesNextBotRgt[i][j].y,
+            m_nextBundlePositionTL[i][j].x-pix, m_nextBundlePositionBR[i][j].x,
+            m_nextBundlePositionTL[i][j].y, m_nextBundlePositionBR[i][j].y,
             arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
             alpha(VisUtils::mediumGray, 0.2), VisUtils::mediumGray);
         }
       }
 
-      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < posBundlesNextBotRgt[i].size())
+      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_nextBundlePositionBR[i].size())
       {
         // fill color
-        QColor colFill = calcColor(framesNext[i]->getInBundle(idxHiLite)->getParent()->getParent()->getIndex(), bundlesByLbl.size());
+        QColor colFill = calcColor(m_nextFrames[i]->getInBundle(idxHiLite)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
 
         // arrow interva
         double arrowItv = 3;
@@ -2632,13 +2625,13 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
 
         // draw
         VisUtils::fillArrow(
-          posBundlesNextTopLft[i][idxHiLite].x-pix, posBundlesNextBotRgt[i][idxHiLite].x,
-          posBundlesNextTopLft[i][idxHiLite].y, posBundlesNextBotRgt[i][idxHiLite].y,
+          m_nextBundlePositionTL[i][idxHiLite].x-pix, m_nextBundlePositionBR[i][idxHiLite].x,
+          m_nextBundlePositionTL[i][idxHiLite].y, m_nextBundlePositionBR[i][idxHiLite].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
           colFill, colFill);
         VisUtils::drawArrow(
-          posBundlesNextTopLft[i][idxHiLite].x-pix, posBundlesNextBotRgt[i][idxHiLite].x,
-          posBundlesNextTopLft[i][idxHiLite].y, posBundlesNextBotRgt[i][idxHiLite].y,
+          m_nextBundlePositionTL[i][idxHiLite].x-pix, m_nextBundlePositionBR[i][idxHiLite].x,
+          m_nextBundlePositionTL[i][idxHiLite].y, m_nextBundlePositionBR[i][idxHiLite].y,
           arrowItv*pix, 3.0*arrowItv*pix, 3.0*arrowItv*pix,
           VisUtils::mediumGray, VisUtils::mediumGray);
       }
@@ -2779,13 +2772,13 @@ void Simulator::animate()
 {
   vector< double > valsFrame;
 
-  if (keyFrameFr != NULL)
+  if (m_animationOldFrame != NULL)
   {
-    if (animPhase == ANIM_POS)
+    if (m_currentAnimationPhase == ANIM_POS)
     {
       // 'new' current frame
-      double x = posTweenFrame.x;
-      double y = posTweenFrame.y;
+      double x = m_animationCurrentPosition.x;
+      double y = m_animationCurrentPosition.y;
       /*
       {
       for ( int j = 0; j < attributes.size(); ++j )
@@ -2797,10 +2790,10 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); ++j)
       {
-        attr = attributes[j];
-        node = keyFrameFr->getNode(0);
+        attr = m_attributes[j];
+        node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
           valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2816,19 +2809,19 @@ void Simulator::animate()
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      diagram->visualize(
+      m_diagram->visualize(
         false,
         canvas,
-        attributes,
+        m_attributes,
         valsFrame);
 
       glPopMatrix();
 
       // 'old' current frame
-      x = posKeyFrameTo.x;
-      y = posKeyFrameTo.y;
+      x = m_animationEndPosition.x;
+      y = m_animationEndPosition.y;
 
       valsFrame.clear();
       /*
@@ -2840,10 +2833,10 @@ void Simulator::animate()
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); ++j)
       {
-        attr = attributes[j];
-        node = keyFrameTo->getNode(0);
+        attr = m_attributes[j];
+        node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
           valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2859,21 +2852,21 @@ void Simulator::animate()
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      diagram->visualize(
+      m_diagram->visualize(
         false,
         canvas,
-        attributes,
+        m_attributes,
         valsFrame);
 
       glPopMatrix();
     }
-    else if (animPhase == ANIM_BLEND)
+    else if (m_currentAnimationPhase == ANIM_BLEND)
     {
       // 'new' current frame
-      double x = posTweenFrame.x;
-      double y = posTweenFrame.y;
+      double x = m_animationCurrentPosition.x;
+      double y = m_animationCurrentPosition.y;
       /*
       {
       for ( int j = 0; j < attributes.size(); ++j )
@@ -2885,10 +2878,10 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); ++j)
       {
-        attr = attributes[j];
-        node = keyFrameFr->getNode(0);
+        attr = m_attributes[j];
+        node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
           valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2904,19 +2897,19 @@ void Simulator::animate()
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      diagram->visualize(
+      m_diagram->visualize(
         false,
         canvas,
-        attributes,
+        m_attributes,
         valsFrame);
 
       glPopMatrix();
 
       // 'old' current frame
-      x = posKeyFrameTo.x;
-      y = posKeyFrameTo.y;
+      x = m_animationEndPosition.x;
+      y = m_animationEndPosition.y;
 
       valsFrame.clear();
       /*
@@ -2928,10 +2921,10 @@ void Simulator::animate()
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); ++j)
       {
-        attr = attributes[j];
-        node = keyFrameTo->getNode(0);
+        attr = m_attributes[j];
+        node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
           valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
@@ -2947,14 +2940,14 @@ void Simulator::animate()
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
-      glScalef(scaleDgrmHori, scaleDgrmHori, scaleDgrmHori);
+      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      diagram->visualize(
+      m_diagram->visualize(
         false,
         canvas,
-        attributes,
+        m_attributes,
         valsFrame,
-        opacityKeyFrameTo);
+        m_animationNewFrameOpacity);
 
       glPopMatrix();
     }
@@ -2969,35 +2962,35 @@ void Simulator::animate()
 
 void Simulator::onTimer()
 {
-  if (timeAlphaMS >= timeTotalMS)
+  if (m_totalBlendTime >= m_totalAnimationTime)
   {
-    if (animPhase == ANIM_POS)
+    if (m_currentAnimationPhase == ANIM_POS)
     {
-      posTweenFrame.x = posKeyFrameTo.x;
-      posTweenFrame.y = posKeyFrameTo.y;
+      m_animationCurrentPosition.x = m_animationEndPosition.x;
+      m_animationCurrentPosition.y = m_animationEndPosition.y;
 
       if (m_blendType != VisUtils::BLEND_HARD)
       {
-        animPhase = ANIM_BLEND;
+        m_currentAnimationPhase = ANIM_BLEND;
 
-        timeTotalMS = 900;
-        timeAlphaMS = 0;
+        m_totalAnimationTime = 900;
+        m_totalBlendTime = 0;
 
-        opacityKeyFrameFr = 1.0;
-        opacityKeyFrameTo = 0.0;
+        m_animationOldFrameOpacity = 1.0;
+        m_animationNewFrameOpacity = 0.0;
       }
       else
       {
-        timerAnim.stop();
+        m_animationTimer.stop();
         canvas->enableMouseMotion();
-        animPhase = ANIM_NONE;
+        m_currentAnimationPhase = ANIM_NONE;
 
         // update new data
-        frameCurr = keyFrameFr;
+        m_currentFrame = m_animationOldFrame;
 
-        keyFrameFr = NULL;
-        delete keyFrameTo;
-        keyFrameTo = NULL;
+        m_animationOldFrame = NULL;
+        delete m_animationNewFrame;
+        m_animationNewFrame = NULL;
 
         initFramesPrevNext();
         initBundles();
@@ -3008,18 +3001,18 @@ void Simulator::onTimer()
         canvas->Refresh();
       }
     }
-    else if (animPhase == ANIM_BLEND)
+    else if (m_currentAnimationPhase == ANIM_BLEND)
     {
-      timerAnim.stop();
+      m_animationTimer.stop();
       canvas->enableMouseMotion();
-      animPhase = ANIM_NONE;
+      m_currentAnimationPhase = ANIM_NONE;
 
       // update new data
-      frameCurr = keyFrameFr;
+      m_currentFrame = m_animationOldFrame;
 
-      keyFrameFr = NULL;
-      delete keyFrameTo;
-      keyFrameTo = NULL;
+      m_animationOldFrame = NULL;
+      delete m_animationNewFrame;
+      m_animationNewFrame = NULL;
 
       initFramesPrevNext();
       initBundles();
@@ -3032,38 +3025,38 @@ void Simulator::onTimer()
   }
   else
   {
-    double a = timeAlphaMS/timeTotalMS;
+    double a = m_totalBlendTime/m_totalAnimationTime;
 
-    if (animPhase == ANIM_POS)
+    if (m_currentAnimationPhase == ANIM_POS)
     {
-      posTweenFrame.x = (1-a)*posKeyFrameFr.x + a*posKeyFrameTo.x;
-      posTweenFrame.y = (1-a)*posKeyFrameFr.y + a*posKeyFrameTo.y;
+      m_animationCurrentPosition.x = (1-a)*m_animationStartPosition.x + a*m_animationEndPosition.x;
+      m_animationCurrentPosition.y = (1-a)*m_animationStartPosition.y + a*m_animationEndPosition.y;
     }
-    else if (animPhase == ANIM_BLEND)
+    else if (m_currentAnimationPhase == ANIM_BLEND)
     {
       if (m_blendType == VisUtils::BLEND_LINEAR)
       {
-        opacityKeyFrameFr = (1-a)*0.0 + a*1.0;
-        opacityKeyFrameTo = (1-a)*1.0 + a*0.0;
+        m_animationOldFrameOpacity = (1-a)*0.0 + a*1.0;
+        m_animationNewFrameOpacity = (1-a)*1.0 + a*0.0;
       }
       else if (m_blendType == VisUtils::BLEND_CONCAVE)
       {
-        opacityKeyFrameFr = (a*1.0) * (a*1.0);
-        opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;
+        m_animationOldFrameOpacity = (a*1.0) * (a*1.0);
+        m_animationNewFrameOpacity = 1.0 - m_animationOldFrameOpacity;
       }
       else if (m_blendType == VisUtils::BLEND_CONVEX)
       {
-        opacityKeyFrameFr = sin(a*(PI/2.0));
-        opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;
+        m_animationOldFrameOpacity = sin(a*(PI/2.0));
+        m_animationNewFrameOpacity = 1.0 - m_animationOldFrameOpacity;
       }
       else if (m_blendType == VisUtils::BLEND_OSCILLATE)
       {
-        opacityKeyFrameFr = (-1.0*(cos(a*3.0*PI)/2.0) + 0.5);
-        opacityKeyFrameTo = 1.0 - opacityKeyFrameFr;
+        m_animationOldFrameOpacity = (-1.0*(cos(a*3.0*PI)/2.0) + 0.5);
+        m_animationNewFrameOpacity = 1.0 - m_animationOldFrameOpacity;
       }
     }
 
-    timeAlphaMS += itvTmrMS;
+    m_totalBlendTime += m_timerInterval;
 
     canvas->Refresh();
     canvas->Update();
