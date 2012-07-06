@@ -67,15 +67,34 @@ const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const boo
   return rewrite_strategies;
 }
 
-/// \brief Get filename based on timestamp
+/// \brief Generate a random alphanumeric character
+inline
+char rand_alnum()
+{
+  char c;
+  do
+  {
+    c = static_cast<char>(std::rand());
+  } while(!std::isalnum(c));
+  return c;
+
+}
+
+/// \brief Generate a random string of length n
+inline
+std::string rand_alnum_str(const std::string::size_type n)
+{
+  std::string s;
+  s.reserve(n);
+  generate_n(std::back_inserter(s), n, rand_alnum);
+  return s;
+}
+
+/// \brief Get filename with random suffix
 /// \warning is prone to race conditions
 std::string temporary_filename(std::string const& prefix = "")
 {
-  time_t now = time(NULL);
-  std::stringstream now_s;
-  now_s << now;
-
-  std::string basename(prefix + now_s.str());
+  std::string basename(prefix + "_" + rand_alnum_str(8));
   boost::filesystem::path result(basename);
   int suffix = 0;
   while (boost::filesystem::exists(result))

@@ -471,7 +471,8 @@ BOOST_AUTO_TEST_CASE(test_deep_stack)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
+  // Initialise random seed to allow parallel running with lps2lts_test
+  std::srand(time(NULL) * 17);
   return 0;
 }
 
