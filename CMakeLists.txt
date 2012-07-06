@@ -333,7 +333,6 @@ add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
 add_subdirectory ( tools/diagraphica )
 add_subdirectory ( tools/formulacheck )
-add_subdirectory ( tools/grapemcrl2 )
 add_subdirectory ( tools/lps2lts )
 add_subdirectory ( tools/lps2pbes )
 add_subdirectory ( tools/lps2torx )
@@ -424,6 +423,9 @@ option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF
 message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
 if(MCRL2_ENABLE_DEPRECATED)
+
+add_subdirectory ( tools/grapemcrl2 )
+
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
