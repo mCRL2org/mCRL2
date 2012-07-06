@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_struct)
   run_linearisation_test_case(text);
 }
 
-/*
+#ifndef MCRL2_SKIP_LONG_TESTS
 BOOST_AUTO_TEST_CASE(test_block)
 {
   run_linearisation_test_case(
@@ -231,9 +231,8 @@ BOOST_AUTO_TEST_CASE(test_block)
     "  );"
   );
 }
-*/
 
-#ifndef MCRL2_SKIP_LONG_TESTS
+
 BOOST_AUTO_TEST_CASE(test_large_specification)
 {
   const std::string MODEL =
