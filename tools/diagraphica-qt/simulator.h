@@ -77,32 +77,9 @@ class Simulator : public QObject, public Visualizer
     void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
+    void handleMouseEvent(QMouseEvent* e);
     void handleMouseLeaveEvent();
-
-    void handleKeyDownEvent(const int& keyCode);
-    /*
-    void handleMarkFrameClust(
-        DiagramChooser* dc,
-        const int &idx );
-    */
+    void handleKeyEvent(QKeyEvent* e);
 
   public slots:
 

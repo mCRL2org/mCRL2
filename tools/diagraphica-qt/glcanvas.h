@@ -87,18 +87,17 @@ class GLCanvas : public wxGLCanvas, Colleague
     void onEvtSize(wxSizeEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
 
-    void onLftMouseDown(wxMouseEvent& event);
-    void onLftMouseUp(wxMouseEvent& event);
-    void onLftMouseDClick(wxMouseEvent& event);
-    void onRgtMouseDown(wxMouseEvent& event);
-    void onRgtMouseUp(wxMouseEvent& event);
-    void onRgtMouseDClick(wxMouseEvent& event);
-    void onMouseMotion(wxMouseEvent& event);
-    void onMouseWheel(wxMouseEvent& event);
-    void onEnterMouse(wxMouseEvent& event);
-    void onLeaveMouse(wxMouseEvent& event);
+    void onMouseEvent(wxMouseEvent& event);
+    void onWheelEvent(wxMouseEvent& event);
+
+    void onEnterMouse(wxMouseEvent& /*event*/);
+    void onLeaveMouse(wxMouseEvent& /*event*/);
+
+    void onKeyEvent(wxKeyEvent& event, bool down);
+
     void onKeyDown(wxKeyEvent& event);
     void onKeyUp(wxKeyEvent& event);
+
   private:
     // -- data members ----------------------------------------------
     double scaleFactor;

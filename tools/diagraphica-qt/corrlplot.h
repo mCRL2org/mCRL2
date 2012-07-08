@@ -54,13 +54,7 @@ class CorrlPlot : public Visualizer
     void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    /*
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    */
+    void handleMouseEvent(QMouseEvent* e);
 
   protected:
     // -- utility data functions ------------------------------------

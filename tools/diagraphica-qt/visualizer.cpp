@@ -22,7 +22,8 @@ Visualizer::Visualizer(
   Mediator* m,
   Graph* g,
   GLCanvas* c)
-  : Colleague(m)
+  : Colleague(m),
+    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)
 {
   clearColor = Qt::white;
 
@@ -59,41 +60,6 @@ void Visualizer::setClearColor(
   clearColor = QColor::fromRgbF(r, g, b);
 }
 
-// -- helper functions ----------------------------------------------
-void Visualizer::printMouseVariables()
-{
-  char const* mb = "DOWN";
-  char const* ms = "LEFT";
-  char const* mc = "SINGLE";
-  char const* md = "DRAG";
-
-  if (mouseButton == MSE_BUTTON_UP)
-  {
-    mb = "UP";
-  }
-  if (mouseSide == MSE_SIDE_RGT)
-  {
-    ms = "RIGHT";
-  }
-  else if (mouseSide == MSE_SIDE_MID)
-  {
-    ms = "MIDDLE";
-  }
-  if (mouseClick == MSE_CLICK_DOUBLE)
-  {
-    mc = "DOUBLE";
-  }
-  if (mouseDrag == MSE_DRAG_FALSE)
-  {
-    md = "NOT_DRAG";
-  }
-
-  std::clog << "Mouse Button: " << mb << std::endl;
-  std::clog << "Mouse Side: " << ms << std::endl;
-  std::clog << "Mouse Click: " << mc << std::endl;
-  std::clog << "Mouse Drag: " << md << std::endl << std::endl;
-}
-
 
 // -- visualization functions ---------------------------------------
 
@@ -119,159 +85,35 @@ void Visualizer::handleSizeEvent()
   geomChanged = true;
 }
 
-
-void Visualizer::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+void Visualizer::handleMouseEvent(QMouseEvent* e)
 {
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_TRUE;
-  if (mouseDrag == MSE_DRAG_TRUE)
-
+  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
+  if (!m_mouseDrag && e->buttons() != Qt::NoButton)
   {
-    xMouseDragBeg = x;
+    m_mouseDrag = true;
+    m_mouseDragStart = e->pos();
   }
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-void Visualizer::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-{
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_LFT;
-  if (mouseClick != MSE_CLICK_DOUBLE)
+  if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
-    mouseClick  = MSE_CLICK_SINGLE;
+    m_mouseDrag = false;
   }
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseCur = x;
-  yMouseCur = y;
 }
-
-
-void Visualizer::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-{
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_DOUBLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-void Visualizer::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-{
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_RGT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_TRUE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-void Visualizer::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-{
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_RGT;
-  if (mouseClick != MSE_CLICK_DOUBLE)
-  {
-    mouseClick  = MSE_CLICK_SINGLE;
-  }
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseCur = x;
-  yMouseCur = y;
-}
-
-
-void Visualizer::handleMouseRgtDClickEvent(
-  const int& x,
-  const int& y)
-{
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_RGT;
-  mouseClick  = MSE_CLICK_DOUBLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-void Visualizer::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-{
-  if (mouseButton == MSE_BUTTON_DOWN)
-  {
-    mouseDrag  = MSE_DRAG_TRUE;
-    mouseClick = MSE_CLICK_SINGLE;
-  }
-  else
-  {
-    mouseDrag  = MSE_DRAG_FALSE;
-    mouseClick = -1;
-  }
-
-  xMouseCur = x;
-  yMouseCur = y;
-}
-
-
-void Visualizer::handleMouseWheelIncEvent(
-  const int& /*x*/,
-  const int& /*y*/)
-{}
-
-
-void Visualizer::handleMouseWheelDecEvent(
-  const int& /*x*/,
-  const int& /*y*/)
-{}
-
-
-void Visualizer::handleMouseEnterEvent()
-{}
-
 
 void Visualizer::handleMouseLeaveEvent()
 {
   initMouse();
 }
 
-
-void Visualizer::handleKeyDownEvent(const int& keyCode)
+void Visualizer::handleKeyEvent(QKeyEvent* e)
 {
-  keyCodeDown = keyCode;
-}
-
-
-void Visualizer::handleKeyUpEvent(const int& /*keyCode*/)
-{
-  keyCodeDown = -1;
+  if (e->type() == QEvent::KeyPress)
+  {
+    m_lastKeyCode = e->key();
+  }
+  else
+  {
+    m_lastKeyCode = -1;
+  }
 }
 
 
@@ -286,15 +128,9 @@ void Visualizer::clear()
 
 void Visualizer::initMouse()
 {
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = 0.0;
-  yMouseDragBeg = 0.0;
-  xMouseCur     = 0.0;
-  yMouseCur     = 0.0;
+  m_lastMouseEvent = QMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+  m_mouseDrag = false;
+  m_mouseDragStart = QPoint(0,0);
 }
 
 
@@ -320,8 +156,8 @@ void Visualizer::startSelectMode(
   glLoadIdentity();
 
   gluPickMatrix(
-    (GLdouble) xMouseCur,
-    (GLdouble)(viewport[3]-yMouseCur),
+    (GLdouble) m_lastMouseEvent.x(),
+    (GLdouble)(viewport[3]-m_lastMouseEvent.y()),
     pickWth,    // picking width
     pickHgt,    // picking height
     viewport);

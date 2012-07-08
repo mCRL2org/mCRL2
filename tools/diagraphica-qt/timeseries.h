@@ -77,33 +77,10 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    void handleMouseWheelIncEvent(
-      const int& x,
-      const int& y);
-    void handleMouseWheelDecEvent(
-      const int& x,
-      const int& y);
+    void handleMouseEvent(QMouseEvent* e);
+    void handleWheelEvent(QWheelEvent* e);
     void handleMouseLeaveEvent();
-    void handleKeyDownEvent(const int& keyCode);
-    void handleKeyUpEvent(const int& keyCode);
+    void handleKeyEvent(QKeyEvent* e);
 
   protected:
     // -- utility functions -----------------------------------------
@@ -182,6 +159,9 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     };
 
     // -- data members ----------------------------------------------
+
+    QPoint m_lastMousePos;
+
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
 

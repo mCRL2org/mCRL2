@@ -295,7 +295,7 @@ void ArcDiagram::visualizeParts(const bool& inSelectMode)
 
 void ArcDiagram::drawBundles(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
   int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
 
   if (render == HQRender)
@@ -379,7 +379,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 
 void ArcDiagram::drawLeaves(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
   int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
   Cluster* clust = NULL;
 
@@ -441,7 +441,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 
 void ArcDiagram::drawTree(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
   int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
   Cluster* clust = NULL;
   QColor colFill = Qt::white;
@@ -530,7 +530,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
 void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
 
   if (render = HQRender)
   {
@@ -576,7 +576,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
   if (posBarTreeTopLft.size() > 1)
   {
 
-    RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+    RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
     Cluster* clust = NULL;
     QColor colFill = Qt::lightGray;
 
@@ -655,7 +655,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 
 void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 {
-  RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+  RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
 
   // selection mode
   if (render == HitRender)
@@ -758,7 +758,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         double pix    = canvas->getPixelSize();
 
         glPushMatrix();
-        if (mouseDrag == MSE_DRAG_FALSE)
+        if (m_mouseDrag)
         {
           if (i == currIdxDgrm)
           {
@@ -787,7 +787,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         }
 
         glTranslatef(xD, yD, 0.0);
-        if (mouseDrag == MSE_DRAG_FALSE)
+        if (m_mouseDrag)
         {
           if (i == currIdxDgrm)
           {
@@ -984,7 +984,7 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 {
   if (markLeaves.size() > 0)
   {
-    RenderMode render = ( inSelectMode ? HitRender : ( mouseDrag == MSE_DRAG_FALSE ? LQRender : HQRender ) );
+    RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
     int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
 
     if (render = HQRender)
@@ -1037,95 +1037,32 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-void ArcDiagram::handleMouseLftDownEvent(
-    const int& x,
-    const int& y)
+
+void ArcDiagram::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void ArcDiagram::handleMouseLftUpEvent(
-    const int& x,
-    const int& y)
-{
-  Visualizer::handleMouseLftUpEvent(x, y);
-
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
 
-  dragIdxDgrm = NON_EXISTING;
-}
-
-
-void ArcDiagram::handleMouseLftDClickEvent(
-    const int& x,
-    const int& y)
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void ArcDiagram::handleMouseRgtDownEvent(
-    const int& x,
-    const int& y)
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void ArcDiagram::handleMouseRgtUpEvent(
-    const int& x,
-    const int& y)
-{
-  Visualizer::handleMouseRgtUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void ArcDiagram::handleMouseMotionEvent(
-    const int& x,
-    const int& y)
-{
-  Visualizer::handleMouseMotionEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-
-  if (showMenu != true)
+  if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton)
   {
-    handleDragDiagram();
-  }
-  else
-  {
-    showMenu = false;
+    dragIdxDgrm = NON_EXISTING;
   }
 
-  xMousePrev = xMouseCur;
-  yMousePrev = yMouseCur;
+  if (e->type() == QEvent::MouseMove)
+  {
+    if (!showMenu)
+    {
+      handleDragDiagram();
+    }
+    else
+    {
+      showMenu = false;
+    }
+
+    m_lastMousePos = m_lastMouseEvent.pos();
+  }
 }
 
 
@@ -1421,19 +1358,6 @@ void ArcDiagram::calcPositionsTree(
     botRgt.x = 0.5*(posTreeTopLft[lvl+1][posTreeTopLft[lvl+1].size()-1].x
                     +  posTreeBotRgt[lvl+1][posTreeBotRgt[lvl+1].size()-1].x);
 
-    /*
-    {
-    for ( int i = 0; i < v.size(); ++i )
-    {
-        *mediator << v[i];
-        *mediator << " ";
-    }
-    }
-    *mediator << " -> ";
-
-    *mediator << lvl;
-    *mediator << "\n";
-    */
 
     topLft.y = (((maxLvl-1)-  lvl)*itvHgt);
     botRgt.y = (((maxLvl-1)-(lvl+1))*itvHgt);
@@ -1442,11 +1366,6 @@ void ArcDiagram::calcPositionsTree(
   {
     topLft.x = posLeaves[c->getIndex()].x;
     botRgt.x = posLeaves[c->getIndex()].x;
-    /*
-    topLft.y = posLeaves[c->getIndex()].y + radLeaves;
-    botRgt.y = posLeaves[c->getIndex()].y;
-    */
-
     topLft.y = (((maxLvl-1)-  lvl)*itvHgt);
     botRgt.y = posLeaves[c->getIndex()].y;
   }
@@ -1730,20 +1649,14 @@ void ArcDiagram::onTimer(wxTimerEvent& /*e*/)
 
 void ArcDiagram::handleHits(const vector< int > &ids)
 {
-  if (mouseButton == MSE_BUTTON_DOWN)
+  if (m_mouseDrag && m_lastMouseEvent.type() == QEvent::MouseMove)
   {
-    if (mouseDrag == MSE_DRAG_TRUE)
+    if (ids[1] == ID_DIAGRAM)
     {
-      if (mouseSide == MSE_SIDE_LFT)
-      {
-        if (ids[1] == ID_DIAGRAM)
-        {
-          handleDragDiagram(ids[2]);
-        }
-      }
+      handleDragDiagram(ids[2]);
     }
   }
-  else // mouse button up
+  else
   {
     if (ids.size() == 1)    // leaves
     {
@@ -1770,42 +1683,12 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         updateMarkBundles();
         mediator->handleUnshowFrame();
 
-        if (mouseButton == MSE_BUTTON_DOWN &&
-            mouseDrag == MSE_DRAG_FALSE)
-        {
-          if (mouseSide == MSE_SIDE_LFT)
-          {
-            /*
-            *mediator << "expand or collapse\n";
-            */
-
-            //Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
-            //vector< int > v;
-            //hitClust->getCoord( v );
-
-            //graph->clearSubClusters( v );
-            //geomChanged = true;
-          }
-          /*
-          else if ( mouseSide == MSE_SIDE_RGT )
-          {
-          Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
-          mediator->handleEditClust( hitClust );
-          hitClust = NULL;
-          }
-          */
-        }
-        else
-        {
-          handleHoverCluster(ids[2], ids[3]);
-        }
+        handleHoverCluster(ids[2], ids[3]);
       }
       // interact with leaf nodes
       else if (ids[1] == ID_LEAF_NODE)
       {
-        if (mouseClick == MSE_CLICK_SINGLE &&
-            mouseDrag == MSE_DRAG_FALSE &&
-            mouseSide == MSE_SIDE_LFT)
+        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
           if (mediator->getView() == Mediator::VIEW_TRACE)
@@ -1813,9 +1696,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
             mediator->markTimeSeries(this, graph->getLeaf(ids[2]));
           }
         }
-        else if (mouseClick == MSE_CLICK_SINGLE &&
-                 mouseDrag == MSE_DRAG_FALSE &&
-                 mouseSide == MSE_SIDE_RGT)
+        else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
         {
           /*mediator->handleShowClusterMenu();*/ // Select attributes from the popup menu for clustering.
         }
@@ -1840,9 +1721,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
       // interact with diagrams
       else if (ids[1] == ID_DIAGRAM)
       {
-        if (mouseClick == MSE_CLICK_SINGLE &&
-            mouseSide   == MSE_SIDE_LFT &&
-            mouseDrag   == MSE_DRAG_FALSE)
+        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           dragIdxDgrm = ids[2];
           currIdxDgrm = ids[2];
@@ -1868,12 +1747,8 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 
               showMenu = true;
 
-              // no mouseup event is generated reset manually
-              dragIdxDgrm = NON_EXISTING;
-              mouseButton = MSE_BUTTON_UP;
-              mouseSide   = MSE_SIDE_LFT;
-              mouseClick  = MSE_CLICK_SINGLE;
-              mouseDrag   = MSE_DRAG_FALSE;
+              // handleSendDgrm prohibits mouseup event, simulate it:
+              handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
             }
             else if (ids[3] == ID_DIAGRAM_RWND)
             {
@@ -1893,9 +1768,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
             }
           }
         }
-        else if (mouseSide   == MSE_SIDE_RGT &&
-                 mouseButton == MSE_BUTTON_DOWN /*&&
-                            mouseDrag   == MSE_DRAG_FALSE*/)
+        else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
         {
           // show menu
           if (mediator->getView() == Mediator::VIEW_SIM)
@@ -1909,12 +1782,8 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 
           showMenu = true;
 
-          // no mouseup event is generated reset manually
-          dragIdxDgrm = NON_EXISTING;
-          mouseButton = MSE_BUTTON_UP;
-          mouseSide   = MSE_SIDE_RGT;
-          mouseClick  = MSE_CLICK_SINGLE;
-          mouseDrag   = MSE_DRAG_FALSE;
+          // handleSendDgrm prohibits mouseup event, simulate it:
+          handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
         }
         else
         {
@@ -2029,8 +1898,8 @@ void ArcDiagram::handleDragDiagram()
     double x1, y1;
     double x2, y2;
 
-    canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-    canvas->getWorldCoords(xMouseCur,  yMouseCur,  x2, y2);
+    canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
+    canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
 
     posDgrm[dragIdxDgrm].x += (x2-x1);
     posDgrm[dragIdxDgrm].y += (y2-y1);
@@ -2042,8 +1911,8 @@ void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
   double x1, y1;
   double x2, y2;
 
-  canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  x2, y2);
+  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
+  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
 
   posDgrm[dgrmIdx].x += (x2-x1);
   posDgrm[dgrmIdx].y += (y2-y1);

@@ -82,25 +82,8 @@ class Examiner : public wxEvtHandler, public Visualizer
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
 
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    void handleKeyDownEvent(const int& keyCode);
+    void handleMouseEvent(QMouseEvent* e);
+    void handleKeyEvent(QKeyEvent* e);
 
   protected:
     // -- utility functions -----------------------------------------

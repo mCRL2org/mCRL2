@@ -299,26 +299,15 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-void CorrlPlot::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
+void CorrlPlot::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
 }
-
-/*
-void CorrlPlot::handleMouseEnterEvent()
-{}
-*/
-/*
-void CorrlPlot::handleMouseLeaveEvent()
-{}
-*/
 
 
 // -- utility data functions ----------------------------------------
@@ -462,7 +451,7 @@ void CorrlPlot::displTooltip(
     // calc diagram position
     double xM, yM;
     double xD, yD;
-    canvas->getWorldCoords(xMouseCur, yMouseCur, xM, yM);
+    canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
 
     if (xM < 0)
     {

@@ -281,26 +281,16 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-void DistrPlot::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
+
+void DistrPlot::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
 }
-
-/*
-void DistrPlot::handleMouseEnterEvent()
-{}
-*/
-/*
-void DistrPlot::handleMouseLeaveEvent()
-{}
-*/
 
 // -- utility data functions ------------------------------------
 
@@ -380,7 +370,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
       // calc diagram position
       double xM, yM;
       double xD, yD;
-      canvas->getWorldCoords(xMouseCur, yMouseCur, xM, yM);
+      canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
 
       if (xM < 0)
       {

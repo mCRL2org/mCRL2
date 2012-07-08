@@ -2666,432 +2666,131 @@ void DiaGraph::handleDragDrop(
     data);
 }
 
-
-void DiaGraph::handleMouseLftDownEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
+Visualizer* DiaGraph::currentVisualizer(GLCanvas* c)
 {
+
   if (mode == MODE_EDIT)
   {
     if (c == canvasEdit && editor != NULL)
     {
-      editor->handleMouseLftDownEvent(x, y);
+      return editor;
     }
     else if (c == canvasColChooser && colChooser != NULL)
     {
-      colChooser->handleMouseLftDownEvent(x, y);
+      return colChooser;
     }
     else if (c == canvasOpaChooser && opaChooser != NULL)
     {
-      opaChooser->handleMouseLftDownEvent(x, y);
+      return opaChooser;
     }
   }
   else if (mode == MODE_ANALYSIS)
   {
     if (c == canvasArcD && arcDgrm != NULL)
     {
-      arcDgrm->handleMouseLftDownEvent(x, y);
-      canvasExnr->Refresh();
+      return arcDgrm;
     }
     else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
     {
-      simulator->handleMouseLftDownEvent(x, y);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
+      return simulator;
     }
     else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
     {
-      timeSeries->handleMouseLftDownEvent(x, y);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
+      return timeSeries;
     }
     else if (c == canvasExnr && examiner != NULL)
     {
-      examiner->handleMouseLftDownEvent(x, y);
-      canvasArcD->Refresh();
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseLftUpEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseLftUpEvent(x, y);
-
-      if (editor->getEditMode() != DiagramEditor::EDIT_MODE_DOF)
-      {
-        editor->setEditModeSelect();
-        frame->setEditModeSelect();
-      }
-    }
-    else if (c == canvasColChooser && colChooser != NULL)
-    {
-      colChooser->handleMouseLftUpEvent(x, y);
-    }
-    else if (c == canvasOpaChooser && opaChooser != NULL)
-    {
-      opaChooser->handleMouseLftUpEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseLftUpEvent(x, y);
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseLftUpEvent(x, y);
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseLftUpEvent(x, y);
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleMouseLftUpEvent(x, y);
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseLftDClickEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseLftDClickEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseLftDClickEvent(x, y);
-      canvasExnr->Refresh();
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseLftDClickEvent(x, y);
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseLftDClickEvent(x, y);
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleMouseLftDClickEvent(x, y);
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseRgtDownEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseRgtDownEvent(x, y);
-    }
-    else if (c == canvasColChooser && colChooser != NULL)
-    {
-      colChooser->handleMouseRgtDownEvent(x, y);
-    }
-    else if (c == canvasOpaChooser && opaChooser != NULL)
-    {
-      opaChooser->handleMouseRgtDownEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseRgtDownEvent(x, y);
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseRgtDownEvent(x, y);
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseRgtDownEvent(x, y);
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleMouseRgtDownEvent(x, y);
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseRgtUpEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseRgtUpEvent(x, y);
-    }
-    else if (c == canvasColChooser && colChooser != NULL)
-    {
-      colChooser->handleMouseRgtUpEvent(x, y);
-    }
-    else if (c == canvasOpaChooser && opaChooser != NULL)
-    {
-      opaChooser->handleMouseRgtUpEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseRgtUpEvent(x, y);
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseRgtUpEvent(x, y);
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseRgtUpEvent(x, y);
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleMouseRgtUpEvent(x, y);
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseRgtDClickEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseRgtDClickEvent(x, y);
-    }
-  }
-}
-
-
-void DiaGraph::handleMouseMotionEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseMotionEvent(x, y);
-    }
-    else if (c == canvasColChooser && colChooser != NULL)
-    {
-      colChooser->handleMouseMotionEvent(x, y);
-    }
-    else if (c == canvasOpaChooser && opaChooser != NULL)
-    {
-      opaChooser->handleMouseMotionEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseMotionEvent(x, y);
-      canvasExnr->Refresh();
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseMotionEvent(x, y);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseMotionEvent(x, y);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
+      return examiner;
     }
   }
 
   if (c == canvasDistr && distrPlot != NULL)
   {
-    distrPlot->handleMouseMotionEvent(x, y);
+    return distrPlot;
   }
   else if (c == canvasCorrl && corrlPlot != NULL)
   {
-    corrlPlot->handleMouseMotionEvent(x, y);
+    return corrlPlot;
   }
   else if (c == canvasCombn && combnPlot != NULL)
   {
-    combnPlot->handleMouseMotionEvent(x, y);
+    return combnPlot;
   }
+
+  return NULL;
 }
 
 
-void DiaGraph::handleMouseWheelIncEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
+void DiaGraph::handleMouseEvent(GLCanvas* c, QMouseEvent* e)
 {
-  if (mode == MODE_EDIT)
+  Visualizer *current = currentVisualizer(c);
+  if (current != NULL)
   {
-    if (c == canvasEdit && editor != NULL)
+    current->handleMouseEvent(e);
+
+    if ((e->type() == QEvent::MouseMove || e->button() == Qt::LeftButton) &&
+        (current == simulator || current == timeSeries || current == examiner))
     {
-      editor->handleMouseWheelIncEvent(x, y);
+      canvasArcD->Refresh();
     }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
+
+    if ((e->type() == QEvent::MouseMove || e->button() == Qt::LeftButton) &&
+        (current == arcDgrm || current == simulator || current == timeSeries))
     {
-      timeSeries->handleMouseWheelIncEvent(x, y);
+      canvasExnr->Refresh();
+    }
+
+    if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton &&
+        current == editor && editor->getEditMode() != DiagramEditor::EDIT_MODE_DOF)
+    {
+      editor->setEditModeSelect();
+      frame->setEditModeSelect();
     }
   }
 }
 
-
-void DiaGraph::handleMouseWheelDecEvent(
-  GLCanvas* c,
-  const int& x,
-  const int& y)
+void DiaGraph::handleWheelEvent(GLCanvas* c, QWheelEvent* e)
 {
-  if (mode == MODE_EDIT)
+  Visualizer *current = currentVisualizer(c);
+  if (current != NULL)
   {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseWheelDecEvent(x, y);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseWheelDecEvent(x, y);
-    }
+    current->handleWheelEvent(e);
   }
 }
-
 
 void DiaGraph::handleMouseEnterEvent(GLCanvas* c)
 {
-  if (mode == MODE_EDIT)
+  Visualizer *current = currentVisualizer(c);
+  if (current != NULL)
   {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseEnterEvent();
-    }
+    current->handleMouseEnterEvent();
   }
 }
-
 
 void DiaGraph::handleMouseLeaveEvent(GLCanvas* c)
 {
-  if (mode == MODE_ANALYSIS)
+  Visualizer *current = currentVisualizer(c);
+  if (current != NULL)
   {
-    if (c == canvasArcD && arcDgrm != NULL)
-    {
-      arcDgrm->handleMouseLeaveEvent();
-    }
-    else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleMouseLeaveEvent();
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleMouseLeaveEvent();
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleMouseLeaveEvent();
-    }
-  }
-  else if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleMouseLeaveEvent();
-    }
+    current->handleMouseLeaveEvent();
   }
 }
 
-
-void DiaGraph::handleKeyDownEvent(
-  GLCanvas* c,
-  const int& keyCode,
-  const int& specialKey)
+void DiaGraph::handleKeyEvent(GLCanvas* c, QKeyEvent* e)
 {
-  if (mode == MODE_EDIT)
+  Visualizer *current = currentVisualizer(c);
+  if (current != NULL)
   {
-    if (c == canvasEdit && editor != NULL)
-    {
-      editor->handleKeyDownEvent(keyCode, specialKey);
-    }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
-    {
-      simulator->handleKeyDownEvent(keyCode);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
-    }
-    else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
-    {
-      timeSeries->handleKeyDownEvent(keyCode);
-      canvasArcD->Refresh();
-      canvasExnr->Refresh();
-    }
-    else if (c == canvasExnr && examiner != NULL)
-    {
-      examiner->handleKeyDownEvent(keyCode);
-      canvasArcD->Refresh();
-    }
-  }
-}
+    current->handleKeyEvent(e);
 
-
-void DiaGraph::handleKeyUpEvent(
-  GLCanvas* c,
-  const int& keyCode,
-  const int& specialKey)
-{
-  if (mode == MODE_EDIT)
-  {
-    if (c == canvasEdit && editor != NULL)
+    if (e->type() == QEvent::KeyPress && (current == simulator || current == timeSeries || current == examiner))
     {
-      editor->handleKeyUpEvent(keyCode, specialKey);
+      canvasArcD->Refresh();
     }
-  }
-  else if (mode == MODE_ANALYSIS)
-  {
-    if (c == canvasTrace && timeSeries != NULL)
+
+    if (e->type() == QEvent::KeyPress && (current == arcDgrm || current == simulator || current == timeSeries))
     {
-      timeSeries->handleKeyUpEvent(keyCode);
+      canvasExnr->Refresh();
     }
   }
 }

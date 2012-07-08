@@ -111,24 +111,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void drawDiagrams(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseLftDownEvent(
-        const int& x,
-        const int& y);
-    void handleMouseLftUpEvent(
-        const int& x,
-        const int& y);
-    void handleMouseLftDClickEvent(
-        const int& x,
-        const int& y);
-    void handleMouseRgtDownEvent(
-        const int& x,
-        const int& y);
-    void handleMouseRgtUpEvent(
-        const int& x,
-        const int& y);
-    void handleMouseMotionEvent(
-        const int& x,
-        const int& y);
+
+    void handleMouseEvent(QMouseEvent* e);
 
     void updateDiagramData();
 
@@ -209,6 +193,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     static QColor colBundles;
 
     // -- data members ----------------------------------------------
+
+    QPoint m_lastMousePos;
 
     // vis settings bundles
     std::vector< Position2D > posBundles;

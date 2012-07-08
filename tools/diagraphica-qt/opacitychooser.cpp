@@ -104,99 +104,56 @@ void OpacityChooser::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-void OpacityChooser::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+void OpacityChooser::handleMouseEvent(QMouseEvent* e)
 {
-  mediator->handleDOFOpaActivate();
-  mediator->setDOFOpacitySelected();
+  if (e->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton)
+  {
+    mediator->handleDOFOpaActivate();
+    mediator->setDOFOpacitySelected();
+  }
   if (active == true)
   {
-    Visualizer::handleMouseLftDownEvent(x, y);
-
-    // selection moce
-    visualize(true);
-    // normal mode
-    visualize(false);
-
-    if (dragIdx == -1)
+    Visualizer::handleMouseEvent(e);
+    if (e->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton)
     {
-      double w, h;
-      double xRgt;
-      double yTop;
-      double xCur, yCur;
+      // selection mode
+      visualize(true);
+      // normal mode
+      visualize(false);
 
-      // get size of sides
-      canvas->getSize(w, h);
+      if (dragIdx == -1)
+      {
+        double w, h;
+        double xRgt;
+        double yTop;
+        double xCur, yCur;
 
-      // calc size of bounding box
-      xRgt =  0.5*w;
-      yTop =  0.5*h;
+        // get size of sides
+        canvas->getSize(w, h);
 
-      // get cur mouse position
-      canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
+        // calc size of bounding box
+        xRgt =  0.5*w;
+        yTop =  0.5*h;
 
-      // normalize mouse position
-      // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
-      xCur = xCur/xRgt;
-      yCur = yCur/yTop;
+        // get cur mouse position
+        canvas->getWorldCoords(e->x(), e->y(), xCur, yCur);
 
-      positionsX.push_back(xCur);
-      positionsY.push_back(yCur);
+        // normalize mouse position
+        // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
+        xCur = xCur/xRgt;
+        yCur = yCur/yTop;
 
-      mediator->handleDOFOpaAdd(0.5*(xCur+1), yCur);
+        positionsX.push_back(xCur);
+        positionsY.push_back(yCur);
+
+        mediator->handleDOFOpaAdd(0.5*(xCur+1), yCur);
+      }
     }
-  }
-}
-
-
-void OpacityChooser::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseLftUpEvent(x, y);
-    dragIdx = -1;
-  }
-}
-
-
-void OpacityChooser::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseRgtDownEvent(x, y);
-
-    // selection mode
-    visualize(true);
-    // normal mode
-    visualize(false);
-  }
-}
-
-
-void OpacityChooser::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseRgtUpEvent(x, y);
-  }
-}
-
-
-void OpacityChooser::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseMotionEvent(x, y);
-    if (mouseDrag == MSE_DRAG_TRUE)
+    else if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton)
+    {
+      dragIdx = -1;
+    }
+    else if (e->type() == QEvent::MouseMove)
     {
       handleDrag();
     }
@@ -481,23 +438,26 @@ void OpacityChooser::drawPoints(const bool& inSelectMode)
 
 void OpacityChooser::handleHits(const vector< int > &ids)
 {
-  if (mouseSide == MSE_SIDE_LFT)
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
   {
-    if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+    if (m_lastMouseEvent.buttons() == Qt::LeftButton)
     {
-      dragIdx = ids[0];
+      if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+      {
+        dragIdx = ids[0];
+      }
     }
-  }
-  else if (mouseSide == MSE_SIDE_RGT)
-  {
-    if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+    else if (m_lastMouseEvent.buttons() == Qt::RightButton)
     {
-      /*
-      positionsX.erase( positionsX.begin()+ids[0] );
-      positionsY.erase( positionsY.begin()+ids[0] );
-      */
+      if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+      {
+        /*
+        positionsX.erase( positionsX.begin()+ids[0] );
+        positionsY.erase( positionsY.begin()+ids[0] );
+        */
 
-      mediator->handleDOFOpaClear(ids[0]);
+        mediator->handleDOFOpaClear(ids[0]);
+      }
     }
   }
 }
@@ -520,7 +480,7 @@ void OpacityChooser::handleDrag()
     yTop =  0.5*h;
 
     // get cur mouse position
-    canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
+    canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xCur, yCur);
 
     // normalize mouse position
     // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0

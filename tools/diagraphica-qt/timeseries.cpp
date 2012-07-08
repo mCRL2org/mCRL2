@@ -427,95 +427,27 @@ void TimeSeries::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-void TimeSeries::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+void TimeSeries::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseLftUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
 
-  xMousePrev = xMouseCur;
-  yMousePrev = yMouseCur;
+  if (e->type() == QEvent::MouseMove)
+  {
+    m_lastMousePos = e->pos();
+  }
 }
 
 
-
-void TimeSeries::handleMouseWheelIncEvent(
-  const int& x,
-  const int& y)
+void TimeSeries::handleWheelEvent(QWheelEvent *e)
 {
-  Visualizer::handleMouseWheelIncEvent(x, y);
+  Visualizer::handleWheelEvent(e);
 
-  if (timerAnim->IsRunning() != true)
+  if (!timerAnim->IsRunning())
   {
     mouseOverIdx = -1;
 
@@ -527,63 +459,42 @@ void TimeSeries::handleMouseWheelIncEvent(
     actPixPerNode = (dist/pix)/(double)(nodesWdwScale-nodesItvSlider);
     diff -= actPixPerNode;
 
-    if (actPixPerNode > minPixPerNode)
+    if (e->delta() > 0)
     {
-      actPixPerNode = minPixPerNode;
-      if (diff > 0)
+      if (actPixPerNode > minPixPerNode)
       {
-        wdwStartIdx += (int)(0.5*(nodesItvSlider-1));
+        actPixPerNode = minPixPerNode;
+        if (diff > 0)
+        {
+          wdwStartIdx += (int)(0.5*(nodesItvSlider-1));
+        }
       }
-    }
-    else if (actPixPerNode < 0)
-    {
-      actPixPerNode = minPixPerNode;
-    }
-    else
-    {
-      wdwStartIdx += (int)(0.5*nodesItvSlider);
-    }
-
-    geomChanged = true;
-
-    // redraw in render mode
-    visualize(false);
-  }
-}
-
-
-void TimeSeries::handleMouseWheelDecEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseWheelDecEvent(x, y);
-
-  if (timerAnim->IsRunning() != true)
-  {
-    mouseOverIdx = -1;
-
-    // zoom in
-    double pix  = canvas->getPixelSize();
-    double dist = posSliderBotRgt.x - posSliderTopLft.x;
-
-    // update pixels per node
-    actPixPerNode = (dist/pix)/(double)(nodesWdwScale+nodesItvSlider);
-    if (actPixPerNode < itvSliderPerNode)
-    {
-      actPixPerNode = itvSliderPerNode;
-      wdwStartIdx -= (int)(0.5*itvSliderPerNode);
-    }
-    else
-    {
-      // update position
-      wdwStartIdx -= (int)(0.5*nodesItvSlider);
-      if (wdwStartIdx + nodesWdwScale+nodesItvSlider > graph->getSizeNodes()-1)
+      else if (actPixPerNode < 0)
       {
-        wdwStartIdx = (graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
+        actPixPerNode = minPixPerNode;
       }
-      if (wdwStartIdx == NON_EXISTING)
+      else
       {
-        wdwStartIdx = 0;
+        wdwStartIdx += (int)(0.5*nodesItvSlider);
+      }
+    } else {
+      if (actPixPerNode < itvSliderPerNode)
+      {
+        actPixPerNode = itvSliderPerNode;
+        wdwStartIdx -= (int)(0.5*itvSliderPerNode);
+      }
+      else
+      {
+        // update position
+        wdwStartIdx -= (int)(0.5*nodesItvSlider);
+        if (wdwStartIdx + nodesWdwScale+nodesItvSlider > graph->getSizeNodes()-1)
+        {
+          wdwStartIdx = (graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
+        }
+        if (wdwStartIdx == NON_EXISTING)
+        {
+          wdwStartIdx = 0;
+        }
       }
     }
 
@@ -593,11 +504,14 @@ void TimeSeries::handleMouseWheelDecEvent(
     visualize(false);
   }
 }
+
+
+
 
 
 void TimeSeries::handleMouseLeaveEvent()
 {
-  Visualizer::initMouse();
+  Visualizer::handleMouseLeaveEvent();
 
   // reset mouse roll-over
   mouseOverIdx = -1;
@@ -608,93 +522,92 @@ void TimeSeries::handleMouseLeaveEvent()
 }
 
 
-void TimeSeries::handleKeyDownEvent(const int& keyCode)
+void TimeSeries::handleKeyEvent(QKeyEvent *e)
 {
-  Visualizer::handleKeyDownEvent(keyCode);
+  Visualizer::handleKeyEvent(e);
 
-  if (keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT)
+  if (e->type() == QEvent::KeyPress)
   {
-    // move to right
-    if ((wdwStartIdx + 1 + nodesWdwScale) <= (graph->getSizeNodes()-1))
+    if (e->key() == WXK_RIGHT || e->key() == WXK_NUMPAD_RIGHT)
     {
-      wdwStartIdx += 1;
+      // move to right
+      if ((wdwStartIdx + 1 + nodesWdwScale) <= (graph->getSizeNodes()-1))
+      {
+        wdwStartIdx += 1;
+      }
+      else if ((wdwStartIdx + 1 + nodesWdwScale) > (graph->getSizeNodes()-1))
+      {
+        wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+      }
     }
-    else if ((wdwStartIdx + 1 + nodesWdwScale) > (graph->getSizeNodes()-1))
+    else if (e->key() == WXK_LEFT || e->key() == WXK_NUMPAD_LEFT)
     {
-      wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+      // move to left
+      if ((wdwStartIdx + 1) == NON_EXISTING)
+      {
+        wdwStartIdx = 0;
+      }
+      else if ((wdwStartIdx - 1) != NON_EXISTING)
+      {
+        wdwStartIdx -= 1;
+      }
     }
-  }
-  else if (keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT)
-  {
-    // move to left
-    if ((wdwStartIdx + 1) == NON_EXISTING)
+    else if (e->key() == WXK_HOME || e->key() == WXK_NUMPAD_HOME)
     {
+      // move to beginning
       wdwStartIdx = 0;
     }
-    else if ((wdwStartIdx - 1) != NON_EXISTING)
+    else if (e->key() == WXK_END || e->key() == WXK_NUMPAD_END)
     {
-      wdwStartIdx -= 1;
-    }
-  }
-  else if (keyCodeDown == WXK_HOME || keyCodeDown == WXK_NUMPAD_HOME)
-  {
-    // move to beginning
-    wdwStartIdx = 0;
-  }
-  else if (keyCodeDown == WXK_END || keyCodeDown == WXK_NUMPAD_END)
-  {
-    // move to end
-    wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
-  }
-  else if (keyCodeDown == WXK_PAGEUP || keyCodeDown == WXK_NUMPAD_PAGEUP || keyCodeDown == WXK_NUMPAD9)
-  {
-    // move one window toward beginning
-    if (wdwStartIdx < nodesWdwScale)
-    {
-      wdwStartIdx = 0;
-    }
-    else
-    {
-      wdwStartIdx -= nodesWdwScale;
-    }
-
-  }
-  else if (keyCodeDown == WXK_PAGEDOWN || keyCodeDown == WXK_NUMPAD_PAGEDOWN || keyCodeDown == WXK_NUMPAD3)
-  {
-    // move one window toward end
-    if ((wdwStartIdx + 2*nodesWdwScale) <= (graph->getSizeNodes()-1))
-    {
-      wdwStartIdx += nodesWdwScale;
-    }
-    else
-    {
+      // move to end
       wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
     }
-  }
-  else if (keyCodeDown == WXK_ESCAPE)
-  {
-    if (timerAnim->IsRunning())
+    else if (e->key() == WXK_PAGEUP || e->key() == WXK_NUMPAD_PAGEUP || e->key() == WXK_NUMPAD9)
     {
-      timerAnim->Stop();
+      // move one window toward beginning
+      if (wdwStartIdx < nodesWdwScale)
+      {
+        wdwStartIdx = 0;
+      }
+      else
+      {
+        wdwStartIdx -= nodesWdwScale;
+      }
+
     }
-    else
+    else if (e->key() == WXK_PAGEDOWN || e->key() == WXK_NUMPAD_PAGEDOWN || e->key() == WXK_NUMPAD3)
     {
-      itemsMarked.clear();
+      // move one window toward end
+      if ((wdwStartIdx + 2*nodesWdwScale) <= (graph->getSizeNodes()-1))
+      {
+        wdwStartIdx += nodesWdwScale;
+      }
+      else
+      {
+        wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+      }
     }
+    else if (e->key() == WXK_ESCAPE)
+    {
+      if (timerAnim->IsRunning())
+      {
+        timerAnim->Stop();
+      }
+      else
+      {
+        itemsMarked.clear();
+      }
+    }
+
+    // redraw in render mode
+    visualize(false);
   }
-
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void TimeSeries::handleKeyUpEvent(const int& keyCode)
-{
-  Visualizer::handleKeyUpEvent(keyCode);
-
-  if (keyCode == WXK_SHIFT)
+  else
   {
-    shiftStartIdx = -1;
+    if (e->key() == WXK_SHIFT)
+    {
+      shiftStartIdx = -1;
+    }
   }
 }
 
@@ -1077,52 +990,49 @@ void TimeSeries::handleHits(const vector< int > &ids)
   if (ids.size() > 1)
   {
     // mouse button down
-    if (mouseButton == MSE_BUTTON_DOWN)
+    if (m_mouseDrag)
     {
       mouseOverIdx = -1;
-
-      if (mouseDrag == MSE_DRAG_TRUE)
+      if (m_lastMouseEvent.buttons() == Qt::LeftButton)
       {
-        if (mouseSide == MSE_SIDE_LFT)
+        if (dragStatus == DRAG_STATUS_SLDR)
         {
-          if (dragStatus == DRAG_STATUS_SLDR)
+          handleDragSliderHdl();
+        }
+        else if (dragStatus == DRAG_STATUS_SLDR_LFT)
+        {
+          handleDragSliderHdlLft();
+        }
+        else if (dragStatus == DRAG_STATUS_SLDR_RGT)
+        {
+          handleDragSliderHdlRgt();
+        }
+        else if (dragStatus == DRAG_STATUS_ITMS)
+        {
+          if (ids.size() > 2)
           {
-            handleDragSliderHdl();
+            handleDragItems(ids[2]);
           }
-          else if (dragStatus == DRAG_STATUS_SLDR_LFT)
+        }
+        else if (dragStatus == DRAG_STATUS_DGRM)
+        {
+          if (ids.size() > 2)
           {
-            handleDragSliderHdlLft();
-          }
-          else if (dragStatus == DRAG_STATUS_SLDR_RGT)
-          {
-            handleDragSliderHdlRgt();
-          }
-          else if (dragStatus == DRAG_STATUS_ITMS)
-          {
-            if (ids.size() > 2)
-            {
-              handleDragItems(ids[2]);
-            }
-          }
-          else if (dragStatus == DRAG_STATUS_DGRM)
-          {
-            if (ids.size() > 2)
-            {
-              handleDragDiagram(ids[2]);
-            }
+            handleDragDiagram(ids[2]);
           }
         }
       }
-    }
-    // mouse button up
-    else
+    }    
+
+    if (m_lastMouseEvent.type() != QEvent::MouseMove) //Implies press, release or double click
     {
       dragDistNodes = 0.0;
       dragStatus = DRAG_STATUS_NONE;
 
-      if (mouseSide == MSE_SIDE_LFT && ids.size() > 2 && ids[1] == ID_DIAGRAM)
+      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton &&
+          ids[1] == ID_DIAGRAM && ids.size() > 2)
       {
-        if (ids.size() == 4 && mouseClick == MSE_CLICK_SINGLE)
+        if (ids.size() == 4)
         {
           if (ids[3] == ID_DIAGRAM_CLSE)
           {
@@ -1178,7 +1088,8 @@ void TimeSeries::handleHits(const vector< int > &ids)
           frame = NULL;
         }
       }
-      else if (mouseClick == MSE_CLICK_SINGLE && mouseSide == MSE_SIDE_LFT && ids[1] == ID_SLIDER)
+      else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton &&
+               ids[1] == ID_SLIDER)
       {
         if (ids.size() == 3)
         {
@@ -1201,15 +1112,15 @@ void TimeSeries::handleHits(const vector< int > &ids)
           handleHitSlider();
         }
       }
-      else if (mouseSide == MSE_SIDE_LFT && ids.size() > 2 &&
-               (ids[1] == ID_ITEMS && attributes.size() > 0))
+      else if (m_lastMouseEvent.button() == Qt::LeftButton &&
+               ids[1] == ID_ITEMS && ids.size() > 2 && attributes.size() > 0)
       {
-        if (mouseClick == MSE_CLICK_SINGLE)
+        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
         {
           handleHitItems(ids[2]);
           dragStatus = DRAG_STATUS_ITMS;
         }
-        else if (mouseClick == MSE_CLICK_DOUBLE)
+        else if (m_lastMouseEvent.type() == QEvent::MouseButtonDblClick)
         {
           handleShowDiagram(ids[2]);
         }
@@ -1219,20 +1130,10 @@ void TimeSeries::handleHits(const vector< int > &ids)
         //mediator->handleMarkFrameClust( this );
         //mediator->handleUnshowFrame();
       }
-      else if (mouseSide == MSE_SIDE_RGT && mouseClick == MSE_CLICK_SINGLE)
+      else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton &&
+               ids[1] == ID_DIAGRAM)
       {
-        if (mouseButton == MSE_BUTTON_DOWN)
-        {
-          /*
-            if ( ids[1] == ID_ITEMS )
-            *mediator << "show menu\n";
-            else
-            */
-          if (ids[1] == ID_DIAGRAM)
-          {
-            mediator->handleSendDgrm(this, false, false, false, true, false);
-          }
-        }
+        mediator->handleSendDgrm(this, false, false, false, true, false);
       }
       else
       {
@@ -2186,7 +2087,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
 void TimeSeries::handleHitSlider()
 {
   double x, y;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, x, y);
+  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), x, y);
   double distWorld = x - (posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode);
 
   dragDistNodes = distWorld/itvSliderPerNode;
@@ -2227,8 +2128,8 @@ void TimeSeries::handleDragSliderHdl()
 
   double x1, y1;
   double x2, y2;
-  canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-  canvas->getWorldCoords(xMouseCur, yMouseCur, x2, y2);
+  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
+  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), x2, y2);
 
   double distWorld = x2-x1;
   dragDistNodes += (distWorld/itvSliderPerNode);
@@ -2269,7 +2170,7 @@ void TimeSeries::handleDragSliderHdlLft()
   double pix  = canvas->getPixelSize();
   double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
   double xMse, yMse;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xMse, yMse);
+  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xMse, yMse);
 
   if (xMse < posSliderTopLft.x)
   {
@@ -2303,7 +2204,7 @@ void TimeSeries::handleDragSliderHdlRgt()
   double pix  = canvas->getPixelSize();
   double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
   double xMse, yMse;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xMse, yMse);
+  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xMse, yMse);
 
   if (posSliderBotRgt.x < xMse)
   {
@@ -2349,7 +2250,7 @@ void TimeSeries::handleHitItems(const int& idx)
   }
 
   // shift key
-  if (keyCodeDown == WXK_SHIFT)
+  if (m_lastKeyCode == WXK_SHIFT)
   {
     int begIdx, endIdx;
 
@@ -2374,7 +2275,7 @@ void TimeSeries::handleHitItems(const int& idx)
     }
   }
   // control key
-  else if (keyCodeDown == WXK_CONTROL)
+  else if (m_lastKeyCode == WXK_CONTROL)
   {
     // update marked items
     set< size_t >::iterator it;
@@ -2437,14 +2338,14 @@ void TimeSeries::handleDragItems(const int& idx)
     bool flag = false;
 
     // shift key
-    if (keyCodeDown == WXK_SHIFT)
+    if (m_lastKeyCode == WXK_SHIFT)
     {
       /*
       for ( int i = begIdx; i <= endIdx; ++i )
           itemsMarked.insert( i );
       */
     }
-    else if (keyCodeDown == WXK_CONTROL)
+    else if (m_lastKeyCode == WXK_CONTROL)
     {
       int begIdx, endIdx;
       bool incr;
@@ -2589,8 +2490,8 @@ void TimeSeries::handleDragDiagram(const int& dgrmIdx)
 
   dragStatus = DRAG_STATUS_DGRM;
 
-  canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  x2, y2);
+  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
+  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
 
   map< size_t, Position2D >::iterator it;
   it = showDgrm.find(dgrmIdx);

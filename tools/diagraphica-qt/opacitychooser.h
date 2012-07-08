@@ -42,21 +42,7 @@ class OpacityChooser : public Visualizer
     void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
+    void handleMouseEvent(QMouseEvent* e);
 
     // -- public constants ------------------------------------------
     static double hdlSzeHnt;

@@ -310,11 +310,9 @@ void Examiner::handleSizeEvent()
 }
 
 
-void Examiner::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+void Examiner::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
@@ -323,86 +321,24 @@ void Examiner::handleMouseLftDownEvent(
 }
 
 
-void Examiner::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
+void Examiner::handleKeyEvent(QKeyEvent* e)
 {
-  Visualizer::handleMouseLftUpEvent(x, y);
+  Visualizer::handleKeyEvent(e);
 
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Examiner::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Examiner::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Examiner::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Examiner::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseMotionEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Examiner::handleKeyDownEvent(const int& keyCode)
-{
-  Visualizer::handleKeyDownEvent(keyCode);
-
-  if (keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT)
+  if (e->type() == QEvent::KeyPress)
   {
-    handleIconRgt();
-  }
-  else if (keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT)
-  {
-    handleIconLft();
-  }
+    if (m_lastKeyCode == WXK_RIGHT || m_lastKeyCode == WXK_NUMPAD_RIGHT)
+    {
+      handleIconRgt();
+    }
+    else if (m_lastKeyCode == WXK_LEFT || m_lastKeyCode == WXK_NUMPAD_LEFT)
+    {
+      handleIconLft();
+    }
 
-  // redraw in render mode
-  visualize(false);
+    // redraw in render mode
+    visualize(false);
+  }
 }
 
 
@@ -521,8 +457,7 @@ void Examiner::handleHits(const vector< int > &ids)
 {
   if (ids.size() > 0)
   {
-    if (mouseButton == MSE_BUTTON_DOWN &&
-        mouseSide == MSE_SIDE_LFT)
+    if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
     {
       if (ids[0] == ID_FRAME)
       {
@@ -551,14 +486,8 @@ void Examiner::handleHits(const vector< int > &ids)
             }
           }
 
-          // no mouseup event is generated reset manually
-          mouseButton = MSE_BUTTON_UP;
-          mouseSide   = MSE_SIDE_LFT;
-          if (mouseClick != MSE_CLICK_DOUBLE)
-          {
-            mouseClick  = MSE_CLICK_SINGLE;
-          }
-          mouseDrag   = MSE_DRAG_FALSE;
+          // handleSendDgrm prohibits mouseup event, simulate it:
+          handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -595,8 +524,7 @@ void Examiner::handleHits(const vector< int > &ids)
       }
 
     }
-    else if (mouseButton == MSE_BUTTON_DOWN &&
-             mouseSide == MSE_SIDE_RGT)
+    else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
     {
       if (ids[0] == ID_FRAME)
       {
@@ -616,14 +544,8 @@ void Examiner::handleHits(const vector< int > &ids)
           mediator->handleSendDgrm(this, false, true, true, false, false);
         }
 
-        // no mouseup event is generated reset manually
-        mouseButton = MSE_BUTTON_UP;
-        mouseSide   = MSE_SIDE_RGT;
-        if (mouseClick != MSE_CLICK_DOUBLE)
-        {
-          mouseClick  = MSE_CLICK_SINGLE;
-        }
-        mouseDrag   = MSE_DRAG_FALSE;
+        // handleSendDgrm prohibits mouseup event, simulate it:
+        handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
       }
       else if (ids[0] == ID_FRAME_HIST)
       {

@@ -85,9 +85,6 @@ class DiagramEditor : public Visualizer
     void clearLinkDOFAttr(const size_t& DOFIdx);
     void clearLinkAttrDOF(const size_t& attrIdx);
 
-    // -- helper functions ------------------------------------------
-    virtual void printMouseVariables();
-
     // -- get functions ---------------------------------------------
     Diagram* getDiagram();
     int getEditMode();
@@ -97,25 +94,8 @@ class DiagramEditor : public Visualizer
     void reGenText();
 
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    using Visualizer::handleKeyUpEvent;
-    using Visualizer::handleKeyDownEvent;
-    void handleKeyUpEvent(const int& keyCode, const int& specialKey);
-    void handleKeyDownEvent(const int& keyCode, const int& specialKey);
+    void handleMouseEvent(QMouseEvent* e);
+    void handleKeyEvent(QKeyEvent* e);
 
     void handleHits(const std::vector< int > &ids);
     void handleHitDiagramOnly();
@@ -201,6 +181,9 @@ class DiagramEditor : public Visualizer
       GLuint buffer[]);
 
     // -- data members ----------------------------------------------
+
+    QPoint m_lastMousePos;
+
     Diagram* diagram; // composition
     int editMode;
     size_t drgBegIdx1;

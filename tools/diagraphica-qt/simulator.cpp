@@ -312,76 +312,9 @@ void Simulator::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-void Simulator::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
+void Simulator::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Simulator::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseLftUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Simulator::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Simulator::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Simulator::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseRgtUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-void Simulator::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-{
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
@@ -392,7 +325,7 @@ void Simulator::handleMouseMotionEvent(
 
 void Simulator::handleMouseLeaveEvent()
 {
-  Visualizer::initMouse();
+  Visualizer::handleMouseLeaveEvent();
 
   if (!showMenu)
   {
@@ -415,29 +348,29 @@ void Simulator::handleMouseLeaveEvent()
 }
 
 
-void Simulator::handleKeyDownEvent(const int& keyCode)
+void Simulator::handleKeyEvent(QKeyEvent* e)
 {
-  if (m_animationTimer.isActive())
-  {
-    Visualizer::handleKeyDownEvent(keyCode);
+  Visualizer::handleKeyEvent(e);
 
-    if (keyCodeDown == WXK_UP  || keyCodeDown == WXK_NUMPAD_UP)
+  if (!m_animationTimer.isActive() && e->type() == QEvent::KeyPress)
+  {
+    if (m_lastKeyCode == WXK_UP  || m_lastKeyCode == WXK_NUMPAD_UP)
     {
       handleKeyUp();
     }
-    else if (keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT)
+    else if (m_lastKeyCode == WXK_RIGHT || m_lastKeyCode == WXK_NUMPAD_RIGHT)
     {
       handleKeyRgt();
     }
-    else if (keyCodeDown == WXK_DOWN || keyCodeDown == WXK_NUMPAD_DOWN)
+    else if (m_lastKeyCode == WXK_DOWN || m_lastKeyCode == WXK_NUMPAD_DOWN)
     {
       handleKeyDwn();
     }
-    else if (keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT)
+    else if (m_lastKeyCode == WXK_LEFT || m_lastKeyCode == WXK_NUMPAD_LEFT)
     {
       handleKeyLft();
     }
-    else if (keyCodeDown == WXK_ESCAPE)
+    else if (m_lastKeyCode == WXK_ESCAPE)
     {
       m_lastSelection = m_currentSelection;
 
@@ -463,16 +396,6 @@ void Simulator::handleKeyDownEvent(const int& keyCode)
     visualize(false);
   }
 }
-
-/*
-void Simulator::handleMarkFrameClust(
-    DiagramChooser* dc,
-    const int &idx )
-{
-    if ( dc == chsrCurr )
-        mediator->handleMarkCurrFrameClust( idx );
-}
-*/
 
 // -- utility functions ---------------------------------------------
 
@@ -1393,169 +1316,70 @@ void Simulator::handleHits(const vector< int > &ids)
   }
   else if (ids.size() > 1)
   {
-    if (ids[1] == ID_ICON_CLEAR &&
-        (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
+    if (m_lastMouseEvent.button() == Qt::LeftButton)
     {
-      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
+      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
       {
-        mediator->handleClearSim(this);
-      }
-    }
-    else if (ids[1] == ID_ICON_UP &&
-             (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-    {
-      handleKeyUp();
-    }
-    else if (ids[1] == ID_ICON_NEXT &&
-             (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-    {
-      handleKeyRgt();
-    }
-    else if (ids[1] == ID_ICON_DOWN &&
-             (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-    {
-      handleKeyDwn();
-    }
-    else if (ids[1] == ID_ICON_PREV &&
-             (mouseSide == MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-    {
-      handleKeyLft();
-    }
-    else if (ids[1] == ID_FRAME_CURR)
-    {
-      m_currentSelection     = ID_FRAME_CURR;
-      m_lastSelection = m_currentSelection;
-      m_currentSelectionIndex     = ids[2];
-
-      if (ids.size() > 3 &&
-          (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-      {
-        if (ids[3] == ID_DIAGRAM_MORE)
+        if (ids[1] == ID_ICON_CLEAR && (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0))
         {
-          showMenu = true;
-          mediator->handleSendDgrm(this, false, false, false, true, false);
-
-          // no mouseup event is generated reset manually
-          mouseButton = MSE_BUTTON_UP;
-          mouseSide   = MSE_SIDE_LFT;
-          if (mouseClick != MSE_CLICK_DOUBLE)
-          {
-            mouseClick  = MSE_CLICK_SINGLE;
-          }
-          mouseDrag   = MSE_DRAG_FALSE;
+          mediator->handleClearSim(this);
+        }
+        else if (ids[1] == ID_ICON_UP)
+        {
+          handleKeyUp();
+        }
+        else if (ids[1] == ID_ICON_NEXT)
+        {
+          handleKeyRgt();
+        }
+        else if (ids[1] == ID_ICON_DOWN)
+        {
+          handleKeyDwn();
+        }
+        else if (ids[1] == ID_ICON_PREV)
+        {
+          handleKeyLft();
         }
       }
-      else if (mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN)
+      else if (m_lastMouseEvent.type() == QEvent::MouseButtonDblClick)
       {
+        if (ids[1] == ID_FRAME_PREV)
+        {
+          updateFrameCurr(new Cluster(*m_previousFrames[ids[2]]), m_previousFramePositions[ids[2]]);
+        }
+        else if (ids[1] == ID_FRAME_NEXT)
+        {
+          updateFrameCurr(new Cluster(*m_nextFrames[ids[2]]), m_nextFramePositions[ids[2]]);
+        }
+      }
+    }
+
+    if (ids[1] == ID_FRAME_CURR || ids[1] == ID_FRAME_PREV || ids[1] == ID_FRAME_NEXT)
+    {
+      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress &&
+          ((m_lastMouseEvent.button() == Qt::LeftButton && ids.size() > 3 && ids[3] == ID_DIAGRAM_MORE) ||
+          m_lastMouseEvent.button() == Qt::RightButton))
+      {
+        m_currentSelection      = ids[1];
+
+        if (ids[1] == ID_FRAME_PREV) m_lastSelectionIndexPrevious = m_currentSelectionIndex;
+        if (ids[1] == ID_FRAME_NEXT) m_lastSelectionIndexNext = m_currentSelectionIndex;
+
+        m_lastSelection         = m_currentSelection;
+        m_currentSelectionIndex = ids[2];
+
         showMenu = true;
         mediator->handleSendDgrm(this, false, false, false, true, false);
 
-        // no mouseup event is generated reset manually
-        mouseButton = MSE_BUTTON_UP;
-        mouseSide   = MSE_SIDE_RGT;
-        if (mouseClick != MSE_CLICK_DOUBLE)
-        {
-          mouseClick  = MSE_CLICK_SINGLE;
-        }
-        mouseDrag   = MSE_DRAG_FALSE;
-      }
-    }
-    else if (ids[1] == ID_FRAME_PREV)
-    {
-      m_currentSelection         = ID_FRAME_PREV;
-      m_lastSelection     = m_currentSelection;
-      m_currentSelectionIndex         = ids[2];
-      m_lastSelectionIndexPrevious = m_currentSelectionIndex;
+        // handleSendDgrm prohibits mouseup event, simulate it:
+        handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), m_lastMouseEvent.button(), Qt::NoButton, m_lastMouseEvent.modifiers()));
 
-      if (ids.size() > 3 &&
-          (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-      {
-        if (ids[3] == ID_DIAGRAM_MORE)
-        {
-          showMenu = true;
-          mediator->handleSendDgrm(this, false, false, false, true, false);
-
-          // no mouseup event is generated reset manually
-          mouseButton = MSE_BUTTON_UP;
-          mouseSide   = MSE_SIDE_LFT;
-          if (mouseClick != MSE_CLICK_DOUBLE)
-          {
-            mouseClick  = MSE_CLICK_SINGLE;
-          }
-          mouseDrag   = MSE_DRAG_FALSE;
-        }
-      }
-      else if (mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN)
-      {
-        showMenu = true;
-        mediator->handleSendDgrm(this, false, false, false, true, false);
-
-        // no mouseup event is generated reset manually
-        mouseButton = MSE_BUTTON_UP;
-        mouseSide   = MSE_SIDE_RGT;
-        if (mouseClick != MSE_CLICK_DOUBLE)
-        {
-          mouseClick  = MSE_CLICK_SINGLE;
-        }
-        mouseDrag   = MSE_DRAG_FALSE;
-      }
-    }
-    else if (ids[1] == ID_FRAME_NEXT)
-    {
-      m_currentSelection         = ID_FRAME_NEXT;
-      m_lastSelection     = m_currentSelection;
-      m_currentSelectionIndex         = ids[2];
-      m_lastSelectionIndexNext = m_currentSelectionIndex;
-
-      if (ids.size() > 3 &&
-          (mouseSide = MSE_SIDE_LFT && mouseButton == MSE_BUTTON_DOWN))
-      {
-        if (ids[3] == ID_DIAGRAM_MORE)
-        {
-          showMenu = true;
-          mediator->handleSendDgrm(this, false, false, false, true, false);
-
-          // no mouseup event is generated reset manually
-          mouseButton = MSE_BUTTON_UP;
-          mouseSide   = MSE_SIDE_LFT;
-          if (mouseClick != MSE_CLICK_DOUBLE)
-          {
-            mouseClick  = MSE_CLICK_SINGLE;
-          }
-          mouseDrag   = MSE_DRAG_FALSE;
-        }
-      }
-      else if (mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN)
-      {
-        showMenu = true;
-        mediator->handleSendDgrm(this, false, false, false, true, false);
-
-        // no mouseup event is generated reset manually
-        mouseButton = MSE_BUTTON_UP;
-        mouseSide   = MSE_SIDE_RGT;
-        if (mouseClick != MSE_CLICK_DOUBLE)
-        {
-          mouseClick  = MSE_CLICK_SINGLE;
-        }
-        mouseDrag   = MSE_DRAG_FALSE;
       }
     }
     else if (ids[1] == ID_BUNDLE_LBL)
     {
       m_previousBundleFocusIndex = ids[2];
       m_nextBundleFocusIndex = ids[2];
-    }
-
-    if (mouseButton == MSE_BUTTON_DOWN && mouseClick == MSE_CLICK_DOUBLE)
-    {
-      if (ids[1] == ID_FRAME_PREV)
-        updateFrameCurr(
-          new Cluster(*m_previousFrames[ids[2]]),
-          m_previousFramePositions[ids[2]]);
-      else if (ids[1] == ID_FRAME_NEXT)
-        updateFrameCurr(
-          new Cluster(*m_nextFrames[ids[2]]),
-          m_nextFramePositions[ids[2]]);
     }
 
     markFrameClusts();

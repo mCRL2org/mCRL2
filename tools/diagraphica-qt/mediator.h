@@ -327,52 +327,11 @@ class Mediator
       const int& tgtY,
       const std::vector< int > &data) = 0;
 
-    virtual void handleMouseLftDownEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseLftUpEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseLftDClickEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseRgtDownEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseRgtUpEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseRgtDClickEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseMotionEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseWheelIncEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
-    virtual void handleMouseWheelDecEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y) = 0;
+    virtual void handleMouseEvent(GLCanvas* c, QMouseEvent* e) = 0;
+    virtual void handleWheelEvent(GLCanvas* c, QWheelEvent* e) = 0;
     virtual void handleMouseEnterEvent(GLCanvas* c) = 0;
     virtual void handleMouseLeaveEvent(GLCanvas* c) = 0;
-    virtual void handleKeyDownEvent(
-      GLCanvas* c,
-      const int& keyCode,
-      const int& specialKey) = 0;
-    virtual void handleKeyUpEvent(
-      GLCanvas* c,
-      const int& keyCode,
-      const int& specialKey) = 0;
+    virtual void handleKeyEvent(GLCanvas* c, QKeyEvent* e) = 0;
 
     // -- overloaded operators --------------------------------------
     virtual void operator<<(const std::string& msg) = 0;

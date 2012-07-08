@@ -28,7 +28,6 @@ CombnPlot::CombnPlot(
   minHgtHintPixBC =  4;
   maxWthHintPixBC = 10;
 
-  mouseInside   = false;
   mouseCombnIdx = NON_EXISTING;
 
   diagram        = NULL;
@@ -534,31 +533,15 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-void CombnPlot::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
+void CombnPlot::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
 }
-
-/*
-void CombnPlot::handleMouseEnterEvent()
-{
-    if ( posLftTop.size() > 0 )
-        mouseInside = true;
-}
-
-
-void CombnPlot::handleMouseLeaveEvent()
-{
-    mouseInside = false;
-}
-*/
 
 // -- utility data functions ----------------------------------------
 
@@ -662,7 +645,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
       // calc diagram position
       double xM, yM;
       double xD, yD;
-      canvas->getWorldCoords(xMouseCur, yMouseCur, xM, yM);
+      canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
 
       if (xM < 0)
       {

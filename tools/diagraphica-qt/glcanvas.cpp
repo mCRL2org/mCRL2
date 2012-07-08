@@ -443,120 +443,67 @@ void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/)
 {}
 
 
-void GLCanvas::onLftMouseDown(wxMouseEvent& event)
+void GLCanvas::onMouseEvent(wxMouseEvent& event)
 {
-  SetCurrent();
-  mediator->handleMouseLftDownEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
+  QEvent::Type type = QEvent::None;
+  if (event.Moving()) type = QEvent::MouseMove;
+  if (event.ButtonDown()) type = QEvent::MouseButtonPress;
+  if (event.ButtonUp()) type = QEvent::MouseButtonRelease;
+  if (event.ButtonDClick()) type = QEvent::MouseButtonDblClick;
 
-  event.Skip();
-}
+  Qt::MouseButton button = Qt::NoButton;
+  if (event.LeftDown()) button = Qt::LeftButton;
+  if (event.MiddleDown()) button = Qt::MiddleButton;
+  if (event.RightDown()) button = Qt::RightButton;
 
+  Qt::MouseButtons buttons = Qt::NoButton;
+  if (event.LeftIsDown()) buttons = buttons | Qt::LeftButton;
+  if (event.MiddleIsDown()) buttons = buttons | Qt::MiddleButton;
+  if (event.RightIsDown()) buttons = buttons | Qt::RightButton;
 
-void GLCanvas::onLftMouseUp(wxMouseEvent& event)
-{
-  SetCurrent();
-  mediator->handleMouseLftUpEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
+  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+  if (event.ShiftDown()) modifiers = modifiers | Qt::ShiftModifier;
+  if (event.ControlDown()) modifiers = modifiers | Qt::ControlModifier;
+  if (event.AltDown()) modifiers = modifiers | Qt::AltModifier;
+  if (event.MetaDown()) modifiers = modifiers | Qt::MetaModifier;
 
-  event.Skip();
-}
+  QMouseEvent mouseEvent(type, QPoint(event.GetX(), event.GetY()), button, buttons, modifiers);
 
-
-void GLCanvas::onLftMouseDClick(wxMouseEvent& event)
-{
-  SetCurrent();
-  mediator->handleMouseLftDClickEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
-}
-
-
-void GLCanvas::onRgtMouseDown(wxMouseEvent& event)
-{
-  SetCurrent();
-  mediator->handleMouseRgtDownEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
-}
-
-
-void GLCanvas::onRgtMouseUp(wxMouseEvent& event)
-{
-  SetCurrent();
-  mediator->handleMouseRgtUpEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
-}
-
-
-void GLCanvas::onRgtMouseDClick(wxMouseEvent& event)
-{
-  SetCurrent();
-  mediator->handleMouseRgtDClickEvent(
-    this,
-    event.GetX(),
-    event.GetY());
-  Refresh();
-}
-
-
-void GLCanvas::onMouseMotion(wxMouseEvent& event)
-{
-  if (handleMouseMotion == true)
+  if (buttons != Qt::NoButton || handleMouseMotion)
   {
     SetCurrent();
-    mediator->handleMouseMotionEvent(
-      this,
-      event.GetX(),
-      event.GetY());
-    Update();
+    mediator->handleMouseEvent(this, &mouseEvent);
     Refresh();
-  }
-  else
-  {
+
+    if (button == Qt::LeftButton && (type == QEvent::MouseButtonPress || type == QEvent::MouseButtonDblClick))
+    {
+      event.Skip();
+    }
+  } else {
     event.Skip();
   }
 }
 
-
-void GLCanvas::onMouseWheel(wxMouseEvent& event)
+void GLCanvas::onWheelEvent(wxMouseEvent& event)
 {
-  // this is current context
+
+  Qt::MouseButtons buttons = Qt::NoButton;
+  if (event.LeftIsDown()) buttons = buttons | Qt::LeftButton;
+  if (event.MiddleIsDown()) buttons = buttons | Qt::MiddleButton;
+  if (event.RightIsDown()) buttons = buttons | Qt::RightButton;
+
+  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+  if (event.ShiftDown()) modifiers = modifiers | Qt::ShiftModifier;
+  if (event.ControlDown()) modifiers = modifiers | Qt::ControlModifier;
+  if (event.AltDown()) modifiers = modifiers | Qt::AltModifier;
+  if (event.MetaDown()) modifiers = modifiers | Qt::MetaModifier;
+
+  QWheelEvent wheelEvent(QPoint(event.GetX(), event.GetY()), event.GetWheelRotation(), buttons, modifiers);
+
   SetCurrent();
-
-  int delta = event.GetWheelRotation();
-
-  if (delta > 0)
-  {
-    mediator->handleMouseWheelIncEvent(
-      this,
-      event.GetX(),
-      event.GetY());
-    Refresh();
-  }
-  else
-  {
-    mediator->handleMouseWheelDecEvent(
-      this,
-      event.GetX(),
-      event.GetY());
-    Refresh();
-  }
+  mediator->handleWheelEvent(this, &wheelEvent);
+  Refresh();
 }
-
 
 void GLCanvas:: onEnterMouse(wxMouseEvent& /*event*/)
 // This function simply sets the focus to this canvas. This allows key
@@ -564,7 +511,6 @@ void GLCanvas:: onEnterMouse(wxMouseEvent& /*event*/)
 {
   // this is current context
   SetCurrent();
-
   SetFocus();
   mediator->handleMouseEnterEvent(this);
   Refresh();
@@ -576,40 +522,43 @@ void GLCanvas:: onLeaveMouse(wxMouseEvent& /*event*/)
 {
   // this is current context
   SetCurrent();
-
   mediator->handleMouseLeaveEvent(this);
   Refresh();
 }
 
 
-void GLCanvas::onKeyDown(wxKeyEvent& event)
+void GLCanvas::onKeyEvent(wxKeyEvent& event, bool down)
 // In order to catch key events, this canvas must have the focus.
 // This is achieved by having 'Canvas::onEnterMouse()' first setting
 // the focus to this canvas.
 {
+  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+  if (event.ShiftDown()) modifiers = modifiers | Qt::ShiftModifier;
+  if (event.ControlDown()) modifiers = modifiers | Qt::ControlModifier;
+  if (event.AltDown()) modifiers = modifiers | Qt::AltModifier;
+  if (event.MetaDown()) modifiers = modifiers | Qt::MetaModifier;
+
+  QEvent::Type type = (down ? QEvent::KeyPress : QEvent::KeyRelease);
+
+  int key = event.GetKeyCode();
+
+  QKeyEvent keyEvent(type, key, modifiers);
+
   SetCurrent();
-  mediator->handleKeyDownEvent(
-    this,
-    event.GetKeyCode(),
-    event.GetModifiers());
+  mediator->handleKeyEvent(this, &keyEvent);
   event.Skip();
 
   Refresh();
 }
 
+void GLCanvas::onKeyDown(wxKeyEvent& event)
+{
+  onKeyEvent(event, true);
+}
 
 void GLCanvas::onKeyUp(wxKeyEvent& event)
-// In order to catch key events, this canvas must have the focus.
-// This is achieved by having 'Canvas::onEnterMouse()' first setting
-// the focus to this canvas.
 {
-  // this is current context
-  SetCurrent();
-
-  mediator->handleKeyUpEvent(this,event.GetKeyCode(), event.GetModifiers());
-  event.Skip();
-
-  Refresh();
+  onKeyEvent(event, false);
 }
 
 
@@ -624,14 +573,14 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_ERASE_BACKGROUND(GLCanvas::OnEraseBackground)
 
   // mouse interaction
-  EVT_LEFT_DOWN(GLCanvas::onLftMouseDown)
-  EVT_LEFT_UP(GLCanvas::onLftMouseUp)
-  EVT_LEFT_DCLICK(GLCanvas::onLftMouseDClick)
-  EVT_RIGHT_DOWN(GLCanvas::onRgtMouseDown)
-  EVT_RIGHT_UP(GLCanvas::onRgtMouseUp)
-  EVT_RIGHT_DCLICK(GLCanvas::onRgtMouseDClick)
-  EVT_MOTION(GLCanvas::onMouseMotion)
-  EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
+  EVT_LEFT_DOWN(GLCanvas::onMouseEvent)
+  EVT_LEFT_UP(GLCanvas::onMouseEvent)
+  EVT_LEFT_DCLICK(GLCanvas::onMouseEvent)
+  EVT_RIGHT_DOWN(GLCanvas::onMouseEvent)
+  EVT_RIGHT_UP(GLCanvas::onMouseEvent)
+  EVT_RIGHT_DCLICK(GLCanvas::onMouseEvent)
+  EVT_MOTION(GLCanvas::onMouseEvent)
+  EVT_MOUSEWHEEL(GLCanvas::onWheelEvent)
   EVT_ENTER_WINDOW(GLCanvas::onEnterMouse)
   EVT_LEAVE_WINDOW(GLCanvas::onLeaveMouse)
 

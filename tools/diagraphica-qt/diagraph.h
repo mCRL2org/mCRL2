@@ -349,52 +349,12 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
       const int& tgtY,
       const std::vector< int > &data);
 
-    void handleMouseLftDownEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseRgtDClickEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseWheelIncEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
-    void handleMouseWheelDecEvent(
-      GLCanvas* c,
-      const int& x,
-      const int& y);
+    void handleMouseEvent(GLCanvas* c, QMouseEvent* e);
+    void handleWheelEvent(GLCanvas* c, QWheelEvent* e);
     void handleMouseEnterEvent(GLCanvas* c);
     void handleMouseLeaveEvent(GLCanvas* c);
-    void handleKeyDownEvent(
-      GLCanvas* c,
-      const int& keyCode,
-      const int& specialKey);
-    void handleKeyUpEvent(
-      GLCanvas* c,
-      const int& keyCode,
-      const int& specialKey);
+    void handleKeyEvent(GLCanvas* c, QKeyEvent* e);
+
 
     // -- overloaded operators --------------------------------------
     void operator<<(const std::string& msg);
@@ -402,6 +362,9 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
     void operator<<(const size_t& msg);
 
   protected:
+
+    Visualizer* currentVisualizer(GLCanvas* c);
+
     // -- protected functions inhereted from Mediator ---------------
     void initColleagues();
     void initVisualizers();

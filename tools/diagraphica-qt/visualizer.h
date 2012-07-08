@@ -44,9 +44,6 @@ class Visualizer : public Colleague
       const double& g,
       const double& b);
 
-    // -- helper functions ------------------------------------------
-    virtual void printMouseVariables();
-
     // -- visualization functions -----------------------------------
     virtual void visualize(const bool& inSelectMode) = 0;
     virtual void setGeomChanged(const bool& flag);
@@ -58,37 +55,11 @@ class Visualizer : public Colleague
     // -- event handlers --------------------------------------------
     virtual void handleSizeEvent();
 
-    virtual void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtDClickEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseWheelIncEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseWheelDecEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseEnterEvent();
+    virtual void handleMouseEvent(QMouseEvent* e);
+    virtual void handleWheelEvent(QWheelEvent* /*e*/) { }
+    virtual void handleMouseEnterEvent() { }
     virtual void handleMouseLeaveEvent();
-    virtual void handleKeyDownEvent(const int& keyCode);
-    virtual void handleKeyUpEvent(const int& keyCode);
+    virtual void handleKeyEvent(QKeyEvent* e);
 
   protected:
     // -- protected utility functions -------------------------------
@@ -113,29 +84,12 @@ class Visualizer : public Colleague
       GLuint buffer[]) = 0;
 
     // -- mouse -----------------------------------------------------
-    enum
-    {
-      MSE_BUTTON_UP,
-      MSE_BUTTON_DOWN,
-      MSE_SIDE_LFT,
-      MSE_SIDE_MID,
-      MSE_SIDE_RGT,
-      MSE_CLICK_SINGLE,
-      MSE_CLICK_DOUBLE,
-      MSE_DRAG_TRUE,
-      MSE_DRAG_FALSE
-    };
-    int mouseButton;
-    int mouseSide;
-    int mouseClick;
-    int mouseDrag;
-    double xMouseDragBeg;
-    double yMouseDragBeg;
-    double xMouseCur;
-    double yMouseCur;
-    double xMousePrev;
-    double yMousePrev;
-    int keyCodeDown;
+
+    QMouseEvent m_lastMouseEvent;
+    bool m_mouseDrag;
+    QPoint m_mouseDragStart;
+
+    int m_lastKeyCode;
 
     bool showMenu;
 
