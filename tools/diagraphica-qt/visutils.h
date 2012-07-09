@@ -93,6 +93,7 @@ class VisUtils
     static void setLineWidth(const double& px);
 
     // -- color -----------------------------------------------------
+    static void setValidColor(QColor color) { if (color.isValid()) setColor(color); }
     static void setColor(QColor color) { setColor(color, color.alphaF()); }
     static void setColor(QColor color, double alpha) { glColor4f(color.redF(), color.greenF(), color.blueF(), alpha); }
 

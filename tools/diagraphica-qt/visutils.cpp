@@ -410,10 +410,7 @@ void VisUtils::drawArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      if (colBeg.isValid() && colEnd.isValid())
-      {
-        setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
-      }
+      setValidColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -424,7 +421,7 @@ void VisUtils::drawArc(
   {
     for (int i = slices; i >= 0; --i)
     {
-      if (colBeg.isValid() && colEnd.isValid()) setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      setValidColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -461,7 +458,7 @@ void VisUtils::fillArc(
   {
     for (int i = 0; i <= slices; ++i)
     {
-      if (colBeg.isValid() && colEnd.isValid()) setColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
+      setValidColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
       // outside
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
@@ -484,11 +481,11 @@ void VisUtils::drawTriangle(
   QColor col1, QColor col2, QColor col3)
 {
   glBegin(GL_LINE_LOOP);
-  if (col1.isValid()) setColor(col1);
+  setValidColor(col1);
   glVertex2f(x1, y1);
-  if (col2.isValid()) setColor(col2);
+  setValidColor(col2);
   glVertex2f(x2, y2);
-  if (col3.isValid()) setColor(col3);
+  setValidColor(col3);
   glVertex2f(x3, y3);
   glEnd();
 }
@@ -500,11 +497,11 @@ void VisUtils::fillTriangle(
     QColor col1, QColor col2, QColor col3)
 {
   glBegin(GL_POLYGON);
-  if (col1.isValid()) setColor(col1);
+  setValidColor(col1);
   glVertex2f(x1, y1);
-  if (col2.isValid()) setColor(col2);
+  setValidColor(col2);
   glVertex2f(x2, y2);
-  if (col3.isValid()) setColor(col3);
+  setValidColor(col3);
   glVertex2f(x3, y3);
   glEnd();
 }
@@ -517,13 +514,13 @@ void VisUtils::drawRect(
   QColor colBotLft,   QColor colBotRgt)
 {
   glBegin(GL_LINE_LOOP);
-  if (colTopLft.isValid()) setColor(colTopLft);
+  setValidColor(colTopLft);
   glVertex2f(xLft, yTop);
-  if (colBotLft.isValid()) setColor(colBotLft);
+  setValidColor(colBotLft);
   glVertex2f(xLft, yBot);
-  if (colBotRgt.isValid()) setColor(colBotRgt);
+  setValidColor(colBotRgt);
   glVertex2f(xRgt, yBot);
-  if (colTopRgt.isValid()) setColor(colTopRgt);
+  setValidColor(colTopRgt);
   glVertex2f(xRgt, yTop);
   glEnd();
 }
@@ -536,13 +533,13 @@ void VisUtils::fillRect(
   QColor colBotLft,   QColor colBotRgt)
 {
   glBegin(GL_POLYGON);
-  setColor(colTopLft);
+  setValidColor(colTopLft);
   glVertex2f(xLft, yTop);
-  setColor(colBotLft);
+  setValidColor(colBotLft);
   glVertex2f(xLft, yBot);
-  setColor(colBotRgt);
+  setValidColor(colBotRgt);
   glVertex2f(xRgt, yBot);
-  setColor(colTopRgt);
+  setValidColor(colTopRgt);
   glVertex2f(xRgt, yTop);
   glEnd();
 }
@@ -723,15 +720,15 @@ void VisUtils::drawArrow(
   glRotatef(angl, 0.0, 0.0, 1.0);
 
   glBegin(GL_LINE_LOOP);
-  if (cFr.isValid()) setColor(cFr);
+  setValidColor(cFr);
   glVertex2f(0.0, 0.5*wBase);
   glVertex2f(0.0, -0.5*wBase);
-  if (cJnc.isValid()) setColor(cJnc);
+  setValidColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wBase);
   glVertex2f(lenArw-lHead, -0.5*wHead);
-  if (cTo.isValid()) setColor(cTo);
+  setValidColor(cTo);
   glVertex2f(lenArw, 0.0);
-  if (cJnc.isValid()) setColor(cJnc);
+  setValidColor(cJnc);
   glVertex2f(lenArw-lHead,  0.5*wHead);
   glVertex2f(lenArw-lHead,  0.5*wBase);
   glEnd();
@@ -795,21 +792,21 @@ void VisUtils::fillArrow(
 
   // base
   glBegin(GL_POLYGON);
-  if (cFr.isValid()) setColor(cFr);
+  setValidColor(cFr);
   glVertex2f(0.0, 0.5*wBase);
   glVertex2f(0.0, -0.5*wBase);
-  if (cJnc.isValid()) setColor(cJnc);
+  setValidColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wBase);
   glVertex2f(lenArw-lHead,  0.5*wBase);
   glEnd();
 
   // head
   glBegin(GL_POLYGON);
-  if (cJnc.isValid()) setColor(cJnc);
+  setValidColor(cJnc);
   glVertex2f(lenArw-lHead, -0.5*wHead);
-  if (cTo.isValid()) setColor(cTo);
+  setValidColor(cTo);
   glVertex2f(lenArw, 0.0);
-  if (cJnc.isValid()) setColor(cJnc);
+  setValidColor(cJnc);
   glVertex2f(lenArw-lHead,  0.5*wHead);
   glEnd();
 
