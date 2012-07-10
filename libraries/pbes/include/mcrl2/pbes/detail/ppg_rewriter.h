@@ -381,7 +381,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
               new_disjuncts.push_back(*it);
             }
           }
-          pbes_expression new_disj = pbes_expr::join_and(new_disjuncts.begin(), new_disjuncts.end());
+          pbes_expression new_disj = pbes_expr::join_or(new_disjuncts.begin(), new_disjuncts.end());
           pbes_expression expr = split_here(new_disj);
           if (simple_disjuncts.size() > 0)
           {
