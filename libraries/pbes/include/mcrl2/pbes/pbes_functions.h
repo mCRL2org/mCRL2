@@ -20,6 +20,68 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
+/// \brief Visitor for printing the root node of a PBES.
+struct print_brief_traverser: public pbes_expression_traverser<print_brief_traverser>
+{
+  typedef pbes_expression_traverser<print_brief_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  std::string result;
+
+  print_brief_traverser()
+    : result("")
+  {}
+
+  void operator()(const not_& /* x */)
+  {
+    result = "not";
+  }
+
+  void operator()(const imp& /* x */)
+  {
+    result = "imp";
+  }
+
+  void operator()(const forall& /* x */)
+  {
+    result = "forall";
+  }
+
+  void operator()(const exists& /* x */)
+  {
+    result = "exists";
+  }
+
+  void operator()(const propositional_variable_instantiation& x)
+  {
+    result = "propvar " + std::string(x.name());
+  }
+
+  void operator()(const pbes_equation& x)
+  {
+    result = "equation " + std::string(x.variable().name());
+  }
+};
+/// \endcond
+
+/// \brief Returns a string representation of the root node of a PBES.
+/// \param x a PBES object
+template <typename T>
+std::string print_brief(const T& x)
+{
+  print_brief_traverser f;
+  f(x);
+  return f.result;
+}
+
+
+/// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pbes object is a simple pbes expression.
 struct is_simple_expression_traverser: public pbes_expression_traverser<is_simple_expression_traverser>
 {
@@ -82,12 +144,19 @@ namespace pbes_expr {
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr)
+atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
   atermpp::vector<pbes_expression> result;
 
-  utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
+  if (split_simple_expr)
+  {
+    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_or, left, right);
+  }
+  else
+  {
+    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
+  }
 
   return result;
 }
@@ -99,12 +168,19 @@ atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr)
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_conjuncts(const pbes_expression& expr)
+atermpp::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
   atermpp::vector<pbes_expression> result;
 
-  utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
+  if (split_simple_expr)
+  {
+    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_and, left, right);
+  }
+  else
+  {
+    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
+  }
 
   return result;
 }

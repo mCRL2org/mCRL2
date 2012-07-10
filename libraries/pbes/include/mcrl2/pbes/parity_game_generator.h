@@ -383,6 +383,10 @@ class parity_game_generator
       {
         return PGAME_OR;
       }
+      else if (tr::is_data(phi))
+      {
+        return PGAME_OR;
+      }
       throw(std::runtime_error("Error in parity_game_generator: unexpected operation " + print(phi)));
     }
 
