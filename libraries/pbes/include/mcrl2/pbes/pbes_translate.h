@@ -275,6 +275,150 @@ data::variable_list Par(const core::identifier_string& X, const data::variable_l
   return f.top();
 }
 
+pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x);
+
+template <typename Derived>
+struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
+{
+  typedef action_formulas::action_formula_traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  const lps::multi_action& a;
+  atermpp::vector<pbes_expression> result_stack;
+
+  sat_traverser(const lps::multi_action& a_)
+    : a(a_)
+  {}
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  void push(const pbes_expression& x)
+  {
+    result_stack.push_back(x);
+  }
+
+  const pbes_expression& top() const
+  {
+    return result_stack.back();
+  }
+
+  pbes_expression pop()
+  {
+    pbes_expression result = top();
+    result_stack.pop_back();
+    return result;
+  }
+
+  void leave(const data::data_expression& x)
+  {
+    push(x);
+  }
+
+  void leave(const lps::multi_action& x)
+  {
+    push(lps::equal_multi_actions(a, x));
+  }
+
+  void leave(const action_formulas::true_& x)
+  {
+    push(true_());
+  }
+
+  void leave(const action_formulas::false_& x)
+  {
+    push(false_());
+  }
+
+  void operator()(const action_formulas::not_& x)
+  {
+    push(not_(Sat(a, x.operand())));
+  }
+
+  void leave(const action_formulas::and_& x)
+  {
+    pbes_expression right = pop();
+    pbes_expression left = pop();
+    push(and_(left, right));
+  }
+
+  void leave(const action_formulas::or_& x)
+  {
+    pbes_expression right = pop();
+    pbes_expression left = pop();
+    push(or_(left, right));
+  }
+
+  void leave(const action_formulas::imp& x)
+  {
+    pbes_expression right = pop();
+    pbes_expression left = pop();
+    push(imp(left, right));
+  }
+
+  void operator()(const action_formulas::forall& x)
+  {
+    data::set_identifier_generator id_generator;
+    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
+    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
+    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    action_formulas::action_formula alpha = x.body();
+    push(forall(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
+  }
+
+  void operator()(const action_formulas::exists& x)
+  {
+    data::set_identifier_generator id_generator;
+    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
+    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
+    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    action_formulas::action_formula alpha = x.body();
+    push(exists(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
+  }
+
+  void operator()(const action_formulas::at& x)
+  {
+    data::data_expression t = a.time();
+    action_formulas::action_formula alpha = x.operand();
+    data::data_expression u = x.time_stamp();
+    push(and_(Sat(a, alpha), data::equal_to(t, u)));
+  }
+};
+
+template <template <class> class Traverser>
+struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
+{
+  typedef Traverser<apply_sat_traverser<Traverser> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::top;
+
+  apply_sat_traverser(const lps::multi_action& a)
+    : super(a)
+  {}
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+inline
+pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x)
+{
+  apply_sat_traverser<sat_traverser> f(a);
+  f(x);
+  return f.top();
+}
+
 } // namespace detail
 /// \endcond
 
@@ -312,87 +456,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \return The function result
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
-#ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << lps::pp(x) << " " << action_formulas::pp(b) << std::flush;
-      lps2pbes_increase_indent();
-#endif
-      using namespace action_formulas::detail::accessors;
-      namespace d = data;
-      namespace z = pbes_expr_optimized;
-      namespace a = action_formulas;
-
-      pbes_expression result;
-
-      if (lps::is_multi_action(b))
-      {
-        result = lps::equal_multi_actions(x, lps::multi_action(mult_params(b)));
-      }
-      else if (a::is_true(b))
-      {
-        result = z::true_();
-      }
-      else if (a::is_false(b))
-      {
-        result = z::false_();
-      }
-      else if (data::is_data_expression(b))
-      {
-        result = b;
-      }
-      else if (a::is_at(b))
-      {
-        data::data_expression t = x.time();
-        action_formulas::action_formula alpha = arg(b);
-        data::data_expression t1 = time(b);
-        result = z::and_(sat_top(x, alpha), d::equal_to(t, t1));
-      }
-      else if (a::is_not(b))
-      {
-        result = z::not_(sat_top(x, arg(b)));
-      }
-      else if (a::is_and(b))
-      {
-        result = z::and_(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_or(b))
-      {
-        result = z::or_(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_imp(b))
-      {
-        result = z::imp(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_forall(b))
-      {
-        data::variable_list v = var(b);
-        assert(v.size() > 0);
-        action_formulas::action_formula alpha = arg(b);
-        data::set_identifier_generator id_generator;
-        id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
-        id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
-        data::variable_list b = pbes_system::detail::make_fresh_variables(v, id_generator, false);
-        result = z::forall(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
-      }
-      else if (a::is_exists(b))
-      {
-        data::variable_list v = var(b);
-        assert(v.size() > 0);
-        action_formulas::action_formula alpha = arg(b);
-        data::set_identifier_generator id_generator;
-        id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
-        id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
-        data::variable_list b = pbes_system::detail::make_fresh_variables(v, id_generator, false);
-        result = z::exists(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
-      }
-      else
-      {
-        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + action_formulas::pp(b));
-      }
-#ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pbes_system::pp(result) << std::flush;
-#endif
-      return result;
+      return detail::Sat(x, b);
     }
 
     /// \brief The \p RHS function of the translation
@@ -931,91 +995,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
     /// \return The function result
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
-#ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat>" << lps::pp(x) << " " << action_formulas::pp(b) << std::flush;
-      lps2pbes_increase_indent();
-#endif
-      using namespace action_formulas::detail::accessors;
-      namespace p = pbes_expr_optimized;
-      namespace a = action_formulas;
-
-      pbes_expression result;
-
-      if (lps::is_multi_action(b))
-      {
-        result = lps::equal_multi_actions(x, lps::multi_action(mult_params(b)));
-      }
-      else if (a::is_true(b))
-      {
-        result = p::true_();
-      }
-      else if (a::is_false(b))
-      {
-        result = p::false_();
-      }
-      else if (data::is_data_expression(b))
-      {
-        result = b;
-      }
-      else if (a::is_not(b))
-      {
-        result = p::not_(sat_top(x, arg(b)));
-      }
-      else if (a::is_and(b))
-      {
-        result = p::and_(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_or(b))
-      {
-        result = p::or_(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_imp(b))
-      {
-        result = p::imp(sat_top(x, left(b)), sat_top(x, right(b)));
-      }
-      else if (a::is_forall(b))
-      {
-        data::variable_list v = var(b);
-        action_formulas::action_formula alpha = arg(b);
-        if (v.size() > 0)
-        {
-          data::set_identifier_generator id_generator;
-          id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
-          id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
-          data::variable_list y = pbes_system::detail::make_fresh_variables(v, id_generator, false);
-          result = p::forall(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
-        }
-        else
-        {
-          result = sat_top(x, alpha);
-        }
-      }
-      else if (a::is_exists(b))
-      {
-        data::variable_list v = var(b);
-        action_formulas::action_formula alpha = arg(b);
-        if (v.size() > 0)
-        {
-          data::set_identifier_generator id_generator;
-          id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(x)));
-          id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(b)));
-          data::variable_list y = pbes_system::detail::make_fresh_variables(v, id_generator, false);
-          result = p::exists(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
-        }
-        else
-        {
-          result = sat_top(x, alpha);
-        }
-      }
-      else
-      {
-        throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + action_formulas::pp(b));
-      }
-#ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pbes_system::pp(result) << std::flush;
-#endif
-      return result;
+      return detail::Sat(x, b);
     }
 };
 
