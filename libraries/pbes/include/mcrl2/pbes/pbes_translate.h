@@ -32,6 +32,7 @@
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
 #include "mcrl2/modal_formula/detail/action_formula_accessors.h"
@@ -115,6 +116,165 @@ data::variable_list make_fresh_variables(const data::variable_list& variables, d
   return atermpp::convert<data::variable_list>(result);
 }
 
+data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x);
+
+struct par_traverser: public state_formulas::state_formula_traverser<par_traverser>
+{
+  typedef state_formulas::state_formula_traverser<par_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  const core::identifier_string& X;
+  const data::variable_list& l;
+  atermpp::vector<data::variable_list> result_stack;
+
+  par_traverser(const core::identifier_string& X_, const data::variable_list& l_)
+    : X(X_), l(l_)
+  {}
+
+  void push(const data::variable_list& x)
+  {
+    result_stack.push_back(x);
+  }
+
+  const data::variable_list& top() const
+  {
+    return result_stack.back();
+  }
+
+  data::variable_list pop()
+  {
+    data::variable_list result = top();
+    result_stack.pop_back();
+    return result;
+  }
+
+  // join the two topmost elements on the stack
+  void join()
+  {
+    data::variable_list right = pop();
+    data::variable_list left = pop();
+    push(left + right);
+  }
+
+  void leave(const data::data_expression& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::true_& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::false_& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::not_& x)
+  {
+    // skip
+  }
+
+  void leave(const state_formulas::and_& x)
+  {
+    join();
+  }
+
+  void leave(const state_formulas::or_& x)
+  {
+    join();
+  }
+
+  void leave(const state_formulas::imp& x)
+  {
+    join();
+  }
+
+  void operator()(const state_formulas::forall& x)
+  {
+    push(Par(X, l + x.variables(), x.body()));
+  }
+
+  void operator()(const state_formulas::exists& x)
+  {
+    push(Par(X, l + x.variables(), x.body()));
+  }
+
+  void leave(const state_formulas::must& x)
+  {
+    // skip
+  }
+
+  void leave(const state_formulas::may& x)
+  {
+    // skip
+  }
+
+  void leave(const state_formulas::yaled& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::yaled_timed& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::delay& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::delay_timed& x)
+  {
+    push(data::variable_list());
+  }
+
+  void leave(const state_formulas::variable& x)
+  {
+    push(data::variable_list());
+  }
+
+  void operator()(const state_formulas::nu& x)
+  {
+    if (x.name() == X)
+    {
+      push(l);
+    }
+    else
+    {
+      push(Par(X, l + data::left_hand_sides(x.assignments()), x.operand()));
+    }
+  }
+
+  void operator()(const state_formulas::mu& x)
+  {
+    if (x.name() == X)
+    {
+      push(l);
+    }
+    else
+    {
+      push(Par(X, l + data::left_hand_sides(x.assignments()), x.operand()));
+    }
+  }
+};
+
+inline
+data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x)
+{
+  par_traverser f(X, l);
+  f(x);
+  return f.top();
+}
+
 } // namespace detail
 /// \endcond
 
@@ -127,92 +287,12 @@ class pbes_translate_algorithm
     /// \param l A sequence of data variables
     /// \param f A modal formula
     /// \return The function result
-    data::variable_list Par(core::identifier_string x, data::variable_list l, state_formulas::state_formula f)
+    data::variable_list Par(const core::identifier_string& x, const data::variable_list& l, const state_formulas::state_formula& f)
     {
-      using namespace state_formulas::detail::accessors;
-      namespace p = pbes_system;
-      namespace s = state_formulas;
-      using atermpp::detail::operator+;
-
-      data::variable_list result;
-
-      if (data::is_data_expression(f))
-      {
-        // result = data::variable_list();
-      }
-      else if (s::is_true(f))
-      {
-        // result = data::variable_list();
-      }
-      else if (s::is_false(f))
-      {
-        // result = data::variable_list();
-      }
-      else if (s::is_not(f))
-      {
-        result = Par(x, l, arg(f));
-      }
-      else if (s::is_and(f))
-      {
-        result = Par(x, l, left(f)) + Par(x, l, right(f));
-      }
-      else if (s::is_or(f))
-      {
-        result = Par(x, l, left(f)) + Par(x, l, right(f));
-      }
-      else if (s::is_imp(f))
-      {
-        result = Par(x, l, left(f)) + Par(x, l, right(f));
-      }
-      else if (s::is_must(f))
-      {
-        result = Par(x, l, arg(f));
-      }
-      else if (s::is_may(f))
-      {
-        result = Par(x, l, arg(f));
-      }
-      else if (s::is_forall(f))
-      {
-        result = Par(x, l + var(f), arg(f));
-      }
-      else if (s::is_exists(f))
-      {
-        result = Par(x, l + var(f), arg(f));
-      }
-      else if (s::is_variable(f))
-      {
-        result = data::variable_list();
-      }
-      else if (s::is_mu(f) || (s::is_nu(f)))
-      {
-        if (name(f) == x)
-        {
-          result = l;
-        }
-        else
-        {
-          data::variable_list xf = detail::mu_variables(f);
-          state_formulas::state_formula g = atermpp::arg3(f);
-          result = Par(x, l + xf, g);
-        }
-      }
-      else if (s::is_yaled_timed(f))
-      {
-        result = data::variable_list();
-      }
-      else if (s::is_delay_timed(f))
-      {
-        result = data::variable_list();
-      }
-      else
-      {
-        assert(false);
-      }
 #ifdef MCRL2_PBES_TRANSLATE_PAR_DEBUG
       std::cerr << "\n<Par>(" << core::pp(x) << ", " << data::pp(l) << ", " << state_formulas::pp(f) << ") = " << data::pp(result) << std::endl;
 #endif
-      return result;
+      return detail::Par(x, l, f);
     }
 
   public:
