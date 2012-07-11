@@ -20,7 +20,7 @@ function platformbar()
   btns = getbuttons($(this));
   for (var i = 0; i < btns.length; ++i)
   {
-    var button = document.createElement('img');
+    var button = document.createElement('div');
     button.className = 'platform-button ' + btns[i];
     result.appendChild(button);
   }

@@ -80,12 +80,15 @@ div.platform-buttons {
   margin-bottom:0px;
   padding:5px;
   padding-bottom:0px;
+  height: 45px;
 }
 .platform-button {
-  padding: 19px;
+  display: block;
+  float: left;
+  padding: 0px;
   margin: 0px;
-  height: 0px;
-  width: 0px;
+  height: 38px;
+  width: 38px;
   opacity: 0.3;
   filter: alpha(opacity=30); /* For IE8 and earlier */
 }
