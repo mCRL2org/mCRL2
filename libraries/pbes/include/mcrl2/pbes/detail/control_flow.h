@@ -19,9 +19,12 @@
 #include <sstream>
 #include <vector>
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/pfnf_pbes.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
