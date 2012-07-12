@@ -30,7 +30,7 @@
 #include "glcanvas.h"
 #include "graph.h"
 #include "popupframe.h"
-#include "settingsframe.h"
+#include "settingsdialog.h"
 #include "utils.h"
 
 class Frame : public wxFrame, public Colleague
@@ -39,6 +39,7 @@ class Frame : public wxFrame, public Colleague
     // -- constructors and destructors ------------------------------
     Frame(
       Mediator* m,
+      Settings* s,
       wxString title);
     virtual ~Frame();
 
@@ -192,8 +193,6 @@ class Frame : public wxFrame, public Colleague
 
 //    void initAboutFrameOld();   // 1
 
-    void initFrameSettings();
-
     void initFrameDOF();
     void initFrameNote();
     void initFrameTextSize();
@@ -286,7 +285,7 @@ class Frame : public wxFrame, public Colleague
     wxTextCtrl*       textCtrl;
 
     // -- settings frame --------------------------------------------
-    SettingsFrame*    frameSettings;
+    SettingsDialog*   settingsDialog;
 
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;

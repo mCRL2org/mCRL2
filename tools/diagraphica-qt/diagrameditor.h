@@ -13,6 +13,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QEvent>
 
 #include <cstddef>
 #include <cstdlib>

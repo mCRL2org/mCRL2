@@ -8,11 +8,18 @@
 //
 /// \file ./diagrameditor.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "diagrameditor.h"
 #include <iostream>
 #include <sstream>
+
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
+#ifdef KeyRelease
+#undef KeyRelease
+#endif
+
 using namespace std;
 
 
@@ -1283,7 +1290,8 @@ void DiagramEditor::handleHitDiagramOnly()
       xPaste,    yPaste);
 
     //focus change prohibits mouseup event, simulate it:
-    handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+    QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+    handleMouseEvent(&event);
 
     bool pasteFlag = false;
     int checkedItem = -1;
@@ -1406,7 +1414,8 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
         s->setModeEdit();
 
         //focus change prohibits mouseup event, simulate it:
-        handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+        QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+        handleMouseEvent(&event);
 
         displShapeEdtOptions(s);
       } // side
@@ -1464,7 +1473,8 @@ void DiagramEditor::handleHitShapeHandle(
                 diagram->getShape(i)->setModeNormal();*/
 
         //focus change prohibits mouseup event, simulate it:
-        handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+        QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+        handleMouseEvent(&event);
 
         displShapeEdtOptions(s);
       }

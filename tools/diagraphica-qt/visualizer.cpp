@@ -15,6 +15,17 @@
 #include "visualizer.h"
 
 
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
+#ifdef KeyRelease
+#undef KeyRelease
+#endif
+#ifdef None
+#undef None
+#endif
+
 // -- constructors and destructor -----------------------------------
 
 

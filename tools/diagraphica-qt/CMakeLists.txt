@@ -23,12 +23,14 @@ qt4_add_resources(DIAGRAPHICA_RC_FILES ${DIAGRAPHICA_RCC_SRCS})
 
 set(DIAGRAPHICA_UI_FILES
 #  mainwindow.ui
+  settingsdialog.ui
 )
-
 qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 
 set(DIAGRAPHICA_MOC_HEADERS
+  settingsdialog.h
   simulator.h
+  visualizer.h
 )
 qt4_wrap_cpp(DIAGRAPHICA_MOC_SOURCES ${DIAGRAPHICA_MOC_HEADERS})
 
@@ -60,7 +62,7 @@ set(DIAGRAPHICA_SRC_FILES
   opacitychooser.cpp
   parser.cpp
   popupframe.cpp
-  settingsframe.cpp
+  settingsdialog.cpp
   shape.cpp
   simulator.cpp
   timeseries.cpp
@@ -92,6 +94,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities_wx
 )
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

@@ -16,14 +16,12 @@
 using namespace std;
 
 
-// -- static variables ----------------------------------------------
+static const int hgtHstPix = 80;
 
-
-QColor Examiner::colClr = Qt::white;
-QColor Examiner::colTxt = Qt::black;
-int Examiner::szeTxt = 12;
-QColor Examiner::colBdl = QColor(0, 0, 0, 76);
-int Examiner::hgtHstPix = 80;
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
 
 
 // -- constructors and destructor -----------------------------------
@@ -31,9 +29,11 @@ int Examiner::hgtHstPix = 80;
 
 Examiner::Examiner(
   Mediator* m,
+  Settings* s,
   Graph* g,
   GLCanvas* c)
-  : Visualizer(m, g, c)
+  : Visualizer(m, g, c),
+    settings(s)
 {
   diagram = NULL;
   frame = NULL;
@@ -41,6 +41,10 @@ Examiner::Examiner(
 
   focusFrameIdx = -1;
   offset = 0;
+
+  connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
 }
 
 
@@ -487,7 +491,8 @@ void Examiner::handleHits(const vector< int > &ids)
           }
 
           // handleSendDgrm prohibits mouseup event, simulate it:
-          handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+          QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+          handleMouseEvent(&event);
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -545,7 +550,8 @@ void Examiner::handleHits(const vector< int > &ids)
         }
 
         // handleSendDgrm prohibits mouseup event, simulate it:
-        handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+        QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+        handleMouseEvent(&event);
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
@@ -735,7 +741,7 @@ void Examiner::processHits(
 
 void Examiner::clear()
 {
-  VisUtils::clear(colClr);
+  VisUtils::clear(settings->backgroundColor.value());
 }
 
 
@@ -1016,7 +1022,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     VisUtils::disableLineAntiAlias();
 
     // border
-    VisUtils::setColor(colClr);
+    VisUtils::setColor(settings->backgroundColor.value());
     VisUtils::fillRect(
       -0.5*wth,               -0.5*wth + 12.0*pix,
       -0.5*hgt + itvHist*pix, -0.5*hgt);

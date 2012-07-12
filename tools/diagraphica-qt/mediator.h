@@ -272,45 +272,6 @@ class Mediator
     virtual void handleUnshowFrame() = 0;
 
     // -- visualization std::settings ------------------------------------
-    virtual void setSettingsGeneral(
-      const wxColour& colClr,
-      const wxColour& colTxt,
-      const int& szeTxt,
-      const double& itvAnim) = 0;
-    virtual void setSettingsClustTree(
-      const bool& show,
-      const bool& annotate,
-      const int& colMap) = 0;
-    virtual void setSettingsBarTree(
-      const bool& show,
-      const double& magn) = 0;
-    virtual void setSettingsSimulator(const int& blendType) = 0;
-    virtual void setSettingsTrace(const bool& useShading) = 0;
-    virtual void setSettingsArcDiagram(
-      const bool& showNodes,
-      const bool& showArcs,
-      const wxColour& colArcs,
-      const double& trspArcs) = 0;
-
-    virtual void getSettingsGeneral(
-      wxColour& colClr,
-      wxColour& colTxt,
-      int& szeTxt,
-      double& itvAnim) = 0;
-    virtual void getSettingsClustTree(
-      bool& show,
-      bool& annotate,
-      int& colMap) = 0;
-    virtual void getSettingsBarTree(
-      bool& show,
-      double& magn) = 0;
-    virtual void getSettingsSimulator(int& blendType) = 0;
-    virtual void getSettingsTrace(bool& useShading) = 0;
-    virtual void getSettingsArcDiagram(
-      bool& showNodes,
-      bool& showArcs,
-      wxColour& colArcs,
-      double& trspArcs) = 0;
     virtual void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom) = 0;
 
     // -- visualization ---------------------------------------------

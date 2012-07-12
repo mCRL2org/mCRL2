@@ -28,8 +28,10 @@
 #include "graph.h"
 #include "visutils.h"
 
-class Visualizer : public Colleague
+class Visualizer : public QObject, public Colleague
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Visualizer(
@@ -60,6 +62,9 @@ class Visualizer : public Colleague
     virtual void handleMouseEnterEvent() { }
     virtual void handleMouseLeaveEvent();
     virtual void handleKeyEvent(QKeyEvent* e);
+
+  public slots:
+    void update() { canvas->Refresh(); }
 
   protected:
     // -- protected utility functions -------------------------------

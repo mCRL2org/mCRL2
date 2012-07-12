@@ -25,6 +25,17 @@ int attribList[11] =
 };
 
 
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
+#ifdef KeyRelease
+#undef KeyRelease
+#endif
+#ifdef None
+#undef None
+#endif
+
 // -- constructors and desctructor ----------------------------------
 
 
@@ -453,12 +464,12 @@ void GLCanvas::onMouseEvent(wxMouseEvent& event)
 
   Qt::MouseButton button = Qt::NoButton;
   if (event.LeftDown()) button = Qt::LeftButton;
-  if (event.MiddleDown()) button = Qt::MiddleButton;
+  if (event.MiddleDown()) button = Qt::MidButton;
   if (event.RightDown()) button = Qt::RightButton;
 
   Qt::MouseButtons buttons = Qt::NoButton;
   if (event.LeftIsDown()) buttons = buttons | Qt::LeftButton;
-  if (event.MiddleIsDown()) buttons = buttons | Qt::MiddleButton;
+  if (event.MiddleIsDown()) buttons = buttons | Qt::MidButton;
   if (event.RightIsDown()) buttons = buttons | Qt::RightButton;
 
   Qt::KeyboardModifiers modifiers = Qt::NoModifier;
@@ -489,7 +500,7 @@ void GLCanvas::onWheelEvent(wxMouseEvent& event)
 
   Qt::MouseButtons buttons = Qt::NoButton;
   if (event.LeftIsDown()) buttons = buttons | Qt::LeftButton;
-  if (event.MiddleIsDown()) buttons = buttons | Qt::MiddleButton;
+  if (event.MiddleIsDown()) buttons = buttons | Qt::MidButton;
   if (event.RightIsDown()) buttons = buttons | Qt::RightButton;
 
   Qt::KeyboardModifiers modifiers = Qt::NoModifier;

@@ -26,6 +26,7 @@
 #include <wx/timer.h>
 #include "diagram.h"
 #include "graph.h"
+#include "settings.h"
 #include "utils.h"
 #include "visualizer.h"
 #include "visutils.h"
@@ -44,42 +45,12 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     // -- constructors and destructor -------------------------------
     ArcDiagram(
         Mediator* m,
+        Settings* s,
         Graph* g,
         GLCanvas* c);
     virtual ~ArcDiagram();
 
-    // -- get functions ---------------------------------------------
-    static QColor getColorClr() { return colClr; }
-    static QColor getColorTxt() { return colTxt; }
-    static int getSizeTxt() { return szeTxt; }
-    static double getIntervAnim() { return itvAnim; }
-    static bool getShowTree() { return showTree; }
-    static bool getAnnotateTree() { return annotateTree; }
-    static int getColorMap() {  return colorMap; }
-    static bool getShowBarTree() { return showBarTree; }
-    static double getMagnBarTree() { return magnBarTree; }
-    static bool getShowLeaves() { return showLeaves; }
-    static bool getShowBundles() { return showBundles; }
-    static QColor getColorBundles() { return colBundles; }
-    static double getTrspBundles() { return colBundles.alphaF(); }
-
     void getAttrsTree(std::vector< size_t > &idcs);
-
-
-    // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col) { colClr = col; }
-    static void setColorTxt(QColor col) { colTxt = col; }
-    static void setSizeTxt(const int& sze) { szeTxt = sze; }
-    static void setIntervAnim(const int& itv) { itvAnim = itv; }
-    static void setShowTree(const bool& shw) { showTree = shw; }
-    static void setAnnotateTree(const bool& shw) { annotateTree = shw; }
-    static void setColorMap(const int& colMap) { colorMap = colMap; }
-    static void setShowBarTree(const bool& shw) { showBarTree = shw; }
-    static void setMagnBarTree(const double& val) { magnBarTree = val; }
-    static void setShowLeaves(const bool& shw) { showLeaves = shw; }
-    static void setShowBundles(const bool& shw) { showBundles = shw; }
-    static void setColorBundles(QColor col) { colBundles = col; }
-    static void setTrspBundles(const double& trsp) { colBundles.setAlphaF(trsp); }
 
     void setAttrsTree(const std::vector< size_t > idcs);
 
@@ -175,24 +146,8 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
         GLuint buffer[]);
 
     // -- static variables ------------------------------------------
-
-    // general
-    static QColor colClr;
-    static QColor colTxt;
-    static int      szeTxt;
-    // cluster tree
-    static bool showTree;
-    static bool annotateTree;
-    static int colorMap;
-    // bar tree
-    static bool showBarTree;
-    static double magnBarTree;
-    // arc diagram
-    static bool showLeaves;
-    static bool showBundles;
-    static QColor colBundles;
-
     // -- data members ----------------------------------------------
+    Settings* settings;
 
     QPoint m_lastMousePos;
 

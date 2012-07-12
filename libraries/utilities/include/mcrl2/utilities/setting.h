@@ -10,7 +10,9 @@
 #define MCRL2_UTILITIES_SETTING_H
 
 #include <QColor>
+#include <QList>
 #include <QObject>
+#include <QPair>
 
 namespace mcrl2
 {
@@ -76,6 +78,17 @@ class SettingColor : public QObject
     void changed(QColor value);
   private:
     QColor m_value;
+};
+
+class SettingEnum : public SettingInt
+{
+  Q_OBJECT
+  public:
+    typedef QPair<int, QString> Item;
+    SettingEnum(QList<Item> items, int value = -1): SettingInt(value == -1 ? items.first().first : value), m_items(items) {}
+    QList<Item> items() const { return m_items; }
+  private:
+    QList<Item> m_items;
 };
 
 } // namespace qt

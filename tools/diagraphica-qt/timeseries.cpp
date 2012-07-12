@@ -16,15 +16,16 @@
 using namespace std;
 
 
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
+
 // -- static variables ----------------------------------------------
 
 
-bool TimeSeries::useShading = false;
-QColor TimeSeries::colClr = Qt::white;
-QColor TimeSeries::colTxt = Qt::black;
-int TimeSeries::szeTxt = 12;
-QColor TimeSeries::colMrk = QColor(186, 227, 255);
-int TimeSeries::itvAnim = 350;
+static const QColor colMrk(186, 227, 255);
+static const int itvAnim = 350;
 
 
 // -- constructors and destructor -----------------------------------
@@ -32,9 +33,11 @@ int TimeSeries::itvAnim = 350;
 
 TimeSeries::TimeSeries(
   Mediator* m,
+  Settings* s,
   Graph* g,
   GLCanvas* c)
-  : Visualizer(m, g, c)
+  : Visualizer(m, g, c),
+    settings(s)
 {
   critSect = false;
 
@@ -55,6 +58,10 @@ TimeSeries::TimeSeries(
 
   animIdxDgrm = -1;
   animFrame = itemsMarked.end();
+
+  connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
 }
 
 
@@ -69,12 +76,6 @@ TimeSeries::~TimeSeries()
 
 
 // -- get functions -------------------------------------------------
-
-
-bool TimeSeries::getUseShading()
-{
-  return useShading;
-}
 
 
 void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
@@ -197,30 +198,6 @@ void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
 
 
 // -- set functions -------------------------------------------------
-
-
-void TimeSeries::setUseShading(const bool& useShd)
-{
-  useShading = useShd;
-}
-
-
-void TimeSeries::setColorClr(QColor col)
-{
-  colClr = col;
-}
-
-
-void TimeSeries::setColorTxt(QColor col)
-{
-  colTxt = col;
-}
-
-
-void TimeSeries::setSizeTxt(const int& sze)
-{
-  szeTxt = sze;
-}
 
 
 void TimeSeries::setDiagram(Diagram* dgrm)
@@ -1216,7 +1193,7 @@ void TimeSeries::processHits(
 
 void TimeSeries::clear()
 {
-  VisUtils::clear(colClr);
+  VisUtils::clear(settings->backgroundColor.value());
 }
 
 
@@ -1345,12 +1322,12 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
             posSliderTopLft.y - 2.0*ySpacePxl*pix,
             posSliderTopLft.y - 4.0*ySpacePxl*pix);
 
-          VisUtils::setColor(colTxt);
+          VisUtils::setColor(settings->textColor.value());
           VisUtils::drawLabelCenter(
             texCharId,
             pos,
             posSliderTopLft.y - 5.0*ySpacePxl*pix,
-            szeTxt*pix/CHARHEIGHT,
+            settings->textSize.value()*pix/CHARHEIGHT,
             Utils::intToStr(ctr*nodesItvSlider));
         }
         else
@@ -1452,12 +1429,12 @@ void TimeSeries::drawScale(const bool& inSelectMode)
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.y,
             posScaleTopLft.y - 2.0*ySpacePxl*pix);
-          VisUtils::setColor(colTxt);
+          VisUtils::setColor(settings->textColor.value());
           VisUtils::drawLabelCenter(
             texCharId,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.y - 3.0*ySpacePxl*pix,
-            szeTxt*pix/CHARHEIGHT,
+            settings->textSize.value()*pix/CHARHEIGHT,
             Utils::size_tToStr(i));
         }
         else
@@ -1552,42 +1529,17 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
     {}
   else
   {
-    double iter, numr;
-
     // draw bars
     for (size_t i = 0; i < posValues.size(); ++i)
     {
       for (size_t j = 0; j < nodesWdwScale; ++j)
       {
-        if (useShading == true)
-        {
-          iter = (double)attributes[i]->mapToValue(
-                   graph->getNode(wdwStartIdx+j)->getTupleVal(
-                     attributes[i]->getIndex()))->getIndex();
-          numr = (double)(attributes[i]->getSizeCurValues());
-
-          QColor colFill = VisUtils::seqGreen(iter, numr);
-          QColor colFade = QColor(std::max(colFill.red() - 64, 0), std::max(colFill.green() - 64, 0), std::max(colFill.blue() - 64, 0));
-
-          VisUtils::fillRect(
-            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-            posValues[i][wdwStartIdx+j].y,
-            posAxesBotRgt[i].y,
-            colFill,
-            colFill,
-            colFade,
-            colFade);
-        }
-        else
-        {
-          VisUtils::setColor(VisUtils::coolGreen);
-          VisUtils::fillRect(
-            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-            posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-            posValues[i][wdwStartIdx+j].y,
-            posAxesBotRgt[i].y);
-        }
+        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::fillRect(
+          posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
+          posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
+          posValues[i][wdwStartIdx+j].y,
+          posAxesBotRgt[i].y);
       }
     }
 
@@ -1598,7 +1550,6 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
       glBegin(GL_LINE_STRIP);
       for (size_t j = 0; j < nodesWdwScale; ++j)
       {
-        iter = graph->getNode(wdwStartIdx+j)->getTupleVal(attributes[i]->getIndex());
         VisUtils::setColor(VisUtils::mediumGray);
         glVertex2f(
           posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode,
@@ -1949,7 +1900,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
       pos2.x = pos1.x;
       pos2.y = posAxesBotRgt[posAxesBotRgt.size()-1].y;
 
-      double txtScaling = szeTxt*pix/CHARHEIGHT;
+      double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
       VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(pos1.x, pos2.x, pos1.y, pos2.y);
@@ -2004,12 +1955,12 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
           posTopLft[i].y,
           posBotRgt[i].y);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(settings->textColor.value());
         VisUtils::drawLabel(
           texCharId,
           posTopLft[i].x + 0.5*txtScaling*CHARWIDTH,
           posTopLft[i].y - 0.5*txtScaling*CHARHEIGHT,
-          szeTxt*pix/CHARHEIGHT,
+          settings->textSize.value()*pix/CHARHEIGHT,
           lbls[i]);
       }
     }
@@ -2024,7 +1975,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
   else
   {
     double pix = canvas->getPixelSize();
-    double txtScaling = szeTxt*pix/CHARHEIGHT;
+    double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
@@ -2038,14 +1989,14 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
         posAxesBotRgt[i].y + 0.5*txtScaling*CHARHEIGHT + 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblBot);
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 1.0*pix,
         posAxesBotRgt[i].y + 0.5*txtScaling*CHARHEIGHT + 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblBot);
 
       // max
@@ -2054,14 +2005,14 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblTop);
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 1.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblTop);
 
       // attribute
@@ -2070,14 +2021,14 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x) + 1.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         attributes[i]->getName());
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabelCenter(
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x),
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         attributes[i]->getName());
     }
   }

@@ -43,6 +43,7 @@
 #include "mediator.h"
 #include "opacitychooser.h"
 #include "parser.h"
+#include "settings.h"
 #include "simulator.h"
 #include "timeseries.h"
 
@@ -293,46 +294,6 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
       QColor col);
     void handleUnshowFrame();
 
-    // -- visualization settings ------------------------------------
-    void setSettingsGeneral(
-      const wxColour& colClr,
-      const wxColour& colTxt,
-      const int& szeTxt,
-      const double& spdAnim);
-    void setSettingsClustTree(
-      const bool& show,
-      const bool& annotate,
-      const int& colMap);
-    void setSettingsBarTree(
-      const bool& show,
-      const double& magn);
-    void setSettingsSimulator(const int& blendType);
-    void setSettingsTrace(const bool& useShading);
-    void setSettingsArcDiagram(
-      const bool& showNodes,
-      const bool& showArcs,
-      const wxColour& colArcs,
-      const double& trspArcs);
-
-    void getSettingsGeneral(
-      wxColour& colClr,
-      wxColour& colTxt,
-      int& szeTxt,
-      double& spdAnim);
-    void getSettingsClustTree(
-      bool& show,
-      bool& annotate,
-      int& colMap);
-    void getSettingsBarTree(
-      bool& show,
-      double& magn);
-    void getSettingsSimulator(int& blendType);
-    void getSettingsTrace(bool& useShading);
-    void getSettingsArcDiagram(
-      bool& showNodes,
-      bool& showArcs,
-      wxColour& colArcs,
-      double& trspArcs);
     void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom);
 
     // -- visualization ---------------------------------------------
@@ -384,6 +345,8 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
     int               view;
     bool              critSect;
     bool        clustered;
+
+    Settings settings;
 
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association

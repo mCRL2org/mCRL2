@@ -34,6 +34,11 @@
 #include <crtdbg.h>
 #endif
 
+/// TODO: find out why this is necessary
+#ifdef KeyPress
+#undef KeyPress
+#endif
+
 using namespace std;
 
 DiaGraph::DiaGraph() : super("DiaGraph",
@@ -203,6 +208,7 @@ void DiaGraph::openFile(const std::string& path)
     // init new visualizers
     arcDgrm = new ArcDiagram(
       this,
+      &settings,
       graph,
       canvasArcD);
     if (mode == MODE_ANALYSIS)
@@ -214,16 +220,19 @@ void DiaGraph::openFile(const std::string& path)
 
     simulator = new Simulator(
       this,
+      &settings,
       graph,
       canvasSiml);
 
     timeSeries = new TimeSeries(
       this,
+      &settings,
       graph,
       canvasTrace);
 
     examiner = new Examiner(
       this,
+      &settings,
       graph,
       canvasExnr);
 
@@ -2324,197 +2333,6 @@ void DiaGraph::handleUnshowFrame()
 // -- visualization settings ----------------------------------------
 
 
-void DiaGraph::setSettingsGeneral(
-  const wxColour& colClr,
-  const wxColour& colTxt,
-  const int& szeTxt,
-  const double& spdAnim)
-{
-  QColor fullColClr = QColor(colClr.Red(), colClr.Green(), colClr.Blue());
-  ArcDiagram::setColorClr(fullColClr);
-  Simulator::setClearColor(fullColClr);
-  TimeSeries::setColorClr(fullColClr);
-  Examiner::setColorClr(fullColClr);
-
-  QColor fullColTxt = QColor(colTxt.Red(), colTxt.Green(), colTxt.Blue());
-  ArcDiagram::setColorTxt(fullColTxt);
-  Simulator::setTextColor(fullColTxt);
-  TimeSeries::setColorTxt(fullColTxt);
-  Examiner::setColorTxt(fullColTxt);
-
-  ArcDiagram::setSizeTxt(szeTxt);
-  Simulator::setTextSize(szeTxt);
-  TimeSeries::setSizeTxt(szeTxt);
-  Examiner::setSizeTxt(szeTxt);
-
-  ArcDiagram::setIntervAnim((int)(1000.0/spdAnim));
-
-  if (mode == MODE_ANALYSIS)
-  {
-    if (canvasArcD != NULL)
-    {
-      canvasArcD->Refresh();
-    }
-    if (canvasSiml != NULL)
-    {
-      canvasSiml->Refresh();
-    }
-    if (canvasExnr != NULL)
-    {
-      canvasExnr->Refresh();
-    }
-  }
-}
-
-
-void DiaGraph::setSettingsClustTree(
-  const bool& show,
-  const bool& annotate,
-  const int& colMap)
-{
-  if (arcDgrm != NULL)
-  {
-    if ((show != arcDgrm->getShowTree()) |
-        (annotate != arcDgrm->getAnnotateTree()) |
-        (colMap != arcDgrm->getColorMap()))
-    {
-      arcDgrm->setGeomChanged(true);
-    }
-  }
-
-  ArcDiagram::setShowTree(show);
-  ArcDiagram::setAnnotateTree(annotate);
-  ArcDiagram::setColorMap(colMap);
-
-  if (canvasArcD != NULL && mode == MODE_ANALYSIS)
-  {
-    canvasArcD->Refresh();
-  }
-}
-
-
-void DiaGraph::setSettingsBarTree(
-  const bool& show,
-  const double& magn)
-{
-  if (arcDgrm != NULL)
-  {
-    if ((show != arcDgrm->getShowBarTree()) |
-        (magn != arcDgrm->getMagnBarTree()))
-    {
-      arcDgrm->setGeomChanged(true);
-    }
-  }
-
-  ArcDiagram::setShowBarTree(show);
-  ArcDiagram::setMagnBarTree(magn);
-
-  if (canvasArcD != NULL && mode == MODE_ANALYSIS)
-  {
-    canvasArcD->Refresh();
-  }
-}
-
-
-void DiaGraph::setSettingsSimulator(const int& blendType)
-{
-  Simulator::setBlendType(blendType);
-}
-
-
-void DiaGraph::setSettingsTrace(const bool& useShading)
-{
-  TimeSeries::setUseShading(useShading);
-
-  if (canvasTrace != NULL && view == VIEW_TRACE)
-  {
-    canvasTrace->Refresh();
-  }
-}
-
-
-void DiaGraph::setSettingsArcDiagram(
-  const bool& showNodes,
-  const bool& showArcs,
-  const wxColour& colArcs,
-  const double& trspArcs)
-{
-  if (arcDgrm != NULL)
-  {
-    arcDgrm->setGeomChanged(true);
-  }
-
-  ArcDiagram::setShowLeaves(showNodes);
-  ArcDiagram::setShowBundles(showArcs);
-
-  ArcDiagram::setColorBundles(QColor(colArcs.Red(), colArcs.Green(), colArcs.Blue(), (int)(255.0 * (1.0 - trspArcs))));
-
-  if (canvasArcD != NULL && mode == MODE_ANALYSIS)
-  {
-    canvasArcD->Refresh();
-  }
-}
-
-
-void DiaGraph::getSettingsGeneral(
-  wxColour& colClr,
-  wxColour& colTxt,
-  int& szeTxt,
-  double& spdAnim)
-{
-  colClr.Set(ArcDiagram::getColorClr().red(), ArcDiagram::getColorClr().green(), ArcDiagram::getColorClr().blue());
-  colTxt.Set(ArcDiagram::getColorTxt().red(), ArcDiagram::getColorTxt().green(), ArcDiagram::getColorTxt().blue());
-  szeTxt = ArcDiagram::getSizeTxt();
-  spdAnim = 1000.0/ArcDiagram::getIntervAnim();
-}
-
-
-void DiaGraph::getSettingsClustTree(
-  bool& show,
-  bool& annotate,
-  int& colMap)
-{
-  show = ArcDiagram::getShowTree();
-  annotate = ArcDiagram::getAnnotateTree();
-  colMap = ArcDiagram::getColorMap();
-}
-
-
-void DiaGraph::getSettingsBarTree(
-  bool& show,
-  double& magn)
-{
-  show = ArcDiagram::getShowBarTree();
-  magn = ArcDiagram::getMagnBarTree();
-}
-
-
-void DiaGraph::getSettingsSimulator(int& blendType)
-{
-  blendType = Simulator::BlendType();
-}
-
-
-void DiaGraph::getSettingsTrace(bool& useShading)
-{
-  useShading = TimeSeries::getUseShading();
-}
-
-
-void DiaGraph::getSettingsArcDiagram(
-  bool& showNodes,
-  bool& showArcs,
-  wxColour& colArcs,
-  double& trspArcs)
-{
-  showNodes = ArcDiagram::getShowLeaves();
-  showArcs = ArcDiagram::getShowBundles();
-
-  colArcs.Set(ArcDiagram::getColorBundles().red(), ArcDiagram::getColorBundles().green(), ArcDiagram::getColorBundles().blue());
-  trspArcs = 1.0 - ArcDiagram::getColorBundles().alphaF();
-}
-
-
 void DiaGraph::getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom)
 {
   if (editor != NULL)
@@ -2826,6 +2644,7 @@ void DiaGraph::initColleagues()
   // init frame
   frame = new Frame(
     this,
+    &settings,
     wxT("DiaGraphica"));
   // show frame
   frame->Show(TRUE);

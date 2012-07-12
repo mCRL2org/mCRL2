@@ -26,6 +26,7 @@
 #include "diagram.h"
 #include "glcanvas.h"
 #include "graph.h"
+#include "settings.h"
 #include "visualizer.h"
 
 class TimeSeries : public wxEvtHandler, public Visualizer
@@ -34,12 +35,12 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     // -- constructors and destructor -------------------------------
     TimeSeries(
       Mediator* m,
+      Settings* s,
       Graph* g,
       GLCanvas* c);
     virtual ~TimeSeries();
 
     // -- get functions ---------------------------------------------
-    static bool getUseShading();
     void getIdcsClstMarked(std::set< size_t > &idcs);
     void getIdcsClstMarked(
       std::set< size_t > &idcs ,
@@ -57,12 +58,6 @@ class TimeSeries : public wxEvtHandler, public Visualizer
       std::set< size_t > &idcsBndl,
       QColor& colLeaf);
     void getAttrIdcs(std::vector< size_t > &idcs);
-
-    // -- set functions ---------------------------------------------
-    static void setUseShading(const bool& useShd);
-    static void setColorClr(QColor col);
-    static void setColorTxt(QColor col);
-    static void setSizeTxt(const int& sze);
 
     void setDiagram(Diagram* dgrm);
     void initAttributes(const std::vector< size_t > attrIdcs);
@@ -126,11 +121,6 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void handleShowDiagram(const int& dgrmIdx);
     void handleDragDiagram(const int& dgrmIdx);
 
-    // -- static variables ------------------------------------------
-    static QColor colClr;
-    static QColor colTxt;
-    static int      szeTxt;
-    static QColor colMrk;
     enum
     {
       ID_TIMER,
@@ -159,13 +149,11 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     };
 
     // -- data members ----------------------------------------------
-
     QPoint m_lastMousePos;
+    Settings* settings;
 
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
-
-    static bool useShading;
 
     Position2D posSliderTopLft;
     Position2D posSliderBotRgt;
@@ -213,7 +201,6 @@ class TimeSeries : public wxEvtHandler, public Visualizer
 
     // animation
     wxTimer* timerAnim;
-    static int itvAnim;
     std::set< size_t >::iterator animFrame;
 
     // -- declare event table ---------------------------------------

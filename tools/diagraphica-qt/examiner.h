@@ -25,6 +25,7 @@
 #include "edge.h"
 #include "glcanvas.h"
 #include "graph.h"
+#include "settings.h"
 #include "utils.h"
 #include "visualizer.h"
 #include "visutils.h"
@@ -35,26 +36,13 @@ class Examiner : public wxEvtHandler, public Visualizer
     // -- constructors and destructor -------------------------------
     Examiner(
       Mediator* m,
+      Settings* s,
       Graph* g,
       GLCanvas* c);
     virtual ~Examiner();
 
-    // -- get functions ---------------------------------------------
-    static QColor getColorClr() { return colClr; }
-    static QColor getColorTxt() { return colTxt; }
-    static int getSizeTxt() { return szeTxt; }
-    static QColor getColorBdl() { return colBdl; }
-
     QColor getColorSel() { return VisUtils::coolRed; }
     size_t getIdxClstSel();
-
-    // -- set functions ---------------------------------------------
-    static void setColorClr(QColor col) { colClr = col; }
-    static void setColorTxt(QColor col) { colTxt = col; }
-    static void setSizeTxt(const int& sze) { szeTxt = sze; }
-    static void setColorBdl(QColor col) { colBdl = col; }
-
-    static void setBlendType(const int& type);
 
     void setDiagram(Diagram* dgrm) { diagram = dgrm; }
     void setFrame(
@@ -124,13 +112,6 @@ class Examiner : public wxEvtHandler, public Visualizer
     /*
         void onTimer( wxTimerEvent &e );
     */
-    // -- static variables ------------------------------------------
-
-    static QColor colClr;
-    static QColor colTxt;
-    static int      szeTxt;
-    static QColor colBdl;
-    static int      hgtHstPix;
 
     enum
     {
@@ -145,6 +126,8 @@ class Examiner : public wxEvtHandler, public Visualizer
     };
 
     // -- data members ----------------------------------------------
+    Settings* settings;
+
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
 

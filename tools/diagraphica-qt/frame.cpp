@@ -28,6 +28,7 @@ using namespace std;
 
 Frame::Frame(
   Mediator* m,
+  Settings* s,
   wxString title)
   : wxFrame(
     NULL,
@@ -42,6 +43,9 @@ Frame::Frame(
   frameNote = NULL;
   frameTextSize = NULL;
   currentShapeId = NON_EXISTING;
+
+  /// TODO
+  settingsDialog = new SettingsDialog(0, s);
 }
 
 
@@ -883,12 +887,6 @@ void Frame::handleDragDrop(
 
 void Frame::closePopupFrames()
 {
-  if (frameSettings != NULL)
-  {
-    frameSettings->Close();
-    frameSettings = NULL;
-  }
-
   if (frameDOF != NULL)
   {
     frameDOF->Close();
@@ -911,11 +909,6 @@ void Frame::closePopupFrames()
 
 void Frame::handleCloseFrame(PopupFrame* f)
 {
-  if (f == frameSettings)
-  {
-    // clean up ptr
-    frameSettings = NULL;
-  }
   if (f == frameDOF)
   {
     // clean up ptr
@@ -1083,8 +1076,6 @@ void Frame::initFrame()
   splitterRgt->SetSashPosition(hCur-300);
   splitterTopLft->SetSashPosition((int)(0.66*(hCur-300)));
 
-  // settings frame only shown on request
-  frameSettings = NULL;
   // DOF frame only shown on request
   frameDOF = NULL;
   // plot frame only shown on request
@@ -1920,22 +1911,6 @@ void Frame::initTextCtrl()
     5);
 }
 
-void Frame::initFrameSettings()
-{
-  // init frame
-  frameSettings = new SettingsFrame(
-    mediator,
-    this,
-    ID_FRAME_SETTINGS,
-    wxString(wxT("Settings")),
-    wxDefaultPosition,
-    wxDefaultSize);
-
-  // show
-  frameSettings->Show();
-}
-
-
 void Frame::initFrameDOF()
 {
   // init frame
@@ -2760,68 +2735,15 @@ void Frame::onMenuBar(wxCommandEvent& e)
     mediator->handleSetViewTrace();
     canvasTwo->Refresh();
   }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_GENERAL)
+  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_GENERAL ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_CLUST_TREE ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_BAR_TREE ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_ARC_DIAGRAM ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_SIMULATOR ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_TRACE ||
+           e.GetId() == ID_MENU_ITEM_SETTINGS_EDITOR)
   {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setGeneral();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_CLUST_TREE)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setClustTree();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_BAR_TREE)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setBarTree();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_ARC_DIAGRAM)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setArcDiagram();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_SIMULATOR)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setSimulator();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_TRACE)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setTrace();
-  }
-  else if (e.GetId() == ID_MENU_ITEM_SETTINGS_EDITOR)
-  {
-    // make sure frame exists
-    if (frameSettings == NULL)
-    {
-      initFrameSettings();
-    }
-    frameSettings->setDgrmEditor();
+    settingsDialog->show();
   }
   else if (e.GetId() == wxID_CLOSE)
   {

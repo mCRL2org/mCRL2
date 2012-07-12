@@ -26,39 +26,26 @@
 #include "edge.h"
 #include "glcanvas.h"
 #include "graph.h"
+#include "settings.h"
 #include "utils.h"
 #include "visualizer.h"
 #include "visutils.h"
 
-class Simulator : public QObject, public Visualizer
+class Simulator : public Visualizer
 {
   Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     Simulator(
       Mediator* m,
+      Settings* s,
       Graph* g,
-      GLCanvas* c,
-      QObject* parent = 0);
+      GLCanvas* c);
     virtual ~Simulator();
 
 
-    // -- get functions ---------------------------------------------
-    static QColor ClearColor()  { return m_clearColor; }
-    static QColor TextColor()   { return m_textColor; }
-    static int TextSize()       { return m_textSize; }
-    static QColor SelectColor() { return m_selectColor; }
-    static int BlendType()      { return m_blendType; }
-
+    static QColor SelectColor() { return VisUtils::coolGreen; }
     size_t SelectedClusterIndex();
-
-
-    // -- set functions ---------------------------------------------
-    static void setClearColor(QColor color)   { m_clearColor = color; }
-    static void setTextColor(QColor color)    { m_textColor = color; }
-    static void setTextSize(int size)         { m_textSize = size; }
-    static void setSelectColor(QColor color)  { m_selectColor = color; }
-    static void setBlendType(int type)        { m_blendType = type; }
 
     void setDiagram(Diagram* dgrm);
 
@@ -130,16 +117,6 @@ class Simulator : public QObject, public Visualizer
     void drawControls(const bool& inSelectMode);
     void animate();
 
-    // -- static variables ------------------------------------------
-
-    static QColor m_clearColor;
-    static QColor m_textColor;
-    static int    m_textSize;
-    static QColor m_selectColor;
-    static int    m_labelHeight;
-    static int    m_timerInterval;
-    static double m_animationPixelsPerMS;
-
     enum
     {
       ID_CANVAS,
@@ -163,6 +140,7 @@ class Simulator : public QObject, public Visualizer
     // -- data members ----------------------------------------------
     Diagram* m_diagram;                      // Diagram used for each frame
     std::vector< Attribute* > m_attributes;  // Attributes for the frames
+    Settings* m_settings;
 
     Cluster* m_currentFrame;            // composition
     std::vector< Cluster* > m_previousFrames; // composition
@@ -200,7 +178,6 @@ class Simulator : public QObject, public Visualizer
     std::vector< std::vector< Position2D > > m_nextBundlePositionBR;
 
     // animation
-    static int m_blendType;
     double m_totalAnimationTime;
     double m_totalBlendTime;
     int m_currentAnimationPhase;
@@ -215,7 +192,6 @@ class Simulator : public QObject, public Visualizer
 
     double m_animationOldFrameOpacity;
     double m_animationNewFrameOpacity;
-
 };
 
 #endif

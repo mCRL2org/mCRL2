@@ -17,27 +17,6 @@
 using namespace std;
 
 
-// -- init static variables -----------------------------------------
-
-
-// general
-QColor ArcDiagram::colClr = Qt::white;
-QColor ArcDiagram::colTxt = Qt::black;
-int ArcDiagram::szeTxt = 12;
-// cluster tree
-bool ArcDiagram::showTree = true;
-bool ArcDiagram::annotateTree = true;
-int ArcDiagram::colorMap = VisUtils::COL_MAP_QUAL_SET_3;
-// bar tree
-bool ArcDiagram::showBarTree = true;
-double ArcDiagram::magnBarTree = 0.0;
-// arc diagram
-bool ArcDiagram::showLeaves = true;
-bool ArcDiagram::showBundles = true;
-QColor ArcDiagram::colBundles = QColor(0, 0, 0, 76);
-int ArcDiagram::itvAnim = 100;
-
-
 // -- init constants ------------------------------------------------
 
 
@@ -52,9 +31,11 @@ int ArcDiagram::SEGM_HINT_LQ    = 12;
 
 ArcDiagram::ArcDiagram(
     Mediator* m,
+    Settings* s,
     Graph* g,
     GLCanvas* c)
-  : Visualizer(m, g, c)
+  : Visualizer(m, g, c),
+    settings(s)
 {
   idxInitStLeaves    = NON_EXISTING;
 
@@ -62,6 +43,21 @@ ArcDiagram::ArcDiagram(
 
   timerAnim = new wxTimer();
   timerAnim->SetOwner(this, ID_TIMER);
+
+  connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
+  connect(&settings->animationSpeed, SIGNAL(changed(float)), this, SLOT(update()));
+  connect(&settings->blendType, SIGNAL(changed(int)), this, SLOT(update()));
+  connect(&settings->showClusters, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&settings->showBundles, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&settings->showClusterTree, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&settings->annotateClusterTree, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&settings->showBarTree, SIGNAL(changed(bool)), this, SLOT(update()));
+  connect(&settings->bundleColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->arcTransparency, SIGNAL(changed(float)), this, SLOT(update()));
+  connect(&settings->clusterTreeColorMap, SIGNAL(changed(int)), this, SLOT(update()));
+  connect(&settings->barTreeMagnification, SIGNAL(changed(float)), this, SLOT(update()));
 }
 
 
@@ -261,24 +257,24 @@ void ArcDiagram::visualize(const bool& inSelectMode)
 
 void ArcDiagram::visualizeParts(const bool& inSelectMode)
 {
-  if (showTree)
+  if (settings->showClusterTree.value())
   {
-    if (annotateTree)
+    if (settings->annotateClusterTree.value())
     {
       drawTreeLvls(inSelectMode);
     }
 
     drawTree(inSelectMode);
   }
-  if (showBarTree)
+  if (settings->showBarTree.value())
   {
     drawBarTree(inSelectMode);
   }
-  if (showBundles)
+  if (settings->showBundles.value())
   {
     drawBundles(inSelectMode);
   }
-  if (showLeaves)
+  if (settings->showClusters.value())
   {
     drawLeaves(inSelectMode);
     if (!inSelectMode)
@@ -286,7 +282,7 @@ void ArcDiagram::visualizeParts(const bool& inSelectMode)
       drawMarkedLeaves(inSelectMode);
     }
   }
-  if (showLeaves || !inSelectMode)
+  if (settings->showClusters.value() || !inSelectMode)
   {
     drawDiagrams(inSelectMode);
   }
@@ -319,8 +315,8 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 
     if (render == HQRender)
     {
-      colFill = markBundles[i] ? VisUtils::darkCoolBlue : colBundles;
-      colFade = alpha(colClr, colFill.alphaF());
+      colFill = markBundles[i] ? VisUtils::darkCoolBlue : alpha(settings->bundleColor.value(), settings->arcTransparency.value());
+      colFade = alpha(settings->backgroundColor.value(), colFill.alphaF());
       colBrdrFill = alpha(colFill, (std::min)(colFill.alphaF() * 1.2, 1.0));
       colBrdrFade = alpha(colFill, colFill.alphaF() * 0.1);
     }
@@ -332,7 +328,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
     double wth    = widthBundles[i];
 
     glPushName((GLuint) i);
-    if (render = LQRender)
+    if (render == LQRender)
     {
       if (orient < 0)
       {
@@ -396,7 +392,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
     double x = posLeaves[i].x;
     double y = posLeaves[i].y;
 
-    if (render = HQRender)
+    if (render == HQRender)
     {
       clust = graph->getLeaf(i);
 
@@ -532,7 +528,7 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 {
   RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
 
-  if (render = HQRender)
+  if (render == HQRender)
   {
     double wth = canvas->getWidth();
     double pix = canvas->getPixelSize();
@@ -546,14 +542,14 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
         lbl = mapPosToClust[i+1][0]->getAttribute()->getName();
 
         double yLin =  posTreeBotRgt[i][0].y;
-        double yTxt =  yLin + 0.5*szeTxt*pix + pix;
+        double yTxt =  yLin + 0.5*settings->textSize.value()*pix + pix;
 
         // left
         double xLft = -0.5*wth + radLeaves;
         double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
 
-        VisUtils::setColor(colTxt);
-        VisUtils::drawLabelRight(texCharId, xLft, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
+        VisUtils::setColor(settings->textColor.value());
+        VisUtils::drawLabelRight(texCharId, xLft, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(xLft, xRgt, yLin, yLin);
 
@@ -561,8 +557,8 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
         xLft = posTreeBotRgt[i][posTreeBotRgt[i].size()-1].x + 2.0*radLeaves;
         xRgt = 0.5*wth - radLeaves;
 
-        VisUtils::setColor(colTxt);
-        VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, szeTxt*pix/CHARHEIGHT, lbl);
+        VisUtils::setColor(settings->textColor.value());
+        VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(xLft, xRgt, yLin, yLin);
       }
@@ -609,7 +605,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
           }
 
           // solid background
-          VisUtils::setColor(colClr);
+          VisUtils::setColor(settings->backgroundColor.value());
           VisUtils::fillRect(xLft, xRgt, yTop, yBot);
 
           // colored foreground
@@ -875,8 +871,8 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
         QString msg = QString("%1/%2").arg(int(frameIdxDgrm[i]+1)).arg(int(framesDgrm[i].size()));
 
-        VisUtils::setColor(colTxt);
-        VisUtils::drawLabelRight(texCharId, -0.76, -0.89, 5*szeTxt*pix/CHARHEIGHT, msg.toStdString());
+        VisUtils::setColor(settings->textColor.value());
+        VisUtils::drawLabelRight(texCharId, -0.76, -0.89, 5*settings->textSize.value()*pix/CHARHEIGHT, msg.toStdString());
 
         VisUtils::enableLineAntiAlias();
 
@@ -987,7 +983,7 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
     RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
     int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
 
-    if (render = HQRender)
+    if (render == HQRender)
     {
       VisUtils::enableLineAntiAlias();
       double pix  = canvas->getPixelSize();
@@ -1089,12 +1085,13 @@ void ArcDiagram::updateDiagramData()
 
 void ArcDiagram::clear()
 {
-  VisUtils::clear(colClr);
+  VisUtils::clear(settings->backgroundColor.value());
 }
 
 
 QColor ArcDiagram::calcColor(size_t iter, size_t numr)
 {
+  int colorMap = settings->clusterTreeColorMap.value();
   if (colorMap == VisUtils::COL_MAP_QUAL_PAST_1)
     return VisUtils::qualPast1(iter, numr);
   else if (colorMap == VisUtils::COL_MAP_QUAL_PAST_2)
@@ -1445,7 +1442,7 @@ void ArcDiagram::calcPositionsBarTree(
 
     double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
 
-    topLft.y = yBot + Utils::fishEye(magnBarTree, frac)*height;
+    topLft.y = yBot + Utils::fishEye(settings->barTreeMagnification.value(), frac)*height;
     botRgt.y = yBot;
   }
   else
@@ -1455,7 +1452,7 @@ void ArcDiagram::calcPositionsBarTree(
 
     double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
 
-    topLft.y = yBot + Utils::fishEye(magnBarTree, frac)*height;
+    topLft.y = yBot + Utils::fishEye(settings->barTreeMagnification.value(), frac)*height;
     botRgt.y = yBot;
   }
 
@@ -1629,10 +1626,10 @@ void ArcDiagram::clearSettingsDiagram()
 
 void ArcDiagram::onTimer(wxTimerEvent& /*e*/)
 {
-  if (timerAnim->GetInterval() != itvAnim)
+  if (timerAnim->GetInterval() != (1000.0 / settings->animationSpeed.value()))
   {
     timerAnim->Stop();
-    timerAnim->Start(itvAnim);
+    timerAnim->Start((1000.0 / settings->animationSpeed.value()));
   }
 
   frameIdxDgrm[animIdxDgrm] += 1;
@@ -1748,7 +1745,8 @@ void ArcDiagram::handleHits(const vector< int > &ids)
               showMenu = true;
 
               // handleSendDgrm prohibits mouseup event, simulate it:
-              handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+              QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+              handleMouseEvent(&event);
             }
             else if (ids[3] == ID_DIAGRAM_RWND)
             {
@@ -1783,7 +1781,8 @@ void ArcDiagram::handleHits(const vector< int > &ids)
           showMenu = true;
 
           // handleSendDgrm prohibits mouseup event, simulate it:
-          handleMouseEvent(&QMouseEvent(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers()));
+          QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
+          handleMouseEvent(&event);
         }
         else
         {
@@ -1983,13 +1982,13 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
     }
     else
     {
-      timerAnim->Start(itvAnim);
+      timerAnim->Start((1000.0 / settings->animationSpeed.value()));
     }
   }
   else
   {
     animIdxDgrm = dgrmIdx;
-    timerAnim->Start(itvAnim);
+    timerAnim->Start((1000.0 / settings->animationSpeed.value()));
   }
 }
 
