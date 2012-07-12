@@ -57,6 +57,13 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 /// \endcond
 
 /// \cond INTERNAL_DOCS
+
+template <typename T>
+void normalize(T& x, bool negated = false, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0);
+
+template <typename T>
+T normalize(const T& x, bool negated = false, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0);
+
 // \brief Visitor for checking if a state formula is normalized.
 struct normalize_builder: public state_formula_builder<normalize_builder>
 {
@@ -71,8 +78,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   bool negated;
 
-  normalize_builder()
-    : negated(false)
+  normalize_builder(bool negated_)
+    : negated(negated_)
   {}
 
   state_formula operator()(const data::data_expression& x)
@@ -106,16 +113,13 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   state_formula operator()(const not_& x)
   {
-    negated = !negated;
-    state_formula result = super::operator()(x.operand());
-    negated = !negated;
-    return result;
+    return normalize(x.operand(), !negated);
   }
 
   state_formula operator()(const and_& x)
   {
-    state_formula left = super::operator()(x.left());
-    state_formula right = super::operator()(x.right());
+    state_formula left = normalize(x.left(), negated);
+    state_formula right = normalize(x.right(), negated);
     if (negated)
     {
       return or_(left, right);
@@ -128,8 +132,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   state_formula operator()(const or_& x)
   {
-    state_formula left = super::operator()(x.left());
-    state_formula right = super::operator()(x.right());
+    state_formula left = normalize(x.left(), negated);
+    state_formula right = normalize(x.right(), negated);
     if (negated)
     {
       return and_(left, right);
@@ -142,43 +146,31 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   state_formula operator()(const imp& x)
   {
-    negated = !negated;
-    state_formula left = super::operator()(x.left());
-    negated = !negated;
-    state_formula right = super::operator()(x.right());
-    if (negated)
-    {
-      return and_(left, right);
-    }
-    else
-    {
-      return or_(left, right);
-    }
+    state_formula y = or_(not_(x.left()), x.right());
+    return normalize(y, negated);
   }
 
   state_formula operator()(const forall& x)
   {
-    state_formula body = super::operator()(x.body());
     if (negated)
     {
-      return exists(x.variables(), body);
+      return exists(x.variables(), normalize(x.body(), true));
     }
     else
     {
-      return forall(x.variables(), body);
+      return forall(x.variables(), normalize(x.body(), false));
     }
   }
 
   state_formula operator()(const exists& x)
   {
-    state_formula body = super::operator()(x.body());
     if (negated)
     {
-      return forall(x.variables(), body);
+      return forall(x.variables(), normalize(x.body(), true));
     }
     else
     {
-      return exists(x.variables(), body);
+      return exists(x.variables(), normalize(x.body(), false));
     }
   }
 
@@ -193,26 +185,40 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   state_formula operator()(const must& x)
   {
-    state_formula operand = super::operator()(x.operand());
-    return must(x.formula(), operand);
+    return must(x.formula(), normalize(x.operand(), negated));
   }
 
   state_formula operator()(const may& x)
   {
-    state_formula operand = super::operator()(x.operand());
-    return may(x.formula(), operand);
+    return may(x.formula(), normalize(x.operand(), negated));
   }
 
   state_formula operator()(const mu& x)
   {
-    state_formula operand = super::operator()(detail::negate_propositional_variable(x.name(), x.operand()));
-    return mu(x.name(), x.assignments(), operand);
+    if (negated)
+    {
+      std::cout << "\n<mu-negated>" << state_formulas::pp(x) << std::endl;
+      std::cout << state_formulas::pp(detail::negate_propositional_variable(x.name(), x.operand())) << std::endl;
+      return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+    }
+    else
+    {
+      return mu(x.name(), x.assignments(), normalize(x.operand(), false));
+    }
   }
 
   state_formula operator()(const nu& x)
   {
-    state_formula operand = super::operator()(detail::negate_propositional_variable(x.name(), x.operand()));
-    return nu(x.name(), x.assignments(), operand);
+    if (negated)
+    {
+      std::cout << "\n<nu-negated>" << state_formulas::pp(x) << std::endl;
+      std::cout << state_formulas::pp(detail::negate_propositional_variable(x.name(), x.operand())) << std::endl;
+      return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+    }
+    else
+    {
+      return nu(x.name(), x.assignments(), normalize(x.operand(), false));
+    }
   }
 
   state_formula operator()(const delay& x)
@@ -252,11 +258,9 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-void normalize(T& x,
-               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-              )
+void normalize(T& x, bool negated, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type*)
 {
-  normalize_builder f;
+  normalize_builder f(negated);
   f(x);
 }
 
@@ -264,11 +268,9 @@ void normalize(T& x,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-T normalize(const T& x,
-            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-           )
+T normalize(const T& x, bool negated, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type*)
 {
-  normalize_builder f;
+  normalize_builder f(negated);
   return f(x);
 }
 
