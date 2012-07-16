@@ -564,7 +564,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
       else
       {
-        result = utilities::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
+        result = utilities::optimized_forall_no_empty_domain(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
       }
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
@@ -601,7 +601,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
       else
       {
-        result = utilities::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
+        result = utilities::optimized_exists_no_empty_domain(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
       }
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
