@@ -11,8 +11,8 @@
 
 // Test program for timed lps2pbes.
 
-#define MCRL2_PBES_TRANSLATE_DEBUG
-#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
+//#define MCRL2_PBES_TRANSLATE_DEBUG
+//#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #include <iostream>
 #include <iterator>

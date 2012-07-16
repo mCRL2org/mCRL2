@@ -12,6 +12,8 @@
 /// \file mcrl2/pbes/pbes_translate.h
 /// \brief The pbes_translate algorithm.
 
+//#define MCRL2_DEBUG_RHS
+
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
@@ -44,384 +46,14 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
+#include "mcrl2/pbes/detail/lps2pbes_utility.h"
+#include "mcrl2/pbes/detail/lps2pbes_rhs.h"
 
 namespace mcrl2
 {
 
 namespace pbes_system
 {
-
-/// \cond INTERNAL_DOCS
-//
-/// \brief Concatenates two sequences of PBES equations
-/// \param p A sequence of PBES equations
-/// \param q A sequence of PBES equations
-/// \return The concatenation result
-inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
-{
-  atermpp::vector<pbes_equation> result(p);
-  result.insert(result.end(), q.begin(), q.end());
-  return result;
-}
-/// \endcond
-
-/// \cond INTERNAL_DOCS
-//
-/// \brief Appends a PBES equation to a sequence of PBES equations
-/// \param p A sequence of PBES equations
-/// \param e A PBES equation
-/// \return The append result
-inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
-{
-  atermpp::vector<pbes_equation> result(p);
-  result.push_back(e);
-  return result;
-}
-/// \endcond
-
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-
-inline
-std::string myprint(const atermpp::vector<pbes_equation>& v)
-{
-  std::ostringstream out;
-  out << "[";
-  for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
-  }
-  out << "\n]";
-  return out.str();
-}
-
-/// \brief Generates fresh variables with names that do not appear in the given context.
-/// Caveat: the implementation is very inefficient.
-/// \param update_context If true, then generated names are added to the context
-inline
-data::variable_list make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
-{
-  data::variable_vector result;
-  for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    core::identifier_string name =  id_generator(std::string(i->name()));
-    result.push_back(data::variable(name, i->sort()));
-    if (!add_to_context)
-    {
-      id_generator.remove_identifier(name);
-    }
-  }
-  return atermpp::convert<data::variable_list>(result);
-}
-
-data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x);
-
-struct par_traverser: public state_formulas::state_formula_traverser<par_traverser>
-{
-  typedef state_formulas::state_formula_traverser<par_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
-  const core::identifier_string& X;
-  const data::variable_list& l;
-  atermpp::vector<data::variable_list> result_stack;
-
-  par_traverser(const core::identifier_string& X_, const data::variable_list& l_)
-    : X(X_), l(l_)
-  {}
-
-  void push(const data::variable_list& x)
-  {
-    result_stack.push_back(x);
-  }
-
-  const data::variable_list& top() const
-  {
-    return result_stack.back();
-  }
-
-  data::variable_list pop()
-  {
-    data::variable_list result = top();
-    result_stack.pop_back();
-    return result;
-  }
-
-  // join the two topmost elements on the stack
-  void join()
-  {
-    data::variable_list right = pop();
-    data::variable_list left = pop();
-    push(left + right);
-  }
-
-  void leave(const data::data_expression& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::true_& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::false_& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::not_& x)
-  {
-    // skip
-  }
-
-  void leave(const state_formulas::and_& x)
-  {
-    join();
-  }
-
-  void leave(const state_formulas::or_& x)
-  {
-    join();
-  }
-
-  void leave(const state_formulas::imp& x)
-  {
-    join();
-  }
-
-  void operator()(const state_formulas::forall& x)
-  {
-    push(Par(X, l + x.variables(), x.body()));
-  }
-
-  void operator()(const state_formulas::exists& x)
-  {
-    push(Par(X, l + x.variables(), x.body()));
-  }
-
-  void leave(const state_formulas::must& x)
-  {
-    // skip
-  }
-
-  void leave(const state_formulas::may& x)
-  {
-    // skip
-  }
-
-  void leave(const state_formulas::yaled& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::yaled_timed& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::delay& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::delay_timed& x)
-  {
-    push(data::variable_list());
-  }
-
-  void leave(const state_formulas::variable& x)
-  {
-    push(data::variable_list());
-  }
-
-  void operator()(const state_formulas::nu& x)
-  {
-    if (x.name() == X)
-    {
-      push(l);
-    }
-    else
-    {
-      push(Par(X, l + data::left_hand_sides(x.assignments()), x.operand()));
-    }
-  }
-
-  void operator()(const state_formulas::mu& x)
-  {
-    if (x.name() == X)
-    {
-      push(l);
-    }
-    else
-    {
-      push(Par(X, l + data::left_hand_sides(x.assignments()), x.operand()));
-    }
-  }
-};
-
-inline
-data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x)
-{
-  par_traverser f(X, l);
-  f(x);
-  return f.top();
-}
-
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x);
-
-template <typename Derived>
-struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
-{
-  typedef action_formulas::action_formula_traverser<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
-  const lps::multi_action& a;
-  atermpp::vector<pbes_expression> result_stack;
-
-  sat_traverser(const lps::multi_action& a_)
-    : a(a_)
-  {}
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
-
-  void push(const pbes_expression& x)
-  {
-    result_stack.push_back(x);
-  }
-
-  const pbes_expression& top() const
-  {
-    return result_stack.back();
-  }
-
-  pbes_expression pop()
-  {
-    pbes_expression result = top();
-    result_stack.pop_back();
-    return result;
-  }
-
-  void leave(const data::data_expression& x)
-  {
-    push(x);
-  }
-
-  void leave(const lps::multi_action& x)
-  {
-    push(lps::equal_multi_actions(a, x));
-  }
-
-  void leave(const action_formulas::true_& x)
-  {
-    push(true_());
-  }
-
-  void leave(const action_formulas::false_& x)
-  {
-    push(false_());
-  }
-
-  void operator()(const action_formulas::not_& x)
-  {
-    push(not_(Sat(a, x.operand())));
-  }
-
-  void leave(const action_formulas::and_& x)
-  {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
-    push(and_(left, right));
-  }
-
-  void leave(const action_formulas::or_& x)
-  {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
-    push(or_(left, right));
-  }
-
-  void leave(const action_formulas::imp& x)
-  {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
-    push(imp(left, right));
-  }
-
-  void operator()(const action_formulas::forall& x)
-  {
-    data::set_identifier_generator id_generator;
-    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
-    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
-    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
-    action_formulas::action_formula alpha = x.body();
-    push(forall(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
-  }
-
-  void operator()(const action_formulas::exists& x)
-  {
-    data::set_identifier_generator id_generator;
-    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
-    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
-    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
-    action_formulas::action_formula alpha = x.body();
-    push(exists(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
-  }
-
-  void operator()(const action_formulas::at& x)
-  {
-    data::data_expression t = a.time();
-    action_formulas::action_formula alpha = x.operand();
-    data::data_expression u = x.time_stamp();
-    push(and_(Sat(a, alpha), data::equal_to(t, u)));
-  }
-};
-
-template <template <class> class Traverser>
-struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
-{
-  typedef Traverser<apply_sat_traverser<Traverser> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-  using super::top;
-
-  apply_sat_traverser(const lps::multi_action& a)
-    : super(a)
-  {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-};
-
-inline
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x)
-{
-  apply_sat_traverser<sat_traverser> f(a);
-  f(x);
-  return f.top();
-}
-
-} // namespace detail
-/// \endcond
 
 /// \brief Abstract algorithm class for translating a state formula and a specification to a pbes.
 class pbes_translate_algorithm
@@ -440,6 +72,15 @@ class pbes_translate_algorithm
       return detail::Par(x, l, f);
     }
 
+    /// \brief The \p sat_top function of the translation
+    /// \param a A timed multi-action
+    /// \param b An action formula
+    /// \return The function result
+    pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
+    {
+      return detail::Sat(x, b);
+    }
+
   public:
     /// \brief Constructor.
     pbes_translate_algorithm()
@@ -450,15 +91,6 @@ class pbes_translate_algorithm
 class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 {
   protected:
-
-    /// \brief The \p sat_top function of the translation
-    /// \param a A timed multi-action
-    /// \param b An action formula
-    /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
-    {
-      return detail::Sat(x, b);
-    }
 
     /// \brief The \p RHS function of the translation
     /// \param f0 A modal formula
@@ -475,6 +107,9 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       data::set_identifier_generator& id_generator
      )
     {
+#ifdef MCRL2_DEBUG_RHS
+      data::set_identifier_generator id_generator_copy = id_generator;
+#endif
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
@@ -662,6 +297,17 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
       std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pbes_system::pp(result) << std::flush;
+#endif
+#ifdef MCRL2_DEBUG_RHS
+      pbes_expression tmp = detail::RHS(f0, f, lps, id_generator_copy, T);
+      if (tmp != result)
+      {
+        std::cout << "------------------------------------------------------------" << std::endl;
+        std::cout << "f      = " << state_formulas::pp(f) << " " << f << std::endl;
+        std::cout << "tmp    = " << pbes_system::pp(tmp) << std::endl;
+        std::cout << "result = " << pbes_system::pp(result) << std::endl;
+      }
+      assert(tmp == result);
 #endif
       return result;
     }
@@ -902,22 +548,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 };
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
-class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
-{
-  protected:
-
-    /// \brief The \p sat_top function of the translation
-    /// \param x A sequence of actions
-    /// \param b An action formula
-    /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
-    {
-      return detail::Sat(x, b);
-    }
-};
-
-/// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
-class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_base
+class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
 {
   protected:
     /// \brief The \p RHS function of the translation
@@ -931,6 +562,9 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
                         const lps::linear_process& lps,
                         data::set_identifier_generator& id_generator)
     {
+#ifdef MCRL2_DEBUG_RHS
+      data::set_identifier_generator id_generator_copy = id_generator;
+#endif
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       std::cerr << "\n" << lps2pbes_indent() << "<RHS-untimed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
@@ -990,12 +624,10 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         const lps::action_summand_vector& asv=lps.action_summands();
         for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
         {
-          data::data_expression ci(i->condition());
-          lps::action_list ai(i->multi_action().actions());
+          data::data_expression ci = i->condition();
+          lps::action_list ai      = i->multi_action().actions();
           data::assignment_list gi = i->assignments();
-          //data::variable_list xp(lps.process_parameters());
-          data::variable_list yi(i->summation_variables());
-
+          data::variable_list yi   = i->summation_variables();
           pbes_expression rhs = RHS(f0, phi, lps, id_generator);
           data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
           ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
@@ -1004,7 +636,6 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           pbes_expression p1 = sat_top(ai, alpha);
           pbes_expression p2 = ci;
           rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
-
           pbes_expression p = pbes_expr::forall(y, imp(and_(p1, p2), rhs));
           v.push_back(p);
         }
@@ -1022,7 +653,6 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           lps::action_list ai(i->multi_action().actions());
           data::assignment_list gi = i->assignments();
           data::variable_list yi(i->summation_variables());
-
           pbes_expression rhs = RHS(f0, phi, lps, id_generator);
           data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
           ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
@@ -1031,7 +661,6 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
           pbes_expression p1 = sat_top(ai, alpha);
           pbes_expression p2 = ci;
           rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
-
           pbes_expression p = pbes_expr::exists(y, and_(and_(p1, p2), rhs));
           v.push_back(p);
         }
@@ -1058,6 +687,17 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
       std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pbes_system::pp(result) << std::flush;
+#endif
+#ifdef MCRL2_DEBUG_RHS
+      pbes_expression tmp = detail::RHS(f0, f, lps, id_generator_copy);
+      if (tmp != result)
+      {
+        std::cout << "------------------------------------------------------------" << std::endl;
+        std::cout << "f      = " << state_formulas::pp(f) << " " << f << std::endl;
+        std::cout << "tmp    = " << pbes_system::pp(tmp) << std::endl;
+        std::cout << "result = " << pbes_system::pp(result) << std::endl;
+      }
+      assert(tmp == result);
 #endif
       return result;
     }

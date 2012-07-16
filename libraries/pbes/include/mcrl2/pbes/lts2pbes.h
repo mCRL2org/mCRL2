@@ -97,7 +97,7 @@ class lts2pbes_lts
 } // namespace detail
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
-class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
+class lts2pbes_algorithm: public pbes_translate_algorithm_untimed
 {
   public:
     typedef lts::lts_lts_t::states_size_type state_type;

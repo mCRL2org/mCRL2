@@ -197,8 +197,6 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      std::cout << "\n<mu-negated>" << state_formulas::pp(x) << std::endl;
-      std::cout << state_formulas::pp(detail::negate_propositional_variable(x.name(), x.operand())) << std::endl;
       return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
     }
     else
@@ -211,8 +209,6 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      std::cout << "\n<nu-negated>" << state_formulas::pp(x) << std::endl;
-      std::cout << state_formulas::pp(detail::negate_propositional_variable(x.name(), x.operand())) << std::endl;
       return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
     }
     else
