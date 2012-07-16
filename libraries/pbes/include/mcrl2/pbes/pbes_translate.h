@@ -44,10 +44,10 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
+#include "mcrl2/pbes/detail/lps2pbes_e.h"
 
 namespace mcrl2
 {
@@ -265,7 +265,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
           pbes_expression p = pbes_expr::forall(yk, or_(data::sort_bool::not_(ck), d::greater(t, tk)));
           v.push_back(p);
         }
-        const lps::deadlock_summand_vector& dsv=lps.deadlock_summands();
+        const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
         for (lps::deadlock_summand_vector::const_iterator i = dsv.begin(); i != dsv.end(); ++i)
         {
           data::data_expression ck(i->condition());
@@ -485,6 +485,17 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
       std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
+#endif
+#ifdef MCRL2_DEBUG_RHS
+      atermpp::vector<pbes_equation> tmp = detail::E(f, f, lps, T);
+      if (!(tmp == result))
+      {
+        std::cout << "------------------------------------------------------------" << std::endl;
+        std::cout << "f      = " << state_formulas::pp(f) << " " << f << std::endl;
+        std::cout << "tmp    = " << pbes_system::pp(tmp) << std::endl;
+        std::cout << "result = " << pbes_system::pp(result) << std::endl;
+      }
+      assert(tmp == result);
 #endif
       return result;
     }
@@ -875,6 +886,17 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
       std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
+#endif
+#ifdef MCRL2_DEBUG_RHS
+      atermpp::vector<pbes_equation> tmp = detail::E(f, f, lps);
+      if (tmp != result)
+      {
+        std::cout << "------------------------------------------------------------" << std::endl;
+        std::cout << "f      = " << state_formulas::pp(f) << " " << f << std::endl;
+        std::cout << "tmp    = " << pbes_system::pp(tmp) << std::endl;
+        std::cout << "result = " << pbes_system::pp(result) << std::endl;
+      }
+      assert(tmp == result);
 #endif
       return result;
     }

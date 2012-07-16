@@ -27,7 +27,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_translate_impl.h"
+#include "mcrl2/pbes/detail/lps2pbes_utility.h"
 
 namespace mcrl2
 {

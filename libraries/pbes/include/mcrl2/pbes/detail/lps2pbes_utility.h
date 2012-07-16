@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 
+#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
@@ -49,6 +51,38 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 /// \endcond
 
 namespace detail {
+
+/// \brief Returns the variables corresponding to ass(f)
+/// \param f A modal formula
+/// \return The variables corresponding to ass(f)
+inline
+data::variable_list mu_variables(state_formulas::state_formula f)
+{
+  assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
+  data::variable_list result;
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  {
+    result = atermpp::push_front(result, i->lhs());
+  }
+  return atermpp::reverse(result);
+}
+
+/// \brief Returns the data expressions corresponding to ass(f)
+/// \param f A modal formula
+/// \return The data expressions corresponding to ass(f)
+inline
+data::data_expression_list mu_expressions(state_formulas::state_formula f)
+{
+  assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
+  data::data_expression_list result;
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  {
+    result = atermpp::push_front(result, i->rhs());
+  }
+  return atermpp::reverse(result);
+}
 
 inline
 std::string myprint(const atermpp::vector<pbes_equation>& v)

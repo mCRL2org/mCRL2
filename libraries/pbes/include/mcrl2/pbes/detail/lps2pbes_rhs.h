@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/detail/lps2pbes_par.h"
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
-#include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
 namespace mcrl2 {
 
