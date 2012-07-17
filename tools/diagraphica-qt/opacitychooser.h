@@ -44,9 +44,6 @@ class OpacityChooser : public Visualizer
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
 
-    // -- public constants ------------------------------------------
-    static double hdlSzeHnt;
-
   protected:
     // -- utility drawing functions ---------------------------------
     // ***

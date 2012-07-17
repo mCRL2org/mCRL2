@@ -8,8 +8,6 @@
 //
 /// \file ./attrdiscr.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "mcrl2/utilities/exception.h"
 #include "attrdiscr.h"
 

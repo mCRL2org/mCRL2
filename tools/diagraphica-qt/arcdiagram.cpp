@@ -8,8 +8,6 @@
 //
 /// \file ./arcdiagram.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include <limits>
 #include "arcdiagram.h"
 #include <iostream>
@@ -41,8 +39,7 @@ ArcDiagram::ArcDiagram(
 
   diagram = NULL;
 
-  timerAnim = new wxTimer();
-  timerAnim->SetOwner(this, ID_TIMER);
+  connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 
   connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
@@ -65,9 +62,6 @@ ArcDiagram::~ArcDiagram()
 {
   diagram = NULL;
   clearSettings();
-
-  delete timerAnim;
-  timerAnim = NULL;
 }
 
 
@@ -926,7 +920,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
-          if (timerAnim->IsRunning() &&
+          if (m_animationTimer.isActive() &&
               animIdxDgrm == i)
           {
             if (i == currIdxDgrm)
@@ -1624,12 +1618,12 @@ void ArcDiagram::clearSettingsDiagram()
 // -- utility event handlers ------------------------------------
 
 
-void ArcDiagram::onTimer(wxTimerEvent& /*e*/)
+void ArcDiagram::animate()
 {
-  if (timerAnim->GetInterval() != (1000.0 / settings->animationSpeed.value()))
+  if (m_animationTimer.interval() != (int)(1000.0 / settings->animationSpeed.value()))
   {
-    timerAnim->Stop();
-    timerAnim->Start((1000.0 / settings->animationSpeed.value()));
+    m_animationTimer.stop();
+    m_animationTimer.start((int)(1000.0 / settings->animationSpeed.value()));
   }
 
   frameIdxDgrm[animIdxDgrm] += 1;
@@ -1920,9 +1914,9 @@ void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
 
 void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (dgrmIdx != animIdxDgrm)
@@ -1942,9 +1936,9 @@ void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
 
 void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (dgrmIdx != animIdxDgrm)
@@ -1971,9 +1965,9 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
 {
   if (dgrmIdx == animIdxDgrm)
   {
-    if (timerAnim->IsRunning())
+    if (m_animationTimer.isActive())
     {
-      timerAnim->Stop();
+      m_animationTimer.stop();
 
       mediator->handleShowFrame(
             framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
@@ -1982,22 +1976,22 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
     }
     else
     {
-      timerAnim->Start((1000.0 / settings->animationSpeed.value()));
+      m_animationTimer.start((int)(1000.0 / settings->animationSpeed.value()));
     }
   }
   else
   {
     animIdxDgrm = dgrmIdx;
-    timerAnim->Start((1000.0 / settings->animationSpeed.value()));
+    m_animationTimer.start((int)(1000.0 / settings->animationSpeed.value()));
   }
 }
 
 
 void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (dgrmIdx != animIdxDgrm)
@@ -2148,9 +2142,9 @@ void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
     // clear animation info
     if (animIdxDgrm == dgrmIdx)
     {
-      if (timerAnim->IsRunning())
+      if (m_animationTimer.isActive())
       {
-        timerAnim->Stop();
+        m_animationTimer.stop();
       }
       animIdxDgrm      = NON_EXISTING;
     }
@@ -2211,15 +2205,3 @@ void ArcDiagram::processHits(
 
   ptr = NULL;
 }
-
-
-// -- implement event table -----------------------------------------
-
-
-BEGIN_EVENT_TABLE(ArcDiagram, wxEvtHandler)
-// menu bar
-EVT_TIMER(ID_TIMER, ArcDiagram::onTimer)
-END_EVENT_TABLE()
-
-
-// -- end -----------------------------------------------------------

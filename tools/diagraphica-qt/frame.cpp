@@ -3435,7 +3435,8 @@ void Frame::onPopupMenu(wxCommandEvent& e)
 
     // confirm action
     vector< wxString > names;
-    mediator->getAttributeNames(indcs, names);
+    ///TODO: restore
+    //mediator->getAttributeNames(indcs, names);
 
     wxString msg(wxT("Are you sure you want to delete \'"));
     for (size_t i = 0; i < names.size(); ++i)

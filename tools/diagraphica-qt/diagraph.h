@@ -115,11 +115,6 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
       const std::string& newValue);
     void handleDomainUngroup(const size_t& attrIdx);
 
-    void getAttributeNames(
-      const std::vector< size_t > &indcs,
-      std::vector< wxString > &names);
-    size_t getAttrSizeCurDomain(const size_t& idx);
-
     // -- attribute plots -------------------------------------------
     void handleAttributePlot(const size_t& idx);
     void handleAttributePlot(

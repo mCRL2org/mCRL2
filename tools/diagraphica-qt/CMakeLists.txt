@@ -28,8 +28,10 @@ set(DIAGRAPHICA_UI_FILES
 qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 
 set(DIAGRAPHICA_MOC_HEADERS
+  arcdiagram.h
   settingsdialog.h
   simulator.h
+  timeseries.h
   visualizer.h
 )
 qt4_wrap_cpp(DIAGRAPHICA_MOC_SOURCES ${DIAGRAPHICA_MOC_HEADERS})
@@ -43,7 +45,6 @@ set(DIAGRAPHICA_SRC_FILES
   attribute.cpp
   bundle.cpp
   cluster.cpp
-  colleague.cpp
   colorchooser.cpp
   combnplot.cpp
   corrlplot.cpp
@@ -53,7 +54,6 @@ set(DIAGRAPHICA_SRC_FILES
   distrplot.cpp
   dof.cpp
   droptarget.cpp
-  edge.cpp
   examiner.cpp
   frame.cpp
   glcanvas.cpp
@@ -67,7 +67,6 @@ set(DIAGRAPHICA_SRC_FILES
   simulator.cpp
   timeseries.cpp
   utils.cpp
-  value.cpp
   visualizer.cpp
   visutils.cpp
 )

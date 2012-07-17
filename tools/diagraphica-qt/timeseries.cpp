@@ -8,8 +8,6 @@
 //
 /// \file ./timeseries.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "timeseries.h"
 
 #include <iostream>
@@ -53,11 +51,10 @@ TimeSeries::TimeSeries(
 
   dragDir = DRAG_DIR_NULL;
 
-  timerAnim = new wxTimer();
-  timerAnim->SetOwner(this, ID_TIMER);
-
   animIdxDgrm = -1;
   animFrame = itemsMarked.end();
+
+  connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 
   connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
@@ -69,9 +66,6 @@ TimeSeries::~TimeSeries()
 {
   clearDiagram();
   clearAttributes();
-
-  delete timerAnim;
-  timerAnim = NULL;
 }
 
 
@@ -369,7 +363,7 @@ void TimeSeries::visualize(const bool& inSelectMode)
       glPushName(ID_CANVAS);
       VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*wth, -0.5*wth);
 
-      if (timerAnim->IsRunning() != true)
+      if (!m_animationTimer.isActive())
       {
         drawMarkedItems(inSelectMode);
         drawSlider(inSelectMode);
@@ -424,7 +418,7 @@ void TimeSeries::handleWheelEvent(QWheelEvent *e)
 {
   Visualizer::handleWheelEvent(e);
 
-  if (!timerAnim->IsRunning())
+  if (!m_animationTimer.isActive())
   {
     mouseOverIdx = -1;
 
@@ -566,9 +560,9 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
     }
     else if (e->key() == WXK_ESCAPE)
     {
-      if (timerAnim->IsRunning())
+      if (m_animationTimer.isActive())
       {
-        timerAnim->Stop();
+        m_animationTimer.stop();
       }
       else
       {
@@ -803,7 +797,7 @@ void TimeSeries::clearAttributes()
 // -- utility event handlers ----------------------------------------
 
 
-void TimeSeries::onTimer(wxTimerEvent& /*e*/)
+void TimeSeries::animate()
 {
   ++animFrame;
   if (animFrame == itemsMarked.end())
@@ -844,9 +838,9 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
 
 void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (animFrame == itemsMarked.begin())
@@ -885,9 +879,9 @@ void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
 {
   if (dgrmIdx == animIdxDgrm)
   {
-    if (timerAnim->IsRunning())
+    if (m_animationTimer.isActive())
     {
-      timerAnim->Stop();
+      m_animationTimer.stop();
 
       if (*animFrame != animIdxDgrm)
       {
@@ -906,23 +900,23 @@ void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
     }
     else
     {
-      timerAnim->Start(itvAnim);
+      m_animationTimer.start(itvAnim);
     }
   }
   else
   {
     animIdxDgrm = dgrmIdx;
     animFrame = itemsMarked.begin();
-    timerAnim->Start(itvAnim);
+    m_animationTimer.start(itvAnim);
   }
 }
 
 
 void TimeSeries::handleNextDiagram(const int& dgrmIdx)
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (animFrame == itemsMarked.end())
@@ -1045,7 +1039,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
         mouseOverIdx = NON_EXISTING;
         currIdxDgrm = ids[2];
 
-        if (currIdxDgrm != NON_EXISTING && timerAnim->IsRunning() != true)
+        if (currIdxDgrm != NON_EXISTING && !m_animationTimer.isActive())
         {
           Cluster* frame = new Cluster();
           vector< Attribute* > attrs;
@@ -1570,7 +1564,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
   if (inSelectMode == true)
   {
     glPushName(ID_DIAGRAM);
-    if (timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING)
+    if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posDgrm;
       map< size_t, Position2D >::iterator it;
@@ -1663,7 +1657,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
   {
     double     pix = canvas->getPixelSize();
 
-    if (timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING)
+    if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posPvot, posDgrm;
       map< size_t, Position2D >::iterator it;
@@ -2452,15 +2446,3 @@ void TimeSeries::handleDragDiagram(const int& dgrmIdx)
     it->second.y += (y2-y1);
   }
 }
-
-
-// -- implement event table -----------------------------------------
-
-
-BEGIN_EVENT_TABLE(TimeSeries, wxEvtHandler)
-  // menu bar
-  EVT_TIMER(ID_TIMER, TimeSeries::onTimer)
-END_EVENT_TABLE()
-
-
-// -- end -----------------------------------------------------------

@@ -24,8 +24,6 @@
 #include <GL/glu.h>
 #endif
 #include <string>
-#include <wx/bitmap.h>
-#include <wx/image.h>
 #include "utils.h"
 
 

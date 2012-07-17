@@ -8,8 +8,6 @@
 //
 /// \file ./diagram.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "diagram.h"
 
 using namespace std;

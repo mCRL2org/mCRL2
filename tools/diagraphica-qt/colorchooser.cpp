@@ -8,16 +8,9 @@
 //
 /// \file ./colorchooser.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "colorchooser.h"
 
 using namespace std;
-
-// -- static variables ----------------------------------------------
-
-double ColorChooser::hdlSzeHnt =  5.0;
-
 
 // -- constructors and destructor -----------------------------------
 
@@ -28,7 +21,7 @@ ColorChooser::ColorChooser(
   GLCanvas* c)
   : Visualizer(m, g, c)
 {
-  hdlSize  = hdlSzeHnt;
+  hdlSize  = 5.0;
 
   active  = false;
   dragIdx = NON_EXISTING;

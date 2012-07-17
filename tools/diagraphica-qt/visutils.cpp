@@ -8,8 +8,6 @@
 //
 /// \file ./visutils.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "visutils.h"
 #include "character_set.xpm"
 
@@ -1783,7 +1781,7 @@ void VisUtils::genCharTextures(
     // bind textures
     glBindTexture(GL_TEXTURE_2D, texCharId[i]);
     // create image
-    wxImage image(characters[i]);
+    QImage image(characters[i]);
 
     int red = 0;
     int green = 0;
@@ -1795,9 +1793,10 @@ void VisUtils::genCharTextures(
     {
       for (int w = 0; w < CHARWIDTH; ++w)
       {
-        red   = (GLubyte)image.GetRed(w, h);
-        green = (GLubyte)image.GetGreen(w, h);
-        blue  = (GLubyte)image.GetBlue(w, h);
+        QColor pixel(image.pixel(w, h));
+        red   = (GLubyte)pixel.red();
+        green = (GLubyte)pixel.green();
+        blue  = (GLubyte)pixel.blue();
 
         texChar[i][count] = (GLubyte)(255.0-(red+green+blue)/3.0);
 

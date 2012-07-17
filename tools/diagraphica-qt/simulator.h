@@ -19,8 +19,6 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include <wx/event.h>
-#include <wx/timer.h>
 #include "bundle.h"
 #include "diagram.h"
 #include "edge.h"

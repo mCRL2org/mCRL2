@@ -18,8 +18,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-#include <wx/event.h>
-#include <wx/timer.h>
 #include "bundle.h"
 #include "diagram.h"
 #include "edge.h"
@@ -30,7 +28,7 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Examiner : public wxEvtHandler, public Visualizer
+class Examiner : public Visualizer
 {
   public:
     // -- constructors and destructor -------------------------------
@@ -108,11 +106,6 @@ class Examiner : public wxEvtHandler, public Visualizer
     void drawFramesHist(const bool& inSelectMode);
     void drawControls(const bool& inSelectMode);
 
-    // -- utility event handlers ------------------------------------
-    /*
-        void onTimer( wxTimerEvent &e );
-    */
-
     enum
     {
       ID_ICON_CLR,
@@ -148,11 +141,6 @@ class Examiner : public wxEvtHandler, public Visualizer
     double offset;
     size_t vsblHistIdxLft;
     size_t vsblHistIdxRgt;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif
-
-// -- end -----------------------------------------------------------

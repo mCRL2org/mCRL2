@@ -836,33 +836,6 @@ void DiaGraph::handleDomainUngroup(const size_t& attrIdx)
 }
 
 
-void DiaGraph::getAttributeNames(
-  const vector< size_t > &indcs,
-  vector< wxString > &names)
-{
-  names.clear();
-  for (size_t i = 0; i < indcs.size(); ++i)
-  {
-    if (NON_EXISTING != indcs[i] && indcs[i] < graph->getSizeAttributes())
-      names.push_back(
-        wxString(
-          graph->getAttribute(indcs[i])->getName().c_str(),
-          wxConvUTF8));
-  }
-}
-
-
-size_t DiaGraph::getAttrSizeCurDomain(const size_t& idx)
-{
-  size_t result = 0;
-  if (idx != NON_EXISTING && idx < graph->getSizeAttributes())
-  {
-    result = graph->getAttribute(idx)->getSizeCurValues();
-  }
-  return result;
-}
-
-
 // -- attribute plots -----------------------------------------------
 
 

@@ -23,7 +23,7 @@
 #include <cmath>
 #include <map>
 #include <vector>
-#include <wx/timer.h>
+#include <QTimer>
 #include "diagram.h"
 #include "graph.h"
 #include "settings.h"
@@ -39,8 +39,9 @@ enum RenderMode
   HitRender
 };
 
-class ArcDiagram : public wxEvtHandler, public Visualizer
+class ArcDiagram : public Visualizer
 {
+  Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
@@ -117,8 +118,9 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void clearSettingsDiagram();
 
     // -- utility event handlers ------------------------------------
-    void onTimer(wxTimerEvent& e);
-
+  protected slots:
+    void animate();
+  protected:
     void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(
@@ -191,8 +193,7 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     std::map< size_t, std::vector< QColor > > markLeaves;
 
     // animation
-    wxTimer* timerAnim;
-    static int itvAnim;
+    QTimer m_animationTimer;
 
     // -- constants -------------------------------------------------
     enum
@@ -216,9 +217,6 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     static int MAX_RAD_HINT_PX; // radius cannot be larger than this
     static int SEGM_HINT_HQ;
     static int SEGM_HINT_LQ;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

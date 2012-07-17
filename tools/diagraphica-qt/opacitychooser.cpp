@@ -8,17 +8,9 @@
 //
 /// \file ./opacitychooser.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "opacitychooser.h"
 
 using namespace std;
-
-// -- static variables ----------------------------------------------
-
-
-double OpacityChooser::hdlSzeHnt =  5.0;
-
 
 // -- constructors and destructor -----------------------------------
 
@@ -29,7 +21,7 @@ OpacityChooser::OpacityChooser(
   GLCanvas* c)
   : Visualizer(m, g, c)
 {
-  hdlSize  = hdlSzeHnt;
+  hdlSize  = 5.0;
 
   active  = false;
   dragIdx = -1;

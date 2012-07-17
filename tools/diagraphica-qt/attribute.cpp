@@ -8,8 +8,6 @@
 //
 /// \file ./attribute.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "attribute.h"
 
 // -- constructors and destructor -----------------------------------

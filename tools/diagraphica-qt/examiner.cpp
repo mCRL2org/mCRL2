@@ -8,8 +8,6 @@
 //
 /// \file ./examiner.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "examiner.h"
 
 #include <iostream>
@@ -1176,13 +1174,3 @@ void Examiner::drawControls(const bool& inSelectMode)
     }
   }
 }
-
-
-// -- implement event table -----------------------------------------
-
-
-BEGIN_EVENT_TABLE(Examiner, wxEvtHandler)
-END_EVENT_TABLE()
-
-
-// -- end -----------------------------------------------------------

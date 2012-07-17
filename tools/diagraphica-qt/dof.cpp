@@ -8,8 +8,6 @@
 //
 /// \file ./dof.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "dof.h"
 
 using namespace std;

@@ -45,13 +45,8 @@ class ColorChooser : public Visualizer
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
 
-    // -- public constants ------------------------------------------
-    static double hdlSzeHnt;
-
   protected:
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
     void drawColorSpectrum();
     void drawPath(const bool& inSelectMode);
     void drawPoints(const bool& inSelectMode);
@@ -74,9 +69,6 @@ class ColorChooser : public Visualizer
 
     // vis settings
     double hdlSize;
-    /*
-    std::vector< Position2D > positions;
-    */
 };
 
 #endif

@@ -26,16 +26,11 @@
 class Colleague
 {
   public:
-    // -- constructors and destructors -----------------------------
-    Colleague(Mediator* m);
-    Colleague(const Colleague& colleague);
-    virtual ~Colleague();
+    Colleague(Mediator* m): mediator(m) {}
+    Colleague(const Colleague& colleague): mediator(colleague.mediator) {}
 
   protected:
-    // -- data members ----------------------------------------------
-    Mediator* mediator;     // association
+    Mediator* mediator;
 };
 
 #endif
-
-// -- end -----------------------------------------------------------

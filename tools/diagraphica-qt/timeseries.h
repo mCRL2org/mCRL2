@@ -21,7 +21,7 @@
 #include <set>
 #include <string>
 #include <vector>
-//#include <wx/event.h>
+#include <QTimer>
 #include "attribute.h"
 #include "diagram.h"
 #include "glcanvas.h"
@@ -29,8 +29,9 @@
 #include "settings.h"
 #include "visualizer.h"
 
-class TimeSeries : public wxEvtHandler, public Visualizer
+class TimeSeries : public Visualizer
 {
+  Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     TimeSeries(
@@ -87,7 +88,9 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void clearAttributes();
 
     // -- utility event handlers ------------------------------------
-    void onTimer(wxTimerEvent& e);
+  protected slots:
+    void animate();
+  protected:
     void handleRwndDiagram(const int& dgrmIdx);
     void handlePrevDiagram(const int& dgrmIdx);
     void handlePlayDiagram(const size_t& dgrmIdx);
@@ -200,11 +203,8 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     bool critSect;
 
     // animation
-    wxTimer* timerAnim;
+    QTimer m_animationTimer;
     std::set< size_t >::iterator animFrame;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

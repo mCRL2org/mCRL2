@@ -24,7 +24,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <wx/wx.h>
 #include "visutils.h"
 
 #ifndef NON_EXISTING
@@ -92,11 +91,6 @@ class Mediator
       const std::vector< int > domIndcs,
       const std::string& newValue) = 0;
     virtual void handleDomainUngroup(const size_t& attrIdx) = 0;
-
-    virtual void getAttributeNames(
-      const std::vector< size_t > &indcs,
-      std::vector< wxString > &names) = 0;
-    virtual size_t getAttrSizeCurDomain(const size_t& idx) = 0;
 
     // -- attribute plots -------------------------------------------
     virtual void handleAttributePlot(const size_t& idx) = 0;

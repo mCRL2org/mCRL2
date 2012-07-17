@@ -8,8 +8,6 @@
 //
 /// \file ./distrplot.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "distrplot.h"
 
 // -- constructors and destructor -----------------------------------

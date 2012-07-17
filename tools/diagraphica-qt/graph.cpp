@@ -8,8 +8,6 @@
 //
 /// \file ./graph.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "mcrl2/utilities/exception.h"
 #include "graph.h"
 #include <iostream>

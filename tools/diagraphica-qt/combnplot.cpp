@@ -8,8 +8,6 @@
 //
 /// \file ./combnplot.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "combnplot.h"
 
 // -- constructors and destructor -----------------------------------
