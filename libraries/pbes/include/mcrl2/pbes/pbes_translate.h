@@ -487,7 +487,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
 #endif
 #ifdef MCRL2_DEBUG_RHS
-      atermpp::vector<pbes_equation> tmp = detail::E(f, f, lps, T);
+      atermpp::vector<pbes_equation> tmp = detail::E(f0, f, lps, T);
       if (!(tmp == result))
       {
         std::cout << "------------------------------------------------------------" << std::endl;
@@ -888,7 +888,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
       std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
 #endif
 #ifdef MCRL2_DEBUG_RHS
-      atermpp::vector<pbes_equation> tmp = detail::E(f, f, lps);
+      atermpp::vector<pbes_equation> tmp = detail::E(f0, f, lps);
       if (tmp != result)
       {
         std::cout << "------------------------------------------------------------" << std::endl;

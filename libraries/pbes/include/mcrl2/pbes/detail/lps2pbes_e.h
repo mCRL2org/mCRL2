@@ -84,19 +84,25 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     return T != data::variable();
   }
 
+  // the empty equation list
+  result_type epsilon() const
+  {
+    return result_type();
+  }
+
   void leave(const data::data_expression& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::true_& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::false_& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void operator()(const state_formulas::not_& x)
@@ -145,27 +151,27 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const state_formulas::yaled& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::yaled_timed& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::delay& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::delay_timed& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   void leave(const state_formulas::variable& x)
   {
-    push(result_type());
+    push(epsilon());
   }
 
   template <typename Expr>
@@ -175,14 +181,14 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     core::identifier_string X = x.name();
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = lps.process_parameters();
-    state_formulas::state_formula g = x.operand();
+    state_formulas::state_formula phi = x.operand();
     data::data_expression_list e = xf + xp + Par(X, data::variable_list(), phi0);
     e = is_timed() ? T + e : e;
     propositional_variable v(X, e);
     data::set_identifier_generator id_generator;
-    pbes_expression expr = detail::RHS(phi0, g, lps, id_generator, T);
+    pbes_expression expr = detail::RHS(phi0, phi, lps, id_generator, T);
     pbes_equation eqn(sigma, v, expr);
-    push(atermpp::vector<pbes_equation>() + eqn + E(phi0, g, lps, T));
+    push(atermpp::vector<pbes_equation>() + eqn + E(phi0, phi, lps, T));
   }
 
   void operator()(const state_formulas::nu& x)
@@ -225,6 +231,7 @@ atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
 {
   apply_e_traverser<e_traverser> f(x0, lps, T);
   f(x);
+  assert(f.result_stack.size() == 1);
   return f.top();
 }
 
