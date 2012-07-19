@@ -34,7 +34,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
-class lts2pbes_algorithm: public pbes_translate_algorithm_untimed
+class lts2pbes_algorithm
 {
   public:
     typedef lts::lts_lts_t::states_size_type state_type;
