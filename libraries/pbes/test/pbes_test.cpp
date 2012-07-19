@@ -30,7 +30,6 @@
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
