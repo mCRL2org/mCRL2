@@ -129,17 +129,6 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     throw mcrl2::runtime_error("rhs_traverser: negation is not supported!");
   }
 
-  void operator()(const state_formulas::and_& x)
-  {
-    push(pbes_expr_optimized::and_(RHS(phi0, x.left(), lps, id_generator, T), RHS(phi0, x.right(), lps, id_generator, T)));
-  }
-
-  void operator()(const state_formulas::or_& x)
-  {
-    push(pbes_expr_optimized::or_(RHS(phi0, x.left(), lps, id_generator, T), RHS(phi0, x.right(), lps, id_generator, T)));
-  }
-
-/*
   void leave(const state_formulas::and_& x)
   {
     pbes_expression right = pop();
@@ -153,7 +142,6 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     pbes_expression left = pop();
     push(pbes_expr_optimized::or_(left, right));
   }
-*/
 
   void operator()(const state_formulas::imp& x)
   {
@@ -182,6 +170,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     bool timed = is_timed();
     atermpp::vector<pbes_expression> v;
+    pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T);
+    action_formulas::action_formula alpha = x.formula();
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
@@ -191,11 +181,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::assignment_list gi = i->assignments();
       data::variable_list yi   = i->summation_variables();
 
-      action_formulas::action_formula alpha = x.formula();
-      //derived()(x.operand());
-      //pbes_expression rhs0 = top();
-      //pop();
-      pbes_expression rhs = RHS(phi0, x.operand(), lps, id_generator, T);
+      pbes_expression rhs = rhs0;
       data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
       ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
       lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
