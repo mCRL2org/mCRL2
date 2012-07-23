@@ -184,8 +184,14 @@ def run_pbesrewr(pbesfile1, pbesfile2, pbes_rewriter = 'simplify', timeout = 10)
     add_temporary_files(pbesfile1, pbesfile2)
     timeout_command('pbesrewr',  '--pbes-rewriter=%s %s %s' % (pbes_rewriter, pbesfile1, pbesfile2), timeout)
 
-def run_mcrl22lps(mcrl2file, lpsfile, timeout = 10):
-    timeout_command('mcrl22lps',  '%s %s' % (mcrl2file, lpsfile), timeout)
+def run_mcrl22lps(mcrl2file, lpsfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, mcrl2file, lpsfile)
+    timeout_command('mcrl22lps',  args.strip(), timeout)
 
-def run_lps2lts(lpsfile, destfile, options, timeout = 10):
-    timeout_command('lps2lts',  '%s %s %s' % (options, lpsfile, destfile), timeout)
+def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, lpsfile, destfile)
+    timeout_command('lps2lts', args.strip(), timeout)
+
+def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
+    dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
+    return text.find('LTSs are strongly bisimilar') != -1
