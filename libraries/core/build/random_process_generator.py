@@ -457,31 +457,30 @@ class process_specification:
         initspec = 'init\n  %s;' % str(init)
         return '%s\n%s\n%s' % (actspec, procspec, initspec)
 
-def make_parallel_expression(actions, process_identifiers, n):
-    # 1) join the process identifiers using merge / left_merge / sync
-    ids = copy.deepcopy(process_identifiers)
+def make_parallel_expression(actions, process_expressions, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow]):
+    # 1) join the process expressions using merge / left_merge / sync
+    V = copy.deepcopy(process_expressions)
     x = None
-    while len(ids) > 0:
+    while len(V) > 0:
         if x == None:
-            p, q = random.sample(ids, 2)
-            ids.remove(p)
-            ids.remove(q)
+            p, q = random.sample(V, 2)
+            V.remove(p)
+            V.remove(q)
             x = merge(p, q)
         else:
-            p = random.choice(ids)
-            ids.remove(p)
+            p = random.choice(V)
+            V.remove(p)
             x = merge(x, p)
 
-    # 2) wrap n parallel operators around x
-    G = [make_block, make_hide, make_rename, make_comm, make_allow]
-    for i in range(n):
-        g = random.choice(G)
-        x = g(actions, x)
+    # 2) wrap size parallel operators around x
+    for i in range(size):
+        f = random.choice(parallel_operators)
+        x = f(actions, x)
 
     return x
 
 # generate a random process specification
-def make_process_specification(generator_map, actions, process_identifiers, size):
+def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow]):
     is_guarded = True
     free_variables = []
     is_pcrl = True
@@ -490,27 +489,17 @@ def make_process_specification(generator_map, actions, process_identifiers, size
         x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size)
         equations.append(process_equation(P, x))
     n = random.randint(0, 3)
-    init = make_parallel_expression(actions, process_identifiers, n)
+    init = make_parallel_expression(actions, process_identifiers, n, parallel_operators)
     return process_specification(actions, equations, init)
 
 generator_map = {
-    make_action          : 5,
+    make_action          : 8,
     make_delta           : 1,
     make_tau             : 1,
-    make_process_instance: 1,
+    make_process_instance: 2,
     make_sum             : 2,
     make_if_then         : 2,
     make_if_then_else    : 2,
     make_choice          : 5,
     make_seq             : 5,
 }
-
-#while True:
-#    actions = ACTIONS
-#    process_identifiers = PROCESS_IDENTIFIERS
-#    size = 8
-#    procspec = make_process_specification(generator_map, actions, process_identifiers, size)
-#    text = str(procspec)
-#    path('1.mcrl2').write_text(text)
-#    os.system('mcrl22lps 1.mcrl2 1.lps')
-#    raw_input('ha')

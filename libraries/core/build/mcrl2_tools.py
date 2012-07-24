@@ -190,8 +190,13 @@ def run_mcrl22lps(mcrl2file, lpsfile, options = '', timeout = 10):
 
 def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
     args = '%s %s %s' % (options, lpsfile, destfile)
-    timeout_command('lps2lts', args.strip(), timeout)
+    dummy, text = timeout_command('lps2lts', args.strip(), timeout)
+    return text
 
 def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
     dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
     return text.find('LTSs are strongly bisimilar') != -1
+
+def run_lpspbes(lpsfile, mcffile, pbesfile, timeout = 10):
+    args = '%s -f%s %s' % (lpsfile, mcffile, pbesfile)
+    timeout_command('lps2pbes',  args.strip(), timeout)
