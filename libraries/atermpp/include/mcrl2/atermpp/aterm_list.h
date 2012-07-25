@@ -431,7 +431,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 /// \return The element at position i in the list l.
 template <typename Term>
 inline
-Term element_at(const term_list<Term> &l, size_t m)
+const Term &element_at(const term_list<Term> &l, size_t m)
 {
   typename term_list<Term>::const_iterator i=l.begin();
   for( ; m>0; --m, ++i)

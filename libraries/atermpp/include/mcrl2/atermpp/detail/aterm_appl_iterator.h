@@ -41,8 +41,8 @@ template <typename Term>
 class term_appl_iterator: public boost::iterator_facade<
   term_appl_iterator<Term>,         // Derived
   const Term,                       // Value
-  boost::forward_traversal_tag,      // CategoryOrTraversal
-  const Term                        // Reference
+  boost::forward_traversal_tag,     // CategoryOrTraversal
+  const Term&                       // Reference
   >
 {
   public:
@@ -70,7 +70,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const Term dereference() const
+    const Term &dereference() const
     {
       return *m_term;
     }

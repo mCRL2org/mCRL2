@@ -34,7 +34,7 @@ namespace lps
 {
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
-#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
+// #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
 #define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
 

@@ -13,6 +13,7 @@
 #define MCRL2_ATERM_ATERM_H
 
 #include <stdarg.h>
+#include <algorithm>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -188,9 +189,9 @@ size_t ATgetLength(const ATermList &list)
 }
 
 inline
-ATerm ATgetFirst(const ATermList &l)
+const ATerm &ATgetFirst(const ATermList &l)
 {
-  return static_cast<ATerm>(l->head);
+  return l->head;
 }
 
 inline
@@ -257,7 +258,7 @@ ATermList ATmakeList6(const ATerm &el0, const ATerm &el1, const ATerm &el2, cons
 }
 
 inline
-ATerm ATelementAt(const ATermList &l, size_t m)
+const ATerm &ATelementAt(const ATermList &l, size_t m)
 {
   return element_at(l,m);
 }
@@ -333,19 +334,11 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
 inline
 ATermList ATgetArguments(const ATermAppl &appl)
 {
-  AFun s = ATgetAFun(appl);
-  size_t i, len = ATgetArity(s);
-  ATermList result = aterm_list();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
-
-  for (i=0; i<len; i++)
+  ATermList result;
+  for (size_t i=appl.size(); i>0; )
   {
-    buffer[i] = &*ATgetArgument(appl, i);
-  }
-
-  for (i=len; i>0; i--)
-  {
-    result = ATinsert(result, buffer[i-1]);
+    --i;
+    result = push_front(result, appl(i));
   }
 
   return result;
@@ -403,16 +396,14 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
 inline
 size_t ATindexOf(const ATermList &list_in, const ATerm &el)
 {
-  ATermList list=list_in;
+  size_t count=0;
+  aterm_list::const_iterator i=list_in.begin();
 
-  size_t i=0;
-  while (!ATisEmpty(list) && !ATisEqual(ATgetFirst(list), el))
-  {
-    list = ATgetNext(list);
-    ++i;
+  for( ; i!=list_in.end() && *i!=el; ++i)
+  { 
+    ++count;
   }
-
-  return (ATisEmpty(list) ? ATERM_NON_EXISTING_POSITION : i);
+  return (i==list_in.end() ? ATERM_NON_EXISTING_POSITION : count);
 }
 
 /* ATtable and ATindexedSet */
@@ -426,7 +417,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 }
 
 inline
-ATerm      ATtableGet(const ATermTable &table, const ATerm &key)
+ATerm ATtableGet(const ATermTable &table, const ATerm &key)
 {
   return table.get(key);
 }
@@ -509,9 +500,9 @@ ATfprintf(FILE* stream, const char* format,...);
  **/
 inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
 {
-  if (ATindexOf(list, el) == size_t(-1))
+  if (std::find(list.begin(),list.end(), el) == list.end())
   {
-    return ATinsert(list, el);
+    return push_front(list, el);
   }
   return list;
 }
@@ -523,7 +514,7 @@ inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
  */
 inline bool ATisAppl(const ATerm &t)
 {
-  return ATgetType(t) == AT_APPL;
+  return t.type() == AT_APPL;
 }
 
 /**
@@ -533,7 +524,7 @@ inline bool ATisAppl(const ATerm &t)
  */
 inline bool ATisList(const ATerm &t)
 {
-  return ATgetType(t) == AT_LIST;
+  return t.type() == AT_LIST;
 }
 
 /**
@@ -543,7 +534,7 @@ inline bool ATisList(const ATerm &t)
  */
 inline bool ATisInt(const ATerm &t)
 {
-  return ATgetType(t) == AT_INT;
+  return t.type() == AT_INT;
 }
 
 /**
@@ -569,51 +560,49 @@ inline bool ATisListOrNull(const ATerm &t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline const ATermAppl ATAelementAt(const ATermList &List, const size_t Index)
+inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 {
-  const ATerm Result = ATelementAt(List, Index);
-  assert(ATisApplOrNull(Result));
-  return static_cast<const ATermAppl>(Result);
+  return aterm_cast<const ATermAppl>(ATelementAt(List, Index));
 }
 
 /**
  * \brief Gets the argument as ATermAppl at the specified position
  **/
-inline ATermAppl ATAgetArgument(const ATermAppl Appl, const size_t Nr)
+inline const ATermAppl &ATAgetArgument(const ATermAppl Appl, const size_t Nr)
 {
-  ATerm Result = ATgetArgument(Appl, Nr);
+  const ATerm &Result = Appl(Nr);
   assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
+  return aterm_cast<const ATermAppl>(Result);
 }
 
 /**
  * \brief Gets the argument as ATermList at the specified position
  **/
-inline ATermList ATLgetArgument(const ATermAppl Appl, const size_t Nr)
+inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
 {
-  ATerm Result = ATgetArgument(Appl, Nr);
+  const ATerm &Result = Appl(Nr);
   assert(ATisListOrNull(Result));
-  return (ATermList) Result;
+  return aterm_cast<const ATermList>(Result);
 }
 
 /**
  * \brief Gets the first argument as ATermAppl
  **/
-inline ATermAppl ATAgetFirst(const ATermList List)
+inline const ATermAppl &ATAgetFirst(const ATermList &List)
 {
-  ATerm Result = ATgetFirst(List);
+  const ATerm &Result = List.front();
   assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
+  return aterm_cast<const ATermAppl>(Result);
 }
 
 /**
  * \brief Gets the first argument as ATermList
  **/
-inline ATermList ATLgetFirst(const ATermList List)
+inline const ATermList &ATLgetFirst(const ATermList &List)
 {
-  ATerm Result = ATgetFirst(List);
+  const ATerm &Result = List.front();
   assert(ATisListOrNull(Result));
-  return (ATermList) Result;
+  return aterm_cast<const ATermList>(Result);
 }
 
 /**
@@ -621,9 +610,9 @@ inline ATermList ATLgetFirst(const ATermList List)
  **/
 inline ATermAppl ATAtableGet(const ATermTable &Table, const ATerm &Key)
 {
-  ATerm Result = ATtableGet(Table, Key);
+  const ATerm Result = ATtableGet(Table, Key);
   assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
+  return aterm_cast<const ATermAppl>(Result);
 }
 
 /**
@@ -631,13 +620,13 @@ inline ATermAppl ATAtableGet(const ATermTable &Table, const ATerm &Key)
  **/
 inline ATermList ATLtableGet(const ATermTable &Table, const ATerm &Key)
 {
-  ATerm Result = ATtableGet(Table, Key);
+  const ATerm Result = ATtableGet(Table, Key);
   assert(ATisListOrNull(Result));
-  return (ATermList) Result;
+  return aterm_cast<const ATermList>(Result);
 }
 
 inline
-ATermList ATinsertA(const ATermList l, const ATermAppl t)
+ATermList ATinsertA(const ATermList &l, const ATermAppl &t)
 {
   return ATinsert(l, t);
 }
@@ -653,7 +642,7 @@ ATermList ATinsertA(const ATermList l, const ATermAppl t)
  *
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  **/
-ATermAppl gsMakeSubst(const ATerm old_value, const ATerm new_value);
+ATermAppl gsMakeSubst(const ATerm &old_value, const ATerm &new_value);
 
 /**
  * \brief Creates a new substitution
@@ -664,7 +653,7 @@ ATermAppl gsMakeSubst(const ATerm old_value, const ATerm new_value);
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermAppl variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_Appl(const ATermAppl old_value, const ATermAppl new_value)
+inline ATermAppl gsMakeSubst_Appl(const ATermAppl &old_value, const ATermAppl &new_value)
 {
   return gsMakeSubst(old_value, new_value);
 }
@@ -678,7 +667,7 @@ inline ATermAppl gsMakeSubst_Appl(const ATermAppl old_value, const ATermAppl new
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermList variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_List(const ATermList old_value, const ATermList new_value)
+inline ATermAppl gsMakeSubst_List(const ATermList &old_value, const ATermList &new_value)
 {
   return gsMakeSubst(old_value, new_value);
 }
@@ -696,7 +685,7 @@ inline ATermAppl gsMakeSubst_List(const ATermList old_value, const ATermList new
  *     from head to tail; if recursive and there was no match, the
  *     substitutions are distributed over the arguments/elements of term
  **/
-ATerm gsSubstValues(const ATermList substs, ATerm term, const bool recursive);
+ATerm gsSubstValues(const ATermList &substs, const ATerm &term, const bool recursive);
 
 /**
  * \brief Applies a list of substitutions to a term
@@ -712,9 +701,9 @@ ATerm gsSubstValues(const ATermList substs, ATerm term, const bool recursive);
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermAppl variant of gsSubstValues
  **/
-inline ATermAppl gsSubstValues_Appl(const ATermList substs, ATermAppl appl, bool recursive)
+inline ATermAppl gsSubstValues_Appl(const ATermList &substs, const ATermAppl &appl, bool recursive)
 {
-  return (ATermAppl) gsSubstValues(substs, appl, recursive);
+  return aterm_cast<ATermAppl>(gsSubstValues(substs, appl, recursive));
 }
 
 /**
@@ -731,9 +720,9 @@ inline ATermAppl gsSubstValues_Appl(const ATermList substs, ATermAppl appl, bool
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermList variant of gsSubstValues
  **/
-inline ATermList gsSubstValues_List(const ATermList substs, ATermList list, const bool recursive)
+inline ATermList gsSubstValues_List(const ATermList &substs, const ATermList &list, const bool recursive)
 {
-  return (ATermList) gsSubstValues(substs, list, recursive);
+  return aterm_cast<ATermList>(gsSubstValues(substs, list, recursive));
 }
 
 /**
@@ -746,7 +735,7 @@ inline ATermList gsSubstValues_List(const ATermList substs, ATermList list, cons
  *     Term is an ATerm consisting of ATermAppl's and ATermList's only
  * \return Term in which all substitutions from substs are performed recursively
  **/
-ATerm gsSubstValuesTable(const ATermTable &substs, ATerm term, const bool recursive);
+ATerm gsSubstValuesTable(const ATermTable &substs, const ATerm &t, const bool recursive);
 
 //Occurrences of ATerm's
 //----------------------
@@ -760,7 +749,7 @@ ATerm gsSubstValuesTable(const ATermTable &substs, ATerm term, const bool recurs
  * \note that this is a faster implementation than gsCount(elt, term) > 0 because
  *       it is used at a crucial point in the rewriter
  **/
-bool gsOccurs(const ATerm elt, ATerm term);
+bool gsOccurs(const ATerm &elt, const ATerm &term);
 
 } // namespace aterm_deprecated
 

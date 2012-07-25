@@ -90,7 +90,7 @@ inline bool is_function_symbol(const atermpp::aterm_appl &p)
 /// \brief Returns true if the term t is a variable
 inline bool is_variable(const atermpp::aterm &p)
 {
-  return core::detail::gsIsDataVarId(atermpp::aterm_appl (p));
+  return core::detail::gsIsDataVarId(atermpp::aterm_cast<atermpp::aterm_appl>(p));
 }
 
 /// \brief Returns true if the term t is an application
@@ -143,7 +143,7 @@ class data_expression: public atermpp::aterm_appl
       // in a linear process, we allow the occurrence of a Nil
       // term as a data_expression. This is a workaround which
       // should be removed.
-      assert(is_data_expression(atermpp::aterm_appl(t)) || core::detail::gsIsNil(atermpp::aterm_appl(t)));
+      assert(is_data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(t)) || core::detail::gsIsNil(atermpp::aterm_cast<atermpp::aterm_appl>(t)));
     }
     
     /// \brief Constructor.
@@ -156,7 +156,7 @@ class data_expression: public atermpp::aterm_appl
       // in a linear process, we allow the occurrence of a Nil
       // term as a data_expression. This is a workaround which
       // should be removed.
-      assert(is_data_expression(atermpp::aterm_appl(t)) || core::detail::gsIsNil(atermpp::aterm_appl(t)));
+      assert(is_data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(t)) || core::detail::gsIsNil(atermpp::aterm_cast<atermpp::aterm_appl>(t)));
     }
 
     application operator()(const data_expression& e) const;

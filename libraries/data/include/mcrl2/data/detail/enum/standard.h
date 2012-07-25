@@ -269,7 +269,7 @@ class EnumeratorSolutionsStandard
     bool find_equality(const atermpp::aterm_appl &T, 
                             const mcrl2::data::variable_list &vars, 
                             mcrl2::data::variable &v, 
-                            atermpp::aterm_appl &e);
+                            atermpp::aterm_appl &e); 
 
     void EliminateVars(fs_expr &e);
 

@@ -23,7 +23,7 @@ namespace aterm_deprecated
 
 static AFun substafun;
 static bool substafun_notset = true;
-ATermAppl gsMakeSubst(const ATerm OldValue, const ATerm NewValue)
+ATermAppl gsMakeSubst(const ATerm &OldValue, const ATerm &NewValue)
 {
   if (substafun_notset)
   {
@@ -33,8 +33,9 @@ ATermAppl gsMakeSubst(const ATerm OldValue, const ATerm NewValue)
   return ATmakeAppl2(substafun, OldValue, NewValue);
 }
 
-ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
+ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
 {
+  ATerm Term=t;
   ATermList l = Substs;
   while (!ATisEmpty(l))
   {
@@ -92,8 +93,9 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
   }
 }
 
-ATerm gsSubstValuesTable(const ATermTable &Substs, ATerm Term, const bool Recursive)
+ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Recursive)
 {
+  ATerm Term=t;
   ATerm Result = ATtableGet(Substs, Term);
   if (Result != aterm())
   {
@@ -149,10 +151,11 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, ATerm Term, const bool Recurs
 //Occurrences of ATerm's
 //----------------------
 
-bool gsOccurs(const ATerm Elt, ATerm Term)
+bool gsOccurs(const ATerm &Elt, const ATerm &t)
 {
+  ATerm Term=t;
   bool Result = false;
-  if (ATisEqual(Elt, Term))
+  if (Elt==Term)
   {
     Result = true;
   }

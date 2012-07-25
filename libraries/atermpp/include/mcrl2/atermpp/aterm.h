@@ -92,7 +92,7 @@ class aterm
   public:
 
     /// \brief Default constructor
-    aterm ():m_term(&*detail::aterm_administration::undefined_aterm())
+    aterm():m_term(&*detail::aterm_administration::undefined_aterm())
     {
       increase_reference_count<false>(m_term);
     }
