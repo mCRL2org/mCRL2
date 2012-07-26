@@ -40,14 +40,15 @@ class aterm_administration
     std::vector < size_t > function_symbol_hashtable;
     
     size_t table_class;
-    // size_t table_size;
+    size_t table_size;
     size_t table_mask;
  
-    std::vector <detail::_aterm*> aterm_hashtable;
+    // std::vector <detail::_aterm*> aterm_hashtable;
+    detail::_aterm* * aterm_hashtable;
     
     void initialise_aterm_administration()
     {
-      if (aterm_hashtable.size()==0)
+      if (function_symbol_hashtable.size()==0)
       {
         first_free=size_t(-1);
         afun_table_class=INITIAL_AFUN_TABLE_CLASS;
@@ -56,10 +57,11 @@ class aterm_administration
         function_symbol_hashtable=std::vector < size_t >(AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS),size_t(-1));
    
         table_class=INITIAL_TERM_TABLE_CLASS;
-        // table_size=AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
+        table_size=AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
         table_mask=AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
    
-        aterm_hashtable=std::vector <detail::_aterm*>(AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS),NULL);
+        // aterm_hashtable=std::vector <detail::_aterm*>(table_size,NULL);
+        aterm_hashtable=reinterpret_cast<detail::_aterm**>(calloc(table_size,sizeof(detail::_aterm*)));
   
       }
     }
@@ -72,10 +74,10 @@ class aterm_administration
         function_symbol_hashtable(function_symbol_hashtable),
    
         table_class(table_class),
-        // table_size(table_size),
-        table_mask(table_mask),
+        table_size(table_size),
+        table_mask(table_mask)
    
-        aterm_hashtable(aterm_hashtable)
+        // aterm_hashtable(aterm_hashtable)
     { 
       initialise_aterm_administration();
     }
@@ -89,10 +91,12 @@ class aterm_administration
       function_symbol_hashtable=std::vector < size_t >();
         
       table_class=0;
-      // table_size=0;
+      table_size=0;
       table_mask=0;
     
-      aterm_hashtable=std::vector <detail::_aterm*>();
+      // aterm_hashtable=std::vector <detail::_aterm*>();
+      free(aterm_hashtable);
+      aterm_hashtable=NULL;
     }
 
     static _aterm *undefined_aterm();

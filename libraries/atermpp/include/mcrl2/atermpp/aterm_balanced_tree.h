@@ -303,8 +303,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
   term_balanced_tree_iterator< Value >, // Derived
   const Value,                          // Value
   boost::forward_traversal_tag,         // CategoryOrTraversal
-  //        const Value &                         // Reference
-  const Value                          // Reference
+  const Value &                         // Reference
   >
 {
   private:
@@ -315,9 +314,9 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    Value dereference() const
+    const Value &dereference() const
     {
-      return Value(m_trees.top());
+      return aterm_cast<const Value>(m_trees.top());
     }
 
     /// \brief Equality operator

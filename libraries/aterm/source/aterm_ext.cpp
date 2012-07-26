@@ -60,13 +60,17 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,detail::_aterm*,NrArgs);
-        std::vector<ATerm> Args(NrArgs);
-        for (size_t i = 0; i < NrArgs; i++)
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
+        // std::vector<ATerm> Args(NrArgs);
+        for (size_t i = 0; i < NrArgs; ++i)
         {
-          Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
+          new (&Args[i]) aterm(gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
         }
-        ATerm a = ATmakeAppl_iterator(Head, Args.begin(),Args.end());
+        const aterm a = ATmakeAppl_iterator(Head, &Args[0],&Args[0]+NrArgs);
+        for (size_t i = 0; i < NrArgs; ++i)
+        {
+          Args[i].~ATerm();
+        }
         return a;
       }
       else
@@ -84,7 +88,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
                           gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
         Term = ATgetNext((ATermList) Term);
       }
-      return ATreverse(Result);
+      return reverse(Result);
     }
     else
     {
@@ -115,13 +119,17 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,detail::_aterm*,NrArgs);
-        std::vector <ATerm> Args(NrArgs);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
+        // std::vector <ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
-          Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
+           new (&Args[i]) aterm(gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
         }
-        ATerm a = ATmakeAppl_iterator(Head, Args.begin(),Args.end());
+        const aterm a = ATmakeAppl_iterator(Head, &Args[0],&Args[0]+NrArgs);
+        for (size_t i = 0; i < NrArgs; i++)
+        {
+          Args[i].~aterm(); 
+        }
         return a;
       }
       else

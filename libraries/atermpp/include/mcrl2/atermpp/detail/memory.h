@@ -81,13 +81,16 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
   const size_t arity = sym.arity();
 
   HashNumber hnr = START(sym.number());
-  std::vector <aterm> arguments(arity);
+  // It is assumed that the aterm array is not initialised with terms.
+  // It is not clear whether this holds for all compilers on all platforms.
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity); 
+  // std::vector <aterm> arguments(arity);
   
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
-    arguments[j]=convert_to_aterm(*i);
+    new (&arguments[j]) aterm(convert_to_aterm(*i));
     const aterm &arg = arguments[j];
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, arg);
@@ -134,27 +137,27 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
   
   m_term=cur;
   increase_reference_count<false>(m_term);
+
+  for (size_t j=0; j!=arity; ++j)
+  {
+    using namespace atermpp;
+    arguments[j].~aterm();
+  }
 }
 
 
 template <class Term>
 template <class ForwardIterator>
 term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
-                     /*    typename boost::enable_if<
-                           typename boost::is_convertible< typename boost::iterator_traversal< ForwardIterator >::type,
-                           boost::forward_traversal_tag >::type >::type* / * = 0* /) */
 {
   const size_t arity = sym.arity();
   HashNumber hnr = START(sym.number());
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, detail::_aterm*, arity);
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
-    arguments[j]=&* *i; 
-    const aterm &arg = arguments[j];
-    CHECK_TERM(arg);
-    hnr = COMBINE(hnr, arg);
+    CHECK_TERM(*i);
+    hnr = COMBINE(hnr, *i);
   }
   assert(j==arity);
   hnr = FINISH(hnr);
@@ -165,9 +168,10 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
     if (cur->function()==sym)
     {
       bool found = true;
-      for (size_t i=0; i<arity; i++)
+      ForwardIterator i=begin;
+      for (size_t j=0; j<arity; ++i,++j)
       {
-        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] != arguments[i])
+        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[j] != *i)
         {
           found = false;
           break;
@@ -188,9 +192,10 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
     hnr &= detail::adm.table_mask;
     cur->function() = sym;
     
-    for (size_t i=0; i<arity; i++)
+    ForwardIterator i=begin;
+    for (size_t j=0; j<arity; ++i, ++j)
     {
-      new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
+      new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[j])) Term(*i);
     }
     cur->next() = detail::adm.aterm_hashtable[hnr];
     detail::adm.aterm_hashtable[hnr] = cur;
@@ -520,9 +525,6 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
   m_term=cur;
   increase_reference_count<false>(m_term);
 }
-
-/*}}}  */
-
 
 template <class Term>
 term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) 

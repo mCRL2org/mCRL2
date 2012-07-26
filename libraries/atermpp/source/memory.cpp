@@ -159,7 +159,7 @@ void aterm::free_term()
   /* if (function().number()<4) // The default term and the empty list are not removed,
                              // as the datastructures may not exist anymore when this 
                              // happens. */
-  if (detail::adm.aterm_hashtable.size()==0)
+  if (detail::adm.function_symbol_hashtable.size()==0)
   {
     return;
   } 
@@ -193,43 +193,48 @@ void aterm::free_term()
 static void resize_aterm_hashtable()
 {
   detail::adm.table_class++;
-  // detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
+  const size_t old_size=detail::adm.table_size;
+  detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
   detail::adm.table_mask = (((HashNumber)1)<<detail::adm.table_class)-1;
-  std::vector < detail::_aterm* > new_hashtable;
+  // std::vector < detail::_aterm* > new_hashtable;
+  detail::_aterm* * new_hashtable;
 
   /*  Create new term table */
-  try
+  // try
   {
-    new_hashtable.resize(((HashNumber)1)<<detail::adm.table_class,NULL);
+    // new_hashtable.resize(((HashNumber)1)<<detail::adm.table_class,NULL);
+    new_hashtable=reinterpret_cast<detail::_aterm**>(calloc(detail::adm.table_size,sizeof(detail::_aterm*)));
   }
-  catch (std::bad_alloc &e)
+  // catch (std::bad_alloc &e)
+  if (new_hashtable==NULL)
   {
-    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::adm.table_class << ". " << e.what() << std::endl;
+    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::adm.table_class << ". "; // << e.what() << std::endl;
     detail::adm.table_class--;
-    // detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
+    detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
     detail::adm.table_mask = (((HashNumber)1)<<detail::adm.table_class)-1;
     return;
   }
   
   /*  Rehash all old elements */
-  for (std::vector < detail::_aterm*>::const_iterator p=detail::adm.aterm_hashtable.begin(); p !=detail::adm.aterm_hashtable.end(); p++)
+  for (size_t p=0; p<old_size; ++p) 
+  // for (std::vector < detail::_aterm*>::const_iterator p=detail::adm.aterm_hashtable.begin(); p !=detail::adm.aterm_hashtable.end(); p++)
   {
-    detail::_aterm* aterm_walker=*p;
+    detail::_aterm* aterm_walker=detail::adm.aterm_hashtable[p];
 
     while (aterm_walker)
     {
       assert(aterm_walker->reference_count()>0);
       detail::_aterm* next = aterm_walker->next();
       const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & detail::adm.table_mask;
-      assert(hnr<new_hashtable.size());
       aterm_walker->next() = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
       aterm_walker = next;
     }
   }
-  new_hashtable.swap(detail::adm.aterm_hashtable);
-
+  // new_hashtable.swap(detail::adm.aterm_hashtable);
+  free(detail::adm.aterm_hashtable);
+  detail::adm.aterm_hashtable=new_hashtable;
 }
 
 #ifndef NDEBUG
@@ -305,7 +310,7 @@ detail::_aterm* detail::allocate_term(const size_t size)
     terminfo.resize(size+1);
   }
 
-  if (total_nodes>=(detail::adm.aterm_hashtable.size()>>1))
+  if (total_nodes>=(detail::adm.table_size>>1))
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
@@ -613,7 +618,7 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
 
 function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
 {
-  if (detail::adm.aterm_hashtable.size()==0)
+  if (detail::adm.function_symbol_hashtable.size()==0)
   {
     detail::initialise_administration();
   }
@@ -677,7 +682,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
 
 void detail::at_free_afun(const size_t n)
 {
-  if (adm.aterm_hashtable.size()==0)
+  if (adm.function_symbol_hashtable.size()==0)
   {
     // The aterm administration is destroyed. We cannot remove
     // this aterm anymore.

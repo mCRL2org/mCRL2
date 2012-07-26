@@ -272,6 +272,13 @@ inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, c
   return atermpp::aterm_appl(get_appl_afun_value(size), begin, end);
 }
 
+/** \brief See Apply. */
+template <class Iterator, class Function>
+inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, const Iterator end, Function f)
+{
+  return atermpp::aterm_appl(get_appl_afun_value(size), begin, end, f);
+}
+
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply0(const atermpp::aterm &head)

@@ -39,24 +39,6 @@ aterm_list list_apply(term_list<Term> l, const Function f)
   return reverse(result);
 }
 
-// template <typename Term, typename Function>
-// aterm_appl appl_apply(term_appl<Term> a, const Function f)
-// {
-//   aterm_appl t = a;
-//   unsigned int n = t.size();
-//   if (n > 0)
-//   {
-//     for (unsigned int i = 0; i < n; i++)
-//     {
-//       aterm ti = t(i);
-//       aterm fi = f(ti);
-//       if (fi != ti)
-//         t = t.set_argument(fi, i);
-//     }
-//   }
-//   return t;
-// }
-
 /// \brief Applies the function f to all children of a.
 /// \param a A term
 /// \param f A function on terms
@@ -65,33 +47,6 @@ template <typename Term, typename Function>
 aterm_appl appl_apply(term_appl<Term> a, const Function f)
 {
   return  term_appl<Term>(a.function(), a.begin(),a.end(),f);
-  // TODO: This function can be more efficiently implemented, by using the feature
-  // that ATmakeAppl can have the function f as last argument. This avoids the use
-  // the explicit vector below.
-
-  /* size_t n = a.size();
-  if (n > 0)
-  {
-    bool term_changed = false;
-
-    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,_ATerm*,n);
-    std::vector <aterm> t(n);
-
-    for (size_t i = 0; i < n; i++)
-    {
-      t[i] = f(a(i));
-
-      if (t[i] != a(i))
-      {
-        term_changed = true;
-      }
-    }
-    if (term_changed)
-    {
-      a = term_appl<Term>(a.function(), t.begin(),t.end());
-    } 
-  }
-  return a; */
 }
 
 //--- find ----------------------------------------------------------------//

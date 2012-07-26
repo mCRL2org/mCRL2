@@ -78,12 +78,11 @@ data_expression_list Rewriter::rewrite_list(
      const data_expression_list &terms,
      substitution_type &sigma)
 {
-  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
-  std::vector < data_expression> term_array(terms.size());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
   size_t position=0;
   for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
   {
-    term_array[position]=rewrite(*i,sigma);
+    new (&term_array[position]) data_expression(rewrite(*i,sigma));
   }
   ++position;
   data_expression_list l;
@@ -91,11 +90,8 @@ data_expression_list Rewriter::rewrite_list(
   {
     --position;
     l = push_front(l,term_array[position]);
-  }
-  /* for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
-  {
     term_array[position].~data_expression();
-  } */
+  }
   return l;
 }
 
@@ -122,24 +118,21 @@ atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
     const atermpp::term_list<atermpp::aterm_appl> &terms,
     internal_substitution_type &sigma)
 {
-  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, atermpp::aterm_appl, terms.size());
-  std::vector <atermpp::aterm_appl> term_array(terms.size());
+  using namespace atermpp;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, aterm_appl, terms.size());
+  // std::vector <atermpp::aterm_appl> term_array(terms.size());
   size_t position=0;
   for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
   {
-    term_array[position]=rewrite_internal(*i,sigma);
+    new (&term_array[position]) aterm_appl(rewrite_internal(*i,sigma));
   }
   atermpp::term_list<atermpp::aterm_appl> l;
   for( ; position>0 ; )
   {
     --position;
     l = push_front(l,term_array[position]);
-  }
-  /* for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
-  {
-    using namespace atermpp;
     term_array[position].~aterm_appl();
-  } */
+  }
   return l;
 }
 
@@ -272,6 +265,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       const atermpp::aterm_appl &t,
                       internal_substitution_type &sigma)
 {
+  using namespace atermpp;
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list vl=static_cast<variable_list>(lambda_term(1));
   const atermpp::aterm_appl lambda_body=rewrite_internal(atermpp::aterm_appl(lambda_term(2)),sigma);
@@ -307,21 +301,20 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   }
 
   // There are more arguments than bound variables.
-  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
-  std::vector < atermpp::aterm > args(arity-vl.size());
-  args[0]=result;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+  // std::vector < atermpp::aterm > args(arity-vl.size());
+  new (&args[0]) aterm(result);
   for(size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
-    args[i]=t(vl.size()+i);
+    new (&args[i]) aterm(t(vl.size()+i));
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),args.begin(),args.end()),sigma);
-  /* for(size_t i=1; i<arity-vl.size(); ++i)
+  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),&args[0],&args[0]+arity-vl.size()),sigma);
+  for(size_t i=0; i<arity-vl.size(); ++i)
   {
-    using namespace atermpp;
     args[i].~aterm();
-  } */
+  } 
   return result1;
 }
 

@@ -96,16 +96,15 @@ class term_appl:public aterm
     }
 
     /// \brief Constructor.
-    /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
+    /// \details The iterator range is traversed more than once. If only one traversal is required
+    //           use term_appl with a ATermConverter argument. But this function
+    //           is substantially less efficient.
     ///          The length of the iterator range should must match the arity of the function symbol.
     /// \param sym A function symbol.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
     term_appl(const function_symbol &sym, Iter first, Iter last);
-    /*           typename boost::enable_if<
-              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::forward_traversal_tag >::type >::type* = 0); */
     
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.

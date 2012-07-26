@@ -344,8 +344,8 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       }
     }
 
-    // MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,arity+extra_arity);
-    std::vector < atermpp::aterm > args(arity+extra_arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,arity+extra_arity);
+    // std::vector < atermpp::aterm > args(arity+extra_arity);
     size_t k = 1;
 
     if (head.type()!=AT_INT && !is_variable(head))
@@ -353,24 +353,24 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        args[i] = aterm_cast<atermpp::aterm_appl>(head)(i);
+        new (&args[i])  atermpp::aterm(aterm_cast<atermpp::aterm_appl>(head)(i));
       }
       head = aterm_cast<atermpp::aterm_appl>(head)(0);
     }
 
-    args[0] = head;
+    new (&args[0]) atermpp::aterm(head);
     for (size_t i=1; i<arity; i++,k++)
     {
-      args[k] = build_solution_aux(aterm_cast<atermpp::aterm_appl>(t(i)),substituted_vars,exprs);
+      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<atermpp::aterm_appl>(t(i)),substituted_vars,exprs));
     }
 
-    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,args.begin(),args.end());
+    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,&args[0],&args[0]+arity+extra_arity);
 
-    /* for(size_t i=0;i<arity+extra_arity; i++)
+    for(size_t i=0;i<arity+extra_arity; i++)
     {
       using namespace atermpp;
       args[i].~aterm();
-    } */
+    } 
     
     return r;
   }
@@ -515,15 +515,15 @@ bool EnumeratorSolutionsStandard::next(
           assert(target_sort==sort);
 
           variable_list var_list;
-          // MCRL2_SYSTEM_SPECIFIC_ALLOCA(var_array,atermpp::aterm,domain_sorts.size()+1);
-          std::vector < atermpp::aterm > var_array(domain_sorts.size()+1);
+          MCRL2_SYSTEM_SPECIFIC_ALLOCA(var_array,atermpp::aterm,domain_sorts.size()+1);
+          // std::vector < atermpp::aterm > var_array(domain_sorts.size()+1);
           size_t j=1;
-          var_array[0]=OpId2Int(*it);
+          new (&var_array[0]) atermpp::aterm(OpId2Int(*it));
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
             const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
             var_list = push_front(var_list,fv);
-            var_array[j]=fv;
+            new (&var_array[j]) atermpp::aterm(fv);
 
 
             used_vars++;
@@ -572,12 +572,12 @@ bool EnumeratorSolutionsStandard::next(
           // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
           // using it is much cheaper than using a default substitution.
           const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,
-                                                 var_array.begin(),var_array.end()),enum_sigma);
-          /* for(size_t i=0;i<=domain_sorts.size(); i++)
+                                                 &var_array[0],&var_array[0]+domain_sorts.size()+1),enum_sigma);
+          for(size_t i=0;i<=domain_sorts.size(); i++)
           {
             using namespace atermpp;
             var_array[i].~aterm();
-          } */
+          } 
 
           const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
           enum_sigma[var]=term_rf;
