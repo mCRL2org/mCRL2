@@ -15,6 +15,11 @@ ${declare longest_match}
 //--- Sort expressions and sort declarations
 
 SortExpr
+  : SimpleSortExpr
+  | ComplexSortExpr
+  ;
+
+SimpleSortExpr
   : 'Bool'                                                          // booleans
   | 'Pos'                                                           // positive numbers
   | 'Nat'                                                           // natural numbers
@@ -25,11 +30,12 @@ SortExpr
   | 'Bag' '(' SortExpr ')'                                          // bag sort
   | Id                                                              // sort reference
   | '(' SortExpr ')'                                                // sort expression with parentheses
-  | SortExprList ('->' $binary_op_right 1) SortExpr
   | 'struct' ConstrDeclList                                         // structured sort
   ;
 
-SortExprList: (SortExpr '#')* SortExpr         $unary_right 2 ;
+ComplexSortExpr: SortExprList '->' SortExpr ;
+
+SortExprList: (SortExpr '#')* SortExpr ;
 
 SortSpec: 'sort' SortDecl+ ;
 
