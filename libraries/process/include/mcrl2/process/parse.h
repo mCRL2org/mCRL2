@@ -12,6 +12,8 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
+//#define MCRL2_NEW_ALPHABET_REDUCE
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -22,6 +24,9 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
+#ifdef MCRL2_NEW_ALPHABET_REDUCE
+#include "mcrl2/process/alphabet.h"
+#endif
 
 namespace mcrl2
 {
@@ -249,9 +254,12 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
   type_check(x);
   if (alpha_reduce)
   {
-    // apply_alphabet_reduction(x);
+#ifdef MCRL2_NEW_ALPHABET_REDUCE
+    alphabet_reduce(x);
+#else
     alphabet_reduction reduce;
     reduce(x);
+#endif
   }
   process::translate_user_notation(x);
   process::normalize_sorts(x, x.data());
@@ -287,8 +295,8 @@ process_specification parse_process_specification(const std::string& spec_string
 /// \param[in] proc_decl A process declaration ("proc P(n: Nat);").
 inline
 process_expression parse_process_expression(const std::string& text,
-    const std::string& data_decl,
-    const std::string& proc_decl
+                                            const std::string& data_decl,
+                                            const std::string& proc_decl
                                            )
 {
   std::string proc_text = utilities::regex_replace(";", " = delta;", proc_decl);

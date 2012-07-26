@@ -1026,6 +1026,23 @@ alphabet_result push_block(const process_expression& x, const multi_action_name_
   return push_block(x, A, parameters);
 }
 
+inline
+void alphabet_reduce(process_specification& procspec)
+{
+  atermpp::vector<process_equation>& eqn = procspec.equations();
+  atermpp::vector<process_equation>::iterator first = eqn.begin();
+  atermpp::vector<process_equation>::iterator last = eqn.end();
+  alphabet_parameters parameters(procspec);
+  multi_action_name_set A;
+  for (atermpp::vector<process_equation>::iterator i = first; i != last; ++i)
+  {
+    alphabet_result r = push_allow(i->expression(), A, true, parameters);
+    i->expression() = r.first;
+  }
+  alphabet_result r = push_allow(procspec.init(), A, true, parameters);
+  procspec.init() = r.first;
+}
+
 } // namespace process
 
 } // namespace mcrl2
