@@ -607,7 +607,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   }
   else // Term has the shape #REWR#(t1,...,tn);
   {
-    const atermpp::aterm op = term(0);
+    const atermpp::aterm &op = term(0);
     const size_t arity=term.size();
     atermpp::aterm_appl head;
 
@@ -707,32 +707,35 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
 
-  aterm_list strat=atermpp::aterm_cast<aterm_list>(aterm());
   const size_t arity=term.size();
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten_defined,bool, arity);
-  // std::vector < atermpp::aterm > rewritten(arity);
 
   for(size_t i=0; i<arity; ++i)
   {
     rewritten_defined[i]=false;
   }
 
-  make_jitty_strat_sufficiently_larger(op.value());
-  if ((strat = jitty_strat[op.value()])!=aterm())
+  const size_t op_value=op.value();
+  if (op_value>=jitty_strat.size())
+  { 
+    make_jitty_strat_sufficiently_larger(op_value);
+  }
+
+  aterm_list strat=jitty_strat[op_value];
+  if (strat!=aterm())
   {
     for (; !strat.empty(); strat=pop_front(strat))
     {
       if (strat.front().type()==AT_INT)
       {
-        size_t i = (aterm_cast<aterm_int>( strat.front())).value()+1;
+        const size_t i = (aterm_cast<aterm_int>( strat.front())).value()+1;
         if (i < arity)
         {
           assert(!rewritten_defined[i]);
           rewritten_defined[i]=true;
           new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma));
-          // rewritten[i]=rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma);
         }
         else
         {

@@ -197,7 +197,7 @@ class term_list:public aterm
     {
       size_t size=0;
       for(detail::_aterm_list<Term>* m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-                 m_list!=reinterpret_cast<detail::_aterm_list<Term>*>(detail::aterm_administration::empty_aterm_list()); m_list=&*(m_list->tail))
+                 m_list->function()!=detail::function_adm.AS_EMPTY_LIST; m_list=&*(m_list->tail))
       {
         size++;
       }
@@ -208,7 +208,7 @@ class term_list:public aterm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return m_term==reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list());
+      return m_term->function()==detail::function_adm.AS_EMPTY_LIST; 
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -222,7 +222,8 @@ class term_list:public aterm
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list()));
+      return const_iterator(detail::static_empty_aterm_list);
+      // return const_iterator(reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list()));
     }
 
     /// \brief Returns the largest possible size of the term_list.

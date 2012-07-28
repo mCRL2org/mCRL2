@@ -23,6 +23,8 @@ namespace detail
 {
   template <class Term>
   class _aterm_list;
+
+  extern aterm static_empty_aterm_list;
 }
 /// \endcond
 

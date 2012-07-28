@@ -27,6 +27,33 @@ namespace atermpp
 
 /*{{{  globals */
 
+namespace detail
+{
+  static size_t afun_table_class;
+  static size_t afun_table_mask;
+  static std::vector < size_t > function_symbol_hashtable;
+
+  static size_t aterm_table_class;
+  static size_t aterm_table_size;
+  size_t aterm_table_mask;  // used in memory.h
+  detail::_aterm* * aterm_hashtable;  // used in memory.h
+
+  static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
+  static const size_t INITIAL_TERM_TABLE_CLASS = 17;
+
+
+  static size_t AT_TABLE_SIZE(const size_t table_class)
+  {
+    return (size_t)1<<(table_class);
+  }
+  
+  static size_t AT_TABLE_MASK(const size_t table_class)
+  {
+    return AT_TABLE_SIZE(table_class)-1;
+  } 
+}
+
+
 /* The constants below are not static to prevent some compiler warnings */
 const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
 const size_t INITIAL_MAX_TERM_SIZE = 256;
@@ -61,9 +88,6 @@ typedef struct TermInfo
 
 } TermInfo;
 
-
-static const size_t INITIAL_TERM_TABLE_CLASS = 17;
-
 static std::vector<TermInfo> terminfo(INITIAL_MAX_TERM_SIZE);
 
 namespace detail
@@ -79,6 +103,21 @@ void initialise_administration()
   // a .cpp file, or due to the initialisation of a pre-main initialisation
   // of a static variable, which some compilers do.
   detail::adm.initialise_aterm_administration();
+
+  if (function_symbol_hashtable.size()==0)
+  { 
+    afun_table_class=detail::INITIAL_AFUN_TABLE_CLASS;
+    afun_table_mask=AT_TABLE_MASK(detail::INITIAL_AFUN_TABLE_CLASS);
+    function_symbol_hashtable=std::vector < size_t >(AT_TABLE_SIZE(detail::INITIAL_AFUN_TABLE_CLASS),size_t(-1));
+
+    aterm_table_class=detail::INITIAL_TERM_TABLE_CLASS;
+    aterm_table_size=detail::AT_TABLE_SIZE(detail::INITIAL_TERM_TABLE_CLASS);
+    aterm_table_mask=detail::AT_TABLE_MASK(detail::INITIAL_TERM_TABLE_CLASS);
+
+    // aterm_hashtable=std::vector <detail::_aterm*>(aterm_table_size,NULL);
+    aterm_hashtable=reinterpret_cast<detail::_aterm**>(calloc(aterm_table_size,sizeof(detail::_aterm*)));
+  }
+
   detail::function_adm.initialise_function_symbols();
 }
 
@@ -97,7 +136,7 @@ _aterm *aterm_administration::undefined_aterm()
   return static_undefined_aterm.m_term;
 } 
 
-static aterm static_empty_aterm_list;
+aterm static_empty_aterm_list;
 
 _aterm *aterm_administration::empty_aterm_list()
 {
@@ -108,7 +147,6 @@ _aterm *aterm_administration::empty_aterm_list()
                                                                               // may not have initialised when this is called, 
                                                                               // causing a problem with reference counting.
   }
-
   return static_empty_aterm_list.m_term;
 } 
 }  // namespace detail
@@ -120,8 +158,8 @@ static void remove_from_hashtable(const detail::_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
   detail::_aterm *prev=NULL;
-  const HashNumber hnr = hash_number(t, term_size(t)) & detail::adm.table_mask;
-  detail::_aterm *cur = detail::adm.aterm_hashtable[hnr];
+  const HashNumber hnr = hash_number(t, term_size(t)) & detail::aterm_table_mask;
+  detail::_aterm *cur = detail::aterm_hashtable[hnr];
 
   do
   {
@@ -137,7 +175,7 @@ static void remove_from_hashtable(const detail::_aterm *t)
       }
       else
       {
-        detail::adm.aterm_hashtable[hnr] = cur->next();
+        detail::aterm_hashtable[hnr] = cur->next();
       }
       /* Put the node in the appropriate free list */
       total_nodes--;
@@ -159,7 +197,7 @@ void aterm::free_term()
   /* if (function().number()<4) // The default term and the empty list are not removed,
                              // as the datastructures may not exist anymore when this 
                              // happens. */
-  if (detail::adm.function_symbol_hashtable.size()==0)
+  if (detail::function_symbol_hashtable.size()==0)
   {
     return;
   } 
@@ -192,49 +230,49 @@ void aterm::free_term()
 
 static void resize_aterm_hashtable()
 {
-  detail::adm.table_class++;
-  const size_t old_size=detail::adm.table_size;
-  detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
-  detail::adm.table_mask = (((HashNumber)1)<<detail::adm.table_class)-1;
+  detail::aterm_table_class++;
+  const size_t old_size=detail::aterm_table_size;
+  detail::aterm_table_size = ((HashNumber)1)<<detail::aterm_table_class;
+  detail::aterm_table_mask = (((HashNumber)1)<<detail::aterm_table_class)-1;
   // std::vector < detail::_aterm* > new_hashtable;
   detail::_aterm* * new_hashtable;
 
   /*  Create new term table */
   // try
   {
-    // new_hashtable.resize(((HashNumber)1)<<detail::adm.table_class,NULL);
-    new_hashtable=reinterpret_cast<detail::_aterm**>(calloc(detail::adm.table_size,sizeof(detail::_aterm*)));
+    // new_hashtable.resize(((HashNumber)1)<<detail::aterm_table_class,NULL);
+    new_hashtable=reinterpret_cast<detail::_aterm**>(calloc(detail::aterm_table_size,sizeof(detail::_aterm*)));
   }
   // catch (std::bad_alloc &e)
   if (new_hashtable==NULL)
   {
-    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::adm.table_class << ". "; // << e.what() << std::endl;
-    detail::adm.table_class--;
-    detail::adm.table_size = ((HashNumber)1)<<detail::adm.table_class;
-    detail::adm.table_mask = (((HashNumber)1)<<detail::adm.table_class)-1;
+    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::aterm_table_class << ". "; // << e.what() << std::endl;
+    detail::aterm_table_class--;
+    detail::aterm_table_size = ((HashNumber)1)<<detail::aterm_table_class;
+    detail::aterm_table_mask = (((HashNumber)1)<<detail::aterm_table_class)-1;
     return;
   }
   
   /*  Rehash all old elements */
   for (size_t p=0; p<old_size; ++p) 
-  // for (std::vector < detail::_aterm*>::const_iterator p=detail::adm.aterm_hashtable.begin(); p !=detail::adm.aterm_hashtable.end(); p++)
+  // for (std::vector < detail::_aterm*>::const_iterator p=detail::aterm_hashtable.begin(); p !=detail::aterm_hashtable.end(); p++)
   {
-    detail::_aterm* aterm_walker=detail::adm.aterm_hashtable[p];
+    detail::_aterm* aterm_walker=detail::aterm_hashtable[p];
 
     while (aterm_walker)
     {
       assert(aterm_walker->reference_count()>0);
       detail::_aterm* next = aterm_walker->next();
-      const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & detail::adm.table_mask;
+      const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & detail::aterm_table_mask;
       aterm_walker->next() = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
       aterm_walker = next;
     }
   }
-  // new_hashtable.swap(detail::adm.aterm_hashtable);
-  free(detail::adm.aterm_hashtable);
-  detail::adm.aterm_hashtable=new_hashtable;
+  // new_hashtable.swap(detail::aterm_hashtable);
+  free(detail::aterm_hashtable);
+  detail::aterm_hashtable=new_hashtable;
 }
 
 #ifndef NDEBUG
@@ -310,7 +348,7 @@ detail::_aterm* detail::allocate_term(const size_t size)
     terminfo.resize(size+1);
   }
 
-  if (total_nodes>=(detail::adm.table_size>>1))
+  if (total_nodes>=(detail::aterm_table_size>>1))
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
@@ -363,7 +401,7 @@ aterm::aterm(const function_symbol &sym)
   hnr = FINISH(START(sym.number()));
 
   prev = NULL;
-  hashspot = &(detail::adm.aterm_hashtable[hnr & detail::adm.table_mask]);
+  hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
 
   cur = *hashspot;
   while (cur)
@@ -388,10 +426,10 @@ aterm::aterm(const function_symbol &sym)
 
   cur = detail::allocate_term(TERM_SIZE_APPL(0));
   /* Delay masking until after allocate */
-  hnr &= detail::adm.table_mask;
+  hnr &= detail::aterm_table_mask;
   cur->function() = sym;
-  cur->next() = &*detail::adm.aterm_hashtable[hnr];
-  detail::adm.aterm_hashtable[hnr] = cur;
+  cur->next() = &*detail::aterm_hashtable[hnr];
+  detail::aterm_hashtable[hnr] = cur;
 
   m_term=cur;
   increase_reference_count<false>(m_term);
@@ -422,7 +460,7 @@ aterm_int::aterm_int(int val)
   hnr = COMBINE(hnr, _val.reserved);
   hnr = FINISH(hnr);
 
-  cur = detail::adm.aterm_hashtable[hnr & detail::adm.table_mask];
+  cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
   {
     cur = cur->next();
@@ -432,16 +470,16 @@ aterm_int::aterm_int(int val)
   {
     cur = detail::allocate_term(TERM_SIZE_INT);
     /* Delay masking until after allocate */
-    hnr &= detail::adm.table_mask;
+    hnr &= detail::aterm_table_mask;
     cur->function() = detail::function_adm.AS_INT;
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
     // reinterpret_cast<detail::_aterm_int*>(cur)->value = _val.value;
 
-    cur->next() = detail::adm.aterm_hashtable[hnr];
-    detail::adm.aterm_hashtable[hnr] = cur;
+    cur->next() = detail::aterm_hashtable[hnr];
+    detail::aterm_hashtable[hnr] = cur;
   }
 
-  assert((hnr & detail::adm.table_mask) == (hash_number(cur, TERM_SIZE_INT) & detail::adm.table_mask));
+  assert((hnr & detail::aterm_table_mask) == (hash_number(cur, TERM_SIZE_INT) & detail::aterm_table_mask));
   m_term=cur;
   increase_reference_count<false>(m_term);
 }
@@ -463,13 +501,13 @@ extern char* _strdup(const char* s);
 
 static void resize_function_symbol_hashtable()
 {
-  ++detail::adm.afun_table_class;
+  ++detail::afun_table_class;
 
-  // detail::adm.afun_table_size  = AT_TABLE_SIZE(detail::adm.afun_table_class);
-  detail::adm.afun_table_mask  = AT_TABLE_MASK(detail::adm.afun_table_class);
+  // detail::afun_table_size  = detail::AT_TABLE_SIZE(detail::afun_table_class);
+  detail::afun_table_mask  = detail::AT_TABLE_MASK(detail::afun_table_class);
 
-  detail::adm.function_symbol_hashtable.clear();
-  detail::adm.function_symbol_hashtable.resize(AT_TABLE_SIZE(detail::adm.afun_table_class),size_t(-1));
+  detail::function_symbol_hashtable.clear();
+  detail::function_symbol_hashtable.resize(detail::AT_TABLE_SIZE(detail::afun_table_class),size_t(-1));
 
   for (size_t i=0; i<detail::adm.at_lookup_table.size(); i++)
   {
@@ -477,9 +515,9 @@ static void resize_function_symbol_hashtable()
     assert(entry->reference_count>0);
 
     HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
-    hnr &= detail::adm.afun_table_mask;
-    entry->next = detail::adm.function_symbol_hashtable[hnr];
-    detail::adm.function_symbol_hashtable[hnr] = i;
+    hnr &= detail::afun_table_mask;
+    entry->next = detail::function_symbol_hashtable[hnr];
+    detail::function_symbol_hashtable[hnr] = i;
   }
 }
 
@@ -618,13 +656,13 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
 
 function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
 {
-  if (detail::adm.function_symbol_hashtable.size()==0)
+  if (detail::function_symbol_hashtable.size()==0)
   {
     detail::initialise_administration();
   }
-  const HashNumber hnr = AT_hashAFun(name, arity) & detail::adm.afun_table_mask;
+  const HashNumber hnr = AT_hashAFun(name, arity) & detail::afun_table_mask;
   /* Find symbol in table */
-  size_t cur = detail::adm.function_symbol_hashtable[hnr];
+  size_t cur = detail::function_symbol_hashtable[hnr];
   while (cur!=size_t(-1) && !(detail::adm.at_lookup_table[cur]->arity()==arity &&
                               detail::adm.at_lookup_table[cur]->is_quoted()==quoted &&
                               detail::adm.at_lookup_table[cur]->name==name))
@@ -635,7 +673,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
   if (cur == size_t(-1))
   {
     const size_t free_entry = detail::adm.first_free;
-    assert(detail::adm.at_lookup_table.size()<detail::adm.function_symbol_hashtable.size());
+    assert(detail::adm.at_lookup_table.size()<detail::function_symbol_hashtable.size());
 
     if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table() to store an function_symbol.
     {
@@ -660,14 +698,14 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
 
     detail::adm.at_lookup_table[cur]->name = name;
 
-    detail::adm.at_lookup_table[cur]->next = detail::adm.function_symbol_hashtable[hnr];
-    detail::adm.function_symbol_hashtable[hnr] = cur;
+    detail::adm.at_lookup_table[cur]->next = detail::function_symbol_hashtable[hnr];
+    detail::function_symbol_hashtable[hnr] = cur;
   }
 
   m_number=cur;
   detail::increase_reference_count<false>(m_number);
 
-  if (detail::adm.at_lookup_table.size()>=detail::adm.function_symbol_hashtable.size())
+  if (detail::adm.at_lookup_table.size()>=detail::function_symbol_hashtable.size())
   {
     resize_function_symbol_hashtable();
   }
@@ -682,7 +720,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
 
 void detail::at_free_afun(const size_t n)
 {
-  if (adm.function_symbol_hashtable.size()==0)
+  if (function_symbol_hashtable.size()==0)
   {
     // The aterm administration is destroyed. We cannot remove
     // this aterm anymore.
@@ -694,17 +732,17 @@ void detail::at_free_afun(const size_t n)
   assert(sym->id==n);
 
   /* Calculate hashnumber */
-  const HashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & detail::adm.afun_table_mask;
+  const HashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & detail::afun_table_mask;
 
   /* Update hashtable */
-  if (detail::adm.function_symbol_hashtable[hnr] == n)
+  if (detail::function_symbol_hashtable[hnr] == n)
   {
-    detail::adm.function_symbol_hashtable[hnr] = sym->next;
+    detail::function_symbol_hashtable[hnr] = sym->next;
   }
   else
   {
     size_t cur;
-    size_t prev = detail::adm.function_symbol_hashtable[hnr];
+    size_t prev = detail::function_symbol_hashtable[hnr];
     for (cur = detail::adm.at_lookup_table[prev]->next; cur != n; prev = cur, cur = detail::adm.at_lookup_table[cur]->next)
     {
       assert(cur != size_t(-1));

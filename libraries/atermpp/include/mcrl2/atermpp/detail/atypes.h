@@ -40,18 +40,6 @@ typedef int ssize_t;
 
 static const size_t MAX_HEADER_BITS = 64;
 
-inline
-size_t AT_TABLE_SIZE(const size_t table_class)
-{
-  return (size_t)1<<(table_class);
-}
-
-inline
-size_t AT_TABLE_MASK(const size_t table_class)
-{
-  return AT_TABLE_SIZE(table_class)-1;
-}
-
 /* Integers in BAF are always exactly 32 bits.  The size must be fixed so that
  *  * BAF terms can be exchanged between platforms. */
 static const size_t INT_SIZE_IN_BAF = 32;
