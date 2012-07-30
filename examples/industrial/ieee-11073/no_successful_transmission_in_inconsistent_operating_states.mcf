@@ -1,0 +1,7 @@
+[true*] forall c, c': Configuration .
+  [operating(c)|operating(c')]
+  [!(exists ch: ChannelId .
+     communicate(ch, AssocAbort)
+   ||communicate(ch, AssocRelReq)
+   ||communicate(ch, AssocRelRsp))*]
+  [exists d: Data . communicate(manager_in(1), data(d))] (val(c == c'))
