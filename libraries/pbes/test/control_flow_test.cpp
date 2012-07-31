@@ -9,7 +9,7 @@
 /// \file control_flow_test.cpp
 /// \brief Tests for control flow algorithm.
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -20,7 +20,7 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_control_flow1()
+BOOST_AUTO_TEST_CASE(test_control_flow1)
 {
   std::string text =
     "pbes nu X(n: Nat)  = X(0) || X(n) || X(2);   \n"
@@ -35,7 +35,7 @@ void test_control_flow1()
   algorithm.run();
 }
 
-void test_control_flow2()
+BOOST_AUTO_TEST_CASE(test_control_flow)
 {
   std::string text =
     "pbes nu X(n: Nat)  = X(2) || X(n) || Y(1); \n"
@@ -49,7 +49,7 @@ void test_control_flow2()
   algorithm.run();
 }
 
-void test_source_dest1()
+BOOST_AUTO_TEST_CASE(test_source_dest1)
 {
   std::string text =
     "sort D = struct d1 | d2 | d3;\n"
@@ -72,7 +72,7 @@ void test_source_dest1()
   algorithm.run();
 }
 
-void test_source_dest2()
+BOOST_AUTO_TEST_CASE(test_source_dest2)
 {
   std::string text =
     "sort D = struct d1 | d2 | d3;                                                \n"
@@ -114,7 +114,7 @@ void test_source_dest2()
   algorithm.run();
 }
 
-void test_simplify()
+BOOST_AUTO_TEST_CASE(test_simplify)
 {
   std::string ptext =
     "pbes                                                  \n"
@@ -148,16 +148,9 @@ void test_simplify()
   }
 }
 
-int test_main(int argc, char** argv)
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
-  test_simplify();
-  test_source_dest1();
-  test_source_dest2();
-  test_control_flow1();
-  test_control_flow2();
-  //BOOST_CHECK(false);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;
 }
