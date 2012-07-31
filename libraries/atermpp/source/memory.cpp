@@ -51,6 +51,13 @@ namespace detail
   {
     return AT_TABLE_SIZE(table_class)-1;
   } 
+
+  static size_t first_free=size_t(-1);;
+  std::vector < detail::_function_symbol* > at_lookup_table;
+  
+  aterm static_undefined_aterm;
+  aterm static_empty_aterm_list;
+ 
 }
 
 
@@ -92,7 +99,6 @@ static std::vector<TermInfo> terminfo(INITIAL_MAX_TERM_SIZE);
 
 namespace detail
 {
-  aterm_administration adm;
   constant_function_symbols function_adm;
 
 void initialise_administration()
@@ -102,7 +108,6 @@ void initialise_administration()
   // which may be due to the initialisation of a global variable in
   // a .cpp file, or due to the initialisation of a pre-main initialisation
   // of a static variable, which some compilers do.
-  detail::adm.initialise_aterm_administration();
 
   if (function_symbol_hashtable.size()==0)
   { 
@@ -114,41 +119,12 @@ void initialise_administration()
     aterm_table_size=detail::AT_TABLE_SIZE(detail::INITIAL_TERM_TABLE_CLASS);
     aterm_table_mask=detail::AT_TABLE_MASK(detail::INITIAL_TERM_TABLE_CLASS);
 
-    // aterm_hashtable=std::vector <detail::_aterm*>(aterm_table_size,NULL);
     aterm_hashtable=reinterpret_cast<detail::_aterm**>(calloc(aterm_table_size,sizeof(detail::_aterm*)));
   }
 
   detail::function_adm.initialise_function_symbols();
 }
 
-static aterm static_undefined_aterm;
-
-_aterm *aterm_administration::undefined_aterm()
-{
-  if (static_undefined_aterm.m_term==NULL)
-  {
-    initialise_administration();
-    new (&static_undefined_aterm) aterm(detail::function_adm.AS_DEFAULT); // Use placement new as static_undefined_aterm
-                                                                          // may not have initialised when this is called, 
-                                                                          // causing a problem with reference counting.
-  }
-
-  return static_undefined_aterm.m_term;
-} 
-
-aterm static_empty_aterm_list;
-
-_aterm *aterm_administration::empty_aterm_list()
-{
-  if (static_empty_aterm_list.m_term==NULL || static_empty_aterm_list==static_undefined_aterm )
-  {
-    initialise_administration();
-    new (&static_empty_aterm_list) aterm(detail::function_adm.AS_EMPTY_LIST); // Use placement new as static_empty_atermlist
-                                                                              // may not have initialised when this is called, 
-                                                                              // causing a problem with reference counting.
-  }
-  return static_empty_aterm_list.m_term;
-} 
 }  // namespace detail
 
 static size_t total_nodes = 0;
@@ -209,7 +185,7 @@ void aterm::free_term()
   }
 #ifndef NDEBUG
   const size_t function_symbol_index=function().number();
-  size_t ref_count=detail::adm.at_lookup_table[function_symbol_index]->reference_count;
+  size_t ref_count=detail::at_lookup_table[function_symbol_index]->reference_count;
 #endif
   const size_t size=term_size(t);
 
@@ -297,13 +273,13 @@ bool check_that_all_objects_are_free()
     }
   }
 
-  for(size_t i=0; i<detail::adm.at_lookup_table.size(); ++i)
+  for(size_t i=0; i<detail::at_lookup_table.size(); ++i)
   {
-    if (i!=detail::function_adm.AS_EMPTY_LIST.number() && detail::adm.at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=detail::function_adm.AS_EMPTY_LIST.number() && detail::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                detail::adm.at_lookup_table[i]->name.c_str(),detail::adm.at_lookup_table[i]->id,detail::adm.at_lookup_table[i]->reference_count);
+                detail::at_lookup_table[i]->name.c_str(),detail::at_lookup_table[i]->id,detail::at_lookup_table[i]->reference_count);
     }
 
   }
@@ -509,9 +485,9 @@ static void resize_function_symbol_hashtable()
   detail::function_symbol_hashtable.clear();
   detail::function_symbol_hashtable.resize(detail::AT_TABLE_SIZE(detail::afun_table_class),size_t(-1));
 
-  for (size_t i=0; i<detail::adm.at_lookup_table.size(); i++)
+  for (size_t i=0; i<detail::at_lookup_table.size(); i++)
   {
-    detail::_function_symbol* entry = detail::adm.at_lookup_table[i];
+    detail::_function_symbol* entry = detail::at_lookup_table[i];
     assert(entry->reference_count>0);
 
     HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
@@ -531,8 +507,8 @@ static void resize_function_symbol_hashtable()
 
 size_t AT_printAFun(const size_t fun, FILE* f)
 {
-  assert(fun<detail::adm.at_lookup_table.size());
-  detail::_function_symbol* entry = detail::adm.at_lookup_table[fun];
+  assert(fun<detail::at_lookup_table.size());
+  detail::_function_symbol* entry = detail::at_lookup_table[fun];
   std::string::const_iterator id = entry->name.begin();
   size_t size = 0;
 
@@ -590,8 +566,8 @@ size_t AT_printAFun(const size_t fun, FILE* f)
 std::string ATwriteAFunToString(const function_symbol &fun)
 {
   std::ostringstream oss;
-  assert(fun.number()<detail::adm.at_lookup_table.size());
-  detail::_function_symbol* entry = detail::adm.at_lookup_table[fun.number()];
+  assert(fun.number()<detail::at_lookup_table.size());
+  detail::_function_symbol* entry = detail::at_lookup_table[fun.number()];
   std::string::const_iterator id = entry->name.begin();
 
   if (entry->is_quoted())
@@ -663,49 +639,49 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
   const HashNumber hnr = AT_hashAFun(name, arity) & detail::afun_table_mask;
   /* Find symbol in table */
   size_t cur = detail::function_symbol_hashtable[hnr];
-  while (cur!=size_t(-1) && !(detail::adm.at_lookup_table[cur]->arity()==arity &&
-                              detail::adm.at_lookup_table[cur]->is_quoted()==quoted &&
-                              detail::adm.at_lookup_table[cur]->name==name))
+  while (cur!=size_t(-1) && !(detail::at_lookup_table[cur]->arity()==arity &&
+                              detail::at_lookup_table[cur]->is_quoted()==quoted &&
+                              detail::at_lookup_table[cur]->name==name))
   {
-    cur = detail::adm.at_lookup_table[cur]->next;
+    cur = detail::at_lookup_table[cur]->next;
   }
 
   if (cur == size_t(-1))
   {
-    const size_t free_entry = detail::adm.first_free;
-    assert(detail::adm.at_lookup_table.size()<detail::function_symbol_hashtable.size());
+    const size_t free_entry = detail::first_free;
+    assert(detail::at_lookup_table.size()<detail::function_symbol_hashtable.size());
 
     if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table() to store an function_symbol.
     {
-      assert(detail::adm.first_free<detail::adm.at_lookup_table.size());
-      cur=detail::adm.first_free;
-      detail::adm.first_free = (size_t)detail::adm.at_lookup_table[detail::adm.first_free]->id;
-      assert(detail::adm.first_free==size_t(-1) || detail::adm.first_free<detail::adm.at_lookup_table.size());
-      assert(free_entry<detail::adm.at_lookup_table.size());
-      detail::adm.at_lookup_table[cur]->id = cur;
-      assert(detail::adm.at_lookup_table[cur]->reference_count==0);
-      detail::adm.at_lookup_table[cur]->reference_count=0;
-      detail::adm.at_lookup_table[cur]->header = detail::_function_symbol::make_header(arity,quoted);
-      detail::adm.at_lookup_table[cur]->count = 0;
-      detail::adm.at_lookup_table[cur]->index = -1;
+      assert(detail::first_free<detail::at_lookup_table.size());
+      cur=detail::first_free;
+      detail::first_free = (size_t)detail::at_lookup_table[detail::first_free]->id;
+      assert(detail::first_free==size_t(-1) || detail::first_free<detail::at_lookup_table.size());
+      assert(free_entry<detail::at_lookup_table.size());
+      detail::at_lookup_table[cur]->id = cur;
+      assert(detail::at_lookup_table[cur]->reference_count==0);
+      detail::at_lookup_table[cur]->reference_count=0;
+      detail::at_lookup_table[cur]->header = detail::_function_symbol::make_header(arity,quoted);
+      detail::at_lookup_table[cur]->count = 0;
+      detail::at_lookup_table[cur]->index = -1;
     }
     else
     {
-      cur = detail::adm.at_lookup_table.size();
-      detail::adm.at_lookup_table.push_back(new detail::_function_symbol(arity,quoted,cur,0,size_t(-1)));
+      cur = detail::at_lookup_table.size();
+      detail::at_lookup_table.push_back(new detail::_function_symbol(arity,quoted,cur,0,size_t(-1)));
     }
 
 
-    detail::adm.at_lookup_table[cur]->name = name;
+    detail::at_lookup_table[cur]->name = name;
 
-    detail::adm.at_lookup_table[cur]->next = detail::function_symbol_hashtable[hnr];
+    detail::at_lookup_table[cur]->next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = cur;
   }
 
   m_number=cur;
   detail::increase_reference_count<false>(m_number);
 
-  if (detail::adm.at_lookup_table.size()>=detail::function_symbol_hashtable.size())
+  if (detail::at_lookup_table.size()>=detail::function_symbol_hashtable.size())
   {
     resize_function_symbol_hashtable();
   }
@@ -726,7 +702,7 @@ void detail::at_free_afun(const size_t n)
     // this aterm anymore.
     return;
   }
-  detail::_function_symbol* sym=detail::adm.at_lookup_table[n];
+  detail::_function_symbol* sym=detail::at_lookup_table[n];
 
   assert(!sym->name.empty());
   assert(sym->id==n);
@@ -743,16 +719,16 @@ void detail::at_free_afun(const size_t n)
   {
     size_t cur;
     size_t prev = detail::function_symbol_hashtable[hnr];
-    for (cur = detail::adm.at_lookup_table[prev]->next; cur != n; prev = cur, cur = detail::adm.at_lookup_table[cur]->next)
+    for (cur = detail::at_lookup_table[prev]->next; cur != n; prev = cur, cur = detail::at_lookup_table[cur]->next)
     {
       assert(cur != size_t(-1));
     }
-    detail::adm.at_lookup_table[prev]->next = detail::adm.at_lookup_table[cur]->next;
+    detail::at_lookup_table[prev]->next = detail::at_lookup_table[cur]->next;
   }
 
-  assert(n<detail::adm.at_lookup_table.size());
-  detail::adm.at_lookup_table[n]->id = detail::adm.first_free;
-  detail::adm.first_free = n;
+  assert(n<detail::at_lookup_table.size());
+  detail::at_lookup_table[n]->id = detail::first_free;
+  detail::first_free = n;
 }
 
 } // namespace atermpp

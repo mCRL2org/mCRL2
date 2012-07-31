@@ -91,22 +91,22 @@ class assignment: public assignment_expression
       : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
     {}
 
-    variable lhs() const
+    const variable &lhs() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const variable>(atermpp::arg1(*this));
     }
 
-    data_expression rhs() const
+    const data_expression &rhs() const
     {
-      return data_expression(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
     /// \param[in] x A variable
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    data_expression operator()(const variable& x) const
+    const data_expression &operator()(const variable& x) const
     {
-      return x == lhs() ? rhs() : data_expression(x);
+      return x == lhs() ? rhs() : atermpp::aterm_cast<const data_expression>(x);
     }
 
     /// \brief Applies the assignment to a term

@@ -69,7 +69,7 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
     
     /// Default constructor. Creates an empty list.
-    term_list ():aterm(detail::aterm_administration::empty_aterm_list())
+    term_list ():aterm(aterm::empty_aterm_list())
     {
     }
 
@@ -223,7 +223,6 @@ class term_list:public aterm
     const_iterator end() const
     {
       return const_iterator(detail::static_empty_aterm_list);
-      // return const_iterator(reinterpret_cast<detail::_aterm*>(detail::aterm_administration::empty_aterm_list()));
     }
 
     /// \brief Returns the largest possible size of the term_list.

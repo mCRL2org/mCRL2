@@ -40,6 +40,9 @@ class aterm
   protected:
     detail::_aterm *m_term;
 
+    static detail::_aterm *undefined_aterm();
+    static detail::_aterm *empty_aterm_list();
+ 
     void free_term();
 
     void decrease_reference_count()
@@ -92,7 +95,7 @@ class aterm
   public:
 
     /// \brief Default constructor
-    aterm():m_term(&*detail::aterm_administration::undefined_aterm())
+    aterm():m_term(undefined_aterm())
     {
       increase_reference_count<false>(m_term);
     }
@@ -231,7 +234,6 @@ class aterm
       return &* *this;
     }
 
-    friend class detail::aterm_administration;
 };
 
 /// \brief A cheap cast from one aterm based type to another

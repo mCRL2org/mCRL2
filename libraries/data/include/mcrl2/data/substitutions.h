@@ -34,9 +34,10 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
     rhs(rhs_)
   {}
 
-  sort_expression operator()(const sort_expression& x)
+  const sort_expression &operator()(const sort_expression& x)
   {
-    if (x == lhs) {
+    if (x == lhs) 
+    {
       return rhs;
     }
     return x;
@@ -57,9 +58,10 @@ struct data_expression_assignment: public std::unary_function<data_expression, d
     rhs(rhs_)
   {}
 
-  data_expression operator()(const data_expression& x)
+  const data_expression &operator()(const data_expression& x)
   {
-    if (x == lhs) {
+    if (x == lhs) 
+    {
       return rhs;
     }
     return x;
@@ -79,7 +81,7 @@ struct assignment_sequence_substitution : public std::unary_function<variable, d
     : assignments(assignments_)
   {}
 
-  data_expression operator()(const variable& v) const
+  const data_expression &operator()(const variable& v) const
   {
     for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
     {
@@ -125,7 +127,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
         return *j;
       }
     }
-    return v;
+    return expression_type(v);
   }
 
   template <typename Expression>
@@ -161,7 +163,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
     : container(container_)
   {}
 
-  expression_type operator()(const variable_type& v) const
+  const expression_type &operator()(const variable_type& v) const
   {
     for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {
@@ -203,7 +205,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
     : m_map(m)
   { }
 
-  expression_type operator()(const variable_type& v) const
+  const expression_type &operator()(const variable_type& v) const
   {
     typename AssociativeContainer::const_iterator i = m_map.find(v);
     if (i == m_map.end())
@@ -317,17 +319,16 @@ public:
   expression_type operator()(const variable_type& v) const
   {
     typename AssociativeContainer::const_iterator i = m_map.find(v);
-    expression_type result;
     if (i == m_map.end())
     {
-      result = expression_type(v);
+      return expression_type(v);
     }
     else
     {
-      result = i->second;
+      return i->second;
     }
-    mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
-    return result;
+    // mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
+    // return result;
     // N.B. This does not work!
     // return i == m_map.end() ? v : i->second;
   }
@@ -532,20 +533,18 @@ public:
   };
 
   /// \brief Application operator; applies substitution to v.
-  expression_type operator()(const variable_type& v) const
+  const expression_type &operator()(const variable_type& v) const
   {
     size_t i = detail::variable_to_index()(v);
-    expression_type result;
     if(i < m_container.size() && m_container[i] != expression_type())
     {
-      result = m_container[i];
+      return m_container[i];
     }
     else
     {
-      result = expression_type(v);
+      return atermpp::aterm_cast<const expression_type>(v);
     }
-    mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
-    return result;
+    // mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
   }
 
   /// \brief Index operator.
@@ -608,7 +607,7 @@ protected:
   }
 
   /// \brief get the element at position i of the wrapped container
-  expression_type get(const size_t i) const
+  const expression_type &get(const size_t i) const
   {
     assert(i < m_container.size());
     return m_container[i];
@@ -877,7 +876,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     /// \brief Apply on single single variable expression
     /// \param[in] v the variable for which to give the associated expression
     /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
-    expression_type operator()(variable_type const& v) const
+    const expression_type operator()(variable_type const& v) const
     {
       return g_(v);
     }

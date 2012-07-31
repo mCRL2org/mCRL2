@@ -4,7 +4,6 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/architecture.h"
-#include "mcrl2/atermpp/detail/aterm_administration.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -16,7 +15,40 @@ namespace detail
 {
   extern size_t aterm_table_mask;
   extern detail::_aterm* * aterm_hashtable;
+
+
+  extern aterm static_undefined_aterm;
+  extern aterm static_empty_aterm_list;
+ 
+  void initialise_administration();
 }
+  
+inline
+detail::_aterm *aterm::undefined_aterm()
+{
+  if (detail::static_undefined_aterm.m_term==NULL)
+  {
+    detail::initialise_administration();
+    new (&detail::static_undefined_aterm) aterm(detail::function_adm.AS_DEFAULT); // Use placement new as static_undefined_aterm
+                                                                          // may not have initialised when this is called, 
+                                                                          // causing a problem with reference counting.
+  }
+
+  return detail::static_undefined_aterm.m_term;
+} 
+
+inline
+detail::_aterm *aterm::empty_aterm_list()
+{
+  if (detail::static_empty_aterm_list.m_term==NULL || detail::static_empty_aterm_list==detail::static_undefined_aterm )
+  {
+    detail::initialise_administration();
+    new (&detail::static_empty_aterm_list) aterm(detail::function_adm.AS_EMPTY_LIST); // Use placement new as static_empty_atermlist
+                                                                              // may not have initialised when this is called, 
+                                                                              // causing a problem with reference counting.
+  }
+  return detail::static_empty_aterm_list.m_term;
+} 
 
 inline
 size_t TERM_SIZE_APPL(const size_t arity)

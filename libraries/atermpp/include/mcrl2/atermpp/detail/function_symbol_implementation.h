@@ -12,24 +12,28 @@
 #ifndef ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H
 #define ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H
 
-#include "mcrl2/atermpp/detail/aterm_administration.h"
 #include "mcrl2/atermpp/function_symbol.h"
+#include "mcrl2/atermpp/detail/function_symbol.h"
+
 
 namespace atermpp
 {
 namespace detail
 {
+
+    extern std::vector < detail::_function_symbol* > at_lookup_table;
+    
     template <bool CHECK>
     void increase_reference_count(const size_t n)
     {
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,detail::adm.at_lookup_table[n]->reference_count,detail::adm.at_lookup_table[n]->name.c_str());
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,detail::at_lookup_table[n]->reference_count,detail::at_lookup_table[n]->name.c_str());
 #endif
-        assert(n<detail::adm.at_lookup_table.size());
-        if (CHECK) assert(detail::adm.at_lookup_table[n]->reference_count>0);
-        detail::adm.at_lookup_table[n]->reference_count++;
+        assert(n<detail::at_lookup_table.size());
+        if (CHECK) assert(detail::at_lookup_table[n]->reference_count>0);
+        detail::at_lookup_table[n]->reference_count++;
       }
     }
 
@@ -39,12 +43,12 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,detail::adm.at_
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,detail::adm.at_lookup_table[n]->reference_count,detail::adm.at_lookup_table[n]->name.c_str());
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,detail::at_lookup_table[n]->reference_count,detail::at_lookup_table[n]->name.c_str());
 #endif
-        assert(n<detail::adm.at_lookup_table.size());
-        assert(detail::adm.at_lookup_table[n]->reference_count>0);
+        assert(n<detail::at_lookup_table.size());
+        assert(detail::at_lookup_table[n]->reference_count>0);
 
-        if (--detail::adm.at_lookup_table[n]->reference_count==0)
+        if (--detail::at_lookup_table[n]->reference_count==0)
         {
           at_free_afun(n);
         }
@@ -90,31 +94,30 @@ inline
 const std::string &function_symbol::name() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::adm.at_lookup_table[m_number]->name;
+  return detail::at_lookup_table[m_number]->name;
 }
 
 inline
 size_t function_symbol::arity() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::adm.at_lookup_table[m_number]->arity();
+  return detail::at_lookup_table[m_number]->arity();
 }
 
 inline
 bool function_symbol::is_quoted() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::adm.at_lookup_table[m_number]->is_quoted();
+  return detail::at_lookup_table[m_number]->is_quoted();
 }
 
 inline
 bool AT_isValidAFun(const size_t sym)
 {
   return (sym != size_t(-1) &&
-          sym < detail::adm.at_lookup_table.size() &&
-          detail::adm.at_lookup_table[sym]->reference_count>0);
+          sym < detail::at_lookup_table.size() &&
+          detail::at_lookup_table[sym]->reference_count>0);
 }
-
 
 size_t AT_printAFun(const size_t sym, FILE* f);
 

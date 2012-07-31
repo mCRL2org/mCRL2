@@ -285,7 +285,7 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
 
   if (binaryWriter->indexInTerm == 0)
   {
-    detail::_function_symbol* symEntry = detail::adm.at_lookup_table[fun.number()];
+    detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
     size_t funHash = (size_t)((unsigned long) symEntry);
 
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
@@ -746,7 +746,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       char* name = binaryReader->tempBytes;
 
       function_symbol fun(name, arity, isQuoted);
-      detail::_function_symbol* symEntry = detail::adm.at_lookup_table[fun.number()];
+      detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
       binaryReader->protected_afuns.insert(fun);
 
       ensureReadSharedAFunCapacity(binaryReader); /* Make sure we have enough space in the array */
