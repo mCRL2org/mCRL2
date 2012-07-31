@@ -33,6 +33,8 @@ class _aterm_int:public _aterm
     };
 };
 
+_aterm *aterm_int(int val);
+
 } // namespace detail 
 
 static const size_t TERM_SIZE_INT = sizeof(detail::_aterm_int)/sizeof(size_t);

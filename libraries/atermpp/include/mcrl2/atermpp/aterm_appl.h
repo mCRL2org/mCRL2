@@ -27,6 +27,12 @@ namespace atermpp
 template <class Term>
 class term_appl:public aterm
 {
+//  protected:
+//    template <class Term>
+//    template <class ForwardIterator>
+//       _aterm* term_appl<Term>::local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end);
+//
+
   public: // Should become protected.
     detail::_aterm_appl<Term> & operator *() const
     {
@@ -103,8 +109,16 @@ class term_appl:public aterm
     /// \param sym A function symbol.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
-    template <class Iter>
-    term_appl(const function_symbol &sym, Iter first, Iter last);
+    
+    template <class ForwardIterator>
+    term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
+        :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
+    {
+      increase_reference_count<false>(m_term);
+    }
+    
+    // template <class Iter>
+    // term_appl(const function_symbol &sym, Iter first, Iter last);
     
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
@@ -115,8 +129,8 @@ class term_appl:public aterm
     /// \param last The end of a range of elements.
     /// \param convert_to_aterm. An optional translator that is applied to each element in the iterator range,
     //                              and which must translate these elements to type Term.
-    template <class Iter, class ATermConverter>
-    term_appl(const function_symbol &sym, Iter first, Iter last, ATermConverter convert_to_aterm);
+    template <class InputIterator, class ATermConverter>
+    term_appl(const function_symbol &sym, InputIterator first, InputIterator last, ATermConverter convert_to_aterm);
     
     /// \brief Constructor.
     /// \param sym A function symbol.
@@ -126,20 +140,32 @@ class term_appl:public aterm
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
-    term_appl(const function_symbol &sym, const Term &t1);
+    term_appl(const function_symbol &sym, const Term &t1)
+         :aterm(detail::term_appl1<Term>(sym,t1))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief Constructor for a binary function application.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2);
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
+         :aterm(detail::term_appl2<Term>(sym,t1,t2))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief Constructor for a ternary function application.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
     /// \param t3 The third argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3);
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
+         :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
@@ -147,7 +173,11 @@ class term_appl:public aterm
     /// \param t2 The second argument.
     /// \param t3 The third argument.
     /// \param t4 The fourth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4);
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
+         :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
@@ -156,7 +186,11 @@ class term_appl:public aterm
     /// \param t3 The third argument.
     /// \param t4 The fourth argument.
     /// \param t5 The fifth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5);
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
+         :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
@@ -166,7 +200,11 @@ class term_appl:public aterm
     /// \param t4 The fourth argument.
     /// \param t5 The fifth argument.
     /// \param t6 The sixth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6);
+    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
+         :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
+    {
+      increase_reference_count<false>(m_term);
+    }
 
     /// \brief The assignment operator
     /// \param t The assigned term

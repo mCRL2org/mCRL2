@@ -61,7 +61,7 @@ class term_list_iterator: public boost::iterator_facade<
     term_list_iterator(detail::_aterm *l)
       : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l))
     { 
-      assert(l.type()==AT_LIST);
+      assert(l->type()==AT_LIST);
     } 
 
   private:

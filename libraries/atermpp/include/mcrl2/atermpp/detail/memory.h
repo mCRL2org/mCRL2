@@ -183,10 +183,11 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
   }
 }
 
+namespace detail
+{
 
-template <class Term>
-template <class ForwardIterator>
-term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
+template <class Term, class ForwardIterator>
+detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
   const size_t arity = sym.arity();
   HashNumber hnr = START(sym.number());
@@ -239,16 +240,12 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
     detail::aterm_hashtable[hnr] = cur;
   }
   
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
+  // m_term=cur;
 }
 
-/**
- * Create an ATermAppl with one argument.
- */
-
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
+_aterm* term_appl1(const function_symbol &sym, const Term &arg0)
 {
   detail::_aterm* cur, *prev, **hashspot;
   assert(sym.arity()==1);
@@ -274,9 +271,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
         cur->next() = *hashspot;
         *hashspot = cur;
       }
-      m_term=cur;
-      increase_reference_count<false>(m_term);
-      return;
+      return cur;
     }
     prev = cur;
     cur = cur->next();
@@ -290,17 +285,11 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0)
   cur->next() = detail::aterm_hashtable[hnr];
   detail::aterm_hashtable[hnr] = cur;
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
 
-
-/**
- * Create an ATermAppl with one argument.
- */
-
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1)
+_aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Term &arg1)
 {
   detail::_aterm* cur, *prev, **hashspot;
 
@@ -330,9 +319,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
         cur->next() = *hashspot;
         *hashspot = cur;
       }
-      m_term=cur;
-      increase_reference_count<false>(m_term);
-      return;
+      return cur;
     }
     prev = cur;
     cur = cur->next();
@@ -348,8 +335,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
   cur->next() = detail::aterm_hashtable[hnr];
   detail::aterm_hashtable[hnr] = cur;
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
 
 /**
@@ -357,7 +343,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
  */
 
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2)
+_aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2)
 {
 
   assert(sym.arity()==3);
@@ -394,21 +380,12 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     detail::aterm_hashtable[hnr] = cur;
   }
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
 
-/*}}}  */
-/*{{{  ATermAppl ATmakeAppl4(function_symbol &sym, aterm &arg0, &arg1, &arg2, &a3) */
-
-/**
- * Create an ATermAppl with four arguments.
- */
-
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2, const Term &arg3)
+_aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2, const Term &arg3)
 {
-
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   CHECK_TERM(arg2);
@@ -447,16 +424,11 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     detail::aterm_hashtable[hnr] = cur;
   }
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
 
-/**
- * Create an ATermAppl with five arguments.
- */
-
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
+_aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4)
 {
 
@@ -502,16 +474,11 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     detail::aterm_hashtable[hnr] = cur;
   }
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
 
-/**
- * Create an ATermAppl with six arguments.
- */
-
 template <class Term>
-term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
+_aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2,
                                       const Term &arg3, const Term &arg4, const Term &arg5)
 {
   assert(sym.arity()==6);
@@ -560,9 +527,9 @@ term_appl<Term>::term_appl(const function_symbol &sym, const Term &arg0, const T
     detail::aterm_hashtable[hnr] = cur;
   }
 
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
+} //namespace detail
 
 template <class Term>
 term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) 

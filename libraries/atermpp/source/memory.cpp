@@ -416,9 +416,11 @@ aterm::aterm(const function_symbol &sym)
  * Create an aterm_int
  */
 
-aterm_int::aterm_int(int val)
+namespace detail
 {
-  detail::_aterm* cur;
+
+_aterm* aterm_int(int val)
+{
   /* The following emulates the encoding trick that is also used in the definition
    * of aterm_int. Not using a union here leads to incorrect hashing results.
    */
@@ -431,12 +433,11 @@ aterm_int::aterm_int(int val)
   _val.reserved = 0;
   _val.value = val;
 
-  // header_type header = INT_HEADER;
   HashNumber hnr = START(detail::function_adm.AS_INT.number());
   hnr = COMBINE(hnr, _val.reserved);
   hnr = FINISH(hnr);
 
-  cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
+  detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
   {
     cur = cur->next();
@@ -449,16 +450,15 @@ aterm_int::aterm_int(int val)
     hnr &= detail::aterm_table_mask;
     cur->function() = detail::function_adm.AS_INT;
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
-    // reinterpret_cast<detail::_aterm_int*>(cur)->value = _val.value;
 
     cur->next() = detail::aterm_hashtable[hnr];
     detail::aterm_hashtable[hnr] = cur;
   }
 
   assert((hnr & detail::aterm_table_mask) == (hash_number(cur, TERM_SIZE_INT) & detail::aterm_table_mask));
-  m_term=cur;
-  increase_reference_count<false>(m_term);
+  return cur;
 }
+} //namespace detail
 
 /*{{{  defines */
 
@@ -469,11 +469,6 @@ char afun_id[] = "$Id$";
 /*{{{  function declarations */
 
 static HashNumber AT_hashAFun(const std::string &name, const size_t arity);
-
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char* _strdup(const char* s);
-#endif
-
 
 static void resize_function_symbol_hashtable()
 {
