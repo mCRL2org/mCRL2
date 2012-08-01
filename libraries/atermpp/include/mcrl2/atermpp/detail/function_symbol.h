@@ -23,16 +23,12 @@ struct _function_symbol
     size_t reference_count;
     size_t id;
     std::string name;
-    size_t count;  /* used in bafio.c */
-    size_t index;  /* used in bafio.c */
 
-    _function_symbol(const size_t arity, bool quoted, const size_t i,size_t c,size_t in):
+    _function_symbol(const size_t arity, bool quoted, const size_t i):
         header(make_header(arity,quoted)),
         next(size_t(-1)),
         reference_count(0),
-        id(i),
-        count(c),
-        index(in)
+        id(i)
     {
     }
 

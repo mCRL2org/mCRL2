@@ -97,7 +97,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   }
   rules = reverse(rules);
 
-  aterm_list strat = ATmakeList0();
+  aterm_list strat;
   size_t arity;
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
@@ -107,10 +107,10 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   }
 
   arity = 0;
-  while (!ATisEmpty(rules))
+  while (!rules.empty())
   {
-    aterm_list l = ATmakeList0();
-    aterm_list m = ATmakeList0();
+    aterm_list l;
+    aterm_list m;
 
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
     for (size_t i=0; i<arity; ++i)
@@ -118,13 +118,13 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
       args[i]=-1;
     }
 
-    for (; !ATisEmpty(rules); rules=ATgetNext(rules))
+    for (; !rules.empty(); rules=pop_front(rules))
     {
-      if (ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1)
+      if (element_at(aterm_cast<aterm_list>(front(rules)),2).function().arity() == arity + 1)
       {
-        atermpp::aterm_appl cond = ATAelementAt(ATLgetFirst(rules),1);
+        const atermpp::aterm_appl &cond = aterm_cast<atermpp::aterm_appl>(element_at(atermpp::aterm_cast<aterm_list>(front(rules)),1));
         atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));
-        atermpp::aterm_appl pars = ATAelementAt(ATLgetFirst(rules),2);
+        const atermpp::aterm_appl &pars = aterm_cast<aterm_appl>(element_at(aterm_cast<aterm_list>(front(rules)),2));
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
         for (size_t i = 0; i < arity; i++)
@@ -177,43 +177,43 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
           }
         }
 
-        aterm_list deps = ATmakeList0();
+        aterm_list deps;
         for (size_t i = 0; i < arity; i++)
         {
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = push_front(deps,atermpp::aterm_cast<aterm>(ATmakeInt((int)i)));
+            deps = push_front(deps,atermpp::aterm_cast<aterm>(aterm_int((int)i)));
             args[i] += 1;
           }
         }
         deps = reverse(deps);
 
-        m = push_front(m,atermpp::aterm_cast<aterm>(ATmakeList2(deps,ATgetFirst(rules))));
+        m = push_front(m,atermpp::aterm_cast<aterm>(ATmakeList2(deps,front(rules))));
       }
       else
       {
-        l = push_front(l,ATgetFirst(rules));
+        l = push_front(l,front(rules));
       }
     }
 
-    while (!ATisEmpty(m))
+    while (!m.empty())
     {
-      aterm_list m2 = ATmakeList0();
-      for (; !ATisEmpty(m); m=ATgetNext(m))
+      aterm_list m2;
+      for (; !m.empty(); m=pop_front(m))
       {
-        if (ATisEmpty(ATLgetFirst(ATLgetFirst(m))))
+        if (aterm_cast<aterm_list>(front(aterm_cast<aterm_list>(front(m)))).empty())
         {
-          strat = push_front(strat, ATgetFirst(ATgetNext(ATLgetFirst(m))));
+          strat = push_front(strat, front(pop_front(aterm_cast<aterm_list>(front(m)))));
         }
         else
         {
-          m2 = push_front(m2,ATgetFirst(m));
+          m2 = push_front(m2,front(m));
         }
       }
       m = reverse(m2);
 
-      if (ATisEmpty(m))
+      if (m.empty())
       {
         break;
       }
@@ -236,13 +236,14 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         args[maxidx] = -1;
         used[maxidx] = true;
 
-        ATermInt k = ATmakeInt(maxidx);
+        aterm_int k(maxidx);
         strat = push_front(strat,atermpp::aterm_cast<aterm>(k));
-        m2 = ATmakeList0();
-        for (; !ATisEmpty(m); m=ATgetNext(m))
+        m2 = aterm_list();
+        for (; !m.empty(); m=pop_front(m))
         {
-          m2 = push_front(m2,atermpp::aterm_cast<aterm>(push_front(ATgetNext(ATLgetFirst(m)),
-                    atermpp::aterm_cast<aterm>(remove_one_element(ATLgetFirst(ATLgetFirst(m)),atermpp::aterm_cast<aterm>(k))))));
+          m2 = push_front(m2,atermpp::aterm_cast<aterm>(push_front(pop_front(aterm_cast<aterm_list>(front(m))),
+                    atermpp::aterm_cast<aterm>(remove_one_element(aterm_cast<aterm_list>(front(aterm_cast<aterm_list>(front(m)))),
+                                      atermpp::aterm_cast<aterm>(k))))));
         }
         m = reverse(m2);
       }
@@ -676,7 +677,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     // Here head has the shape #REWR#(u0,u1,...,un).
 
       const atermpp::aterm_appl &term_op=head;
-      assert(ATisInt(term_op(0)));
+      assert(term_op(0).type()==AT_INT);
       const size_t arity_op=term_op.size();
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity+arity_op-1);
       // std::vector < atermpp::aterm > args(arity+arity_op-1);
@@ -744,8 +745,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const aterm_list &rule = ATLgetFirst(strat);
-        const aterm_appl &lhs = ATAelementAt(rule,2);
+        const aterm_list &rule = aterm_cast<aterm_list>(front(strat));
+        const aterm_appl &lhs = aterm_cast<const aterm_appl>(element_at(rule,2));
         size_t rule_arity = lhs.size();
 
         if (rule_arity > arity)
@@ -753,7 +754,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        size_t max_len = ATLgetFirst(rule).size();
+        size_t max_len = aterm_cast<aterm_list>(front(rule)).size();
         size_t number_of_vars=0;
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
@@ -771,10 +772,10 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           }
         }
         assert(number_of_vars<=max_len);
-        if (matches && (ATAelementAt(rule,1)==internal_true ||
-                        rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,ATelementAt(rule,1))),sigma)==internal_true))
+        if (matches && (element_at(rule,1)==internal_true ||
+                        rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
         {
-          const atermpp::aterm_appl &rhs = ATAelementAt(rule,3);
+          const atermpp::aterm_appl &rhs = aterm_cast<aterm_appl>(element_at(rule,3));
 
           if (arity == rule_arity)
           {

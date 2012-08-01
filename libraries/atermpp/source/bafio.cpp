@@ -30,7 +30,10 @@ namespace atermpp
 
 /*{{{  static size_t calcUniqueAFuns(aterm t) */
 
-static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
+static size_t calcUniqueAFuns(
+                  const aterm &t, 
+                  std::set<aterm> &visited, 
+                  std::vector<size_t> &count)
 {
   size_t nr_unique = 0;
   size_t  i, arity;
@@ -45,7 +48,8 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
   switch (t.type())
   {
     case AT_INT:
-      if (!detail::at_lookup_table[detail::function_adm.AS_INT.number()]->count++)
+      // if (!detail::at_lookup_table[detail::function_adm.AS_INT.number()]->count++)
+      if (!count[detail::function_adm.AS_INT.number()]++)
       {
         nr_unique = 1;
       }
@@ -54,12 +58,12 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
     case AT_APPL:
       sym = t.function(); 
       assert(detail::at_lookup_table.size()>sym.number());
-      nr_unique = detail::at_lookup_table[sym.number()]->count>0 ? 0 : 1;
-      detail::at_lookup_table[sym.number()]->count++;
+      nr_unique = count[sym.number()]>0 ? 0 : 1;
+      count[sym.number()]++;
       arity = sym.arity();
       for (i = 0; i < arity; i++)
       {
-        nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)(i),visited);
+        nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)(i),visited,count);
       }
       break;
 
@@ -68,17 +72,17 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
       while (list!=aterm_list() && visited.count(list)==0)
       {
         visited.insert(list);
-        if (!detail::at_lookup_table[detail::function_adm.AS_LIST.number()]->count++)
+        if (!count[detail::function_adm.AS_LIST.number()]++)
         {
           nr_unique++;
         }
-        nr_unique += calcUniqueAFuns(list.front(),visited);
+        nr_unique += calcUniqueAFuns(list.front(),visited,count);
         list = list.tail();
       }
       if (list==aterm_list() && visited.count(list)==0)
       {
         visited.insert(list);
-        if (!detail::at_lookup_table[detail::function_adm.AS_EMPTY_LIST.number()]->count++)
+        if (!count[detail::function_adm.AS_EMPTY_LIST.number()]++)
         {
           nr_unique++;
         }
@@ -91,11 +95,10 @@ static size_t calcUniqueAFuns(const aterm &t, std::set<aterm> &visited)
   return nr_unique;
 }
 
-static size_t AT_calcUniqueAFuns(const aterm &t)
+static size_t AT_calcUniqueAFuns(const aterm &t, std::vector<size_t> &count)
 {
   std::set<aterm> visited;
-  size_t result = calcUniqueAFuns(t,visited);
-  // AT_unmarkIfAllMarked(t);
+  size_t result = calcUniqueAFuns(t,visited,count);
 
   return result;
 }
@@ -552,14 +555,14 @@ static bool write_symbol(const function_symbol sym, byte_writer* writer)
 
 /*}}}  */
 
-/*{{{  static sym_entry *get_top_symbol(aterm t) */
+/*{{{  static sym_entry *get_top_symbol(aterm t,index) */
 
 /**
  * Retrieve the top symbol of a term. Could be a special symbol
  * (AS_INT, etc) when the term is not an AT_APPL.
  */
 
-static sym_entry* get_top_symbol(const aterm t)
+static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &index)
 {
   function_symbol sym;
 
@@ -580,7 +583,8 @@ static sym_entry* get_top_symbol(const aterm t)
       break;
   }
 
-  return &sym_entries[detail::at_lookup_table[sym.number()]->index];
+  // return &sym_entries[detail::at_lookup_table[sym.number()]->index];
+  return &sym_entries[index[sym.number()]];
 }
 
 /*}}}  */
@@ -653,7 +657,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
   }
 }
 
-static void build_arg_tables()
+static void build_arg_tables(const std::vector<size_t> &index)
 {
   // function_symbol cur_sym;
   size_t cur_trm;
@@ -708,7 +712,7 @@ static void build_arg_tables()
             throw std::runtime_error("build_arg_tables: illegal term");
             break;
         }
-        topsym = get_top_symbol(arg);
+        topsym = get_top_symbol(arg,index);
         if (!topsym->nr_times_top++)
         {
           total_top_symbols++;
@@ -744,7 +748,7 @@ static void add_term(sym_entry* entry, const aterm &t)
  * Collect all terms in the appropriate symbol table.
  */
 
-static void collect_terms(const aterm &t, std::set<aterm> &visited)
+static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::vector<size_t> &index)
 {
   function_symbol sym;
   sym_entry* entry;
@@ -766,8 +770,8 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
         else
         {
           sym = detail::function_adm.AS_LIST;
-          collect_terms(list.front(),visited);
-          collect_terms((aterm)(list.tail()),visited);
+          collect_terms(list.front(),visited,index);
+          collect_terms((aterm)(list.tail()),visited,index);
         }
       }
       break;
@@ -779,7 +783,7 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
         const size_t cur_arity = sym.arity();
         for (size_t cur_arg=0; cur_arg<cur_arity; cur_arg++)
         {
-          collect_terms(appl(cur_arg),visited);
+          collect_terms(appl(cur_arg),visited,index);
         }
       }
       break;
@@ -788,7 +792,8 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited)
         sym = (function_symbol)(-1); // Kill compiler warnings
         break;
     }
-    entry = &sym_entries[detail::at_lookup_table[sym.number()]->index];
+    // entry = &sym_entries[detail::at_lookup_table[sym.number()]->index];
+    entry = &sym_entries[index[sym.number()]];
 
     assert(entry->id == sym);
     add_term(entry, t);
@@ -893,17 +898,17 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
  */
 
 /* forward declaration */
-static bool write_term(const aterm, byte_writer*);
+static bool write_term(const aterm, byte_writer*, const std::vector<size_t> &index);
 
 static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
-                      byte_writer* writer)
+                      byte_writer* writer, const std::vector<size_t> &index)
 {
   top_symbol* ts;
   sym_entry* arg_sym;
   size_t arg_trm_idx;
   function_symbol sym;
 
-  sym = get_top_symbol(arg)->id;
+  sym = get_top_symbol(arg,index)->id;
   ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
 
   if (writeBits(ts->code, ts->code_width, writer)<0)
@@ -920,7 +925,7 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   }
 
   if (arg_trm_idx >= arg_sym->cur_index &&
-      !write_term(arg, writer))
+      !write_term(arg, writer,index))
   {
     return false;
   }
@@ -935,7 +940,7 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm t, byte_writer* writer)
+static bool write_term(const aterm t, byte_writer* writer, const std::vector<size_t> &index)
 {
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
@@ -948,23 +953,26 @@ static bool write_term(const aterm t, byte_writer* writer)
         {
           return false;
         }
-        trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_INT.number()]->index];
+        // trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_INT.number()]->index];
+        trm_sym = &sym_entries[index[detail::function_adm.AS_INT.number()]];
         break;
       case AT_LIST:
       {
         aterm_list list (t);
         if (list==aterm_list())
         {
-          trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_EMPTY_LIST.number()]->index];
+          // trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_EMPTY_LIST.number()]->index];
+          trm_sym = &sym_entries[index[detail::function_adm.AS_EMPTY_LIST.number()]];
         }
         else
         {
-          trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_LIST.number()]->index];
-          if (!write_arg(trm_sym, list.front(), 0, writer))
+          // trm_sym = &sym_entries[detail::at_lookup_table[detail::function_adm.AS_LIST.number()]->index];
+          trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
+          if (!write_arg(trm_sym, list.front(), 0, writer,index))
           {
             return false;
           }
-          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, writer))
+          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, writer,index))
           {
             return false;
           }
@@ -975,13 +983,14 @@ static bool write_term(const aterm t, byte_writer* writer)
       {
         size_t arity;
         function_symbol sym = t.function();
-        trm_sym = &sym_entries[detail::at_lookup_table[sym.number()]->index];
+        // trm_sym = &sym_entries[detail::at_lookup_table[sym.number()]->index];
+        trm_sym = &sym_entries[index[sym.number()]];
         assert(sym == trm_sym->id);
         arity = sym.arity();
         for (arg_idx=0; arg_idx<arity; arg_idx++)
         {
           aterm cur_arg = static_cast<aterm_appl>(t)(arg_idx);
-          if (!write_arg(trm_sym, cur_arg, arg_idx, writer))
+          if (!write_arg(trm_sym, cur_arg, arg_idx, writer,index))
           {
             return false;
           }
@@ -1067,14 +1076,17 @@ write_baf(const aterm &t, byte_writer* writer)
   bit_buffer     = '\0';
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-  for (size_t lcv=0; lcv<nr_symbols; lcv++)
+
+  std::vector<size_t> count(detail::at_lookup_table.size(),0);
+  std::vector<size_t> index(detail::at_lookup_table.size(),size_t(-1));
+  /* for (size_t lcv=0; lcv<nr_symbols; lcv++)
   {
     if (detail::at_lookup_table[lcv]->reference_count>0)
     {
       detail::at_lookup_table[lcv]->count = 0;
     }
-  }
-  nr_unique_symbols = AT_calcUniqueAFuns(t);
+  } */
+  nr_unique_symbols = AT_calcUniqueAFuns(t,count);
 
   sym_entries = std::vector<sym_entry>(nr_unique_symbols);
 
@@ -1083,17 +1095,17 @@ write_baf(const aterm &t, byte_writer* writer)
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
     detail::_function_symbol* entry = detail::at_lookup_table[lcv];
-    if (entry->reference_count>0 && entry->count>0)
+    if (entry->reference_count>0 && count[lcv]>0)
     {
       assert(lcv == entry->id);
-      nr_unique_terms += entry->count;
+      nr_unique_terms += count[lcv];
 
-      sym_entries[cur].term_width = bit_width(entry->count);
+      sym_entries[cur].term_width = bit_width(count[lcv]);
       sym_entries[cur].id = lcv;
       sym_entries[cur].arity = function_symbol(lcv).arity();
-      sym_entries[cur].nr_terms = entry->count;
-      sym_entries[cur].terms.resize(entry->count);
-      sym_entries[cur].termtable_size = (entry->count*5)/4;
+      sym_entries[cur].nr_terms = count[lcv];
+      sym_entries[cur].terms.resize(count[lcv]);
+      sym_entries[cur].termtable_size = (count[lcv]*5)/4;
       sym_entries[cur].termtable =
         (trm_bucket**) calloc(sym_entries[cur].termtable_size,
                                  sizeof(trm_bucket*));
@@ -1102,8 +1114,9 @@ write_baf(const aterm &t, byte_writer* writer)
         std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
       }
 
-      entry->index = cur;
-      entry->count = 0; /* restore invariant that symbolcount is zero */
+      // entry->index = cur;
+      index[lcv] = cur;
+      count[lcv] = 0; /* restore invariant that symbolcount is zero */
 
       cur++;
     }
@@ -1114,7 +1127,7 @@ write_baf(const aterm &t, byte_writer* writer)
   /*}}}  */
 
   std::set<aterm> visited;
-  collect_terms(t,visited);
+  collect_terms(t,visited,index);
   // AT_unmarkIfAllMarked(t);
 
   /* reset cur_index */
@@ -1123,7 +1136,7 @@ write_baf(const aterm &t, byte_writer* writer)
     sym_entries[lcv].cur_index = 0;
   }
 
-  build_arg_tables();
+  build_arg_tables(index);
   /*print_sym_entries();*/
 
   /*{{{  write header */
@@ -1161,12 +1174,12 @@ write_baf(const aterm &t, byte_writer* writer)
   }
 
   /* Write the top symbol */
-  if (!writeInt(get_top_symbol(t)-&sym_entries[0], writer))
+  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], writer))
   {
     return false;
   }
 
-  if (!write_term(t, writer))
+  if (!write_term(t, writer,index))
   {
     return false;
   }

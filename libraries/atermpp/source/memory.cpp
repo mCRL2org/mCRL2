@@ -657,13 +657,13 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
       assert(detail::at_lookup_table[cur]->reference_count==0);
       detail::at_lookup_table[cur]->reference_count=0;
       detail::at_lookup_table[cur]->header = detail::_function_symbol::make_header(arity,quoted);
-      detail::at_lookup_table[cur]->count = 0;
-      detail::at_lookup_table[cur]->index = -1;
+      // detail::at_lookup_table[cur]->count = 0;
+      // detail::at_lookup_table[cur]->index = -1;
     }
     else
     {
       cur = detail::at_lookup_table.size();
-      detail::at_lookup_table.push_back(new detail::_function_symbol(arity,quoted,cur,0,size_t(-1)));
+      detail::at_lookup_table.push_back(new detail::_function_symbol(arity,quoted,cur));
     }
 
 

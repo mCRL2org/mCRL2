@@ -261,7 +261,7 @@ inline
 const ATerm &ATelementAt(const ATermList &l, size_t m)
 {
   return element_at(l,m);
-}
+} 
 
 inline
 ATermList ATconcat(const ATermList &l1, const ATermList &l2)
@@ -532,10 +532,10 @@ inline bool ATisList(const ATerm &t)
  * \param[in] t an ATerm
  * \return t is an ATermInt
  */
-inline bool ATisInt(const ATerm &t)
+/* inline bool ATisInt(const ATerm &t)
 {
   return t.type() == AT_INT;
-}
+} */
 
 /**
  * \brief Condition on an Aterm
@@ -563,7 +563,7 @@ inline bool ATisListOrNull(const ATerm &t)
 inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 {
   return aterm_cast<const ATermAppl>(ATelementAt(List, Index));
-}
+} 
 
 /**
  * \brief Gets the argument as ATermAppl at the specified position

@@ -278,7 +278,7 @@ static char* whitespace(int len)
 
 static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
 {
-  if (ATisInt(t))
+  if (t.type()==AT_INT)
   {
     term2seq(ATmakeList1(t),s,var_cnt);
   }
@@ -377,7 +377,7 @@ static aterm_list create_sequence(const data_equation &rule, int* var_cnt, const
     }
   }
 
-  if (ATisInt(cond) && ATisEqual(cond, true_inner))
+  if (cond.type()==AT_INT && ATisEqual(cond, true_inner))
   {
     rseq = push_front<aterm>(rseq,atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
   }
@@ -565,7 +565,7 @@ static void inc_usedcnt(aterm_list l)
   for (; !l.empty(); l=ATgetNext(l))
   {
     aterm first=ATgetFirst(l);
-    if (ATisInt(first))
+    if (first.type()==AT_INT)
     {
       treevars_usedcnt[ATgetInt(static_cast<aterm_int>(first))]++;
     }
@@ -904,7 +904,7 @@ static variable_list get_vars(const data_expression &t)
 
 static aterm_list get_vars(const aterm &a)
 {
-  if (ATisInt(a))
+  if (a.type()==AT_INT)
   {
     return ATmakeList0();
   }
@@ -1250,7 +1250,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int
     return;
   }
   aterm_list strat = create_strategy(eqns,opid.value(),arity,nfs,true_inner);
-  while (!strat.empty() && ATisInt(ATgetFirst(strat)))
+  while (!strat.empty() && ATgetFirst(strat).type()==AT_INT)
   {
     nfs.set(ATgetInt(static_cast<aterm_int>(ATgetFirst(strat))));
     strat = ATgetNext(strat);
@@ -1304,7 +1304,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   if (ATisList(t))
   {
     int arity = ATgetLength((aterm_list) t)-1;
-    if (ATisInt(ATgetFirst((aterm_list) t)))
+    if (ATgetFirst((aterm_list) t).type()==AT_INT)
     {
       if (opid_is_nf(static_cast<aterm_int>(ATgetFirst((aterm_list) t)),arity) && arity != 0)
       {
@@ -1328,7 +1328,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
       return false;
     }
   }
-  else if (ATisInt(t))
+  else if (t.type()==AT_INT)
   {
     return opid_is_nf(static_cast<aterm_int>(t),0);
   }
@@ -1406,7 +1406,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     size_t arity = ATgetLength((aterm_list) t)-1;
 
 
-    if (ATisInt(ATgetFirst((aterm_list) t)))
+    if (ATgetFirst((aterm_list) t).type()==AT_INT)
     {
       b = opid_is_nf(static_cast<aterm_int>(ATgetFirst((aterm_list) t)),arity);
 
@@ -1547,7 +1547,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-      // !ATisInt(ATgetFirst((aterm_list) t)). So the first element of this list is
+      // ATgetFirst((aterm_list) t).type()!=AT_INT). So the first element of this list is
       // either a variable, or a lambda term. It cannot be a forall or exists, because in
       // that case there would be a type error.
       if (arity == 0)
@@ -1640,7 +1640,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     return pair<bool,string>(b,ss.str());
 
   }
-  else if (ATisInt(t))
+  else if (t.type()==AT_INT)
   {
     stringstream ss;
     bool b = opid_is_nf(static_cast<aterm_int>(t),0);
@@ -2258,7 +2258,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, int a
 
   while (!strat.empty())
   {
-    if (ATisInt(ATgetFirst(strat)))
+    if (ATgetFirst(strat).type()==AT_INT)
     {
       int arg = ATgetInt(static_cast<aterm_int>(ATgetFirst(strat)));
 
@@ -2284,7 +2284,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, int a
 
 aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
 {
-  if (ATisInt(expr))
+  if (expr.type()==AT_INT)
   {
     return make_ar_false();
   }
@@ -2302,7 +2302,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
   }
 
   aterm head = ATgetFirst((aterm_list) expr);
-  if (!ATisInt(head))
+  if (head.type()!=AT_INT)
   {
     return ATisEqual(head,var)?make_ar_true():make_ar_false();
   }
@@ -2333,12 +2333,12 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
   if (eqn_arity <= arg)
   {
     aterm rhs = toInner_list_odd(eqn.rhs());  // rhs in special internal list format.
-    if (ATisInt(rhs))
+    if (rhs.type()==AT_INT)
     {
       int idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
-    else if (ATisList(rhs) && ATisInt(ATgetFirst((aterm_list) rhs)))
+    else if (ATisList(rhs) && ATgetFirst((aterm_list) rhs).type()==AT_INT)
     {
       int rhs_arity = ATgetLength((aterm_list) rhs)-1;
       size_t diff_arity = arity-eqn_arity;
