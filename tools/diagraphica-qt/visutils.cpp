@@ -2176,14 +2176,11 @@ void VisUtils::drawLabelInBoundBox(
   if (r >= 1.0)   // longer than tall or short label
   {
     int numToCrop = (int)ceil((lblLength-w)/charWidth);
-    if (0 < numToCrop && static_cast <size_t>(numToCrop) < cropLbl.size())
+    if (0 < numToCrop && static_cast<size_t>(numToCrop) < cropLbl.size())
     {
-      ssize_t eraseSize = cropLbl.size() - numToCrop;
-      if (eraseSize > 0)
-      {
-        cropLbl.erase(eraseSize);
-        cropLbl.append(".");
-      }
+      size_t eraseSize = cropLbl.size() - numToCrop;
+      cropLbl.erase(eraseSize);
+      cropLbl.append(".");
     }
 
     drawLabelCenter(
@@ -2196,9 +2193,9 @@ void VisUtils::drawLabelInBoundBox(
   else // taller than long
   {
     int numToCrop = (int)ceil((lblLength-h)/charWidth);
-    if (0 < numToCrop && static_cast  <size_t>(numToCrop) < cropLbl.size())
+    if (0 < numToCrop && static_cast<size_t>(numToCrop)+2 < cropLbl.size())
     {
-      ssize_t eraseSize = cropLbl.size() - numToCrop - 2;
+      size_t eraseSize = cropLbl.size() - numToCrop - 2;
       if (eraseSize > 2)
       {
         cropLbl.erase(eraseSize);

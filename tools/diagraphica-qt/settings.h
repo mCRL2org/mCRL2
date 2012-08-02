@@ -41,7 +41,7 @@ struct Settings
     backgroundColor(QColor(Qt::white)),
     textColor(QColor(Qt::black)),
     textSize(12),
-    animationSpeed(10.0),
+    animationSpeed(10.0f),
     blendType(QList<Item>()
       << Item(VisUtils::BLEND_HARD, "Hard transition")
       << Item(VisUtils::BLEND_LINEAR, "Linear")
@@ -55,7 +55,7 @@ struct Settings
     annotateClusterTree(true),
     showBarTree(true),
     bundleColor(QColor(Qt::black)),
-    arcTransparency(0.3),
+    arcTransparency(0.3f),
     clusterTreeColorMap(QList<Item>()
       << Item(VisUtils::COL_MAP_QUAL_PAST_1, "Pastel 1 (Qual)")
       << Item(VisUtils::COL_MAP_QUAL_PAST_2, "Pastel 2 (Qual)")
@@ -66,7 +66,7 @@ struct Settings
       << Item(VisUtils::COL_MAP_QUAL_DARK, "Dark (Qual)")
       << Item(VisUtils::COL_MAP_QUAL_ACCENT, "Accents (Qual)")
       ),
-    barTreeMagnification(0.0)
+    barTreeMagnification(0.0f)
   {}
 };
 
