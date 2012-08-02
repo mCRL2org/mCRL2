@@ -11,6 +11,7 @@
 #include <limits>
 #include "arcdiagram.h"
 #include <iostream>
+#include <QDebug>
 
 using namespace std;
 
@@ -1030,10 +1031,15 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
 
 void ArcDiagram::handleMouseEvent(QMouseEvent* e)
 {
+  Visualizer::handleMouseEvent(e);
+
   // redraw in select mode
   visualize(true);
   // redraw in render mode
   visualize(false);
+
+  qDebug() << e;
+  qDebug() << e->pos();
 
   if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton)
   {
@@ -1487,7 +1493,7 @@ void ArcDiagram::updateMarkBundles()
     markBundles[i] = false;
   }
 
-  if (currIdxDgrm != std::numeric_limits< size_t >::max())
+  if (currIdxDgrm != std::numeric_limits<size_t>::max())
   {
     Cluster* clst;
     Node* node;
@@ -1640,6 +1646,7 @@ void ArcDiagram::animate()
 
 void ArcDiagram::handleHits(const vector< int > &ids)
 {
+  qDebug() << "handleHits";
   if (m_mouseDrag && m_lastMouseEvent.type() == QEvent::MouseMove)
   {
     if (ids[1] == ID_DIAGRAM)
@@ -1649,6 +1656,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
   }
   else
   {
+    qDebug() << "handleHits else";
     if (ids.size() == 1)    // leaves
     {
       if (currIdxDgrm != std::numeric_limits< size_t >::max())
@@ -1661,6 +1669,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
     }
     else
     {
+      qDebug() << "handleHits else 2";
       // interact with bundles
       if (ids[1] == ID_BUNDLES)
       {
@@ -1679,6 +1688,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
       // interact with leaf nodes
       else if (ids[1] == ID_LEAF_NODE)
       {
+        qDebug() << "handleHits leaf";
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);

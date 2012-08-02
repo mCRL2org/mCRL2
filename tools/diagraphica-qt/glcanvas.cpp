@@ -458,14 +458,24 @@ void GLCanvas::onMouseEvent(wxMouseEvent& event)
 {
   QEvent::Type type = QEvent::None;
   if (event.Moving()) type = QEvent::MouseMove;
+  if (event.Dragging()) type = QEvent::MouseMove;
   if (event.ButtonDown()) type = QEvent::MouseButtonPress;
   if (event.ButtonUp()) type = QEvent::MouseButtonRelease;
   if (event.ButtonDClick()) type = QEvent::MouseButtonDblClick;
 
   Qt::MouseButton button = Qt::NoButton;
-  if (event.LeftDown()) button = Qt::LeftButton;
-  if (event.MiddleDown()) button = Qt::MidButton;
-  if (event.RightDown()) button = Qt::RightButton;
+  if (event.ButtonDown())
+  {
+    if (event.LeftDown()) button = Qt::LeftButton;
+    if (event.MiddleDown()) button = Qt::MidButton;
+    if (event.RightDown()) button = Qt::RightButton;
+  }
+  if (event.ButtonUp())
+  {
+    if (event.LeftUp()) button = Qt::LeftButton;
+    if (event.MiddleUp()) button = Qt::MidButton;
+    if (event.RightUp()) button = Qt::RightButton;
+  }
 
   Qt::MouseButtons buttons = Qt::NoButton;
   if (event.LeftIsDown()) buttons = buttons | Qt::LeftButton;
