@@ -53,7 +53,7 @@ namespace detail
   } 
 
   static size_t first_free=size_t(-1);;
-  std::vector < detail::_function_symbol* > at_lookup_table;
+  std::vector < detail::_function_symbol > at_lookup_table;
   
   aterm static_undefined_aterm;
   aterm static_empty_aterm_list;
@@ -120,9 +120,10 @@ void initialise_administration()
     aterm_table_mask=detail::AT_TABLE_MASK(detail::INITIAL_TERM_TABLE_CLASS);
 
     aterm_hashtable=reinterpret_cast<detail::_aterm**>(calloc(aterm_table_size,sizeof(detail::_aterm*)));
-  }
+    at_lookup_table.reserve(128);
 
-  detail::function_adm.initialise_function_symbols();
+    detail::function_adm.initialise_function_symbols();
+  }
 }
 
 }  // namespace detail
@@ -185,7 +186,7 @@ void aterm::free_term()
   }
 #ifndef NDEBUG
   const size_t function_symbol_index=function().number();
-  size_t ref_count=detail::at_lookup_table[function_symbol_index]->reference_count;
+  size_t ref_count=detail::at_lookup_table[function_symbol_index].reference_count;
 #endif
   const size_t size=term_size(t);
 
@@ -275,11 +276,11 @@ bool check_that_all_objects_are_free()
 
   for(size_t i=0; i<detail::at_lookup_table.size(); ++i)
   {
-    if (i!=detail::function_adm.AS_EMPTY_LIST.number() && detail::at_lookup_table[i]->reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
+    if (i!=detail::function_adm.AS_EMPTY_LIST.number() && detail::at_lookup_table[i].reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                detail::at_lookup_table[i]->name.c_str(),detail::at_lookup_table[i]->id,detail::at_lookup_table[i]->reference_count);
+                detail::at_lookup_table[i].name.c_str(),i,detail::at_lookup_table[i].reference_count);
     }
 
   }
@@ -374,7 +375,7 @@ aterm::aterm(const function_symbol &sym)
 
   assert(sym.arity()==0);
 
-  hnr = FINISH(START(sym.number()));
+  hnr = START(sym.number());
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -435,7 +436,6 @@ _aterm* aterm_int(int val)
 
   HashNumber hnr = START(detail::function_adm.AS_INT.number());
   hnr = COMBINE(hnr, _val.reserved);
-  hnr = FINISH(hnr);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
@@ -482,12 +482,12 @@ static void resize_function_symbol_hashtable()
 
   for (size_t i=0; i<detail::at_lookup_table.size(); i++)
   {
-    detail::_function_symbol* entry = detail::at_lookup_table[i];
-    assert(entry->reference_count>0);
+    detail::_function_symbol &entry = detail::at_lookup_table[i];
+    assert(entry.reference_count>0);
 
-    HashNumber hnr = AT_hashAFun(entry->name, entry->arity() );
+    HashNumber hnr = AT_hashAFun(entry.name, entry.arity() );
     hnr &= detail::afun_table_mask;
-    entry->next = detail::function_symbol_hashtable[hnr];
+    entry.next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = i;
   }
 }
@@ -503,16 +503,16 @@ static void resize_function_symbol_hashtable()
 size_t AT_printAFun(const size_t fun, FILE* f)
 {
   assert(fun<detail::at_lookup_table.size());
-  detail::_function_symbol* entry = detail::at_lookup_table[fun];
-  std::string::const_iterator id = entry->name.begin();
+  const detail::_function_symbol &entry = detail::at_lookup_table[fun];
+  std::string::const_iterator id = entry.name.begin();
   size_t size = 0;
 
-  if (entry->is_quoted())
+  if (entry.is_quoted())
   {
     /* This function symbol needs quotes */
     fputc('"', f);
     size++;
-    while (id!=entry->name.end())
+    while (id!=entry.name.end())
     {
       /* We need to escape special characters */
       switch (*id)
@@ -550,8 +550,8 @@ size_t AT_printAFun(const size_t fun, FILE* f)
   }
   else
   {
-    fputs(entry->name.c_str(), f);
-    size += entry->name.size();
+    fputs(entry.name.c_str(), f);
+    size += entry.name.size();
   }
   return size;
 }
@@ -562,14 +562,14 @@ std::string ATwriteAFunToString(const function_symbol &fun)
 {
   std::ostringstream oss;
   assert(fun.number()<detail::at_lookup_table.size());
-  detail::_function_symbol* entry = detail::at_lookup_table[fun.number()];
-  std::string::const_iterator id = entry->name.begin();
+  const detail::_function_symbol &entry = detail::at_lookup_table[fun.number()];
+  std::string::const_iterator id = entry.name.begin();
 
-  if (entry->is_quoted())
+  if (entry.is_quoted())
   {
     /* This function symbol needs quotes */
     oss << "\"";
-    while (id!=entry->name.end())
+    while (id!=entry.name.end())
     {
       /* We need to escape special characters */
       switch (*id)
@@ -597,7 +597,7 @@ std::string ATwriteAFunToString(const function_symbol &fun)
   }
   else
   {
-    oss << entry->name;
+    oss << entry.name;
   }
 
   return oss.str();
@@ -634,11 +634,11 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
   const HashNumber hnr = AT_hashAFun(name, arity) & detail::afun_table_mask;
   /* Find symbol in table */
   size_t cur = detail::function_symbol_hashtable[hnr];
-  while (cur!=size_t(-1) && !(detail::at_lookup_table[cur]->arity()==arity &&
-                              detail::at_lookup_table[cur]->is_quoted()==quoted &&
-                              detail::at_lookup_table[cur]->name==name))
+  while (cur!=size_t(-1) && !(detail::at_lookup_table[cur].arity()==arity &&
+                              detail::at_lookup_table[cur].is_quoted()==quoted &&
+                              detail::at_lookup_table[cur].name==name))
   {
-    cur = detail::at_lookup_table[cur]->next;
+    cur = detail::at_lookup_table[cur].next;
   }
 
   if (cur == size_t(-1))
@@ -650,26 +650,23 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
     {
       assert(detail::first_free<detail::at_lookup_table.size());
       cur=detail::first_free;
-      detail::first_free = (size_t)detail::at_lookup_table[detail::first_free]->id;
+      detail::first_free = detail::at_lookup_table[detail::first_free].next;
       assert(detail::first_free==size_t(-1) || detail::first_free<detail::at_lookup_table.size());
       assert(free_entry<detail::at_lookup_table.size());
-      detail::at_lookup_table[cur]->id = cur;
-      assert(detail::at_lookup_table[cur]->reference_count==0);
-      detail::at_lookup_table[cur]->reference_count=0;
-      detail::at_lookup_table[cur]->header = detail::_function_symbol::make_header(arity,quoted);
-      // detail::at_lookup_table[cur]->count = 0;
-      // detail::at_lookup_table[cur]->index = -1;
+      assert(detail::at_lookup_table[cur].reference_count==0);
+      detail::at_lookup_table[cur].reference_count=0;
+      detail::at_lookup_table[cur].header = detail::_function_symbol::make_header(arity,quoted);
     }
     else
     {
       cur = detail::at_lookup_table.size();
-      detail::at_lookup_table.push_back(new detail::_function_symbol(arity,quoted,cur));
+      detail::at_lookup_table.push_back(detail::_function_symbol(arity,quoted));
     }
 
 
-    detail::at_lookup_table[cur]->name = name;
+    detail::at_lookup_table[cur].name = name;
 
-    detail::at_lookup_table[cur]->next = detail::function_symbol_hashtable[hnr];
+    detail::at_lookup_table[cur].next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = cur;
   }
 
@@ -694,35 +691,34 @@ void detail::at_free_afun(const size_t n)
   if (function_symbol_hashtable.size()==0)
   {
     // The aterm administration is destroyed. We cannot remove
-    // this aterm anymore.
+    // this afun anymore.
     return;
   }
-  detail::_function_symbol* sym=detail::at_lookup_table[n];
+  const detail::_function_symbol &sym=detail::at_lookup_table[n];
 
-  assert(!sym->name.empty());
-  assert(sym->id==n);
+  assert(!sym.name.empty());
 
   /* Calculate hashnumber */
-  const HashNumber hnr = AT_hashAFun(sym->name, sym->arity()) & detail::afun_table_mask;
+  const HashNumber hnr = AT_hashAFun(sym.name, sym.arity()) & detail::afun_table_mask;
 
   /* Update hashtable */
   if (detail::function_symbol_hashtable[hnr] == n)
   {
-    detail::function_symbol_hashtable[hnr] = sym->next;
+    detail::function_symbol_hashtable[hnr] = sym.next;
   }
   else
   {
     size_t cur;
     size_t prev = detail::function_symbol_hashtable[hnr];
-    for (cur = detail::at_lookup_table[prev]->next; cur != n; prev = cur, cur = detail::at_lookup_table[cur]->next)
+    for (cur = detail::at_lookup_table[prev].next; cur != n; prev = cur, cur = detail::at_lookup_table[cur].next)
     {
       assert(cur != size_t(-1));
     }
-    detail::at_lookup_table[prev]->next = detail::at_lookup_table[cur]->next;
+    detail::at_lookup_table[prev].next = detail::at_lookup_table[cur].next;
   }
 
   assert(n<detail::at_lookup_table.size());
-  detail::at_lookup_table[n]->id = detail::first_free;
+  detail::at_lookup_table[n].next = detail::first_free;
   detail::first_free = n;
 }
 

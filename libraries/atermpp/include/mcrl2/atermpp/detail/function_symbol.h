@@ -21,14 +21,13 @@ struct _function_symbol
 
     size_t next;
     size_t reference_count;
-    size_t id;
+    // size_t id;
     std::string name;
 
-    _function_symbol(const size_t arity, bool quoted, const size_t i):
+    _function_symbol(const size_t arity, bool quoted):
         header(make_header(arity,quoted)),
         next(size_t(-1)),
-        reference_count(0),
-        id(i)
+        reference_count(0)
     {
     }
 

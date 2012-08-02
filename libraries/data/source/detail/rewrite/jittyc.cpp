@@ -3112,7 +3112,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 //       "  std::vector<atermpp::aterm> args(arity_u+arity_t-1);\n"
       "  new (&args[0]) aterm(head1);\n"
       "  int function_index;\n"
-      "  if ((head1.type()==AT_INT) && ((function_index = atermpp::aterm_int(head1).value()) < %zu) )\n"
+      "  if ((head1.function().number()==%ld) && ((function_index = atermpp::aterm_int(head1).value()) < %zu) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -3152,7 +3152,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    return result;\n"
       "  }\n"
       "}\n\n",
-      get_num_opids(), max_arity
+      atermpp::detail::function_adm.AS_INT.number(),get_num_opids(), max_arity
       );
 
   fprintf(f,
@@ -3202,7 +3202,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    // Term t has the shape #REWR#(t1,...,tn)\n"
       "    const atermpp::aterm &head = t(0);\n"
-      "    if (head.type()==AT_INT)\n"
+      "    if (head.function().number()==%ld)\n"
       "    {\n"
       "      const int function_index = reinterpret_cast<const atermpp::aterm_int&>(head).value();\n"
       "      if (function_index < %zu )\n"
@@ -3229,7 +3229,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      get_num_opids(), max_arity);
+      atermpp::detail::function_adm.AS_INT.number(),get_num_opids(), max_arity);
 
 
   fclose(f);

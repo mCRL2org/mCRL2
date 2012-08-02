@@ -248,10 +248,6 @@ static aterm getNextTerm(BinaryWriter binaryWriter)
       current->nextPartOfList = nextList.tail();
 
       current->subTermIndex++;
-      /* }else if(type == AT_PLACEHOLDER){
-        next = ATgetPlaceholder(term);
-
-        current->subTermIndex++; */
     }
     else
     {
@@ -285,11 +281,12 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
 
   if (binaryWriter->indexInTerm == 0)
   {
-    detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
+    // detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
+    size_t symEntry = fun.number();
     size_t funHash = (size_t)((unsigned long) symEntry);
 
     IDMappings sharedAFuns = binaryWriter->sharedAFuns;
-    size_t id = IMgetID(sharedAFuns, symEntry, funHash);
+    size_t id = IMgetID(sharedAFuns, (void*)symEntry, funHash);
 
     size_t header = getHeader(arg);
 
@@ -338,7 +335,7 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
 
       id = binaryWriter->currentSharedAFunKey++;
 
-      IMmakeIDMapping(sharedAFuns, symEntry, funHash, id);
+      IMmakeIDMapping(sharedAFuns, (void*)symEntry, funHash, id);
     }
   }
   else
@@ -584,7 +581,7 @@ static void ensureReadSharedAFunCapacity(BinaryReader binaryReader)
 {
   if ((binaryReader->sharedAFunsIndex + 1) >= binaryReader->sharedAFunsSize)
   {
-    binaryReader->sharedAFuns = (detail::_function_symbol**) realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(detail::_function_symbol*));
+    binaryReader->sharedAFuns = (size_t*) realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(size_t));
     if (binaryReader->sharedAFuns == NULL)
     {
       std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared signatures array.");
@@ -633,8 +630,9 @@ static aterm buildTerm(BinaryReader /* binaryReader*/, ATermConstruct* parent)
     size_t nrOfSubTerms = parent->nrOfSubTerms;
     std::vector<aterm> subTerms = parent->subTerms;
 
-    detail::_function_symbol* symEntry = parent->tempTerm;
-    function_symbol fun = symEntry->id;
+    // detail::_function_symbol* symEntry = parent->tempTerm;
+    // function_symbol fun = symEntry->id;
+    function_symbol fun = parent->tempTerm;
 
     /* Use the appropriate way of constructing the appl, depending on if it has arguments or not. */
     if (nrOfSubTerms > 0)
@@ -746,7 +744,8 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       char* name = binaryReader->tempBytes;
 
       function_symbol fun(name, arity, isQuoted);
-      detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
+      // detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
+      size_t symEntry = fun.number();
       binaryReader->protected_afuns.insert(fun);
 
       ensureReadSharedAFunCapacity(binaryReader); /* Make sure we have enough space in the array */
@@ -790,11 +789,11 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
   {
     size_t key = readInt(byteBuffer);
 
-    detail::_function_symbol* symEntry = binaryReader->sharedAFuns[key];
+    size_t symEntry = binaryReader->sharedAFuns[key];
     // ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
     ATermConstruct* ac = &(binaryReader->stack.top());
 
-    function_symbol fun = symEntry->id;
+    function_symbol fun = symEntry;
     size_t arity = fun.arity();
 
     if (arity > 0)
@@ -968,7 +967,7 @@ BinaryReader ATcreateBinaryReader()
 {
   // ATermConstruct* stack;
   // aterm* sharedTerms;
-  detail::_function_symbol** sharedAFuns;
+  size_t* sharedAFuns;
 
   BinaryReader binaryReader = new _BinaryReader; // (BinaryReader) malloc(sizeof(struct _BinaryReader));
   /* if (binaryReader == NULL)
@@ -997,7 +996,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->sharedTermsSize = DEFAULTSHAREDTERMARRAYSIZE;
   binaryReader->sharedTermsIndex = 0; */
 
-  sharedAFuns = (detail::_function_symbol**) malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(detail::_function_symbol*));
+  sharedAFuns = (size_t*) malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(size_t));
   if (sharedAFuns == NULL)
   {
     std::runtime_error("Unable to allocate memory for the binaryReader's shared symbols array.");

@@ -21,19 +21,20 @@ namespace atermpp
 namespace detail
 {
 
-    extern std::vector < detail::_function_symbol* > at_lookup_table;
+    extern std::vector < detail::_function_symbol > at_lookup_table;
     
     template <bool CHECK>
     void increase_reference_count(const size_t n)
     {
+
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,detail::at_lookup_table[n]->reference_count,detail::at_lookup_table[n]->name.c_str());
+fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n].reference_count,at_lookup_table[n].name.c_str());
 #endif
-        assert(n<detail::at_lookup_table.size());
-        if (CHECK) assert(detail::at_lookup_table[n]->reference_count>0);
-        detail::at_lookup_table[n]->reference_count++;
+        assert(n<at_lookup_table.size());
+        if (CHECK) assert(at_lookup_table[n].reference_count>0);
+        at_lookup_table[n].reference_count++;
       }
     }
 
@@ -43,12 +44,12 @@ fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,detail::at_look
       if (n!=size_t(-1))
       {
 #ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,detail::at_lookup_table[n]->reference_count,detail::at_lookup_table[n]->name.c_str());
+fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n].reference_count,at_lookup_table[n].name.c_str());
 #endif
-        assert(n<detail::at_lookup_table.size());
-        assert(detail::at_lookup_table[n]->reference_count>0);
+        assert(n<at_lookup_table.size());
+        assert(at_lookup_table[n].reference_count>0);
 
-        if (--detail::at_lookup_table[n]->reference_count==0)
+        if (--at_lookup_table[n].reference_count==0)
         {
           at_free_afun(n);
         }
@@ -94,21 +95,21 @@ inline
 const std::string &function_symbol::name() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::at_lookup_table[m_number]->name;
+  return detail::at_lookup_table[m_number].name;
 }
 
 inline
 size_t function_symbol::arity() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::at_lookup_table[m_number]->arity();
+  return detail::at_lookup_table[m_number].arity();
 }
 
 inline
 bool function_symbol::is_quoted() const
 {
   assert(AT_isValidAFun(m_number));
-  return detail::at_lookup_table[m_number]->is_quoted();
+  return detail::at_lookup_table[m_number].is_quoted();
 }
 
 inline
@@ -116,7 +117,7 @@ bool AT_isValidAFun(const size_t sym)
 {
   return (sym != size_t(-1) &&
           sym < detail::at_lookup_table.size() &&
-          detail::at_lookup_table[sym]->reference_count>0);
+          detail::at_lookup_table[sym].reference_count>0);
 }
 
 size_t AT_printAFun(const size_t sym, FILE* f);

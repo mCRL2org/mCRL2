@@ -75,12 +75,6 @@ size_t COMBINE(const HashNumber hnr, const aterm &w)
 }
 
 inline
-HashNumber FINISH(const HashNumber hnr)
-{
-  return hnr;
-}
-
-inline
 void CHECK_TERM(const aterm &
 #ifndef NDEBUG 
 t
@@ -109,7 +103,7 @@ inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size
     hnr = COMBINE(hnr, *(reinterpret_cast<const size_t *>(t) + i));
   }
 
-  return FINISH(hnr);
+  return hnr;
 }
 
 template <class Term>
@@ -134,7 +128,6 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
     hnr = COMBINE(hnr, arg);
   }
   assert(j==arity);
-  hnr = FINISH(hnr);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -199,7 +192,6 @@ detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterato
     hnr = COMBINE(hnr, *i);
   }
   assert(j==arity);
-  hnr = FINISH(hnr);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -253,7 +245,6 @@ _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
 
   HashNumber hnr = START(sym.number());
   hnr = COMBINE(hnr, arg0);
-  hnr = FINISH(hnr);
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -300,7 +291,6 @@ _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Term &arg
   HashNumber hnr = START(sym.number());
   hnr = COMBINE(hnr, arg0);
   hnr = COMBINE(hnr, arg1);
-  hnr = FINISH(hnr);
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -355,7 +345,6 @@ _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Term &arg
   hnr = COMBINE(hnr, arg0);
   hnr = COMBINE(hnr, arg1);
   hnr = COMBINE(hnr, arg2);
-  hnr = FINISH(hnr);
 
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -397,7 +386,6 @@ _aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Term &arg
   hnr = COMBINE(hnr, arg1);
   hnr = COMBINE(hnr, arg2);
   hnr = COMBINE(hnr, arg3);
-  hnr = FINISH(hnr);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -445,7 +433,6 @@ _aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Term &arg
   hnr = COMBINE(hnr, arg2);
   hnr = COMBINE(hnr, arg3);
   hnr = COMBINE(hnr, arg4);
-  hnr = FINISH(hnr);
 
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -496,7 +483,6 @@ _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Term &arg
   hnr = COMBINE(hnr, arg3);
   hnr = COMBINE(hnr, arg4);
   hnr = COMBINE(hnr, arg5);
-  hnr = FINISH(hnr);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -552,7 +538,6 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
     }
   }
 
-  hnr = FINISH(hnr);
 
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
