@@ -109,9 +109,9 @@ void OpacityChooser::handleMouseEvent(QMouseEvent* e)
     if (e->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton)
     {
       // selection mode
-      visualize(true);
+      updateGL(true);
       // normal mode
-      visualize(false);
+      updateGL();
 
       if (dragIdx == -1)
       {

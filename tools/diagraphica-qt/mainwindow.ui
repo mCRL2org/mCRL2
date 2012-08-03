@@ -125,9 +125,6 @@
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
            <column>
             <property name="text">
              <string>#</string>
@@ -202,7 +199,14 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="examinerWidget" native="true"/>
+       <widget class="QWidget" name="examinerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
       </widget>
       <widget class="QStackedWidget" name="mainViewStack">
        <property name="sizePolicy">
@@ -223,6 +227,12 @@
            </property>
            <widget class="QWidget" name="arcDiagramWidget" native="true"/>
            <widget class="QStackedWidget" name="analysisStack">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
             <property name="currentIndex">
              <number>0</number>
             </property>
@@ -484,7 +494,7 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

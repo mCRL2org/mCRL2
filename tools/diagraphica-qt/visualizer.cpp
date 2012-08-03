@@ -26,6 +26,7 @@ Visualizer::Visualizer(
 
   initMouse();
 
+  m_inSelectMode = false;
   texCharOK = false;
   texCushOK = false;
 
@@ -35,6 +36,12 @@ Visualizer::Visualizer(
   showMenu = false;
 }
 
+
+void Visualizer::updateGL(bool inSelectMode)
+{
+  m_inSelectMode = inSelectMode;
+  QGLWidget::updateGL();
+}
 
 void Visualizer::paintGL()
 {
@@ -55,7 +62,8 @@ void Visualizer::paintGL()
   glLoadIdentity();
   glViewport(0, 0, width(), height());
 
-  visualize(false);
+  visualize(m_inSelectMode);
+  m_inSelectMode = false;
 }
 
 
@@ -125,16 +133,16 @@ void Visualizer::handleSizeEvent()
 
 void Visualizer::handleMouseEvent(QMouseEvent* e)
 {
-  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
-  if (!m_mouseDrag && e->buttons() != Qt::NoButton)
+  if (!m_mouseDrag && e->buttons() != Qt::NoButton && e->type() == QEvent::MouseMove)
   {
     m_mouseDrag = true;
-    m_mouseDragStart = e->pos();
+    m_mouseDragStart = m_lastMouseEvent.pos();
   }
   if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
     m_mouseDrag = false;
   }
+  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
 }
 
 void Visualizer::handleMouseLeaveEvent()

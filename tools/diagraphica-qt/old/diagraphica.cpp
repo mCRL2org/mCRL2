@@ -2327,15 +2327,15 @@ void DiaGraph::handlePaintEvent(GLCanvas* c)
       // draw in render mode
       if (c == canvasEdit && editor != NULL)
       {
-        editor->visualize(false);
+        editor->updateGL();
       }
       else if (c == canvasColChooser && colChooser != NULL)
       {
-        colChooser->visualize(false);
+        colChooser->updateGL();
       }
       else if (c == canvasOpaChooser && opaChooser != NULL)
       {
-        opaChooser->visualize(false);
+        opaChooser->updateGL();
       }
       else if (c != NULL)
       {
@@ -2347,31 +2347,31 @@ void DiaGraph::handlePaintEvent(GLCanvas* c)
       // draw in render mode
       if (c == canvasArcD && arcDgrm != NULL)
       {
-        arcDgrm->visualize(false);
+        arcDgrm->updateGL();
       }
       else if (view == VIEW_SIM && (c == canvasSiml && simulator != NULL))
       {
-        simulator->visualize(false);
+        simulator->updateGL();
       }
       else if (view == VIEW_TRACE && (c == canvasTrace && timeSeries != NULL))
       {
-        timeSeries->visualize(false);
+        timeSeries->updateGL();
       }
       else if (c == canvasExnr && examiner != NULL)
       {
-        examiner->visualize(false);
+        examiner->updateGL();
       }
       else if (c == canvasDistr && distrPlot != NULL)
       {
-        distrPlot->visualize(false);
+        distrPlot->updateGL();
       }
       else if (c == canvasCorrl && corrlPlot != NULL)
       {
-        corrlPlot->visualize(false);
+        corrlPlot->updateGL();
       }
       else if (c == canvasCombn && combnPlot != NULL)
       {
-        combnPlot->visualize(false);
+        combnPlot->updateGL();
       }
       else if (c!= NULL)
       {

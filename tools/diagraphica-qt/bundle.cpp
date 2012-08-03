@@ -92,7 +92,7 @@ Bundle* Bundle::getChild(const size_t& idx)
 
 Edge* Bundle::getEdge(const size_t& idx)
 {
-  if (idx >= children.size())
+  if (idx >= edges.size())
     throw mcrl2::runtime_error("Error retrieving bundle edge.");
   return edges[idx];
 }

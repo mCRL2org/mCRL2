@@ -56,6 +56,8 @@ ArcDiagram::ArcDiagram(
   connect(&settings->arcTransparency, SIGNAL(changed(float)), this, SLOT(update()));
   connect(&settings->clusterTreeColorMap, SIGNAL(changed(int)), this, SLOT(update()));
   connect(&settings->barTreeMagnification, SIGNAL(changed(float)), this, SLOT(update()));
+
+  setMouseTracking(true);
 }
 
 
@@ -1033,12 +1035,9 @@ void ArcDiagram::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
-
-  qDebug() << e;
-  qDebug() << e->pos();
+  updateGL();
 
   if (e->type() == QEvent::MouseButtonRelease && e->button() == Qt::LeftButton)
   {
@@ -1055,9 +1054,9 @@ void ArcDiagram::handleMouseEvent(QMouseEvent* e)
     {
       showMenu = false;
     }
-
-    m_lastMousePos = m_lastMouseEvent.pos();
   }
+
+  m_lastMousePos = e->pos();
 }
 
 
@@ -1334,7 +1333,7 @@ void ArcDiagram::calcPositionsTree(
 
   Position2D topLft;
   Position2D botRgt;
-  ssize_t        lvl = c->getSizeCoord()-1;
+  int        lvl = c->getSizeCoord()-1;
 
   vector< size_t > v;
   c->getCoord(v);
@@ -1418,7 +1417,7 @@ void ArcDiagram::calcPositionsBarTree(
 
   Position2D topLft;
   Position2D botRgt;
-  ssize_t        lvl = c->getSizeCoord()-1;
+  int        lvl = c->getSizeCoord()-1;
 
   if (c->getSizeChildren() != 0)
   {
@@ -1482,7 +1481,7 @@ void ArcDiagram::updateMarkBundles()
     markBundles[i] = false;
   }
 
-  if (currIdxDgrm != std::numeric_limits<size_t>::max())
+  if (currIdxDgrm != NON_EXISTING)
   {
     Cluster* clst;
     Node* node;
@@ -1628,56 +1627,24 @@ void ArcDiagram::animate()
   }
   updateMarkBundles();
 
-  visualize(false);
+  updateGL();
   repaint();
 }
 
 
 void ArcDiagram::handleHits(const vector< int > &ids)
 {
-  qDebug() << "handleHits";
-  if (m_mouseDrag && m_lastMouseEvent.type() == QEvent::MouseMove)
+  if (ids.size() > 1)
   {
-    if (ids[1] == ID_DIAGRAM)
+    qDebug() << "handleHits > 1" << ids[1];
+    switch (ids[1])
     {
-      handleDragDiagram(ids[2]);
-    }
-  }
-  else
-  {
-    qDebug() << "handleHits else";
-    if (ids.size() == 1)    // leaves
-    {
-      if (currIdxDgrm != std::numeric_limits< size_t >::max())
-      {
-        currIdxDgrm = NON_EXISTING;
-        updateMarkBundles();
-        mediator->handleUnshowFrame();
-      }
-      setToolTip(QString());
-    }
-    else
-    {
-      qDebug() << "handleHits else 2";
-      // interact with bundles
-      if (ids[1] == ID_BUNDLES)
-      {
+      case ID_BUNDLES:
         currIdxDgrm = NON_EXISTING;
         handleHoverBundle(ids[2]);
-      }
-      // interact with tree nodes
-      else if (ids[1] == ID_TREE_NODE)
-      {
-        currIdxDgrm = NON_EXISTING;
-        updateMarkBundles();
-        mediator->handleUnshowFrame();
+        break;
 
-        handleHoverCluster(ids[2], ids[3]);
-      }
-      // interact with leaf nodes
-      else if (ids[1] == ID_LEAF_NODE)
-      {
-        qDebug() << "handleHits leaf";
+      case ID_LEAF_NODE:
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
@@ -1698,19 +1665,25 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 
           handleHoverCluster(mapPosToClust.size()-1, ids[2]);
         }
-      }
-      // interact with bar tree
-      else if (ids[1] == ID_BAR_TREE)
-      {
+        break;
+
+      case ID_TREE_NODE:
+        currIdxDgrm = NON_EXISTING;
+        updateMarkBundles();
+        mediator->handleUnshowFrame();
+
+        handleHoverCluster(ids[2], ids[3]);
+        break;
+
+      case ID_BAR_TREE:
         currIdxDgrm = NON_EXISTING;
         updateMarkBundles();
         mediator->handleUnshowFrame();
 
         handleHoverBarTree(ids[2], ids[3]);
-      }
-      // interact with diagrams
-      else if (ids[1] == ID_DIAGRAM)
-      {
+        break;
+
+      case ID_DIAGRAM:
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           dragIdxDgrm = ids[2];
@@ -1788,8 +1761,21 @@ void ArcDiagram::handleHits(const vector< int > &ids)
                 attrsDgrm[currIdxDgrm],
                 VisUtils::coolBlue);
         }
-      }
+        break;
+
+      default:
+        break;
     }
+  }
+  else
+  {       // Nothing selected
+    if (currIdxDgrm != NON_EXISTING)
+    {
+      currIdxDgrm = NON_EXISTING;
+      updateMarkBundles();
+      mediator->handleUnshowFrame();
+    }
+    setToolTip(QString());
   }
 }
 
@@ -1882,7 +1868,7 @@ void ArcDiagram::handleShowDiagram(const size_t& dgrmIdx)
 
 void ArcDiagram::handleDragDiagram()
 {
-  if (dragIdxDgrm != NON_EXISTING && static_cast <size_t>(dragIdxDgrm) < posDgrm.size())
+  if (dragIdxDgrm != NON_EXISTING && static_cast<size_t>(dragIdxDgrm) < posDgrm.size())
   {
     handleDragDiagram(dragIdxDgrm);
   }

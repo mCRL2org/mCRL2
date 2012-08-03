@@ -309,9 +309,9 @@ void Examiner::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
 
 
@@ -331,7 +331,7 @@ void Examiner::handleKeyEvent(QKeyEvent* e)
     }
 
     // redraw in render mode
-    visualize(false);
+    updateGL();
   }
 }
 

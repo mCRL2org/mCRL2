@@ -77,6 +77,9 @@ class Visualizer : public QGLWidget, public Colleague
     virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseReleaseEvent(event); }
     virtual void resizeEvent(QResizeEvent *event) { handleSizeEvent(); QGLWidget::resizeEvent(event); }
 
+  public slots:
+    void updateGL(bool inSelectMode = false);
+
   protected:
     // -- protected utility functions -------------------------------
     virtual void clear();
@@ -100,6 +103,8 @@ class Visualizer : public QGLWidget, public Colleague
       GLuint buffer[]) = 0;
 
     // -- mouse -----------------------------------------------------
+
+    bool m_inSelectMode;
 
     QMouseEvent m_lastMouseEvent;
     bool m_mouseDrag;

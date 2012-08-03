@@ -309,9 +309,9 @@ void Simulator::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
 
 
@@ -336,7 +336,7 @@ void Simulator::handleMouseLeaveEvent()
   }
 
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
 
 
@@ -385,7 +385,7 @@ void Simulator::handleKeyEvent(QKeyEvent* e)
     markFrameClusts();
 
     // redraw in render mode
-    visualize(false);
+    updateGL();
   }
 }
 

@@ -1080,7 +1080,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
          (e->type() == QEvent::MouseButtonPress ||
           e->type() == QEvent::MouseButtonRelease)))
     {
-      visualize(true);
+      updateGL(true);
     }
     if (e->button() == Qt::LeftButton && e->type() == QEvent::MouseButtonRelease)
     {
@@ -1196,7 +1196,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
       if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
       {
         selection = true;
-        visualize(true);      // select mode
+        updateGL(true);      // select mode
       }
       else
       {

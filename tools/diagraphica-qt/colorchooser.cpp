@@ -107,9 +107,9 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
     if (e->type() == QEvent::MouseButtonPress)
     {
       // selection mode
-      visualize(true);
+      updateGL(true);
       // normal mode
-      visualize(false);
+      updateGL();
     }
     if (e->button() == Qt::LeftButton)
     {

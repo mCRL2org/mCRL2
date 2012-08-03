@@ -296,9 +296,9 @@ void CorrlPlot::handleMouseEvent(QMouseEvent* e)
   Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
 
 
