@@ -34,10 +34,10 @@ class Simulator : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     Simulator(
+      QWidget *parent,
       Mediator* m,
       Settings* s,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~Simulator();
 
 

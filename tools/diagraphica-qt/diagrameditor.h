@@ -31,9 +31,9 @@ class DiagramEditor : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     DiagramEditor(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~DiagramEditor();
 
     // -- set functions ---------------------------------------------

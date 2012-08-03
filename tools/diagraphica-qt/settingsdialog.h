@@ -69,6 +69,10 @@ class SettingsDialog : public QDialog
   public:
     SettingsDialog(QWidget *parent, Settings *settings);
 
+  public slots:
+    void showGeneral() { m_ui.tabWidget->setCurrentIndex(0); show(); }
+    void showArcDiagram() { m_ui.tabWidget->setCurrentIndex(1); show(); }
+
   private:
     void setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting);
     void setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting);

@@ -56,9 +56,6 @@ class Graph : public Colleague
       const size_t& idx,
       const std::vector< std::string > &vals);
 
-    void swapAttributes(
-      const size_t& idx1,
-      const size_t& idx2);
     void moveAttribute(
       const size_t& idxFr,
       const size_t& idxTo);

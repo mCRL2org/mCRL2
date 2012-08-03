@@ -32,10 +32,10 @@ class Examiner : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     Examiner(
+      QWidget *parent,
       Mediator* m,
       Settings* s,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~Examiner();
 
     QColor getColorSel() { return VisUtils::coolRed; }

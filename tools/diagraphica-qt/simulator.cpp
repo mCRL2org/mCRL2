@@ -8,14 +8,7 @@
 //
 /// \file ./simulator.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "simulator.h"
-
-/// TODO: find out why this is necessary
-#ifdef KeyPress
-#undef KeyPress
-#endif
 
 using namespace std;
 
@@ -29,11 +22,11 @@ static const double animationPixelsPerMS =  1.0;
 
 
 Simulator::Simulator(
+  QWidget *parent,
   Mediator* m,
   Settings* s,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c),
+  Graph* g)
+  : Visualizer(parent, m, g),
     m_settings(s)
 {
   m_diagram   = NULL;
@@ -353,23 +346,23 @@ void Simulator::handleKeyEvent(QKeyEvent* e)
 
   if (!m_animationTimer.isActive() && e->type() == QEvent::KeyPress)
   {
-    if (m_lastKeyCode == WXK_UP  || m_lastKeyCode == WXK_NUMPAD_UP)
+    if (e->key() == Qt::Key_Up)
     {
       handleKeyUp();
     }
-    else if (m_lastKeyCode == WXK_RIGHT || m_lastKeyCode == WXK_NUMPAD_RIGHT)
+    else if (e->key() == Qt::Key_Right)
     {
       handleKeyRgt();
     }
-    else if (m_lastKeyCode == WXK_DOWN || m_lastKeyCode == WXK_NUMPAD_DOWN)
+    else if (e->key() == Qt::Key_Down)
     {
       handleKeyDwn();
     }
-    else if (m_lastKeyCode == WXK_LEFT || m_lastKeyCode == WXK_NUMPAD_LEFT)
+    else if (e->key() == Qt::Key_Left)
     {
       handleKeyLft();
     }
-    else if (m_lastKeyCode == WXK_ESCAPE)
+    else if (e->key() == Qt::Key_Escape)
     {
       m_lastSelection = m_currentSelection;
 

@@ -16,21 +16,15 @@ using namespace std;
 
 static const int hgtHstPix = 80;
 
-/// TODO: find out why this is necessary
-#ifdef KeyPress
-#undef KeyPress
-#endif
-
-
 // -- constructors and destructor -----------------------------------
 
 
 Examiner::Examiner(
+  QWidget *parent,
   Mediator* m,
   Settings* s,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c),
+  Graph* g)
+  : Visualizer(parent, m, g),
     settings(s)
 {
   diagram = NULL;
@@ -327,11 +321,11 @@ void Examiner::handleKeyEvent(QKeyEvent* e)
 
   if (e->type() == QEvent::KeyPress)
   {
-    if (m_lastKeyCode == WXK_RIGHT || m_lastKeyCode == WXK_NUMPAD_RIGHT)
+    if (e->key() == Qt::Key_Right)
     {
       handleIconRgt();
     }
-    else if (m_lastKeyCode == WXK_LEFT || m_lastKeyCode == WXK_NUMPAD_LEFT)
+    else if (e->key() == Qt::Key_Left)
     {
       handleIconLft();
     }

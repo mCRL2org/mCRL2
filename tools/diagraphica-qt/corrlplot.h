@@ -28,9 +28,9 @@ class CorrlPlot : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     CorrlPlot(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~CorrlPlot();
 
     // -- set data functions ----------------------------------------

@@ -19,15 +19,17 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "colleague.h"
 #include "value.h"
 
-class Attribute : public Colleague
+#ifndef NON_EXISTING
+#define NON_EXISTING (size_t)(-1)
+#endif
+
+class Attribute
 {
   public:
     // -- constructors and destructor -------------------------------
     Attribute(
-      Mediator* m,
       const std::string& nam,
       const std::string& typ,
       const size_t& idx);

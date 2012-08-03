@@ -29,9 +29,9 @@ class CombnPlot : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     CombnPlot(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~CombnPlot();
 
     // -- set data functions ----------------------------------------

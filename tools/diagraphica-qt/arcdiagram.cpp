@@ -29,11 +29,11 @@ int ArcDiagram::SEGM_HINT_LQ    = 12;
 
 
 ArcDiagram::ArcDiagram(
+    QWidget *parent,
     Mediator* m,
     Settings* s,
-    Graph* g,
-    GLCanvas* c)
-  : Visualizer(m, g, c),
+    Graph* g)
+  : Visualizer(parent, m, g),
     settings(s)
 {
   idxInitStLeaves    = NON_EXISTING;

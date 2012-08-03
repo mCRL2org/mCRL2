@@ -29,9 +29,9 @@ class DistrPlot : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     DistrPlot(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~DistrPlot();
 
     // -- set data functions ----------------------------------------

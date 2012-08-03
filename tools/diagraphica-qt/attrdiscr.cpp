@@ -16,13 +16,11 @@
 using namespace std;
 
 AttrDiscr::AttrDiscr(
-  Mediator* m,
   const string& nam,
   const string& typ,
   const size_t& idx,
   const vector< string > &vals)
   : Attribute(
-    m,
     nam,
     typ,
     idx)
@@ -91,7 +89,7 @@ void AttrDiscr::clusterValues(
     sort(sorted.begin(), sorted.end());
 
     // ptr to new value
-    value = new Value(NON_EXISTING , newValue);
+    value = new Value(NON_EXISTING, newValue);
 
     // update current map
     {

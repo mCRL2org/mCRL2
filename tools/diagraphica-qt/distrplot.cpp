@@ -15,10 +15,10 @@
 using namespace std;
 
 DistrPlot::DistrPlot(
+  QWidget *parent,
   Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  Graph* g)
+  : Visualizer(parent, m, g)
 {
   maxNumber    =  0;
   minHgtHintPx =  4;

@@ -15,11 +15,9 @@
 using namespace std;
 
 Attribute::Attribute(
-  Mediator* m,
   const string& nam,
   const string& typ,
   const size_t& idx)
-  : Colleague(m)
 {
   name  = nam;
   type  = typ;
@@ -28,7 +26,6 @@ Attribute::Attribute(
 
 
 Attribute::Attribute(const Attribute& attr)
-  :Colleague(attr)
 {
   index = attr.index;
   name  = attr.name;

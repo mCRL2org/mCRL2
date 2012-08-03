@@ -90,42 +90,12 @@ void Graph::addAttrDiscr(
   const vector< string > &vals)
 {
   AttrDiscr* attr = new AttrDiscr(
-    mediator,
     name,
     type,
     idx,
     vals);
   attributes.push_back(attr);
   attr = NULL;
-}
-
-
-void Graph::swapAttributes(
-  const size_t& idx1,
-  const size_t& idx2)
-{
-  if ((idx1 < attributes.size()) &&
-      (idx2 < attributes.size()))
-  {
-    // swap attributes
-    Attribute* temp  = attributes[idx1];
-    attributes[idx1] = attributes[idx2];
-    attributes[idx2] = temp;
-    temp = NULL;
-    // update index
-    attributes[idx1]->setIndex(idx1);
-    attributes[idx2]->setIndex(idx2);
-
-    // swap node tuple values
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-      nodes[i]->swapTupleVal(idx1, idx2);
-    }
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error swapping attributes.");
-  }
 }
 
 

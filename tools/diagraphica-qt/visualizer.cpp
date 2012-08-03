@@ -13,33 +13,18 @@
 #include "visualizer.h"
 
 
-/// TODO: find out why this is necessary
-#ifdef KeyPress
-#undef KeyPress
-#endif
-#ifdef KeyRelease
-#undef KeyRelease
-#endif
-#ifdef None
-#undef None
-#endif
-
-// -- constructors and destructor -----------------------------------
-
-
 Visualizer::Visualizer(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Colleague(m),
-    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)
+  QWidget *parent,
+  Mediator *mediator_,
+  Graph *graph_)
+  : QGLWidget(parent),
+    Colleague(mediator_),
+    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
+    graph(graph_)
 {
   clearColor = Qt::white;
 
   initMouse();
-
-  graph  = g;
-  canvas = c;
 
   texCharOK = false;
   texCushOK = false;
@@ -48,6 +33,29 @@ Visualizer::Visualizer(
   dataChanged = true;
 
   showMenu = false;
+}
+
+
+void Visualizer::paintGL()
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
+  if (aspect > 1)
+  {
+    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+  }
+  else
+  {
+    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+  }
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glViewport(0, 0, width(), height());
+
+  visualize(false);
 }
 
 
@@ -138,11 +146,11 @@ void Visualizer::handleKeyEvent(QKeyEvent* e)
 {
   if (e->type() == QEvent::KeyPress)
   {
-    m_lastKeyCode = e->key();
+    m_lastKeyCode = Qt::Key(e->key());
   }
   else
   {
-    m_lastKeyCode = -1;
+    m_lastKeyCode = Qt::Key_unknown;
   }
 }
 
@@ -192,12 +200,8 @@ void Visualizer::startSelectMode(
     pickHgt,    // picking height
     viewport);
 
-  // get current size of canvas
-  int width, height;
-  canvas->GetSize(&width, &height);
-
   // casting to GLdouble ensures smooth transitions
-  GLdouble aspect = (GLdouble)width / (GLdouble)height;
+  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
 
   // specify clipping rectangle ( left, right, bottom, top )
   if (aspect > 1)
@@ -244,6 +248,3 @@ void Visualizer::genCushTex()
     texCush);
   texCushOK = true;
 }
-
-
-// -- end -----------------------------------------------------------

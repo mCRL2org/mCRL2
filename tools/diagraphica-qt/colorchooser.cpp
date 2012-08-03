@@ -16,10 +16,10 @@ using namespace std;
 
 
 ColorChooser::ColorChooser(
+  QWidget *parent,
   Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  Graph* g)
+  : Visualizer(parent, m, g)
 {
   hdlSize  = 5.0;
 

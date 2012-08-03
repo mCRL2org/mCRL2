@@ -27,9 +27,9 @@ class OpacityChooser : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     OpacityChooser(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~OpacityChooser();
 
     // -- set functions ---------------------------------------------

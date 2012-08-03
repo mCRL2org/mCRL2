@@ -16,10 +16,10 @@ using namespace std;
 
 
 CorrlPlot::CorrlPlot(
+  QWidget *parent,
   Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  Graph* g)
+  : Visualizer(parent, m, g)
 {
   minRadHintPx =  5;
   maxRadHintPx = 25;

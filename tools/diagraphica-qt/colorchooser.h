@@ -28,9 +28,9 @@ class ColorChooser : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     ColorChooser(
+      QWidget *parent,
       Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~ColorChooser();
 
     // -- set functions ---------------------------------------------

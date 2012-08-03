@@ -34,10 +34,10 @@ class TimeSeries : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     TimeSeries(
+      QWidget *parent,
       Mediator* m,
       Settings* s,
-      Graph* g,
-      GLCanvas* c);
+      Graph* g);
     virtual ~TimeSeries();
 
     // -- get functions ---------------------------------------------

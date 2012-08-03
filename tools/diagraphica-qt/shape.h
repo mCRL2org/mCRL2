@@ -18,22 +18,23 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "colleague.h"
 #include "dof.h"
 #include "visutils.h"
 #include "visualizer.h"
 
-class Shape : public Colleague
+class Diagram;
+
+class Shape
 {
   public:
     // -- constructors and destructor -------------------------------
     Shape(
-      Mediator* m,      const size_t& idx,
+      Diagram *d,       const size_t& idx,
       const double& xC, const double& yC,
       const double& xD, const double& yD,
       const double& aC, const int&    typ);
     Shape(
-      Mediator* m,      const size_t& idx,
+      Diagram *d,       const size_t& idx,
       const double& xC, const double& yC,
       const double& xD, const double& yD,
       const double& xBegin, const double& yBegin,
@@ -243,7 +244,7 @@ class Shape : public Colleague
       double pixelSize);
 
     // -- data members ----------------------------------------------
-
+    Diagram *diagram;
     size_t index;
 
     // geometry

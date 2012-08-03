@@ -12,14 +12,6 @@
 #include <iostream>
 #include <sstream>
 
-/// TODO: find out why this is necessary
-#ifdef KeyPress
-#undef KeyPress
-#endif
-#ifdef KeyRelease
-#undef KeyRelease
-#endif
-
 using namespace std;
 
 
@@ -31,10 +23,10 @@ int DiagramEditor::szeTxt = 12;
 
 
 DiagramEditor::DiagramEditor(
+  QWidget *parent,
   Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  Graph* g)
+  : Visualizer(parent, m, g)
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
@@ -1137,7 +1129,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
       yDFC = -0.5*dY;
 
       double xLeft, xRight, yTop, yBottom;
-      mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+      diagram->getGridCoordinates(xLeft, xRight, yTop, yBottom);
       if (!(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC)))
       {
         if (xLeft > (xC - xDFC))
@@ -1159,7 +1151,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
       }
 
       Shape* s = new Shape(
-        mediator,
+        diagram,
         diagram->getSizeShapes(),
         xC,     yC,
         0.5*dX, -0.5*dY,
@@ -1223,27 +1215,26 @@ void DiagramEditor::handleKeyEvent(QKeyEvent* e)
   {
     if (e->type() == QEvent::KeyPress)
     {
-      // Ctrl+A is pressed, select all the shapes in the diagram, 65 for A, 10 for CTRL, GetModifiers function of wxWidgets is not working properly
       if (e->matches(QKeySequence::SelectAll))
       {
         handleSelectAll();
       }
-      else if (e->matches(QKeySequence::Cut))     // Cut Shortcut, ctrl + x   (platform dependent)
+      else if (e->matches(QKeySequence::Cut))
       {
         handleCut();
       }
-      else if (e->matches(QKeySequence::Copy))    // Copy Shortcut, ctrl + c  (platform dependent)
+      else if (e->matches(QKeySequence::Copy))
       {
         handleCopy();
       }
-      else if (e->matches(QKeySequence::Paste))   // Paste Shortcut, ctrl + v (platform dependent)
+      else if (e->matches(QKeySequence::Paste))
       {
         handlePaste();
       }
     }
     if (e->type() == QEvent::KeyRelease)
     {
-      if (e->matches(QKeySequence::Delete))       // Delete                   (platform dependent)
+      if (e->matches(QKeySequence::Delete))
       {
         handleDelete();
       }

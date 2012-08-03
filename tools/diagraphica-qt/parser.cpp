@@ -24,15 +24,10 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-Parser::Parser(Mediator* m)
-  : Colleague(m)
+Parser::Parser()
 {
   delims = "() \"";
 }
-
-
-Parser::~Parser()
-{}
 
 
 // -- parsing functions ---------------------------------------------
@@ -51,6 +46,9 @@ void Parser::parseFile(const string& path, Graph* graph)
   mcrl2::lts::lts_fsm_t l;
 
   load_lts_as_fsm_file(path,l);
+
+  emit started(l.process_parameters().size() + l.num_states() + l.get_transitions().size());
+  int progress = 0;
 
   const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
@@ -78,6 +76,7 @@ void Parser::parseFile(const string& path, Graph* graph)
       line.append("\"");
     }
     parseStateVarDescr(line, graph);
+    emit progressed(++progress);
   }
 
   for (unsigned int si= 0; si<l.num_states(); ++si)
@@ -96,6 +95,7 @@ void Parser::parseFile(const string& path, Graph* graph)
     }
     // }
     parseStates(line, graph);
+    emit progressed(++progress);
   }
 
   const std::vector<transition> &trans=l.get_transitions();
@@ -111,9 +111,8 @@ void Parser::parseFile(const string& path, Graph* graph)
     parseTransitions(
       line,
       graph);
+    emit progressed(++progress);
   }
-
-  mediator->updateProgress(1);
 }
 
 
@@ -134,12 +133,7 @@ void Parser::writeFSMFile(
   int lineCnt = 0;
   size_t lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
 
-  // init progress
-  mediator->initProgress(
-    "Saving file",
-    "Writing " + fileName.toStdString(),
-    lineTot);
-
+  emit started(lineTot);
 
   // write state variable description
   for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
@@ -163,12 +157,7 @@ void Parser::writeFSMFile(
     line.append("\n");
 
     file.write(line.toAscii());
-
-    if (lineCnt % 1000 == 0)
-    {
-      mediator->updateProgress(lineCnt);
-    }
-    ++lineCnt;
+    emit progressed(++lineCnt);
   }
 
   // write state vectors
@@ -192,11 +181,7 @@ void Parser::writeFSMFile(
 
     file.write(line.toAscii());
 
-    if (lineCnt % 1000 == 0)
-    {
-      mediator->updateProgress(lineCnt);
-    }
-    ++lineCnt;
+    emit progressed(++lineCnt);
   }
 
   // write transitions
@@ -211,17 +196,10 @@ void Parser::writeFSMFile(
     line = QString("%1 %2 \"%3\"\n").arg(inNode, outNode, label);
     file.write(line.toAscii());
 
-    if (lineCnt % 1000 == 0)
-    {
-      mediator->updateProgress(lineCnt);
-    }
-    ++lineCnt;
+    emit progressed(++lineCnt);
   }
 
   file.close();
-
-  // close progress
-  mediator->closeProgress();
 }
 
 
@@ -1543,7 +1521,7 @@ void Parser::parseShape(
 
   // init shape
   Shape* s = new Shape(
-    mediator,
+    dgrmNew,
     dgrmNew->getSizeShapes(),
     xCtr,   yCtr,
     xDFC,   yDFC,

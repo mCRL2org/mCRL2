@@ -20,6 +20,7 @@
 #endif
 
 #include "shape.h"
+#include "diagram.h"
 #include <iostream>
 using namespace std;
 
@@ -37,13 +38,13 @@ QColor Shape::colTxt = Qt::black;
 
 
 Shape::Shape(
-  Mediator* m,      const size_t& idx,
+  Diagram *d,       const size_t& idx,
   const double& xC, const double& yC,
   const double& xD, const double& yD,
   const double& aC, const int& typ)
-  : Colleague(m)
 {
   // geometery
+  diagram = d;
   index  = idx;
   xCtr   = xC;
   yCtr   = yC;
@@ -72,9 +73,9 @@ Shape::Shape(
 
 
 Shape::Shape(const Shape& shape)
-  : Colleague(shape.mediator)
 // Copy constructor.
 {
+  diagram = shape.diagram;
   index  = shape.index;
 
   // geometry
@@ -173,7 +174,7 @@ void Shape::setTextSize(const size_t& size)
 void Shape::setCenter(const double& xC, const double& yC)
 {
   double xLeft, xRight, yTop, yBottom;
-  mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+  diagram->getGridCoordinates(xLeft, xRight, yTop, yBottom);
   if (xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC))
   {
     xCtr = xC;

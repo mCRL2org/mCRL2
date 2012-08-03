@@ -20,7 +20,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "colleague.h"
 #include "diagram.h"
 #include "dof.h"
 #include "graph.h"
@@ -37,14 +36,13 @@ inline std::string to_string(const T& t)
 
 class Mediator;
 
-class Parser : public Colleague
+class Parser : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
-    Parser(Mediator* m);
-    virtual ~Parser();
-
-    // -- parsing functions -----------------------------------------
+    Parser();
 
     // fsm files
     void parseFile(
@@ -75,6 +73,10 @@ class Parser : public Colleague
       const std::string& path,
       Graph* graph,
       Diagram* diagram);
+
+  signals:
+    void started(int steps);
+    void progressed(int steps);
 
   private:
     // -- private utility functions ---------------------------------

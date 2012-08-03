@@ -27,7 +27,6 @@ class AttrDiscr : public Attribute
   public:
     // -- constructors and destructor -------------------------------
     AttrDiscr(
-      Mediator* m,
       const std::string& nam,
       const std::string& typ,
       const size_t& idx,

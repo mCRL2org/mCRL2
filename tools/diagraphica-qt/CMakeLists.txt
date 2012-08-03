@@ -17,18 +17,21 @@ if (QT4_FOUND)
 include(${QT_USE_FILE})
 
 
-#set(DIAGRAPHICA_RCC_SRCS diagraphica.qrc)
-
+set(DIAGRAPHICA_RCC_SRCS
+  icons.qrc
+)
 qt4_add_resources(DIAGRAPHICA_RC_FILES ${DIAGRAPHICA_RCC_SRCS})
 
 set(DIAGRAPHICA_UI_FILES
-#  mainwindow.ui
+  mainwindow.ui
   settingsdialog.ui
 )
 qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 
 set(DIAGRAPHICA_MOC_HEADERS
   arcdiagram.h
+  mainwindow.h
+  parser.h
   settingsdialog.h
   simulator.h
   timeseries.h
@@ -50,18 +53,15 @@ set(DIAGRAPHICA_SRC_FILES
   corrlplot.cpp
   diagram.cpp
   diagrameditor.cpp
-  diagraphica.cpp
   distrplot.cpp
   dof.cpp
-  droptarget.cpp
   examiner.cpp
-  frame.cpp
-  glcanvas.cpp
   graph.cpp
+  main.cpp
+  mainwindow.cpp
   node.cpp
   opacitychooser.cpp
   parser.cpp
-  popupframe.cpp
   settingsdialog.cpp
   shape.cpp
   simulator.cpp

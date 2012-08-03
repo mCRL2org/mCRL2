@@ -26,27 +26,22 @@
 #endif
 #include <cstddef>
 #include "colleague.h"
-#include "glcanvas.h"
 #include "graph.h"
 #include "visutils.h"
 
-class Visualizer : public QObject, public Colleague
+class Visualizer : public QGLWidget, public Colleague
 {
   Q_OBJECT
 
   public:
     // -- constructors and destructor -------------------------------
     Visualizer(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      QWidget *parent,
+      Mediator *mediator,
+      Graph *graph);
     virtual ~Visualizer() {}
 
-int height() { int width, height; canvas->GetClientSize(&width, &height); return height; }
-int width() { int width, height; canvas->GetClientSize(&width, &height); return width; }
-void setToolTip(QString tooltip) { if(tooltip.isEmpty()) canvas->clearToolTip(); else canvas->showToolTip(tooltip.toStdString()); }
-void setMouseTracking(bool enabled) { if(enabled) canvas->enableMouseMotion(); else canvas->disableMouseMotion(); }
-
+    virtual void paintGL();
 
     QSizeF worldSize();
     double pixelSize();
@@ -72,18 +67,15 @@ void setMouseTracking(bool enabled) { if(enabled) canvas->enableMouseMotion(); e
     virtual void handleMouseLeaveEvent();
     virtual void handleKeyEvent(QKeyEvent* e);
 
-    virtual void enterEvent(QEvent *) { handleMouseEnterEvent(); }
-    virtual void leaveEvent(QEvent *) { handleMouseLeaveEvent(); }
-    virtual void keyPressEvent(QKeyEvent *event) { handleKeyEvent(event); }
-    virtual void keyReleaseEvent(QKeyEvent *event) { handleKeyEvent(event); }
-    virtual void wheelEvent(QWheelEvent *event) { handleWheelEvent(event); }
-    virtual void mouseMoveEvent(QMouseEvent *event) { handleMouseEvent(event); }
-    virtual void mousePressEvent(QMouseEvent *event) { handleMouseEvent(event); }
-    virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); }
-
-  public slots:
-    void update() { canvas->Refresh(); }
-    void repaint() { canvas->Refresh(); }
+    virtual void enterEvent(QEvent *event) { handleMouseEnterEvent(); QGLWidget::enterEvent(event); }
+    virtual void leaveEvent(QEvent *event) { handleMouseLeaveEvent(); QGLWidget::leaveEvent(event); }
+    virtual void keyPressEvent(QKeyEvent *event) { handleKeyEvent(event); QGLWidget::keyPressEvent(event); }
+    virtual void keyReleaseEvent(QKeyEvent *event) { handleKeyEvent(event); QGLWidget::keyReleaseEvent(event); }
+    virtual void wheelEvent(QWheelEvent *event) { handleWheelEvent(event); QGLWidget::wheelEvent(event); }
+    virtual void mouseMoveEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseMoveEvent(event); }
+    virtual void mousePressEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mousePressEvent(event); }
+    virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseReleaseEvent(event); }
+    virtual void resizeEvent(QResizeEvent *event) { handleSizeEvent(); QGLWidget::resizeEvent(event); }
 
   protected:
     // -- protected utility functions -------------------------------
@@ -113,14 +105,13 @@ void setMouseTracking(bool enabled) { if(enabled) canvas->enableMouseMotion(); e
     bool m_mouseDrag;
     QPoint m_mouseDragStart;
 
-    int m_lastKeyCode;
+    Qt::Key m_lastKeyCode;
 
     bool showMenu;
 
     QColor clearColor;
 
     Graph *graph;
-    GLCanvas *canvas;
 
     bool geomChanged; // canvas resized
     bool dataChanged; // data has changed

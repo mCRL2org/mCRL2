@@ -45,10 +45,10 @@ class ArcDiagram : public Visualizer
   public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
+        QWidget *parent,
         Mediator* m,
         Settings* s,
-        Graph* g,
-        GLCanvas* c);
+        Graph* g);
     virtual ~ArcDiagram();
 
     void getAttrsTree(std::vector< size_t > &idcs);

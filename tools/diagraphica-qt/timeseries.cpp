@@ -14,11 +14,6 @@
 using namespace std;
 
 
-/// TODO: find out why this is necessary
-#ifdef KeyPress
-#undef KeyPress
-#endif
-
 // -- static variables ----------------------------------------------
 
 
@@ -30,11 +25,11 @@ static const int itvAnim = 350;
 
 
 TimeSeries::TimeSeries(
+  QWidget *parent,
   Mediator* m,
   Settings* s,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c),
+  Graph* g)
+  : Visualizer(parent, m, g),
     settings(s)
 {
   critSect = false;
@@ -497,7 +492,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
 
   if (e->type() == QEvent::KeyPress)
   {
-    if (e->key() == WXK_RIGHT || e->key() == WXK_NUMPAD_RIGHT)
+    if (e->key() == Qt::Key_Right)
     {
       // move to right
       if ((wdwStartIdx + 1 + nodesWdwScale) <= (graph->getSizeNodes()-1))
@@ -509,7 +504,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
         wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
       }
     }
-    else if (e->key() == WXK_LEFT || e->key() == WXK_NUMPAD_LEFT)
+    else if (e->key() == Qt::Key_Left)
     {
       // move to left
       if ((wdwStartIdx + 1) == NON_EXISTING)
@@ -521,17 +516,17 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
         wdwStartIdx -= 1;
       }
     }
-    else if (e->key() == WXK_HOME || e->key() == WXK_NUMPAD_HOME)
+    else if (e->key() == Qt::Key_Home)
     {
       // move to beginning
       wdwStartIdx = 0;
     }
-    else if (e->key() == WXK_END || e->key() == WXK_NUMPAD_END)
+    else if (e->key() == Qt::Key_End)
     {
       // move to end
       wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
     }
-    else if (e->key() == WXK_PAGEUP || e->key() == WXK_NUMPAD_PAGEUP || e->key() == WXK_NUMPAD9)
+    else if (e->key() == Qt::Key_PageUp || (e->key() == Qt::Key_9 && (e->modifiers() & Qt::KeypadModifier)))
     {
       // move one window toward beginning
       if (wdwStartIdx < nodesWdwScale)
@@ -544,7 +539,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
       }
 
     }
-    else if (e->key() == WXK_PAGEDOWN || e->key() == WXK_NUMPAD_PAGEDOWN || e->key() == WXK_NUMPAD3)
+    else if (e->key() == Qt::Key_PageDown || (e->key() == Qt::Key_3 && (e->modifiers() & Qt::KeypadModifier)))
     {
       // move one window toward end
       if ((wdwStartIdx + 2*nodesWdwScale) <= (graph->getSizeNodes()-1))
@@ -556,7 +551,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
         wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
       }
     }
-    else if (e->key() == WXK_ESCAPE)
+    else if (e->key() == Qt::Key_Escape)
     {
       if (m_animationTimer.isActive())
       {
@@ -573,7 +568,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
   }
   else
   {
-    if (e->key() == WXK_SHIFT)
+    if (e->key() == Qt::Key_Shift)
     {
       shiftStartIdx = -1;
     }
@@ -2171,7 +2166,7 @@ void TimeSeries::handleHitItems(const int& idx)
   }
 
   // shift key
-  if (m_lastKeyCode == WXK_SHIFT)
+  if (m_lastKeyCode == Qt::Key_Shift)
   {
     int begIdx, endIdx;
 
@@ -2196,7 +2191,7 @@ void TimeSeries::handleHitItems(const int& idx)
     }
   }
   // control key
-  else if (m_lastKeyCode == WXK_CONTROL)
+  else if (m_lastKeyCode == Qt::Key_Control)
   {
     // update marked items
     set< size_t >::iterator it;
@@ -2259,14 +2254,14 @@ void TimeSeries::handleDragItems(const int& idx)
     bool flag = false;
 
     // shift key
-    if (m_lastKeyCode == WXK_SHIFT)
+    if (m_lastKeyCode == Qt::Key_Shift)
     {
       /*
       for ( int i = begIdx; i <= endIdx; ++i )
           itemsMarked.insert( i );
       */
     }
-    else if (m_lastKeyCode == WXK_CONTROL)
+    else if (m_lastKeyCode == Qt::Key_Control)
     {
       int begIdx, endIdx;
       bool incr;

@@ -15,10 +15,10 @@
 using namespace std;
 
 CombnPlot::CombnPlot(
+  QWidget *parent,
   Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
+  Graph* g)
+  : Visualizer(parent, m, g)
 {
   maxAttrCard      = 0;
   maxNumberPerComb = 0;
