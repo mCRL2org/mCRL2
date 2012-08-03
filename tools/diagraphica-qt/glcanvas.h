@@ -44,24 +44,7 @@ class GLCanvas : public wxGLCanvas, Colleague
       wxWindowID id);
     virtual ~GLCanvas();
 
-    // -- set functions ---------------------------------------------
-    void setScaleFactor(const double& f);
-    void setXTranslation(const double& x);
-    void setYTranslation(const double& y);
-    void setTranslation(
-      const double& x,
-      const double& y);
-
     void enableMouseMotion();
-
-    // -- get functions ---------------------------------------------
-    double getScaleFactor();
-    double getXTranslation();
-    double getYTranslation();
-    void getTranslation(
-      double& x,
-      double& y);
-
     void disableMouseMotion();
 
     double getWidth();
@@ -100,11 +83,6 @@ class GLCanvas : public wxGLCanvas, Colleague
     void onKeyUp(wxKeyEvent& event);
 
   private:
-    // -- data members ----------------------------------------------
-    double scaleFactor;
-    double xTranslation;
-    double yTranslation;
-
     bool handleMouseMotion;
 
     wxString tooltip;

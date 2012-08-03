@@ -343,14 +343,12 @@ void TimeSeries::visualize(const bool& inSelectMode)
       calcSettingsDataBased();
     }
 
-    // clear canvas
     clear();
 
     // visualize
     if (inSelectMode == true)
     {
-      double wth, hgt;
-      canvas->getSize(wth, hgt);
+      QSizeF size = worldSize();
 
       GLint hits = 0;
       GLuint selectBuf[512];
@@ -361,7 +359,7 @@ void TimeSeries::visualize(const bool& inSelectMode)
         0.0125);
 
       glPushName(ID_CANVAS);
-      VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*wth, -0.5*wth);
+      VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
 
       if (!m_animationTimer.isActive())
       {
@@ -423,7 +421,7 @@ void TimeSeries::handleWheelEvent(QWheelEvent *e)
     mouseOverIdx = -1;
 
     // zoom out
-    double pix  = canvas->getPixelSize();
+    double pix  = pixelSize();
     double dist = posSliderBotRgt.x - posSliderTopLft.x;
 
     double diff = actPixPerNode;
@@ -620,13 +618,12 @@ void TimeSeries::calcPositions()
   double prevScaleLft      = posScaleTopLft.x;
 
   // calc general info
-  double pix = canvas->getPixelSize();
-  double cWth, cHgt;
-  canvas->getSize(cWth, cHgt);
-  double xLft = -0.5*cWth;
-  double xRgt =  0.5*cWth;
-  double yTop =  0.5*cHgt;
-  double yBot = -0.5*cHgt;
+  double pix = pixelSize();
+  QSizeF size = worldSize();
+  double xLft = -0.5*size.width();
+  double xRgt =  0.5*size.width();
+  double yTop =  0.5*size.height();
+  double yBot = -0.5*size.height();
 
   // calc positions of slider at top
   posSliderTopLft.x = xLft + 5.0*pix;
@@ -659,7 +656,7 @@ void TimeSeries::calcPositions()
   }
   else
   {
-    itvSlider = cWth;
+    itvSlider = size.width();
   }
 
   // calc size of visible window
@@ -695,7 +692,7 @@ void TimeSeries::calcPositions()
   }
   else
   {
-    nodesItvScale = int (cWth);
+    nodesItvScale = int (size.width());
   }
 
   // calc positions of scale at bottom
@@ -710,7 +707,7 @@ void TimeSeries::calcPositions()
 
   if (attributes.size() > 0)
   {
-    double yDist = cHgt
+    double yDist = size.height()
                    - (6.0*ySpacePxl + 6.0)*pix // slider at top
                    - (3.5*ySpacePxl + 6.0)*pix // scale at bottom
                    - 2.0*pix;                  // spacing
@@ -809,7 +806,7 @@ void TimeSeries::animate()
   mediator->handleAnimFrameClust(this);
 
   visualize(false);
-  canvas->Refresh();
+  repaint();
 }
 
 
@@ -832,7 +829,7 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
   mediator->handleAnimFrameClust(this);
 
   visualize(false);
-  canvas->Refresh();
+  update();
 }
 
 
@@ -1175,7 +1172,7 @@ void TimeSeries::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
   }
 
   ptr = NULL;
@@ -1195,7 +1192,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
 {
   if (inSelectMode == true)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     glPushName(ID_SLIDER);
     VisUtils::fillRect(
@@ -1234,7 +1231,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     // draw marked items on slider
     VisUtils::setColor(colMrk);
@@ -1400,7 +1397,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
     {}
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     size_t    beg = 0;
     for (size_t i = 0; i < nodesWdwScale; ++i)
     {
@@ -1459,7 +1456,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
 {
   if (inSelectMode == true)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     glPushName(ID_ITEMS);
     for (size_t i = 0; i < nodesWdwScale; ++i)
@@ -1476,7 +1473,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     // draw selected items
     VisUtils::setColor(colMrk);
@@ -1655,7 +1652,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
   }
   else
   {
-    double     pix = canvas->getPixelSize();
+    double     pix = pixelSize();
 
     if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
@@ -1724,7 +1721,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       }
       diagram->visualize(
         inSelectMode,
-        canvas,
+        pixelSize(),
         attrs,
         vals);
       attrs.clear();
@@ -1826,7 +1823,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
 
         diagram->visualize(
           inSelectMode,
-          canvas,
+          pixelSize(),
           attrs,
           vals);
         attrs.clear();
@@ -1882,7 +1879,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
   {
     if (mouseOverIdx != NON_EXISTING && attributes.size() > 0)
     {
-      double pix = canvas->getPixelSize();
+      double pix = pixelSize();
       Position2D pos1, pos2;
       vector< string > lbls;
       vector< Position2D > posTopLft;
@@ -1968,7 +1965,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
     {}
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
@@ -2031,9 +2028,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
 
 void TimeSeries::handleHitSlider()
 {
-  double x, y;
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), x, y);
-  double distWorld = x - (posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode);
+  double distWorld = worldCoordinate(m_lastMouseEvent.posF()).x() - (posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode);
 
   dragDistNodes = distWorld/itvSliderPerNode;
 
@@ -2071,12 +2066,7 @@ void TimeSeries::handleDragSliderHdl()
 //    draggingSlider = true;
   dragStatus = DRAG_STATUS_SLDR;
 
-  double x1, y1;
-  double x2, y2;
-  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), x2, y2);
-
-  double distWorld = x2-x1;
+  double distWorld = worldCoordinate(m_lastMouseEvent.posF()).x() - worldCoordinate(m_lastMousePos).x();
   dragDistNodes += (distWorld/itvSliderPerNode);
 
   if (dragDistNodes < -1)
@@ -2112,17 +2102,10 @@ void TimeSeries::handleDragSliderHdl()
 
 void TimeSeries::handleDragSliderHdlLft()
 {
-  double pix  = canvas->getPixelSize();
+  double pix  = pixelSize();
   double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
-  double xMse, yMse;
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xMse, yMse);
 
-  if (xMse < posSliderTopLft.x)
-  {
-    xMse = posSliderTopLft.x;
-  }
-
-  double distWorld  = xMse-xHdl;
+  double distWorld  = Utils::maxx(posSliderTopLft.x, worldCoordinate(m_lastMouseEvent.posF()).x())-xHdl;
   double distNodes  = Utils::rndToNearestMult((distWorld/itvSliderPerNode), 1.0);
 
   double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
@@ -2146,17 +2129,10 @@ void TimeSeries::handleDragSliderHdlLft()
 
 void TimeSeries::handleDragSliderHdlRgt()
 {
-  double pix  = canvas->getPixelSize();
+  double pix  = pixelSize();
   double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
-  double xMse, yMse;
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xMse, yMse);
 
-  if (posSliderBotRgt.x < xMse)
-  {
-    xMse = posSliderBotRgt.x;
-  }
-
-  double distWorld  = xMse-xHdl;
+  double distWorld  = Utils::minn(posSliderTopLft.x, worldCoordinate(m_lastMouseEvent.posF()).x())-xHdl;
   double distNodes  = distWorld/itvSliderPerNode;
 
   double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
@@ -2430,19 +2406,14 @@ void TimeSeries::handleShowDiagram(const int& dgrmIdx)
 
 void TimeSeries::handleDragDiagram(const int& dgrmIdx)
 {
-  double x1, y1;
-  double x2, y2;
-
   dragStatus = DRAG_STATUS_DGRM;
-
-  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
 
   map< size_t, Position2D >::iterator it;
   it = showDgrm.find(dgrmIdx);
   if (it != showDgrm.end())
   {
-    it->second.x += (x2-x1);
-    it->second.y += (y2-y1);
+    QPointF delta = worldCoordinate(m_lastMouseEvent.posF()) - worldCoordinate(m_lastMousePos);
+    it->second.x += delta.x();
+    it->second.y += delta.y();
   }
 }

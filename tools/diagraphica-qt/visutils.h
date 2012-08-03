@@ -79,7 +79,6 @@ class VisUtils
   };
 
   public:
-    // -- clear canvas ----------------------------------------------
     static void clear(QColor col);
 
     // -- anti-aliasing & blending ----------------------------------

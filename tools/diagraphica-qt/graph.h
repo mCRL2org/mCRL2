@@ -187,13 +187,9 @@ class Graph : public Colleague
     void clearLeaves();
     void deleteClusters();
 
-    void printClusters();
-    void printClusters(std::vector< Cluster* > &clusts);
-
     void updateBundles(size_t& progress);
     void updateBundles();
     void deleteBundles();
-    void printBundles();
 
     // -- data members ----------------------------------------------
     std::string               fileName;   // file name

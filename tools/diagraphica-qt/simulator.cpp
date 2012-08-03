@@ -137,7 +137,7 @@ void Simulator::initFrameCurr(
 
   // init & visualize
   dataChanged = true;
-  canvas->Refresh();
+  update();
 }
 
 
@@ -161,7 +161,7 @@ void Simulator::updateFrameCurr(
   xFr = m_animationStartPosition.x;
   yFr = m_animationStartPosition.y;
 
-  double distPix = Utils::dist(xTo, yTo, xFr, yFr) / canvas->getPixelSize();
+  double distPix = Utils::dist(xTo, yTo, xFr, yFr) / pixelSize();
   m_totalAnimationTime = distPix/animationPixelsPerMS;
   m_totalBlendTime = 0.0;
 
@@ -176,7 +176,7 @@ void Simulator::updateFrameCurr(
   m_lastSelectionIndexNext = -1;
 
   m_animationTimer.start(timerInterval);
-  canvas->disableMouseMotion();
+  setMouseTracking(false);
 }
 
 
@@ -251,8 +251,7 @@ void Simulator::visualize(const bool& inSelectMode)
   {
     if (!m_animationTimer.isActive())
     {
-      double wth, hgt;
-      canvas->getSize(wth, hgt);
+      QSizeF size = worldSize();
 
       GLint hits = 0;
       GLuint selectBuf[512];
@@ -263,7 +262,7 @@ void Simulator::visualize(const bool& inSelectMode)
         2.0);
 
       glPushName(ID_CANVAS);
-      VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*hgt, -0.5*hgt);
+      VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
 
       drawBdlLblGridPrev(inSelectMode);
       drawBdlLblGridNext(inSelectMode);
@@ -764,12 +763,10 @@ void Simulator::calcPosFrames()
   m_previousFramePositions.clear();
   m_nextFramePositions.clear();
 
-  // get canvas info & calc intervals
-  double wthCvs, hgtCvs;
-  canvas->getSize(wthCvs, hgtCvs);
-  double pix = canvas->getPixelSize();
-  double itvHori = wthCvs/6;
-  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
+  QSizeF size = worldSize();
+  double pix = pixelSize();
+  double itvHori = size.width()/6;
+  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
   m_horizontalFrameScale = 0.5*itvHori;
   m_verticalFrameScale = Utils::minn(m_horizontalFrameScale, 0.45*itvVert);
 
@@ -778,7 +775,7 @@ void Simulator::calcPosFrames()
   pos.y = 0;
   m_currentFramePosition = pos;
 
-  pos.x = -0.5*wthCvs + 0.5*itvHori + 4.0*pix;
+  pos.x = -0.5*size.width() + 0.5*itvHori + 4.0*pix;
   pos.y = 0.5*m_previousFrames.size()*itvVert - 0.5*itvVert;
   {
     for (size_t i = 0; i < m_previousFrames.size(); ++i)
@@ -788,7 +785,7 @@ void Simulator::calcPosFrames()
     }
   }
 
-  pos.x = 0.5*wthCvs - 0.5*itvHori - 4.0*pix;
+  pos.x = 0.5*size.width() - 0.5*itvHori - 4.0*pix;
   pos.y = 0.5*m_nextFrames.size()*itvVert - 0.5*itvVert;
   {
     for (size_t i = 0; i < m_nextFrames.size(); ++i)
@@ -815,12 +812,10 @@ void Simulator::calcPosBundles()
   m_nextBundlePositionTL.clear();
   m_nextBundlePositionBR.clear();
 
-  // get canvas info & calc intervals
-  double wthCvs, hgtCvs;
-  canvas->getSize(wthCvs, hgtCvs);
-  double pix = canvas->getPixelSize();
-  double itvHori = wthCvs/6;
-  double itvVert = (hgtCvs-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
+  QSizeF size = worldSize();
+  double pix = pixelSize();
+  double itvHori = size.width()/6;
+  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
 
   // calc new positions
   if (m_previousFramePositions.size() > 0 && m_bundlesPreviousByLabel.size() > 0)
@@ -843,9 +838,9 @@ void Simulator::calcPosBundles()
       for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
       {
         posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
-        posTopLft.y =  0.5*hgtCvs - labelHeight*pix;
+        posTopLft.y =  0.5*size.height() - labelHeight*pix;
         posBotRgt.x =  posTopLft.x;
-        posBotRgt.y = -0.5*hgtCvs + labelHeight*pix;
+        posBotRgt.y = -0.5*size.height() + labelHeight*pix;
 
         m_previousBundleLabelPositionTL.push_back(posTopLft);
         m_previousBundleLabelPositionBR.push_back(posBotRgt);
@@ -915,9 +910,9 @@ void Simulator::calcPosBundles()
       for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
       {
         posTopLft.x = 2.0*itvHori - (m_bundlesNextByLabel.size()-i)*itvGrid;
-        posTopLft.y =  0.5*hgtCvs - labelHeight*pix;
+        posTopLft.y =  0.5*size.height() - labelHeight*pix;
         posBotRgt.x = posTopLft.x;
-        posBotRgt.y = -0.5*hgtCvs + labelHeight*pix;
+        posBotRgt.y = -0.5*size.height() + labelHeight*pix;
 
         m_nextBundleLabelPositionTL.push_back(posTopLft);
         m_nextBundleLabelPositionBR.push_back(posBotRgt);
@@ -1431,7 +1426,7 @@ void Simulator::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
   }
 
   ptr = NULL;
@@ -1487,7 +1482,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     vector< double > valsFrame;
 
     if (m_currentFrame != NULL)
@@ -1540,7 +1535,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
       }
       m_diagram->visualize(
         inSelectMode,
-        canvas,
+        pixelSize(),
         m_attributes,
         valsFrame);
 
@@ -1605,7 +1600,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     vector< double > valsFrame;
 
     for (int i = 0; i < (int) m_previousFramePositions.size(); ++i)
@@ -1654,7 +1649,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 
           m_diagram->visualize(
             inSelectMode,
-            canvas,
+            pixelSize(),
             m_attributes,
             valsFrame);
         }
@@ -1715,7 +1710,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
         m_diagram->visualize(
           inSelectMode,
-          canvas,
+          pixelSize(),
           m_attributes,
           valsFrame);
 
@@ -1775,7 +1770,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     vector< double > valsFrame;
 
     for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
@@ -1824,7 +1819,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 
           m_diagram->visualize(
             inSelectMode,
-            canvas,
+            pixelSize(),
             m_attributes,
             valsFrame);
         }
@@ -1885,7 +1880,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
         m_diagram->visualize(
           inSelectMode,
-          canvas,
+          pixelSize(),
           m_attributes,
           valsFrame);
 
@@ -1909,7 +1904,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    double pix = canvas->getPixelSize();;
+    double pix = pixelSize();;
     string lbl;
 
     glPushName(ID_BUNDLE_LBL);
@@ -1957,7 +1952,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     size_t idxHiLite = NON_EXISTING;
 
     for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
@@ -2095,7 +2090,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    double pix = canvas->getPixelSize();;
+    double pix = pixelSize();;
 
     glPushName(ID_BUNDLE_LBL);
     for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
@@ -2142,7 +2137,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();;
+    double pix = pixelSize();;
     size_t idxHiLite = NON_EXISTING;
 
     for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
@@ -2280,7 +2275,7 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     glPushName(ID_BUNDLE_LBL);
     for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
@@ -2304,7 +2299,7 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     size_t idxHiLite = NON_EXISTING;
 
     VisUtils::setColor(VisUtils::lightGray);
@@ -2371,7 +2366,7 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     double arrowItv;
 
     glPushName(ID_BUNDLE_LBL);
@@ -2396,7 +2391,7 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     size_t idxHiLite = NON_EXISTING;
 
     VisUtils::setColor(VisUtils::lightGray);
@@ -2468,9 +2463,8 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
 
 void Simulator::drawControls(const bool& inSelectMode)
 {
-  double wth, hgt;
-  canvas->getSize(wth, hgt);
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
 
   double itvSml = 6.0*pix;
   double itvLrg = 9.0*pix;
@@ -2478,36 +2472,36 @@ void Simulator::drawControls(const bool& inSelectMode)
   if (inSelectMode)
   {
     // clear icon
-    double x = 0.5*wth - itvSml - pix;
-    double y = 0.5*hgt - itvSml - pix;
+    double x = 0.5*size.width() - itvSml - pix;
+    double y = 0.5*size.height() - itvSml - pix;
     glPushName(ID_ICON_CLEAR);
     VisUtils::fillRect(x-itvSml, x+itvSml, y+itvSml, y-itvSml);
     glPopName();
 
     // up arrow
     x =  0.0;
-    y = -0.5*hgt + 3.0*itvLrg + 2.0*pix + 4*pix;
+    y = -0.5*size.height() + 3.0*itvLrg + 2.0*pix + 4*pix;
     glPushName(ID_ICON_UP);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     glPopName();
 
     // right arrow
     x =  0.0 + 2*itvLrg + 4.0*pix;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     glPushName(ID_ICON_NEXT);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     glPopName();
 
     // down arrow
     x =  0.0;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     glPushName(ID_ICON_DOWN);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     glPopName();
 
     // left arrow
     x =  0.0 - 2.0*itvLrg - 4.0*pix;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     glPushName(ID_ICON_PREV);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     glPopName();
@@ -2517,8 +2511,8 @@ void Simulator::drawControls(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
 
     // clear icon
-    double x = 0.5*wth - itvSml - pix;
-    double y = 0.5*hgt - itvSml - pix;
+    double x = 0.5*size.width() - itvSml - pix;
+    double y = 0.5*size.height() - itvSml - pix;
     VisUtils::setColor(Qt::white);
     VisUtils::fillClearIcon(x-itvSml, x+itvSml, y+itvSml, y-itvSml);
     VisUtils::setColor(VisUtils::darkGray);
@@ -2526,7 +2520,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 
     // up arrow
     x =  0.0;
-    y = -0.5*hgt + 3.0*itvLrg + 2.0*pix + 4*pix;
+    y = -0.5*size.height() + 3.0*itvLrg + 2.0*pix + 4*pix;
     VisUtils::setColor(Qt::white);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     VisUtils::setColor(VisUtils::lightGray);
@@ -2542,7 +2536,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 
     // right arrow
     x =  0.0 + 2*itvLrg + 4.0*pix;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     VisUtils::setColor(Qt::white);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     VisUtils::setColor(VisUtils::lightGray);
@@ -2558,7 +2552,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 
     // down arrow
     x =  0.0;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     VisUtils::setColor(Qt::white);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     VisUtils::setColor(VisUtils::lightGray);
@@ -2574,7 +2568,7 @@ void Simulator::drawControls(const bool& inSelectMode)
 
     // left arrow
     x =  0.0 - 2.0*itvLrg - 4.0*pix;
-    y = -0.5*hgt + 1.0*itvLrg + 2.0*pix;
+    y = -0.5*size.height() + 1.0*itvLrg + 2.0*pix;
     VisUtils::setColor(Qt::white);
     VisUtils::fillRect(x-itvLrg-pix, x+itvLrg+pix, y+itvLrg+pix, y-itvLrg-pix);
     VisUtils::setColor(VisUtils::lightGray);
@@ -2638,7 +2632,7 @@ void Simulator::animate()
 
       m_diagram->visualize(
         false,
-        canvas,
+        pixelSize(),
         m_attributes,
         valsFrame);
 
@@ -2681,7 +2675,7 @@ void Simulator::animate()
 
       m_diagram->visualize(
         false,
-        canvas,
+        pixelSize(),
         m_attributes,
         valsFrame);
 
@@ -2726,7 +2720,7 @@ void Simulator::animate()
 
       m_diagram->visualize(
         false,
-        canvas,
+        pixelSize(),
         m_attributes,
         valsFrame);
 
@@ -2769,7 +2763,7 @@ void Simulator::animate()
 
       m_diagram->visualize(
         false,
-        canvas,
+        pixelSize(),
         m_attributes,
         valsFrame,
         m_animationNewFrameOpacity);
@@ -2807,7 +2801,7 @@ void Simulator::onTimer()
       else
       {
         m_animationTimer.stop();
-        canvas->enableMouseMotion();
+        setMouseTracking(true);
         m_currentAnimationPhase = ANIM_NONE;
 
         // update new data
@@ -2823,13 +2817,13 @@ void Simulator::onTimer()
 
         // init & visualize
         dataChanged = true;
-        canvas->Refresh();
+        update();
       }
     }
     else if (m_currentAnimationPhase == ANIM_BLEND)
     {
       m_animationTimer.stop();
-      canvas->enableMouseMotion();
+      setMouseTracking(true);
       m_currentAnimationPhase = ANIM_NONE;
 
       // update new data
@@ -2845,7 +2839,7 @@ void Simulator::onTimer()
 
       // init & visualize
       dataChanged = true;
-      canvas->Refresh();
+      update();
     }
   }
   else
@@ -2882,9 +2876,7 @@ void Simulator::onTimer()
     }
 
     m_totalBlendTime += timerInterval;
-
-    canvas->Refresh();
-    canvas->Update();
+    update();
   }
 }
 

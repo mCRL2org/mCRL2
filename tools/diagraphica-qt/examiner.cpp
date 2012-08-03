@@ -291,17 +291,15 @@ void Examiner::handleSizeEvent()
   Visualizer::handleSizeEvent();
 
   double bdr     = 10;
-  double wth, hgt;
-  canvas->getSize(wth, hgt);
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   if (posFramesHist.size() > 0)
   {
     // update offset if necessary
-    if ((posFramesHist[posFramesHist.size()-1].x + offset*pix + scaleFramesHist*1.0) < (0.5*wth - bdr*pix)  &&
+    if ((posFramesHist[posFramesHist.size()-1].x + offset*pix + scaleFramesHist*1.0) < (0.5*worldSize().width() - bdr*pix)  &&
         (offset < 0))
     {
-      offset += ((0.5*wth - bdr*pix) - (posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0))/pix;
+      offset += ((0.5*worldSize().width() - bdr*pix) - (posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0))/pix;
 
       if (offset > 0)
       {
@@ -372,9 +370,7 @@ void Examiner::calcPosFrame()
   double itvHist = hgtHstPix;
   double bdr     = 10;
 
-  double wth, hgt;
-  canvas->getSize(wth, hgt);
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   // position & scaling
   posFrame.x = 0.0;
@@ -382,12 +378,12 @@ void Examiner::calcPosFrame()
   {
     // frame
     posFrame.y = 0.0 + 0.5*itvHist*pix;
-    scaleFrame = Utils::minn((wth - 2.0*bdr*pix), (hgt - itvHist*pix - 2.0*bdr*pix))/2.0;
+    scaleFrame = Utils::minn((worldSize().width() - 2.0*bdr*pix), (worldSize().height() - itvHist*pix - 2.0*bdr*pix))/2.0;
   }
   else
   {
     posFrame.y = 0.0;
-    scaleFrame = Utils::minn((wth - 2.0*bdr*pix), (hgt - 2.0*bdr*pix))/2.0;
+    scaleFrame = Utils::minn((worldSize().width() - 2.0*bdr*pix), (worldSize().height() - 2.0*bdr*pix))/2.0;
   }
 }
 
@@ -397,9 +393,7 @@ void Examiner::calcPosFramesHist()
   double itvHist = hgtHstPix;
   double bdr     = 10;
 
-  double wth, hgt;
-  canvas->getSize(wth, hgt);
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   vsblHistIdxLft = 0;
   vsblHistIdxRgt = framesHist.size()-1;
@@ -409,17 +403,17 @@ void Examiner::calcPosFramesHist()
     // frames history
     posFramesHist.clear();
     Position2D pos;
-    pos.y = -0.5*hgt + 0.5*itvHist*pix;
+    pos.y = -0.5*worldSize().height() + 0.5*itvHist*pix;
     for (size_t i = 0; i < framesHist.size(); ++i)
     {
-      pos.x = -0.5*wth + bdr*pix + 0.5*itvHist*pix + i*itvHist*pix + offset*pix;
+      pos.x = -0.5*worldSize().width() + bdr*pix + 0.5*itvHist*pix + i*itvHist*pix + offset*pix;
       posFramesHist.push_back(pos);
 
-      if (pos.x + bdr*pix < -0.5*wth)
+      if (pos.x + bdr*pix < -0.5*worldSize().width())
       {
         ++vsblHistIdxLft;
       }
-      if (0.5*wth < pos.x - bdr*pix)
+      if (0.5*worldSize().width() < pos.x - bdr*pix)
       {
         --vsblHistIdxRgt;
       }
@@ -588,8 +582,7 @@ void Examiner::handleIconLft()
 {
   double bdr = 12;
 
-  double wth = canvas->getWidth();
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   if (framesHist.size() > 0)
   {
@@ -600,8 +593,8 @@ void Examiner::handleIconLft()
         focusFrameIdx -= 1;
       }
 
-      double dLft = (-0.5*wth + bdr*pix) - (posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0);
-      double dRgt = (posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - (0.5*wth - bdr*pix);
+      double dLft = (-0.5*worldSize().width() + bdr*pix) - (posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0);
+      double dRgt = (posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - (0.5*worldSize().width() - bdr*pix);
       if (dRgt > 0)
       {
         offset -= dRgt/pix;
@@ -619,7 +612,7 @@ void Examiner::handleIconLft()
     }
     else
     {
-      if ((posFramesHist[0].x - scaleFramesHist*1.0) < (-0.5*wth + bdr*pix))
+      if ((posFramesHist[0].x - scaleFramesHist*1.0) < (-0.5*worldSize().width() + bdr*pix))
       {
         offset += 10;
       }
@@ -638,8 +631,7 @@ void Examiner::handleIconRgt()
 {
   double bdr = 12;
 
-  double wth = canvas->getWidth();
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   if (framesHist.size() > 0)
   {
@@ -650,8 +642,8 @@ void Examiner::handleIconRgt()
         focusFrameIdx += 1;
       }
 
-      double dLft = (-0.5*wth + bdr*pix) - (posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0);
-      double dRgt = (posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - (0.5*wth - bdr*pix);
+      double dLft = (-0.5*worldSize().width() + bdr*pix) - (posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0);
+      double dRgt = (posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - (0.5*worldSize().width() - bdr*pix);
       if (dRgt > 0)
       {
         offset -= dRgt/pix;
@@ -669,7 +661,7 @@ void Examiner::handleIconRgt()
     }
     else
     {
-      if ((posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0) > (0.5*wth - bdr*pix))
+      if ((posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0) > (0.5*worldSize().width() - bdr*pix))
       {
         offset -= 10;
       }
@@ -727,7 +719,7 @@ void Examiner::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
   }
 
   ptr = NULL;
@@ -745,7 +737,7 @@ void Examiner::clear()
 
 void Examiner::drawFrame(const bool& inSelectMode)
 {
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   if (inSelectMode == true)
   {
@@ -802,7 +794,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
 
     diagram->visualize(
       false,
-      canvas,
+      pixelSize(),
       attributes,
       valsFrame);
 
@@ -842,7 +834,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     vector< double > valsFrame;
 
     //for ( int i = 0; i < framesHist.size(); ++i )
@@ -896,7 +888,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
 
       diagram->visualize(
         false,
-        canvas,
+        pixelSize(),
         attrsHist[i],
         valsFrame);
 
@@ -910,16 +902,14 @@ void Examiner::drawControls(const bool& inSelectMode)
 {
   double itvHist = hgtHstPix;
 
-  double wth, hgt;
-  canvas->getSize(wth, hgt);
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
 
   if (inSelectMode == true)
   {
     // clear icon
     double itvSml = 6.0*pix;
-    double x = 0.5*wth - itvSml - pix;
-    double y = 0.5*hgt - itvSml - pix;
+    double x = 0.5*worldSize().width() - itvSml - pix;
+    double y = 0.5*worldSize().height() - itvSml - pix;
     glPushName(ID_ICON_CLR);
     VisUtils::fillRect(x-itvSml, x+itvSml, y+itvSml, y-itvSml);
     glPopName();
@@ -927,7 +917,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // rewind
     glPushName(ID_ICON_RWND);
     glPushMatrix();
-    glTranslatef(-18.0*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(-18.0*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -937,7 +927,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // left
     glPushName(ID_ICON_LFT);
     glPushMatrix();
-    glTranslatef(-6*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(-6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -947,7 +937,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // left
     glPushName(ID_ICON_LFT);
     glPushMatrix();
-    glTranslatef(-0.5*wth+6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
+    glTranslatef(-0.5*worldSize().width()+6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -957,7 +947,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // play
     glPushName(ID_ICON_PLAY);
     glPushMatrix();
-    glTranslatef(6*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -967,7 +957,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // right
     glPushName(ID_ICON_RGT);
     glPushMatrix();
-    glTranslatef(18*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(18*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -977,7 +967,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     // right
     glPushName(ID_ICON_RGT);
     glPushMatrix();
-    glTranslatef(0.5*wth-6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
+    glTranslatef(0.5*worldSize().width()-6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -988,16 +978,16 @@ void Examiner::drawControls(const bool& inSelectMode)
   {
     // clear icon
     double itvSml = 6.0*pix;
-    double x = 0.5*wth - itvSml - pix;
-    double y = 0.5*hgt - itvSml - pix;
+    double x = 0.5*worldSize().width() - itvSml - pix;
+    double y = 0.5*worldSize().height() - itvSml - pix;
     double bdr = 10;
     double dLft = 0;
     double dRgt = 0;
 
     if (posFramesHist.size() > 1)
     {
-      dLft = (-0.5*wth + bdr*pix) - (posFramesHist[0].x - scaleFramesHist*1.0);
-      dRgt = (posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0) - (0.5*wth - bdr*pix);
+      dLft = (-0.5*worldSize().width() + bdr*pix) - (posFramesHist[0].x - scaleFramesHist*1.0);
+      dRgt = (posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0) - (0.5*worldSize().width() - bdr*pix);
     }
     else
     {
@@ -1022,34 +1012,34 @@ void Examiner::drawControls(const bool& inSelectMode)
     // border
     VisUtils::setColor(settings->backgroundColor.value());
     VisUtils::fillRect(
-      -0.5*wth,               -0.5*wth + 12.0*pix,
-      -0.5*hgt + itvHist*pix, -0.5*hgt);
+      -0.5*worldSize().width(),               -0.5*worldSize().width() + 12.0*pix,
+      -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height());
     VisUtils::fillRect(
-      0.5*wth - 12.0*pix,      0.5*wth,
-      -0.5*hgt + itvHist*pix, -0.5*hgt);
+      0.5*worldSize().width() - 12.0*pix,      0.5*worldSize().width(),
+      -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height());
 
     // lines
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(
-      -0.5*wth + 6.0*pix,     -26.0*pix,
-      -0.5*hgt + itvHist*pix, -0.5*hgt + itvHist*pix);
+      -0.5*worldSize().width() + 6.0*pix,     -26.0*pix,
+      -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height() + itvHist*pix);
     /*
     VisUtils::drawLine(
-        -0.5*wth + 6.0*pix,     -0.5*wth + 6.0*pix,
-        -0.5*hgt + itvHist*pix, -0.5*hgt + 0.5*itvHist*pix + 8.0*pix );
+        -0.5*worldSize().width() + 6.0*pix,     -0.5*worldSize().width() + 6.0*pix,
+        -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height() + 0.5*itvHist*pix + 8.0*pix );
     */
     VisUtils::drawLine(
-      26.0*pix,                0.5*wth - 6.0*pix,
-      -0.5*hgt + itvHist*pix, -0.5*hgt + itvHist*pix);
+      26.0*pix,                0.5*worldSize().width() - 6.0*pix,
+      -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height() + itvHist*pix);
     /*
     VisUtils::drawLine(
-        0.5*wth - 6.0*pix,       0.5*wth - 6.0*pix,
-        -0.5*hgt + itvHist*pix, -0.5*hgt + 0.5*itvHist*pix + 8.0*pix );
+        0.5*worldSize().width() - 6.0*pix,       0.5*worldSize().width() - 6.0*pix,
+        -0.5*worldSize().height() + itvHist*pix, -0.5*worldSize().height() + 0.5*itvHist*pix + 8.0*pix );
     */
 
     // rewind
     glPushMatrix();
-    glTranslatef(-18.0*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(-18.0*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
@@ -1073,7 +1063,7 @@ void Examiner::drawControls(const bool& inSelectMode)
 
     // left
     glPushMatrix();
-    glTranslatef(-6*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(-6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
@@ -1099,7 +1089,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     if (dLft > 0)
     {
       glPushMatrix();
-      glTranslatef(-0.5*wth+6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
+      glTranslatef(-0.5*worldSize().width()+6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillPrevIcon(
@@ -1115,7 +1105,7 @@ void Examiner::drawControls(const bool& inSelectMode)
 
     // play
     glPushMatrix();
-    glTranslatef(6*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
     //VisUtils::setColor(VisUtils::coolRed);
@@ -1133,7 +1123,7 @@ void Examiner::drawControls(const bool& inSelectMode)
 
     // right
     glPushMatrix();
-    glTranslatef(18*pix, -0.5*hgt + itvHist*pix, 0.0);
+    glTranslatef(18*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
     if (dRgt > 0)
@@ -1159,7 +1149,7 @@ void Examiner::drawControls(const bool& inSelectMode)
     if (dRgt > 0)
     {
       glPushMatrix();
-      glTranslatef(0.5*wth-6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0);
+      glTranslatef(0.5*worldSize().width()-6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillNextIcon(

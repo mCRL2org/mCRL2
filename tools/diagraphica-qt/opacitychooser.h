@@ -70,9 +70,6 @@ class OpacityChooser : public Visualizer
 
     // vis settings
     double hdlSize;
-    /*
-    std::vector< Position2D > positions;
-    */
 };
 
 #endif

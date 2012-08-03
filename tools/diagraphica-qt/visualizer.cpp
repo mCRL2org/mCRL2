@@ -51,14 +51,35 @@ Visualizer::Visualizer(
 }
 
 
-Visualizer::~Visualizer()
+QSizeF Visualizer::worldSize()
+// Return viewport width and height in WORLD coordinates. The 
+// viewport is set up such that the shortest side has
+// length 2 in world coordinates.
 {
-  graph  = NULL;
-  canvas = NULL;
+  if (height() < width())
+  {
+    return QSizeF(width() / (double)height() * 2.0, 2.0);
+  }
+  else
+  {
+    return QSizeF(2.0, height() / (double)width() * 2.0);
+  }
 }
 
 
-// -- set functions -------------------------------------------------
+double Visualizer::pixelSize()
+// Return distance in WORLD coordinates of 1 pixel.
+{
+  return worldSize().width() / (double)width();
+}
+
+
+QPointF Visualizer::worldCoordinate(QPointF deviceCoordinate)
+{
+  QSizeF size = worldSize();
+  double pixel = pixelSize();
+  return QPointF(-0.5 * size.width() + deviceCoordinate.x() * pixel, 0.5 * size.height() - deviceCoordinate.y() * pixel);
+}
 
 
 void Visualizer::setClearColor(

@@ -1803,108 +1803,6 @@ void Graph::deleteClusters()
 }
 
 
-void Graph::printClusters()
-{
-  // clusters
-  vector< Cluster* > c;
-  c.push_back(root);
-  *mediator << "Clusters:\n";
-  printClusters(c);
-
-  // leaves
-  Cluster* clst = NULL;
-  *mediator << "Leaves:\n";
-  vector< size_t > coord;
-  {
-    for (size_t i = 0; i < leaves.size(); ++i)
-    {
-      clst = leaves[i];
-      coord.clear();
-      clst->getCoord(coord);
-
-      *mediator << "[";
-      {
-        for (size_t j = 0; j < coord.size(); ++j)
-        {
-          *mediator << coord[j];
-          *mediator << " ";
-        }
-      }
-      *mediator << "]";
-    }
-  }
-  *mediator << "\n";
-  clst = NULL;
-}
-
-
-void Graph::printClusters(vector< Cluster* > &clusts)
-{
-  if (clusts.size() > 0)
-  {
-    Cluster* c = clusts[0];
-    // update clusts
-    clusts.erase(clusts.begin());
-    {
-      for (size_t i = 0; i < c->getSizeChildren(); ++i)
-      {
-        clusts.push_back(c->getChild(i));
-      }
-    }
-
-    // print index
-    *mediator << c->getIndex();
-    *mediator << ") ";
-
-    // print coords
-    vector< size_t > coord;
-    c->getCoord(coord);
-    *mediator << "[";
-    {
-      for (size_t i = 0; i < coord.size(); ++i)
-      {
-        *mediator << coord[i];
-        *mediator << " ";
-      }
-    }
-    *mediator << "]";
-
-    // print number nodes
-    size_t sum = 0;
-    sumNodesInCluster(
-      c,
-      sum);
-    *mediator << " (";
-    *mediator << sum;
-    *mediator << ")";
-
-    // print attr info
-    *mediator << "AttrIdx(";
-    if (c->getAttribute() != NULL)
-    {
-      *mediator << c->getAttribute()->getIndex();
-    }
-    else
-    {
-      *mediator << "NULL";
-    }
-    *mediator << ") ";
-
-    *mediator << "AttrValIdx(";
-    *mediator << c->getAttrValIdx();
-    *mediator << ") ";
-
-    // line break
-    *mediator << "\n";
-
-    c = NULL;
-
-    // print others recursively
-    printClusters(clusts);
-  }
-}
-
-
 void Graph::updateBundles(size_t& progress)
 {
   vector< vector< Bundle* > > temp;
@@ -2107,23 +2005,6 @@ void Graph::deleteBundles()
     bundles[i] = NULL;
   }
   bundles.clear();
-}
-
-
-void Graph::printBundles()
-{
-  *mediator << "Bundles:\n";
-  for (size_t i = 0; i < bundles.size(); ++i)
-  {
-    *mediator << bundles[i]->getIndex();
-    *mediator << ") ";
-    *mediator << bundles[i]->getInCluster()->getIndex();
-    *mediator << " -> ";
-    *mediator << bundles[i]->getOutCluster()->getIndex();
-    *mediator << " (";
-    *mediator << bundles[i]->getSizeEdges();
-    *mediator << ")\n";
-  }
 }
 
 

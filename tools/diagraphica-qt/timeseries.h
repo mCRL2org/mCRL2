@@ -24,7 +24,6 @@
 #include <QTimer>
 #include "attribute.h"
 #include "diagram.h"
-#include "glcanvas.h"
 #include "graph.h"
 #include "settings.h"
 #include "visualizer.h"

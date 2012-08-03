@@ -13,6 +13,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QGLWidget>
 
 #ifdef __APPLE__
 # include <GLUT/glut.h>
@@ -39,7 +40,17 @@ class Visualizer : public QObject, public Colleague
       Mediator* m,
       Graph* g,
       GLCanvas* c);
-    virtual ~Visualizer();
+    virtual ~Visualizer() {}
+
+int height() { int width, height; canvas->GetClientSize(&width, &height); return height; }
+int width() { int width, height; canvas->GetClientSize(&width, &height); return width; }
+void setToolTip(QString tooltip) { if(tooltip.isEmpty()) canvas->clearToolTip(); else canvas->showToolTip(tooltip.toStdString()); }
+void setMouseTracking(bool enabled) { if(enabled) canvas->enableMouseMotion(); else canvas->disableMouseMotion(); }
+
+
+    QSizeF worldSize();
+    double pixelSize();
+    QPointF worldCoordinate(QPointF deviceCoordinate);
 
     // -- set functions ---------------------------------------------
     virtual void setClearColor(
@@ -51,9 +62,6 @@ class Visualizer : public QObject, public Colleague
     virtual void visualize(const bool& inSelectMode) = 0;
     virtual void setGeomChanged(const bool& flag);
     virtual void setDataChanged(const bool& flag);
-    /*
-    virtual void animate() = 0;
-    */
 
     // -- event handlers --------------------------------------------
     virtual void handleSizeEvent();
@@ -64,8 +72,18 @@ class Visualizer : public QObject, public Colleague
     virtual void handleMouseLeaveEvent();
     virtual void handleKeyEvent(QKeyEvent* e);
 
+    virtual void enterEvent(QEvent *) { handleMouseEnterEvent(); }
+    virtual void leaveEvent(QEvent *) { handleMouseLeaveEvent(); }
+    virtual void keyPressEvent(QKeyEvent *event) { handleKeyEvent(event); }
+    virtual void keyReleaseEvent(QKeyEvent *event) { handleKeyEvent(event); }
+    virtual void wheelEvent(QWheelEvent *event) { handleWheelEvent(event); }
+    virtual void mouseMoveEvent(QMouseEvent *event) { handleMouseEvent(event); }
+    virtual void mousePressEvent(QMouseEvent *event) { handleMouseEvent(event); }
+    virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); }
+
   public slots:
     void update() { canvas->Refresh(); }
+    void repaint() { canvas->Refresh(); }
 
   protected:
     // -- protected utility functions -------------------------------
@@ -99,27 +117,21 @@ class Visualizer : public QObject, public Colleague
 
     bool showMenu;
 
-    // -- data members ----------------------------------------------
     QColor clearColor;
 
-    Graph*    graph;  // association
-    GLCanvas* canvas; // association
+    Graph *graph;
+    GLCanvas *canvas;
 
-    // -- flags -----------------------------------------------------
     bool geomChanged; // canvas resized
     bool dataChanged; // data has changed
 
-    // -- character textures ----------------------------------------
-    bool    texCharOK;
-    GLuint  texCharId[CHARSETSIZE];
+    bool texCharOK;
+    GLuint texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH];
 
-    // -- cushion texture -------------------------------------------
-    bool    texCushOK;
-    GLuint  texCushId;
-    float   texCush[CUSHSIZE];
+    bool texCushOK;
+    GLuint texCushId;
+    float texCush[CUSHSIZE];
 };
 
 #endif
-
-// -- end -----------------------------------------------------------

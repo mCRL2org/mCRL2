@@ -121,17 +121,14 @@ void DistrPlot::visualize(const bool& inSelectMode)
 
 void DistrPlot::drawAxes(const bool& inSelectMode)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
 
   // calc size of bounding box
-  double xLft = -0.5*w+20*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yTop =  0.5*h-10*pix;
-  double yBot = -0.5*h+20*pix;
+  double xLft = -0.5*size.width()+20*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yTop =  0.5*size.height()-10*pix;
+  double yBot = -0.5*size.height()+20*pix;
   double yMid =  0.5*(yTop+yBot);
 
   // rendering mode
@@ -153,11 +150,8 @@ void DistrPlot::drawAxes(const bool& inSelectMode)
 
 void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
 
@@ -165,7 +159,7 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
   VisUtils::setColor(Qt::black);
 
   // y-axis labels
-  double x = -0.5*w+9*pix;
+  double x = -0.5*size.width()+9*pix;
   double y =  0;
   VisUtils::drawLabelVertCenter(texCharId, x, y, scaling, "Number");
 
@@ -174,16 +168,16 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
     // x-axis label
     string xLabel = graph->getAttribute(attrIdx)->getName();
     x =  0.0;
-    y = -0.5*h+9*pix;
+    y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
 
     string max = Utils::size_tToStr(maxNumber);
-    x = -0.5*w+13*pix;
-    y =  0.5*h-10*pix;
+    x = -0.5*size.width()+13*pix;
+    y =  0.5*size.height()-10*pix;
     VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
 
     string min = "0";
-    y = -0.5*h+20*pix;
+    y = -0.5*size.height()+20*pix;
     VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
   }
 }
@@ -192,8 +186,8 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
 void DistrPlot::drawPlot(const bool& inSelectMode)
 {
 
-  double hCanv = canvas->getHeight();
-  double pix = canvas->getPixelSize();
+  double hCanv = worldSize().height();
+  double pix = pixelSize();
   size_t sizePositions = positions.size();
 
   double yBot = -0.5*hCanv + 20*pix;
@@ -242,7 +236,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
 {
   if (inSelectMode != true)
   {
-    double pix      = canvas->getPixelSize();
+    double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
     vector< Attribute* > attrs;
@@ -264,7 +258,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     // diagram
     diagram->visualize(
       inSelectMode,
-      canvas,
+      pixelSize(),
       attrs,
       vals);
 
@@ -320,13 +314,6 @@ void DistrPlot::setScalingTransf()
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  double f = canvas->getScaleFactor();
-  glScalef(f, f, f);
-  glTranslatef(
-    canvas->getXTranslation(),
-    canvas->getYTranslation(),
-    0.0);
-  glLoadIdentity();
 }
 
 
@@ -360,38 +347,14 @@ void DistrPlot::displTooltip(const size_t& posIdx)
 
     if (diagram == NULL)
     {
-      // show tooltip
-      canvas->showToolTip(msgDgrm);
+      setToolTip(QString::fromStdString(msgDgrm));
     }
     else
     {
-      // calc diagram position
-      double xM, yM;
-      double xD, yD;
-      canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
-
-      if (xM < 0)
-      {
-        xD = xM+1.0*scaleDgrm;
-      }
-      else
-      {
-        xD = xM-1.0*scaleDgrm;
-      }
-
-      if (yM < 0)
-      {
-        yD = yM+1.0*scaleDgrm;
-      }
-      else
-      {
-        yD = yM-1.0*scaleDgrm;
-      }
-
-      posDgrm.x = xD;
-      posDgrm.y = yD;
-
-      showDgrm       = true;
+      QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+      posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      showDgrm = true;
       attrValIdxDgrm = posIdx;
     }
 
@@ -409,16 +372,14 @@ void DistrPlot::calcPositions()
   // calc positions
   if (number.size() > 0)
   {
-    // get size of sides & 1 pixel
-    double w,h;
-    canvas->getSize(w, h);
-    double pix = canvas->getPixelSize();
+    QSizeF size = worldSize();
+    double pix = pixelSize();
 
     // calc size of bounding box
-    double xLft = -0.5*w+20*pix;
-    double xRgt =  0.5*w-10*pix;
-    double yTop =  0.5*h-10*pix;
-    double yBot = -0.5*h+20*pix;
+    double xLft = -0.5*size.width()+20*pix;
+    double xRgt =  0.5*size.width()-10*pix;
+    double yTop =  0.5*size.height()-10*pix;
+    double yBot = -0.5*size.width()+20*pix;
 
     // get number of values per axis
     double numX = graph->getAttribute(attrIdx)->getSizeCurValues();
@@ -513,7 +474,7 @@ void DistrPlot::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
     showDgrm = false;
   }
 

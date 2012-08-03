@@ -138,17 +138,14 @@ void CorrlPlot::drawAxes(
   const string& /*xLbl*/,
   const string& /*yLbl*/)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
 
   // calc size of bounding box
-  double xLft = -0.5*w+20*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yTop =  0.5*h-10*pix;
-  double yBot = -0.5*h+20*pix;
+  double xLft = -0.5*size.width()+20*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yTop =  0.5*size.height()-10*pix;
+  double yBot = -0.5*size.height()+20*pix;
 
   // rendering mode
   if (inSelectMode != true)
@@ -172,11 +169,8 @@ void CorrlPlot::drawAxes(
 
 void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
 
@@ -187,11 +181,11 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
   {
     // x-axis label
     double x =  0.0;
-    double y = -0.5*h+9*pix;
+    double y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
 
     // y-axis labels
-    x = -0.5*w+9*pix;
+    x = -0.5*size.width()+9*pix;
     y =  0;
     VisUtils::drawLabelVertCenter(texCharId, x, y, scaling, yLabel);
   }
@@ -223,7 +217,7 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
   // rendering mode
   else
   {
-    double pix   = canvas->getPixelSize();
+    double pix   = pixelSize();
 
     for (size_t i = 0; i < positions.size(); ++i)
     {
@@ -258,7 +252,7 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
 
 void CorrlPlot::drawDiagram(const bool& inSelectMode)
 {
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
   vector< Attribute* > attrs;
@@ -283,7 +277,7 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
   // diagram
   diagram->visualize(
     inSelectMode,
-    canvas,
+    pixelSize(),
     attrs,
     vals);
 
@@ -405,12 +399,6 @@ void CorrlPlot::setScalingTransf()
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  double f = canvas->getScaleFactor();
-  glScalef(f, f, f);
-  glTranslatef(
-    canvas->getXTranslation(),
-    canvas->getYTranslation(),
-    0.0);
 }
 
 
@@ -441,37 +429,13 @@ void CorrlPlot::displTooltip(
 
   if (diagram == NULL)
   {
-    // show tooltip
-    canvas->showToolTip(msgDgrm);
+    setToolTip(QString::fromStdString(msgDgrm));
   }
   else
   {
-    // calc diagram position
-    double xM, yM;
-    double xD, yD;
-    canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
-
-    if (xM < 0)
-    {
-      xD = xM+1.0*scaleDgrm;
-    }
-    else
-    {
-      xD = xM-1.0*scaleDgrm;
-    }
-
-    if (yM < 0)
-    {
-      yD = yM+1.0*scaleDgrm;
-    }
-    else
-    {
-      yD = yM-1.0*scaleDgrm;
-    }
-
-    posDgrm.x = xD;
-    posDgrm.y = yD;
-
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+    posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
     showDgrm       = true;
     attrValIdx1Dgrm = xIdx;
     attrValIdx2Dgrm = mapXToY[xIdx][yIdx];
@@ -486,16 +450,14 @@ void CorrlPlot::calcPositions()
 
   if (mapXToY.size() > 0)
   {
-    // get size of canvas & 1 pixel
-    double w,h;
-    canvas->getSize(w, h);
-    double pix = canvas->getPixelSize();
+    QSizeF size = worldSize();
+    double pix = pixelSize();
 
     // calc sides of bounding box
-    double xLft = -0.5*w+20*pix;
-    double xRgt =  0.5*w-10*pix;
-    double yTop =  0.5*h-10*pix;
-    double yBot = -0.5*h+20*pix;
+    double xLft = -0.5*size.width()+20*pix;
+    double xRgt =  0.5*size.width()-10*pix;
+    double yTop =  0.5*size.height()-10*pix;
+    double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
     double numX = graph->getAttribute(attrIdx1)->getSizeCurValues();
@@ -628,7 +590,7 @@ void CorrlPlot::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
     showDgrm = false;
   }
 

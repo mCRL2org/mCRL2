@@ -17,7 +17,6 @@
 #include <cstddef>
 #include <vector>
 #include "colleague.h"
-#include "glcanvas.h"
 #include "visutils.h"
 #include "shape.h"
 
@@ -43,7 +42,7 @@ class Diagram : public Colleague
     Shape* getShape(const size_t& idx);
 
     bool getSnapGrid();
-    double getGridInterval(GLCanvas* canvas);
+    double getGridInterval(double pixelSize);
     double getAngleInterval();
     void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom);
 
@@ -53,15 +52,15 @@ class Diagram : public Colleague
     // -- vis functions ---------------------------------------------
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas,
+      double pixelSize,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs);
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas,
+      double pixelSize,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs,
       double opacity);
@@ -73,23 +72,21 @@ class Diagram : public Colleague
 
     void drawAxes(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawBorder(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
+    void drawBorderFlush(
+      const bool& inSelectMode);
     void drawBorderFlush(
       const bool& inSelectMode,
-      GLCanvas* canvas);
-    void drawBorderFlush(
-      const bool& inSelectMode,
-      GLCanvas* canvas,
       const double& opacity);
     void drawGrid(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawShapes(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
 
     // -- data members ----------------------------------------------
     std::vector< Shape* > shapes; // composition

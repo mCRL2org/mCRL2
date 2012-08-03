@@ -20,7 +20,6 @@
 #include <vector>
 #include "colleague.h"
 #include "dof.h"
-#include "glcanvas.h"
 #include "visutils.h"
 #include "visualizer.h"
 
@@ -138,9 +137,9 @@ class Shape : public Colleague
     // -- visualization ---------------------------------------------
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void visualize(
-      GLCanvas* canvas,
+      double pixelSize,
       const double& opacity,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs);
@@ -204,44 +203,44 @@ class Shape : public Colleague
     // -- private visualization functions ---------------------------
     void drawNormal(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEdit(
       const bool& inSelectMode,
-      GLCanvas* canvas);
-    void drawText(GLCanvas* canvas);
+      double pixelSize);
+    void drawText(double pixelSize);
     void drawEditDOF(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEditDOFXCtr(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawDOFXCtr(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEditDOFYCtr(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawDOFYCtr(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEditDOFWth(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawDOFWth(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEditDOFHgt(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawDOFHgt(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawEditDOFAgl(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawDOFAgl(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
 
     // -- data members ----------------------------------------------
 
@@ -268,7 +267,6 @@ class Shape : public Colleague
     GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH]; // resources for drawing text
     bool texturesGenerated; // check whether textures for drawing text is generated or not
-    GLCanvas* lastCanvas; // Last Canvas the text drawn on
 
     // degrees of freedom
     DOF* xCtrDOF; // composition

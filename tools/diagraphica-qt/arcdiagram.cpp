@@ -219,8 +219,7 @@ void ArcDiagram::visualize(const bool& inSelectMode)
   // selection mode
   if (inSelectMode)
   {
-    double wth, hgt;
-    canvas->getSize(wth, hgt);
+    QSizeF size = worldSize();
 
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -231,7 +230,7 @@ void ArcDiagram::visualize(const bool& inSelectMode)
           2.0);
 
     glPushName(ID_CANVAS);
-    VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*hgt, -0.5*hgt);
+    VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
 
     visualizeParts(inSelectMode);
 
@@ -525,8 +524,8 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 
   if (render == HQRender)
   {
-    double wth = canvas->getWidth();
-    double pix = canvas->getPixelSize();
+    double wth = worldSize().width();
+    double pix = pixelSize();
 
     string lbl;
 
@@ -693,7 +692,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
         diagram->visualize(
               inSelectMode,
-              canvas,
+              pixelSize(),
               attrsDgrm[i],
               vals);
         vals.clear();
@@ -746,7 +745,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         double yD = posDgrm[i].y;
         double aglDeg = Utils::calcAngleDg(xD-xL, yD-yL);
         double dist   = Utils::dist(xL, yL, xD, yD);
-        double pix    = canvas->getPixelSize();
+        double pix    = pixelSize();
 
         glPushMatrix();
         if (m_mouseDrag)
@@ -822,7 +821,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
           diagram->visualize(
                 inSelectMode,
-                canvas,
+                pixelSize(),
                 attrsDgrm[i],
                 vals);
           vals.clear();
@@ -858,7 +857,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 
           diagram->visualize(
                 inSelectMode,
-                canvas,
+                pixelSize(),
                 attrsDgrm[i],
                 vals);
           vals.clear();
@@ -981,7 +980,7 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
     if (render == HQRender)
     {
       VisUtils::enableLineAntiAlias();
-      double pix  = canvas->getPixelSize();
+      double pix  = pixelSize();
 
       for (size_t i = 0; i < posLeaves.size(); ++i)
       {
@@ -1138,14 +1137,12 @@ void ArcDiagram::calcSettingsLeaves()
 {
   if (graph->getSizeLeaves() > 0)
   {
-    // get size of canvas & 1 pixel
-    double w, h;
-    canvas->getSize(w, h);
-    double pix = canvas->getPixelSize();
+    QSizeF size = worldSize();
+    double pix = pixelSize();
 
     // calc lft & rgt boundary
-    double xLft = -0.5*Utils::minn(w, h)+20*pix;
-    double xRgt =  0.5*Utils::minn(w, h)-20*pix;
+    double xLft = -0.5*Utils::minn(size.width(), size.height())+20*pix;
+    double xRgt =  0.5*Utils::minn(size.width(), size.height())-20*pix;
 
     // get number of values on x-axis
     double numX = graph->getSizeLeaves();
@@ -1287,12 +1284,8 @@ void ArcDiagram::calcSettingsTree()
 {
   if (graph->getRoot() != NULL)
   {
-    // get size of canvas & 1 pixel
-    double w, h;
-    canvas->getSize(w, h);
-
-    // calc lft & rgt boundary
-    double yTop = 0.5*Utils::minn(w, h)-2.0*radLeaves;
+    QSizeF size = worldSize();
+    double yTop = 0.5*Utils::minn(size.width(), size.height())-2.0*radLeaves;
 
     // clear prev settings
     clearSettingsTree();
@@ -1377,12 +1370,8 @@ void ArcDiagram::calcSettingsBarTree()
 {
   if (graph->getRoot() != NULL)
   {
-    // get size of canvas & 1 pixel
-    double w, h;
-    canvas->getSize(w, h);
-
-    // calc lft & rgt boundary
-    double yBot = -0.5*Utils::minn(w, h);
+    QSizeF size = worldSize();
+    double yBot = -0.5*Utils::minn(size.width(), size.height());
     double hght = abs(yBot)-2.0*radLeaves;
 
     // clear prev settings
@@ -1640,7 +1629,7 @@ void ArcDiagram::animate()
   updateMarkBundles();
 
   visualize(false);
-  canvas->Refresh();
+  repaint();
 }
 
 
@@ -1665,7 +1654,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         updateMarkBundles();
         mediator->handleUnshowFrame();
       }
-      canvas->clearToolTip();
+      setToolTip(QString());
     }
     else
     {
@@ -1790,7 +1779,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         }
         else
         {
-          canvas->clearToolTip();
+          setToolTip(QString());
           currIdxDgrm = ids[2];
           updateMarkBundles();
 
@@ -1837,7 +1826,7 @@ void ArcDiagram::handleHoverCluster(
       val = NULL;
       */
     }
-    canvas->showToolTip(msg);
+    setToolTip(QString::fromStdString(msg));
   }
 }
 
@@ -1850,8 +1839,7 @@ void ArcDiagram::handleHoverBundle(const size_t& bndlIdx)
     string  lbls = "";
     Bundle* bndl = graph->getBundle(bndlIdx);
     bndl->getLabels(sepr, lbls);
-    canvas->showToolTip(lbls);
-    bndl = NULL;
+    setToolTip(QString::fromStdString(lbls));
   }
 }
 
@@ -1868,9 +1856,7 @@ void ArcDiagram::handleHoverBarTree(
 
     clust = mapPosToClust[i][j];
     msg = Utils::size_tToStr(clust->getSizeDescNodes());
-    canvas->showToolTip(msg);
-
-    clust = NULL;
+    setToolTip(QString::fromStdString(msg));
   }
 }
 
@@ -1898,27 +1884,16 @@ void ArcDiagram::handleDragDiagram()
 {
   if (dragIdxDgrm != NON_EXISTING && static_cast <size_t>(dragIdxDgrm) < posDgrm.size())
   {
-    double x1, y1;
-    double x2, y2;
-
-    canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
-    canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
-
-    posDgrm[dragIdxDgrm].x += (x2-x1);
-    posDgrm[dragIdxDgrm].y += (y2-y1);
+    handleDragDiagram(dragIdxDgrm);
   }
 }
 
 void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
 {
-  double x1, y1;
-  double x2, y2;
+  QPointF delta = worldCoordinate(m_lastMouseEvent.posF()) - worldCoordinate(m_lastMousePos);
 
-  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), x1, y1);
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  x2, y2);
-
-  posDgrm[dgrmIdx].x += (x2-x1);
-  posDgrm[dgrmIdx].y += (y2-y1);
+  posDgrm[dgrmIdx].x += delta.x();
+  posDgrm[dgrmIdx].y += delta.y();
 }
 
 

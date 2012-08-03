@@ -115,25 +115,12 @@ void OpacityChooser::handleMouseEvent(QMouseEvent* e)
 
       if (dragIdx == -1)
       {
-        double w, h;
-        double xRgt;
-        double yTop;
-        double xCur, yCur;
-
-        // get size of sides
-        canvas->getSize(w, h);
-
-        // calc size of bounding box
-        xRgt =  0.5*w;
-        yTop =  0.5*h;
-
         // get cur mouse position
-        canvas->getWorldCoords(e->x(), e->y(), xCur, yCur);
+        QPointF pos = worldCoordinate(e->posF());
 
         // normalize mouse position
-        // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
-        xCur = xCur/xRgt;
-        yCur = yCur/yTop;
+        double xCur = pos.x() / (0.5 * worldSize().width());
+        double yCur = pos.y() / (0.5 * worldSize().height());
 
         positionsX.push_back(xCur);
         positionsY.push_back(yCur);
@@ -165,21 +152,15 @@ void OpacityChooser::clear()
 
 void OpacityChooser::drawGrayScale()
 {
-  double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
-  double xItv;
-
-  // get size of sides
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
-  yBot = -0.5*h;
+  double xLft = -0.5*size.width();
+  double xRgt =  0.5*size.width();
+  double yTop =  0.5*size.height();
+  double yBot = -0.5*size.height();
 
-  xItv = (xRgt-xLft)/255.0;
+  double xItv = (xRgt-xLft)/255.0;
   VisUtils::enableBlending();
   for (int i = 0; i < 255; ++i)
   {
@@ -194,23 +175,16 @@ void OpacityChooser::drawGrayScale()
 
 void OpacityChooser::drawPath(const bool& inSelectMode)
 {
-  double w, h;
   double xRgt;
   double yTop;
   double pix;
-  double size;
 
-  // get size of sides
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  pix = pixelSize();
 
   // calc size of bounding box
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
-
-  // size of positions
-  size = positionsX.size();
+  xRgt =  0.5*size.width();
+  yTop =  0.5*size.height();
 
   // selection mode
   if (inSelectMode == true)
@@ -219,7 +193,7 @@ void OpacityChooser::drawPath(const bool& inSelectMode)
   else
   {
     VisUtils::enableLineAntiAlias();
-    for (int i = 0; i < size-1; ++i)
+    for (size_t i = 0; i < positionsX.size()-1; ++i)
     {
       VisUtils::setColor(Qt::black);
       VisUtils::drawLineDashed(
@@ -239,21 +213,17 @@ void OpacityChooser::drawPath(const bool& inSelectMode)
 
 void OpacityChooser::drawPoints(const bool& inSelectMode)
 {
-  double w, h;
   double xRgt;
   double yTop;
   double pix;
   size_t size;
   double hdlDOF;
 
-  // get size of sides
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  pix = canvas->getPixelSize();
+  pix = pixelSize();
 
   // calc size of bounding box
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
+  xRgt =  0.5*worldSize().width();
+  yTop =  0.5*worldSize().height();
 
   // size of handle
   hdlDOF = hdlSize*pix;
@@ -459,25 +429,13 @@ void OpacityChooser::handleDrag()
 {
   if (0 <= dragIdx && static_cast <size_t>(dragIdx) < positionsX.size())
   {
-    double w, h;
-    double xRgt;
-    double yTop;
-    double xCur, yCur;
-
-    // get size of sides
-    canvas->getSize(w, h);
-
-    // calc size of bounding box
-    xRgt =  0.5*w;
-    yTop =  0.5*h;
-
-    // get cur mouse position
-    canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xCur, yCur);
+    QSizeF size = worldSize();
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
 
     // normalize mouse position
     // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
-    xCur = xCur/xRgt;
-    yCur = yCur/yTop;
+    double xCur = pos.x()/(0.5*size.width());
+    double yCur = pos.y()/(0.5*size.height());
 
     positionsX[dragIdx] = xCur;
     positionsY[dragIdx] = yCur;

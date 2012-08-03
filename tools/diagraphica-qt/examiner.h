@@ -21,7 +21,6 @@
 #include "bundle.h"
 #include "diagram.h"
 #include "edge.h"
-#include "glcanvas.h"
 #include "graph.h"
 #include "settings.h"
 #include "utils.h"

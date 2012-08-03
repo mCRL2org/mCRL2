@@ -55,7 +55,6 @@ Shape::Shape(
   variable = "";
   checkedVariableId = -1;
   texturesGenerated = false;
-  lastCanvas = NULL;
 
   aglCtr = aC;
 
@@ -762,7 +761,7 @@ void Shape::getDOFAttrs(vector< Attribute* > &attrs)
 
 void Shape::visualize(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   // set up transf
   glPushMatrix();
@@ -771,15 +770,15 @@ void Shape::visualize(
 
   if (mode == MODE_NORMAL)
   {
-    drawNormal(inSelectMode, canvas);
+    drawNormal(inSelectMode, pixelSize);
   }
   else if (mode == MODE_EDIT)
   {
-    drawEdit(inSelectMode, canvas);
+    drawEdit(inSelectMode, pixelSize);
   }
   else
   {
-    drawEditDOF(inSelectMode, canvas);
+    drawEditDOF(inSelectMode, pixelSize);
   }
 
   // clear transf
@@ -788,7 +787,7 @@ void Shape::visualize(
 
 
 void Shape::visualize(
-  GLCanvas* canvas,
+  double pixelSize,
   const double& opacity,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs
@@ -959,38 +958,34 @@ void Shape::visualize(
   }
   else if (type == TYPE_ARROW)
   {
-    double pix = canvas->getPixelSize();
-
     //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillArrow(
       -xD,         xD,
       yD,        -yD,
-      hdlSze*pix, 2*hdlSze*pix);
+      hdlSze*pixelSize, 2*hdlSze*pixelSize);
 
     VisUtils::setColor(colLine);
     VisUtils::drawArrow(
       -xD,       xD,
       yD,      -yD,
-      hdlSze*pix, 2*hdlSze*pix);
+      hdlSze*pixelSize, 2*hdlSze*pixelSize);
   }
   else if (type == TYPE_DARROW)
   {
-    double pix = canvas->getPixelSize();
-
     //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillDArrow(
       -xD,         xD,
       yD,        -yD,
-      hdlSze*pix, 2*hdlSze*pix);
+      hdlSze*pixelSize, 2*hdlSze*pixelSize);
     VisUtils::setColor(colLine);
     VisUtils::drawDArrow(
       -xD,         xD,
       yD,        -yD,
-      hdlSze*pix, 2*hdlSze*pix);
+      hdlSze*pixelSize, 2*hdlSze*pixelSize);
   }
-  drawText(canvas);   // Draw the textual values of the shape
+  drawText(pixelSize);   // Draw the textual values of the shape
   VisUtils::disableBlending();
   VisUtils::disableLineAntiAlias();
 
@@ -1123,7 +1118,7 @@ void Shape::handleHitEdtDOFAgl(const size_t& hdlIdx)
 
 void Shape::drawNormal(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   if (inSelectMode == true)
   {
@@ -1154,19 +1149,17 @@ void Shape::drawNormal(
     }
     else if (type == TYPE_ARROW)
     {
-      double pix = canvas->getPixelSize();
       VisUtils::fillArrow(
         -xDFC,       xDFC,
         yDFC,      -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
     }
     else if (type == TYPE_DARROW)
     {
-      double pix = canvas->getPixelSize();
       VisUtils::fillDArrow(
         -xDFC,      xDFC,
         yDFC,     -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
     }
   }
   else
@@ -1216,41 +1209,37 @@ void Shape::drawNormal(
     }
     else if (type == TYPE_ARROW)
     {
-      double pix = canvas->getPixelSize();
-
       VisUtils::setColor(colFil);
       VisUtils::fillArrow(
         -xDFC,      xDFC,
         yDFC,     -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
       VisUtils::setColor(colLin);
       VisUtils::drawArrow(
         -xDFC,      xDFC,
         yDFC,     -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
     }
     else if (type == TYPE_DARROW)
     {
-      double pix = canvas->getPixelSize();
-
       VisUtils::setColor(colFil);
       VisUtils::fillDArrow(
         -xDFC,      xDFC,
         yDFC,     -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
       VisUtils::setColor(colLin);
       VisUtils::drawDArrow(
         -xDFC,      xDFC,
         yDFC,     -yDFC,
-        hdlSze*pix, 2*hdlSze*pix);
+        hdlSze*pixelSize, 2*hdlSze*pixelSize);
     }
-    drawText(canvas);   // Draw the textual values of the shape
+    drawText(pixelSize);   // Draw the textual values of the shape
     VisUtils::disableLineAntiAlias();
   }
 }
 
 
-void Shape::drawText(GLCanvas* canvas)
+void Shape::drawText(double pixelSize)
 {
   string text = note;
   if (text != "")
@@ -1258,35 +1247,30 @@ void Shape::drawText(GLCanvas* canvas)
     text.append(" ");
     text.append(variable);
 
-    double pix = canvas->getPixelSize();
-
-    // generate textures for drawing text, if they aren't generated yet
-    if (!texturesGenerated || lastCanvas != canvas)
+    if (!texturesGenerated)
     {
       VisUtils::genCharTextures(
         texCharId,
         texChar);
       texturesGenerated = true;
-      lastCanvas = canvas;
     }
 
     VisUtils::setColor(colTxt);
-    VisUtils::drawLabelInBoundBox(texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text);
+    VisUtils::drawLabelInBoundBox(texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pixelSize/CHARHEIGHT, text);
   }
 }
 
 
 void Shape::drawEdit(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix      = canvas->getPixelSize();
-  double hdlDelta = hdlSze*pix;
+  double hdlDelta = hdlSze*pixelSize;
 
   if (inSelectMode == true)
   {
     // draw shape
-    drawNormal(inSelectMode, canvas);
+    drawNormal(inSelectMode, pixelSize);
 
     glPushName(ID_HDL_CTR);
     VisUtils::fillRect(-xDFC, xDFC, yDFC, -yDFC);
@@ -1347,7 +1331,7 @@ void Shape::drawEdit(
     VisUtils::disableLineAntiAlias();
 
     // draw shape
-    drawNormal(inSelectMode, canvas);
+    drawNormal(inSelectMode, pixelSize);
 
     // enable antialiasing
     VisUtils::enableLineAntiAlias();
@@ -1456,81 +1440,81 @@ void Shape::drawEdit(
 
 void Shape::drawEditDOF(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   if (inSelectMode == true)
   {
     // draw shape
-    drawNormal(inSelectMode, canvas);
+    drawNormal(inSelectMode, pixelSize);
 
     if (mode == MODE_EDT_DOF_XCTR)
     {
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFXCtr(inSelectMode, canvas);
+      drawEditDOFXCtr(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_YCTR)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFYCtr(inSelectMode, canvas);
+      drawEditDOFYCtr(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_WTH)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFWth(inSelectMode, canvas);
+      drawEditDOFWth(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_HGT)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFHgt(inSelectMode, canvas);
+      drawEditDOFHgt(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_AGL)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
 
-      drawEditDOFAgl(inSelectMode, canvas);
+      drawEditDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_COL)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_OPA)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_TEXT)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
   }
   else
@@ -1544,77 +1528,77 @@ void Shape::drawEditDOF(
     VisUtils::disableLineAntiAlias();
 
     // draw shape
-    drawNormal(inSelectMode, canvas);
+    drawNormal(inSelectMode, pixelSize);
 
     VisUtils::enableLineAntiAlias();
     if (mode == MODE_EDT_DOF_XCTR)
     {
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFXCtr(inSelectMode, canvas);
+      drawEditDOFXCtr(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_YCTR)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFYCtr(inSelectMode, canvas);
+      drawEditDOFYCtr(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_WTH)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFWth(inSelectMode, canvas);
+      drawEditDOFWth(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_HGT)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
 
-      drawEditDOFHgt(inSelectMode, canvas);
+      drawEditDOFHgt(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_AGL)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
 
-      drawEditDOFAgl(inSelectMode, canvas);
+      drawEditDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_COL)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_OPA)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
     else if (mode == MODE_EDT_DOF_TEXT)
     {
-      drawDOFXCtr(inSelectMode, canvas);
-      drawDOFYCtr(inSelectMode, canvas);
-      drawDOFWth(inSelectMode, canvas);
-      drawDOFHgt(inSelectMode, canvas);
-      drawDOFAgl(inSelectMode, canvas);
+      drawDOFXCtr(inSelectMode, pixelSize);
+      drawDOFYCtr(inSelectMode, pixelSize);
+      drawDOFWth(inSelectMode, pixelSize);
+      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFAgl(inSelectMode, pixelSize);
     }
     VisUtils::disableLineAntiAlias();
   }
@@ -1623,10 +1607,9 @@ void Shape::drawEditDOF(
 
 void Shape::drawDOFXCtr(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double xBeg   = xCtrDOF->getMin();
   double xEnd   = xCtrDOF->getMax();
 
@@ -1747,10 +1730,9 @@ void Shape::drawDOFXCtr(
 
 void Shape::drawEditDOFXCtr(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double xBeg   = xCtrDOF->getMin();
   double xEnd   = xCtrDOF->getMax();
 
@@ -1921,10 +1903,9 @@ void Shape::drawEditDOFXCtr(
 
 void Shape::drawDOFYCtr(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double yBeg   = yCtrDOF->getMin();
   double yEnd   = yCtrDOF->getMax();
 
@@ -2044,10 +2025,9 @@ void Shape::drawDOFYCtr(
 
 void Shape::drawEditDOFYCtr(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double yBeg   = yCtrDOF->getMin();
   double yEnd   = yCtrDOF->getMax();
 
@@ -2217,10 +2197,9 @@ void Shape::drawEditDOFYCtr(
 
 void Shape::drawEditDOFWth(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double wBeg   = wthDOF->getMin();
   double wEnd   = wthDOF->getMax();
 
@@ -2406,10 +2385,9 @@ void Shape::drawEditDOFWth(
 
 void Shape::drawDOFWth(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double wBeg   = wthDOF->getMin();
   double wEnd   = wthDOF->getMax();
 
@@ -2550,10 +2528,9 @@ void Shape::drawDOFWth(
 
 void Shape::drawEditDOFHgt(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double hBeg   = hgtDOF->getMin();
   double hEnd   = hgtDOF->getMax();
 
@@ -2739,10 +2716,9 @@ void Shape::drawEditDOFHgt(
 
 void Shape::drawDOFHgt(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
   double hBeg   = hgtDOF->getMin();
   double hEnd   = hgtDOF->getMax();
 
@@ -2883,10 +2859,9 @@ void Shape::drawDOFHgt(
 
 void Shape::drawEditDOFAgl(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
 
   glPushMatrix();
   glRotatef(-aglCtr, 0.0, 0.0, 1.0);
@@ -3219,10 +3194,9 @@ void Shape::drawEditDOFAgl(
 
 void Shape::drawDOFAgl(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
-  double pix    = canvas->getPixelSize();
-  double hdlDOF = hdlSze*pix;
+  double hdlDOF = hdlSze*pixelSize;
 
   glPushMatrix();
   glRotatef(-aglCtr, 0.0, 0.0, 1.0);

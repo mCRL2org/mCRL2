@@ -63,10 +63,6 @@ GLCanvas::GLCanvas(
   wxToolTip::Enable(true);
   wxToolTip::SetDelay(1);
 
-  scaleFactor  = 1.0;
-  xTranslation = 0.0;
-  yTranslation = 0.0;
-
   handleMouseMotion = true;
 }
 
@@ -78,71 +74,10 @@ GLCanvas::~GLCanvas()
 // -- set functions -------------------------------------------------
 
 
-void GLCanvas::setScaleFactor(const double& f)
-// Size(viewport)  = Size(world)*scaleFactor
-// So, Size(world) = Size(viewport)/scaleFactor
-{
-  scaleFactor = f;
-}
-
-
-void GLCanvas::setXTranslation(const double& x)
-{
-  xTranslation = x;
-}
-
-
-void GLCanvas::setYTranslation(const double& y)
-{
-  yTranslation = y;
-}
-
-
-void GLCanvas::setTranslation(
-  const double& x,
-  const double& y)
-{
-  setXTranslation(x);
-  setYTranslation(y);
-}
-
-
 void GLCanvas::enableMouseMotion()
 {
   handleMouseMotion = true;
 }
-
-
-// -- Get functions -------------------------------------------------
-
-
-double GLCanvas::getScaleFactor()
-{
-  return scaleFactor;
-}
-
-
-double GLCanvas::getXTranslation()
-{
-  return xTranslation;
-}
-
-
-double GLCanvas::getYTranslation()
-{
-  return yTranslation;
-}
-
-
-void GLCanvas::getTranslation(
-  double& x,
-  double& y)
-{
-  x = getXTranslation();
-  y = getYTranslation();
-}
-
-
 
 void GLCanvas::disableMouseMotion()
 {
@@ -187,22 +122,22 @@ double GLCanvas::getHeight()
 void GLCanvas::getSize(
   double& width,
   double& height)
-// Return viewport width and height in WORLD coordinates. Before
-// scaling, the viewport is set up such that the shortest side has
+// Return viewport width and height in WORLD coordinates. The 
+// viewport is set up such that the shortest side has
 // length 2 in world coordinates. Let ratio = width/height be the
 // aspect ratio of the window and keep in mind that:
-//     Size(viewport)   = Size(world)*scaleFactor
-//     So, Size(world)  = Size(viewport)/ScaleFactor
-//     So, Size(world)  = 2/ScaleFactor
+//     Size(viewport)   = Size(world)
+//     So, Size(world)  = Size(viewport)
+//     So, Size(world)  = 2
 // There are 2 cases:
 // (1) If aspect > 1, the viewport is wider than tall
 //     So, the starting height was 2:
-//     world width      = ( aspect*2 ) / scaleFactor
-//     world height     = 2 / scaleFactor
+//     world width      = ( aspect*2 )
+//     world height     = 2
 // (2) If aspect <= 1, the viewport is taller than wide
 //     So, the starting width was 2:
-//     world width      = 2 / scaleFactor;
-//     world height     = ( aspect*2 ) / scaleFactor
+//     world width      = 2;
+//     world height     = ( aspect*2 )
 {
   int widthViewPort;
   int heightViewPort;
@@ -220,14 +155,14 @@ void GLCanvas::getSize(
   if (aspect > 1)
   {
     // width > height, so starting height = 2
-    width = (aspect*2.0) / (double)scaleFactor;
-    height = 2.0 / (double)scaleFactor;
+    width = (aspect*2.0);
+    height = 2.0;
   }
   else
   {
     // height >= width, so starting width = 2
-    width = 2.0 / (double)scaleFactor;
-    height = ((1/aspect)*2.0) / (double)scaleFactor;
+    width = 2.0;
+    height = ((1/aspect)*2.0);
   }
 }
 
@@ -377,16 +312,6 @@ void GLCanvas::display()
   // swap buffers
   glFinish();
   SwapBuffers();
-
-  // check for errors
-  int error = glGetError();
-  if (error != GL_NO_ERROR)
-  {
-    *mediator << "OpenGL error.\n";
-    string s = string((char*)gluErrorString(error));
-    *mediator << s;
-    *mediator << "\n";
-  }
 }
 
 

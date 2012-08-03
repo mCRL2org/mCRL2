@@ -155,18 +155,9 @@ bool Diagram::getSnapGrid()
 }
 
 
-double Diagram::getGridInterval(GLCanvas* canvas)
+double Diagram::getGridInterval(double pixelSize)
 {
-  double numIntervals = GRID_NUM_INTERV_HINT;
-  double sizeInterval;
-  double pix;
-
-  // get pixel size
-  pix = canvas->getPixelSize();
-
-  sizeInterval = (2.0-(2.0*pix*SIZE_BORDER))/(double)numIntervals;
-
-  return sizeInterval;
+  return (2.0-(2.0*pixelSize*SIZE_BORDER))/(double)GRID_NUM_INTERV_HINT;
 }
 
 
@@ -213,35 +204,35 @@ void Diagram::deleteShape(const size_t& idx)
 
 void Diagram::visualize(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 // Used by diagram editor.
 {
-  drawBorder(inSelectMode, canvas);
+  drawBorder(inSelectMode, pixelSize);
   if (showGrid == true)
   {
-    drawGrid(inSelectMode, canvas);
+    drawGrid(inSelectMode, pixelSize);
   }
-  drawShapes(inSelectMode, canvas);
+  drawShapes(inSelectMode, pixelSize);
 }
 
 
 void Diagram::visualize(
   const bool& inSelectMode,
-  GLCanvas* canvas,
+  double pixelSize,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs)
 // Used by visualizers.
 {
   if (inSelectMode == true)
   {
-    drawBorderFlush(inSelectMode, canvas);
+    drawBorderFlush(inSelectMode);
   }
   else
   {
-    drawBorderFlush(inSelectMode, canvas);
+    drawBorderFlush(inSelectMode);
     for (size_t i = 0; i < shapes.size(); ++i)
     {
-      shapes[i]->visualize(canvas, 1.0, attrs, attrValIdcs);
+      shapes[i]->visualize(pixelSize, 1.0, attrs, attrValIdcs);
     }
   }
 }
@@ -249,7 +240,7 @@ void Diagram::visualize(
 
 void Diagram::visualize(
   const bool& inSelectMode,
-  GLCanvas* canvas,
+  double pixelSize,
   const vector< Attribute* > attrs,
   const vector< double > attrValIdcs,
   double opacity)
@@ -257,14 +248,14 @@ void Diagram::visualize(
 {
   if (inSelectMode == true)
   {
-    drawBorderFlush(inSelectMode, canvas);
+    drawBorderFlush(inSelectMode);
   }
   else
   {
-    drawBorderFlush(inSelectMode, canvas, opacity);
+    drawBorderFlush(inSelectMode, opacity);
     for (size_t i = 0; i < shapes.size(); ++i)
     {
-      shapes[i]->visualize(canvas, opacity, attrs, attrValIdcs);
+      shapes[i]->visualize(pixelSize, opacity, attrs, attrValIdcs);
     }
   }
 }
@@ -282,18 +273,16 @@ void Diagram::initGridSettings()
 
 void Diagram::drawAxes(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   if (inSelectMode != true)
   {
-    double pix = canvas->getPixelSize();
-
     VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       0.0,                 0.0,
-      1.0-pix*SIZE_BORDER, -1+pix*SIZE_BORDER);
+      1.0-pixelSize*SIZE_BORDER, -1+pixelSize*SIZE_BORDER);
     VisUtils::drawLine(
-      -1.0+pix*SIZE_BORDER, 1-pix*SIZE_BORDER,
+      -1.0+pixelSize*SIZE_BORDER, 1-pixelSize*SIZE_BORDER,
       0.0,                  0.0);
   }
 }
@@ -301,38 +290,30 @@ void Diagram::drawAxes(
 
 void Diagram::drawBorder(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   if (inSelectMode == true)
   {
-    double pix;
     double xLft, xRgt, yTop, yBot;
 
-    // get pixel size
-    pix = canvas->getPixelSize();
-
     // calc margins
-    xLft = -1.0 + pix*SIZE_BORDER;
-    xRgt =  1.0 - pix*SIZE_BORDER;
-    yTop =  1.0 - pix*SIZE_BORDER;
-    yBot = -1.0 + pix*SIZE_BORDER;
+    xLft = -1.0 + pixelSize*SIZE_BORDER;
+    xRgt =  1.0 - pixelSize*SIZE_BORDER;
+    yTop =  1.0 - pixelSize*SIZE_BORDER;
+    yBot = -1.0 + pixelSize*SIZE_BORDER;
 
     // draw
     VisUtils::fillRect(xLft, xRgt, yTop, yBot);
   }
   else
   {
-    double pix;
     double xLft, xRgt, yTop, yBot;
 
-    // get pixel size
-    pix = canvas->getPixelSize();
-
     // calc margins
-    xLft = -1.0 + pix*SIZE_BORDER;
-    xRgt =  1.0 - pix*SIZE_BORDER;
-    yTop =  1.0 - pix*SIZE_BORDER;
-    yBot = -1.0 + pix*SIZE_BORDER;
+    xLft = -1.0 + pixelSize*SIZE_BORDER;
+    xRgt =  1.0 - pixelSize*SIZE_BORDER;
+    yTop =  1.0 - pixelSize*SIZE_BORDER;
+    yBot = -1.0 + pixelSize*SIZE_BORDER;
 
     // draw
     VisUtils::setColor(Qt::white);
@@ -345,8 +326,7 @@ void Diagram::drawBorder(
 
 
 void Diagram::drawBorderFlush(
-  const bool& inSelectMode,
-  GLCanvas* /*canvas*/)
+  const bool& inSelectMode)
 {
   if (inSelectMode == true)
   {
@@ -366,7 +346,6 @@ void Diagram::drawBorderFlush(
 
 void Diagram::drawBorderFlush(
   const bool& inSelectMode,
-  GLCanvas* /*canvas*/,
   const double& opacity)
 {
   if (inSelectMode == true)
@@ -388,30 +367,26 @@ void Diagram::drawBorderFlush(
 
 void Diagram::drawGrid(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
   if (inSelectMode != true)
   {
     double numIntervals = GRID_NUM_INTERV_HINT;
     double sizeInterval;
-    double pix;
     double xLft, xRgt, yTop, yBot;
 
-    // get pixel size
-    pix = canvas->getPixelSize();
-
     // calc margins
-    xLft = -1.0 + pix*SIZE_BORDER;
-    xRgt =  1.0 - pix*SIZE_BORDER;
-    yTop =  1.0 - pix*SIZE_BORDER;
-    yBot = -1.0 + pix*SIZE_BORDER;
+    xLft = -1.0 + pixelSize*SIZE_BORDER;
+    xRgt =  1.0 - pixelSize*SIZE_BORDER;
+    yTop =  1.0 - pixelSize*SIZE_BORDER;
+    yBot = -1.0 + pixelSize*SIZE_BORDER;
 
     gridXLeft = xLft;
     gridXRight = xRgt;
     gridYTop = yTop;
     gridYBottom = yBot;
 
-    sizeInterval = (2.0-(2.0*pix*SIZE_BORDER)-2.0*pix)/(double)numIntervals;
+    sizeInterval = (2.0-(2.0*pixelSize*SIZE_BORDER)-2.0*pixelSize)/(double)numIntervals;
 
     VisUtils::setColor(VisUtils::lightGray);
     // draw inside out
@@ -420,16 +395,16 @@ void Diagram::drawGrid(
       // vertical
       VisUtils::drawLine(
         -i*sizeInterval,          -i*sizeInterval,
-        1.0-pix*SIZE_BORDER-pix, -1.0+pix*SIZE_BORDER+pix);
+        1.0-pixelSize*SIZE_BORDER-pixelSize, -1.0+pixelSize*SIZE_BORDER+pixelSize);
       VisUtils::drawLine(
         i*sizeInterval,           i*sizeInterval,
-        1.0-pix*SIZE_BORDER-pix, -1.0+pix*SIZE_BORDER+pix);
+        1.0-pixelSize*SIZE_BORDER-pixelSize, -1.0+pixelSize*SIZE_BORDER+pixelSize);
       // horizontal
       VisUtils::drawLine(
-        -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix,
+        -1.0+pixelSize*SIZE_BORDER+pixelSize,  1.0-pixelSize*SIZE_BORDER-pixelSize,
         i*sizeInterval,           i*sizeInterval);
       VisUtils::drawLine(
-        -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix,
+        -1.0+pixelSize*SIZE_BORDER+pixelSize,  1.0-pixelSize*SIZE_BORDER-pixelSize,
         -i*sizeInterval,          -i*sizeInterval);
     }
   }
@@ -438,7 +413,7 @@ void Diagram::drawGrid(
 
 void Diagram::drawShapes(
   const bool& inSelectMode,
-  GLCanvas* canvas)
+  double pixelSize)
 {
 
   if (inSelectMode == true)
@@ -446,7 +421,7 @@ void Diagram::drawShapes(
     for (size_t i = 0; i < shapes.size(); ++i)
     {
       glPushName((GLuint) i);
-      shapes[i]->visualize(inSelectMode, canvas);
+      shapes[i]->visualize(inSelectMode, pixelSize);
       glPopName();
     }
   }
@@ -454,7 +429,7 @@ void Diagram::drawShapes(
   {
     for (size_t i = 0; i < shapes.size(); ++i)
     {
-      shapes[i]->visualize(inSelectMode, canvas);
+      shapes[i]->visualize(inSelectMode, pixelSize);
     }
   }
 

@@ -141,26 +141,24 @@ void CombnPlot::drawAxes(const bool& inSelectMode)
 
 void CombnPlot::drawAxesBC(const bool& inSelectMode)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
   // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   // get num attributes
   size_t numAttr = attributeIndcs.size();
 
   // calc size of bounding box
-  double xLft = -0.5*w+25*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yTop =  0.5*h-10*pix;
+  double xLft = -0.5*size.width()+25*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yTop =  0.5*size.height()-10*pix;
   double yBot;
   if (numAttr > 0)
   {
-    yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
+    yBot = yTop - (size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
-    yBot = yTop - 0.5*(h - (20+10+10)*pix);
+    yBot = yTop - 0.5*(size.height() - (20+10+10)*pix);
   }
 
   // rendering mode
@@ -181,26 +179,24 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
 
 void CombnPlot::drawAxesCP(const bool& inSelectMode)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
   // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   // get num attributes
   size_t numAttr = attributeIndcs.size();
 
   // calc size of bounding box
-  double xLft = -0.5*w+25*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yBot = -0.5*h+20*pix;
+  double xLft = -0.5*size.width()+25*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yBot = -0.5*size.height()+20*pix;
   double yTop;
   if (numAttr > 0)
   {
-    yTop = yBot + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
+    yTop = yBot + numAttr*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
-    yTop = yBot + 0.5*(h - (20+10+10)*pix);
+    yTop = yBot + 0.5*(size.height() - (20+10+10)*pix);
   }
 
   // rendering mode
@@ -244,11 +240,9 @@ void CombnPlot::drawLabels(const bool& inSelectMode)
 
 void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
   // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
@@ -258,17 +252,17 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   VisUtils::setColor(Qt::black);
 
   // y-axis labels
-  double xLft = -0.51*w+3*pix;
-  double xRgt = -0.50*w+12*pix;
-  double yTop =  0.50*h-10*pix;
+  double xLft = -0.51*size.width()+3*pix;
+  double xRgt = -0.50*size.width()+12*pix;
+  double yTop =  0.50*size.height()-10*pix;
   double yBot;
   if (numAttr > 0)
   {
-    yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
+    yBot = yTop - (size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
-    yBot = yTop - 0.5*(h - (20+10+10)*pix);
+    yBot = yTop - 0.5*(size.height() - (20+10+10)*pix);
   }
 
   VisUtils::drawLabelInBoundBox(
@@ -281,8 +275,8 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   {
     // max number
     string max = Utils::intToStr((int) maxNumberPerComb);
-    double x   = -0.5*w+13*pix;
-    double y   =  0.5*h-10*pix;
+    double x   = -0.5*size.width()+13*pix;
+    double y   =  0.5*size.height()-10*pix;
     VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
 
     // min number
@@ -295,11 +289,9 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
 
 void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
   // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
@@ -310,15 +302,15 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
 
   // x-axis label
   double x =  0.0;
-  double y =  -0.5*h+9*pix;
+  double y =  -0.5*size.height()+9*pix;
   VisUtils::drawLabelCenter(texCharId, x, y, scaling, "Combinations");
 
   if (numAttr > 0)
   {
     // y-axis labels
 
-    double xLft = -0.51*w+3*pix;
-    double xRgt = -0.5*w+12*pix;
+    double xLft = -0.51*size.width()+3*pix;
+    double xRgt = -0.5*size.width()+12*pix;
 
     for (size_t i = 0; i < attributeLabels.size(); ++i)
     {
@@ -329,7 +321,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
       }
       else
       {
-        yTop = -0.5*h+20*pix + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
+        yTop = -0.5*size.height()+20*pix + numAttr*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
       }
 
 
@@ -356,8 +348,8 @@ void CombnPlot::drawPlot(const bool& inSelectMode)
 
 void CombnPlot::drawPlotBC(const bool& inSelectMode)
 {
-  double hCanv = canvas->getHeight();
-  double pix = canvas->getPixelSize();
+  double hCanv = worldSize().height();
+  double pix = pixelSize();
   size_t sizePositions = posBC.size();
   size_t numAttr = attributeIndcs.size();
 
@@ -413,7 +405,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
 
 void CombnPlot::drawPlotCP(const bool& inSelectMode)
 {
-  double pix   = canvas->getPixelSize();
+  double pix   = pixelSize();
 
   // selection mode
   if (inSelectMode == true)
@@ -493,7 +485,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
 {
   if (inSelectMode != true)
   {
-    double pix      = canvas->getPixelSize();
+    double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
     vector< Attribute* > attrs;
@@ -516,7 +508,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
     // diagram
     diagram->visualize(
       inSelectMode,
-      canvas,
+      pixelSize(),
       attrs,
       attrValIdcsDgrm);
 
@@ -593,12 +585,6 @@ void CombnPlot::setScalingTransf()
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  double f = canvas->getScaleFactor();
-  glScalef(f, f, f);
-  glTranslatef(
-    canvas->getXTranslation(),
-    canvas->getYTranslation(),
-    0.0);
 }
 
 
@@ -636,36 +622,13 @@ void CombnPlot::displTooltip(const size_t& posIdx)
     if (diagram == NULL)
     {
       // show tooltip
-      canvas->showToolTip(msgDgrm);
+      setToolTip(QString::fromStdString(msgDgrm));
     }
     else
     {
-      // calc diagram position
-      double xM, yM;
-      double xD, yD;
-      canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xM, yM);
-
-      if (xM < 0)
-      {
-        xD = xM+1.0*scaleDgrm;
-      }
-      else
-      {
-        xD = xM-1.0*scaleDgrm;
-      }
-
-      if (yM < 0)
-      {
-        yD = yM+1.0*scaleDgrm;
-      }
-      else
-      {
-        yD = yM-1.0*scaleDgrm;
-      }
-
-      posDgrm.x = xD;
-      posDgrm.y = yD;
-
+      QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+      posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
@@ -689,32 +652,30 @@ void CombnPlot::calcPositions()
   calcPosCP();
 
   // diagram scale factor to draw 120 x 120 pix diagram
-  double pix = canvas->getPixelSize();
+  double pix = pixelSize();
   scaleDgrm = 120.0*(pix/2.0);
 }
 
 
 void CombnPlot::calcPosBC()
 {
-  // get size of sides & 1 pixel
-  double w,h;
-  canvas->getSize(w, h);
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
   // number of attributes
   double numAttr = attributeIndcs.size();
 
   // calc size of bounding box
-  double xLft = -0.5*w+25*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yTop =  0.5*h-10*pix;
+  double xLft = -0.5*size.width()+25*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yTop =  0.5*size.height()-10*pix;
   double yBot;
   if (numAttr > 0)
   {
-    yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
+    yBot = yTop - (size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
-    yBot = yTop - 0.5*(h - (20+10+10)*pix);
+    yBot = yTop - 0.5*(size.height() - (20+10+10)*pix);
   }
 
   // get number of values per axis
@@ -761,22 +722,21 @@ void CombnPlot::calcPosCP()
   // calc positions
   Attribute* attribute = NULL;
 
-  double w, h;
-  canvas->getSize(w, h);
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
   size_t numAttr = attributeIndcs.size();
 
-  double xLft = -0.5*w+25*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yBot = -0.5*h+20*pix;
+  double xLft = -0.5*size.width()+25*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yBot = -0.5*size.height()+20*pix;
   double yTop;
   if (numAttr > 0)
   {
-    yTop = yBot + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
+    yTop = yBot + numAttr*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
-    yTop = yBot + 0.5*(h - (20+10+10)*pix);
+     yTop = yBot + 0.5*(size.height() - (20+10+10)*pix);
   }
 
   // get number of values per axis
@@ -888,7 +848,7 @@ void CombnPlot::processHits(
   else
   {
     mouseCombnIdx = NON_EXISTING;
-    canvas->clearToolTip();
+    setToolTip(QString());
     showDgrm = false;
   }
 

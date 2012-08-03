@@ -94,7 +94,7 @@ void DiagramEditor::setEditModeSelect()
     }
   }
 
-  canvas->Refresh();
+  update();
 }
 
 
@@ -102,7 +102,7 @@ void DiagramEditor::setEditModeNote()
 {
   editMode = EDIT_MODE_NOTE;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -110,7 +110,7 @@ void DiagramEditor::setEditModeDOF()
 {
   editMode = EDIT_MODE_DOF;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -118,7 +118,7 @@ void DiagramEditor::setEditModeRect()
 {
   editMode = EDIT_MODE_RECT;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -126,7 +126,7 @@ void DiagramEditor::setEditModeEllipse()
 {
   editMode = EDIT_MODE_ELLIPSE;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -134,7 +134,7 @@ void DiagramEditor::setEditModeLine()
 {
   editMode = EDIT_MODE_LINE;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -142,7 +142,7 @@ void DiagramEditor::setEditModeArrow()
 {
   editMode = EDIT_MODE_ARROW;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
@@ -150,21 +150,21 @@ void DiagramEditor::setEditModeDArrow()
 {
   editMode = EDIT_MODE_DARROW;
   deselectAll();
-  canvas->Refresh();
+  update();
 }
 
 
 void DiagramEditor::setShowGrid(const bool& flag)
 {
   diagram->setShowGrid(flag);
-  canvas->Refresh();
+  update();
 }
 
 
 void DiagramEditor::setSnapGrid(const bool& flag)
 {
   diagram->setSnapGrid(flag);
-  canvas->Refresh();
+  update();
 }
 
 
@@ -186,7 +186,7 @@ void DiagramEditor::setFillCol()
   {
     s->setFillColor(mediator->getColor(s->getFillColor()));
 
-    canvas->Refresh();
+    update();
   }
 
   s = NULL;
@@ -211,7 +211,7 @@ void DiagramEditor::setLineCol()
   {
     s->setLineColor(mediator->getColor(s->getLineColor()));
 
-    canvas->Refresh();
+    update();
   }
 
   s = NULL;
@@ -364,7 +364,7 @@ void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
     }
     s = NULL;
 
-    canvas->Refresh();
+    update();
   }
 }
 
@@ -970,7 +970,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
 
       // render in select mode
       glPushName(0);
-      diagram->visualize(inSelectMode, canvas);
+      diagram->visualize(inSelectMode, pixelSize());
       glPopName();
 
       // finish up picking
@@ -981,7 +981,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
   }
   else
   {
-    diagram->visualize(inSelectMode, canvas);
+    diagram->visualize(inSelectMode, pixelSize());
 
     if (m_mouseDrag && m_lastMouseEvent.buttons() == Qt::LeftButton)
     {
@@ -989,12 +989,17 @@ void DiagramEditor::visualize(const bool& inSelectMode)
       double x2, y2;
       double pix;
 
-      canvas->getWorldCoords(m_mouseDragStart.x(), m_mouseDragStart.y(), x1, y1);
-      canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), x2, y2);
+      QPointF start = worldCoordinate(m_mouseDragStart);
+      QPointF stop = worldCoordinate(m_lastMouseEvent.posF());
+
+      x1 = start.x();
+      y1 = start.y();
+      x2 = stop.x();
+      y2 = stop.y();
 
       if (diagram->getSnapGrid() == true)
       {
-        double intv = diagram->getGridInterval(canvas);
+        double intv = diagram->getGridInterval(pixelSize());
 
         x1 = Utils::rndToNearestMult(x1, intv);
         y1 = Utils::rndToNearestMult(y1, intv);
@@ -1002,7 +1007,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
         y2 = Utils::rndToNearestMult(y2, intv);
       }
 
-      pix = canvas->getPixelSize();
+      pix = pixelSize();
 
       double dX, dY;
       double xC, yC;
@@ -1091,22 +1096,23 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
     }
     if (editMode != EDIT_MODE_SELECT && editMode != EDIT_MODE_DOF)
     {
-      double w, h;
       double x1, x2, y1, y2;
       double dX, dY;
       double pix;
 
-      canvas->getSize(w, h);
-      pix = canvas->getPixelSize();
+      pix = pixelSize();
 
-      // do transl & scale here
+      QPointF start = worldCoordinate(m_mouseDragStart);
+      QPointF stop = worldCoordinate(e->posF());
 
-      canvas->getWorldCoords(m_mouseDragStart.x(), m_mouseDragStart.y(), x1, y1);
-      canvas->getWorldCoords(e->x(), e->y(), x2, y2);
+      x1 = start.x();
+      y1 = start.y();
+      x2 = stop.x();
+      y2 = stop.y();
 
       if (diagram->getSnapGrid() == true)
       {
-        double intv = diagram->getGridInterval(canvas);
+        double intv = diagram->getGridInterval(pixelSize());
 
         x1 = Utils::rndToNearestMult(x1, intv);
         y1 = Utils::rndToNearestMult(y1, intv);
@@ -1285,9 +1291,9 @@ void DiagramEditor::handleHitDiagramOnly()
   if (m_lastMouseEvent.type() == QEvent::MouseButtonPress &&
       m_lastMouseEvent.button() == Qt::RightButton)
   {
-    canvas->getWorldCoords(
-      m_lastMouseEvent.x(), m_lastMouseEvent.y(),
-      xPaste,    yPaste);
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    xPaste = pos.x();
+    yPaste = pos.y();
 
     //focus change prohibits mouseup event, simulate it:
     QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
@@ -1396,9 +1402,9 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
       else if (m_lastMouseEvent.button() == Qt::RightButton)
       {
         s->setModeEdit();
-        canvas->getWorldCoords(
-          m_lastMouseEvent.x(), m_lastMouseEvent.y(),
-          xPaste,    yPaste);
+        QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+        xPaste = pos.x();
+        yPaste = pos.y();
         int countSelectedShapes = 0;
         for (size_t i = 0; i < sizeShapes; i++)
         {
@@ -1421,7 +1427,7 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
       } // side
     } // click
 
-    canvas->Refresh();
+    update();
     s = NULL;
   }
 }
@@ -1464,9 +1470,9 @@ void DiagramEditor::handleHitShapeHandle(
       }
       else if (m_lastMouseEvent.button() == Qt::RightButton)
       {
-        canvas->getWorldCoords(
-          m_lastMouseEvent.x(), m_lastMouseEvent.y(),
-          xPaste,    yPaste);
+        QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+        xPaste = pos.x();
+        yPaste = pos.y();
 
         /*for ( int i = 0; i < sizeShapes; ++i )
             if ( i != s->getIndex() )
@@ -1655,7 +1661,7 @@ void DiagramEditor::handleDrag()
     }
     // undo transl & scale here
 
-    canvas->Refresh();
+    update();
     s = NULL;
   }
 }
@@ -2255,45 +2261,43 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
 void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
 {
-  double xPrv, yPrv;
-  double xCur, yCur;
   double xCtr, yCtr;
   double xDFC, yDFC;
   double x,    y;
 
-  canvas->getWorldCoords(m_lastMousePos.x(), m_lastMousePos.y(), xPrv, yPrv);
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  QPointF pos = worldCoordinate(m_lastMousePos);
+  QPointF eventPos = worldCoordinate(m_lastMouseEvent.posF());
   s->getCenter(xCtr, yCtr);
   s->getDFC(xDFC, yDFC);
 
   x = xCtr;
   y = yCtr;
 
-  xDrgDist += xCur-xPrv;
-  yDrgDist += yCur-yPrv;
+  xDrgDist += eventPos.x()-pos.x();
+  yDrgDist += eventPos.y()-pos.y();
 
   if (diagram->getSnapGrid() == true)
   {
-    x = Utils::rndToNearestMult(x+xDrgDist, diagram->getGridInterval(canvas));
-    y = Utils::rndToNearestMult(y+yDrgDist, diagram->getGridInterval(canvas));
-    double x1 = Utils::rndToNearestMult(x - xDFC, diagram->getGridInterval(canvas));
-    double y1 = Utils::rndToNearestMult(y - yDFC, diagram->getGridInterval(canvas));
+    x = Utils::rndToNearestMult(x+xDrgDist, diagram->getGridInterval(pixelSize()));
+    y = Utils::rndToNearestMult(y+yDrgDist, diagram->getGridInterval(pixelSize()));
+    double x1 = Utils::rndToNearestMult(x - xDFC, diagram->getGridInterval(pixelSize()));
+    double y1 = Utils::rndToNearestMult(y - yDFC, diagram->getGridInterval(pixelSize()));
     x = x1 + xDFC;
     y = y1 + yDFC;
 
     if (x != xCtr)
     {
-      xDrgDist = xCur-x;
+      xDrgDist = eventPos.x()-x;
     }
     if (y != yCtr)
     {
-      yDrgDist = yCur-y;
+      yDrgDist = eventPos.y()-y;
     }
   }
   else
   {
-    x += xCur-xPrv;
-    y += yCur-yPrv;
+    x += eventPos.x()-pos.x();
+    y += eventPos.y()-pos.y();
   }
   xDrag = x - xCtr;
   yDrag = y - yCtr;
@@ -2321,11 +2325,12 @@ void DiagramEditor::handleDragTopLft(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv = diagram->getGridInterval(canvas);
+    double itv = diagram->getGridInterval(pixelSize());
     xCur = Utils::rndToNearestMult(xCur, itv);
     yCur = Utils::rndToNearestMult(yCur, itv);
   }
@@ -2368,7 +2373,8 @@ void DiagramEditor::handleDragLft(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2378,7 +2384,7 @@ void DiagramEditor::handleDragLft(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
     xS = a/cos(angl);
   }
@@ -2412,11 +2418,12 @@ void DiagramEditor::handleDragBotLft(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv = diagram->getGridInterval(canvas);
+    double itv = diagram->getGridInterval(pixelSize());
     xCur = Utils::rndToNearestMult(xCur, itv);
     yCur = Utils::rndToNearestMult(yCur, itv);
   }
@@ -2459,7 +2466,8 @@ void DiagramEditor::handleDragBot(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2469,7 +2477,7 @@ void DiagramEditor::handleDragBot(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
     yS = a/cos(angl);
   }
@@ -2502,11 +2510,12 @@ void DiagramEditor::handleDragBotRgt(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv = diagram->getGridInterval(canvas);
+    double itv = diagram->getGridInterval(pixelSize());
     xCur = Utils::rndToNearestMult(xCur, itv);
     yCur = Utils::rndToNearestMult(yCur, itv);
   }
@@ -2548,7 +2557,8 @@ void DiagramEditor::handleDragRgt(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2559,7 +2569,7 @@ void DiagramEditor::handleDragRgt(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
     xS = a/cos(angl);
   }
@@ -2592,11 +2602,12 @@ void DiagramEditor::handleDragTopRgt(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv = diagram->getGridInterval(canvas);
+    double itv = diagram->getGridInterval(pixelSize());
     xCur = Utils::rndToNearestMult(xCur, itv);
     yCur = Utils::rndToNearestMult(yCur, itv);
   }
@@ -2638,7 +2649,8 @@ void DiagramEditor::handleDragTop(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2648,7 +2660,7 @@ void DiagramEditor::handleDragTop(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
     yS = a/cos(angl);
   }
@@ -2680,7 +2692,8 @@ void DiagramEditor::handleDragRotRgt(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2729,7 +2742,8 @@ void DiagramEditor::handleDragRotTop(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(), m_lastMouseEvent.y(), xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2771,14 +2785,15 @@ void DiagramEditor::handleDragDOFXCtrBeg(Shape* s)
   s->getCenter(xCtr, yCtr);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   x0 = xCur-xCtr;
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
   }
 
@@ -2796,14 +2811,15 @@ void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
   s->getCenter(xCtr, yCtr);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   x0 = xCur-xCtr;
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
   }
 
@@ -2821,14 +2837,15 @@ void DiagramEditor::handleDragDOFYCtrBeg(Shape* s)
   s->getCenter(xCtr, yCtr);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   y0 = yCur-yCtr;
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
   }
 
@@ -2846,14 +2863,15 @@ void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
   s->getCenter(xCtr, yCtr);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   y0 = yCur-yCtr;
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
   }
 
@@ -2877,7 +2895,8 @@ void DiagramEditor::handleDragDOFWthBeg(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   x0 = xCur-xCtr;
@@ -2888,7 +2907,7 @@ void DiagramEditor::handleDragDOFWthBeg(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
     xS = a/cos(angl);
   }
@@ -2914,7 +2933,8 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   x0 = xCur-xCtr;
@@ -2925,7 +2945,7 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
     xS = a/cos(angl);
   }
@@ -2951,7 +2971,8 @@ void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2961,7 +2982,7 @@ void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
     yS = a/cos(angl);
   }
@@ -2987,7 +3008,8 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
   s->getDFC(xDFC, yDFC);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to xCtr, the 'origin'
   x0 = xCur-xCtr;
@@ -2997,7 +3019,7 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
     yS = a/cos(angl);
   }
@@ -3017,7 +3039,8 @@ void DiagramEditor::handleDragHge(Shape* s)
   s->getCenter(xCtr, yCtr);
 
   // get mouse info
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
   // translate to center, the 'origin'
   y0 = yCur-yCtr;
@@ -3025,7 +3048,7 @@ void DiagramEditor::handleDragHge(Shape* s)
 
   if (diagram->getSnapGrid() == true)
   {
-    double itv  = diagram->getGridInterval(canvas);
+    double itv  = diagram->getGridInterval(pixelSize());
     x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
     y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
   }
@@ -3056,7 +3079,8 @@ void DiagramEditor::handleDragDOFAglBeg(Shape* s)
   }
 
   // mouse position relative to hinge
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
   xRelHge = xCur-(xCtr+xHge);
   yRelHge = yCur-(yCtr+yHge);
 
@@ -3094,7 +3118,8 @@ void DiagramEditor::handleDragDOFAglEnd(Shape* s)
   }
 
   // mouse position relative to hinge
-  canvas->getWorldCoords(m_lastMouseEvent.x(),  m_lastMouseEvent.y(),  xCur, yCur);
+  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
+  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
 
 
   xRelHge = xCur-(xCtr+xHge);
