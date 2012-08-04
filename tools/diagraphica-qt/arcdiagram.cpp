@@ -1636,7 +1636,6 @@ void ArcDiagram::handleHits(const vector< int > &ids)
 {
   if (ids.size() > 1)
   {
-    qDebug() << "handleHits > 1" << ids[1];
     switch (ids[1])
     {
       case ID_BUNDLES:

@@ -55,63 +55,40 @@ void Parser::parseFile(QString filename, Graph* graph)
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
   for (size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
   {
-    line.clear();
-    // line.append(l.state_parameter_name_str(i));
-    line.append(parameter->first); // variable name
-    line.append("(");
-    std::vector< string > tmp = l.state_element_values(i);
-    line.append(to_string(tmp.size()));
-    line.append(") ");
-    // line.append(l.state_parameter_sort_str(i)) ;
-    line.append(parameter->second);  // sort of the variable
-    //Following line of code is needed to avoid iteration over a changing object.
-    for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+    std::vector< string > values = l.state_element_values(i);
+    for (size_t j = 0; j < values.size(); j++)
     {
-      line.append(" \"");
-      string str = *z;
-      if (str.empty())
-      {
-        str ="-";
-      }
-      line.append(str);
-      line.append("\"");
+      if (values.at(j).empty())
+        values.assign(j, "-");
     }
-    parseStateVarDescr(line, graph);
+
+    graph->addAttrDiscr(
+      parameter->first,
+      parameter->second,
+      graph->getSizeAttributes(),
+      values);
+
     emit progressed(++progress);
   }
 
   for (unsigned int si= 0; si<l.num_states(); ++si)
   {
-    line.clear();
-    /* if(l.has_process_parameters ())
-    { */
+    vector< double > stateVector;
     for (unsigned int i = 0; i < process_parameters.size(); ++i)
     {
-      if (i != 0)
-      {
-        line.append(" ");
-      }
-
-      line.append(to_string(l.state_label(si)[i]));
+      stateVector.push_back(l.state_label(si)[i]);
     }
-    // }
-    parseStates(line, graph);
+    graph->addNode(stateVector);
     emit progressed(++progress);
   }
 
   const std::vector<transition> &trans=l.get_transitions();
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r) 
   {
-    line.clear();
-    line.append(to_string(r->from()+1));
-    line.append(" ");
-    line.append(to_string(r->to()+1));
-    line.append(" \"");
-    line.append(detail::pp(l.action_label(r->label())));
-    line.append("\"");
-    parseTransitions(
-      line,
-      graph);
+    graph->addEdge(
+      detail::pp(l.action_label(r->label())),
+      r->from(),
+      r->to());
     emit progressed(++progress);
   }
 }
@@ -726,181 +703,6 @@ void Parser::writeDiagram(
 
 
 // -- private utility functions -------------------------------------
-
-
-void Parser::parseStateVarDescr(
-  const string& nextLine,
-  Graph* graph)
-// This function is used by Parser::parseFsmFile() to parse the state
-// description (first) part of an fsm file.
-{
-  try
-  {
-    vector< string > values;
-
-    // description
-    string::size_type begIdx = nextLine.find_first_not_of(delims);
-    string::size_type endIdx = nextLine.find_first_of(delims);
-    string token = nextLine.substr(begIdx, endIdx-begIdx);
-    string name;
-    if (token == "\n")
-    {
-      name = "unspecified";
-    }
-    else
-    {
-      name = token;
-    }
-
-    // cardinality
-    begIdx = nextLine.find_first_not_of(delims, endIdx);
-    endIdx = nextLine.find_first_of(delims, begIdx);
-    token = nextLine.substr(begIdx, endIdx-begIdx);
-    string card = token;
-
-    // type
-    begIdx = nextLine.find_first_not_of("() ", endIdx);
-    endIdx = nextLine.find_first_of("() ", begIdx);
-    token = nextLine.substr(begIdx, endIdx-begIdx);
-    string type;
-    if (token == "\n")
-      // end of line
-    {
-      type = "Unspecified";
-    }
-    else if (token.substr(0, 1) == "\"")
-    {
-      // no type specified
-      type = "Unspecified";
-      endIdx = begIdx;
-    }
-    else
-    {
-      type = token;
-    }
-
-    // all domain values are specified
-    begIdx = nextLine.find_first_not_of(" \"", endIdx);
-    endIdx = nextLine.find_first_of("\"", begIdx);
-
-    while (endIdx != string::npos)
-    {
-      token = nextLine.substr(begIdx, endIdx-begIdx);
-      if (token != "\n")
-      {
-        values.push_back(token);
-      }
-      begIdx = nextLine.find_first_not_of(" \"", endIdx);
-      endIdx = nextLine.find_first_of("\"", begIdx);
-    }
-
-    // add new discrete attribute to graph
-    graph->addAttrDiscr(
-      name,
-      type,
-      graph->getSizeAttributes(),
-      values);
-  }
-  catch (...)
-  {
-    throw mcrl2::runtime_error(
-      "Error parsing state description.");
-  }
-
-}
-
-
-void Parser::parseStates(
-  const string& nextLine,
-  Graph* graph)
-// This function is used by Parser::ParseFsmFile() to parse the states
-// (second) part of an fsm file.
-{
-  vector< double > stateVector;
-  try
-  {
-    string::size_type begIdx = nextLine.find_first_not_of(delims);
-    string::size_type endIdx = nextLine.find_first_of(delims);
-    // get all tokens in line
-    while (begIdx != string::npos)
-    {
-      string token = nextLine.substr(begIdx, endIdx-begIdx);
-      if (token != "\n")
-      {
-        stateVector.push_back(Utils::strToDbl(token));
-      }
-      begIdx = nextLine.find_first_not_of(delims, endIdx);
-      endIdx = nextLine.find_first_of(delims, begIdx);
-    }
-
-    // add new node to graph
-    graph->addNode(stateVector);
-  }
-  catch (...)
-  {
-    throw mcrl2::runtime_error("Error parsing states.");
-  }
-}
-
-
-void Parser::parseTransitions(
-  const string& nextLine,
-  Graph* graph)
-// This function is used by Parser::ParseFsmFile() to parse the
-// transitions (third) part of an fsm file.
-{
-  //vector< string > params;
-  try
-  {
-    // index of from state
-    string::size_type begIdx     = nextLine.find_first_not_of(delims);
-    string::size_type endIdx     = nextLine.find_first_of(delims);
-    string token      = nextLine.substr(begIdx, endIdx-begIdx);
-    int frStateIdx = Utils::strToInt(token) - 1;
-
-    // index (1-based) of to state
-    begIdx     = nextLine.find_first_not_of(delims, endIdx);
-    endIdx     = nextLine.find_first_of(delims, begIdx);
-    token      = nextLine.substr(begIdx, endIdx-begIdx);
-    int toStateIdx = Utils::strToInt(token) - 1;
-
-    // label of transition
-    begIdx = nextLine.find_first_not_of(delims, endIdx);
-    string lblDelims = "()\"";
-    endIdx = nextLine.find_first_of(lblDelims, begIdx);
-    if (endIdx != string::npos)
-    {
-      token = nextLine.substr(begIdx, endIdx-begIdx);
-    }
-    else
-    {
-      token = "";
-    }
-    string trLbl = token;
-    /*
-    // transition parameters
-    if ( endIdx != string::npos )
-    {
-        begIdx = nextLine.find_first_not_of( delims, endIdx );
-        endIdx = nextLine.find_last_of( ")" );
-        token = nextLine.substr( begIdx, endIdx-begIdx );
-    }
-    else
-        token = "";
-    if ( token != "\n" )
-        params.push_back( token );
-    */
-    graph->addEdge(
-      trLbl,
-      frStateIdx,
-      toStateIdx);
-  }
-  catch (...)
-  {
-    throw mcrl2::runtime_error("Error parsing transitions.");
-  }
-}
-
 
 void Parser::parseAttrConfig(
   Graph* graph,

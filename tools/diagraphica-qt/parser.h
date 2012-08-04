@@ -80,16 +80,6 @@ class Parser : public QObject
 
   private:
     // -- private utility functions ---------------------------------
-    // fsm files
-    void parseStateVarDescr(
-      const std::string& nextLine,
-      Graph* graph);
-    void parseStates(
-      const std::string& nextLine,
-      Graph* graph);
-    void parseTransitions(
-      const std::string& nextLine,
-      Graph* graph);
 
     // dgc files
     void parseAttrConfig(
