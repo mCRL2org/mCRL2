@@ -42,35 +42,35 @@ class Parser : public QObject
 
   public:
     // -- constructors and destructor -------------------------------
-    Parser();
+    Parser(QObject* parent = 0);
 
     // fsm files
     void parseFile(
-      const std::string& path,
+      QString filename,
       Graph* graph);
     void writeFSMFile(
-      const std::string& path,
+      QString filename,
       Graph* graph);
 
     // dgc files
     void parseAttrConfig(
-      const std::string& path,
+      QString filename,
       Graph* graph,
       std::map< size_t, size_t > &attrIdxFrTo,
       std::map< size_t, std::vector< std::string > > &attrCurDomains,
       std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains);
     void writeAttrConfig(
-      const std::string& path,
+      QString filename,
       Graph* graph);
 
     // dgd files
     void parseDiagram(
-      const std::string& path,
+      QString filename,
       Graph* graph,
       Diagram* dgrmOld,
       Diagram* dgrmNew);
     void writeDiagram(
-      const std::string& path,
+      QString filename,
       Graph* graph,
       Diagram* diagram);
 

@@ -22,6 +22,7 @@
 #include "distrplot.h"
 #include "examiner.h"
 #include "mediator.h"
+#include "parser.h"
 #include "settings.h"
 #include "settingsdialog.h"
 #include "simulator.h"
@@ -36,13 +37,17 @@ class MainWindow : public QMainWindow, public Mediator
 
   public slots:
     void open(QString filename);
+    void save(QString filename);
 
   protected slots:
     void openFile();
     void saveFile();
+    void saveFileAs();
 
   private:
     Ui::MainWindow m_ui;
+
+    Parser m_parser;
     Settings m_settings;
     SettingsDialog *m_settingsDialog;
     QSet<QDialog *> m_plots;

@@ -24,7 +24,8 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-Parser::Parser()
+Parser::Parser(QObject* parent) :
+  QObject(parent)
 {
   delims = "() \"";
 }
@@ -32,7 +33,7 @@ Parser::Parser()
 
 // -- parsing functions ---------------------------------------------
 
-void Parser::parseFile(const string& path, Graph* graph)
+void Parser::parseFile(QString filename, Graph* graph)
 // Parse the file identified by 'fileName' by calling:
 //  - Parser::parseStateVarDescr()
 //  - Parser::parseStates()
@@ -45,7 +46,7 @@ void Parser::parseFile(const string& path, Graph* graph)
   string line = "";
   mcrl2::lts::lts_fsm_t l;
 
-  load_lts_as_fsm_file(path,l);
+  load_lts_as_fsm_file(filename.toStdString(),l);
 
   emit started(l.process_parameters().size() + l.num_states() + l.get_transitions().size());
   int progress = 0;
@@ -117,12 +118,10 @@ void Parser::parseFile(const string& path, Graph* graph)
 
 
 void Parser::writeFSMFile(
-  const string& path,
+  QString filename,
   Graph* graph)
 {
-  QFileInfo fileInfo(QString::fromStdString(path));
-  QString fileName = fileInfo.fileName();
-  QFile file(fileInfo.absolutePath());
+  QFile file(filename);
 
   if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
   {
@@ -169,7 +168,7 @@ void Parser::writeFSMFile(
 
     for (size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j)
     {
-      line.append(QString::number(graph->getNode(i)->getTupleVal(j), 'f'));
+      line.append(QString::number(int(graph->getNode(i)->getTupleVal(j))));
 
       if (j < graph->getNode(i)->getSizeTuple()-1)
       {
@@ -204,14 +203,14 @@ void Parser::writeFSMFile(
 
 
 void Parser::parseAttrConfig(
-  const string& path,
+  QString filename,
   Graph* graph,
   map< size_t, size_t > &attrIdxFrTo,
   map< size_t, vector< string > > &attrCurDomains,
   map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains)
 {
   wxXmlDocument doc;
-  if (doc.Load(wxString(path.c_str(), wxConvUTF8)) == true)
+  if (doc.Load(wxString(filename.toStdString().c_str(), wxConvUTF8)) == true)
   {
     wxXmlNode* curNode    = NULL;
 
@@ -248,7 +247,7 @@ void Parser::parseAttrConfig(
 
 
 void Parser::writeAttrConfig(
-  const string& path,
+  QString filename,
   Graph* graph)
 {
   try
@@ -327,7 +326,7 @@ void Parser::writeAttrConfig(
       }
     }
 
-    doc.Save(wxString(path.c_str(), wxConvUTF8));
+    doc.Save(wxString(filename.toStdString().c_str(), wxConvUTF8));
 
     conf = NULL;
     file = NULL;
@@ -349,14 +348,14 @@ void Parser::writeAttrConfig(
 
 
 void Parser::parseDiagram(
-  const string& path,
+  QString filename,
   Graph* graph,
   Diagram* dgrmOld,
   Diagram* dgrmNew)
 {
   wxXmlDocument doc;
 
-  if (doc.Load(wxString(path.c_str(), wxConvUTF8)))
+  if (doc.Load(wxString(filename.toStdString().c_str(), wxConvUTF8)))
   {
     wxXmlNode* curNode    = NULL;
 
@@ -391,7 +390,7 @@ void Parser::parseDiagram(
 
 
 void Parser::writeDiagram(
-  const string& path,
+  QString filename,
   Graph* graph,
   Diagram* diagram)
 {
@@ -709,7 +708,7 @@ void Parser::writeDiagram(
       }
     }
 
-    doc.Save(wxString(path.c_str(), wxConvUTF8));
+    doc.Save(wxString(filename.toStdString().c_str(), wxConvUTF8));
 
     dgrm = NULL;
     file = NULL;

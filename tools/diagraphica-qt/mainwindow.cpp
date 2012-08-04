@@ -7,14 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mainwindow.h"
-#include "parser.h"
 #include "mcrl2/lts/lts_io.h"
 #include <QTableWidgetItem>
+#include <QMessageBox>
 
 
 MainWindow::MainWindow():
   m_settingsDialog(new SettingsDialog(this, &m_settings)),
-  m_graph(0)
+  m_graph(NULL)
 {
   m_ui.setupUi(this);
 
@@ -23,6 +23,7 @@ MainWindow::MainWindow():
 
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(openFile()));
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
+  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
   connect(m_ui.actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
 
   connect(m_ui.actionSettingsGeneral, SIGNAL(triggered()), m_settingsDialog, SLOT(showGeneral()));
@@ -42,18 +43,18 @@ void MainWindow::open(QString filename)
   graph->setFileName(filename.toStdString());
   try
   {
-    Parser parser;
     QProgressDialog dialog(QString("Opening ") + filename, QString(), 0, 1, this);
-    connect(&parser, SIGNAL(started(int)), &dialog, SLOT(setMaximum(int)));
-    connect(&parser, SIGNAL(progressed(int)), &dialog, SLOT(setValue(int)));
+    connect(&m_parser, SIGNAL(started(int)), &dialog, SLOT(setMaximum(int)));
+    connect(&m_parser, SIGNAL(progressed(int)), &dialog, SLOT(setValue(int)));
     dialog.show();
 
-    parser.parseFile(filename.toStdString(), graph);
+    m_parser.parseFile(filename, graph);
 
     graph->initGraph();
   }
   catch (const mcrl2::runtime_error& e)
   {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
     delete graph;
     return;
   }
@@ -124,6 +125,26 @@ void MainWindow::open(QString filename)
   m_ui.attributes->resizeColumnsToContents();
 }
 
+void MainWindow::save(QString filename)
+{
+  try
+  {
+    QProgressDialog dialog(QString("Saving ") + filename, QString(), 0, 1, this);
+    connect(&m_parser, SIGNAL(started(int)), &dialog, SLOT(setMaximum(int)));
+    connect(&m_parser, SIGNAL(progressed(int)), &dialog, SLOT(setValue(int)));
+    dialog.show();
+
+    m_parser.writeFSMFile(filename, m_graph);
+
+    m_graph->setFileName(filename.toStdString());
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
+    return;
+  }
+}
+
 void MainWindow::openFile()
 {
   QString filter = QString("All supported files (") + QString::fromStdString(mcrl2::lts::detail::lts_extensions_as_string(" ")) + ");;All files (*.*)";
@@ -138,11 +159,36 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
+  if (m_graph == NULL)
+  {
+    return;
+  }
   QString filter = QString("FSM files (*.fsm);;All files (*.*)");
-  QString filename = QFileDialog::getSaveFileName(this, "Save LTS", QString(), filter);
+  QString filename = QString::fromStdString(m_graph->getFileName());
+
+  if (filename.isNull() || QFileInfo(filename).suffix().toLower() != "fsm")
+  {
+    filename = QFileDialog::getSaveFileName(this, "Save LTS", QString(), filter);
+  }
   if (filename.isNull())
   {
     return;
   }
+  save(filename);
+}
 
+void MainWindow::saveFileAs()
+{
+  if (m_graph == NULL)
+  {
+    return;
+  }
+  QString filter = QString("FSM files (*.fsm);;All files (*.*)");
+  QString filename = QFileDialog::getSaveFileName(this, "Save LTS", QString(), filter);
+
+  if (filename.isNull())
+  {
+    return;
+  }
+  save(filename);
 }
