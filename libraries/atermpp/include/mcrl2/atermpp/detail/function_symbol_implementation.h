@@ -69,7 +69,7 @@ struct constant_function_symbols
       AS_INT("<int>", 0),
       AS_LIST("[_,_]", 2),
       AS_EMPTY_LIST("[]", 0) 
-    {}
+    {} 
 
     // This function is used to explicitly initialise
     // the default constant function symbols, in case 

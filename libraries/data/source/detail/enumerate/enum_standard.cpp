@@ -227,14 +227,14 @@ bool EnumeratorSolutionsStandard::find_equality(
     if (a1!=a2)
     {
       if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) &&
-                               (find_if(a2,test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
+                               (!find_if(a2,test_equal(a1)).defined()))        // true if a1 does not occur in a2.
       {
         v = a1;
         e = a2;
         return true;
       }
       if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
-                               (find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
+                               (!find_if(a1,test_equal(a2)).defined()))        // true if a2 does not occur in a1.
       {
         v = a2;
         e = a1;

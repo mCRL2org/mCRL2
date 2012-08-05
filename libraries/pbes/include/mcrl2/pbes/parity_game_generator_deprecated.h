@@ -263,7 +263,7 @@ protected:
         if (m_precompile_pbes)
         {
           // datar_internal.set_internally_associated_value(*i,(atermpp::aterm)(*j));
-          sigma_internal[*i]=atermpp::aterm(*j);
+          sigma_internal[*i]=*j;
         }
         else
         {

@@ -57,12 +57,6 @@ size_t TERM_SIZE_APPL(const size_t arity)
 }
 
 inline
-size_t START(const size_t w)
-{
-  return w;
-}
-
-inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
 {
   return ((hnr)<<1 ^(hnr)>>1 ^ w);
@@ -97,7 +91,7 @@ inline size_t detail::term_size(const detail::_aterm *t)
 
 inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size)
 {
-  HashNumber hnr = START(t->function().number());
+  HashNumber hnr = t->function().number();
   for (size_t i=TERM_SIZE_APPL(0); i<size; i++)
   {
     hnr = COMBINE(hnr, *(reinterpret_cast<const size_t *>(t) + i));
@@ -112,7 +106,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
 {
   const size_t arity = sym.arity();
 
-  HashNumber hnr = START(sym.number());
+  HashNumber hnr = sym.number();
   // It is assumed that the aterm array is not initialised with terms.
   // It is not clear whether this holds for all compilers on all platforms.
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity); 
@@ -183,7 +177,7 @@ template <class Term, class ForwardIterator>
 detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
   const size_t arity = sym.arity();
-  HashNumber hnr = START(sym.number());
+  HashNumber hnr = sym.number();
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
@@ -243,8 +237,7 @@ _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
   assert(sym.arity()==1);
   CHECK_TERM(arg0);
 
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
+  HashNumber hnr = COMBINE(sym.number(), arg0);
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -288,9 +281,7 @@ _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Term &arg
 
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
-  hnr = COMBINE(hnr, arg1);
+  HashNumber hnr = COMBINE(COMBINE(sym.number(), arg0),arg1);
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -341,10 +332,7 @@ _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Term &arg
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   CHECK_TERM(arg2);
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
-  hnr = COMBINE(hnr, arg1);
-  hnr = COMBINE(hnr, arg2);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(sym.number(), arg0), arg1), arg2);
 
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -381,11 +369,7 @@ _aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Term &arg
   CHECK_TERM(arg3);
   assert(sym.arity()==4);
 
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
-  hnr = COMBINE(hnr, arg1);
-  hnr = COMBINE(hnr, arg2);
-  hnr = COMBINE(hnr, arg3);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(sym.number(), arg0), arg1), arg2), arg3);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -427,12 +411,7 @@ _aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Term &arg
   CHECK_TERM(arg3);
 
 
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
-  hnr = COMBINE(hnr, arg1);
-  hnr = COMBINE(hnr, arg2);
-  hnr = COMBINE(hnr, arg3);
-  hnr = COMBINE(hnr, arg4);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(sym.number(), arg0), arg1), arg2), arg3), arg4);
 
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -476,13 +455,7 @@ _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Term &arg
   CHECK_TERM(arg4);
   CHECK_TERM(arg5);
 
-  HashNumber hnr = START(sym.number());
-  hnr = COMBINE(hnr, arg0);
-  hnr = COMBINE(hnr, arg1);
-  hnr = COMBINE(hnr, arg2);
-  hnr = COMBINE(hnr, arg3);
-  hnr = COMBINE(hnr, arg4);
-  hnr = COMBINE(hnr, arg5);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(sym.number(), arg0), arg1), arg2), arg3), arg4), arg5);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=sym ||
@@ -525,7 +498,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   size_t arity = function().arity();
   assert(n < arity);
 
-  HashNumber hnr = START((*this)->function().number());
+  HashNumber hnr = (*this)->function().number();
   for (size_t i=0; i<arity; i++)
   {
     if (i!=n)

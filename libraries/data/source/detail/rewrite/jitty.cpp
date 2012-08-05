@@ -707,7 +707,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
                       internal_substitution_type &sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
-
   const size_t arity=term.size();
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
@@ -737,6 +736,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           assert(!rewritten_defined[i]);
           rewritten_defined[i]=true;
           new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma));
+          assert(rewritten[i].defined());
         }
         else
         {

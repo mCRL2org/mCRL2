@@ -234,6 +234,17 @@ class aterm
       return &* *this;
     }
 
+    /// \brief Returns true if this term is not equal to the term assigned by
+    //         the default constructor, i.e. *this!=aterm().
+    /// \details This operation is more efficient than comparing the current
+    ///          term with an aterm().
+    /// \return A boolean indicating whether this term equals the default constructor.
+    bool defined() const
+    {
+      assert(m_term!=NULL && m_term->reference_count()>0);
+      return this->function().number()!=detail::function_adm.AS_DEFAULT.number();
+    }
+
 };
 
 /// \brief A cheap cast from one aterm based type to another

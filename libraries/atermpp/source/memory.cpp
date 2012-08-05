@@ -370,12 +370,10 @@ detail::_aterm* detail::allocate_term(const size_t size)
 aterm::aterm(const function_symbol &sym)
 {
   detail::_aterm *cur, *prev, **hashspot;
-  HashNumber hnr;
-
 
   assert(sym.arity()==0);
 
-  hnr = START(sym.number());
+  HashNumber hnr = sym.number();
 
   prev = NULL;
   hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
@@ -434,8 +432,7 @@ _aterm* aterm_int(int val)
   _val.reserved = 0;
   _val.value = val;
 
-  HashNumber hnr = START(detail::function_adm.AS_INT.number());
-  hnr = COMBINE(hnr, _val.reserved);
+  HashNumber hnr = COMBINE(detail::function_adm.AS_INT.number(), _val.reserved);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))

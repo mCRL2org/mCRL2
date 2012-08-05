@@ -108,11 +108,14 @@ void test_indexed_substitution()
 
   s[y] = c;
 
-  BOOST_CHECK(data::replace_free_variables(x, s) == x);
 #ifdef MCRL2_NEW_REPLACE_VARIABLES
 // in the old version this fails due to the unfortunate interface of replace_free_variables
+  BOOST_CHECK(data::replace_free_variables(x, s) == x);
   BOOST_CHECK(data::replace_free_variables(y, s) == c);
 #endif
+std::cerr << "TEST " << x << "  " << y << " OUD \n";
+std::cerr << "RES " << c + x * c << "\n";
+std::cerr << "RES " << data::replace_free_variables(c + x * y, s) << "\n";
   BOOST_CHECK(data::replace_free_variables(c + x * y, s) == c + x * c);
   BOOST_CHECK(data::replace_free_variables(lambda(x,x), s) == lambda(x,x));
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
@@ -357,10 +360,8 @@ void test_sort_substitution()
 
 }
 
-int test_main(int a, char** aa)
+int test_main(int /* a */, char**  /* aa */)
 {
-  MCRL2_ATERMPP_INIT(a, aa);
-
   test_my_assignment_sequence_substitution();
   test_my_list_substitution();
 

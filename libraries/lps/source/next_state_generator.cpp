@@ -290,7 +290,8 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
 
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
-    m_pruning_substitution[m_generator->m_process_parameters[m_pruning_parameters[i]]] = rewriter_expression_t();
+    const variable &v=m_generator->m_process_parameters[m_pruning_parameters[i]];
+    m_pruning_substitution[v] = v;
   }
 
   pruning_tree_node_t *node = &m_pruning_tree;
@@ -441,7 +442,7 @@ void next_state_generator::iterator::increment()
     {
       for (data::variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
       {
-        (*m_substitution)[*i] = rewriter_expression_t();
+        (*m_substitution)[*i] = *i;  // Reset the variable.
       }
       m_enumeration_iterator = m_generator->m_enumerator.begin_internal(m_summand->variables, m_summand->condition, *m_substitution);
     }
@@ -499,6 +500,6 @@ void next_state_generator::iterator::increment()
 
   for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
   {
-    (*m_substitution)[*i] = rewriter_expression_t();
+    (*m_substitution)[*i] = *i;  // Reset the variable.
   }
 }

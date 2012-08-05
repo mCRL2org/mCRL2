@@ -443,8 +443,7 @@ namespace detail
 
     size_t operator()(const data::variable& v) const
     {
-      size_t result = v.name().function().number();
-      return result;
+      return v.name().function().number();
     }
   };
 }
@@ -463,6 +462,8 @@ protected:
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
   ExpressionSequence m_container;
+  std::vector <size_t> m_index_table;
+  std::stack<size_t> m_free_positions;
 
 public:
 
@@ -488,22 +489,25 @@ public:
   {}
 
   /// \brief Copy constructor
-  mutable_indexed_substitution(const ExpressionSequence& c)
-    : m_container(c)
-  {}
+  // mutable_indexed_substitution(const ExpressionSequence& c)
+  //   : m_container(c)
+  // {}
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
   {
-    variable_type        m_variable;
-    ExpressionSequence&  m_container;
+    const variable_type  &m_variable;
+    ExpressionSequence   &m_container;
+    std::vector <size_t> &m_index_table;
+    std::stack<size_t> &m_free_positions;
+    
 
     /// \brief Constructor.
     ///
     /// \param[in] v a variable.
     /// \param[in] c a container of expressions.
-    assignment(variable_type v, ExpressionSequence& c) :
-      m_variable(v), m_container(c)
+    assignment(const variable_type &v, ExpressionSequence& c, std::vector <size_t> &table, std::stack<size_t> & fp) :
+      m_variable(v), m_container(c), m_index_table(table), m_free_positions(fp)
     { }
 
     /// \brief Actual assignment
@@ -511,52 +515,88 @@ public:
     void operator=(AssignableToExpression const& e)
     {
       mCRL2log(log::debug2, "substitutions") << "Setting " << data::pp(m_variable) << " := " << e << std::endl;
+      assert(e.defined());
 
       size_t i = detail::variable_to_index()(m_variable);
-
-      // Resize container if needed
-      if(i >= m_container.size())
-      {
-        m_container.resize(i+1, expression_type());
-      }
-
-      // update substitution
       if (e != m_variable)
       {
-        m_container[i] = atermpp::aterm_appl(e);
+        // Set a new variable;
+
+        // Resize container if needed
+        if (i >= m_index_table.size())
+        {
+          m_index_table.resize(i+1, size_t(-1));
+        }
+        
+        size_t j=m_index_table[i];
+        assert(j==size_t(-1) || j<m_container.size());
+        if (j==size_t(-1))
+        {
+          // The variable was not assigned.
+          if (m_free_positions.empty())
+          {
+            m_index_table[i]=m_container.size();
+            m_container.push_back(e);
+          }
+          else
+          {
+            j=m_free_positions.top();
+            m_index_table[i]=j;
+            m_container[j]=e;
+            m_free_positions.pop();
+          }
+        }
+        else
+        {
+          // The variable was already assigned. Replace the assignment.
+          m_container[j]=e;
+        }
       }
       else
       {
-        m_container[i] = expression_type();
-      }
+        // Indicate that the current variable is free; postpone deleting the
+        // actual value assigned to the variable. 
+        if (i<m_index_table.size())
+        {
+          size_t j=m_index_table[i];
+          if (j!=size_t(-1))
+          {
+            m_free_positions.push(j);
+            m_index_table[i]=size_t(-1);
+          }
+        }
+      } 
     }
   };
 
   /// \brief Application operator; applies substitution to v.
   const expression_type &operator()(const variable_type& v) const
   {
-    size_t i = detail::variable_to_index()(v);
-    if(i < m_container.size() && m_container[i] != expression_type())
-    {
-      return m_container[i];
+    const size_t i = detail::variable_to_index()(v);
+    if (i < m_index_table.size())
+    { 
+      const size_t j = m_index_table[i];
+      if (j!=size_t(-1))
+      {
+        // the variable has an assigned value.
+        return m_container[j];
+      }
     }
-    else
-    {
-      return atermpp::aterm_cast<const expression_type>(v);
-    }
-    // mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
+    // no value assigned to v;
+    return v;
   }
 
   /// \brief Index operator.
   assignment operator[](variable_type const& v)
   {
-    return assignment(v, this->m_container);
+    return assignment(v, this->m_container,this->m_index_table,this->m_free_positions);
   }
 
   /// \brief Clear substitutions.
   void clear()
   {
-    m_container.assign(m_container.size(), expression_type());
+    m_index_table.clear();
+    m_free_positions=std::stack<size_t>();
   }
 
   /// \brief Compare substitutions
@@ -570,20 +610,16 @@ public:
   mutable_indexed_substitution & operator=(const mutable_indexed_substitution& other)
   {
     m_container=other.m_container;
+    m_index_table=other.m_index_table;
+    m_free_positions=other.m_free_positions;
     return *this;
   }
 
   /// \brief Returns true if the substitution is empty
   bool empty()
   {
-    for(typename ExpressionSequence::const_iterator i = m_container.begin(); i != m_container.end(); ++i)
-    {
-      if(*i != expression_type())
-      {
-        return false;
-      }
-    }
-    return true;
+    assert(m_container.size()>=m_free_positions.size());
+    return m_container.size()==m_free_positions.size();
   }
 
 protected:
@@ -591,12 +627,6 @@ protected:
   size_t size() const
   {
     return m_container.size();
-  }
-
-  /// \brief resize the wrapped container
-  void resize(const size_t n)
-  {
-    m_container.resize(n);
   }
 
   /// \brief set position i of the wrapped container to e
@@ -609,9 +639,10 @@ protected:
   /// \brief get the element at position i of the wrapped container
   const expression_type &get(const size_t i) const
   {
-    assert(i < m_container.size());
-    return m_container[i];
-  }
+    assert(i < m_index_table.size());
+    assert(m_index_table[i]!=size_t(-1));
+    return m_container[m_index_table[i]];
+  } 
 
 public:
   /// \brief string representation of the substitution
@@ -620,11 +651,11 @@ public:
     std::stringstream result;
     bool first = true;
     result << "[";
-    for (size_t i = 0; i < size(); ++i)
+    for (size_t i = 0; i < m_index_table.size(); ++i)
     {
-      if(get(i) != expression_type())
+      if (m_index_table[i] != size_t(-1))
       {
-        if(first)
+        if (first)
         {
           first = false;
         }
@@ -632,12 +663,12 @@ public:
         {
           result << "; ";
         }
-        result << core::identifier_string(static_cast<atermpp::function_symbol>(i).name()) << " := " << data::pp(get(i));
+        result << core::identifier_string(static_cast<atermpp::function_symbol>(m_index_table[i]).name()) << " := " << data::pp(get(i));
       }
     }
     result << "]";
     return result.str();
-  }
+  } 
 
 };
 
@@ -648,8 +679,9 @@ namespace detail
 // The function below gets all free variables of the term t, which has
 // the shape of an expression in internal format. The variables are added to result.
 // This routine should be removed after internal and external format have merged.
-inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable > &result)
+inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &result)
 {
+  const atermpp::aterm_appl &t=atermpp::aterm_cast<const atermpp::aterm_appl>(t1);
   if (is_variable(t))
   {
     result.insert(variable(t));
@@ -657,7 +689,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
   else if (is_where_clause(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(atermpp::aterm_appl(t(0)),free_variables_in_body);
+    get_free_variables(t(0),free_variables_in_body);
     
     variable_list bound_vars;
     const assignment_expression_list lv=assignment_expression_list(t(1));
@@ -677,7 +709,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
   else if (is_abstraction(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(atermpp::aterm_appl(t(2)),free_variables_in_body);
+    get_free_variables(t(2),free_variables_in_body);
     const variable_list bound_vars=variable_list(t(1));
 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
@@ -694,7 +726,7 @@ inline void get_free_variables(const atermpp::aterm_appl t, std::set < variable 
     {
       if (t(i).type()!=atermpp::AT_INT)
       { 
-        get_free_variables(atermpp::aterm_appl(t(i)),result);
+        get_free_variables(t(i),result);
       }
     }
   }
@@ -710,11 +742,11 @@ std::set < variable > get_free_variables(const mutable_indexed_substitution<Vari
   std::set < variable > result;
   typedef typename ExpressionSequence::value_type expression_type;
 
-  for(size_t i = 0; i < sigma.size(); ++i)
+  for(std::vector<size_t> ::const_iterator i=sigma.m_index_table.begin(); i != sigma.m_index_table.end(); ++i)
   {
-    if(sigma.get(i) != expression_type())
+    if (*i != size_t(-1))
     {
-      detail::get_free_variables(sigma.get(i),result);
+      detail::get_free_variables(sigma.m_container[*i],result);
     }
   }
   return result;
@@ -761,12 +793,16 @@ mutable_indexed_substitution<VariableType, std::vector<atermpp::aterm_appl> >
 apply(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma, UnaryOperator f)
 {
   mutable_indexed_substitution<VariableType, std::vector<atermpp::aterm_appl> > result;
-  result.resize(sigma.size());
-  for(size_t i = 0; i < sigma.size(); ++i)
+  result.m_index_table=sigma.m_index_table;
+  result.m_container.resize(sigma.m_container.size(),atermpp::aterm_appl());
+  result.m_free_positions=sigma.m_free_positions;
+  
+  for(std::vector<size_t>::const_iterator i=sigma.m_index_table.begin(); i != sigma.m_index_table.end(); ++i)
   {
-    if(sigma.get(i) != data_expression())
+    if (*i != size_t(-1))
     {
-      result.set(i, f(sigma.get(i)));
+      assert(*i<result.m_container.size());
+      result.m_container[*i] = f(sigma.m_container[*i]); 
     }
   }
   return result;
