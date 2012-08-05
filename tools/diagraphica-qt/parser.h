@@ -13,6 +13,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QDomDocument>
 
 #include <cstddef>
 #include <fstream>
@@ -67,7 +68,7 @@ class Parser : public QObject
     void parseDiagram(
       QString filename,
       Graph* graph,
-      Diagram* dgrmNew);
+      Diagram* diagram);
     void writeDiagram(
       QString filename,
       Graph* graph,
@@ -79,6 +80,12 @@ class Parser : public QObject
 
   private:
     // -- private utility functions ---------------------------------
+
+    QMap<QString, QDomElement> findElements(QDomElement root, QStringList tagNames);
+    QMap<QString, QString> findStringValues(QDomElement root, QStringList tagNames);
+    QMap<QString, double> findDoubleValues(QDomElement root, QStringList tagNames);
+    QMap<QString, float> findFloatValues(QDomElement root, QStringList tagNames);
+    QMap<QString, int> findIntValues(QDomElement root, QStringList tagNames);
 
     // dgc files
     void parseAttrConfig(
@@ -95,17 +102,10 @@ class Parser : public QObject
       wxXmlNode* curNode);
 
     // dgd files
-    void parseDiagram(
-      Graph* graph,
-      Diagram* dgrmNew,
-      wxXmlNode* curNode);
     void parseShape(
       Graph* graph,
-      Diagram* dgrmNew,
-      wxXmlNode* curNode);
-
-    // -- data members ----------------------------------------------
-    std::string delims;
+      Diagram* diagram,
+      QDomNode shapeNode);
 };
 
 #endif

@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_ENABLE_GUI_TOOLS )
 
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtOpenGL)
+find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtXml QtOpenGL)
 if (QT4_FOUND)
 include(${QT_USE_FILE})
 

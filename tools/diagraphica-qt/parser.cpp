@@ -9,6 +9,7 @@
 /// \file ./parser.cpp
 
 #include <QFileInfo>
+
 #include "wx.hpp" // precompiled headers
 
 #include "parser.h"
@@ -26,9 +27,7 @@ using namespace std;
 
 Parser::Parser(QObject* parent) :
   QObject(parent)
-{
-  delims = "() \"";
-}
+{ }
 
 
 // -- parsing functions ---------------------------------------------
@@ -63,10 +62,10 @@ void Parser::parseFile(QString filename, Graph* graph)
     }
 
     graph->addAttrDiscr(
-      parameter->first,
-      parameter->second,
-      graph->getSizeAttributes(),
-      values);
+          parameter->first,
+          parameter->second,
+          graph->getSizeAttributes(),
+          values);
 
     emit progressed(++progress);
   }
@@ -83,20 +82,20 @@ void Parser::parseFile(QString filename, Graph* graph)
   }
 
   const std::vector<transition> &trans=l.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r) 
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     graph->addEdge(
-      detail::pp(l.action_label(r->label())),
-      r->from(),
-      r->to());
+          detail::pp(l.action_label(r->label())),
+          r->from(),
+          r->to());
     emit progressed(++progress);
   }
 }
 
 
 void Parser::writeFSMFile(
-  QString filename,
-  Graph* graph)
+    QString filename,
+    Graph* graph)
 {
   QFile file(filename);
 
@@ -180,11 +179,11 @@ void Parser::writeFSMFile(
 
 
 void Parser::parseAttrConfig(
-  QString filename,
-  Graph* graph,
-  map< size_t, size_t > &attrIdxFrTo,
-  map< size_t, vector< string > > &attrCurDomains,
-  map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains)
+    QString filename,
+    Graph* graph,
+    map< size_t, size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains)
 {
   wxXmlDocument doc;
   if (doc.Load(wxString(filename.toStdString().c_str(), wxConvUTF8)) == true)
@@ -200,11 +199,11 @@ void Parser::parseAttrConfig(
       {
         attrIdxFrTo.clear();
         parseAttrConfig(
-          graph,
-          attrIdxFrTo,
-          attrCurDomains,
-          attrOrigToCurDomains,
-          curNode);
+              graph,
+              attrIdxFrTo,
+              attrCurDomains,
+              attrOrigToCurDomains,
+              curNode);
       }
 
       curNode    = NULL;
@@ -224,8 +223,8 @@ void Parser::parseAttrConfig(
 
 
 void Parser::writeAttrConfig(
-  QString filename,
-  Graph* graph)
+    QString filename,
+    Graph* graph)
 {
   try
   {
@@ -319,55 +318,62 @@ void Parser::writeAttrConfig(
   catch (...)
   {
     throw mcrl2::runtime_error(
-      "Error saving attribute configuration.");
+          "Error saving attribute configuration.");
   }
 }
 
 
 void Parser::parseDiagram(
-  QString filename,
-  Graph* graph,
-  Diagram* dgrmNew)
+    QString filename,
+    Graph* graph,
+    Diagram* diagram)
 {
-  wxXmlDocument doc;
+  QDomDocument xml;
 
-  if (doc.Load(wxString(filename.toStdString().c_str(), wxConvUTF8)))
+  QFile file(filename);
+  if(!file.open( QFile::ReadOnly ))
   {
-    wxXmlNode* curNode    = NULL;
-
-    try
-    {
-
-      curNode = doc.GetRoot();
-
-      if (curNode != NULL)
-      {
-        parseDiagram(
-          graph,
-          dgrmNew,
-          curNode);
-      }
-
-      curNode    = NULL;
-    }
-    catch (const mcrl2::runtime_error& e)
-    {
-      curNode = NULL;
-
-      throw mcrl2::runtime_error(string("Error loading diagram.\n") + string(e.what()));
-    }
+    throw mcrl2::runtime_error(QString("Could not open XML file: %1").arg(filename).toStdString());
   }
-  else
+
+  QString errorMsg;
+  if(!xml.setContent(&file, false, &errorMsg))
   {
-    throw mcrl2::runtime_error("Error opening diagram file.");
+    file.close();
+    throw mcrl2::runtime_error(QString("Could not parse XML file: %1").arg(errorMsg).toStdString());
   }
+  file.close();
+
+  QDomElement root = xml.documentElement();
+  if(root.tagName() != "Diagram")
+  {
+    throw mcrl2::runtime_error("XML contains no valid diagram");
+  }
+
+  QDomElement fileElement = root.firstChildElement("File");
+  if(fileElement.isNull() || fileElement.text().isEmpty())
+  {
+    throw mcrl2::runtime_error("XML contains no valid filename");
+  }
+
+  QDomNode node = root.firstChild();
+  while (!node.isNull()) {
+    QDomElement e = node.toElement();
+
+    if (e.tagName() == "Shape") {
+      parseShape(graph, diagram, node);
+    }
+
+    node = node.nextSibling();
+  }
+
 }
 
 
 void Parser::writeDiagram(
-  QString filename,
-  Graph* graph,
-  Diagram* diagram)
+    QString filename,
+    Graph* graph,
+    Diagram* diagram)
 {
   try
   {
@@ -695,19 +701,104 @@ void Parser::writeDiagram(
   catch (...)
   {
     throw mcrl2::runtime_error(
-      "Error saving diagram.");
+          "Error saving diagram.");
   }
 }
 
 
 // -- private utility functions -------------------------------------
 
+QMap<QString, QDomElement> Parser::findElements(QDomElement root, QStringList tagNames)
+{
+  QMap<QString, QDomElement> result;
+  for (int i = 0; i < tagNames.size(); i++)
+  {
+    QDomElement tagElement = root.firstChildElement(tagNames[i]);
+    if (tagElement.isNull())
+    {
+      throw mcrl2::runtime_error(QString("%1 value not found.").arg(tagNames[i]).toStdString());
+    }
+    result.insert(tagNames[i], tagElement);
+  }
+  return result;
+}
+
+QMap<QString, QString> Parser::findStringValues(QDomElement root, QStringList tagNames)
+{
+  QMap<QString, QDomElement> elements = findElements(root, tagNames);
+  QMap<QString, QString> result;
+  for (int i = 0; i < tagNames.size(); i++)
+  {
+    QDomElement tagElement = elements[tagNames[i]];
+    if (tagElement.text().isEmpty())
+    {
+      throw mcrl2::runtime_error(QString("%1 value is empty.").arg(tagNames[i]).toStdString());
+    }
+    result.insert(tagNames[i], tagElement.text());
+  }
+  return result;
+}
+
+QMap<QString, double> Parser::findDoubleValues(QDomElement root, QStringList tagNames)
+{
+  QMap<QString, QString> values = findStringValues(root, tagNames);
+  QMap<QString, double> result;
+
+  for (int i = 0; i < tagNames.size(); i++)
+  {
+    bool ok;
+    double value = values[tagNames[i]].toDouble(&ok);
+    if (!ok)
+    {
+      throw mcrl2::runtime_error(QString("%1 contains no valid double (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+    }
+    result.insert(tagNames[i], value);
+  }
+  return result;
+}
+
+QMap<QString, float> Parser::findFloatValues(QDomElement root, QStringList tagNames)
+{
+  QMap<QString, QString> values = findStringValues(root, tagNames);
+  QMap<QString, float> result;
+
+  for (int i = 0; i < tagNames.size(); i++)
+  {
+    bool ok;
+    float value = values[tagNames[i]].toFloat(&ok);
+    if (!ok)
+    {
+      throw mcrl2::runtime_error(QString("%1 contains no valid float (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+    }
+    result.insert(tagNames[i], value);
+  }
+  return result;
+}
+
+QMap<QString, int> Parser::findIntValues(QDomElement root, QStringList tagNames)
+{
+  QMap<QString, QString> values = findStringValues(root, tagNames);
+  QMap<QString, int> result;
+
+  for (int i = 0; i < tagNames.size(); i++)
+  {
+    bool ok;
+    int value = values[tagNames[i]].toInt(&ok);
+    if (!ok)
+    {
+      throw mcrl2::runtime_error(QString("%1 contains no valid integer (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+    }
+    result.insert(tagNames[i], value);
+  }
+  return result;
+}
+
 void Parser::parseAttrConfig(
-  Graph* graph,
-  map< size_t , size_t > &attrIdxFrTo,
-  map< size_t, vector< string > > &attrCurDomains,
-  map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
-  wxXmlNode* curNode)
+    Graph* graph,
+    map< size_t , size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
+    wxXmlNode* curNode)
 {
   if (curNode != NULL && curNode->GetName() != wxEmptyString)
   {
@@ -742,11 +833,11 @@ void Parser::parseAttrConfig(
       try
       {
         parseAttr(
-          graph,
-          attrIdxFrTo,
-          attrCurDomains,
-          attrOrigToCurDomains,
-          curNode);
+              graph,
+              attrIdxFrTo,
+              attrCurDomains,
+              attrOrigToCurDomains,
+              curNode);
       }
       catch (const mcrl2::runtime_error& e)
       {
@@ -762,11 +853,11 @@ void Parser::parseAttrConfig(
            nxtNode = nxtNode->GetNext())
       {
         parseAttrConfig(
-          graph,
-          attrIdxFrTo,
-          attrCurDomains,
-          attrOrigToCurDomains,
-          nxtNode);
+              graph,
+              attrIdxFrTo,
+              attrCurDomains,
+              attrOrigToCurDomains,
+              nxtNode);
       }
       nxtNode = NULL;
     }
@@ -775,11 +866,11 @@ void Parser::parseAttrConfig(
 
 
 void Parser::parseAttr(
-  Graph* graph,
-  map< size_t , size_t > &attrIdxFrTo,
-  map< size_t, vector< string > > &attrCurDomains,
-  map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
-  wxXmlNode* curNode)
+    Graph* graph,
+    map< size_t , size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
+    wxXmlNode* curNode)
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
@@ -901,8 +992,8 @@ void Parser::parseAttr(
         if (s != wxEmptyString)
         {
           origToCur.insert(
-            pair< int, int >(
-              valCnt, Utils::strToInt(std::string(s.mb_str()))));
+                pair< int, int >(
+                  valCnt, Utils::strToInt(std::string(s.mb_str()))));
           ++valCnt;
         }
         else
@@ -934,547 +1025,228 @@ void Parser::parseAttr(
 }
 
 
-void Parser::parseDiagram(
-  Graph* graph,
-  Diagram* dgrmNew,
-  wxXmlNode* curNode)
+void Parser::parseShape(
+    Graph* graph,
+    Diagram* diagram,
+    QDomNode shapeNode)
 {
-  if (curNode != NULL && curNode->GetName() != wxEmptyString)
-  {
-    // file
-    if (curNode->GetName() == wxT("File"))
-    {
-      /*
-      // the code below checks for matching file names
-      if ( curNode->GetChildren()->GetName() != NULL )
-      {
-          if ( strcmp( curNode->GetChildren()->GetName(),
-               graph->getFileName().c_str() ) != 0 )
-          {
-              throw mcrl2::runtime_error( "File names do not match." );
-          }
-      }
-      else
-      {
-          throw mcrl2::runtime_error( "No file name specified." );
-      }
-      */
 
-      // the code below does not check for matchin file names
-      if (curNode->GetChildren()->GetName() == wxEmptyString)
-      {
-        throw mcrl2::runtime_error("No file name specified.");
-      }
-    }
-    // shape
-    else if (curNode->GetName() == wxT("Shape"))
+  try
+  {
+    // Shape Attributes
+    QStringList doubleAttributes = QStringList() << "XCenter" <<
+                                                    "YCenter" <<
+                                                    "XDistanceFromCenter" <<
+                                                    "YDistanceFromCenter" <<
+                                                    "XHinge" <<
+                                                    "YHinge" <<
+                                                    "AngleCenter" <<
+                                                    "LineWidth";
+    QMap<QString, double> doubleAttributeValues = findDoubleValues(shapeNode.toElement(), doubleAttributes);
+
+    QStringList colorAttributes = QStringList() << "LineColor" <<
+                                                   "FillColor";
+    QMap<QString, QDomElement> colorAttributeElements = findElements(shapeNode.toElement(), colorAttributes);
+    QMap<QString, QColor> colorAttributeValues;
+
+    QStringList colorParts = QStringList() << "Red" <<
+                                              "Green" <<
+                                              "Blue" <<
+                                              "Alpha";
+
+    for (int i = 0; i < colorAttributes.size(); i++)
     {
       try
       {
-        parseShape(graph, dgrmNew, curNode);
+        QMap<QString, float> colorPartValues = findFloatValues(colorAttributeElements[colorAttributes[i]], colorParts);
+        colorAttributeValues.insert(colorAttributes[i], QColor::fromRgbF(colorPartValues["Red"],
+                                                                                colorPartValues["Green"],
+                                                                                colorPartValues["Blue"],
+                                                                                colorPartValues["Alpha"]));
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(string("Error parsing shape.\n") + string(e.what()));
+        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(colorAttributes[i], e.what()).toStdString());
       }
     }
-    // other
-    else
+
+    QMap<QString, int> types;
+    types.insert("TYPE_LINE", Shape::TYPE_LINE);
+    types.insert("TYPE_RECT", Shape::TYPE_RECT);
+    types.insert("TYPE_ELLIPSE", Shape::TYPE_ELLIPSE);
+    types.insert("TYPE_ARROW", Shape::TYPE_ARROW);
+    types.insert("TYPE_DARROW", Shape::TYPE_DARROW);
+    types.insert("TYPE_NOTE", Shape::TYPE_NOTE);
+
+    QMap<QString, QString> typeValue = findStringValues(shapeNode.toElement(), QStringList("Type"));
+    if (!types.contains(typeValue["Type"]))
     {
-      wxXmlNode* nxtNode = curNode->GetChildren();
-      while (nxtNode)
-      {
-        parseDiagram(graph, dgrmNew, nxtNode);
-        nxtNode = nxtNode->GetNext();
-      }
-      nxtNode = NULL;
+      throw mcrl2::runtime_error(QString("Invalid type (%1).").arg(typeValue["Type"]).toStdString());
     }
+    int type = types[typeValue["Type"]];
+
+    // Create shape
+    Shape* shape = new Shape(
+          diagram,
+          diagram->getSizeShapes(),
+          doubleAttributeValues["XCenter"],   doubleAttributeValues["YCenter"],
+          doubleAttributeValues["XDistanceFromCenter"],   doubleAttributeValues["YDistanceFromCenter"],
+          doubleAttributeValues["AngleCenter"], type);
+    shape->setHinge(doubleAttributeValues["XHinge"], doubleAttributeValues["YHinge"]);
+    shape->setLineWidth(doubleAttributeValues["LineWidth"]);
+    shape->setLineColor(colorAttributeValues["LineColor"]);
+    shape->setFillColor(colorAttributeValues["FillColor"]);
+
+    // TODO: Read DOF information
+
+    diagram->addShape(shape);
   }
-}
-
-
-void Parser::parseShape(
-  Graph* graph,
-  Diagram* dgrmNew,
-  wxXmlNode* curNode)
-{
-  wxXmlNode* prop = NULL;
-  wxXmlNode* subp = NULL;
-
-  double xCtr, yCtr;
-  double xDFC, yDFC;
-  double aglCtr;
-
-  int      type;
-  double   lineWth;
-  QColor lineCol;
-  QColor fillCol;
-
-  // x center
-  prop = curNode->GetChildren();
-  if (prop != NULL &&
-      prop->GetName() == wxT("XCenter") &&
-      prop->GetNodeContent() != wxEmptyString
-     )
+  catch (const mcrl2::runtime_error& e)
   {
-    xCtr = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing x-coordinate.");
-  }
-
-  // y center
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("YCenter") &&
-      prop->GetNodeContent() != wxEmptyString
-     )
-  {
-    yCtr = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing y-coordinate.");
-  }
-
-  // x distance from center
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("XDistanceFromCenter") &&
-      prop->GetNodeContent() != wxEmptyString
-     )
-  {
-    xDFC = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing x distance from center.");
-  }
-
-  // y distance from center
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("YDistanceFromCenter") &&
-      prop->GetNodeContent() != wxEmptyString
-     )
-  {
-    yDFC = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing y distance from center.");
-  }
-
-  // x hinge
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("XHinge") &&
-      prop->GetNodeContent() != wxEmptyString)
-  {
-// Strange, xHge is not used (Jeroen Keiren 4 June 2009)
-    /*
-          xHge = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
-    */
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing x hinge.");
+    throw mcrl2::runtime_error(QString("Invalid shape.\n%1").arg(e.what()).toStdString());
   }
 
 
-  // y hinge
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("YHinge") &&
-      prop->GetNodeContent() != wxEmptyString)
-  {
-// Strange, yHge is not used (Jeroen Keiren 4 June 2009)
-    /*
-            yHge = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
-    */
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing x hinge.");
-  }
-  // angle center
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("AngleCenter") &&
-      prop->GetNodeContent() != wxEmptyString)
+  //  prop = prop->GetNext();
+  //  while (prop)
+  //  {
+  //    attr = NULL;
+  //    dof  = NULL;
 
-  {
-    aglCtr = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing angle.");
-  }
+  //    // dof
+  //    if (prop->GetName() == wxT("XCenterDOF"))
+  //    {
+  //      dof = s->getDOFXCtr();
+  //    }
+  //    else if (prop->GetName() == wxT("YCenterDOF"))
+  //    {
+  //      dof = s->getDOFYCtr();
+  //    }
+  //    else if (prop->GetName() == wxT("WidthDOF"))
+  //    {
+  //      dof = s->getDOFWth();
+  //    }
+  //    else if (prop->GetName() == wxT("HeightDOF"))
+  //    {
+  //      dof = s->getDOFHgt();
+  //    }
+  //    else if (prop->GetName() == wxT("AngleDOF"))
+  //    {
+  //      dof = s->getDOFAgl();
+  //    }
+  //    else if (prop->GetName() == wxT("ColorDOF"))
+  //    {
+  //      dof = s->getDOFCol();
+  //    }
+  //    else if (prop->GetName() == wxT("OpacityDOF"))
+  //    {
+  //      dof = s->getDOFOpa();
+  //    }
 
-  // type
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("Type") &&
-      prop->GetNodeContent() != wxEmptyString)
+  //    if (dof != NULL)
+  //    {
 
-  {
-    if (prop->GetNodeContent() == wxT("TYPE_LINE"))
-    {
-      type = Shape::TYPE_LINE;
-    }
-    else if (prop->GetNodeContent() == wxT("TYPE_RECT"))
-    {
-      type = Shape::TYPE_RECT;
-    }
-    else if (prop->GetNodeContent() == wxT("TYPE_ELLIPSE"))
-    {
-      type = Shape::TYPE_ELLIPSE;
-    }
-    else if (prop->GetNodeContent() == wxT("TYPE_ARROW"))
-    {
-      type = Shape::TYPE_ARROW;
-    }
-    else if (prop->GetNodeContent() == wxT("TYPE_DARROW"))
-    {
-      type = Shape::TYPE_DARROW;
-    }
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing type.");
-  }
+  //      subp = prop->GetChildren();
 
-  // line width
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("LineWidth") &&
-      prop->GetNodeContent() != wxEmptyString)
+  //      cntVal    = 0;
+  //      cntAuxCol = 0;
+  //      cntAuxOpa = 0;
 
-  {
-    lineWth = Utils::strToDbl(std::string(prop->GetNodeContent().mb_str()));
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing line width.");
-  }
+  //      while (subp)
+  //      {
 
-  // line color
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("LineColor"))
-  {
-    double red, green, blue, alpha;
-    // red
-    subp = prop->GetChildren();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Red") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      red = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("LineColor: Missing red channel.");
-    }
+  //        // Atribute
+  //        if (subp->GetName() == wxT("Attribute") &&
+  //            subp->GetNodeContent() != wxEmptyString)
+  //        {
+  //          attr = graph->getAttribute(std::string(subp->GetNodeContent().mb_str()));
+  //          if (attr != NULL)
+  //          {
+  //            dof->setAttribute(attr);
+  //          }
+  //        }
 
-    // green
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Green") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      green = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("LineColor: Missing green channel.");
-    }
+  //        if (subp->GetName() == wxT("Value") &&
+  //            subp->GetNodeContent() != wxEmptyString)
+  //        {
+  //          ++cntVal;
+  //          // reset min
+  //          if (cntVal == 1)
+  //          {
+  //            dof->setMin(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // reset max
+  //          else if (cntVal == 2)
+  //          {
+  //            dof->setMax(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // add additional values
+  //          else
+  //          {
+  //            dof->addValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //        }
 
-    // blue
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Blue") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      blue = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("LineColor: Missing blue channel.");
-    }
+  //        if (subp->GetName() == wxT("AuxilaryValue") &&
+  //            prop->GetName() == wxT("ColorDOF") &&
+  //            subp->GetNodeContent() != wxEmptyString)
+  //        {
+  //          ++cntAuxCol;
+  //          // reset min
+  //          if (cntAuxCol == 1)
+  //          {
+  //            s->setDOFColYValue(0, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // reset max
+  //          else if (cntAuxCol == 2)
+  //          {
+  //            s->setDOFColYValue(1, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // add additional values
+  //          else
+  //          {
+  //            s->addDOFColYValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //        }
 
-    // alpha
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Alpha") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      alpha = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("LineColor: Missing alpha channel.");
-    }
+  //        if (subp->GetName() == wxT("AuxilaryValue") &&
+  //            prop->GetName() == wxT("OpacityDOF") &&
+  //            subp->GetNodeContent() != wxEmptyString)
+  //        {
+  //          ++cntAuxOpa;
+  //          // reset min
+  //          if (cntAuxOpa == 1)
+  //          {
+  //            s->setDOFOpaYValue(0, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // reset max
+  //          else if (cntAuxOpa == 2)
+  //          {
+  //            s->setDOFOpaYValue(1, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //          // add additional values
+  //          else
+  //          {
+  //            s->addDOFOpaYValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
+  //          }
+  //        }
 
-    lineCol = QColor::fromRgbF(red, green, blue, alpha);
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing line color.");
-  }
+  //        subp = subp->GetNext();
+  //      }
+  //    } // dof
 
-  // fill color
-  prop = prop->GetNext();
-  if (prop != NULL &&
-      prop->GetName() == wxT("FillColor"))
-  {
-    double red, green, blue, alpha;
-    // red
-    subp = prop->GetChildren();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Red") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      red = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("FillColor: Missing red channel.");
-    }
+  //    prop = prop->GetNext();
+  //  }
 
-    // green
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Green") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      green = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("FillColor: Missing green channel.");
-    }
+  //  // add shape
+  //  diagram->addShape(s);
+  //  s =NULL;
 
-    // blue
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Blue") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      blue = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("FillColor: Missing blue channel.");
-    }
+  //  attr = NULL;
+  //  dof  = NULL;
 
-    // alpha
-    subp = subp->GetNext();
-    if (subp != NULL &&
-        subp->GetName() == wxT("Alpha") &&
-        subp->GetNodeContent() != wxEmptyString)
-    {
-      alpha = Utils::strToDbl(std::string(subp->GetNodeContent().mb_str()));
-    }
-    else
-    {
-      prop = NULL;
-      subp = NULL;
-      throw mcrl2::runtime_error("FillColor:Missing alpha channel.");
-    }
-
-    fillCol = QColor::fromRgbF(red, green, blue, alpha);
-  }
-  else
-  {
-    prop = NULL;
-    throw mcrl2::runtime_error("Missing fill color.");
-  }
-
-  // init shape
-  Shape* s = new Shape(
-    dgrmNew,
-    dgrmNew->getSizeShapes(),
-    xCtr,   yCtr,
-    xDFC,   yDFC,
-    aglCtr, type);
-  s->setLineWidth(lineWth);
-  s->setLineColor(lineCol);
-  s->setFillColor(fillCol);
-
-  // DOF's
-  Attribute* attr;
-  DOF*       dof;
-
-  int  cntVal;
-  int  cntAuxCol;
-  int  cntAuxOpa;
-
-  prop = prop->GetNext();
-  while (prop)
-  {
-    attr = NULL;
-    dof  = NULL;
-
-    // dof
-    if (prop->GetName() == wxT("XCenterDOF"))
-    {
-      dof = s->getDOFXCtr();
-    }
-    else if (prop->GetName() == wxT("YCenterDOF"))
-    {
-      dof = s->getDOFYCtr();
-    }
-    else if (prop->GetName() == wxT("WidthDOF"))
-    {
-      dof = s->getDOFWth();
-    }
-    else if (prop->GetName() == wxT("HeightDOF"))
-    {
-      dof = s->getDOFHgt();
-    }
-    else if (prop->GetName() == wxT("AngleDOF"))
-    {
-      dof = s->getDOFAgl();
-    }
-    else if (prop->GetName() == wxT("ColorDOF"))
-    {
-      dof = s->getDOFCol();
-    }
-    else if (prop->GetName() == wxT("OpacityDOF"))
-    {
-      dof = s->getDOFOpa();
-    }
-
-    if (dof != NULL)
-    {
-
-      subp = prop->GetChildren();
-
-      cntVal    = 0;
-      cntAuxCol = 0;
-      cntAuxOpa = 0;
-
-      while (subp)
-      {
-
-        // Atribute
-        if (subp->GetName() == wxT("Attribute") &&
-            subp->GetNodeContent() != wxEmptyString)
-        {
-          attr = graph->getAttribute(std::string(subp->GetNodeContent().mb_str()));
-          if (attr != NULL)
-          {
-            dof->setAttribute(attr);
-          }
-        }
-
-        if (subp->GetName() == wxT("Value") &&
-            subp->GetNodeContent() != wxEmptyString)
-        {
-          ++cntVal;
-          // reset min
-          if (cntVal == 1)
-          {
-            dof->setMin(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // reset max
-          else if (cntVal == 2)
-          {
-            dof->setMax(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // add additional values
-          else
-          {
-            dof->addValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-        }
-
-        if (subp->GetName() == wxT("AuxilaryValue") &&
-            prop->GetName() == wxT("ColorDOF") &&
-            subp->GetNodeContent() != wxEmptyString)
-        {
-          ++cntAuxCol;
-          // reset min
-          if (cntAuxCol == 1)
-          {
-            s->setDOFColYValue(0, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // reset max
-          else if (cntAuxCol == 2)
-          {
-            s->setDOFColYValue(1, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // add additional values
-          else
-          {
-            s->addDOFColYValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-        }
-
-        if (subp->GetName() == wxT("AuxilaryValue") &&
-            prop->GetName() == wxT("OpacityDOF") &&
-            subp->GetNodeContent() != wxEmptyString)
-        {
-          ++cntAuxOpa;
-          // reset min
-          if (cntAuxOpa == 1)
-          {
-            s->setDOFOpaYValue(0, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // reset max
-          else if (cntAuxOpa == 2)
-          {
-            s->setDOFOpaYValue(1, Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-          // add additional values
-          else
-          {
-            s->addDOFOpaYValue(Utils::strToDbl(std::string(subp->GetNodeContent().mb_str())));
-          }
-        }
-
-        subp = subp->GetNext();
-      }
-    } // dof
-
-    prop = prop->GetNext();
-  }
-
-  // add shape
-  dgrmNew->addShape(s);
-  s =NULL;
-
-  attr = NULL;
-  dof  = NULL;
-
-  prop = NULL;
-  subp = NULL;
+  //  prop = NULL;
+  //  subp = NULL;
 }
 
 
