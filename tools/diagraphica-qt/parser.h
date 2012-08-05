@@ -67,7 +67,6 @@ class Parser : public QObject
     void parseDiagram(
       QString filename,
       Graph* graph,
-      Diagram* dgrmOld,
       Diagram* dgrmNew);
     void writeDiagram(
       QString filename,
@@ -98,12 +97,10 @@ class Parser : public QObject
     // dgd files
     void parseDiagram(
       Graph* graph,
-      Diagram* dgrmOld,
       Diagram* dgrmNew,
       wxXmlNode* curNode);
     void parseShape(
       Graph* graph,
-      Diagram* dgrmOld,
       Diagram* dgrmNew,
       wxXmlNode* curNode);
 

@@ -40,9 +40,19 @@ class MainWindow : public QMainWindow, public Mediator
     void save(QString filename);
 
   protected slots:
+    void refreshWidgets(Graph* newGraph = 0);
+    void refreshAttributes();
+    void refreshDomain();
+
     void openFile();
     void saveFile();
     void saveFileAs();
+
+    void openDgcFile();
+    void saveDgcFile();
+
+    void openDgdFile();
+    void saveDgdFile();
 
   private:
     Ui::MainWindow m_ui;

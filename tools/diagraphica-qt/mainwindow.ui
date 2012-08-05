@@ -110,6 +110,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>100</height>
+            </size>
+           </property>
            <property name="dragDropOverwriteMode">
             <bool>false</bool>
            </property>
@@ -122,6 +128,9 @@
            <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
@@ -166,6 +175,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>100</height>
+            </size>
+           </property>
            <property name="dragDropMode">
             <enum>QAbstractItemView::InternalMove</enum>
            </property>
@@ -175,6 +190,12 @@
            <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
            <column>
             <property name="text">
              <string>#</string>
@@ -199,7 +220,19 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="examinerWidget" native="true"/>
+       <widget class="QWidget" name="examinerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="margin">
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
       </widget>
       <widget class="QStackedWidget" name="mainViewStack">
        <property name="sizePolicy">
@@ -218,13 +251,43 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <widget class="QWidget" name="arcDiagramWidget" native="true"/>
+           <widget class="QWidget" name="arcDiagramWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>100</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <property name="margin">
+              <number>0</number>
+             </property>
+            </layout>
+           </widget>
            <widget class="QStackedWidget" name="analysisStack">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>100</height>
+             </size>
+            </property>
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="simulatorWidget"/>
-            <widget class="QWidget" name="traceWidget"/>
+            <widget class="QWidget" name="simulatorWidget">
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="margin">
+               <number>0</number>
+              </property>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="traceWidget">
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <property name="margin">
+               <number>0</number>
+              </property>
+             </layout>
+            </widget>
            </widget>
           </widget>
          </item>
@@ -234,12 +297,11 @@
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QWidget" name="diagramEditorWidget" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <property name="margin">
+             <number>0</number>
+            </property>
+           </layout>
           </widget>
          </item>
          <item>
@@ -492,7 +554,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
-    <addaction name="actionLoadAttributes"/>
+    <addaction name="actionOpenAttributes"/>
     <addaction name="actionSaveAttributes"/>
     <addaction name="separator"/>
     <addaction name="actionOpenDiagram"/>
@@ -565,7 +627,7 @@
     <string>Save &amp;As...</string>
    </property>
   </action>
-  <action name="actionLoadAttributes">
+  <action name="actionOpenAttributes">
    <property name="text">
     <string>Open Attributes...</string>
    </property>

@@ -327,7 +327,6 @@ void Parser::writeAttrConfig(
 void Parser::parseDiagram(
   QString filename,
   Graph* graph,
-  Diagram* dgrmOld,
   Diagram* dgrmNew)
 {
   wxXmlDocument doc;
@@ -345,7 +344,6 @@ void Parser::parseDiagram(
       {
         parseDiagram(
           graph,
-          dgrmOld,
           dgrmNew,
           curNode);
       }
@@ -938,7 +936,6 @@ void Parser::parseAttr(
 
 void Parser::parseDiagram(
   Graph* graph,
-  Diagram* dgrmOld,
   Diagram* dgrmNew,
   wxXmlNode* curNode)
 {
@@ -974,7 +971,7 @@ void Parser::parseDiagram(
     {
       try
       {
-        parseShape(graph, dgrmOld, dgrmNew, curNode);
+        parseShape(graph, dgrmNew, curNode);
       }
       catch (const mcrl2::runtime_error& e)
       {
@@ -987,7 +984,7 @@ void Parser::parseDiagram(
       wxXmlNode* nxtNode = curNode->GetChildren();
       while (nxtNode)
       {
-        parseDiagram(graph, dgrmOld, dgrmNew, nxtNode);
+        parseDiagram(graph, dgrmNew, nxtNode);
         nxtNode = nxtNode->GetNext();
       }
       nxtNode = NULL;
@@ -998,7 +995,6 @@ void Parser::parseDiagram(
 
 void Parser::parseShape(
   Graph* graph,
-  Diagram* /*dgrmOld*/,
   Diagram* dgrmNew,
   wxXmlNode* curNode)
 {
