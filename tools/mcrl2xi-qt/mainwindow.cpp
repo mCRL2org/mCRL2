@@ -185,7 +185,7 @@ bool MainWindow::onCloseRequest(int index)
       m_findReplaceDialog->setTextEdit(0);
       m_ui.documentManager->closeDocument(index);
       break;
-    case QMessageBox::Cancel:
+    default: 
       return false;
       break;
   }
