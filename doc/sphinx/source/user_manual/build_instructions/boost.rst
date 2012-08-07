@@ -11,7 +11,7 @@ To compile *Boost* manually, download the sources to a directory that we will
 call ``<BOOSTROOT>``.
 
 .. admonition:: Windows
-   :class: platform-specific win-only
+   :class: platform-specific win
 
    - Open the appropriate Visual Studio command prompt. This prompt can be found
      in ``C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin`` for Windows
@@ -43,7 +43,7 @@ call ``<BOOSTROOT>``.
       above from an x64 development command prompt.
 
 .. admonition:: Mac OS X
-   :class: platform-specific mac-only
+   :class: platform-specific mac
 
    - Ensure that the shell scripts we need are executable::
 
@@ -59,7 +59,7 @@ call ``<BOOSTROOT>``.
      for OS-X 10.5, use ``toolset=darwin address-model=32 architecture=x86 macosx-version=10.5 macosx-version-min=10.5``.
    
 .. admonition:: Linux
-   :class: platform-specific linux-only
+   :class: platform-specific linux
 
    - Ensure that the shell scripts we need are executable::
 
@@ -73,6 +73,4 @@ call ``<BOOSTROOT>``.
    
 After the build, Boost reports information on the build. The compiler path
 specified here, must be used to set the CMake variable :envvar:`BOOST_ROOT`. 
-
-|enable_toggle|
 
