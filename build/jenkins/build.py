@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 import subprocess
 import multiprocessing
 
@@ -54,8 +55,11 @@ if not buildthreads:
 # Build
 #
 
-make_command = ['make', '-j{0}'.format(buildthreads)]
-if call('Make/NMake', make_command):
+extraoptions = []
+if platform.system() == 'Linux':
+  extraoptions =  ['-j{0}'.format(buildthreads)]
+make_command = ['cmake', '--build', '--'] + extraoptions
+if call('CMake --build', make_command):
   print 'Build failed.'
   sys.exit(1)
 
