@@ -94,12 +94,12 @@ Make sure you have Ecplise installed before you start with these instructions.
   At :guilabel:`Work with` select CDT. 
   - CDT Main Features
   - CDT Optional Features
-    - CDT GNU Toolchain Build Support
-    - CDT GNU Toolchain Debug Support
-    - CDT Utilities
-    - Eclipse C/C++ Development Platform
-    - Eclipse C/C++ DSF gdb Debugger Integration
-    - Eclipse C/C++ Memory View Enhancements
+  - CDT GNU Toolchain Build Support
+  - CDT GNU Toolchain Debug Support
+  - CDT Utilities
+  - Eclipse C/C++ Development Platform
+  - Eclipse C/C++ DSF gdb Debugger Integration
+  - Eclipse C/C++ Memory View Enhancements
 
   Now click :guilabel:`Next`, :guilabel:`Next`, :guilabel:`accept EULA`,
   :guilabel:`Finish`, and CDT will be installed. If asked to restart Eclipse, do

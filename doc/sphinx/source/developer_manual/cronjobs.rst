@@ -257,7 +257,7 @@ requirements:
   #. If your account has no SSH key pair yet, run the following command::
   
        ssh-keygen -t rsa
-        
+      
      Save the key to the default location (``$HOME/.ssh/id_rsa``) and do
      **not** enter a passphrase (simply hit enter when prompted, twice).
   #. Upload the **public** key of the account's SSH key pair to the webserver::
