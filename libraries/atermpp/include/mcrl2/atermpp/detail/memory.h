@@ -50,6 +50,9 @@ detail::_aterm *aterm::empty_aterm_list()
   return detail::static_empty_aterm_list.m_term;
 } 
 
+namespace detail
+{
+
 inline
 size_t TERM_SIZE_APPL(const size_t arity)
 {
@@ -100,9 +103,8 @@ inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size
   return hnr;
 }
 
-template <class Term>
-template <class ForwardIterator, class ATermConverter>
-term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end, ATermConverter convert_to_aterm)
+template <class Term, class InputIterator, class ATermConverter>
+_aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm)
 {
   const size_t arity = sym.arity();
 
@@ -113,7 +115,7 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
   // std::vector <aterm> arguments(arity);
   
   size_t j=0;
-  for (ForwardIterator i=begin; i!=end; ++i, ++j)
+  for (InputIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
     new (&arguments[j]) aterm(convert_to_aterm(*i));
@@ -160,21 +162,18 @@ term_appl<Term>::term_appl(const function_symbol &sym, const ForwardIterator beg
     detail::aterm_hashtable[hnr] = cur;
   }
   
-  m_term=cur;
-  increase_reference_count<false>(m_term);
 
   for (size_t j=0; j!=arity; ++j)
   {
     using namespace atermpp;
     arguments[j].~aterm();
   }
+  
+  return cur;
 }
 
-namespace detail
-{
-
 template <class Term, class ForwardIterator>
-detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
+_aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
   const size_t arity = sym.arity();
   HashNumber hnr = sym.number();
@@ -227,7 +226,6 @@ detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterato
   }
   
   return cur;
-  // m_term=cur;
 }
 
 template <class Term>
@@ -318,10 +316,6 @@ _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Term &arg
 
   return cur;
 }
-
-/**
- * Create an ATermAppl with one argument.
- */
 
 template <class Term>
 _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Term &arg1, const Term &arg2)
@@ -503,11 +497,11 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   {
     if (i!=n)
     {
-      hnr = COMBINE(hnr, ((*this)->arg[i]));
+      hnr = detail::COMBINE(hnr, ((*this)->arg[i]));
     }
     else
     {
-      hnr = COMBINE(hnr, arg);
+      hnr = detail::COMBINE(hnr, arg);
     }
   }
 
@@ -547,7 +541,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
 
   if (!cur)
   {
-    cur = detail::allocate_term(TERM_SIZE_APPL(arity));
+    cur = detail::allocate_term(detail::TERM_SIZE_APPL(arity));
     /* Delay masking until after allocate_term */
     hnr &= detail::aterm_table_mask;
     cur->function() = (*this)->function();
@@ -573,7 +567,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
 template <class Term>
 term_list<Term> push_front(const term_list<Term> &tail, const Term &el)
 {
-  return aterm_cast<term_list<Term> > (term_appl<aterm> (detail::function_adm.AS_LIST,el,tail));
+  return aterm_cast<const term_list<Term> > (term_appl<aterm> (detail::function_adm.AS_LIST,el,tail));
 }
 
 

@@ -234,83 +234,83 @@ struct add_sort_expressions: public Builder<Derived>
     process::process_expression result;
     if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (lps::is_action(x))
     {
-      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -513,83 +513,83 @@ struct add_data_expressions: public Builder<Derived>
     process::process_expression result;
     if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (lps::is_action(x))
     {
-      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -792,83 +792,83 @@ struct add_process_expressions: public Builder<Derived>
     process::process_expression result;
     if (process::is_process_instance(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_process_instance_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_delta(x))
     {
-      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::delta(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_tau(x))
     {
-      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::tau(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sum(x))
     {
-      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sum(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_block(x))
     {
-      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::block(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_hide(x))
     {
-      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::hide(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_rename(x))
     {
-      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::rename(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_comm(x))
     {
-      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::comm(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_allow(x))
     {
-      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::allow(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_sync(x))
     {
-      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::sync(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_at(x))
     {
-      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::at(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_seq(x))
     {
-      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::seq(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_if_then_else(x))
     {
-      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_bounded_init(x))
     {
-      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_left_merge(x))
     {
-      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (process::is_choice(x))
     {
-      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(process::choice(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     else if (lps::is_action(x))
     {
-      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(lps::action(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

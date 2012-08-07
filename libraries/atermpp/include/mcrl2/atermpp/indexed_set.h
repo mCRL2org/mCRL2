@@ -92,7 +92,7 @@ class indexed_set
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    aterm get(size_t index) const;
+    const aterm &get(size_t index) const;
 
     /// \brief Remove elem from set.
     /// The elem is removed from the indexed set, and if a number was assigned to elem,

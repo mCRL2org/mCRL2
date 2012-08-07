@@ -144,7 +144,7 @@ class term_list:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      std::vector<Term> temporary_store;
+      std::vector<Term> temporary_store;  // This can be made more efficient...
       while (first != last)
       {
         const Term t= *first;

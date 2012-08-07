@@ -56,7 +56,7 @@ class aterm_int:public aterm
     /// \param value An integer value.
     aterm_int(int value):aterm(detail::aterm_int(value))
     {
-      increase_reference_count<false>(m_term);
+//       increase_reference_count<false>(m_term);
     }
 
     /// \brief Assignment operator.

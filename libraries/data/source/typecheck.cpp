@@ -577,7 +577,7 @@ ATermList type_check_mult_actions(
   // ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
   //XXX read-in from spec (not finished)
-  ATermList result=aterm_list();
+  ATermList result;
   if (gstcReadInSorts(sorts)
       && gstcReadInConstructors()
       && gstcReadInFuncs(constructors,mappings)

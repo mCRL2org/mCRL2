@@ -104,8 +104,8 @@ static void finalise_common()
   is_initialised--;
 }
 
-#define is_ar_true(x) (ATisEqual((x),ar_true))
-#define is_ar_false(x) (ATisEqual((x),ar_false))
+#define is_ar_true(x) (x==ar_true)
+#define is_ar_false(x) (x==ar_false)
 #define is_ar_and(x) (x.function()==afunARand)
 #define is_ar_or(x) (x.function()==afunARor)
 #define is_ar_var(x) (x.function()==afunARvar)
@@ -161,11 +161,11 @@ static aterm_appl make_ar_or(aterm_appl x, aterm_appl y)
 
 static aterm_appl make_ar_var(int var)
 {
-  return atermpp::aterm_appl(afunARvar,ATmakeInt(var));
+  return atermpp::aterm_appl(afunARvar,atermpp::aterm_int(var));
 }
 
 static size_t num_int2aterms = 0;
-static atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared ATermInt's.
+static atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared aterm_int's.
 static atermpp::detail::_aterm* get_int2aterm_value(int i)
 {
   assert(i >= 0);
@@ -185,7 +185,7 @@ static atermpp::detail::_aterm* get_int2aterm_value(int i)
     }
     for (; old_num < num_int2aterms; old_num++)
     {
-      int2aterms[old_num] = (atermpp::detail::_aterm*) &*ATmakeInt(old_num);
+      int2aterms[old_num] = reinterpret_cast<atermpp::detail::_aterm*>( &*atermpp::aterm_int(old_num));
     }
   }
   return int2aterms[i];
@@ -193,7 +193,7 @@ static atermpp::detail::_aterm* get_int2aterm_value(int i)
 
 static atermpp::detail::_aterm* get_int2aterm_value(const aterm_int &i)
 {
-  return get_int2aterm_value(ATgetInt(i));
+  return get_int2aterm_value(i.value());
 }
 
 static std::vector <aterm_appl> rewr_appls;
@@ -282,13 +282,13 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
   {
     term2seq(ATmakeList1(t),s,var_cnt);
   }
-  else if (ATisAppl(t))
+  else if (t.type()==AT_APPL)
   {
     if (gsIsDataVarId((aterm_appl) t))
     {
       aterm store = atermpp::aterm_appl(afunS, t,dummy);
 
-      if (ATindexOf(*s,store) != ATERM_NON_EXISTING_POSITION)
+      if (std::find(s->begin(),s->end(),store) != s->end())
       {
         *s = push_front<aterm>(*s, static_cast<atermpp::aterm>(atermpp::aterm_appl(afunM,t,dummy,dummy)));
       }
@@ -302,11 +302,11 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
     {
       int arity = t.function().arity(); 
 
-      *s = push_front<aterm>(*s, atermpp::aterm_appl(afunF,ATgetArgument((aterm_appl) t,0),dummy,dummy));
+      *s = push_front<aterm>(*s, atermpp::aterm_appl(afunF,atermpp::aterm_cast<const aterm_appl>(t)(0),dummy,dummy));
 
       for (int i=1; i<arity; ++i)
       {
-        term2seq(ATgetArgument((aterm_appl) t,i),s,var_cnt);
+        term2seq(atermpp::aterm_cast<const aterm_appl>(t)(i),s,var_cnt);
         if (i<arity-1)
         {
           *s = push_front<aterm>(*s, atermpp::aterm_appl(afunN,dummy));
@@ -322,20 +322,22 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
 
 }
 
-static void get_used_vars_aux(aterm t, aterm_list* vars)
+static void get_used_vars_aux(const aterm &t, aterm_list* vars)
 {
-  if (ATisList(t))
+  using namespace atermpp;
+  if (t.type()==AT_LIST)
   {
-    for (; !((aterm_list) t).empty(); t=(aterm) ATgetNext((aterm_list) t))
+    const atermpp::aterm_list &l=atermpp::aterm_cast<const aterm_list>(t);
+    for (aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
     {
-      get_used_vars_aux(ATgetFirst((aterm_list) t),vars);
+      get_used_vars_aux(*i,vars);
     }
   }
-  else if (ATisAppl(t))
+  else if (t.type()==AT_APPL)
   {
     if (gsIsDataVarId((aterm_appl) t))
     {
-      if (ATindexOf(*vars,t) == ATERM_NON_EXISTING_POSITION)
+      if (find(vars->begin(),vars->end(),t) == vars->end())
       {
         *vars = push_front<aterm>(*vars,t);
       }
@@ -345,7 +347,7 @@ static void get_used_vars_aux(aterm t, aterm_list* vars)
       int a = t.function().arity(); 
       for (int i=0; i<a; i++)
       {
-        get_used_vars_aux(ATgetArgument((aterm_appl) t,i),vars);
+        get_used_vars_aux(aterm_cast<const aterm_appl>(t)(i),vars);
       }
     }
   }
@@ -353,7 +355,7 @@ static void get_used_vars_aux(aterm t, aterm_list* vars)
 
 static aterm_list get_used_vars(const aterm &t)
 {
-  aterm_list l = ATmakeList0();
+  aterm_list l;
 
   get_used_vars_aux(t,&l);
 
@@ -366,18 +368,18 @@ static aterm_list create_sequence(const data_equation &rule, int* var_cnt, const
   int pat_arity = pat.function().arity(); 
   aterm cond = toInner_list_odd(rule.condition());
   aterm rslt = toInner_list_odd(rule.rhs());
-  aterm_list rseq = ATmakeList0();
+  aterm_list rseq;
 
   for (int i=1; i<pat_arity; ++i)
   {
-    term2seq(ATgetArgument(pat,i),&rseq,var_cnt);
+    term2seq(pat(i),&rseq,var_cnt);
     if (i<pat_arity-1)
     {
       rseq = push_front<aterm>(rseq, atermpp::aterm_appl(afunN,dummy));
     }
   }
 
-  if (cond.type()==AT_INT && ATisEqual(cond, true_inner))
+  if (cond.type()==AT_INT && cond==true_inner)
   {
     rseq = push_front<aterm>(rseq,atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
   }
@@ -386,7 +388,7 @@ static aterm_list create_sequence(const data_equation &rule, int* var_cnt, const
     rseq = push_front<aterm>(rseq, atermpp::aterm_appl(afunCRe,cond,rslt, get_used_vars(cond), get_used_vars(rslt)));
   }
 
-  return ATreverse(rseq);
+  return reverse(rseq);
 }
 
 
@@ -404,11 +406,11 @@ typedef struct
 
 static void initialise_build_pars(build_pars* p)
 {
-  p->Flist = ATmakeList0();
-  p->Slist = ATmakeList0();
-  p->Mlist = ATmakeList0();
-  p->stack = ATmakeList1(ATmakeList0());
-  p->upstack = ATmakeList0();
+  p->Flist = aterm_list();
+  p->Slist = aterm_list();
+  p->Mlist = aterm_list();
+  p->stack = ATmakeList1(aterm_list());
+  p->upstack = aterm_list();
 }
 
 static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_appl* r, aterm_list* cr)
@@ -418,7 +420,7 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
     return stack;
   }
 
-  aterm_list l = ATmakeList0();
+  aterm_list l;
   aterm_list h = ATLgetFirst(stack);
 
   for (; !seqs.empty(); seqs=ATgetNext(seqs))
@@ -448,7 +450,7 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
 
 static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, aterm_list* cr)
 {
-  aterm_list l = ATmakeList0();
+  aterm_list l;
 
   for (; !seqs.empty(); seqs=ATgetNext(seqs))
   {
@@ -510,7 +512,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   else if (isCRe(head))
   {
     aterm_list l = (aterm_list) ATgetArgument(head,2);
-    aterm_list m = ATmakeList0();
+    aterm_list m ;
     for (; !l.empty(); l=ATgetNext(l))
     {
       if (ATisEqual(ATgetFirst(l),old))
@@ -523,7 +525,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
       }
     }
     l = (aterm_list) ATgetArgument(head,3);
-    aterm_list n = ATmakeList0();
+    aterm_list n;
     for (; !l.empty(); l=ATgetNext(l))
     {
       if (ATisEqual(ATgetFirst(l),old))
@@ -540,7 +542,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   else if (isRe(head))
   {
     aterm_list l = (aterm_list) ATgetArgument(head,1);
-    aterm_list m = ATmakeList0();
+    aterm_list m ;
     for (; !l.empty(); l=ATgetNext(l))
     {
       if (ATisEqual(ATgetFirst(l),old))
@@ -582,8 +584,8 @@ static aterm_appl build_tree(build_pars pars, int i)
     aterm_appl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i);
     treevars_usedcnt[k] = 0;
 
-    l = ATmakeList0();
-    m = ATmakeList0();
+    l = aterm_list();
+    m = aterm_list();
     for (; !pars.Slist.empty(); pars.Slist=ATgetNext(pars.Slist))
     {
       aterm_list e = ATLgetFirst(pars.Slist);
@@ -595,7 +597,7 @@ static aterm_appl build_tree(build_pars pars, int i)
     }
 
     aterm_appl r;
-    aterm_list readies = ATmakeList0();
+    aterm_list readies;
 
     pars.stack = add_to_stack(pars.stack,m,&r,&readies);
 
@@ -631,8 +633,8 @@ static aterm_appl build_tree(build_pars pars, int i)
   {
     aterm M = ATgetFirst(ATLgetFirst(pars.Mlist));
 
-    aterm_list l = ATmakeList0();
-    aterm_list m = ATmakeList0();
+    aterm_list l;
+    aterm_list m;
     for (; !pars.Mlist.empty(); pars.Mlist=ATgetNext(pars.Mlist))
     {
       if (ATisEqual(M,ATgetFirst(ATLgetFirst(pars.Mlist))))
@@ -648,7 +650,7 @@ static aterm_appl build_tree(build_pars pars, int i)
 
     aterm_appl true_tree,false_tree;
     aterm_appl r ;
-    aterm_list readies = ATmakeList0();
+    aterm_list readies;
 
     aterm_list newstack = add_to_stack(pars.stack,l,&r,&readies);
 
@@ -687,7 +689,7 @@ static aterm_appl build_tree(build_pars pars, int i)
     aterm_appl true_tree,false_tree;
 
     aterm_list newupstack = pars.upstack;
-    aterm_list l = ATmakeList0();
+    aterm_list l;
 
     for (; !pars.Flist.empty(); pars.Flist=ATgetNext(pars.Flist))
     {
@@ -703,7 +705,7 @@ static aterm_appl build_tree(build_pars pars, int i)
 
     pars.Flist = l;
     false_tree = build_tree(pars,i);
-    pars.Flist = ATmakeList0();
+    pars.Flist = aterm_list();
     pars.upstack = newupstack;
     true_tree = build_tree(pars,i);
 
@@ -721,11 +723,11 @@ static aterm_appl build_tree(build_pars pars, int i)
     aterm_list l;
 
     aterm_appl r;
-    aterm_list readies = ATmakeList0();
+    aterm_list readies;
 
-    pars.stack = push_front<aterm>(pars.stack,ATmakeList0());
+    pars.stack = push_front<aterm>(pars.stack,aterm_list());
     l = pars.upstack;
-    pars.upstack = ATmakeList0();
+    pars.upstack = aterm_list();
     add_to_build_pars(&pars,l,&r,&readies);
 
 
@@ -766,9 +768,9 @@ static aterm_appl build_tree(build_pars pars, int i)
     {
       aterm_list l = ATLgetFirst(pars.stack);
       aterm_appl r ;
-      aterm_list readies = ATmakeList0();
+      aterm_list readies;
 
-      pars.stack = push_front<aterm>(ATgetNext(pars.stack),ATmakeList0());
+      pars.stack = push_front<aterm>(ATgetNext(pars.stack),aterm_list());
       add_to_build_pars(&pars,l,&r,&readies);
 
       aterm_appl tree;
@@ -809,7 +811,7 @@ static aterm_appl create_tree(const data_equation_list &rules, int /*opid*/, int
   // store the total number of variables used in these sequences.
   // (The total number of variables in all sequences should be an upper
   // bound for the number of variable in the final tree.)
-  aterm_list rule_seqs = ATmakeList0();
+  aterm_list rule_seqs;
   int total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
@@ -819,7 +821,7 @@ static aterm_appl create_tree(const data_equation_list &rules, int /*opid*/, int
   // Generate initial parameters for built_tree
   build_pars init_pars;
   aterm_appl r;
-  aterm_list readies = ATmakeList0();
+  aterm_list readies;
 
   initialise_build_pars(&init_pars);
   add_to_build_pars(&init_pars,rule_seqs,&r,&readies);
@@ -906,7 +908,7 @@ static aterm_list get_vars(const aterm &a)
 {
   if (a.type()==AT_INT)
   {
-    return ATmakeList0();
+    return aterm_list();
   }
   else if (ATisAppl(a) && gsIsDataVarId((aterm_appl) a))
   {
@@ -914,7 +916,7 @@ static aterm_list get_vars(const aterm &a)
   }
   else if (ATisList(a))
   {
-    aterm_list l = ATmakeList0();
+    aterm_list l;
     for (aterm_list m=(aterm_list) a; !m.empty(); m=ATgetNext(m))
     {
       l = ATconcat(get_vars(ATgetFirst(m)),l);
@@ -923,7 +925,7 @@ static aterm_list get_vars(const aterm &a)
   }
   else     // ATisAppl(a)
   {
-    aterm_list l = ATmakeList0();
+    aterm_list l;
     int arity = a.function().arity();
     for (int i=0; i<arity; ++i)
     {
@@ -1001,7 +1003,7 @@ static aterm_list dep_vars(const data_equation &eqn)
     vars = push_front<aterm>(vars, get_vars(ATgetArgument(pars,i+1)));
   }
 
-  aterm_list deps = ATmakeList0();
+  aterm_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
     if (bs[i] && gsIsDataVarId(ATAgetArgument(pars,i+1)))
@@ -1056,7 +1058,7 @@ static aterm_list create_strategy(
         nfs_array &nfs,
         const aterm_int &true_inner)
 {
-  aterm_list strat = ATmakeList0();
+  aterm_list strat;
   // Array to keep note of the used parameters
   std::vector <bool> used;
   for (size_t i = 0; i < arity; i++)
@@ -1073,7 +1075,7 @@ static aterm_list create_strategy(
 
   // Process all (applicable) rules
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
-  aterm_list dep_list = ATmakeList0();
+  aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
     size_t rule_arity = (toInner(it->lhs(),true).function().arity())-1;
@@ -1146,7 +1148,7 @@ static aterm_list create_strategy(
     }
 
     // Create dependency list for this rule
-    aterm_list deps = ATmakeList0();
+    aterm_list deps;
     for (size_t i = 0; i < rule_arity; i++)
     {
       // Only if needed and not already rewritten
@@ -1158,7 +1160,7 @@ static aterm_list create_strategy(
         //fprintf(stderr,"dep of arg %i\n",i);
       }
     }
-    deps = ATreverse(deps);
+    deps = reverse(deps);
 
     // Add rule with its dependencies
     dep_list = push_front<aterm>(dep_list, ATmakeList2( deps, (aterm_appl)*it));
@@ -1168,8 +1170,8 @@ static aterm_list create_strategy(
   while (1)
   {
     // First collect rules without dependencies to the strategy
-    data_equation_list no_deps = data_equation_list(ATmakeList0());
-    aterm_list has_deps = ATmakeList0();
+    data_equation_list no_deps = data_equation_list(aterm_list());
+    aterm_list has_deps;
     for (; !dep_list.empty(); dep_list=ATgetNext(dep_list))
     {
       if (ATLgetFirst(ATLgetFirst(dep_list)).empty())
@@ -1181,7 +1183,7 @@ static aterm_list create_strategy(
         has_deps = push_front<aterm>(has_deps,ATgetFirst(dep_list));
       }
     }
-    dep_list = ATreverse(has_deps);
+    dep_list = reverse(has_deps);
 
     // Create and add tree of collected rules
     if (!no_deps.empty())
@@ -1217,17 +1219,17 @@ static aterm_list create_strategy(
 
       strat = push_front<aterm>(strat, rewr_arg);
 
-      aterm_list l = ATmakeList0();
+      aterm_list l;
       for (; !dep_list.empty(); dep_list=ATgetNext(dep_list))
       {
         l = push_front<aterm>(l, push_front<aterm>(ATgetNext(ATLgetFirst(dep_list)),
                     remove_one_element<aterm>(ATLgetFirst(ATLgetFirst(dep_list)), rewr_arg)));
       }
-      dep_list = ATreverse(l);
+      dep_list = reverse(l);
     }
   }
 
-  return ATreverse(strat);
+  return reverse(strat);
 }
 
 void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, const atermpp::aterm_int &opid, size_t arity)
@@ -2119,7 +2121,7 @@ void RewriterCompilingJitty::implement_tree(
 {
   int l = 0;
 
-  aterm_list nnfvars = ATmakeList0();
+  aterm_list nnfvars;
   for (size_t i=0; i<arity; i++)
   {
     if (!used[i])
@@ -2131,7 +2133,7 @@ void RewriterCompilingJitty::implement_tree(
   while (isC(tree))
   {
     fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,ATgetArgument(tree,0),0,ATmakeList0());
+    calcTerm(f,tree(0),0,aterm_list());
 
     fprintf(f,"==atermpp::aterm_appl((atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
@@ -2457,19 +2459,19 @@ static aterm toInner_list_odd(const data_expression &t)
 {
   if (is_application(t))
   {
-    aterm_list l = ATmakeList0();
+    aterm_list l;
     const data_expression_list a=application(t).arguments();
     for (data_expression_list::const_iterator i=a.begin(); i!=a.end(); ++i )
     {
       l = push_front<aterm>(l,toInner_list_odd(*i));
     }
 
-    l = ATreverse(l);
+    l = reverse(l);
 
     aterm arg0 = toInner_list_odd(application(t).head());
-    if (ATisList(arg0))
+    if (arg0.type()==AT_LIST)
     {
-      l = ATconcat((aterm_list) arg0, l);
+      l = aterm_cast<const aterm_list>(arg0) + l;
     }
     else
     {
@@ -2499,7 +2501,7 @@ static aterm toInner_list_odd(const data_expression &t)
     for (assignment_expression_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
       translated_assignments=push_back(translated_assignments,
-                                   atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs()))));
+                                   core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
     }
     return gsMakeWhr((aterm_appl)toInner_list_odd(w.body()),
                      (aterm_list)reverse(translated_assignments));
@@ -2888,7 +2890,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f,
             "\n"
 //            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%zu),(aterm*)args);\n"  // YYYY+
-            "    const atermpp::aterm_appl result=atermpp::aterm_appl(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  // YYYY+
+            "    const atermpp::aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  // YYYY+
             "    for (size_t i=0; i<(arity+%zu); ++i)\n"
             "    {\n"
             "      args[i].~aterm();\n"
@@ -3091,7 +3093,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    new (&args[0]) atermpp::aterm(head);\n"
       "    for(size_t i=1; i<arity; ++i)\n"
       "    {\n"
-      "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_appl(t(i))));\n"
+      "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t(i))));\n"
       "    }\n"
       "    const aterm_appl result= ApplyArray(arity,&args[0],&args[0]+arity);\n"
       "    for(size_t i=0; i<arity; ++i)\n"
@@ -3124,7 +3126,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      new (&args[k]) aterm(t(i));\n"
       "    }\n"
       "    size_t arity = arity_u+arity_t-2;\n"
-      "    const atermpp::aterm_appl intermediate = atermpp::aterm_appl(mcrl2::data::detail::get_appl_afun_value(arity+1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
+      "    const atermpp::aterm_appl intermediate(mcrl2::data::detail::get_appl_afun_value(arity+1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
       "    for(size_t i=0; i<arity_u+arity_t-1; ++i)\n"
       "    {\n"
       "      args[i].~aterm();\n"
@@ -3137,12 +3139,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
-      "      new (&args[i]) aterm(rewrite(atermpp::aterm_appl(u(i))));\n"
+      "      new (&args[i]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(u(i))));\n"
       "    }\n"
       "    size_t k = arity_u;\n"
       "    for (size_t i=1; i<arity_t; ++i,++k)\n"
       "    {\n"
-      "      new (&args[k]) aterm(rewrite(atermpp::aterm_appl(t(i))));\n"
+      "      new (&args[k]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t(i))));\n"
       "    }\n"
       "    const aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
       "    for(size_t i=0; i<arity_u+arity_t-1; ++i)\n"
@@ -3182,8 +3184,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
       "      return this_rewriter->rewrite_single_lambda(\n"
-      "               mcrl2::data::variable_list(atermpp::aterm_list(t(1))),\n"
-      "               atermpp::aterm_appl(t(2)),false,*(this_rewriter->global_sigma));\n"
+      "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t(1)),\n"
+      "               atermpp::aterm_cast<const atermpp::aterm_appl>(t(2)),false,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    assert(0);\n"
       "    return t;\n"

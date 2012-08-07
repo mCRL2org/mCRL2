@@ -75,6 +75,9 @@ inline HashNumber hash_number(const detail::_aterm *t, const size_t size);
 template <class Term, class ForwardIterator>
 detail::_aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end);
 
+template <class Term, class InputIterator, class ATermConverter>
+_aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm);
+
 template <class Term>
 detail::_aterm* term_appl1(const function_symbol &sym, const Term &t1);
 

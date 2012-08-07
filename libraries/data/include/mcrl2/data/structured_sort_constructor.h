@@ -112,8 +112,8 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     {
       assert(name != no_identifier());
 
-      return atermpp::aterm_appl(core::detail::gsMakeStructCons(name, arguments,
-                                 (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< atermpp::aterm_appl >(recogniser)));
+      return core::detail::gsMakeStructCons(name, arguments,
+                                 (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< atermpp::aterm_appl >(recogniser));
     }
 
     inline
@@ -143,7 +143,7 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     /// \brief Constructor.
     /// \param term A term
     structured_sort_constructor(const aterm &term)
-      : detail::structured_sort_constructor_base(atermpp::aterm_appl(term))
+      : detail::structured_sort_constructor_base(atermpp::aterm_cast<const atermpp::aterm_appl>(term))
     {}
 
     /// \brief Constructor

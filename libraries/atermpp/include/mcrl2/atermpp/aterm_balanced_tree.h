@@ -42,46 +42,46 @@ class term_balanced_tree: public aterm
 
   protected:
 
-    static atermpp::function_symbol const tree_empty()
+    static const atermpp::function_symbol &tree_empty()
     {
       static atermpp::function_symbol empty("@empty@", 0);
       return empty;
     }
 
-    static atermpp::function_symbol const tree_node()
+    static const atermpp::function_symbol &tree_node()
     {
       static atermpp::function_symbol node("@node@", 2);
       return node;
     }
 
-    static bool is_empty(const aterm tree)
+    static bool is_empty(const aterm &tree)
     {
-      return tree == aterm_appl(tree_empty());
+      return tree == tree_empty();
     }
 
-    static bool is_node(const aterm tree)
+    static bool is_node(const aterm &tree)
     {
       return tree.type() == AT_APPL && (aterm_appl(tree).function() == tree_node());
     }
 
-    static aterm left_branch(aterm tree)
+    static const aterm &left_branch(const aterm &tree)
     {
       assert(is_node(tree));
-      return aterm_appl(tree)(0);
+      return (aterm_cast<const aterm_appl>(tree))(0);
     }
 
-    static aterm right_branch(aterm tree)
+    static const aterm &right_branch(const aterm &tree)
     {
       assert(is_node(tree));
-      return aterm_appl(tree)(1);
+      return (aterm_cast<const aterm_appl>(tree))(1);
     }
 
-    static aterm node(aterm left, aterm right)
+    static aterm node(const aterm &left, const aterm &right)
     {
       return aterm_appl(tree_node(), left, right);
     }
 
-    static size_t tree_size(aterm tree)
+    static size_t tree_size(const aterm &tree)
     {
       if (is_node(tree))
       {
@@ -91,12 +91,12 @@ class term_balanced_tree: public aterm
       return (is_empty(tree)) ? 0 : 1;
     }
 
-    Term element_at(size_t position) const
+    const Term &element_at(size_t position) const
     {
       return element_at(*this, m_size, position);
     }
 
-    static Term element_at(aterm tree, size_t size, size_t position)
+    static const Term &element_at(const aterm &tree, size_t size, size_t position)
     {
       assert(size == tree_size(tree));
       assert(position < size);
@@ -110,7 +110,7 @@ class term_balanced_tree: public aterm
                element_at(right_branch(tree), size - left_size, position - left_size);
       }
 
-      return Term(tree);
+      return aterm_cast<const Term>(tree);
     }
 
     template < typename ForwardTraversalIterator >
@@ -130,7 +130,7 @@ class term_balanced_tree: public aterm
     {
       if (size==0)
       {
-        return aterm(aterm_appl(tree_empty()));
+        return tree_empty();
       }
 
       if (size==1)
@@ -192,7 +192,7 @@ class term_balanced_tree: public aterm
 
     /// Construction from aterm_list. THIS IS A VERY ODD ASSIGNMENT OPERATOR. UGLY.
     /// \param l A list.
-    term_balanced_tree(atermpp::aterm_list l)
+    term_balanced_tree(const atermpp::aterm_list &l)
       : m_size(l.size())
     {
       atermpp::aterm_list::const_iterator first=l.begin();
@@ -238,7 +238,7 @@ class term_balanced_tree: public aterm
     /// Element indexing operator.
     /// \param position Index in the tree.
     /// This operation behaves logarithmically with respect to container size
-    Term operator[](size_t position) const
+    const Term &operator[](size_t position) const
     {
       return element_at(position);
     }
@@ -275,7 +275,7 @@ class term_balanced_tree: public aterm
     /// \return True if the list is empty.
     bool empty() const
     {
-      return m_term==&*aterm_list();
+      return m_term->function()==detail::function_adm.AS_EMPTY_LIST;
     }
 
     /// \brief Conversion to aterm_list.

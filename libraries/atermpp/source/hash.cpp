@@ -28,12 +28,8 @@
 #include "mcrl2/atermpp/detail/memory.h"
 
 
-/*}}}  */
-
 namespace atermpp
 {
-
-/*{{{  defines */
 
 /* ======================================================= */
 
@@ -70,10 +66,7 @@ size_t hashcode(void* a, const size_t sizeMinus1)
   return ((((size_t)(a) >> 2) * a_prime_number) & sizeMinus1);
 }
 
-/*}}}  */
-/*{{{  static size_t approximatepowerof2(size_t n) */
-
-/**
+/*static size_t approximatepowerof2(size_t n) 
  * return smallest 2^m-1 larger or equal than n, where
  * returned size must at least be 127
  */
@@ -94,8 +87,6 @@ static size_t approximatepowerof2(size_t n)
   return n;
 }
 
-/*}}}  */
-/*{{{  static size_t calc_size_t_max() */
 static size_t calc_size_t_max()
 {
   size_t try_size_t_max;
@@ -111,8 +102,6 @@ static size_t calc_size_t_max()
 
   return size_t_max;
 }
-/*}}}  */
-/*{{{  static size_t calculateNewSize(sizeMinus1, nrdel, nrentries) */
 
 static size_t calculateNewSize
 (size_t sizeMinus1, size_t nr_deletions, size_t nr_entries)
@@ -143,16 +132,10 @@ static size_t calculateNewSize
   return (2*sizeMinus1)+1;
 }
 
-/*}}}  */
-/*{{{  static aterm tableGet(aterm **tableindex, size_t n) */
-
-static aterm tableGet(const std::vector< std::vector<aterm> > &tableindex, size_t n)
+static const aterm &tableGet(const std::vector< std::vector<aterm> > &tableindex, size_t n)
 {
   return tableindex[divELEMENTS_PER_TABLE(n)][modELEMENTS_PER_TABLE(n)];
 }
-
-/*}}}  */
-/*{{{  static void insertKeyvalue(set, size_t n, aterm t, aterm v) */
 
 static void insertKeyOrValue(std::vector<std::vector<aterm> >  &vec, size_t n, const aterm &t)
 {
@@ -167,9 +150,6 @@ static void insertKeyOrValue(std::vector<std::vector<aterm> >  &vec, size_t n, c
 
   vec[x][y] = t;
 }
-
-/*}}}  */
-/*{{{  static size_t hashPut(ATerm_table s, aterm key, size_t n) */
 
 size_t indexed_set::hashPut(const aterm &key, size_t n)
 {
@@ -200,9 +180,6 @@ size_t indexed_set::hashPut(const aterm &key, size_t n)
   return c;
 }
 
-/*}}}  */
-/*{{{  static void hashResizeSet(ATerm_indexed_set s) */
-
 void indexed_set::hashResizeSet()
 {
   size_t newsizeMinus1 = calculateNewSize(sizeMinus1,
@@ -218,16 +195,13 @@ void indexed_set::hashResizeSet()
   for (size_t i=0; i<m_size+free_positions.size(); i++)
   {
     aterm t = tableGet(m_keys, i);
-    if (t != aterm())
+    if (t.defined())
     {
       hashPut(t, i);
     }
   }
   free_positions=std::stack < size_t >();
 }
-
-/*}}}  */
-/*{{{  static ATermList tableContent(aterm **tableidx, entries) */
 
 static aterm_list tableContent(const std::vector< std::vector<aterm> > &tableindex,size_t nr_entries)
 {
@@ -238,7 +212,7 @@ static aterm_list tableContent(const std::vector< std::vector<aterm> > &tableind
   for (i=nr_entries; i>0; i--)
   {
     t = tableGet(tableindex, i-1);
-    if (t != aterm())
+    if (t.defined())
     {
       result = push_front(result, t);
     }
@@ -253,28 +227,24 @@ indexed_set::indexed_set(size_t initial_size /* = 100 */, unsigned int max_load_
         hashtable(std::vector<size_t>(1+sizeMinus1,EMPTY)),
         m_size(0)
 {
-  // std::cerr << "MAKE INDEXED SET \n";
 }
 
 ssize_t indexed_set::index(const aterm& elem) const
 {
-  // std::cerr << " INDEX " << elem << "\n";
-  size_t c,start,v;
+  size_t v;
 
-  start = hashcode(&*elem, sizeMinus1);
-  c = start;
+  size_t start = hashcode(&*elem, sizeMinus1);
+  size_t c = start;
   do
   {
     v=hashtable[c];
     if (v == EMPTY)
     {
-  // std::cerr << " NOT FOUND \n";
       return ATERM_NON_EXISTING_POSITION; /* Not found. */
     }
 
     if (v != DELETED && elem==tableGet(m_keys, v))
     {
-  // std::cerr << "FOUND " << v << "\n";
       return v;
     }
 
@@ -282,13 +252,11 @@ ssize_t indexed_set::index(const aterm& elem) const
   }
   while (c != start);
 
-  // std::cerr << " NOT FOUND2 \n";
   return ATERM_NON_EXISTING_POSITION; /* Not found. */
 }
 
 bool indexed_set::remove(const aterm& key)
 {
-// std::cerr << "REMOVE " << key << "\n";
   size_t start,c,v;
 
   start = hashcode(&*key,sizeMinus1);
@@ -314,19 +282,14 @@ bool indexed_set::remove(const aterm& key)
 
   hashtable[c] = DELETED;
 
-  insertKeyOrValue(m_keys, v, aterm());
+  insertKeyOrValue(m_keys, v, detail::static_undefined_aterm);
 
   free_positions.push(v);
   m_size--;
   return true;
 }
 
-/*}}}  */
-/*{{{  aterm ATindexedSetGetElem(ATerm_indexed_set hashset, size_t index) */
-
-// aterm ATindexedSetGetElem(ATerm_indexed_set hashset, size_t index)
-
-aterm indexed_set::get(size_t index) const
+const aterm &indexed_set::get(size_t index) const
 {
   assert(m_size+free_positions.size()>index);
   return tableGet(m_keys, index);
@@ -334,7 +297,6 @@ aterm indexed_set::get(size_t index) const
 
 void indexed_set::reset()
 {
-  // std::cerr << "RESET " << "\n";
   for (size_t i=0; i<=sizeMinus1 ; i++)
   {
     hashtable[i] = EMPTY;
@@ -353,13 +315,10 @@ void table::reset()
 
 std::pair<size_t, bool> indexed_set::put(const aterm& key)
 {
-  // std::cerr << "PUT " << key ;
   const size_t m=(free_positions.empty()? m_size : free_positions.top());
   const size_t n = hashPut(key,m);
-// std::cerr << " N " << n << " M " << m << "   ";
   if (n != m)
   {
-  // std::cerr << " NOT ADDED " << n << "\n";
       return std::make_pair(n,false);
   }
   
@@ -375,14 +334,9 @@ std::pair<size_t, bool> indexed_set::put(const aterm& key)
     hashResizeSet(); 
   }
 
-  // std::cerr << " ADDED " << n << " M_SIZE " << m_size << "\n";
   return std::make_pair(n, true);
 }
 
-/*}}}  */
-/*}}}  */
-/*{{{  void ATtablePut(ATerm_table table, aterm key, aterm value) */
-// void ATtablePut(ATerm_table table, const aterm &key, const aterm &value)
 
 void table::put(const aterm &key, const aterm &value)
 {
@@ -393,17 +347,13 @@ void table::put(const aterm &key, const aterm &value)
   insertKeyOrValue(m_values,p.first,value);
 }
 
-/*}}}  */
-/*{{{  aterm ATtableGet(ATerm_table table, aterm key) */
 
-// aterm ATtableGet(ATerm_table table, const aterm &key)
-
-aterm table::get(const aterm &key) const
+const aterm &table::get(const aterm &key) const
 {
   const size_t v = index(key);
   if (v==ATERM_NON_EXISTING_POSITION)
   {
-    return aterm();
+    return detail::static_undefined_aterm;
   }
   return tableGet(m_values, v);
 }
@@ -411,7 +361,6 @@ aterm table::get(const aterm &key) const
 
 bool table::remove(const aterm &key)
 {
-// std::cerr << "TABLE REMOVE " <<  key << "\n";
   const bool removed=indexed_set::remove(key);
   // At the top of the stack is the freed position with the key, 
   // of which the value must still be removed.
@@ -431,7 +380,5 @@ aterm_list table::values() const
 {
   return tableContent(m_values, m_size+free_positions.size());
 }
-
-/*}}}  */
 
 } // namespace atermpp

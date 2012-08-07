@@ -791,6 +791,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
 data_expression fromInner(const atermpp::aterm_appl &term)
 {
+  using namespace atermpp;
   if (is_variable(term))
   {
     return variable(term);
@@ -798,34 +799,34 @@ data_expression fromInner(const atermpp::aterm_appl &term)
 
   if (is_where_clause(term))
   {
-    const data_expression body=fromInner(atermpp::aterm_appl(term(0)));
-    const atermpp::term_list<atermpp::aterm_appl> l=static_cast<atermpp::term_list<atermpp::aterm_appl> >(term(1));
+    const data_expression body=fromInner(aterm_cast<const aterm_appl>(term(0)));
+    const term_list<atermpp::aterm_appl> &l=aterm_cast<const term_list<aterm_appl> >(term(1));
 
     std::vector < assignment_expression > lv;
-    for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
+    for(term_list<aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
     {
-      const atermpp::aterm_appl ass_expr= *it;
-      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(atermpp::aterm_appl(ass_expr(1)))));
+      const aterm_appl &ass_expr= *it;
+      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(aterm_cast<const aterm_appl>(ass_expr(1)))));
     }
     return where_clause(body,lv);
   }
 
   if (is_abstraction(term))
   {
-    return abstraction(binder_type(atermpp::aterm_appl(term(0))),variable_list(term(1)),fromInner(atermpp::aterm_appl(term(2))));
+    return abstraction(binder_type(aterm_cast<const aterm_appl>(term(0))),variable_list(term(1)),fromInner(aterm_cast<const aterm_appl>(term(2))));
   }
 
-  size_t arity = ATgetArity(ATgetAFun(term));
-  atermpp::aterm t = term(0);
+  size_t arity = term.size();
+  const atermpp::aterm &t = term(0);
   data_expression a;
 
   if (t.type()==AT_INT)
   {
-    a = get_int2term((atermpp::aterm_int(t)).value());
+    a = get_int2term(aterm_cast<const aterm_int>(t).value());
   }
   else
   {
-    a = fromInner(atermpp::aterm_appl(t));
+    a = fromInner(aterm_cast<const aterm_appl>(t));
   }
 
   size_t i = 1;
@@ -834,10 +835,10 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   {
     sort_expression_list sort_dom = function_sort(sort).domain();
     data_expression_list list;
-    while (!ATisEmpty(sort_dom))
+    while (!sort_dom.empty())
     {
       assert(i < arity);
-      list = push_front(list, fromInner(atermpp::aterm_appl(ATgetArgument(term,i))));
+      list = push_front(list, fromInner(aterm_cast<const atermpp::aterm_appl>(term(i))));
       sort_dom = pop_front(sort_dom);
       ++i;
     }

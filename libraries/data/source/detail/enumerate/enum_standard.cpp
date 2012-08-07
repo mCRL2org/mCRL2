@@ -66,7 +66,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       }
       else if (condition.type()==AT_APPL && condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
       {
-        return aterm_cast<atermpp::aterm_appl>(condition(1));
+        return aterm_cast<const atermpp::aterm_appl>(condition(1));
       }
       return Apply1(atermpp::aterm(m_enclosing_enumerator->rewr_obj->internal_not), condition);
     }
@@ -87,7 +87,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
     }
     else if (second_argument(0) == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=aterm_cast<atermpp::aterm_appl>(second_argument(1));
+      second_argument=aterm_cast<const atermpp::aterm_appl>(second_argument(1));
     }
     else
     {
@@ -218,7 +218,7 @@ bool EnumeratorSolutionsStandard::find_equality(
   if (t(0) == m_enclosing_enumerator->rewr_obj->internal_and)
   {
     assert(t.size()==3);
-    return find_equality(aterm_cast<const atermpp::aterm_appl>(t(1)),vars,v,e) || find_equality(aterm_cast<atermpp::aterm_appl>(t(2)),vars,v,e);
+    return find_equality(aterm_cast<const atermpp::aterm_appl>(t(1)),vars,v,e) || find_equality(aterm_cast<const atermpp::aterm_appl>(t(2)),vars,v,e);
   }
   else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_int(t(0))) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
   {
@@ -323,7 +323,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   {
     const atermpp::aterm_appl &t1=t;
     const atermpp::aterm_appl &binder=aterm_cast<const atermpp::aterm_appl>(t1(0));
-    const variable_list &bound_variables=aterm_cast<variable_list>(t1(1));
+    const variable_list &bound_variables=aterm_cast<const variable_list>(t1(1));
     const atermpp::aterm_appl &body=build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t1(2)),substituted_vars,exprs);
     return gsMakeBinder(binder,bound_variables,body);
   }
@@ -353,15 +353,15 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        new (&args[i])  atermpp::aterm(aterm_cast<atermpp::aterm_appl>(head)(i));
+        new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)(i));
       }
-      head = aterm_cast<atermpp::aterm_appl>(head)(0);
+      head = aterm_cast<const atermpp::aterm_appl>(head)(0);
     }
 
     new (&args[0]) atermpp::aterm(head);
     for (size_t i=1; i<arity; i++,k++)
     {
-      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<atermpp::aterm_appl>(t(i)),substituted_vars,exprs));
+      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t(i)),substituted_vars,exprs));
     }
 
     atermpp::aterm_appl r = ApplyArray(arity+extra_arity,&args[0],&args[0]+arity+extra_arity);

@@ -52,7 +52,7 @@ static variable_list get_vars(const atermpp::aterm_appl &a)
     {
       if (arg->type()!=AT_INT)
       {
-        l= get_vars(aterm_cast<atermpp::aterm_appl>(*arg))+l;
+        l= get_vars(aterm_cast<const atermpp::aterm_appl>(*arg))+l;
       }
     }
     return l;
@@ -90,7 +90,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   aterm_list rules=aterm_list();
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = push_front(rules,aterm_cast<aterm>(ATmakeList4(aterm_cast<aterm_list>(j->variables()),
+    rules = push_front(rules,aterm_cast<const aterm>(ATmakeList4(aterm_cast<const aterm_list>(j->variables()),
                                          rewriter->toRewriteFormat(j->condition()),
                                          rewriter->toRewriteFormat(j->lhs()),
                                          rewriter->toRewriteFormat(j->rhs()))));
@@ -120,11 +120,11 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
 
     for (; !rules.empty(); rules=pop_front(rules))
     {
-      if (element_at(aterm_cast<aterm_list>(front(rules)),2).function().arity() == arity + 1)
+      if (element_at(aterm_cast<const aterm_list>(front(rules)),2).function().arity() == arity + 1)
       {
-        const atermpp::aterm_appl &cond = aterm_cast<atermpp::aterm_appl>(element_at(atermpp::aterm_cast<aterm_list>(front(rules)),1));
+        const atermpp::aterm_appl &cond = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(front(rules)),1));
         atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));
-        const atermpp::aterm_appl &pars = aterm_cast<aterm_appl>(element_at(aterm_cast<aterm_list>(front(rules)),2));
+        const atermpp::aterm_appl &pars = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(front(rules)),2));
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
         for (size_t i = 0; i < arity; i++)
@@ -134,10 +134,10 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
 
         for (size_t i = 0; i < arity; i++)
         {
-          if (!is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(pars(i+1))))
+          if (!is_variable(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1))))
           {
             bs[i] = true;
-            const variable_list evars = get_vars(atermpp::aterm_cast<atermpp::aterm_appl>(pars(i+1)));
+            const variable_list evars = get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1)));
             for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
@@ -151,7 +151,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
                 j++;
               }
             }
-            vars = push_back(vars,get_vars(atermpp::aterm_cast<atermpp::aterm_appl>(pars(i+1))));
+            vars = push_back(vars,get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
           }
           else
           {
@@ -159,7 +159,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
             bool b = false;
             for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
             {
-              if (std::find(o->begin(),o->end(),variable(atermpp::aterm_cast<atermpp::aterm_appl>(pars(i+1)))) != o->end())
+              if (std::find(o->begin(),o->end(),variable(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1)))) != o->end())
               {
                 if (j >= 0)
                 {
@@ -173,7 +173,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
             {
               bs[i] = true;
             }
-            vars = push_back(vars,get_vars(aterm_cast<atermpp::aterm_appl>(pars(i+1))));
+            vars = push_back(vars,get_vars(aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
           }
         }
 
@@ -183,13 +183,13 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = push_front(deps,atermpp::aterm_cast<aterm>(aterm_int((int)i)));
+            deps = push_front(deps,static_cast<const aterm>(aterm_int((int)i)));
             args[i] += 1;
           }
         }
         deps = reverse(deps);
 
-        m = push_front(m,atermpp::aterm_cast<aterm>(ATmakeList2(deps,front(rules))));
+        m = push_front(m,static_cast<const aterm>(ATmakeList2(deps,front(rules))));
       }
       else
       {
@@ -202,9 +202,9 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
       aterm_list m2;
       for (; !m.empty(); m=pop_front(m))
       {
-        if (aterm_cast<aterm_list>(front(aterm_cast<aterm_list>(front(m)))).empty())
+        if (aterm_cast<const aterm_list>(front(aterm_cast<const aterm_list>(front(m)))).empty())
         {
-          strat = push_front(strat, front(pop_front(aterm_cast<aterm_list>(front(m)))));
+          strat = push_front(strat, front(pop_front(aterm_cast<const aterm_list>(front(m)))));
         }
         else
         {
@@ -237,13 +237,13 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         used[maxidx] = true;
 
         aterm_int k(maxidx);
-        strat = push_front(strat,atermpp::aterm_cast<aterm>(k));
+        strat = push_front(strat,static_cast<aterm>(k));
         m2 = aterm_list();
         for (; !m.empty(); m=pop_front(m))
         {
-          m2 = push_front(m2,atermpp::aterm_cast<aterm>(push_front(pop_front(aterm_cast<aterm_list>(front(m))),
-                    atermpp::aterm_cast<aterm>(remove_one_element(aterm_cast<aterm_list>(front(aterm_cast<aterm_list>(front(m)))),
-                                      atermpp::aterm_cast<aterm>(k))))));
+          m2 = push_front(m2,static_cast<aterm>(push_front(pop_front(aterm_cast<const aterm_list>(front(m))),
+                    static_cast<aterm>(remove_one_element(aterm_cast<const aterm_list>(front(aterm_cast<const aterm_list>(front(m)))),
+                                      static_cast<aterm>(k))))));
         }
         m = reverse(m2);
       }
@@ -447,12 +447,12 @@ static atermpp::aterm subst_values(
     }
     return t;
   }
-  else if (is_abstraction(atermpp::aterm_cast<atermpp::aterm_appl>(t)))
+  else if (is_abstraction(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
   {
-    const atermpp::aterm_appl &t1=atermpp::aterm_cast<atermpp::aterm_appl>(t);
-    const atermpp::aterm_appl &binder=atermpp::aterm_cast<atermpp::aterm_appl>(t1(0));
-    const variable_list &bound_variables=atermpp::aterm_cast<variable_list>(t1(1));
-    const atermpp::aterm_appl body=atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<atermpp::aterm_appl>(t1(2))));
+    const atermpp::aterm_appl &t1=atermpp::aterm_cast<const atermpp::aterm_appl>(t);
+    const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(t1(0));
+    const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1(1));
+    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(t1(2))));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(size_t i=0; i<number_of_vars; ++i)
@@ -466,11 +466,11 @@ static atermpp::aterm subst_values(
     return gsMakeBinder(binder,bound_variables,body);
 
   }
-  else if (is_where_clause(atermpp::aterm_cast<atermpp::aterm_appl>(t)))
+  else if (is_where_clause(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
   {
-    const atermpp::aterm_appl &t1=atermpp::aterm_cast<atermpp::aterm_appl>(t);
-    const atermpp::term_list < atermpp::aterm_appl > &assignment_list=atermpp::aterm_cast<atermpp::term_list < atermpp::aterm_appl > >(t1(1));
-    const atermpp::aterm_appl body=atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<atermpp::aterm_appl>(t1(0))));
+    const atermpp::aterm_appl &t1=atermpp::aterm_cast<const atermpp::aterm_appl>(t);
+    const atermpp::term_list < atermpp::aterm_appl > &assignment_list=atermpp::aterm_cast<const atermpp::term_list < atermpp::aterm_appl > >(t1(1));
+    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(t1(0))));
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
@@ -478,7 +478,7 @@ static atermpp::aterm subst_values(
     {
       for(atermpp::term_list < atermpp::aterm_appl >::const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
       {
-        assert(atermpp::aterm_cast<atermpp::aterm_appl>(*it)(0)!= *vars[i]);
+        assert(atermpp::aterm_cast<const atermpp::aterm_appl>(*it)(0)!= *vars[i]);
       }
     }
 #endif
@@ -489,7 +489,7 @@ static atermpp::aterm subst_values(
     {
       const atermpp::aterm_appl &assignment= *it;
       new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment(0)),
-    		atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<atermpp::aterm_appl>(assignment(1))))));
+    		atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(assignment(1))))));
     }
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
     for(std::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
@@ -500,7 +500,7 @@ static atermpp::aterm subst_values(
   }
   else
   {
-    const atermpp::aterm_appl &t1=aterm_cast<atermpp::aterm_appl>(t);
+    const atermpp::aterm_appl &t1=aterm_cast<const atermpp::aterm_appl>(t);
     const size_t arity = t1.size();
     const subst_values_argument substitute_values_in_arguments(vars,vals,number_of_vars);
     return ApplyArray(arity,t1.begin(),t1.end(),substitute_values_in_arguments);
@@ -540,7 +540,7 @@ static bool match_jitty(
       }
     }
     assert(number_of_vars<maxlen);
-    // vars.push_back(aterm_cast<variable>(p));
+    // vars.push_back(aterm_cast<const variable>(p));
     // vals.push_back(t);
     vars[number_of_vars]=reinterpret_cast<const variable*>(&p);
     vals[number_of_vars]=&t;
@@ -549,13 +549,13 @@ static bool match_jitty(
   }
   else
   {
-    if (t.type()==AT_INT || is_variable(t) || is_abstraction(aterm_cast<atermpp::aterm_appl>(t)) || is_where_clause(aterm_cast<atermpp::aterm_appl>(t)))
+    if (t.type()==AT_INT || is_variable(t) || is_abstraction(aterm_cast<const atermpp::aterm_appl>(t)) || is_where_clause(aterm_cast<const atermpp::aterm_appl>(t)))
     {
       return false;
     }
     // p and t must be aterm_appl's.
-    const atermpp::aterm_appl &pa=aterm_cast<atermpp::aterm_appl>(p);
-    const atermpp::aterm_appl &ta=aterm_cast<atermpp::aterm_appl>(t);
+    const atermpp::aterm_appl &pa=aterm_cast<const atermpp::aterm_appl>(p);
+    const atermpp::aterm_appl &ta=aterm_cast<const atermpp::aterm_appl>(t);
 
     if (pa.function()!=ta.function())
     {
@@ -590,7 +590,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   }
   else if (is_abstraction(term))
   {
-    const atermpp::aterm_appl &binder=atermpp::aterm_cast<atermpp::aterm_appl>(term(0));
+    const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(term(0));
     if (binder==gsMakeExists())
     {
       return internal_existential_quantifier_enumeration(term,sigma);
@@ -601,7 +601,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     if (binder==gsMakeLambda())
     {
-      return rewrite_single_lambda(aterm_cast<variable_list>(term(1)),atermpp::aterm_cast<atermpp::aterm_appl>(term(2)),false,sigma);
+      return rewrite_single_lambda(aterm_cast<const variable_list>(term(1)),atermpp::aterm_cast<const atermpp::aterm_appl>(term(2)),false,sigma);
     }
     assert(0);
     return term;
@@ -620,25 +620,25 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     {
       head=sigma(variable(op));
     }
-    else if (is_abstraction(atermpp::aterm_cast<atermpp::aterm_appl>(op)))
+    else if (is_abstraction(atermpp::aterm_cast<const atermpp::aterm_appl>(op)))
     {
-      head=aterm_cast<atermpp::aterm_appl>(op);
+      head=aterm_cast<const atermpp::aterm_appl>(op);
     }
-    else if (is_where_clause(atermpp::aterm_cast<atermpp::aterm_appl>(op)))
+    else if (is_where_clause(atermpp::aterm_cast<const atermpp::aterm_appl>(op)))
     {
-      head = rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(op),sigma);
+      head = rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(op),sigma);
     }
     else
     {
       // op has the shape = #REWR#(u1,...,un).
-      head=aterm_cast<atermpp::aterm_appl>(op);
+      head=aterm_cast<const atermpp::aterm_appl>(op);
     }
 
     // Here head has the shape
     // u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
     if (is_abstraction(head))
     {
-      const atermpp::aterm_appl &binder=atermpp::aterm_cast<atermpp::aterm_appl>(head(0));
+      const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(head(0));
       if (binder==gsMakeLambda())
       {
         return rewrite_lambda_application(head,term,sigma);
@@ -662,8 +662,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
       new (&args[0]) aterm(head);
       for(size_t i=1; i<arity; ++i)
       {
-        // args[i]=rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma);
-        new (&args[i]) aterm(rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma));
+        // args[i]=rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma);
+        new (&args[i]) aterm(rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma));
       }
       const aterm_appl result=ApplyArray(arity,&args[0],&args[0]+arity);
       for(size_t i=0; i<arity; ++i)
@@ -730,12 +730,12 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     {
       if (strat.front().type()==AT_INT)
       {
-        const size_t i = (aterm_cast<aterm_int>( strat.front())).value()+1;
+        const size_t i = (aterm_cast<const aterm_int>( strat.front())).value()+1;
         if (i < arity)
         {
           assert(!rewritten_defined[i]);
           rewritten_defined[i]=true;
-          new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma));
+          new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma));
           assert(rewritten[i].defined());
         }
         else
@@ -745,7 +745,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const aterm_list &rule = aterm_cast<aterm_list>(front(strat));
+        const aterm_list &rule = aterm_cast<const aterm_list>(front(strat));
         const aterm_appl &lhs = aterm_cast<const aterm_appl>(element_at(rule,2));
         size_t rule_arity = lhs.size();
 
@@ -754,7 +754,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        size_t max_len = aterm_cast<aterm_list>(front(rule)).size();
+        size_t max_len = aterm_cast<const aterm_list>(front(rule)).size();
         size_t number_of_vars=0;
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
@@ -773,9 +773,9 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         }
         assert(number_of_vars<=max_len);
         if (matches && (element_at(rule,1)==internal_true ||
-                        rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
+                        rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
         {
-          const atermpp::aterm_appl &rhs = aterm_cast<aterm_appl>(element_at(rule,3));
+          const atermpp::aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule,3));
 
           if (arity == rule_arity)
           {
@@ -833,8 +833,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     if (!rewritten_defined[i])
     {
       rewritten_defined[i]=true;
-      // rewritten[i]=rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma);
-      new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<atermpp::aterm_appl>(term(i)),sigma));
+      // rewritten[i]=rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma);
+      new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma));
     }
   }
 

@@ -96,7 +96,7 @@ static core::identifier_string make_identifier(std::string const& name)
 inline
 static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
 {
-  return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
+  return (a == core::detail::gsMakeNil()) ? no_identifier() : core::identifier_string(a);
 }
 }
 /// \endcond

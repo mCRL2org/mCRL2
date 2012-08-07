@@ -885,7 +885,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 is_function = c.is_function_name(True)
                 namespace = c.namespace()
                 # visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, classname))
-                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))); }' % (is_function, classname))
+                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x))); }' % (is_function, classname))
             vtext = '\n  ' + '\n  else '.join(visit_functions)
             text = re.sub('VISIT_FUNCTIONS', vtext, text)
             return text
@@ -922,7 +922,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 is_function = c.is_function_name(True)
                 updates.append('''if (%s(x))
 {
-  static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+  static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
 }''' % (is_function, c.classname(True)))
             if len(updates) == 0:
                 visit_text = '// skip'
@@ -1026,7 +1026,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     else:
                       updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
 }''' % (is_function, c.classname(True)))
                 if len(updates) == 0:
                     visit_text = '// skip'

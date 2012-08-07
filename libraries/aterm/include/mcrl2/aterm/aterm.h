@@ -169,7 +169,7 @@ ATermAppl ATmakeAppl_varargs(const AFun &sym, ...)
 } 
 
 inline
-const ATerm ATgetArgument(const ATermAppl &appl, const size_t idx)
+const ATerm &ATgetArgument(const ATermAppl &appl, const size_t idx)
 {
   return appl(idx);
 }
@@ -195,18 +195,18 @@ const ATerm &ATgetFirst(const ATermList &l)
 }
 
 inline
-ATermList ATgetNext(const ATermList &l)
+ATermList &ATgetNext(const ATermList &l)
 {
-  return static_cast<ATermList>(l->tail);
+  return l->tail;
 }
 
 inline
 bool ATisEmpty(const ATermList &l)
 {
-  return l == aterm_list();
+  return l.empty();
 }
 
-ATermList ATgetTail(const ATermList &list, const int &start);
+ATermList &ATgetTail(const ATermList &list, const int &start);
 ATermList ATgetSlice(const ATermList &list, const size_t start, const size_t end);
 
 inline
@@ -417,7 +417,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 }
 
 inline
-ATerm ATtableGet(const ATermTable &table, const ATerm &key)
+const ATerm &ATtableGet(const ATermTable &table, const ATerm &key)
 {
   return table.get(key);
 }
@@ -468,7 +468,7 @@ bool     ATindexedSetRemove(ATermIndexedSet &set, const ATerm &elem)   /* Return
 }
 
 inline
-ATerm      ATindexedSetGetElem(const ATermIndexedSet &set, size_t index)
+const ATerm      &ATindexedSetGetElem(const ATermIndexedSet &set, size_t index)
 {
   return set.get(index);
 }
@@ -608,19 +608,18 @@ inline const ATermList &ATLgetFirst(const ATermList &List)
 /**
  * \brief Gets the term associated with a key as ATermAppl
  **/
-inline ATermAppl ATAtableGet(const ATermTable &Table, const ATerm &Key)
+inline const ATermAppl &ATAtableGet(const ATermTable &Table, const ATerm &Key)
 {
-  const ATerm Result = ATtableGet(Table, Key);
-  assert(ATisApplOrNull(Result));
+  const ATerm &Result = ATtableGet(Table, Key);
   return aterm_cast<const ATermAppl>(Result);
 }
 
 /**
  * \brief Gets the term associated with a key as ATermList
  **/
-inline ATermList ATLtableGet(const ATermTable &Table, const ATerm &Key)
+inline const ATermList &ATLtableGet(const ATermTable &Table, const ATerm &Key)
 {
-  const ATerm Result = ATtableGet(Table, Key);
+  const ATerm &Result = ATtableGet(Table, Key);
   assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
 }

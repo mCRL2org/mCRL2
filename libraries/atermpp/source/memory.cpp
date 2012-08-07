@@ -62,7 +62,7 @@ namespace detail
 
 
 /* The constants below are not static to prevent some compiler warnings */
-const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);
+const size_t MIN_TERM_SIZE = detail::TERM_SIZE_APPL(0);
 const size_t INITIAL_MAX_TERM_SIZE = 256;
 
 
@@ -399,7 +399,7 @@ aterm::aterm(const function_symbol &sym)
     cur = cur->next();
   }
 
-  cur = detail::allocate_term(TERM_SIZE_APPL(0));
+  cur = detail::allocate_term(detail::TERM_SIZE_APPL(0));
   /* Delay masking until after allocate */
   hnr &= detail::aterm_table_mask;
   cur->function() = sym;

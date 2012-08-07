@@ -58,7 +58,7 @@ class table:public indexed_set
     /// \brief Get the value belonging to a given key in a table.
     /// \param key A key value.
     /// \return The corresponding value.
-    aterm get(const aterm &key) const; 
+    const aterm &get(const aterm &key) const; 
 
     /// \brief Remove the (key, value)-pair from table.
     /// \param key A key value.
