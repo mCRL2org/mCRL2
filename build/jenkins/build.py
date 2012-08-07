@@ -58,7 +58,7 @@ if not buildthreads:
 extraoptions = []
 if platform.system() == 'Linux':
   extraoptions =  ['-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', '--'] + extraoptions
+make_command = ['cmake', '--build', workspace, '--'] + extraoptions
 if call('CMake --build', make_command):
   print 'Build failed.'
   sys.exit(1)
