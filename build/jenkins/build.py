@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import multiprocessing
 
@@ -7,6 +8,10 @@ buildthreads = os.environ['BUILD_THREADS'] if 'BUILD_THREADS' in os.environ else
 buildtype = os.environ['buildtype']
 compiler = os.environ['compiler']
 label = os.environ['label']
+
+def call(name, command, **kwargs):
+  print '\n##\n## Running {0}\n## {1}\n##\n'.format(name, ' '.join(command))
+  return subprocess.call(command, **kwargs)
 
 #
 # Configuration axis: compiler
@@ -28,11 +33,12 @@ if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
 #
 # Run CMake, take into account configuration axes.
 #
-if subprocess.call(['cmake', 
-                    '-DCMAKE_BUILD_TYPE={0}'.format(buildtype),
-                    '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(workspace)] 
-                    + compilerflags
-                    + testflags):
+cmake_command = ['cmake', \
+                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), \
+                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(workspace)] \
+                 + compilerflags \
+                 + testflags
+if call('CMake', cmake_command):
   print 'CMake failed.'
   sys.exit(1)
 
@@ -48,7 +54,8 @@ if not buildthreads:
 # Build
 #
 
-if subprocess.call(['make', '-j{0}'.format(buildthreads)]):
+make_command = ['make', '-j{0}'.format(buildthreads)]
+if call('Make/NMake', make_command):
   print 'Build failed.'
   sys.exit(1)
 
@@ -58,9 +65,14 @@ if subprocess.call(['make', '-j{0}'.format(buildthreads)]):
 
 newenv = {'MCRL2_COMPILEREWRITER': '{0}/stage/bin/mcrl2compilerewriter'.format(workspace)}
 newenv.update(os.environ)
-ctest = subprocess.call(['ctest', '-T', 'Test', '--output-on-failure', '--no-compress-output', '-j{0}'.format(buildthreads)], env=newenv)
-if ctest:
-  print 'CTest returned {0}'.format(ctest)
+ctest_command = ['ctest', \
+                 '-T', 'Test', \
+                 '--output-on-failure', \
+                 '--no-compress-output', \
+                 '-j{0}'.format(buildthreads)]
+ctest_result = call('CTest', ctest_command, env=newenv)
+if ctest_result:
+  print '\n##\n## CTest returned {0}\n##\n'.format(ctest_result)
 
 #
 # Copy test output to ${WORKSPACE}/ctest.xml, so the xUnit plugin can find
