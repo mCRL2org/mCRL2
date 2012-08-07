@@ -444,6 +444,7 @@ BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
 }
 
 #ifndef MCRL2_SKIP_LONG_TESTS
+#if 0 // This test has been disabled; it was decided not to fix this issue.
 // The following example illustrates that enumeration can sometimes need
 // a large stack depth.
 // The example was attached to bug #1019, and fails with limited stack,
@@ -466,6 +467,7 @@ BOOST_AUTO_TEST_CASE(test_deep_stack)
   );
   check_lps2lts_specification(spec, 3, 524289, 2);
 }
+#endif // false
 #endif // MCRL2_SKIP_LONG_TESTS
 
 
