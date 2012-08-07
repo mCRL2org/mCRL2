@@ -81,6 +81,6 @@ if ctest_result:
 
 tagfile = '{0}/Testing/TAG'.format(workspace)
 if os.path.exists(tagfile):
-  dirname = open(tagfile).read()
+  dirname = open(tagfile).readline().strip()
   shutil.copyfile('{0}/Testing/{1}/Test.xml'.format(workspace, dirname), 
                   '{0}/ctest.xml'.format(workspace))
