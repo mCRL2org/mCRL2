@@ -48,7 +48,7 @@ if not buildthreads:
 # Build
 #
 
-if subprocess.check(['make', '-j{0}'.format(buildthreads)]):
+if subprocess.call(['make', '-j{0}'.format(buildthreads)]):
   print 'Build failed.'
   sys.exit(1)
 
