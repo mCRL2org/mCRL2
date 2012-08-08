@@ -48,11 +48,14 @@ class MainWindow : public QMainWindow, public Mediator
     void saveFile();
     void saveFileAs();
 
-    void openDgcFile();
-    void saveDgcFile();
+    void openAttributeConfiguration();
+    void saveAttributeConfiguration();
 
-    void openDgdFile();
-    void saveDgdFile();
+    void openDiagram();
+    void saveDiagram();
+
+    void showAttributeContextMenu(const QPoint &position);
+    void updateAttributeOperations();
 
   private:
     Ui::MainWindow m_ui;

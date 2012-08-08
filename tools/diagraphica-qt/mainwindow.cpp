@@ -14,8 +14,13 @@
 
 MainWindow::MainWindow():
   m_settingsDialog(new SettingsDialog(this, &m_settings)),
-  m_graph(NULL), m_diagramEditor(NULL), m_examiner(NULL), m_arcDiagram(NULL), m_simulator(NULL), m_timeSeries(NULL)
-{
+  m_graph(0),
+  m_examiner(0),
+  m_arcDiagram(0),
+  m_simulator(0),
+  m_timeSeries(0),
+  m_diagramEditor(0)
+  {
   m_ui.setupUi(this);
 
   m_ui.attributes->resizeColumnsToContents();
@@ -25,16 +30,21 @@ MainWindow::MainWindow():
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
   connect(m_ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
 
-  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openDgcFile()));
-  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveDgcFile()));
+  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openAttributeConfiguration()));
+  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveAttributeConfiguration()));
 
-  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDgdFile()));
-  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDgdFile()));
+  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDiagram()));
+  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
 
   connect(m_ui.actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
 
   connect(m_ui.actionSettingsGeneral, SIGNAL(triggered()), m_settingsDialog, SLOT(showGeneral()));
   connect(m_ui.actionSettingsArcDiagram, SIGNAL(triggered()), m_settingsDialog, SLOT(showArcDiagram()));
+
+  connect(m_ui.attributes, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showAttributeContextMenu(const QPoint &)));
+  m_ui.attributes->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_ui.attributes, SIGNAL(itemSelectionChanged()), this, SLOT(updateAttributeOperations()));
+  updateAttributeOperations();
 }
 
 static void stretch(QWidget *widget)
@@ -217,7 +227,7 @@ void MainWindow::saveFileAs()
   save(filename);
 }
 
-void MainWindow::openDgcFile()
+void MainWindow::openAttributeConfiguration()
 {
   if (m_graph == NULL)
   {
@@ -259,7 +269,7 @@ void MainWindow::openDgcFile()
   }
 }
 
-void MainWindow::saveDgcFile()
+void MainWindow::saveAttributeConfiguration()
 {
   if (m_graph == NULL)
   {
@@ -286,7 +296,7 @@ void MainWindow::saveDgcFile()
   }
 }
 
-void MainWindow::openDgdFile()
+void MainWindow::openDiagram()
 {
   if (m_graph == NULL)
   {
@@ -299,28 +309,28 @@ void MainWindow::openDgdFile()
     return;
   }
 
-  Diagram* dgrmNew = new Diagram(this);
+  Diagram* diagram = new Diagram(this);
 
   try
   {
     m_parser.parseDiagram(
           filename,
           m_graph,
-          dgrmNew);
+          diagram);
 
-    m_diagramEditor->setDiagram(dgrmNew);
+    m_diagramEditor->setDiagram(diagram);
 
-    m_arcDiagram->setDiagram(dgrmNew);
+    m_arcDiagram->setDiagram(diagram);
     m_arcDiagram->hideAllDiagrams();
 
     m_simulator->clearData();
-    m_simulator->setDiagram(dgrmNew);
+    m_simulator->setDiagram(diagram);
 
     m_timeSeries->clearData();
-    m_timeSeries->setDiagram(dgrmNew);
+    m_timeSeries->setDiagram(diagram);
 
     m_examiner->clearData();
-    m_examiner->setDiagram(dgrmNew);
+    m_examiner->setDiagram(diagram);
 
     if (m_diagramEditor->isVisible()) // Edit Mode
     {
@@ -337,17 +347,14 @@ void MainWindow::openDgdFile()
   }
   catch (const mcrl2::runtime_error& e)
   {
-    delete dgrmNew;
-    dgrmNew = NULL;
+    delete diagram;
 
     QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
     return;
   }
-
-  dgrmNew = NULL;
 }
 
-void MainWindow::saveDgdFile()
+void MainWindow::saveDiagram()
 {
   if (m_graph == NULL)
   {
@@ -372,5 +379,38 @@ void MainWindow::saveDgdFile()
   {
     QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
     return;
+  }
+}
+
+void MainWindow::showAttributeContextMenu(const QPoint &position)
+{
+  m_ui.menuAttributes->popup(m_ui.attributes->viewport()->mapToGlobal(position));
+}
+
+void MainWindow::updateAttributeOperations()
+{
+  QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
+  int items = 0;
+  for (int i = 0; i < ranges.size(); i++)
+  {
+    items += ranges[i].rowCount();
+  }
+
+  m_ui.actionClusterNodes->setEnabled(items > 0);
+  m_ui.actionViewTrace->setEnabled(items > 0);
+  m_ui.actionDistributionPlot->setEnabled(items == 1);
+  m_ui.actionCorrelationPlot->setEnabled(items == 2);
+  m_ui.actionCombinationPlot->setEnabled(items > 0);
+  m_ui.actionDuplicate->setEnabled(items == 1);
+  m_ui.actionRenameAttribute->setEnabled(items == 1);
+  m_ui.actionDelete->setEnabled(items == 1);
+
+  if (items == 1)
+  {
+  
+  }
+  else
+  {
+  
   }
 }
