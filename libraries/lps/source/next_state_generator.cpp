@@ -75,11 +75,21 @@ next_state_generator::next_state_generator(
     m_summands.push_back(summand);
   }
 
+  state initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
+  state initial_state;
+  for (size_t i = 0; i < initial_state_raw.size(); i++)
+  {
+    initial_state.push_back(m_rewriter(initial_state_raw[i]));
+  }
+  m_initial_state = get_internal_state(initial_state);
+  m_initial_state.protect();
+
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
 
 next_state_generator::~next_state_generator()
 {
+  m_initial_state.unprotect();
   m_state_function.unprotect();
 }
 

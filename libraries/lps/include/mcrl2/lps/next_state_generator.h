@@ -194,6 +194,7 @@ class next_state_generator
     data::variable_vector m_process_parameters;
     atermpp::function_symbol m_state_function;
     atermpp::vector<summand_t> m_summands;
+    internal_state_t m_initial_state;
 
     summand_subset_t m_all_summands;
 
@@ -255,13 +256,13 @@ class next_state_generator
     /// \brief Gets the initial state.
     state initial_state() const
     {
-      return m_specification.initial_process().state(m_specification.process().process_parameters());
+      return get_state(internal_initial_state());
     }
 
     /// \brief Gets the initial state in internal format.
     internal_state_t internal_initial_state() const
     {
-      return get_internal_state(initial_state());
+      return m_initial_state;
     }
 
     /// \brief Returns the currently loaded specification.
