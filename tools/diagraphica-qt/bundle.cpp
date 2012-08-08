@@ -18,18 +18,18 @@ using namespace std;
 Bundle::Bundle()
 {
   index = NON_EXISTING;
-  parent = NULL;
-  inCluster = NULL;
-  outCluster = NULL;
+  parent = 0;
+  inCluster = 0;
+  outCluster = 0;
 }
 
 
 Bundle::Bundle(const size_t& idx)
 {
   index      = idx;
-  parent     = NULL;
-  inCluster  = NULL;
-  outCluster = NULL;
+  parent     = 0;
+  inCluster  = 0;
+  outCluster = 0;
 }
 
 
@@ -85,7 +85,7 @@ void Bundle::setEdges(const vector< Edge* > &e)
 Bundle* Bundle::getChild(const size_t& idx)
 {
   if (idx >= children.size())
-    return NULL;
+    return 0;
   return children[idx];
 }
 
@@ -160,7 +160,7 @@ void Bundle::clearChildren()
 {
   for (size_t i = 0; i < children.size(); ++i)
   {
-    children[i] = NULL;
+    children[i] = 0;
   }
   children.clear();
 }
@@ -170,7 +170,7 @@ void Bundle::clearEdges()
 {
   for (size_t i = 0; i < edges.size(); ++i)
   {
-    edges[i] = NULL;
+    edges[i] = 0;
   }
   edges.clear();
 

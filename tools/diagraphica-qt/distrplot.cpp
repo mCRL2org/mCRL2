@@ -24,7 +24,7 @@ DistrPlot::DistrPlot(
   minHgtHintPx =  4;
   maxWthHintPx = 10;
 
-  diagram        = NULL;
+  diagram        = 0;
   showDgrm       = false;
   attrValIdxDgrm = -1;
 }
@@ -33,7 +33,7 @@ DistrPlot::DistrPlot(
 DistrPlot::~DistrPlot()
 {
   clearValues();
-  diagram = NULL;
+  diagram = 0;
 }
 
 
@@ -345,7 +345,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
                      Utils::perc((int) number[posIdx], (int) graph->getSizeNodes())));
     msgDgrm.append("%");
 
-    if (diagram == NULL)
+    if (diagram == 0)
     {
       setToolTip(QString::fromStdString(msgDgrm));
     }
@@ -359,7 +359,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
     }
 
     // free memory
-    attr = NULL;
+    attr = 0;
   }
 }
 
@@ -478,7 +478,7 @@ void DistrPlot::processHits(
     showDgrm = false;
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

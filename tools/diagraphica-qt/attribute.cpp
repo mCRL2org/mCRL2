@@ -105,13 +105,13 @@ size_t Attribute::getSizeOrigValues()
 
 Value* Attribute::getOrigValue(size_t /*idx*/)
 {
-  return NULL;
+  return 0;
 }
 
 
 Value* Attribute::getCurValue(size_t /*idx*/)
 {
-  return NULL;
+  return 0;
 }
 
 

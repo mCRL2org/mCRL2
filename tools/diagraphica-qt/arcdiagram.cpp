@@ -38,7 +38,7 @@ ArcDiagram::ArcDiagram(
 {
   idxInitStLeaves    = NON_EXISTING;
 
-  diagram = NULL;
+  diagram = 0;
 
   connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 
@@ -63,7 +63,7 @@ ArcDiagram::ArcDiagram(
 
 ArcDiagram::~ArcDiagram()
 {
-  diagram = NULL;
+  diagram = 0;
   clearSettings();
 }
 
@@ -373,7 +373,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 {
   RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
   int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
-  Cluster* clust = NULL;
+  Cluster* clust = 0;
 
   if (render == HQRender)
   {
@@ -398,7 +398,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
       VisUtils::fillEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
     }
 
-    if (clust != NULL && clust->getAttribute() != NULL)
+    if (clust != 0 && clust->getAttribute() != 0)
       VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
     else if (render != HitRender)
       VisUtils::setColor(Qt::white);
@@ -426,7 +426,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
     }
 
     VisUtils::disableLineAntiAlias();
-    clust = NULL;
+    clust = 0;
   }
 }
 
@@ -435,7 +435,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 {
   RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
   int segs = (render == LQRender ? SEGM_HINT_LQ : SEGM_HINT_HQ);
-  Cluster* clust = NULL;
+  Cluster* clust = 0;
   QColor colFill = Qt::white;
 
   if (render == HQRender)
@@ -463,7 +463,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
         clust   = mapPosToClust[i][j];
         colFill = VisUtils::lightGray;
 
-        if (clust != NULL && clust->getAttribute() != NULL)
+        if (clust != 0 && clust->getAttribute() != 0)
         {
           colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
         }
@@ -569,7 +569,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
   {
 
     RenderMode render = ( inSelectMode ? HitRender : ( m_mouseDrag ? LQRender : HQRender ) );
-    Cluster* clust = NULL;
+    Cluster* clust = 0;
     QColor colFill = Qt::lightGray;
 
     if (render == HQRender)
@@ -595,7 +595,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
         {
           // fill color
           clust   = mapPosToClust[i][j];
-          if (clust != NULL && clust->getAttribute() != NULL)
+          if (clust != 0 && clust->getAttribute() != 0)
           {
             colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
           }
@@ -639,7 +639,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
     {
       VisUtils::disableBlending();
       VisUtils::disableLineAntiAlias();
-      clust = NULL;
+      clust = 0;
     }
   }
 }
@@ -689,8 +689,8 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
             vals.push_back(val);
           }
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
 
         diagram->visualize(
               inSelectMode,
@@ -818,8 +818,8 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
               vals.push_back(val);
             }
           }
-          attr = NULL;
-          node = NULL;
+          attr = 0;
+          node = 0;
 
           diagram->visualize(
                 inSelectMode,
@@ -854,8 +854,8 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
               vals.push_back(val);
             }
           }
-          attr = NULL;
-          node = NULL;
+          attr = 0;
+          node = 0;
 
           diagram->visualize(
                 inSelectMode,
@@ -1281,7 +1281,7 @@ void ArcDiagram::calcSettingsBundles()
 
 void ArcDiagram::calcSettingsTree()
 {
-  if (graph->getRoot() != NULL)
+  if (graph->getRoot() != 0)
   {
     QSizeF size = worldSize();
     double yTop = 0.5*Utils::minn(size.width(), size.height())-2.0*radLeaves;
@@ -1367,7 +1367,7 @@ void ArcDiagram::calcPositionsTree(
 
 void ArcDiagram::calcSettingsBarTree()
 {
-  if (graph->getRoot() != NULL)
+  if (graph->getRoot() != 0)
   {
     QSizeF size = worldSize();
     double yBot = -0.5*Utils::minn(size.width(), size.height());
@@ -1485,7 +1485,7 @@ void ArcDiagram::updateMarkBundles()
   {
     Cluster* clst;
     Node* node;
-    Edge* edge = NULL;
+    Edge* edge = 0;
 
     clst = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
     for (size_t j = 0; j < clst->getSizeNodes(); ++j)
@@ -1495,7 +1495,7 @@ void ArcDiagram::updateMarkBundles()
         for (size_t k = 0; k < node->getSizeInEdges(); ++k)
         {
           edge = node->getInEdge(k);
-          if (edge != NULL &&
+          if (edge != 0 &&
               edge->getBundle()->getIndex() != NON_EXISTING &&
               markBundles.size() > edge->getBundle()->getIndex())
           {
@@ -1508,7 +1508,7 @@ void ArcDiagram::updateMarkBundles()
         for (size_t k = 0; k < node->getSizeOutEdges(); ++k)
         {
           edge = node->getOutEdge(k);
-          if (edge != NULL &&
+          if (edge != 0 &&
               edge->getBundle()->getIndex() != NON_EXISTING &&
               markBundles.size() > edge->getBundle()->getIndex())
           {
@@ -1518,9 +1518,9 @@ void ArcDiagram::updateMarkBundles()
       }
     }
 
-    edge = NULL;
-    node = NULL;
-    clst = NULL;
+    edge = 0;
+    node = 0;
+    clst = 0;
   }
 }
 
@@ -1804,11 +1804,11 @@ void ArcDiagram::handleHoverCluster(
       /* -*-
       Value* val;
       val = clust->getAttribute()->mapToValue( clust->getAttrValIdx() );
-      if ( val != NULL )
+      if ( val != 0 )
           msg = val->getValue();
       else
           msg = "";
-      val = NULL;
+      val = 0;
       */
     }
     setToolTip(QString::fromStdString(msg));
@@ -1988,7 +1988,7 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 {
   Cluster* clust = graph->getLeaf(dgrmIdx);
 
-  if (clust != NULL)
+  if (clust != 0)
   {
     Attribute*        attr;
     set< Attribute* > attrs;
@@ -2001,49 +2001,49 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
     {
       // get result
       attr   = diagram->getShape(i)->getDOFXCtr()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFYCtr()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFWth()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFHgt()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFAgl()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFCol()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->getShape(i)->getDOFText()->getAttribute();
-      if (attr != NULL)
+      if (attr != 0)
       {
         attrs.insert(attr);
       }
@@ -2090,10 +2090,10 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 
     // clear memory
     attrs.clear();
-    attr = NULL;
+    attr = 0;
   }
 
-  clust = NULL;
+  clust = 0;
 }
 
 
@@ -2101,7 +2101,7 @@ void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
 {
   Cluster* clust = graph->getLeaf(dgrmIdx);
 
-  if (clust != NULL)
+  if (clust != 0)
   {
     // hide diagram
     showDgrm[dgrmIdx] = false;
@@ -2124,7 +2124,7 @@ void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
     posDgrm[dgrmIdx].y = 0;
   }
 
-  clust = NULL;
+  clust = 0;
 }
 
 
@@ -2173,5 +2173,5 @@ void ArcDiagram::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }

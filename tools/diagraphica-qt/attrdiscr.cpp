@@ -58,7 +58,7 @@ AttrDiscr::AttrDiscr(const AttrDiscr& attr)
       curMap.push_back(mapping);
     }
   }
-  mapping = NULL;
+  mapping = 0;
 }
 
 
@@ -144,7 +144,7 @@ void AttrDiscr::clusterValues(
     }
 
     // -*-
-    value = NULL;
+    value = 0;
   }
   catch (...)
   {
@@ -187,7 +187,7 @@ void AttrDiscr::moveValue(
       curValues[idxTo]->setIndex(idxTo);
     }
 
-    temp = NULL;
+    temp = 0;
   }
   catch (...)
   {
@@ -207,7 +207,7 @@ void AttrDiscr::configValues(
       for (size_t i = 0; i < curValues.size(); ++i)
       {
         delete curValues[i];
-        curValues[i] = NULL;
+        curValues[i] = 0;
       }
     }
     curValues.clear();
@@ -233,7 +233,7 @@ void AttrDiscr::configValues(
         curMap.push_back(mapping);
       }
     }
-    mapping = NULL;
+    mapping = 0;
   }
   catch (const mcrl2::runtime_error& e)
   {
@@ -314,9 +314,9 @@ void AttrDiscr::clearClusters()
 
 void AttrDiscr::initValues(const vector< string > &vals)
 {
-  Value*  value0  = NULL;
-  Value*  value1  = NULL;
-  Value** mapping = NULL;
+  Value*  value0  = 0;
+  Value*  value1  = 0;
+  Value** mapping = 0;
 
   // init orig & current domain, current map
   for (size_t i = 0; i < vals.size(); ++i)
@@ -335,16 +335,16 @@ void AttrDiscr::initValues(const vector< string > &vals)
     curMap.push_back(mapping);
   }
 
-  value0  = NULL;
-  value1  = NULL;
-  mapping = NULL;
+  value0  = 0;
+  value1  = 0;
+  mapping = 0;
 }
 
 
 void AttrDiscr::resetCurValues()
 {
-  Value* value    = NULL;
-  Value** mapping = NULL;
+  Value* value    = 0;
+  Value** mapping = 0;
 
   // clear current domain & mapping
   deleteCurValues();
@@ -367,8 +367,8 @@ void AttrDiscr::resetCurValues()
     curMap.push_back(mapping);
   }
 
-  value   = NULL;
-  mapping = NULL;
+  value   = 0;
+  mapping = 0;
 }
 
 
@@ -377,7 +377,7 @@ void AttrDiscr::deleteOrigValues()
   for (size_t i = 0; i < origValues.size(); ++i)
   {
     delete origValues[i];
-    origValues[i] = NULL;
+    origValues[i] = 0;
   }
   origValues.clear();
 }
@@ -388,7 +388,7 @@ void AttrDiscr::deleteCurValues()
   for (size_t i = 0; i < curValues.size(); ++i)
   {
     delete curValues[i];
-    curValues[i] = NULL;
+    curValues[i] = 0;
   }
   curValues.clear();
 }
@@ -399,7 +399,7 @@ void AttrDiscr::deleteCurMap()
   for (size_t i = 0; i < curMap.size(); ++i)
   {
     delete curMap[i];
-    curMap[i] = NULL;
+    curMap[i] = 0;
   }
   curMap.clear();
 }

@@ -18,8 +18,8 @@ using namespace std;
 Cluster::Cluster()
 {
   index      = NON_EXISTING;
-  parent     = NULL;
-  attribute  = NULL;
+  parent     = 0;
+  attribute  = 0;
   attrValIdx = NON_EXISTING;
 }
 
@@ -28,8 +28,8 @@ Cluster::Cluster(const vector< size_t > &crd)
 {
   coord      = crd;
   index      = NON_EXISTING;
-  parent     = NULL;
-  attribute  = NULL;
+  parent     = 0;
+  attribute  = 0;
   attrValIdx = NON_EXISTING;
 }
 
@@ -140,7 +140,7 @@ void Cluster::clearChildren()
 {
   for (size_t i = 0; i < children.size(); ++i)
   {
-    children[i] = NULL;
+    children[i] = 0;
   }
   children.clear();
 }
@@ -150,7 +150,7 @@ void Cluster::clearNodes()
 {
   for (size_t i = 0; i < nodes.size(); ++i)
   {
-    nodes[i] = NULL;
+    nodes[i] = 0;
   }
   nodes.clear();
 }
@@ -158,7 +158,7 @@ void Cluster::clearNodes()
 
 void Cluster::clearAttribute()
 {
-  attribute  = NULL;
+  attribute  = 0;
   attrValIdx = NON_EXISTING;
 }
 
@@ -167,7 +167,7 @@ void Cluster::clearInBundles()
 {
   for (size_t i = 0; i < inBundles.size(); ++i)
   {
-    inBundles[i] = NULL;
+    inBundles[i] = 0;
   }
   inBundles.clear();
 }
@@ -177,7 +177,7 @@ void Cluster::clearOutBundles()
 {
   for (size_t i = 0; i < outBundles.size(); ++i)
   {
-    outBundles[i] = NULL;
+    outBundles[i] = 0;
   }
   outBundles.clear();
 }

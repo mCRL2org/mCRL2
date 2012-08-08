@@ -28,7 +28,7 @@ DOF::DOF(
   values.push_back(0.0);   // init min
   values.push_back(0.0);   // init max
   dir   = 1;
-  attr  = NULL;
+  attr  = 0;
   textStatus = ID_TEXT_NONE;
 }
 
@@ -52,7 +52,7 @@ DOF::DOF(const DOF& dof)
 DOF::~DOF()
 {
   // association
-  attr = NULL;
+  attr = 0;
 }
 
 

@@ -487,7 +487,7 @@ void ColorChooser::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

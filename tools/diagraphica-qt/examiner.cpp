@@ -27,8 +27,8 @@ Examiner::Examiner(
   : Visualizer(parent, m, g),
     settings(s)
 {
-  diagram = NULL;
-  frame = NULL;
+  diagram = 0;
+  frame = 0;
   colFrm = VisUtils::mediumGray;
 
   focusFrameIdx = -1;
@@ -43,12 +43,12 @@ Examiner::Examiner(
 Examiner::~Examiner()
 {
   // association
-  diagram = NULL;
+  diagram = 0;
   attributes.clear();
 
   // composition
   delete frame;
-  frame = NULL;
+  frame = 0;
 
   // composition
   {
@@ -104,7 +104,7 @@ void Examiner::setFrame(
 void Examiner::clrFrame()
 {
   delete frame;
-  frame = NULL;
+  frame = 0;
 
   attributes.clear();
 
@@ -246,7 +246,7 @@ void Examiner::visualize(const bool& inSelectMode)
       2.0,
       2.0);
 
-    if (diagram != NULL)
+    if (diagram != 0)
     {
       drawFrame(inSelectMode);
 
@@ -263,7 +263,7 @@ void Examiner::visualize(const bool& inSelectMode)
   }
   else
   {
-    if (diagram != NULL)
+    if (diagram != 0)
     {
       drawFrame(inSelectMode);
 
@@ -428,7 +428,7 @@ void Examiner::clearAttributes()
 void Examiner::clearDiagram()
 {
   // association
-  diagram = NULL;
+  diagram = 0;
 }
 
 
@@ -436,7 +436,7 @@ void Examiner::clearFrames()
 {
   // composition
   delete frame;
-  frame = NULL;
+  frame = 0;
 }
 
 
@@ -455,7 +455,7 @@ void Examiner::handleHits(const vector< int > &ids)
         {
           if (mediator->getView() == Mediator::VIEW_SIM)
           {
-            if (frame != NULL)
+            if (frame != 0)
             {
               mediator->handleSendDgrm(this, true, false, false, false, false);
             }
@@ -466,7 +466,7 @@ void Examiner::handleHits(const vector< int > &ids)
           }
           else if (mediator->getView() == Mediator::VIEW_TRACE)
           {
-            if (frame != NULL)
+            if (frame != 0)
             {
               mediator->handleSendDgrm(this, false, true, true, false, false);
             }
@@ -521,7 +521,7 @@ void Examiner::handleHits(const vector< int > &ids)
       {
         if (mediator->getView() == Mediator::VIEW_SIM)
         {
-          if (frame != NULL)
+          if (frame != 0)
           {
             mediator->handleSendDgrm(this, true, false, false, false, false);
           }
@@ -716,7 +716,7 @@ void Examiner::processHits(
     setToolTip(QString());
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 
@@ -783,8 +783,8 @@ void Examiner::drawFrame(const bool& inSelectMode)
         valsFrame.push_back(val);
       }
     }
-    attr = NULL;
-    node = NULL;
+    attr = 0;
+    node = 0;
 
     diagram->visualize(
       false,
@@ -858,8 +858,8 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);

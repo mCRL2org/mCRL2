@@ -702,43 +702,43 @@ void Shape::getDOFAttrs(vector< Attribute* > &attrs)
 
   // get result
   tempAttr = xCtrDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = yCtrDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = wthDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = hgtDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = aglDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = colDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
 
   tempAttr = opaDOF->getAttribute();
-  if (tempAttr != NULL)
+  if (tempAttr != 0)
   {
     tempSet.insert(tempAttr);
   }
@@ -753,7 +753,7 @@ void Shape::getDOFAttrs(vector< Attribute* > &attrs)
 
   // clear memory
   tempSet.clear();
-  tempAttr = NULL;
+  tempAttr = 0;
 }
 
 
@@ -1055,52 +1055,52 @@ void Shape::initDOF()
 void Shape::clearDOF()
 {
   // composition
-  if (xCtrDOF != NULL)
+  if (xCtrDOF != 0)
   {
     delete xCtrDOF;
-    xCtrDOF = NULL;
+    xCtrDOF = 0;
   }
 
-  if (yCtrDOF != NULL)
+  if (yCtrDOF != 0)
   {
     delete yCtrDOF;
-    yCtrDOF = NULL;
+    yCtrDOF = 0;
   }
 
-  if (wthDOF != NULL)
+  if (wthDOF != 0)
   {
     delete wthDOF;
-    wthDOF = NULL;
+    wthDOF = 0;
   }
 
-  if (hgtDOF != NULL)
+  if (hgtDOF != 0)
   {
     delete hgtDOF;
-    hgtDOF = NULL;
+    hgtDOF = 0;
   }
 
-  if (aglDOF != NULL)
+  if (aglDOF != 0)
   {
     delete aglDOF;
-    aglDOF = NULL;
+    aglDOF = 0;
   }
 
-  if (colDOF != NULL)
+  if (colDOF != 0)
   {
     delete colDOF;
-    colDOF = NULL;
+    colDOF = 0;
   }
 
-  if (opaDOF != NULL)
+  if (opaDOF != 0)
   {
     delete opaDOF;
-    opaDOF = NULL;
+    opaDOF = 0;
   }
 
-  if (textDOF != NULL)
+  if (textDOF != 0)
   {
     delete textDOF;
-    textDOF = NULL;
+    textDOF = 0;
   }
 }
 

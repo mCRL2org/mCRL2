@@ -34,7 +34,7 @@ Diagram::~Diagram()
   for (size_t i = 0; i < shapes.size(); ++i)
   {
     delete shapes[i];
-    shapes[i] = NULL;
+    shapes[i] = 0;
   }
   shapes.clear();
 }
@@ -61,7 +61,7 @@ void Diagram::moveShapeToFront(const size_t& idx)
     }
     shapes[0] = tmp;
     shapes[0]->setIndex(0);
-    tmp = NULL;
+    tmp = 0;
   }
 }
 
@@ -78,7 +78,7 @@ void Diagram::moveShapeToBack(const size_t& idx)
     }
     shapes[shapes.size()-1] = tmp;
     shapes[shapes.size()-1]->setIndex(shapes.size()-1);
-    tmp = NULL;
+    tmp = 0;
   }
 }
 
@@ -95,7 +95,7 @@ void Diagram::moveShapeForward(const size_t& idx)
     shapes[idx-1] = tmp;
     shapes[idx-1]->setIndex(idx-1);
 
-    tmp = NULL;
+    tmp = 0;
   }
 }
 
@@ -112,7 +112,7 @@ void Diagram::moveShapeBackward(const size_t& idx)
     shapes[idx+1] = tmp;
     shapes[idx+1]->setIndex(idx+1);
 
-    tmp = NULL;
+    tmp = 0;
   }
 }
 
@@ -140,7 +140,7 @@ size_t Diagram::getSizeShapes()
 
 Shape* Diagram::getShape(const size_t& idx)
 {
-  Shape* result = NULL;
+  Shape* result = 0;
   if (idx < shapes.size())
   {
     result = shapes[idx];
@@ -189,7 +189,7 @@ void Diagram::deleteShape(const size_t& idx)
     Shape* s = shapes[idx];
     shapes.erase(shapes.begin()+idx);
     delete s;
-    s = NULL;
+    s = 0;
     // update indices
     for (size_t i = idx; i < shapes.size(); ++i)
     {

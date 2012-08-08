@@ -28,7 +28,7 @@ CombnPlot::CombnPlot(
 
   mouseCombnIdx = NON_EXISTING;
 
-  diagram        = NULL;
+  diagram        = 0;
   showDgrm       = false;
 }
 
@@ -37,7 +37,7 @@ CombnPlot::~CombnPlot()
 {
   clearValues();
 
-  diagram = NULL;
+  diagram = 0;
   attrValIdcsDgrm.clear();
 }
 
@@ -619,7 +619,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
                      Utils::perc((double) numberPerComb[posIdx], (double) graph->getSizeNodes())));
     msgDgrm.append("%");
 
-    if (diagram == NULL)
+    if (diagram == 0)
     {
       // show tooltip
       setToolTip(QString::fromStdString(msgDgrm));
@@ -720,7 +720,7 @@ void CombnPlot::calcPosBC()
 void CombnPlot::calcPosCP()
 {
   // calc positions
-  Attribute* attribute = NULL;
+  Attribute* attribute = 0;
 
   QSizeF size = worldSize();
   double pix = pixelSize();
@@ -796,7 +796,7 @@ void CombnPlot::calcPosCP()
     }
   }
 
-  attribute = NULL;
+  attribute = 0;
 }
 
 
@@ -852,7 +852,7 @@ void CombnPlot::processHits(
     showDgrm = false;
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

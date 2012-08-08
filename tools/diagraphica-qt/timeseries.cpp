@@ -102,7 +102,7 @@ void TimeSeries::getIdxMseOver(
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
-    node = NULL;
+    node = 0;
   }
   colLeaf = VisUtils::coolBlue;
 }
@@ -123,7 +123,7 @@ void TimeSeries::getCurrIdxDgrm(
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
-    node = NULL;
+    node = 0;
   }
   colLeaf = VisUtils::coolBlue;
 }
@@ -169,9 +169,9 @@ void TimeSeries::getAnimIdxDgrm(
     }
     colLeaf = VisUtils::coolBlue;
 
-    nodeFr = NULL;
-    nodeTo = NULL;
-    edgeIn = NULL;
+    nodeFr = 0;
+    nodeTo = 0;
+    edgeIn = 0;
   }
 }
 
@@ -281,7 +281,7 @@ void TimeSeries::markItems(const vector< Cluster* > frames)
       itemsMarked.insert(frame->getNode(j)->getIndex());
     }
   }
-  frame = NULL;
+  frame = 0;
 
   // update animation frame
   animFrame = itemsMarked.find(prevAnimIdx);
@@ -309,7 +309,7 @@ void TimeSeries::handleSendDgrmSglToExnr()
   mediator->addToExaminer(frame, attrs);
 
   delete frame;
-  frame = NULL;
+  frame = 0;
   attrs.clear();
 }
 
@@ -767,15 +767,15 @@ void TimeSeries::calcPositions()
   }
 
   // clear memory
-  attr = NULL;
-  node = NULL;
+  attr = 0;
+  node = 0;
 }
 
 
 void TimeSeries::clearDiagram()
 {
   // association
-  diagram = NULL;
+  diagram = 0;
 }
 
 
@@ -1048,7 +1048,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
           mediator->handleMarkFrameClust(this);
 
           delete frame;
-          frame = NULL;
+          frame = 0;
         }
       }
       else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton &&
@@ -1170,7 +1170,7 @@ void TimeSeries::processHits(
     setToolTip(QString());
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 
@@ -1711,8 +1711,8 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
           attrs.push_back(attr);
           vals.push_back(val);
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
       }
       diagram->visualize(
         inSelectMode,
@@ -1813,8 +1813,8 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
             vals.push_back(val);
           }
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
 
         diagram->visualize(
           inSelectMode,
@@ -1899,8 +1899,8 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
         lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
 
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
         lbls.push_back(lbl);
 
         if (lbl.size() > maxLbl)

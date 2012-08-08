@@ -493,7 +493,7 @@ void OpacityChooser::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

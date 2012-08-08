@@ -29,8 +29,8 @@ Simulator::Simulator(
   : Visualizer(parent, m, g),
     m_settings(s)
 {
-  m_diagram   = NULL;
-  m_currentFrame = NULL;
+  m_diagram   = 0;
+  m_currentFrame = 0;
 
   m_currentSelection = -1;
   m_currentSelectionIndex = -1;
@@ -54,7 +54,7 @@ Simulator::Simulator(
 
 Simulator::~Simulator()
 {
-  graph = NULL;
+  graph = 0;
 
   clearDiagram();
   clearFrames();
@@ -79,7 +79,7 @@ size_t Simulator::SelectedClusterIndex()
   }
   else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (m_currentFrame != NULL)
+    if (m_currentFrame != 0)
     {
       result = m_currentFrame->getNode(0)->getCluster()->getIndex();
     }
@@ -264,7 +264,7 @@ void Simulator::visualize(const bool& inSelectMode)
       drawFrameCurr(inSelectMode);
       drawFramesPrev(inSelectMode);
       drawFramesNext(inSelectMode);
-      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
+      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
       {
         drawControls(inSelectMode);
       }
@@ -292,7 +292,7 @@ void Simulator::visualize(const bool& inSelectMode)
       drawFrameCurr(inSelectMode);
       drawFramesPrev(inSelectMode);
       drawFramesNext(inSelectMode);
-      if (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0)
+      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
       {
         drawControls(inSelectMode);
       }
@@ -449,13 +449,13 @@ void Simulator::initFramesPrevNext()
     m_nextFrames);
 
   // clear memory
-  temp = NULL;
+  temp = 0;
   tempPrev.clear();
   tempNext.clear();
   delete nodesPrev;
-  nodesPrev = NULL;
+  nodesPrev = 0;
   delete nodesNext;
-  nodesNext = NULL;
+  nodesNext = 0;
 }
 
 
@@ -670,14 +670,14 @@ void Simulator::initBundles()
   }
 
   // clear memory
-  clst = NULL;
-  edge = NULL;
+  clst = 0;
+  edge = 0;
   currNodes.clear();
   bdls.clear();
-  bdl = NULL;
+  bdl = 0;
 
   lbls.clear();
-  bdlLbls = NULL;
+  bdlLbls = 0;
 }
 
 
@@ -1162,7 +1162,7 @@ void Simulator::markFrameClusts()
   }
   else if (m_currentSelection == ID_FRAME_CURR)
   {
-    if (m_currentFrame != NULL)
+    if (m_currentFrame != 0)
     {
       /*
       mediator->handleUnmarkFrameClusts();
@@ -1201,16 +1201,16 @@ void Simulator::clearAttributes()
 
 void Simulator::clearDiagram()
 {
-  m_diagram = NULL;
+  m_diagram = 0;
 }
 
 
 void Simulator::clearFrames()
 {
-  if (m_currentFrame != NULL)
+  if (m_currentFrame != 0)
   {
     delete m_currentFrame;
-    m_currentFrame = NULL;
+    m_currentFrame = 0;
   }
 
   {
@@ -1308,7 +1308,7 @@ void Simulator::handleHits(const vector< int > &ids)
     {
       if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
       {
-        if (ids[1] == ID_ICON_CLEAR && (m_previousFrames.size() > 0 || m_currentFrame != NULL || m_nextFrames.size() > 0))
+        if (ids[1] == ID_ICON_CLEAR && (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0))
         {
           mediator->handleClearSim(this);
         }
@@ -1422,7 +1422,7 @@ void Simulator::processHits(
     setToolTip(QString());
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 
@@ -1445,7 +1445,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 {
   if (inSelectMode)
   {
-    if (m_currentFrame != NULL)
+    if (m_currentFrame != 0)
     {
       double x = m_currentFramePosition.x;
       double y = m_currentFramePosition.y;
@@ -1478,7 +1478,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
     double pix = pixelSize();
     vector< double > valsFrame;
 
-    if (m_currentFrame != NULL)
+    if (m_currentFrame != 0)
     {
       double x = m_currentFramePosition.x;
       double y = m_currentFramePosition.y;
@@ -1505,8 +1505,8 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
@@ -1637,8 +1637,8 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
               valsFrame.push_back(val);
             }
           }
-          attr = NULL;
-          node = NULL;
+          attr = 0;
+          node = 0;
 
           m_diagram->visualize(
             inSelectMode,
@@ -1687,8 +1687,8 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
             valsFrame.push_back(val);
           }
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
 
         glPushMatrix();
         glTranslatef(
@@ -1807,8 +1807,8 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
               valsFrame.push_back(val);
             }
           }
-          attr = NULL;
-          node = NULL;
+          attr = 0;
+          node = 0;
 
           m_diagram->visualize(
             inSelectMode,
@@ -1857,8 +1857,8 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
             valsFrame.push_back(val);
           }
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
 
         glPushMatrix();
         glTranslatef(
@@ -2584,7 +2584,7 @@ void Simulator::animate()
 {
   vector< double > valsFrame;
 
-  if (m_animationOldFrame != NULL)
+  if (m_animationOldFrame != 0)
   {
     if (m_currentAnimationPhase == ANIM_POS)
     {
@@ -2616,8 +2616,8 @@ void Simulator::animate()
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
@@ -2659,8 +2659,8 @@ void Simulator::animate()
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
@@ -2704,8 +2704,8 @@ void Simulator::animate()
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
@@ -2747,8 +2747,8 @@ void Simulator::animate()
           valsFrame.push_back(val);
         }
       }
-      attr = NULL;
-      node = NULL;
+      attr = 0;
+      node = 0;
 
       glPushMatrix();
       glTranslatef(x, y, 0.0);
@@ -2800,9 +2800,9 @@ void Simulator::onTimer()
         // update new data
         m_currentFrame = m_animationOldFrame;
 
-        m_animationOldFrame = NULL;
+        m_animationOldFrame = 0;
         delete m_animationNewFrame;
-        m_animationNewFrame = NULL;
+        m_animationNewFrame = 0;
 
         initFramesPrevNext();
         initBundles();
@@ -2822,9 +2822,9 @@ void Simulator::onTimer()
       // update new data
       m_currentFrame = m_animationOldFrame;
 
-      m_animationOldFrame = NULL;
+      m_animationOldFrame = 0;
       delete m_animationNewFrame;
-      m_animationNewFrame = NULL;
+      m_animationNewFrame = 0;
 
       initFramesPrevNext();
       initBundles();

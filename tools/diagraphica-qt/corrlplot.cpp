@@ -24,7 +24,7 @@ CorrlPlot::CorrlPlot(
   minRadHintPx =  5;
   maxRadHintPx = 25;
 
-  diagram         = NULL;
+  diagram         = 0;
   showDgrm        = false;
   attrValIdx1Dgrm = NON_EXISTING;
   attrValIdx2Dgrm = NON_EXISTING;
@@ -34,7 +34,7 @@ CorrlPlot::CorrlPlot(
 CorrlPlot::~CorrlPlot()
 {
   clearValues();
-  diagram = NULL;
+  diagram = 0;
 }
 
 
@@ -427,7 +427,7 @@ void CorrlPlot::displTooltip(
                    Utils::perc((double) number[xIdx][ yIdx ], (double) graph->getSizeNodes())));
   msgDgrm.append("%");
 
-  if (diagram == NULL)
+  if (diagram == 0)
   {
     setToolTip(QString::fromStdString(msgDgrm));
   }
@@ -594,7 +594,7 @@ void CorrlPlot::processHits(
     showDgrm = false;
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

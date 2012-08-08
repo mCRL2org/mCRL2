@@ -44,22 +44,22 @@ DiagramEditor::DiagramEditor(
 
   initMouse();
 
-  clipBoardShape = NULL;
+  clipBoardShape = 0;
 }
 
 
 DiagramEditor::~DiagramEditor()
 {
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     delete diagram;
-    diagram = NULL;
+    diagram = 0;
   }
 
-  if (clipBoardShape != NULL)
+  if (clipBoardShape != 0)
   {
     delete clipBoardShape;
-    clipBoardShape = NULL;
+    clipBoardShape = 0;
   }
 }
 
@@ -162,7 +162,7 @@ void DiagramEditor::setSnapGrid(const bool& flag)
 
 void DiagramEditor::setFillCol()
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -174,20 +174,20 @@ void DiagramEditor::setFillCol()
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->setFillColor(mediator->getColor(s->getFillColor()));
 
     update();
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::setLineCol()
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -199,21 +199,21 @@ void DiagramEditor::setLineCol()
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->setLineColor(mediator->getColor(s->getLineColor()));
 
     update();
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleIntersection()
 {
   size_t shapeCount = diagram->getSizeShapes();
-  Shape* s = NULL;
+  Shape* s = 0;
   if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
   {
     for (size_t i = 0; i < shapeCount; i++)
@@ -233,7 +233,7 @@ void DiagramEditor::handleIntersection()
       {
         s->setMode(Shape::MODE_EDIT);
       }
-      s = NULL;
+      s = 0;
     }
   }
   selection = false;
@@ -267,7 +267,7 @@ void DiagramEditor::translatePoints(double& x1, double& y1,
 
 bool DiagramEditor::isAnyShapeSelected()
 {
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     size_t sizeShapes = diagram->getSizeShapes();
     for (size_t i = 0; i < sizeShapes; ++i)
@@ -285,7 +285,7 @@ bool DiagramEditor::isAnyShapeSelected()
 
 void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -304,7 +304,7 @@ void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
@@ -354,7 +354,7 @@ void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
       mediator->handleDOFColDeactivate();
       mediator->handleDOFOpaActivate();
     }
-    s = NULL;
+    s = 0;
 
     update();
   }
@@ -365,7 +365,7 @@ void DiagramEditor::handleDOFSetTextStatus(
   const size_t& DOFIdx,
   const int& status)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
   {
@@ -384,7 +384,7 @@ void DiagramEditor::handleDOFSetTextStatus(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
@@ -418,7 +418,7 @@ void DiagramEditor::handleDOFSetTextStatus(
     {
       s->getDOFText()->setTextStatus(status);
     }
-    s = NULL;
+    s = 0;
   }
 }
 
@@ -427,7 +427,7 @@ int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
 {
   int result = -1;
 
-  Shape* s = NULL;
+  Shape* s = 0;
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
   {
@@ -446,7 +446,7 @@ int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
@@ -490,7 +490,7 @@ void DiagramEditor::handleDOFColAdd(
   const double& hue,
   const double& y)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -510,7 +510,7 @@ void DiagramEditor::handleDOFColAdd(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->setModeEdtDOFCol();
     mediator->handleDOFColActivate();
@@ -519,7 +519,7 @@ void DiagramEditor::handleDOFColAdd(
     s->addDOFColYValue(y);
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
@@ -528,7 +528,7 @@ void DiagramEditor::handleDOFColUpdate(
   const double& hue,
   const double& y)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -540,20 +540,20 @@ void DiagramEditor::handleDOFColUpdate(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->getDOFCol()->setValue(idx, hue);
     s->setDOFColYValue(idx, y);
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleDOFColClear(
   const size_t& idx)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -565,7 +565,7 @@ void DiagramEditor::handleDOFColClear(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     if (s->getDOFCol()->getSizeValues() > 2)
     {
@@ -582,7 +582,7 @@ void DiagramEditor::handleDOFColClear(
     }
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
@@ -590,7 +590,7 @@ void DiagramEditor::handleDOFOpaAdd(
   const double& hue,
   const double& y)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -610,7 +610,7 @@ void DiagramEditor::handleDOFOpaAdd(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->setModeEdtDOFOpa();
     mediator->handleDOFColDeactivate();
@@ -619,7 +619,7 @@ void DiagramEditor::handleDOFOpaAdd(
     s->addDOFOpaYValue(y);
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
@@ -628,7 +628,7 @@ void DiagramEditor::handleDOFOpaUpdate(
   const double& opa,
   const double& y)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -640,20 +640,20 @@ void DiagramEditor::handleDOFOpaUpdate(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     s->getDOFOpa()->setValue(idx, opa);
     s->setDOFOpaYValue(idx, y);
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleDOFOpaClear(
   const size_t& idx)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -665,7 +665,7 @@ void DiagramEditor::handleDOFOpaClear(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     if (s->getDOFOpa()->getSizeValues() > 2)
     {
@@ -682,7 +682,7 @@ void DiagramEditor::handleDOFOpaClear(
     }
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
@@ -690,7 +690,7 @@ void DiagramEditor::setLinkDOFAttr(
   const size_t& DOFIdx,
   const size_t& attrIdx)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -710,10 +710,10 @@ void DiagramEditor::setLinkDOFAttr(
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
     Attribute* a = graph->getAttribute(attrIdx);
-    DOF* dof = NULL;
+    DOF* dof = 0;
 
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
@@ -759,24 +759,24 @@ void DiagramEditor::setLinkDOFAttr(
 
     }
 
-    if (dof != NULL)
+    if (dof != 0)
     {
       dof->setAttribute(a);
     }
 
     displDOFInfo(s);
 
-    a   = NULL;
-    dof = NULL;
+    a   = 0;
+    dof = 0;
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -796,9 +796,9 @@ void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
     }
   }
 
-  if (s != NULL)
+  if (s != 0)
   {
-    DOF* dof = NULL;
+    DOF* dof = 0;
 
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
@@ -836,25 +836,25 @@ void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
       s->setNote("");
     }
 
-    if (dof != NULL)
+    if (dof != 0)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     displDOFInfo(s);
 
-    dof = NULL;
+    dof = 0;
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
 {
-  Shape* s        = NULL;
-  DOF* dof        = NULL;
-  Attribute* attr = NULL;
+  Shape* s        = 0;
+  DOF* dof        = 0;
+  Attribute* attr = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -863,65 +863,65 @@ void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
 
     dof  = s->getDOFXCtr();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFYCtr();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFWth();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFHgt();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFAgl();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFCol();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFOpa();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
 
     dof  = s->getDOFText();
     attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
+    if (attr != 0 && attr->getIndex() == attrIdx)
     {
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
     s->setVariable("");
   }
 
-  s    = NULL;
-  dof  = NULL;
-  attr = NULL;
+  s    = 0;
+  dof  = 0;
+  attr = 0;
 }
 
 
@@ -1055,7 +1055,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
 
 void DiagramEditor::reGenText()
 {
-  Shape* s        = NULL;
+  Shape* s        = 0;
 
   size_t sizeShapes = diagram->getSizeShapes();
   for (size_t i = 0; i < sizeShapes; ++i)
@@ -1184,7 +1184,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
       }
 
       diagram->addShape(s);
-      s = NULL;
+      s = 0;
 
       // undo transl & scale here
     }
@@ -1292,14 +1292,14 @@ void DiagramEditor::handleHitDiagramOnly()
 
     bool pasteFlag = false;
     int checkedItem = -1;
-    if (clipBoardShape != NULL || clipBoardList.size() > 0)
+    if (clipBoardShape != 0 || clipBoardList.size() > 0)
     {
       pasteFlag = true;
     }
 
-    Shape* selectedShape = NULL;
+    Shape* selectedShape = 0;
     //find the selected shape
-    for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i)
+    for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == 0; ++i)
     {
       if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
       {
@@ -1325,7 +1325,7 @@ void DiagramEditor::handleHitDiagramOnly()
 void DiagramEditor::handleHitShape(const size_t& shapeIdx)
 {
   size_t sizeShapes = 0;
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     sizeShapes = diagram->getSizeShapes();
   }
@@ -1419,7 +1419,7 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
     } // click
 
     update();
-    s = NULL;
+    s = 0;
   }
 }
 
@@ -1429,7 +1429,7 @@ void DiagramEditor::handleHitShapeHandle(
   const size_t& handleId)
 {
   size_t sizeShapes = 0;
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     sizeShapes = diagram->getSizeShapes();
   }
@@ -1507,7 +1507,7 @@ void DiagramEditor::handleHitShapeHandle(
           diagram->getShape(i)->setModeNormal();
         }
     }
-    s = NULL;
+    s = 0;
   }
 }
 
@@ -1515,7 +1515,7 @@ void DiagramEditor::handleHitShapeHandle(
 void DiagramEditor::handleDrag()
 {
   size_t sizeShapes = 0;
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     sizeShapes = diagram->getSizeShapes();
   }
@@ -1543,7 +1543,7 @@ void DiagramEditor::handleDrag()
             yCtr += yDrag;
             otherSelectedShape ->setCenter(xCtr, yCtr);
           }
-          otherSelectedShape = NULL;
+          otherSelectedShape = 0;
         }
       }
       else if (drgBegIdx2 == Shape::ID_HDL_TOP_LFT)
@@ -1653,14 +1653,14 @@ void DiagramEditor::handleDrag()
     // undo transl & scale here
 
     update();
-    s = NULL;
+    s = 0;
   }
 }
 
 
 void DiagramEditor::handleShowVariable(const string& variable, const int& variableId)
 {
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
   if (lastSelectedShapeId != NON_EXISTING)
   {
     selectedShape = diagram->getShape(lastSelectedShapeId);
@@ -1687,7 +1687,7 @@ void DiagramEditor::handleShowVariable(const string& variable, const int& variab
 
 void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId)
 {
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
   selectedShape = diagram->getShape(shapeId);
   selectedShape->setNote(variable);
   if (selectedShape->getType() == Shape::TYPE_NOTE)
@@ -1702,23 +1702,23 @@ void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId
 
 void DiagramEditor::handleAddText(string& variable, size_t& shapeId)
 {
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
   shapeId = lastSelectedShapeId;
   selectedShape = diagram->getShape(shapeId);
   variable = selectedShape->getNote();
-  selectedShape = NULL;
+  selectedShape = 0;
 }
 
 
 void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
 {
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
   shapeId = lastSelectedShapeId;
   selectedShape = diagram->getShape(shapeId);
-  if (selectedShape != NULL)
+  if (selectedShape != 0)
   {
     textSize = selectedShape->getTextSize();
-    selectedShape = NULL;
+    selectedShape = 0;
   }
 }
 
@@ -1726,7 +1726,7 @@ void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
 void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
 {
 
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
   selectedShape = diagram->getShape(shapeId);
   selectedShape->setTextSize(textSize);
 }
@@ -1734,8 +1734,8 @@ void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
 
 void DiagramEditor::handleCut()
 {
-  Shape* origShape = NULL;
-  Shape* copyShape = NULL;
+  Shape* origShape = 0;
+  Shape* copyShape = 0;
   bool shapeSelected = false;
 
   // find & copy selected shape
@@ -1757,8 +1757,8 @@ void DiagramEditor::handleCut()
       i--; // decrement index; because deletion of the shape decrements the size of the diagram
 
       clipBoardList.push_back(copyShape);
-      origShape = NULL;
-      copyShape = NULL;
+      origShape = 0;
+      copyShape = 0;
     }
   }
 }
@@ -1766,8 +1766,8 @@ void DiagramEditor::handleCut()
 
 void DiagramEditor::handleCopy()
 {
-  Shape* origShape = NULL;
-  Shape* copyShape = NULL;
+  Shape* origShape = 0;
+  Shape* copyShape = 0;
   bool shapeSelected = false;
 
   // find & copy selected shape
@@ -1786,8 +1786,8 @@ void DiagramEditor::handleCopy()
       copyShape = new Shape(*origShape);
 
       clipBoardList.push_back(copyShape);
-      origShape = NULL;
-      copyShape = NULL;
+      origShape = 0;
+      copyShape = 0;
     }
   }
 }
@@ -1798,7 +1798,7 @@ void DiagramEditor::clearClipBoard()
   size_t size = clipBoardList.size();
   for (size_t i = 0; i < size; i++)
   {
-    clipBoardList[i] = NULL;
+    clipBoardList[i] = 0;
   }
   clipBoardList.clear();
 }
@@ -1901,84 +1901,84 @@ void DiagramEditor::handleSelectAll()
 
 void DiagramEditor::handleBringToFront()
 {
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
+  Shape* s = 0;
+  for (size_t i = 0; i < diagram->getSizeShapes() && s == 0; ++i)
     if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
     {
       s = diagram->getShape(i);
     }
 
-  if (s != NULL)
+  if (s != 0)
   {
     diagram->moveShapeToBack(s->getIndex());
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleSendToBack()
 {
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
+  Shape* s = 0;
+  for (size_t i = 0; i < diagram->getSizeShapes() && s == 0; ++i)
     if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
     {
       s = diagram->getShape(i);
     }
 
-  if (s != NULL)
+  if (s != 0)
   {
     diagram->moveShapeToFront(s->getIndex());
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleBringForward()
 {
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
+  Shape* s = 0;
+  for (size_t i = 0; i < diagram->getSizeShapes() && s == 0; ++i)
     if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
     {
       s = diagram->getShape(i);
     }
 
-  if (s != NULL)
+  if (s != 0)
   {
     diagram->moveShapeBackward(s->getIndex());
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleSendBackward()
 {
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
+  Shape* s = 0;
+  for (size_t i = 0; i < diagram->getSizeShapes() && s == 0; ++i)
     if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
     {
       s = diagram->getShape(i);
     }
 
-  if (s != NULL)
+  if (s != 0)
   {
     diagram->moveShapeForward(s->getIndex());
   }
 
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleEditDOF()
 {
-  Shape* s = NULL;
+  Shape* s = 0;
   if (lastSelectedShapeId != NON_EXISTING)
   {
     s = diagram->getShape(lastSelectedShapeId);
   }
-  if (s != NULL)
+  if (s != 0)
   {
     s->setModeEdtDOFXCtr();
     displDOFInfo(s);
@@ -1990,47 +1990,47 @@ void DiagramEditor::handleEditDOF()
       {
         diagram->getShape(i)->setModeNormal();
       }
-    s = NULL;
+    s = 0;
   }
 }
 
 
 void DiagramEditor::handleSetDOF(const size_t& attrIdx)   // Link Attribute to the Text DOF of the selected Shape
 {
-  Shape* s = NULL;
+  Shape* s = 0;
 
   if (lastSelectedShapeId != NON_EXISTING)
   {
     s = diagram->getShape(lastSelectedShapeId);
   }
-  if (s != NULL)
+  if (s != 0)
   {
-    DOF* dof = NULL;
+    DOF* dof = 0;
     if (attrIdx == NON_EXISTING) // NON_EXISTING Indicates, removing attribute from the Text DOF of the selected shape
     {
       dof = s->getDOFText();
       s->setVariable("");
-      dof->setAttribute(NULL);
+      dof->setAttribute(0);
     }
     else
     {
       Attribute* a = graph->getAttribute(attrIdx);
       dof = s->getDOFText();
       dof->setAttribute(a);
-      a   = NULL;
+      a   = 0;
     }
-    dof = NULL;
+    dof = 0;
   }
-  s = NULL;
+  s = 0;
 }
 
 
 void DiagramEditor::handleCheckedVariable(const size_t& idDOF, const int& variableId)
 {
-  Shape* selectedShape = NULL;
+  Shape* selectedShape = 0;
 
   //find the selected shape
-  for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i)
+  for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == 0; ++i)
   {
     if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
     {
@@ -2050,7 +2050,7 @@ void DiagramEditor::handleCheckedVariable(const size_t& idDOF, const int& variab
 void DiagramEditor::deselectAll()
 {
   size_t sizeShapes = 0;
-  if (diagram != NULL)
+  if (diagram != 0)
   {
     sizeShapes = diagram->getSizeShapes();
   }
@@ -2070,12 +2070,12 @@ void DiagramEditor::deselectAll()
 
 void DiagramEditor::displShapeEdtOptions(Shape* s)
 {
-  if (s != NULL)
+  if (s != 0)
   {
     bool editDOF = true;
     bool pasteFlag = false;
     int checkedId = s->getCheckedId();
-    if (clipBoardShape != NULL || clipBoardList.size() > 0)
+    if (clipBoardShape != 0 || clipBoardList.size() > 0)
     {
       pasteFlag = true;
     }
@@ -2102,7 +2102,7 @@ void DiagramEditor::displShapeEdtOptions(Shape* s)
 
 void DiagramEditor::displDOFInfo(Shape* s)
 {
-  if (s != NULL)
+  if (s != 0)
   {
     vector< size_t > indcs;
     vector< string > dofs;
@@ -2111,7 +2111,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFXCtr()->getIndex());
     dofs.push_back(s->getDOFXCtr()->getLabel());
-    if (s->getDOFXCtr()->getAttribute() == NULL)
+    if (s->getDOFXCtr()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2126,7 +2126,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFYCtr()->getIndex());
     dofs.push_back(s->getDOFYCtr()->getLabel());
-    if (s->getDOFYCtr()->getAttribute() == NULL)
+    if (s->getDOFYCtr()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2141,7 +2141,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFWth()->getIndex());
     dofs.push_back(s->getDOFWth()->getLabel());
-    if (s->getDOFWth()->getAttribute() == NULL)
+    if (s->getDOFWth()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2156,7 +2156,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFHgt()->getIndex());
     dofs.push_back(s->getDOFHgt()->getLabel());
-    if (s->getDOFHgt()->getAttribute() == NULL)
+    if (s->getDOFHgt()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2171,7 +2171,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFAgl()->getIndex());
     dofs.push_back(s->getDOFAgl()->getLabel());
-    if (s->getDOFAgl()->getAttribute() == NULL)
+    if (s->getDOFAgl()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2186,7 +2186,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFCol()->getIndex());
     dofs.push_back(s->getDOFCol()->getLabel());
-    if (s->getDOFCol()->getAttribute() == NULL)
+    if (s->getDOFCol()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2201,7 +2201,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFOpa()->getIndex());
     dofs.push_back(s->getDOFOpa()->getLabel());
-    if (s->getDOFOpa()->getAttribute() == NULL)
+    if (s->getDOFOpa()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -2216,7 +2216,7 @@ void DiagramEditor::displDOFInfo(Shape* s)
 
     indcs.push_back(s->getDOFText()->getIndex());
     dofs.push_back(s->getDOFText()->getLabel());
-    if (s->getDOFText()->getAttribute() == NULL)
+    if (s->getDOFText()->getAttribute() == 0)
     {
       attrIdcs.push_back(NON_EXISTING);
     }
@@ -3180,7 +3180,7 @@ void DiagramEditor::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 
