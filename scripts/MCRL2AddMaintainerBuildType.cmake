@@ -58,8 +58,6 @@ if(NOT DEFINED CMAKE_C_FLAGS_MAINTAINER)
   try_add_c_flag(-Wall      MAINTAINER)
   try_add_c_flag(-pedantic  MAINTAINER)
   try_add_c_flag(-W         MAINTAINER)
-
-  try_add_c_flag(/MD        MAINTAINER)
   set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_MAINTAINER}" CACHE STRING "Flags used by the C compiler during maintainer builds.")
 endif(NOT DEFINED CMAKE_C_FLAGS_MAINTAINER)
 

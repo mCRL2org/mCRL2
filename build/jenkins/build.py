@@ -11,6 +11,15 @@ buildtype = os.environ['buildtype']
 compiler = os.environ['compiler']
 label = os.environ['label']
 
+#
+# Try to remove CMake cache. We can wait the extra few minutes if it means we don't
+# get weird errors all the time.
+#
+try:
+  os.remove(os.path.join(workspace, 'CMakeCache.txt'))
+except:
+  pass
+
 def log(*lines):
   print '\n##\n## ' + '\n## '.join(lines) + '\n##\n'
   sys.stdout.flush()
@@ -78,7 +87,7 @@ if compiler != 'default':
 #
 testflags = []
 if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
-  testflags += ['-DCMAKE_CXX_FLAGS=-DMCRL2_SKIP_LONG_TESTS']
+  testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
 
 #
 # For the time being, do not build the GUI tools on Windows

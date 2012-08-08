@@ -17,6 +17,13 @@
 ## Set properties for testing
 set(MCRL2_TEST_LABEL "rev.${MCRL2_VERSION}-${CMAKE_BUILD_TYPE}")
 
+option(MCRL2_SKIP_LONG_TESTS "Disable execution of tests that take a long time to complete" OFF)
+message(STATUS "MCRL2_SKIP_LONG_TESTS: ${MCRL2_SKIP_LONG_TESTS}")
+mark_as_advanced(MCRL2_SKIP_LONG_TESTS)
+
+if(MCRL2_SKIP_LONG_TESTS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMCRL2_SKIP_LONG_TESTS")
+endif(MCRL2_SKIP_LONG_TESTS)
 
 option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
 message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
