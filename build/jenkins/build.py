@@ -20,16 +20,23 @@ def call(name, command, **kwargs):
 
 compilerflags = []
 if compiler == 'clang':
-  compilerflags = ['-DCMAKE_C_COMPILER=clang', '-DCMAKE_CXX_COMPILER=clang++']
+  compilerflags += ['-DCMAKE_C_COMPILER=clang', '-DCMAKE_CXX_COMPILER=clang++']
 elif compiler == 'gcc-latest':
-  compilerflags = ['-DCMAKE_C_COMPILER=gcc-4.7', '-DCMAKE_CXX_COMPILER=g++-4.7']
+  compilerflags += ['-DCMAKE_C_COMPILER=gcc-4.7', '-DCMAKE_CXX_COMPILER=g++-4.7']
 
 #
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
 #
 testflags = []
 if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
-  testflags = ['-DCMAKE_CXX_FLAGS=-DMCRL2_SKIP_LONG_TESTS']
+  testflags += ['-DCMAKE_CXX_FLAGS=-DMCRL2_SKIP_LONG_TESTS']
+
+#
+# For the time being, do not build the GUI tools on Windows
+# TODO: Enable these tools
+#
+if (label == 'windows-amd64' or label == 'windows-x86'):
+  compilerflags += ['-DMCRL2_ENABLE_GUI_TOOLS=OFF']
 
 #
 # Run CMake, take into account configuration axes.
