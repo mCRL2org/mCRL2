@@ -10,8 +10,12 @@ buildtype = os.environ['buildtype']
 compiler = os.environ['compiler']
 label = os.environ['label']
 
+def log(*lines):
+  print '\n##\n## ' + '\n## '.join(lines) + '\n##\n'
+  sys.stdout.flush()
+
 def call(name, command, **kwargs):
-  print '\n##\n## Running {0}\n## {1}\n##\n'.format(name, ' '.join(command))
+  log('Running ' + name, ' '.join(command))
   return subprocess.call(command, **kwargs)
 
 def which(name, flags=os.X_OK):
@@ -65,7 +69,7 @@ if compiler != 'default':
   if cc and cpp:
     compilerflags = ['-DCMAKE_C_COMPILER=' + cc, '-DCMAKE_CXX_COMPILER=' + cpp]
   else:
-    print 'Compiler not found: ' + compiler
+    log('Compiler not found: ' + compiler)
     sys.exit(1)
 
 #
@@ -91,7 +95,7 @@ cmake_command = ['cmake', \
                  + compilerflags \
                  + testflags
 if call('CMake', cmake_command):
-  print 'CMake failed.'
+  log('CMake failed.')
   sys.exit(1)
 
 #
@@ -111,7 +115,7 @@ if platform.system() == 'Linux':
   extraoptions =  ['-j{0}'.format(buildthreads)]
 make_command = ['cmake', '--build', workspace, '--'] + extraoptions
 if call('CMake --build', make_command):
-  print 'Build failed.'
+  log('Build failed.')
   sys.exit(1)
 
 #
@@ -127,7 +131,7 @@ ctest_command = ['ctest', \
                  '-j{0}'.format(buildthreads)]
 ctest_result = call('CTest', ctest_command, env=newenv)
 if ctest_result:
-  print '\n##\n## CTest returned {0}\n##\n'.format(ctest_result)
+  log('CTest returned ' + str(ctest_result))
 
 #
 # Copy test output to ${WORKSPACE}/ctest.xml, so the xUnit plugin can find
