@@ -12,16 +12,19 @@ set(BUILD_SHARED_LIBS OFF)
 ##---------------------------------------------------
 ## Set MSVC specific compiler flags
 ##---------------------------------------------------
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHs")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHs")
 
-## Compile with big-objects 
-set(CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
-set(CMAKE_C_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
+include(AddFlag)
+
+try_add_cxx_flag(/MD)
+try_add_cxx_flag(/EHs)
+try_add_cxx_flag(/bigobj)
+try_add_c_flag(/MD)
+try_add_c_flag(/EHs)
+try_add_c_flag(/bigobj)
 
 ## Compile multi-core  
 option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
 if( MCRL2_ENABLE_MULTICORE_COMPILATION )
-  set(CMAKE_CXX_FLAGS "/MP ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "/MP ${CMAKE_C_FLAGS}")
+  try_add_cxx_flag(/MP)
+  try_add_c_flag(/MP)
 endif( MCRL2_ENABLE_MULTICORE_COMPILATION )
