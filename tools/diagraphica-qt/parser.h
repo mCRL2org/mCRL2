@@ -88,18 +88,12 @@ class Parser : public QObject
     QMap<QString, int> findIntValues(QDomElement root, QStringList tagNames);
 
     // dgc files
-    void parseAttrConfig(
-      Graph* graph,
-      std::map< size_t, size_t > &attrIdxFrTo,
-      std::map< size_t, std::vector< std::string > > &attrCurDomains,
-      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
-      wxXmlNode* curNode);
-    void parseAttr(
+    void parseAttribute(
       Graph* graph,
       std::map< size_t, size_t > &attrIdxFrTo,
       std::map< size_t , std::vector< std::string > > &attrCurDomains,
       std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
-      wxXmlNode* curNode);
+      QDomNode AttributeNode);
 
     // dgd files
     void parseShape(
