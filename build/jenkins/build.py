@@ -14,15 +14,59 @@ def call(name, command, **kwargs):
   print '\n##\n## Running {0}\n## {1}\n##\n'.format(name, ' '.join(command))
   return subprocess.call(command, **kwargs)
 
+def which(name, flags=os.X_OK):
+    """Search PATH for executable files with the given name.
+   
+    On newer versions of MS-Windows, the PATHEXT environment variable will be
+    set to the list of file extensions for files considered executable. This
+    will normally include things like ".EXE". This fuction will also find files
+    with the given name ending with any of these extensions.
+
+    On MS-Windows the only flag that has any meaning is os.F_OK. Any other
+    flags will be ignored.
+   
+    @type name: C{str}
+    @param name: The name for which to search.
+   
+    @type flags: C{int}
+    @param flags: Arguments to L{os.access}.
+   
+    @rtype: C{list}
+    @param: A list of the full paths to files found, in the
+    order in which they were found.
+    """
+    result = None # []
+    exts = filter(None, os.environ.get('PATHEXT', '').split(os.pathsep))
+    path = os.environ.get('PATH', None)
+    if path is None:
+      return None # []
+    for p in os.environ.get('PATH', '').split(os.pathsep):
+      p = os.path.join(p, name)
+      if os.access(p, flags):
+        return p # result.append(p)
+      for e in exts:
+        pext = p + e
+        if os.access(pext, flags):
+          return pext # result.append(pext)
+    return result
+
 #
 # Configuration axis: compiler
 #
 
 compilerflags = []
 if compiler == 'clang':
-  compilerflags += ['-DCMAKE_C_COMPILER=clang', '-DCMAKE_CXX_COMPILER=clang++']
+  cc = which('clang')
+  cpp = which('clang++')
 elif compiler == 'gcc-latest':
-  compilerflags += ['-DCMAKE_C_COMPILER=gcc-4.7', '-DCMAKE_CXX_COMPILER=g++-4.7']
+  cc = which('gcc-4.7')
+  cpp = which('g++-4.7')
+if compiler != 'default':
+  if cc and cpp:
+    compilerflags = ['-DCMAKE_C_COMPILER=' + cc, '-DCMAKE_CXX_COMPILER=' + cpp]
+  else:
+    print 'Compiler not found: ' + compiler
+    sys.exit(1)
 
 #
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
