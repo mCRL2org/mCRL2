@@ -109,7 +109,7 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     void save_actions(generator_state_t state, const next_state_generator::transition_t &transition);
     void save_deadlock(generator_state_t state);
     void save_error(generator_state_t state);
-    bool add_transition(generator_state_t state, next_state_generator::transition_t &transition);
+    bool add_transition(generator_state_t state, const next_state_generator::transition_t &transition);
     atermpp::list<next_state_generator::transition_t> get_transitions(generator_state_t state);
 
     void generate_lts_breadth();

@@ -28,7 +28,9 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
-#include "mcrl2/lps/action_label.h"
+// #include "mcrl2/lps/action_label.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/action_parse.h"
 
 #include "mcrl2/lts/lts_io.h"
 
@@ -47,38 +49,34 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
-static atermpp::set < identifier_string > parse_action_list(const std::string& s)
+std::list<std::string> split_actions(const std::string& s)
 {
-  atermpp::set < identifier_string > result;
-
-  for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
+  size_t pcount = 0;
+  std::string a;
+  std::list<std::string> result;
+  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
   {
-    const std::string a=s.substr(p, q - p);
-    // Check that a is a proper string, with syntax: [a-zA-Z\_][a-zA-Z0-9\_']
-    for (unsigned int i=0; i<a.size(); ++i)
+    if (*i == ',' && pcount == 0)
     {
-      const char c=a[i];
-      if (!(('a'<=c && c<='z')||
-            ('A'<=c && c<='Z')||
-            (c=='_')||
-            (i>0 && (('0'<=c && c<='9') || c=='\''))))
-      {
-        throw mcrl2::runtime_error("The string " + a + " is not a proper action label.");
-      }
+      result.push_back(a);
+      a.clear();
     }
-    result.insert(identifier_string(a));
-
-    if (q == std::string::npos)
+    else
     {
-      break;
+      if (*i == '(') ++pcount;
+      else if (*i == ')') --pcount;
+      a.push_back(*i);
     }
   }
+  if (!a.empty())
+    result.push_back(a);
   return result;
 }
 
+/*
 static void check_whether_actions_on_commandline_exist(
-             const atermpp::set < identifier_string > &actions,
-             const action_label_list action_labels)
+             const atermpp::set < mcrl2::lps::multi_action > &actions,
+             const std::set<std::string> action_labels)
 {
   for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
@@ -98,6 +96,7 @@ static void check_whether_actions_on_commandline_exist(
   }
 
 }
+*/
 
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
@@ -154,7 +153,17 @@ class lps2lts_tool : public lps2lts_base
       m_options.specification.load(m_filename);
       m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
 
-      check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
+      // check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
+      try
+      {
+        m_options.validate_actions();
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        mCRL2log(error) << "Invalid (multi-)action given: " << e.what() << std::endl;
+        return false;
+      }
+
       if (!m_lps2lts->initialise_lts_generation(&m_options))
       {
         return false;
@@ -226,6 +235,10 @@ class lps2lts_tool : public lps2lts_base
                  "to find (or prove the absence) of an action error. A message "
                  "is printed for every occurrence of one of these action names. "
                  "With the -t flag traces towards these actions are generated", 'a').
+      add_option("multiaction", make_mandatory_argument("NAMES"),
+                 "detect and report multiactions in the transitions system "
+                 "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
+                 "are matched exactly, including data parameters.", 'm').
       add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
                  "Write a shortest trace to each state that is reached with an action from NAMES "
                  "from option --action, is a deadlock detected with --deadlock, or is a "
@@ -336,7 +349,14 @@ class lps2lts_tool : public lps2lts_base
       if (parser.options.count("action"))
       {
         m_options.detect_action = true;
-        m_options.trace_actions = parse_action_list(parser.option_argument("action").c_str());
+        std::list<std::string> actions = split_actions(parser.option_argument("action"));
+        for (std::list<std::string>::iterator it = actions.begin(); it != actions.end(); ++it)
+          m_options.trace_actions.insert(mcrl2::core::identifier_string(it->c_str()));
+      }
+      if (parser.options.count("multiaction"))
+      {
+        std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
+        m_options.trace_multiaction_strings.insert(actions.begin(), actions.end());
       }
       if (parser.options.count("trace"))
       {

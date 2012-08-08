@@ -18,6 +18,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
+#include "mcrl2/lps/action_parse.h"
 
 namespace mcrl2
 {
@@ -67,6 +68,38 @@ struct lts_generation_options
     return basefilename + std::string("_") + info + std::string(".") + extension;
   }
 
+  void validate_actions()
+  {
+    for (std::set < std::string >::const_iterator it = trace_multiaction_strings.begin(); it != trace_multiaction_strings.end(); ++it)
+    {
+      try
+      {
+        trace_multiactions.insert(mcrl2::lps::parse_multi_action(*it, specification.action_labels(), specification.data()));
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(*it + ": " + e.what());
+      }
+      mCRL2log(log::verbose) << "Checking for action '" << *it << "'\n";
+    }
+    if (detect_action)
+    {
+      for (atermpp::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
+      {
+        mcrl2::lps::action_label_list::iterator it = specification.action_labels().begin();
+        bool found = (*ta == "tau");
+        while (!found && it != specification.action_labels().end())
+        {
+            found = (*it++ == *ta);
+        }
+        if (!found)
+          throw mcrl2::runtime_error(*ta);
+        else
+          mCRL2log(log::verbose) << "Checking for action '" << *ta << "'\n";
+      }
+    }
+  }
+
   mcrl2::lps::specification specification;
   bool usedummies;
   bool removeunused;
@@ -95,6 +128,8 @@ struct lts_generation_options
   bool detect_divergence;
   bool detect_action;
   atermpp::set < mcrl2::core::identifier_string > trace_actions;
+  std::set < std::string > trace_multiaction_strings;
+  atermpp::set < mcrl2::lps::multi_action > trace_multiactions;
 
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter; /// REMOVE
 
