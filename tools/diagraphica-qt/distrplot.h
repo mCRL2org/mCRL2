@@ -26,12 +26,15 @@
 
 class DistrPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     DistrPlot(
       QWidget *parent,
-      Graph* g);
-    virtual ~DistrPlot();
+      Graph* g,
+      int attributeIndex
+      );
 
     // -- set data functions ----------------------------------------
     void setValues(

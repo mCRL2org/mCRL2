@@ -17,8 +17,10 @@ using namespace std;
 
 CorrlPlot::CorrlPlot(
   QWidget *parent,
-  Graph* g)
-  : Visualizer(parent, g)
+  Graph* g,
+  int attributeIndex1,
+  int attributeIndex2):
+  Visualizer(parent, g)
 {
   minRadHintPx =  5;
   maxRadHintPx = 25;
@@ -27,50 +29,17 @@ CorrlPlot::CorrlPlot(
   showDgrm        = false;
   attrValIdx1Dgrm = NON_EXISTING;
   attrValIdx2Dgrm = NON_EXISTING;
-}
 
-
-CorrlPlot::~CorrlPlot()
-{
-  clearValues();
-  diagram = 0;
-}
-
-
-// -- set data functions --------------------------------------------
-
-
-void CorrlPlot::setValues(
-  const size_t& idx1,
-  const size_t& idx2,
-  const vector< vector< size_t > > &mapXY,
-  const vector< vector< int > > &num)
-{
-  clearValues();
-  attrIdx1 = idx1;
-  attrIdx2 = idx2;
-  mapXToY = mapXY;
-  number  = num;
+  attrIdx1 = attributeIndex1;
+  attrIdx2 = attributeIndex2;
+  graph->calcAttrCorrl(attrIdx1, attrIdx2, mapXToY, number);
   initLabels();
   calcMaxNumber();
   calcPositions();
 }
 
 
-void CorrlPlot::clearValues()
-{
-  attrIdx1  = NON_EXISTING;
-  attrIdx2  = NON_EXISTING;
-  maxNumber = 0;
-  maxNumX.clear();
-  sumMaxNumX = 0;
-  maxNumY.clear();
-  sumMaxNumY = 0;
-  mapXToY.clear();
-  number.clear();
-  clearPositions();
-}
-
+// -- set data functions --------------------------------------------
 
 void CorrlPlot::setDiagram(Diagram* dgrm)
 {

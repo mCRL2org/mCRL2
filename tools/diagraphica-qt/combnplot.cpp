@@ -16,7 +16,8 @@ using namespace std;
 
 CombnPlot::CombnPlot(
   QWidget *parent,
-  Graph* g)
+  Graph* g,
+  const std::vector<size_t> &attributeIndices)
   : Visualizer(parent, g)
 {
   maxAttrCard      = 0;
@@ -29,36 +30,9 @@ CombnPlot::CombnPlot(
 
   diagram        = 0;
   showDgrm       = false;
-}
 
-
-CombnPlot::~CombnPlot()
-{
-  clearValues();
-
-  diagram = 0;
-  attrValIdcsDgrm.clear();
-}
-
-
-void CombnPlot::setDiagram(Diagram* dgrm)
-{
-  diagram = dgrm;
-}
-
-
-// -- set data functions --------------------------------------------
-
-
-void CombnPlot::setValues(
-  const vector< size_t > &attrIndcs,
-  vector< vector< size_t > > &combs,
-  vector< size_t > &number)
-{
-  attributeIndcs = attrIndcs;
-  combinations   = combs;
-  numberPerComb  = number;
-
+  attributeIndcs = attributeIndices;
+  graph->calcAttrCombn(attributeIndcs, combinations, numberPerComb);
   initLabels();
   calcMaxAttrCard();
   calcMaxNumberPerComb();
@@ -66,13 +40,11 @@ void CombnPlot::setValues(
 }
 
 
-void CombnPlot::clearValues()
-{
-  attributeIndcs.clear();
-  combinations.clear();
-  numberPerComb.clear();
+// -- set data functions --------------------------------------------
 
-  clearPositions();
+void CombnPlot::setDiagram(Diagram* dgrm)
+{
+  diagram = dgrm;
 }
 
 

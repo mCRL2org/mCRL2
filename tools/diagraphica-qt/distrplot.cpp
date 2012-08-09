@@ -16,8 +16,9 @@ using namespace std;
 
 DistrPlot::DistrPlot(
   QWidget *parent,
-  Graph* g)
-  : Visualizer(parent, g)
+  Graph* g,
+  int attributeIndex):
+  Visualizer(parent, g)
 {
   maxNumber    =  0;
   minHgtHintPx =  4;
@@ -26,40 +27,15 @@ DistrPlot::DistrPlot(
   diagram        = 0;
   showDgrm       = false;
   attrValIdxDgrm = -1;
-}
 
-
-DistrPlot::~DistrPlot()
-{
-  clearValues();
-  diagram = 0;
-}
-
-
-// -- set functions -------------------------------------------------
-
-
-void DistrPlot::setValues(
-  const size_t& idx,
-  const vector< size_t > &num)
-{
-  clearValues();
-
-  attrIdx = idx;
-  number  = num;
+  attrIdx = attributeIndex;
+  graph->calcAttrDistr(attrIdx, number);
   calcMaxNumber();
   calcPositions();
 }
 
 
-void DistrPlot::clearValues()
-{
-  number.clear();
-  attrIdx    = 0;
-  maxNumber  = 0;
-
-  clearPositions();
-}
+// -- set functions -------------------------------------------------
 
 
 void DistrPlot::setDiagram(Diagram* dgrm)

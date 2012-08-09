@@ -381,14 +381,8 @@ size_t Graph::getSizeAttributes()
 
 Attribute* Graph::getAttribute(const size_t& idx)
 {
-  if (idx < attributes.size())
-  {
-    return attributes[idx];
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error retrieving attribute.");
-  }
+  assert(idx < attributes.size());
+  return attributes[idx];
 }
 
 
@@ -560,50 +554,6 @@ void Graph::calcAttrDistr(
 }
 
 
-void Graph::calcAttrDistr(
-  Cluster* clust,
-  const size_t& attrIdx,
-  vector< size_t > &distr)
-{
-  // vars
-  Attribute* attribute = 0;
-  size_t sizeDomain       = 0;
-  vector< Node* > clustNodes;
-  size_t sizeNodes        = 0;
-
-  // init vars
-  attribute  = getAttribute(attrIdx);
-  sizeDomain = attribute->getSizeCurValues();
-
-  getDescNodesInCluster(clust, clustNodes);
-  sizeNodes  = clustNodes.size();
-
-  // init results
-  distr.clear();
-  if (sizeDomain > 0)
-  {
-    for (size_t i = 0; i < sizeDomain; ++i)
-    {
-      distr.push_back(0);
-    }
-  }
-
-  // calc results
-  if (sizeDomain > 0)
-  {
-    for (size_t i = 0; i < sizeNodes; ++i)
-      /*distr[ attribute->mapToValue( (int)clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;*/
-    {
-      distr[ attribute->mapToValue(clustNodes[i]->getTupleVal(attrIdx))->getIndex() ] += 1;
-    }
-  }
-
-  // reset ptrs
-  clustNodes.clear();
-  attribute = 0;
-}
-
-
 void Graph::calcAttrCorrl(
   const size_t& attrIdx1,
   const size_t& attrIdx2,
@@ -717,126 +667,6 @@ void Graph::calcAttrCorrl(
   // reset ptrs
   attr1 = 0;
   attr2 = 0;
-  node  = 0;
-}
-
-
-void Graph::calcAttrCorrl(
-  Cluster* clust,
-  const size_t& attrIdx1,
-  const size_t& attrIdx2,
-  vector< vector< size_t > > &corrlMap,
-  vector< vector< int > > &number)
-{
-  // vars
-  Attribute* attr1 = 0;
-  Attribute* attr2 = 0;
-  Node*      node  = 0;
-  size_t sizeDomain1  = 0;
-  size_t sizeDomain2  = 0;
-  vector< Node* > clustNodes;
-  size_t sizeNodes    = 0;
-  size_t domIdx1      = 0;
-  size_t domIdx2      = 0;
-  int count        = 0;
-  vector< int >::iterator it;
-  vector< int > toErase;
-
-  // init vars
-  attr1       = getAttribute(attrIdx1);
-  attr2       = getAttribute(attrIdx2);
-  sizeDomain1 = attr1->getSizeCurValues();
-  sizeDomain2 = attr2->getSizeCurValues();
-  getDescNodesInCluster(clust, clustNodes);
-  sizeNodes   = clustNodes.size();
-
-  // init results;
-  corrlMap.clear();
-  number.clear();
-  if (sizeDomain1 > 0 && sizeDomain2 > 0)
-  {
-    for (size_t i = 0; i < sizeDomain1; ++i)
-    {
-      vector< int > tempNumVec;
-      for (size_t j = 0; j < sizeDomain2; ++j)
-      {
-        tempNumVec.push_back(0);
-      }
-      number.push_back(tempNumVec);
-
-      vector< size_t > tempMapVec;
-      corrlMap.push_back(tempMapVec);
-    }
-  }
-
-  // calc prelim results
-  if (sizeDomain1 > 0 && sizeDomain2 > 0)
-  {
-    for (size_t i = 0; i < sizeNodes; ++i)
-    {
-      node    = clustNodes[i];
-      /*
-      domIdx1 = attr1->mapToValue(
-          (int)node->getTupleVal(
-              attrIdx1 ) )->getIndex();
-      domIdx2 = attr2->mapToValue(
-          (int)node->getTupleVal(
-              attrIdx2 ) )->getIndex();
-      */
-      domIdx1 = attr1->mapToValue(
-                  node->getTupleVal(
-                    attrIdx1))->getIndex();
-      domIdx2 = attr2->mapToValue(
-                  node->getTupleVal(
-                    attrIdx2))->getIndex();
-
-
-      number[domIdx1][domIdx2] += 1;
-    }
-  }
-
-  // update correlation map
-  if (sizeDomain1 > 0 && sizeDomain2 > 0)
-  {
-    for (size_t i = 0; i < sizeDomain1; ++i)
-    {
-      for (size_t j = 0; j < sizeDomain2; ++j)
-      {
-        if (number[i][j] > 0)
-        {
-          corrlMap[i].push_back(j);
-        }
-      }
-    }
-  }
-
-  // remove zero entries from number
-  if (sizeDomain1 > 0 && sizeDomain2 > 0)
-  {
-    for (size_t i = 0; i < sizeDomain1; ++i)
-    {
-      toErase.clear();
-      count = 0;
-      for (it = number[i].begin(); it != number[i].end(); ++it)
-      {
-        if (*it < 1)
-        {
-          toErase.push_back(count);
-        }
-        ++count;
-      }
-
-      for (size_t j = 0; j < toErase.size(); ++j)
-      {
-        number[i].erase(number[i].begin() + toErase[j] - j);
-      }
-    }
-  }
-
-  // reset ptrs
-  attr1 = 0;
-  attr2 = 0;
-  clustNodes.clear();
   node  = 0;
 }
 

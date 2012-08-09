@@ -26,20 +26,16 @@
 
 class CombnPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     CombnPlot(
       QWidget *parent,
-      Graph* g);
-    virtual ~CombnPlot();
-
+      Graph* g,
+      const std::vector<size_t> &attributeIndices
+      );
     // -- set data functions ----------------------------------------
-    void setValues(
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs,
-      std::vector< size_t > &number);
-    void clearValues();
-
     void setDiagram(Diagram* dgrm);
 
     // -- set vis settings functions --------------------------------

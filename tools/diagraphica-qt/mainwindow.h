@@ -16,10 +16,7 @@
 #include "ui_mainwindow.h"
 
 #include "arcdiagram.h"
-#include "combnplot.h"
-#include "corrlplot.h"
 #include "diagrameditor.h"
-#include "distrplot.h"
 #include "examiner.h"
 #include "mediator.h"
 #include "parser.h"
@@ -40,22 +37,33 @@ class MainWindow : public QMainWindow, public Mediator
     void save(QString filename);
 
   protected slots:
-    void refreshWidgets(Graph* newGraph = 0);
-    void refreshAttributes();
-    void refreshDomain();
-
     void openFile();
     void saveFile();
     void saveFileAs();
 
-    void openAttributeConfiguration();
-    void saveAttributeConfiguration();
+//    void openAttributeConfiguration();
+//    void saveAttributeConfiguration();
 
-    void openDiagram();
-    void saveDiagram();
+//    void openDiagram();
+//    void saveDiagram();
 
     void showAttributeContextMenu(const QPoint &position);
     void updateAttributeOperations();
+
+    void clusterNodes();
+    void viewTrace();
+    void distributionPlot();
+    void correlationPlot();
+    void combinationPlot();
+    void duplicateAttribute();
+    void renameAttribute();
+    void deleteAttribute();
+
+  protected:
+    QList<int> selectedAttributes();
+
+  signals:
+    void closingGraph();
 
   private:
     Ui::MainWindow m_ui;
@@ -63,7 +71,6 @@ class MainWindow : public QMainWindow, public Mediator
     Parser m_parser;
     Settings m_settings;
     SettingsDialog *m_settingsDialog;
-    QSet<QDialog *> m_plots;
 
     Graph *m_graph;
 

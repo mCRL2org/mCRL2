@@ -39,6 +39,9 @@ qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 
 set(DIAGRAPHICA_MOC_HEADERS
   arcdiagram.h
+  combnplot.h
+  corrlplot.h
+  distrplot.h
   mainwindow.h
   parser.h
   settingsdialog.h

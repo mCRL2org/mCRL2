@@ -94,18 +94,8 @@ class Graph : public Colleague
     void calcAttrDistr(
       const size_t& attrIdx,
       std::vector< size_t > &distr);
-    void calcAttrDistr(
-      Cluster* clust,
-      const size_t& attrIdx,
-      std::vector< size_t > &distr);
 
     void calcAttrCorrl(
-      const size_t& attrIdx1,
-      const size_t& attrIdx2,
-      std::vector< std::vector< size_t > > &corrlMap,
-      std::vector< std::vector< int > > &number);
-    void calcAttrCorrl(
-      Cluster* clust,
       const size_t& attrIdx1,
       const size_t& attrIdx2,
       std::vector< std::vector< size_t > > &corrlMap,

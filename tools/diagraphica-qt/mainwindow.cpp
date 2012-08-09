@@ -7,6 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mainwindow.h"
+#include "combnplot.h"
+#include "corrlplot.h"
+#include "distrplot.h"
 #include "mcrl2/lts/lts_io.h"
 #include <QTableWidgetItem>
 #include <QMessageBox>
@@ -30,11 +33,11 @@ MainWindow::MainWindow():
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
   connect(m_ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
 
-  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openAttributeConfiguration()));
-  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveAttributeConfiguration()));
+//  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openAttributeConfiguration()));
+//  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveAttributeConfiguration()));
 
-  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDiagram()));
-  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
+//  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDiagram()));
+//  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
 
   connect(m_ui.actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
 
@@ -45,94 +48,20 @@ MainWindow::MainWindow():
   m_ui.attributes->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_ui.attributes, SIGNAL(itemSelectionChanged()), this, SLOT(updateAttributeOperations()));
   updateAttributeOperations();
+
+  connect(m_ui.actionClusterNodes, SIGNAL(triggered()), this, SLOT(clusterNodes()));
+  connect(m_ui.actionViewTrace, SIGNAL(triggered()), this, SLOT(viewTrace()));
+  connect(m_ui.actionDistributionPlot, SIGNAL(triggered()), this, SLOT(distributionPlot()));
+  connect(m_ui.actionCorrelationPlot, SIGNAL(triggered()), this, SLOT(correlationPlot()));
+  connect(m_ui.actionCombinationPlot, SIGNAL(triggered()), this, SLOT(combinationPlot()));
+  connect(m_ui.actionDuplicate, SIGNAL(triggered()), this, SLOT(duplicateAttribute()));
+  connect(m_ui.actionRenameAttribute, SIGNAL(triggered()), this, SLOT(renameAttribute()));
+  connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteAttribute()));
 }
 
 static void stretch(QWidget *widget)
 {
   widget->parentWidget()->layout()->addWidget(widget);
-}
-
-void MainWindow::refreshWidgets(Graph* newGraph)
-{
-  QList<QWidget *> oldWidgets = QList<QWidget *>()
-      << m_diagramEditor
-      << m_examiner
-      << m_arcDiagram
-      << m_simulator
-      << m_timeSeries;
-
-  for (int i = 0; i < oldWidgets.size(); i++)
-  {
-    delete oldWidgets[i];
-  }
-  oldWidgets.clear();
-
-  for (QSet<QDialog *>::iterator i = m_plots.begin(); i != m_plots.end(); i++)
-  {
-    delete *i;
-  }
-  m_plots.clear();
-
-  if (newGraph != 0)
-  {
-    delete m_graph;
-    m_graph = newGraph;
-
-    m_ui.numberOfStates->setText(QString::number(m_graph->getSizeNodes()));
-    m_ui.numberOfTransitions->setText(QString::number(m_graph->getSizeEdges()));
-  }
-
-  m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, this, m_graph);
-  stretch(m_diagramEditor);
-
-  m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
-  m_examiner->setDiagram(m_diagramEditor->getDiagram());
-  stretch(m_examiner);
-
-  m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
-  m_arcDiagram->setDiagram(m_diagramEditor->getDiagram());
-  stretch(m_arcDiagram);
-
-  m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
-  m_simulator->setDiagram(m_diagramEditor->getDiagram());
-  stretch(m_simulator);
-
-  m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
-  m_timeSeries->setDiagram(m_diagramEditor->getDiagram());
-  stretch(m_timeSeries);
-
-  refreshAttributes();
-  refreshDomain();
-}
-
-void MainWindow::refreshAttributes()
-{
-  m_ui.attributes->setRowCount(0);
-
-  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
-  {
-    m_ui.attributes->insertRow(i);
-    for (int j = 0; j < m_ui.attributes->columnCount(); j++)
-    {
-      m_ui.attributes->setItem(i, j, new QTableWidgetItem());
-      m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
-    }
-
-    Attribute *attribute = m_graph->getAttribute(i);
-    m_ui.attributes->item(i, 0)->setText(QString::number(i));
-    m_ui.attributes->item(i, 1)->setText(attribute->name());
-    m_ui.attributes->item(i, 2)->setText(attribute->type());
-    m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
-  }
-
-  m_ui.attributes->resizeColumnsToContents();
-}
-
-void MainWindow::refreshDomain()
-{
-  m_ui.domain->setRowCount(0);
-
-  // ...
 }
 
 void MainWindow::open(QString filename)
@@ -156,7 +85,70 @@ void MainWindow::open(QString filename)
     delete graph;
     return;
   }
-  refreshWidgets(graph);
+
+  QList<QWidget *> oldWidgets = QList<QWidget *>()
+      << m_diagramEditor
+      << m_examiner
+      << m_arcDiagram
+      << m_simulator
+      << m_timeSeries;
+
+  for (int i = 0; i < oldWidgets.size(); i++)
+  {
+    delete oldWidgets[i];
+  }
+  oldWidgets.clear();
+
+  if (graph != 0)
+  {
+    emit closingGraph();
+    delete m_graph;
+  }
+
+  m_graph = graph;
+
+  m_ui.numberOfStates->setText(QString::number(m_graph->getSizeNodes()));
+  m_ui.numberOfTransitions->setText(QString::number(m_graph->getSizeEdges()));
+
+  m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, this, m_graph);
+  stretch(m_diagramEditor);
+
+  m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
+  m_examiner->setDiagram(m_diagramEditor->getDiagram());
+  stretch(m_examiner);
+
+  m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
+  m_arcDiagram->setDiagram(m_diagramEditor->getDiagram());
+  stretch(m_arcDiagram);
+
+  m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
+  m_simulator->setDiagram(m_diagramEditor->getDiagram());
+  stretch(m_simulator);
+
+  m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
+  m_timeSeries->setDiagram(m_diagramEditor->getDiagram());
+  stretch(m_timeSeries);
+
+  m_ui.attributes->setRowCount(0);
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
+  {
+    m_ui.attributes->insertRow(i);
+    for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+    {
+      m_ui.attributes->setItem(i, j, new QTableWidgetItem());
+      m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+    }
+
+    Attribute *attribute = m_graph->getAttribute(i);
+    m_ui.attributes->item(i, 0)->setText(QString::number(i));
+    m_ui.attributes->item(i, 1)->setText(attribute->name());
+    m_ui.attributes->item(i, 2)->setText(attribute->type());
+    m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
+  }
+
+  m_ui.attributes->resizeColumnsToContents();
+
+  updateAttributeOperations();
 }
 
 void MainWindow::save(QString filename)
@@ -227,161 +219,6 @@ void MainWindow::saveFileAs()
   save(filename);
 }
 
-void MainWindow::openAttributeConfiguration()
-{
-  if (m_graph == NULL)
-  {
-    return;
-  }
-  QString filter = QString("DGC files (*.dgc);;All files (*.*)");
-  QString filename = QFileDialog::getOpenFileName(this, "Open Attribute Configuration", QString(), filter);
-  if (filename.isNull())
-  {
-    return;
-  }
-
-
-  try
-  {
-
-    std::map< size_t , size_t > attrIdxFrTo;
-    std::map< size_t , std::vector< std::string > > attrCurDomains;
-    std::map< size_t , std::map< size_t, size_t  > > attrOrigToCurDomains;
-
-    m_parser.parseAttrConfig(
-          filename,
-          m_graph,
-          attrIdxFrTo,
-          attrCurDomains,
-          attrOrigToCurDomains);
-
-    m_graph->configAttributes(
-          attrIdxFrTo,
-          attrCurDomains,
-          attrOrigToCurDomains);
-
-    refreshWidgets();
-  }
-  catch (const mcrl2::runtime_error& e)
-  {
-    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
-    return;
-  }
-}
-
-void MainWindow::saveAttributeConfiguration()
-{
-  if (m_graph == NULL)
-  {
-    return;
-  }
-  QString filter = QString("DGC files (*.dgc);;All files (*.*)");
-  QString filename = QFileDialog::getSaveFileName(this, "Save Attribute Configuration", QString(), filter);
-
-  if (filename.isNull())
-  {
-    return;
-  }
-
-  try
-  {
-    m_parser.writeAttrConfig(
-          filename,
-          m_graph);
-  }
-  catch (const mcrl2::runtime_error& e)
-  {
-    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
-    return;
-  }
-}
-
-void MainWindow::openDiagram()
-{
-  if (m_graph == NULL)
-  {
-    return;
-  }
-  QString filter = QString("DGD files (*.dgd);;All files (*.*)");
-  QString filename = QFileDialog::getOpenFileName(this, "Open Diagram", QString(), filter);
-  if (filename.isNull())
-  {
-    return;
-  }
-
-  Diagram* diagram = new Diagram(this);
-
-  try
-  {
-    m_parser.parseDiagram(
-          filename,
-          m_graph,
-          diagram);
-
-    m_diagramEditor->setDiagram(diagram);
-
-    m_arcDiagram->setDiagram(diagram);
-    m_arcDiagram->hideAllDiagrams();
-
-    m_simulator->clearData();
-    m_simulator->setDiagram(diagram);
-
-    m_timeSeries->clearData();
-    m_timeSeries->setDiagram(diagram);
-
-    m_examiner->clearData();
-    m_examiner->setDiagram(diagram);
-
-    if (m_diagramEditor->isVisible()) // Edit Mode
-    {
-      m_diagramEditor->updateGL();
-    }
-
-    if (m_arcDiagram->isVisible())
-    {
-      m_examiner->updateGL();
-      m_arcDiagram->updateGL();
-      m_simulator->updateGL();
-      m_timeSeries->updateGL();
-    }
-  }
-  catch (const mcrl2::runtime_error& e)
-  {
-    delete diagram;
-
-    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
-    return;
-  }
-}
-
-void MainWindow::saveDiagram()
-{
-  if (m_graph == NULL)
-  {
-    return;
-  }
-  QString filter = QString("DGD files (*.dgd);;All files (*.*)");
-  QString filename = QFileDialog::getSaveFileName(this, "Save Diagram", QString(), filter);
-
-  if (filename.isNull())
-  {
-    return;
-  }
-
-  try
-  {
-    m_parser.writeDiagram(
-      filename,
-      m_graph,
-      m_diagramEditor->getDiagram());
-  }
-  catch (const mcrl2::runtime_error& e)
-  {
-    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
-    return;
-  }
-}
-
 void MainWindow::showAttributeContextMenu(const QPoint &position)
 {
   m_ui.menuAttributes->popup(m_ui.attributes->viewport()->mapToGlobal(position));
@@ -389,12 +226,8 @@ void MainWindow::showAttributeContextMenu(const QPoint &position)
 
 void MainWindow::updateAttributeOperations()
 {
-  QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
-  int items = 0;
-  for (int i = 0; i < ranges.size(); i++)
-  {
-    items += ranges[i].rowCount();
-  }
+  QList<int> attributes = selectedAttributes();
+  int items = attributes.size();
 
   m_ui.actionClusterNodes->setEnabled(items > 0);
   m_ui.actionViewTrace->setEnabled(items > 0);
@@ -403,14 +236,124 @@ void MainWindow::updateAttributeOperations()
   m_ui.actionCombinationPlot->setEnabled(items > 0);
   m_ui.actionDuplicate->setEnabled(items == 1);
   m_ui.actionRenameAttribute->setEnabled(items == 1);
-  m_ui.actionDelete->setEnabled(items == 1);
+  m_ui.actionDelete->setEnabled(items > 0);
 
-  if (items == 1)
+  m_ui.domain->setRowCount(0);
+  if (attributes.size() == 1)
   {
-  
-  }
-  else
-  {
-  
+    assert(attributes[0] < m_graph->getSizeAttributes());
+
+    std::vector<size_t> valueDistribution;
+    m_graph->calcAttrDistr(attributes[0], valueDistribution);
+
+    Attribute *attribute = m_graph->getAttribute(attributes[0]);
+    for (size_t i = 0; i < attribute->getSizeCurValues(); i++)
+    {
+      Value *value = attribute->getCurValue(i);
+
+      m_ui.domain->insertRow(i);
+      for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+      {
+        m_ui.domain->setItem(i, j, new QTableWidgetItem());
+        m_ui.domain->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+      }
+
+      m_ui.domain->item(i, 0)->setText(QString::number(i));
+      m_ui.domain->item(i, 1)->setText(QString::fromStdString(value->getValue()));
+      m_ui.domain->item(i, 2)->setText(QString::number(valueDistribution[i]));
+      m_ui.domain->item(i, 3)->setText(QString::number(100 * valueDistribution[i] / (double)m_graph->getSizeNodes()));
+    }
   }
 }
+
+void MainWindow::clusterNodes()
+{
+
+}
+
+void MainWindow::viewTrace()
+{
+
+}
+
+void MainWindow::distributionPlot()
+{
+  QList<int> attributes = selectedAttributes();
+  if (attributes.size() != 1)
+  {
+    return;
+  }
+
+  DistrPlot *plot = new DistrPlot(0, m_graph, attributes[0]);
+  connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
+  plot->setAttribute(Qt::WA_DeleteOnClose);
+  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->show();
+}
+
+void MainWindow::correlationPlot()
+{
+  QList<int> attributes = selectedAttributes();
+  if (attributes.size() != 2)
+  {
+    return;
+  }
+
+  CorrlPlot *plot = new CorrlPlot(0, m_graph, attributes[0], attributes[1]);
+  connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
+  plot->setAttribute(Qt::WA_DeleteOnClose);
+  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->show();
+}
+
+void MainWindow::combinationPlot()
+{
+  QList<int> attributes = selectedAttributes();
+  if (attributes.size() == 0)
+  {
+    return;
+  }
+  std::vector<size_t> attributeVector;
+  for (int i = 0; i < attributes.size(); i++)
+  {
+    attributeVector.push_back(attributes[i]);
+  }
+
+  CombnPlot *plot = new CombnPlot(0, m_graph, attributeVector);
+  connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
+  plot->setAttribute(Qt::WA_DeleteOnClose);
+  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->show();
+}
+
+void MainWindow::duplicateAttribute()
+{
+
+}
+
+void MainWindow::renameAttribute()
+{
+
+}
+
+void MainWindow::deleteAttribute()
+{
+
+}
+
+
+
+QList<int> MainWindow::selectedAttributes()
+{
+  QList<int> output;
+  QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
+  for (int i = 0; i < ranges.size(); i++)
+  {
+    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
+    {
+      output += j;
+    }
+  }
+  return output;
+}
+

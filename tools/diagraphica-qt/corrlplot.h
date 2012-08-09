@@ -25,21 +25,17 @@
 
 class CorrlPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     CorrlPlot(
       QWidget *parent,
-      Graph* g);
-    virtual ~CorrlPlot();
+      Graph* g,
+      int attributeIndex1,
+      int attributeIndex2);
 
     // -- set data functions ----------------------------------------
-    void setValues(
-      const size_t& idx1,
-      const size_t& idx2,
-      const std::vector< std::vector< size_t > > &mapXY,
-      const std::vector< std::vector< int > > &num);
-    void clearValues();
-
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
