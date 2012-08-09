@@ -25,11 +25,10 @@
 # include <GL/glu.h>
 #endif
 #include <cstddef>
-#include "colleague.h"
 #include "graph.h"
 #include "visutils.h"
 
-class Visualizer : public QGLWidget, public Colleague
+class Visualizer : public QGLWidget
 {
   Q_OBJECT
 
@@ -37,7 +36,6 @@ class Visualizer : public QGLWidget, public Colleague
     // -- constructors and destructor -------------------------------
     Visualizer(
       QWidget *parent,
-      Mediator *mediator,
       Graph *graph);
     virtual ~Visualizer() {}
 

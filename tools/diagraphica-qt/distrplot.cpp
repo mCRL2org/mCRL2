@@ -16,9 +16,8 @@ using namespace std;
 
 DistrPlot::DistrPlot(
   QWidget *parent,
-  Mediator* m,
   Graph* g)
-  : Visualizer(parent, m, g)
+  : Visualizer(parent, g)
 {
   maxNumber    =  0;
   minHgtHintPx =  4;

@@ -18,11 +18,12 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include "colleague.h"
 #include "graph.h"
 #include "utils.h"
 #include "visualizer.h"
 
-class OpacityChooser : public Visualizer
+class OpacityChooser : public Visualizer, public Colleague
 {
   public:
     // -- constructors and destructor -------------------------------

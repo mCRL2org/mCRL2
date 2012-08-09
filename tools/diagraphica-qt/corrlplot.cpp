@@ -17,9 +17,8 @@ using namespace std;
 
 CorrlPlot::CorrlPlot(
   QWidget *parent,
-  Mediator* m,
   Graph* g)
-  : Visualizer(parent, m, g)
+  : Visualizer(parent, g)
 {
   minRadHintPx =  5;
   maxRadHintPx = 25;

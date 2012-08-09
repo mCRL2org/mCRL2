@@ -18,8 +18,9 @@ using namespace std;
 ColorChooser::ColorChooser(
   QWidget *parent,
   Mediator* m,
-  Graph* g)
-  : Visualizer(parent, m, g)
+  Graph* g):
+  Visualizer(parent, g),
+  Colleague(m)
 {
   hdlSize  = 5.0;
 

@@ -20,13 +20,14 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include "colleague.h"
 #include "colorchooser.h"
 #include "dof.h"
 #include "diagram.h"
 #include "graph.h"
 #include "visualizer.h"
 
-class DiagramEditor : public Visualizer
+class DiagramEditor : public Visualizer, public Colleague
 {
   public:
     // -- constructors and destructor -------------------------------

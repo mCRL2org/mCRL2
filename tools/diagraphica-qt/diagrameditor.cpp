@@ -25,8 +25,9 @@ int DiagramEditor::szeTxt = 12;
 DiagramEditor::DiagramEditor(
   QWidget *parent,
   Mediator* m,
-  Graph* g)
-  : Visualizer(parent, m, g)
+  Graph* g):
+  Visualizer(parent, g),
+  Colleague(m)
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);

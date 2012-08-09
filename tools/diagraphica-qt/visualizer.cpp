@@ -15,10 +15,8 @@
 
 Visualizer::Visualizer(
   QWidget *parent,
-  Mediator *mediator_,
   Graph *graph_)
   : QGLWidget(parent),
-    Colleague(mediator_),
     m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
     graph(graph_)
 {

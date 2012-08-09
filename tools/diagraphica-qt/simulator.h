@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "bundle.h"
+#include "colleague.h"
 #include "diagram.h"
 #include "edge.h"
 #include "graph.h"
@@ -28,7 +29,7 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Simulator : public Visualizer
+class Simulator : public Visualizer, public Colleague
 {
   Q_OBJECT
   public:

@@ -30,7 +30,6 @@ class DistrPlot : public Visualizer
     // -- constructors and destructor -------------------------------
     DistrPlot(
       QWidget *parent,
-      Mediator* m,
       Graph* g);
     virtual ~DistrPlot();
 

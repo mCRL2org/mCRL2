@@ -26,7 +26,8 @@ Simulator::Simulator(
   Mediator* m,
   Settings* s,
   Graph* g)
-  : Visualizer(parent, m, g),
+  : Visualizer(parent, g),
+    Colleague(m),
     m_settings(s)
 {
   m_diagram   = 0;

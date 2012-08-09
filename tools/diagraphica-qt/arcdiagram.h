@@ -24,6 +24,7 @@
 #include <map>
 #include <vector>
 #include <QTimer>
+#include "colleague.h"
 #include "diagram.h"
 #include "graph.h"
 #include "settings.h"
@@ -39,7 +40,7 @@ enum RenderMode
   HitRender
 };
 
-class ArcDiagram : public Visualizer
+class ArcDiagram : public Visualizer, public Colleague
 {
   Q_OBJECT
   public:

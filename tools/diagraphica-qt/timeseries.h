@@ -23,12 +23,13 @@
 #include <vector>
 #include <QTimer>
 #include "attribute.h"
+#include "colleague.h"
 #include "diagram.h"
 #include "graph.h"
 #include "settings.h"
 #include "visualizer.h"
 
-class TimeSeries : public Visualizer
+class TimeSeries : public Visualizer, public Colleague
 {
   Q_OBJECT
   public:

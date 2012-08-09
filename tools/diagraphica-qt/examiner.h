@@ -19,6 +19,7 @@
 #include <cmath>
 #include <vector>
 #include "bundle.h"
+#include "colleague.h"
 #include "diagram.h"
 #include "edge.h"
 #include "graph.h"
@@ -27,7 +28,7 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Examiner : public Visualizer
+class Examiner : public Visualizer, public Colleague
 {
   public:
     // -- constructors and destructor -------------------------------

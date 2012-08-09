@@ -18,12 +18,13 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include "colleague.h"
 #include "graph.h"
 #include "shape.h"
 #include "utils.h"
 #include "visualizer.h"
 
-class ColorChooser : public Visualizer
+class ColorChooser : public Visualizer, public Colleague
 {
   public:
     // -- constructors and destructor -------------------------------

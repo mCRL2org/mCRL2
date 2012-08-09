@@ -24,7 +24,8 @@ Examiner::Examiner(
   Mediator* m,
   Settings* s,
   Graph* g)
-  : Visualizer(parent, m, g),
+  : Visualizer(parent, g),
+    Colleague(m),
     settings(s)
 {
   diagram = 0;

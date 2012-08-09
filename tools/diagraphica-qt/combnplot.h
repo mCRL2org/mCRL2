@@ -30,7 +30,6 @@ class CombnPlot : public Visualizer
     // -- constructors and destructor -------------------------------
     CombnPlot(
       QWidget *parent,
-      Mediator* m,
       Graph* g);
     virtual ~CombnPlot();
 
