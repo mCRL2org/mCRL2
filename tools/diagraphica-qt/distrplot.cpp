@@ -166,7 +166,7 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
   if (number.size() > 0)
   {
     // x-axis label
-    string xLabel = graph->getAttribute(attrIdx)->getName();
+    string xLabel = graph->getAttribute(attrIdx)->name().toStdString();
     x =  0.0;
     y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
@@ -322,7 +322,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
   if (posIdx < number.size())
   {
     Attribute* attr = graph->getAttribute(attrIdx);
-    string xLabel   = attr->getName();
+    string xLabel   = attr->name().toStdString();
     string value    = "";
     if (posIdx < static_cast <size_t>(attr->getSizeCurValues()))
     {

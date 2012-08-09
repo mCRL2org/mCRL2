@@ -24,7 +24,6 @@
 #include "diagram.h"
 #include "dof.h"
 #include "graph.h"
-#include <wx/xml/xml.h>
 #include "utils.h"
 
 template <class T>
@@ -86,6 +85,9 @@ class Parser : public QObject
     QMap<QString, double> findDoubleValues(QDomElement root, QStringList tagNames);
     QMap<QString, float> findFloatValues(QDomElement root, QStringList tagNames);
     QMap<QString, int> findIntValues(QDomElement root, QStringList tagNames);
+
+    QDomElement appendValue(QDomDocument document, QDomElement root, QString tag, QString val);
+    QDomElement appendDOF(QDomDocument document, QDomElement root, QString name, DOF* dof);
 
     // dgc files
     void parseAttribute(

@@ -43,9 +43,9 @@ Graph::~Graph()
 // -- set functions -------------------------------------------------
 
 
-void Graph::setFileName(const string& fn)
+void Graph::setFileName(QString filename)
 {
-  fileName = fn;
+  m_filename = filename;
 }
 
 /*
@@ -84,8 +84,8 @@ void Graph::addAttribute(
 */
 
 void Graph::addAttrDiscr(
-  const string& name,
-  const string& type,
+  QString name,
+  QString type,
   const size_t& idx,
   const vector< string > &vals)
 {
@@ -246,7 +246,7 @@ void Graph::duplAttributes(const vector< size_t > &idcs)
 
       attributes[ insIdx + i ]->setIndex(insIdx + i);
       attributes[ insIdx + i ]->setName(
-        "Copy_of_" + attributes[ idcs[i] ]->getName());
+        "Copy_of_" + attributes[ idcs[i] ]->name());
       {
         for (size_t j = insIdx + i + 1; j < attributes.size(); ++j)
         {
@@ -367,9 +367,9 @@ void Graph::initGraph()
 // -- get functions -------------------------------------------------
 
 
-string Graph::getFileName()
+QString Graph::filename()
 {
-  return fileName;
+  return m_filename;
 }
 
 
@@ -392,13 +392,13 @@ Attribute* Graph::getAttribute(const size_t& idx)
 }
 
 
-Attribute* Graph::getAttribute(const string& name)
+Attribute* Graph::getAttribute(QString name)
 {
   Attribute* result = 0;
 
   for (size_t i = 0; i < attributes.size() && result == 0; ++i)
   {
-    if (attributes[i]->getName() == name)
+    if (attributes[i]->name() == name)
     {
       result = attributes[i];
     }

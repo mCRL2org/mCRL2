@@ -30,16 +30,16 @@ class Attribute
   public:
     // -- constructors and destructor -------------------------------
     Attribute(
-      const std::string& nam,
-      const std::string& typ,
+      QString name,
+      QString type,
       const size_t& idx);
     Attribute(const Attribute& attr);
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
     void setIndex(const size_t& idx);
-    void setName(const std::string& nme);
-    void setType(const std::string& typ);
+    void setName(QString name);
+    void setType(QString type);
 
     virtual void clusterValues(
       const std::vector< int > &indices,
@@ -55,8 +55,8 @@ class Attribute
 
     // -- get functions ---------------------------------------------
     size_t getIndex();
-    std::string getName();
-    std::string getType();
+    QString name();
+    QString type();
 
     // functions overridden by AttrDiscr
     virtual size_t getSizeOrigValues();
@@ -76,8 +76,8 @@ class Attribute
 
     // -- data members ----------------------------------------------
     size_t    index;
-    std::string name;
-    std::string type;
+    QString m_name;
+    QString m_type;
 };
 
 #endif

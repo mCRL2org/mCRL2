@@ -15,12 +15,12 @@
 using namespace std;
 
 Attribute::Attribute(
-  const string& nam,
-  const string& typ,
+  QString name,
+  QString type,
   const size_t& idx)
 {
-  name  = nam;
-  type  = typ;
+  m_name  = name;
+  m_type  = type;
   index = idx;
 }
 
@@ -28,8 +28,8 @@ Attribute::Attribute(
 Attribute::Attribute(const Attribute& attr)
 {
   index = attr.index;
-  name  = attr.name;
-  type  = attr.type;
+  m_name  = attr.m_name;
+  m_type  = attr.m_type;
 }
 
 
@@ -46,15 +46,15 @@ void Attribute::setIndex(const size_t& idx)
 }
 
 
-void Attribute::setName(const string& nme)
+void Attribute::setName(QString name)
 {
-  name = nme;
+  m_name = name;
 }
 
 
-void Attribute::setType(const string& typ)
+void Attribute::setType(QString type)
 {
-  type = typ;
+  m_type = type;
 }
 
 
@@ -85,15 +85,15 @@ size_t Attribute::getIndex()
 }
 
 
-string Attribute::getName()
+QString Attribute::name()
 {
-  return name;
+  return m_name;
 }
 
 
-string Attribute::getType()
+QString Attribute::type()
 {
-  return type;
+  return m_type;
 }
 
 

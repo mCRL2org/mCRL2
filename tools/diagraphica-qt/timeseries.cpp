@@ -2008,14 +2008,14 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x) + 1.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 2.0*pix,
         settings->textSize.value()*pix/CHARHEIGHT,
-        attributes[i]->getName());
+        attributes[i]->name().toStdString());
       VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabelCenter(
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x),
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 1.0*pix,
         settings->textSize.value()*pix/CHARHEIGHT,
-        attributes[i]->getName());
+        attributes[i]->name().toStdString());
     }
   }
 }

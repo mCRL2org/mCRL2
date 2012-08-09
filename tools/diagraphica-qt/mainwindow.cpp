@@ -120,8 +120,8 @@ void MainWindow::refreshAttributes()
 
     Attribute *attribute = m_graph->getAttribute(i);
     m_ui.attributes->item(i, 0)->setText(QString::number(i));
-    m_ui.attributes->item(i, 1)->setText(QString::fromStdString(attribute->getName()));
-    m_ui.attributes->item(i, 2)->setText(QString::fromStdString(attribute->getType()));
+    m_ui.attributes->item(i, 1)->setText(attribute->name());
+    m_ui.attributes->item(i, 2)->setText(attribute->type());
     m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
   }
 
@@ -138,7 +138,7 @@ void MainWindow::refreshDomain()
 void MainWindow::open(QString filename)
 {
   Graph *graph = new Graph(this);
-  graph->setFileName(filename.toStdString());
+  graph->setFileName(filename);
   try
   {
     QProgressDialog dialog(QString("Opening ") + filename, QString(), 0, 1, this);
@@ -170,7 +170,7 @@ void MainWindow::save(QString filename)
 
     m_parser.writeFSMFile(filename, m_graph);
 
-    m_graph->setFileName(filename.toStdString());
+    m_graph->setFileName(filename);
   }
   catch (const mcrl2::runtime_error& e)
   {
@@ -198,7 +198,7 @@ void MainWindow::saveFile()
     return;
   }
   QString filter = QString("FSM files (*.fsm);;All files (*.*)");
-  QString filename = QString::fromStdString(m_graph->getFileName());
+  QString filename = m_graph->filename();
 
   if (filename.isNull() || QFileInfo(filename).suffix().toLower() != "fsm")
   {

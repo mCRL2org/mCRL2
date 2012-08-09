@@ -541,7 +541,7 @@ void CombnPlot::initLabels()
   attributeLabels.clear();
   for (size_t i = 0; i < attributeIndcs.size(); ++i)
     attributeLabels.push_back(
-      graph->getAttribute(attributeIndcs[i])->getName());
+      graph->getAttribute(attributeIndcs[i])->name().toStdString());
 }
 
 

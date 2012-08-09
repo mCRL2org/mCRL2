@@ -753,7 +753,7 @@ void DiagramEditor::setLinkDOFAttr(
       }
       else
       {
-        s->setNote(a->getName());
+        s->setNote(a->name().toStdString());
         s->setVariable("");
       }
 

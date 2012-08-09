@@ -10,8 +10,6 @@
 
 #include <QFileInfo>
 
-#include "wx.hpp" // precompiled headers
-
 #include "parser.h"
 
 #include "mcrl2/utilities/logger.h"
@@ -51,13 +49,13 @@ void Parser::parseFile(QString filename, Graph* graph)
     std::vector< string > values = l.state_element_values(i);
     for (size_t j = 0; j < values.size(); j++)
     {
-      if (values.at(j).empty())
+      if (values[j].empty())
         values.assign(j, "-");
     }
 
     graph->addAttrDiscr(
-          parameter->first,
-          parameter->second,
+          QString::fromStdString(parameter->first),
+          QString::fromStdString(parameter->second),
           graph->getSizeAttributes(),
           values);
 
@@ -107,9 +105,9 @@ void Parser::writeFSMFile(
   // write state variable description
   for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
   {
-    QString name = QString::fromStdString(graph->getAttribute(i)->getName());
+    QString name = graph->getAttribute(i)->name();
     QString sizeOrigValues = QString::number(int(graph->getAttribute(i)->getSizeOrigValues()));
-    QString type = QString::fromStdString(graph->getAttribute(i)->getType());
+    QString type = graph->getAttribute(i)->type();
 
     line = QString("%1(%2) %3 ").arg(name, sizeOrigValues, type);
 
@@ -230,100 +228,48 @@ void Parser::writeAttrConfig(
     QString filename,
     Graph* graph)
 {
-  try
+  QString file = QFileInfo(graph->filename()).fileName();
+
+  QDomDocument xml;
+  QDomElement root = xml.createElement("Configuration");
+  xml.appendChild(root);
+
+  appendValue(xml, root, "File", file);
+
+  // attributes
+  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
   {
-    // new xml document
-    wxXmlDocument  doc;
-    wxXmlNode*     conf;
-    wxXmlNode*     file;
-    wxXmlNode*     attr;
-    wxXmlNode*     name;
-    wxXmlNode*     type;
-    wxXmlNode*     card;
-    wxXmlNode*     domn;
-    wxXmlNode*     valu;
-    wxXmlNode*     map;
-    wxXmlNode*     pos;
+    Attribute* attribute = graph->getAttribute(i);
+    QDomElement attributeElement = xml.createElement("Attribute");
+    appendValue(xml, attributeElement, "Name", attribute->name());
+    appendValue(xml, attributeElement, "Type", attribute->type());
+    appendValue(xml, attributeElement, "OriginalCardinality", QString::number(attribute->getSizeOrigValues()));
 
-    // document declaration
-    doc.SetVersion(wxT("1.0"));
-
-    // configuration
-    conf = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Configuration"));
-    doc.SetRoot(conf);
-
-    // file name
-    file = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("File"));
-    conf -> AddChild(file);
-    new wxXmlNode(file, wxXML_TEXT_NODE, wxEmptyString, wxString(graph->getFileName().c_str(), wxConvUTF8));
-
-    // attributes
-    for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+    QDomElement currentDomainElement = xml.createElement("CurrentDomain");
+    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
     {
-      attr = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      conf -> AddChild(attr);
-
-      // name
-      name = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Name"));
-      attr -> AddChild(name);
-      new wxXmlNode(name, wxXML_TEXT_NODE, wxEmptyString, wxString(graph->getAttribute(i)->getName().c_str(), wxConvUTF8));
-
-      // type
-      type = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Type"));
-      attr -> AddChild(type);
-      new wxXmlNode(type , wxXML_TEXT_NODE, wxEmptyString, wxString(graph->getAttribute(i)->getType().c_str(), wxConvUTF8));
-
-      // cardinality
-      card = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("OriginalCardinality"));
-      attr -> AddChild(card);
-      new wxXmlNode(card , wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::intToStr((int) graph->getAttribute(i)->getSizeOrigValues()).c_str(), wxConvUTF8));
-
-      // current domain
-      domn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("CurrentDomain"));
-      attr -> AddChild(domn);
-      {
-        for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
-        {
-          // value
-          valu = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          domn -> AddChild(valu);
-          new wxXmlNode(valu , wxXML_TEXT_NODE, wxEmptyString, wxString(graph->getAttribute(i)->getCurValue(j)->getValue().c_str(), wxConvUTF8));
-        }
-      }
-
-      // mapping from original to current domain
-      // current domain
-      map = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("OriginalToCurrent")) ;
-      attr -> AddChild(map);
-      {
-        for (size_t j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j)
-        {
-          // value
-          pos = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("CurrentPosition"));
-          map -> AddChild(pos);
-          new wxXmlNode(pos , wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::intToStr((int) graph->getAttribute(i)->mapToValue(j)->getIndex()).c_str(), wxConvUTF8));
-        }
-      }
+      appendValue(xml, currentDomainElement, "Value", QString::fromStdString(attribute->getCurValue(j)->getValue()));
     }
+    attributeElement.appendChild(currentDomainElement);
 
-    doc.Save(wxString(filename.toStdString().c_str(), wxConvUTF8));
+    QDomElement originalToCurrentElement = xml.createElement("OriginalToCurrent");
+    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
+    {
+      appendValue(xml, originalToCurrentElement, "CurrentPosition", QString::number(int(attribute->mapToValue(j)->getIndex())));
+    }
+    attributeElement.appendChild(originalToCurrentElement);
 
-    conf = 0;
-    file = 0;
-    attr = 0;
-    name = 0;
-    type = 0;
-    card = 0;
-    domn = 0;
-    valu = 0;
-    map  = 0;
-    pos  = 0;
+    root.appendChild(attributeElement);
   }
-  catch (...)
-  {
-    throw mcrl2::runtime_error(
-          "Error saving attribute configuration.");
+
+  QFile data(filename);
+  if (!data.open(QFile::WriteOnly | QFile::Truncate)) {
+    throw mcrl2::runtime_error("Error opening file for writing.");
   }
+
+  QTextStream out(&data);
+  xml.save(out, 2);
+
 }
 
 
@@ -379,334 +325,87 @@ void Parser::writeDiagram(
     Graph* graph,
     Diagram* diagram)
 {
-  try
+  QString file = QFileInfo(graph->filename()).fileName();
+
+  QMap<int, QString> types;
+  types.insert(Shape::TYPE_LINE,     "TYPE_LINE");
+  types.insert(Shape::TYPE_RECT,     "TYPE_RECT");
+  types.insert(Shape::TYPE_ELLIPSE,  "TYPE_ELLIPSE");
+  types.insert(Shape::TYPE_ARROW,    "TYPE_ARROW");
+  types.insert(Shape::TYPE_DARROW,   "TYPE_DARROW");
+  types.insert(Shape::TYPE_NOTE,     "TYPE_NOTE");
+
+  QDomDocument xml;
+  QDomElement root = xml.createElement("Diagram");
+  xml.appendChild(root);
+
+  appendValue(xml, root, "File", file);
+
+  // shapes
+  for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
   {
-    // new xml document
-    wxXmlDocument     doc;
-    wxXmlNode*     dgrm;
-    wxXmlNode*     file;
-    wxXmlNode*     shpe;
-    wxXmlNode*     prop;
-    wxXmlNode*     subp;
-    Attribute*        attr;
+    Shape* shape = diagram->getShape(i);
+    QDomElement shapeElement = xml.createElement("Shape");
 
-    // document declaration
-    doc.SetVersion(wxT("1.0"));
+    appendValue(xml, shapeElement, "XCenter", QString::number(shape->getXCtr()));
+    appendValue(xml, shapeElement, "YCenter", QString::number(shape->getYCtr()));
+    appendValue(xml, shapeElement, "XDistanceFromCenter", QString::number(shape->getXDFC()));
+    appendValue(xml, shapeElement, "YDistanceFromCenter", QString::number(shape->getYDFC()));
+    appendValue(xml, shapeElement, "XHinge", QString::number(shape->getXHinge()));
+    appendValue(xml, shapeElement, "YHinge", QString::number(shape->getYHinge()));
+    appendValue(xml, shapeElement, "AngleCenter", QString::number(shape->getAngleCtr()));
+    appendValue(xml, shapeElement, "Type", types[shape->getType()]);
+    appendValue(xml, shapeElement, "LineWidth", QString::number(shape->getLineWidth()));
 
-    // configuration
-    dgrm = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Diagram"));
-    doc.SetRoot(dgrm);
+    QColor lineColor = diagram->getShape(i)->getLineColor();
+    QDomElement lineColorElement = xml.createElement("LineColor");
+    appendValue(xml, lineColorElement, "Red", QString::number(lineColor.redF()));
+    appendValue(xml, lineColorElement, "Green", QString::number(lineColor.greenF()));
+    appendValue(xml, lineColorElement, "Blue", QString::number(lineColor.blueF()));
+    appendValue(xml, lineColorElement, "Alpha", QString::number(lineColor.alphaF()));
+    shapeElement.appendChild(lineColorElement);
 
-    // file name
-    file = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("File"));
-    dgrm -> AddChild(file);
+    QColor fillColor = diagram->getShape(i)->getFillColor();
+    QDomElement fillColorElement = xml.createElement("LineColor");
+    appendValue(xml, fillColorElement, "Red", QString::number(fillColor.redF()));
+    appendValue(xml, fillColorElement, "Green", QString::number(fillColor.greenF()));
+    appendValue(xml, fillColorElement, "Blue", QString::number(fillColor.blueF()));
+    appendValue(xml, fillColorElement, "Alpha", QString::number(fillColor.alphaF()));
+    shapeElement.appendChild(fillColorElement);
 
-    new wxXmlNode(file, wxXML_TEXT_NODE, wxEmptyString, wxString(graph->getFileName().c_str(), wxConvUTF8));
+    appendDOF(xml, shapeElement, "XCenterDOF", shape->getDOFXCtr());
+    appendDOF(xml, shapeElement, "YCenterDOF", shape->getDOFYCtr());
+    appendDOF(xml, shapeElement, "WidthDOF",   shape->getDOFWth());
+    appendDOF(xml, shapeElement, "HeightDOF",  shape->getDOFHgt());
+    appendDOF(xml, shapeElement, "AngleDOF",   shape->getDOFAgl());
+    appendDOF(xml, shapeElement, "XCenterDOF", shape->getDOFXCtr());
 
-    // shapes
-    for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
+    QDomElement colorDofElement = appendDOF(xml, shapeElement, "ColorDOF", shape->getDOFCol());
+    vector< double > colorValues;
+    shape->getDOFColYValues(colorValues);
+    for (size_t i = 0; i < colorValues.size(); ++i)
     {
-      shpe = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Shape"));
-      dgrm -> AddChild(shpe);
-
-      // coordinates
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XCenter"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getXCtr()).c_str(), wxConvUTF8));
-
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YCenter"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getYCtr()).c_str(), wxConvUTF8));
-
-      // distance from center
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XDistanceFromCenter"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getXDFC()).c_str(), wxConvUTF8));
-
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YDistanceFromCenter"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getYDFC()).c_str(), wxConvUTF8));
-
-      // hinge
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XHinge"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getXHinge()).c_str(), wxConvUTF8));
-
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YHinge"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getYHinge()).c_str(), wxConvUTF8));
-
-      // angle center
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("AngleCenter"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getAngleCtr()).c_str(), wxConvUTF8));
-
-      // type
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Type"));
-      shpe -> AddChild(prop);
-      if (diagram->getShape(i)->getType() == Shape::TYPE_LINE)
-      {
-        new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_LINE"));
-      }
-      else if (diagram->getShape(i)->getType() == Shape::TYPE_RECT)
-      {
-        new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_RECT"));
-      }
-      else if (diagram->getShape(i)->getType() == Shape::TYPE_ELLIPSE)
-      {
-        new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_ELLIPSE"));
-      }
-      else if (diagram->getShape(i)->getType() == Shape::TYPE_ARROW)
-      {
-        new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_ARROW"));
-      }
-      else if (diagram->getShape(i)->getType() == Shape::TYPE_DARROW)
-      {
-        new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_DARROW"));
-      }
-
-      // line width
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("LineWidth"));
-      shpe -> AddChild(prop);
-      new wxXmlNode(prop, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getLineWidth()).c_str(), wxConvUTF8));
-
-      // color line
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("LineColor"));
-      shpe -> AddChild(prop);
-
-      QColor col = diagram->getShape(i)->getLineColor();
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Red"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.redF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Green"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.greenF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Blue"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.blueF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Alpha"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
-
-      // color fill
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("FillColor"));
-      shpe -> AddChild(prop);
-
-      col = diagram->getShape(i)->getFillColor();
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Red"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.redF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Green"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.greenF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Blue"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.blueF()).c_str(), wxConvUTF8));
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Alpha"));
-      prop -> AddChild(subp);
-      new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
-
-      // X center DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XCenterDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-      attr = diagram->getShape(i)->getDOFXCtr()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(col.alphaF()).c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFXCtr()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFXCtr()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      // Y center DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YCenterDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-
-      attr = diagram->getShape(i)->getDOFYCtr()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFYCtr()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFYCtr()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      // width DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("WidthDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-      attr = diagram->getShape(i)->getDOFWth()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFWth()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFWth()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      // height DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("HeightDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-
-      attr = diagram->getShape(i)->getDOFHgt()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFHgt()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFHgt()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      // angle DOF (relative to hinge)
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("AngleDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-
-      attr = diagram->getShape(i)->getDOFAgl()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFAgl()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFAgl()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      // color DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("ColorDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-      attr = diagram->getShape(i)->getDOFCol()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFCol()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFCol()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      vector< double > yValsCol;
-      diagram->getShape(i)->getDOFColYValues(yValsCol);
-      {
-        for (size_t j = 0; j < yValsCol.size(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("AuxilaryValue"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(yValsCol[j]).c_str(), wxConvUTF8));
-        }
-      }
-
-      // opacity DOF
-      prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("OpacityDOF"));
-      shpe -> AddChild(prop);
-
-      subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Attribute"));
-      prop -> AddChild(subp);
-
-      attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
-      if (attr != 0)
-      {
-        new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(attr->getName().c_str(), wxConvUTF8));
-      }
-      attr = 0;
-
-      {
-        for (size_t j = 0; j < diagram->getShape(i)->getDOFOpa()->getSizeValues(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Value"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(diagram->getShape(i)->getDOFOpa()->getValue(j)).c_str(), wxConvUTF8));
-        }
-      }
-
-      vector< double > yValsOpa;
-      diagram->getShape(i)->getDOFOpaYValues(yValsOpa);
-      {
-        for (size_t j = 0; j < yValsOpa.size(); ++j)
-        {
-          subp = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("AuxilaryValue"));
-          prop -> AddChild(subp);
-          new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString(Utils::dblToStr(yValsOpa[j]).c_str(), wxConvUTF8));
-        }
-      }
+      appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorValues[i]));
     }
 
-    doc.Save(wxString(filename.toStdString().c_str(), wxConvUTF8));
+    QDomElement opacityDofElement = appendDOF(xml, shapeElement, "OpacityDOF", shape->getDOFOpa());
+    vector< double > opacityValues;
+    shape->getDOFColYValues(opacityValues);
+    for (size_t i = 0; i < opacityValues.size(); ++i)
+    {
+      appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityValues[i]));
+    }
 
-    dgrm = 0;
-    file = 0;
-    shpe = 0;
-    prop = 0;
-    subp = 0;
-    attr = 0;
+    root.appendChild(shapeElement);
   }
-  catch (...)
-  {
-    throw mcrl2::runtime_error(
-          "Error saving diagram.");
+
+  QFile data(filename);
+  if (!data.open(QFile::WriteOnly | QFile::Truncate)) {
+    throw mcrl2::runtime_error("Error opening file for writing.");
   }
+
+  QTextStream out(&data);
+  xml.save(out, 2);
 }
 
 
@@ -797,6 +496,29 @@ QMap<QString, int> Parser::findIntValues(QDomElement root, QStringList tagNames)
   return result;
 }
 
+QDomElement Parser::appendValue(QDomDocument document, QDomElement root, QString tag, QString val)
+{
+  QDomElement element = document.createElement(tag);
+  QDomText textElement = document.createTextNode(val);
+  element.appendChild(textElement);
+  root.appendChild(element);
+  return element;
+}
+
+QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString name, DOF* dof)
+{
+  QDomElement element = document.createElement(name);
+  Attribute* attribute = dof->getAttribute();
+  appendValue(document, element, "Attribute", (attribute == 0 ? QString("") : attribute->name()));
+
+  for (size_t i = 0; i < dof->getSizeValues(); ++i)
+  {
+    appendValue(document, element, "Value", QString::number(dof->getValue(i)));
+  }
+
+  root.appendChild(element);
+  return element;
+}
 
 void Parser::parseAttribute(
     Graph* graph,
@@ -819,15 +541,15 @@ void Parser::parseAttribute(
 
     QMap<QString, QDomElement> listPropertyElements = findElements(AttributeNode.toElement(), listProperties);
 
-    Attribute* attribute = graph->getAttribute(stringPropertyValues["Name"].toStdString());
+    Attribute* attribute = graph->getAttribute(stringPropertyValues["Name"]);
     if (attribute == 0)
     {
       throw mcrl2::runtime_error(QString("Invalid attribute name (%1).").arg(stringPropertyValues["Name"]).toStdString());
     }
 
-    if (QString::fromStdString(attribute->getType()) != stringPropertyValues["Type"])
+    if (attribute->type() != stringPropertyValues["Type"])
     {
-      throw mcrl2::runtime_error(QString("Types do not match (%1 vs %2).").arg(QString::fromStdString(attribute->getType()), stringPropertyValues["Type"]).toStdString());
+      throw mcrl2::runtime_error(QString("Types do not match (%1 vs %2).").arg(attribute->type(), stringPropertyValues["Type"]).toStdString());
     }
 
     if (attribute->getSizeOrigValues() != originalCardinality)
@@ -984,7 +706,7 @@ void Parser::parseShape(
         QDomElement attributeElement = attributeElements["Attribute"];
         if (!attributeElement.text().isEmpty())
         {
-          Attribute* attribute = graph->getAttribute(attributeElement.text().toStdString());
+          Attribute* attribute = graph->getAttribute(attributeElement.text());
           if (attribute != 0)
           {
             dof->setAttribute(attribute);

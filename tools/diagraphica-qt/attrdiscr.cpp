@@ -16,18 +16,12 @@
 using namespace std;
 
 AttrDiscr::AttrDiscr(
-  const string& nam,
-  const string& typ,
+  QString name,
+  QString type,
   const size_t& idx,
   const vector< string > &vals)
-  : Attribute(
-    nam,
-    typ,
-    idx)
+  : Attribute(name, type, idx)
 {
-  name   = nam;
-  type   = typ;
-  index  = idx;
   initValues(vals);
 }
 

@@ -309,8 +309,8 @@ void CorrlPlot::initLabels()
 {
   if (attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING)
   {
-    xLabel = graph->getAttribute(attrIdx1)->getName();
-    yLabel = graph->getAttribute(attrIdx2)->getName();
+    xLabel = graph->getAttribute(attrIdx1)->name().toStdString();
+    yLabel = graph->getAttribute(attrIdx2)->name().toStdString();
   }
   else
   {

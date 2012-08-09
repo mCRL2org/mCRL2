@@ -535,7 +535,7 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
     {
       if (posTreeTopLft[i].size() > 0)
       {
-        lbl = mapPosToClust[i+1][0]->getAttribute()->getName();
+        lbl = mapPosToClust[i+1][0]->getAttribute()->name().toStdString();
 
         double yLin =  posTreeBotRgt[i][0].y;
         double yTxt =  yLin + 0.5*settings->textSize.value()*pix + pix;

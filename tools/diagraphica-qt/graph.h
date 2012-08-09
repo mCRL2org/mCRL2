@@ -36,7 +36,7 @@ class Graph : public Colleague
     virtual ~Graph();
 
     // -- set functions ---------------------------------------------
-    void setFileName(const std::string& fn);
+    void setFileName(QString filename);
     /*
         void addAttribute(
             const std::string &name,
@@ -51,8 +51,8 @@ class Graph : public Colleague
             const double &uprBnd );
     */
     void addAttrDiscr(
-      const std::string& name,
-      const std::string& type,
+      QString name,
+      QString type,
       const size_t& idx,
       const std::vector< std::string > &vals);
 
@@ -75,10 +75,10 @@ class Graph : public Colleague
     void initGraph();
 
     // -- get functions  --------------------------------------------
-    std::string getFileName();
+    QString filename();
     size_t getSizeAttributes();
     Attribute* getAttribute(const size_t& idx);
-    Attribute* getAttribute(const std::string& name);
+    Attribute* getAttribute(QString name);
     size_t getSizeNodes();
     Node* getNode(const size_t& idx);
     size_t getSizeEdges();
@@ -189,11 +189,11 @@ class Graph : public Colleague
     void deleteBundles();
 
     // -- data members ----------------------------------------------
-    std::string               fileName;   // file name
+    QString                   m_filename; // file name
     std::vector< Attribute* > attributes; // attributes
     std::vector< Node* >      nodes;      // composition
     std::vector< Edge* >      edges;      // composition
-    Cluster*             root;       // composition
+    Cluster*                  root;       // composition
     std::vector< Cluster* >   leaves;     // association
     std::vector< Bundle* >    bundles;    // composition
 

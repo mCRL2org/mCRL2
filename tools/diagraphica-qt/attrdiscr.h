@@ -27,8 +27,8 @@ class AttrDiscr : public Attribute
   public:
     // -- constructors and destructor -------------------------------
     AttrDiscr(
-      const std::string& nam,
-      const std::string& typ,
+      QString name,
+      QString type,
       const size_t& idx,
       const std::vector< std::string > &vals);
     AttrDiscr(const AttrDiscr& attr);
