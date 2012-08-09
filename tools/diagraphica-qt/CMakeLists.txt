@@ -16,6 +16,17 @@ find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtXml QtOpenGL)
 if (QT4_FOUND)
 include(${QT_USE_FILE})
 
+if(APPLE)
+   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
+   find_library(GLUT_LIBRARY GLUT )
+   find_library(OpenGL_LIBRARY OpenGL )
+   mark_as_advanced (GLUT_LIBRARY OpenGL_LIBRARY)
+   set(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
+elseif(WIN32)
+   set(MCRL2gl GLU32)
+else(APPLE)
+   set(MCRL2gl GLU )
+endif(APPLE)
 
 set(DIAGRAPHICA_RCC_SRCS
   icons.qrc
@@ -84,13 +95,12 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  ${wxWidgets_LIBRARIES}
   mcrl2_lts
   mcrl2_syntax
   dparser
   mcrl2_utilities
   mcrl2_utilities_qt
-  mcrl2_utilities_wx
+  ${MCRL2gl}
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
