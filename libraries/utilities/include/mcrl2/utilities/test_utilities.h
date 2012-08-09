@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cctype>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/core/garbage_collection.h"
