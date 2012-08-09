@@ -233,7 +233,6 @@ void Visualizer::finishSelectMode(
 {
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
-  glFlush();
 
   hits = glRenderMode(GL_RENDER);
   processHits(hits, selectBuf);
