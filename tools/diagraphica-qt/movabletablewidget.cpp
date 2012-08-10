@@ -9,6 +9,8 @@
 
 #include "movabletablewidget.h"
 #include <QPainter>
+#include <QHeaderView>
+#include <QDebug>
 
 MovableTableWidget::MovableTableWidget(QWidget *parent) :
   QTableWidget(parent), m_lineRow(-1)
@@ -16,6 +18,23 @@ MovableTableWidget::MovableTableWidget(QWidget *parent) :
   setSelectionBehavior(QAbstractItemView::SelectRows);
   setDragDropMode(QAbstractItemView::InternalMove);
   setDragDropOverwriteMode(false);
+}
+
+int MovableTableWidget::sizeHintForColumn(int column)
+{
+  ensurePolished();
+
+  QStyleOptionViewItem option = viewOptions();
+
+  int hint = 0;
+  QModelIndex index;
+  for (int row = 0; row <= rowCount(); ++row) {
+
+      index = indexFromItem(item(row, column));
+      hint = qMax(hint, itemDelegate(index)->sizeHint(option, index).width());
+  }
+
+  return showGrid() ? hint + 1 : hint;
 }
 
 void MovableTableWidget::paintEvent(QPaintEvent *e)
@@ -129,4 +148,19 @@ int MovableTableWidget::dropRow(QPoint pos)
     }
   }
   return result;
+}
+
+void MovableTableWidget::resizeColumnToContents(int column)
+{
+  int content = sizeHintForColumn(column);
+  int header = horizontalHeader()->sectionSizeHint(column);
+  horizontalHeader()->resizeSection(column, qMax(content, header));
+}
+
+void MovableTableWidget::resizeColumnsToContents()
+{
+  for (int i = 0; i < columnCount(); i++)
+  {
+    resizeColumnToContents(i);
+  }
 }
