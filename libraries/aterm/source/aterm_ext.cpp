@@ -27,7 +27,7 @@ ATermAppl gsMakeSubst(const ATerm &OldValue, const ATerm &NewValue)
 {
   if (substafun_notset)
   {
-    substafun = AFun("subst", 2, false);
+    substafun = AFun("subst", 2);
     substafun_notset = false;
   }
   return ATmakeAppl2(substafun, OldValue, NewValue);

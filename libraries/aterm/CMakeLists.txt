@@ -17,7 +17,7 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # main target
 add_library(${PROJECT_NAME}
-  source/aterm.cpp
+#  source/aterm.cpp
   source/aterm_ext.cpp
 )
 

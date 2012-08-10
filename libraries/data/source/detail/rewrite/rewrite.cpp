@@ -820,7 +820,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   const atermpp::aterm &t = term(0);
   data_expression a;
 
-  if (t.type()==AT_INT)
+  if (t.type_is_int())
   {
     a = get_int2term(aterm_cast<const aterm_int>(t).value());
   }

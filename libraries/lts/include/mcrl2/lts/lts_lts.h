@@ -67,13 +67,13 @@ class state_label_lts : public atermpp::aterm_appl
       }
       if (vector_templates[arity]==atermpp::aterm_appl())
       {
-        atermpp::aterm_appl stub(atermpp::function_symbol("STUB",0,false));
+        atermpp::aterm_appl stub(atermpp::function_symbol("STUB",0));
         atermpp::aterm_list l;
         for (size_t i=0; i<arity; ++i)
         {
           l=atermpp::push_front(l,atermpp::aterm(stub));
         }
-        vector_templates[arity]=atermpp::aterm_appl(atermpp::function_symbol("STATE",arity,false),l.begin(),l.end());
+        vector_templates[arity]=atermpp::aterm_appl(atermpp::function_symbol("STATE",arity),l.begin(),l.end());
       }
       return vector_templates[arity].function();
     }

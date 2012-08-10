@@ -27,7 +27,7 @@ namespace core
 namespace detail
 {
 
-ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
+ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSuffix)
 {
   bool found = false;
   ATermAppl NewTerm = gsString2ATermAppl(s);

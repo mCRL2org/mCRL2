@@ -392,12 +392,12 @@ inline static void dbg_prints(const char* Value)
 
 static void PrintAFun(std::ostream& OutStream, const AFun fun)
 {
-  if (ATisQuoted(fun))
+  // if (ATisQuoted(fun))
   {
     OutStream <<  "\"";
   }
   OutStream <<  ATgetName(fun);
-  if (ATisQuoted(fun))
+  // if (ATisQuoted(fun))
   {
     OutStream <<  "\"";
   }
@@ -494,12 +494,7 @@ void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
 void PrintPart_Appl(std::ostream& OutStream,
                                 const ATermAppl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
-  if (gsIsString(Part))
-  {
-    //print string
-    OutStream <<  ATgetName(ATgetAFun(Part));
-  }
-  else if (gsIsSortExpr(Part))
+  if (gsIsSortExpr(Part))
   {
     //print sort expression or unknown
     mCRL2log(log::debug2, "pretty printer") << "printing sort expression or unknown\n" << std::endl;
@@ -1068,6 +1063,11 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing action rename rules" << std::endl;
     PrintEqns(OutStream, ATLgetArgument(Part, 0),
                           pp_format, ShowSorts, PrecLevel);
+  }
+  else if (gsIsString(Part))
+  {
+    //print string
+    OutStream <<  ATgetName(ATgetAFun(Part));
   }
   else
   {

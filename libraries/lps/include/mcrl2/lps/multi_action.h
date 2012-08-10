@@ -111,14 +111,14 @@ class multi_action
     /// \return The name of the first action.
     core::identifier_string name() const
     {
-      return front(m_actions).label().name();
+      return m_actions.front().label().name();
     }
 
     /// \brief Returns the arguments of the multi action.
     /// \return The arguments of the multi action.
     data::data_expression_list arguments() const
     {
-      return front(m_actions).arguments();
+      return m_actions.front().arguments();
     }
 
     /// \brief Joins the actions of both multi actions.

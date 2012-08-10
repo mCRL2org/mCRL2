@@ -304,7 +304,7 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
       size_t remaining;
 
       std::string name = fun.name(); 
-      size_t isQuoted = fun.is_quoted();
+      size_t isQuoted = true;
       size_t arity = fun.arity();
       size_t nameLength = name.size();
 
@@ -743,7 +743,8 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       bool isQuoted = binaryReader->tempIsQuoted;
       char* name = binaryReader->tempBytes;
 
-      function_symbol fun(name, arity, isQuoted);
+      assert(isQuoted);
+      function_symbol fun(name, arity);
       // detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
       size_t symEntry = fun.number();
       binaryReader->protected_afuns.insert(fun);

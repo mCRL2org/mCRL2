@@ -28,7 +28,7 @@ namespace detail
 inline
 aterm_appl str2appl(std::string const& s)
 {
-  return aterm_appl(function_symbol(s.c_str(), 0, true));
+  return aterm_appl(function_symbol(s.c_str(), 0));
 }
 
 } // namespace detail

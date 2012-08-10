@@ -579,7 +579,7 @@ class Trace
     {
       if (trace_pair_set == 0)
       {
-        trace_pair = atermpp::function_symbol("pair",2,false);
+        trace_pair = atermpp::function_symbol("pair",2);
       }
       trace_pair_set++;
 
@@ -670,7 +670,6 @@ class Trace
 
       resetPosition();
       truncate();
-
       atermpp::aterm_list trace(readATerm(is));
       assert(trace.type() == atermpp::AT_LIST);
       for (; !trace.empty(); trace=trace.tail())

@@ -257,12 +257,12 @@ typedef term_list<aterm> aterm_list;
 /// \brief Returns the first element of the list l.
 /// \param l A list
 /// \return The first element of the list.
-template <typename Term>
+/* template <typename Term>
 inline
 const Term &front(const term_list<Term> &l)
 {
   return l.front(); 
-}
+}  */
 
 /// \brief Returns the list obtained by inserting a new element at the beginning.
 /// \param l A list.

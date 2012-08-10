@@ -181,9 +181,9 @@ static void add_extra_mcrl2_lts_data(
   }
 
   ATerm arg1 = (ATerm)(has_data_spec?data_spec:gsMakeNil());
-  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(AFun("ParamSpec",1,false),(ATerm) params):gsMakeNil());
+  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(AFun("ParamSpec",1),(ATerm) params):gsMakeNil());
   ATerm arg3 = (ATerm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
-  ATerm data = (ATerm) ATmakeAppl3(AFun("mCRL2LTS1",3,false),arg1,arg2,arg3);
+  ATerm data = (ATerm) ATmakeAppl3(AFun("mCRL2LTS1",3),arg1,arg2,arg3);
 
   /* From the remarks on MSDN:
    *

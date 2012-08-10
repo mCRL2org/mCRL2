@@ -141,10 +141,10 @@ writeToTextFile(const aterm &t, FILE* f)
       appl = (aterm_appl) t;
 
       sym = appl.function();
-      AT_printAFun(sym.number(), f);
+      fprintf(f, "\"%s\"",sym.name().c_str());
       arity = sym.arity();
       name = sym.name();
-      if (arity > 0 || (!sym.is_quoted() && name.empty()))
+      if (arity > 0 || (!true && name.empty()))
       {
         fputc('(', f);
         for (i = 0; i < arity; i++)
@@ -260,7 +260,7 @@ writeToStream(const aterm &t, std::ostream& os)
       arity = sym.arity();
       name = sym.name();
       os << ATwriteAFunToString(sym);
-      if (arity > 0 || (!sym.is_quoted() && name.empty()))
+      if (arity > 0 || (!true && name.empty()))
       {
         os << "(";
         if (arity > 0)
@@ -499,7 +499,7 @@ fparse_quoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name, args.size(), true);
+  sym = function_symbol(name, args.size());
   free(name);
   return aterm_appl(sym, args.begin(), args.end());
 }
@@ -558,7 +558,7 @@ fparse_unquoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name ? name : "", args.size(), false);
+  sym = function_symbol(name ? name : "", args.size());
   if (name != NULL)
   {
     free(name);
@@ -909,7 +909,7 @@ sparse_quoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name, args.size(), true);
+  sym = function_symbol(name, args.size());
   free(name);
   return aterm_appl(sym, args.begin(), args.end());
 }
@@ -933,7 +933,7 @@ sparse_unquoted_appl(int* c, char** s)
   {
     /* First parse the identifier */
     while (isalnum(*c)
-           || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$')
+           || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$' || *c == '@')
     {
       string_buffer+= *c;
       snext_char(c, s);
@@ -968,7 +968,7 @@ sparse_unquoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name ? name : "", args.size(), false);
+  sym = function_symbol(name ? name : "", args.size());
   if (name != NULL)
   {
     free(name);
@@ -1046,7 +1046,7 @@ sparse_term(int* c, char** s)
       snext_skip_layout(c, s);
       break;
     default:
-      if (isalpha(*c) || *c == '(')
+      if (isalpha(*c) || *c == '(' || *c == '@' )
       {
         result = sparse_unquoted_appl(c, s);
       }

@@ -724,7 +724,7 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
   {
     for(size_t i=0 ; i<t.size(); ++i)
     {
-      if (t(i).type()!=atermpp::AT_INT)
+      if (!t(i).type_is_int())
       { 
         get_free_variables(t(i),result);
       }

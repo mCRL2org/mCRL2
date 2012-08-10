@@ -211,16 +211,12 @@ static void resize_aterm_hashtable()
   const size_t old_size=detail::aterm_table_size;
   detail::aterm_table_size = ((HashNumber)1)<<detail::aterm_table_class;
   detail::aterm_table_mask = (((HashNumber)1)<<detail::aterm_table_class)-1;
-  // std::vector < detail::_aterm* > new_hashtable;
   detail::_aterm* * new_hashtable;
 
-  /*  Create new term table */
-  // try
   {
-    // new_hashtable.resize(((HashNumber)1)<<detail::aterm_table_class,NULL);
     new_hashtable=reinterpret_cast<detail::_aterm**>(calloc(detail::aterm_table_size,sizeof(detail::_aterm*)));
   }
-  // catch (std::bad_alloc &e)
+  
   if (new_hashtable==NULL)
   {
     mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::aterm_table_class << ". "; // << e.what() << std::endl;
@@ -232,7 +228,6 @@ static void resize_aterm_hashtable()
   
   /*  Rehash all old elements */
   for (size_t p=0; p<old_size; ++p) 
-  // for (std::vector < detail::_aterm*>::const_iterator p=detail::aterm_hashtable.begin(); p !=detail::aterm_hashtable.end(); p++)
   {
     detail::_aterm* aterm_walker=detail::aterm_hashtable[p];
 
@@ -247,7 +242,6 @@ static void resize_aterm_hashtable()
       aterm_walker = next;
     }
   }
-  // new_hashtable.swap(detail::aterm_hashtable);
   free(detail::aterm_hashtable);
   detail::aterm_hashtable=new_hashtable;
 }
@@ -489,72 +483,6 @@ static void resize_function_symbol_hashtable()
   }
 }
 
-/*}}}  */
-
-/*{{{  int AT_printAFun(function_symbol sym, FILE *f) */
-
-/**
-  * Print an afun.
-  */
-
-size_t AT_printAFun(const size_t fun, FILE* f)
-{
-  assert(fun<detail::at_lookup_table.size());
-  const detail::_function_symbol &entry = detail::at_lookup_table[fun];
-  std::string::const_iterator id = entry.name.begin();
-  size_t size = 0;
-
-  if (entry.is_quoted())
-  {
-    /* This function symbol needs quotes */
-    fputc('"', f);
-    size++;
-    while (id!=entry.name.end())
-    {
-      /* We need to escape special characters */
-      switch (*id)
-      {
-        case '\\':
-        case '"':
-          fputc('\\', f);
-          fputc(*id, f);
-          size += 2;
-          break;
-        case '\n':
-          fputc('\\', f);
-          fputc('n', f);
-          size += 2;
-          break;
-        case '\t':
-          fputc('\\', f);
-          fputc('t', f);
-          size += 2;
-          break;
-        case '\r':
-          fputc('\\', f);
-          fputc('r', f);
-          size += 2;
-          break;
-        default:
-          fputc(*id, f);
-          size++;
-          break;
-      }
-      id++;
-    }
-    fputc('"', f);
-    size++;
-  }
-  else
-  {
-    fputs(entry.name.c_str(), f);
-    size += entry.name.size();
-  }
-  return size;
-}
-
-/*}}}  */
-
 std::string ATwriteAFunToString(const function_symbol &fun)
 {
   std::ostringstream oss;
@@ -562,40 +490,33 @@ std::string ATwriteAFunToString(const function_symbol &fun)
   const detail::_function_symbol &entry = detail::at_lookup_table[fun.number()];
   std::string::const_iterator id = entry.name.begin();
 
-  if (entry.is_quoted())
+  /* This function symbol needs quotes */
+  oss << "\"";
+  while (id!=entry.name.end())
   {
-    /* This function symbol needs quotes */
-    oss << "\"";
-    while (id!=entry.name.end())
+    /* We need to escape special characters */
+    switch (*id)
     {
-      /* We need to escape special characters */
-      switch (*id)
-      {
-        case '\\':
-        case '"':
-          oss << "\\" << *id;
-          break;
-        case '\n':
-          oss << "\\n";
-          break;
-        case '\t':
-          oss << "\\t";
-          break;
-        case '\r':
-          oss << "\\r";
-          break;
-        default:
-          oss << *id;
-          break;
-      }
-      ++id;
+      case '\\':
+      case '"':
+        oss << "\\" << *id;
+        break;
+      case '\n':
+        oss << "\\n";
+        break;
+      case '\t':
+        oss << "\\t";
+        break;
+      case '\r':
+        oss << "\\r";
+        break;
+      default:
+        oss << *id;
+        break;
     }
-    oss << "\"";
+    ++id;
   }
-  else
-  {
-    oss << entry.name;
-  }
+  oss << "\"";
 
   return oss.str();
 }
@@ -618,11 +539,7 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
 }
 
 
-/*}}}  */
-
-/*{{{  function_symbol ATmakeAFun(const char *name, int arity, ATbool quoted) */
-
-function_symbol::function_symbol(const std::string &name, const size_t arity, const bool quoted)
+function_symbol::function_symbol(const std::string &name, const size_t arity)
 {
   if (detail::function_symbol_hashtable.size()==0)
   {
@@ -632,7 +549,6 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
   /* Find symbol in table */
   size_t cur = detail::function_symbol_hashtable[hnr];
   while (cur!=size_t(-1) && !(detail::at_lookup_table[cur].arity()==arity &&
-                              detail::at_lookup_table[cur].is_quoted()==quoted &&
                               detail::at_lookup_table[cur].name==name))
   {
     cur = detail::at_lookup_table[cur].next;
@@ -652,16 +568,16 @@ function_symbol::function_symbol(const std::string &name, const size_t arity, co
       assert(free_entry<detail::at_lookup_table.size());
       assert(detail::at_lookup_table[cur].reference_count==0);
       detail::at_lookup_table[cur].reference_count=0;
-      detail::at_lookup_table[cur].header = detail::_function_symbol::make_header(arity,quoted);
+      detail::at_lookup_table[cur].m_arity = arity;
+      detail::at_lookup_table[cur].name = name;
     }
     else
     {
       cur = detail::at_lookup_table.size();
-      detail::at_lookup_table.push_back(detail::_function_symbol(arity,quoted));
+      detail::at_lookup_table.push_back(detail::_function_symbol(name,arity));
     }
 
 
-    detail::at_lookup_table[cur].name = name;
 
     detail::at_lookup_table[cur].next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = cur;

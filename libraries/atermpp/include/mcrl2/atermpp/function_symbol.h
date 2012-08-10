@@ -17,22 +17,10 @@
 #include <cstdio>
 #include <vector>
 #include "mcrl2/atermpp/detail/atypes.h"
+#include "mcrl2/atermpp/detail/function_symbol.h"
 
 namespace atermpp
 {
-
-inline
-bool AT_isValidAFun(const size_t sym);
-
-namespace detail
-{
-template <bool CHECK>
-void increase_reference_count(const size_t n);
-
-inline
-void decrease_reference_count(const size_t n);
-} // namespace detail
-
 
 class function_symbol
 {
@@ -49,13 +37,13 @@ class function_symbol
     /// \param name A string
     /// \param arity The arity of the function.
     /// \param quoted True if the function symbol is a quoted string.
-    function_symbol(const std::string &name, const size_t arity, const bool quoted = false);
+    function_symbol(const std::string &name, const size_t arity);
     
     /// \brief default constructor
     /// \param n The number of an function_symbol
     function_symbol(const size_t n):m_number(n)
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
       detail::increase_reference_count<false>(m_number);
     }
 
@@ -92,7 +80,7 @@ class function_symbol
       // First check below is a trick, function symbols with small numbers may
       // be referred to, while the data structures containing the data about these
       // functions may already have destroyed.
-      assert(m_number<=2 || m_number==size_t(-1) || AT_isValidAFun(m_number));
+      assert(m_number<=3 || m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
       return m_number;
     }
 
@@ -100,18 +88,14 @@ class function_symbol
     /// \return The arity of the function symbol.
     size_t arity() const;
 
-    /// \brief Determine if the function symbol (function_symbol) is quoted or not.
-    /// \return True if the function symbol is quoted.
-    bool is_quoted() const;;;;;
-    
     /// \brief Equality test.
     /// \detail This operator compares the indices of the function symbols. This means
     ///         that this operation takes constant time.
     /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number==f.m_number;
     }
 
@@ -120,8 +104,8 @@ class function_symbol
     /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number!=f.m_number;
     }
 
@@ -130,8 +114,8 @@ class function_symbol
     /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number<f.m_number;
     }
 
@@ -140,8 +124,8 @@ class function_symbol
     /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number>f.m_number;
     }
 
@@ -150,8 +134,8 @@ class function_symbol
     /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number<=f.m_number;
     }
 
@@ -160,8 +144,8 @@ class function_symbol
     /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || AT_isValidAFun(m_number));
-      assert(f.m_number==size_t(-1) || AT_isValidAFun(f.m_number));
+      assert(m_number==size_t(-1) || detail::AT_isValidAFun(m_number));
+      assert(f.m_number==size_t(-1) || detail::AT_isValidAFun(f.m_number));
       return m_number>=f.m_number;
     }
 };

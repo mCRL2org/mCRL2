@@ -139,15 +139,42 @@ class aterm
     /// \brief Returns the type of this term.
     /// Result is one of AT_APPL, AT_INT,
     /// or AT_LIST.
-    /// \detail Often it is more efficient to use function_symbol(),
-    /// and check whether the function symbol matches AS_INT for an 
-    /// AT_INT, AS_LIST or AS_EMPTY_LIST for AT_LIST, or something else
-    /// for AT_APPL.
+    /// \detail Often it is more efficient to use the utility functions
+    ///      type_is_appl, type_is_int or type_is_list.
     /// \return The type of the term.
     size_t type() const
     {
       return m_term->type(); 
     }
+
+    /// \brief Returns whether this term has type AT_APPL.
+    /// \detail This function is more efficient than using
+    ///   type()==AT_APPL.
+    /// \return True iff term is an term_appl.
+    bool type_is_appl() const
+    {
+      return m_term->function().number()>detail::function_adm.AS_EMPTY_LIST.number(); 
+    }
+
+    /// \brief Returns whether this term has type AT_INT
+    /// \detail This function is more efficient than using
+    ///   type()==AT_INT.
+    /// \return True iff term is an term_int.
+    bool type_is_int() const
+    {
+      return m_term->function().number()==detail::function_adm.AS_INT.number(); 
+    }
+
+    /// \brief Returns whether this term has type AT_LIST
+    /// \detail This function is more efficient than using
+    ///   type()==AT_LIST.
+    /// \return True iff term is an term_list.
+    bool type_is_list() const
+    {
+      const size_t n=m_term->function().number();
+      return n==detail::function_adm.AS_LIST.number()|| n==detail::function_adm.AS_EMPTY_LIST.number(); 
+    }
+
 
     /// \brief Writes the term to a string.
     /// \return A string representation of the term.

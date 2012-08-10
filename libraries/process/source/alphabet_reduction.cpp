@@ -2315,7 +2315,7 @@ namespace mcrl2
     {
       mCRL2log(verbose) << "applying alphabet reductions...\n";
       //create the tables
-      detail::afunPair=AFun("p_allow",2,false);
+      detail::afunPair=AFun("p_allow",2);
 
       //fill in tables
       for (process_equation_list::const_iterator pr=equations.begin(); pr!=equations.end(); ++pr)

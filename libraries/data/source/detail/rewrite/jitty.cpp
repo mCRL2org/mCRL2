@@ -50,7 +50,7 @@ static variable_list get_vars(const atermpp::aterm_appl &a)
     variable_list l;
     for(atermpp::aterm_appl::const_iterator arg=a.begin(); arg!=a.end(); ++arg)
     {
-      if (arg->type()!=AT_INT)
+      if (!arg->type_is_int())
       {
         l= get_vars(aterm_cast<const atermpp::aterm_appl>(*arg))+l;
       }
@@ -432,7 +432,7 @@ static atermpp::aterm subst_values(
             const size_t number_of_vars,
             const atermpp::aterm &t)
 {
-  if (t.type()==AT_INT)
+  if (t.type_is_int())
   {
     return t;
   }
@@ -518,7 +518,7 @@ static bool match_jitty(
                     size_t &number_of_vars,
                     const size_t maxlen)
 {
-  if (p.type()==AT_INT)
+  if (p.type_is_int())
   {
     return p==t;
   }
@@ -549,7 +549,7 @@ static bool match_jitty(
   }
   else
   {
-    if (t.type()==AT_INT || is_variable(t) || is_abstraction(aterm_cast<const atermpp::aterm_appl>(t)) || is_where_clause(aterm_cast<const atermpp::aterm_appl>(t)))
+    if (t.type_is_int() || is_variable(t) || is_abstraction(aterm_cast<const atermpp::aterm_appl>(t)) || is_where_clause(aterm_cast<const atermpp::aterm_appl>(t)))
     {
       return false;
     }
@@ -612,7 +612,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     const size_t arity=term.size();
     atermpp::aterm_appl head;
 
-    if (op.type()==AT_INT)
+    if (op.type_is_int())
     {
       return rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
     }
@@ -677,7 +677,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     // Here head has the shape #REWR#(u0,u1,...,un).
 
       const atermpp::aterm_appl &term_op=head;
-      assert(term_op(0).type()==AT_INT);
+      assert(term_op(0).type_is_int());
       const size_t arity_op=term_op.size();
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity+arity_op-1);
       // std::vector < atermpp::aterm > args(arity+arity_op-1);
@@ -701,15 +701,15 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   }
 }
 
-atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
-                      const atermpp::aterm_int &op,
-                      const atermpp::aterm_appl &term,
+aterm_appl RewriterJitty::rewrite_aux_function_symbol(
+                      const aterm_int &op,
+                      const aterm_appl &term,
                       internal_substitution_type &sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   const size_t arity=term.size();
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,aterm, arity);
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten_defined,bool, arity);
 
   for(size_t i=0; i<arity; ++i)
@@ -723,19 +723,20 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     make_jitty_strat_sufficiently_larger(op_value);
   }
 
-  aterm_list strat=jitty_strat[op_value];
-  if (strat!=aterm())
+  const aterm_list &strat=jitty_strat[op_value];
+  if (strat.defined())
   {
-    for (; !strat.empty(); strat=pop_front(strat))
+    for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
-      if (strat.front().type()==AT_INT)
+      const aterm_list &rule = aterm_cast<const aterm_list>(*strategy_it);
+      if (rule.type_is_int())
       {
-        const size_t i = (aterm_cast<const aterm_int>( strat.front())).value()+1;
+        const size_t i = (aterm_cast<const aterm_int>(rule)).value()+1;
         if (i < arity)
         {
           assert(!rewritten_defined[i]);
           rewritten_defined[i]=true;
-          new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma));
+          new (&rewritten[i]) aterm(rewrite_aux(aterm_cast<const aterm_appl>(term(i)),sigma));
           assert(rewritten[i].defined());
         }
         else
@@ -745,7 +746,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const aterm_list &rule = aterm_cast<const aterm_list>(front(strat));
         const aterm_appl &lhs = aterm_cast<const aterm_appl>(element_at(rule,2));
         size_t rule_arity = lhs.size();
 
@@ -758,7 +758,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         size_t number_of_vars=0;
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,const atermpp::aterm*, max_len);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,const aterm*, max_len);
         
         bool matches = true;
 
@@ -773,13 +773,13 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         }
         assert(number_of_vars<=max_len);
         if (matches && (element_at(rule,1)==internal_true ||
-                        rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
+                        rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
         {
-          const atermpp::aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule,3));
+          const aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule,3));
 
           if (arity == rule_arity)
           {
-            const atermpp::aterm_appl result=rewrite_aux(static_cast<aterm_appl>(subst_values(vars,vals,number_of_vars,rhs)),sigma);
+            const aterm_appl result=rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {
               if (rewritten_defined[i])
@@ -793,8 +793,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           {
             assert(arity>rule_arity);
             const size_t new_arity=1+arity-rule_arity;
-            MCRL2_SYSTEM_SPECIFIC_ALLOCA(newargs, atermpp::aterm, new_arity);
-            // std::vector < atermpp::aterm > newargs;
+            MCRL2_SYSTEM_SPECIFIC_ALLOCA(newargs, aterm, new_arity);
+            // std::vector < aterm > newargs;
             // newargs.reserve(new_arity);
             // newargs.push_back(subst_values(vars,vals,number_of_vars,rhs));
             new (&newargs[0]) aterm(subst_values(vars,vals,number_of_vars,rhs));
@@ -804,7 +804,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
               // newargs.push_back(term(rule_arity+i-1)));
               new (&newargs[i]) aterm(term(rule_arity+i-1));
             }
-            const atermpp::aterm_appl result=rewrite_aux(ApplyArray(new_arity,&newargs[0],&newargs[0]+new_arity),sigma);
+            const aterm_appl result=rewrite_aux(ApplyArray(new_arity,&newargs[0],&newargs[0]+new_arity),sigma);
             for (size_t i=0; i<new_arity; ++i)
             {
               newargs[i].~aterm();
@@ -826,19 +826,19 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   assert(!rewritten_defined[0]);
   rewritten_defined[0]=true;
-  new (&rewritten[0]) atermpp::aterm_appl(op);
+  new (&rewritten[0]) aterm_appl(op);
   // rewritten[0] = op;
   for (size_t i=1; i<arity; i++)
   {
     if (!rewritten_defined[i])
     {
       rewritten_defined[i]=true;
-      // rewritten[i]=rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma);
-      new (&rewritten[i]) atermpp::aterm(rewrite_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(term(i)),sigma));
+      // rewritten[i]=rewrite_aux(aterm_cast<const aterm_appl>(term(i)),sigma);
+      new (&rewritten[i]) aterm(rewrite_aux(aterm_cast<const aterm_appl>(term(i)),sigma));
     }
   }
 
-  const atermpp::aterm_appl result=ApplyArray(arity,&rewritten[0],&rewritten[0]+arity);
+  const aterm_appl result=ApplyArray(arity,&rewritten[0],&rewritten[0]+arity);
   for (size_t i=0; i<arity; i++)
   {
     rewritten[i].~aterm();
@@ -869,7 +869,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
     {
       const size_t j=opids->first.value();
       make_jitty_strat_sufficiently_larger(j);
-      if (jitty_strat[j]==aterm())
+      if (!jitty_strat[j].defined())
       {
         jitty_strat[j] = create_strategy(opids->second, this);
       }

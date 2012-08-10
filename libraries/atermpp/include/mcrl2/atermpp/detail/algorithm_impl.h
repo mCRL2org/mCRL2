@@ -94,7 +94,7 @@ struct found_term_exception
 template <typename UnaryFunction>
 UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 {
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
@@ -134,7 +134,7 @@ void find_if_impl(aterm t, MatchPredicate match)
     }
   }
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
@@ -152,7 +152,7 @@ void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
 {
   typedef typename iterator_value<OutputIterator>::type value_type;
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     aterm_list l(t);
     for (aterm_list::iterator i = l.begin(); i != l.end(); ++i)
@@ -204,7 +204,7 @@ void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
     }
   }
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
@@ -237,7 +237,7 @@ void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop,
     }
   }
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
@@ -284,7 +284,7 @@ aterm replace_impl(aterm t, ReplaceFunction f)
     aterm_appl fa = f(a);
     result = (a == fa) ? appl_apply(f(a), replace_helper<ReplaceFunction>(f)) : fa;
   }
-  else if (t.type() == AT_LIST)
+  else if (t.type_is_list())
   {
     aterm_list l(t);
     result = list_apply(l, replace_helper<ReplaceFunction>(f));
@@ -355,7 +355,7 @@ aterm partial_replace_impl(aterm t, ReplaceFunction f)
       result = fa.first;
     }
   }
-  else if (t.type() == AT_LIST)
+  else if (t.type_is_list())
   {
     aterm_list l(t);
     result = list_apply(l, partial_replace_helpsr<ReplaceFunction>(f));
@@ -399,7 +399,7 @@ aterm bottom_up_replace_impl(aterm t, ReplaceFunction f)
     aterm_appl a(t);
     result = f(appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f)));
   }
-  else if (t.type() == AT_LIST)
+  else if (t.type_is_list())
   {
     aterm_list l(t);
     result = list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));

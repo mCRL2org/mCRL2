@@ -124,16 +124,15 @@ int CSreadString(CompressedStream* cs, std::string &str)
   ATerm term;
 
   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
-  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
-      !ATisQuoted(ATgetAFun((ATermAppl)term)))
-  {
-    str =ATgetName(ATgetAFun((ATermAppl)term));
-    return 1;
-  }
-  else
-  {
+  HFdecodeATerm(cs->bs, &cs->tree, &term); //&& ATgetType(term)==AT_APPL && !true
+  // {
+  //   str =term.function().name();
+  //   return 1;
+  // }
+  //else
+  //{
     return 0;
-  }
+  //}
 
 }
 
@@ -225,7 +224,7 @@ int CSuwriteATerm(CompressedStream* cs, ATerm term)
 int CSwriteString(CompressedStream* cs, const char* str)
 {
 
-  return HFencodeATerm(cs->bs, &cs->tree, ATmakeAppl0(AFun(str,0,false)));
+  return HFencodeATerm(cs->bs, &cs->tree, ATmakeAppl0(AFun(str,0)));
 }
 
 int CSuwriteString(CompressedStream* cs, const char* str)

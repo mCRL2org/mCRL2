@@ -544,7 +544,7 @@ static bool write_symbol(const function_symbol sym, byte_writer* writer)
     return false;
   }
 
-  if (!writeInt(sym.is_quoted(), writer))
+  if (!writeInt(true, writer))
   {
     return false;
   }
@@ -1294,7 +1294,7 @@ static function_symbol read_symbol(byte_reader* reader)
     return ATERM_NON_EXISTING_POSITION;
   }
 
-  return function_symbol(text_buffer, arity, quoted ? true : false);
+  return function_symbol(text_buffer, arity);
 }
 
 /*}}}  */

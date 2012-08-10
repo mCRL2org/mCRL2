@@ -177,7 +177,7 @@ std::string description(const transformation_strategy s)
 /* Declare a protected PAIR symbol */
 inline atermpp::function_symbol PAIR()
 {
-  static atermpp::function_symbol PAIR("PAIR", 2, false);
+  static atermpp::function_symbol PAIR("PAIR", 2);
   return PAIR;
 }
 
@@ -448,19 +448,19 @@ void use_hashtables(void)
 
 inline atermpp::function_symbol AFunBESAnd()
 {
-  static atermpp::function_symbol BESAnd("BESAnd", 2, false);
+  static atermpp::function_symbol BESAnd("BESAnd", 2);
   return BESAnd;
 }
 
 inline atermpp::function_symbol AFunBESOr()
 {
-  static atermpp::function_symbol BESOr("BESOr", 2, false);
+  static atermpp::function_symbol BESOr("BESOr", 2);
   return BESOr;
 }
 
 inline atermpp::function_symbol AFunBESIf()
 {
-  static atermpp::function_symbol BESIf("BESIf", 3, false);
+  static atermpp::function_symbol BESIf("BESIf", 3);
   return BESIf;
 }
 
@@ -468,7 +468,7 @@ inline atermpp::function_symbol AFunBESIf()
 inline
 atermpp::function_symbol gsAFunBESFalse()
 {
-  static atermpp::function_symbol AFunBESFalse("BESFalse", 0, false);
+  static atermpp::function_symbol AFunBESFalse("BESFalse", 0);
   return AFunBESFalse;
 }
 
@@ -482,7 +482,7 @@ bool gsIsBESFalse(atermpp::aterm_appl Term)
 inline
 atermpp::function_symbol gsAFunBESTrue()
 {
-  static atermpp::function_symbol AFunBESTrue("BESTrue", 0, false);
+  static atermpp::function_symbol AFunBESTrue("BESTrue", 0);
   return AFunBESTrue;
 }
 
@@ -496,7 +496,7 @@ bool gsIsBESTrue(atermpp::aterm_appl Term)
 inline
 atermpp::function_symbol gsAFunBESDummy()
 {
-  static atermpp::function_symbol AFunBESDummy("BESDummy", 0, false);
+  static atermpp::function_symbol AFunBESDummy("BESDummy", 0);
   return AFunBESDummy;
 }
 
@@ -608,7 +608,7 @@ inline bes_expression or_optimized(bes_expression b1,bes_expression b2)
 
 inline bool is_variable(bes_expression b)
 {
-  return b.type()==atermpp::AT_INT;
+  return b.type_is_int();
 }
 
 inline bes_expression if_(bes_expression b1,bes_expression b2,bes_expression b3)

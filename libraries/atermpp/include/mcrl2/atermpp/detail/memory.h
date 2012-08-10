@@ -85,7 +85,7 @@ t
 
 inline size_t detail::term_size(const detail::_aterm *t)
 {
-  if (t->function()==detail::function_adm.AS_INT)
+  if (t->function().number()==detail::function_adm.AS_INT.number())
   {
     return TERM_SIZE_INT;
   }

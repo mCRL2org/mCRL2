@@ -52,13 +52,6 @@ size_t ATgetArity(const AFun &sym)
   return sym.arity();
 }
 
-
-inline
-bool ATisQuoted(const AFun &sym)
-{
-  return sym.is_quoted();
-}
-
 inline
 const AFun &ATgetAFun(const ATerm &t)
 {
@@ -526,16 +519,6 @@ inline bool ATisList(const ATerm &t)
 {
   return t.type() == AT_LIST;
 }
-
-/**
- * \brief Condition on an ATerm
- * \param[in] t an ATerm
- * \return t is an ATermInt
- */
-/* inline bool ATisInt(const ATerm &t)
-{
-  return t.type() == AT_INT;
-} */
 
 /**
  * \brief Condition on an Aterm

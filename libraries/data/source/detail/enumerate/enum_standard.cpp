@@ -335,7 +335,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     size_t arity = t.size();
     size_t extra_arity = 0;
 
-    if (head.type()!=AT_INT)
+    if (!head.type_is_int())
     {
       head = build_solution_single(aterm_cast<const atermpp::aterm_appl>(head),substituted_vars,exprs);
       if (!is_variable(head))
@@ -348,7 +348,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     // std::vector < atermpp::aterm > args(arity+extra_arity);
     size_t k = 1;
 
-    if (head.type()!=AT_INT && !is_variable(head))
+    if (!head.type_is_int() && !is_variable(head))
     {
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)

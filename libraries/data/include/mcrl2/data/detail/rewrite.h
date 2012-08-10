@@ -247,7 +247,7 @@ inline size_t get_appl_afun_value(size_t arity)
     for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
     {
       assert(old_num==apples.size());
-      apples.push_back(atermpp::function_symbol("#REWR#",old_num,false));
+      apples.push_back(atermpp::function_symbol("#REWR#",old_num));
     }
   }
   assert(arity<apples.size());

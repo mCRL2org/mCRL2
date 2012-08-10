@@ -72,26 +72,26 @@ static void initialise_common()
 {
   if (is_initialised == 0)
   {
-    afunS = atermpp::function_symbol("@@S",2,false); // Store term ( target_variable, result_tree )
-    afunM = atermpp::function_symbol("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
-    afunF = atermpp::function_symbol("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
-    afunN = atermpp::function_symbol("@@N",1,false); // Go to next parameter ( result_tree )
-    afunD = atermpp::function_symbol("@@D",1,false); // Go down a level ( result_tree )
-    afunR = atermpp::function_symbol("@@R",1,false); // End of tree ( matching_rule )
-    afunCR = atermpp::function_symbol("@@CR",2,false); // End of tree ( condition, matching_rule )
-    afunC = atermpp::function_symbol("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
-    afunX = atermpp::function_symbol("@@X",0,false); // End of tree
-    afunRe = atermpp::function_symbol("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
-    afunCRe = atermpp::function_symbol("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
-    afunMe = atermpp::function_symbol("@@Me",2,false); // Match term ( match_variable, variable_index )
+    afunS = atermpp::function_symbol("@@S",2); // Store term ( target_variable, result_tree )
+    afunM = atermpp::function_symbol("@@M",3); // Match term ( match_variable, true_tree , false_tree )
+    afunF = atermpp::function_symbol("@@F",3); // Match function ( match_function, true_tree, false_tree )
+    afunN = atermpp::function_symbol("@@N",1); // Go to next parameter ( result_tree )
+    afunD = atermpp::function_symbol("@@D",1); // Go down a level ( result_tree )
+    afunR = atermpp::function_symbol("@@R",1); // End of tree ( matching_rule )
+    afunCR = atermpp::function_symbol("@@CR",2); // End of tree ( condition, matching_rule )
+    afunC = atermpp::function_symbol("@@C",3); // Check condition ( condition, true_tree, false_tree )
+    afunX = atermpp::function_symbol("@@X",0); // End of tree
+    afunRe = atermpp::function_symbol("@@Re",2); // End of tree ( matching_rule , vars_of_rule)
+    afunCRe = atermpp::function_symbol("@@CRe",4); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
+    afunMe = atermpp::function_symbol("@@Me",2); // Match term ( match_variable, variable_index )
 
     dummy = gsMakeNil();
 
-    afunARtrue = atermpp::function_symbol("@@true",0,false);
-    afunARfalse = atermpp::function_symbol("@@false",0,false);
-    afunARand = atermpp::function_symbol("@@and",2,false);
-    afunARor = atermpp::function_symbol("@@or",2,false);
-    afunARvar = atermpp::function_symbol("@@var",1,false);
+    afunARtrue = atermpp::function_symbol("@@true",0);
+    afunARfalse = atermpp::function_symbol("@@false",0);
+    afunARand = atermpp::function_symbol("@@and",2);
+    afunARor = atermpp::function_symbol("@@or",2);
+    afunARvar = atermpp::function_symbol("@@var",1);
     ar_true = atermpp::aterm_appl(afunARtrue);
     ar_false = atermpp::aterm_appl(afunARfalse);
   }
@@ -278,7 +278,7 @@ static char* whitespace(int len)
 
 static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
 {
-  if (t.type()==AT_INT)
+  if (t.type_is_int())
   {
     term2seq(ATmakeList1(t),s,var_cnt);
   }
@@ -325,7 +325,7 @@ static void term2seq(const aterm &t, aterm_list* s, int* var_cnt)
 static void get_used_vars_aux(const aterm &t, aterm_list* vars)
 {
   using namespace atermpp;
-  if (t.type()==AT_LIST)
+  if (t.type_is_list())
   {
     const atermpp::aterm_list &l=atermpp::aterm_cast<const aterm_list>(t);
     for (aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -379,7 +379,7 @@ static aterm_list create_sequence(const data_equation &rule, int* var_cnt, const
     }
   }
 
-  if (cond.type()==AT_INT && cond==true_inner)
+  if (cond.type_is_int() && cond==true_inner)
   {
     rseq = push_front<aterm>(rseq,atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
   }
@@ -567,7 +567,7 @@ static void inc_usedcnt(aterm_list l)
   for (; !l.empty(); l=ATgetNext(l))
   {
     aterm first=ATgetFirst(l);
-    if (first.type()==AT_INT)
+    if (first.type_is_int())
     {
       treevars_usedcnt[ATgetInt(static_cast<aterm_int>(first))]++;
     }
@@ -906,7 +906,7 @@ static variable_list get_vars(const data_expression &t)
 
 static aterm_list get_vars(const aterm &a)
 {
-  if (a.type()==AT_INT)
+  if (a.type_is_int())
   {
     return aterm_list();
   }
@@ -1252,7 +1252,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int
     return;
   }
   aterm_list strat = create_strategy(eqns,opid.value(),arity,nfs,true_inner);
-  while (!strat.empty() && ATgetFirst(strat).type()==AT_INT)
+  while (!strat.empty() && ATgetFirst(strat).type_is_int())
   {
     nfs.set(ATgetInt(static_cast<aterm_int>(ATgetFirst(strat))));
     strat = ATgetNext(strat);
@@ -1306,7 +1306,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   if (ATisList(t))
   {
     int arity = ATgetLength((aterm_list) t)-1;
-    if (ATgetFirst((aterm_list) t).type()==AT_INT)
+    if (ATgetFirst((aterm_list) t).type_is_int())
     {
       if (opid_is_nf(static_cast<aterm_int>(ATgetFirst((aterm_list) t)),arity) && arity != 0)
       {
@@ -1330,7 +1330,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
       return false;
     }
   }
-  else if (t.type()==AT_INT)
+  else if (t.type_is_int())
   {
     return opid_is_nf(static_cast<aterm_int>(t),0);
   }
@@ -1408,7 +1408,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     size_t arity = ATgetLength((aterm_list) t)-1;
 
 
-    if (ATgetFirst((aterm_list) t).type()==AT_INT)
+    if (ATgetFirst((aterm_list) t).type_is_int())
     {
       b = opid_is_nf(static_cast<aterm_int>(ATgetFirst((aterm_list) t)),arity);
 
@@ -1642,7 +1642,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     return pair<bool,string>(b,ss.str());
 
   }
-  else if (t.type()==AT_INT)
+  else if (t.type_is_int())
   {
     stringstream ss;
     bool b = opid_is_nf(static_cast<aterm_int>(t),0);
@@ -2260,7 +2260,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, int a
 
   while (!strat.empty())
   {
-    if (ATgetFirst(strat).type()==AT_INT)
+    if (ATgetFirst(strat).type_is_int())
     {
       int arg = ATgetInt(static_cast<aterm_int>(ATgetFirst(strat)));
 
@@ -2286,7 +2286,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, int a
 
 aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
 {
-  if (expr.type()==AT_INT)
+  if (expr.type_is_int())
   {
     return make_ar_false();
   }
@@ -2304,7 +2304,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
   }
 
   aterm head = ATgetFirst((aterm_list) expr);
-  if (head.type()!=AT_INT)
+  if (!head.type_is_int())
   {
     return ATisEqual(head,var)?make_ar_true():make_ar_false();
   }
@@ -2335,12 +2335,12 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
   if (eqn_arity <= arg)
   {
     aterm rhs = toInner_list_odd(eqn.rhs());  // rhs in special internal list format.
-    if (rhs.type()==AT_INT)
+    if (rhs.type_is_int())
     {
       int idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
-    else if (ATisList(rhs) && ATgetFirst((aterm_list) rhs).type()==AT_INT)
+    else if (ATisList(rhs) && ATgetFirst((aterm_list) rhs).type_is_int())
     {
       int rhs_arity = ATgetLength((aterm_list) rhs)-1;
       size_t diff_arity = arity-eqn_arity;
@@ -2469,7 +2469,7 @@ static aterm toInner_list_odd(const data_expression &t)
     l = reverse(l);
 
     aterm arg0 = toInner_list_odd(application(t).head());
-    if (arg0.type()==AT_LIST)
+    if (arg0.type_is_list())
     {
       l = aterm_cast<const aterm_list>(arg0) + l;
     }

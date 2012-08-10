@@ -2690,7 +2690,7 @@ ATermAppl gsString2ATermAppl(const char* s)
 {
   if (s != NULL)
   {
-    return ATmakeAppl0(AFun(s, 0, true));
+    return ATmakeAppl0(AFun(s, 0));
   }
   else
   {
@@ -2699,26 +2699,26 @@ ATermAppl gsString2ATermAppl(const char* s)
 }
 
 inline
-bool gsIsString(ATermAppl term)
+bool gsIsString(const ATermAppl &term)
 //Ret: term is a quoted constant
 {
   AFun head = ATgetAFun(term);
-  return ((ATgetArity(head) == 0) && (ATisQuoted(head) == true));
+  return ((ATgetArity(head) == 0) /* && (ATisQuoted(head) == true) */ );
 }
 
 inline
-std::string gsATermAppl2String(ATermAppl term)
+std::string gsATermAppl2String(const ATermAppl &term)
 //Ret: string s, if term is a quoted constant s
 //     NULL, otherwise
 {
-  if (gsIsString(term))
+  // if (gsIsString(term))
   {
     return ATgetName(ATgetAFun(term));
   }
-  else
-  {
-    return NULL;
-  }
+  // else
+  // {
+  //   return NULL;
+  // }
 }
 
 inline
@@ -2758,7 +2758,7 @@ bool gsIsNumericString(std::string s)
   return true;
 }
 
-ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix);
+ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSuffix);
 //Pre: Term is an ATerm containing ATermAppl's and ATermList's only
 //     s is not NULL
 //Ret: "s", if it does not occur in Term, and TryNoSuffix holds
@@ -2770,7 +2770,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix);
 ///\pre Term is not NULL
 ///\return Term is a sort expression
 inline
-bool gsIsSortExpr(ATermAppl Term)
+bool gsIsSortExpr(const ATermAppl &Term)
 {
   return
     gsIsSortId(Term)        || gsIsSortCons(Term)     ||
@@ -2781,7 +2781,7 @@ bool gsIsSortExpr(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a data expression
 inline
-bool gsIsDataExpr(ATermAppl Term)
+bool gsIsDataExpr(const ATermAppl &Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
          gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
@@ -2789,7 +2789,7 @@ bool gsIsDataExpr(ATermAppl Term)
 
 ///\return Term is a state formula
 inline
-bool gsIsStateFrm(ATermAppl Term)
+bool gsIsStateFrm(const ATermAppl &Term)
 {
   return gsIsDataExpr(Term)
          || gsIsStateTrue(Term)
@@ -2814,7 +2814,7 @@ bool gsIsStateFrm(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a action formula
 inline
-bool gsIsActFrm(ATermAppl Term)
+bool gsIsActFrm(const ATermAppl &Term)
 {
   return
     gsIsMultAct(Term) || gsIsDataExpr(Term) || gsIsActTrue(Term) ||
@@ -2826,7 +2826,7 @@ bool gsIsActFrm(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a regular formula
 inline
-bool gsIsRegFrm(ATermAppl Term)
+bool gsIsRegFrm(const ATermAppl &Term)
 {
   return
     gsIsActFrm(Term) || gsIsRegNil(Term) || gsIsRegSeq(Term) ||
@@ -2836,7 +2836,7 @@ bool gsIsRegFrm(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a process expression
 inline
-bool gsIsProcExpr(ATermAppl Term)
+bool gsIsProcExpr(const ATermAppl &Term)
 {
   return gsIsParamId(Term)
          || gsIsIdAssignment(Term)
@@ -2868,7 +2868,7 @@ bool gsIsProcExpr(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a Parameterised Boolean Expression
 inline
-bool gsIsPBExpr(ATermAppl Term)
+bool gsIsPBExpr(const ATermAppl &Term)
 {
   return gsIsDataExpr(Term)
          || gsIsPBESTrue(Term)
@@ -2886,7 +2886,7 @@ bool gsIsPBExpr(ATermAppl Term)
 ///\pre Term is not NULL
 ///\return Term is a fixpoint
 inline
-bool gsIsFixpoint(ATermAppl Term)
+bool gsIsFixpoint(const ATermAppl &Term)
 {
   return gsIsMu(Term) || gsIsNu(Term);
 }

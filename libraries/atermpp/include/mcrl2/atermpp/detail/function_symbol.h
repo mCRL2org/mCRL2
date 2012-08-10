@@ -13,42 +13,34 @@ namespace detail
 struct _function_symbol
 {
   public:
-    size_t header;
-/*  Onderstaande is een suggestie van Sjoerd, om van expliciete shifts af te komen,
- *      en de code helderder te krijgen.
- *          size_t arity: 63; XXXX
- *              size_t quoted: 1; */
-
+    size_t m_arity;
     size_t next;
     size_t reference_count;
-    // size_t id;
     std::string name;
 
-    _function_symbol(const size_t arity, bool quoted):
-        header(make_header(arity,quoted)),
+    _function_symbol(const std::string &s, const size_t arity):
+        m_arity(arity),
         next(size_t(-1)),
-        reference_count(0)
+        reference_count(0),
+        name(s)
     {
     }
 
-    static size_t make_header(const size_t arity, bool quoted)
+    size_t arity() const    
     {
-      assert ((quoted & 1) == quoted);
-      return arity << 1 | quoted;
-    }
-
-    size_t arity() const    {
-      return header>>1;
-    }
-
-    bool is_quoted() const
-    {
-      return header & 1;
+      return m_arity;
     }
 };
 
 void at_free_afun(const size_t n);
+
 inline bool AT_isValidAFun(const size_t sym);
+
+template <bool CHECK>
+void increase_reference_count(const size_t n);
+
+inline
+void decrease_reference_count(const size_t n);
 
 
 } // namespace detail
