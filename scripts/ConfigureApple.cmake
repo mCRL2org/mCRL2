@@ -23,7 +23,6 @@ option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF)
 ## Add definitions
 ##---------------------------------------------------
 
-add_definitions( -D__DARWIN__)
 add_definitions( -D__WXMAC__)
 
 ##---------------------------------------------------
