@@ -103,7 +103,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QTableWidget" name="attributes">
+          <widget class="MovableTableWidget" name="attributes">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -116,15 +116,6 @@
              <height>100</height>
             </size>
            </property>
-           <property name="dragDropOverwriteMode">
-            <bool>false</bool>
-           </property>
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::InternalMove</enum>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
            <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
@@ -133,6 +124,9 @@
            </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>19</number>
            </attribute>
            <column>
             <property name="text">
@@ -168,7 +162,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QTableWidget" name="domain">
+          <widget class="MovableTableWidget" name="domain">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -181,12 +175,6 @@
              <height>100</height>
             </size>
            </property>
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::InternalMove</enum>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
            <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
@@ -195,6 +183,9 @@
            </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>19</number>
            </attribute>
            <column>
             <property name="text">
@@ -733,6 +724,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MovableTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>movabletablewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="icons.qrc"/>
  </resources>

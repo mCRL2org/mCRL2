@@ -552,7 +552,7 @@ void Parser::parseAttribute(
       throw mcrl2::runtime_error(QString("Types do not match (%1 vs %2).").arg(attribute->type(), stringPropertyValues["Type"]).toStdString());
     }
 
-    if (attribute->getSizeOrigValues() != originalCardinality)
+    if (int(attribute->getSizeOrigValues()) != originalCardinality)
     {
       throw mcrl2::runtime_error(QString("Cardinalities do not match (%1 vs %2).").arg(attribute->getSizeOrigValues()).arg(originalCardinality).toStdString());
     }

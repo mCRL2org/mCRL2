@@ -43,6 +43,7 @@ set(DIAGRAPHICA_MOC_HEADERS
   corrlplot.h
   distrplot.h
   mainwindow.h
+  movabletablewidget.h
   parser.h
   settingsdialog.h
   simulator.h
@@ -71,6 +72,7 @@ set(DIAGRAPHICA_SRC_FILES
   graph.cpp
   main.cpp
   mainwindow.cpp
+  movabletablewidget.cpp
   node.cpp
   opacitychooser.cpp
   parser.cpp

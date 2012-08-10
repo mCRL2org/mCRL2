@@ -241,7 +241,7 @@ void MainWindow::updateAttributeOperations()
   m_ui.domain->setRowCount(0);
   if (attributes.size() == 1)
   {
-    assert(attributes[0] < m_graph->getSizeAttributes());
+    assert(attributes[0] < int(m_graph->getSizeAttributes()));
 
     std::vector<size_t> valueDistribution;
     m_graph->calcAttrDistr(attributes[0], valueDistribution);
@@ -351,7 +351,7 @@ QList<int> MainWindow::selectedAttributes()
   {
     for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
     {
-      output += j;
+      output += m_ui.attributes->item(j, 0)->text().toInt();
     }
   }
   return output;
