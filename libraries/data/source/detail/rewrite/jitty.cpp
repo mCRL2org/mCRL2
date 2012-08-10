@@ -120,11 +120,11 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
 
     for (; !rules.empty(); rules=pop_front(rules))
     {
-      if (element_at(aterm_cast<const aterm_list>(front(rules)),2).function().arity() == arity + 1)
+      if (element_at(aterm_cast<const aterm_list>(rules.front()),2).function().arity() == arity + 1)
       {
-        const atermpp::aterm_appl &cond = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(front(rules)),1));
+        const atermpp::aterm_appl &cond = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),1));
         atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));
-        const atermpp::aterm_appl &pars = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(front(rules)),2));
+        const atermpp::aterm_appl &pars = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2));
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
         for (size_t i = 0; i < arity; i++)
@@ -189,11 +189,11 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         }
         deps = reverse(deps);
 
-        m = push_front(m,static_cast<const aterm>(ATmakeList2(deps,front(rules))));
+        m = push_front(m,static_cast<const aterm>(ATmakeList2(deps,rules.front())));
       }
       else
       {
-        l = push_front(l,front(rules));
+        l = push_front(l,rules.front());
       }
     }
 
@@ -202,13 +202,13 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
       aterm_list m2;
       for (; !m.empty(); m=pop_front(m))
       {
-        if (aterm_cast<const aterm_list>(front(aterm_cast<const aterm_list>(front(m)))).empty())
+        if (aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()).empty())
         {
-          strat = push_front(strat, front(pop_front(aterm_cast<const aterm_list>(front(m)))));
+          strat = push_front(strat, (pop_front(aterm_cast<const aterm_list>(m.front()))).front());
         }
         else
         {
-          m2 = push_front(m2,front(m));
+          m2 = push_front(m2,m.front());
         }
       }
       m = reverse(m2);
@@ -241,8 +241,8 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         m2 = aterm_list();
         for (; !m.empty(); m=pop_front(m))
         {
-          m2 = push_front(m2,static_cast<aterm>(push_front(pop_front(aterm_cast<const aterm_list>(front(m))),
-                    static_cast<aterm>(remove_one_element(aterm_cast<const aterm_list>(front(aterm_cast<const aterm_list>(front(m)))),
+          m2 = push_front(m2,static_cast<aterm>(push_front(pop_front(aterm_cast<const aterm_list>(m.front())),
+                    static_cast<aterm>(remove_one_element(aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()),
                                       static_cast<aterm>(k))))));
         }
         m = reverse(m2);
@@ -754,7 +754,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        size_t max_len = aterm_cast<const aterm_list>(front(rule)).size();
+        size_t max_len = aterm_cast<const aterm_list>(rule.front()).size();
         size_t number_of_vars=0;
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
