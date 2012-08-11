@@ -42,7 +42,7 @@ namespace lps
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
 
-static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
+static std::string print_state(const atermpp::aterm_appl &s, ns_info const& info)
 {
   if (info.stateformat==GS_STATE_TREE)
   {
@@ -65,7 +65,7 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
   return result;
 }
 
-static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
+static std::string print_assignments(const atermpp::aterm_list &a, ns_info const& info)
 {
   atermpp::aterm_list res;
   for (atermpp::aterm_list::const_iterator i = a.begin(); i != a.end(); ++i)
@@ -180,8 +180,9 @@ ATerm NextState::buildTree(std::vector<ATerm> &args)
   return args[0];
 }
 
-ATerm NextState::getTreeElement(ATerm tree, size_t index)
+ATerm NextState::getTreeElement(const ATerm &tree1, size_t index)
 {
+  ATerm tree=tree1;
   size_t n = info.statelen;
   size_t m = 0;
   while (m+1 != n)
@@ -210,7 +211,7 @@ size_t NextState::getStateLength()
   return info.statelen;
 }
 
-ATermAppl NextState::getStateArgument(ATerm state, size_t index)
+ATermAppl NextState::getStateArgument(const ATerm &state, size_t index)
 {
   switch (info.stateformat)
   {
@@ -223,7 +224,7 @@ ATermAppl NextState::getStateArgument(ATerm state, size_t index)
   }
 }
 
-mcrl2::lps::state NextState::make_new_state_vector(ATerm s)
+mcrl2::lps::state NextState::make_new_state_vector(const ATerm &s)
 {
   mcrl2::lps::state new_state;
   for (size_t i=0; i<info.statelen; i++)
@@ -233,7 +234,7 @@ mcrl2::lps::state NextState::make_new_state_vector(ATerm s)
   return new_state;
 }
 
-ATermAppl NextState::makeStateVector(ATerm state)
+ATermAppl NextState::makeStateVector(const ATerm &state)
 {
   if (!stateAFun_made)
   {
@@ -251,8 +252,8 @@ ATermAppl NextState::makeStateVector(ATerm state)
 
 //Prototype
 static bool statearg_match(
-     const data_expression arg,
-     const data_expression pat,
+     const data_expression &arg,
+     const data_expression &pat,
      std::map < variable, data_expression > &vars);
 
 static bool statearg_match_list(
@@ -274,8 +275,8 @@ static bool statearg_match_list(
 }
 
 static bool statearg_match(
-     const data_expression arg,
-     const data_expression pat,
+     const data_expression &arg,
+     const data_expression &pat,
      std::map < variable, data_expression > &vars)
 {
   bool r;
@@ -316,14 +317,14 @@ static bool statearg_match(
   return r;
 }
 
-static bool statearg_match(const data_expression arg, const data_expression pat)
+static bool statearg_match(const data_expression &arg, const data_expression &pat)
 {
   std::map < variable, data_expression > vars;
   return statearg_match(arg,pat,vars);
 
 }
 
-ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state match, bool check_match)
+ATerm NextState::parse_state_vector_new(const mcrl2::lps::state &s, const mcrl2::lps::state &match, bool check_match)
 {
   if (!stateAFun_made)
   {
@@ -368,7 +369,7 @@ ATerm NextState::parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state m
   return aterm();
 }
 
-ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
+ATerm NextState::parseStateVector(const ATermAppl &state, const ATerm &match)
 {
   if (!stateAFun_made)
   {
@@ -417,7 +418,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
   return aterm();
 }
 
-ATerm NextState::SetVars(ATerm a, ATermList free_vars)
+ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
 {
   if (!usedummies)
   {
@@ -458,7 +459,7 @@ ATerm NextState::SetVars(ATerm a, ATermList free_vars)
   }
 }
 
-ATermList NextState::ListToFormat(ATermList l,ATermList free_vars)
+ATermList NextState::ListToFormat(const ATermList &l, const ATermList &free_vars)
 {
   if (ATisEmpty(l))
   {
@@ -470,7 +471,7 @@ ATermList NextState::ListToFormat(ATermList l,ATermList free_vars)
   }
 }
 
-ATermList NextState::ListFromFormat(ATermList l)
+ATermList NextState::ListFromFormat(const ATermList &l)
 {
   if ( ATisEmpty(l) )
   {
@@ -482,7 +483,7 @@ ATermList NextState::ListFromFormat(ATermList l)
   }
 }
 
-ATermList NextStateGenerator::ListFromFormat(ATermList l)
+ATermList NextStateGenerator::ListFromFormat(const ATermList &l)
 {
   if ( ATisEmpty(l) )
   {
@@ -494,7 +495,7 @@ ATermList NextStateGenerator::ListFromFormat(ATermList l)
   }
 }
 
-ATermAppl NextState::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
+ATermAppl NextState::ActionToRewriteFormat(const ATermAppl &act, const ATermList &free_vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::ActionToRewriteFormat(act, free_vars) called, with" << std::endl <<
@@ -516,7 +517,7 @@ ATermAppl NextState::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
   return gsMakeMultAct(m);
 }
 
-ATermList NextState::AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
+ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATermList &free_vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::AssignsToRewriteFormat(assigns, free_vars) called, with: " << std::endl <<
@@ -719,21 +720,21 @@ NextState::~NextState()
   free(tree_init);
 }
 
-static bool only_action(ATermList ma, const char* action)
+static bool only_action(const ATermList &ma, const char* action)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "only_action(ma, action) called, with " << std::endl <<
             "  ma = " << atermpp::aterm_list(ma) << std::endl <<
             "  action = " << std::string(action) << std::endl;
 #endif
-  if (ATisEmpty(ma))
+  if (ma.empty())
   {
     return false;
   }
 
-  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
+  for (ATermList::const_iterator i=ma.begin(); i!=ma.end(); ++i) 
   {
-    if (strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0))),action))
+    if (strcmp(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(*i)(0))(0).function().name().c_str(),action))
     {
       return false;
     }
@@ -780,7 +781,7 @@ ATerm NextState::getInitialState()
   return initial_state;
 }
 
-NextStateGenerator* NextState::getNextStates(ATerm state, NextStateGenerator* old)
+NextStateGenerator* NextState::getNextStates(const ATerm &state, NextStateGenerator* old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::getNextStates(state, old) called, with " <<
@@ -802,7 +803,7 @@ class NextStateGeneratorSummand : public NextStateGenerator
 
   public:
 
-    NextStateGeneratorSummand(size_t summand, ATerm state, ns_info& info, size_t identifier)
+    NextStateGeneratorSummand(size_t summand, const ATerm &state, ns_info& info, size_t identifier)
       : NextStateGenerator(state, info, identifier, true, summand)
     {
 
@@ -817,7 +818,7 @@ class NextStateGeneratorSummand : public NextStateGenerator
     }
 };
 
-NextStateGenerator* NextState::getNextStates(ATerm state, size_t index, NextStateGenerator* old)
+NextStateGenerator* NextState::getNextStates(const ATerm &state, size_t index, NextStateGenerator* old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::getNextStates(state, index, old) called, with " <<
@@ -837,7 +838,7 @@ NextStateGenerator* NextState::getNextStates(ATerm state, size_t index, NextStat
   return new NextStateGeneratorSummand(index, state,info,next_id++);
 }
 
-ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
+ATerm NextStateGenerator::makeNewState(const ATerm &old, const ATermList &assigns1)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::makeNewState(old, assigns) called, with " << std::endl <<
@@ -847,14 +848,14 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
   std::clog <<
             "  (human readable assigns): " << print_assignments(atermpp::aterm_list(assigns), info) << std::endl;
 #endif
-  ATermList l;
 
+  ATermList assigns=assigns1;
   if (*info.current_id != id)
   {
     set_substitutions();
   }
 
-  l = info.procvars;
+  ATermList l = info.procvars;
   for (size_t i=0; i<info.statelen; i++)
   {
     ATerm a = ATgetFirst(assigns);
@@ -901,7 +902,7 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
   }
 }
 
-ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
+ATermAppl NextStateGenerator::rewrActionArgs(const ATermAppl &act)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::rewrActionArgs(act) called, with " << std::endl <<
@@ -922,7 +923,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
   return gsMakeMultAct(m);
 }
 
-void NextStateGenerator::SetTreeStateVars(ATerm tree, ATermList* vars)
+void NextStateGenerator::SetTreeStateVars(const ATerm &tree, ATermList* vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::SetTreeStateVars(tree, vars) called, with " << std::endl <<
@@ -949,7 +950,7 @@ void NextStateGenerator::SetTreeStateVars(ATerm tree, ATermList* vars)
   *vars = ATgetNext(*vars);
 }
 
-NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand, size_t SingleSummandIndex) : info(Info)
+NextStateGenerator::NextStateGenerator(const ATerm &State, ns_info& Info, size_t identifier, bool SingleSummand, size_t SingleSummandIndex) : info(Info)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::NextStateGenerator(State, Info, identifier, SingleSummand) called, with " << std::endl <<
@@ -1011,7 +1012,7 @@ void NextStateGenerator::set_substitutions()
   *info.current_id = id;
 }
 
-void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
+void NextStateGenerator::reset(const ATerm &State, size_t SummandIndex)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::reset(State, SummandIndex) called with:" << std::endl <<

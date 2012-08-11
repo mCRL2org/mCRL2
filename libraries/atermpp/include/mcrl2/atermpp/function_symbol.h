@@ -71,7 +71,12 @@ class function_symbol
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
-    const std::string &name() const;
+    const std::string &name() const
+    {
+      assert(detail::AT_isValidAFun(m_number));
+      return detail::at_lookup_table[m_number].name;
+    }
+
     
     /// \brief Return the number of the function_symbol.
     /// \return The number of the function symbol.
@@ -86,7 +91,12 @@ class function_symbol
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.
-    size_t arity() const;
+    size_t arity() const
+    {
+      assert(detail::AT_isValidAFun(m_number));
+      return detail::at_lookup_table[m_number].arity();
+    }
+
 
     /// \brief Equality test.
     /// \detail This operator compares the indices of the function symbols. This means

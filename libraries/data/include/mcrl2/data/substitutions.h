@@ -434,20 +434,6 @@ make_mutable_map_substitution(const VariableContainer& vc, const ExpressionConta
   return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
 }
 
-namespace detail
-{
-  struct variable_to_index : public std::unary_function< data::variable, size_t >
-  {
-    variable_to_index()
-    {}
-
-    size_t operator()(const data::variable& v) const
-    {
-      return v.name().function().number();
-    }
-  };
-}
-
 /// \brief Generic substitution function.
 /// \details This substitution assumes a function variable -> size_t, that, for
 ///          each variable gives a unique index. The substitutions are stored
@@ -517,7 +503,7 @@ public:
       mCRL2log(log::debug2, "substitutions") << "Setting " << data::pp(m_variable) << " := " << e << std::endl;
       assert(e.defined());
 
-      size_t i = detail::variable_to_index()(m_variable);
+      size_t i = m_variable.name().function().number();
       if (e != m_variable)
       {
         // Set a new variable;
@@ -572,7 +558,7 @@ public:
   /// \brief Application operator; applies substitution to v.
   const expression_type &operator()(const variable_type& v) const
   {
-    const size_t i = detail::variable_to_index()(v);
+    const size_t i = v.name().function().number();
     if (i < m_index_table.size())
     { 
       const size_t j = m_index_table[i];

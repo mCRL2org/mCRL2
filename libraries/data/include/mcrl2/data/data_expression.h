@@ -234,7 +234,7 @@ class data_expression: public atermpp::aterm_appl
       }
       else if (is_application(*this))
       {
-        data_expression head = data_expression(atermpp::arg1(*this));
+        const data_expression &head = atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
         sort_expression s(head.sort());
         if (s == sort_expression())
         {

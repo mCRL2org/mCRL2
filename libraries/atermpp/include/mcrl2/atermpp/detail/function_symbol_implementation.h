@@ -21,8 +21,6 @@ namespace atermpp
 namespace detail
 {
 
-    extern std::vector < detail::_function_symbol > at_lookup_table;
-    
     template <bool CHECK>
     void increase_reference_count(const size_t n)
     {
@@ -109,22 +107,7 @@ bool AT_isValidAFun(const size_t sym)
 
 } // namespace detail
 
-inline
-const std::string &function_symbol::name() const
-{
-  assert(detail::AT_isValidAFun(m_number));
-  return detail::at_lookup_table[m_number].name;
-}
-
-inline
-size_t function_symbol::arity() const
-{
-  assert(detail::AT_isValidAFun(m_number));
-  return detail::at_lookup_table[m_number].arity();
-}
-
 std::string ATwriteAFunToString(const function_symbol &t);
-
 
 } // namespace atermpp
 #endif // ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H

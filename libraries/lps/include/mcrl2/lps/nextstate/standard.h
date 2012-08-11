@@ -50,10 +50,12 @@ struct ns_info
   atermpp::function_symbol stateAFun;
   size_t* current_id;
 
-  enumerator_type::iterator_internal get_sols(atermpp::aterm_list v, const atermpp::aterm c,
+  enumerator_type::iterator_internal get_sols(const atermpp::aterm_list &v, 
+                                              const atermpp::aterm &c,
                                               internal_substitution_type &sigma)
   {
-    return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(atermpp::aterm_appl)c, sigma); // Laatste expressie is intern.
+    using namespace atermpp;
+    return m_enumerator.begin_internal(aterm_cast<mcrl2::data::variable_list>(v),aterm_cast<aterm_appl>(c), sigma); // Laatste expressie is intern.
   }
 
   ns_info(const mcrl2::data::data_specification & specification,
@@ -73,12 +75,12 @@ class NextStateGenerator
     typedef ns_info::substitution_type substitution_type;
     typedef ns_info::internal_substitution_type internal_substitution_type;
 
-    NextStateGenerator(atermpp::aterm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
+    NextStateGenerator(const atermpp::aterm &State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGenerator();
 
     bool next(mcrl2::lps::multi_action &Transition, atermpp::aterm* State, bool* prioritised = NULL);
 
-    void reset(atermpp::aterm State, size_t SummandIndex = 0);
+    void reset(const atermpp::aterm &State, size_t SummandIndex = 0);
 
     atermpp::aterm get_state() const;
 
@@ -102,10 +104,10 @@ class NextStateGenerator
 
     void set_substitutions();
 
-    void SetTreeStateVars(atermpp::aterm tree, atermpp::aterm_list* vars);
-    atermpp::aterm_appl rewrActionArgs(atermpp::aterm_appl act);
-    atermpp::aterm makeNewState(atermpp::aterm old, atermpp::aterm_list assigns);
-    atermpp::aterm_list ListFromFormat(atermpp::aterm_list l);
+    void SetTreeStateVars(const atermpp::aterm &tree, atermpp::aterm_list* vars);
+    atermpp::aterm_appl rewrActionArgs(const atermpp::aterm_appl &act);
+    atermpp::aterm makeNewState(const atermpp::aterm &old, const atermpp::aterm_list &assigns);
+    atermpp::aterm_list ListFromFormat(const atermpp::aterm_list &l);
 };
 
 class NextState
@@ -121,18 +123,19 @@ class NextState
     void prioritise(const char* action);
 
     atermpp::aterm getInitialState();
-    NextStateGenerator* getNextStates(atermpp::aterm state, NextStateGenerator* old = NULL);
-    NextStateGenerator* getNextStates(atermpp::aterm state, size_t group, NextStateGenerator* old = NULL);
+    NextStateGenerator* getNextStates(const atermpp::aterm &state, NextStateGenerator* old = NULL);
+    NextStateGenerator* getNextStates(const atermpp::aterm &state, size_t group, NextStateGenerator* old = NULL);
 
     void gatherGroupInformation();
 
     size_t getGroupCount() const;
     size_t getStateLength();
-    atermpp::aterm_appl getStateArgument(atermpp::aterm state, size_t index);
-    atermpp::aterm_appl makeStateVector(atermpp::aterm state);
-    mcrl2::lps::state make_new_state_vector(atermpp::aterm s);
-    atermpp::aterm parseStateVector(atermpp::aterm_appl state, atermpp::aterm match = NULL);
-    atermpp::aterm parse_state_vector_new(mcrl2::lps::state s, mcrl2::lps::state match=mcrl2::lps::state(), bool check_match=false);
+    atermpp::aterm_appl getStateArgument(const atermpp::aterm &state, size_t index);
+    atermpp::aterm_appl makeStateVector(const atermpp::aterm &state);
+    mcrl2::lps::state make_new_state_vector(const atermpp::aterm &s);
+    // atermpp::aterm parseStateVector(const atermpp::aterm_appl &state, const atermpp::aterm &match = NULL);
+    atermpp::aterm parseStateVector(const atermpp::aterm_appl &state, const atermpp::aterm &match);
+    atermpp::aterm parse_state_vector_new(const mcrl2::lps::state &s, const mcrl2::lps::state &match=mcrl2::lps::state(), bool check_match=false);
     mcrl2::data::rewriter& getRewriter()   // Deprecated. Do not use.
     {
       return const_cast< mcrl2::data::detail::legacy_rewriter& >(info.m_rewriter);
@@ -155,18 +158,18 @@ class NextState
     atermpp::aterm initial_state;
 
     atermpp::aterm buildTree(std::vector<atermpp::aterm> &args);
-    atermpp::aterm getTreeElement(atermpp::aterm tree, size_t index);
+    atermpp::aterm getTreeElement(const atermpp::aterm &tree, size_t index);
 
-    atermpp::aterm SetVars(atermpp::aterm a, atermpp::aterm_list free_vars);
-    atermpp::aterm_list ListToFormat(atermpp::aterm_list l,atermpp::aterm_list free_vars);
-    atermpp::aterm_list ListFromFormat(atermpp::aterm_list l);
-    atermpp::aterm_appl ActionToRewriteFormat(atermpp::aterm_appl act, atermpp::aterm_list free_vars);
-    atermpp::aterm_list AssignsToRewriteFormat(atermpp::aterm_list assigns, atermpp::aterm_list free_vars);
+    atermpp::aterm SetVars(const atermpp::aterm &a, const atermpp::aterm_list &free_vars);
+    atermpp::aterm_list ListToFormat(const atermpp::aterm_list &l, const atermpp::aterm_list &free_vars);
+    atermpp::aterm_list ListFromFormat(const atermpp::aterm_list &l);
+    atermpp::aterm_appl ActionToRewriteFormat(const atermpp::aterm_appl &act, const atermpp::aterm_list &free_vars);
+    atermpp::aterm_list AssignsToRewriteFormat(const atermpp::aterm_list &assigns, const atermpp::aterm_list &free_vars);
 };
 
 
 NextState* createNextState(
-     mcrl2::lps::specification const& spec,
+     const mcrl2::lps::specification &spec,
      const mcrl2::data::rewriter &rewriter,
      bool allow_free_vars,
      int state_format = GS_STATE_VECTOR,

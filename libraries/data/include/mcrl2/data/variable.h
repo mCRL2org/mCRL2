@@ -56,14 +56,14 @@ class variable: public data_expression
       : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    sort_expression sort() const
+    const sort_expression &sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 

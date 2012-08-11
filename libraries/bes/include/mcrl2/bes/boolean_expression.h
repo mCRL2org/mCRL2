@@ -152,9 +152,9 @@ class not_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanNot(operand))
     {}
 
-    boolean_expression operand() const
+    const boolean_expression &operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -190,14 +190,14 @@ class and_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanAnd(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression &left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression &right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -233,14 +233,14 @@ class or_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanOr(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression &left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression &right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -276,14 +276,14 @@ class imp: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanImp(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression &left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression &right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -324,9 +324,9 @@ class boolean_variable: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 
@@ -392,17 +392,17 @@ bool is_same_different_precedence(const or_&, const boolean_expression& x)
 namespace accessors
 {
 inline
-boolean_expression left(boolean_expression const& e)
+const boolean_expression &left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::arg1(e);
+  return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(e));
 }
 
 inline
-boolean_expression right(boolean_expression const& e)
+const boolean_expression &right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::arg2(e);
+  return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(e));
 }
 
 } // namespace accessors
@@ -579,67 +579,67 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The requested argument
   static inline
-  term_type arg(const term_type& t)
+  const term_type &arg(const term_type& t)
   {
     assert(is_not(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp
   /// \param t A term
   /// \return The left argument of the term
   static inline
-  term_type left(const term_type& t)
+  const term_type &left(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the right argument of a term of type and, or or imp
   /// \param t A term
   /// \return The right argument of the term
   static inline
-  term_type right(const term_type& t)
+  const term_type &right(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::arg2(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg2(t));
   }
 
   /// \brief Returns the argument of a term of type not
   /// \param t A term
   static inline
-  term_type not_arg(const term_type& t)
+  const term_type &not_arg(const term_type& t)
   {
     assert(is_not(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the name of a boolean variable
   /// \param t A term
   /// \return The name of the boolean variable
   static inline
-  string_type name(const term_type& t)
+  const string_type &name(const term_type& t)
   {
     assert(is_variable(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const string_type>(atermpp::arg1(t));
   }
 
   /// \brief Conversion from variable to term
   /// \param v A variable
   /// \returns The converted variable
   static inline
-  term_type variable2term(variable_type v)
+  const term_type &variable2term(const variable_type &v)
   {
-    return v;
+    return atermpp::aterm_cast<const term_type>(v);
   }
 
   /// \brief Conversion from term to variable
   /// \param t a term
   /// \returns The converted term
   static inline
-  variable_type term2variable(const term_type& t)
+  const variable_type &term2variable(const term_type& t)
   {
-    return variable_type(t);
+    return atermpp::aterm_cast<const variable_type>(t);
   }
 
   /// \brief Pretty print function

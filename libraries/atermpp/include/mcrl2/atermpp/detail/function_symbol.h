@@ -32,6 +32,8 @@ struct _function_symbol
     }
 };
 
+extern std::vector < detail::_function_symbol > at_lookup_table;
+
 void at_free_afun(const size_t n);
 
 inline bool AT_isValidAFun(const size_t sym);

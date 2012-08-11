@@ -304,16 +304,12 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
       size_t remaining;
 
       std::string name = fun.name(); 
-      size_t isQuoted = true;
       size_t arity = fun.arity();
       size_t nameLength = name.size();
 
       size_t bytesToWrite = nameLength;
 
-      if (isQuoted)
-      {
-        header |= APPLQUOTED;
-      }
+      header |= APPLQUOTED;
       *(byteBuffer->currentPos) = (char) header;
       byteBuffer->currentPos++;
       assert(arity< (((size_t)1)<<(8*sizeof(int)-1))); /* arity must fit in an int */
@@ -740,10 +736,10 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       ATermConstruct* ac = &(binaryReader->stack.top());
 
       size_t arity = binaryReader->tempArity;
-      bool isQuoted = binaryReader->tempIsQuoted;
+      // bool isQuoted = binaryReader->tempIsQuoted;
       char* name = binaryReader->tempBytes;
 
-      assert(isQuoted);
+      // assert(isQuoted);
       function_symbol fun(name, arity);
       // detail::_function_symbol* symEntry = detail::at_lookup_table[fun.number()];
       size_t symEntry = fun.number();

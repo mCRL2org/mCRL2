@@ -614,7 +614,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 
     if (op.type_is_int())
     {
-      return rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
+      return rewrite_aux_function_symbol(aterm_cast<const atermpp::aterm_int>(op),term,sigma);
     }
     else if (is_variable(op))
     {
@@ -826,7 +826,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   assert(!rewritten_defined[0]);
   rewritten_defined[0]=true;
-  new (&rewritten[0]) aterm_appl(op);
+  new (&rewritten[0]) aterm(op);
   // rewritten[0] = op;
   for (size_t i=1; i<arity; i++)
   {

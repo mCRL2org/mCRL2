@@ -182,7 +182,7 @@ _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin,
   {
     assert(j<arity);
     CHECK_TERM(*i);
-    hnr = COMBINE(hnr, *i);
+    hnr = COMBINE(hnr, reinterpret_cast<size_t>(&* *i));
   }
   assert(j==arity);
 
