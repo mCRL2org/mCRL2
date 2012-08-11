@@ -10,7 +10,6 @@
 #include "movabletablewidget.h"
 #include <QPainter>
 #include <QHeaderView>
-#include <QDebug>
 
 MovableTableWidget::MovableTableWidget(QWidget *parent) :
   QTableWidget(parent), m_lineRow(-1)
@@ -71,6 +70,11 @@ void MovableTableWidget::dragMoveEvent(QDragMoveEvent *event)
     return;
   }
 
+  if (hasAutoScroll())
+  {
+    QAbstractItemView::dragMoveEvent(event);
+  }
+
   m_lineRow = dropRow(event->pos());
   viewport()->repaint();
 
@@ -103,6 +107,16 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
   QList<int> rowkeys = rows.keys();
   qSort(rowkeys);
 
+  for (int row = rowkeys.count()-1; 0 <= row ; row--)
+  {
+    int rowIndex = rowkeys[row];
+    if (rowIndex < targetRow)
+    {
+      targetRow--;
+    }
+    removeRow(rowIndex);
+  }
+
   for (int row = 0; row < rowkeys.count(); row++)
   {
     QMap<int, QString> cols = rows[rowkeys[row]];
@@ -113,21 +127,10 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
     {
       QString value = cols[colkeys[col]];
       setItem(targetRow+row, col, new QTableWidgetItem(value));
+      setItemSelected(item(targetRow+row, col), true);
     }
   }
 
-  for (int row = rowkeys.count()-1; 0 <= row ; row--)
-  {
-    int rowIndex = rowkeys[row];
-    if (rowIndex < targetRow)
-    {
-      removeRow(rowIndex);
-    }
-    if (rowIndex >= targetRow)
-    {
-      removeRow(rowIndex+rowkeys.count());
-    }
-  }
 
   m_lineRow = -1;
 }
