@@ -38,7 +38,7 @@ class term_balanced_tree: public aterm
     friend class term_balanced_tree_iterator;
 
     template <typename T, typename F>
-    friend term_balanced_tree< T > apply(term_balanced_tree< T > l, const F f);
+    friend term_balanced_tree< T > apply(const term_balanced_tree< T > &l, const F f);
 
   protected:
 
@@ -56,12 +56,12 @@ class term_balanced_tree: public aterm
 
     static bool is_empty(const aterm &tree)
     {
-      return tree == tree_empty();
+      return tree.function() == tree_empty();
     }
 
     static bool is_node(const aterm &tree)
     {
-      return tree.type() == AT_APPL && (aterm_appl(tree).function() == tree_node());
+      return tree.type_is_appl() && (aterm_cast<aterm_appl>(tree).function() == tree_node());
     }
 
     static const aterm &left_branch(const aterm &tree)
@@ -135,7 +135,7 @@ class term_balanced_tree: public aterm
 
       if (size==1)
       {
-        const aterm result=*p;
+        const aterm &result=*p;
         ++p;
         return result;
       }
@@ -310,7 +310,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     friend class boost::iterator_core_access;
 
-    std::stack< aterm > m_trees;
+    std::stack< detail::_aterm* > m_trees;
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
@@ -338,16 +338,16 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
           m_trees.pop();
 
-          m_trees.push(term_balanced_tree< Value >::right_branch(top));
-          m_trees.push(term_balanced_tree< Value >::left_branch(top));
+          m_trees.push(&*term_balanced_tree< Value >::right_branch(top));
+          m_trees.push(&*term_balanced_tree< Value >::left_branch(top));
         }
       }
     }
 
-    void initialise(aterm tree)
+    void initialise(const aterm &tree)
     {
-      m_trees.push(tree);
-      m_trees.push(tree);
+      m_trees.push(&*tree);
+      m_trees.push(&*tree);
       increment();
     }
 
@@ -356,7 +356,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
     term_balanced_tree_iterator()
     { }
 
-    term_balanced_tree_iterator(aterm tree)
+    term_balanced_tree_iterator(const aterm &tree)
     {
       initialise(tree);
     }
@@ -381,7 +381,7 @@ typedef term_balanced_tree<aterm> aterm_balanced_tree;
 /// \return The transformed list.
 template <typename Term, typename Function>
 inline
-term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
+term_balanced_tree< Term > apply(const term_balanced_tree<Term> &l, const Function f)
 {
   std::vector < Term > result;
 
