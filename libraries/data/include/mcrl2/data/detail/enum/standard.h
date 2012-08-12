@@ -79,22 +79,22 @@ class fs_expr
     {
     }
 
-    variable_list vars() const
+    const variable_list &vars() const
     {
       return m_vars;
     }
 
-    variable_list substituted_vars() const
+    const variable_list &substituted_vars() const
     {
       return m_substituted_vars;
     }
 
-    atermpp::term_list< atermpp::aterm_appl > vals() const
+    const atermpp::term_list< atermpp::aterm_appl > &vals() const
     {
       return m_vals;
     }
 
-    atermpp::aterm_appl expr() const
+    const atermpp::aterm_appl &expr() const
     {
       return m_expr;
     }

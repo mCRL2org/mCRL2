@@ -618,7 +618,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     else if (is_variable(op))
     {
-      head=sigma(variable(op));
+      head=sigma(atermpp::aterm_cast<const variable>(op));
     }
     else if (is_abstraction(atermpp::aterm_cast<const atermpp::aterm_appl>(op)))
     {

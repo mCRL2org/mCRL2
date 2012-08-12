@@ -68,7 +68,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       {
         return aterm_cast<const atermpp::aterm_appl>(condition(1));
       }
-      return Apply1(atermpp::aterm(m_enclosing_enumerator->rewr_obj->internal_not), condition);
+      return Apply1(m_enclosing_enumerator->rewr_obj->internal_not, condition);
     }
     return condition;
   }
@@ -220,7 +220,8 @@ bool EnumeratorSolutionsStandard::find_equality(
     assert(t.size()==3);
     return find_equality(aterm_cast<const atermpp::aterm_appl>(t(1)),vars,v,e) || find_equality(aterm_cast<const atermpp::aterm_appl>(t(2)),vars,v,e);
   }
-  else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_int(t(0))) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
+  else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_cast<const atermpp::aterm_int>(t(0))) != 
+                      m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
   {
     const atermpp::aterm_appl &a1 = aterm_cast<const atermpp::aterm_appl>(t(1));
     const atermpp::aterm_appl &a2 = aterm_cast<const atermpp::aterm_appl>(t(2));
@@ -666,7 +667,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
     if (i->name().to_string() == "\"==\"")
     {
       atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
-      eqs.insert(atermpp::aterm_int(t(0)));
+      eqs.insert(atermpp::aterm_cast<atermpp::aterm_int>(t(0)));
     }
   }
 }

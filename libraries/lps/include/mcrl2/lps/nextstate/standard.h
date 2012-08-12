@@ -94,7 +94,7 @@ class NextStateGenerator
 
     atermpp::aterm cur_state;
     internal_substitution_type current_substitution;
-    atermpp::aterm cur_act;
+    atermpp::aterm_appl cur_act;
     atermpp::aterm_list cur_nextstate;
 
     std::vector <atermpp::aterm> stateargs;

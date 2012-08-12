@@ -3058,7 +3058,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  using namespace atermpp;\n"
       "  if (mcrl2::core::detail::gsIsDataVarId(head))\n"
       "  {\n"
-      "    head=(*(this_rewriter->global_sigma))(mcrl2::data::variable(head));\n"
+      "    head=(*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(head));\n"
       "  }\n"
       "  else if (mcrl2::data::is_where_clause(head))\n"
       "  {\n"

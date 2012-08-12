@@ -236,7 +236,6 @@ void CheckRewriteRule(const data_equation &dataeqn);
  **/
 bool isValidRewriteRule(const data_equation &dataeqn);
 
-// extern size_t num_apples;
 extern std::vector <atermpp::function_symbol> apples;
 
 /** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
