@@ -33,13 +33,6 @@ namespace mcrl2
 namespace lps
 {
 
-#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
-// #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
-//#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
-// #define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
-
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-
 #ifdef MCRL2_NEXTSTATE_DEBUG
 
 static std::string print_state(const atermpp::aterm_appl &s, ns_info const& info)
@@ -693,7 +686,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   internal_substitution_type dummy;
   for (size_t i=0; i<info.statelen; i++)
   {
-    stateargs[i] = info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i],dummy);
+    stateargs[i] = info.m_rewriter.rewrite_internal(atermpp::aterm_cast<const atermpp::aterm_appl>(stateargs[i]),dummy);
   }
 
   initial_state = aterm_appl();

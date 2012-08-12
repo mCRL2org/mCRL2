@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERM_ATERM_H
 #define MCRL2_ATERM_ATERM_H
 
-#include <stdarg.h>
 #include <algorithm>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -141,25 +140,6 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList args)
 {
   return term_appl<aterm>(sym,args.begin(), args.end());
 }
-
-inline 
-ATermAppl ATmakeAppl_varargs(const AFun &sym, ...) 
-{ 
-  va_list args; 
-  const size_t arity = sym.arity(); 
-   
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity); 
- 
-  va_start(args, sym); 
-  for (size_t i=0; i<arity; i++) 
-  { 
-    detail::_aterm* arg = va_arg(args, detail::_aterm *); 
-    CHECK_TERM(arg); 
-    buffer[i] = arg; 
-  } 
-  va_end(args); 
-  return aterm_appl(sym,buffer,buffer+arity); 
-} 
 
 inline
 const ATerm &ATgetArgument(const ATermAppl &appl, const size_t idx)

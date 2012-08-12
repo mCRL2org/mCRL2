@@ -2813,14 +2813,19 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     fprintf(f, ")\n"
             "{\n");
-    fprintf(f,
-            "  return ATmakeAppl_varargs(f");
+    fprintf(f, 
+      "const size_t arity = f.arity();\n"
+
+      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);\n");
+
     for (size_t j=0; j<=i; ++j)
     {
-      fprintf(f, ", &*arg%zu",j);
+      fprintf(f, "buffer[%zu] = &*arg%zu;\n",j,j);
     }
-    fprintf(f, ");\n"
-            "}\n\n");
+    
+    fprintf(f, "return aterm_appl(f,buffer,buffer+arity);\n");
+
+    fprintf(f, "}\n\n");
   }
 
 
@@ -2839,57 +2844,27 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "{\n");
     fprintf(f,
             "  size_t arity = a.size();\n");
-//TODO: The outcommented piece of code should be investigated, to see whether this is causing a lot of
-//      performance loss.
-
-/*             "  if (arity == 1 )\n"
-            "  {\n"
-            "      return ATmakeAppl_varargs(%li,&*a(0)", (long int) get_appl_afun_value(i+1)); // YYYY
-
-    for (size_t j=0; j<i; j++)
-    {
-      fprintf(f, ",&*(aterm_appl)arg%zu",j);
-    } 
-    fprintf(f,
-            ");\n"
-            "  }\n"
-            "  else if (mcrl2::data::is_abstraction(a))\n"
-            "  {\n"
-            "    return ATmakeAppl_varargs(%li,(atermpp::detail::_aterm*)&*(aterm_appl)a", (long int) get_appl_afun_value(i+1)); // YYYY */ 
-
-// Statement below is replacement.
     fprintf(f,
             "  if (mcrl2::data::is_abstraction(a))\n"
             "  {\n"
             "     arity=1;\n"
             "  }\n");
-/*     for (size_t j=0; j<i; j++)
-    {
-      fprintf(f, ",&*(aterm_appl)arg%zu",j);
-    } */
     fprintf(f,
-/*             ");\n"
-            "  }\n"
-            "  else\n" */
             "  {\n"  
             "    //atermpp::aterm args[arity+ld];\n"
             "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity+%zu));\n"
-//            "    std::vector <atermpp::aterm> args(arity+%zu);\n"
             "\n"
             "    for (size_t i=0; i<arity; i++)\n"
             "    {\n"
-//            "      args[i] = a(i);\n"
             "      new (&args[i]) aterm(a(i));\n"
             "    }\n",i);
     for (size_t j=0; j<i; j++)
     {
       fprintf(f,
-//              "    args[arity+%zu] = arg%zu;\n",j,j);
               "    new (&args[arity+%zu]) aterm(arg%zu);\n",j,j);
     }
     fprintf(f,
             "\n"
-//            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%zu),(aterm*)args);\n"  // YYYY+
             "    const atermpp::aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  // YYYY+
             "    for (size_t i=0; i<(arity+%zu); ++i)\n"
             "    {\n"

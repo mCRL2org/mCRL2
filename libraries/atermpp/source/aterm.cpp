@@ -138,7 +138,7 @@ writeToTextFile(const aterm &t, FILE* f)
     case AT_APPL:
       /*{{{  Print application */
 
-      appl = (aterm_appl) t;
+      appl = aterm_cast<aterm_appl>(t);
 
       sym = appl.function();
       fprintf(f, "\"%s\"",sym.name().c_str());
@@ -255,7 +255,7 @@ writeToStream(const aterm &t, std::ostream& os)
       os << aterm_int(t).value();
       break;
     case AT_APPL:
-      appl = (aterm_appl) t;
+      appl = aterm_cast<aterm_appl>(t);
       sym = appl.function();
       arity = sym.arity();
       name = sym.name();

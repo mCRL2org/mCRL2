@@ -37,7 +37,6 @@ static size_t calcUniqueAFuns(
 {
   size_t nr_unique = 0;
   size_t  i, arity;
-  function_symbol sym;
   aterm_list list;
 
   if (visited.count(t)>0)
@@ -55,7 +54,8 @@ static size_t calcUniqueAFuns(
       break;
 
     case AT_APPL:
-      sym = t.function(); 
+    {
+      function_symbol sym = t.function(); 
       assert(detail::at_lookup_table.size()>sym.number());
       nr_unique = count[sym.number()]>0 ? 0 : 1;
       count[sym.number()]++;
@@ -65,7 +65,7 @@ static size_t calcUniqueAFuns(
         nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)(i),visited,count);
       }
       break;
-
+    }
     case AT_LIST:
       list = static_cast<aterm_list>(t);
       while (list!=aterm_list() && visited.count(list)==0)
@@ -1315,11 +1315,6 @@ static bool read_all_symbols(byte_reader* reader)
     /*{{{  Read the actual symbol */
 
     function_symbol sym = read_symbol(reader);
-    if (sym == (function_symbol)(-1))
-    {
-      std::runtime_error("read_symbols: error reading symbol, giving up.");
-    }
-
     read_symbols[i].sym = sym;
     arity = sym.arity();
     read_symbols[i].arity = arity;

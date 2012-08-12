@@ -190,7 +190,7 @@ void aterm::free_term()
 #endif
   const size_t size=term_size(t);
 
-  t->function()=function_symbol(); 
+  t->function().~function_symbol(); 
 
   TermInfo &ti = terminfo[size];
   t->next()  = ti.at_freelist;
@@ -335,7 +335,7 @@ detail::_aterm* detail::allocate_term(const size_t size)
     at = (detail::_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
     at->reference_count()=0;
-    new (&at->function()) function_symbol;  // placement new, as the memory calloc'ed.
+    // new (&at->function()) function_symbol;  // placement new, as the memory calloc'ed.
   }
   else if (ti.at_freelist)
   {
@@ -396,7 +396,8 @@ aterm::aterm(const function_symbol &sym)
   cur = detail::allocate_term(detail::TERM_SIZE_APPL(0));
   /* Delay masking until after allocate */
   hnr &= detail::aterm_table_mask;
-  cur->function() = sym;
+  new (&cur->function()) function_symbol(sym);
+  
   cur->next() = &*detail::aterm_hashtable[hnr];
   detail::aterm_hashtable[hnr] = cur;
 
@@ -439,7 +440,7 @@ _aterm* aterm_int(int val)
     cur = detail::allocate_term(TERM_SIZE_INT);
     /* Delay masking until after allocate */
     hnr &= detail::aterm_table_mask;
-    cur->function() = detail::function_adm.AS_INT;
+    new (&cur->function()) function_symbol(detail::function_adm.AS_INT);
     reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
 
     cur->next() = detail::aterm_hashtable[hnr];

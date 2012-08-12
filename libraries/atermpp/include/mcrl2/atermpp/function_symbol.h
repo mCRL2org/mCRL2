@@ -29,8 +29,10 @@ class function_symbol
 
   public:
     /// \brief default constructor
-    function_symbol():m_number(size_t(-1))
+    function_symbol():m_number(0)
     {
+      assert(detail::at_lookup_table.size()>0);
+      detail::increase_reference_count<false>(m_number);
     }
 
     /// \brief Constructor.
@@ -58,7 +60,7 @@ class function_symbol
     {
       detail::increase_reference_count<true>(f.m_number);
       detail::decrease_reference_count(m_number); // Decrease after increasing the number, as otherwise this goes wrong when 
-                                          // carrying out x=x;
+                                                  // carrying out x=x;
       m_number=f.m_number;
       return *this;
     }
@@ -163,10 +165,10 @@ class function_symbol
 inline
 std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 {
-  if (t==function_symbol())
+  /* if (t==function_symbol())
   {
     return out << std::string("UNDEFINED");
-  }
+  } */
   return out << t.name();
 }
 

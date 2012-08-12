@@ -118,21 +118,12 @@ int CSureadATerm(CompressedStream* cs, ATerm* term)
   }
 }
 
-// int CSreadString(CompressedStream* cs, char** str)
-int CSreadString(CompressedStream* cs, std::string &str)
+int CSreadString(CompressedStream* cs)
 {
   ATerm term;
 
-  /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
-  HFdecodeATerm(cs->bs, &cs->tree, &term); //&& ATgetType(term)==AT_APPL && !true
-  // {
-  //   str =term.function().name();
-  //   return 1;
-  // }
-  //else
-  //{
-    return 0;
-  //}
+  HFdecodeATerm(cs->bs, &cs->tree, &term); 
+  return 0;
 
 }
 
