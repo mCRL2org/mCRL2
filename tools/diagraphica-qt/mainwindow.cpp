@@ -23,8 +23,13 @@ MainWindow::MainWindow():
   m_simulator(0),
   m_timeSeries(0),
   m_diagramEditor(0)
-  {
+{
   m_ui.setupUi(this);
+
+  QActionGroup* groupMode = new QActionGroup(m_ui.menuMode);
+  groupMode->addAction(m_ui.actionSimulationMode);
+  groupMode->addAction(m_ui.actionTraceMode);
+  groupMode->addAction(m_ui.actionEditMode);
 
   m_ui.attributes->resizeColumnsToContents();
   m_ui.domain->resizeColumnsToContents();
@@ -40,6 +45,8 @@ MainWindow::MainWindow():
 //  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
 
   connect(m_ui.actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
+
+  connect(groupMode, SIGNAL(triggered(QAction*)), this, SLOT(modeSelected(QAction*)));
 
   connect(m_ui.actionSettingsGeneral, SIGNAL(triggered()), m_settingsDialog, SLOT(showGeneral()));
   connect(m_ui.actionSettingsArcDiagram, SIGNAL(triggered()), m_settingsDialog, SLOT(showArcDiagram()));
@@ -57,6 +64,9 @@ MainWindow::MainWindow():
   connect(m_ui.actionDuplicate, SIGNAL(triggered()), this, SLOT(duplicateAttribute()));
   connect(m_ui.actionRenameAttribute, SIGNAL(triggered()), this, SLOT(renameAttribute()));
   connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteAttribute()));
+
+  connect(m_ui.toolButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(toolSelected(int)));
+
 }
 
 static void stretch(QWidget *widget)
@@ -112,6 +122,10 @@ void MainWindow::open(QString filename)
 
   m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, this, m_graph);
   stretch(m_diagramEditor);
+  connect(m_ui.colorTool, SIGNAL(pressed()), m_diagramEditor, SLOT(setFillColor()));
+  connect(m_ui.lineColorTool, SIGNAL(pressed()), m_diagramEditor, SLOT(setLineColor()));
+  connect(m_ui.showGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setShowGrid(bool)));
+  connect(m_ui.snapToGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setSnapGrid(bool)));
 
   m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
   m_examiner->setDiagram(m_diagramEditor->getDiagram());
@@ -217,6 +231,24 @@ void MainWindow::saveFileAs()
     return;
   }
   save(filename);
+}
+
+void MainWindow::modeSelected(QAction *action)
+{
+  if (action == m_ui.actionSimulationMode)
+  {
+    m_ui.mainViewStack->setCurrentWidget(m_ui.analysisPage);
+    m_ui.analysisStack->setCurrentWidget(m_ui.simulatorWidget);
+  }
+  if (action == m_ui.actionTraceMode)
+  {
+    m_ui.mainViewStack->setCurrentWidget(m_ui.analysisPage);
+    m_ui.analysisStack->setCurrentWidget(m_ui.traceWidget);
+  }
+  if (action == m_ui.actionEditMode)
+  {
+    m_ui.mainViewStack->setCurrentWidget(m_ui.editPage);
+  }
 }
 
 void MainWindow::showAttributeContextMenu(const QPoint &position)
@@ -339,6 +371,42 @@ void MainWindow::renameAttribute()
 void MainWindow::deleteAttribute()
 {
 
+}
+
+void MainWindow::toolSelected(int index)
+{
+  if (m_diagramEditor != 0)
+  {
+    switch (index)
+    {
+      case -2:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_SELECT);
+        break;
+      case -3:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_NOTE);
+        break;
+      case -4:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_DOF);
+        break;
+      case -5:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_RECT);
+        break;
+      case -6:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_ELLIPSE);
+        break;
+      case -7:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_LINE);
+        break;
+      case -8:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_ARROW);
+        break;
+      case -9:
+        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_DARROW);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 

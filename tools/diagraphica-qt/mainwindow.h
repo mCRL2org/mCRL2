@@ -47,6 +47,8 @@ class MainWindow : public QMainWindow, public Mediator
 //    void openDiagram();
 //    void saveDiagram();
 
+    void modeSelected(QAction* action);
+
     void showAttributeContextMenu(const QPoint &position);
     void updateAttributeOperations();
 
@@ -58,6 +60,8 @@ class MainWindow : public QMainWindow, public Mediator
     void duplicateAttribute();
     void renameAttribute();
     void deleteAttribute();
+
+    void toolSelected(int index);
 
   protected:
     QList<int> selectedAttributes();

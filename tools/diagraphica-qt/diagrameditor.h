@@ -37,24 +37,6 @@ class DiagramEditor : public Visualizer, public Colleague
       Graph* g);
     virtual ~DiagramEditor();
 
-    // -- set functions ---------------------------------------------
-    void setDiagram(Diagram* dgrm);
-
-    void setEditModeSelect();
-    void setEditModeNote();
-    void setEditModeDOF();
-    void setEditModeRect();
-    void setEditModeEllipse();
-    void setEditModeLine();
-    void setEditModeArrow();
-    void setEditModeDArrow();
-
-    void setShowGrid(const bool& flag);
-    void setSnapGrid(const bool& flag);
-
-    void setFillCol();
-    void setLineCol();
-
     void handleIntersection();
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
     bool isAnyShapeSelected();
@@ -148,6 +130,18 @@ class DiagramEditor : public Visualizer, public Colleague
       EDIT_MODE_DARROW
     };
 
+  public slots:
+    // -- set functions ---------------------------------------------
+    void setDiagram(Diagram* dgrm);
+
+    void setEditMode(int mode);
+
+    void setShowGrid(bool flag);
+    void setSnapGrid(bool flag);
+
+    void setFillColor();
+    void setLineColor();
+
   protected:
     // -- private utility functions ---------------------------------
     void displShapeEdtOptions(Shape* s);
@@ -186,8 +180,8 @@ class DiagramEditor : public Visualizer, public Colleague
 
     QPoint m_lastMousePos;
 
-    Diagram* diagram; // composition
-    int editMode;
+    Diagram* m_diagram; // composition
+    int m_editMode;
     size_t drgBegIdx1;
     size_t drgBegIdx2;
     size_t lastSelectedShapeId;
