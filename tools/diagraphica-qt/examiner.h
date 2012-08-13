@@ -41,8 +41,8 @@ class Examiner : public Visualizer, public Colleague
       Graph* g);
     virtual ~Examiner();
 
-    QColor getColorSel() { return VisUtils::coolRed; }
-    size_t getIdxClstSel();
+    QColor selectionColor() { return VisUtils::coolRed; }
+    size_t selectedClusterIndex();
 
     void setDiagram(Diagram* dgrm) { diagram = dgrm; }
     void setFrame(
@@ -75,6 +75,7 @@ class Examiner : public Visualizer, public Colleague
 
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void selectionChanged();
 
   protected:
     // -- utility functions -----------------------------------------

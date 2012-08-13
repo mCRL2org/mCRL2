@@ -32,6 +32,10 @@ class MainWindow : public QMainWindow, public Mediator
   public:
     MainWindow();
 
+    bool simulationMode() const { return m_ui.actionSimulationMode->isChecked(); }
+    bool traceMode() const { return m_ui.actionTraceMode->isChecked(); }
+    bool editMode() const { return m_ui.actionEditMode->isChecked(); }
+
   public slots:
     void open(QString filename);
     void save(QString filename);
@@ -69,6 +73,8 @@ class MainWindow : public QMainWindow, public Mediator
     void allToExaminer() { m_examiner->addFrameHist(m_routingClusterSet, m_routingClusterAttributes.toVector().toStdVector()); }
 
     void hoverCluster(Cluster *cluster, QList<Attribute *> attributes);
+
+    void updateArcDiagramMarks();
 
   protected:
     QList<int> selectedAttributes();

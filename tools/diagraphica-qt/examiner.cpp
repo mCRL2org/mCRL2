@@ -74,7 +74,7 @@ Examiner::~Examiner()
 // -- get functions -------------------------------------------------
 
 
-size_t Examiner::getIdxClstSel()
+size_t Examiner::selectedClusterIndex()
 {
   size_t result = NON_EXISTING;
   if (focusFrameIdx < framesHist.size())
@@ -94,13 +94,13 @@ void Examiner::setFrame(
   QColor col)
 {
   delete frame;
-  attributes.clear();
   frame = new Cluster(*frme);
 
   attributes = attrs;
   colFrm = col;
 
   update();
+  emit selectionChanged();
 }
 
 
@@ -109,16 +109,18 @@ void Examiner::clrFrame()
   delete frame;
   frame = 0;
 
-  attributes.clear();
-
-  colFrm = VisUtils::mediumGray;
-
   if (focusFrameIdx < framesHist.size())
   {
     setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
   }
+  else
+  {
+    attributes.clear();
+    colFrm = VisUtils::mediumGray;
+  }
 
   update();
+  emit selectionChanged();
 }
 
 
@@ -168,8 +170,6 @@ void Examiner::clrFrameHistCur()
     focusFrameIdx = -1;
 
     clrFrame();
-
-    mediator->handleUnmarkFrameClusts(this);
   }
 
   update();
@@ -433,14 +433,12 @@ void Examiner::handleHits(const vector< int > &ids)
         {
           focusFrameIdx = -1;
           clrFrame();
-          mediator->handleUnmarkFrameClusts(this);
         }
         else
         {
           focusFrameIdx = ids[1];
 
           setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
-          mediator->handleMarkFrameClust(this);
         }
       }
       else if (ids[ids.size()-1] == ID_ICON_CLR)
@@ -458,8 +456,6 @@ void Examiner::handleHits(const vector< int > &ids)
 
           focusFrameIdx = -1;
           offset = 0;
-
-          mediator->handleMarkFrameClust(this);
 
           update();
         }
@@ -512,8 +508,6 @@ void Examiner::handleIconRwnd()
     geomChanged   = true;
 
     setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
-
-    mediator->handleMarkFrameClust(this);
   }
   else
   {
@@ -552,8 +546,6 @@ void Examiner::handleIconLft()
       setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
       geomChanged = true;
-
-      mediator->handleMarkFrameClust(this);
     }
     else
     {
@@ -601,8 +593,6 @@ void Examiner::handleIconRgt()
       setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
       geomChanged = true;
-
-      mediator->handleMarkFrameClust(this);
     }
     else
     {

@@ -138,6 +138,7 @@ void MainWindow::open(QString filename)
   m_examiner->setDiagram(m_diagramEditor->diagram());
   stretch(m_examiner);
   connect(m_examiner, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
+  connect(m_examiner, SIGNAL(selectionChanged()), this, SLOT(updateArcDiagramMarks()));
 
   m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
   m_arcDiagram->setDiagram(m_diagramEditor->diagram());
@@ -433,7 +434,7 @@ void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QLi
 
   menu->popup(QCursor::pos());
 }
-#include <QDebug>
+
 void MainWindow::hoverCluster(Cluster *cluster, QList<Attribute *> attributes)
 {
   if (cluster)
@@ -444,6 +445,51 @@ void MainWindow::hoverCluster(Cluster *cluster, QList<Attribute *> attributes)
   {
     m_examiner->clrFrame();
   }
+}
+
+void MainWindow::updateArcDiagramMarks()
+{
+  m_arcDiagram->unmarkLeaves();
+  m_arcDiagram->unmarkBundles();
+
+  if (simulationMode())
+  {
+    m_arcDiagram->markLeaf(m_simulator->SelectedClusterIndex(), m_simulator->SelectColor());
+  }
+  else if (traceMode())
+  {
+    QColor color;
+    std::set<size_t> indices;
+    size_t index;
+
+    m_timeSeries->getIdcsClstMarked(indices, color);
+    for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+    {
+      m_arcDiagram->markLeaf(*i, color);
+    }
+
+    m_timeSeries->getIdxMseOver(index, indices, color);
+    if (index != NON_EXISTING)
+    {
+      m_arcDiagram->markLeaf(index, color);
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      {
+        m_arcDiagram->markBundle(*i);
+      }
+    }
+
+    m_timeSeries->getCurrIdxDgrm(index, indices, color);
+    if (index != NON_EXISTING)
+    {
+      m_arcDiagram->markLeaf(index, color);
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      {
+        m_arcDiagram->markBundle(*i);
+      }
+    }
+  }
+
+  m_arcDiagram->markLeaf(m_examiner->selectedClusterIndex(), m_examiner->selectionColor());
 }
 
 
