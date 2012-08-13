@@ -132,6 +132,18 @@ void Examiner::addFrameHist(
 }
 
 
+void Examiner::addFrameHist(
+  QList<Cluster*> frames,
+  const std::vector< Attribute* > &attrs)
+{
+  for (int i = 0; i < frames.size(); i++)
+  {
+    addFrameHist(frames[i], attrs);
+  }
+}
+
+
+
 void Examiner::clrFrameHist()
 {
   // update flag
@@ -197,26 +209,6 @@ void Examiner::clearData()
   clearAttributes();
   clearDiagram();
   clearFrames();
-}
-
-
-void Examiner::handleSendDgrmSglToSiml()
-{
-  mediator->initSimulator(
-    framesHist[focusFrameIdx],
-    attrsHist[focusFrameIdx]);
-}
-
-
-void Examiner::handleSendDgrmSglToTrace()
-{
-  mediator->markTimeSeries(this, frame);
-}
-
-
-void Examiner::handleSendDgrmSetToTrace()
-{
-  mediator->markTimeSeries(this, framesHist);
 }
 
 
@@ -454,32 +446,7 @@ void Examiner::handleHits(const vector< int > &ids)
       {
         if (ids.size() == 2 && ids[1] == ID_ICON_MORE)
         {
-          if (mediator->getView() == Mediator::VIEW_SIM)
-          {
-            if (frame != 0)
-            {
-              mediator->handleSendDgrm(this, true, false, false, false, false);
-            }
-            else
-            {
-              mediator->handleSendDgrm(this, false, false, false, false, false);
-            }
-          }
-          else if (mediator->getView() == Mediator::VIEW_TRACE)
-          {
-            if (frame != 0)
-            {
-              mediator->handleSendDgrm(this, false, true, true, false, false);
-            }
-            else
-            {
-              mediator->handleSendDgrm(this, false, false, false, false, false);
-            }
-          }
-
-          // handleSendDgrm prohibits mouseup event, simulate it:
-          QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers());
-          handleMouseEvent(&event);
+          emit routingCluster(frame, QVector<Cluster *>::fromStdVector(framesHist).toList(), QVector<Attribute *>::fromStdVector(attributes).toList());
         }
       }
       else if (ids[0] == ID_FRAME_HIST)
@@ -520,25 +487,7 @@ void Examiner::handleHits(const vector< int > &ids)
     {
       if (ids[0] == ID_FRAME)
       {
-        if (mediator->getView() == Mediator::VIEW_SIM)
-        {
-          if (frame != 0)
-          {
-            mediator->handleSendDgrm(this, true, false, false, false, false);
-          }
-          else
-          {
-            mediator->handleSendDgrm(this, false, false, false, false, false);
-          }
-        }
-        else if (mediator->getView() == Mediator::VIEW_TRACE)
-        {
-          mediator->handleSendDgrm(this, false, true, true, false, false);
-        }
-
-        // handleSendDgrm prohibits mouseup event, simulate it:
-        QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
-        handleMouseEvent(&event);
+        emit routingCluster(frame, QVector<Cluster *>::fromStdVector(framesHist).toList(), QVector<Attribute *>::fromStdVector(attributes).toList());
       }
       else if (ids[0] == ID_FRAME_HIST)
       {

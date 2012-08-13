@@ -32,6 +32,7 @@
 class Simulator : public Visualizer, public Colleague
 {
   Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Simulator(
@@ -56,8 +57,6 @@ class Simulator : public Visualizer, public Colleague
       const Position2D& pos);
     void clearData();
 
-    void handleSendDgrmSglToExnr();
-
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 
@@ -70,6 +69,9 @@ class Simulator : public Visualizer, public Colleague
 
     // -- utility event handlers ------------------------------------
     void onTimer();
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
 
   protected:
     // -- utility functions -----------------------------------------

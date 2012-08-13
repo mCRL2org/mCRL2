@@ -119,37 +119,12 @@ class Mediator
     virtual void handleDOFFrameDestroy() = 0;
     virtual void handleDOFDeselect() = 0;
 
-    virtual void initSimulator(
-      Cluster* currFrame,
-      const std::vector< Attribute* > &attrs) = 0;
-
-    virtual void initTimeSeries(const std::vector< size_t > attrIdcs) = 0;
     virtual void markTimeSeries(
       Colleague* sender,
       Cluster* currFrame) = 0;
     virtual void markTimeSeries(
       Colleague* sender,
       const std::vector< Cluster* > frames) = 0;
-
-    virtual void addToExaminer(
-      Cluster* currFrame,
-      const std::vector< Attribute* > &attrs) = 0;
-    virtual void addToExaminer(
-      const std::vector< Cluster* > frames,
-      const std::vector< Attribute* > &attrs) = 0;
-
-    virtual void handleSendDgrm(
-      Colleague* sender,
-      const bool& sendSglToSiml,
-      const bool& sendSglToTrace,
-      const bool& sendSetToTrace,
-      const bool& sendSglToExnr,
-      const bool& sendSetToExnr) = 0;
-    virtual void handleSendDgrmSglToSiml() = 0;
-    virtual void handleSendDgrmSglToTrace() = 0;
-    virtual void handleSendDgrmSetToTrace() = 0;
-    virtual void handleSendDgrmSglToExnr() = 0;
-    virtual void handleSendDgrmSetToExnr() = 0;
 
     virtual void handleClearSim(void* sender) = 0;
     virtual void handleClearExnr(void* sender) = 0;

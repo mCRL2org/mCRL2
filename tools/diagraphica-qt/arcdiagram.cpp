@@ -162,42 +162,6 @@ void ArcDiagram::unmarkBundles()
 }
 
 
-void ArcDiagram::handleSendDgrmSglToSiml()
-{
-  mediator->initSimulator(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm]);
-}
-
-
-void ArcDiagram::handleSendDgrmSglToTrace()
-{
-  mediator->markTimeSeries(this, framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]]);
-}
-
-
-void ArcDiagram::handleSendDgrmSetToTrace()
-{
-  mediator->markTimeSeries(this, framesDgrm[currIdxDgrm]);
-}
-
-
-void ArcDiagram::handleSendDgrmSglToExnr()
-{
-  mediator->addToExaminer(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm]);
-}
-
-
-void ArcDiagram::handleSendDgrmSetToExnr()
-{
-  mediator->addToExaminer(
-        framesDgrm[currIdxDgrm],
-        attrsDgrm[currIdxDgrm]);
-}
-
-
 // -- visualization functions  --------------------------------------
 
 
@@ -1047,14 +1011,7 @@ void ArcDiagram::handleMouseEvent(QMouseEvent* e)
 
   if (e->type() == QEvent::MouseMove)
   {
-    if (!showMenu)
-    {
-      handleDragDiagram();
-    }
-    else
-    {
-      showMenu = false;
-    }
+    handleDragDiagram();
   }
 
   m_lastMousePos = e->pos();
@@ -1698,21 +1655,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
             }
             else if (ids[3] == ID_DIAGRAM_MORE)
             {
-              // show menu
-              if (mediator->getView() == Mediator::VIEW_SIM)
-              {
-                mediator->handleSendDgrm(this, true, false, false, true, true);
-              }
-              else if (mediator->getView() == Mediator::VIEW_TRACE)
-              {
-                mediator->handleSendDgrm(this, false, true, true, true, true);
-              }
-
-              showMenu = true;
-
-              // handleSendDgrm prohibits mouseup event, simulate it:
-              QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::LeftButton, Qt::NoButton, m_lastMouseEvent.modifiers());
-              handleMouseEvent(&event);
+              emit routingCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Cluster *>::fromStdVector(framesDgrm[currIdxDgrm]).toList(), QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
             }
             else if (ids[3] == ID_DIAGRAM_RWND)
             {
@@ -1734,21 +1677,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         }
         else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
         {
-          // show menu
-          if (mediator->getView() == Mediator::VIEW_SIM)
-          {
-            mediator->handleSendDgrm(this, true, false, false, true, true);
-          }
-          else if (mediator->getView() == Mediator::VIEW_TRACE)
-          {
-            mediator->handleSendDgrm(this, false, true, true, true, true);
-          }
-
-          showMenu = true;
-
-          // handleSendDgrm prohibits mouseup event, simulate it:
-          QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), Qt::RightButton, Qt::NoButton, m_lastMouseEvent.modifiers());
-          handleMouseEvent(&event);
+          emit routingCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Cluster *>::fromStdVector(framesDgrm[currIdxDgrm]).toList(), QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
         }
         else
         {

@@ -252,66 +252,12 @@ void TimeSeries::markItems(Cluster* frame)
 }
 
 
-void TimeSeries::markItems(const vector< Cluster* > frames)
+void TimeSeries::markItems(QList<Cluster*> frames)
 {
-  Cluster* frame;
-
-  // get index of animation frame
-  size_t prevAnimIdx;
-  if (animFrame != itemsMarked.end())
+  for (int i = 0; i < frames.size(); i++)
   {
-    prevAnimIdx = *animFrame;
+    markItems(frames[i]);
   }
-  else
-  {
-    prevAnimIdx = NON_EXISTING;
-  }
-
-  // update marked items
-  for (size_t i = 0; i < frames.size(); ++i)
-  {
-    frame = frames[i];
-
-    if (i == 0 && frame->getSizeNodes() > 0)
-    {
-      itemsMarked.clear();
-    }
-
-    for (size_t j = 0; j < frame->getSizeNodes(); ++j)
-    {
-      itemsMarked.insert(frame->getNode(j)->getIndex());
-    }
-  }
-  frame = 0;
-
-  // update animation frame
-  animFrame = itemsMarked.find(prevAnimIdx);
-  if (animFrame == itemsMarked.end())
-  {
-    animFrame = itemsMarked.begin();
-  }
-}
-
-
-void TimeSeries::handleSendDgrmSglToExnr()
-{
-  Cluster* frame;
-  vector< Attribute* > attrs;
-
-  frame = new Cluster();
-  frame->addNode(graph->getNode(currIdxDgrm));
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
-  {
-    if (graph->getAttribute(i)->getSizeCurValues() > 0)
-    {
-      attrs.push_back(graph->getAttribute(i));
-    }
-  }
-  mediator->addToExaminer(frame, attrs);
-
-  delete frame;
-  frame = 0;
-  attrs.clear();
 }
 
 
@@ -949,6 +895,21 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
 // -- hit detection -------------------------------------------------
 
 
+void TimeSeries::route()
+{
+  Cluster cluster;
+  QList<Attribute*> attributes;
+
+  cluster.addNode(graph->getNode(currIdxDgrm));
+  for (size_t i = 0; i < graph->getSizeAttributes(); i++)
+  {
+    attributes += graph->getAttribute(i);
+  }
+
+  emit routingCluster(&cluster, QList<Cluster *>(), attributes);
+}
+
+
 void TimeSeries::handleHits(const vector< int > &ids)
 {
   if (ids.size() > 1)
@@ -1005,7 +966,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
           else if (ids[3] == ID_DIAGRAM_MORE)
           {
             currIdxDgrm = ids[2];
-            mediator->handleSendDgrm(this, false, false, false, true, false);
+            route();
           }
           else if (ids[3] == ID_DIAGRAM_RWND)
           {
@@ -1097,7 +1058,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
       else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton &&
                ids[1] == ID_DIAGRAM)
       {
-        mediator->handleSendDgrm(this, false, false, false, true, false);
+        route();
       }
       else
       {

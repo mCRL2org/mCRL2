@@ -66,12 +66,6 @@ class ArcDiagram : public Visualizer, public Colleague
     void markBundle(const size_t& idx);
     void unmarkBundles();
 
-    void handleSendDgrmSglToSiml();
-    void handleSendDgrmSglToTrace();
-    void handleSendDgrmSetToTrace();
-    void handleSendDgrmSglToExnr();
-    void handleSendDgrmSetToExnr();
-
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
     void visualizeParts(const bool& inSelectMode);
@@ -88,6 +82,9 @@ class ArcDiagram : public Visualizer, public Colleague
     void handleMouseEvent(QMouseEvent* e);
 
     void updateDiagramData();
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
 
   protected:
     // -- utility drawing functions ---------------------------------

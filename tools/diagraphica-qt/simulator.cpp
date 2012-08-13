@@ -192,32 +192,6 @@ void Simulator::clearData()
 }
 
 
-void Simulator::handleSendDgrmSglToExnr()
-{
-  if (m_currentSelection == ID_FRAME_PREV)
-  {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
-      mediator->addToExaminer(
-        m_previousFrames[m_currentSelectionIndex],
-        m_attributes);
-  }
-  else if (m_currentSelection == ID_FRAME_CURR)
-  {
-    if (m_currentSelectionIndex == 0)
-      mediator->addToExaminer(
-        m_currentFrame,
-        m_attributes);
-  }
-  else if (m_currentSelection == ID_FRAME_NEXT)
-  {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
-      mediator->addToExaminer(
-        m_nextFrames[m_currentSelectionIndex],
-        m_attributes);
-  }
-}
-
-
 // -- visualization functions  --------------------------------------
 
 
@@ -1357,13 +1331,10 @@ void Simulator::handleHits(const vector< int > &ids)
         m_lastSelection         = m_currentSelection;
         m_currentSelectionIndex = ids[2];
 
-        showMenu = true;
-        mediator->handleSendDgrm(this, false, false, false, true, false);
-
-        // handleSendDgrm prohibits mouseup event, simulate it:
-        QMouseEvent event(QEvent::MouseButtonRelease, m_lastMouseEvent.pos(), m_lastMouseEvent.button(), Qt::NoButton, m_lastMouseEvent.modifiers());
-        handleMouseEvent(&event);
-
+        Cluster *frame = m_currentSelection == ID_FRAME_PREV ? m_previousFrames[m_currentSelectionIndex] :
+                         m_currentSelection == ID_FRAME_NEXT ? m_nextFrames[m_currentSelectionIndex] :
+                         m_currentFrame;
+        emit routingCluster(frame, QList<Cluster *>(), QVector<Attribute *>::fromStdVector(m_attributes).toList());
       }
     }
     else if (ids[1] == ID_BUNDLE_LBL)

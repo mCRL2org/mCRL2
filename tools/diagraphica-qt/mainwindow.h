@@ -62,6 +62,13 @@ class MainWindow : public QMainWindow, public Mediator
     void deleteAttribute();
 
     void toolSelected(int index);
+    
+    void routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void toSimulator() { m_simulator->initFrameCurr(m_routingCluster, m_routingClusterAttributes.toVector().toStdVector()); }
+    void toTrace() { m_timeSeries->markItems(m_routingCluster); }
+    void allToTrace() { m_timeSeries->markItems(m_routingClusterSet); }
+    void toExaminer() { m_examiner->addFrameHist(m_routingCluster, m_routingClusterAttributes.toVector().toStdVector()); }
+    void allToExaminer() { m_examiner->addFrameHist(m_routingClusterSet, m_routingClusterAttributes.toVector().toStdVector()); }
 
   protected:
     QList<int> selectedAttributes();
@@ -84,7 +91,9 @@ class MainWindow : public QMainWindow, public Mediator
     TimeSeries *m_timeSeries;
     DiagramEditor *m_diagramEditor;
 
-
+    Cluster *m_routingCluster;
+    QList<Cluster *> m_routingClusterSet;
+    QList<Attribute *> m_routingClusterAttributes;
 
 
 
@@ -174,37 +183,12 @@ class MainWindow : public QMainWindow, public Mediator
     virtual void handleDOFFrameDestroy() {}
     virtual void handleDOFDeselect() {}
 
-    virtual void initSimulator(
-      Cluster* currFrame,
-      const std::vector< Attribute* > &attrs) {}
-
-    virtual void initTimeSeries(const std::vector< size_t > attrIdcs) {}
     virtual void markTimeSeries(
       Colleague* sender,
       Cluster* currFrame) {}
     virtual void markTimeSeries(
       Colleague* sender,
       const std::vector< Cluster* > frames) {}
-
-    virtual void addToExaminer(
-      Cluster* currFrame,
-      const std::vector< Attribute* > &attrs) {}
-    virtual void addToExaminer(
-      const std::vector< Cluster* > frames,
-      const std::vector< Attribute* > &attrs) {}
-
-    virtual void handleSendDgrm(
-      Colleague* sender,
-      const bool& sendSglToSiml,
-      const bool& sendSglToTrace,
-      const bool& sendSetToTrace,
-      const bool& sendSglToExnr,
-      const bool& sendSetToExnr) {}
-    virtual void handleSendDgrmSglToSiml() {}
-    virtual void handleSendDgrmSglToTrace() {}
-    virtual void handleSendDgrmSetToTrace() {}
-    virtual void handleSendDgrmSglToExnr() {}
-    virtual void handleSendDgrmSetToExnr() {}
 
     virtual void handleClearSim(void* sender) {}
     virtual void handleClearExnr(void* sender) {}

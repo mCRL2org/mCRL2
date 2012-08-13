@@ -22,7 +22,8 @@ MainWindow::MainWindow():
   m_arcDiagram(0),
   m_simulator(0),
   m_timeSeries(0),
-  m_diagramEditor(0)
+  m_diagramEditor(0),
+  m_routingCluster(0)
 {
   m_ui.setupUi(this);
 
@@ -130,18 +131,22 @@ void MainWindow::open(QString filename)
   m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
   m_examiner->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_examiner);
+  connect(m_examiner, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
 
   m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
   m_arcDiagram->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_arcDiagram);
+  connect(m_arcDiagram, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
 
   m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
   m_simulator->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_simulator);
+  connect(m_simulator, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
 
   m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
   m_timeSeries->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_timeSeries);
+  connect(m_timeSeries, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
 
   m_ui.attributes->setRowCount(0);
   for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
@@ -407,6 +412,49 @@ void MainWindow::toolSelected(int index)
         break;
     }
   }
+}
+
+void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes)
+{
+  if (m_routingCluster)
+  {
+    delete m_routingCluster;
+  }
+
+  m_routingCluster = (cluster == 0 ? 0 : new Cluster(*cluster));
+  m_routingClusterSet = clusterSet;
+  m_routingClusterAttributes = attributes;
+
+  QObject *sender = QObject::sender();
+
+  QMenu *menu = new QMenu();
+  connect(menu, SIGNAL(aboutToHide()), menu, SLOT(deleteLater()));
+
+  QAction *toSimulator = menu->addAction("Send this to simulator");
+  connect(toSimulator, SIGNAL(triggered()), this, SLOT(toSimulator()));
+  toSimulator->setEnabled(cluster != 0 && sender != m_simulator);
+
+  menu->addSeparator();
+
+  QAction *toTrace = menu->addAction("Mark this in trace");
+  connect(toTrace, SIGNAL(triggered()), this, SLOT(toTrace()));
+  toTrace->setEnabled(cluster != 0 && sender != m_timeSeries);
+
+  QAction *allToTrace = menu->addAction("Mark all in trace");
+  connect(allToTrace, SIGNAL(triggered()), this, SLOT(allToTrace()));
+  allToTrace->setEnabled(!clusterSet.isEmpty() && sender != m_timeSeries);
+
+  menu->addSeparator();
+
+  QAction *toExaminer = menu->addAction("Send this to examiner");
+  connect(toExaminer, SIGNAL(triggered()), this, SLOT(toExaminer()));
+  toExaminer->setEnabled(cluster != 0 && sender != m_examiner);
+
+  QAction *allToExaminer = menu->addAction("Send all to examiner");
+  connect(allToExaminer, SIGNAL(triggered()), this, SLOT(allToExaminer()));
+  allToExaminer->setEnabled(!clusterSet.isEmpty() && sender != m_examiner);
+
+  menu->popup(QCursor::pos());
 }
 
 

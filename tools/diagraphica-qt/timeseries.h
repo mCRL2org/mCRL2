@@ -65,9 +65,7 @@ class TimeSeries : public Visualizer, public Colleague
     void clearData();
 
     void markItems(Cluster* frame);
-    void markItems(const std::vector< Cluster* > frames);
-
-    void handleSendDgrmSglToExnr();
+    void markItems(QList<Cluster*> frames);
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
@@ -77,6 +75,9 @@ class TimeSeries : public Visualizer, public Colleague
     void handleWheelEvent(QWheelEvent* e);
     void handleMouseLeaveEvent();
     void handleKeyEvent(QKeyEvent* e);
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
 
   protected:
     // -- utility functions -----------------------------------------
@@ -97,6 +98,7 @@ class TimeSeries : public Visualizer, public Colleague
     void handleNextDiagram(const int& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
+    void route();
     void handleHits(const std::vector< int > &ids);
     void processHits(
       GLint hits,

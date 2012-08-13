@@ -30,6 +30,8 @@
 
 class Examiner : public Visualizer, public Colleague
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Examiner(
@@ -52,15 +54,14 @@ class Examiner : public Visualizer, public Colleague
     void addFrameHist(
       Cluster* frme,
       const std::vector< Attribute* > &attrs);
+    void addFrameHist(
+      QList<Cluster*> frames,
+      const std::vector< Attribute* > &attrs);
     void clrFrameHist();
     void clrFrameHistCur();
     size_t getSizeFramesHist();
 
     void clearData();
-
-    void handleSendDgrmSglToSiml();
-    void handleSendDgrmSglToTrace();
-    void handleSendDgrmSetToTrace();
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
@@ -70,6 +71,9 @@ class Examiner : public Visualizer, public Colleague
 
     void handleMouseEvent(QMouseEvent* e);
     void handleKeyEvent(QKeyEvent* e);
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
 
   protected:
     // -- utility functions -----------------------------------------
