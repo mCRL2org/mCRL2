@@ -29,12 +29,15 @@
 
 class DiagramEditor : public Visualizer, public Colleague
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     DiagramEditor(
       QWidget *parent,
       Mediator* m,
       Graph* g);
+
     virtual ~DiagramEditor();
 
     void handleIntersection();
