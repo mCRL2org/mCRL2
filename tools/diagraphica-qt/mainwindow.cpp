@@ -66,8 +66,6 @@ MainWindow::MainWindow():
   connect(m_ui.actionRenameAttribute, SIGNAL(triggered()), this, SLOT(renameAttribute()));
   connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteAttribute()));
 
-  connect(m_ui.toolButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(toolSelected(int)));
-
 }
 
 static void stretch(QWidget *widget)
@@ -123,30 +121,38 @@ void MainWindow::open(QString filename)
 
   m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, this, m_graph);
   stretch(m_diagramEditor);
-  connect(m_ui.colorTool, SIGNAL(pressed()), m_diagramEditor, SLOT(setFillColor()));
-  connect(m_ui.lineColorTool, SIGNAL(pressed()), m_diagramEditor, SLOT(setLineColor()));
+  connect(m_ui.selectTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setSelectMode()));
+  connect(m_ui.noteTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setNoteMode()));
+  connect(m_ui.configureTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setConfigureMode()));
+  connect(m_ui.rectangleTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setRectangleMode()));
+  connect(m_ui.ellipseTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setEllipseMode()));
+  connect(m_ui.lineTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setLineMode()));
+  connect(m_ui.arrowTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setArrowMode()));
+  connect(m_ui.doubleArrowTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setDoubleArrowMode()));
+  connect(m_ui.colorTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setFillColor()));
+  connect(m_ui.lineColorTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setLineColor()));
   connect(m_ui.showGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setShowGrid(bool)));
   connect(m_ui.snapToGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setSnapGrid(bool)));
 
   m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
-  m_examiner->setDiagram(m_diagramEditor->getDiagram());
+  m_examiner->setDiagram(m_diagramEditor->diagram());
   stretch(m_examiner);
   connect(m_examiner, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
 
   m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
-  m_arcDiagram->setDiagram(m_diagramEditor->getDiagram());
+  m_arcDiagram->setDiagram(m_diagramEditor->diagram());
   stretch(m_arcDiagram);
   connect(m_arcDiagram, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_arcDiagram, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
   m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
-  m_simulator->setDiagram(m_diagramEditor->getDiagram());
+  m_simulator->setDiagram(m_diagramEditor->diagram());
   stretch(m_simulator);
   connect(m_simulator, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
   m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
-  m_timeSeries->setDiagram(m_diagramEditor->getDiagram());
+  m_timeSeries->setDiagram(m_diagramEditor->diagram());
   stretch(m_timeSeries);
   connect(m_timeSeries, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
@@ -247,15 +253,18 @@ void MainWindow::modeSelected(QAction *action)
   {
     m_ui.mainViewStack->setCurrentWidget(m_ui.analysisPage);
     m_ui.analysisStack->setCurrentWidget(m_ui.simulatorWidget);
+    m_ui.examinerWidget->show();
   }
   if (action == m_ui.actionTraceMode)
   {
     m_ui.mainViewStack->setCurrentWidget(m_ui.analysisPage);
     m_ui.analysisStack->setCurrentWidget(m_ui.traceWidget);
+    m_ui.examinerWidget->show();
   }
   if (action == m_ui.actionEditMode)
   {
     m_ui.mainViewStack->setCurrentWidget(m_ui.editPage);
+    m_ui.examinerWidget->hide();
   }
 }
 
@@ -327,7 +336,7 @@ void MainWindow::distributionPlot()
   DistrPlot *plot = new DistrPlot(0, m_graph, attributes[0]);
   connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
   plot->setAttribute(Qt::WA_DeleteOnClose);
-  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->setDiagram(m_diagramEditor->diagram());
   plot->show();
 }
 
@@ -342,7 +351,7 @@ void MainWindow::correlationPlot()
   CorrlPlot *plot = new CorrlPlot(0, m_graph, attributes[0], attributes[1]);
   connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
   plot->setAttribute(Qt::WA_DeleteOnClose);
-  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->setDiagram(m_diagramEditor->diagram());
   plot->show();
 }
 
@@ -362,7 +371,7 @@ void MainWindow::combinationPlot()
   CombnPlot *plot = new CombnPlot(0, m_graph, attributeVector);
   connect(this, SIGNAL(closingGraph()), plot, SLOT(close()));
   plot->setAttribute(Qt::WA_DeleteOnClose);
-  plot->setDiagram(m_diagramEditor->getDiagram());
+  plot->setDiagram(m_diagramEditor->diagram());
   plot->show();
 }
 
@@ -381,41 +390,6 @@ void MainWindow::deleteAttribute()
 
 }
 
-void MainWindow::toolSelected(int index)
-{
-  if (m_diagramEditor != 0)
-  {
-    switch (index)
-    {
-      case -2:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_SELECT);
-        break;
-      case -3:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_NOTE);
-        break;
-      case -4:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_DOF);
-        break;
-      case -5:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_RECT);
-        break;
-      case -6:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_ELLIPSE);
-        break;
-      case -7:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_LINE);
-        break;
-      case -8:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_ARROW);
-        break;
-      case -9:
-        m_diagramEditor->setEditMode(DiagramEditor::EDIT_MODE_DARROW);
-        break;
-      default:
-        break;
-    }
-  }
-}
 
 void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes)
 {

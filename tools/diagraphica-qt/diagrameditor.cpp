@@ -11,6 +11,7 @@
 #include "diagrameditor.h"
 #include <iostream>
 #include <sstream>
+#include <QColorDialog>
 
 using namespace std;
 
@@ -32,7 +33,7 @@ DiagramEditor::DiagramEditor(
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
 
-  m_diagram     = new Diagram(m/*, c*/);
+  m_diagram     = new Diagram(this);
   m_editMode    = EDIT_MODE_SELECT;
   drgBegIdx1 = -1;
   drgBegIdx2 = -1;
@@ -44,26 +45,7 @@ DiagramEditor::DiagramEditor(
   lastSelectedShapeId = NON_EXISTING;
 
   initMouse();
-
-  clipBoardShape = 0;
 }
-
-
-DiagramEditor::~DiagramEditor()
-{
-  if (m_diagram != 0)
-  {
-    delete m_diagram;
-    m_diagram = 0;
-  }
-
-  if (clipBoardShape != 0)
-  {
-    delete clipBoardShape;
-    clipBoardShape = 0;
-  }
-}
-
 
 // -- set data functions --------------------------------------------
 
@@ -97,61 +79,40 @@ void DiagramEditor::setSnapGrid(bool show)
 
 void DiagramEditor::setFillColor()
 {
-  Shape* s = 0;
-
-  size_t sizeShapes = m_diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-    {
-      s = m_diagram->getShape(i);
-      break;
-    }
-  }
-
+  Shape* s = selectedShape();
   if (s != 0)
   {
-    s->setFillColor(mediator->getColor(s->getFillColor()));
-
-    update();
+    QColor color = QColorDialog::getColor(s->getFillColor(), this);
+    if (color.isValid())
+    {
+      s->setFillColor(color);
+      update();
+    }
   }
-
-  s = 0;
 }
 
 
 void DiagramEditor::setLineColor()
 {
-  Shape* s = 0;
-
-  size_t sizeShapes = m_diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-    {
-      s = m_diagram->getShape(i);
-      break;
-    }
-  }
-
+  Shape* s = selectedShape();
   if (s != 0)
   {
-    s->setLineColor(mediator->getColor(s->getLineColor()));
-
-    update();
+    QColor color = QColorDialog::getColor(s->getLineColor(), this);
+    if (color.isValid())
+    {
+      s->setLineColor(color);
+      update();
+    }
   }
-
-  s = 0;
 }
 
 
 void DiagramEditor::handleIntersection()
 {
-  size_t shapeCount = m_diagram->getSizeShapes();
   Shape* s = 0;
   if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
   {
-    for (size_t i = 0; i < shapeCount; i++)
+    for (size_t i = 0; i < m_diagram->getSizeShapes(); i++)
     {
       s = m_diagram->getShape(i);
       double sX1 = s->getXCtr() - s->getXDFC();
@@ -202,19 +163,7 @@ void DiagramEditor::translatePoints(double& x1, double& y1,
 
 bool DiagramEditor::isAnyShapeSelected()
 {
-  if (m_diagram != 0)
-  {
-    size_t sizeShapes = m_diagram->getSizeShapes();
-    for (size_t i = 0; i < sizeShapes; ++i)
-    {
-      if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-  return false;
+  return (selectedShape() != 0);
 }
 
 
@@ -863,15 +812,31 @@ void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
 // -- get functions ---------------------------------------------
 
 
-Diagram* DiagramEditor::getDiagram()
+Diagram* DiagramEditor::diagram()
 {
   return m_diagram;
 }
 
 
-int DiagramEditor::getEditMode()
+int DiagramEditor::editMode()
 {
   return m_editMode;
+}
+
+Shape *DiagramEditor::selectedShape()
+{
+  if (m_diagram != 0)
+  {
+    size_t sizeShapes = m_diagram->getSizeShapes();
+    for (size_t i = 0; i < sizeShapes; ++i)
+    {
+      if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
+      {
+        return m_diagram->getShape(i);
+      }
+    }
+  }
+  return 0;
 }
 
 
@@ -880,8 +845,7 @@ int DiagramEditor::getEditMode()
 
 void DiagramEditor::visualize(const bool& inSelectMode)
 {
-  clear();
-
+  qDebug() << "visualize(" << inSelectMode << ")";
   if (inSelectMode == true)
   {
     if (m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF || m_editMode == EDIT_MODE_NOTE)
@@ -908,6 +872,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
   }
   else
   {
+    clear();
     m_diagram->visualize(inSelectMode, pixelSize());
 
     if (m_mouseDrag && m_lastMouseEvent.buttons() == Qt::LeftButton)
@@ -1015,123 +980,125 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
          (e->type() == QEvent::MouseButtonPress ||
           e->type() == QEvent::MouseButtonRelease)))
     {
+      // redraw in select mode
       updateGL(true);
     }
     if (e->button() == Qt::LeftButton && e->type() == QEvent::MouseButtonRelease)
     {
       handleIntersection();
-    }
-    if (m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF)
-    {
-      double x1, x2, y1, y2;
-      double dX, dY;
-      double pix;
-
-      pix = pixelSize();
-
-      QPointF start = worldCoordinate(m_mouseDragStart);
-      QPointF stop = worldCoordinate(e->posF());
-
-      x1 = start.x();
-      y1 = start.y();
-      x2 = stop.x();
-      y2 = stop.y();
-
-      if (m_diagram->getSnapGrid() == true)
+      if (m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF)
       {
-        double intv = m_diagram->getGridInterval(pixelSize());
+        double x1, x2, y1, y2;
+        double dX, dY;
+        double pix;
 
-        x1 = Utils::rndToNearestMult(x1, intv);
-        y1 = Utils::rndToNearestMult(y1, intv);
-        x2 = Utils::rndToNearestMult(x2, intv);
-        y2 = Utils::rndToNearestMult(y2, intv);
-      }
+        pix = pixelSize();
 
-      dX = x2-x1;
-      dY = y2-y1;
+        QPointF start = worldCoordinate(m_mouseDragStart);
+        QPointF stop = worldCoordinate(e->posF());
 
-      if (Utils::abs(dX) < Shape::minSzeHnt*pix &&
-          Utils::abs(dY) < Shape::minSzeHnt*pix)
-      {
-        dX = Shape::minSzeHnt*pix;
-        dY = Shape::minSzeHnt*pix;
-      }
+        x1 = start.x();
+        y1 = start.y();
+        x2 = stop.x();
+        y2 = stop.y();
 
-      double xC, yC, xDFC, yDFC;
-      xC = x1+0.5*dX;
-      yC = y1+0.5*dY;
-      xDFC = 0.5*dX;
-      yDFC = -0.5*dY;
-
-      double xLeft, xRight, yTop, yBottom;
-      m_diagram->getGridCoordinates(xLeft, xRight, yTop, yBottom);
-      if (!(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC)))
-      {
-        if (xLeft > (xC - xDFC))
+        if (m_diagram->getSnapGrid() == true)
         {
-          xC = xLeft + xDFC;
+          double intv = m_diagram->getGridInterval(pixelSize());
+
+          x1 = Utils::rndToNearestMult(x1, intv);
+          y1 = Utils::rndToNearestMult(y1, intv);
+          x2 = Utils::rndToNearestMult(x2, intv);
+          y2 = Utils::rndToNearestMult(y2, intv);
         }
-        else if (xRight < (xC + xDFC))
+
+        dX = x2-x1;
+        dY = y2-y1;
+
+        if (Utils::abs(dX) < Shape::minSzeHnt*pix &&
+            Utils::abs(dY) < Shape::minSzeHnt*pix)
         {
-          xC = xRight - xDFC;
+          dX = Shape::minSzeHnt*pix;
+          dY = Shape::minSzeHnt*pix;
         }
-        if (yBottom > (yC - yDFC))
+
+        double xC, yC, xDFC, yDFC;
+        xC = x1+0.5*dX;
+        yC = y1+0.5*dY;
+        xDFC = 0.5*dX;
+        yDFC = -0.5*dY;
+
+        double xLeft, xRight, yTop, yBottom;
+        m_diagram->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+        if (!(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC)))
         {
-          yC = yBottom + yDFC;
+          if (xLeft > (xC - xDFC))
+          {
+            xC = xLeft + xDFC;
+          }
+          else if (xRight < (xC + xDFC))
+          {
+            xC = xRight - xDFC;
+          }
+          if (yBottom > (yC - yDFC))
+          {
+            yC = yBottom + yDFC;
+          }
+          else if (yTop < (yC + yDFC))
+          {
+            yC = yTop - yDFC;
+          }
         }
-        else if (yTop < (yC + yDFC))
+
+        Shape* s = new Shape(
+          m_diagram,
+          m_diagram->getSizeShapes(),
+          xC,     yC,
+          0.5*dX, -0.5*dY,
+          0.0,    Shape::TYPE_RECT);
+
+        if (m_editMode == EDIT_MODE_RECT)
         {
-          yC = yTop - yDFC;
+          s->setTypeRect();
         }
-      }
+        else if (m_editMode == EDIT_MODE_ELLIPSE)
+        {
+          s->setTypeEllipse();
+        }
+        else if (m_editMode == EDIT_MODE_LINE)
+        {
+          s->setTypeLine();
+        }
+        else if (m_editMode == EDIT_MODE_ARROW)
+        {
+          s->setTypeArrow();
+        }
+        else if (m_editMode == EDIT_MODE_DARROW)
+        {
+          s->setTypeDArrow();
+        }
+        else if (m_editMode == EDIT_MODE_NOTE)
+        {
+          s->setTypeNote();
+          mediator->handleNote(s->getIndex() , s->getNote());
+        }
 
-      Shape* s = new Shape(
-        m_diagram,
-        m_diagram->getSizeShapes(),
-        xC,     yC,
-        0.5*dX, -0.5*dY,
-        0.0,    Shape::TYPE_RECT);
+        m_diagram->addShape(s);
+        s = 0;
 
-      if (m_editMode == EDIT_MODE_RECT)
-      {
-        s->setTypeRect();
+        // undo transl & scale here
       }
-      else if (m_editMode == EDIT_MODE_ELLIPSE)
-      {
-        s->setTypeEllipse();
-      }
-      else if (m_editMode == EDIT_MODE_LINE)
-      {
-        s->setTypeLine();
-      }
-      else if (m_editMode == EDIT_MODE_ARROW)
-      {
-        s->setTypeArrow();
-      }
-      else if (m_editMode == EDIT_MODE_DARROW)
-      {
-        s->setTypeDArrow();
-      }
-      else if (m_editMode == EDIT_MODE_NOTE)
-      {
-        s->setTypeNote();
-        mediator->handleNote(s->getIndex() , s->getNote());
-      }
-
-      m_diagram->addShape(s);
-      s = 0;
-
-      // undo transl & scale here
     }
   }
   else
   {
-    if (m_mouseDrag && (m_editMode  == EDIT_MODE_SELECT || m_editMode  == EDIT_MODE_DOF))
+    if (m_mouseDrag && (m_editMode  == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF))
     {
       if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
       {
         selection = true;
-        updateGL(true);      // select mode
+        // redraw in select mode
+        updateGL(true);
       }
       else
       {
@@ -1141,6 +1108,8 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
 
     m_lastMousePos = e->pos();
   }
+  // redraw in render mode
+  updateGL();
 }
 
 void DiagramEditor::handleKeyEvent(QKeyEvent* e)
@@ -1175,6 +1144,8 @@ void DiagramEditor::handleKeyEvent(QKeyEvent* e)
       }
     }
   }
+  // redraw in render mode
+  updateGL();
 }
 
 
@@ -1227,7 +1198,7 @@ void DiagramEditor::handleHitDiagramOnly()
 
     bool pasteFlag = false;
     int checkedItem = -1;
-    if (clipBoardShape != 0 || clipBoardList.size() > 0)
+    if (clipBoardList.size() > 0)
     {
       pasteFlag = true;
     }
@@ -2010,7 +1981,7 @@ void DiagramEditor::displShapeEdtOptions(Shape* s)
     bool editDOF = true;
     bool pasteFlag = false;
     int checkedId = s->getCheckedId();
-    if (clipBoardShape != 0 || clipBoardList.size() > 0)
+    if (clipBoardList.size() > 0)
     {
       pasteFlag = true;
     }

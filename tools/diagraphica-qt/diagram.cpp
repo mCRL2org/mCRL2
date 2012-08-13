@@ -15,9 +15,8 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-Diagram::Diagram(
-  Mediator* m)
-  : Colleague(m)
+Diagram::Diagram(QObject *parent):
+  QObject(parent)
 {
   showGrid = true;
   snapGrid = true;

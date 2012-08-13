@@ -20,11 +20,13 @@
 #include "visutils.h"
 #include "shape.h"
 
-class Diagram : public Colleague
+class Diagram : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
-    Diagram(Mediator* m);
+    Diagram(QObject *parent = 0);
     virtual ~Diagram();
 
     // -- set functions ---------------------------------------------

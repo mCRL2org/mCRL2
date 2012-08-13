@@ -61,8 +61,6 @@ class MainWindow : public QMainWindow, public Mediator
     void renameAttribute();
     void deleteAttribute();
 
-    void toolSelected(int index);
-    
     void routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void toSimulator() { m_simulator->initFrameCurr(m_routingCluster, m_routingClusterAttributes.toVector().toStdVector()); }
     void toTrace() { m_timeSeries->markItems(m_routingCluster); }

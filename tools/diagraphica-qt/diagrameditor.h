@@ -38,8 +38,6 @@ class DiagramEditor : public Visualizer, public Colleague
       Mediator* m,
       Graph* g);
 
-    virtual ~DiagramEditor();
-
     void handleIntersection();
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
     bool isAnyShapeSelected();
@@ -73,8 +71,9 @@ class DiagramEditor : public Visualizer, public Colleague
     void clearLinkAttrDOF(const size_t& attrIdx);
 
     // -- get functions ---------------------------------------------
-    Diagram* getDiagram();
-    int getEditMode();
+    Diagram* diagram();
+    int editMode();
+    Shape* selectedShape();
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
@@ -139,8 +138,17 @@ class DiagramEditor : public Visualizer, public Colleague
 
     void setEditMode(int mode);
 
-    void setShowGrid(bool flag);
-    void setSnapGrid(bool flag);
+    void setSelectMode() { setEditMode(EDIT_MODE_SELECT); }
+    void setNoteMode() { setEditMode(EDIT_MODE_NOTE); }
+    void setConfigureMode() { setEditMode(EDIT_MODE_DOF); }
+    void setRectangleMode() { setEditMode(EDIT_MODE_RECT); }
+    void setEllipseMode() { setEditMode(EDIT_MODE_ELLIPSE); }
+    void setLineMode() { setEditMode(EDIT_MODE_LINE); }
+    void setArrowMode() { setEditMode(EDIT_MODE_ARROW); }
+    void setDoubleArrowMode() { setEditMode(EDIT_MODE_DARROW); }
+
+    void setShowGrid(bool show);
+    void setSnapGrid(bool show);
 
     void setFillColor();
     void setLineColor();
@@ -194,7 +202,6 @@ class DiagramEditor : public Visualizer, public Colleague
     double yDrgDist;
     double selectedX1, selectedX2, selectedY1, selectedY2;
 
-    Shape* clipBoardShape; // composition
     std::vector < Shape* > clipBoardList;
     double xPaste, yPaste;
 

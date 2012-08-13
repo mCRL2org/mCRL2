@@ -41,6 +41,7 @@ set(DIAGRAPHICA_MOC_HEADERS
   arcdiagram.h
   combnplot.h
   corrlplot.h
+  diagram.h
   diagrameditor.h
   distrplot.h
   examiner.h
