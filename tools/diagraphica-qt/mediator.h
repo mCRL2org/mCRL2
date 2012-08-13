@@ -123,26 +123,10 @@ class Mediator
       Colleague* sender,
       const std::vector< Cluster* > frames) = 0;
 
-    virtual void handleClearSim(void* sender) = 0;
-    virtual void handleClearExnr(void* sender) = 0;
-    virtual void handleClearExnrCur(void* sender) = 0;
-
     virtual void handleAnimFrameClust(Colleague* sender) = 0;
 
     virtual void handleMarkFrameClust(Colleague* sender) = 0;
     virtual void handleUnmarkFrameClusts(Colleague* sender) = 0;
-
-    // -- public constants ------------------------------------------
-    enum
-    {
-      MODE_ANALYSIS,
-      MODE_EDIT,
-      VIEW_SIM,
-      VIEW_TRACE,
-      CLUST_DISTR_PLOT,
-      CLUST_CORRL_PLOT,
-      CLUST_COMBN_PLOT
-    };
 };
 
 #endif

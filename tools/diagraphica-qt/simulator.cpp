@@ -174,24 +174,6 @@ void Simulator::updateFrameCurr(
 }
 
 
-void Simulator::clearData()
-{
-  m_currentSelection  = -1;
-  m_currentSelectionIndex  = -1;
-
-  m_lastSelection     = -1;
-  m_lastSelectionIndexPrevious = -1;
-  m_lastSelectionIndexPrevious = -1;
-
-  m_previousBundleFocusIndex  = -1;
-  m_nextBundleFocusIndex  = -1;
-
-  clearAttributes();
-  clearFrames();
-  clearBundles();
-}
-
-
 // -- visualization functions  --------------------------------------
 
 
@@ -1140,9 +1122,6 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
-      /*
-      mediator->handleUnmarkFrameClusts();
-      */
       mediator->handleMarkFrameClust(this);
       emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
@@ -1267,7 +1246,22 @@ void Simulator::handleHits(const vector< int > &ids)
       {
         if (ids[1] == ID_ICON_CLEAR && (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0))
         {
-          mediator->handleClearSim(this);
+          if(QMessageBox::question(this, "Confirm simulator clear", "Are you sure you want to clear the simulator?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+          {
+            m_currentSelection  = -1;
+            m_currentSelectionIndex  = -1;
+
+            m_lastSelection     = -1;
+            m_lastSelectionIndexPrevious = -1;
+            m_lastSelectionIndexPrevious = -1;
+
+            m_previousBundleFocusIndex  = -1;
+            m_nextBundleFocusIndex  = -1;
+
+            clearAttributes();
+            clearFrames();
+            clearBundles();
+          }
         }
         else if (ids[1] == ID_ICON_UP)
         {

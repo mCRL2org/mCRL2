@@ -55,7 +55,6 @@ class Simulator : public Visualizer, public Colleague
     void updateFrameCurr(
       Cluster* frame,
       const Position2D& pos);
-    void clearData();
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);

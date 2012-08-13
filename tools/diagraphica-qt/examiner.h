@@ -57,8 +57,6 @@ class Examiner : public Visualizer, public Colleague
     void addFrameHist(
       QList<Cluster*> frames,
       const std::vector< Attribute* > &attrs);
-    void clrFrameHist();
-    void clrFrameHistCur();
     size_t getSizeFramesHist();
 
     void clearData();
@@ -71,6 +69,9 @@ class Examiner : public Visualizer, public Colleague
 
     void handleMouseEvent(QMouseEvent* e);
     void handleKeyEvent(QKeyEvent* e);
+
+  protected slots:
+    void clrFrameHistCur();
 
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);

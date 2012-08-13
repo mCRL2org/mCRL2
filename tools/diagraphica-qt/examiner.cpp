@@ -150,38 +150,6 @@ void Examiner::addFrameHist(
 
 
 
-void Examiner::clrFrameHist()
-{
-  // update flag
-  dataChanged = true;
-
-  // composition
-  {
-    for (size_t i = 0; i < framesHist.size(); ++i)
-    {
-      delete framesHist[i];
-    }
-  }
-  framesHist.clear();
-
-  // association
-  {
-    for (size_t i = 0; i < attrsHist.size(); ++i)
-    {
-      attrsHist[i].clear();
-    }
-  }
-  attrsHist.clear();
-
-  focusFrameIdx = -1;
-  offset = 0;
-
-  mediator->handleMarkFrameClust(this);
-
-  update();
-}
-
-
 void Examiner::clrFrameHistCur()
 {
   // update flag
@@ -477,7 +445,24 @@ void Examiner::handleHits(const vector< int > &ids)
       }
       else if (ids[ids.size()-1] == ID_ICON_CLR)
       {
-        mediator->handleClearExnr(this);
+        if(QMessageBox::question(this, "Confirm examiner clear", "Are you sure you want to clear the examiner history?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+        {
+          dataChanged = true;
+
+          for (size_t i = 0; i < framesHist.size(); ++i)
+          {
+            delete framesHist[i];
+          }
+          framesHist.clear();
+          attrsHist.clear();
+
+          focusFrameIdx = -1;
+          offset = 0;
+
+          mediator->handleMarkFrameClust(this);
+
+          update();
+        }
       }
       else if (ids[ids.size()-1] == ID_ICON_RWND)
       {
@@ -505,7 +490,13 @@ void Examiner::handleHits(const vector< int > &ids)
 
         setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
 
-        mediator->handleClearExnrCur(this);
+        QMenu *menu = new QMenu();
+        connect(menu, SIGNAL(aboutToHide()), menu, SLOT(deleteLater()));
+
+        QAction *deleteCluster = menu->addAction("Delete");
+        connect(deleteCluster, SIGNAL(triggered()), this, SLOT(clrFrameHistCur()));
+
+        menu->popup(QCursor::pos());
       }
     }
   }

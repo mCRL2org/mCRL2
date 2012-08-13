@@ -187,10 +187,6 @@ class MainWindow : public QMainWindow, public Mediator
       Colleague* sender,
       const std::vector< Cluster* > frames) {}
 
-    virtual void handleClearSim(void* sender) {}
-    virtual void handleClearExnr(void* sender) {}
-    virtual void handleClearExnrCur(void* sender) {}
-
     virtual void handleAnimFrameClust(Colleague* sender) {}
 
     virtual void handleMarkFrameClust(Colleague* sender) {}
