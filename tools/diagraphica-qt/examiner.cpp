@@ -21,11 +21,9 @@ static const int hgtHstPix = 80;
 
 Examiner::Examiner(
   QWidget *parent,
-  Mediator* m,
   Settings* s,
   Graph* g)
   : Visualizer(parent, g),
-    Colleague(m),
     settings(s)
 {
   diagram = 0;
@@ -173,12 +171,6 @@ void Examiner::clrFrameHistCur()
   }
 
   update();
-}
-
-
-size_t Examiner::getSizeFramesHist()
-{
-  return framesHist.size();
 }
 
 

@@ -26,11 +26,9 @@ static const int itvAnim = 350;
 
 TimeSeries::TimeSeries(
   QWidget *parent,
-  Mediator* m,
   Settings* s,
   Graph* g)
   : Visualizer(parent, g),
-    Colleague(m),
     settings(s)
 {
   critSect = false;
@@ -426,7 +424,6 @@ void TimeSeries::handleMouseLeaveEvent()
 
   // reset mouse roll-over
   mouseOverIdx = -1;
-  mediator->handleMarkFrameClust(this);
 
   // redraw in render mode
   updateGL();
@@ -744,8 +741,7 @@ void TimeSeries::animate()
     animFrame = itemsMarked.begin();
   }
 
-  //mediator->handleAnimFrameBundl( this );
-  mediator->handleAnimFrameClust(this);
+  emit animationChanged();
 
   updateGL();
   repaint();
@@ -768,7 +764,7 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
   animIdxDgrm = idx;
   currIdxDgrm = idx;
 
-  mediator->handleAnimFrameClust(this);
+  emit animationChanged();
 
   updateGL();
   update();
@@ -806,7 +802,7 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
     showDgrm.erase(it);
     showDgrm.insert(pair< size_t, Position2D >(idx, pos));
 
-    mediator->handleAnimFrameClust(this);
+    emit animationChanged();
 
     animIdxDgrm = idx;
     currIdxDgrm = idx;
@@ -884,7 +880,7 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
     showDgrm.erase(it);
     showDgrm.insert(pair< size_t, Position2D >(idx, pos));
 
-    mediator->handleAnimFrameClust(this);
+    emit animationChanged();
 
     animIdxDgrm = idx;
     currIdxDgrm = idx;
@@ -1007,7 +1003,6 @@ void TimeSeries::handleHits(const vector< int > &ids)
           }
 
           emit hoverCluster(frame, QVector<Attribute *>::fromStdVector(attrs).toList());
-          mediator->handleMarkFrameClust(this);
 
           delete frame;
           frame = 0;
@@ -1060,7 +1055,6 @@ void TimeSeries::handleHits(const vector< int > &ids)
         currIdxDgrm = NON_EXISTING;
         mouseOverIdx = NON_EXISTING;
 
-        mediator->handleMarkFrameClust(this);
         emit hoverCluster(0);
       }
     }
@@ -2172,7 +2166,7 @@ void TimeSeries::handleHitItems(const int& idx)
 
   dragStartIdx = idx;
 
-  mediator->handleMarkFrameClust(this);
+  emit marksChanged();
 }
 
 
@@ -2322,7 +2316,7 @@ void TimeSeries::handleDragItems(const int& idx)
     animFrame = itemsMarked.begin();
   }
 
-  mediator->handleMarkFrameClust(this);
+  emit marksChanged();
 }
 
 

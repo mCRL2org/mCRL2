@@ -122,11 +122,6 @@ class Mediator
     virtual void markTimeSeries(
       Colleague* sender,
       const std::vector< Cluster* > frames) = 0;
-
-    virtual void handleAnimFrameClust(Colleague* sender) = 0;
-
-    virtual void handleMarkFrameClust(Colleague* sender) = 0;
-    virtual void handleUnmarkFrameClusts(Colleague* sender) = 0;
 };
 
 #endif

@@ -20,7 +20,6 @@
 #include <string>
 #include <vector>
 #include "bundle.h"
-#include "colleague.h"
 #include "diagram.h"
 #include "edge.h"
 #include "graph.h"
@@ -29,7 +28,7 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Simulator : public Visualizer, public Colleague
+class Simulator : public Visualizer
 {
   Q_OBJECT
 
@@ -37,7 +36,6 @@ class Simulator : public Visualizer, public Colleague
     // -- constructors and destructor -------------------------------
     Simulator(
       QWidget *parent,
-      Mediator* m,
       Settings* s,
       Graph* g);
     virtual ~Simulator();

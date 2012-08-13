@@ -23,11 +23,9 @@ static const double animationPixelsPerMS =  1.0;
 
 Simulator::Simulator(
   QWidget *parent,
-  Mediator* m,
   Settings* s,
   Graph* g)
   : Visualizer(parent, g),
-    Colleague(m),
     m_settings(s)
 {
   m_diagram   = 0;
@@ -284,7 +282,6 @@ void Simulator::handleMouseLeaveEvent()
     m_previousBundleFocusIndex = -1;
     m_nextBundleFocusIndex = -1;
 
-    mediator->handleUnmarkFrameClusts(this);
     emit hoverCluster(0);
   }
   else
@@ -335,7 +332,6 @@ void Simulator::handleKeyEvent(QKeyEvent* e)
       m_currentSelection = -1;
       m_currentSelectionIndex = -1;
 
-      mediator->handleUnmarkFrameClusts(this);
       emit hoverCluster(0);
     }
 
@@ -1106,7 +1102,6 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
-      mediator->handleMarkFrameClust(this);
       emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
@@ -1114,7 +1109,6 @@ void Simulator::markFrameClusts()
   {
     if (m_currentFrame != 0)
     {
-      mediator->handleMarkFrameClust(this);
       emit hoverCluster(m_currentFrame, QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
@@ -1122,7 +1116,6 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
-      mediator->handleMarkFrameClust(this);
       emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
@@ -1230,7 +1223,6 @@ void Simulator::handleHits(const vector< int > &ids)
         m_currentSelection = -1;
         m_currentSelectionIndex = -1;
 
-        mediator->handleUnmarkFrameClusts(this);
         emit hoverCluster(0);
       }
 

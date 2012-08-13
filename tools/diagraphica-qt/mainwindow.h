@@ -192,11 +192,6 @@ class MainWindow : public QMainWindow, public Mediator
     virtual void markTimeSeries(
       Colleague* sender,
       const std::vector< Cluster* > frames) {}
-
-    virtual void handleAnimFrameClust(Colleague* sender) {}
-
-    virtual void handleMarkFrameClust(Colleague* sender) {}
-    virtual void handleUnmarkFrameClusts(Colleague* sender) {}
 };
 
 #endif

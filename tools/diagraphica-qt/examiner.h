@@ -19,7 +19,6 @@
 #include <cmath>
 #include <vector>
 #include "bundle.h"
-#include "colleague.h"
 #include "diagram.h"
 #include "edge.h"
 #include "graph.h"
@@ -28,7 +27,7 @@
 #include "visualizer.h"
 #include "visutils.h"
 
-class Examiner : public Visualizer, public Colleague
+class Examiner : public Visualizer
 {
   Q_OBJECT
 
@@ -36,7 +35,6 @@ class Examiner : public Visualizer, public Colleague
     // -- constructors and destructor -------------------------------
     Examiner(
       QWidget *parent,
-      Mediator* m,
       Settings* s,
       Graph* g);
     virtual ~Examiner();
@@ -44,7 +42,7 @@ class Examiner : public Visualizer, public Colleague
     QColor selectionColor() { return VisUtils::coolRed; }
     size_t selectedClusterIndex();
 
-    void setDiagram(Diagram* dgrm) { diagram = dgrm; }
+    void setDiagram(Diagram* dgrm) { diagram = dgrm; update(); }
     void setFrame(
       Cluster* frme,
       const std::vector< Attribute* > &attrs,
@@ -57,7 +55,6 @@ class Examiner : public Visualizer, public Colleague
     void addFrameHist(
       QList<Cluster*> frames,
       const std::vector< Attribute* > &attrs);
-    size_t getSizeFramesHist();
 
     void clearData();
 

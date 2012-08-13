@@ -134,7 +134,7 @@ void MainWindow::open(QString filename)
   connect(m_ui.showGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setShowGrid(bool)));
   connect(m_ui.snapToGridButton, SIGNAL(toggled(bool)), m_diagramEditor, SLOT(setSnapGrid(bool)));
 
-  m_examiner = new Examiner(m_ui.examinerWidget, this, &m_settings, m_graph);
+  m_examiner = new Examiner(m_ui.examinerWidget, &m_settings, m_graph);
   m_examiner->setDiagram(m_diagramEditor->diagram());
   stretch(m_examiner);
   connect(m_examiner, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
@@ -146,17 +146,21 @@ void MainWindow::open(QString filename)
   connect(m_arcDiagram, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_arcDiagram, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
-  m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
+  m_simulator = new Simulator(m_ui.simulatorWidget, &m_settings, m_graph);
   m_simulator->setDiagram(m_diagramEditor->diagram());
   stretch(m_simulator);
   connect(m_simulator, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
+  connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(updateArcDiagramMarks()));
 
-  m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
+  m_timeSeries = new TimeSeries(m_ui.traceWidget, &m_settings, m_graph);
   m_timeSeries->setDiagram(m_diagramEditor->diagram());
   stretch(m_timeSeries);
   connect(m_timeSeries, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
+  connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(updateArcDiagramMarks()));
+  connect(m_timeSeries, SIGNAL(marksChanged()), this, SLOT(updateArcDiagramMarks()));
+  connect(m_timeSeries, SIGNAL(animationChanged()), this, SLOT(updateArcDiagramMarks()));
 
   m_ui.attributes->setRowCount(0);
   for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
@@ -479,6 +483,16 @@ void MainWindow::updateArcDiagramMarks()
     }
 
     m_timeSeries->getCurrIdxDgrm(index, indices, color);
+    if (index != NON_EXISTING)
+    {
+      m_arcDiagram->markLeaf(index, color);
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      {
+        m_arcDiagram->markBundle(*i);
+      }
+    }
+
+    m_timeSeries->getAnimIdxDgrm(index, indices, color);
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
