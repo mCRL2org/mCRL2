@@ -63,7 +63,6 @@ class VisUtils
 {
   template<class T> struct ColorMap
   {
-    ColorMap() {}
     QColor operator()(int numerator, int denominator) const { return T::operator()(numerator / (double)denominator); }
   };
 
@@ -106,8 +105,8 @@ class VisUtils
     static const QRgb orange = 0xff8000;
     static const QRgb coolRed = 0xf54000;
 
-    static const struct BlueYellow: public ColorMap<BlueYellow> { QColor operator()(double fraction) const; } blueYellow;
-    static const struct Spectral: public ColorMap<Spectral> { QColor operator()(double fraction) const; } spectral;
+    static const struct BlueYellow: public ColorMap<BlueYellow> { BlueYellow(){} QColor operator()(double fraction) const; } blueYellow;
+    static const struct Spectral: public ColorMap<Spectral> { Spectral(){} QColor operator()(double fraction) const; } spectral;
 
     static const ListColorMap grayScale;
     static const ListColorMap qualPast1;
