@@ -72,6 +72,7 @@ class Simulator : public Visualizer, public Colleague
 
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
 
   protected:
     // -- utility functions -----------------------------------------

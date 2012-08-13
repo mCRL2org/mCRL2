@@ -303,7 +303,7 @@ void Simulator::handleMouseLeaveEvent()
     m_nextBundleFocusIndex = -1;
 
     mediator->handleUnmarkFrameClusts(this);
-    mediator->handleUnshowFrame();
+    emit hoverCluster(0);
   }
   else
   {
@@ -354,7 +354,7 @@ void Simulator::handleKeyEvent(QKeyEvent* e)
       m_currentSelectionIndex = -1;
 
       mediator->handleUnmarkFrameClusts(this);
-      mediator->handleUnshowFrame();
+      emit hoverCluster(0);
     }
 
     markFrameClusts();
@@ -1124,30 +1124,16 @@ void Simulator::markFrameClusts()
   {
     if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
-      /*
-      mediator->handleUnmarkFrameClusts();
-      */
       mediator->handleMarkFrameClust(this);
-
-      mediator->handleShowFrame(
-        m_previousFrames[m_currentSelectionIndex],
-        m_attributes,
-        SelectColor());
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
   else if (m_currentSelection == ID_FRAME_CURR)
   {
     if (m_currentFrame != 0)
     {
-      /*
-      mediator->handleUnmarkFrameClusts();
-      */
       mediator->handleMarkFrameClust(this);
-
-      mediator->handleShowFrame(
-        m_currentFrame,
-        m_attributes,
-        SelectColor());
+      emit hoverCluster(m_currentFrame, QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
@@ -1158,11 +1144,7 @@ void Simulator::markFrameClusts()
       mediator->handleUnmarkFrameClusts();
       */
       mediator->handleMarkFrameClust(this);
-
-      mediator->handleShowFrame(
-        m_nextFrames[m_currentSelectionIndex],
-        m_attributes,
-        SelectColor());
+      emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
   }
 }
@@ -1270,7 +1252,7 @@ void Simulator::handleHits(const vector< int > &ids)
         m_currentSelectionIndex = -1;
 
         mediator->handleUnmarkFrameClusts(this);
-        mediator->handleUnshowFrame();
+        emit hoverCluster(0);
       }
 
       m_previousBundleFocusIndex = -1;

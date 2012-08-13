@@ -1605,20 +1605,13 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
-          if (mediator->getView() == Mediator::VIEW_TRACE)
-          {
-            mediator->markTimeSeries(this, graph->getLeaf(ids[2]));
-          }
-        }
-        else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
-        {
-          /*mediator->handleShowClusterMenu();*/ // Select attributes from the popup menu for clustering.
+          mediator->markTimeSeries(this, graph->getLeaf(ids[2]));
         }
         else
         {
           currIdxDgrm = NON_EXISTING;
           updateMarkBundles();
-          mediator->handleUnshowFrame();
+          emit hoverCluster(0);
 
           handleHoverCluster(mapPosToClust.size()-1, ids[2]);
         }
@@ -1627,7 +1620,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
       case ID_TREE_NODE:
         currIdxDgrm = NON_EXISTING;
         updateMarkBundles();
-        mediator->handleUnshowFrame();
+        emit hoverCluster(0);
 
         handleHoverCluster(ids[2], ids[3]);
         break;
@@ -1635,7 +1628,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
       case ID_BAR_TREE:
         currIdxDgrm = NON_EXISTING;
         updateMarkBundles();
-        mediator->handleUnshowFrame();
+        emit hoverCluster(0);
 
         handleHoverBarTree(ids[2], ids[3]);
         break;
@@ -1685,10 +1678,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
           currIdxDgrm = ids[2];
           updateMarkBundles();
 
-          mediator->handleShowFrame(
-                framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-                attrsDgrm[currIdxDgrm],
-                VisUtils::coolBlue);
+          emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
         }
         break;
 
@@ -1702,7 +1692,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
     {
       currIdxDgrm = NON_EXISTING;
       updateMarkBundles();
-      mediator->handleUnshowFrame();
+      emit hoverCluster(0);
     }
     setToolTip(QString());
   }
@@ -1790,7 +1780,7 @@ void ArcDiagram::handleShowDiagram(const size_t& dgrmIdx)
     hideDiagram(dgrmIdx);
     currIdxDgrm = NON_EXISTING;
     updateMarkBundles();
-    mediator->handleUnshowFrame();
+    emit hoverCluster(0);
   }
 }
 
@@ -1825,10 +1815,7 @@ void ArcDiagram::handleRwndDiagram(const size_t& dgrmIdx)
   }
   frameIdxDgrm[dgrmIdx] = 0;
 
-  mediator->handleShowFrame(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm],
-        VisUtils::coolBlue);
+  emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
 
   updateMarkBundles();
 }
@@ -1852,10 +1839,7 @@ void ArcDiagram::handlePrevDiagram(const size_t& dgrmIdx)
     frameIdxDgrm[dgrmIdx] = static_cast<int>(framesDgrm[dgrmIdx].size()-1);
   }
 
-  mediator->handleShowFrame(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm],
-        VisUtils::coolBlue);
+  emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
 
   updateMarkBundles();
 }
@@ -1869,10 +1853,7 @@ void ArcDiagram::handlePlayDiagram(const size_t& dgrmIdx)
     {
       m_animationTimer.stop();
 
-      mediator->handleShowFrame(
-            framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-            attrsDgrm[currIdxDgrm],
-            VisUtils::coolBlue);
+      emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
     }
     else
     {
@@ -1905,11 +1886,7 @@ void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
     frameIdxDgrm[dgrmIdx] = 0;
   }
 
-  mediator->handleShowFrame(
-        framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-        attrsDgrm[currIdxDgrm],
-        VisUtils::coolBlue);
-
+  emit hoverCluster(framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]], QVector<Attribute *>::fromStdVector(attrsDgrm[currIdxDgrm]).toList());
   updateMarkBundles();
 }
 

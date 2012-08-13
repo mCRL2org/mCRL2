@@ -1006,7 +1006,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
             attrs.push_back(graph->getAttribute(i));
           }
 
-          mediator->handleShowFrame(frame, attrs, VisUtils::coolBlue);
+          emit hoverCluster(frame, QVector<Attribute *>::fromStdVector(attrs).toList());
           mediator->handleMarkFrameClust(this);
 
           delete frame;
@@ -1049,11 +1049,6 @@ void TimeSeries::handleHits(const vector< int > &ids)
         {
           handleShowDiagram(ids[2]);
         }
-        //mouseOverIdx = ids[2];
-        //currIdxDgrm = -1;
-
-        //mediator->handleMarkFrameClust( this );
-        //mediator->handleUnshowFrame();
       }
       else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton &&
                ids[1] == ID_DIAGRAM)
@@ -1062,20 +1057,11 @@ void TimeSeries::handleHits(const vector< int > &ids)
       }
       else
       {
-        if (currIdxDgrm != NON_EXISTING)
-        {
-          currIdxDgrm = -1;
-          mediator->handleUnshowFrame();
-          mediator->handleMarkFrameClust(this);
-        }
-
-        if (mouseOverIdx != NON_EXISTING)
-        {
-          mouseOverIdx = NON_EXISTING;
-        }
+        currIdxDgrm = NON_EXISTING;
+        mouseOverIdx = NON_EXISTING;
 
         mediator->handleMarkFrameClust(this);
-        mediator->handleUnshowFrame();
+        emit hoverCluster(0);
       }
     }
   }

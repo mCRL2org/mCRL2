@@ -137,16 +137,19 @@ void MainWindow::open(QString filename)
   m_arcDiagram->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_arcDiagram);
   connect(m_arcDiagram, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
+  connect(m_arcDiagram, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
   m_simulator = new Simulator(m_ui.simulatorWidget, this, &m_settings, m_graph);
   m_simulator->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_simulator);
   connect(m_simulator, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
+  connect(m_simulator, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
   m_timeSeries = new TimeSeries(m_ui.traceWidget, this, &m_settings, m_graph);
   m_timeSeries->setDiagram(m_diagramEditor->getDiagram());
   stretch(m_timeSeries);
   connect(m_timeSeries, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
+  connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(hoverCluster(Cluster *, QList<Attribute *>)));
 
   m_ui.attributes->setRowCount(0);
   for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
@@ -455,6 +458,18 @@ void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QLi
   allToExaminer->setEnabled(!clusterSet.isEmpty() && sender != m_examiner);
 
   menu->popup(QCursor::pos());
+}
+#include <QDebug>
+void MainWindow::hoverCluster(Cluster *cluster, QList<Attribute *> attributes)
+{
+  if (cluster)
+  {
+    m_examiner->setFrame(cluster, attributes.toVector().toStdVector(), VisUtils::coolBlue);
+  }
+  else
+  {
+    m_examiner->clrFrame();
+  }
 }
 
 

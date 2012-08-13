@@ -49,9 +49,6 @@ class Mediator
 
     virtual void handleAttributeCluster(const std::vector< size_t > &indcs) = 0;
 
-    virtual int getMode() = 0;
-    virtual int getView() = 0;
-
     virtual void handleNote(const size_t& shapeId, const std::string& msg) = 0;
     virtual void handleEditModeDOF(Colleague* c) = 0;
 
@@ -134,12 +131,6 @@ class Mediator
 
     virtual void handleMarkFrameClust(Colleague* sender) = 0;
     virtual void handleUnmarkFrameClusts(Colleague* sender) = 0;
-
-    virtual void handleShowFrame(
-      Cluster* frame,
-      const std::vector< Attribute* > &attrs,
-      QColor col) = 0;
-    virtual void handleUnshowFrame() = 0;
 
     // -- public constants ------------------------------------------
     enum

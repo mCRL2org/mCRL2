@@ -99,6 +99,8 @@ void Examiner::setFrame(
 
   attributes = attrs;
   colFrm = col;
+
+  update();
 }
 
 
@@ -115,6 +117,8 @@ void Examiner::clrFrame()
   {
     setFrame(framesHist[focusFrameIdx], attrsHist[focusFrameIdx], VisUtils::coolRed);
   }
+
+  update();
 }
 
 
@@ -129,6 +133,8 @@ void Examiner::addFrameHist(
 
   vector< Attribute* > v;
   attrsHist.push_back(attrs);
+
+  update();
 }
 
 
@@ -171,6 +177,8 @@ void Examiner::clrFrameHist()
   offset = 0;
 
   mediator->handleMarkFrameClust(this);
+
+  update();
 }
 
 
@@ -195,6 +203,8 @@ void Examiner::clrFrameHistCur()
 
     mediator->handleUnmarkFrameClusts(this);
   }
+
+  update();
 }
 
 

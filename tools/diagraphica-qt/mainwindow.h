@@ -70,6 +70,8 @@ class MainWindow : public QMainWindow, public Mediator
     void toExaminer() { m_examiner->addFrameHist(m_routingCluster, m_routingClusterAttributes.toVector().toStdVector()); }
     void allToExaminer() { m_examiner->addFrameHist(m_routingClusterSet, m_routingClusterAttributes.toVector().toStdVector()); }
 
+    void hoverCluster(Cluster *cluster, QList<Attribute *> attributes);
+
   protected:
     QList<int> selectedAttributes();
 
@@ -112,9 +114,6 @@ class MainWindow : public QMainWindow, public Mediator
     virtual QColor getColor(QColor col) { return col; }
 
     virtual void handleAttributeCluster(const std::vector< size_t > &indcs) {}
-
-    virtual int getMode() { return 0; }
-    virtual int getView() { return 0; }
 
     virtual void handleNote(const size_t& shapeId, const std::string& msg) {}
     virtual void handleEditModeDOF(Colleague* c) {}
@@ -198,12 +197,6 @@ class MainWindow : public QMainWindow, public Mediator
 
     virtual void handleMarkFrameClust(Colleague* sender) {}
     virtual void handleUnmarkFrameClusts(Colleague* sender) {}
-
-    virtual void handleShowFrame(
-      Cluster* frame,
-      const std::vector< Attribute* > &attrs,
-      QColor col) {}
-    virtual void handleUnshowFrame() {}
 };
 
 #endif
