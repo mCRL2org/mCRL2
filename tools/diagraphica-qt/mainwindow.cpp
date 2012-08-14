@@ -126,7 +126,7 @@ void MainWindow::open(QString filename)
   m_ui.numberOfStates->setText(QString::number(m_graph->getSizeNodes()));
   m_ui.numberOfTransitions->setText(QString::number(m_graph->getSizeEdges()));
 
-  m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, this, m_graph);
+  m_diagramEditor = new DiagramEditor(m_ui.diagramEditorWidget, m_graph);
   stretch(m_diagramEditor);
   connect(m_ui.selectTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setSelectMode()));
   connect(m_ui.noteTool, SIGNAL(clicked(bool)), m_diagramEditor, SLOT(setNoteMode()));

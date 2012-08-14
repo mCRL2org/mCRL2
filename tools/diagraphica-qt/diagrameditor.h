@@ -20,14 +20,14 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include "colleague.h"
 #include "colorchooser.h"
 #include "dof.h"
+#include "dofdialog.h"
 #include "diagram.h"
 #include "graph.h"
 #include "visualizer.h"
 
-class DiagramEditor : public Visualizer, public Colleague
+class DiagramEditor : public Visualizer
 {
   Q_OBJECT
 
@@ -35,7 +35,6 @@ class DiagramEditor : public Visualizer, public Colleague
     // -- constructors and destructor -------------------------------
     DiagramEditor(
       QWidget *parent,
-      Mediator* m,
       Graph* g);
 
     void handleIntersection();
@@ -188,6 +187,8 @@ class DiagramEditor : public Visualizer, public Colleague
       GLuint buffer[]);
 
     // -- data members ----------------------------------------------
+
+    DofDialog m_dofDialog;
 
     QPoint m_lastMousePos;
 

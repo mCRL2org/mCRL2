@@ -32,6 +32,7 @@ set(DIAGRAPHICA_RCC_SRCS
 qt4_add_resources(DIAGRAPHICA_RC_FILES ${DIAGRAPHICA_RCC_SRCS})
 
 set(DIAGRAPHICA_UI_FILES
+  dofdialog.ui
   mainwindow.ui
   settingsdialog.ui
 )
@@ -44,6 +45,7 @@ set(DIAGRAPHICA_MOC_HEADERS
   diagram.h
   diagrameditor.h
   distrplot.h
+  dofdialog.h
   examiner.h
   graph.h
   mainwindow.h
@@ -72,6 +74,7 @@ set(DIAGRAPHICA_SRC_FILES
   diagrameditor.cpp
   distrplot.cpp
   dof.cpp
+  dofdialog.cpp
   examiner.cpp
   graph.cpp
   main.cpp

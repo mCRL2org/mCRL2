@@ -25,18 +25,17 @@ int DiagramEditor::szeTxt = 12;
 
 DiagramEditor::DiagramEditor(
   QWidget *parent,
-  Mediator* m,
   Graph* g):
   Visualizer(parent, g),
-  Colleague(m)
+  m_dofDialog(this)
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
 
   m_diagram     = new Diagram(this);
   m_editMode    = EDIT_MODE_SELECT;
-  drgBegIdx1 = -1;
-  drgBegIdx2 = -1;
+  drgBegIdx1 = NON_EXISTING;
+  drgBegIdx2 = NON_EXISTING;
   selectedX1 = -1;
   selectedX2 = -1;
   selectedY1 = -1;
@@ -45,6 +44,10 @@ DiagramEditor::DiagramEditor(
   lastSelectedShapeId = NON_EXISTING;
 
   initMouse();
+
+  qDebug() << g->getSizeAttributes();
+  m_dofDialog.setCurrentGraph(g);
+  //m_dofDialog.show();
 }
 
 // -- set data functions --------------------------------------------
@@ -109,6 +112,7 @@ void DiagramEditor::setLineColor()
 
 void DiagramEditor::handleIntersection()
 {
+  qDebug() << "handleIntersection";
   Shape* s = 0;
   if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
   {
@@ -192,181 +196,56 @@ void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
   {
     if (DOFIdx == s->getDOFXCtr()->getIndex())
     {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaDeactivate();
       s->setModeEdtDOFXCtr();
     }
     else if (DOFIdx == s->getDOFYCtr()->getIndex())
     {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaDeactivate();
       s->setModeEdtDOFYCtr();
     }
     else if (DOFIdx == s->getDOFHgt()->getIndex())
     {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaDeactivate();
       s->setModeEdtDOFHgt();
     }
     else if (DOFIdx == s->getDOFWth()->getIndex())
     {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaDeactivate();
       s->setModeEdtDOFWth();
     }
     else if (DOFIdx == s->getDOFAgl()->getIndex())
     {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaDeactivate();
       s->setModeEdtDOFAgl();
     }
     else if (DOFIdx == s->getDOFCol()->getIndex())
     {
       s->setModeEdtDOFCol();
-      mediator->handleDOFColActivate();
-      mediator->handleDOFOpaDeactivate();
+      //mediator->handleDOFColActivate();
+      //mediator->handleDOFOpaDeactivate();
     }
     else if (DOFIdx == s->getDOFOpa()->getIndex())
     {
       s->setModeEdtDOFOpa();
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaActivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaActivate();
     }
     else if (DOFIdx == s->getDOFText()->getIndex())
     {
       s->setModeEdtDOFText();
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaActivate();
+      //mediator->handleDOFColDeactivate();
+      //mediator->handleDOFOpaActivate();
     }
     s = 0;
 
     update();
   }
-}
-
-
-void DiagramEditor::handleDOFSetTextStatus(
-  const size_t& DOFIdx,
-  const int& status)
-{
-  Shape* s = 0;
-  size_t sizeShapes = m_diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = m_diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != 0)
-  {
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      s->getDOFXCtr()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      s->getDOFYCtr()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      s->getDOFHgt()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      s->getDOFWth()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      s->getDOFAgl()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      s->getDOFCol()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      s->getDOFOpa()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      s->getDOFText()->setTextStatus(status);
-    }
-    s = 0;
-  }
-}
-
-
-int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
-{
-  int result = -1;
-
-  Shape* s = 0;
-  size_t sizeShapes = m_diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (m_diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        m_diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      s = m_diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != 0)
-  {
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      result = s->getDOFXCtr()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      result = s->getDOFYCtr()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      result = s->getDOFHgt()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      result = s->getDOFWth()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      result = s->getDOFAgl()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      result = s->getDOFCol()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      result = s->getDOFOpa()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      result = s->getDOFText()->getTextStatus();
-    }
-  }
-
-  return result;
 }
 
 
@@ -397,8 +276,8 @@ void DiagramEditor::handleDOFColAdd(
   if (s != 0)
   {
     s->setModeEdtDOFCol();
-    mediator->handleDOFColActivate();
-    mediator->handleDOFOpaDeactivate();
+    //mediator->handleDOFColActivate();
+    //mediator->handleDOFOpaDeactivate();
     s->getDOFCol()->addValue(hue);
     s->addDOFColYValue(y);
   }
@@ -462,7 +341,7 @@ void DiagramEditor::handleDOFColClear(
       s->getDOFCol()->getValues(hues);
       s->getDOFColYValues(yVals);
 
-      mediator->handleDOFColSetValuesEdt(hues, yVals);
+      //mediator->handleDOFColSetValuesEdt(hues, yVals);
     }
   }
 
@@ -497,8 +376,8 @@ void DiagramEditor::handleDOFOpaAdd(
   if (s != 0)
   {
     s->setModeEdtDOFOpa();
-    mediator->handleDOFColDeactivate();
-    mediator->handleDOFOpaActivate();
+    //mediator->handleDOFColDeactivate();
+    //mediator->handleDOFOpaActivate();
     s->getDOFOpa()->addValue(hue);
     s->addDOFOpaYValue(y);
   }
@@ -562,7 +441,7 @@ void DiagramEditor::handleDOFOpaClear(
       s->getDOFOpa()->getValues(opas);
       s->getDOFOpaYValues(yVals);
 
-      mediator->handleDOFOpaSetValuesEdt(opas, yVals);
+      //mediator->handleDOFOpaSetValuesEdt(opas, yVals);
     }
   }
 
@@ -1080,7 +959,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
         else if (m_editMode == EDIT_MODE_NOTE)
         {
           s->setTypeNote();
-          mediator->handleNote(s->getIndex() , s->getNote());
+          //mediator->handleNote(s->getIndex() , s->getNote());
         }
 
         m_diagram->addShape(s);
@@ -1094,6 +973,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
   {
     if (m_mouseDrag && (m_editMode  == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF))
     {
+      qDebug() << "drgBegIdx1" << drgBegIdx1 << "drgBegIdx2" << drgBegIdx1;
       if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
       {
         selection = true;
@@ -1102,6 +982,7 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
       }
       else
       {
+        qDebug() << "drgBegIdx1 exists";
         handleDrag();
       }
     }
@@ -1151,21 +1032,24 @@ void DiagramEditor::handleKeyEvent(QKeyEvent* e)
 
 void DiagramEditor::handleHits(const vector< int > &ids)
 {
-
+  qDebug() << "handleHits";
   // only diagram was hit
   if (ids.size() == 1)
   {
+    qDebug() << "1";
     lastSelectedShapeId = NON_EXISTING;
     handleHitDiagramOnly();
   }
   // shape was hit
   else if (ids.size() == 2 && !selection)
   {
+    qDebug() << "2";
     lastSelectedShapeId = ids[1];
     handleHitShape(ids[1]);
   }
   else if (ids.size() == 3)
   {
+    qDebug() << "3";
     lastSelectedShapeId = ids[1];
     handleHitShapeHandle(ids[1], ids[2]);
   }
@@ -1177,7 +1061,7 @@ void DiagramEditor::handleHitDiagramOnly()
   if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
   {
     deselectAll();
-    mediator->handleDOFDeselect();
+    //mediator->handleDOFDeselect();
   }
   else
   {
@@ -1214,17 +1098,17 @@ void DiagramEditor::handleHitDiagramOnly()
       }
     }
 
-    mediator->handleEditShape(
-      false,     // cut
-      false,     // copy
-      pasteFlag, // paste
-      false,     // delete
-      false,     // bring to front
-      false,     // send to back
-      false,     // bring forward
-      false,     // send backward
-      false,     // edit DOF
-      checkedItem);  // id of the variable displayed on the shape
+    //mediator->handleEditShape(
+//      false,     // cut
+//      false,     // copy
+//      pasteFlag, // paste
+//      false,     // delete
+//      false,     // bring to front
+//      false,     // send to back
+//      false,     // bring forward
+//      false,     // send backward
+//      false,     // edit DOF
+//      checkedItem);  // id of the variable displayed on the shape
   }
 }
 
@@ -1279,8 +1163,8 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
               s->getMode() != Shape::MODE_EDT_DOF_AGL)
           {
             s->setMode(Shape::MODE_EDT_DOF_XCTR);
-            drgBegIdx1 = -1;
-            drgBegIdx2 = -1;
+            drgBegIdx1 = NON_EXISTING;
+            drgBegIdx2 = NON_EXISTING;
           }
           displDOFInfo(s);
 
@@ -1293,7 +1177,7 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
         }
         else if (m_editMode == EDIT_MODE_NOTE)
         {
-          //mediator->handleNote( shapeIdx, s->getNote() );
+          ////mediator->handleNote( shapeIdx, s->getNote() );
         } // mode
       } // side
       else if (m_lastMouseEvent.button() == Qt::RightButton)
@@ -1360,8 +1244,8 @@ void DiagramEditor::handleHitShapeHandle(
           }
           else
           {
-            drgBegIdx1 = -1;
-            drgBegIdx2 = -1;
+            drgBegIdx1 = NON_EXISTING;
+            drgBegIdx2 = NON_EXISTING;
           }
         }
       }
@@ -1398,14 +1282,14 @@ void DiagramEditor::handleHitShapeHandle(
           s->getMode() != Shape::MODE_EDT_DOF_AGL)
       {
         s->setMode(Shape::MODE_EDT_DOF_XCTR);
-        drgBegIdx1 = -1;
-        drgBegIdx2 = -1;
+        drgBegIdx1 = NON_EXISTING;
+        drgBegIdx2 = NON_EXISTING;
       }
       if (s->getType() != Shape::TYPE_NOTE)
       {
         displDOFInfo(s);
         m_editMode = EDIT_MODE_DOF;
-        mediator->handleEditModeDOF(this);
+        //mediator->handleEditModeDOF(this);
       }
       for (size_t i = 0; i < sizeShapes; ++i)
         if (i != shapeIdx)
@@ -1420,6 +1304,7 @@ void DiagramEditor::handleHitShapeHandle(
 
 void DiagramEditor::handleDrag()
 {
+  qDebug() << "handleDrag";
   size_t sizeShapes = 0;
   if (m_diagram != 0)
   {
@@ -1889,8 +1774,7 @@ void DiagramEditor::handleEditDOF()
     s->setModeEdtDOFXCtr();
     displDOFInfo(s);
     m_editMode = EDIT_MODE_DOF;
-    mediator->
-    handleEditModeDOF(this);
+    //mediator->handleEditModeDOF(this);
     for (size_t i = 0; i < m_diagram->getSizeShapes(); ++i)
       if (i != s->getIndex())
       {
@@ -1966,8 +1850,8 @@ void DiagramEditor::deselectAll()
     m_diagram->getShape(i)->setModeNormal();
   }
 
-  drgBegIdx1 = -1;
-  drgBegIdx2 = -1;
+  drgBegIdx1 = NON_EXISTING;
+  drgBegIdx2 = NON_EXISTING;
 }
 
 
@@ -1991,17 +1875,17 @@ void DiagramEditor::displShapeEdtOptions(Shape* s)
       editDOF = false;
     }
 
-    mediator->handleEditShape(
-      true,      // cut
-      true,      // copy
-      pasteFlag, // paste
-      true,      // delete
-      true,      // bring to front
-      true,      // send to back
-      true,      // bring forward
-      true,      // send backward
-      editDOF,     // edit DOF
-      checkedId);  // id of the variable displayed on the shape
+    //mediator->handleEditShape(
+//      true,      // cut
+//      true,      // copy
+//      pasteFlag, // paste
+//      true,      // delete
+//      true,      // bring to front
+//      true,      // send to back
+//      true,      // bring forward
+//      true,      // send backward
+//      editDOF,     // edit DOF
+//      checkedId);  // id of the variable displayed on the shape
   }
 }
 
@@ -2135,29 +2019,30 @@ void DiagramEditor::displDOFInfo(Shape* s)
       selIdx = s->getDOFText()->getIndex();
     }
 
-    mediator->handleEditDOF(
-      indcs,
-      dofs,
-      attrIdcs,
-      selIdx);
+    //mediator->handleEditDOF(
+//      indcs,
+//      dofs,
+//      attrIdcs,
+//      selIdx);
 
     vector< double > vals;
     vector< double > yVals;
 
     s->getDOFCol()->getValues(vals);
     s->getDOFColYValues(yVals);
-    mediator->handleDOFColSetValuesEdt(vals, yVals);
+    //mediator->handleDOFColSetValuesEdt(vals, yVals);
 
     vals.clear();
     s->getDOFOpa()->getValues(vals);
     s->getDOFOpaYValues(yVals);
-    mediator->handleDOFOpaSetValuesEdt(vals, yVals);
+    //mediator->handleDOFOpaSetValuesEdt(vals, yVals);
   }
 }
 
 
 void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
 {
+  qDebug() << "handleDragCtr";
   double xCtr, yCtr;
   double xDFC, yDFC;
   double x,    y;

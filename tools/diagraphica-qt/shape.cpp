@@ -1243,9 +1243,11 @@ void Shape::drawNormal(
 void Shape::drawText(double pixelSize)
 {
   string text = note;
-  if (text != "")
+  if (text != "" || variable != "")
   {
-    text.append(" ");
+    if (text != "")
+      text.append(" ");
+
     text.append(variable);
 
     if (!texturesGenerated)
