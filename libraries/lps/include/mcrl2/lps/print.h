@@ -241,24 +241,15 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::deadlock_summand& x)
   {
     derived().enter(x);
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print("(");
-#endif
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.deadlock());
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print(")");
-#endif
     derived().leave(x);
   }
 
   void operator()(const lps::action_summand& x)
   {
     derived().enter(x);
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print("(");
-#endif
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.multi_action());
@@ -266,9 +257,6 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().print("P(");
     print_assignments(x.assignments(), true, "", "", ", ");
     derived().print(")");
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print(")");
-#endif
     derived().leave(x);
   }
 
