@@ -144,6 +144,8 @@ void AttrDiscr::clusterValues(
   {
     throw mcrl2::runtime_error("Error clustering attribute domain.");
   }
+
+  emit changed();
 }
 
 
@@ -187,6 +189,8 @@ void AttrDiscr::moveValue(
   {
     throw mcrl2::runtime_error("Error moving attribute domain value.");
   }
+
+  emit changed();
 }
 
 
@@ -233,6 +237,8 @@ void AttrDiscr::configValues(
   {
     throw mcrl2::runtime_error(string("Error configuring attribute domain values.\n") + string(e.what()));
   }
+
+  emit changed();
 }
 
 
@@ -300,6 +306,7 @@ Value* AttrDiscr::mapToValue(double key)
 void AttrDiscr::clearClusters()
 {
   resetCurValues();
+  emit changed();
 }
 
 

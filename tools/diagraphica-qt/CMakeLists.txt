@@ -40,6 +40,7 @@ qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 
 set(DIAGRAPHICA_MOC_HEADERS
   arcdiagram.h
+  attribute.h
   combnplot.h
   corrlplot.h
   diagram.h

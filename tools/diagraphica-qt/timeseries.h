@@ -60,9 +60,9 @@ class TimeSeries : public Visualizer
 
     void setDiagram(Diagram* dgrm);
     void initAttributes(const std::vector< size_t > attrIdcs);
-    void clearData();
 
   public slots:
+    void clearData();
     void markItems(Cluster* frame);
     void markItems(QList<Cluster*> frames);
 

@@ -36,6 +36,8 @@ Examiner::Examiner(
   connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
+  
+  connect(graph, SIGNAL(deletedAttribute()), this, SLOT(clearData()));
 }
 
 
@@ -177,8 +179,8 @@ void Examiner::clrFrameHistCur()
 void Examiner::clearData()
 {
   clearAttributes();
-  clearDiagram();
   clearFrames();
+  update();
 }
 
 

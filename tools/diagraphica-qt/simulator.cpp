@@ -120,12 +120,20 @@ void Simulator::initFrameCurr(
   m_lastSelectionIndexPrevious = -1;
   m_lastSelectionIndexNext = -1;
 
-  // update new data
-  m_attributes = attrs;
-  m_currentFrame = new Cluster(*frame);
-  initFramesPrevNext();
-  initBundles();
-  sortFramesPrevNext();
+  if (frame)
+  {
+    // update new data
+    m_attributes = attrs;
+    for (size_t i = 0; i < m_attributes.size(); i++)
+    {
+      connect(m_attributes[i], SIGNAL(deleted()), this, SLOT(reset()));
+    }
+
+    m_currentFrame = new Cluster(*frame);
+    initFramesPrevNext();
+    initBundles();
+    sortFramesPrevNext();
+  }
 
   // init & visualize
   dataChanged = true;
@@ -1124,6 +1132,8 @@ void Simulator::markFrameClusts()
 
 void Simulator::clearAttributes()
 {
+  disconnect(this, SLOT(reset()));
+
   m_attributes.clear();
 }
 

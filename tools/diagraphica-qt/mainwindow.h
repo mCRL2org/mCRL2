@@ -41,6 +41,10 @@ class MainWindow : public QMainWindow, public Mediator
     void save(QString filename);
 
   protected slots:
+    void updateAttributes();
+    void updateAttributeOperations();
+    void updateValues();
+    void updateValueOperations();
     void openFile();
     void saveFile();
     void saveFileAs();
@@ -54,7 +58,6 @@ class MainWindow : public QMainWindow, public Mediator
     void modeSelected(QAction* action);
 
     void showAttributeContextMenu(const QPoint &position);
-    void updateAttributeOperations();
 
     void clusterNodes();
     void viewTrace();
@@ -64,6 +67,11 @@ class MainWindow : public QMainWindow, public Mediator
     void duplicateAttribute();
     void renameAttribute();
     void deleteAttribute();
+    void moveAttribute(int index, int newPosition);
+    void groupValues();
+    void ungroupValues();
+    void renameValue();
+    void moveValue(int index, int newPosition);
 
     void routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void toSimulator() { m_simulator->initFrameCurr(m_routingCluster, m_routingClusterAttributes.toVector().toStdVector()); }
@@ -78,6 +86,7 @@ class MainWindow : public QMainWindow, public Mediator
 
   protected:
     QList<int> selectedAttributes();
+    QList<int> selectedValues();
 
   signals:
     void closingGraph();

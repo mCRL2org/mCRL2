@@ -49,6 +49,7 @@ void Attribute::setIndex(const size_t& idx)
 void Attribute::setName(QString name)
 {
   m_name = name;
+  emit renamed();
 }
 
 

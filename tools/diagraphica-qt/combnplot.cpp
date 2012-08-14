@@ -31,8 +31,13 @@ CombnPlot::CombnPlot(
   diagram        = 0;
   showDgrm       = false;
 
-  attributeIndcs = attributeIndices;
-  graph->calcAttrCombn(attributeIndcs, combinations, numberPerComb);
+  for (size_t i = 0; i < attributeIndices.size(); i++)
+  {
+    Attribute *attribute = graph->getAttribute(attributeIndices[i]);
+    attributes.push_back(attribute);
+    connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
+  }
+  graph->calcAttrCombn(attributeIndices, combinations, numberPerComb);
   initLabels();
   calcMaxAttrCard();
   calcMaxNumberPerComb();
@@ -116,7 +121,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
   // get size of 1 pixel
   double pix = pixelSize();
   // get num attributes
-  size_t numAttr = attributeIndcs.size();
+  size_t numAttr = attributes.size();
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -154,7 +159,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
   // get size of 1 pixel
   double pix = pixelSize();
   // get num attributes
-  size_t numAttr = attributeIndcs.size();
+  size_t numAttr = attributes.size();
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -217,7 +222,7 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
-  size_t numAttr = attributeIndcs.size();
+  size_t numAttr = attributes.size();
 
   // color
   VisUtils::setColor(Qt::black);
@@ -266,7 +271,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
-  double numAttr = attributeIndcs.size();
+  double numAttr = attributes.size();
 
   // color
   VisUtils::setColor(Qt::black);
@@ -322,7 +327,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   double hCanv = worldSize().height();
   double pix = pixelSize();
   size_t sizePositions = posBC.size();
-  size_t numAttr = attributeIndcs.size();
+  size_t numAttr = attributes.size();
 
   double yBot;
   if (sizePositions > 0)
@@ -459,12 +464,6 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
     double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
-    vector< Attribute* > attrs;
-    for (size_t i = 0; i < attributeIndcs.size(); ++i)
-    {
-      attrs.push_back(graph->getAttribute(attributeIndcs[i]));
-    }
-
     glPushMatrix();
     glTranslatef(posDgrm.x, posDgrm.y, 0.0);
     glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
@@ -480,7 +479,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
     diagram->visualize(
       inSelectMode,
       pixelSize(),
-      attrs,
+      attributes,
       attrValIdcsDgrm);
 
     VisUtils::setColor(Qt::black);
@@ -510,21 +509,18 @@ void CombnPlot::handleMouseEvent(QMouseEvent* e)
 void CombnPlot::initLabels()
 {
   attributeLabels.clear();
-  for (size_t i = 0; i < attributeIndcs.size(); ++i)
-    attributeLabels.push_back(
-      graph->getAttribute(attributeIndcs[i])->name().toStdString());
+  for (size_t i = 0; i < attributes.size(); ++i)
+    attributeLabels.push_back(attributes[i]->name().toStdString());
 }
 
 
 void CombnPlot::calcMaxAttrCard()
 {
   maxAttrCard = 0;
-  for (size_t i = 0; i < attributeIndcs.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); ++i)
   {
-    if (graph->getAttribute(
-          attributeIndcs[i])->getSizeCurValues() > maxAttrCard)
-      maxAttrCard = graph->getAttribute(
-                      attributeIndcs[i])->getSizeCurValues();
+    if (attributes[i]->getSizeCurValues() > maxAttrCard)
+      maxAttrCard = attributes[i]->getSizeCurValues();
   }
 }
 
@@ -564,24 +560,6 @@ void CombnPlot::displTooltip(const size_t& posIdx)
   if (posIdx < combinations.size())
   {
     msgDgrm.clear();
-    /*
-    for ( int i = 0; i < numAttrs; ++i )
-    {
-        attr = graph->getAttribute( attributeIndcs[i] );
-        msg.append( attr->getName() );
-
-        if ( attr->getSizeCurValues() > 0 )
-        {
-            val = attr->getCurValue( combinations[posIdx][i] );
-            msg.append( " = " );
-            msg.append( val->getValue() );
-        }
-        else
-            msg.append( " " );
-
-        msg.append( "; " );
-    }
-    */
     // number
     msgDgrm.append(Utils::dblToStr(numberPerComb[posIdx]));
     msgDgrm.append("nodes; ");
@@ -603,7 +581,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
-      for (size_t i = 0; i < attributeIndcs.size(); ++i)
+      for (size_t i = 0; i < attributes.size(); ++i)
       {
         attrValIdcsDgrm.push_back(combinations[posIdx][i]);
       }
@@ -633,7 +611,7 @@ void CombnPlot::calcPosBC()
   QSizeF size = worldSize();
   double pix = pixelSize();
   // number of attributes
-  double numAttr = attributeIndcs.size();
+  double numAttr = attributes.size();
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -690,12 +668,9 @@ void CombnPlot::calcPosBC()
 
 void CombnPlot::calcPosCP()
 {
-  // calc positions
-  Attribute* attribute = 0;
-
   QSizeF size = worldSize();
   double pix = pixelSize();
-  size_t numAttr = attributeIndcs.size();
+  size_t numAttr = attributes.size();
 
   double xLft = -0.5*size.width()+25*pix;
   double xRgt =  0.5*size.width()-10*pix;
@@ -712,7 +687,7 @@ void CombnPlot::calcPosCP()
 
   // get number of values per axis
   double numX = combinations.size();
-  double numY = attributeIndcs.size();
+  double numY = attributes.size();
 
   // get intervals per axis
   double fracX = 1;
@@ -739,8 +714,7 @@ void CombnPlot::calcPosCP()
     for (size_t j = 0; j < combinations[i].size(); ++j)
     {
       // calc ratio
-      attribute = graph->getAttribute(attributeIndcs[j]);
-      size_t card  = attribute->getSizeCurValues();
+      size_t card  = attributes[j]->getSizeCurValues();
       if (card > 0)
       {
         double ratio = 1.0; //(double)(idx+1)/(double)(card+1);
@@ -766,8 +740,6 @@ void CombnPlot::calcPosCP()
       }
     }
   }
-
-  attribute = 0;
 }
 
 

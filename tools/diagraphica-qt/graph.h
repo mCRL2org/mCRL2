@@ -147,11 +147,15 @@ class Graph : public QObject
       std::vector< Node* > &nodes);
     size_t calcMaxNumCombns(const std::vector< size_t > &attrIdcs);
 
+  protected slots:
+    void recluster();
+
   signals:
     void startedClusteringNodes(int steps);
     void startedClusteringEdges(int steps);
     void progressedClustering(int steps);
     void clusteringChanged();
+    void deletedAttribute();
 
   protected:
     // -- private utility functions ---------------------------------

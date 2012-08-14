@@ -66,6 +66,7 @@ class Simulator : public Visualizer
 
     // -- utility event handlers ------------------------------------
     void onTimer();
+    void reset() { initFrameCurr(0, std::vector< Attribute* >()); }
 
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);

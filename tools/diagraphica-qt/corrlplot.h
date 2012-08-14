@@ -75,8 +75,8 @@ class CorrlPlot : public Visualizer
     // -- data members ----------------------------------------------
 
     // data
-    size_t attrIdx1;
-    size_t attrIdx2;
+    Attribute *attribute1;
+    Attribute *attribute2;
     std::string xLabel;
     std::string yLabel;
     std::vector< std::vector< size_t > > mapXToY; // for each x idx, 1 or more y indices

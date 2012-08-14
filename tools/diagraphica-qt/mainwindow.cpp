@@ -66,7 +66,12 @@ MainWindow::MainWindow():
   connect(m_ui.actionDuplicate, SIGNAL(triggered()), this, SLOT(duplicateAttribute()));
   connect(m_ui.actionRenameAttribute, SIGNAL(triggered()), this, SLOT(renameAttribute()));
   connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteAttribute()));
+  connect(m_ui.attributes, SIGNAL(itemMoved(int, int)), this, SLOT(moveAttribute(int, int)));
 
+  connect(m_ui.actionGroup, SIGNAL(triggered()), this, SLOT(groupValues()));
+  connect(m_ui.actionUngroup, SIGNAL(triggered()), this, SLOT(ungroupValues()));
+  connect(m_ui.actionRenameValue, SIGNAL(triggered()), this, SLOT(renameValue()));
+  connect(m_ui.domain, SIGNAL(itemMoved(int, int)), this, SLOT(moveValue(int, int)));
 }
 
 static void stretch(QWidget *widget)
@@ -172,26 +177,7 @@ void MainWindow::open(QString filename)
   connect(m_arcDiagram, SIGNAL(clickedCluster(Cluster *)), m_timeSeries, SLOT(markItems(Cluster *)));
   connect(m_graph, SIGNAL(clusteringChanged()), this, SLOT(updateArcDiagramMarks()));
 
-  m_ui.attributes->setRowCount(0);
-  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
-  {
-    m_ui.attributes->insertRow(i);
-    for (int j = 0; j < m_ui.attributes->columnCount(); j++)
-    {
-      m_ui.attributes->setItem(i, j, new QTableWidgetItem());
-      m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
-    }
-
-    Attribute *attribute = m_graph->getAttribute(i);
-    m_ui.attributes->item(i, 0)->setText(QString::number(i));
-    m_ui.attributes->item(i, 1)->setText(attribute->name());
-    m_ui.attributes->item(i, 2)->setText(attribute->type());
-    m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
-  }
-
-  m_ui.attributes->resizeColumnsToContents();
-
-  updateAttributeOperations();
+  updateAttributes();
 }
 
 void MainWindow::save(QString filename)
@@ -212,6 +198,91 @@ void MainWindow::save(QString filename)
     QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
     return;
   }
+}
+
+void MainWindow::updateAttributes()
+{
+  m_ui.attributes->setRowCount(m_graph->getSizeAttributes());
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
+  {
+    for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+    {
+      m_ui.attributes->setItem(i, j, new QTableWidgetItem());
+      m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+    }
+
+    Attribute *attribute = m_graph->getAttribute(i);
+    m_ui.attributes->item(i, 0)->setText(QString::number(i));
+    m_ui.attributes->item(i, 1)->setText(attribute->name());
+    m_ui.attributes->item(i, 2)->setText(attribute->type());
+    m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
+  }
+
+  m_ui.attributes->resizeColumnsToContents();
+  updateAttributeOperations();
+}
+
+void MainWindow::updateAttributeOperations()
+{
+  QList<int> attributes = selectedAttributes();
+  int items = attributes.size();
+
+  m_ui.actionClusterNodes->setEnabled(items > 0);
+  m_ui.actionViewTrace->setEnabled(items > 0 && traceMode());
+  m_ui.actionDistributionPlot->setEnabled(items == 1);
+  m_ui.actionCorrelationPlot->setEnabled(items == 2);
+  m_ui.actionCombinationPlot->setEnabled(items > 0);
+  m_ui.actionDuplicate->setEnabled(items == 1);
+  m_ui.actionRenameAttribute->setEnabled(items == 1);
+  m_ui.actionDelete->setEnabled(items > 0);
+
+  updateValues();
+}
+
+void MainWindow::updateValues()
+{
+  QList<int> attributes = selectedAttributes();
+  if (attributes.size() == 1)
+  {
+    assert(attributes[0] < int(m_graph->getSizeAttributes()));
+
+    std::vector<size_t> valueDistribution;
+    m_graph->calcAttrDistr(attributes[0], valueDistribution);
+
+    Attribute *attribute = m_graph->getAttribute(attributes[0]);
+    m_ui.domain->setRowCount(attribute->getSizeCurValues());
+    for (size_t i = 0; i < attribute->getSizeCurValues(); i++)
+    {
+      Value *value = attribute->getCurValue(i);
+
+      for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+      {
+        m_ui.domain->setItem(i, j, new QTableWidgetItem());
+        m_ui.domain->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+      }
+
+      m_ui.domain->item(i, 0)->setText(QString::number(i));
+      m_ui.domain->item(i, 1)->setText(QString::fromStdString(value->getValue()));
+      m_ui.domain->item(i, 2)->setText(QString::number(valueDistribution[i]));
+      m_ui.domain->item(i, 3)->setText(QString::number(100 * valueDistribution[i] / (double)m_graph->getSizeNodes()));
+    }
+  }
+  else
+  {
+    m_ui.domain->setRowCount(0);
+  }
+
+  updateValueOperations();
+}
+
+void MainWindow::updateValueOperations()
+{
+  QList<int> values = selectedValues();
+  int items = values.size();
+
+  m_ui.actionGroup->setEnabled(items > 1);
+  m_ui.actionUngroup->setEnabled(items > 0);
+  m_ui.actionRenameValue->setEnabled(items == 1);
 }
 
 void MainWindow::openFile()
@@ -288,48 +359,6 @@ void MainWindow::showAttributeContextMenu(const QPoint &position)
   m_ui.menuAttributes->popup(m_ui.attributes->viewport()->mapToGlobal(position));
 }
 
-void MainWindow::updateAttributeOperations()
-{
-  QList<int> attributes = selectedAttributes();
-  int items = attributes.size();
-
-  m_ui.actionClusterNodes->setEnabled(items > 0);
-  m_ui.actionViewTrace->setEnabled(items > 0);
-  m_ui.actionDistributionPlot->setEnabled(items == 1);
-  m_ui.actionCorrelationPlot->setEnabled(items == 2);
-  m_ui.actionCombinationPlot->setEnabled(items > 0);
-  m_ui.actionDuplicate->setEnabled(items == 1);
-  m_ui.actionRenameAttribute->setEnabled(items == 1);
-  m_ui.actionDelete->setEnabled(items > 0);
-
-  m_ui.domain->setRowCount(0);
-  if (attributes.size() == 1)
-  {
-    assert(attributes[0] < int(m_graph->getSizeAttributes()));
-
-    std::vector<size_t> valueDistribution;
-    m_graph->calcAttrDistr(attributes[0], valueDistribution);
-
-    Attribute *attribute = m_graph->getAttribute(attributes[0]);
-    for (size_t i = 0; i < attribute->getSizeCurValues(); i++)
-    {
-      Value *value = attribute->getCurValue(i);
-
-      m_ui.domain->insertRow(i);
-      for (int j = 0; j < m_ui.attributes->columnCount(); j++)
-      {
-        m_ui.domain->setItem(i, j, new QTableWidgetItem());
-        m_ui.domain->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
-      }
-
-      m_ui.domain->item(i, 0)->setText(QString::number(i));
-      m_ui.domain->item(i, 1)->setText(QString::fromStdString(value->getValue()));
-      m_ui.domain->item(i, 2)->setText(QString::number(valueDistribution[i]));
-      m_ui.domain->item(i, 3)->setText(QString::number(100 * valueDistribution[i] / (double)m_graph->getSizeNodes()));
-    }
-  }
-}
-
 void MainWindow::clusterNodes()
 {
   QList<int> attributes = selectedAttributes();
@@ -404,18 +433,77 @@ void MainWindow::combinationPlot()
 
 void MainWindow::duplicateAttribute()
 {
-
+  std::vector<size_t> attributes;
+  attributes.push_back(selectedAttributes().first());
+  m_graph->duplAttributes(attributes);
+  updateAttributes();
 }
 
 void MainWindow::renameAttribute()
 {
-
+  Attribute *attribute = m_graph->getAttribute(selectedAttributes().first());
+  bool ok;
+  QString name = QInputDialog::getText(this, "Rename attribute", "Please enter a new name for attribute '" + attribute->name() + "'.", QLineEdit::Normal, attribute->name(), &ok);
+  if (ok)
+  {
+    attribute->setName(name);
+    updateAttributes();
+  }
 }
 
 void MainWindow::deleteAttribute()
 {
-
+  int attribute = selectedAttributes().first();
+  if(QMessageBox::question(this, "Confirm attribute delete", "Are you sure you want to delete attribute '" + m_graph->getAttribute(attribute)->name() + "'?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+  {
+    m_graph->deleteAttribute(attribute);
+    updateAttributes();
+  }
 }
+
+void MainWindow::moveAttribute(int index, int newPosition)
+{
+  m_graph->moveAttribute(index, newPosition);
+  updateAttributes();
+}
+
+void MainWindow::groupValues()
+{
+  bool ok;
+  QString name = QInputDialog::getText(this, "Group values", "Enter a new name for the value group.", QLineEdit::Normal, QString(), &ok);
+  if (ok)
+  {
+    m_graph->getAttribute(selectedAttributes().first())->clusterValues(selectedValues().toVector().toStdVector(), name.toStdString());
+    updateValues();
+  }
+}
+
+void MainWindow::ungroupValues()
+{
+  m_graph->getAttribute(selectedAttributes().first())->clearClusters();
+  updateValues();
+}
+
+void MainWindow::renameValue()
+{
+  Value *value = m_graph->getAttribute(selectedAttributes().first())->getCurValue(selectedValues().first());
+  bool ok;
+  QString oldName = QString::fromStdString(value->getValue());
+  QString name = QInputDialog::getText(this, "Rename attribute", "Please enter a new name for attribute '" + oldName + "'.", QLineEdit::Normal, oldName, &ok);
+  if (ok)
+  {
+    value->setValue(name.toStdString());
+    updateValues();
+  }
+}
+
+void MainWindow::moveValue(int index, int newPosition)
+{
+  m_graph->getAttribute(selectedAttributes().first())->moveValue(index, newPosition);
+  updateValues();
+}
+
+
 
 
 void MainWindow::routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes)
@@ -534,6 +622,23 @@ QList<int> MainWindow::selectedAttributes()
 {
   QMap<int, int> output;
   QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
+  for (int i = 0; i < ranges.size(); i++)
+  {
+    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
+    {
+      if (!output.contains(j))
+      {
+        output[j] = j;
+      }
+    }
+  }
+  return output.values();
+}
+
+QList<int> MainWindow::selectedValues()
+{
+  QMap<int, int> output;
+  QList<QTableWidgetSelectionRange> ranges = m_ui.domain->selectedRanges();
   for (int i = 0; i < ranges.size(); i++)
   {
     for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)

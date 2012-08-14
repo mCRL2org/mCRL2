@@ -56,8 +56,6 @@ class Examiner : public Visualizer
       QList<Cluster*> frames,
       const std::vector< Attribute* > &attrs);
 
-    void clearData();
-
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 
@@ -68,6 +66,7 @@ class Examiner : public Visualizer
     void handleKeyEvent(QKeyEvent* e);
 
   protected slots:
+    void clearData();
     void clrFrameHistCur();
 
   signals:

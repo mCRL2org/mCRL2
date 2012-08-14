@@ -137,6 +137,8 @@ void Graph::moveAttribute(
   {
     throw mcrl2::runtime_error("Error moving attribute.");
   }
+
+  attributes[idxTo]->emitMoved(idxTo);
 }
 
 
@@ -251,6 +253,8 @@ void Graph::duplAttributes(const vector< size_t > &idcs)
             insIdx + i,
             nodes[j]->getTupleVal(idcs[i]));
       }
+
+      attributes[idcs[i]]->emitDuplicated();
     }
   }
 }
@@ -289,9 +293,8 @@ void Graph::deleteAttribute(const size_t& idx)
     clustNodesOnAttr(idcsNewClust);
   }
 
+  Attribute *attribute = attributes[idx];
   // update attributes & nodes
-  delete attributes[idx];
-  attributes[idx] = 0;
   attributes.erase(attributes.begin() + idx);
   {
     for (size_t i = idx; i < attributes.size(); ++i)
@@ -307,6 +310,10 @@ void Graph::deleteAttribute(const size_t& idx)
       nodes[i]->delTupleVal(idx);
     }
   }
+
+  attribute->emitDeleted();
+  delete attribute;
+  emit deletedAttribute();
 }
 
 
@@ -1135,6 +1142,12 @@ void Graph::clustNodesOnAttr(const vector< size_t > &attrIdcs)
   size_t progress       = 0;
   vector< size_t > idcs = attrIdcs;
 
+  disconnect(this, SLOT(recluster()));
+  for (size_t i = 0; i < attrIdcs.size(); i++)
+  {
+    connect(getAttribute(attrIdcs[i]), SIGNAL(changed()), this, SLOT(recluster()));
+  }
+
   // cluster nodes
   emit startedClusteringNodes(calcMaxNumCombns(attrIdcs));
   clustNodesOnAttr(root, idcs, progress);
@@ -1263,6 +1276,17 @@ size_t Graph::calcMaxNumCombns(const vector< size_t > &attrIdcs)
 
   attribute = 0;
   return combinations;
+}
+
+
+void Graph::recluster()
+{
+  std::vector<size_t> attributes;
+  for(Cluster *cluster = getLeaf(0); cluster != getRoot(); cluster = cluster->getParent())
+  {
+    attributes.insert(attributes.begin(), cluster->getAttribute()->getIndex());
+  }
+  clustNodesOnAttr(attributes);
 }
 
 

@@ -25,8 +25,10 @@
 #define NON_EXISTING (size_t)(-1)
 #endif
 
-class Attribute
+class Attribute : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Attribute(
@@ -68,6 +70,18 @@ class Attribute
 
     // -- clear functions -------------------------------------------
     virtual void clearClusters() = 0;
+
+  public:
+    void emitDuplicated() { emit duplicated(); }
+    void emitDeleted() { emit deleted(); }
+    void emitMoved(int newPosition) { emit moved(newPosition); }
+
+  signals:
+    void changed();
+    void duplicated();
+    void renamed();
+    void deleted();
+    void moved(int newPosition);
 
   protected:
     // -- private utility functions ---------------------------------

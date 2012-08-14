@@ -30,9 +30,12 @@ CorrlPlot::CorrlPlot(
   attrValIdx1Dgrm = NON_EXISTING;
   attrValIdx2Dgrm = NON_EXISTING;
 
-  attrIdx1 = attributeIndex1;
-  attrIdx2 = attributeIndex2;
-  graph->calcAttrCorrl(attrIdx1, attrIdx2, mapXToY, number);
+  attribute1 = graph->getAttribute(attributeIndex1);
+  attribute2 = graph->getAttribute(attributeIndex2);
+  connect(attribute1, SIGNAL(deleted()), this, SLOT(close()));
+  connect(attribute2, SIGNAL(deleted()), this, SLOT(close()));
+
+  graph->calcAttrCorrl(attributeIndex1, attributeIndex2, mapXToY, number);
   initLabels();
   calcMaxNumber();
   calcPositions();
@@ -224,8 +227,8 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
   vector< Attribute* > attrs;
-  attrs.push_back(graph->getAttribute(attrIdx1));
-  attrs.push_back(graph->getAttribute(attrIdx2));
+  attrs.push_back(attribute1);
+  attrs.push_back(attribute2);
 
   vector< double > vals;
   vals.push_back(attrValIdx1Dgrm);
@@ -275,16 +278,8 @@ void CorrlPlot::handleMouseEvent(QMouseEvent* e)
 
 void CorrlPlot::initLabels()
 {
-  if (attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING)
-  {
-    xLabel = graph->getAttribute(attrIdx1)->name().toStdString();
-    yLabel = graph->getAttribute(attrIdx2)->name().toStdString();
-  }
-  else
-  {
-    xLabel = "";
-    yLabel = "";
-  }
+  xLabel = attribute1->name().toStdString();
+  yLabel = attribute2->name().toStdString();
 }
 
 
@@ -296,23 +291,16 @@ void CorrlPlot::calcMaxNumber()
   maxNumber  = 0;
 
   // init max row & col numbers
-  if (attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING)
+  size_t sizeX = attribute1->getSizeCurValues();
+  size_t sizeY = attribute2->getSizeCurValues();
+  for (size_t i = 0; i < sizeX; ++i)
   {
-    size_t sizeX = graph->getAttribute(attrIdx1)->getSizeCurValues();
-    size_t sizeY = graph->getAttribute(attrIdx2)->getSizeCurValues();
-    {
-      for (size_t i = 0; i < sizeX; ++i)
-      {
-        maxNumX.push_back(0);
-      }
-    }
+    maxNumX.push_back(0);
+  }
 
-    {
-      for (size_t i = 0; i < sizeY; ++i)
-      {
-        maxNumY.push_back(0);
-      }
-    }
+  for (size_t i = 0; i < sizeY; ++i)
+  {
+    maxNumY.push_back(0);
   }
 
   // calc max
@@ -375,18 +363,6 @@ void CorrlPlot::displTooltip(
   const int& yIdx)
 {
   msgDgrm.clear();
-  /*
-  // x-axis label
-  msgDgrm.append( xLabel );
-  msgDgrm.append( ": " );
-  msgDgrm.append( graph->getAttribute( attrIdx1 )->getCurValue( xIdx )->getValue() );
-  msgDgrm.append( "; " );
-  // y-axis label
-  msgDgrm.append( yLabel );
-  msgDgrm.append( ": " );
-  msgDgrm.append( graph->getAttribute( attrIdx2 )->getCurValue( mapXToY[xIdx][yIdx] )->getValue() );
-  msgDgrm.append( "; " );
-  */
   // number
   msgDgrm.append(Utils::dblToStr(number[xIdx][ yIdx ]));
   msgDgrm.append(" nodes; ");
@@ -428,8 +404,8 @@ void CorrlPlot::calcPositions()
     double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
-    double numX = graph->getAttribute(attrIdx1)->getSizeCurValues();
-    double numY = graph->getAttribute(attrIdx2)->getSizeCurValues();
+    double numX = attribute1->getSizeCurValues();
+    double numY = attribute2->getSizeCurValues();
 
     // calc intervals per axis
     double fracX = 1.0;

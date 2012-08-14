@@ -83,7 +83,7 @@ class CombnPlot : public Visualizer
 
     // data
     std::vector< std::string >        attributeLabels;
-    std::vector< size_t >           attributeIndcs;
+    std::vector< Attribute *> attributes;
     size_t                     maxAttrCard;
     std::vector< std::vector< size_t > > combinations;
     std::vector< size_t >           numberPerComb;

@@ -74,7 +74,7 @@ class DistrPlot : public Visualizer
 
     // -- data members ----------------------------------------------
     // data
-    size_t              attrIdx;
+    Attribute *attribute;
     std::vector< size_t >    number;
     size_t              maxNumber;
     // vis settings

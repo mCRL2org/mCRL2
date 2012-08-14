@@ -28,8 +28,9 @@ DistrPlot::DistrPlot(
   showDgrm       = false;
   attrValIdxDgrm = -1;
 
-  attrIdx = attributeIndex;
-  graph->calcAttrDistr(attrIdx, number);
+  attribute = graph->getAttribute(attributeIndex);
+  connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
+  graph->calcAttrDistr(attributeIndex, number);
   calcMaxNumber();
   calcPositions();
 }
@@ -141,7 +142,7 @@ void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
   if (number.size() > 0)
   {
     // x-axis label
-    string xLabel = graph->getAttribute(attrIdx)->name().toStdString();
+    string xLabel = attribute->name().toStdString();
     x =  0.0;
     y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
@@ -215,7 +216,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
     vector< Attribute* > attrs;
-    attrs.push_back(graph->getAttribute(attrIdx));
+    attrs.push_back(attribute);
     vector< double > vals;
     vals.push_back(attrValIdxDgrm);
 
@@ -296,12 +297,11 @@ void DistrPlot::displTooltip(const size_t& posIdx)
 {
   if (posIdx < number.size())
   {
-    Attribute* attr = graph->getAttribute(attrIdx);
-    string xLabel   = attr->name().toStdString();
+    string xLabel   = attribute->name().toStdString();
     string value    = "";
-    if (posIdx < static_cast <size_t>(attr->getSizeCurValues()))
+    if (posIdx < static_cast <size_t>(attribute->getSizeCurValues()))
     {
-      value = attr->getCurValue(posIdx)->getValue();
+      value = attribute->getCurValue(posIdx)->getValue();
     }
 
     msgDgrm.clear();
@@ -332,9 +332,6 @@ void DistrPlot::displTooltip(const size_t& posIdx)
       showDgrm = true;
       attrValIdxDgrm = posIdx;
     }
-
-    // free memory
-    attr = 0;
   }
 }
 
@@ -357,7 +354,7 @@ void DistrPlot::calcPositions()
     double yBot = -0.5*size.width()+20*pix;
 
     // get number of values per axis
-    double numX = graph->getAttribute(attrIdx)->getSizeCurValues();
+    double numX = attribute->getSizeCurValues();
 
     // get intervals for x-axis
     double fracX = 1.0;

@@ -205,7 +205,9 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
   // init new attributes
   for (size_t i = 0; i < attrIdcs.size(); ++i)
   {
-    attributes.push_back(graph->getAttribute(attrIdcs[i]));
+    Attribute *attribute = graph->getAttribute(attrIdcs[i]);
+    attributes.push_back(attribute);
+    connect(attribute, SIGNAL(deleted()), this, SLOT(clearData()));
   }
 
   dataChanged = true;
@@ -725,7 +727,8 @@ void TimeSeries::clearDiagram()
 
 void TimeSeries::clearAttributes()
 {
-  // association
+  disconnect(this, SLOT(clearData()));
+
   attributes.clear();
 }
 
