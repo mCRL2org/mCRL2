@@ -179,11 +179,11 @@ ProcExpr
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
   | ProcExpr ('+' $binary_op_left 1) ProcExpr
-  | 'sum' VarsDeclList '.' ProcExpr             $unary_right  2
+  | 'sum' VarsDeclList '.' ProcExpr $unary_right  2
   | ProcExpr ('||' $binary_op_right 3) ProcExpr
   | ProcExpr ('||_' $binary_op_right 4) ProcExpr
-  | DataExprUnit '->' ProcExpr                  $unary_right  5
-  | DataExprUnit IfThen ProcExpr                $unary_right  5
+  | (DataExprUnit '->' $unary_op_right 5) ProcExpr
+  | (DataExprUnit IfThen $unary_op_right 5) ProcExpr
   | ProcExpr ('<<' $binary_op_left 6) ProcExpr
   | ProcExpr ('.' $binary_op_right 7) ProcExpr
   | ProcExpr ('@' $binary_op_left 8) DataExprUnit
@@ -205,7 +205,7 @@ ProcExprNoIf
   | 'sum' VarsDeclList '.' ProcExprNoIf         $unary_right  2
   | ProcExprNoIf ('||' $binary_op_right 3) ProcExprNoIf
   | ProcExprNoIf ('||_' $binary_op_right 3) ProcExprNoIf
-  | DataExprUnit IfThen ProcExprNoIf            $unary_right  4
+  | (DataExprUnit IfThen $unary_op_right 4) ProcExprNoIf
   | ProcExprNoIf ('<<' $binary_op_left 5) ProcExprNoIf
   | ProcExprNoIf ('.' $binary_op_right 6) ProcExprNoIf
   | ProcExprNoIf ('@' $binary_op_left 7) DataExprUnit
