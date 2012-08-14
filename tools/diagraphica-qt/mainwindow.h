@@ -185,13 +185,6 @@ class MainWindow : public QMainWindow, public Mediator
     virtual void handleUnlinkDOFAttr(const size_t DOFIdx) {}
     virtual void handleDOFFrameDestroy() {}
     virtual void handleDOFDeselect() {}
-
-    virtual void markTimeSeries(
-      Colleague* sender,
-      Cluster* currFrame) {}
-    virtual void markTimeSeries(
-      Colleague* sender,
-      const std::vector< Cluster* > frames) {}
 };
 
 #endif

@@ -30,11 +30,9 @@ int ArcDiagram::SEGM_HINT_LQ    = 12;
 
 ArcDiagram::ArcDiagram(
     QWidget *parent,
-    Mediator* m,
     Settings* s,
     Graph* g)
   : Visualizer(parent, g),
-    Colleague(m),
     settings(s)
 {
   idxInitStLeaves    = NON_EXISTING;
@@ -1605,7 +1603,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
-          mediator->markTimeSeries(this, graph->getLeaf(ids[2]));
+          emit clickedCluster(graph->getLeaf(ids[2]));
         }
         else
         {

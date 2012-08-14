@@ -140,7 +140,7 @@ void MainWindow::open(QString filename)
   connect(m_examiner, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
   connect(m_examiner, SIGNAL(selectionChanged()), this, SLOT(updateArcDiagramMarks()));
 
-  m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, this, &m_settings, m_graph);
+  m_arcDiagram = new ArcDiagram(m_ui.arcDiagramWidget, &m_settings, m_graph);
   m_arcDiagram->setDiagram(m_diagramEditor->diagram());
   stretch(m_arcDiagram);
   connect(m_arcDiagram, SIGNAL(routingCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)), this, SLOT(routeCluster(Cluster *, QList<Cluster *>, QList<Attribute *>)));
@@ -161,6 +161,8 @@ void MainWindow::open(QString filename)
   connect(m_timeSeries, SIGNAL(hoverCluster(Cluster *, QList<Attribute *>)), this, SLOT(updateArcDiagramMarks()));
   connect(m_timeSeries, SIGNAL(marksChanged()), this, SLOT(updateArcDiagramMarks()));
   connect(m_timeSeries, SIGNAL(animationChanged()), this, SLOT(updateArcDiagramMarks()));
+
+  connect(m_arcDiagram, SIGNAL(clickedCluster(Cluster *)), m_timeSeries, SLOT(markItems(Cluster *)));
 
   m_ui.attributes->setRowCount(0);
   for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)

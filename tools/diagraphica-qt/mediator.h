@@ -115,13 +115,6 @@ class Mediator
     virtual void handleUnlinkDOFAttr(const size_t DOFIdx) = 0;
     virtual void handleDOFFrameDestroy() = 0;
     virtual void handleDOFDeselect() = 0;
-
-    virtual void markTimeSeries(
-      Colleague* sender,
-      Cluster* currFrame) = 0;
-    virtual void markTimeSeries(
-      Colleague* sender,
-      const std::vector< Cluster* > frames) = 0;
 };
 
 #endif

@@ -62,9 +62,11 @@ class TimeSeries : public Visualizer
     void initAttributes(const std::vector< size_t > attrIdcs);
     void clearData();
 
+  public slots:
     void markItems(Cluster* frame);
     void markItems(QList<Cluster*> frames);
 
+  public:
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 

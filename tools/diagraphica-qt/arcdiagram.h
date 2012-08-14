@@ -24,7 +24,6 @@
 #include <map>
 #include <vector>
 #include <QTimer>
-#include "colleague.h"
 #include "diagram.h"
 #include "graph.h"
 #include "settings.h"
@@ -40,14 +39,13 @@ enum RenderMode
   HitRender
 };
 
-class ArcDiagram : public Visualizer, public Colleague
+class ArcDiagram : public Visualizer
 {
   Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
         QWidget *parent,
-        Mediator* m,
         Settings* s,
         Graph* g);
     virtual ~ArcDiagram();
@@ -86,6 +84,7 @@ class ArcDiagram : public Visualizer, public Colleague
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
+    void clickedCluster(Cluster *cluster);
 
   protected:
     // -- utility drawing functions ---------------------------------
