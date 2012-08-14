@@ -18,6 +18,7 @@
 MainWindow::MainWindow():
   m_settingsDialog(new SettingsDialog(this, &m_settings)),
   m_graph(0),
+  m_clusteringProgress("Clustering...", QString(), 0, 1, this),
   m_examiner(0),
   m_arcDiagram(0),
   m_simulator(0),
@@ -75,7 +76,7 @@ static void stretch(QWidget *widget)
 
 void MainWindow::open(QString filename)
 {
-  Graph *graph = new Graph(this);
+  Graph *graph = new Graph;
   graph->setFileName(filename);
   try
   {
@@ -115,6 +116,12 @@ void MainWindow::open(QString filename)
   }
 
   m_graph = graph;
+
+  connect(m_graph, SIGNAL(startedClusteringNodes(int)), &m_clusteringProgress, SLOT(setMaximum(int)));
+  connect(m_graph, SIGNAL(startedClusteringNodes(int)), &m_clusteringProgress, SLOT(show()));
+  connect(m_graph, SIGNAL(startedClusteringEdges(int)), &m_clusteringProgress, SLOT(setMaximum(int)));
+  connect(m_graph, SIGNAL(startedClusteringEdges(int)), &m_clusteringProgress, SLOT(show()));
+  connect(m_graph, SIGNAL(progressedClustering(int)), &m_clusteringProgress, SLOT(setValue(int)));
 
   m_ui.numberOfStates->setText(QString::number(m_graph->getSizeNodes()));
   m_ui.numberOfTransitions->setText(QString::number(m_graph->getSizeEdges()));
@@ -163,6 +170,7 @@ void MainWindow::open(QString filename)
   connect(m_timeSeries, SIGNAL(animationChanged()), this, SLOT(updateArcDiagramMarks()));
 
   connect(m_arcDiagram, SIGNAL(clickedCluster(Cluster *)), m_timeSeries, SLOT(markItems(Cluster *)));
+  connect(m_graph, SIGNAL(clusteringChanged()), this, SLOT(updateArcDiagramMarks()));
 
   m_ui.attributes->setRowCount(0);
   for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
@@ -324,12 +332,24 @@ void MainWindow::updateAttributeOperations()
 
 void MainWindow::clusterNodes()
 {
-
+  QList<int> attributes = selectedAttributes();
+  std::vector<size_t> attributeVector;
+  for (int i = 0; i < attributes.size(); i++)
+  {
+    attributeVector.push_back(attributes[i]);
+  }
+  m_graph->clustNodesOnAttr(attributeVector);
 }
 
 void MainWindow::viewTrace()
 {
-
+  QList<int> attributes = selectedAttributes();
+  std::vector<size_t> attributeVector;
+  for (int i = 0; i < attributes.size(); i++)
+  {
+    attributeVector.push_back(attributes[i]);
+  }
+  m_timeSeries->initAttributes(attributeVector);
 }
 
 void MainWindow::distributionPlot()
@@ -512,15 +532,18 @@ void MainWindow::updateArcDiagramMarks()
 
 QList<int> MainWindow::selectedAttributes()
 {
-  QList<int> output;
+  QMap<int, int> output;
   QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
   for (int i = 0; i < ranges.size(); i++)
   {
     for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
     {
-      output += m_ui.attributes->item(j, 0)->text().toInt();
+      if (!output.contains(j))
+      {
+        output[j] = j;
+      }
     }
   }
-  return output;
+  return output.values();
 }
 

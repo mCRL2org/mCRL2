@@ -22,18 +22,19 @@
 #include "attrdiscr.h"
 #include "bundle.h"
 #include "cluster.h"
-#include "colleague.h"
 #include "edge.h"
 #include "node.h"
 
 class Mediator;
 
-class Graph : public Colleague
+class Graph : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructors ------------------------------
-    Graph(Mediator* m);
-    virtual ~Graph();
+    Graph();
+    ~Graph();
 
     // -- set functions ---------------------------------------------
     void setFileName(QString filename);
@@ -146,6 +147,12 @@ class Graph : public Colleague
       std::vector< Node* > &nodes);
     size_t calcMaxNumCombns(const std::vector< size_t > &attrIdcs);
 
+  signals:
+    void startedClusteringNodes(int steps);
+    void startedClusteringEdges(int steps);
+    void progressedClustering(int steps);
+    void clusteringChanged();
+
   protected:
     // -- private utility functions ---------------------------------
     void deleteAttributes();
@@ -186,9 +193,6 @@ class Graph : public Colleague
     Cluster*                  root;       // composition
     std::vector< Cluster* >   leaves;     // association
     std::vector< Bundle* >    bundles;    // composition
-
-    // -- constants -------------------------------------------------
-    static int PROGRESS_INTERV_HINT;
 };
 
 #endif

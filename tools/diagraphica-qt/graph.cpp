@@ -14,17 +14,7 @@
 using namespace std;
 
 
-// -- init constants ------------------------------------------------
-
-
-int Graph::PROGRESS_INTERV_HINT = 100;
-
-
-// -- constructors and destructors ----------------------------------
-
-
-Graph::Graph(Mediator* m)
-  : Colleague(m)
+Graph::Graph()
 {
   initRoot();
 }
@@ -296,7 +286,7 @@ void Graph::deleteAttribute(const size_t& idx)
   // init new clustering
   if (idcsNewClust.size() < idcsCurClust.size())
   {
-    mediator->handleAttributeCluster(idcsNewClust);
+    clustNodesOnAttr(idcsNewClust);
   }
 
   // update attributes & nodes
@@ -1142,33 +1132,23 @@ bool Graph::hasMultAttrCombns(
 
 void Graph::clustNodesOnAttr(const vector< size_t > &attrIdcs)
 {
-  size_t combinations   = 0;
   size_t progress       = 0;
   vector< size_t > idcs = attrIdcs;
 
   // cluster nodes
-  combinations = calcMaxNumCombns(attrIdcs);
-  mediator->initProgress(
-    "Clustering",
-    "Clustering nodes",
-    combinations);
+  emit startedClusteringNodes(calcMaxNumCombns(attrIdcs));
   clustNodesOnAttr(root, idcs, progress);
-  mediator->closeProgress();
 
   // update leaves
   updateLeaves();
 
   // update bundles
   progress     = 0;
-  combinations = edges.size();
-  mediator->initProgress(
-    "Clustering",
-    "Bundling edges  ",
-    combinations);
+  emit startedClusteringEdges(edges.size());
   updateBundles(progress);
-  mediator->closeProgress();
 
   idcs.clear();
+  emit clusteringChanged();
 }
 
 
@@ -1366,7 +1346,7 @@ void Graph::clustNodesOnAttr(
     if (attrIdcs.size() == 1)
     {
       progress += getAttribute(attrIdcs[0])->getSizeCurValues();
-      mediator ->updateProgress(progress);
+      emit progressedClustering(progress);
     }
 
     // remove first attribute
@@ -1649,10 +1629,7 @@ void Graph::updateBundles(size_t& progress)
 
       // update progress
       ++progress;
-      if (progress%PROGRESS_INTERV_HINT == 0)
-      {
-        mediator->updateProgress(progress);
-      }
+      emit progressedClustering(progress);
     }
   }
 

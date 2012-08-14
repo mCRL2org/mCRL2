@@ -56,6 +56,8 @@ ArcDiagram::ArcDiagram(
   connect(&settings->clusterTreeColorMap, SIGNAL(changed(int)), this, SLOT(update()));
   connect(&settings->barTreeMagnification, SIGNAL(changed(float)), this, SLOT(update()));
 
+  connect(graph, SIGNAL(clusteringChanged()), this, SLOT(clustersChanged()));
+
   setMouseTracking(true);
 }
 
@@ -1585,6 +1587,19 @@ void ArcDiagram::animate()
 
   updateGL();
   repaint();
+}
+
+
+void ArcDiagram::clustersChanged()
+{
+  attrsTree.clear();
+  for(Cluster *cluster = graph->getLeaf(0); cluster != graph->getRoot(); cluster = cluster->getParent())
+  {
+    attrsTree.insert(attrsTree.begin(), cluster->getAttribute());
+  }
+
+  setDataChanged(true);
+  update();
 }
 
 

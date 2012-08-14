@@ -38,16 +38,7 @@ class Mediator
   public:
     virtual ~Mediator() {}
 
-    virtual void initProgress(
-      const std::string& title,
-      const std::string& msg,
-      const size_t& max) = 0;
-    virtual void updateProgress(const size_t& val) = 0;
-    virtual void closeProgress() = 0;
-
     virtual QColor getColor(QColor col) = 0;
-
-    virtual void handleAttributeCluster(const std::vector< size_t > &indcs) = 0;
 
     virtual void handleNote(const size_t& shapeId, const std::string& msg) = 0;
     virtual void handleEditModeDOF(Colleague* c) = 0;

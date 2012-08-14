@@ -90,6 +90,7 @@ class MainWindow : public QMainWindow, public Mediator
     SettingsDialog *m_settingsDialog;
 
     Graph *m_graph;
+    QProgressDialog m_clusteringProgress;
 
     Examiner *m_examiner;
     ArcDiagram *m_arcDiagram;
@@ -108,16 +109,7 @@ class MainWindow : public QMainWindow, public Mediator
 
 
   public:
-    virtual void initProgress(
-      const std::string& title,
-      const std::string& msg,
-      const size_t& max) {}
-    virtual void updateProgress(const size_t& val) {}
-    virtual void closeProgress() {}
-
     virtual QColor getColor(QColor col) { return col; }
-
-    virtual void handleAttributeCluster(const std::vector< size_t > &indcs) {}
 
     virtual void handleNote(const size_t& shapeId, const std::string& msg) {}
     virtual void handleEditModeDOF(Colleague* c) {}

@@ -118,6 +118,8 @@ class ArcDiagram : public Visualizer
     // -- utility event handlers ------------------------------------
   protected slots:
     void animate();
+    void clustersChanged();
+
   protected:
     void handleHits(const std::vector< int > &ids);
 

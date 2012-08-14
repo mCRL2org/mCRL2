@@ -45,6 +45,7 @@ set(DIAGRAPHICA_MOC_HEADERS
   diagrameditor.h
   distrplot.h
   examiner.h
+  graph.h
   mainwindow.h
   movabletablewidget.h
   parser.h
