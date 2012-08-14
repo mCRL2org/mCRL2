@@ -31,6 +31,7 @@ class MovableTableWidget : public QTableWidget
     int m_lineRow;
 
   signals:
+    void itemMoved(int oldIndex, int newIndex);
     
   public slots:
     void resizeColumnToContents(int column);
