@@ -49,6 +49,20 @@ BOOST_AUTO_TEST_CASE(test_control_flow)
   algorithm.run();
 }
 
+BOOST_AUTO_TEST_CASE(test_control_flow2)
+{
+  std::string text =
+    "pbes nu X(n: Nat, m:Nat) = (val(n == 1) => Y(n)) && (val(n == 2) => Y(m)); \n"
+    "     nu Y(p: Nat)  = X(p,p);         \n"
+    "init X(1,0); \n"
+    ;
+  pbes<> p = txt2pbes(text, false);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+
+  detail::pbes_control_flow_algorithm algorithm(p);
+  algorithm.run();
+}
+
 BOOST_AUTO_TEST_CASE(test_source_dest1)
 {
   std::string text =
