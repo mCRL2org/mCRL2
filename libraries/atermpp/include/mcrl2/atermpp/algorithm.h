@@ -40,15 +40,9 @@ UnaryFunction for_each(Term t, UnaryFunction op)
 template <typename Term, typename MatchPredicate>
 aterm_appl find_if(Term t, MatchPredicate match)
 {
-  try
-  {
-    detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match);
-  }
-  catch (detail::found_term_exception& e)
-  {
-    return e.t;
-  }
-  return aterm_appl();
+  aterm_appl output;
+  detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, output);
+  return output;
 }
 
 /// \brief Finds a subterm of t that matches a given predicate.

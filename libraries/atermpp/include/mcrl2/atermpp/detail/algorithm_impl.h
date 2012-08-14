@@ -156,31 +156,40 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 }
 
 /// \brief Implements the find_if algorithm
-/// If the term t is found, an exception of type found_term_exception is thrown
+/// If the term t is found, it is stored in output and true is returned
 /// \param t A term
 /// \param match A predicate function on terms
+/// \param output The variable to store the match in
+/// \return true if a match was found, false otherwise
 template <typename MatchPredicate>
-void find_if_impl(aterm t, MatchPredicate match)
+bool find_if_impl(const aterm& t, const MatchPredicate& match, aterm_appl& output)
 {
-  if (t.type() == AT_APPL)
+  switch (t.type())
   {
-    if (match(aterm_appl(t)))
+  case AT_APPL:
     {
-      throw found_term_exception(aterm_appl(t)); // report the match
+      aterm_appl appl(t);
+      if (match(appl))
+      {
+        output = appl;
+        return true;
+      }
+      for (aterm_appl::iterator i = appl.begin(); i != appl.end(); ++i)
+      {
+        if (find_if_impl(*i, match, output))
+          return true;
+      }
     }
-    for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
-    {
-      find_if_impl(*i, match);
-    }
-  }
-
-  if (t.type() == AT_LIST)
-  {
+    break;
+  case AT_LIST:
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
-      find_if_impl(*i, match);
+      if (find_if_impl(*i, match, output))
+        return true;
     }
+    break;
   }
+  return false;
 }
 
 /// \brief Implements the find_all_if algorithm
