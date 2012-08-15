@@ -16,6 +16,7 @@
 #include "graph.h"
 #include "shape.h"
 #include "dof.h"
+#include "colorchooser.h"
 
 namespace Ui {
   class DofDialog;
@@ -31,6 +32,10 @@ class DofDialog : public QDialog
   public slots:
     void attributeSelected(int index);
 
+  protected slots:
+    void colorActivated() { emit dofActivated(5); }
+    void opacityActivated() { emit dofActivated(6); }
+
   signals:
     void dofActivated(int dofIndex);
 
@@ -39,6 +44,9 @@ class DofDialog : public QDialog
 
   private:
     Ui::DofDialog m_ui;
+    ColorChooser *m_colorChooser;
+    ColorChooser *m_opacityChooser;
+
     Graph* m_graph;
     Shape* m_shape;
 

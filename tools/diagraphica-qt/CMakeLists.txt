@@ -41,6 +41,7 @@ qt4_wrap_ui(DIAGRAPHICA_UI_HEADERS ${DIAGRAPHICA_UI_FILES})
 set(DIAGRAPHICA_MOC_HEADERS
   arcdiagram.h
   attribute.h
+  colorchooser.h
   combnplot.h
   corrlplot.h
   diagram.h
@@ -83,7 +84,6 @@ set(DIAGRAPHICA_SRC_FILES
   mainwindow.cpp
   movabletablewidget.cpp
   node.cpp
-  opacitychooser.cpp
   parser.cpp
   settingsdialog.cpp
   shape.cpp

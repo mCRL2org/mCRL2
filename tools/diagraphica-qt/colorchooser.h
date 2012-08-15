@@ -18,58 +18,44 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-#include "colleague.h"
+#include "dof.h"
 #include "graph.h"
 #include "shape.h"
 #include "utils.h"
 #include "visualizer.h"
 
-class ColorChooser : public Visualizer, public Colleague
+class ColorChooser : public Visualizer
 {
+  Q_OBJECT
+
   public:
-    // -- constructors and destructor -------------------------------
-    ColorChooser(
-      QWidget *parent,
-      Mediator* m,
-      Graph* g);
-    virtual ~ColorChooser();
+    enum ColorType { HueColor, OpacityColor };
+    ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorType type);
 
-    // -- set functions ---------------------------------------------
-    void setActive(const bool& flag);
-    void setPoints(
-      const std::vector< double > &hue,
-      const std::vector< double > &y);
-
-    // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 
-    // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
 
+  signals:
+    void activated();
+    void deactivated();
+
   protected:
-    // -- utility drawing functions ---------------------------------
     void drawColorSpectrum();
+    void drawGrayScale();
     void drawPath(const bool& inSelectMode);
     void drawPoints(const bool& inSelectMode);
 
-    // -- utility event handlers ------------------------------------
-    void handleHits(const std::vector< int > &ids);
+    void handleHits(const std::vector<int> &ids);
     void handleDrag();
 
-    // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    void processHits(GLint hits, GLuint buffer[]);
 
-    // -- data members ----------------------------------------------
-    bool active;
-
-    std::vector< double > positionsX;
-    std::vector< double > positionsY;
-    size_t dragIdx;
-
-    // vis settings
-    double hdlSize;
+  protected:
+    DOF *m_dof;
+    QList<double> *m_yCoordinates;
+    ColorType m_type;
+    size_t m_dragIdx;
 };
 
 #endif

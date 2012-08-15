@@ -49,6 +49,14 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
   }
   m_ui.colorLabel->setText(m_shape->colorDOF()->label());
   m_ui.opacityLabel->setText(m_shape->opacityDOF()->label());
+
+  m_colorChooser = new ColorChooser(m_ui.colorChooser, m_shape->colorDOF(), &m_shape->colorYValues(), ColorChooser::HueColor);
+  connect(m_colorChooser, SIGNAL(activated()), this, SLOT(colorActivated()));
+  m_colorChooser->parentWidget()->layout()->addWidget(m_colorChooser);
+
+  m_opacityChooser = new ColorChooser(m_ui.opacityChooser, m_shape->opacityDOF(), &m_shape->opacityYValues(), ColorChooser::OpacityColor);
+  connect(m_opacityChooser , SIGNAL(activated()), this, SLOT(opacityActivated()));
+  m_opacityChooser->parentWidget()->layout()->addWidget(m_opacityChooser);
 }
 
 void DofDialog::attributeSelected(int index)

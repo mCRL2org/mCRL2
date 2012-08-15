@@ -120,9 +120,9 @@ class Shape : public QObject
     DOF* heightDOF()                { return m_heightDOF; }
     DOF* angleDOF()                 { return m_angleDOF; }
     DOF* colorDOF()                 { return m_colorDOF; }
-    QList<double> colorYValues()    { return m_colorYValues; }
+    QList<double> &colorYValues()    { return m_colorYValues; }
     DOF* opacityDOF()               { return m_opacityDOF; }
-    QList<double> opacityYValues()  { return m_opacityYValues; }
+    QList<double> &opacityYValues()  { return m_opacityYValues; }
     DOF* textDOF()                  { return m_textDOF; }
 
     int dofCount()                  { return 7; }

@@ -1958,6 +1958,12 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
   }
 }
 
+/*
+void TimeSeries::dragSlider()
+{
+
+}
+*/
 
 void TimeSeries::handleHitSlider()
 {

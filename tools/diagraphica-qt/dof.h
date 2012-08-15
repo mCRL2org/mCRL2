@@ -48,7 +48,7 @@ class DOF
     double max()            { return m_values.last(); }
     int valueCount()        { return m_values.size(); }
     double value(int index);
-    QList<double> values()  { return m_values; }
+    const QList<double> &values()  { return m_values; }
     int direction()         { return m_direction; }
     Attribute* attribute()  { return m_attribute; }
 
