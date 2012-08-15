@@ -34,13 +34,6 @@ QColor interpolateRgb(QColor from, QColor to, float t)
     );
 }
 
-QColor interpolateHsv(QColor from, QColor to, float t, bool longPath)
-{
-  // TODO
-  return QColor();
-}
-
-
 void VisUtils::clear(QColor col)
 {
   glClearColor(col.redF(), col.greenF(), col.blueF(), col.alphaF());

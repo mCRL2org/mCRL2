@@ -57,7 +57,6 @@ const int CHARHEIGHT  = 32;
 const int CUSHSIZE    = 256;
 
 QColor interpolateRgb(QColor from, QColor to, float t);
-QColor interpolateHsv(QColor from, QColor to, float t, bool longPath = false);
 
 class VisUtils
 {
