@@ -31,8 +31,6 @@ TimeSeries::TimeSeries(
   : Visualizer(parent, g),
     settings(s)
 {
-  critSect = false;
-
   ySpacePxl     = 6.0;
   minPixPerNode = 4.0;
   actPixPerNode = 4.0;
@@ -194,6 +192,7 @@ void TimeSeries::setDiagram(Diagram* dgrm)
   diagram = dgrm;
 
   dataChanged = true;
+  update();
 }
 
 
@@ -211,12 +210,14 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
   }
 
   dataChanged = true;
+  update();
 }
 
 
 void TimeSeries::clearData()
 {
   wdwStartIdx = 0;
+  update();
 }
 
 
@@ -248,6 +249,8 @@ void TimeSeries::markItems(Cluster* frame)
     {
       animFrame = itemsMarked.begin();
     }
+
+    update();
   }
 }
 
@@ -266,71 +269,67 @@ void TimeSeries::markItems(QList<Cluster*> frames)
 
 void TimeSeries::visualize(const bool& inSelectMode)
 {
-  if (critSect != true)
+  // have textures been generated
+  if (texCharOK != true)
   {
-    // have textures been generated
-    if (texCharOK != true)
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged == true)
+  {
+    calcSettingsGeomBased();
+  }
+  // check if data are ok
+  if (dataChanged == true)
+  {
+    calcSettingsDataBased();
+  }
+
+  // visualize
+  if (inSelectMode == true)
+  {
+    QSizeF size = worldSize();
+
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+      hits,
+      selectBuf,
+      0.0125,
+      0.0125);
+
+    glPushName(ID_CANVAS);
+    VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
+
+    if (!m_animationTimer.isActive())
     {
-      genCharTex();
-    }
-
-    // check if positions are ok
-    if (geomChanged == true)
-    {
-      calcSettingsGeomBased();
-    }
-    // check if data are ok
-    if (dataChanged == true)
-    {
-      calcSettingsDataBased();
-    }
-
-    clear();
-
-    // visualize
-    if (inSelectMode == true)
-    {
-      QSizeF size = worldSize();
-
-      GLint hits = 0;
-      GLuint selectBuf[512];
-      startSelectMode(
-        hits,
-        selectBuf,
-        0.0125,
-        0.0125);
-
-      glPushName(ID_CANVAS);
-      VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
-
-      if (!m_animationTimer.isActive())
-      {
-        drawMarkedItems(inSelectMode);
-        drawSlider(inSelectMode);
-      }
-      if (dragStatus != DRAG_STATUS_ITMS)
-      {
-        drawDiagrams(inSelectMode);
-      }
-
-      glPopName();
-
-      finishSelectMode(
-        hits,
-        selectBuf);
-    }
-    else
-    {
-      drawAxes(inSelectMode);
       drawMarkedItems(inSelectMode);
       drawSlider(inSelectMode);
-      drawScale(inSelectMode);
-      drawAttrVals(inSelectMode);
-      //drawAxes( inSelectMode );
-      drawLabels(inSelectMode);
-      drawMouseOver(inSelectMode);
+    }
+    if (dragStatus != DRAG_STATUS_ITMS)
+    {
       drawDiagrams(inSelectMode);
     }
+
+    glPopName();
+
+    finishSelectMode(
+      hits,
+      selectBuf);
+  }
+  else
+  {
+    clear();
+    drawAxes(inSelectMode);
+    drawMarkedItems(inSelectMode);
+    drawSlider(inSelectMode);
+    drawScale(inSelectMode);
+    drawAttrVals(inSelectMode);
+    //drawAxes( inSelectMode );
+    drawLabels(inSelectMode);
+    drawMouseOver(inSelectMode);
+    drawDiagrams(inSelectMode);
   }
 }
 
@@ -527,27 +526,19 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
 
 void TimeSeries::calcSettingsGeomBased()
 {
-  critSect = true;
-
-  // update flag
-  geomChanged = false;
   // calculate positions
   calcPositions();
-
-  critSect = false;
+  // update flag
+  geomChanged = false;
 }
 
 
 void TimeSeries::calcSettingsDataBased()
 {
-  critSect = true;
-
-  // update flag
-  dataChanged = false;
   // calculate positions
   calcPositions();
-
-  critSect = false;
+  // update flag
+  dataChanged = false;
 }
 
 
@@ -699,6 +690,8 @@ void TimeSeries::calcPositions()
      pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
      v.push_back(pos);
     }
+
+    posValues.push_back(v);
   }
 
   // diagram scale factor to draw 120 x 120 pix diagram

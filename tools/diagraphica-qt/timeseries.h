@@ -205,7 +205,6 @@ class TimeSeries : public Visualizer
     size_t animIdxDgrm; // diagram being animated
 
     double ySpacePxl;
-    bool critSect;
 
     // animation
     QTimer m_animationTimer;

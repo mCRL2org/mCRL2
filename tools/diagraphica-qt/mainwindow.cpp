@@ -352,6 +352,7 @@ void MainWindow::modeSelected(QAction *action)
     m_ui.mainViewStack->setCurrentWidget(m_ui.editPage);
     m_ui.examinerWidget->hide();
   }
+  updateAttributeOperations();
 }
 
 void MainWindow::showAttributeContextMenu(const QPoint &position)
