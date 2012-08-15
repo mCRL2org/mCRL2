@@ -30,26 +30,26 @@ class Diagram : public QObject
     virtual ~Diagram();
 
     // -- set functions ---------------------------------------------
-    void addShape(Shape* s);
-    void moveShapeToFront(const size_t& idx);
-    void moveShapeToBack(const size_t& idx);
-    void moveShapeForward(const size_t& idx);
-    void moveShapeBackward(const size_t& idx);
+    void addShape(Shape* s)     { m_shapes.append(s); }
+    void moveShapeToFront(int index);
+    void moveShapeToBack(int index);
+    void moveShapeForward(int index);
+    void moveShapeBackward(int index);
 
-    void setShowGrid(const bool& flag);
-    void setSnapGrid(const bool& flag);
+    void setShowGrid(bool flag) { m_showGrid = flag; }
+    void setSnapGrid(bool flag) { m_snapGrid = flag; }
 
     // -- get functions ---------------------------------------------
-    size_t getSizeShapes();
-    Shape* getShape(const size_t& idx);
+    int shapeCount()        { return m_shapes.size(); }
+    Shape* shape(int index) { return m_shapes.at(index); }
 
-    bool getSnapGrid();
-    double getGridInterval(double pixelSize);
-    double getAngleInterval();
-    void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom);
+    bool snapGrid()                       { return m_snapGrid; }
+    double gridInterval(double pixelSize) { return (2.0-(2.0*pixelSize*SIZE_BORDER))/(double)GRID_NUM_INTERV_HINT; }
+    double angleInterval()                { return 360.0/(double)ANGL_NUM_INTERV_HINT; }
+    QRectF gridCoordinates()               { return m_gridCoordinates; }
 
     // -- clear functions -------------------------------------------
-    void deleteShape(const size_t& idx);
+    void removeShape(int index);
 
     // -- vis functions ---------------------------------------------
     void visualize(
@@ -70,7 +70,6 @@ class Diagram : public QObject
 
   protected:
     // -- private utility functions ---------------------------------
-    void initGridSettings();
 
     void drawAxes(
       const bool& inSelectMode,
@@ -91,14 +90,11 @@ class Diagram : public QObject
       double pixelSize);
 
     // -- data members ----------------------------------------------
-    std::vector< Shape* > shapes; // composition
+    QList<Shape*> m_shapes; // composition
 
-    bool   showGrid;
-    bool   snapGrid;
-    double gridXLeft;
-    double gridXRight;
-    double gridYTop;
-    double gridYBottom;
+    bool  m_showGrid;
+    bool  m_snapGrid;
+    QRectF m_gridCoordinates;
 
     // constants
     int SIZE_BORDER;

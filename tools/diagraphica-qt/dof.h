@@ -23,60 +23,43 @@ class DOF
 {
   public:
     // -- constructors and destructor -------------------------------
-    DOF(
-      const int& idx,
-      const std::string& lbl);
+    DOF(int index, QString label);
     DOF(const DOF& dof);
-    virtual ~DOF();
 
     // -- std::set functions ---------------------------------------------
-    void setIndex(const int& idx);
-    void setLabel(const std::string& lbl);
-    void setMin(const double& m);
-    void setMax(const double& m);
-    void setMinMax(const double& mn, const double& mx);
-    void setValue(
-      const size_t& idx,
-      const double& val);
-    void addValue(const double& val);
-    void clearValue(const size_t& idx);
-    void setDir(const int& dr);
-    void setAttribute(Attribute* a);
-    void setTextStatus(const int& status);
+    void setIndex(int index)      { m_index = index; }
+    void setLabel(QString label)  { m_label = label; }
+
+    void setMin(double value)     { m_values[0] = value; }
+    void setMax(double value)     { m_values[m_values.size()-1] = value; }
+    void clearValues()            { m_values.clear(); }
+    void setValue(int index, double value);
+    void addValue(double value)   { m_values.append(value); }
+    void removeValue(int index);
+
+    void setDirection(int direction)        { m_direction = direction; }
+    void setAttribute(Attribute* attribute) { m_attribute = attribute; }
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
-    std::string getLabel();
-    double getMin();
-    double getMax();
-    size_t getSizeValues();
-    double getValue(const size_t& idx);
-    void getValues(std::vector< double > &vals);
-    int getDir();
-    Attribute* getAttribute();
-    int getTextStatus();
+    int getIndex()          { return m_index; }
+    QString getLabel()      { return m_label; }
 
-    // -- public constants ------------------------------------------
-    enum
-    {
-      ID_TEXT_NONE,
-      ID_TEXT_ALL,
-      ID_TEXT_ATTR,
-      ID_TEXT_VAL
-    };
+    double getMin()         { return m_values.first(); }
+    double getMax()         { return m_values.last(); }
+    int valueCount()        { return m_values.size(); }
+    double value(int index);
+    QList<double> values()  { return m_values; }
+    int direction()         { return m_direction; }
+    Attribute* attribute()  { return m_attribute; }
+
 
   protected:
     // -- data members ----------------------------------------------
-    size_t    index;    // index in attribute
-    std::string label;
-    /*
-    double min;
-    double max;
-    */
-    std::vector< double > values;
-    int    dir;
-    Attribute* attr; // association
-    int    textStatus;
+    size_t        m_index;    // index in attribute
+    QString       m_label;
+    QList<double> m_values;
+    int           m_direction;
+    Attribute*    m_attribute; // association
 };
 
 #endif

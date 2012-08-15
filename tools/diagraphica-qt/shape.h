@@ -29,121 +29,109 @@ class Shape
   public:
     // -- constructors and destructor -------------------------------
     Shape(
-      Diagram *d,       const size_t& idx,
-      const double& xC, const double& yC,
-      const double& xD, const double& yD,
-      const double& aC, const int&    typ);
-    Shape(
-      Diagram *d,       const size_t& idx,
-      const double& xC, const double& yC,
-      const double& xD, const double& yD,
-      const double& xBegin, const double& yBegin,
-      const double& xEnd, const double& yEnd,
-      const double& aC, const int&    typ);
+        Diagram *parentDiagram, size_t index,
+        double xCenter,         double yCenter,
+        double xDistance,       double yDistance,
+        double angle,           int    shapeType,
+        double xHinge,          double yHinge);
     Shape(const Shape& shape);
     virtual ~Shape();
 
     // -- set functions ---------------------------------------------
-    void setIndex(const size_t& idx);
-    void setVariable(const std::string& msg);
-    void setVariableName(const std::string& msg);
-    void setCheckedId(const int& id);
-    void setNote(const std::string& msg);
-    void setTextSize(const size_t& size);
+    void setIndex(size_t index) { m_index = index; }
 
-    void setCenter(const double& xC, const double& yC);
-    void setDFC(const double& xD, const double& yD);
-    void setAngleCtr(const double& a);
+    void setCenter(double xCenter, double yCenter)        { m_xCenter = xCenter; m_yCenter = yCenter; }
+    void setDistance(double xDistance, double yDistance)  { m_xDistance = xDistance; m_yDistance = yDistance; }
+    void setAngle(double angle)                           { m_angle = angle; }
+    void setHinge(double xHinge, double yHinge)           { m_xHinge = xHinge, m_yHinge = yHinge; }
 
-    void setHinge(const double& xH, const double& yH);
-    void addDOFColYValue(const double& y);
-    void setDOFColYValue(const size_t& idx, const double& y);
-    void clearDOFColYValue(const size_t& idx);
-    void clearDOFColYValues();
-    void addDOFOpaYValue(const double& y);
-    void setDOFOpaYValue(const size_t& idx, const double& y);
-    void clearDOFOpaYValue(const size_t& idx);
-    void clearDOFOpaYValues();
+    void setShapeType(int type) { m_shapeType = type; }
+    void setTypeNote()          { setShapeType(TYPE_NOTE); }
+    void setTypeLine()          { setShapeType(TYPE_LINE); }
+    void setTypeRect()          { setShapeType(TYPE_RECT); }
+    void setTypeEllipse()       { setShapeType(TYPE_ELLIPSE); }
+    void setTypeArrow()         { setShapeType(TYPE_ARROW); }
+    void setTypeDArrow()        { setShapeType(TYPE_DARROW); }
 
-    void setType(const int& typ);
-    void setTypeNote();
-    void setTypeLine();
-    void setTypeRect();
-    void setTypeEllipse();
-    void setTypeArrow();
-    void setTypeDArrow();
+    void setDrawMode(int mode)  { m_drawMode = mode; }
+    void setModeNormal()        { setDrawMode(MODE_NORMAL); }
+    void setModeEdit()          { setDrawMode(MODE_EDIT); }
+    void setModeEditDOFXCtr()   { setDrawMode(MODE_EDIT_DOF_XCTR); }
+    void setModeEditDOFYCtr()   { setDrawMode(MODE_EDIT_DOF_YCTR); }
+    void setModeEditDOFHgt()    { setDrawMode(MODE_EDIT_DOF_HGT); }
+    void setModeEditDOFWth()    { setDrawMode(MODE_EDIT_DOF_WTH); }
+    void setModeEditDOFAgl()    { setDrawMode(MODE_EDIT_DOF_AGL); }
+    void setModeEditDOFCol()    { setDrawMode(MODE_EDIT_DOF_COL); }
+    void setModeEditDOFOpa()    { setDrawMode(MODE_EDIT_DOF_OPA); }
+    void setModeEditDOFText()   { setDrawMode(MODE_EDIT_DOF_TEXT); }
 
-    void setMode(const int& typ);
-    void setModeNormal();
-    void setModeEdit();
+    void setTextSize(size_t size) { m_textSize = size; m_texturesGenerated = false; }
 
-    void setModeEdtDOFXCtr();
-    void setModeEdtDOFYCtr();
-    void setModeEdtDOFHgt();
-    void setModeEdtDOFWth();
-    void setModeEdtDOFAgl();
-    void setModeEdtDOFCol();
-    void setModeEdtDOFOpa();
-    void setModeEdtDOFText();
+    void setLineWidth(double width) { m_lineWidth = width; }
+    void setLineColor(QColor color) { m_lineColor = color; }
+    void setFillColor(QColor color) { m_fillColor = color; }
 
-    void setLineWidth(const double& w);
-    void setLineColor(QColor c);
-    void setLineTransp(const double& a);
-    void setFillColor(QColor c);
-    void setFillTransp(const double& a);
-    void setHandleSize(const double& s);
-    void setTextures(const bool& generated);
+    void setVariableValue(QString value)  { m_variableValue = value; m_texturesGenerated = false; }
+    void setNote(QString note)            { m_note = note; m_texturesGenerated = false; }
+
+    void generateTextures()  { m_texturesGenerated = false; }
+
+    void addDOFColYValue(double value)  { m_colorYValues.append(value); }
+    void setDOFColYValue(int index, double value);
+    void removeDOFColYValue(int index);
+    void clearDOFColYValues()           { m_colorYValues.clear(); }
+
+    void addDOFOpaYValue(double value)  { m_opacityYValues.append(value); }
+    void setDOFOpaYValue(int index, double value);
+    void removeDOFOpaYValue(int index);
+    void clearDOFOpaYValues()           { m_opacityYValues.clear(); }
+
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
-    int getCheckedId();
-    std::string getNote();
-    std::string getVariable();
-    std::string getVariableName();
-    size_t getTextSize();
+    size_t index() { return m_index; }
 
-    void getCenter(double& x, double& y);
-    double getXCtr();
-    double getYCtr();
-    void getDFC(double& x, double& y);
-    double getXDFC();
-    double getYDFC();
-    double getAngleCtr();
-    void getHinge(double& x, double& y);
-    double getXHinge();
-    double getYHinge();
+    void center(double& x, double& y)   { x = m_xCenter; y = m_yCenter; }
+    double xCenter()                    { return m_xCenter; }
+    double yCenter()                    { return m_yCenter; }
+    void distance(double& x, double& y) { x = m_xDistance; y = m_yCenter; }
+    double xDistance()                  { return m_xDistance; }
+    double yDistance()                  { return m_yDistance; }
+    double angle()                      { return m_angle; }
+    void hinge(double& x, double& y)    { x = m_xHinge; y = m_yHinge; }
+    double xHinge()                     { return m_xHinge; }
+    double yHinge()                     { return m_yHinge; }
 
-    int getType();
-    int getMode();
-    double getLineWidth();
-    QColor getLineColor();
-    double getLineTransp();
-    QColor getFillColor();
-    double getFillTransp();
-    double getHandleSize();
+    int shapeType()    { return m_shapeType; }
+    int drawMode()     { return m_drawMode; }
+    size_t textSize()  { return m_textSize; }
 
-    DOF* getDOFXCtr();
-    DOF* getDOFYCtr();
-    DOF* getDOFWth();
-    DOF* getDOFHgt();
-    DOF* getDOFAgl();
-    DOF* getDOFCol();
-    DOF* getDOFText();
-    void getDOFColYValues(std::vector< double > &yVals);
-    DOF* getDOFOpa();
-    void getDOFOpaYValues(std::vector< double > &yVals);
+    double lineWidth() { return m_lineWidth; }
+    QColor lineColor() { return m_lineColor; }
+    QColor fillColor() { return m_fillColor; }
 
-    void getDOFAttrs(std::vector< Attribute* > &attrs);
+    QString variableValue() { return m_variableValue; }
+    QString note()          { return m_note; }
+
+    DOF* xCenterDOF()               { return m_xCenterDOF; }
+    DOF* yCenterDOF()               { return m_yCenterDOF; }
+    DOF* widthDOF()                 { return m_widthDOF; }
+    DOF* heightDOF()                { return m_heightDOF; }
+    DOF* angleDOF()                 { return m_angleDOF; }
+    DOF* colorDOF()                 { return m_colorDOF; }
+    QList<double> colorYValues()    { return m_colorYValues; }
+    DOF* opacityDOF()               { return m_opacityDOF; }
+    QList<double> opacityYValues()  { return m_opacityYValues; }
+    DOF* textDOF()                  { return m_textDOF; }
 
     // -- visualization ---------------------------------------------
     void visualize(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void visualize(
-      double pixelSize,
-      const double& opacity,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs);
+        double pixelSize,
+        const double& opacity,
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs);
 
     void setTransf();
     void clrTransf();
@@ -163,14 +151,14 @@ class Shape
 
       MODE_NORMAL,
       MODE_EDIT,
-      MODE_EDT_DOF_XCTR,
-      MODE_EDT_DOF_YCTR,
-      MODE_EDT_DOF_HGT,
-      MODE_EDT_DOF_WTH,
-      MODE_EDT_DOF_AGL,
-      MODE_EDT_DOF_COL,
-      MODE_EDT_DOF_OPA,
-      MODE_EDT_DOF_TEXT,
+      MODE_EDIT_DOF_XCTR,
+      MODE_EDIT_DOF_YCTR,
+      MODE_EDIT_DOF_HGT,
+      MODE_EDIT_DOF_WTH,
+      MODE_EDIT_DOF_AGL,
+      MODE_EDIT_DOF_COL,
+      MODE_EDIT_DOF_OPA,
+      MODE_EDIT_DOF_TEXT,
 
       ID_HDL_CTR,
       ID_HDL_TOP_LFT,
@@ -203,85 +191,84 @@ class Shape
 
     // -- private visualization functions ---------------------------
     void drawNormal(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEdit(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawText(double pixelSize);
     void drawEditDOF(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEditDOFXCtr(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawDOFXCtr(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEditDOFYCtr(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawDOFYCtr(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEditDOFWth(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawDOFWth(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEditDOFHgt(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawDOFHgt(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawEditDOFAgl(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
     void drawDOFAgl(
-      const bool& inSelectMode,
-      double pixelSize);
+        const bool& inSelectMode,
+        double pixelSize);
 
     // -- data members ----------------------------------------------
-    Diagram *diagram;
-    size_t index;
+    Diagram *m_parentDiagram;
+    size_t m_index;
 
     // geometry
-    double xCtr,   yCtr;   // center,             [-1,1]
-    double xDFC,   yDFC;   // bound dist from ctr,norm
-    double aglCtr;         // rotation & incline, degrees
+    double m_xCenter,   m_yCenter;    // center,             [-1,1]
+    double m_xDistance, m_yDistance;  // bound dist from ctr,norm
+    double m_angle;                   // rotation & incline, degrees
+    double m_xHinge,    m_yHinge;     // hinge point, relative to center
 
     // properties
-    int      type;      // type of shape
-    int      mode;      // drawing mode
-    size_t   szeTxt;  // font size
-    double   linWth;    // line width,      pix
-    QColor colLin;    // line color
-    QColor colFil;    // fill color
-    double   hdlSze;    // handle size,     pix
-    int checkedVariableId; // Event id of the variable displayed on the shape;
-    std::string  variable;  //variable shown on the shape
-    std::string  variableName; // name of the variable
-    std::string  note; // note shown on the shape
-    double   currentPix; // used in Simulator for drawing text more readable
-    GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
-    GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH]; // resources for drawing text
-    bool texturesGenerated; // check whether textures for drawing text is generated or not
+    int         m_shapeType;      // type of shape
+    int         m_drawMode;       // drawing mode
+    size_t      m_textSize;       // font size
+
+    double      m_lineWidth;      // line width in pix
+    QColor      m_lineColor;      // line color
+    QColor      m_fillColor;      // fill color
+
+    QString     m_variableValue;  // variable shown on the shape
+    QString     m_note;           // note shown on the shape
+
+    GLuint      m_texCharId[CHARSETSIZE];                       // resources for drawing text
+    GLubyte     m_texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH];  // resources for drawing text
+    bool        m_texturesGenerated; // check whether textures for drawing text is generated or not
 
     // degrees of freedom
-    DOF* xCtrDOF; // composition
-    DOF* yCtrDOF; // composition
-    DOF* wthDOF;  // composition
-    DOF* hgtDOF;  // composition
-    DOF* aglDOF;  // composition
-    DOF* textDOF;   // composition
-    double xHge,   yHge;   // hinge point, relative to center
+    DOF* m_xCenterDOF;  // composition
+    DOF* m_yCenterDOF;  // composition
+    DOF* m_widthDOF;    // composition
+    DOF* m_heightDOF;   // composition
+    DOF* m_angleDOF;    // composition
+    DOF* m_textDOF;     // composition
 
-    DOF* colDOF;  // composition
-    std::vector< double > colYValues;
-    DOF* opaDOF;  // composition
-    std::vector< double > opaYValues;
+    DOF* m_colorDOF;    // composition
+    QList<double> m_colorYValues;
+    DOF* m_opacityDOF;  // composition
+    QList<double> m_opacityYValues;
 };
 
 #endif

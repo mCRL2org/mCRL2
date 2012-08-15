@@ -55,7 +55,7 @@ void DofDialog::refresh()
       DOF* dof = currentDof(dofName);
       if (dof != 0)
       {
-        currentAttribute = dof->getAttribute();
+        currentAttribute = dof->attribute();
       }
 
       for (size_t j = 0; j < m_currentGraph->getSizeAttributes(); j++)
@@ -102,25 +102,25 @@ DOF *DofDialog::currentDof(QString name)
   switch(index)
   {
     case 0:
-      return m_currentShape->getDOFXCtr();
+      return m_currentShape->xCenterDOF();
       break;
     case 1:
-      return m_currentShape->getDOFYCtr();
+      return m_currentShape->yCenterDOF();
       break;
     case 2:
-      return m_currentShape->getDOFWth();
+      return m_currentShape->widthDOF();
       break;
     case 3:
-      return m_currentShape->getDOFHgt();
+      return m_currentShape->heightDOF();
       break;
     case 4:
-      return m_currentShape->getDOFAgl();
+      return m_currentShape->angleDOF();
       break;
     case 5:
-      return m_currentShape->getDOFOpa();
+      return m_currentShape->opacityDOF();
       break;
     case 6:
-      return m_currentShape->getDOFCol();
+      return m_currentShape->colorDOF();
       break;
     default:
       return 0;

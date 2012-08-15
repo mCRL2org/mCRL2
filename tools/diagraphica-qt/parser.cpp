@@ -342,22 +342,22 @@ void Parser::writeDiagram(
   appendValue(xml, root, "File", file);
 
   // shapes
-  for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
+  for (int i = 0; i < diagram->shapeCount(); ++i)
   {
-    Shape* shape = diagram->getShape(i);
+    Shape* shape = diagram->shape(i);
     QDomElement shapeElement = xml.createElement("Shape");
 
-    appendValue(xml, shapeElement, "XCenter", QString::number(shape->getXCtr()));
-    appendValue(xml, shapeElement, "YCenter", QString::number(shape->getYCtr()));
-    appendValue(xml, shapeElement, "XDistanceFromCenter", QString::number(shape->getXDFC()));
-    appendValue(xml, shapeElement, "YDistanceFromCenter", QString::number(shape->getYDFC()));
-    appendValue(xml, shapeElement, "XHinge", QString::number(shape->getXHinge()));
-    appendValue(xml, shapeElement, "YHinge", QString::number(shape->getYHinge()));
-    appendValue(xml, shapeElement, "AngleCenter", QString::number(shape->getAngleCtr()));
-    appendValue(xml, shapeElement, "Type", types[shape->getType()]);
-    appendValue(xml, shapeElement, "LineWidth", QString::number(shape->getLineWidth()));
+    appendValue(xml, shapeElement, "XCenter", QString::number(shape->xCenter()));
+    appendValue(xml, shapeElement, "YCenter", QString::number(shape->yCenter()));
+    appendValue(xml, shapeElement, "XDistanceFromCenter", QString::number(shape->xDistance()));
+    appendValue(xml, shapeElement, "YDistanceFromCenter", QString::number(shape->yDistance()));
+    appendValue(xml, shapeElement, "XHinge", QString::number(shape->xHinge()));
+    appendValue(xml, shapeElement, "YHinge", QString::number(shape->yHinge()));
+    appendValue(xml, shapeElement, "AngleCenter", QString::number(shape->angle()));
+    appendValue(xml, shapeElement, "Type", types[shape->shapeType()]);
+    appendValue(xml, shapeElement, "LineWidth", QString::number(shape->lineWidth()));
 
-    QColor lineColor = diagram->getShape(i)->getLineColor();
+    QColor lineColor = diagram->shape(i)->lineColor();
     QDomElement lineColorElement = xml.createElement("LineColor");
     appendValue(xml, lineColorElement, "Red", QString::number(lineColor.redF()));
     appendValue(xml, lineColorElement, "Green", QString::number(lineColor.greenF()));
@@ -365,7 +365,7 @@ void Parser::writeDiagram(
     appendValue(xml, lineColorElement, "Alpha", QString::number(lineColor.alphaF()));
     shapeElement.appendChild(lineColorElement);
 
-    QColor fillColor = diagram->getShape(i)->getFillColor();
+    QColor fillColor = diagram->shape(i)->fillColor();
     QDomElement fillColorElement = xml.createElement("LineColor");
     appendValue(xml, fillColorElement, "Red", QString::number(fillColor.redF()));
     appendValue(xml, fillColorElement, "Green", QString::number(fillColor.greenF()));
@@ -373,27 +373,25 @@ void Parser::writeDiagram(
     appendValue(xml, fillColorElement, "Alpha", QString::number(fillColor.alphaF()));
     shapeElement.appendChild(fillColorElement);
 
-    appendDOF(xml, shapeElement, "XCenterDOF", shape->getDOFXCtr());
-    appendDOF(xml, shapeElement, "YCenterDOF", shape->getDOFYCtr());
-    appendDOF(xml, shapeElement, "WidthDOF",   shape->getDOFWth());
-    appendDOF(xml, shapeElement, "HeightDOF",  shape->getDOFHgt());
-    appendDOF(xml, shapeElement, "AngleDOF",   shape->getDOFAgl());
-    appendDOF(xml, shapeElement, "XCenterDOF", shape->getDOFXCtr());
+    appendDOF(xml, shapeElement, "XCenterDOF", shape->xCenterDOF());
+    appendDOF(xml, shapeElement, "YCenterDOF", shape->yCenterDOF());
+    appendDOF(xml, shapeElement, "WidthDOF",   shape->widthDOF());
+    appendDOF(xml, shapeElement, "HeightDOF",  shape->heightDOF());
+    appendDOF(xml, shapeElement, "AngleDOF",   shape->angleDOF());
+    appendDOF(xml, shapeElement, "XCenterDOF", shape->xCenterDOF());
 
-    QDomElement colorDofElement = appendDOF(xml, shapeElement, "ColorDOF", shape->getDOFCol());
-    vector< double > colorValues;
-    shape->getDOFColYValues(colorValues);
-    for (size_t i = 0; i < colorValues.size(); ++i)
+    QDomElement colorDofElement = appendDOF(xml, shapeElement, "ColorDOF", shape->colorDOF());
+    QList<double> colorYValues = shape->colorYValues();
+    for (int i = 0; i < colorYValues.size(); ++i)
     {
-      appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorValues[i]));
+      appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorYValues[i]));
     }
 
-    QDomElement opacityDofElement = appendDOF(xml, shapeElement, "OpacityDOF", shape->getDOFOpa());
-    vector< double > opacityValues;
-    shape->getDOFColYValues(opacityValues);
-    for (size_t i = 0; i < opacityValues.size(); ++i)
+    QDomElement opacityDofElement = appendDOF(xml, shapeElement, "OpacityDOF", shape->opacityDOF());
+    QList<double> opacityYValues = shape->colorYValues();
+    for (int i = 0; i < opacityYValues.size(); ++i)
     {
-      appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityValues[i]));
+      appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityYValues[i]));
     }
 
     root.appendChild(shapeElement);
@@ -508,12 +506,12 @@ QDomElement Parser::appendValue(QDomDocument document, QDomElement root, QString
 QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString name, DOF* dof)
 {
   QDomElement element = document.createElement(name);
-  Attribute* attribute = dof->getAttribute();
+  Attribute* attribute = dof->attribute();
   appendValue(document, element, "Attribute", (attribute == 0 ? QString("") : attribute->name()));
 
-  for (size_t i = 0; i < dof->getSizeValues(); ++i)
+  for (int i = 0; i < dof->valueCount(); ++i)
   {
-    appendValue(document, element, "Value", QString::number(dof->getValue(i)));
+    appendValue(document, element, "Value", QString::number(dof->value(i)));
   }
 
   root.appendChild(element);
@@ -675,23 +673,23 @@ void Parser::parseShape(
     // Create shape
     Shape* shape = new Shape(
           diagram,
-          diagram->getSizeShapes(),
+          diagram->shapeCount(),
           doublePropertyValues["XCenter"],   doublePropertyValues["YCenter"],
           doublePropertyValues["XDistanceFromCenter"],   doublePropertyValues["YDistanceFromCenter"],
-          doublePropertyValues["AngleCenter"], type);
-    shape->setHinge(doublePropertyValues["XHinge"], doublePropertyValues["YHinge"]);
+          doublePropertyValues["AngleCenter"], type,
+          doublePropertyValues["XHinge"], doublePropertyValues["YHinge"]);
     shape->setLineWidth(doublePropertyValues["LineWidth"]);
     shape->setLineColor(colorPropertyValues["LineColor"]);
     shape->setFillColor(colorPropertyValues["FillColor"]);
 
     QMap<QString, DOF*> dofs;
-    dofs.insert("XCenterDOF", shape->getDOFXCtr());
-    dofs.insert("YCenterDOF", shape->getDOFYCtr());
-    dofs.insert("WidthDOF",   shape->getDOFWth());
-    dofs.insert("HeightDOF",  shape->getDOFHgt());
-    dofs.insert("AngleDOF",   shape->getDOFAgl());
-    dofs.insert("ColorDOF",   shape->getDOFCol());
-    dofs.insert("OpacityDOF", shape->getDOFOpa());
+    dofs.insert("XCenterDOF", shape->xCenterDOF());
+    dofs.insert("YCenterDOF", shape->yCenterDOF());
+    dofs.insert("WidthDOF",   shape->widthDOF());
+    dofs.insert("HeightDOF",  shape->heightDOF());
+    dofs.insert("AngleDOF",   shape->angleDOF());
+    dofs.insert("ColorDOF",   shape->colorDOF());
+    dofs.insert("OpacityDOF", shape->opacityDOF());
 
     QStringList dofTags = dofs.keys();
     QMap<QString, QDomElement> dofElements = findElements(shapeNode.toElement(), dofTags);

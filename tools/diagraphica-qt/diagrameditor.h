@@ -38,45 +38,16 @@ class DiagramEditor : public Visualizer
       Graph* g);
 
     void handleIntersection();
-    void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
-    bool isAnyShapeSelected();
-    void handleDOFSel(const size_t& DOFIdx);
-    void handleDOFSetTextStatus(
-      const size_t& DOFIdx,
-      const int& status);
-    int handleDOFGetTextStatus(const size_t& DOFIdx);
-    void handleDOFColAdd(
-      const double& hue,
-      const double& y);
-    void handleDOFColUpdate(
-      const size_t& idx,
-      const double& hue,
-      const double& y);
-    void handleDOFColClear(
-      const size_t& idx);
-    void handleDOFOpaAdd(
-      const double& opa,
-      const double& y);
-    void handleDOFOpaUpdate(
-      const size_t& idx,
-      const double& opa,
-      const double& y);
-    void handleDOFOpaClear(
-      const size_t& idx);
-    void setLinkDOFAttr(
-      const size_t& DOFIdx,
-      const size_t& attrIdx);
-    void clearLinkDOFAttr(const size_t& DOFIdx);
-    void clearLinkAttrDOF(const size_t& attrIdx);
 
     // -- get functions ---------------------------------------------
-    Diagram* diagram();
-    int editMode();
+    Diagram* diagram()        { return m_diagram; }
+    int editMode()            { return m_editMode; }
     Shape* selectedShape();
+    bool isAnyShapeSelected() { return (selectedShape() != 0); }
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
-    void reGenText();
+    void generateTextures();
 
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
@@ -96,24 +67,14 @@ class DiagramEditor : public Visualizer
         const int &y,
         const vector< int > &data );
     */
-    void handleShowVariable(const std::string& variable, const int& variableId);
-    void handleShowNote(const std::string& variable, const size_t& shapeId);
-    void handleAddText(std::string& variable, size_t& shapeId);
-    void handleTextSize(size_t& textSize, size_t& shapeId);
-    void handleSetTextSize(size_t& textSize, size_t& shapeId);
     void handleCut();
     void handleCopy();
     void clearClipBoard();
+
     void handlePaste();
     void handleDelete();
     void handleSelectAll();
-    void handleBringToFront();
-    void handleSendToBack();
-    void handleBringForward();
-    void handleSendBackward();
     void handleEditDOF();
-    void handleSetDOF(const size_t& attrIdx);
-    void handleCheckedVariable(const size_t& idDOF, const int& variableId);
 
     // -- public utility functions ----------------------------------
     void deselectAll();
@@ -154,8 +115,7 @@ class DiagramEditor : public Visualizer
 
   protected:
     // -- private utility functions ---------------------------------
-    void displShapeEdtOptions(Shape* s);
-    void displDOFInfo(Shape* s);
+    void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
 
     void handleDragCtr(Shape* s, double& xDrag, double& yDrag);
     void handleDragTopLft(Shape* s);
@@ -169,16 +129,11 @@ class DiagramEditor : public Visualizer
     void handleDragRotRgt(Shape* s);
     void handleDragRotTop(Shape* s);
 
-    void handleDragDOFXCtrBeg(Shape* s);
     void handleDragDOFXCtrEnd(Shape* s);
-    void handleDragDOFYCtrBeg(Shape* s);
     void handleDragDOFYCtrEnd(Shape* s);
-    void handleDragDOFWthBeg(Shape* s);
     void handleDragDOFWthEnd(Shape* s);
-    void handleDragDOFHgtBeg(Shape* s);
     void handleDragDOFHgtEnd(Shape* s);
-    void handleDragHge(Shape* s);
-    void handleDragDOFAglBeg(Shape* s);
+    void handleDragDOFHge(Shape* s);
     void handleDragDOFAglEnd(Shape* s);
 
     // -- hit detection ---------------------------------------------
@@ -189,19 +144,17 @@ class DiagramEditor : public Visualizer
     // -- data members ----------------------------------------------
 
     DofDialog m_dofDialog;
-
     QPoint m_lastMousePos;
+    QPointF m_dragDistance;
 
     Diagram* m_diagram; // composition
     int m_editMode;
+    QRectF m_selection;
+
     size_t drgBegIdx1;
     size_t drgBegIdx2;
     size_t lastSelectedShapeId;
-    bool selection;
-
-    double xDrgDist;
-    double yDrgDist;
-    double selectedX1, selectedX2, selectedY1, selectedY2;
+    bool m_selectionActive;
 
     std::vector < Shape* > clipBoardList;
     double xPaste, yPaste;

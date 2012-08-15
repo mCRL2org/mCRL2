@@ -1917,52 +1917,52 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
     showDgrm[dgrmIdx] = true;
 
     // find attributes linked to DOF's in diagram
-    for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
+    for (int i = 0; i < diagram->shapeCount(); ++i)
     {
       // get result
-      attr   = diagram->getShape(i)->getDOFXCtr()->getAttribute();
+      attr   = diagram->shape(i)->xCenterDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFYCtr()->getAttribute();
+      attr = diagram->shape(i)->yCenterDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFWth()->getAttribute();
+      attr = diagram->shape(i)->widthDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFHgt()->getAttribute();
+      attr = diagram->shape(i)->heightDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFAgl()->getAttribute();
+      attr = diagram->shape(i)->angleDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFCol()->getAttribute();
+      attr = diagram->shape(i)->colorDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
+      attr = diagram->shape(i)->opacityDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
       }
 
-      attr = diagram->getShape(i)->getDOFText()->getAttribute();
+      attr = diagram->shape(i)->textDOF()->attribute();
       if (attr != 0)
       {
         attrs.insert(attr);
