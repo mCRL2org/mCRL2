@@ -234,33 +234,33 @@ void Shape::visualize(
 
     if (attrs[i] == m_xCenterDOF->attribute())
     {
-      xC = m_xCenter + (1-alpha)*m_xCenterDOF->getMin() + alpha*m_xCenterDOF->getMax();
+      xC = m_xCenter + (1-alpha)*m_xCenterDOF->min() + alpha*m_xCenterDOF->max();
     }
 
     if (attrs[i] == m_yCenterDOF->attribute())
     {
-      yC = m_yCenter + (1-alpha)*m_yCenterDOF->getMin() + alpha*m_yCenterDOF->getMax();
+      yC = m_yCenter + (1-alpha)*m_yCenterDOF->min() + alpha*m_yCenterDOF->max();
     }
 
     if (attrs[i] == m_widthDOF->attribute())
     {
-      xD = m_xDistance + (1-alpha)*m_widthDOF->getMin() + alpha*m_widthDOF->getMax();
+      xD = m_xDistance + (1-alpha)*m_widthDOF->min() + alpha*m_widthDOF->max();
     }
 
     if (attrs[i] == m_heightDOF->attribute())
     {
-      yD = m_yDistance + (1-alpha)*m_heightDOF->getMin() + alpha*m_heightDOF->getMax();
+      yD = m_yDistance + (1-alpha)*m_heightDOF->min() + alpha*m_heightDOF->max();
     }
 
     if (attrs[i] == m_angleDOF->attribute())
     {
       if (m_angleDOF->direction() > 0)
       {
-        aglH = 0.0 + (1-alpha)*m_angleDOF->getMin() + alpha*m_angleDOF->getMax();
+        aglH = 0.0 + (1-alpha)*m_angleDOF->min() + alpha*m_angleDOF->max();
       }
       else
       {
-        aglH = 360.0 - (1-alpha)*m_angleDOF->getMin() + alpha*m_angleDOF->getMax();
+        aglH = 360.0 - (1-alpha)*m_angleDOF->min() + alpha*m_angleDOF->max();
       }
     }
 
@@ -1019,8 +1019,8 @@ void Shape::drawDOFXCtr(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double xBeg   = m_xCenterDOF->getMin();
-  double xEnd   = m_xCenterDOF->getMax();
+  double xBeg   = m_xCenterDOF->min();
+  double xEnd   = m_xCenterDOF->max();
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
@@ -1142,8 +1142,8 @@ void Shape::drawEditDOFXCtr(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double xBeg   = m_xCenterDOF->getMin();
-  double xEnd   = m_xCenterDOF->getMax();
+  double xBeg   = m_xCenterDOF->min();
+  double xEnd   = m_xCenterDOF->max();
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
@@ -1315,8 +1315,8 @@ void Shape::drawDOFYCtr(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double yBeg   = m_yCenterDOF->getMin();
-  double yEnd   = m_yCenterDOF->getMax();
+  double yBeg   = m_yCenterDOF->min();
+  double yEnd   = m_yCenterDOF->max();
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
@@ -1437,8 +1437,8 @@ void Shape::drawEditDOFYCtr(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double yBeg   = m_yCenterDOF->getMin();
-  double yEnd   = m_yCenterDOF->getMax();
+  double yBeg   = m_yCenterDOF->min();
+  double yEnd   = m_yCenterDOF->max();
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
@@ -1609,8 +1609,8 @@ void Shape::drawEditDOFWth(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double wBeg   = m_widthDOF->getMin();
-  double wEnd   = m_widthDOF->getMax();
+  double wBeg   = m_widthDOF->min();
+  double wEnd   = m_widthDOF->max();
 
   if (inSelectMode == true)
   {
@@ -1797,8 +1797,8 @@ void Shape::drawDOFWth(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double wBeg   = m_widthDOF->getMin();
-  double wEnd   = m_widthDOF->getMax();
+  double wBeg   = m_widthDOF->min();
+  double wEnd   = m_widthDOF->max();
 
   if (inSelectMode == true)
   {}
@@ -1940,8 +1940,8 @@ void Shape::drawEditDOFHgt(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double hBeg   = m_heightDOF->getMin();
-  double hEnd   = m_heightDOF->getMax();
+  double hBeg   = m_heightDOF->min();
+  double hEnd   = m_heightDOF->max();
 
   if (inSelectMode == true)
   {
@@ -2128,8 +2128,8 @@ void Shape::drawDOFHgt(
     double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
-  double hBeg   = m_heightDOF->getMin();
-  double hEnd   = m_heightDOF->getMax();
+  double hBeg   = m_heightDOF->min();
+  double hEnd   = m_heightDOF->max();
 
   if (inSelectMode == true)
   {}
@@ -2295,8 +2295,8 @@ void Shape::drawEditDOFAgl(
     {
       aglRef = Utils::calcAngleDg(-m_xHinge, -m_yHinge);
     }
-    aglBeg = aglRef + m_angleDOF->getMin();
-    aglEnd = aglRef + m_angleDOF->getMax();
+    aglBeg = aglRef + m_angleDOF->min();
+    aglEnd = aglRef + m_angleDOF->max();
     // x & y coords at aglBeg, dstHgeCtr+dstCtrHdl from hinge
     xBeg = m_xHinge+dstHgeHdl*cos(Utils::degrToRad(aglBeg));
     yBeg = m_yHinge+dstHgeHdl*sin(Utils::degrToRad(aglBeg));
@@ -2410,8 +2410,8 @@ void Shape::drawEditDOFAgl(
     {
       aglRef = Utils::calcAngleDg(-m_xHinge, -m_yHinge);
     }
-    aglBeg = aglRef + m_angleDOF->getMin();
-    aglEnd = aglRef + m_angleDOF->getMax();
+    aglBeg = aglRef + m_angleDOF->min();
+    aglEnd = aglRef + m_angleDOF->max();
     // x & y coords at aglBeg, dstHgeCtr+dstCtrHdl from hinge
     xBeg = m_xHinge+dstHgeHdl*cos(Utils::degrToRad(aglBeg));
     yBeg = m_yHinge+dstHgeHdl*sin(Utils::degrToRad(aglBeg));
@@ -2632,8 +2632,8 @@ void Shape::drawDOFAgl(
     {
       aglRef = Utils::calcAngleDg(-m_xHinge, -m_yHinge);
     }
-    aglBeg = aglRef + m_angleDOF->getMin();
-    aglEnd = aglRef + m_angleDOF->getMax();
+    aglBeg = aglRef + m_angleDOF->min();
+    aglEnd = aglRef + m_angleDOF->max();
     // x & y coords at aglBeg, dstHgeCtr+dstCtrHdl from hinge
     xBeg = m_xHinge+dstHgeHdl*cos(Utils::degrToRad(aglBeg));
     yBeg = m_yHinge+dstHgeHdl*sin(Utils::degrToRad(aglBeg));

@@ -41,11 +41,11 @@ class DOF
     void setAttribute(Attribute* attribute) { m_attribute = attribute; }
 
     // -- get functions ---------------------------------------------
-    int getIndex()          { return m_index; }
-    QString getLabel()      { return m_label; }
+    int index()             { return m_index; }
+    QString label()         { return m_label; }
 
-    double getMin()         { return m_values.first(); }
-    double getMax()         { return m_values.last(); }
+    double min()            { return m_values.first(); }
+    double max()            { return m_values.last(); }
     int valueCount()        { return m_values.size(); }
     double value(int index);
     QList<double> values()  { return m_values; }
