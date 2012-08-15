@@ -1679,6 +1679,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
             {
               handleNextDiagram(ids[2]);
             }
+            dragIdxDgrm = NON_EXISTING;
           }
         }
         else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
