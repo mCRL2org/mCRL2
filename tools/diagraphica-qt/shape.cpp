@@ -42,9 +42,8 @@ Shape::Shape(
     double xCenter,         double yCenter,
     double xDistance,       double yDistance,
     double angle,           int    shapeType,
-    double xHinge,          double yHinge,
-    QObject* parent) :
-  QObject(parent)
+    double xHinge,          double yHinge) :
+  QObject(parentDiagram)
 {
   m_parentDiagram     = parentDiagram;
   m_index             = index;

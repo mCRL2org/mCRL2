@@ -677,7 +677,7 @@ void Parser::parseShape(
           doublePropertyValues["XCenter"],   doublePropertyValues["YCenter"],
           doublePropertyValues["XDistanceFromCenter"],   doublePropertyValues["YDistanceFromCenter"],
           doublePropertyValues["AngleCenter"], type,
-          doublePropertyValues["XHinge"], doublePropertyValues["YHinge"], diagram);
+          doublePropertyValues["XHinge"], doublePropertyValues["YHinge"]);
     shape->setLineWidth(doublePropertyValues["LineWidth"]);
     shape->setLineColor(colorPropertyValues["LineColor"]);
     shape->setFillColor(colorPropertyValues["FillColor"]);

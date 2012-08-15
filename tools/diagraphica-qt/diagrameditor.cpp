@@ -115,27 +115,24 @@ void DiagramEditor::visualize(const bool& inSelectMode)
   qDebug() << "visualize(" << inSelectMode << ")";
   if (inSelectMode == true)
   {
-    if (m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF || m_editMode == EDIT_MODE_NOTE)
-    {
-      // set up picking
-      GLint hits = 0;
-      GLuint selectBuf[512];
-      startSelectMode(
-            hits,
-            selectBuf,
-            2.0,
-            2.0);
+    // set up picking
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+          hits,
+          selectBuf,
+          2.0,
+          2.0);
 
-      // render in select mode
-      glPushName(0);
-      m_diagram->visualize(inSelectMode, pixelSize());
-      glPopName();
+    // render in select mode
+    glPushName(0);
+    m_diagram->visualize(inSelectMode, pixelSize());
+    glPopName();
 
-      // finish up picking
-      finishSelectMode(
-            hits,
-            selectBuf);
-    }
+    // finish up picking
+    finishSelectMode(
+          hits,
+          selectBuf);
   }
   else
   {
@@ -609,7 +606,113 @@ void DiagramEditor::handleHits(const vector< int > &ids)
   }
   if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
   {
+    handleIntersection();
+    if (m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF)
+    {
+      deselectAll();
 
+      double x1, x2, y1, y2;
+      double dX, dY;
+      double pix;
+
+      pix = pixelSize();
+
+      QPointF start = worldCoordinate(m_mouseDragStart);
+      QPointF stop = worldCoordinate(m_lastMouseEvent.pos());
+
+      x1 = start.x();
+      y1 = start.y();
+      x2 = stop.x();
+      y2 = stop.y();
+
+      if (m_diagram->snapGrid() == true)
+      {
+        double intv = m_diagram->gridInterval(pixelSize());
+
+        x1 = Utils::rndToNearestMult(x1, intv);
+        y1 = Utils::rndToNearestMult(y1, intv);
+        x2 = Utils::rndToNearestMult(x2, intv);
+        y2 = Utils::rndToNearestMult(y2, intv);
+      }
+
+      dX = x2-x1;
+      dY = y2-y1;
+
+      if (Utils::abs(dX) < Shape::minSzeHnt*pix &&
+          Utils::abs(dY) < Shape::minSzeHnt*pix)
+      {
+        dX = Shape::minSzeHnt*pix;
+        dY = Shape::minSzeHnt*pix;
+      }
+
+      double xC, yC, xDFC, yDFC;
+      xC = x1+0.5*dX;
+      yC = y1+0.5*dY;
+      xDFC = 0.5*dX;
+      yDFC = -0.5*dY;
+
+      QRectF gridCoordinates = m_diagram->gridCoordinates();
+      double xLeft = gridCoordinates.left();
+      double xRight = gridCoordinates.right();
+      double yTop = gridCoordinates.top();
+      double yBottom = gridCoordinates.bottom();
+      if (xLeft > (xC - xDFC))
+      {
+        xC = xLeft + xDFC;
+      }
+      else if (xRight < (xC + xDFC))
+      {
+        xC = xRight - xDFC;
+      }
+      if (yBottom > (yC - yDFC))
+      {
+        yC = yBottom + yDFC;
+      }
+      else if (yTop < (yC + yDFC))
+      {
+        yC = yTop - yDFC;
+      }
+
+      Shape* s = new Shape(m_diagram, m_diagram->shapeCount(),
+                           xC,        yC,
+                           0.5*dX,    -0.5*dY,
+                           0.0,       Shape::TYPE_RECT,
+                           0.0,       0.0);
+
+      s->setModeEdit();
+
+      if (m_editMode == EDIT_MODE_RECT)
+      {
+        s->setTypeRect();
+      }
+      else if (m_editMode == EDIT_MODE_ELLIPSE)
+      {
+        s->setTypeEllipse();
+      }
+      else if (m_editMode == EDIT_MODE_LINE)
+      {
+        s->setTypeLine();
+      }
+      else if (m_editMode == EDIT_MODE_ARROW)
+      {
+        s->setTypeArrow();
+      }
+      else if (m_editMode == EDIT_MODE_DARROW)
+      {
+        s->setTypeDArrow();
+      }
+      else if (m_editMode == EDIT_MODE_NOTE)
+      {
+        s->setTypeNote();
+        editNote();
+      }
+
+      m_diagram->addShape(s);
+      s = 0;
+      updateGL();
+
+      // undo transl & scale here
+    }
   }
   if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
   {

@@ -35,8 +35,7 @@ class Shape : public QObject
         double xCenter,         double yCenter,
         double xDistance,       double yDistance,
         double angle,           int    shapeType,
-        double xHinge,          double yHinge,
-        QObject* parent = 0);
+        double xHinge,          double yHinge);
     Shape(const Shape& shape);
     virtual ~Shape();
 
