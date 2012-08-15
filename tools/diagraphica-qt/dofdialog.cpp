@@ -11,119 +11,88 @@
 #include "ui_dofdialog.h"
 #include <QDebug>
 
-DofDialog::DofDialog(QWidget *parent) :
+DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
   QDialog(parent),
-  m_currentGraph(0),
-  m_currentShape(0)
+  m_graph(graph),
+  m_shape(shape)
 {
   m_ui.setupUi(this);
 
-  m_dofNames << "Horizontal position" <<
-                "Vertical position" <<
-                "Width" <<
-                "Height" <<
-                "Rotation" <<
-                "Color" <<
-                "Opacity" <<
-                "Text";
+  setAttribute(Qt::WA_DeleteOnClose);
+  connect(shape, SIGNAL(destroyed()), this, SLOT(close()));
 
   m_comboBoxes.clear();
-  for (int i = 0; i < m_dofNames.size(); i++)
+
+  for (int i = 0; i < m_shape->dofCount(); i++)
   {
     QComboBox* comboBox = new QComboBox(this);
     comboBox->addItem("None");
-    m_ui.formLayout->addRow(m_dofNames[i], comboBox);
 
-    m_comboBoxes.insert(m_dofNames[i], comboBox);
-    connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(attributeSelected(int)));
-  }
+    DOF* dof = m_shape->dof(i);
+    Attribute* currentAttribute = (dof == 0 ? 0 : dof->attribute());
 
-}
-
-void DofDialog::refresh()
-{
-
-  for (int i = 0; i < m_dofNames.count(); i++)
-  {
-    QString dofName = m_dofNames[i];
-    QComboBox* comboBox = m_comboBoxes[dofName];
-    comboBox->clear();
-    comboBox->addItem("None");
-    if (m_currentGraph != 0)
+    for (size_t j = 0; j < m_graph->getSizeAttributes(); j++)
     {
-      Attribute* currentAttribute = 0;
-      DOF* dof = currentDof(dofName);
-      if (dof != 0)
+      Attribute* attribute = m_graph->getAttribute(j);
+      comboBox->addItem(attribute->name());
+      if (currentAttribute == attribute)
       {
-        currentAttribute = dof->attribute();
-      }
-
-      for (size_t j = 0; j < m_currentGraph->getSizeAttributes(); j++)
-      {
-        Attribute* attribute = m_currentGraph->getAttribute(j);
-        comboBox->addItem(attribute->name());
-        if (currentAttribute == attribute)
-        {
-          comboBox->setCurrentIndex(comboBox->count()-1);
-        }
+        comboBox->setCurrentIndex(comboBox->count()-1);
       }
     }
+
+    m_ui.formLayout->addRow(m_shape->dofLabel(i), comboBox);
+
+    m_comboBoxes.insert(i, comboBox);
+    connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(attributeSelected(int)));
+    comboBox->installEventFilter(this);
   }
+  m_ui.colorLabel->setText(m_shape->colorDOF()->label());
+  m_ui.opacityLabel->setText(m_shape->opacityDOF()->label());
 }
 
 void DofDialog::attributeSelected(int index)
 {
-  if (m_currentGraph != 0)
+  if (m_graph != 0)
   {
     QObject* sender = QObject::sender();
     QComboBox* comboBox = dynamic_cast<QComboBox*>(sender);
     if (comboBox != 0)
     {
-      QString dofName = m_comboBoxes.key(comboBox, QString());
-      if (!dofName.isNull())
+      int dofIndex = m_comboBoxes.indexOf(comboBox);
+      if (dofIndex != -1)
       {
-        DOF* dof = currentDof(dofName);
+        DOF* dof = m_shape->dof(dofIndex);
         if (dof != 0)
         {
-          dof->setAttribute(m_currentGraph->getAttribute(index-1));
+          if (index > 0)
+          {
+            dof->setAttribute(m_graph->getAttribute(index-1));
+          }
+          else
+          {
+            dof->setAttribute(0);
+          }
         }
       }
     }
   }
 }
 
-DOF *DofDialog::currentDof(QString name)
+bool DofDialog::eventFilter(QObject *object, QEvent *event)
 {
-  if (m_currentShape == 0)
+  if (event->type() == QEvent::FocusIn)
   {
-    return 0;
+    QComboBox* comboBox = dynamic_cast<QComboBox*>(object);
+    if (comboBox != 0)
+    {
+      int dofIndex = m_comboBoxes.indexOf(comboBox);
+      if (dofIndex != -1)
+      {
+        emit(dofActivated(dofIndex));
+      }
+      return true;
+    }
   }
-  int index = m_dofNames.indexOf(name);
-  switch(index)
-  {
-    case 0:
-      return m_currentShape->xCenterDOF();
-      break;
-    case 1:
-      return m_currentShape->yCenterDOF();
-      break;
-    case 2:
-      return m_currentShape->widthDOF();
-      break;
-    case 3:
-      return m_currentShape->heightDOF();
-      break;
-    case 4:
-      return m_currentShape->angleDOF();
-      break;
-    case 5:
-      return m_currentShape->opacityDOF();
-      break;
-    case 6:
-      return m_currentShape->colorDOF();
-      break;
-    default:
-      return 0;
-      break;
-  }
+  return false;
 }

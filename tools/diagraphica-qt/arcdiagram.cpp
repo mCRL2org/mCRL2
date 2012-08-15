@@ -56,7 +56,7 @@ ArcDiagram::ArcDiagram(
   connect(&settings->clusterTreeColorMap, SIGNAL(changed(int)), this, SLOT(update()));
   connect(&settings->barTreeMagnification, SIGNAL(changed(float)), this, SLOT(update()));
 
-  connect(graph, SIGNAL(clusteringChanged()), this, SLOT(clustersChanged()));
+  connect(m_graph, SIGNAL(clusteringChanged()), this, SLOT(clustersChanged()));
 
   setMouseTracking(true);
 }
@@ -90,7 +90,7 @@ void ArcDiagram::setAttrsTree(const vector< size_t > idcs)
   attrsTree.clear();
   for (size_t i = 0; i < idcs.size(); ++i)
   {
-    attrsTree.push_back(graph->getAttribute(idcs[i]));
+    attrsTree.push_back(m_graph->getAttribute(idcs[i]));
   }
 }
 
@@ -355,7 +355,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 
     if (render == HQRender)
     {
-      clust = graph->getLeaf(i);
+      clust = m_graph->getLeaf(i);
 
       // drop shadow
       VisUtils::setColor(VisUtils::mediumGray);
@@ -1092,7 +1092,7 @@ void ArcDiagram::calcSettingsDataBased()
 
 void ArcDiagram::calcSettingsLeaves()
 {
-  if (graph->getSizeLeaves() > 0)
+  if (m_graph->getSizeLeaves() > 0)
   {
     QSizeF size = worldSize();
     double pix = pixelSize();
@@ -1102,7 +1102,7 @@ void ArcDiagram::calcSettingsLeaves()
     double xRgt =  0.5*Utils::minn(size.width(), size.height())-20*pix;
 
     // get number of values on x-axis
-    double numX = graph->getSizeLeaves();
+    double numX = m_graph->getSizeLeaves();
 
     // calc intervals per axis
     double fracX;
@@ -1142,7 +1142,7 @@ void ArcDiagram::calcSettingsLeaves()
     }
 
     // update idx of init state
-    idxInitStLeaves = graph->getNode(0)->getCluster()->getIndex();
+    idxInitStLeaves = m_graph->getNode(0)->getCluster()->getIndex();
   }
 
   prevFrameIdxClust = NON_EXISTING;
@@ -1153,7 +1153,7 @@ void ArcDiagram::calcSettingsLeaves()
 
 void ArcDiagram::calcSettingsBundles()
 {
-  if (graph->getSizeBundles() > 0)
+  if (m_graph->getSizeBundles() > 0)
   {
     // clear prev settings
     posBundles.clear();
@@ -1165,19 +1165,19 @@ void ArcDiagram::calcSettingsBundles()
     // max size
     double maxSize = 0;
     {
-      for (size_t i = 0; i < graph->getSizeBundles(); ++i)
-        if (graph->getBundle(i)->getSizeEdges() > maxSize)
+      for (size_t i = 0; i < m_graph->getSizeBundles(); ++i)
+        if (m_graph->getBundle(i)->getSizeEdges() > maxSize)
         {
-          maxSize = graph->getBundle(i)->getSizeEdges();
+          maxSize = m_graph->getBundle(i)->getSizeEdges();
         }
     }
 
     // calc new settings
     {
-      for (size_t i = 0; i < graph->getSizeBundles(); ++i)
+      for (size_t i = 0; i < m_graph->getSizeBundles(); ++i)
       {
-        size_t idxFr = graph->getBundle(i)->getInCluster()->getIndex();
-        size_t idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
+        size_t idxFr = m_graph->getBundle(i)->getInCluster()->getIndex();
+        size_t idxTo = m_graph->getBundle(i)->getOutCluster()->getIndex();
         Position2D pos;
 
         // position
@@ -1211,7 +1211,7 @@ void ArcDiagram::calcSettingsBundles()
         radiusBundles.push_back(rad);
 
         // width
-        double frac = (double)graph->getBundle(i)->getSizeEdges()/maxSize;
+        double frac = (double)m_graph->getBundle(i)->getSizeEdges()/maxSize;
         rad = sqrt(frac*(2.0*radLeaves)*(2.0*radLeaves));
         widthBundles.push_back(rad);
 
@@ -1239,7 +1239,7 @@ void ArcDiagram::calcSettingsBundles()
 
 void ArcDiagram::calcSettingsTree()
 {
-  if (graph->getRoot() != 0)
+  if (m_graph->getRoot() != 0)
   {
     QSizeF size = worldSize();
     double yTop = 0.5*Utils::minn(size.width(), size.height())-2.0*radLeaves;
@@ -1274,7 +1274,7 @@ void ArcDiagram::calcSettingsTree()
     }
 
     // calc positions
-    calcPositionsTree(graph->getRoot(), maxLvl, yTop/(double)(maxLvl-1));
+    calcPositionsTree(m_graph->getRoot(), maxLvl, yTop/(double)(maxLvl-1));
   }
 }
 
@@ -1325,7 +1325,7 @@ void ArcDiagram::calcPositionsTree(
 
 void ArcDiagram::calcSettingsBarTree()
 {
-  if (graph->getRoot() != 0)
+  if (m_graph->getRoot() != 0)
   {
     QSizeF size = worldSize();
     double yBot = -0.5*Utils::minn(size.width(), size.height());
@@ -1337,11 +1337,11 @@ void ArcDiagram::calcSettingsBarTree()
     // calc max depth of clustering tree
     size_t maxLvl = 0;
     {
-      for (size_t i = 0; i < graph->getSizeLeaves(); ++i)
+      for (size_t i = 0; i < m_graph->getSizeLeaves(); ++i)
       {
-        if (graph->getLeaf(i)->getSizeCoord() > maxLvl)
+        if (m_graph->getLeaf(i)->getSizeCoord() > maxLvl)
         {
-          maxLvl = graph->getLeaf(i)->getSizeCoord();
+          maxLvl = m_graph->getLeaf(i)->getSizeCoord();
         }
       }
     }
@@ -1358,7 +1358,7 @@ void ArcDiagram::calcSettingsBarTree()
 
     // calc positions
     calcPositionsBarTree(
-          graph->getRoot(), yBot, hght);
+          m_graph->getRoot(), yBot, hght);
   }
 }
 
@@ -1386,7 +1386,7 @@ void ArcDiagram::calcPositionsBarTree(
     botRgt.x = 0.5*(posBarTreeTopLft[lvl+1][posBarTreeTopLft[lvl+1].size()-1].x
                     +  posBarTreeBotRgt[lvl+1][posBarTreeBotRgt[lvl+1].size()-1].x);
 
-    double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
+    double frac = (double)c->getSizeDescNodes()/(double)m_graph->getSizeNodes();
 
     topLft.y = yBot + Utils::fishEye(settings->barTreeMagnification.value(), frac)*height;
     botRgt.y = yBot;
@@ -1396,7 +1396,7 @@ void ArcDiagram::calcPositionsBarTree(
     topLft.x = posLeaves[c->getIndex()].x - radLeaves;
     botRgt.x = posLeaves[c->getIndex()].x + radLeaves;
 
-    double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
+    double frac = (double)c->getSizeDescNodes()/(double)m_graph->getSizeNodes();
 
     topLft.y = yBot + Utils::fishEye(settings->barTreeMagnification.value(), frac)*height;
     botRgt.y = yBot;
@@ -1593,7 +1593,7 @@ void ArcDiagram::animate()
 void ArcDiagram::clustersChanged()
 {
   attrsTree.clear();
-  for(Cluster *cluster = graph->getLeaf(0); cluster != graph->getRoot(); cluster = cluster->getParent())
+  for(Cluster *cluster = m_graph->getLeaf(0); cluster != m_graph->getRoot(); cluster = cluster->getParent())
   {
     attrsTree.insert(attrsTree.begin(), cluster->getAttribute());
   }
@@ -1618,7 +1618,7 @@ void ArcDiagram::handleHits(const vector< int > &ids)
         if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
         {
           handleShowDiagram(ids[2]);
-          emit clickedCluster(graph->getLeaf(ids[2]));
+          emit clickedCluster(m_graph->getLeaf(ids[2]));
         }
         else
         {
@@ -1751,11 +1751,11 @@ void ArcDiagram::handleHoverCluster(
 
 void ArcDiagram::handleHoverBundle(const size_t& bndlIdx)
 {
-  if (bndlIdx != NON_EXISTING && bndlIdx < graph->getSizeBundles())
+  if (bndlIdx != NON_EXISTING && bndlIdx < m_graph->getSizeBundles())
   {
     string  sepr  = "; ";
     string  lbls = "";
-    Bundle* bndl = graph->getBundle(bndlIdx);
+    Bundle* bndl = m_graph->getBundle(bndlIdx);
     bndl->getLabels(sepr, lbls);
     setToolTip(QString::fromStdString(lbls));
   }
@@ -1906,7 +1906,7 @@ void ArcDiagram::handleNextDiagram(const size_t& dgrmIdx)
 
 void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 {
-  Cluster* clust = graph->getLeaf(dgrmIdx);
+  Cluster* clust = m_graph->getLeaf(dgrmIdx);
 
   if (clust != 0)
   {
@@ -1971,7 +1971,7 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 
 
     // find attributes corresponding to path to root in clustering tree
-    while (clust != graph->getRoot())
+    while (clust != m_graph->getRoot())
     {
       attrs.insert(clust->getAttribute());
       clust = clust->getParent();
@@ -1995,8 +1995,8 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
     framesDgrm[dgrmIdx].clear();
 
     // update framesDgrm
-    clust = graph->getLeaf(dgrmIdx);
-    graph->calcAttrCombn(
+    clust = m_graph->getLeaf(dgrmIdx);
+    m_graph->calcAttrCombn(
           clust,
           attrsDgrm[dgrmIdx],
           framesDgrm[dgrmIdx]);
@@ -2019,7 +2019,7 @@ void ArcDiagram::showDiagram(const size_t& dgrmIdx)
 
 void ArcDiagram::hideDiagram(const size_t& dgrmIdx)
 {
-  Cluster* clust = graph->getLeaf(dgrmIdx);
+  Cluster* clust = m_graph->getLeaf(dgrmIdx);
 
   if (clust != 0)
   {

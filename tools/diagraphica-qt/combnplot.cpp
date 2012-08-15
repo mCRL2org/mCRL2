@@ -33,11 +33,11 @@ CombnPlot::CombnPlot(
 
   for (size_t i = 0; i < attributeIndices.size(); i++)
   {
-    Attribute *attribute = graph->getAttribute(attributeIndices[i]);
+    Attribute *attribute = m_graph->getAttribute(attributeIndices[i]);
     attributes.push_back(attribute);
     connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
   }
-  graph->calcAttrCombn(attributeIndices, combinations, numberPerComb);
+  m_graph->calcAttrCombn(attributeIndices, combinations, numberPerComb);
   initLabels();
   calcMaxAttrCard();
   calcMaxNumberPerComb();
@@ -565,7 +565,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
     msgDgrm.append("nodes; ");
     // percentage
     msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((double) numberPerComb[posIdx], (double) graph->getSizeNodes())));
+                     Utils::perc((double) numberPerComb[posIdx], (double) m_graph->getSizeNodes())));
     msgDgrm.append("%");
 
     if (diagram == 0)

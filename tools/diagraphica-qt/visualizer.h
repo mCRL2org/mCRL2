@@ -36,7 +36,7 @@ class Visualizer : public QGLWidget
     // -- constructors and destructor -------------------------------
     Visualizer(
       QWidget *parent,
-      Graph *graph);
+      Graph *m_graph);
     virtual ~Visualizer() {}
 
     virtual void paintGL();
@@ -114,7 +114,7 @@ class Visualizer : public QGLWidget
 
     QColor clearColor;
 
-    Graph *graph;
+    Graph *m_graph;
 
     bool geomChanged; // canvas resized
     bool dataChanged; // data has changed

@@ -53,7 +53,7 @@ Simulator::Simulator(
 
 Simulator::~Simulator()
 {
-  graph = 0;
+  m_graph = 0;
 
   clearDiagram();
   clearFrames();
@@ -400,11 +400,11 @@ void Simulator::initFramesPrevNext()
   }
 
   // calculate prev & next frames
-  graph->calcAttrCombn(
+  m_graph->calcAttrCombn(
     nodesPrev,
     m_attributes,
     m_previousFrames);
-  graph->calcAttrCombn(
+  m_graph->calcAttrCombn(
     nodesNext,
     m_attributes,
     m_nextFrames);

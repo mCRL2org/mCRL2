@@ -26,28 +26,23 @@ class DofDialog : public QDialog
     Q_OBJECT
     
   public:
-    explicit DofDialog(QWidget *parent = 0);
-
-    void setCurrentGraph(Graph* graph) { m_currentGraph = graph; refresh(); }
-    Graph* currentGraph() { return m_currentGraph; }
-
-    void setCurrentShape(Shape* shape) { m_currentShape = shape; refresh(); }
-    Shape* currentShape() { return m_currentShape; }
+    explicit DofDialog(Graph* graph, Shape* shape, QWidget *parent = 0);
     
   public slots:
-    void refresh();
     void attributeSelected(int index);
 
+  signals:
+    void dofActivated(int dofIndex);
+
   protected:
-    DOF* currentDof(QString name);
+    bool eventFilter(QObject *object, QEvent *event);
 
   private:
     Ui::DofDialog m_ui;
-    Graph* m_currentGraph;
-    Shape* m_currentShape;
+    Graph* m_graph;
+    Shape* m_shape;
 
-    QStringList m_dofNames;
-    QMap<QString, QComboBox*> m_comboBoxes;
+    QList<QComboBox*> m_comboBoxes;
 
 };
 

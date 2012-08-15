@@ -37,47 +37,19 @@ class DiagramEditor : public Visualizer
       QWidget *parent,
       Graph* g);
 
-    void handleIntersection();
-
     // -- get functions ---------------------------------------------
     Diagram* diagram()        { return m_diagram; }
     int editMode()            { return m_editMode; }
-    Shape* selectedShape();
     bool isAnyShapeSelected() { return (selectedShape() != 0); }
+    Shape* selectedShape();   // Last selected
+    QList<Shape*> selectedShapes();
+
+    // -- public utility functions ----------------------------------
+    void deselectAll();
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
     void generateTextures();
-
-    // -- event handlers --------------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
-    void handleKeyEvent(QKeyEvent* e);
-
-    void handleHits(const std::vector< int > &ids);
-    void handleHitDiagramOnly();
-    void handleHitShape(const size_t& shapeIdx);
-    void handleHitShapeHandle(
-      const size_t& shapeIdx,
-      const size_t& handleId);
-
-    void handleDrag();
-    /*
-    void handleDrop(
-        const int &x,
-        const int &y,
-        const vector< int > &data );
-    */
-    void handleCut();
-    void handleCopy();
-    void clearClipBoard();
-
-    void handlePaste();
-    void handleDelete();
-    void handleSelectAll();
-    void handleEditDOF();
-
-    // -- public utility functions ----------------------------------
-    void deselectAll();
 
     // -- public constants ------------------------------------------
     enum
@@ -97,7 +69,6 @@ class DiagramEditor : public Visualizer
     void setDiagram(Diagram* dgrm);
 
     void setEditMode(int mode);
-
     void setSelectMode() { setEditMode(EDIT_MODE_SELECT); }
     void setNoteMode() { setEditMode(EDIT_MODE_NOTE); }
     void setConfigureMode() { setEditMode(EDIT_MODE_DOF); }
@@ -113,9 +84,44 @@ class DiagramEditor : public Visualizer
     void setFillColor();
     void setLineColor();
 
+    // -- context menu functions ------------------------------------
+
+    void editDof();
+    void editNote();
+    void editTextSize();
+
+    void cutShapes();
+    void copyShapes();
+    void pasteShapes();
+    void selectAllShapes();
+
+    void deleteShapes();
+
+    void bringToFront();
+    void sendToBack();
+    void bringForward();
+    void sendBackward();
+
+
   protected:
     // -- private utility functions ---------------------------------
+    void handleIntersection();
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
+
+    void initContextMenu();
+    void showContextMenu();
+
+    // -- event handlers --------------------------------------------
+    void handleMouseEvent(QMouseEvent* e);
+
+    void handleHits(const std::vector< int > &ids);
+    void handleHitDiagramOnly();
+    void handleHitShape(const size_t& shapeIdx);
+    void handleHitShapeHandle(
+      const size_t& shapeIdx,
+      const size_t& handleId);
+
+    void handleDrag();
 
     void handleDragCtr(Shape* s, double& xDrag, double& yDrag);
     void handleDragTopLft(Shape* s);
@@ -143,7 +149,8 @@ class DiagramEditor : public Visualizer
 
     // -- data members ----------------------------------------------
 
-    DofDialog m_dofDialog;
+    QMenu m_popup;
+
     QPoint m_lastMousePos;
     QPointF m_dragDistance;
 
@@ -151,13 +158,13 @@ class DiagramEditor : public Visualizer
     int m_editMode;
     QRectF m_selection;
 
+    int m_lastSelectedShapeId;
+
     size_t drgBegIdx1;
     size_t drgBegIdx2;
-    size_t lastSelectedShapeId;
     bool m_selectionActive;
 
-    std::vector < Shape* > clipBoardList;
-    double xPaste, yPaste;
+    QList<Shape*> m_clipBoardList;
 
     // -- static variables ------------------------------------------
     static int szeTxt;

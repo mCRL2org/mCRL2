@@ -24,8 +24,10 @@
 
 class Diagram;
 
-class Shape
+class Shape : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Shape(
@@ -33,7 +35,8 @@ class Shape
         double xCenter,         double yCenter,
         double xDistance,       double yDistance,
         double angle,           int    shapeType,
-        double xHinge,          double yHinge);
+        double xHinge,          double yHinge,
+        QObject* parent = 0);
     Shape(const Shape& shape);
     virtual ~Shape();
 
@@ -122,6 +125,10 @@ class Shape
     DOF* opacityDOF()               { return m_opacityDOF; }
     QList<double> opacityYValues()  { return m_opacityYValues; }
     DOF* textDOF()                  { return m_textDOF; }
+
+    int dofCount()                  { return 7; }
+    DOF* dof(int index);
+    QString dofLabel(int index);
 
     // -- visualization ---------------------------------------------
     void visualize(

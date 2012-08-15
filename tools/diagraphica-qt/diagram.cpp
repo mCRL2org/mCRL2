@@ -29,13 +29,7 @@ Diagram::Diagram(QObject *parent):
 
 Diagram::~Diagram()
 {
-  // composition
-  for (int i = 0; i < m_shapes.size(); ++i)
-  {
-    delete m_shapes[i];
-    m_shapes[i] = 0;
-  }
-  m_shapes.clear();
+  // Shapes are deleted as children
 }
 
 

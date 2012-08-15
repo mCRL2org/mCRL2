@@ -72,7 +72,7 @@ void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
   set< size_t >::iterator it;
   for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
   {
-    idcs.insert(graph->getNode(*it)->getCluster()->getIndex());
+    idcs.insert(m_graph->getNode(*it)->getCluster()->getIndex());
   }
 }
 
@@ -93,9 +93,9 @@ void TimeSeries::getIdxMseOver(
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
-  if (mouseOverIdx != NON_EXISTING && mouseOverIdx < graph->getSizeNodes())
+  if (mouseOverIdx != NON_EXISTING && mouseOverIdx < m_graph->getSizeNodes())
   {
-    Node* node = graph->getNode(mouseOverIdx);
+    Node* node = m_graph->getNode(mouseOverIdx);
     idxLeaf = node->getCluster()->getIndex();
     for (size_t i = 0; i < node->getSizeInEdges(); ++i)
     {
@@ -114,9 +114,9 @@ void TimeSeries::getCurrIdxDgrm(
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
-  if (currIdxDgrm != NON_EXISTING && currIdxDgrm < graph->getSizeNodes())
+  if (currIdxDgrm != NON_EXISTING && currIdxDgrm < m_graph->getSizeNodes())
   {
-    Node* node = graph->getNode(currIdxDgrm);
+    Node* node = m_graph->getNode(currIdxDgrm);
     idxLeaf = node->getCluster()->getIndex();
     for (size_t i = 0; i < node->getSizeInEdges(); ++i)
     {
@@ -142,9 +142,9 @@ void TimeSeries::getAnimIdxDgrm(
     idxLeaf = NON_EXISTING;
     idcsBndl.clear();
 
-    if (*animFrame != NON_EXISTING && *animFrame < graph->getSizeNodes())
+    if (*animFrame != NON_EXISTING && *animFrame < m_graph->getSizeNodes())
     {
-      nodeTo = graph->getNode(*animFrame);
+      nodeTo = m_graph->getNode(*animFrame);
       set< size_t >::iterator it = itemsMarked.begin();
       if (nodeTo->getIndex() == *it)
       {
@@ -154,7 +154,7 @@ void TimeSeries::getAnimIdxDgrm(
       {
         it = animFrame;
       }
-      nodeFr = graph->getNode(*(--it));
+      nodeFr = m_graph->getNode(*(--it));
 
       idxLeaf = nodeTo->getCluster()->getIndex();
       for (size_t i = 0; i < nodeTo->getSizeInEdges(); ++i)
@@ -205,7 +205,7 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
   // init new attributes
   for (size_t i = 0; i < attrIdcs.size(); ++i)
   {
-    Attribute *attribute = graph->getAttribute(attrIdcs[i]);
+    Attribute *attribute = m_graph->getAttribute(attrIdcs[i]);
     attributes.push_back(attribute);
     connect(attribute, SIGNAL(deleted()), this, SLOT(clearData()));
   }
@@ -398,9 +398,9 @@ void TimeSeries::handleWheelEvent(QWheelEvent *e)
       {
         // update position
         wdwStartIdx -= (int)(0.5*nodesItvSlider);
-        if (wdwStartIdx + nodesWdwScale+nodesItvSlider > graph->getSizeNodes()-1)
+        if (wdwStartIdx + nodesWdwScale+nodesItvSlider > m_graph->getSizeNodes()-1)
         {
-          wdwStartIdx = (graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
+          wdwStartIdx = (m_graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
         }
         if (wdwStartIdx == NON_EXISTING)
         {
@@ -441,13 +441,13 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Right)
     {
       // move to right
-      if ((wdwStartIdx + 1 + nodesWdwScale) <= (graph->getSizeNodes()-1))
+      if ((wdwStartIdx + 1 + nodesWdwScale) <= (m_graph->getSizeNodes()-1))
       {
         wdwStartIdx += 1;
       }
-      else if ((wdwStartIdx + 1 + nodesWdwScale) > (graph->getSizeNodes()-1))
+      else if ((wdwStartIdx + 1 + nodesWdwScale) > (m_graph->getSizeNodes()-1))
       {
-        wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+        wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
       }
     }
     else if (e->key() == Qt::Key_Left)
@@ -470,7 +470,7 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_End)
     {
       // move to end
-      wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+      wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
     }
     else if (e->key() == Qt::Key_PageUp || (e->key() == Qt::Key_9 && (e->modifiers() & Qt::KeypadModifier)))
     {
@@ -488,13 +488,13 @@ void TimeSeries::handleKeyEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_PageDown || (e->key() == Qt::Key_3 && (e->modifiers() & Qt::KeypadModifier)))
     {
       // move one window toward end
-      if ((wdwStartIdx + 2*nodesWdwScale) <= (graph->getSizeNodes()-1))
+      if ((wdwStartIdx + 2*nodesWdwScale) <= (m_graph->getSizeNodes()-1))
       {
         wdwStartIdx += nodesWdwScale;
       }
       else
       {
-        wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+        wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
       }
     }
     else if (e->key() == Qt::Key_Escape)
@@ -572,7 +572,7 @@ void TimeSeries::calcPositions()
   posSliderBotRgt.x = xRgt - 5.0*pix;
   posSliderBotRgt.y = yTop - 6.0*pix - 6.0*ySpacePxl*pix;
   // calc intervals of slider
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     nodesItvSlider = 1;
     double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
@@ -580,7 +580,7 @@ void TimeSeries::calcPositions()
 
     while (itvSlider == 0.0)
     {
-      double fact = (double)(graph->getSizeNodes())/(double)nodesItvSlider;
+      double fact = (double)(m_graph->getSizeNodes())/(double)nodesItvSlider;
       double itvPx = distPx/fact;
 
       if (itvPx >= 5)
@@ -593,7 +593,7 @@ void TimeSeries::calcPositions()
       }
     }
 
-    itvSliderPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)(graph->getSizeNodes());
+    itvSliderPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)(m_graph->getSizeNodes());
   }
   else
   {
@@ -601,14 +601,14 @@ void TimeSeries::calcPositions()
   }
 
   // calc size of visible window
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
 
     nodesWdwScale = int (distPx/actPixPerNode);
-    if (graph->getSizeNodes() < nodesWdwScale)
+    if (m_graph->getSizeNodes() < nodesWdwScale)
     {
-      nodesWdwScale = graph->getSizeNodes();
+      nodesWdwScale = m_graph->getSizeNodes();
     }
 
     itvWdwPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)nodesWdwScale;
@@ -619,7 +619,7 @@ void TimeSeries::calcPositions()
   }
 
   // calc intervals of scale
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     nodesItvScale = 1;
     double distPx = (posScaleBotRgt.x - posScaleTopLft.x)/pix;
@@ -682,9 +682,9 @@ void TimeSeries::calcPositions()
     attr = attributes[i];
     vector< Position2D > v;
 
-    for (size_t j = 0; j< graph->getSizeNodes(); ++j)
+    for (size_t j = 0; j< m_graph->getSizeNodes(); ++j)
     {
-      node = graph->getNode(j);
+      node = m_graph->getNode(j);
 
       double alphaHgt;
       if (attr->getSizeCurValues() == 1)
@@ -899,10 +899,10 @@ void TimeSeries::route()
   Cluster cluster;
   QList<Attribute*> attributes;
 
-  cluster.addNode(graph->getNode(currIdxDgrm));
-  for (size_t i = 0; i < graph->getSizeAttributes(); i++)
+  cluster.addNode(m_graph->getNode(currIdxDgrm));
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
   {
-    attributes += graph->getAttribute(i);
+    attributes += m_graph->getAttribute(i);
   }
 
   emit routingCluster(&cluster, QList<Cluster *>(), attributes);
@@ -997,12 +997,12 @@ void TimeSeries::handleHits(const vector< int > &ids)
           Cluster* frame = new Cluster();
           vector< Attribute* > attrs;
 
-          frame->addNode(graph->getNode(currIdxDgrm));
+          frame->addNode(m_graph->getNode(currIdxDgrm));
 
-          for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+          for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
           {
             //if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
-            attrs.push_back(graph->getAttribute(i));
+            attrs.push_back(m_graph->getAttribute(i));
           }
 
           emit hoverCluster(frame, QVector<Attribute *>::fromStdVector(attrs).toList());
@@ -1641,10 +1641,10 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         1.0 - 4.0*pix/scaleDgrm,
         -1.0 - 4.0*pix/scaleDgrm);
       // diagram
-      for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+      for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
       {
-        Attribute* attr = graph->getAttribute(i);
-        Node* node = graph->getNode(*animFrame);
+        Attribute* attr = m_graph->getAttribute(i);
+        Node* node = m_graph->getNode(*animFrame);
         if (attr->getSizeCurValues() > 0)
         {
           attrs.push_back(attr);
@@ -1742,10 +1742,10 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         // diagram
         Attribute* attr;
         Node* node;
-        for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+        for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
         {
-          attr = graph->getAttribute(i);
-          node = graph->getNode(it->first);
+          attr = m_graph->getAttribute(i);
+          node = m_graph->getNode(it->first);
           if (attr->getSizeCurValues() > 0)
           {
             attrs.push_back(attr);
@@ -1840,7 +1840,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
       {
         string lbl;
         Attribute* attr = attributes[i];
-        Node* node = graph->getNode(mouseOverIdx);
+        Node* node = m_graph->getNode(mouseOverIdx);
 
         lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
 
@@ -1987,13 +1987,13 @@ void TimeSeries::handleHitSlider()
   else if (distWorld > 0)
   {
     // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (graph->getSizeNodes()/*-1*/))
+    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (m_graph->getSizeNodes()/*-1*/))
     {
       wdwStartIdx += (int)dragDistNodes;
     }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (graph->getSizeNodes()/*-1*/))
+    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (m_graph->getSizeNodes()/*-1*/))
     {
-      wdwStartIdx = (graph->getSizeNodes()/*-1*/) - nodesWdwScale;
+      wdwStartIdx = (m_graph->getSizeNodes()/*-1*/) - nodesWdwScale;
     }
   }
 
@@ -2026,14 +2026,14 @@ void TimeSeries::handleDragSliderHdl()
   else if (dragDistNodes > 1)
   {
     // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (graph->getSizeNodes()/*-1*/))
+    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (m_graph->getSizeNodes()/*-1*/))
     {
       wdwStartIdx += (int)dragDistNodes;
       dragDistNodes -= (int)dragDistNodes;
     }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (graph->getSizeNodes()/*-1*/))
+    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (m_graph->getSizeNodes()/*-1*/))
     {
-      wdwStartIdx = (graph->getSizeNodes()/*-1*/) - nodesWdwScale;
+      wdwStartIdx = (m_graph->getSizeNodes()/*-1*/) - nodesWdwScale;
       dragDistNodes = 0.0;
     }
   }

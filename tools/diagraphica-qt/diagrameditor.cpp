@@ -26,118 +26,39 @@ int DiagramEditor::szeTxt = 12;
 DiagramEditor::DiagramEditor(
     QWidget *parent,
     Graph* g):
-  Visualizer(parent, g),
-  m_dofDialog(this)
+  Visualizer(parent, g)
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
+
 
   m_diagram     = new Diagram(this);
   m_editMode    = EDIT_MODE_SELECT;
   drgBegIdx1 = NON_EXISTING;
   drgBegIdx2 = NON_EXISTING;
   m_selectionActive = false;
-  lastSelectedShapeId = NON_EXISTING;
+  m_lastSelectedShapeId = -1;
 
   initMouse();
-
-  m_dofDialog.setCurrentGraph(g);
-}
-
-// -- set data functions --------------------------------------------
-
-
-void DiagramEditor::setDiagram(Diagram* dgrm)
-{
-  delete m_diagram;
-  m_diagram = dgrm;
-  m_dofDialog.setCurrentShape(0);
-  update();
-}
-
-void DiagramEditor::setEditMode(int mode)
-{
-  m_editMode = mode;
-  deselectAll();
-  update();
-}
-
-void DiagramEditor::setShowGrid(bool show)
-{
-  m_diagram->setShowGrid(show);
-  update();
-}
-
-
-void DiagramEditor::setSnapGrid(bool show)
-{
-  m_diagram->setSnapGrid(show);
-  update();
-}
-
-
-void DiagramEditor::setFillColor()
-{
-  Shape* s = selectedShape();
-  if (s != 0)
-  {
-    QColor color = QColorDialog::getColor(s->fillColor(), this);
-    if (color.isValid())
-    {
-      s->setFillColor(color);
-      update();
-    }
-  }
-}
-
-
-void DiagramEditor::setLineColor()
-{
-  Shape* s = selectedShape();
-  if (s != 0)
-  {
-    QColor color = QColorDialog::getColor(s->lineColor(), this);
-    if (color.isValid())
-    {
-      s->setLineColor(color);
-      update();
-    }
-  }
-}
-
-
-void DiagramEditor::handleIntersection()
-{
-  qDebug() << "handleIntersection";
-  Shape* s = 0;
-  if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
-  {
-    for (int i = 0; i < m_diagram->shapeCount(); i++)
-    {
-      s = m_diagram->shape(i);
-      double sX1, sY1, sX2, sY2, x1, x2, y1, y2;
-      translatePoints(sX1, sY1, sX2, sY2, s->xCenter(), s->yCenter(), s->xDistance(), s->yDistance());
-      translatePoints(x1, y1, x2, y2, m_selection.left(), m_selection.top(), m_selection.right(), m_selection.bottom());
-      if (!(x1 >= sX2 || x2 <= sX1 || y1 <= sY2 || y2 >= sY1))
-      {
-        s->setDrawMode(Shape::MODE_EDIT);
-      }
-      s = 0;
-    }
-  }
-  m_selectionActive = false;
+  initContextMenu();
 }
 
 
 // -- get functions ---------------------------------------------
 
 
-Shape *DiagramEditor::selectedShape()
+Shape* DiagramEditor::selectedShape()
 {
   if (m_diagram != 0)
   {
-    size_t sizeShapes = m_diagram->shapeCount();
-    for (size_t i = 0; i < sizeShapes; ++i)
+    // Return last selected if possible
+    if (m_lastSelectedShapeId != -1 && m_lastSelectedShapeId < m_diagram->shapeCount())
+    {
+      return m_diagram->shape(m_lastSelectedShapeId);
+    }
+
+    // Find any selected shape
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
     {
       if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
       {
@@ -146,6 +67,43 @@ Shape *DiagramEditor::selectedShape()
     }
   }
   return 0;
+}
+
+QList<Shape*> DiagramEditor::selectedShapes()
+{
+  QList<Shape*> result;
+  if (m_diagram != 0)
+  {
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
+    {
+      if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+      {
+        result.append(m_diagram->shape(i));
+      }
+    }
+  }
+  return result;
+}
+
+
+// -- public utility functions --------------------------------------
+
+
+void DiagramEditor::deselectAll()
+{
+  size_t sizeShapes = 0;
+  if (m_diagram != 0)
+  {
+    sizeShapes = m_diagram->shapeCount();
+  }
+
+  for (size_t i = 0; i < sizeShapes; ++i)
+  {
+    m_diagram->shape(i)->setModeNormal();
+  }
+
+  drgBegIdx1 = NON_EXISTING;
+  drgBegIdx2 = NON_EXISTING;
 }
 
 
@@ -265,6 +223,362 @@ void DiagramEditor::generateTextures()
 }
 
 
+// -- set functions ---------------------------------------------
+
+
+void DiagramEditor::setDiagram(Diagram* dgrm)
+{
+  delete m_diagram;
+  m_diagram = dgrm;
+  update();
+}
+
+void DiagramEditor::setEditMode(int mode)
+{
+  m_editMode = mode;
+  deselectAll();
+  update();
+}
+
+void DiagramEditor::setShowGrid(bool show)
+{
+  m_diagram->setShowGrid(show);
+  update();
+}
+
+
+void DiagramEditor::setSnapGrid(bool show)
+{
+  m_diagram->setSnapGrid(show);
+  update();
+}
+
+
+void DiagramEditor::setFillColor()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    QColor color = QColorDialog::getColor(s->fillColor(), this);
+    if (color.isValid())
+    {
+      s->setFillColor(color);
+      update();
+    }
+  }
+}
+
+
+void DiagramEditor::setLineColor()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    QColor color = QColorDialog::getColor(s->lineColor(), this);
+    if (color.isValid())
+    {
+      s->setLineColor(color);
+      update();
+    }
+  }
+}
+
+
+// -- context menu functions ------------------------------------
+
+
+void DiagramEditor::editDof()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    DofDialog* dofDialog = new DofDialog(m_graph, s, this);
+    dofDialog->show();
+  }
+}
+
+void DiagramEditor::editTextSize()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    bool ok;
+    int size = QInputDialog::getInt(this, "Set Text Size", "Points:", s->textSize(), 6, 72, 1, &ok);
+    if (ok)
+    {
+      s->setTextSize(size);
+    }
+  }
+}
+
+void DiagramEditor::editNote()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    bool ok;
+    QString note = QInputDialog::getText(this, "Set Note", "Text:", QLineEdit::Normal, s->note(), &ok);
+    if (ok)
+    {
+      s->setNote(note);
+    }
+  }
+}
+
+
+void DiagramEditor::cutShapes()
+{
+  // find & cut selected shapes
+  QList<Shape*> shapes = selectedShapes();
+
+  if (!shapes.isEmpty()) {
+    m_clipBoardList.clear();
+    for (int i = 0; i < shapes.size(); i++)
+    {
+      m_clipBoardList.append(new Shape(*shapes[i]));
+      m_diagram->removeShape(shapes[i]->index());
+    }
+  }
+}
+
+
+void DiagramEditor::copyShapes()
+{
+  // find & copy selected shapes
+  QList<Shape*> shapes = selectedShapes();
+
+  if (!shapes.isEmpty()) {
+    m_clipBoardList.clear();
+    for (int i = 0; i < shapes.size(); i++)
+    {
+      m_clipBoardList.append(new Shape(*shapes[i]));
+    }
+  }
+}
+
+void DiagramEditor::pasteShapes()
+{
+  if (m_clipBoardList.size() > 0)
+  {
+    deselectAll();
+
+    double xOriginal = m_clipBoardList[0]->xCenter();
+    double yOriginal = m_clipBoardList[0]->yCenter();
+
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    double xPaste = pos.x();
+    double yPaste = pos.y();
+
+
+
+    for (int i = 1; i < m_clipBoardList.size(); i++)
+    {
+      // update index of clipboard shape
+      m_clipBoardList[i]->setIndex(m_diagram->shapeCount());
+
+      // update clipboard shape
+      if (i == 0) // Paste the first selected shape to the clicked position
+      {
+        m_clipBoardList[i]->setCenter(xPaste, yPaste);
+      }
+      else // Paste other shapes relative to their position with respect to first shape
+      {
+        double distanceX, distanceY, x1, x2, y1, y2;
+        m_clipBoardList[0]->center(x1, y1);
+        m_clipBoardList[i]->center(x2, y2);
+
+        // calculate the distance between the first selected shape and the current shape
+        distanceX = xOriginal - x2;
+        distanceY = yOriginal - y2;
+        if (x2 > xOriginal)
+        {
+          distanceX = x2 - xOriginal;
+        }
+        if (y2 > yOriginal)
+        {
+          distanceY = y2 - yOriginal;
+        }
+
+        double xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
+        double yC = yPaste + distanceY;
+
+        m_clipBoardList[i]->setCenter(xC, yC);
+      }
+      m_clipBoardList[i]->setModeEdit();
+
+      // add clipboard shape to diagram
+      m_diagram->addShape(m_clipBoardList[i]);
+      // make another copy of clipboard shape
+      m_clipBoardList[i] = new Shape(*m_clipBoardList[i]);
+    }
+  }
+}
+
+void DiagramEditor::selectAllShapes()
+{
+  for (int i = 0; i < m_diagram->shapeCount() ; ++i)
+  {
+    m_diagram->shape(i)->setDrawMode(Shape::MODE_EDIT);
+  }
+}
+
+void DiagramEditor::deleteShapes()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->removeShape(i);
+    }
+  }
+}
+
+void DiagramEditor::bringToFront()
+{
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeToFront(i);
+    }
+  }
+}
+
+void DiagramEditor::sendToBack()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeToBack(i);
+    }
+  }
+}
+
+void DiagramEditor::bringForward()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeForward(i);
+    }
+  }
+}
+
+void DiagramEditor::sendBackward()
+{
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeBackward(i);
+    }
+  }
+}
+
+
+// -- private utility functions ---------------------------------
+
+
+void DiagramEditor::handleIntersection()
+{
+  qDebug() << "handleIntersection";
+  Shape* s = 0;
+  if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
+  {
+    for (int i = 0; i < m_diagram->shapeCount(); i++)
+    {
+      s = m_diagram->shape(i);
+      double sX1, sY1, sX2, sY2, x1, x2, y1, y2;
+      translatePoints(sX1, sY1, sX2, sY2, s->xCenter(), s->yCenter(), s->xDistance(), s->yDistance());
+      translatePoints(x1, y1, x2, y2, m_selection.left(), m_selection.top(), m_selection.right(), m_selection.bottom());
+      if (!(x1 >= sX2 || x2 <= sX1 || y1 <= sY2 || y2 >= sY1))
+      {
+        s->setDrawMode(Shape::MODE_EDIT);
+      }
+      s = 0;
+    }
+  }
+  m_selectionActive = false;
+}
+
+
+void DiagramEditor::translatePoints(double& x1, double& y1,
+                                    double& x2, double& y2,
+                                    double givenX1, double givenY1,
+                                    double givenX2, double givenY2)
+{
+  x1 = givenX1 - givenX2;
+  y1 = givenY1 + givenY2;
+  x2 = givenX1 + givenX2;
+  y2 = givenY1 - givenY2;
+  double temp;
+  if (x1 > x2)
+  {
+    temp = x1;
+    x1 = x2;
+    x2 = temp;
+  }
+  if (y2 > y1)
+  {
+    temp = y1;
+    y1 = y2;
+    y2 = temp;
+  }
+}
+
+void DiagramEditor::initContextMenu()
+{
+  m_popup.clear();
+  m_popup.addAction("Edit DOF", this, SLOT(editDof()));
+  m_popup.addAction("Edit Note", this, SLOT(editNote()));
+  m_popup.addAction("Text Size", this, SLOT(editTextSize()));
+  m_popup.addSeparator();
+  m_popup.addAction("Cut", this, SLOT(cutShapes()), QKeySequence::Cut);
+  m_popup.addAction("Copy", this, SLOT(copyShapes()), QKeySequence::Copy);
+  m_popup.addAction("Paste", this, SLOT(copyShapes()), QKeySequence::Paste);
+  m_popup.addAction("Select All", this, SLOT(pasteShapes()), QKeySequence::SelectAll);
+  m_popup.addSeparator();
+  m_popup.addAction("Delete", this, SLOT(deleteShapes()), QKeySequence::Delete);
+  m_popup.addSeparator();
+  m_popup.addAction("Bring to front", this, SLOT(bringToFront()));
+  m_popup.addAction("Send to back", this, SLOT(sendToBack()));
+  m_popup.addAction("Bring forward", this, SLOT(bringForward()));
+  m_popup.addAction("Send backward", this, SLOT(sendBackward()));
+}
+
+void DiagramEditor::showContextMenu()
+{
+  QStringList enabledOptions("Select All");
+
+  if (!m_clipBoardList.isEmpty())
+  {
+    enabledOptions << "Paste";
+  }
+
+  QList<Shape*> shapes = selectedShapes();
+  if (shapes.size() == 1)
+  {
+    enabledOptions << "Edit DOF" << "Edit Note" << "Text Size";
+  }
+  if (shapes.size() > 0)
+  {
+    enabledOptions << "Cut" << "Copy" << "Delete" <<
+                      "Bring to front" << "Send to back" <<
+                      "Bring forward" << "Send backward";
+  }
+
+  QList<QAction*> actions = m_popup.actions();
+  for (int i = 0; i < actions.size(); i++)
+  {
+    actions[i]->setEnabled(enabledOptions.indexOf(actions[i]->text()) != -1);
+  }
+
+  m_popup.popup(mapToGlobal(m_lastMouseEvent.pos()));
+}
+
+
 // -- event handlers --------------------------------------------
 
 
@@ -272,208 +586,48 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
 {
   Visualizer::handleMouseEvent(e);
 
-  if (e->type() != QEvent::MouseMove)
+  if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
-    if (m_editMode == EDIT_MODE_SELECT ||
-        (m_editMode == EDIT_MODE_DOF && e->button() == Qt::LeftButton &&
-         (e->type() == QEvent::MouseButtonPress ||
-          e->type() == QEvent::MouseButtonRelease)))
-    {
-      // redraw in select mode
-      updateGL(true);
-    }
-    if (e->button() == Qt::LeftButton && e->type() == QEvent::MouseButtonRelease)
-    {
-      handleIntersection();
-      if (m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF)
-      {
-        double x1, x2, y1, y2;
-        double dX, dY;
-        double pix;
-
-        pix = pixelSize();
-
-        QPointF start = worldCoordinate(m_mouseDragStart);
-        QPointF stop = worldCoordinate(e->posF());
-
-        x1 = start.x();
-        y1 = start.y();
-        x2 = stop.x();
-        y2 = stop.y();
-
-        if (m_diagram->snapGrid() == true)
-        {
-          double intv = m_diagram->gridInterval(pixelSize());
-
-          x1 = Utils::rndToNearestMult(x1, intv);
-          y1 = Utils::rndToNearestMult(y1, intv);
-          x2 = Utils::rndToNearestMult(x2, intv);
-          y2 = Utils::rndToNearestMult(y2, intv);
-        }
-
-        dX = x2-x1;
-        dY = y2-y1;
-
-        if (Utils::abs(dX) < Shape::minSzeHnt*pix &&
-            Utils::abs(dY) < Shape::minSzeHnt*pix)
-        {
-          dX = Shape::minSzeHnt*pix;
-          dY = Shape::minSzeHnt*pix;
-        }
-
-        double xC, yC, xDFC, yDFC;
-        xC = x1+0.5*dX;
-        yC = y1+0.5*dY;
-        xDFC = 0.5*dX;
-        yDFC = -0.5*dY;
-
-        QRectF gridCoordinates = m_diagram->gridCoordinates();
-        double xLeft = gridCoordinates.left();
-        double xRight = gridCoordinates.right();
-        double yTop = gridCoordinates.top();
-        double yBottom = gridCoordinates.bottom();
-        if (xLeft > (xC - xDFC))
-        {
-          xC = xLeft + xDFC;
-        }
-        else if (xRight < (xC + xDFC))
-        {
-          xC = xRight - xDFC;
-        }
-        if (yBottom > (yC - yDFC))
-        {
-          yC = yBottom + yDFC;
-        }
-        else if (yTop < (yC + yDFC))
-        {
-          yC = yTop - yDFC;
-        }
-
-        Shape* s = new Shape(m_diagram, m_diagram->shapeCount(),
-                             xC,        yC,
-                             0.5*dX,    -0.5*dY,
-                             0.0,       Shape::TYPE_RECT,
-                             0.0,       0.0);
-
-        if (m_editMode == EDIT_MODE_RECT)
-        {
-          s->setTypeRect();
-        }
-        else if (m_editMode == EDIT_MODE_ELLIPSE)
-        {
-          s->setTypeEllipse();
-        }
-        else if (m_editMode == EDIT_MODE_LINE)
-        {
-          s->setTypeLine();
-        }
-        else if (m_editMode == EDIT_MODE_ARROW)
-        {
-          s->setTypeArrow();
-        }
-        else if (m_editMode == EDIT_MODE_DARROW)
-        {
-          s->setTypeDArrow();
-        }
-        else if (m_editMode == EDIT_MODE_NOTE)
-        {
-          s->setTypeNote();
-          //mediator->handleNote(s->getIndex() , s->getNote());
-        }
-
-        m_diagram->addShape(s);
-        s = 0;
-
-        // undo transl & scale here
-      }
-    }
+    // redraw in select mode
+    updateGL(true);
+    // redraw in render mode
+    updateGL();
   }
-  else
-  {
-    if (m_mouseDrag && (m_editMode  == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF))
-    {
-      qDebug() << "drgBegIdx1" << drgBegIdx1 << "drgBegIdx2" << drgBegIdx1;
-      if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
-      {
-        m_selectionActive = true;
-        // redraw in select mode
-        updateGL(true);
-      }
-      else
-      {
-        qDebug() << "drgBegIdx1 exists";
-        handleDrag();
-      }
-    }
-
-    m_lastMousePos = e->pos();
-  }
-  // redraw in render mode
-  updateGL();
-}
-
-void DiagramEditor::handleKeyEvent(QKeyEvent* e)
-{
-  Visualizer::handleKeyEvent(e);
-  if (m_editMode == EDIT_MODE_SELECT)
-  {
-    if (e->type() == QEvent::KeyPress)
-    {
-      if (e->matches(QKeySequence::SelectAll))
-      {
-        handleSelectAll();
-      }
-      else if (e->matches(QKeySequence::Cut))
-      {
-        handleCut();
-      }
-      else if (e->matches(QKeySequence::Copy))
-      {
-        handleCopy();
-      }
-      else if (e->matches(QKeySequence::Paste))
-      {
-        handlePaste();
-      }
-    }
-    if (e->type() == QEvent::KeyRelease)
-    {
-      if (e->matches(QKeySequence::Delete))
-      {
-        handleDelete();
-      }
-    }
-  }
-  // redraw in render mode
-  updateGL();
 }
 
 
 void DiagramEditor::handleHits(const vector< int > &ids)
 {
-  // only diagram was hit
-  if (ids.size() == 1)
+  qDebug() << "handleHits";
+
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton)
   {
-    lastSelectedShapeId = NON_EXISTING;
-    handleHitDiagramOnly();
+    if (ids.size() == 1)
+    {
+      deselectAll();
+    }
   }
-  // shape was hit
-  else if (ids.size() == 2 && !m_selectionActive)
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
   {
-    lastSelectedShapeId = ids[1];
-    handleHitShape(ids[1]);
+
   }
-  else if (ids.size() == 3)
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton)
   {
-    lastSelectedShapeId = ids[1];
-    handleHitShapeHandle(ids[1], ids[2]);
+    if (ids.size() == 1)
+    {
+      deselectAll();
+    }
+  }
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::RightButton)
+  {
+    showContextMenu();
   }
 }
 
 
 void DiagramEditor::handleHitDiagramOnly()
 {
-  //Deselect all and show popup menu
+  deselectAll();
 }
 
 void DiagramEditor::handleHitShape(const size_t& shapeIdx)
@@ -532,7 +686,7 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
           }
 
 
-          //TODO: Show DOF Dialog
+          editDof();
 
 
           for (size_t i = 0; i < sizeShapes; ++i)
@@ -549,9 +703,6 @@ void DiagramEditor::handleHitShape(const size_t& shapeIdx)
       else if (m_lastMouseEvent.button() == Qt::RightButton)
       {
         s->setModeEdit();
-        QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
-        xPaste = pos.x();
-        yPaste = pos.y();
         int countSelectedShapes = 0;
         for (size_t i = 0; i < sizeShapes; i++)
         {
@@ -617,8 +768,6 @@ void DiagramEditor::handleHitShapeHandle(
       else if (m_lastMouseEvent.button() == Qt::RightButton)
       {
         QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
-        xPaste = pos.x();
-        yPaste = pos.y();
 
         /*for ( int i = 0; i < sizeShapes; ++i )
             if ( i != s->getIndex() )
@@ -652,10 +801,8 @@ void DiagramEditor::handleHitShapeHandle(
       }
       if (s->shapeType() != Shape::TYPE_NOTE)
       {
-        //TODO: Show DOF Dialog
-
         m_editMode = EDIT_MODE_DOF;
-        //mediator->handleEditModeDOF(this);
+        editDof();
       }
       for (size_t i = 0; i < sizeShapes; ++i)
         if (i != shapeIdx)
@@ -791,386 +938,8 @@ void DiagramEditor::handleDrag()
 }
 
 
-//void DiagramEditor::handleShowVariable(const string& variable, const int& variableId)
-//{
-//  Shape* selectedShape = 0;
-//  if (lastSelectedShapeId != NON_EXISTING)
-//  {
-//    selectedShape = m_diagram->shape(lastSelectedShapeId);
-//    selectedShape->setCheckedId(variableId);
-//    string variableName = variable;
-//    size_t i = variable.find(":",0); // for getting variable's name
-//    variableName = variable.substr(0, i);
-//    i++;
-//    string variableValue = variable;
-//    variableValue.erase(0,i);
-//    selectedShape->setNote(variableName);
-//    selectedShape->setVariableName(variableName);
-//    if (variable.length() > variableValue.length())  // If their length is same, it means variable doesn't have a value
-//    {
-//      selectedShape->setVariableValue(variableValue);
-//    }
-//    else
-//    {
-//      selectedShape->setVariableValue("");
-//    }
-//  }
-//}
-
-
-//void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId)
-//{
-//  Shape* selectedShape = 0;
-//  selectedShape = m_diagram->shape(shapeId);
-//  selectedShape->setNote(variable);
-//  if (selectedShape->shapeType() == Shape::TYPE_NOTE)
-//  {
-//    double letterCount = selectedShape->note().length();
-//    double x = letterCount * 0.009;
-//    double y = 0.02;
-//    selectedShape->setDistance(x, y);
-//  }
-//}
-
-
-//void DiagramEditor::handleAddText(string& variable, size_t& shapeId)
-//{
-//  Shape* selectedShape = 0;
-//  shapeId = lastSelectedShapeId;
-//  selectedShape = m_diagram->shape(shapeId);
-//  variable = selectedShape->note();
-//  selectedShape = 0;
-//}
-
-
-//void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
-//{
-//  Shape* selectedShape = 0;
-//  shapeId = lastSelectedShapeId;
-//  selectedShape = m_diagram->shape(shapeId);
-//  if (selectedShape != 0)
-//  {
-//    textSize = selectedShape->textSize();
-//    selectedShape = 0;
-//  }
-//}
-
-
-//void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
-//{
-//  Shape* selectedShape = 0;
-//  selectedShape = m_diagram->shape(shapeId);
-//  selectedShape->setTextSize(textSize);
-//}
-
-
-void DiagramEditor::handleCut()
-{
-  Shape* origShape = 0;
-  Shape* copyShape = 0;
-  bool shapeSelected = false;
-
-  // find & copy selected shape
-  for (int i = 0; i < m_diagram->shapeCount(); ++i)
-  {
-    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-    {
-      if (!shapeSelected)
-      {
-        shapeSelected = true;
-        clearClipBoard();
-      }
-      origShape = m_diagram->shape(i);
-
-      // invoke copy constructor
-      copyShape = new Shape(*origShape);
-      // delete original shape
-      m_diagram->removeShape(origShape->index());
-      i--; // decrement index; because deletion of the shape decrements the size of the diagram
-
-      clipBoardList.push_back(copyShape);
-      origShape = 0;
-      copyShape = 0;
-    }
-  }
-}
-
-
-void DiagramEditor::handleCopy()
-{
-  Shape* origShape = 0;
-  Shape* copyShape = 0;
-  bool shapeSelected = false;
-
-  // find & copy selected shape
-  for (int i = 0; i < m_diagram->shapeCount(); ++i)
-  {
-    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-    {
-      if (!shapeSelected)
-      {
-        shapeSelected = true;
-        clearClipBoard();
-      }
-      origShape = m_diagram->shape(i);
-
-      // invoke copy constructor
-      copyShape = new Shape(*origShape);
-
-      clipBoardList.push_back(copyShape);
-      origShape = 0;
-      copyShape = 0;
-    }
-  }
-}
-
-
-void DiagramEditor::clearClipBoard()
-{
-  size_t size = clipBoardList.size();
-  for (size_t i = 0; i < size; i++)
-  {
-    clipBoardList[i] = 0;
-  }
-  clipBoardList.clear();
-}
-
-
-void DiagramEditor::handlePaste()
-{
-  if (clipBoardList.size() > 0)
-  {
-    // deselect all other shapes
-    for (int i = 0; i < m_diagram->shapeCount(); ++i)
-      if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-      {
-        m_diagram->shape(i)->setModeNormal();
-      }
-
-    size_t size = clipBoardList.size();
-    double xC, yC, xCFirst, yCFirst;
-    clipBoardList[0]->center(xCFirst, yCFirst);
-    for (size_t i = 0; i < size; i++)
-    {
-      // update index of clipboard shape
-      clipBoardList[i]->setIndex(m_diagram->shapeCount());
-
-      // update clipboard shape
-      if (i == 0) // Paste the first selected shape to the clicked position
-      {
-        clipBoardList[i]->setCenter(xPaste, yPaste);
-      }
-      else // Paste other shapes relative to their position with respect to first shape
-      {
-        double distanceX, distanceY, x1, x2, y1, y2;
-        clipBoardList[0]->center(x1, y1);
-        clipBoardList[i]->center(x2, y2);
-
-        // calculate the distance between the first selected shape and the current shape
-        distanceX = xCFirst - x2;
-        distanceY = yCFirst - y2;
-        if (x2 > xCFirst)
-        {
-          distanceX = x2 - xCFirst;
-        }
-        if (y2 > yCFirst)
-        {
-          distanceY = y2 - yCFirst;
-        }
-
-        xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
-        yC = yPaste + distanceY;
-
-        clipBoardList[i]->setCenter(xC, yC);
-      }
-      clipBoardList[i]->setModeEdit();
-
-      // add clipboard shape to diagram
-      m_diagram->addShape(clipBoardList[i]);
-      // make another copy of clipboard shape
-      clipBoardList[i] = new Shape(*clipBoardList[i]);
-    }
-  }
-}
-
-
-void DiagramEditor::handleDelete()
-{
-  QList<int> toDelete;
-  // get indices to delete
-  {
-    for (int i = 0; i < m_diagram->shapeCount() ; ++i)
-    {
-      /*
-      if ( diagram->getShape(i)->getMode() == Shape::MODE_EDT_CTR_DFC ||
-      diagram->getShape(i)->getMode() == Shape::MODE_EDT_HGE_AGL )
-      */
-      if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
-      {
-        toDelete.append(i);
-      }
-    }
-  }
-
-  // delete shapes
-  {
-    for (int i = 0; i < toDelete.size(); ++i)
-    {
-      m_diagram->removeShape(toDelete[i]);
-    }
-  }
-}
-
-
-void DiagramEditor::handleSelectAll()
-{
-  for (int i = 0; i < m_diagram->shapeCount() ; ++i)
-  {
-    m_diagram->shape(i)->setDrawMode(Shape::MODE_EDIT);
-  }
-}
-
-
-//void DiagramEditor::handleBringToFront()
-//{
-//  Shape* s = 0;
-//  for (size_t i = 0; i < m_diagram->shapeCount() && s == 0; ++i)
-//    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-//    {
-//      s = m_diagram->shape(i);
-//    }
-
-//  if (s != 0)
-//  {
-//    m_diagram->moveShapeToBack(s->index());
-//  }
-
-//  s = 0;
-//}
-
-
-//void DiagramEditor::handleSendToBack()
-//{
-//  Shape* s = 0;
-//  for (size_t i = 0; i < m_diagram->shapeCount() && s == 0; ++i)
-//    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-//    {
-//      s = m_diagram->shape(i);
-//    }
-
-//  if (s != 0)
-//  {
-//    m_diagram->moveShapeToFront(s->index());
-//  }
-
-//  s = 0;
-//}
-
-
-//void DiagramEditor::handleBringForward()
-//{
-//  Shape* s = 0;
-//  for (size_t i = 0; i < m_diagram->shapeCount() && s == 0; ++i)
-//    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-//    {
-//      s = m_diagram->shape(i);
-//    }
-
-//  if (s != 0)
-//  {
-//    m_diagram->moveShapeBackward(s->index());
-//  }
-
-//  s = 0;
-//}
-
-
-//void DiagramEditor::handleSendBackward()
-//{
-//  Shape* s = 0;
-//  for (size_t i = 0; i < m_diagram->shapeCount() && s == 0; ++i)
-//    if (m_diagram->shape(i)->drawMode() != Shape::MODE_NORMAL)
-//    {
-//      s = m_diagram->shape(i);
-//    }
-
-//  if (s != 0)
-//  {
-//    m_diagram->moveShapeForward(s->index());
-//  }
-
-//  s = 0;
-//}
-
-
-void DiagramEditor::handleEditDOF()
-{
-  Shape* s = 0;
-  if (lastSelectedShapeId != NON_EXISTING)
-  {
-    s = m_diagram->shape(lastSelectedShapeId);
-  }
-  if (s != 0)
-  {
-    m_dofDialog.setCurrentShape(s);
-    m_dofDialog.show();
-  }
-}
-
-
-// -- public utility functions --------------------------------------
-
-
-void DiagramEditor::deselectAll()
-{
-  size_t sizeShapes = 0;
-  if (m_diagram != 0)
-  {
-    sizeShapes = m_diagram->shapeCount();
-  }
-
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    m_diagram->shape(i)->setModeNormal();
-  }
-
-  drgBegIdx1 = NON_EXISTING;
-  drgBegIdx2 = NON_EXISTING;
-}
-
-
-// -- private utility functions -------------------------------------
-
-
-
-void DiagramEditor::translatePoints(double& x1, double& y1,
-                                    double& x2, double& y2,
-                                    double givenX1, double givenY1,
-                                    double givenX2, double givenY2)
-{
-  x1 = givenX1 - givenX2;
-  y1 = givenY1 + givenY2;
-  x2 = givenX1 + givenX2;
-  y2 = givenY1 - givenY2;
-  double temp;
-  if (x1 > x2)
-  {
-    temp = x1;
-    x1 = x2;
-    x2 = temp;
-  }
-  if (y2 > y1)
-  {
-    temp = y1;
-    y1 = y2;
-    y2 = temp;
-  }
-}
-
-
 void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
 {
-  qDebug() << "handleDragCtr";
   double xCtr, yCtr;
   double xDFC, yDFC;
   double x,    y;

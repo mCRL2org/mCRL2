@@ -42,7 +42,9 @@ Shape::Shape(
     double xCenter,         double yCenter,
     double xDistance,       double yDistance,
     double angle,           int    shapeType,
-    double xHinge,          double yHinge)
+    double xHinge,          double yHinge,
+    QObject* parent) :
+  QObject(parent)
 {
   m_parentDiagram     = parentDiagram;
   m_index             = index;
@@ -75,7 +77,8 @@ Shape::Shape(
 }
 
 
-Shape::Shape(const Shape& shape)
+Shape::Shape(const Shape& shape) :
+  QObject(shape.parent())
 // Copy constructor.
 {
   m_parentDiagram     = shape.m_parentDiagram;
@@ -162,6 +165,48 @@ void Shape::removeDOFOpaYValue(int index)
   {
     m_opacityYValues.removeAt(index);
   }
+}
+
+
+DOF* Shape::dof(int index)
+{
+  switch(index)
+  {
+    case 0:
+      return xCenterDOF();
+      break;
+    case 1:
+      return yCenterDOF();
+      break;
+    case 2:
+      return widthDOF();
+      break;
+    case 3:
+      return heightDOF();
+      break;
+    case 4:
+      return angleDOF();
+      break;
+    case 5:
+      return colorDOF();
+      break;
+    case 6:
+      return opacityDOF();
+      break;
+    default:
+      return 0;
+      break;
+  }
+}
+
+QString Shape::dofLabel(int index)
+{
+  DOF* current = dof(index);
+  if (current != 0)
+  {
+    return current->label();
+  }
+  return QString("");
 }
 
 

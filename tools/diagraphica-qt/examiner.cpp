@@ -37,7 +37,7 @@ Examiner::Examiner(
   connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
   
-  connect(graph, SIGNAL(deletedAttribute()), this, SLOT(clearData()));
+  connect(m_graph, SIGNAL(deletedAttribute()), this, SLOT(clearData()));
 }
 
 

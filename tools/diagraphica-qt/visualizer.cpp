@@ -18,7 +18,7 @@ Visualizer::Visualizer(
   Graph *graph_)
   : QGLWidget(parent),
     m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
-    graph(graph_)
+    m_graph(graph_)
 {
   clearColor = Qt::white;
 

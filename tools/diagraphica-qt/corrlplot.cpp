@@ -30,12 +30,12 @@ CorrlPlot::CorrlPlot(
   attrValIdx1Dgrm = NON_EXISTING;
   attrValIdx2Dgrm = NON_EXISTING;
 
-  attribute1 = graph->getAttribute(attributeIndex1);
-  attribute2 = graph->getAttribute(attributeIndex2);
+  attribute1 = m_graph->getAttribute(attributeIndex1);
+  attribute2 = m_graph->getAttribute(attributeIndex2);
   connect(attribute1, SIGNAL(deleted()), this, SLOT(close()));
   connect(attribute2, SIGNAL(deleted()), this, SLOT(close()));
 
-  graph->calcAttrCorrl(attributeIndex1, attributeIndex2, mapXToY, number);
+  m_graph->calcAttrCorrl(attributeIndex1, attributeIndex2, mapXToY, number);
   initLabels();
   calcMaxNumber();
   calcPositions();
@@ -368,7 +368,7 @@ void CorrlPlot::displTooltip(
   msgDgrm.append(" nodes; ");
   // percentage
   msgDgrm.append(Utils::dblToStr(
-                   Utils::perc((double) number[xIdx][ yIdx ], (double) graph->getSizeNodes())));
+                   Utils::perc((double) number[xIdx][ yIdx ], (double) m_graph->getSizeNodes())));
   msgDgrm.append("%");
 
   if (diagram == 0)

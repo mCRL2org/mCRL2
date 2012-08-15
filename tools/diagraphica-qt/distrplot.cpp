@@ -28,9 +28,9 @@ DistrPlot::DistrPlot(
   showDgrm       = false;
   attrValIdxDgrm = -1;
 
-  attribute = graph->getAttribute(attributeIndex);
+  attribute = m_graph->getAttribute(attributeIndex);
   connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
-  graph->calcAttrDistr(attributeIndex, number);
+  m_graph->calcAttrDistr(attributeIndex, number);
   calcMaxNumber();
   calcPositions();
 }
@@ -317,7 +317,7 @@ void DistrPlot::displTooltip(const size_t& posIdx)
     msgDgrm.append(Utils::size_tToStr(number[posIdx]));
     msgDgrm.append(" nodes; ");
     msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((int) number[posIdx], (int) graph->getSizeNodes())));
+                     Utils::perc((int) number[posIdx], (int) m_graph->getSizeNodes())));
     msgDgrm.append("%");
 
     if (diagram == 0)

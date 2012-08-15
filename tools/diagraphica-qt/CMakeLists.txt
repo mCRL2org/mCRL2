@@ -53,6 +53,7 @@ set(DIAGRAPHICA_MOC_HEADERS
   movabletablewidget.h
   parser.h
   settingsdialog.h
+  shape.h
   simulator.h
   timeseries.h
   visualizer.h
