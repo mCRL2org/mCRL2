@@ -85,7 +85,7 @@ class DiagramEditor : public Visualizer
 
     // -- context menu functions ------------------------------------
 
-    void editDof();
+    void editDof(Shape *shape = 0);
     void editNote();
     void editTextSize();
 
@@ -103,6 +103,7 @@ class DiagramEditor : public Visualizer
 
   protected:
     // -- private utility functions ---------------------------------
+    QRectF worldRectangle(QPointF start, QPointF stop);
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
     void createShape();
 
@@ -113,14 +114,7 @@ class DiagramEditor : public Visualizer
     void handleMouseEvent(QMouseEvent* e);
 
     void handleHits(const std::vector< int > &ids);
-    void handleHitShape(const size_t& shapeIdx);
-    void handleHitShapeHandle(
-      const size_t& shapeIdx,
-      const size_t& handleId);
 
-    void handleDrag();
-
-    void handleDragCtr(Shape* s, double& xDrag, double& yDrag);
     void handleDragTopLft(Shape* s);
     void handleDragLft(Shape* s);
     void handleDragBotLft(Shape* s);

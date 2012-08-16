@@ -98,7 +98,6 @@ bool DofDialog::eventFilter(QObject *object, QEvent *event)
       int dofIndex = m_comboBoxes.indexOf(comboBox);
       if (dofIndex != -1)
       {
-        qDebug() << "dofActivated";
         emit(dofActivated(dofIndex));
       }
       return true;
