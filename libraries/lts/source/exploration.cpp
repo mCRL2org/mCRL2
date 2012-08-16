@@ -498,7 +498,6 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
   trace.setState(m_generator->get_state(state));
   for (atermpp::deque<generator_state_t>::iterator i = states.begin(); i != states.end(); i++)
   {
-    bool found = false;
     for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
     {
       generator_state_t destination = j->internal_state();
@@ -509,7 +508,6 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
       if (destination == *i)
       {
         trace.addAction(j->action());
-        found = true;
         break;
       }
     }
