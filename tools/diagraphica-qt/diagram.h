@@ -41,7 +41,7 @@ class Diagram : public QObject
 
     // -- get functions ---------------------------------------------
     int shapeCount()        { return m_shapes.size(); }
-    Shape* shape(int index) { return m_shapes.at(index); }
+    Shape* shape(int index);
 
     bool snapGrid()                       { return m_snapGrid; }
     double gridInterval(double pixelSize) { return (2.0-(2.0*pixelSize*SIZE_BORDER))/(double)GRID_NUM_INTERV_HINT; }

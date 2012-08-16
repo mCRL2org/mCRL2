@@ -131,6 +131,41 @@ Shape::~Shape()
 // -- set functions ---------------------------------------------
 
 
+void Shape::setModeEditDof(int dofIndex)
+{
+  switch(dofIndex)
+  {
+    case 0:
+      setDrawMode(MODE_EDIT_DOF_XCTR);
+      break;
+    case 1:
+      setDrawMode(MODE_EDIT_DOF_YCTR);
+      break;
+    case 2:
+      setDrawMode(MODE_EDIT_DOF_WTH);
+      break;
+    case 3:
+      setDrawMode(MODE_EDIT_DOF_HGT);
+      break;
+    case 4:
+      setDrawMode(MODE_EDIT_DOF_AGL);
+      break;
+    case 5:
+      setDrawMode(MODE_EDIT_DOF_COL);
+      break;
+    case 6:
+      setDrawMode(MODE_EDIT_DOF_OPA);
+      break;
+    case 7:
+      setDrawMode(MODE_EDIT_DOF_TEXT);
+      break;
+    default:
+      setDrawMode(MODE_EDIT);
+      break;
+  }
+}
+
+
 void Shape::setDOFColYValue(int index, double value)
 {
   if (0 <= index && index < m_colorYValues.size())
@@ -192,6 +227,9 @@ DOF* Shape::dof(int index)
     case 6:
       return opacityDOF();
       break;
+    case 7:
+      return textDOF();
+      break;
     default:
       return 0;
       break;
@@ -216,6 +254,8 @@ void Shape::visualize(
     const bool& inSelectMode,
     double pixelSize)
 {
+  m_variableValue = "";
+
   // set up transf
   glPushMatrix();
   glTranslatef(m_xCenter, m_yCenter, 0.0);
@@ -246,6 +286,8 @@ void Shape::visualize(
     const vector< double > attrValIdcs
     )
 {
+  m_variableValue = "";
+
   double xC, yC; // center, [-1,1]
   double xD, yD; // bound dist from ctr,norm
   double aglH;   // rotation about hinge, degrees
@@ -259,7 +301,7 @@ void Shape::visualize(
   aglH       = 0.0;
   QColor colFill = m_fillColor;
 
-  for (size_t i = 0; i < attrs.size(); ++i)
+  for (size_t i = 0; i < attrs.size(); i++)
   {
     /*
     if ( attrs[i]->getSizeCurValues() == 1 )
@@ -340,6 +382,10 @@ void Shape::visualize(
       {
         colFill.setAlphaF(m_opacityDOF->value((int)intPtVal));
       }
+    }
+    if (attrs[i] == m_textDOF->attribute() && attrs[i]->getSizeCurValues() > 0)
+    {
+      m_variableValue = QString::fromStdString(attrs[i]->getCurValue((int) attrValIdcs[i])->getValue());
     }
   }
 
@@ -694,7 +740,7 @@ void Shape::drawNormal(
 
 void Shape::drawText(double pixelSize)
 {
-  if (!m_note.isEmpty() || m_variableValue.isEmpty())
+  if (!m_note.isEmpty() || !m_variableValue.isEmpty())
   {
     QString text = m_note;
     if (!text.isEmpty() && !m_variableValue.isEmpty())

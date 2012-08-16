@@ -138,7 +138,7 @@ Bundle* Cluster::getOutBundle(const size_t& idx)
 
 void Cluster::clearChildren()
 {
-  for (size_t i = 0; i < children.size(); ++i)
+  for (size_t i = 0; i < children.size(); i++)
   {
     children[i] = 0;
   }
@@ -148,7 +148,7 @@ void Cluster::clearChildren()
 
 void Cluster::clearNodes()
 {
-  for (size_t i = 0; i < nodes.size(); ++i)
+  for (size_t i = 0; i < nodes.size(); i++)
   {
     nodes[i] = 0;
   }
@@ -165,7 +165,7 @@ void Cluster::clearAttribute()
 
 void Cluster::clearInBundles()
 {
-  for (size_t i = 0; i < inBundles.size(); ++i)
+  for (size_t i = 0; i < inBundles.size(); i++)
   {
     inBundles[i] = 0;
   }
@@ -175,7 +175,7 @@ void Cluster::clearInBundles()
 
 void Cluster::clearOutBundles()
 {
-  for (size_t i = 0; i < outBundles.size(); ++i)
+  for (size_t i = 0; i < outBundles.size(); i++)
   {
     outBundles[i] = 0;
   }
@@ -196,7 +196,7 @@ void Cluster::getSizeDescNodes(
   }
   else
   {
-    for (size_t i = 0; i < curClst->getSizeChildren(); ++i)
+    for (size_t i = 0; i < curClst->getSizeChildren(); i++)
     {
       getSizeDescNodes(curClst->getChild(i), sum);
     }

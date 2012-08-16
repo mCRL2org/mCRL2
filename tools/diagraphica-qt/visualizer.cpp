@@ -20,6 +20,7 @@ Visualizer::Visualizer(
     m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
     m_graph(graph_)
 {
+  setFocusPolicy(Qt::ClickFocus);
   clearColor = Qt::white;
 
   initMouse();
@@ -131,6 +132,7 @@ void Visualizer::handleSizeEvent()
 
 void Visualizer::handleMouseEvent(QMouseEvent* e)
 {
+  m_mouseDragReleased = false;
   if (!m_mouseDrag && e->buttons() != Qt::NoButton && e->type() == QEvent::MouseMove)
   {
     m_mouseDrag = true;
@@ -139,13 +141,9 @@ void Visualizer::handleMouseEvent(QMouseEvent* e)
   if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
     m_mouseDrag = false;
+    m_mouseDragReleased = true;
   }
   m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
-}
-
-void Visualizer::handleMouseLeaveEvent()
-{
-  initMouse();
 }
 
 void Visualizer::handleKeyEvent(QKeyEvent* e)

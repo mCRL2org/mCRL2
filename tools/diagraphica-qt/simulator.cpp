@@ -361,13 +361,13 @@ void Simulator::initFramesPrevNext()
   Cluster*     nodesNext;
 
   // get nodes leading to & from current frame
-  for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
+  for (size_t i = 0; i < m_currentFrame->getSizeNodes(); i++)
   {
     temp = m_currentFrame->getNode(i);
 
     // incoming nodes
     {
-      for (size_t j = 0; j < temp->getSizeInEdges(); ++j)
+      for (size_t j = 0; j < temp->getSizeInEdges(); j++)
       {
         tempPrev.insert(temp->getInEdge(j)->getInNode());
       }
@@ -375,7 +375,7 @@ void Simulator::initFramesPrevNext()
 
     // outgoing nodes
     {
-      for (size_t j = 0; j < temp->getSizeOutEdges(); ++j)
+      for (size_t j = 0; j < temp->getSizeOutEdges(); j++)
       {
         tempNext.insert(temp->getOutEdge(j)->getOutNode());
       }
@@ -387,13 +387,13 @@ void Simulator::initFramesPrevNext()
   nodesNext = new Cluster();
   set< Node* >::iterator it;
   {
-    for (it = tempPrev.begin(); it != tempPrev.end(); ++it)
+    for (it = tempPrev.begin(); it != tempPrev.end(); it++)
     {
       nodesPrev->addNode(*it);
     }
   }
   {
-    for (it = tempNext.begin(); it != tempNext.end(); ++it)
+    for (it = tempNext.begin(); it != tempNext.end(); it++)
     {
       nodesNext->addNode(*it);
     }
@@ -433,7 +433,7 @@ void Simulator::initBundles()
 
   // get nodes in current frame
   {
-    for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
+    for (size_t i = 0; i < m_currentFrame->getSizeNodes(); i++)
     {
       currNodes.insert(m_currentFrame->getNode(i));
     }
@@ -442,12 +442,12 @@ void Simulator::initBundles()
   // get all edges from previous frames to current frame
   lbls.clear();
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); i++)
     {
       bdls.clear();
 
       clst = m_previousFrames[i];
-      for (size_t j = 0; j < clst->getSizeNodes(); ++j)
+      for (size_t j = 0; j < clst->getSizeNodes(); j++)
       {
         node = clst->getNode(j);
         for (size_t k = 0; k < node->getSizeOutEdges(); ++k)
@@ -500,7 +500,7 @@ void Simulator::initBundles()
   }
 
   map< string, Bundle* >::iterator it;
-  for (it = lbls.begin(); it != lbls.end(); ++it)
+  for (it = lbls.begin(); it != lbls.end(); it++)
   {
     bdlLbls = it->second;
     bdlLbls->setIndex(m_bundlesPreviousByLabel.size());
@@ -510,11 +510,11 @@ void Simulator::initBundles()
   // get all edges from current frame to next frames
   lbls.clear();
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); i++)
     {
       bdls.clear();
       clst = m_nextFrames[i];
-      for (size_t j = 0; j < clst->getSizeNodes(); ++j)
+      for (size_t j = 0; j < clst->getSizeNodes(); j++)
       {
         node = clst->getNode(j);
         for (size_t k = 0; k < node->getSizeInEdges(); ++k)
@@ -565,7 +565,7 @@ void Simulator::initBundles()
     }
   }
 
-  for (it = lbls.begin(); it != lbls.end(); ++it)
+  for (it = lbls.begin(); it != lbls.end(); it++)
   {
     bdlLbls = it->second;
     bdlLbls->setIndex(m_bundlesNextByLabel.size());
@@ -574,7 +574,7 @@ void Simulator::initBundles()
 
   lbls.clear();
   {
-    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); i++)
     {
       bdl = m_bundlesPreviousByLabel[i];
 
@@ -599,7 +599,7 @@ void Simulator::initBundles()
   }
 
   {
-    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+    for (size_t i = 0; i < m_bundlesNextByLabel.size(); i++)
     {
       bdl = m_bundlesNextByLabel[i];
 
@@ -623,7 +623,7 @@ void Simulator::initBundles()
     }
   }
 
-  for (it = lbls.begin(); it != lbls.end(); ++it)
+  for (it = lbls.begin(); it != lbls.end(); it++)
   {
     bdlLbls = it->second;
     bdlLbls->setIndex(m_bundlesByLabel.size());
@@ -648,10 +648,10 @@ void Simulator::sortFramesPrevNext()
 
   // sort previous frames
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); i++)
     {
       int key = 0;
-      for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
+      for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); j++)
       {
         key += (int)pow(10.0, (int) m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex());
       }
@@ -662,17 +662,17 @@ void Simulator::sortFramesPrevNext()
 
   m_previousFrames.clear();
   multimap< int, Cluster* >::iterator it;
-  for (it = sorted.begin(); it != sorted.end(); ++it)
+  for (it = sorted.begin(); it != sorted.end(); it++)
   {
     m_previousFrames.push_back(it->second);
   }
   sorted.clear();
 
   // sort previous frames
-  for (size_t i = 0; i < m_nextFrames.size(); ++i)
+  for (size_t i = 0; i < m_nextFrames.size(); i++)
   {
     int key = 0;
-    for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
+    for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); j++)
     {
       key += (int)pow(10.0, (int) m_nextFrames[i]->getInBundle(j)->getParent()->getIndex());
     }
@@ -681,7 +681,7 @@ void Simulator::sortFramesPrevNext()
   }
 
   m_nextFrames.clear();
-  for (it = sorted.begin(); it != sorted.end(); ++it)
+  for (it = sorted.begin(); it != sorted.end(); it++)
   {
     m_nextFrames.push_back(it->second);
   }
@@ -732,7 +732,7 @@ void Simulator::calcPosFrames()
   pos.x = -0.5*size.width() + 0.5*itvHori + 4.0*pix;
   pos.y = 0.5*m_previousFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); i++)
     {
       m_previousFramePositions.push_back(pos);
       pos.y -= itvVert;
@@ -742,7 +742,7 @@ void Simulator::calcPosFrames()
   pos.x = 0.5*size.width() - 0.5*itvHori - 4.0*pix;
   pos.y = 0.5*m_nextFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); i++)
     {
       m_nextFramePositions.push_back(pos);
       pos.y -= itvVert;
@@ -789,7 +789,7 @@ void Simulator::calcPosBundles()
     double itvGrid = (1.5*itvHori)/(m_bundlesPreviousByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+      for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); i++)
       {
         posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
@@ -803,7 +803,7 @@ void Simulator::calcPosBundles()
 
     // bundles prev
     {
-      for (size_t i = 0; i < m_previousFrames.size(); ++i)
+      for (size_t i = 0; i < m_previousFrames.size(); i++)
       {
         vector< Position2D > v;
 
@@ -813,7 +813,7 @@ void Simulator::calcPosBundles()
         // incoming bundles
         double itv = 2.0/m_bundlesPreviousByLabel.size();
         {
-          for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
+          for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); j++)
           {
             ///*
             posTopLft.x = m_previousFramePositions[i].x + 1.0*m_verticalFrameScale + 3.0*pix;
@@ -861,7 +861,7 @@ void Simulator::calcPosBundles()
     double itvGrid = (1.5*itvHori)/(m_bundlesNextByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+      for (size_t i = 0; i < m_bundlesNextByLabel.size(); i++)
       {
         posTopLft.x = 2.0*itvHori - (m_bundlesNextByLabel.size()-i)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
@@ -875,7 +875,7 @@ void Simulator::calcPosBundles()
 
     // bundles next
     {
-      for (size_t i = 0; i < m_nextFrames.size(); ++i)
+      for (size_t i = 0; i < m_nextFrames.size(); i++)
       {
         vector< Position2D > v;
 
@@ -885,7 +885,7 @@ void Simulator::calcPosBundles()
         // outgoing bundles
         double itv = 2.0/m_bundlesNextByLabel.size();
         {
-          for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
+          for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); j++)
           {
             posTopLft.x = m_nextBundleLabelPositionTL[ m_nextFrames[i]->getInBundle(j)->getParent()->getIndex() ].x + 1.0*pix;
             posTopLft.y = posBotRgt.y = m_nextFramePositions[i].y
@@ -1153,7 +1153,7 @@ void Simulator::clearFrames()
   }
 
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (size_t i = 0; i < m_previousFrames.size(); i++)
     {
       delete m_previousFrames[i];
     }
@@ -1161,7 +1161,7 @@ void Simulator::clearFrames()
   m_previousFrames.clear();
 
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (size_t i = 0; i < m_nextFrames.size(); i++)
     {
       delete m_nextFrames[i];
     }
@@ -1176,7 +1176,7 @@ void Simulator::clearFrames()
 void Simulator::clearBundles()
 {
   {
-    for (size_t i = 0; i < m_bundles.size(); ++i)
+    for (size_t i = 0; i < m_bundles.size(); i++)
     {
       delete m_bundles[i];
     }
@@ -1184,7 +1184,7 @@ void Simulator::clearBundles()
   }
 
   {
-    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); i++)
     {
       delete m_bundlesPreviousByLabel[i];
     }
@@ -1192,7 +1192,7 @@ void Simulator::clearBundles()
   m_bundlesPreviousByLabel.clear();
 
   {
-    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+    for (size_t i = 0; i < m_bundlesNextByLabel.size(); i++)
     {
       delete m_bundlesNextByLabel[i];
     }
@@ -1200,7 +1200,7 @@ void Simulator::clearBundles()
   m_bundlesNextByLabel.clear();
 
   {
-    for (size_t i = 0; i < m_bundlesByLabel.size(); ++i)
+    for (size_t i = 0; i < m_bundlesByLabel.size(); i++)
     {
       delete m_bundlesByLabel[i];
     }
@@ -1340,13 +1340,13 @@ void Simulator::processHits(
     // if necassary, advance to closest hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); ++i)
+      for (int i = 0; i < (hits-1); i++)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; ++j)
+        for (int j = 0; j < number; j++)
         {
           ++ptr;  // names
         }
@@ -1359,7 +1359,7 @@ void Simulator::processHits(
     ++ptr; // z1
     ++ptr; // z2
 
-    for (int i = 0; i < number; ++i)
+    for (int i = 0; i < number; i++)
     {
       ids.push_back(*ptr);
       ++ptr;
@@ -1433,7 +1433,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
       double x = m_currentFramePosition.x;
       double y = m_currentFramePosition.y;
       /*
-      for ( int j = 0; j < attributes.size(); ++j )
+      for ( int j = 0; j < attributes.size(); j++ )
           valsFrame.push_back(
               attributes[j]->mapToValue(
                   frameCurr->getNode(0)->getTupleVal(
@@ -1441,7 +1441,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); j++)
       {
         attr = m_attributes[j];
         node = m_currentFrame->getNode(0);
@@ -1506,7 +1506,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_PREV);
-    for (size_t i = 0; i < m_previousFramePositions.size(); ++i)
+    for (size_t i = 0; i < m_previousFramePositions.size(); i++)
     {
       double x = m_previousFramePositions[i].x;
       double y = m_previousFramePositions[i].y;
@@ -1546,7 +1546,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
     double pix = pixelSize();
     vector< double > valsFrame;
 
-    for (int i = 0; i < (int) m_previousFramePositions.size(); ++i)
+    for (int i = 0; i < (int) m_previousFramePositions.size(); i++)
     {
       if (m_currentSelection != ID_FRAME_PREV ||  i != m_currentSelectionIndex)
       {
@@ -1565,7 +1565,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         if (2.0*m_verticalFrameScale > 30.0*pix)
         {
           /*
-          for ( int j = 0; j < attributes.size(); ++j )
+          for ( int j = 0; j < attributes.size(); j++ )
               valsFrame.push_back(
                   attributes[j]->mapToValue(
                       framesPrev[i]->getNode(0)->getTupleVal(
@@ -1573,7 +1573,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < m_attributes.size(); ++j)
+          for (size_t j = 0; j < m_attributes.size(); j++)
           {
             attr = m_attributes[j];
             node = m_previousFrames[i]->getNode(0);
@@ -1615,7 +1615,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
       if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_previousFramePositions.size())
       {
         /*
-        for ( int j = 0; j < attributes.size(); ++j )
+        for ( int j = 0; j < attributes.size(); j++ )
             valsFrame.push_back(
                 attributes[j]->mapToValue(
                     framesPrev[focusFrameIdx]->getNode(0)->getTupleVal(
@@ -1623,7 +1623,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < m_attributes.size(); ++j)
+        for (size_t j = 0; j < m_attributes.size(); j++)
         {
           attr = m_attributes[j];
           node = m_previousFrames[m_currentSelectionIndex]->getNode(0);
@@ -1678,7 +1678,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_NEXT);
-    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
+    for (size_t i = 0; i < m_nextFramePositions.size(); i++)
     {
       double x = m_nextFramePositions[i].x;
       double y = m_nextFramePositions[i].y;
@@ -1716,7 +1716,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
     double pix = pixelSize();
     vector< double > valsFrame;
 
-    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
+    for (size_t i = 0; i < m_nextFramePositions.size(); i++)
     {
       if (m_currentSelection != ID_FRAME_NEXT || i !=  static_cast <size_t>(m_currentSelectionIndex))
       {
@@ -1735,7 +1735,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
         if (2.0*m_verticalFrameScale > 30.0*pix)
         {
           /*
-          for ( int j = 0; j < attributes.size(); ++j )
+          for ( int j = 0; j < attributes.size(); j++ )
               valsFrame.push_back(
                   attributes[j]->mapToValue(
                       framesNext[i]->getNode(0)->getTupleVal(
@@ -1743,7 +1743,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < m_attributes.size(); ++j)
+          for (size_t j = 0; j < m_attributes.size(); j++)
           {
             attr = m_attributes[j];
             node = m_nextFrames[i]->getNode(0);
@@ -1785,7 +1785,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
       if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_nextFramePositions.size())
       {
         /*
-        for ( int j = 0; j < attributes.size(); ++j )
+        for ( int j = 0; j < attributes.size(); j++ )
             valsFrame.push_back(
                 attributes[j]->mapToValue(
                     framesNext[focusFrameIdx]->getNode(0)->getTupleVal(
@@ -1793,7 +1793,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < m_attributes.size(); ++j)
+        for (size_t j = 0; j < m_attributes.size(); j++)
         {
           attr = m_attributes[j];
           node = m_nextFrames[m_currentSelectionIndex]->getNode(0);
@@ -1851,7 +1851,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     string lbl;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
+    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); i++)
     {
       lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
@@ -1898,7 +1898,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     double pix = pixelSize();
     size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
+    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); i++)
     {
       if (m_bundlesPreviousByLabel[i]->getParent()->getIndex() == m_previousBundleFocusIndex)
       {
@@ -2036,7 +2036,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     double pix = pixelSize();;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
+    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); i++)
     {
       string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2083,7 +2083,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     double pix = pixelSize();;
     size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
+    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); i++)
     {
       if (m_bundlesNextByLabel[i]->getParent()->getIndex() == m_nextBundleFocusIndex)
       {
@@ -2221,9 +2221,9 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
     double pix = pixelSize();
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
+    for (size_t i = 0; i < m_previousBundlePositionTL.size(); i++)
     {
-      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
+      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); j++)
       {
         glPushName((GLuint) m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
@@ -2248,10 +2248,10 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
+    for (size_t i = 0; i < m_previousBundlePositionTL.size(); i++)
     {
       idxHiLite = -1;
-      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
+      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); j++)
       {
         // fade color
         if (m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex() == m_previousBundleFocusIndex)
@@ -2313,9 +2313,9 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
     double arrowItv;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
+    for (size_t i = 0; i < m_nextBundlePositionTL.size(); i++)
     {
-      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
+      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); j++)
       {
         glPushName((GLuint) m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
@@ -2340,11 +2340,11 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
+    for (size_t i = 0; i < m_nextBundlePositionTL.size(); i++)
     {
       idxHiLite = -1;
 
-      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
+      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); j++)
       {
         // fade color
         if (m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex() == m_nextBundleFocusIndex)
@@ -2543,7 +2543,7 @@ void Simulator::animate()
       double y = m_animationCurrentPosition.y;
       /*
       {
-      for ( int j = 0; j < attributes.size(); ++j )
+      for ( int j = 0; j < attributes.size(); j++ )
           valsFrame.push_back(
               attributes[j]->mapToValue(
                   keyFrameFr->getNode(0)->getTupleVal(
@@ -2552,7 +2552,7 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); j++)
       {
         attr = m_attributes[j];
         node = m_animationOldFrame->getNode(0);
@@ -2588,14 +2588,14 @@ void Simulator::animate()
       valsFrame.clear();
       /*
       {
-      for ( int j = 0; j < attributes.size(); ++j )
+      for ( int j = 0; j < attributes.size(); j++ )
           valsFrame.push_back(
               attributes[j]->mapToValue(
                   keyFrameTo->getNode(0)->getTupleVal(
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); j++)
       {
         attr = m_attributes[j];
         node = m_animationNewFrame->getNode(0);
@@ -2631,7 +2631,7 @@ void Simulator::animate()
       double y = m_animationCurrentPosition.y;
       /*
       {
-      for ( int j = 0; j < attributes.size(); ++j )
+      for ( int j = 0; j < attributes.size(); j++ )
           valsFrame.push_back(
               attributes[j]->mapToValue(
                   keyFrameFr->getNode(0)->getTupleVal(
@@ -2640,7 +2640,7 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); j++)
       {
         attr = m_attributes[j];
         node = m_animationOldFrame->getNode(0);
@@ -2676,14 +2676,14 @@ void Simulator::animate()
       valsFrame.clear();
       /*
       {
-      for ( int j = 0; j < attributes.size(); ++j )
+      for ( int j = 0; j < attributes.size(); j++ )
           valsFrame.push_back(
               attributes[j]->mapToValue(
                   keyFrameTo->getNode(0)->getTupleVal(
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (size_t j = 0; j < m_attributes.size(); j++)
       {
         attr = m_attributes[j];
         node = m_animationNewFrame->getNode(0);

@@ -9,7 +9,6 @@
 
 #include "dofdialog.h"
 #include "ui_dofdialog.h"
-#include <QDebug>
 
 DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
   QDialog(parent),
@@ -20,6 +19,7 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
 
   setAttribute(Qt::WA_DeleteOnClose);
   connect(shape, SIGNAL(destroyed()), this, SLOT(close()));
+  connect(this, SIGNAL(dofActivated(int)), shape, SLOT(setModeEditDof(int)));
 
   m_comboBoxes.clear();
 
@@ -45,6 +45,7 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
 
     m_comboBoxes.insert(i, comboBox);
     connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(attributeSelected(int)));
+    comboBox->setFocusPolicy(Qt::StrongFocus);
     comboBox->installEventFilter(this);
   }
   m_ui.colorLabel->setText(m_shape->colorDOF()->label());

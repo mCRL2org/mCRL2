@@ -28,13 +28,15 @@ class DofDialog : public QDialog
     
   public:
     explicit DofDialog(Graph* graph, Shape* shape, QWidget *parent = 0);
+    Graph* graph() { return m_graph; }
+    Shape* shape() { return m_shape; }
     
   public slots:
     void attributeSelected(int index);
 
   protected slots:
-    void colorActivated() { emit dofActivated(5); }
-    void opacityActivated() { emit dofActivated(6); }
+    void colorActivated() { emit(dofActivated(5)); }
+    void opacityActivated() { emit(dofActivated(6)); }
 
   signals:
     void dofActivated(int dofIndex);

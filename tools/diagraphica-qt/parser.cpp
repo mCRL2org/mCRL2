@@ -44,7 +44,7 @@ void Parser::parseFile(QString filename, Graph* graph)
 
   const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
-  for (size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
+  for (size_t i = 0; parameter != process_parameters.end(); i++, ++parameter)
   {
     std::vector< string > values = l.state_element_values(i);
     for (size_t j = 0; j < values.size(); j++)
@@ -65,7 +65,7 @@ void Parser::parseFile(QString filename, Graph* graph)
   for (unsigned int si= 0; si<l.num_states(); ++si)
   {
     vector< double > stateVector;
-    for (unsigned int i = 0; i < process_parameters.size(); ++i)
+    for (unsigned int i = 0; i < process_parameters.size(); i++)
     {
       stateVector.push_back(l.state_label(si)[i]);
     }
@@ -103,7 +103,7 @@ void Parser::writeFSMFile(
   emit started(lineTot);
 
   // write state variable description
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+  for (size_t i = 0; i < graph->getSizeAttributes(); i++)
   {
     QString name = graph->getAttribute(i)->name();
     QString sizeOrigValues = QString::number(int(graph->getAttribute(i)->getSizeOrigValues()));
@@ -111,7 +111,7 @@ void Parser::writeFSMFile(
 
     line = QString("%1(%2) %3 ").arg(name, sizeOrigValues, type);
 
-    for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
+    for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); j++)
     {
       QString value = QString::fromStdString(graph->getAttribute(i)->getCurValue(j)->getValue());
       line.append(QString("\"%1\"").arg(value));
@@ -130,11 +130,11 @@ void Parser::writeFSMFile(
   // write state vectors
   file.write("---\n");
 
-  for (size_t i = 0; i < graph->getSizeNodes(); ++i)
+  for (size_t i = 0; i < graph->getSizeNodes(); i++)
   {
     line = "";
 
-    for (size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j)
+    for (size_t j = 0; j < graph->getNode(i)->getSizeTuple(); j++)
     {
       line.append(QString::number(int(graph->getNode(i)->getTupleVal(j))));
 
@@ -154,7 +154,7 @@ void Parser::writeFSMFile(
   // write transitions
   file.write("---\n");
 
-  for (size_t i = 0; i < graph->getSizeEdges(); ++i)
+  for (size_t i = 0; i < graph->getSizeEdges(); i++)
   {
     QString inNode = QString::number(int(graph->getEdge(i)->getInNode()->getIndex()+1));
     QString outNode = QString::number(int(graph->getEdge(i)->getOutNode()->getIndex()+1));
@@ -237,7 +237,7 @@ void Parser::writeAttrConfig(
   appendValue(xml, root, "File", file);
 
   // attributes
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+  for (size_t i = 0; i < graph->getSizeAttributes(); i++)
   {
     Attribute* attribute = graph->getAttribute(i);
     QDomElement attributeElement = xml.createElement("Attribute");
@@ -246,14 +246,14 @@ void Parser::writeAttrConfig(
     appendValue(xml, attributeElement, "OriginalCardinality", QString::number(attribute->getSizeOrigValues()));
 
     QDomElement currentDomainElement = xml.createElement("CurrentDomain");
-    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
+    for (size_t j = 0; j < attribute->getSizeCurValues(); j++)
     {
       appendValue(xml, currentDomainElement, "Value", QString::fromStdString(attribute->getCurValue(j)->getValue()));
     }
     attributeElement.appendChild(currentDomainElement);
 
     QDomElement originalToCurrentElement = xml.createElement("OriginalToCurrent");
-    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
+    for (size_t j = 0; j < attribute->getSizeCurValues(); j++)
     {
       appendValue(xml, originalToCurrentElement, "CurrentPosition", QString::number(int(attribute->mapToValue(j)->getIndex())));
     }
@@ -342,7 +342,7 @@ void Parser::writeDiagram(
   appendValue(xml, root, "File", file);
 
   // shapes
-  for (int i = 0; i < diagram->shapeCount(); ++i)
+  for (int i = 0; i < diagram->shapeCount(); i++)
   {
     Shape* shape = diagram->shape(i);
     QDomElement shapeElement = xml.createElement("Shape");
@@ -382,14 +382,14 @@ void Parser::writeDiagram(
 
     QDomElement colorDofElement = appendDOF(xml, shapeElement, "ColorDOF", shape->colorDOF());
     QList<double> colorYValues = shape->colorYValues();
-    for (int i = 0; i < colorYValues.size(); ++i)
+    for (int i = 0; i < colorYValues.size(); i++)
     {
       appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorYValues[i]));
     }
 
     QDomElement opacityDofElement = appendDOF(xml, shapeElement, "OpacityDOF", shape->opacityDOF());
     QList<double> opacityYValues = shape->colorYValues();
-    for (int i = 0; i < opacityYValues.size(); ++i)
+    for (int i = 0; i < opacityYValues.size(); i++)
     {
       appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityYValues[i]));
     }
@@ -509,7 +509,7 @@ QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString n
   Attribute* attribute = dof->attribute();
   appendValue(document, element, "Attribute", (attribute == 0 ? QString("") : attribute->name()));
 
-  for (int i = 0; i < dof->valueCount(); ++i)
+  for (int i = 0; i < dof->valueCount(); i++)
   {
     appendValue(document, element, "Value", QString::number(dof->value(i)));
   }

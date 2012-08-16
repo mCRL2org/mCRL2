@@ -68,7 +68,7 @@ void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
 {
   idcs.clear();
   set< size_t >::iterator it;
-  for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
+  for (it = itemsMarked.begin(); it != itemsMarked.end(); it++)
   {
     idcs.insert(m_graph->getNode(*it)->getCluster()->getIndex());
   }
@@ -95,7 +95,7 @@ void TimeSeries::getIdxMseOver(
   {
     Node* node = m_graph->getNode(mouseOverIdx);
     idxLeaf = node->getCluster()->getIndex();
-    for (size_t i = 0; i < node->getSizeInEdges(); ++i)
+    for (size_t i = 0; i < node->getSizeInEdges(); i++)
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
@@ -116,7 +116,7 @@ void TimeSeries::getCurrIdxDgrm(
   {
     Node* node = m_graph->getNode(currIdxDgrm);
     idxLeaf = node->getCluster()->getIndex();
-    for (size_t i = 0; i < node->getSizeInEdges(); ++i)
+    for (size_t i = 0; i < node->getSizeInEdges(); i++)
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
@@ -155,7 +155,7 @@ void TimeSeries::getAnimIdxDgrm(
       nodeFr = m_graph->getNode(*(--it));
 
       idxLeaf = nodeTo->getCluster()->getIndex();
-      for (size_t i = 0; i < nodeTo->getSizeInEdges(); ++i)
+      for (size_t i = 0; i < nodeTo->getSizeInEdges(); i++)
       {
         edgeIn = nodeTo->getInEdge(i);
         if (edgeIn->getInNode() == nodeFr)
@@ -176,7 +176,7 @@ void TimeSeries::getAnimIdxDgrm(
 void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
 {
   idcs.clear();
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); i++)
   {
     idcs.push_back(attributes[i]->getIndex());
   }
@@ -202,7 +202,7 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
   clearAttributes();
 
   // init new attributes
-  for (size_t i = 0; i < attrIdcs.size(); ++i)
+  for (size_t i = 0; i < attrIdcs.size(); i++)
   {
     Attribute *attribute = m_graph->getAttribute(attrIdcs[i]);
     attributes.push_back(attribute);
@@ -238,7 +238,7 @@ void TimeSeries::markItems(Cluster* frame)
 
     // update marked items
     itemsMarked.clear();
-    for (size_t i = 0; i < frame->getSizeNodes(); ++i)
+    for (size_t i = 0; i < frame->getSizeNodes(); i++)
     {
       itemsMarked.insert(frame->getNode(i)->getIndex());
     }
@@ -647,7 +647,7 @@ void TimeSeries::calcPositions()
   }
 
   Position2D pos;
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); i++)
   {
     pos.x = posScaleTopLft.x;
     pos.y = yTop
@@ -668,12 +668,12 @@ void TimeSeries::calcPositions()
   posValues.clear();
   Attribute* attr;
   Node* node;
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); i++)
   {
     attr = attributes[i];
     vector< Position2D > v;
 
-    for (size_t j = 0; j< m_graph->getSizeNodes(); ++j)
+    for (size_t j = 0; j< m_graph->getSizeNodes(); j++)
     {
       node = m_graph->getNode(j);
 
@@ -699,7 +699,7 @@ void TimeSeries::calcPositions()
 
   // update positions of diagrams
   map< size_t, Position2D >::iterator it;
-  for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
+  for (it = showDgrm.begin(); it != showDgrm.end(); it++)
   {
     double prevCorrIdx = (it->second.x-prevScaleLft)/prevItvWdwPerNode;
     it->second.x = posScaleTopLft.x + prevCorrIdx*itvWdwPerNode;
@@ -992,7 +992,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
 
           frame->addNode(m_graph->getNode(currIdxDgrm));
 
-          for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
+          for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
           {
             //if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
             attrs.push_back(m_graph->getAttribute(i));
@@ -1075,13 +1075,13 @@ void TimeSeries::processHits(
     // if necassary, advance to closest hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); ++i)
+      for (int i = 0; i < (hits-1); i++)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; ++j)
+        for (int j = 0; j < number; j++)
         {
           ++ptr;  // names
         }
@@ -1095,7 +1095,7 @@ void TimeSeries::processHits(
     ++ptr; // z2
 
     vector< int > ids;
-    for (int i = 0; i < number; ++i)
+    for (int i = 0; i < number; i++)
     {
       ids.push_back(*ptr);
       ++ptr;
@@ -1171,7 +1171,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     if (itvSliderPerNode < pix)
     {
       set< size_t >::iterator it;
-      for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
+      for (it = itemsMarked.begin(); it != itemsMarked.end(); it++)
       {
         VisUtils::drawLine(
           posSliderTopLft.x + (*it)*itvSliderPerNode,
@@ -1183,7 +1183,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     else
     {
       set< size_t >::iterator it;
-      for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
+      for (it = itemsMarked.begin(); it != itemsMarked.end(); it++)
       {
         VisUtils::fillRect(
           posSliderTopLft.x + (*it)*itvSliderPerNode,
@@ -1196,7 +1196,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     // draw positions of diagrams
     VisUtils::setColor(VisUtils::coolBlue);
     map< size_t, Position2D >::iterator it;
-    for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
+    for (it = showDgrm.begin(); it != showDgrm.end(); it++)
     {
       VisUtils::drawLine(
         posSliderTopLft.x + it->first*itvSliderPerNode,
@@ -1332,7 +1332,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
   {
     double pix = pixelSize();
     size_t    beg = 0;
-    for (size_t i = 0; i < nodesWdwScale; ++i)
+    for (size_t i = 0; i < nodesWdwScale; i++)
     {
       beg = wdwStartIdx+i;
       if (beg%nodesItvScale == 0)
@@ -1392,7 +1392,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
     double pix = pixelSize();
 
     glPushName(ID_ITEMS);
-    for (size_t i = 0; i < nodesWdwScale; ++i)
+    for (size_t i = 0; i < nodesWdwScale; i++)
     {
       glPushName((GLuint)(wdwStartIdx + i));
       VisUtils::fillRect(
@@ -1412,7 +1412,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
     VisUtils::setColor(colMrk);
 
     set< size_t >::iterator it;
-    for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
+    for (it = itemsMarked.begin(); it != itemsMarked.end(); it++)
     {
       if (wdwStartIdx <= (*it) && (*it) <= (wdwStartIdx + nodesWdwScale))
         VisUtils::fillRect(
@@ -1431,7 +1431,7 @@ void TimeSeries::drawAxes(const bool& inSelectMode)
     {}
   else
   {
-    for (size_t i = 0; i < posAxesTopLft.size(); ++i)
+    for (size_t i = 0; i < posAxesTopLft.size(); i++)
     {
       VisUtils::fillRect(
         posAxesTopLft[i].x,
@@ -1454,9 +1454,9 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
   else
   {
     // draw bars
-    for (size_t i = 0; i < posValues.size(); ++i)
+    for (size_t i = 0; i < posValues.size(); i++)
     {
-      for (size_t j = 0; j < nodesWdwScale; ++j)
+      for (size_t j = 0; j < nodesWdwScale; j++)
       {
         VisUtils::setColor(VisUtils::coolGreen);
         VisUtils::fillRect(
@@ -1469,10 +1469,10 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
 
     // draw line above or below bars
     VisUtils::enableLineAntiAlias();
-    for (size_t i = 0; i < posValues.size(); ++i)
+    for (size_t i = 0; i < posValues.size(); i++)
     {
       glBegin(GL_LINE_STRIP);
-      for (size_t j = 0; j < nodesWdwScale; ++j)
+      for (size_t j = 0; j < nodesWdwScale; j++)
       {
         VisUtils::setColor(VisUtils::mediumGray);
         glVertex2f(
@@ -1538,7 +1538,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       vector< Attribute* > attrs;
 
       map< size_t, Position2D >::iterator it;
-      for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
+      for (it = showDgrm.begin(); it != showDgrm.end(); it++)
       {
         posDgrm = it->second;
         posDgrm.x -= wdwStartIdx*itvWdwPerNode;
@@ -1634,7 +1634,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         1.0 - 4.0*pix/scaleDgrm,
         -1.0 - 4.0*pix/scaleDgrm);
       // diagram
-      for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
+      for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
       {
         Attribute* attr = m_graph->getAttribute(i);
         Node* node = m_graph->getNode(*animFrame);
@@ -1692,7 +1692,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       vector< Attribute* > attrs;
 
       map< size_t, Position2D >::iterator it;
-      for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
+      for (it = showDgrm.begin(); it != showDgrm.end(); it++)
       {
         posPvot.x = posScaleTopLft.x + (it->first /*+ 0.5*/ - wdwStartIdx)*itvWdwPerNode;
         posPvot.y = posScaleTopLft.y /*+ 0.5*ySpacePxl*pix*/;
@@ -1735,7 +1735,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         // diagram
         Attribute* attr;
         Node* node;
-        for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
+        for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
         {
           attr = m_graph->getAttribute(i);
           node = m_graph->getNode(it->first);
@@ -1829,7 +1829,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
       VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(pos1.x, pos2.x, pos1.y, pos2.y);
 
-      for (size_t i = 0; i < attributes.size(); ++i)
+      for (size_t i = 0; i < attributes.size(); i++)
       {
         string lbl;
         Attribute* attr = attributes[i];
@@ -1856,7 +1856,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
       if (pos1.x + maxLbl*txtScaling*CHARWIDTH > posScaleBotRgt.x)
       {
-        for (size_t i = 0; i < posTopLft.size(); ++i)
+        for (size_t i = 0; i < posTopLft.size(); i++)
         {
           double diff = posBotRgt[i].x-posTopLft[i].x;
           posTopLft[i].x -= diff;
@@ -1864,7 +1864,7 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
         }
       }
 
-      for (size_t i = 0; i < posTopLft.size(); ++i)
+      for (size_t i = 0; i < posTopLft.size(); i++)
       {
         VisUtils::setColor(Qt::white);
         VisUtils::fillRect(
@@ -1901,7 +1901,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
     double pix = pixelSize();
     double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
-    for (size_t i = 0; i < posAxesTopLft.size(); ++i)
+    for (size_t i = 0; i < posAxesTopLft.size(); i++)
     {
       string lblTop, lblBot;
       lblTop = Utils::dblToStr(0);
@@ -2129,7 +2129,7 @@ void TimeSeries::handleHitItems(const int& idx)
 
     // update marked items
     itemsMarked.clear();
-    for (int i = begIdx; i <= endIdx; ++i)
+    for (int i = begIdx; i <= endIdx; i++)
     {
       itemsMarked.insert(i);
     }
@@ -2201,7 +2201,7 @@ void TimeSeries::handleDragItems(const int& idx)
     if (m_lastKeyCode == Qt::Key_Shift)
     {
       /*
-      for ( int i = begIdx; i <= endIdx; ++i )
+      for ( int i = begIdx; i <= endIdx; i++ )
           itemsMarked.insert( i );
       */
     }
@@ -2246,7 +2246,7 @@ void TimeSeries::handleDragItems(const int& idx)
           flag = false;
         }
 
-        for (int i = begIdx+1; i <= endIdx; ++i)
+        for (int i = begIdx+1; i <= endIdx; i++)
         {
           it = itemsMarked.find(i);
           if (it == itemsMarked.end())
@@ -2273,7 +2273,7 @@ void TimeSeries::handleDragItems(const int& idx)
           flag = false;
         }
 
-        for (int i = begIdx; i < endIdx; ++i)
+        for (int i = begIdx; i < endIdx; i++)
         {
           it = itemsMarked.find(i);
           if (it == itemsMarked.end())
@@ -2304,7 +2304,7 @@ void TimeSeries::handleDragItems(const int& idx)
       }
 
       itemsMarked.clear();
-      for (int i = begIdx; i <= endIdx; ++i)
+      for (int i = begIdx; i <= endIdx; i++)
       {
         itemsMarked.insert(i);
       }

@@ -194,7 +194,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
       VisUtils::setColor(VisUtils::mediumGray);
       xLft += pix;
       xRgt -= pix;
-      for (size_t i = 0; i < posRgtBot[0].size()-1; ++i)
+      for (size_t i = 0; i < posRgtBot[0].size()-1; i++)
       {
         yTop = posRgtBot[0][i].y;
         yBot = yTop;
@@ -288,7 +288,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
     double xLft = -0.51*size.width()+3*pix;
     double xRgt = -0.5*size.width()+12*pix;
 
-    for (size_t i = 0; i < attributeLabels.size(); ++i)
+    for (size_t i = 0; i < attributeLabels.size(); i++)
     {
       double yTop;
       if (i > 0)
@@ -342,7 +342,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   // selection mode
   if (inSelectMode == true)
   {
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (size_t i = 0; i < sizePositions; i++)
     {
       double xLft = posBC[i].x - 0.5*widthBC;
       double xRgt = posBC[i].x + 0.5*widthBC;
@@ -356,7 +356,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (size_t i = 0; i < sizePositions; i++)
     {
       double xLft = posBC[i].x - 0.5*widthBC;
       double xRgt = posBC[i].x + 0.5*widthBC;
@@ -386,7 +386,7 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
   // selection mode
   if (inSelectMode == true)
   {
-    for (size_t i = 0; i < posLftTop.size(); ++i)
+    for (size_t i = 0; i < posLftTop.size(); i++)
     {
       // name per collumn
       glPushName((GLuint) i);
@@ -405,9 +405,9 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < posLftTop.size(); ++i)
+    for (size_t i = 0; i < posLftTop.size(); i++)
     {
-      for (size_t j = 0; j < posLftTop[i].size(); ++j)
+      for (size_t j = 0; j < posLftTop[i].size(); j++)
       {
         double xLft = posLftTop[i][j].x;
         double yTop = posLftTop[i][j].y;
@@ -509,7 +509,7 @@ void CombnPlot::handleMouseEvent(QMouseEvent* e)
 void CombnPlot::initLabels()
 {
   attributeLabels.clear();
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); i++)
     attributeLabels.push_back(attributes[i]->name().toStdString());
 }
 
@@ -517,7 +517,7 @@ void CombnPlot::initLabels()
 void CombnPlot::calcMaxAttrCard()
 {
   maxAttrCard = 0;
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (size_t i = 0; i < attributes.size(); i++)
   {
     if (attributes[i]->getSizeCurValues() > maxAttrCard)
       maxAttrCard = attributes[i]->getSizeCurValues();
@@ -528,7 +528,7 @@ void CombnPlot::calcMaxAttrCard()
 void CombnPlot::calcMaxNumberPerComb()
 {
   maxNumberPerComb = 0;
-  for (size_t i = 0; i < numberPerComb.size(); ++i)
+  for (size_t i = 0; i < numberPerComb.size(); i++)
   {
     if (numberPerComb[i] > maxNumberPerComb)
     {
@@ -581,7 +581,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
-      for (size_t i = 0; i < attributes.size(); ++i)
+      for (size_t i = 0; i < attributes.size(); i++)
       {
         attrValIdcsDgrm.push_back(combinations[posIdx][i]);
       }
@@ -645,7 +645,7 @@ void CombnPlot::calcPosBC()
 
   // calc positions
   posBC.clear();
-  for (size_t i = 0; i < numberPerComb.size(); ++i)
+  for (size_t i = 0; i < numberPerComb.size(); i++)
   {
     // calc ratio
     double ratio = (double)numberPerComb[i]/(double)maxNumberPerComb;
@@ -705,13 +705,13 @@ void CombnPlot::calcPosCP()
   // calc positions
   posLftTop.clear();
   posRgtBot.clear();
-  for (size_t i = 0; i < combinations.size(); ++i)
+  for (size_t i = 0; i < combinations.size(); i++)
   {
     vector< Position2D > temp;
     posLftTop.push_back(temp);
     posRgtBot.push_back(temp);
 
-    for (size_t j = 0; j < combinations[i].size(); ++j)
+    for (size_t j = 0; j < combinations[i].size(); j++)
     {
       // calc ratio
       size_t card  = attributes[j]->getSizeCurValues();
@@ -765,13 +765,13 @@ void CombnPlot::processHits(
     // if necassary advance to last hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); ++i)
+      for (int i = 0; i < (hits-1); i++)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; ++j)
+        for (int j = 0; j < number; j++)
         {
           ++ptr;  // names
         }

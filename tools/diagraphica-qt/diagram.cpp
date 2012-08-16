@@ -57,7 +57,7 @@ void Diagram::moveShapeToBack(int index)
   if (index < m_shapes.size())
   {
     Shape* tmp = m_shapes[index];
-    for (int i = index; i < m_shapes.size()-1; ++i)
+    for (int i = index; i < m_shapes.size()-1; i++)
     {
       m_shapes[i] = m_shapes[i+1];
       m_shapes[i]->setIndex(i);
@@ -89,6 +89,15 @@ void Diagram::moveShapeBackward(int index)
   }
 }
 
+Shape *Diagram::shape(int index)
+{
+  if (0 <= index && index < m_shapes.size())
+  {
+    return m_shapes.at(index);
+  }
+  return 0;
+}
+
 
 // -- clear functions -----------------------------------------------
 
@@ -102,7 +111,7 @@ void Diagram::removeShape(int index)
     m_shapes.removeAt(index);
     delete s;
     // update indices
-    for (int i = index; i < m_shapes.size(); ++i)
+    for (int i = index; i < m_shapes.size(); i++)
     {
       m_shapes[i]->setIndex(i);
     }
@@ -149,7 +158,7 @@ void Diagram::visualize(
   drawBorderFlush(inSelectMode);
   if (!inSelectMode)
   {
-    for (int i = 0; i < m_shapes.size(); ++i)
+    for (int i = 0; i < m_shapes.size(); i++)
     {
       m_shapes[i]->visualize(pixelSize, opacity, attrs, attrValIdcs);
     }
@@ -276,7 +285,7 @@ void Diagram::drawGrid(
 
     VisUtils::setColor(VisUtils::lightGray);
     // draw inside out
-    for (int i = 0; i < numIntervals/2; ++i)
+    for (int i = 0; i < numIntervals/2; i++)
     {
       // vertical
       VisUtils::drawLine(
@@ -301,7 +310,7 @@ void Diagram::drawShapes(
   const bool& inSelectMode,
   double pixelSize)
 {
-  for (int i = 0; i < m_shapes.size(); ++i)
+  for (int i = 0; i < m_shapes.size(); i++)
   {
     glPushName((GLuint) i);
     m_shapes[i]->visualize(inSelectMode, pixelSize);

@@ -168,10 +168,10 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
   // selection mode
   if (inSelectMode == true)
   {
-    for (size_t i = 0; i < positions.size(); ++i)
+    for (size_t i = 0; i < positions.size(); i++)
     {
       glPushName((GLuint) i);
-      for (size_t j = 0; j < positions[i].size(); ++j)
+      for (size_t j = 0; j < positions[i].size(); j++)
       {
         double x   = positions[i][j].x;
         double y   = positions[i][j].y;
@@ -190,9 +190,9 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
   {
     double pix   = pixelSize();
 
-    for (size_t i = 0; i < positions.size(); ++i)
+    for (size_t i = 0; i < positions.size(); i++)
     {
-      for (size_t j = 0; j < positions[i].size(); ++j)
+      for (size_t j = 0; j < positions[i].size(); j++)
       {
         double x   = positions[i][j].x;
         double y   = positions[i][j].y;
@@ -293,21 +293,21 @@ void CorrlPlot::calcMaxNumber()
   // init max row & col numbers
   size_t sizeX = attribute1->getSizeCurValues();
   size_t sizeY = attribute2->getSizeCurValues();
-  for (size_t i = 0; i < sizeX; ++i)
+  for (size_t i = 0; i < sizeX; i++)
   {
     maxNumX.push_back(0);
   }
 
-  for (size_t i = 0; i < sizeY; ++i)
+  for (size_t i = 0; i < sizeY; i++)
   {
     maxNumY.push_back(0);
   }
 
   // calc max
   {
-    for (size_t i = 0; i < number.size(); ++i)
+    for (size_t i = 0; i < number.size(); i++)
     {
-      for (size_t j = 0; j < number[i].size(); ++j)
+      for (size_t j = 0; j < number[i].size(); j++)
       {
         if (number[i][j] > maxNumber)
         {
@@ -327,13 +327,13 @@ void CorrlPlot::calcMaxNumber()
 
   // calc totals
   {
-    for (size_t i = 0; i < maxNumX.size(); ++i)
+    for (size_t i = 0; i < maxNumX.size(); i++)
     {
       sumMaxNumX += maxNumX[i];
     }
   }
   {
-    for (size_t i = 0; i < maxNumY.size(); ++i)
+    for (size_t i = 0; i < maxNumY.size(); i++)
     {
       sumMaxNumY += maxNumY[i];
     }
@@ -445,14 +445,14 @@ void CorrlPlot::calcPositions()
       }
     }
 
-    for (size_t i = 0; i < mapXToY.size(); ++i)
+    for (size_t i = 0; i < mapXToY.size(); i++)
     {
       vector< Position2D > tempPos;
       positions.push_back(tempPos);
       vector< double > tempRad;
       radii.push_back(tempRad);
 
-      for (size_t j = 0; j < mapXToY[i].size(); ++j)
+      for (size_t j = 0; j < mapXToY[i].size(); j++)
       {
         // fraction of total number
         double frac = (double)number[i][j]/(double)maxNumber;
@@ -508,13 +508,13 @@ void CorrlPlot::processHits(
     // if necassary advance to last hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); ++i)
+      for (int i = 0; i < (hits-1); i++)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; ++j)
+        for (int j = 0; j < number; j++)
         {
           ++ptr;  // names
         }

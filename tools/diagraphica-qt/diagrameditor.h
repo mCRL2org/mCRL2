@@ -40,8 +40,7 @@ class DiagramEditor : public Visualizer
     // -- get functions ---------------------------------------------
     Diagram* diagram()        { return m_diagram; }
     int editMode()            { return m_editMode; }
-    bool isAnyShapeSelected() { return (selectedShape() != 0); }
-    Shape* selectedShape();   // Last selected
+    Shape* selectedShape();
     QList<Shape*> selectedShapes();
 
     // -- public utility functions ----------------------------------
@@ -102,11 +101,10 @@ class DiagramEditor : public Visualizer
     void bringForward();
     void sendBackward();
 
-
   protected:
     // -- private utility functions ---------------------------------
-    void handleIntersection();
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
+    void createShape();
 
     void initContextMenu();
     void showContextMenu();
@@ -115,7 +113,6 @@ class DiagramEditor : public Visualizer
     void handleMouseEvent(QMouseEvent* e);
 
     void handleHits(const std::vector< int > &ids);
-    void handleHitDiagramOnly();
     void handleHitShape(const size_t& shapeIdx);
     void handleHitShapeHandle(
       const size_t& shapeIdx,
@@ -149,22 +146,18 @@ class DiagramEditor : public Visualizer
 
     // -- data members ----------------------------------------------
 
-    QMenu m_popup;
+    QMenu m_popup;          // Context menu
 
-    QPoint m_lastMousePos;
-    QPointF m_dragDistance;
+    Diagram* m_diagram;     // Composition
+    int m_editMode;         // Current selected tool
+    QRectF m_selection;     // Selection rectangle
 
-    Diagram* m_diagram; // composition
-    int m_editMode;
-    QRectF m_selection;
+    QPoint m_lastMousePos;  // For dragging
+    QPointF m_dragDistance; // For dragging
+    int m_currentSelectedShapeId;   // If a shape is dragged
+    int m_currentSelectedHandleId;  // If a handle is dragged
 
-    int m_lastSelectedShapeId;
-
-    size_t drgBegIdx1;
-    size_t drgBegIdx2;
-    bool m_selectionActive;
-
-    QList<Shape*> m_clipBoardList;
+    QList<Shape*> m_clipBoardList;  // If shapes are cut/copied
 
     // -- static variables ------------------------------------------
     static int szeTxt;

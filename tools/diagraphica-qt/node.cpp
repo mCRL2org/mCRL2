@@ -23,7 +23,7 @@ void Node::moveTupleVal(size_t idxFr, size_t idxTo)
 
   if (idxFr < idxTo)
   {
-    for (size_t i = idxFr; i < idxTo; ++i)
+    for (size_t i = idxFr; i < idxTo; i++)
     {
       tuple[i] = tuple[i+1];
     }
@@ -43,7 +43,7 @@ void Node::moveTupleVals(std::map<size_t, size_t> &idcsFrTo)
 {
   std::vector<double> tupleNew(idcsFrTo.size(), -1);
 
-  for (size_t i = 0; i < idcsFrTo.size(); ++i)
+  for (size_t i = 0; i < idcsFrTo.size(); i++)
   {
     tupleNew[idcsFrTo[i]] = tuple[i];
   }

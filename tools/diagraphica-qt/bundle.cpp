@@ -72,7 +72,7 @@ void Bundle::setEdges(const vector< Edge* > &e)
   edges = e;
 
   labels.clear();
-  for (size_t i = 0; i < edges.size(); ++i)
+  for (size_t i = 0; i < edges.size(); i++)
   {
     labels.insert(pair< string, string >(edges[i]->getLabel(), "MAY"));
   }
@@ -103,7 +103,7 @@ void Bundle::getLabels(vector< string > &lbls)
   lbls.clear();
 
   map< string, string >::iterator it;
-  for (it = labels.begin(); it != labels.end(); ++it)
+  for (it = labels.begin(); it != labels.end(); it++)
   {
     lbls.push_back(it->first);
   }
@@ -119,7 +119,7 @@ void Bundle::getLabels(
   status.clear();
 
   map< string, string >::iterator it;
-  for (it = labels.begin(); it != labels.end(); ++it)
+  for (it = labels.begin(); it != labels.end(); it++)
   {
     lbls.push_back(it->first);
     status.push_back(it->second);
@@ -137,7 +137,7 @@ void Bundle::getLabels(
   size_t count = 0;
 
   map< string, string >::iterator it;
-  for (it = labels.begin(); it != labels.end(); ++it)
+  for (it = labels.begin(); it != labels.end(); it++)
   {
     count += 1;
     lbls  += it->first;
@@ -158,7 +158,7 @@ void Bundle::getLabels(
 
 void Bundle::clearChildren()
 {
-  for (size_t i = 0; i < children.size(); ++i)
+  for (size_t i = 0; i < children.size(); i++)
   {
     children[i] = 0;
   }
@@ -168,7 +168,7 @@ void Bundle::clearChildren()
 
 void Bundle::clearEdges()
 {
-  for (size_t i = 0; i < edges.size(); ++i)
+  for (size_t i = 0; i < edges.size(); i++)
   {
     edges[i] = 0;
   }

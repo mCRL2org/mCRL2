@@ -125,7 +125,7 @@ class Shape : public QObject
     QList<double> &opacityYValues()  { return m_opacityYValues; }
     DOF* textDOF()                  { return m_textDOF; }
 
-    int dofCount()                  { return 7; }
+    int dofCount()                  { return 8; }
     DOF* dof(int index);
     QString dofLabel(int index);
 
@@ -187,6 +187,9 @@ class Shape : public QObject
     static double minSzeHnt;
     static int    segNumHnt;
     static QColor colTxt;
+
+  public slots:
+    void setModeEditDof(int dofIndex);
 
   protected:
     // -- private utility functions ---------------------------------

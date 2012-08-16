@@ -62,7 +62,7 @@ class Visualizer : public QGLWidget
     virtual void handleMouseEvent(QMouseEvent* e);
     virtual void handleWheelEvent(QWheelEvent* /*e*/) { }
     virtual void handleMouseEnterEvent() { }
-    virtual void handleMouseLeaveEvent();
+    virtual void handleMouseLeaveEvent() { }
     virtual void handleKeyEvent(QKeyEvent* e);
 
     virtual void enterEvent(QEvent *event) { handleMouseEnterEvent(); QGLWidget::enterEvent(event); }
@@ -104,9 +104,10 @@ class Visualizer : public QGLWidget
 
     bool m_inSelectMode;
 
-    QMouseEvent m_lastMouseEvent;
-    bool m_mouseDrag;
-    QPoint m_mouseDragStart;
+    QMouseEvent m_lastMouseEvent;   // The latest received event
+    bool m_mouseDrag;               // The mouse is being dragged
+    bool m_mouseDragReleased;       // The cursor was released after dragging
+    QPoint m_mouseDragStart;        // The position where the drag started, only valid if (m_mouseDrag or m_mouseDragReleased)
 
     Qt::Key m_lastKeyCode;
 
