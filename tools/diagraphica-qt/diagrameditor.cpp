@@ -288,6 +288,7 @@ void DiagramEditor::editDof()
       }
     }
     DofDialog* dofDialog = new DofDialog(m_graph, s, this);
+    connect(dofDialog, SIGNAL(dofActivated(int)), this, SLOT(updateGL()));
     dofDialog->show();
   }
 }
@@ -662,6 +663,8 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
     // redraw in render mode
     updateGL();
   }
+
+  m_lastMousePos = e->pos();
 }
 
 
@@ -673,14 +676,14 @@ void DiagramEditor::handleHits(const vector< int > &ids)
     {
       deselectAll();
     }
-    else
+    else if (ids.size() == 2)
     {
       if (m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF || m_lastMouseEvent.button() == Qt::RightButton)
       {
         Shape* s = m_diagram->shape(ids[1]);
         if (s != 0)
         {
-          if (m_editMode == EDIT_MODE_DOF || s->drawMode() != Shape::MODE_EDIT)
+          if (m_editMode == EDIT_MODE_DOF || s->drawMode() == Shape::MODE_NORMAL)
           {
             deselectAll();
             s->setModeEdit();
@@ -692,11 +695,19 @@ void DiagramEditor::handleHits(const vector< int > &ids)
         m_currentSelectedShapeId = ids[1];
       }
     }
+    else
+    {
+      if (m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF)
+      {
+        m_currentSelectedShapeId = ids[1];
+        m_currentSelectedHandleId = ids[2];
+      }
+    }
   }
 
   if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
   {
-    if (ids.size() > 1 && m_editMode == EDIT_MODE_DOF)
+    if (ids.size() == 2 && m_editMode == EDIT_MODE_DOF)
     {
       editDof();
     }
@@ -708,6 +719,40 @@ void DiagramEditor::handleHits(const vector< int > &ids)
     if (m_currentSelectedShapeId != -1)
     {
       qDebug() << "Dragging";
+
+      QPointF start = worldCoordinate(m_lastMousePos);
+      QPointF stop = worldCoordinate(m_lastMouseEvent.pos());
+
+      QRectF gridCoordinates = m_diagram->gridCoordinates();
+
+      double x1 = qMin(start.x(), gridCoordinates.right());
+      double y1 = qMin(start.y(), gridCoordinates.top());
+      double x2 = qMax(stop.x(), gridCoordinates.left());
+      double y2 = qMax(stop.y(), gridCoordinates.bottom());
+
+      x1 = qMax(x1, gridCoordinates.left());
+      y1 = qMax(y1, gridCoordinates.bottom());
+      x2 = qMin(x2, gridCoordinates.right());
+      y2 = qMin(y2, gridCoordinates.top());
+
+      if (m_diagram->snapGrid() == true)
+      {
+        double intv = m_diagram->gridInterval(pixelSize());
+
+        x1 = Utils::rndToNearestMult(x1, intv);
+        y1 = Utils::rndToNearestMult(y1, intv);
+        x2 = Utils::rndToNearestMult(x2, intv);
+        y2 = Utils::rndToNearestMult(y2, intv);
+      }
+
+      double dX = x2-x1;
+      double dY = y2-y1;
+      QList<Shape*> shapes = selectedShapes();
+      for (int i = 0; i < shapes.size(); i++)
+      {
+        Shape* s = shapes[i];
+        s->setCenter(s->xCenter()+dX, s->yCenter()+dY);
+      }
     }
   }
 
