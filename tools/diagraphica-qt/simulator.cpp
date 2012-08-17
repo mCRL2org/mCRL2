@@ -42,7 +42,6 @@ Simulator::Simulator(
   m_nextBundleFocusIndex  = -1;
 
   connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
-  m_animationTimer.start(timerInterval);
 
   connect(&m_settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
   connect(&m_settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
@@ -191,8 +190,6 @@ void Simulator::visualize(const bool& inSelectMode)
     genCharTex();
   }
 
-  clear();
-
   // check if positions are ok
   if (geomChanged)
   {
@@ -241,6 +238,8 @@ void Simulator::visualize(const bool& inSelectMode)
   }
   else
   {
+    clear();
+
     if (m_animationTimer.isActive())
     {
       animate();
