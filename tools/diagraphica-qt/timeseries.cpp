@@ -912,17 +912,9 @@ void TimeSeries::handleHits(const vector< int > &ids)
       mouseOverIdx = -1;
       if (m_lastMouseEvent.buttons() == Qt::LeftButton)
       {
-        if (dragStatus == DRAG_STATUS_SLDR)
+        if (dragStatus == DRAG_STATUS_SLDR || dragStatus == DRAG_STATUS_SLDR_LFT || dragStatus == DRAG_STATUS_SLDR_RGT)
         {
-          handleDragSliderHdl();
-        }
-        else if (dragStatus == DRAG_STATUS_SLDR_LFT)
-        {
-          handleDragSliderHdlLft();
-        }
-        else if (dragStatus == DRAG_STATUS_SLDR_RGT)
-        {
-          handleDragSliderHdlRgt();
+          dragSlider();
         }
         else if (dragStatus == DRAG_STATUS_ITMS)
         {
@@ -1021,11 +1013,12 @@ void TimeSeries::handleHits(const vector< int > &ids)
           {
             dragStatus = DRAG_STATUS_SLDR_RGT;
           }
+          initDragSlider();
         }
         else
         {
           dragStatus = DRAG_STATUS_SLDR;
-          handleHitSlider();
+          clickSliderBar();
         }
       }
       else if (m_lastMouseEvent.button() == Qt::LeftButton &&
@@ -1958,136 +1951,29 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
   }
 }
 
-/*
+
+
+void TimeSeries::initDragSlider()
+{
+  double pix  = pixelSize();
+  sliderDragPosition = worldCoordinate(m_lastMouseEvent.posF()).x() - (posSliderTopLft.x + 5 * pix + wdwStartIdx*itvSliderPerNode);
+}
+
+
+void TimeSeries::clickSliderBar()
+{
+  double pix  = pixelSize();
+  sliderDragPosition = nodesWdwScale * itvSliderPerNode / 2.0 - 5 * pix;
+  dragSlider();
+}
+
+
 void TimeSeries::dragSlider()
 {
-
-}
-*/
-
-void TimeSeries::handleHitSlider()
-{
-  double distWorld = worldCoordinate(m_lastMouseEvent.posF()).x() - (posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode);
-
-  dragDistNodes = distWorld/itvSliderPerNode;
-
-  if (distWorld < 0)
-  {
-    // move to left
-    if (((double)wdwStartIdx + dragDistNodes) < 0)
-    {
-      wdwStartIdx   = 0;
-    }
-    else if (((double)wdwStartIdx + dragDistNodes) >= 0)
-    {
-      wdwStartIdx += (size_t)dragDistNodes;
-    }
-  }
-  else if (distWorld > 0)
-  {
-    // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (m_graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx += (int)dragDistNodes;
-    }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (m_graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx = (m_graph->getSizeNodes()/*-1*/) - nodesWdwScale;
-    }
-  }
-
-  dragDistNodes = 0.0;
-}
-
-
-void TimeSeries::handleDragSliderHdl()
-{
-//    draggingSlider = true;
-  dragStatus = DRAG_STATUS_SLDR;
-
-  double distWorld = worldCoordinate(m_lastMouseEvent.posF()).x() - worldCoordinate(m_lastMousePos).x();
-  dragDistNodes += (distWorld/itvSliderPerNode);
-
-  if (dragDistNodes < -1)
-  {
-    // move to left
-    if (((double)wdwStartIdx + dragDistNodes) < 0)
-    {
-      wdwStartIdx   = 0;
-      dragDistNodes = 0.0;
-    }
-    else if (((double)wdwStartIdx + dragDistNodes) >= 0)
-    {
-      wdwStartIdx += (size_t)dragDistNodes;
-      dragDistNodes -= (size_t)dragDistNodes;
-    }
-  }
-  else if (dragDistNodes > 1)
-  {
-    // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (m_graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx += (int)dragDistNodes;
-      dragDistNodes -= (int)dragDistNodes;
-    }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (m_graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx = (m_graph->getSizeNodes()/*-1*/) - nodesWdwScale;
-      dragDistNodes = 0.0;
-    }
-  }
-}
-
-
-void TimeSeries::handleDragSliderHdlLft()
-{
   double pix  = pixelSize();
-  double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
-
-  double distWorld  = Utils::maxx(posSliderTopLft.x, worldCoordinate(m_lastMouseEvent.posF()).x())-xHdl;
-  double distNodes  = Utils::rndToNearestMult((distWorld/itvSliderPerNode), 1.0);
-
-  double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-  double pixWindow  = distWindow/pix;
-
-  double tempPixPerNode = pixWindow/(double)(nodesWdwScale-distNodes);
-  if (tempPixPerNode < minPixPerNode)
-  {
-    // update pixels per node
-    actPixPerNode  = tempPixPerNode;
-    wdwStartIdx   += int (distNodes);
-
-    geomChanged    = true;
-  }
-  else
-  {
-    dragStatus = -1;
-  }
-}
-
-
-void TimeSeries::handleDragSliderHdlRgt()
-{
-  double pix  = pixelSize();
-  double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
-
-  double distWorld  = Utils::minn(posSliderTopLft.x, worldCoordinate(m_lastMouseEvent.posF()).x())-xHdl;
-  double distNodes  = distWorld/itvSliderPerNode;
-
-  double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-  double pixWindow  = distWindow/pix;
-
-  double tempPixPerNode = pixWindow/(double)(nodesWdwScale+distNodes);
-  if (tempPixPerNode < minPixPerNode)
-  {
-    // update pixels per node
-    actPixPerNode  = tempPixPerNode;
-    geomChanged = true;
-  }
-  else
-  {
-    dragStatus = -1;
-  }
+  int index = (int)((worldCoordinate(m_lastMouseEvent.posF()).x() - sliderDragPosition - posSliderTopLft.x - 5 * pix) / itvSliderPerNode);
+  wdwStartIdx = (index < 0) ? 0 : ((size_t)index > m_graph->getSizeNodes() - nodesWdwScale) ? m_graph->getSizeNodes() - nodesWdwScale : index;
+  update();
 }
 
 

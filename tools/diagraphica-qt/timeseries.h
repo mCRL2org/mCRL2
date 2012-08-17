@@ -118,10 +118,9 @@ class TimeSeries : public Visualizer
     void drawMouseOver(const bool& inSelectMode);
     void drawLabels(const bool& inSelectMode);
 
-    void handleHitSlider();
-    void handleDragSliderHdl();
-    void handleDragSliderHdlLft();
-    void handleDragSliderHdlRgt();
+    void initDragSlider();
+    void clickSliderBar();
+    void dragSlider();
 
     void handleHitItems(const int& idx);
     void handleDragItems(const int& idx);
@@ -168,6 +167,7 @@ class TimeSeries : public Visualizer
     double itvSlider;
     int    nodesItvSlider;
     double itvSliderPerNode;
+    double sliderDragPosition;
 
     Position2D posScaleTopLft;
     Position2D posScaleBotRgt;
