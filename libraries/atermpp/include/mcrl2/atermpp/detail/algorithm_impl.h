@@ -162,7 +162,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 /// \param output The variable to store the match in
 /// \return true if a match was found, false otherwise
 template <typename MatchPredicate>
-bool find_if_impl(const aterm& t, const MatchPredicate& match, aterm_appl& output)
+bool find_if_impl(const aterm_base& t, MatchPredicate match, aterm_appl& output)
 {
   switch (t.type())
   {

@@ -41,7 +41,7 @@ template <typename Term, typename MatchPredicate>
 aterm_appl find_if(Term t, MatchPredicate match)
 {
   aterm_appl output;
-  detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, output);
+  detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match, output);
   return output;
 }
 

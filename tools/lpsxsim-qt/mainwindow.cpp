@@ -152,6 +152,15 @@ void MainWindow::updateSimulation()
     }
     else
     {
+#ifdef __APPLE_CC__
+#ifdef __GNUG__
+      /* This is a workaround for a compiler bug in                          *
+       *   i686-apple-darwin9-g++-4.0.1 (GCC) 4.0.1 (Apple Inc. build 5493)  *
+       * TODO: Remove this code when this compiler is no longer supported    *
+       *       by mCRL2                                                      */
+      mCRL2log(debug) << (i - 1) << std::endl;
+#endif // __GNUG__
+#endif // __APPLE_CC__
       m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action);
       m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
