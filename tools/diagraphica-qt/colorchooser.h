@@ -41,6 +41,9 @@ class ColorChooser : public Visualizer
     void deactivated();
 
   protected:
+    double xPosition(int index) { return m_dof->value(index) * 2.0 - 1.0; }
+    double yPosition(int index) { return (*m_yCoordinates)[index]; }
+
     void drawColorSpectrum();
     void drawGrayScale();
     void drawPath(const bool& inSelectMode);

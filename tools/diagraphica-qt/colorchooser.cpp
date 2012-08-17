@@ -80,7 +80,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
         double xCur = pos.x() / (0.5 * worldSize().width());
         double yCur = pos.y() / (0.5 * worldSize().height());
 
-        m_dof->addValue(xCur);
+        m_dof->addValue((xCur + 1.0) / 2.0);
         m_yCoordinates->append(yCur);
       }
     }
@@ -154,13 +154,13 @@ void ColorChooser::drawPath(const bool& inSelectMode)
     {
       VisUtils::setColor(Qt::black);
       VisUtils::drawLineDashed(
-        m_dof->value(i)*xRgt+pix,      m_dof->value(i+1)*xRgt+pix,
-        (*m_yCoordinates)[i]*yTop-pix, (*m_yCoordinates)[i+1]*yTop-pix);
+        xPosition(i)*xRgt+pix, xPosition(i+1)*xRgt+pix,
+        yPosition(i)*yTop-pix, yPosition(i+1)*yTop-pix);
 
       VisUtils::setColor(VisUtils::lightGray);
       VisUtils::drawLineDashed(
-        m_dof->value(i)*xRgt,      m_dof->value(i+1)*xRgt,
-        (*m_yCoordinates)[i]*yTop, (*m_yCoordinates)[i+1]*yTop);
+        xPosition(i)*xRgt, xPosition(i+1)*xRgt,
+        yPosition(i)*yTop, yPosition(i+1)*yTop);
     }
     VisUtils::disableLineAntiAlias();
   }
@@ -184,11 +184,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   // size of handle
   hdlDOF = handleSize*pix;
 
-  const QList<double> &xPositions = m_dof->values();
-  const QList<double> &yPositions = *m_yCoordinates;
-
   // size of positions
-  size = xPositions.size();
+  size = m_yCoordinates->size();
 
   // selection mode
   if (inSelectMode == true)
@@ -197,8 +194,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     {
       glPushName((GLuint) i);
       VisUtils::fillRect(
-        xPositions[i]*xRgt-5.0*pix, xPositions[i]*xRgt+5.0*pix,
-        yPositions[i]*yTop+5.0*pix, yPositions[i]*yTop-5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop+5.0*pix, yPosition(i)*yTop-5.0*pix);
       glPopName();
     }
 
@@ -206,21 +203,21 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     {
       glPushName((GLuint) size-1);
       VisUtils::fillRect(
-        xPositions[size-1]*xRgt-5.0*pix, xPositions[size-1]*xRgt+5.0*pix,
-        yPositions[size-1]*yTop+5.0*pix, yPositions[size-1]*yTop-5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop+5.0*pix, yPosition(size-1)*yTop-5.0*pix);
       glPopName();
     }
     else if (size > 1)
     {
       double agl = Utils::calcAngleDg(
-                     xPositions[size-1]*xRgt - xPositions[size-2]*xRgt,
-                     yPositions[size-1]*yTop - yPositions[size-2]*yTop);
+                     xPosition(size-1)*xRgt - xPosition(size-2)*xRgt,
+                     yPosition(size-1)*yTop - yPosition(size-2)*yTop);
 
       // arrow
       glPushMatrix();
       glTranslatef(
-        xPositions[size-1]*xRgt,
-        yPositions[size-1]*yTop,
+        xPosition(size-1)*xRgt,
+        yPosition(size-1)*yTop,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
@@ -242,53 +239,53 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     {
       VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
-        xPositions[i]*xRgt-4.0*pix, xPositions[i]*xRgt+6.0*pix,
-        yPositions[i]*yTop+4.0*pix, yPositions[i]*yTop-6.0*pix);
+        xPosition(i)*xRgt-4.0*pix, xPosition(i)*xRgt+6.0*pix,
+        yPosition(i)*yTop+4.0*pix, yPosition(i)*yTop-6.0*pix);
       VisUtils::drawLine(
-        xPositions[i]*xRgt-4.0*pix, xPositions[i]*xRgt+6.0*pix,
-        yPositions[i]*yTop-6.0*pix, yPositions[i]*yTop+4.0*pix);
+        xPosition(i)*xRgt-4.0*pix, xPosition(i)*xRgt+6.0*pix,
+        yPosition(i)*yTop-6.0*pix, yPosition(i)*yTop+4.0*pix);
 
       VisUtils::setColor(underMouse() ? Qt::red : Qt::white);
 
       VisUtils::drawLine(
-        xPositions[i]*xRgt-5.0*pix, xPositions[i]*xRgt+5.0*pix,
-        yPositions[i]*yTop+5.0*pix, yPositions[i]*yTop-5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop+5.0*pix, yPosition(i)*yTop-5.0*pix);
       VisUtils::drawLine(
-        xPositions[i]*xRgt-5.0*pix, xPositions[i]*xRgt+5.0*pix,
-        yPositions[i]*yTop-5.0*pix, yPositions[i]*yTop+5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop-5.0*pix, yPosition(i)*yTop+5.0*pix);
     }
 
     if (size == 1)
     {
       VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
-        xPositions[size-1]*xRgt-4.0*pix, xPositions[size-1]*xRgt+6.0*pix,
-        yPositions[size-1]*yTop+4.0*pix, yPositions[size-1]*yTop-6.0*pix);
+        xPosition(size-1)*xRgt-4.0*pix, xPosition(size-1)*xRgt+6.0*pix,
+        yPosition(size-1)*yTop+4.0*pix, yPosition(size-1)*yTop-6.0*pix);
       VisUtils::drawLine(
-        xPositions[size-1]*xRgt-4.0*pix, xPositions[size-1]*xRgt+6.0*pix,
-        yPositions[size-1]*yTop-6.0*pix, yPositions[size-1]*yTop+4.0*pix);
+        xPosition(size-1)*xRgt-4.0*pix, xPosition(size-1)*xRgt+6.0*pix,
+        yPosition(size-1)*yTop-6.0*pix, yPosition(size-1)*yTop+4.0*pix);
 
 
       VisUtils::setColor(underMouse() ? Qt::red : Qt::white);
 
       VisUtils::drawLine(
-        xPositions[size-1]*xRgt-5.0*pix, xPositions[size-1]*xRgt+5.0*pix,
-        yPositions[size-1]*yTop+5.0*pix, yPositions[size-1]*yTop-5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop+5.0*pix, yPosition(size-1)*yTop-5.0*pix);
       VisUtils::drawLine(
-        xPositions[size-1]*xRgt-5.0*pix, xPositions[size-1]*xRgt+5.0*pix,
-        yPositions[size-1]*yTop-5.0*pix, yPositions[size-1]*yTop+5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop-5.0*pix, yPosition(size-1)*yTop+5.0*pix);
     }
     else if (size > 1)
     {
       double agl = Utils::calcAngleDg(
-                     xPositions[size-1]*xRgt - xPositions[size-2]*xRgt,
-                     yPositions[size-1]*yTop - yPositions[size-2]*yTop);
+                     xPosition(size-1)*xRgt - xPosition(size-2)*xRgt,
+                     yPosition(size-1)*yTop - yPosition(size-2)*yTop);
 
       // drop shadow
       glPushMatrix();
       glTranslatef(
-        xPositions[size-1]*xRgt+pix,
-        yPositions[size-1]*yTop-pix,
+        xPosition(size-1)*xRgt+pix,
+        yPosition(size-1)*yTop-pix,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
@@ -306,8 +303,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
       // arrow
       glPushMatrix();
       glTranslatef(
-        xPositions[size-1]*xRgt,
-        yPositions[size-1]*yTop,
+        xPosition(size-1)*xRgt,
+        yPosition(size-1)*yTop,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
@@ -348,7 +345,7 @@ void ColorChooser::handleHits(const vector< int > &ids)
     }
     else if (m_lastMouseEvent.button() == Qt::RightButton)
     {
-      if (0 <= id && id < m_yCoordinates->size())
+      if (0 <= id && id < m_yCoordinates->size() && m_yCoordinates->size() > 2)
       {
         m_dof->removeValue(id);
         m_yCoordinates->removeAt(id);
@@ -368,7 +365,7 @@ void ColorChooser::handleDrag()
     double xCur = pos.x()/(0.5*size.width());
     double yCur = pos.y()/(0.5*size.height());
 
-    m_dof->setValue(m_dragIdx, xCur);
+    m_dof->setValue(m_dragIdx, (xCur + 1.0) / 2.0);
     (*m_yCoordinates)[m_dragIdx] = yCur;
     updateGL(true);
     updateGL();
