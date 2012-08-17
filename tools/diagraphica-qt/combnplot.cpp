@@ -42,6 +42,8 @@ CombnPlot::CombnPlot(
   calcMaxAttrCard();
   calcMaxNumberPerComb();
   calcPositions();
+
+  setMouseTracking(true);
 }
 
 

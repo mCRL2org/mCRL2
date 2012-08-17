@@ -39,6 +39,8 @@ CorrlPlot::CorrlPlot(
   initLabels();
   calcMaxNumber();
   calcPositions();
+
+  setMouseTracking(true);
 }
 
 

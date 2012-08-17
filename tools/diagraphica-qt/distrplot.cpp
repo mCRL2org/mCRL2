@@ -33,6 +33,8 @@ DistrPlot::DistrPlot(
   m_graph->calcAttrDistr(attributeIndex, number);
   calcMaxNumber();
   calcPositions();
+
+  setMouseTracking(true);
 }
 
 
@@ -351,7 +353,7 @@ void DistrPlot::calcPositions()
     double xLft = -0.5*size.width()+20*pix;
     double xRgt =  0.5*size.width()-10*pix;
     double yTop =  0.5*size.height()-10*pix;
-    double yBot = -0.5*size.width()+20*pix;
+    double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
     double numX = attribute->getSizeCurValues();
