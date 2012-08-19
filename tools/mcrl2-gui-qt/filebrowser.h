@@ -30,7 +30,7 @@ class FileBrowser : public QTreeView
     Q_OBJECT
   public:
     explicit FileBrowser(QWidget *parent = 0);
-    void setCatalog(ToolCatalog catalog);
+    void setCatalog(ToolCatalog catalog) { m_catalog = catalog; }
 
   public slots:
     void onToolSelected();
@@ -50,8 +50,10 @@ class FileBrowser : public QTreeView
     void mouseDoubleClickEvent(QMouseEvent *event);
 
   private:
-    void createContextMenu(QFileInfo info);
+    QAction* addConditionalAction(QMenu* menu, QString action, bool condition);
+    void createContextMenu(QList<QFileInfo> info);
     void copyDirectory(QString oldPath, QString newPath, bool move = false);
+    bool askRemove(QModelIndexList files);
     bool askRemove(QString filename, bool copy = false);
 
 
@@ -59,7 +61,7 @@ class FileBrowser : public QTreeView
     QMenu *m_context;
     ToolCatalog m_catalog;
 
-    QModelIndex m_pastefile;
+    QStringList m_pastefiles;
     bool m_cut;
     bool m_copy;
 

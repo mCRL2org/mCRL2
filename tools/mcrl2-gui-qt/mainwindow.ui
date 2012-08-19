@@ -29,7 +29,10 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTabWidget" name="tabInstances">
+     <widget class="ExtendedTabWidget" name="tabInstances">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
       <property name="currentIndex">
        <number>-1</number>
       </property>
@@ -121,6 +124,9 @@
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragOnly</enum>
        </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
        <property name="indentation">
         <number>15</number>
        </property>
@@ -177,6 +183,12 @@
    <class>FileBrowser</class>
    <extends>QTreeView</extends>
    <header>filebrowser.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ExtendedTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>extendedtabwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

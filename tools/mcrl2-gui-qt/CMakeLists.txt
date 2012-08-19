@@ -32,7 +32,7 @@ qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
 
 set(MCRL2_GUI_MOC_HEADERS
   mainwindow.h
-
+  extendedtabwidget.h
   filebrowser.h
   toolaction.h
   toolinstance.h
@@ -49,7 +49,7 @@ set(MCRL2_GUI_SRC_FILES
   ${MCRL2_GUI_MOC_SOURCES}
   main.cpp
   mainwindow.cpp
-
+  extendedtabwidget.cpp
   filebrowser.cpp
   toolaction.cpp
   toolinstance.cpp
