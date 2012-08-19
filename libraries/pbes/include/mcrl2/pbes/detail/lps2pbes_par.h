@@ -66,37 +66,37 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     push(left + right);
   }
 
-  void leave(const data::data_expression& x)
+  void leave(const data::data_expression&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::true_& x)
+  void leave(const state_formulas::true_&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::false_& x)
+  void leave(const state_formulas::false_&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::not_& x)
+  void leave(const state_formulas::not_&)
   {
     // skip
   }
 
-  void leave(const state_formulas::and_& x)
+  void leave(const state_formulas::and_&)
   {
     join();
   }
 
-  void leave(const state_formulas::or_& x)
+  void leave(const state_formulas::or_&)
   {
     join();
   }
 
-  void leave(const state_formulas::imp& x)
+  void leave(const state_formulas::imp&)
   {
     join();
   }
@@ -111,37 +111,37 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     push(Par(X, l + x.variables(), x.body()));
   }
 
-  void leave(const state_formulas::must& x)
+  void leave(const state_formulas::must&)
   {
     // skip
   }
 
-  void leave(const state_formulas::may& x)
+  void leave(const state_formulas::may&)
   {
     // skip
   }
 
-  void leave(const state_formulas::yaled& x)
+  void leave(const state_formulas::yaled&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::yaled_timed& x)
+  void leave(const state_formulas::yaled_timed&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::delay& x)
+  void leave(const state_formulas::delay&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::delay_timed& x)
+  void leave(const state_formulas::delay_timed&)
   {
     push(data::variable_list());
   }
 
-  void leave(const state_formulas::variable& x)
+  void leave(const state_formulas::variable&)
   {
     push(data::variable_list());
   }

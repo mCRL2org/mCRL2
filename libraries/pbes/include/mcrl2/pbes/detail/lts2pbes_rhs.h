@@ -101,41 +101,41 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     return result;
   }
 
-  void leave(const data::data_expression& x)
+  void leave(const data::data_expression&)
   {
     push(x);
   }
 
-  void leave(const state_formulas::true_& x)
+  void leave(const state_formulas::true_&)
   {
     push(true_());
   }
 
-  void leave(const state_formulas::false_& x)
+  void leave(const state_formulas::false_&)
   {
     push(false_());
   }
 
-  void operator()(const state_formulas::not_& x)
+  void operator()(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: negation is not supported!");
   }
 
-  void leave(const state_formulas::and_& x)
+  void leave(const state_formulas::and_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(pbes_expr_optimized::and_(left, right));
   }
 
-  void leave(const state_formulas::or_& x)
+  void leave(const state_formulas::or_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(pbes_expr_optimized::or_(left, right));
   }
 
-  void operator()(const state_formulas::imp& x)
+  void operator()(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: implication is not supported!");
   }
@@ -186,22 +186,22 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(pbes_expr_optimized::join_or(v.begin(), v.end()));
   }
 
-  void leave(const state_formulas::yaled& x)
+  void leave(const state_formulas::yaled&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: yaled is not supported!");
   }
 
-  void leave(const state_formulas::yaled_timed& x)
+  void leave(const state_formulas::yaled_timed&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: yaled_timed is not supported!");
   }
 
-  void leave(const state_formulas::delay& x)
+  void leave(const state_formulas::delay&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: yaled is not supported!");
   }
 
-  void leave(const state_formulas::delay_timed& x)
+  void leave(const state_formulas::delay_timed&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: delay_timed is not supported!");
   }

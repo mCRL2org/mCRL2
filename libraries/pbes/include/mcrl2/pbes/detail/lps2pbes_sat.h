@@ -77,12 +77,12 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(lps::equal_multi_actions(a, x));
   }
 
-  void leave(const action_formulas::true_& x)
+  void leave(const action_formulas::true_&)
   {
     push(true_());
   }
 
-  void leave(const action_formulas::false_& x)
+  void leave(const action_formulas::false_&)
   {
     push(false_());
   }
@@ -92,21 +92,21 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(not_(Sat(a, x.operand())));
   }
 
-  void leave(const action_formulas::and_& x)
+  void leave(const action_formulas::and_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(and_(left, right));
   }
 
-  void leave(const action_formulas::or_& x)
+  void leave(const action_formulas::or_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(or_(left, right));
   }
 
-  void leave(const action_formulas::imp& x)
+  void leave(const action_formulas::imp&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();

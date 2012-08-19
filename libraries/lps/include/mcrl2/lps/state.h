@@ -37,6 +37,9 @@ class state: public atermpp::vector < mcrl2::data::data_expression >
     }
 };
 
+// template function overloads
+std::string pp(const lps::state& x);
+
 } // namespace lps
 } // namespace mcrl2
 

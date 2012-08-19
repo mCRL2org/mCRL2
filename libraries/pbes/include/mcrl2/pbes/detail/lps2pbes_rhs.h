@@ -114,36 +114,36 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(x);
   }
 
-  void leave(const state_formulas::true_& x)
+  void leave(const state_formulas::true_&)
   {
     push(true_());
   }
 
-  void leave(const state_formulas::false_& x)
+  void leave(const state_formulas::false_&)
   {
     push(false_());
   }
 
-  void operator()(const state_formulas::not_& x)
+  void operator()(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("rhs_traverser: negation is not supported!");
   }
 
-  void leave(const state_formulas::and_& x)
+  void leave(const state_formulas::and_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(pbes_expr_optimized::and_(left, right));
   }
 
-  void leave(const state_formulas::or_& x)
+  void leave(const state_formulas::or_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(pbes_expr_optimized::or_(left, right));
   }
 
-  void operator()(const state_formulas::imp& x)
+  void operator()(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("rhs_traverser: implication is not supported!");
   }
@@ -214,7 +214,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     handle_must_may(x, false);
   }
 
-  void leave(const state_formulas::yaled& x)
+  void leave(const state_formulas::yaled&)
   {
     throw mcrl2::runtime_error("rhs_traverser: yaled is not supported!");
   }
@@ -244,7 +244,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(and_(pbes_expr::join_or(v.begin(), v.end()), data::greater(t, T)));
   }
 
-  void leave(const state_formulas::delay& x)
+  void leave(const state_formulas::delay&)
   {
     throw mcrl2::runtime_error("rhs_traverser: delay is not supported!");
   }

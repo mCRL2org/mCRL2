@@ -88,86 +88,86 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     return result_type();
   }
 
-  void leave(const data::data_expression& x)
+  void leave(const data::data_expression&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::true_& x)
+  void leave(const state_formulas::true_&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::false_& x)
+  void leave(const state_formulas::false_&)
   {
     push(epsilon());
   }
 
-  void operator()(const state_formulas::not_& x)
+  void operator()(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: negation is not supported!");
   }
 
-  void leave(const state_formulas::and_& x)
+  void leave(const state_formulas::and_&)
   {
     atermpp::vector<pbes_equation> right = pop();
     atermpp::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
-  void leave(const state_formulas::or_& x)
+  void leave(const state_formulas::or_&)
   {
     atermpp::vector<pbes_equation> right = pop();
     atermpp::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
-  void operator()(const state_formulas::imp& x)
+  void operator()(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: implication is not supported!");
   }
 
-  void leave(const state_formulas::forall& x)
+  void leave(const state_formulas::forall&)
   {
     // skip
   }
 
-  void leave(const state_formulas::exists& x)
+  void leave(const state_formulas::exists&)
   {
     // skip
   }
 
-  void leave(const state_formulas::must& x)
+  void leave(const state_formulas::must&)
   {
     // skip
   }
 
-  void leave(const state_formulas::may& x)
+  void leave(const state_formulas::may&)
   {
     // skip
   }
 
-  void leave(const state_formulas::yaled& x)
+  void leave(const state_formulas::yaled&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::yaled_timed& x)
+  void leave(const state_formulas::yaled_timed&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::delay& x)
+  void leave(const state_formulas::delay&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::delay_timed& x)
+  void leave(const state_formulas::delay_timed&)
   {
     push(epsilon());
   }
 
-  void leave(const state_formulas::variable& x)
+  void leave(const state_formulas::variable&)
   {
     push(epsilon());
   }
