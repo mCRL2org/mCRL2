@@ -21,6 +21,9 @@ ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinate
   m_type(type),
   m_dragIdx(NON_EXISTING)
 {
+  setMouseTracking(true);
+  setMinimumSize(100,50);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 
@@ -52,45 +55,58 @@ void ColorChooser::visualize(const bool& inSelectMode)
   }
 }
 
+void ColorChooser::handleMouseEnterEvent()
+{
+  emit activated();
+  // normal mode
+  updateGL();
+}
+
+void ColorChooser::handleMouseLeaveEvent()
+{
+  emit deactivated();
+  // normal mode
+  updateGL();
+}
+
 
 void ColorChooser::handleMouseEvent(QMouseEvent* e)
 {
   Visualizer::handleMouseEvent(e);
-  if (e->type() == QEvent::Enter)
-  {
-    emit activated();
-  }
-  if (e->type() == QEvent::Leave)
-  {
-    emit deactivated();
-  }
-  if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::Enter || e->type() == QEvent::Leave)
+  if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
     // selection mode
     updateGL(true);
-  }
-  if (e->button() == Qt::LeftButton)
-  {
-    if (e->type() == QEvent::MouseButtonPress)
+
+    if (e->button() == Qt::LeftButton)
     {
-      if (m_dragIdx == NON_EXISTING)
+      if (e->type() == QEvent::MouseButtonPress)
       {
-        QPointF pos = worldCoordinate(e->posF());
+        if (m_dragIdx == NON_EXISTING)
+        {
+          QPointF pos = worldCoordinate(e->posF());
 
-        double xCur = pos.x() / (0.5 * worldSize().width());
-        double yCur = pos.y() / (0.5 * worldSize().height());
+          double xCur = pos.x() / (0.5 * worldSize().width());
+          double yCur = pos.y() / (0.5 * worldSize().height());
 
-        m_dof->addValue((xCur + 1.0) / 2.0);
-        m_yCoordinates->append(yCur);
+          m_dof->addValue((xCur + 1.0) / 2.0);
+          m_yCoordinates->append(yCur);
+        }
+      }
+      if (e->type() == QEvent::MouseButtonRelease)
+      {
+        m_dragIdx = NON_EXISTING;
       }
     }
-    if (e->type() == QEvent::MouseButtonRelease)
+
+    if (m_mouseDrag && e->buttons() == Qt::LeftButton)
     {
-      m_dragIdx = NON_EXISTING;
+      handleDrag();
     }
+
+    // normal mode
+    updateGL();
   }
-  // normal mode
-  updateGL();
 }
 
 void ColorChooser::drawColorSpectrum()

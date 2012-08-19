@@ -112,6 +112,7 @@ class DiagramEditor : public Visualizer
 
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
+    void handleKeyEvent(QKeyEvent* e);
 
     void handleHits(const std::vector< int > &ids);
 
@@ -132,6 +133,8 @@ class DiagramEditor : public Visualizer
     void handleDragDOFHgtEnd(Shape* s);
     void handleDragDOFHge(Shape* s);
     void handleDragDOFAglEnd(Shape* s);
+
+    QSize sizeHint() { return QSize(600,600); }
 
     // -- hit detection ---------------------------------------------
     void processHits(

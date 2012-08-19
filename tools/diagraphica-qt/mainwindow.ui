@@ -128,15 +128,6 @@
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>19</number>
            </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>19</number>
-           </attribute>
-           <attribute name="horizontalHeaderStretchLastSection">
-            <bool>true</bool>
-           </attribute>
            <column>
             <property name="text">
              <string>#</string>
@@ -196,15 +187,6 @@
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>19</number>
            </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>19</number>
-           </attribute>
-           <attribute name="horizontalHeaderStretchLastSection">
-            <bool>true</bool>
-           </attribute>
            <column>
             <property name="text">
              <string>#</string>
@@ -231,7 +213,7 @@
        </widget>
        <widget class="QWidget" name="examinerWidget" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -605,7 +587,7 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

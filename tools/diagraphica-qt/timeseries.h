@@ -76,6 +76,8 @@ class TimeSeries : public Visualizer
     void handleMouseLeaveEvent();
     void handleKeyEvent(QKeyEvent* e);
 
+    QSize sizeHint() { return QSize(600,200); }
+
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());

@@ -31,6 +31,7 @@ TimeSeries::TimeSeries(
   : Visualizer(parent, g),
     settings(s)
 {
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   ySpacePxl     = 6.0;
   minPixPerNode = 4.0;
   actPixPerNode = 4.0;

@@ -20,6 +20,8 @@ Visualizer::Visualizer(
     m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
     m_graph(graph_)
 {
+  setMinimumSize(10,10);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setFocusPolicy(Qt::ClickFocus);
   clearColor = Qt::white;
 

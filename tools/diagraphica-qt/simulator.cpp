@@ -28,6 +28,7 @@ Simulator::Simulator(
   : Visualizer(parent, g),
     m_settings(s)
 {
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   m_diagram   = 0;
   m_currentFrame = 0;
 

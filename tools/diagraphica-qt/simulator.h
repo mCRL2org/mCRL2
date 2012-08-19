@@ -62,6 +62,8 @@ class Simulator : public Visualizer
     void handleMouseLeaveEvent();
     void handleKeyEvent(QKeyEvent* e);
 
+    QSize sizeHint() { return QSize(600,200); }
+
   public slots:
 
     // -- utility event handlers ------------------------------------

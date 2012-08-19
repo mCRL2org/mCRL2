@@ -75,6 +75,7 @@ class Visualizer : public QGLWidget
     virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseReleaseEvent(event); }
     virtual void resizeEvent(QResizeEvent *event) { handleSizeEvent(); QGLWidget::resizeEvent(event); }
 
+    QSize sizeHint() { return QSize(200,200); } // Reimplement to change preferred size
   public slots:
     void updateGL(bool inSelectMode = false);
 

@@ -38,7 +38,7 @@ DiagramEditor::DiagramEditor(
   m_currentSelectedHandleId = -1;
 
   initContextMenu();
-
+  setMouseTracking(true); // Needed to paste at the current position with keyboard shortcuts
 }
 
 
@@ -676,6 +676,41 @@ void DiagramEditor::handleMouseEvent(QMouseEvent* e)
   m_lastMousePos = e->pos();
 }
 
+void DiagramEditor::handleKeyEvent(QKeyEvent* e)
+{
+  Visualizer::handleKeyEvent(e);
+  if (m_editMode == EDIT_MODE_SELECT)
+  {
+    if (e->type() == QEvent::KeyPress)
+    {
+      if (e->matches(QKeySequence::SelectAll))
+      {
+        selectAllShapes();
+      }
+      else if (e->matches(QKeySequence::Cut))
+      {
+        cutShapes();
+      }
+      else if (e->matches(QKeySequence::Copy))
+      {
+        copyShapes();
+      }
+      else if (e->matches(QKeySequence::Paste))
+      {
+        pasteShapes();
+      }
+    }
+    if (e->type() == QEvent::KeyRelease)
+    {
+      if (e->matches(QKeySequence::Delete))
+      {
+        deleteShapes();
+      }
+    }
+  }
+  // redraw in render mode
+  updateGL();
+}
 
 void DiagramEditor::handleHits(const vector< int > &ids)
 {

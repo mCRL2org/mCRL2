@@ -79,6 +79,8 @@ class ArcDiagram : public Visualizer
 
     void handleMouseEvent(QMouseEvent* e);
 
+    QSize sizeHint() { return QSize(600,600); }
+
     void updateDiagramData();
 
   signals:
