@@ -101,7 +101,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     return result;
   }
 
-  void leave(const data::data_expression&)
+  void leave(const data::data_expression& x)
   {
     push(x);
   }
