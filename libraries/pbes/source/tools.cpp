@@ -48,7 +48,8 @@ namespace pbes_system
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
               const std::string& formfilename,
-              bool timed
+              bool timed,
+              bool structured
              )
 {
   if (formfilename.empty())
@@ -78,7 +79,7 @@ void lps2pbes(const std::string& input_filename,
   instream.close();
   //convert formula and LPS to a PBES
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed, structured);
   //save the result
   if (output_filename.empty())
   {

@@ -99,7 +99,13 @@ def run_pbes2bool(filename, timeout = 3):
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
-    return last_word(text) == 'true'
+    try:
+        return last_word(text) == 'true'
+    except IndexError:
+        print 'pbes2bool output:'
+        print '  stdout:', text
+        print '  stderr:', dummy
+        return None
 
 # returns True, False or None if a timeout occurs
 def run_pbespgsolve(filename, timeout = 3):
@@ -197,6 +203,6 @@ def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
     dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
     return text.find('LTSs are strongly bisimilar') != -1
 
-def run_lpspbes(lpsfile, mcffile, pbesfile, timeout = 10):
-    args = '%s -f%s %s' % (lpsfile, mcffile, pbesfile)
+def run_lpspbes(lpsfile, mcffile, pbesfile, options = '', timeout = 10):
+    args = '%s -f%s %s %s' % (lpsfile, mcffile, options, pbesfile)
     timeout_command('lps2pbes',  args.strip(), timeout)

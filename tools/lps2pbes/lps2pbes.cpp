@@ -29,8 +29,9 @@ class lps2pbes_tool : public input_output_tool
     typedef input_output_tool super;
 
   protected:
-    bool timed;
     std::string formfilename;
+    bool timed;
+    bool structured;
 
     std::string synopsis() const
     {
@@ -44,13 +45,16 @@ class lps2pbes_tool : public input_output_tool
                       "use the state formula from FILE", 'f');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');
+      desc.add_option("structured",
+                      "generate equations such that no mixed conjunctions and disjunctions occur", 's');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
 
-      timed     = 0 < parser.options.count("timed");
+      timed      = parser.options.count("timed") > 0;
+      structured = parser.options.count("structured") > 0;
 
       //check for presence of -f
       if (parser.options.count("formula"))
@@ -75,7 +79,8 @@ class lps2pbes_tool : public input_output_tool
       lps2pbes(input_filename(),
                output_filename(),
                formfilename,
-               timed
+               timed,
+               structured
              );
       return true;
     }

@@ -444,6 +444,22 @@ struct nil_traverser: public state_formulas::regular_formula_traverser<nil_trave
     result = true;
   }
 };
+
+// collects state variable names in a set
+struct state_variable_name_traverser: public state_formulas::state_formula_traverser<state_variable_name_traverser>
+{
+  typedef state_formulas::state_formula_traverser<state_variable_name_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  std::set<core::identifier_string> names;
+
+  void operator()(const state_formulas::variable& x)
+  {
+    names.insert(x.name());
+  }
+};
 /// \endcond
 
 } // namespace detail
@@ -456,6 +472,16 @@ bool find_nil(const T& x)
   detail::nil_traverser f;
   f(x);
   return f.result;
+}
+
+/// \brief Returns the names of the state variables that occur in x.
+/// \param[in] x A state formula
+inline
+std::set<core::identifier_string> find_state_variable_names(const state_formula& x)
+{
+  detail::state_variable_name_traverser f;
+  f(x);
+  return f.names;
 }
 
 } // namespace state_formulas
