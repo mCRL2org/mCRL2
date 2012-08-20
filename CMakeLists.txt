@@ -331,6 +331,7 @@ add_subdirectory ( libraries/utilities )
 
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
+add_subdirectory ( tools/complps2pbes )
 add_subdirectory ( tools/diagraphica )
 add_subdirectory ( tools/diagraphica-qt )
 add_subdirectory ( tools/formulacheck )

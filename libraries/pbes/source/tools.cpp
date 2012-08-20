@@ -10,11 +10,13 @@
 /// \brief Tool implementations.
 
 #include <cassert>
+#include <fstream>
 #include <sstream>
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/constelm.h"
@@ -22,6 +24,7 @@
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/complps2pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/parelm.h"
@@ -81,6 +84,57 @@ void lps2pbes(const std::string& input_filename,
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed, structured);
   //save the result
+  if (output_filename.empty())
+  {
+    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
+  }
+  result.save(output_filename);
+}
+
+void complps2pbes(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& formfilename
+                 )
+{
+  if (formfilename.empty())
+  {
+    throw mcrl2::runtime_error("option -f is not specified");
+  }
+
+  // load mCRL2 specification
+  std::string text;
+  if (input_filename.empty())
+  {
+    mCRL2log(log::verbose) << "reading mCRL2 specification from stdin..." << std::endl;
+    text = utilities::read_text(std::cin);
+  }
+  else
+  {
+    mCRL2log(log::verbose) << "reading mCRL2 specification from file '" <<  input_filename << "'..." << std::endl;
+    std::ifstream from(input_filename.c_str());
+    text = utilities::read_text(from);
+  }
+  // TODO: check if alpha reduction should be applied
+  process::process_specification procspec = process::parse_process_specification(text, false);
+  lps::specification spec = lps::linearise(procspec);
+
+  // load state formula
+  mCRL2log(log::verbose) << "reading formula from file '" <<  formfilename << "'..." << std::endl;
+  std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+  if (!instream)
+  {
+    throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+  }
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
+  instream.close();
+
+  pbes_system::pbes<> result = pbes_system::complps2pbes(procspec, formula);
+
+  // save the result
   if (output_filename.empty())
   {
     mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
