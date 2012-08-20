@@ -64,7 +64,7 @@ set(MCRL2_GUI_SRC_FILES
 
 # ######### Copy extra files ##########
 if(NOT APPLE)
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tool_catalog.xml" COPYONLY )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
 
   if( UNIX )
