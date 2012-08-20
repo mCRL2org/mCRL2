@@ -34,7 +34,7 @@ namespace lts
 namespace old
 {
 
-class lps2lts_algorithm: public lps2lts_algorithm_base
+class lps2lts_algorithm
 {
     typedef atermpp::aterm state_t; // Type of a state.
 

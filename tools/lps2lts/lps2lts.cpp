@@ -28,15 +28,11 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
-// #include "mcrl2/lps/action_label.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/action_parse.h"
 
 #include "mcrl2/lts/lts_io.h"
-
-// Support both the old and the new implementation of state space exploration
 #include "mcrl2/lts/detail/exploration.h"
-#include "mcrl2/lts/detail/exploration_old.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
@@ -73,42 +69,16 @@ std::list<std::string> split_actions(const std::string& s)
   return result;
 }
 
-/*
-static void check_whether_actions_on_commandline_exist(
-             const atermpp::set < mcrl2::lps::multi_action > &actions,
-             const std::set<std::string> action_labels)
-{
-  for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
-               i!=actions.end(); ++i)
-  {
-    mCRL2log(verbose) << "checking for occurrences of action '" << pp(*i) << "'.\n";
-
-    bool found=(pp(*i)=="tau"); // If i equals tau, it does not need to be declared.
-    for(action_label_list::const_iterator j=action_labels.begin();
-              !found && j!=action_labels.end(); ++j)
-    {
-      found=(*i == j->name());  // The action in the set occurs in the action label.
-    }
-    if (!found)
-    {
-      throw mcrl2::runtime_error("'" + pp(*i) + "' is not declared as an action in this LPS.");
-    }
-  }
-
-}
-*/
-
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
   protected:
-    lps2lts_algorithm_base* m_lps2lts;
+    mcrl2::lts::lps2lts_algorithm m_lps2lts;
     lts_generation_options m_options;
     std::string m_filename;
 
   public:
-    ~lps2lts_tool() { m_options.m_rewriter.reset();
-                      delete m_lps2lts; }
+    ~lps2lts_tool() { m_options.m_rewriter.reset(); }
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -138,14 +108,13 @@ class lps2lts_tool : public lps2lts_base
                    "label between any pair of states. If this is not desired, such "
                    "transitions can be removed by applying a strong bisimulation reducton "
                    "using for instance the tool ltsconvert."
-                  ),
-      m_lps2lts(NULL)
+                  )
     {
     }
 
     void abort()
     {
-      m_lps2lts->abort();
+      m_lps2lts.abort();
     }
 
     bool run()
@@ -164,23 +133,23 @@ class lps2lts_tool : public lps2lts_base
         return false;
       }
 
-      if (!m_lps2lts->initialise_lts_generation(&m_options))
+      if (!m_lps2lts.initialise_lts_generation(&m_options))
       {
         return false;
       }
 
       try
       {
-        m_lps2lts->generate_lts();
+        m_lps2lts.generate_lts();
       }
       catch (mcrl2::runtime_error& e)
       {
         mCRL2log(error) << e.what() << std::endl;
-        m_lps2lts->finalise_lts_generation();
+        m_lps2lts.finalise_lts_generation();
         return false;
       }
 
-      m_lps2lts->finalise_lts_generation();
+      m_lps2lts.finalise_lts_generation();
 
       return true;
     }
@@ -191,14 +160,10 @@ class lps2lts_tool : public lps2lts_base
       lps2lts_base::add_options(desc);
 
       desc.
-      add_option("alternative",
-                 "use the alternative implementation by Ruud Koolen").
       add_option("cached",
-                 "use enumeration caching techniques to speed up state space generation. "
-                 "Requires --alternative.").
+                 "use enumeration caching techniques to speed up state space generation.").
       add_option("prune",
-                 "use summand pruning to speed up state space generation. "
-                 "Requires --alternative.").
+                 "use summand pruning to speed up state space generation.").
       add_option("dummy", make_mandatory_argument("BOOL"),
                  "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
       add_option("unused-data",
@@ -291,25 +256,6 @@ class lps2lts_tool : public lps2lts_base
       m_options.outinfo         = parser.options.count("no-info") == 0;
       m_options.suppress_progress_messages = parser.options.count("suppress") !=0;
       m_options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
-
-      if(parser.options.count("alternative"))
-      {
-        m_lps2lts = new mcrl2::lts::lps2lts_algorithm();
-      }
-      else
-      {
-        m_lps2lts = new mcrl2::lts::old::lps2lts_algorithm();
-      }
-
-      if(parser.options.count("cached") && !parser.options.count("alternative"))
-      {
-        parser.error("option --cached requires option --alternative to be passed as well");
-      }
-
-      if(parser.options.count("pruned") && !parser.options.count("alternative"))
-      {
-        parser.error("option --pruned requires option --alternative to be passed as well");
-      }
 
       m_options.use_enumeration_caching = parser.options.count("cached");
       m_options.use_summand_pruning = parser.options.count("prune");

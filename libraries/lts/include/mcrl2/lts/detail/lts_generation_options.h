@@ -137,16 +137,6 @@ struct lts_generation_options
   bool use_summand_pruning;
 };
 
-class lps2lts_algorithm_base
-{
-public:
-  virtual bool initialise_lts_generation(lts_generation_options* opts) = 0;
-  virtual bool generate_lts() = 0;
-  virtual bool finalise_lts_generation() = 0;
-  virtual void abort() = 0;
-  virtual ~lps2lts_algorithm_base() {}
-};
-
 } // namespace lts
 } // namespace mcrl2
 

@@ -31,7 +31,7 @@ namespace mcrl2
 namespace lts
 {
 
-class lps2lts_algorithm: public lps2lts_algorithm_base
+class lps2lts_algorithm
 {
   private:
   typedef lps::next_state_generator next_state_generator;
