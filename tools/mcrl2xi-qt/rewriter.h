@@ -20,6 +20,7 @@
 #define MCRL2XI_REWRITER_H
 
 #include <QObject>
+#include <QPoint>
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/classic_enumerator.h"
 
@@ -41,9 +42,18 @@ class Rewriter : public QObject
      */
     void rewritten(QString output);
     /**
+     * @brief Signal to indicate that the algorithm finished
+     */
+    void finished();
+
+    /**
+     * @brief Signal to indicate that the parsing failed
+     */
+    void parseError(QString error);
+    /**
      * @brief Signal to indicate an epression error
      */
-    void exprError();
+    void exprError(QString error);
     
   public slots:
     /**
@@ -63,6 +73,7 @@ class Rewriter : public QObject
     mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
     atermpp::set <mcrl2::data::variable > m_vars;       ///< The variables used in the last rewrite process
     bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
+    QString m_parseError;                               ///< The last parse error message
     QString m_specification;                            ///< String containing the last specification that was parsed
 };
 

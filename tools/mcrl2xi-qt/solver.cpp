@@ -31,94 +31,100 @@ void Solver::setRewriter(QString solver)
 void Solver::solve(QString specification, QString dataExpression)
 {
   m_abort = false;
-  try
+  if (m_specification != specification || !m_parsed)
   {
-    if (m_specification != specification)
+    m_parsed = false;
+    m_specification = specification;
+    try
     {
-      m_specification = specification;
-      mCRL2log(info) << "Parsing and type checking specification" << std::endl;
-      m_parsed = mcrl2xi_qt::parse_mcrl2_specification_with_variables(specification.toStdString(), m_data_spec, m_vars);
-      if (!m_parsed) {
-        emit solved();
-        return;
-      }
+      mcrl2xi_qt::parseMcrl2Specification(m_specification.toStdString(), m_data_spec, m_vars);
+      m_parsed = true;
     }
-    else if (!m_parsed)
+    catch (mcrl2::runtime_error e)
     {
-      throw mcrl2::runtime_error("Specification contains no valid data or mCRL2 specification.");
+      m_parseError = QString::fromStdString(e.what());
     }
+  }
 
-    std::string stdDataExpression = dataExpression.toStdString();
-
-    mCRL2log(info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
-
-    int dotpos =  stdDataExpression.find('.');
-    if (dotpos  == -1)
+  if (m_parsed)
+  {
+    try
     {
-      throw mcrl2::runtime_error("Expected a '.' in the input.");
-    }
+      std::string stdDataExpression = dataExpression.toStdString();
 
-    parse_variables(std::string(stdDataExpression.substr(0, dotpos)
-                                ) + ";",std::inserter(m_vars,m_vars.begin()),m_data_spec);
+      mCRL2log(info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
 
-    mcrl2::data::data_expression term =
-        mcrl2::data::parse_data_expression(
-          stdDataExpression.substr(dotpos+1, stdDataExpression.length()-1),
-          m_vars.begin(), m_vars.end(),
-          m_data_spec
-          );
-    if (term.sort()!=mcrl2::data::sort_bool::bool_())
-    {
-      throw mcrl2::runtime_error("Expression is not of sort Bool.");
-    }
-
-    mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
-    term=rewr(term);
-
-    typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
-
-    enumerator_type enumerator(m_data_spec,rewr);
-
-    for (enumerator_type::iterator i = enumerator.begin(m_vars,term,10000); // Stop when more than 10000 internal variables are required.
-         i != enumerator.end() && !m_abort; ++i)
-    {
-      mCRL2log(info) << "Solution found" << std::endl;
-
-      QString s('[');
-
-      for (atermpp::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
+      int dotpos =  stdDataExpression.find('.');
+      if (dotpos  == -1)
       {
-        if( v != m_vars.begin() )
-        {
-          s.append(", ");
-        }
-        s.append(mcrl2::data::pp(*v).c_str());
-        s.append(" := ");
-        s.append(mcrl2::data::pp((*i)(*v)).c_str());
+        throw mcrl2::runtime_error("Expected a '.' in the input.");
       }
-      s.append("] evaluates to ");
-      s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
 
-      emit solvedPart(s);
+      parse_variables(std::string(stdDataExpression.substr(0, dotpos)
+                                  ) + ";",std::inserter(m_vars,m_vars.begin()),m_data_spec);
 
-      QCoreApplication::processEvents(); // To process the signals
+      mcrl2::data::data_expression term =
+          mcrl2::data::parse_data_expression(
+            stdDataExpression.substr(dotpos+1, stdDataExpression.length()-1),
+            m_vars.begin(), m_vars.end(),
+            m_data_spec
+            );
+
+      if (term.sort()!=mcrl2::data::sort_bool::bool_())
+      {
+        throw mcrl2::runtime_error("Expression is not of sort Bool.");
+      }
+
+      mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
+      term=rewr(term);
+
+      typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
+
+      enumerator_type enumerator(m_data_spec,rewr);
+
+      for (enumerator_type::iterator i = enumerator.begin(m_vars,term,10000); // Stop when more than 10000 internal variables are required.
+           i != enumerator.end() && !m_abort; ++i)
+      {
+        mCRL2log(info) << "Solution found" << std::endl;
+
+        QString s('[');
+
+        for (atermpp::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
+        {
+          if( v != m_vars.begin() )
+          {
+            s.append(", ");
+          }
+          s.append(mcrl2::data::pp(*v).c_str());
+          s.append(" := ");
+          s.append(mcrl2::data::pp((*i)(*v)).c_str());
+        }
+        s.append("] evaluates to ");
+        s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
+
+        emit solvedPart(s);
+
+        QCoreApplication::processEvents(); // To process the signals
+        if (m_abort)
+          break;
+      }
       if (m_abort)
-        break;
+        mCRL2log(info) << "Abort by user." << std::endl;
+      else
+        mCRL2log(info) << "Done solving." << std::endl;
+
     }
-
-    if (m_abort)
-      mCRL2log(info) << "Abort by user." << std::endl;
-    else
-      mCRL2log(info) << "Done solving." << std::endl;
-
+    catch (mcrl2::runtime_error e)
+    {
+      QString err = QString::fromStdString(e.what());
+      emit(exprError(err));
+    }
   }
-  catch (mcrl2::runtime_error e)
+  else
   {
-    mCRL2log(error) << e.what() << std::endl;
-    if (m_parsed)
-      emit solvedPart(QString("Syntax Error"));
+    emit(parseError(m_parseError));
   }
-  emit solved();
+  emit(finished());
 }
 
 void Solver::abort()

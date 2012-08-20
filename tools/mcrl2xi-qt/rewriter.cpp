@@ -28,48 +28,57 @@ void Rewriter::setRewriter(QString rewriter)
 
 void Rewriter::rewrite(QString specification, QString dataExpression)
 {
-  try
+  if (m_specification != specification || !m_parsed)
   {
-    if (m_specification != specification)
+    m_parsed = false;
+    m_specification = specification;
+    try
     {
-      m_specification = specification;
-      mCRL2log(info) << "Parsing and type checking specification" << std::endl;
-      m_parsed = mcrl2xi_qt::parse_mcrl2_specification_with_variables(specification.toStdString(), m_data_spec, m_vars);
-      if (!m_parsed) {
-        emit rewritten(QString());
-        return;
-      }
+      mcrl2xi_qt::parseMcrl2Specification(m_specification.toStdString(), m_data_spec, m_vars);
+      m_parsed = true;
     }
-    else if (!m_parsed)
+    catch (mcrl2::runtime_error e)
     {
-      throw mcrl2::runtime_error("Specification contains no valid data or mCRL2 specification.");
+      m_parseError = QString::fromStdString(e.what());
     }
-
-    std::string stdDataExpression = dataExpression.toStdString();
-
-    mCRL2log(info) << "Evaluate: \"" << stdDataExpression << "\"" << std::endl;
-    mCRL2log(info) << "Parsing data expression: \"" << stdDataExpression << "\"" << std::endl;
-
-    mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(stdDataExpression,
-                                                                           m_vars.begin(), m_vars.end(), m_data_spec);
-
-    mCRL2log(info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
-
-    mcrl2::data::rewriter rewr(m_data_spec, m_rewrite_strategy);
-    mcrl2::data::mutable_map_substitution < atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
-
-    mCRL2log(info) << "Result: \"" << mcrl2::data::pp(rewr(term,assignments)) << "\"" << std::endl;
-
-    emit rewritten(mcrl2::data::pp(rewr(term,assignments)).c_str());
-
   }
-  catch (mcrl2::runtime_error e)
+
+  if (m_parsed)
   {
-    mCRL2log(error) << e.what() << std::endl;
-    if (m_parsed)
-      emit rewritten(QString("Syntax Error"));
-    else
-      emit rewritten(QString());
+    try
+    {
+
+      std::string stdDataExpression = dataExpression.toStdString();
+
+      mCRL2log(info) << "Evaluate: \"" << stdDataExpression << "\"" << std::endl;
+      mCRL2log(info) << "Parsing data expression: \"" << stdDataExpression << "\"" << std::endl;
+
+      mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(stdDataExpression,
+                                                                             m_vars.begin(), m_vars.end(), m_data_spec);
+
+      mCRL2log(info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
+
+      mcrl2::data::rewriter rewr(m_data_spec, m_rewrite_strategy);
+      mcrl2::data::mutable_map_substitution < atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
+
+      std::string result = mcrl2::data::pp(rewr(term,assignments));
+
+      mCRL2log(info) << "Result: \"" << result << "\"" << std::endl;
+
+      emit rewritten(QString::fromStdString(result));
+
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      QString err = QString::fromStdString(e.what());
+      emit(exprError(err));
+    }
   }
+  else
+  {
+    emit(parseError(m_parseError));
+  }
+
+  emit(finished());
 }
 

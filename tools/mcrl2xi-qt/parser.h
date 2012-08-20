@@ -32,9 +32,13 @@ class Parser : public QObject
 
   signals:
     /**
-     * @brief Signal to indicate that the parsing is done
+     * @brief Signal to indicate that the algorithm finished
      */
-    void parsed();
+    void finished();
+    /**
+     * @brief Signal to indicate that the parsing failed
+     */
+    void parseError(QString error);
     
   public slots:
     /**

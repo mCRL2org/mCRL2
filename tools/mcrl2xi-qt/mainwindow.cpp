@@ -60,7 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
   //All button functionality
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
   connect(m_ui.actionParse, SIGNAL(triggered()), this, SLOT(onParse()));
-  connect(m_parser, SIGNAL(parsed()), this, SLOT(parsed()));
+  connect(m_parser, SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(m_parser, SIGNAL(finished()), this, SLOT(parserFinished()));
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
   connect(m_ui.actionRewrite, SIGNAL(triggered()), this, SLOT(onRewrite()));
@@ -94,6 +95,7 @@ bool MainWindow::saveDocument(DocumentWidget *document)
   }
   if (!fileName.isNull()) {
     m_ui.documentManager->saveFile(fileName);
+    m_ui.statusBar->showMessage(QString("Saved %1.").arg(fileName), 5000);
     return true;
   }
   return false;
@@ -144,11 +146,16 @@ void MainWindow::formatDocument(DocumentWidget *document)
   ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
   QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
   connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
+  connect(rewriter->getThread(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(rewriter->getThread(), SIGNAL(exprError(QString)), this, SLOT(rewriteError(QString)));
+  connect(rewriter->getThread(), SIGNAL(finished()), this, SLOT(rewriterFinished()));
 
   ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
   QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
   connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
-  connect(solver->getThread(), SIGNAL(solved()), this, SLOT(solved()));
+  connect(solver->getThread(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(solver->getThread(), SIGNAL(exprError(QString)), this, SLOT(solveError(QString)));
+  connect(solver->getThread(), SIGNAL(finished()), this, SLOT(solverFinished()));
 
   connect(editor, SIGNAL(textChanged()), this, SLOT(textChanged()));
 }
@@ -193,35 +200,10 @@ bool MainWindow::onCloseRequest(int index)
   return true;
 }
 
-void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString message, QString formattedMessage)
+void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString message, QString /*formattedMessage*/)
 {
-  m_ui.statusBar->showMessage(formattedMessage, 5000);
-
-  QRegExp rxlen("line (\\d+) col (\\d+): syntax error");
-   int pos = rxlen.indexIn(message);
-   if (pos > -1) {
-       int lineNr = rxlen.cap(1).toInt();
-       int ColNr = rxlen.cap(1).toInt();
-
-       QTextEdit::ExtraSelection highlight;
-
-       QTextEdit *editor = m_ui.documentManager->currentDocument()->getEditor();
-
-       QTextBlock block = editor->document()->findBlockByNumber(lineNr-1);
-
-       QTextCursor cursor = editor->textCursor();
-       cursor.setPosition(block.position()+ColNr);
-
-       editor->setTextCursor(cursor);
-
-       highlight.cursor = cursor;
-       highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
-       highlight.format.setBackground(QColor("orange"));
-
-       QList<QTextEdit::ExtraSelection> extras;
-       extras << highlight;
-       editor->setExtraSelections(extras);
-   }
+  findErrorPosition(message);
+  m_ui.statusBar->showMessage(message, 5000);
 }
 
 void MainWindow::textChanged()
@@ -253,6 +235,7 @@ void MainWindow::onSaveAs()
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
   if (!fileName.isNull()) {
     m_ui.documentManager->saveFile(fileName);
+    m_ui.statusBar->showMessage(QString("Saved %1.").arg(fileName), 5000);
   }
 }
 
@@ -330,7 +313,35 @@ void MainWindow::onParse()
   QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
 }
 
-void MainWindow::parsed()
+void MainWindow::parseError(QString err)
+{
+  mCRL2log(error) << err.toStdString() << std::endl;
+
+  int line = m_lastErrorPosition.x();
+  int col = m_lastErrorPosition.y();
+  QTextEdit::ExtraSelection highlight;
+
+  QTextEdit *editor = m_ui.documentManager->currentDocument()->getEditor();
+
+  QTextBlock block = editor->document()->findBlockByNumber(line-1);
+  if (block.isValid() && block.position()+col <= editor->toPlainText().length())
+  {
+    QTextCursor cursor = editor->textCursor();
+    cursor.setPosition(block.position()+col);
+
+    editor->setTextCursor(cursor);
+
+    highlight.cursor = cursor;
+    highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+    highlight.format.setBackground(QColor("orange"));
+
+    QList<QTextEdit::ExtraSelection> extras;
+    extras << highlight;
+    editor->setExtraSelections(extras);
+  }
+}
+
+void MainWindow::parserFinished()
 {
   m_ui.buttonParse->setEnabled(true);
 }
@@ -349,9 +360,19 @@ void MainWindow::onRewrite()
   QMetaObject::invokeMethod(rewriterparent->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
 }
 
+void MainWindow::rewriteError(QString err)
+{
+  mCRL2log(error) << err.toStdString() << std::endl;
+  m_ui.editRewriteExpr->selectAll();
+}
+
 void MainWindow::rewritten(QString output)
 {
   m_ui.editRewriteOutput->setPlainText(output);
+}
+
+void MainWindow::rewriterFinished()
+{
   m_ui.buttonRewrite->setEnabled(true);
 }
 
@@ -389,7 +410,13 @@ void MainWindow::solvedPart(QString output)
   m_ui.editSolveOutput->appendPlainText(output);
 }
 
-void MainWindow::solved()
+void MainWindow::solveError(QString err)
+{
+  mCRL2log(error) << err.toStdString() << std::endl;
+  m_ui.editSolveExpr->selectAll();
+}
+
+void MainWindow::solverFinished()
 {
   m_ui.buttonSolveAbort->setEnabled(false);
   m_ui.buttonSolve->setEnabled(true);
@@ -408,4 +435,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
   }
   event->accept();
+}
+
+void MainWindow::findErrorPosition(QString err)
+{
+  QStringList lines = err.split("\n");
+  for (int i = 0; i < lines.size(); i++)
+  {
+    QRegExp rxlen("line (\\d+) col (\\d+): syntax error");
+    int pos = rxlen.indexIn(lines[i]);
+    if (pos > -1) {
+      m_lastErrorPosition.setX(rxlen.cap(1).toInt());
+      m_lastErrorPosition.setY(rxlen.cap(2).toInt());
+    }
+  }
 }

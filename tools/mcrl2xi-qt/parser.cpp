@@ -21,7 +21,15 @@ Parser::Parser()
 
 void Parser::parse(QString specification)
 {
-  mcrl2xi_qt::parse_mcrl2_specification(specification.toStdString());
-  emit parsed();
+  try
+  {
+    mcrl2xi_qt::parseMcrl2Specification(specification.toStdString());
+  }
+  catch (mcrl2::runtime_error e)
+  {
+    QString err = QString::fromStdString(e.what());
+    emit(parseError(err));
+  }
+  emit(finished());
 }
 
