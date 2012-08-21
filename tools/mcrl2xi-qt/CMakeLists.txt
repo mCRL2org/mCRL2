@@ -12,6 +12,9 @@ cmake_minimum_required(VERSION 2.6)
 
 if(MCRL2_ENABLE_GUI_TOOLS)
 
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+
 find_package(Qt4 COMPONENTS QtCore QtGui)
 if(QT4_FOUND)
 include(${QT_USE_FILE})
@@ -46,6 +49,8 @@ set(MCRL2XI_SRC_FILES
   ${MCRL2XI_RC_FILES}
   ${MCRL2XI_UI_HEADERS}
   ${MCRL2XI_MOC_SOURCES}
+  ${MACOSX_BUNDLE_ICON_FILE}
+
   main.cpp
   mainwindow.cpp
   highlighter.cpp
@@ -56,10 +61,9 @@ set(MCRL2XI_SRC_FILES
   rewriter.cpp
   solver.cpp
   findreplacedialog.cpp
+
 )
 
-# ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
 
 # ######### Create Windows Icon ##########
 if(WIN32)
@@ -78,6 +82,10 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_utilities_qt
 )
+
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!

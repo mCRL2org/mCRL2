@@ -135,6 +135,8 @@ void MainWindow::formatDocument(DocumentWidget *document)
     editor->setWordWrapMode(QTextOption::NoWrap);
   }
 
+  editor->setFocus();
+
   QFont font;
   font.setFamily("Monospace");
   font.setFixedPitch(true);
