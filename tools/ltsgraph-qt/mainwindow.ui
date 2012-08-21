@@ -64,9 +64,6 @@
      <height>21</height>
     </rect>
    </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
-   </property>
    <widget class="QMenu" name="mnuFile">
     <property name="title">
      <string>&amp;File</string>
