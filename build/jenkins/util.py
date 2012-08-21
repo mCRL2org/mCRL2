@@ -7,6 +7,8 @@ buildthreads = os.environ['BUILD_THREADS'] if 'BUILD_THREADS' in os.environ else
 buildtype = os.environ['buildtype']
 compiler = os.environ['compiler']
 label = os.environ['label']
+srcdir = "{0}/src".format(workspace)
+builddir = "{0}/build".format(workspace)
 
 def log(*lines):
   print '\n##\n## ' + '\n## '.join(lines) + '\n##\n'

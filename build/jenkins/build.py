@@ -11,7 +11,7 @@ from util import *
 # get weird errors all the time.
 #
 try:
-  os.remove(os.path.join(workspace, 'CMakeCache.txt'))
+  os.remove(os.path.join(builddir, 'CMakeCache.txt'))
 except:
   pass
 
@@ -50,9 +50,11 @@ if (label == 'windows-amd64' or label == 'windows-x86'):
 #
 # Run CMake, take into account configuration axes.
 #
+os.chdir(builddir)
 cmake_command = ['cmake', \
+                 srcdir, \
                  '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), \
-                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(workspace)] \
+                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
                  + compilerflags \
                  + testflags
 if call('CMake', cmake_command):
@@ -74,7 +76,7 @@ if not buildthreads:
 extraoptions = []
 if platform.system() == 'Linux':
   extraoptions =  ['-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', workspace, '--'] + extraoptions
+make_command = ['cmake', '--build', builddir, '--'] + extraoptions
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -83,7 +85,7 @@ if call('CMake --build', make_command):
 # Test
 #
 
-newenv = {'MCRL2_COMPILEREWRITER': '{0}/stage/bin/mcrl2compilerewriter'.format(workspace)}
+newenv = {'MCRL2_COMPILEREWRITER': '{0}/stage/bin/mcrl2compilerewriter'.format(builddir)}
 newenv.update(os.environ)
 ctest_command = ['ctest', \
                  '-T', 'Test', \
@@ -95,12 +97,14 @@ if ctest_result:
   log('CTest returned ' + str(ctest_result))
 
 #
-# Copy test output to ${WORKSPACE}/ctest.xml, so the xUnit plugin can find
+# Copy test output to ${builddir}/ctest.xml, so the xUnit plugin can find
 # it and transform it into a test report.
 #
 
-tagfile = '{0}/Testing/TAG'.format(workspace)
+tagfile = '{0}/Testing/TAG'.format(builddir)
 if os.path.exists(tagfile):
   dirname = open(tagfile).readline().strip()
-  shutil.copyfile('{0}/Testing/{1}/Test.xml'.format(workspace, dirname), 
-                  '{0}/ctest.xml'.format(workspace))
+  shutil.copyfile('{0}/Testing/{1}/Test.xml'.format(builddir, dirname), 
+                  '{0}/ctest.xml'.format(builddir))
+                  
+os.chdir(workspace)
