@@ -29,10 +29,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="ExtendedTabWidget" name="tabInstances">
-      <property name="focusPolicy">
-       <enum>Qt::StrongFocus</enum>
-      </property>
+     <widget class="mcrl2::utilities::qt::ExtendedTabWidget" name="tabInstances">
       <property name="currentIndex">
        <number>-1</number>
       </property>
@@ -185,9 +182,9 @@
    <header>filebrowser.h</header>
   </customwidget>
   <customwidget>
-   <class>ExtendedTabWidget</class>
+   <class>mcrl2::utilities::qt::ExtendedTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>extendedtabwidget.h</header>
+   <header>mcrl2/utilities/extendedtabwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

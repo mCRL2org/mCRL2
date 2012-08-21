@@ -7,11 +7,13 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "numberedtextedit.h"
+#include "mcrl2/utilities/numberedtextedit.h"
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextBlock>
 #include <QAbstractTextDocumentLayout>
+
+using namespace mcrl2::utilities::qt;
 
 class LineNumberArea : public QWidget
 {
@@ -35,20 +37,6 @@ protected:
 private:
     NumberedTextEdit* m_edit;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 NumberedTextEdit::NumberedTextEdit(QWidget *parent) :
     QTextEdit(parent)

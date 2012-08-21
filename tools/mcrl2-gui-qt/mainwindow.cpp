@@ -129,8 +129,16 @@ void MainWindow::onTabColorChanged(QColor color)
 void MainWindow::onTabCloseRequest(int index)
 {
   ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(m_ui.tabInstances->widget(index));
-  delete toolInstance;
+  if (toolInstance != 0)
+  {
+    m_ui.tabInstances->removeTab(index);
+    toolInstance->deleteLater();
+  }
   FileInformation* fileInformation = dynamic_cast<FileInformation*>(m_ui.tabInstances->widget(index));
-  delete fileInformation;
+  if (fileInformation != 0)
+  {
+    m_ui.tabInstances->removeTab(index);
+    fileInformation->deleteLater();
+  }
 }
 

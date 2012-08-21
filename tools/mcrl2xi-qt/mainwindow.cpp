@@ -111,7 +111,7 @@ void MainWindow::openDocument(QString fileName)
 void MainWindow::setRewriter(QString name)
 {
   m_current_rewriter = name;
-  for (int i = 0; i < m_ui.documentManager->documentCount(); i++) {
+  for (int i = 0; i < m_ui.documentManager->count(); i++) {
     DocumentWidget *document = m_ui.documentManager->getDocument(i);
 
     ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
@@ -125,14 +125,13 @@ void MainWindow::setRewriter(QString name)
 
 void MainWindow::formatDocument(DocumentWidget *document)
 {
-  QTextEdit *editor = document->getEditor();
   if (m_ui.actionWrap_mode->isChecked())
   {
-    editor->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    document->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
   }
   else
   {
-    editor->setWordWrapMode(QTextOption::NoWrap);
+    document->setWordWrapMode(QTextOption::NoWrap);
   }
 
   editor->setFocus();
@@ -142,8 +141,8 @@ void MainWindow::formatDocument(DocumentWidget *document)
   font.setFixedPitch(true);
   font.setWeight(QFont::Light);
 
-  editor->setFont(font);
-  new Highlighter(editor->document());
+  document->setFont(font);
+  new Highlighter(document->document());
 
   ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
   QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
@@ -159,13 +158,13 @@ void MainWindow::formatDocument(DocumentWidget *document)
   connect(solver->getThread(), SIGNAL(exprError(QString)), this, SLOT(solveError(QString)));
   connect(solver->getThread(), SIGNAL(finished()), this, SLOT(solverFinished()));
 
-  connect(editor, SIGNAL(textChanged()), this, SLOT(textChanged()));
+  connect(document, SIGNAL(textChanged()), this, SLOT(textChanged()));
 }
 
 void MainWindow::changeDocument(DocumentWidget *document)
 {
   if (document)
-    m_findReplaceDialog->setTextEdit(document->getEditor());
+    m_findReplaceDialog->setTextEdit(document);
   else
     m_findReplaceDialog->setTextEdit(0);
 }
@@ -184,7 +183,7 @@ bool MainWindow::onCloseRequest(int index)
   switch(ret)
   {
     case QMessageBox::Yes:
-      if (this->saveDocument(document))
+      if (saveDocument(document))
       {
         m_findReplaceDialog->setTextEdit(0);
         m_ui.documentManager->closeDocument(index);
@@ -211,7 +210,7 @@ void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*ti
 void MainWindow::textChanged()
 {
   QList<QTextEdit::ExtraSelection> extras;
-  m_ui.documentManager->currentDocument()->getEditor()->setExtraSelections(extras);
+  m_ui.documentManager->currentDocument()->setExtraSelections(extras);
 }
 
 void MainWindow::onNew()
@@ -223,12 +222,12 @@ void MainWindow::onOpen()
 {
   QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
-  this->openDocument(fileName);
+  openDocument(fileName);
 }
 
 void MainWindow::onSave()
 {
-  this->saveDocument(m_ui.documentManager->currentDocument());
+  saveDocument(m_ui.documentManager->currentDocument());
 }
 
 void MainWindow::onSaveAs()
@@ -243,61 +242,61 @@ void MainWindow::onSaveAs()
 
 void MainWindow::onExit()
 {
-  this->close();
+  close();
 }
 
 void MainWindow::onUndo()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->undo();
+  m_ui.documentManager->currentDocument()->undo();
 }
 
 void MainWindow::onRedo()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->redo();
+  m_ui.documentManager->currentDocument()->redo();
 }
 
 void MainWindow::onCut()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->cut();
+  m_ui.documentManager->currentDocument()->cut();
 }
 
 void MainWindow::onCopy()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->copy();
+  m_ui.documentManager->currentDocument()->copy();
 }
 
 void MainWindow::onPaste()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->paste();
+  m_ui.documentManager->currentDocument()->paste();
 }
 
 void MainWindow::onDelete()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->textCursor().deleteChar();
+  m_ui.documentManager->currentDocument()->textCursor().deleteChar();
 }
 
 void MainWindow::onSelectAll()
 {
-  m_ui.documentManager->currentDocument()->getEditor()->selectAll();
+  m_ui.documentManager->currentDocument()->selectAll();
 }
 
 void MainWindow::onFind()
 {
-  m_findReplaceDialog->setTextEdit(m_ui.documentManager->currentDocument()->getEditor());
+  m_findReplaceDialog->setTextEdit(m_ui.documentManager->currentDocument());
   m_findReplaceDialog->show();
 }
 
 void MainWindow::onWrapMode()
 {
-  for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
+  for (int i = 0; i < m_ui.documentManager->count(); i++)
   {
     if (m_ui.actionWrap_mode->isChecked())
     {
-      m_ui.documentManager->getDocument(i)->getEditor()->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+      m_ui.documentManager->getDocument(i)->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     }
     else
     {
-      m_ui.documentManager->getDocument(i)->getEditor()->setWordWrapMode(QTextOption::NoWrap);
+      m_ui.documentManager->getDocument(i)->setWordWrapMode(QTextOption::NoWrap);
     }
   }
 }
@@ -312,7 +311,7 @@ void MainWindow::onParse()
 {
   m_ui.buttonParse->setEnabled(false);
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-  QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()));
+  QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()));
 }
 
 void MainWindow::parseError(QString err)
@@ -323,7 +322,7 @@ void MainWindow::parseError(QString err)
   int col = m_lastErrorPosition.y();
   QTextEdit::ExtraSelection highlight;
 
-  QTextEdit *editor = m_ui.documentManager->currentDocument()->getEditor();
+  DocumentWidget *editor = m_ui.documentManager->currentDocument();
 
   QTextBlock block = editor->document()->findBlockByNumber(line-1);
   if (block.isValid() && block.position()+col <= editor->toPlainText().length())
@@ -359,7 +358,7 @@ void MainWindow::onRewrite()
   // findChild<...> without using templates works correctly, this could be a Qt bug
 
   ThreadParent<Rewriter> *rewriterparent = document->findChild<ThreadParent<Rewriter> *>("Rewriter");
-  QMetaObject::invokeMethod(rewriterparent->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
+  QMetaObject::invokeMethod(rewriterparent->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
 }
 
 void MainWindow::rewriteError(QString err)
@@ -390,7 +389,7 @@ void MainWindow::onSolve()
   // findChild<...> without using templates works correctly, this could be a Qt bug
 
   ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
-  QMetaObject::invokeMethod(solverparent->getThread(), "solve", Qt::QueuedConnection, Q_ARG(QString, document->getEditor()->toPlainText()), Q_ARG(QString, m_ui.editSolveExpr->text()));
+  QMetaObject::invokeMethod(solverparent->getThread(), "solve", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editSolveExpr->text()));
 }
 
 void MainWindow::onSolveAbort()
@@ -428,9 +427,9 @@ void MainWindow::solverFinished()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
   m_findReplaceDialog->close();
-  for (int i = 0; i < m_ui.documentManager->documentCount(); i++)
+  for (int i = 0; i < m_ui.documentManager->count(); i++)
   {
-    if (!this->onCloseRequest(i))
+    if (!onCloseRequest(i))
     {
       event->ignore();
       return;

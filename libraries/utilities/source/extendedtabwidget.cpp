@@ -7,16 +7,19 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "extendedtabwidget.h"
+#include "mcrl2/utilities/extendedtabwidget.h"
 #include <QTabBar>
 #include <QEvent>
 #include <QMouseEvent>
 #include <QMenu>
 #include <QAction>
 
+using namespace mcrl2::utilities::qt;
+
 ExtendedTabWidget::ExtendedTabWidget(QWidget *parent) :
   QTabWidget(parent)
 {
+  setFocusPolicy(Qt::StrongFocus);
   tabBar()->installEventFilter(this);
 }
 
@@ -46,37 +49,40 @@ bool ExtendedTabWidget::eventFilter(QObject *target, QEvent *event) {
           menu.addAction("Close tabs on the left");
           menu.addAction("Close tabs on the right");
           QAction* act = menu.exec(mapToGlobal(position));
-          if (act->text() == "Close tab")
+          if (act != 0)
           {
-            emit(tabCloseRequested(clickedItem));
-          }
-          if (act->text() == "Close all tabs")
-          {
-            for (int i = count()-1; i >= 0; i--)
+            if (act->text() == "Close tab")
             {
+              emit(tabCloseRequested(clickedItem));
+            }
+            if (act->text() == "Close all tabs")
+            {
+              for (int i = count()-1; i >= 0; i--)
+              {
+                  emit(tabCloseRequested(i));
+              }
+            }
+            if (act->text() == "Close other tabs")
+            {
+              for (int i = count()-1; i >= 0; i--)
+              {
+                if (i != clickedItem)
+                  emit(tabCloseRequested(i));
+              }
+            }
+            if (act->text() == "Close tabs on the left")
+            {
+              for (int i = clickedItem-1; i >= 0; i--)
+              {
                 emit(tabCloseRequested(i));
+              }
             }
-          }
-          if (act->text() == "Close other tabs")
-          {
-            for (int i = count()-1; i >= 0; i--)
+            if (act->text() == "Close tabs on the right")
             {
-              if (i != clickedItem)
+              for (int i = count()-1; i > clickedItem; i--)
+              {
                 emit(tabCloseRequested(i));
-            }
-          }
-          if (act->text() == "Close tabs on the left")
-          {
-            for (int i = clickedItem-1; i >= 0; i--)
-            {
-              emit(tabCloseRequested(i));
-            }
-          }
-          if (act->text() == "Close tabs on the right")
-          {
-            for (int i = count()-1; i > clickedItem; i--)
-            {
-              emit(tabCloseRequested(i));
+              }
             }
           }
           return true;
@@ -92,5 +98,9 @@ void ExtendedTabWidget::keyPressEvent(QKeyEvent *event)
   if (event->matches(QKeySequence::Close) && currentIndex() != -1)
   {
     emit(tabCloseRequested(currentIndex()));
+  }
+  else
+  {
+    QTabWidget::keyPressEvent(event);
   }
 }

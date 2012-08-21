@@ -8,19 +8,12 @@
 //
 
 #include "documentwidget.h"
-#include "ui_documentwidget.h"
 #include <QFile>
 
 DocumentWidget::DocumentWidget(QWidget *parent) :
-  QWidget(parent)
+  NumberedTextEdit(parent)
 {
-  m_ui.setupUi(this);
-  m_ui.textEdit->document()->setModified(false);
-}
-
-QTextEdit* DocumentWidget::getEditor()
-{
-  return m_ui.textEdit;
+  document()->setModified(false);
 }
 
 QString DocumentWidget::getFileName()
@@ -30,7 +23,7 @@ QString DocumentWidget::getFileName()
 
 bool DocumentWidget::isModified()
 {
-  return m_ui.textEdit->document()->isModified();
+  return document()->isModified();
 }
 
 void DocumentWidget::openFile(QString fileName)
@@ -39,10 +32,10 @@ void DocumentWidget::openFile(QString fileName)
 
   if (file.open(QFile::ReadOnly | QFile::Text))
   {
-    m_ui.textEdit->setPlainText(file.readAll());
+    setPlainText(file.readAll());
     file.close();
     m_filename = fileName;
-    m_ui.textEdit->document()->setModified(false);
+    document()->setModified(false);
   }
 }
 
@@ -52,9 +45,9 @@ void DocumentWidget::saveFile(QString fileName)
 
   if (file.open(QFile::WriteOnly | QFile::Text))
   {
-    file.write((const char *)m_ui.textEdit->toPlainText().toAscii().data());
+    file.write((const char *)toPlainText().toAscii().data());
     file.close();
     m_filename = fileName;
-    m_ui.textEdit->document()->setModified(false);
+    document()->setModified(false);
   }
 }

@@ -7,10 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef NUMBEREDTEXTEDIT_H
-#define NUMBEREDTEXTEDIT_H
+#ifndef MCRL2_UTILITIES_NUMBEREDTEXTEDIT_H
+#define MCRL2_UTILITIES_NUMBEREDTEXTEDIT_H
 
 #include <QTextEdit>
+
+
+namespace mcrl2
+{
+
+namespace utilities
+{
+
+namespace qt
+{
 
 class NumberedTextEdit : public QTextEdit
 {
@@ -32,4 +42,10 @@ private:
     QWidget* m_numberArea;
 };
 
-#endif // NUMBEREDTEXTEDIT_H
+} // namespace qt
+
+} // namespace utilities
+
+} // namespace mcrl2
+
+#endif // MCRL2_UTILITIES_NUMBEREDTEXTEDIT_H

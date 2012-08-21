@@ -7,10 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef EXTENDEDTABWIDGET_H
-#define EXTENDEDTABWIDGET_H
+#ifndef MCRL2_UTILITIES_EXTENDEDTABWIDGET_H
+#define MCRL2_UTILITIES_EXTENDEDTABWIDGET_H
 
 #include <QTabWidget>
+
+
+namespace mcrl2
+{
+
+namespace utilities
+{
+
+namespace qt
+{
 
 class ExtendedTabWidget : public QTabWidget
 {
@@ -37,4 +47,10 @@ public slots:
     
 };
 
-#endif // EXTENDEDTABWIDGET_H
+} // namespace qt
+
+} // namespace utilities
+
+} // namespace mcrl2
+
+#endif // MCRL2_UTILITIES_EXTENDEDTABWIDGET_H

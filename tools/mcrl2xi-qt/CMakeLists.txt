@@ -25,8 +25,6 @@ qt4_add_resources(MCRL2XI_RC_FILES ${MCRL2XI_RCC_SRCS})
 
 set(MCRL2XI_UI_FILES
   mainwindow.ui
-  documentmanager.ui
-  documentwidget.ui
   findreplacedialog.ui
 )
 
@@ -37,7 +35,6 @@ set(MCRL2XI_MOC_HEADERS
   highlighter.h
   documentmanager.h
   documentwidget.h
-  numberedtextedit.h
   parser.h
   rewriter.h
   solver.h
@@ -56,7 +53,6 @@ set(MCRL2XI_SRC_FILES
   highlighter.cpp
   documentmanager.cpp
   documentwidget.cpp
-  numberedtextedit.cpp
   parser.cpp
   rewriter.cpp
   solver.cpp

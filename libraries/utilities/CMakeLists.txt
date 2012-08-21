@@ -102,6 +102,8 @@ set(mcrl2_utilities_qt_h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/logwidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/qt_tool.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/setting.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/extendedtabwidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/numberedtextedit.h
 )
 qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
 
@@ -110,6 +112,8 @@ set(mcrl2_utilities_qt_src
   ${mcrl2_utilities_qt_h_moc}
   ${CMAKE_CURRENT_SOURCE_DIR}/source/atermthread.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/extendedtabwidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/numberedtextedit.cpp
 )
 
 #set(mcrl2_utilities_qt_src ${mcrl2_utilities_qt_src} PARENT_SCOPE)

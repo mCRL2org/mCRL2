@@ -8,7 +8,6 @@
 //
 
 #include "documentmanager.h"
-#include "ui_documentmanager.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
@@ -16,109 +15,111 @@
 #include "documentwidget.h"
 
 DocumentManager::DocumentManager(QWidget *parent) :
-  QWidget(parent)
+  ExtendedTabWidget(parent)
 {
-  m_ui.setupUi(this);
-  connect(m_ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
-  connect(m_ui.tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseRequest(int)));
+  setTabsClosable(true);
+  setDocumentMode(true);
+  setMovable(true);
+  connect(this, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
 }
 
 void DocumentManager::showEvent(QShowEvent* /*event*/)
 {
   // This cannot be done in the constructor because
   // the documentCreated signal is fired before the connection can be made
-  if (m_ui.tabWidget->count() == 0)
-    this->newFile();
+  if (count() == 0)
+    newFile();
 }
 
 DocumentWidget* DocumentManager::createDocument(QString title)
 {
 
-  DocumentWidget *document = new DocumentWidget(m_ui.tabWidget);
-  m_ui.tabWidget->addTab(document, title);
+  DocumentWidget *document = new DocumentWidget(this);
+  addTab(document, title);
 
   emit(documentCreated(document));
 
-  m_ui.tabWidget->setCurrentWidget(document);
+  setCurrentWidget(document);
   return document;
-}
-
-int DocumentManager::documentCount()
-{
-  return m_ui.tabWidget->count();
-}
-
-int DocumentManager::indexOf(DocumentWidget *document)
-{
-  return m_ui.tabWidget->indexOf(document);
 }
 
 DocumentWidget* DocumentManager::getDocument(int index)
 {
-  if (index < 0 || index >= documentCount())
+  if (index < 0 || index >= count())
     return 0;
-  return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->widget(index));
+  return dynamic_cast<DocumentWidget *>(widget(index));
 }
 
 DocumentWidget* DocumentManager::findDocument(QString fileName)
 {
-  for (int i = 0; i < this->documentCount(); i++) {
-    if (this->getDocument(i)->getFileName() == fileName)
-      return this->getDocument(i);
+  for (int i = 0; i < count(); i++) {
+    if (getDocument(i)->getFileName() == fileName)
+      return getDocument(i);
   }
   return 0;
 }
 
 void DocumentManager::closeDocument(int index)
 {
-  DocumentWidget* document = this->getDocument(index);
-  emit documentClosed(document);
-  delete document;
+  if (index < 0 || index >= count())
+    return;
 
-  if (m_ui.tabWidget->count() == 0)
-    this->newFile();
+  DocumentWidget* document = getDocument(index);
+  if (document != 0)
+  {
+    emit documentClosed(document);
+    document->deleteLater();
+    removeTab(index);
+
+    if (count() == 0)
+      newFile();
+  }
 }
 
 DocumentWidget* DocumentManager::currentDocument()
 {
-  return dynamic_cast<DocumentWidget *>(m_ui.tabWidget->currentWidget());
+  return dynamic_cast<DocumentWidget *>(currentWidget());
 }
 
 QString DocumentManager::currentFileName()
 {
-  DocumentWidget* document = this->currentDocument();
+  DocumentWidget* document = currentDocument();
+  if (document == 0)
+  {
+    return QString("");
+  }
   return document->getFileName();
 }
 
 void DocumentManager::newFile()
 {
-  this->createDocument(tr("Untitled"));
+  createDocument(tr("Untitled"));
 }
 
 void DocumentManager::openFile(QString fileName)
 {
 
   QFileInfo fileInfo(fileName);
-  DocumentWidget *document = this->findDocument(fileName);
+  DocumentWidget *document = findDocument(fileName);
 
   if (document) {
-    m_ui.tabWidget->setCurrentWidget(document);
+    setCurrentWidget(document);
     return;
   }
 
-  for (int i = 0; i < documentCount(); i++)
+  for (int i = 0; i < count(); i++)
   {
     if (getDocument(i)->getFileName() == QString() && !getDocument(i)->isModified())
     {
       document = getDocument(i);
-      m_ui.tabWidget->setCurrentWidget(document);
-      m_ui.tabWidget->setTabText(indexOf(document), fileInfo.baseName());
+      setCurrentWidget(document);
+      setTabText(indexOf(document), fileInfo.baseName());
       break;
     }
   }
 
-  if (!document)
-    document = this->createDocument(fileInfo.baseName());
+  if (document == 0)
+    document = createDocument(fileInfo.baseName());
 
   document->openFile(fileName);
 }
@@ -126,6 +127,6 @@ void DocumentManager::openFile(QString fileName)
 void DocumentManager::saveFile(QString fileName)
 {
   QFileInfo fileInfo(fileName);
-  m_ui.tabWidget->setTabText(m_ui.tabWidget->currentIndex(), fileInfo.baseName());
-  this->currentDocument()->saveFile(fileName);
+  setTabText(currentIndex(), fileInfo.baseName());
+  currentDocument()->saveFile(fileName);
 }
