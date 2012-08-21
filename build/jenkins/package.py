@@ -1,4 +1,4 @@
-import platform
+import os
 from util import *
 
 os.chdir(builddir)
