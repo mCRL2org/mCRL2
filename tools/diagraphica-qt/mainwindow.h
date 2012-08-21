@@ -85,6 +85,11 @@ class MainWindow : public QMainWindow, public Mediator
     void updateArcDiagramMarks();
 
   protected:
+    /**
+     * @brief Saves window information
+     */
+    void closeEvent(QCloseEvent *event);
+
     QList<int> selectedAttributes();
     QList<int> selectedValues();
 

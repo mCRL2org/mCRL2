@@ -70,6 +70,12 @@ class MainWindow : public QMainWindow
     void hideProgressDialog() { setProgress(6, ""); }
     void setProgress(int phase, QString message);
 
+  protected:
+    /**
+     * @brief Saves window information
+     */
+    void closeEvent(QCloseEvent *event);
+
   private:
     Ui::MainWindow m_ui;
     LogMessenger m_messenger;

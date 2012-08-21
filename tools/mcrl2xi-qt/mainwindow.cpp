@@ -11,6 +11,7 @@
 #include <QTextEdit>
 #include <QMessageBox>
 #include <QPalette>
+#include <QSettings>
 
 #include "mainwindow.h"
 #include "threadparent.h"
@@ -78,6 +79,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
   m_state = saveState();
+  QSettings settings("mCRL2", "mCRL2xi");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -435,6 +439,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
       return;
     }
   }
+  QSettings settings("mCRL2", "mCRL2xi");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
   event->accept();
 }
 

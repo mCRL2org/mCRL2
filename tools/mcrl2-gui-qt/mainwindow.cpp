@@ -9,7 +9,10 @@
 
 #include "mainwindow.h"
 #include "mcrl2/utilities/logger.h"
+
 #include <QMessageBox>
+#include <QSettings>
+
 #include "toolaction.h"
 #include "toolinstance.h"
 #include "fileinformation.h"
@@ -38,10 +41,17 @@ MainWindow::MainWindow(QWidget *parent) :
   createToolMenu();
 
   m_state = saveState();
+  QSettings settings("mCRL2", "mCRL2-gui");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
 }
 
-MainWindow::~MainWindow()
+void MainWindow::closeEvent(QCloseEvent *event)
 {
+  QSettings settings("mCRL2", "mCRL2-gui");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+  QMainWindow::closeEvent(event);
 }
 
 void MainWindow::onResetPerspective()

@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QPixmap>
 #include <QString>
+#include <QSettings>
 #include <gl2ps.h>
 
 #include "mcrl2/lts/lts_io.h"
@@ -89,6 +90,18 @@ MainWindow::MainWindow():
   toolGroup->addAction(m_ui.zoom);
   toolGroup->addAction(m_ui.rotate);
   m_ui.select->setChecked(true);
+
+  QSettings settings("mCRL2", "LTSView");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+  QSettings settings("mCRL2", "LTSView");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+  QMainWindow::closeEvent(event);
 }
 
 void MainWindow::open(QString filename)

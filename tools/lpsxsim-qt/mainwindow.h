@@ -43,6 +43,10 @@ class MainWindow : public QMainWindow
     void animationStep();
 
   protected:
+    /**
+     * @brief Saves window information
+     */
+    void closeEvent(QCloseEvent *event);
     QString renderStateChange(Simulation::State source, Simulation::State destination);
 
   protected:

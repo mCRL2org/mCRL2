@@ -15,6 +15,7 @@
 #include "glwidget.h"
 #include "mcrl2/lts/lts_lts.h"
 #include <QFileDialog>
+#include <QSettings>
 #include "dimensionsdialog.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -68,6 +69,18 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui->actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
 
   m_timer->start(40);
+
+  QSettings settings("mCRL2", "LTSGraph");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+  QSettings settings("mCRL2", "LTSGraph");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+  QMainWindow::closeEvent(event);
 }
 
 MainWindow::~MainWindow()

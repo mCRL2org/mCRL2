@@ -97,7 +97,7 @@ class MainWindow : public QMainWindow
 
   protected:
     /**
-     * @brief Overridden function to ask the user to save all changed files
+     * @brief Asks the user to save all changed files and saves window information
      */
     void closeEvent(QCloseEvent *event);
 
