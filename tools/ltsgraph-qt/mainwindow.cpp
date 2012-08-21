@@ -16,6 +16,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include <QFileDialog>
 #include <QSettings>
+#include <QDebug>
 #include "dimensionsdialog.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -83,6 +84,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QMainWindow::closeEvent(event);
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+  QMainWindow::showEvent(event);
+  qDebug() << "showEvent";
+  if (!m_delayedOpen.isEmpty())
+  {
+    qDebug() << "m_delayedOpen";
+    m_glwidget->updateGL();
+    openFile(m_delayedOpen);
+    m_delayedOpen = QString();
+  }
+}
+
 MainWindow::~MainWindow()
 {
   delete m_timer;
@@ -109,6 +123,12 @@ void MainWindow::on3DChanged(bool enabled)
 void MainWindow::onTimer()
 {
   m_glwidget->updateGL();
+}
+
+void MainWindow::delayedOpenFile(QString fileName)
+{
+  qDebug() << "set delayed";
+  m_delayedOpen = fileName;
 }
 
 void MainWindow::openFile(QString fileName)

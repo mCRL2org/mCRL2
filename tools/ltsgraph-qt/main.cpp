@@ -34,7 +34,7 @@ class ltsgraph_tool : public ltsgraph_base
 
       if (!m_input_filename.empty())
       {
-        window->openFile(QString::fromStdString(m_input_filename));
+        window->delayedOpenFile(QString::fromStdString(m_input_filename));
       }
 
       return show_main_window(window);

@@ -122,6 +122,9 @@ namespace Graph
             stateLabelnodes[i].anchored = false;
             stateLabelnodes[i].selected = 0.0;
             stateLabelnodes[i].labelindex = i;
+            stateLabelnodes[i].color[0] = 0.0;
+            stateLabelnodes[i].color[1] = 0.0;
+            stateLabelnodes[i].color[2] = 0.0;
           }
 
           // Store string representations of labels
@@ -149,6 +152,9 @@ namespace Graph
             transitionLabelnodes[i].anchored = false;
             transitionLabelnodes[i].selected = 0.0;
             transitionLabelnodes[i].labelindex = t.label();
+            transitionLabelnodes[i].color[0] = 0.0;
+            transitionLabelnodes[i].color[1] = 0.0;
+            transitionLabelnodes[i].color[2] = 0.0;
           }
 
           initialState = m_graph.initial_state();
@@ -327,6 +333,9 @@ namespace Graph
         n->locked = e.attribute("locked").toInt();
         n->anchored = n->locked;
         n->selected = 0.0f;
+        n->color[0] = e.attribute("red").toFloat();
+        n->color[1] = e.attribute("green").toFloat();
+        n->color[2] = e.attribute("blue").toFloat();
       }
 
       if (e.tagName() == "TransitionLabel") {
@@ -355,6 +364,9 @@ namespace Graph
         n->locked = e.attribute("locked").toInt();
         n->anchored = n->locked;
         n->selected = 0.0f;
+        n->color[0] = e.attribute("red").toFloat();
+        n->color[1] = e.attribute("green").toFloat();
+        n->color[2] = e.attribute("blue").toFloat();
       }
 
       node = node.nextSibling();
@@ -402,6 +414,9 @@ namespace Graph
       stateL.setAttribute("y", stateLabel(i).pos.y);
       stateL.setAttribute("z", stateLabel(i).pos.z);
       stateL.setAttribute("locked", stateLabel(i).locked);
+      stateL.setAttribute("red", stateLabel(i).color[0]);
+      stateL.setAttribute("green", stateLabel(i).color[1]);
+      stateL.setAttribute("blue", stateLabel(i).color[2]);
       root.appendChild(stateL);
     }
 
@@ -432,6 +447,9 @@ namespace Graph
       edgL.setAttribute("y", transitionLabel(i).pos.y);
       edgL.setAttribute("z", transitionLabel(i).pos.z);
       edgL.setAttribute("locked", transitionLabel(i).locked);
+      edgL.setAttribute("red", transitionLabel(i).color[0]);
+      edgL.setAttribute("green", transitionLabel(i).color[1]);
+      edgL.setAttribute("blue", transitionLabel(i).color[2]);
       root.appendChild(edgL);
     }
 

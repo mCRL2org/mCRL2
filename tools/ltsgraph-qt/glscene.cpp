@@ -128,7 +128,7 @@ struct TextureData
 
     void generate(const Graph::Graph& g)
     {
-
+      assert(glGetError() == 0);
       QFont font;
 
       glDeleteTextures(transition_count, transition_textures);
@@ -763,6 +763,9 @@ void GLScene::renderTransitionLabel(size_t i)
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   if (!m_graph.transitionLabelstring(label.labelindex).isEmpty()) {
     glStartName(so_label, i);
+
+    Color3f fill = Color3f((std::max)(label.color[0], label.selected), (std::min)(label.color[1], 1.0f - label.selected), (std::min)(label.color[2], 1.0f - label.selected));
+    glColor3fv(fill);
     if (gl2ps())
     {
       Coord3D pos = label.pos;
@@ -778,7 +781,6 @@ void GLScene::renderTransitionLabel(size_t i)
     {
       glPushMatrix();
 
-      glColor3f(label.selected, 0.0, 0.0);
       m_camera->billboard_cylindrical(label.pos);
       drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
@@ -793,6 +795,8 @@ void GLScene::renderStateLabel(size_t i)
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex).isEmpty()) {
     glStartName(so_slabel, i);
+    Color3f fill = Color3f((std::max)(label.color[0], label.selected), (std::min)(label.color[1], 1.0f - label.selected), (std::min)(label.color[2], 1.0f - label.selected));
+    glColor3fv(fill);
     if (gl2ps())
     {
       Coord3D pos = label.pos;
@@ -805,7 +809,6 @@ void GLScene::renderStateLabel(size_t i)
     {
       glPushMatrix();
 
-      glColor3f(label.selected, 0.0, 0.0);
       m_camera->billboard_cylindrical(label.pos);
       drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 

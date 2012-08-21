@@ -230,6 +230,20 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
       node.color[1] = m_paintcolor.greenF();
       node.color[2] = m_paintcolor.blueF();
     }
+    if (m_hover.selectionType == GLScene::so_label)
+    {
+      Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
+      node.color[0] = m_paintcolor.redF();
+      node.color[1] = m_paintcolor.greenF();
+      node.color[2] = m_paintcolor.blueF();
+    }
+    if (m_hover.selectionType == GLScene::so_slabel)
+    {
+      Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
+      node.color[0] = m_paintcolor.redF();
+      node.color[1] = m_paintcolor.greenF();
+      node.color[2] = m_paintcolor.blueF();
+    }
     m_dragmode = dm_paint;
   }
   else
@@ -311,6 +325,20 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         if (m_hover.selectionType == GLScene::so_node)
         {
           Graph::NodeNode& node = m_graph.node(m_hover.index);
+          node.color[0] = m_paintcolor.redF();
+          node.color[1] = m_paintcolor.greenF();
+          node.color[2] = m_paintcolor.blueF();
+        }
+        if (m_hover.selectionType == GLScene::so_label)
+        {
+          Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
+          node.color[0] = m_paintcolor.redF();
+          node.color[1] = m_paintcolor.greenF();
+          node.color[2] = m_paintcolor.blueF();
+        }
+        if (m_hover.selectionType == GLScene::so_slabel)
+        {
+          Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
           node.color[0] = m_paintcolor.redF();
           node.color[1] = m_paintcolor.greenF();
           node.color[2] = m_paintcolor.blueF();

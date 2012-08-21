@@ -161,6 +161,7 @@ namespace Graph
   struct LabelNode : public Node
   {
       size_t labelindex;      ///< The index of the label (string).
+      GLfloat color[3];       ///< The (painted) color of the label.
   };
 
 
