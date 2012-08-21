@@ -12,9 +12,7 @@ elif label in ["ubuntu-x86", "ubuntu-amd64"]:
 elif label in ["windows-x86", "windows-amd64"]:
   cpack_options = ["-G", "NSIS"]
 
-if platform.system() == 
 cpack_command = ['cpack'] + cpack_options
-
 cpack_result = call('CPack', cpack_command)
 if cpack_result:
   log('CPack returned ' + str(cpack_result))
