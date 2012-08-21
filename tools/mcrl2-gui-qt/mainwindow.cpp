@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.treeFiles->setCatalog(m_catalog);
 
   createToolMenu();
+
   m_state = saveState();
 }
 
@@ -45,7 +46,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onResetPerspective()
 {
-  m_state = saveState();
+  restoreState(m_state);
 }
 
 void MainWindow::createToolMenu()
