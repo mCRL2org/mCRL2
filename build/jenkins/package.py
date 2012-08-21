@@ -1,6 +1,8 @@
 import platform
 from util import *
 
+os.chdir(builddir)
+
 #
 # Package
 #
@@ -17,3 +19,4 @@ cpack_result = call('CPack', cpack_command)
 if cpack_result:
   log('CPack returned ' + str(cpack_result))
 
+os.chdir(workspace)
