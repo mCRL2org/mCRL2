@@ -21,6 +21,7 @@
 #include <QUrl>
 #include <QtGlobal>
 #include <string>
+#include "toolset_version.h"
 
 namespace mcrl2
 {
@@ -72,12 +73,15 @@ class QtToolBase : public QObject
 
     void showAbout()
     {
+      QString version = QString(mcrl2::utilities::get_toolset_version().c_str());
       QString description = m_description;
       description.replace("\n", "<br>");
       QString message;
       message += "<h1>" + m_name + "</h1>";
       message += "<p>" + description + "</p>";
       message += "<p>Written by " + m_author + "</p>";
+      message += "<\br>";
+      message += "<p>Version: " + version + "</p>";
       QMessageBox::about(m_window, QString("About ") + m_name, message);
     }
 
