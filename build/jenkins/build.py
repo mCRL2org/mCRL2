@@ -50,6 +50,8 @@ if (label == 'windows-amd64' or label == 'windows-x86'):
 #
 # Run CMake, take into account configuration axes.
 #
+if not os.path.exists(builddir):
+  os.mkdir(builddir)
 os.chdir(builddir)
 cmake_command = ['cmake', \
                  srcdir, \
