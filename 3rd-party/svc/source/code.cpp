@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-   $Id: code.c,v 1.3 2008/09/30 08:22:51 bertl Exp $ */
+*/
 
 #include <stdio.h>
 #include <limits.h>

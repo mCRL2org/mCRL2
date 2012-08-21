@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: ptable.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
+*/
 
 #include <svc/ptable.h>
 #include <stdio.h>
