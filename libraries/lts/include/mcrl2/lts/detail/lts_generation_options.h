@@ -80,7 +80,7 @@ struct lts_generation_options
       {
         throw mcrl2::runtime_error(*it + ": " + e.what());
       }
-      mCRL2log(log::verbose) << "Checking for action '" << *it << "'\n";
+      mCRL2log(log::verbose) << "Checking for action \"" << *it << "\"\n";
     }
     if (detect_action)
     {
@@ -90,12 +90,12 @@ struct lts_generation_options
         bool found = (*ta == "tau");
         while (!found && it != specification.action_labels().end())
         {
-            found = (*it++ == *ta);
+            found = (it++->name() == *ta);
         }
         if (!found)
           throw mcrl2::runtime_error(*ta);
         else
-          mCRL2log(log::verbose) << "Checking for action '" << *ta << "'\n";
+          mCRL2log(log::verbose) << "Checking for action " << *ta << "\n";
       }
     }
   }
