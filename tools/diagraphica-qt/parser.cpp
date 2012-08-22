@@ -366,7 +366,7 @@ void Parser::writeDiagram(
     shapeElement.appendChild(lineColorElement);
 
     QColor fillColor = diagram->shape(i)->fillColor();
-    QDomElement fillColorElement = xml.createElement("LineColor");
+    QDomElement fillColorElement = xml.createElement("FillColor");
     appendValue(xml, fillColorElement, "Red", QString::number(fillColor.redF()));
     appendValue(xml, fillColorElement, "Green", QString::number(fillColor.greenF()));
     appendValue(xml, fillColorElement, "Blue", QString::number(fillColor.blueF()));

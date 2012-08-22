@@ -42,11 +42,11 @@ MainWindow::MainWindow():
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
   connect(m_ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
 
-//  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openAttributeConfiguration()));
-//  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveAttributeConfiguration()));
+  connect(m_ui.actionOpenAttributes, SIGNAL(triggered()), this, SLOT(openAttributeConfiguration()));
+  connect(m_ui.actionSaveAttributes, SIGNAL(triggered()), this, SLOT(saveAttributeConfiguration()));
 
-//  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDiagram()));
-//  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
+  connect(m_ui.actionOpenDiagram, SIGNAL(triggered()), this, SLOT(openDiagram()));
+  connect(m_ui.actionSaveDiagram, SIGNAL(triggered()), this, SLOT(saveDiagram()));
 
   connect(m_ui.actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
 
@@ -75,6 +75,7 @@ MainWindow::MainWindow():
   connect(m_ui.actionRenameValue, SIGNAL(triggered()), this, SLOT(renameValue()));
   connect(m_ui.domain, SIGNAL(itemMoved(int, int)), this, SLOT(moveValue(int, int)));
 
+
   QSettings settings("mCRL2", "DiaGraphica");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
@@ -86,6 +87,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
   QMainWindow::closeEvent(event);
+  QApplication::quit();
 }
 
 static void stretch(QWidget *widget)
@@ -190,6 +192,13 @@ void MainWindow::open(QString filename)
 
   connect(m_arcDiagram, SIGNAL(clickedCluster(Cluster *)), m_timeSeries, SLOT(markItems(Cluster *)));
   connect(m_graph, SIGNAL(clusteringChanged()), this, SLOT(updateArcDiagramMarks()));
+
+  m_ui.actionSave->setEnabled(true);
+  m_ui.actionSaveAs->setEnabled(true);
+  m_ui.actionOpenAttributes->setEnabled(true);
+  m_ui.actionSaveAttributes->setEnabled(true);
+  m_ui.actionOpenDiagram->setEnabled(true);
+  m_ui.actionSaveDiagram->setEnabled(true);
 
   updateAttributes();
 }
@@ -313,10 +322,6 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-  if (m_graph == NULL)
-  {
-    return;
-  }
   QString filter = QString("FSM files (*.fsm);;All files (*.*)");
   QString filename = m_graph->filename();
 
@@ -333,10 +338,6 @@ void MainWindow::saveFile()
 
 void MainWindow::saveFileAs()
 {
-  if (m_graph == NULL)
-  {
-    return;
-  }
   QString filter = QString("FSM files (*.fsm);;All files (*.*)");
   QString filename = m_fileDialog.getSaveFileName("Save LTS", filter);
 
@@ -345,6 +346,99 @@ void MainWindow::saveFileAs()
     return;
   }
   save(filename);
+}
+
+void MainWindow::openAttributeConfiguration()
+{
+  QString filter = "Attribute configuration files (*.dgc);;All files (*.*)";
+  QString filename = m_fileDialog.getOpenFileName("Open Attribute Configuration", filter);
+  if (filename.isNull())
+  {
+    return;
+  }
+
+  try
+  {
+    std::map<size_t, size_t > attrIdxFrTo;
+    std::map<size_t, std::vector< std::string > > attrCurDomains;
+    std::map<size_t, std::map< size_t, size_t  > > attrOrigToCurDomains;
+
+    m_parser.parseAttrConfig(filename, m_graph, attrIdxFrTo, attrCurDomains, attrOrigToCurDomains);
+
+    m_graph->configAttributes(attrIdxFrTo, attrCurDomains, attrOrigToCurDomains);
+
+    updateAttributes();
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
+    return;
+  }
+}
+
+void MainWindow::saveAttributeConfiguration()
+{
+  QString filter = "Attribute configuration files (*.dgc);;All files (*.*)";
+  QString filename = m_fileDialog.getSaveFileName("Save Attribute Configuration", filter);
+  if (filename.isNull())
+  {
+    return;
+  }
+
+  try
+  {
+    m_parser.writeAttrConfig(filename, m_graph);
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
+    return;
+  }
+}
+
+void MainWindow::openDiagram()
+{
+  QString filter = "Diagram files (*.dgd);;All files (*.*)";
+  QString filename = m_fileDialog.getOpenFileName("Open Diagram", filter);
+  if (filename.isNull())
+  {
+    return;
+  }
+
+  Diagram diagram;
+  try
+  {
+    m_parser.parseDiagram(filename, m_graph, &diagram);
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
+    return;
+  }
+
+  *m_diagramEditor->diagram() = diagram;
+
+  update();
+}
+
+void MainWindow::saveDiagram()
+{
+  QString filter = "Diagram files (*.dgd);;All files (*.*)";
+  QString filename = m_fileDialog.getSaveFileName("Open Diagram", filter);
+  if (filename.isNull())
+  {
+    return;
+  }
+
+  try
+  {
+    m_parser.writeDiagram(filename, m_graph, m_diagramEditor->diagram());
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    QMessageBox::critical(this, "Error", QString::fromStdString(e.what()));
+    return;
+  }
 }
 
 void MainWindow::modeSelected(QAction *action)

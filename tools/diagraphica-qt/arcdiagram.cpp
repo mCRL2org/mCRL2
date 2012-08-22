@@ -97,6 +97,7 @@ void ArcDiagram::setAttrsTree(const vector< size_t > idcs)
 void ArcDiagram::setDiagram(Diagram* dgrm)
 {
   diagram = dgrm;
+  update();
 }
 
 

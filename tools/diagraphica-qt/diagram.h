@@ -26,7 +26,7 @@ class Diagram : public QObject
   public:
     // -- constructors and destructor -------------------------------
     Diagram(QObject *parent = 0);
-    virtual ~Diagram();
+    Diagram &operator=(const Diagram &other);
 
     // -- set functions ---------------------------------------------
     void addShape(Shape* s)     { m_shapes.append(s); }
@@ -39,8 +39,9 @@ class Diagram : public QObject
     void setSnapGrid(bool flag) { m_snapGrid = flag; }
 
     // -- get functions ---------------------------------------------
-    int shapeCount()        { return m_shapes.size(); }
-    Shape* shape(int index);
+    int shapeCount() const { return m_shapes.size(); }
+    Shape* shape(int index) { return m_shapes[index]; }
+    const Shape* shape(int index) const { return m_shapes[index]; }
 
     bool snapGrid()                       { return m_snapGrid; }
     double gridInterval(double pixelSize) { return (2.0-(2.0*pixelSize*SIZE_BORDER))/(double)GRID_NUM_INTERV_HINT; }
@@ -65,7 +66,6 @@ class Diagram : public QObject
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs,
       double opacity);
-
 
   protected:
     // -- private utility functions ---------------------------------

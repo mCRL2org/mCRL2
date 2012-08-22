@@ -241,7 +241,6 @@ class Shape : public QObject
         double pixelSize);
 
     // -- data members ----------------------------------------------
-    Diagram *m_parentDiagram;
     size_t m_index;
 
     // geometry

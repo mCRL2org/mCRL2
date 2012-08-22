@@ -49,11 +49,11 @@ class MainWindow : public QMainWindow
     void saveFile();
     void saveFileAs();
 
-//    void openAttributeConfiguration();
-//    void saveAttributeConfiguration();
+    void openAttributeConfiguration();
+    void saveAttributeConfiguration();
 
-//    void openDiagram();
-//    void saveDiagram();
+    void openDiagram();
+    void saveDiagram();
 
     void modeSelected(QAction* action);
 

@@ -104,6 +104,7 @@ void Simulator::setDiagram(Diagram* dgrm)
   m_diagram = dgrm;
 
   dataChanged = true;
+  update();
 }
 
 

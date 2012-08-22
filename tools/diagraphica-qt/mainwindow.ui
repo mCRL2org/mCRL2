@@ -132,6 +132,15 @@
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>19</number>
            </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>19</number>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
            <column>
             <property name="text">
              <string>#</string>
@@ -190,6 +199,15 @@
            </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>19</number>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>19</number>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
            </attribute>
            <column>
             <property name="text">
@@ -591,7 +609,7 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -663,6 +681,9 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -671,26 +692,41 @@
    </property>
   </action>
   <action name="actionSaveAs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save &amp;As...</string>
    </property>
   </action>
   <action name="actionOpenAttributes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Open Attributes...</string>
    </property>
   </action>
   <action name="actionSaveAttributes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save Attributes...</string>
    </property>
   </action>
   <action name="actionOpenDiagram">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Open Diagram...</string>
    </property>
   </action>
   <action name="actionSaveDiagram">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save Diagram...</string>
    </property>

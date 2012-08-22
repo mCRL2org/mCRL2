@@ -45,7 +45,6 @@ Shape::Shape(
     double xHinge,          double yHinge) :
   QObject(parentDiagram)
 {
-  m_parentDiagram     = parentDiagram;
   m_index             = index;
 
   // geometery
@@ -75,12 +74,10 @@ Shape::Shape(
   initDOF();
 }
 
-
 Shape::Shape(const Shape& shape) :
   QObject(shape.parent())
 // Copy constructor.
 {
-  m_parentDiagram     = shape.m_parentDiagram;
   m_index             = shape.m_index;
 
   // geometry

@@ -26,10 +26,25 @@ Diagram::Diagram(QObject *parent):
   SIZE_BORDER          = 15;
 }
 
-
-Diagram::~Diagram()
+Diagram &Diagram::operator=(const Diagram &other)
 {
-  // Shapes are deleted as children
+  while (!m_shapes.empty())
+  {
+    removeShape(0);
+  }
+
+  m_showGrid = other.m_showGrid;
+  m_snapGrid = other.m_snapGrid;
+  m_gridCoordinates = other.m_gridCoordinates;
+
+  for (int i = 0; i < other.shapeCount(); i++)
+  {
+    Shape *shape = new Shape(*other.shape(i));
+    shape->setParent(this);
+    addShape(shape);
+  }
+
+  return *this;
 }
 
 
@@ -88,18 +103,6 @@ void Diagram::moveShapeBackward(int index)
     m_shapes[index+1]->setIndex(index+1);
   }
 }
-
-Shape *Diagram::shape(int index)
-{
-  if (0 <= index && index < m_shapes.size())
-  {
-    return m_shapes.at(index);
-  }
-  return 0;
-}
-
-
-// -- clear functions -----------------------------------------------
 
 
 void Diagram::removeShape(int index)
