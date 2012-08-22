@@ -4,7 +4,16 @@ from util import *
 os.chdir(builddir)
 
 #
-# Package
+# Source distribution
+#
+if label in ["ubuntu-amd64"]:
+  source_command = ['make', 'package_source']
+  source_result = call('Source', source_command)
+  if source_result:
+    log('Make returned ' + str(source_result)
+
+#
+# Binary Package
 #
 cpack_options = []
 if label in ["fedora-amd64"]:
