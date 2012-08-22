@@ -47,21 +47,17 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 # ##############################
-# ##    mcrl2_utilities_wx    ##
+# ##    mcrl2_utilities_qt    ##
 # ##############################
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtMain)
-if (QT4_FOUND)
-
+  
 # ##############################
 # ##    mcrl2_utilities_qt    ##
 # ##############################
 
 project(mcrl2_utilities_qt)
 cmake_minimum_required(VERSION 2.6)
-
 
 set(mcrl2_utilities_qt_ui
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.ui
@@ -117,9 +113,5 @@ target_link_libraries(${PROJECT_NAME}
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-
-endif(QT4_FOUND)
-
 
 endif(MCRL2_ENABLE_GUI_TOOLS)
