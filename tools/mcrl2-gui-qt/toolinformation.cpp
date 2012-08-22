@@ -11,12 +11,13 @@
 #include "mcrl2/utilities/logger.h"
 #include <QTextStream>
 
-ToolInformation::ToolInformation(QString name, QString input, QString output)
+ToolInformation::ToolInformation(QString name, QString input, QString output, QString isGui)
   : name(name), input(input), output(output), valid(false)
 {
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
 
   #ifdef __APPLE__
+    appDir.cdUp();
     appDir.cdUp();
     appDir.cdUp();
   #endif
@@ -26,7 +27,11 @@ ToolInformation::ToolInformation(QString name, QString input, QString output)
     path.append(".exe");
   #endif
   #ifdef __APPLE__
-    path.append(".app/Contents/MacOS/"+ name);
+    if (isGui.compare(QString("true"),Qt::CaseSensitive) == 0)
+    {
+      path.append(".app/Contents/MacOS/");
+      path.append(name);
+    }
   #endif
 }
 
@@ -37,6 +42,7 @@ void ToolInformation::load()
   toolProcess.start(path, QStringList("--generate-xml"), QIODevice::ReadOnly);
   if (!toolProcess.waitForFinished(3000))
   {
+    mCRL2log(mcrl2::log::error) << "Command: " << path.toStdString() << " --generate-xml" << std::endl;
     mCRL2log(mcrl2::log::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")" << std::endl;
     return;
   }

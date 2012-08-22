@@ -90,7 +90,7 @@ struct ToolOption
 class ToolInformation
 {
   public:
-    ToolInformation(QString name, QString input, QString output);
+    ToolInformation(QString name, QString input, QString output, QString isGui);
 
     void load();
     bool hasOutput() { return !output.isEmpty(); }
