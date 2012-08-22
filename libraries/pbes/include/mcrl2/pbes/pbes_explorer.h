@@ -239,7 +239,8 @@ private:
     /// \param e the expression
     /// \param current_priority the priority of the current equation for which the parts are computed
     /// \param current_type the operation type (AND/OR) of the current equation for which the parts are computed
-    atermpp::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type);
+    /// \param vars_stack used for detection of infinite recursion. Please, initialise to the empty set.
+    atermpp::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
 
     /// \brief Computes LTS Type from PBES.
     void compute_lts_type();

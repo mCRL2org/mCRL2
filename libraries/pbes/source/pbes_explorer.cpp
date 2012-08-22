@@ -8,6 +8,9 @@
 //
 /// \file mcrl2/pbes/pbes_explorer.cpp
 /// \brief
+#include <queue>
+#include <set>
+
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
@@ -32,7 +35,7 @@ namespace detail
     typename MapContainer::const_iterator i = m.find(key);
     if (i == m.end())
     {
-      throw mcrl2::runtime_error("map_at: key is not present in the map");
+      throw mcrl2::runtime_error("map_at: key is not present in the map: " + key);
     }
     return i->second;
   }
@@ -306,8 +309,7 @@ inline int lts_info::count_variables(pbes_expression e)
     }
 }
 
-
-atermpp::vector<pbes_expression> lts_info::split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type)
+atermpp::vector<pbes_expression> lts_info::split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack)
 {
     atermpp::vector<pbes_expression> result;
     atermpp::vector<pbes_expression> parts;
@@ -348,7 +350,8 @@ atermpp::vector<pbes_expression> lts_info::split_expression_and_substitute_varia
                 pbes_expression expr = this->variable_expression[varname];
 
                 if ((priority == current_priority) &&
-                    (current_type == type || is_simple_expression(expr) || count_variables(expr) <= 1) )
+                    (current_type == type || is_simple_expression(expr) || count_variables(expr) <= 1) &&
+                    vars_stack.find(varname) == vars_stack.end())
                 {
                     // The associated equation has the same priority and operation type as the current equation,
                     // so substitution is safe.
@@ -357,7 +360,10 @@ atermpp::vector<pbes_expression> lts_info::split_expression_and_substitute_varia
                     //          << "      with: " << pbes_system::pp(expr) << std::endl;
 
                     // Recursively try to further substitute variables:
-                    atermpp::vector<pbes_expression> part_result = split_expression_and_substitute_variables(expr, current_priority, current_type);
+                    // (vars_stack is used to prevent infinite recursion)
+                    std::set<std::string> new_vars_stack(vars_stack.begin(), vars_stack.end());
+                    new_vars_stack.insert(varname);
+                    atermpp::vector<pbes_expression> part_result = split_expression_and_substitute_variables(expr, current_priority, current_type, new_vars_stack);
                     result.insert(result.end(), part_result.begin(), part_result.end());
                 }
                 else
@@ -464,31 +470,71 @@ void lts_info::compute_transition_groups()
         this->variable_expression[variable_name] = expr;
     }
 
-    //TODO: skip 'unused' equations....
+    // Skip 'unused' equations....
+    std::set<std::string> variable_set;
+    {
+        propositional_variable_instantiation init = p.initial_state();
+        std::queue<std::string> variable_queue;
+        variable_queue.push(init.name());
+        variable_set.insert(init.name());
+        while (!variable_queue.empty())
+        {
+            std::string var = variable_queue.front();
+            variable_queue.pop();
+            type = this->variable_type[var];
+            priority = this->variable_priority[var];
+            pbes_expression expr = this->variable_expression[var];
+            std::set<std::string> vars_stack;
+            atermpp::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
+            for (atermpp::vector<pbes_expression>::const_iterator e =
+                    expression_parts.begin(); e != expression_parts.end(); ++e) {
+                 std::set<std::string> occ_vars = lts_info::occ(*e);
+                 for (std::set<std::string>::const_iterator var_str = variable_set.begin(); var_str != variable_set.end(); ++var_str)
+                 {
+                   occ_vars.erase(*var_str);
+                 }
+                 for(std::set<std::string>::const_iterator occ_var = occ_vars.begin(); occ_var != occ_vars.end(); ++occ_var)
+                 {
+                     variable_queue.push(*occ_var);
+                 }
+                 variable_set.insert(occ_vars.begin(), occ_vars.end());
+            }
+        }
+        mCRL2log(log::debug) << "Set of 'used' variables: " << std::endl;
+        for (std::set<std::string>::const_iterator var_str = variable_set.begin(); var_str != variable_set.end(); ++var_str)
+        {
+            mCRL2log(log::debug) << "  " << (*var_str) << std::endl;
+        }
+        mCRL2log(log::debug) << std::endl;
+    }
 
     for (atermpp::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
             != p.equations().end(); ++eqn) {
         std::string variable_name = (*eqn).variable().name();
-        type = this->variable_type[variable_name];
-        priority = this->variable_priority[variable_name];
-        pbes_expression expr = this->variable_expression[variable_name];
-        //std::clog << std::endl << "Generating groups for equation " << variable_name << std::endl;
-        atermpp::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type);
-        for (atermpp::vector<pbes_expression>::const_iterator e =
-                expression_parts.begin(); e != expression_parts.end(); ++e) {
-            this->transition_expression_plain.push_back(*e);
-            this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(*e));
-            this->transition_variable_name.push_back(variable_name);
-            this->transition_type.push_back(type);
-            mCRL2log(log::verbose) << std::endl << "Add transition group " << group << ": "
-                    << (type==parity_game_generator::PGAME_AND ? "AND" : "OR") << " " << variable_name << " "
-                    << pbes_system::pp(*e) << std::endl;
-            group++;
+        if (variable_set.find(variable_name) != variable_set.end())
+        {
+            type = this->variable_type[variable_name];
+            priority = this->variable_priority[variable_name];
+            pbes_expression expr = this->variable_expression[variable_name];
+            std::set<std::string> vars_stack;
+            //std::clog << std::endl << "Generating groups for equation " << variable_name << std::endl;
+            atermpp::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
+            for (atermpp::vector<pbes_expression>::const_iterator e =
+                    expression_parts.begin(); e != expression_parts.end(); ++e) {
+                this->transition_expression_plain.push_back(*e);
+                this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(*e));
+                this->transition_variable_name.push_back(variable_name);
+                this->transition_type.push_back(type);
+                mCRL2log(log::debug) << "Add transition group " << group << ": "
+                        << (type==parity_game_generator::PGAME_AND ? "AND" : "OR") << " " << variable_name << " "
+                        << pbes_system::pp(*e) << std::endl;
+                group++;
+            }
         }
     }
     number_of_groups = group;
     //std::clog << "Added " << group << " transition groups." << std::endl;
-    mCRL2log(log::verbose) << "end of compute_transition_groups." << std::endl;
+    mCRL2log(log::debug) << "end of compute_transition_groups." << std::endl;
 }
 
 
