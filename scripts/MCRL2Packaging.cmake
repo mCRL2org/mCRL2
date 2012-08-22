@@ -30,7 +30,7 @@ elseif(APPLE OR UNIX)
 endif()
 set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG})
-set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${MCRL2_ARCHITECTURE})
+set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CXX_COMPILER_ARCHITECTURE})
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY )
 
@@ -117,24 +117,23 @@ set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 # /etc/zenwalk-version
 
 set(MCRL2_BOOST_VER "1.35" ) 
-set(MCRL2_WX_VER    "2.8" ) 
 
 # OpenSuSE RPM dependencies
 if(EXISTS /etc/SuSE-release )
 	message(STATUS "Distribution: OpenSuSE" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, boost-devel >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, boost-devel >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/SuSE-release )
 
 # Fedora/RedHat RPM dependencies
 if(EXISTS /etc/redhat-release )
 	message(STATUS "Distribution: RedHat/Fedora" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, wxBase >= ${MCRL2_WX_VER}, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/redhat-release )
 
 # Debian/Ubuntu dependencies
 if(EXISTS /etc/debian_version )
 	message(STATUS "Distribution: Debian/Ubuntu" )
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "gcc, debhelper (>= 5), libboost-dev (>=${MCRL2_BOOST_VER}), libwxgtk2.8-dev, libwxgtk2.8-0, libglu1-mesa-dev (>= 7.0.1)")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "gcc, debhelper (>= 5), libboost-dev (>=${MCRL2_BOOST_VER}), libglu1-mesa-dev (>= 7.0.1)")
 endif(EXISTS /etc/debian_version )
 
 include(CPack)

@@ -6,6 +6,10 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+if(NOT MSVC)
+  return()
+endif()
+
 include_directories( build/workarounds/msvc )
 set(BUILD_SHARED_LIBS OFF)
 
@@ -15,16 +19,15 @@ set(BUILD_SHARED_LIBS OFF)
 
 include(AddFlag)
 
-try_add_cxx_flag(/MD)
-try_add_cxx_flag(/EHs)
-try_add_cxx_flag(/bigobj)
+try_add_cxx_flag(/MD)                   # Creates multithreaded DLLs using MSVCRT.lib
+try_add_cxx_flag(/EHs)                  # Synchronous exception handling (TODO: check why)
+try_add_cxx_flag(/bigobj)               # Allow big object files
+try_add_cxx_flag(/MP)                   # Use multicore compilation where possible
+try_add_cxx_flag(/W3        MAINTAINER) # More warnings in Maintainer builds
+
 try_add_c_flag(/MD)
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
+try_add_c_flag(/MP)
+try_add_c_flag(/W3          MAINTAINER)
 
-## Compile multi-core  
-option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
-if( MCRL2_ENABLE_MULTICORE_COMPILATION )
-  try_add_cxx_flag(/MP)
-  try_add_c_flag(/MP)
-endif( MCRL2_ENABLE_MULTICORE_COMPILATION )

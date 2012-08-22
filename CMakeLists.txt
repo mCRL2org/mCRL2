@@ -6,7 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 project (MCRL2)
 # Commonly used options
 # ---------------------
@@ -122,33 +122,9 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
-## Set platform specific options
-if(WIN32)
-  include(ConfigureWindows)
-endif(WIN32)
-if(UNIX AND NOT APPLE)
-  include(ConfigureUnix)
-endif(UNIX AND NOT APPLE)
-if(APPLE)
-  include(ConfigureApple)
-endif(APPLE)
-set(MCRL2_LIB_DIR "lib/mcrl2")
-
-## Set Compiler specific options
-if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-  include(ConfigureClang)
-
-else( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-  if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-    include(ConfigureGCC)
-  endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-endif( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-if(MSVC)
-  include(ConfigureMSVC)
-endif(MSVC)
-
-## Cache values for the "Maintainer" Build type
-include(MCRL2AddMaintainerBuildType)
+## Configure the compiler
+include(GetCompilerVersion)
+include(ConfigureCompiler)
 
 ## Setup dependency to CADP
 include(MCRL2CADPSupport)
@@ -172,7 +148,7 @@ if( MCRL2_ENABLE_GUI_TOOLS )
   find_package(gl2ps)
 
   if(NOT OPENGL_FOUND)
-    message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
+    message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools.")
   else( OPENGL_FOUND )
     if ( APPLE )
       include_directories( ${OPENGL_INCLUDE_DIR} )
@@ -182,11 +158,30 @@ if( MCRL2_ENABLE_GUI_TOOLS )
       set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
     endif (APPLE)
   endif(NOT OPENGL_FOUND)
+
+  find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL)
+  if(QT4_FOUND)
+    include(${QT_USE_FILE})
+  else(QT4_FOUND)
+    message(FATAL_ERROR "Qt4 not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools.")
+  endif(QT4_FOUND)
+
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------
 ## 3rd party libraries
 ##---------------------------------------------------
+
+if(MCRL2_ENABLE_GUI_TOOLS)
+  add_subdirectory ( 3rd-party/tr)
+  if( GL2PS_FOUND )
+    message(STATUS "Using system gl2ps library.")
+  else( GL2PS_FOUND )
+    message(STATUS "Using gl2ps library provided by mCRL2.")
+    add_subdirectory ( 3rd-party/gl2ps )
+  endif( GL2PS_FOUND)
+endif(MCRL2_ENABLE_GUI_TOOLS)
+
 add_subdirectory ( 3rd-party/svc )
 add_subdirectory ( 3rd-party/dparser )
 
@@ -213,7 +208,6 @@ add_subdirectory ( libraries/utilities )
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
 add_subdirectory ( tools/complps2pbes )
-add_subdirectory ( tools/diagraphica-qt )
 add_subdirectory ( tools/formulacheck )
 add_subdirectory ( tools/lps2lts )
 add_subdirectory ( tools/lps2pbes )
@@ -254,39 +248,21 @@ add_subdirectory ( tools/tracepp )
 add_subdirectory ( tools/txt2pbes )
 add_subdirectory ( tools/txt2lps )
 
-if(MCRL2_ENABLE_GUI_TOOLS)
-  add_subdirectory ( 3rd-party/tr)
-  if( GL2PS_FOUND )
-    message(STATUS "using system gl2ps library")
-  else( GL2PS_FOUND )
-    message(STATUS "using mcrl2-provided gl2ps library")
-    add_subdirectory ( 3rd-party/gl2ps )
-  endif( GL2PS_FOUND)
-endif(MCRL2_ENABLE_GUI_TOOLS)
-
 ##---------------------------------------------------
 ## Graphical tools
 ##---------------------------------------------------
 if(MCRL2_ENABLE_GUI_TOOLS)
-  find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL)
-  if(QT4_FOUND)
-    include(${QT_USE_FILE})
-
-    add_subdirectory ( tools/lpsxsim-qt )
-    add_subdirectory ( tools/mcrl2xi-qt )
-    add_subdirectory ( tools/mcrl2-gui-qt )
-    add_subdirectory ( tools/ltsgraph-qt )
-    add_subdirectory ( tools/ltsview-qt )
-  else(QT4_FOUND)
-    message(STATUS "Could NOT find Qt4, not building lpsxsim-qt, ltsgraph-qt, ltsview-qt, mcrl2xi-qt and mcrl2-gui-qt.")
-  endif(QT4_FOUND)
+  add_subdirectory ( tools/lpsxsim-qt )
+  add_subdirectory ( tools/mcrl2xi-qt )
+  add_subdirectory ( tools/mcrl2-gui-qt )
+  add_subdirectory ( tools/ltsgraph-qt )
+  add_subdirectory ( tools/ltsview-qt )
+  add_subdirectory ( tools/diagraphica-qt )
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
 ## Experimental tools
 ##---------------------------------------------------
-
-message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/besconvert )
@@ -303,8 +279,6 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 ## Deprecated tools
 ##---------------------------------------------------
-
-message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
 if(MCRL2_ENABLE_DEPRECATED)
 
@@ -352,8 +326,6 @@ include(MCRL2ConfigureComplingRewriters)
 ##---------------------------------------------------
 ## Install headers
 ## --------------------------------------------------
-
-message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
 
 if ( MCRL2_INSTALL_HEADERS )
 install(
