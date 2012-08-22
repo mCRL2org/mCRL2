@@ -1,4 +1,5 @@
 include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
 
 macro(flagvar FLAG FLAGNAME PREFIX)
   string(REPLACE "-" "_" RESULT "${FLAG}")

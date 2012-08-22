@@ -22,6 +22,14 @@ try_add_c_flag(-Wno-inline)
 try_add_c_flag(-fno-strict-overflow)
 try_add_c_flag(-pipe)
 
+try_add_c_flag(-fprofile-arcs            MAINTAINER)
+try_add_c_flag(-ftest-coverage           MAINTAINER)
+try_add_c_flag(-g                        MAINTAINER)
+try_add_c_flag(-O0                       MAINTAINER)
+try_add_c_flag(-pedantic                 MAINTAINER)
+try_add_c_flag(-W                        MAINTAINER)
+
+
 if( NOT MINGW )
   try_add_c_flag(-pthread)
 endif( NOT MINGW )
@@ -41,12 +49,28 @@ try_add_cxx_flag(-Wno-inline)
 try_add_cxx_flag(-fno-strict-overflow)
 try_add_cxx_flag(-pipe)
 
+try_add_cxx_flag(-g                      MAINTAINER)
+try_add_cxx_flag(-O0                     MAINTAINER)
+try_add_cxx_flag(-W                      MAINTAINER)
+try_add_cxx_flag(-Wextra                 MAINTAINER)
+try_add_cxx_flag(-Wunused-variable       MAINTAINER)
+try_add_cxx_flag(-Wunused-parameter      MAINTAINER)
+try_add_cxx_flag(-Wunused-function       MAINTAINER)
+try_add_cxx_flag(-Wunused                MAINTAINER)
+try_add_cxx_flag(-Wno-system-headers     MAINTAINER)
+try_add_cxx_flag(-Woverloaded-virtual    MAINTAINER)
+try_add_cxx_flag(-Wwrite-strings         MAINTAINER)
+try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
+try_add_cxx_flag(-fprofile-arcs          MAINTAINER)
+try_add_cxx_flag(-ftest-coverage         MAINTAINER)
+
 if( NOT MINGW )
   try_add_cxx_flag(-pthread)
 endif( NOT MINGW )
 
 # Following flag will cause warning on MacOSX, if enabled:
-#686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
+#   686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because 
+#   linking not done
 if( NOT APPLE)
   try_add_cxx_flag(-Wl,-as-needed)
 endif( NOT APPLE )
@@ -60,3 +84,19 @@ if(BUILD_SHARED_LIBS)
       set(BUILD_SHARED_LIBS_OPTION "-fPIC")
     endif( CXX_ACCEPTS_FPIC AND C_ACCEPTS_FPIC )
 endif(BUILD_SHARED_LIBS)
+
+##---------------------------------------------------
+## Set linker flags
+##---------------------------------------------------
+
+set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
+    CACHE STRING "Flags used for linking binaries during maintainer builds.")
+set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
+    CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+if(CXX_ACCEPTS_FPROFILE_ARCS)
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
+endif(CXX_ACCEPTS_FPROFILE_ARCS)
+if(CXX_ACCEPTS_FTEST_COVERAGE)
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -ftest-coverage")
+endif(CXX_ACCEPTS_FTEST_COVERAGE)

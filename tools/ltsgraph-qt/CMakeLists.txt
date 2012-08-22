@@ -10,11 +10,6 @@
 project(ltsgraph-qt)
 cmake_minimum_required(VERSION 2.6)
 
-if(MCRL2_ENABLE_GUI_TOOLS)
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtXml QtOpenGL)
-if(QT4_FOUND)
-include(${QT_USE_FILE})
-
 if(APPLE)
   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
   find_library(GLUT_LIBRARY GLUT )
@@ -116,8 +111,3 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-
-else(QT4_FOUND)
-  message(STATUS "Could NOT find Qt4, not building ltsgraph-qt.")
-endif(QT4_FOUND)
-endif ( MCRL2_ENABLE_GUI_TOOLS )

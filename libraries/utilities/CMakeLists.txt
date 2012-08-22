@@ -52,35 +52,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 if(MCRL2_ENABLE_GUI_TOOLS)
 
-project(mcrl2_utilities_wx)
-cmake_minimum_required(VERSION 2.6)
-
-set(mcrl2_utilities_wx_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/spinctrlfloat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/colorbutton.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/font_renderer.cpp
-)
-
-set(mcrl2_utilities_wx_src ${mcrl2_utilities_wx_src} PARENT_SCOPE)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-
-
-add_library(${PROJECT_NAME}
-  ${mcrl2_utilities_wx_src}
-)
-
-target_link_libraries(${PROJECT_NAME}
-  ${wxWidgets_LIBRARIES}
-  ${OPENGL_LIBRARY}
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-
-
 find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtMain)
 if (QT4_FOUND)
 
