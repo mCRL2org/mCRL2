@@ -10,14 +10,18 @@
 ## Detect and print architecture
 ## --------------------------------------------------
 
+set(MCRL2_ARCHITECTURE "Unknown")
+
 if(MSVC)
   ## Architecture detection for MSVC
   if(CMAKE_CL_64)
     message( STATUS "Architecture: 64bit Windows" )
     add_definitions("-DAT_64BIT")
+    set(MCRL2_ARCHITECTURE "x86_64")
   else(CMAKE_CL_64)
     message( STATUS "Architecture: 32bit Windows" )
     add_definitions("-DAT_32BIT")
+    set(MCRL2_ARCHITECTURE "i386")
   endif(CMAKE_CL_64)
 else(MSVC)
   ## Architecture detection for non-MSVC
