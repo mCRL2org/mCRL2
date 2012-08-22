@@ -173,7 +173,7 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
   if (inSelectMode == true)
   {
 
-    for (size_t i = 0; i < sizePositions; i++)
+    for (size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
@@ -187,7 +187,7 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < sizePositions; i++)
+    for (size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
@@ -268,7 +268,7 @@ void DistrPlot::handleMouseEvent(QMouseEvent* e)
 void DistrPlot::calcMaxNumber()
 {
   maxNumber = 0;
-  for (size_t i = 0; i < number.size(); i++)
+  for (size_t i = 0; i < number.size(); ++i)
   {
     if (number[i] > maxNumber)
     {
@@ -377,7 +377,7 @@ void DistrPlot::calcPositions()
 
     // calc positions
     positions.clear();
-    for (size_t i = 0; i < number.size(); i++)
+    for (size_t i = 0; i < number.size(); ++i)
     {
       // calc ratio
       double ratio = (double)number[i]/(double)maxNumber;
@@ -424,13 +424,13 @@ void DistrPlot::processHits(
     // if necassary advance to last hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); i++)
+      for (int i = 0; i < (hits-1); ++i)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; j++)
+        for (int j = 0; j < number; ++j)
         {
           ++ptr;  // names
         }

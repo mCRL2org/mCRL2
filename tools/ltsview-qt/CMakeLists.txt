@@ -16,16 +16,18 @@ find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtOpenGL)
 if (QT4_FOUND)
 include(${QT_USE_FILE})
 
-# ########## Create MacOSX Bundle Information ######### 
+# ########## Create MacOSX Bundle Information #########
 include(MCRL2MacOSXBundleInformation)
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 
 # ######### General setup ##########
-IF(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  SET(SRCS ${SRCS} ltsview.rc)
-ENDIF(WIN32)
+set(LTSVIEW_RCC_SRCS ltsview.qrc)
 
-set(UI_FILES
+qt4_add_resources(LTSVIEW_RC_FILES ${LTSVIEW_RCC_SRCS})
+
+set(LTSVIEW_UI_FILES
   infodialog.ui
   mainwindow.ui
   markdialog.ui
@@ -35,9 +37,9 @@ set(UI_FILES
   settingsdialog.ui
   simdialog.ui
 )
-qt4_wrap_ui(UI_HEADERS ${UI_FILES})
+qt4_wrap_ui(LTSVIEW_UI_HEADERS ${LTSVIEW_UI_FILES})
 
-set(MOC_HEADERS
+set(LTSVIEW_MOC_HEADERS
   infodialog.h
   ltscanvas.h
   ltsmanager.h
@@ -53,11 +55,12 @@ set(MOC_HEADERS
   simulation.h
   visualizer.h
 )
-qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
+qt4_wrap_cpp(LTSVIEW_MOC_SOURCES ${LTSVIEW_MOC_HEADERS})
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
-  ${UI_HEADERS}
-  ${MOC_SOURCES}
+set(LTSVIEW_SRC_FILES
+  ${LTSVIEW_RC_FILES}
+  ${LTSVIEW_UI_HEADERS}
+  ${LTSVIEW_MOC_SOURCES}
   cluster.cpp
   conedb.cpp
   fsm_state_positioner.cpp
@@ -84,12 +87,36 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   vectors.cpp
   visobjectfactory.cpp
   visualizer.cpp
-  ${MACOSX_BUNDLE_ICON_FILE}
 )
 
-IF (APPLE)
- SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ENDIF (APPLE)
+# ######### Create Windows Icon ##########
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(LTSVIEW_SRC_FILES ${LTSVIEW_SRC_FILES} ltsview.rc)
+ENDIF(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${LTSVIEW_SRC_FILES})
+
+target_link_libraries(${PROJECT_NAME}
+  ${QT_LIBRARIES}
+  mcrl2_lts
+  mcrl2_utilities
+  mcrl2_utilities_qt
+  mcrl2_syntax
+  dparser
+  tr
+)
+
+if(GL2PS_FOUND)
+  target_link_libraries(${PROJECT_NAME}
+    ${GL2PS_LIBRARIES}
+  )
+else (GL2PS_FOUND)
+  target_link_libraries(${PROJECT_NAME}
+    gl2ps
+  )
+endif(GL2PS_FOUND)
+
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!
@@ -111,27 +138,6 @@ if(GL2PS_FOUND)
   include_directories(${GL2PS_INCLUDE_DIRS})
 else(GL2PS_FOUND)
   include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
-endif(GL2PS_FOUND)
-
-# actual target:
-target_link_libraries(${PROJECT_NAME}
-  ${QT_LIBRARIES}
-  mcrl2_lts
-  mcrl2_utilities
-  mcrl2_utilities_qt
-  mcrl2_syntax
-  dparser
-  tr
-)
-
-if(GL2PS_FOUND)
-  target_link_libraries(${PROJECT_NAME}
-    ${GL2PS_LIBRARIES}
-  )
-else (GL2PS_FOUND)
-  target_link_libraries(${PROJECT_NAME}
-    gl2ps
-  )
 endif(GL2PS_FOUND)
 
 # install target:

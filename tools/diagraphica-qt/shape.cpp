@@ -301,7 +301,7 @@ void Shape::visualize(
   aglH       = 0.0;
   QColor colFill = m_fillColor;
 
-  for (size_t i = 0; i < attrs.size(); i++)
+  for (size_t i = 0; i < attrs.size(); ++i)
   {
     /*
     if ( attrs[i]->getSizeCurValues() == 1 )

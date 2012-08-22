@@ -23,7 +23,7 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
 
   m_comboBoxes.clear();
 
-  for (int i = 0; i < m_shape->dofCount(); i++)
+  for (int i = 0; i < m_shape->dofCount(); ++i)
   {
     QComboBox* comboBox = new QComboBox(this);
     comboBox->addItem("None");
@@ -31,7 +31,7 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
     DOF* dof = m_shape->dof(i);
     Attribute* currentAttribute = (dof == 0 ? 0 : dof->attribute());
 
-    for (size_t j = 0; j < m_graph->getSizeAttributes(); j++)
+    for (size_t j = 0; j < m_graph->getSizeAttributes(); ++j)
     {
       Attribute* attribute = m_graph->getAttribute(j);
       comboBox->addItem(attribute->name());

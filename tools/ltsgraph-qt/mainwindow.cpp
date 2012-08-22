@@ -8,31 +8,29 @@
 //
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/utilities/exception.h"
+
+#include <QSettings>
 
 #include "springlayout.h"
 #include "information.h"
 #include "glwidget.h"
-#include "mcrl2/lts/lts_lts.h"
-#include <QFileDialog>
-#include <QSettings>
-#include <QDebug>
 #include "dimensionsdialog.h"
-
-#include "mcrl2/utilities/exception.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
-  m_ui(new Ui::MainWindow)
+  m_fileDialog("", this)
 {
 
-  m_ui->setupUi(this);
-  m_ui->dockOutput->setVisible(false);
+  m_ui.setupUi(this);
+  m_ui.dockOutput->setVisible(false);
 
   // Add graph area
-  m_glwidget = new GLWidget(m_graph, m_ui->frame);
+  m_glwidget = new GLWidget(m_graph, m_ui.frame);
   m_glwidget->setDepth(0.0, 0);
-  m_ui->widgetLayout->addWidget(m_glwidget);
+  m_ui.widgetLayout->addWidget(m_glwidget);
 
   // Create springlayout algorithm + UI
   m_layout = new Graph::SpringLayout(m_graph);
@@ -56,24 +54,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
-  connect(m_ui->actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
-  connect(m_ui->actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
-  connect(m_ui->actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
-  connect(m_ui->actOutput, SIGNAL(toggled(bool)), m_ui->dockOutput, SLOT(setVisible(bool)));
+  connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
+  connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
+  connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
+  connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
   connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-  connect(m_ui->act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
-  connect(m_ui->actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
-  connect(m_ui->actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
-  connect(m_ui->actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
-  connect(m_ui->actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
-  connect(m_ui->actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
-  connect(m_ui->actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
+  connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
+  connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
+  connect(m_ui.actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
+  connect(m_ui.actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
+  connect(m_ui.actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
+  connect(m_ui.actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
+  connect(m_ui.actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
 
   m_timer->start(40);
 
   QSettings settings("mCRL2", "LTSGraph");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+  m_ui.actLayoutControl->setChecked(springlayoutui->isVisible());
+  m_ui.actVisualization->setChecked(glwidgetui->isVisible());
+  m_ui.actInformation->setChecked(informationui->isVisible());
+  m_ui.actOutput->setChecked(m_ui.dockOutput->isVisible());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -102,7 +104,6 @@ MainWindow::~MainWindow()
   delete m_timer;
   delete m_layout;
   delete m_information;
-  delete m_ui;
   delete m_glwidget;
 }
 
@@ -153,7 +154,7 @@ void MainWindow::openFile(QString fileName)
 void MainWindow::onOpenFile()
 {
 
-  QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
+  QString fileName(m_fileDialog.getOpenFileName(tr("Open file"),
                                                 tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)")));
 
   openFile(fileName);
@@ -161,21 +162,23 @@ void MainWindow::onOpenFile()
 
 void MainWindow::onExportImage()
 {
-  QString selectedFilter = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
-  QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
-                                                tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm);;"
-                                                   "PDF (*.pdf);;"
-                                                   "Postscript (*.ps);;"
-                                                   "Encapsulated Postscript (*.eps);;"
-                                                   "SVG (*.svg);;"
-                                                   "LaTeX TikZ Image (*.tex);;"
-                                                   "PGF (*.pgf);;"
-                                                   ),
+  QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
+  QString pdf = tr("Portable Document Format (*.pdf)");
+  QString ps = tr("PostScript (*.ps)");
+  QString eps = tr("Encapsulated PostScript (*.eps)");
+  QString svg = tr("Scalable Vector Graphics (*.svg)");
+  QString tikz = tr("LaTeX TikZ Image (*.tex)");
+  QString pgf = tr("PGF (*.pgf)");
+
+  QString filter = bitmap + ";;" + pdf + ";;" + ps + ";;" + eps + ";;" + svg + ";;" + tikz + ";;" + pgf;
+  QString selectedFilter = bitmap;
+  QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
+                                                filter,
                                                 &selectedFilter));
 
   if (!fileName.isNull())
   {
-    if (selectedFilter.startsWith("Bitmap images"))
+    if (selectedFilter == bitmap)
     {
       DimensionsDialog dDialog(this);
       if (dDialog.exec())
@@ -193,7 +196,7 @@ void MainWindow::onExportImage()
 
 void MainWindow::onImportXML()
 {
-  QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
+  QString fileName(m_fileDialog.getOpenFileName(tr("Open file"),
                                                 tr("XML Graph (*.xml)")));
 
   if (!fileName.isNull())
@@ -209,7 +212,7 @@ void MainWindow::onImportXML()
 
 void MainWindow::onExportXML()
 {
-  QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+  QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                                                 tr("XML Graph (*.xml)")));
 
   if (!fileName.isNull())

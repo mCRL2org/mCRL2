@@ -20,10 +20,7 @@
 #define DIMENSIONSDIALOG_H
 
 #include <QDialog>
-
-namespace Ui {
-  class DimensionsDialog;
-}
+#include "ui_dimensionsdialog.h"
 
 class DimensionsDialog : public QDialog
 {
@@ -37,11 +34,6 @@ class DimensionsDialog : public QDialog
     explicit DimensionsDialog(QWidget *parent = 0);
 
     /**
-     * @brief Destructor
-     */
-    ~DimensionsDialog();
-
-    /**
      * @brief Returns the supplied width, only valid if exec() returned QDialog::Accepted.
      */
     int resultWidth();
@@ -52,7 +44,7 @@ class DimensionsDialog : public QDialog
     int resultHeight();
     
   private:
-    Ui::DimensionsDialog *m_ui;     ///< The user inferface of the class.
+    Ui::DimensionsDialog m_ui;     ///< The user inferface of the class.
 
 };
 

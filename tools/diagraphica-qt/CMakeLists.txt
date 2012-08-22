@@ -26,9 +26,15 @@ else(APPLE)
   set(MCRL2gl ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 endif(APPLE)
 
-set(DIAGRAPHICA_RCC_SRCS
-  icons.qrc
-)
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
+
+# ######### General setup ##########
+set(DIAGRAPHICA_RCC_SRCS icons.qrc)
+
 qt4_add_resources(DIAGRAPHICA_RC_FILES ${DIAGRAPHICA_RCC_SRCS})
 
 set(DIAGRAPHICA_UI_FILES
@@ -94,9 +100,6 @@ set(DIAGRAPHICA_SRC_FILES
   visutils.cpp
 )
 
-# ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
-
 # ######### Create Windows Icon ##########
 if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
@@ -115,7 +118,10 @@ target_link_libraries(${PROJECT_NAME}
   ${MCRL2gl}
 )
 
+# Don't forget to include output directory, otherwise
+# the UI file won't be wrapped!
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+# For promoted widgets
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

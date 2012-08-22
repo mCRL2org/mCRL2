@@ -264,15 +264,15 @@ namespace Graph
   };
 
   SpringLayoutUi::SpringLayoutUi(SpringLayout &layout, QWidget *parent)
-    : QDockWidget(parent), m_layout(layout), m_ui(new Ui::DockWidgetLayout), m_thread(NULL)
+    : QDockWidget(parent), m_layout(layout), m_thread(NULL)
   {
-    m_ui->setupUi(this);
-    m_ui->sldAttraction->setValue(m_layout.attraction());
-    m_ui->sldRepulsion->setValue(m_layout.repulsion());
-    m_ui->sldSpeed->setValue(m_layout.speed());
-    m_ui->sldHandleWeight->setValue(m_layout.controlPointWeight());
-    m_ui->sldNatLength->setValue(m_layout.naturalTransitionLength());
-    m_ui->cmbForceCalculation->setCurrentIndex(m_layout.forceCalculation());
+    m_ui.setupUi(this);
+    m_ui.sldAttraction->setValue(m_layout.attraction());
+    m_ui.sldRepulsion->setValue(m_layout.repulsion());
+    m_ui.sldSpeed->setValue(m_layout.speed());
+    m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
+    m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
+    m_ui.cmbForceCalculation->setCurrentIndex(m_layout.forceCalculation());
   }
 
   SpringLayoutUi::~SpringLayoutUi()
@@ -282,19 +282,18 @@ namespace Graph
       static_cast<WorkerThread*>(m_thread)->stop();
       m_thread->wait();
     }
-    delete m_ui;
   }
 
   void SpringLayoutUi::onAttractionChanged(int value)
   {
     m_layout.setAttraction(value);
-    m_ui->lblAttraction->setText(QString("Attraction (%0)").arg(m_layout.attraction()));
+    m_ui.lblAttraction->setText(QString("Attraction (%0)").arg(m_layout.attraction()));
   }
 
   void SpringLayoutUi::onRepulsionChanged(int value)
   {
     m_layout.setRepulsion(value);
-    m_ui->lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
+    m_ui.lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
   }
 
   void SpringLayoutUi::onSpeedChanged(int value)
@@ -311,7 +310,7 @@ namespace Graph
   void SpringLayoutUi::onNatLengthChanged(int value)
   {
     m_layout.setNaturalTransitionLength(value);
-    m_ui->lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
+    m_ui.lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
   }
 
   void SpringLayoutUi::onForceCalculationChanged(int value)
@@ -329,24 +328,24 @@ namespace Graph
 
   void SpringLayoutUi::onStarted()
   {
-    m_ui->btnStartStop->setText("Stop");
-    m_ui->btnStartStop->setEnabled(true);
+    m_ui.btnStartStop->setText("Stop");
+    m_ui.btnStartStop->setEnabled(true);
   }
 
   void SpringLayoutUi::onStopped()
   {
-    m_ui->btnStartStop->setText("Start");
-    m_ui->btnStartStop->setEnabled(true);
+    m_ui.btnStartStop->setText("Start");
+    m_ui.btnStartStop->setEnabled(true);
     emit runningChanged(false);
   }
 
   void SpringLayoutUi::onStartStop()
   {
-    m_ui->btnStartStop->setEnabled(false);
+    m_ui.btnStartStop->setEnabled(false);
     if (m_thread == NULL)
     {
       emit runningChanged(true);
-      m_thread = new WorkerThread(m_layout, 100 - m_ui->sldSpeed->value(), this);
+      m_thread = new WorkerThread(m_layout, 100 - m_ui.sldSpeed->value(), this);
       m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
       m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
       m_thread->start();

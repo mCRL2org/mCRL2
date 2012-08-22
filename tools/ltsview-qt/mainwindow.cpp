@@ -8,7 +8,6 @@
 
 #include <QActionGroup>
 #include <QApplication>
-#include <QFileDialog>
 #include <QImageWriter>
 #include <QMessageBox>
 #include <QPixmap>
@@ -21,14 +20,11 @@
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
 
-#include "icons/main_window.xpm"
-
 MainWindow::MainWindow():
-  m_messenger(this)
+  m_messenger(this),
+  m_fileDialog("", this)
 {
   m_ui.setupUi(this);
-
-  setWindowIcon(QPixmap(main_window));
 
   m_ltsManager = new LtsManager(this, &m_settings);
   m_markManager = new MarkManager(this, m_ltsManager);
@@ -118,7 +114,7 @@ void MainWindow::open(QString filename)
 void MainWindow::open()
 {
   QString filter = QString("All supported files (") + QString::fromStdString(mcrl2::lts::detail::lts_extensions_as_string(" ")) + ");;All files (*.*)";
-  QString filename = QFileDialog::getOpenFileName(this, "Open LTS", QString(), filter);
+  QString filename = m_fileDialog.getOpenFileName("Open LTS", filter);
   if (filename.isNull())
   {
     return;
@@ -134,7 +130,7 @@ void MainWindow::openTrace()
     return;
   }
 
-  QString filename = QFileDialog::getOpenFileName(this, "Open Trace", QString(), "Traces (*.trc);;All files (*.*)");
+  QString filename = m_fileDialog.getOpenFileName("Open Trace", "Traces (*.trc);;All files (*.*)");
   if (filename.isNull())
   {
     return;
@@ -157,7 +153,7 @@ void MainWindow::exportBitmap()
   }
   filter += ")";
 
-  QString filename = QFileDialog::getSaveFileName(this, "Save picture", QString(), filter);
+  QString filename = m_fileDialog.getSaveFileName("Save picture", filter);
   if (filename.isNull())
   {
     return;
@@ -171,7 +167,7 @@ void MainWindow::exportBitmap()
 
 void MainWindow::exportText()
 {
-  QString filename = QFileDialog::getSaveFileName(this, "Save text", QString(), "All files (*.*)");
+  QString filename = m_fileDialog.getSaveFileName("Save text", "All files (*.*)");
   if (filename.isNull())
   {
     return;
@@ -188,8 +184,8 @@ void MainWindow::exportVector()
   QString svg = "Scalable Vector Graphics (*.svg)";
 
   QString filter = all + ";;" + ps + ";;" + eps + ";;" + pdf + ";;" + svg;
-  QString selectedFilter;
-  QString filename = QFileDialog::getSaveFileName(this, "Save vector", QString(), filter, &selectedFilter);
+  QString selectedFilter = all;
+  QString filename = m_fileDialog.getSaveFileName("Save vector", filter, &selectedFilter);
   if (filename.isNull())
   {
     return;

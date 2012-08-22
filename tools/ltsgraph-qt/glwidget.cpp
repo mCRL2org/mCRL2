@@ -456,30 +456,29 @@ GLWidgetUi* GLWidget::ui(QWidget *parent)
 }
 
 GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
-  : QDockWidget(parent), m_widget(widget), m_ui(new Ui::GLWidget)
+  : QDockWidget(parent), m_widget(widget)
 {
   QColor initialcolor(255, 0, 0);
-  m_ui->setupUi(this);
+  m_ui.setupUi(this);
   m_colordialog = new QColorDialog(initialcolor, this);
   selectColor(initialcolor);
-  m_ui->spinRadius->setValue(m_widget.nodeSize());
-  m_ui->spinFog->setValue(m_widget.fogDistance());
+  m_ui.spinRadius->setValue(m_widget.nodeSize());
+  m_ui.spinFog->setValue(m_widget.fogDistance());
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
-  connect(m_ui->btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
-  connect(m_ui->btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
-  connect(m_ui->cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
-  connect(m_ui->cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
-  connect(m_ui->cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
-  connect(m_ui->cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
-  connect(m_ui->cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
-  connect(m_ui->spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
-  connect(m_ui->spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDistance(int)));
+  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
+  connect(m_ui.btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
+  connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
+  connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
+  connect(m_ui.cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
+  connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
+  connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
+  connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
+  connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDistance(int)));
 }
 
 GLWidgetUi::~GLWidgetUi()
 {
-  delete m_ui;
   delete m_colordialog;
 }
 
@@ -490,7 +489,7 @@ void GLWidgetUi::selectColor(const QColor& color)
   painter.begin(&icon);
   painter.fillRect(icon.rect(), color);
   painter.end();
-  m_ui->btnSelectColor->setIcon(QIcon(icon));
+  m_ui.btnSelectColor->setIcon(QIcon(icon));
   m_widget.setPaint(color);
 }
 

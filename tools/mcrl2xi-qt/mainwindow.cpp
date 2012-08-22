@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <QFileDialog>
 #include <QTextEdit>
 #include <QMessageBox>
 #include <QPalette>
@@ -22,7 +21,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
-  m_palette(QApplication::palette())
+  m_palette(QApplication::palette()),
+  m_fileDialog("", this)
 {
   m_findReplaceDialog = new FindReplaceDialog(this);
   m_findReplaceDialog->setModal(false);
@@ -94,7 +94,7 @@ bool MainWindow::saveDocument(DocumentWidget *document)
 {
   QString fileName = document->getFileName();
   if (fileName.isNull()) {
-    fileName = QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+    fileName = m_fileDialog.getSaveFileName(tr("Save file"),
                                             tr("mCRL2 specification (*.mcrl2 *.txt )"));
   }
   if (!fileName.isNull()) {
@@ -224,7 +224,7 @@ void MainWindow::onNew()
 
 void MainWindow::onOpen()
 {
-  QString fileName(QFileDialog::getOpenFileName(this, tr("Open file"), QString(),
+  QString fileName(m_fileDialog.getOpenFileName(tr("Open file"),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
   openDocument(fileName);
 }
@@ -236,7 +236,7 @@ void MainWindow::onSave()
 
 void MainWindow::onSaveAs()
 {
-  QString fileName(QFileDialog::getSaveFileName(this, tr("Save file"), QString(),
+  QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
   if (!fileName.isNull()) {
     m_ui.documentManager->saveFile(fileName);

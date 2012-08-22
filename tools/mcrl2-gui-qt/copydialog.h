@@ -11,10 +11,7 @@
 #define COPYDIALOG_H
 
 #include <QDialog>
-
-namespace Ui {
-  class CopyDialog;
-}
+#include "ui_copydialog.h"
 
 class CopyDialog : public QDialog
 {
@@ -22,7 +19,6 @@ class CopyDialog : public QDialog
     
   public:
     explicit CopyDialog(QWidget *parent = 0);
-    ~CopyDialog();
 
     void init(int count, bool move = false);
 
@@ -31,7 +27,7 @@ class CopyDialog : public QDialog
 
 
   private:
-    Ui::CopyDialog *ui;
+    Ui::CopyDialog m_ui;
     int m_count;
     bool m_move;
 

@@ -16,6 +16,13 @@ find_package(Qt4 COMPONENTS QtCore QtGui QtXml)
 if(QT4_FOUND)
 include(${QT_USE_FILE})
 
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
+
+# ######### General setup ##########
 set(MCRL2_GUI_RCC_SRCS mcrl2-gui.qrc)
 
 qt4_add_resources(MCRL2_GUI_RC_FILES ${MCRL2_GUI_RCC_SRCS})
@@ -65,7 +72,7 @@ if(NOT APPLE)
   if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tool_catalog.xml" COPYONLY )
   else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)  
-    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}share/mcrl2/tool_catalog.xml" COPYONLY )
+    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
   endif(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
 
@@ -78,9 +85,6 @@ else(NOT APPLE)
   # Copy directly into application
   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
 endif(NOT APPLE)
-
-# ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
 
 # ######### Create Windows Icon ##########
 if(WIN32)

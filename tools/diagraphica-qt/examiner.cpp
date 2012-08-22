@@ -53,7 +53,7 @@ Examiner::~Examiner()
 
   // composition
   {
-    for (size_t i = 0; i < framesHist.size(); i++)
+    for (size_t i = 0; i < framesHist.size(); ++i)
     {
       delete framesHist[i];
     }
@@ -62,7 +62,7 @@ Examiner::~Examiner()
 
   // association
   {
-    for (size_t i = 0; i < attrsHist.size(); i++)
+    for (size_t i = 0; i < attrsHist.size(); ++i)
     {
       attrsHist[i].clear();
     }
@@ -144,7 +144,7 @@ void Examiner::addFrameHist(
   QList<Cluster*> frames,
   const std::vector< Attribute* > &attrs)
 {
-  for (int i = 0; i < frames.size(); i++)
+  for (int i = 0; i < frames.size(); ++i)
   {
     addFrameHist(frames[i], attrs);
   }
@@ -363,7 +363,7 @@ void Examiner::calcPosFramesHist()
     posFramesHist.clear();
     Position2D pos;
     pos.y = -0.5*worldSize().height() + 0.5*itvHist*pix;
-    for (size_t i = 0; i < framesHist.size(); i++)
+    for (size_t i = 0; i < framesHist.size(); ++i)
     {
       pos.x = -0.5*worldSize().width() + bdr*pix + 0.5*itvHist*pix + i*itvHist*pix + offset*pix;
       posFramesHist.push_back(pos);
@@ -441,7 +441,7 @@ void Examiner::handleHits(const vector< int > &ids)
         {
           dataChanged = true;
 
-          for (size_t i = 0; i < framesHist.size(); i++)
+          for (size_t i = 0; i < framesHist.size(); ++i)
           {
             delete framesHist[i];
           }
@@ -619,13 +619,13 @@ void Examiner::processHits(
     // if necassary, advance to closest hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); i++)
+      for (int i = 0; i < (hits-1); ++i)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; j++)
+        for (int j = 0; j < number; ++j)
         {
           ++ptr;  // names
         }
@@ -638,7 +638,7 @@ void Examiner::processHits(
     ++ptr; // z1
     ++ptr; // z2
 
-    for (int i = 0; i < number; i++)
+    for (int i = 0; i < number; ++i)
     {
       ids.push_back(*ptr);
       ++ptr;
@@ -696,7 +696,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
 
     vector< double > valsFrame;
     /*
-    for ( int i = 0; i < attributes.size(); i++ )
+    for ( int i = 0; i < attributes.size(); ++i )
         valsFrame.push_back(
            attributes[i]->mapToValue(
                 frame->getNode(0)->getTupleVal(
@@ -704,7 +704,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
     */
     Attribute* attr;
     Node* node;
-    for (size_t i = 0; i < attributes.size(); i++)
+    for (size_t i = 0; i < attributes.size(); ++i)
     {
       attr = attributes[i];
       node = frame->getNode(0);
@@ -744,8 +744,8 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
   if (inSelectMode == true)
   {
     glPushName(ID_FRAME_HIST);
-    //for ( int i = 0; i < framesHist.size(); i++ )
-    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; i++)
+    //for ( int i = 0; i < framesHist.size(); ++i )
+    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       glPushMatrix();
       glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);
@@ -766,12 +766,12 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
     double pix = pixelSize();
     vector< double > valsFrame;
 
-    //for ( int i = 0; i < framesHist.size(); i++ )
-    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; i++)
+    //for ( int i = 0; i < framesHist.size(); ++i )
+    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       valsFrame.clear();
       /*
-      for ( int j = 0; j < attrsHist[i].size(); j++ )
+      for ( int j = 0; j < attrsHist[i].size(); ++j )
           valsFrame.push_back(
               attrsHist[i][j]->mapToValue(
                   framesHist[i]->getNode(0)->getTupleVal(
@@ -779,7 +779,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < attrsHist[i].size(); j++)
+      for (size_t j = 0; j < attrsHist[i].size(); ++j)
       {
         attr = attrsHist[i][j];
         node = framesHist[i]->getNode(0);

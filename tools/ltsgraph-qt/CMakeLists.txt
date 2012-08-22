@@ -16,17 +16,22 @@ if(QT4_FOUND)
 include(${QT_USE_FILE})
 
 if(APPLE)
-   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
-   find_library(GLUT_LIBRARY GLUT )
-   find_library(OpenGL_LIBRARY OpenGL )
-   mark_as_advanced (GLUT_LIBRARY OpenGL_LIBRARY)
-   set(MCRL2gl ${GLUT_LIBRARY} ${OpenGL_LIBRARY})
-elseif(WIN32)
-   set(MCRL2gl GLU32)
+  INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
+  find_library(GLUT_LIBRARY GLUT )
+  find_library(OpenGL_LIBRARY OpenGL )
+  set(MCRL2gl ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
 else(APPLE)
-   set(MCRL2gl GLU )
+  find_library(OpenGL_LIBRARY OpenGL )
+  set(MCRL2gl ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 endif(APPLE)
 
+# ########## Create MacOSX Bundle Information #########
+include(MCRL2MacOSXBundleInformation)
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
+
+# ######### General setup ##########
 set(LTSGRAPH_RCC_SRCS ltsgraph.qrc)
 
 qt4_add_resources(LTSGRAPH_RC_FILES ${LTSGRAPH_RCC_SRCS})
@@ -63,9 +68,6 @@ set(LTSGRAPH_SRC_FILES
   information.cpp
   dimensionsdialog.cpp
 )
-
-# ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
 
 # ######### Create Windows Icon ##########
 if(WIN32)

@@ -16,7 +16,6 @@
 
 #include <cstddef>
 #include <vector>
-#include "colleague.h"
 #include "visutils.h"
 #include "shape.h"
 

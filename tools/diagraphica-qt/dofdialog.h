@@ -18,10 +18,6 @@
 #include "dof.h"
 #include "colorchooser.h"
 
-namespace Ui {
-  class DofDialog;
-}
-
 class DofDialog : public QDialog
 {
     Q_OBJECT

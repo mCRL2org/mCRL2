@@ -117,13 +117,13 @@ void MovableTableWidget::dropEvent(QDropEvent *event)
     removeRow(rowIndex);
   }
 
-  for (int row = 0; row < rowkeys.count(); row++)
+  for (int row = 0; row < rowkeys.count(); ++row)
   {
     QMap<int, QString> cols = rows[rowkeys[row]];
     QList<int> colkeys = cols.keys();
 
     insertRow(targetRow+row);
-    for (int col = 0; col < colkeys.count(); col++)
+    for (int col = 0; col < colkeys.count(); ++col)
     {
       QString value = cols[colkeys[col]];
       setItem(targetRow+row, col, new QTableWidgetItem(value));
@@ -163,7 +163,7 @@ void MovableTableWidget::resizeColumnToContents(int column)
 
 void MovableTableWidget::resizeColumnsToContents()
 {
-  for (int i = 0; i < columnCount(); i++)
+  for (int i = 0; i < columnCount(); ++i)
   {
     resizeColumnToContents(i);
   }

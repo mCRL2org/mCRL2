@@ -8,26 +8,19 @@
 //
 
 #include "dimensionsdialog.h"
-#include "ui_dimensionsdialog.h"
 
 DimensionsDialog::DimensionsDialog(QWidget *parent) :
-  QDialog(parent),
-  m_ui(new Ui::DimensionsDialog)
+  QDialog(parent)
 {
-  m_ui->setupUi(this);
-}
-
-DimensionsDialog::~DimensionsDialog()
-{
-  delete m_ui;
+  m_ui.setupUi(this);
 }
 
 int DimensionsDialog::resultWidth()
 {
-  return m_ui->spinWidth->value();
+  return m_ui.spinWidth->value();
 }
 
 int DimensionsDialog::resultHeight()
 {
-  return m_ui->spinHeight->value();
+  return m_ui.spinHeight->value();
 }

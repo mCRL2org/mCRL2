@@ -25,7 +25,8 @@ MainWindow::MainWindow():
   m_simulator(0),
   m_timeSeries(0),
   m_diagramEditor(0),
-  m_routingCluster(0)
+  m_routingCluster(0),
+  m_fileDialog("", this)
 {
   m_ui.setupUi(this);
 
@@ -121,7 +122,7 @@ void MainWindow::open(QString filename)
       << m_simulator
       << m_timeSeries;
 
-  for (int i = 0; i < oldWidgets.size(); i++)
+  for (int i = 0; i < oldWidgets.size(); ++i)
   {
     delete oldWidgets[i];
   }
@@ -216,9 +217,9 @@ void MainWindow::save(QString filename)
 void MainWindow::updateAttributes()
 {
   m_ui.attributes->setRowCount(m_graph->getSizeAttributes());
-  for (size_t i = 0; i < m_graph->getSizeAttributes(); i++)
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
   {
-    for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+    for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
     {
       m_ui.attributes->setItem(i, j, new QTableWidgetItem());
       m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
@@ -264,11 +265,11 @@ void MainWindow::updateValues()
 
     Attribute *attribute = m_graph->getAttribute(attributes[0]);
     m_ui.domain->setRowCount(attribute->getSizeCurValues());
-    for (size_t i = 0; i < attribute->getSizeCurValues(); i++)
+    for (size_t i = 0; i < attribute->getSizeCurValues(); ++i)
     {
       Value *value = attribute->getCurValue(i);
 
-      for (int j = 0; j < m_ui.attributes->columnCount(); j++)
+      for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
       {
         m_ui.domain->setItem(i, j, new QTableWidgetItem());
         m_ui.domain->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
@@ -301,7 +302,7 @@ void MainWindow::updateValueOperations()
 void MainWindow::openFile()
 {
   QString filter = QString("All supported files (") + QString::fromStdString(mcrl2::lts::detail::lts_extensions_as_string(" ")) + ");;All files (*.*)";
-  QString filename = QFileDialog::getOpenFileName(this, "Open LTS", QString(), filter);
+  QString filename = m_fileDialog.getOpenFileName("Open LTS", filter);
   if (filename.isNull())
   {
     return;
@@ -321,7 +322,7 @@ void MainWindow::saveFile()
 
   if (filename.isNull() || QFileInfo(filename).suffix().toLower() != "fsm")
   {
-    filename = QFileDialog::getSaveFileName(this, "Save LTS", QString(), filter);
+    filename = m_fileDialog.getSaveFileName("Save LTS", filter);
   }
   if (filename.isNull())
   {
@@ -337,7 +338,7 @@ void MainWindow::saveFileAs()
     return;
   }
   QString filter = QString("FSM files (*.fsm);;All files (*.*)");
-  QString filename = QFileDialog::getSaveFileName(this, "Save LTS", QString(), filter);
+  QString filename = m_fileDialog.getSaveFileName("Save LTS", filter);
 
   if (filename.isNull())
   {
@@ -377,7 +378,7 @@ void MainWindow::clusterNodes()
 {
   QList<int> attributes = selectedAttributes();
   std::vector<size_t> attributeVector;
-  for (int i = 0; i < attributes.size(); i++)
+  for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
   }
@@ -388,7 +389,7 @@ void MainWindow::viewTrace()
 {
   QList<int> attributes = selectedAttributes();
   std::vector<size_t> attributeVector;
-  for (int i = 0; i < attributes.size(); i++)
+  for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
   }
@@ -433,7 +434,7 @@ void MainWindow::combinationPlot()
     return;
   }
   std::vector<size_t> attributeVector;
-  for (int i = 0; i < attributes.size(); i++)
+  for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
   }
@@ -591,7 +592,7 @@ void MainWindow::updateArcDiagramMarks()
     size_t index;
 
     m_timeSeries->getIdcsClstMarked(indices, color);
-    for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+    for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
     {
       m_arcDiagram->markLeaf(*i, color);
     }
@@ -600,7 +601,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }
@@ -610,7 +611,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }
@@ -620,7 +621,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); i++)
+      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }
@@ -636,9 +637,9 @@ QList<int> MainWindow::selectedAttributes()
 {
   QMap<int, int> output;
   QList<QTableWidgetSelectionRange> ranges = m_ui.attributes->selectedRanges();
-  for (int i = 0; i < ranges.size(); i++)
+  for (int i = 0; i < ranges.size(); ++i)
   {
-    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
+    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); ++j)
     {
       if (!output.contains(j))
       {
@@ -653,9 +654,9 @@ QList<int> MainWindow::selectedValues()
 {
   QMap<int, int> output;
   QList<QTableWidgetSelectionRange> ranges = m_ui.domain->selectedRanges();
-  for (int i = 0; i < ranges.size(); i++)
+  for (int i = 0; i < ranges.size(); ++i)
   {
-    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); j++)
+    for (int j = ranges[i].topRow(); j <= ranges[i].bottomRow(); ++j)
     {
       if (!output.contains(j))
       {

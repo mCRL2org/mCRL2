@@ -13,30 +13,30 @@
 #include <QWidget>
 #include "ui_filepicker.h"
 
-namespace Ui {
-  class FilePicker;
-}
+#include "mcrl2/utilities/persistentfiledialog.h"
 
 class FilePicker : public QWidget
 {
     Q_OBJECT
     
   public:
-    explicit FilePicker(QWidget *parent = 0);
-    ~FilePicker();
+    explicit FilePicker(mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
 
-    QString text() { return ui->value->text(); }
+    QString text() { return m_ui.value->text(); }
 
   public slots:
     void onBrowse();
-    void setText(QString value) { ui->value->setText(value); }
+    void setText(QString value) { m_ui.value->setText(value); }
     
   protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
 
   private:
-    Ui::FilePicker *ui;
+    Ui::FilePicker m_ui;
+
+    mcrl2::utilities::qt::PersistentFileDialog* m_fileDialog;
+
 
   private slots:
     void onTextChanged(QString value) { emit(textChanged(value)); }

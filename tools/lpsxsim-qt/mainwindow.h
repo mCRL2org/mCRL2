@@ -12,6 +12,9 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "ui_mainwindow.h"
+
+#include "mcrl2/utilities/persistentfiledialog.h"
+
 #include "simulation.h"
 
 class TraceTableModel;
@@ -49,13 +52,15 @@ class MainWindow : public QMainWindow
     void closeEvent(QCloseEvent *event);
     QString renderStateChange(Simulation::State source, Simulation::State destination);
 
-  protected:
+  private:
     Ui::MainWindow m_ui;
     Simulation *m_simulation;
     Simulation::Trace m_trace;
     int m_selectedState;
     QTimer *m_animationTimer;
     bool m_randomAnimation;
+
+    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };
 
 #endif

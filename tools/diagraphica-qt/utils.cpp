@@ -275,7 +275,7 @@ double Utils::mean(const vector< double > vals)
   double result = 0;
   if (vals.size() > 0)
   {
-    for (size_t i = 0; i < vals.size(); i++)
+    for (size_t i = 0; i < vals.size(); ++i)
     {
       result += vals[i];
     }
@@ -292,7 +292,7 @@ double Utils::variance(const vector< double > vals)
 
   if (vals.size() > 1)
   {
-    for (size_t i = 0; i < vals.size(); i++)
+    for (size_t i = 0; i < vals.size(); ++i)
     {
       result += (vals[i]-mean)*(vals[i]-mean);
     }

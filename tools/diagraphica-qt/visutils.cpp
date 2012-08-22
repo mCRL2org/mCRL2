@@ -294,7 +294,7 @@ void VisUtils::drawArc(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     double xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     double yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -344,7 +344,7 @@ void VisUtils::drawArcCW(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     double xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     double yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
@@ -396,7 +396,7 @@ void VisUtils::drawArc(
   glBegin(GL_LINE_LOOP);
   // outside
   {
-    for (int i = 0; i <= slices; i++)
+    for (int i = 0; i <= slices; ++i)
     {
       setValidColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
@@ -444,7 +444,7 @@ void VisUtils::fillArc(
 
   glBegin(GL_QUAD_STRIP);
   {
-    for (int i = 0; i <= slices; i++)
+    for (int i = 0; i <= slices; ++i)
     {
       setValidColor(interpolateRgb(colBeg, colEnd, i / (double)slices));
 
@@ -541,7 +541,7 @@ void VisUtils::drawEllipse(
   double slice = (2*PI)/(double)slices;
 
   glBegin(GL_LINE_LOOP);
-  for (int i = 0; i < slices; i++)
+  for (int i = 0; i < slices; ++i)
   {
     double xCur = xCtr + xDOF*sin(i*slice);
     double yCur = yCtr + yDOF*cos(i*slice);
@@ -559,7 +559,7 @@ void VisUtils::fillEllipse(
   double slice = (2*PI)/(double)slices;
 
   glBegin(GL_POLYGON);
-  for (int i = 0; i < slices; i++)
+  for (int i = 0; i < slices; ++i)
   {
     double xCur = xCtr + xDOF*sin(i*slice);
     double yCur = yCtr + yDOF*cos(i*slice);
@@ -582,7 +582,7 @@ void VisUtils::fillEllipse(
   double xCurOut = xCtr + xDOFOut*cos(0.0);
   double yCurOut = yCtr + yDOFOut*sin(0.0);
 
-  for (int i = 1; i <= slices; i++)
+  for (int i = 1; i <= slices; ++i)
   {
     glBegin(GL_POLYGON);
 
@@ -630,7 +630,7 @@ void VisUtils::fillEllipse(
   double xOutside = xCtr + xDOFOut*cos(aglBegRd);
   double yOutside = yCtr + yDOFOut*sin(aglBegRd);
 
-  for (int i = 1; i <= slices; i++)
+  for (int i = 1; i <= slices; ++i)
   {
     glBegin(GL_POLYGON);
 
@@ -887,7 +887,7 @@ void VisUtils::drawArrowArcCW(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -930,7 +930,7 @@ void VisUtils::fillArrowArcCW(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
@@ -973,7 +973,7 @@ void VisUtils::drawArrowArcCCW(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
@@ -1016,7 +1016,7 @@ void VisUtils::fillArrowArcCCW(
   }
 
   glBegin(GL_LINE_STRIP);
-  for (int i = 0; i <= slices; i++)
+  for (int i = 0; i <= slices; ++i)
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
@@ -1766,7 +1766,7 @@ void VisUtils::genCharTextures(
   glGenTextures(CHARSETSIZE, texCharId);
 
   // create textures
-  for (int i = 0; i < CHARSETSIZE; i++)
+  for (int i = 0; i < CHARSETSIZE; ++i)
   {
     // bind textures
     glBindTexture(GL_TEXTURE_2D, texCharId[i]);
@@ -1952,7 +1952,7 @@ void VisUtils::drawLabel(
     // enable texture mapping
     glEnable(GL_TEXTURE_2D);
 
-    for (size_t i = 0; i < label.length(); i++)
+    for (size_t i = 0; i < label.length(); ++i)
     {
       double xLft = xCoord + i*scaling*CHARWIDTH;
       double xRgt = xCoord + (i+1)*scaling*CHARWIDTH;
@@ -2057,7 +2057,7 @@ void VisUtils::drawLabelVert(
     // enable texture mapping
     glEnable(GL_TEXTURE_2D);
 
-    for (size_t i = 0; i < label.length(); i++)
+    for (size_t i = 0; i < label.length(); ++i)
     {
       double xLft = xCoord - 0.5*scaling*CHARHEIGHT;
       double xRgt = xCoord + 0.5*scaling*CHARHEIGHT;
@@ -2226,7 +2226,7 @@ void VisUtils::genCushTextures(
   glBindTexture(GL_TEXTURE_1D, texCushId);
 
   // define texture
-  for (int i = 0; i < CUSHSIZE; i++)
+  for (int i = 0; i < CUSHSIZE; ++i)
   {
     texCush[i] = cushionProfile1D(
                    (float)i,

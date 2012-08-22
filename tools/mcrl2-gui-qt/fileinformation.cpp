@@ -12,14 +12,12 @@
 #include <QDir>
 
 #include "fileinformation.h"
-#include "ui_fileinformation.h"
 
 FileInformation::FileInformation(QString filename, QWidget *parent) :
     QWidget(parent),
-    m_filename(filename),
-    ui(new Ui::FileInformation)
+    m_filename(filename)
 {
-    ui->setupUi(this);
+    m_ui.setupUi(this);
 
     QFileInfo info(filename);
 
@@ -33,11 +31,6 @@ FileInformation::FileInformation(QString filename, QWidget *parent) :
         addRow("Date modified", info.lastModified().toString("yyyy-MM-dd hh:mm:ss"));
         addRow("Size", sizeString(info.size()));
     }
-}
-
-FileInformation::~FileInformation()
-{
-    delete ui;
 }
 
 QString FileInformation::sizeString(qint64 size)
@@ -57,5 +50,5 @@ void FileInformation::addRow(QString name, QString value)
 {
     QLabel *nameLabel = new QLabel(name.append(":"), this);
     QLabel *valueLabel = new QLabel(value, this);
-    ui->formLayout->addRow(nameLabel, valueLabel);
+    m_ui.formLayout->addRow(nameLabel, valueLabel);
 }

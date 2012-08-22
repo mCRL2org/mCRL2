@@ -8,19 +8,12 @@
 //
 
 #include "copydialog.h"
-#include "ui_copydialog.h"
 
 CopyDialog::CopyDialog(QWidget *parent) :
   QDialog(parent),
-  ui(new Ui::CopyDialog),
   m_move(false)
 {
-  ui->setupUi(this);
-}
-
-CopyDialog::~CopyDialog()
-{
-  delete ui;
+  m_ui.setupUi(this);
 }
 
 void CopyDialog::init(int count, bool move)
@@ -33,6 +26,6 @@ void CopyDialog::setFile(int num, QString filename)
 {
   QString caption = (m_move ? tr("Moving: '%1'") : tr("Copying: '%1'"));
   if (0 < num && num <= m_count)
-    ui->pbFiles->setValue(100*num/m_count);
-  ui->lblCopy->setText(caption.arg(filename));
+    m_ui.pbFiles->setValue(100*num/m_count);
+  m_ui.lblCopy->setText(caption.arg(filename));
 }

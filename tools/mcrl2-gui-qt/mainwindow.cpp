@@ -18,7 +18,8 @@
 #include "fileinformation.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-  QMainWindow(parent)
+  QMainWindow(parent),
+  m_fileDialog("", this)
 {
   m_ui.setupUi(this);
 
@@ -84,7 +85,7 @@ void MainWindow::createToolMenu()
 
 void MainWindow::createToolInstance(QString filename, ToolInformation info)
 {
-  ToolInstance* toolInstance = new ToolInstance(filename, info, m_ui.tabInstances);
+  ToolInstance* toolInstance = new ToolInstance(filename, info, &m_fileDialog, m_ui.tabInstances);
   int index = m_ui.tabInstances->addTab(toolInstance, info.name);
   connect(toolInstance, SIGNAL(titleChanged(QString)), this, SLOT(onTabTitleChanged(QString)));
   connect(toolInstance, SIGNAL(colorChanged(QColor)), this, SLOT(onTabColorChanged(QColor)));

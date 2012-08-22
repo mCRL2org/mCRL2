@@ -104,6 +104,7 @@ set(mcrl2_utilities_qt_h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/setting.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/extendedtabwidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/numberedtextedit.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/persistentfiledialog.h
 )
 qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
 
@@ -114,6 +115,7 @@ set(mcrl2_utilities_qt_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/extendedtabwidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/numberedtextedit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/persistentfiledialog.cpp
 )
 
 #set(mcrl2_utilities_qt_src ${mcrl2_utilities_qt_src} PARENT_SCOPE)

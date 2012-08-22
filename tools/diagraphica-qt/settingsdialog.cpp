@@ -42,7 +42,7 @@ EnumHandler::EnumHandler(QComboBox *comboBox, Settings::SettingEnum &setting):
   m_setting(&setting)
 {
   QStringList items;
-  for (int i = 0; i < m_setting->items().size(); i++)
+  for (int i = 0; i < m_setting->items().size(); ++i)
   {
     items += m_setting->items()[i].second;
   }
@@ -56,7 +56,7 @@ EnumHandler::EnumHandler(QComboBox *comboBox, Settings::SettingEnum &setting):
 
 void EnumHandler::setValue()
 {
-  for (int i = 0; i < m_setting->items().size(); i++)
+  for (int i = 0; i < m_setting->items().size(); ++i)
   {
     if (m_setting->items()[i].first == m_setting->value())
     {

@@ -25,8 +25,6 @@
 #include "edge.h"
 #include "node.h"
 
-class Mediator;
-
 class Graph : public QObject
 {
   Q_OBJECT

@@ -20,12 +20,9 @@
 #define GRAPHINFORMATION_H
 
 #include <QDockWidget>
-#include "graph.h"
+#include "ui_information.h"
 
-namespace Ui
-{
-  class DockWidgetInfo;
-}
+#include "graph.h"
 
 namespace Graph
 {
@@ -74,7 +71,7 @@ namespace Graph
       Q_OBJECT
     private:
       Information& m_info;      ///< The Information containing all needed information.
-      Ui::DockWidgetInfo* m_ui; ///< The user interface of this objest.
+      Ui::DockWidgetInfo m_ui;  ///< The user interface of this objest.
     public:
 
       /**
@@ -83,11 +80,6 @@ namespace Graph
        * @param parent The parent widget for this user interface.
        */
       InformationUi(Information& info, QWidget* parent=0);
-
-      /**
-       * @brief Destructor.
-       */
-      virtual ~InformationUi();
 
       /**
        * @brief Updates all labels with the information available in the Information object.

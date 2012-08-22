@@ -11,20 +11,19 @@
 #define TOOLINSTANCE_H
 
 #include <QWidget>
+#include "ui_toolinstance.h"
+
+#include "mcrl2/utilities/persistentfiledialog.h"
+
 #include "toolinformation.h"
 #include "optionvalue.h"
-
-namespace Ui {
-  class ToolInstance;
-}
 
 class ToolInstance : public QWidget
 {
     Q_OBJECT
     
   public:
-    explicit ToolInstance(QString filename, ToolInformation information, QWidget *parent = 0);
-    ~ToolInstance();
+    explicit ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
 
     ToolInformation information() { return m_info; }
     QString executable();
@@ -43,10 +42,13 @@ class ToolInstance : public QWidget
   private:
     QString m_filename;
     ToolInformation m_info;
-    Ui::ToolInstance *ui;
+    Ui::ToolInstance m_ui;
 
     QList<OptionValue> m_optionValues;
     QProcess m_process;
+
+    FilePicker* m_pckFileOut;
+    mcrl2::utilities::qt::PersistentFileDialog* m_fileDialog;
 
   signals:
     void titleChanged(QString title);

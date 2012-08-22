@@ -12,20 +12,20 @@
 #include <QtCore>
 #include <QtGui>
 #include <QMainWindow>
-
 #include "ui_mainwindow.h"
+
+#include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "arcdiagram.h"
 #include "diagrameditor.h"
 #include "examiner.h"
-#include "mediator.h"
 #include "parser.h"
 #include "settings.h"
 #include "settingsdialog.h"
 #include "simulator.h"
 #include "timeseries.h"
 
-class MainWindow : public QMainWindow, public Mediator
+class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
@@ -116,81 +116,8 @@ class MainWindow : public QMainWindow, public Mediator
     QList<Cluster *> m_routingClusterSet;
     QList<Attribute *> m_routingClusterAttributes;
 
+    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 
-
-
-
-
-
-  public:
-    virtual QColor getColor(QColor col) { return col; }
-
-    virtual void handleNote(const size_t& shapeId, const std::string& msg) {}
-    virtual void handleEditModeDOF(Colleague* c) {}
-
-    virtual void handleEditShape(
-      const bool& cut,
-      const bool& copy,
-      const bool& paste,
-      const bool& clear,
-      const bool& bringToFront,
-      const bool& sendToBack,
-      const bool& bringForward,
-      const bool& sendBackward,
-      const bool& editDOF,
-      const int&  checkedItem) {}
-
-    virtual void handleEditDOF(
-      const std::vector< size_t > &degsOfFrdmIds,
-      const std::vector< std::string > &degsOfFrdm,
-      const std::vector< size_t > &attrIndcs,
-      const size_t& selIdx) {}
-    virtual void handleDOFSel(const size_t& DOFIdx) {}
-
-    virtual void setDOFColorSelected() {}
-    virtual void setDOFOpacitySelected() {}
-
-    virtual void handleSetDOFTextStatus(
-      const size_t& DOFIdx,
-      const int& status) {}
-    virtual size_t handleGetDOFTextStatus(const size_t& DOFIdx) { return 0; }
-
-    virtual void handleDOFColActivate() {}
-    virtual void handleDOFColDeactivate() {}
-    virtual void handleDOFColAdd(
-      const double& hue,
-      const double& y) {}
-    virtual void handleDOFColUpdate(
-      const size_t& idx,
-      const double& hue,
-      const double& y) {}
-    virtual void handleDOFColClear(
-      const size_t& idx) {}
-    virtual void handleDOFColSetValuesEdt(
-      const std::vector< double > &hue,
-      const std::vector< double > &y) {}
-
-    virtual void handleDOFOpaActivate() {}
-    virtual void handleDOFOpaDeactivate() {}
-    virtual void handleDOFOpaAdd(
-      const double& hue,
-      const double& y) {}
-    virtual void handleDOFOpaUpdate(
-      const size_t& idx,
-      const double& hue,
-      const double& y) {}
-    virtual void handleDOFOpaClear(
-      const size_t& idx) {}
-    virtual void handleDOFOpaSetValuesEdt(
-      const std::vector< double > &hue,
-      const std::vector< double > &y) {}
-
-    virtual void handleLinkDOFAttr(
-      const size_t DOFIdx,
-      const size_t attrIdx) {}
-    virtual void handleUnlinkDOFAttr(const size_t DOFIdx) {}
-    virtual void handleDOFFrameDestroy() {}
-    virtual void handleDOFDeselect() {}
 };
 
 #endif

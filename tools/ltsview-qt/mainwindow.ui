@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>LTSView</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="ltsview.qrc">
+    <normaloff>:/ltsview/icons/ltsview.ico</normaloff>:/ltsview/icons/ltsview.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -20,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -266,6 +270,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="ltsview.qrc"/>
+ </resources>
  <connections/>
 </ui>

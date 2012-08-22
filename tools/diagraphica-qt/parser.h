@@ -34,8 +34,6 @@ inline std::string to_string(const T& t)
   return ss.str();
 }
 
-class Mediator;
-
 class Parser : public QObject
 {
   Q_OBJECT

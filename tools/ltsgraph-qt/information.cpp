@@ -54,25 +54,20 @@ namespace Graph
   }
 
   InformationUi::InformationUi(Information &info, QWidget *parent)
-    : QDockWidget(parent), m_info(info), m_ui(new Ui::DockWidgetInfo)
+    : QDockWidget(parent), m_info(info)
   {
-    m_ui->setupUi(this);
+    m_ui.setupUi(this);
     updateLabels();
-  }
-
-  InformationUi::~InformationUi()
-  {
-    delete m_ui;
   }
 
   void InformationUi::updateLabels()
   {
-    m_ui->lblInitialValue->setText(m_info.m_initial);
-    m_ui->lblInitialValue->setToolTip(m_info.m_initialstring);
-    m_ui->lblStatesValue->setText(QString::number(m_info.m_nodes));
-    m_ui->lblTransitionsValue->setText(QString::number(m_info.m_edges));
-    m_ui->lblStateLabelsValue->setText(QString::number(m_info.m_slabels));
-    m_ui->lblTransitionLabelsValue->setText(QString::number(m_info.m_tlabels));
+    m_ui.lblInitialValue->setText(m_info.m_initial);
+    m_ui.lblInitialValue->setToolTip(m_info.m_initialstring);
+    m_ui.lblStatesValue->setText(QString::number(m_info.m_nodes));
+    m_ui.lblTransitionsValue->setText(QString::number(m_info.m_edges));
+    m_ui.lblStateLabelsValue->setText(QString::number(m_info.m_slabels));
+    m_ui.lblTransitionLabelsValue->setText(QString::number(m_info.m_tlabels));
   }
 
 }

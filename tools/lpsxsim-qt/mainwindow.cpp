@@ -8,7 +8,6 @@
 
 #include "mainwindow.h"
 #include <QApplication>
-#include <QFileDialog>
 #include <QInputDialog>
 #include <QMetaObject>
 #include <QUrl>
@@ -17,7 +16,8 @@
 
 MainWindow::MainWindow()
   : m_simulation(0),
-    m_animationTimer(new QTimer(this))
+    m_animationTimer(new QTimer(this)),
+    m_fileDialog("", this)
 {
   m_ui.setupUi(this);
 
@@ -70,7 +70,7 @@ QTableWidgetItem *item()
 
 void MainWindow::openSpecification()
 {
-  QString filename = QFileDialog::getOpenFileName(this, "Open Process Specification", "", "Process specifications (*.lps)");
+  QString filename = m_fileDialog.getOpenFileName("Open Process Specification", "Process specifications (*.lps)");
   if (filename.isNull())
   {
     return;
@@ -86,7 +86,7 @@ void MainWindow::loadTrace()
     return;
   }
 
-  QString filename = QFileDialog::getOpenFileName(this, "Open Trace", "", "Traces (*.trc)");
+  QString filename = m_fileDialog.getOpenFileName("Open Trace", "Traces (*.trc)");
   if (filename.isNull())
   {
     return;
@@ -103,7 +103,7 @@ void MainWindow::saveTrace()
     return;
   }
 
-  QString filename = QFileDialog::getSaveFileName(this, "Save Trace", "", "Traces (*.trc)");
+  QString filename = m_fileDialog.getSaveFileName("Save Trace", "Traces (*.trc)");
   if (filename.isNull())
   {
     return;

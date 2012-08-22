@@ -11,10 +11,7 @@
 #define FILEINFORMATION_H
 
 #include <QWidget>
-
-namespace Ui {
-class FileInformation;
-}
+#include "ui_fileinformation.h"
 
 class FileInformation : public QWidget
 {
@@ -22,14 +19,13 @@ class FileInformation : public QWidget
     
 public:
     explicit FileInformation(QString filename, QWidget *parent = 0);
-    ~FileInformation();
     
 private:
     QString sizeString(qint64 size);
     void addRow(QString name, QString value);
 
     QString m_filename;
-    Ui::FileInformation *ui;
+    Ui::FileInformation m_ui;
 };
 
 #endif // FILEINFORMATION_H

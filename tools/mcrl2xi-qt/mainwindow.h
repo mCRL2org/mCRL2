@@ -20,15 +20,14 @@
 #define MCRL2XI_MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QFileDialog>
-
 #include "ui_mainwindow.h"
+
+#include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "highlighter.h"
 #include "documentwidget.h"
 #include "documentmanager.h"
 #include "parser.h"
-
 #include "findreplacedialog.h"
 
 class QTextEdit;
@@ -155,6 +154,8 @@ class MainWindow : public QMainWindow
     QString m_current_rewriter;               ///< The currently selected rewriter
     QPalette m_palette;
     QPoint m_lastErrorPosition;               ///< The last error position that was found in the log
+
+    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 
 };
 

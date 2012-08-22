@@ -50,7 +50,7 @@ Shape* DiagramEditor::selectedShape()
   if (m_diagram != 0)
   {
     // Find any selected shape
-    for (int i = 0; i < m_diagram->shapeCount(); i++)
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
     {
       if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
       {
@@ -66,7 +66,7 @@ QList<Shape*> DiagramEditor::selectedShapes()
   QList<Shape*> result;
   if (m_diagram != 0)
   {
-    for (int i = 0; i < m_diagram->shapeCount(); i++)
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
     {
       if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
       {
@@ -89,7 +89,7 @@ void DiagramEditor::deselectAll()
     sizeShapes = m_diagram->shapeCount();
   }
 
-  for (size_t i = 0; i < sizeShapes; i++)
+  for (size_t i = 0; i < sizeShapes; ++i)
   {
     m_diagram->shape(i)->setModeNormal();
   }
@@ -201,7 +201,7 @@ void DiagramEditor::visualize(const bool& inSelectMode)
 
 void DiagramEditor::generateTextures()
 {
-  for (int i = 0; i < m_diagram->shapeCount(); i++)
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
   {
     m_diagram->shape(i)->generateTextures();
   }
@@ -282,7 +282,7 @@ void DiagramEditor::editDof(Shape *shape)
       s->setModeEditDOFXCtr();
     }
     QList<DofDialog*> openDialogs = findChildren<DofDialog*>();
-    for (int i = 0; i < openDialogs.size(); i++)
+    for (int i = 0; i < openDialogs.size(); ++i)
     {
       if (openDialogs[i]->shape() == s)
       {
@@ -335,7 +335,7 @@ void DiagramEditor::cutShapes()
 
   if (!shapes.isEmpty()) {
     m_clipBoardList.clear();
-    for (int i = 0; i < shapes.size(); i++)
+    for (int i = 0; i < shapes.size(); ++i)
     {
       m_clipBoardList.append(new Shape(*shapes[i]));
       m_diagram->removeShape(shapes[i]->index());
@@ -352,7 +352,7 @@ void DiagramEditor::copyShapes()
 
   if (!shapes.isEmpty()) {
     m_clipBoardList.clear();
-    for (int i = 0; i < shapes.size(); i++)
+    for (int i = 0; i < shapes.size(); ++i)
     {
       m_clipBoardList.append(new Shape(*shapes[i]));
     }
@@ -372,7 +372,7 @@ void DiagramEditor::pasteShapes()
     double xPaste = pos.x();
     double yPaste = pos.y();
 
-    for (int i = 0; i < m_clipBoardList.size(); i++)
+    for (int i = 0; i < m_clipBoardList.size(); ++i)
     {
       // update index of clipboard shape
       m_clipBoardList[i]->setIndex(m_diagram->shapeCount());
@@ -418,7 +418,7 @@ void DiagramEditor::pasteShapes()
 
 void DiagramEditor::selectAllShapes()
 {
-  for (int i = 0; i < m_diagram->shapeCount() ; i++)
+  for (int i = 0; i < m_diagram->shapeCount() ; ++i)
   {
     m_diagram->shape(i)->setDrawMode(Shape::MODE_EDIT);
   }
@@ -439,7 +439,7 @@ void DiagramEditor::deleteShapes()
 
 void DiagramEditor::bringToFront()
 {
-  for (int i = 0; i < m_diagram->shapeCount(); i++)
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
   {
     if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
     {
@@ -475,7 +475,7 @@ void DiagramEditor::bringForward()
 
 void DiagramEditor::sendBackward()
 {
-  for (int i = 0; i < m_diagram->shapeCount(); i++)
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
   {
     if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
     {
@@ -649,7 +649,7 @@ void DiagramEditor::showContextMenu()
   }
 
   QList<QAction*> actions = m_popup.actions();
-  for (int i = 0; i < actions.size(); i++)
+  for (int i = 0; i < actions.size(); ++i)
   {
     actions[i]->setEnabled(enabledOptions.indexOf(actions[i]->text()) != -1);
   }
@@ -793,7 +793,7 @@ void DiagramEditor::handleHits(const vector< int > &ids)
           double dY = rectangle.height();
 
           QList<Shape*> shapes = selectedShapes();
-          for (int i = 0; i < shapes.size(); i++)
+          for (int i = 0; i < shapes.size(); ++i)
           {
             Shape* s = shapes[i];
             s->setCenter(s->xCenter()+dX, s->yCenter()+dY);
@@ -897,7 +897,7 @@ void DiagramEditor::handleHits(const vector< int > &ids)
     // We try to select some shapes
     {
       deselectAll();
-      for (int i = 0; i < m_diagram->shapeCount(); i++)
+      for (int i = 0; i < m_diagram->shapeCount(); ++i)
       {
         Shape* s = m_diagram->shape(i);
         QRectF shape(s->xCenter()-s->xDistance(), s->yCenter()-s->yDistance(), 2.0*s->xDistance(), 2.0*s->yDistance());
@@ -1619,13 +1619,13 @@ void DiagramEditor::processHits(
     // if necassary, advance to closest hit
     if (hits > 1)
     {
-      for (int i = 0; i < (hits-1); i++)
+      for (int i = 0; i < (hits-1); ++i)
       {
         int number = *ptr;
         ++ptr; // number;
         ++ptr; // z1
         ++ptr; // z2
-        for (int j = 0; j < number; j++)
+        for (int j = 0; j < number; ++j)
         {
           ++ptr;  // names
         }
@@ -1638,7 +1638,7 @@ void DiagramEditor::processHits(
     ++ptr; // z1
     ++ptr; // z2
 
-    for (int i = 0; i < number; i++)
+    for (int i = 0; i < number; ++i)
     {
       ids.push_back(*ptr);
       ++ptr;

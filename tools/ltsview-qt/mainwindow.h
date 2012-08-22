@@ -9,12 +9,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ui_mainwindow.h"
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include "ui_mainwindow.h"
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "infodialog.h"
 #include "ltscanvas.h"
@@ -88,6 +89,8 @@ class MainWindow : public QMainWindow
     SimDialog *m_simDialog;
     LtsCanvas *m_ltsCanvas;
     QProgressDialog *m_progressDialog;
+
+    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };
 
 #endif
