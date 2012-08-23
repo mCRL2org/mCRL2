@@ -30,12 +30,6 @@ try_add_c_flag(-O0                       MAINTAINER)
 try_add_c_flag(-pedantic                 MAINTAINER)
 try_add_c_flag(-W                        MAINTAINER)
 
-# Following flag will cause warning on MacOSX, if enabled:
-#686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
-if(NOT APPLE)
-  try_add_c_flag(-Wl,-as-needed)
-endif()
-
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
   try_add_c_flag(-fprofile-arcs            MAINTAINER)
