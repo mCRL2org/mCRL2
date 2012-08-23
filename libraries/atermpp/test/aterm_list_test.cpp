@@ -78,7 +78,7 @@ void test_aterm_list()
   BOOST_CHECK(os.str() == "[5,6]1234");
 
   int sum = 0;
-  std::for_each(r.begin(), r.end(), counter(sum));
+  for_each(r.begin(), r.end(), counter(sum));
   BOOST_CHECK(sum == 10);
 
   aterm_list v = make_term("[1,2,3,4]");

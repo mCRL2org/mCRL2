@@ -103,16 +103,19 @@ void test_replace()
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
   BOOST_CHECK(b == make_term("f(x)"));
+  b = bottom_up_replace(a, make_term("f(x)"), make_term("x"));
+  BOOST_CHECK(b == make_term("x"));
 
   atermpp::aterm f = make_term("[]");
   aterm_appl g = replace(f, a, b);
   BOOST_CHECK(f == make_term("[]"));
-  BOOST_CHECK(f == g);
 
   atermpp::aterm x = make_term("g(f(x),f(y),h(f(x)))");
   atermpp::aterm y = replace(x, fg_replacer());
+  atermpp::aterm z = partial_replace(x, fg_partial_replacer());
 
   BOOST_CHECK(y == make_term("f(f(x),f(y),h(f(x)))"));
+  BOOST_CHECK(z == make_term("f(f(x),f(y),h(f(x)))"));
 }
 
 int test_main(int argc, char* argv[])

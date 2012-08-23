@@ -21,6 +21,17 @@
 
 namespace atermpp
 {
+/// \brief Calls op(elem) for subterms of the term t.
+/// \param t A term
+/// \param op The operation that is applied to subterms
+/// \return a copy of the (internally modified) op.
+/// The function op must have the signature bool op(aterm_appl t).
+/// When op(t) is false, the children of t are skipped.
+template <typename UnaryFunction, typename Term>
+UnaryFunction for_each(Term t, UnaryFunction op)
+{
+  return detail::for_each_impl< typename boost::add_reference< UnaryFunction >::type >(aterm_traits<Term>::term(t), op);
+}
 
 /// \brief Finds a subterm of t that matches a given predicate.
 /// \param t A term
@@ -34,6 +45,27 @@ aterm_appl find_if(Term t, MatchPredicate match)
   return output;
 }
 
+/// \brief Finds a subterm of t that matches a given predicate.
+/// The term is only partially traversed. If the stop predicate
+/// returns true in a subterm, the recursion is not continued.
+/// \param t A term
+/// \param match The predicate that determines if a subterm is a match
+/// \param stop The predicate that determines if the recursion should not be continued in a subterm
+/// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
+template <typename Term, typename MatchPredicate, typename StopPredicate>
+aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
+{
+  try
+  {
+    detail::partial_find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, stop);
+  }
+  catch (detail::found_term_exception& e)
+  {
+    return e.t;
+  }
+  return aterm_appl();
+}
+
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
 /// to the destination range starting with destBegin.
 /// \param t A term
@@ -44,6 +76,22 @@ void find_all_if(Term t, MatchPredicate match, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
   detail::find_all_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, i);
+}
+
+/// \brief Finds all subterms of t that match a given predicate, and writes the found terms
+/// to the destination range starting with destBegin.
+/// The term is only partially traversed. If the stop predicate
+/// returns true in a subterm, the recursion is not continued.
+/// \param t A term
+/// \param match The predicate that determines if a subterm is a match
+/// \param stop The predicate that determines if the recursion should not be continued in a subterm
+/// \param destBegin The iterator range to which output is written.
+template <typename Term, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
+{
+  OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
+  detail::partial_find_all_if_impl< typename boost::add_reference< MatchPredicate >::type,
+         typename boost::add_reference< StopPredicate >::type >(aterm_traits<Term>::term(t), match, stop, i);
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -72,6 +120,53 @@ template <typename Term>
 Term replace(Term t, aterm_appl old_value, aterm_appl new_value)
 {
   return replace(t, detail::default_replace(old_value, new_value));
+}
+
+/// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
+/// the following signature:
+/// aterm_appl x;
+/// aterm_appl result = r(x);
+/// The replacements are performed in bottom up order. For example,
+/// replace(f(f(x)), f(x), x) returns x.
+/// \param t A term
+/// \param r The replace function that is applied to subterms.
+/// \return The result of the replacement.
+template <typename Term, typename ReplaceFunction>
+Term bottom_up_replace(Term t, ReplaceFunction r)
+{
+  ATerm x = detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
+  return Term(reinterpret_cast<ATermAppl>(x));
+}
+
+/// \brief Replaces each subterm in t that is equal to old_value with new_value.
+/// The replacements are performed in top down order. For example,
+/// replace(f(f(x)), f(x), x) returns f(x) and not x.
+/// \param t A term
+/// \param old_value The value of the subterm that is replaced.
+/// \param new_value The value that is substituted.
+/// \return The result of the replacement.
+template <typename Term>
+Term bottom_up_replace(Term t, aterm_appl old_value, aterm_appl new_value)
+{
+  return bottom_up_replace(t, detail::default_replace(old_value, new_value));
+}
+
+/// \brief Replaces subterms x of t by r(x). The replace function r returns an
+/// additional boolean value. This value is used to prevent further recursion.
+/// The ReplaceFunction r has the following signature:
+/// aterm_appl x;
+/// std::pair<aterm_appl, bool> result = r(x);
+/// result.first  is the result r(x) of the replacement
+/// result.second denotes if the recursion should be continued
+/// The replacements are performed in top down order.
+/// \param t A term
+/// \param r The replace function that is applied to subterms.
+/// \return The result of the replacement.
+template <typename Term, typename ReplaceFunction>
+Term partial_replace(Term t, ReplaceFunction r)
+{
+  ATerm x = detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
+  return Term(reinterpret_cast<ATermAppl>(x));
 }
 
 } // namespace atermpp

@@ -128,6 +128,33 @@ struct found_term_exception
   {}
 };
 
+/// \brief Implements the for_each algorithm
+/// \param t A term
+/// \param op A unary function on terms
+/// \return The result of the algorithm
+template <typename UnaryFunction>
+UnaryFunction for_each_impl(aterm t, UnaryFunction op)
+{
+  if (t.type() == AT_LIST)
+  {
+    for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+    {
+      for_each_impl(*i, op);
+    }
+  }
+  else if (t.type() == AT_APPL)
+  {
+    if (op(t))
+    {
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        for_each_impl(*i, op);
+      }
+    }
+  }
+  return op;
+}
+
 /// \brief Implements the find_if algorithm
 /// If the term t is found, it is stored in output and true is returned
 /// \param t A term
@@ -198,6 +225,73 @@ void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
   else
   {
     return;
+  }
+}
+
+//--- partial find --------------------------------------------------------//
+
+/// \brief Implements the partial_find_if_impl algorithm
+/// \param t A term
+/// \param match A predicate function on terms
+/// \param stop A predicate function on terms
+template <typename MatchPredicate, typename StopPredicate>
+void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
+{
+  if (t.type() == AT_APPL)
+  {
+    if (match(aterm_appl(t)))
+    {
+      throw found_term_exception(aterm_appl(t)); // report the match
+    }
+    if (stop(aterm_appl(t)))
+    {
+      return; // nothing was found
+    }
+    for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+    {
+      partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
+    }
+  }
+
+  if (t.type() == AT_LIST)
+  {
+    for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+    {
+      partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
+    }
+  }
+}
+
+/// \brief Implements the partial_find_all_if algorithm
+/// \param t A term
+/// \param match A predicate function on terms
+/// \param stop A predicate function on terms
+/// \param destBegin The beginning of a range to where the results are written
+template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
+{
+  if (t.type() == AT_APPL)
+  {
+    if (match(aterm_appl(t)))
+    {
+      *destBegin++ = aterm_appl(t);
+    }
+    if (stop(aterm_appl(t)))
+    {
+      return;
+    }
+    for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+    {
+      partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
+    }
+  }
+
+  if (t.type() == AT_LIST)
+  {
+    for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+    {
+      partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
+    }
   }
 }
 
