@@ -36,14 +36,11 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/next_state_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/simulator.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/simbase.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/simulation.cpp
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
