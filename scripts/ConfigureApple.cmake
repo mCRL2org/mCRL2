@@ -77,14 +77,9 @@ else(MCRL2_SINGLE_BUNDLE)
 endif(MCRL2_SINGLE_BUNDLE)
 
 ##---------------------------------------------------
-## Compile installer tools for mac
+## Set configuration for a single bundle app 
 ##---------------------------------------------------
 if(MCRL2_SINGLE_BUNDLE)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
-
-  # Install "install_tools" in share/installer
-  # install_tools contains the tools marked for symlink export
-  install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
   #Process Info.plist with Copyright Information
   configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
   #Install Info.plist for single application bundle

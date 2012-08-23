@@ -285,6 +285,15 @@ if(MCRL2_ENABLE_DEPRECATED)
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
+## Helper for exporting symbolic links on OS-X 
+##---------------------------------------------------
+
+if(APPLE AND MCRL2_SINGLE_BUNDLE AND MCRL2_ENABLE_GUI_TOOLS)
+  add_subdirectory( build/macosx )
+endif(APPLE AND MCRL2_SINGLE_BUNDLE AND MCRL2_ENABLE_GUI_TOOLS)
+
+
+##---------------------------------------------------
 ## Documentation
 ##---------------------------------------------------
 
