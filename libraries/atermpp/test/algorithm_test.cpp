@@ -53,37 +53,6 @@ void test_algorithm()
   BOOST_CHECK(v.back() == make_term("f(z)"));
 }
 
-struct for_each_proc
-{
-  std::set<std::string>& m_names;
-
-  for_each_proc(std::set<std::string>& names)
-    : m_names(names)
-  {}
-
-  bool operator()(aterm_appl t)
-  {
-    m_names.insert(t.function().name());
-    return true;
-  }
-};
-
-void test_for_each()
-{
-  aterm_appl t = make_term("h(g(x),f(y))");
-  std::set<std::string> names;
-  for_each(t, for_each_proc(names));
-  for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
-  {
-    std::cout << *i << " ";
-  }
-  BOOST_CHECK(names.find("h") != names.end());
-  BOOST_CHECK(names.find("g") != names.end());
-  BOOST_CHECK(names.find("x") != names.end());
-  BOOST_CHECK(names.find("f") != names.end());
-  BOOST_CHECK(names.find("y") != names.end());
-}
-
 void test_operators()
 {
   {
@@ -121,7 +90,6 @@ int test_main(int argc, char* argv[])
 
   test_algorithm();
   test_operators();
-  test_for_each();
 
   return 0;
 }

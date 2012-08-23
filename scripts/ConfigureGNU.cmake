@@ -30,10 +30,6 @@ try_add_c_flag(-O0                       MAINTAINER)
 try_add_c_flag(-pedantic                 MAINTAINER)
 try_add_c_flag(-W                        MAINTAINER)
 
-if(NOT MINGW)
-  try_add_c_flag(-pthread)
-endif()
-
 # Following flag will cause warning on MacOSX, if enabled:
 #686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
 if(NOT APPLE)
@@ -67,10 +63,6 @@ try_add_cxx_flag(-Wno-system-headers     MAINTAINER)
 try_add_cxx_flag(-Woverloaded-virtual    MAINTAINER)
 try_add_cxx_flag(-Wwrite-strings         MAINTAINER)
 try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
-
-if(NOT MINGW)
-  try_add_cxx_flag(-pthread)
-endif()
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
