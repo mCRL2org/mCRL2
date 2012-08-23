@@ -92,12 +92,19 @@ endif()
 ## Set linker flags
 ##---------------------------------------------------
 
-set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
+if(NOT APPLE)
+  set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
+else()
+  set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dead_strip")
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dead_strip")
+endif()
+
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
     CACHE STRING "Flags used for linking binaries during maintainer builds.")
 set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
     CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
   if(CXX_ACCEPTS_FPROFILE_ARCS)
