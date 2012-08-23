@@ -1,6 +1,8 @@
 import os
 import sys
 import subprocess
+import shutil
+import glob
 
 workspace = os.environ['WORKSPACE']
 buildthreads = os.environ['BUILD_THREADS'] if 'BUILD_THREADS' in os.environ else 0
@@ -54,3 +56,6 @@ def which(name, flags=os.X_OK):
           return pext # result.append(pext)
     return result
 
+def copy_files(src_glob, dst_folder):
+  for filename in glob.iglob(src_glob):
+    shutil.copy(filename, os.path.join(dst_folder, os.path.basename(filename)))
