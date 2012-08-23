@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(ltsview-qt)
+project(ltsview)
 cmake_minimum_required(VERSION 2.6)
 
 # ########## Create MacOSX Bundle Information #########

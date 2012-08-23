@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(mcrl2-gui-qt)
+project(mcrl2-gui)
 cmake_minimum_required(VERSION 2.6)
 
 # ########## Create MacOSX Bundle Information #########
@@ -83,7 +83,7 @@ endif(NOT APPLE)
 # ######### Create Windows Icon ##########
 if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  set(MCRL2_GUI_SRC_FILES ${MCRL2_GUI_SRC_FILES} mcrl2-gui-qt.rc)
+  set(MCRL2_GUI_SRC_FILES ${MCRL2_GUI_SRC_FILES} mcrl2-gui.rc)
 endif(WIN32)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2_GUI_SRC_FILES})

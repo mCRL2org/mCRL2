@@ -252,12 +252,12 @@ add_subdirectory ( tools/txt2lps )
 ## Graphical tools
 ##---------------------------------------------------
 if(MCRL2_ENABLE_GUI_TOOLS)
-  add_subdirectory ( tools/lpsxsim-qt )
-  add_subdirectory ( tools/mcrl2xi-qt )
-  add_subdirectory ( tools/mcrl2-gui-qt )
-  add_subdirectory ( tools/ltsgraph-qt )
-  add_subdirectory ( tools/ltsview-qt )
-  add_subdirectory ( tools/diagraphica-qt )
+  add_subdirectory ( tools/diagraphica )
+  add_subdirectory ( tools/lpsxsim )
+  add_subdirectory ( tools/ltsgraph )
+  add_subdirectory ( tools/ltsview )
+  add_subdirectory ( tools/mcrl2-gui )
+  add_subdirectory ( tools/mcrl2xi )
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------

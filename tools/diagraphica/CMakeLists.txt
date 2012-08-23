@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(diagraphica-qt)
+project(diagraphica)
 cmake_minimum_required(VERSION 2.6)
 
 if(APPLE)
@@ -97,7 +97,7 @@ set(DIAGRAPHICA_SRC_FILES
 # ######### Create Windows Icon ##########
 if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  set(DIAGRAPHICA_SRC_FILES ${DIAGRAPHICA_SRC_FILES} diagraphica-qt.rc)
+  set(DIAGRAPHICA_SRC_FILES ${DIAGRAPHICA_SRC_FILES} diagraphica.rc)
 endif(WIN32)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${DIAGRAPHICA_SRC_FILES})
