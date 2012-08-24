@@ -2163,9 +2163,9 @@ void RewriterCompilingJitty::implement_tree(
   {
     if (arity==0)
     { // return a reference to an aterm_appl
-      fprintf(f,"%sstatic aterm_appl static_term(",whitespace(d*2));
+      fprintf(f,"%sstatic aterm_appl static_term(rewrite(",whitespace(d*2));
       calcTerm(f,add_args(ATgetArgument(tree,0),arity),get_startarg(ATgetArgument(tree,0),0),nnfvars);
-      fprintf(f,"); \n");
+      fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
       fprintf(f,"; // R2a\n");
     }
@@ -2843,37 +2843,54 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f, ")\n"
             "{\n");
     fprintf(f,
-            "  size_t arity = a.size();\n");
-    fprintf(f,
-            "  if (mcrl2::data::is_abstraction(a))\n"
+            "  size_t arity = a.size();\n"
+            "  if (arity == 1 )\n"
             "  {\n"
-            "     arity=1;\n"
-            "  }\n");
+            "      return %sa(0)", calc_inner_appl_head(i).c_str()); 
+
+    for (size_t j=0; j<i; j++)
+    {
+      fprintf(f, ",arg%zu",j);
+    }
     fprintf(f,
-            "  {\n"  
+            ");\n"
+            "  }\n"
+            "  else if (mcrl2::data::is_abstraction(a))\n"
+            "  {\n"
+            "    return %sa", calc_inner_appl_head(i).c_str()); 
+
+    for (size_t j=0; j<i; j++)
+    {
+      fprintf(f, ",arg%zu",j);
+    }
+    fprintf(f,
+            ");\n"
+            "  }\n"
+            "  else\n"
+            "  {\n"
             "    //atermpp::aterm args[arity+ld];\n"
-            "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity+%zu));\n"
+            "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::detail::_aterm*,(arity+%zu));\n"
             "\n"
             "    for (size_t i=0; i<arity; i++)\n"
             "    {\n"
-            "      new (&args[i]) aterm(a(i));\n"
+            "      args[i]=&*a(i);\n"
             "    }\n",i);
     for (size_t j=0; j<i; j++)
     {
       fprintf(f,
-              "    new (&args[arity+%zu]) aterm(arg%zu);\n",j,j);
-    }
+              "    args[arity+%zu]=&*arg%zu;\n",j,j);
+    } 
     fprintf(f,
             "\n"
-            "    const atermpp::aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  // YYYY+
-            "    for (size_t i=0; i<(arity+%zu); ++i)\n"
+            "    return atermpp::aterm_appl(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  
+/*            "    for (size_t i=0; i<(arity+%zu); ++i)\n"
             "    {\n"
             "      args[i].~aterm();\n"
-            "    }\n"
-            "    return result;\n"
+            "    }\n"  
+            "    return result;\n" */
             "  }\n"
             "}\n"
-            "\n",i,i,i);
+            "\n",i,i);
   }
 
   //

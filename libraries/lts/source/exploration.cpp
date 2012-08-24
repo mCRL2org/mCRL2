@@ -329,20 +329,21 @@ bool lps2lts_algorithm::finalise_lts_generation()
   return true;
 }
 
-lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(lps2lts_algorithm::storage_state_t storage_state)
+lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(const lps2lts_algorithm::storage_state_t &storage_state)
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    return static_cast<generator_state_t>(storage_state);
+    return aterm_cast<generator_state_t>(storage_state);
   }
   else
   {
-    atermpp::term_balanced_tree<atermpp::aterm_appl> tree(storage_state);
+    const atermpp::term_balanced_tree<atermpp::aterm_appl> &tree=
+              atermpp::aterm_cast<atermpp::term_balanced_tree<atermpp::aterm_appl> >(storage_state);
     return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
   }
 }
 
-lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(lps2lts_algorithm::generator_state_t generator_state)
+lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(const lps2lts_algorithm::generator_state_t &generator_state)
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
@@ -484,8 +485,9 @@ void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transit
   }
 }
 
-bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, std::string filename)
+bool lps2lts_algorithm::save_trace(const lps2lts_algorithm::generator_state_t &state1, const std::string &filename)
 {
+  lps2lts_algorithm::generator_state_t state=state1;
   std::deque<generator_state_t> states;
   std::map<storage_state_t, storage_state_t>::iterator source;
   while ((source = m_backpointers.find(storage_state(state))) != m_backpointers.end())
@@ -526,7 +528,7 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
   }
 }
 
-bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t state, std::set<lps2lts_algorithm::generator_state_t> &current_path, std::set<lps2lts_algorithm::generator_state_t> &visited)
+bool lps2lts_algorithm::search_divergence(const lps2lts_algorithm::generator_state_t &state, std::set<lps2lts_algorithm::generator_state_t> &current_path, std::set<lps2lts_algorithm::generator_state_t> &visited)
 {
   current_path.insert(state);
 
@@ -557,7 +559,7 @@ bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t s
   return false;
 }
 
-void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::check_divergence(const lps2lts_algorithm::generator_state_t &state)
 {
   std::set<generator_state_t> visited;
   std::set<generator_state_t> current_path;
@@ -589,7 +591,7 @@ void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t st
   }
 }
 
-void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state, const next_state_generator::transition_t &transition)
+void lps2lts_algorithm::save_actions(const lps2lts_algorithm::generator_state_t &state, const next_state_generator::transition_t &transition)
 {
   for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
   {
@@ -623,7 +625,7 @@ void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state,
   }
 }
 
-void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::save_deadlock(const lps2lts_algorithm::generator_state_t &state)
 {
   size_t state_number = m_state_numbers.index(storage_state(state));
   if (m_options.trace && m_traces_saved < m_options.max_traces)
@@ -648,7 +650,7 @@ void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::generator_state_t state
   }
 }
 
-void lps2lts_algorithm::save_error(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::save_error(const lps2lts_algorithm::generator_state_t &state)
 {
   if (m_options.save_error_trace)
   {
@@ -664,7 +666,7 @@ void lps2lts_algorithm::save_error(lps2lts_algorithm::generator_state_t state)
   }
 }
 
-bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t state, next_state_generator::transition_t &transition)
+bool lps2lts_algorithm::add_transition(const lps2lts_algorithm::generator_state_t &state, next_state_generator::transition_t &transition)
 {
   storage_state_t source = storage_state(state);
   storage_state_t destination = storage_state(transition.internal_state());
@@ -726,7 +728,7 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
   return destination_state_number.second;
 }
 
-std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(lps2lts_algorithm::generator_state_t state)
+std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(const lps2lts_algorithm::generator_state_t &state)
 {
   if (m_options.detect_divergence)
   {
@@ -817,7 +819,7 @@ void lps2lts_algorithm::generate_lts_breadth()
   }
 }
 
-void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_breadth_bithashing(const generator_state_t &initial_state)
 {
   size_t current_state = 0;
 
@@ -881,7 +883,7 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initia
   }
 }
 
-void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_depth(const generator_state_t &initial_state)
 {
   std::list<storage_state_t> stack;
   stack.push_back(storage_state(initial_state));
@@ -913,7 +915,7 @@ void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
   }
 }
 
-void lps2lts_algorithm::generate_lts_random(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_random(const generator_state_t &initial_state)
 {
   generator_state_t state = initial_state;
 

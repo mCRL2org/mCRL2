@@ -98,23 +98,23 @@ class lps2lts_algorithm: public lps2lts_algorithm_base
     }
 
   private:
-    generator_state_t generator_state(const storage_state_t storage_state);
-    storage_state_t storage_state(const generator_state_t generator_state);
+    generator_state_t generator_state(const storage_state_t &storage_state);
+    storage_state_t storage_state(const generator_state_t &generator_state);
     generator_state_t get_prioritised_representative(generator_state_t state);
     void value_prioritize(std::list<next_state_generator::transition_t> &transitions);
-    bool save_trace(generator_state_t state, std::string filename);
-    bool search_divergence(generator_state_t state, std::set<generator_state_t> &current_path, std::set<generator_state_t> &visited);
-    void check_divergence(generator_state_t state);
-    void save_actions(generator_state_t state, const next_state_generator::transition_t &transition);
-    void save_deadlock(generator_state_t state);
-    void save_error(generator_state_t state);
-    bool add_transition(generator_state_t state, next_state_generator::transition_t &transition);
-    std::list<next_state_generator::transition_t> get_transitions(generator_state_t state);
+    bool save_trace(const generator_state_t &state, const std::string &filename);
+    bool search_divergence(const generator_state_t &state, std::set<generator_state_t> &current_path, std::set<generator_state_t> &visited);
+    void check_divergence(const generator_state_t &state);
+    void save_actions(const generator_state_t &state, const next_state_generator::transition_t &transition);
+    void save_deadlock(const generator_state_t &state);
+    void save_error(const generator_state_t &state);
+    bool add_transition(const generator_state_t &state, next_state_generator::transition_t &transition);
+    std::list<next_state_generator::transition_t> get_transitions(const generator_state_t &state);
 
     void generate_lts_breadth();
-    void generate_lts_breadth_bithashing(generator_state_t initial_state);
-    void generate_lts_depth(generator_state_t initial_state);
-    void generate_lts_random(generator_state_t initial_state);
+    void generate_lts_breadth_bithashing(const generator_state_t &initial_state);
+    void generate_lts_depth(const generator_state_t &initial_state);
+    void generate_lts_random(const generator_state_t &initial_state);
 };
 
 } // namespace lps

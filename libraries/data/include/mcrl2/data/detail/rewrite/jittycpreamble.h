@@ -25,9 +25,9 @@ extern "C" {
 
 static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
 
-static inline atermpp::aterm_appl makeAppl1(const atermpp::function_symbol a, const atermpp::aterm &h, const atermpp::aterm_appl &t1) 
+static inline atermpp::aterm_appl makeAppl1(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1) 
               { return atermpp::aterm_appl(a,h,reinterpret_cast<const atermpp::aterm &>(t1)); } 
-static inline atermpp::aterm_appl makeAppl2(const atermpp::function_symbol a, const atermpp::aterm &h, const atermpp::aterm_appl &t1, 
+static inline atermpp::aterm_appl makeAppl2(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1, 
                             const atermpp::aterm_appl &t2) 
               { return atermpp::aterm_appl(a,h,t1, t2); }
 

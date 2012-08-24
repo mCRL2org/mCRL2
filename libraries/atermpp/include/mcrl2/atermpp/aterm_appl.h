@@ -27,11 +27,6 @@ namespace atermpp
 template <class Term>
 class term_appl:public aterm
 {
-//  protected:
-//    template <class Term>
-//    template <class ForwardIterator>
-//       _aterm* term_appl<Term>::local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end);
-//
 
   public: // Should become protected.
     detail::_aterm_appl<Term> & operator *() const

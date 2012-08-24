@@ -31,7 +31,6 @@ class term_balanced_tree_iterator;
 ///
 /// Models Random Access Container (STL concept)
 template <typename Term>
-// class term_balanced_tree: public aterm_base OLD
 class term_balanced_tree: public aterm 
 {
     template < typename T >
@@ -54,65 +53,6 @@ class term_balanced_tree: public aterm
       return node;
     }
 
-    static bool is_empty(const aterm &tree)
-    {
-      return tree.function() == tree_empty();
-    }
-
-    static bool is_node(const aterm &tree)
-    {
-      return tree.type_is_appl() && (aterm_cast<aterm_appl>(tree).function() == tree_node());
-    }
-
-    static const aterm &left_branch(const aterm &tree)
-    {
-      assert(is_node(tree));
-      return (aterm_cast<const aterm_appl>(tree))(0);
-    }
-
-    static const aterm &right_branch(const aterm &tree)
-    {
-      assert(is_node(tree));
-      return (aterm_cast<const aterm_appl>(tree))(1);
-    }
-
-    static aterm node(const aterm &left, const aterm &right)
-    {
-      return aterm_appl(tree_node(), left, right);
-    }
-
-    static size_t tree_size(const aterm &tree)
-    {
-      if (is_node(tree))
-      {
-        return tree_size(left_branch(tree)) + tree_size(right_branch(tree));
-      }
-
-      return (is_empty(tree)) ? 0 : 1;
-    }
-
-    const Term &element_at(size_t position) const
-    {
-      return element_at(*this, m_size, position);
-    }
-
-    static const Term &element_at(const aterm &tree, size_t size, size_t position)
-    {
-      assert(size == tree_size(tree));
-      assert(position < size);
-
-      if (size>1)
-      {
-        size_t left_size = (size + 1) >> 1;
-
-        return (position < left_size) ?
-               element_at(left_branch(tree), left_size, position) :
-               element_at(right_branch(tree), size - left_size, position - left_size);
-      }
-
-      return aterm_cast<const Term>(tree);
-    }
-
     template < typename ForwardTraversalIterator >
     static size_t get_distance(ForwardTraversalIterator begin, ForwardTraversalIterator end)
     {
@@ -126,38 +66,39 @@ class term_balanced_tree: public aterm
 
 
     template < typename ForwardTraversalIterator >
-    static aterm make_tree(ForwardTraversalIterator& p, const size_t size)
+    term_balanced_tree make_tree(ForwardTraversalIterator& p, const size_t size)
     {
       if (size==0)
       {
-        return tree_empty();
+        return term_balanced_tree(aterm_appl(tree_empty()));
       }
 
       if (size==1)
       {
-        const aterm &result=*p;
+        const term_balanced_tree &result=atermpp::aterm_cast<const term_balanced_tree>(*p);
         ++p;
         return result;
       }
       else
       {
         size_t left_size = (size + 1) >> 1; // size/2 rounded up.
-        const aterm left_tree=make_tree(p, left_size);
+        const  term_balanced_tree left_tree=make_tree(p, left_size);
         size_t right_size = size >> 1; // size/2 rounded down.
-        const aterm right_tree=make_tree(p, right_size);
 
-        return node(left_tree,right_tree);
+        return term_balanced_tree(left_tree,make_tree(p, right_size));
       }
     }
 
-    /// \brief the number of elements in the container
-    size_t m_size;
+    // \brief Protected constructor
+    term_balanced_tree(const term_balanced_tree &left, const term_balanced_tree &right)
+           : aterm(term_appl<term_balanced_tree>(tree_node(), left, right))
+    {
+    }
 
   public:
 
     /// The type of object, T stored in the term_balanced_tree.
     typedef Term value_type;
-
     /// Pointer to T.
     typedef Term* pointer;
 
@@ -181,30 +122,14 @@ class term_balanced_tree: public aterm
 
     /// Default constructor. Creates an empty tree.
     term_balanced_tree()
-      : aterm(aterm_appl(tree_empty())), m_size(0)
+      : aterm(tree_empty())
     {}
 
     /// Construction from aterm
-    term_balanced_tree(const aterm &tree)
-      : aterm(tree), m_size(tree_size(tree))
+    explicit term_balanced_tree(const aterm &tree)
+       : aterm(tree)
     {
-    }
-
-    /// Construction from aterm_list. THIS IS A VERY ODD ASSIGNMENT OPERATOR. UGLY.
-    /// \param l A list.
-    term_balanced_tree(const atermpp::aterm_list &l)
-      : m_size(l.size())
-    {
-      atermpp::aterm_list::const_iterator first=l.begin();
-      copy_term(&*make_tree(first,m_size));
     } 
-
-    /// Construction from a term_balanced_tree.
-    /// \param t A term containing a list.
-    template <typename SpecificTerm>
-    term_balanced_tree(term_balanced_tree< SpecificTerm > const& t) :
-      aterm(t.m_term), m_size(t.m_size)
-    { }
 
     /// Creates an term_balanced_tree with a copy of a range.
     /// \param first The start of a range of elements.
@@ -212,35 +137,68 @@ class term_balanced_tree: public aterm
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
     {
-      m_size=get_distance(first,last);
-      copy_term(&*make_tree(first,m_size));
+      copy_term(&*make_tree(first,get_distance(first,last)));
     }
 
-    /// Creates an term_balanced_tree with a copy of a range. THIS IS A VERY NON STANDARD ITERATOR 
+    /// \brief Creates an term_balanced_tree with a copy of a range. 
     /// \param first The start of a range of elements.
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
     {
-      m_size=size;
-      copy_term(&*make_tree(first,m_size));
+      copy_term(&*make_tree(first,size));
     }
 
-    /// Assignment operator. THIS IS ALSO A NON STANDARD CONSTRUCTOR.
-    /// \param t A term containing a list.
-    term_balanced_tree<Term>& operator=(aterm_list &t)
+    /// \brief Get the left branch of the tree
+    /// \detail It is assumed that the tree is a node with a left branch.
+    /// \return A reference t the left subtree of the current tree
+    const term_balanced_tree<Term>&left_branch() const
     {
-      m_size=t.size();
-      copy_term(make_tree(t,m_size));
-      return *this;
-    } 
+      assert(is_node());
+      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))(0));
+    }
 
-    /// Element indexing operator.
+    /// \brief Get the left branch of the tree
+    /// \detail It is assumed that the tree is a node with a left branch.
+    /// \return A reference t the left subtree of the current tree
+    const term_balanced_tree<Term>&right_branch() const
+    {
+      assert(is_node());
+      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))(1));
+    }
+
+    /// \brief Element indexing operator.
     /// \param position Index in the tree.
-    /// This operation behaves logarithmically with respect to container size
+    /// \details This operation behaves linear with respect to container size, 
+    ///          because it must calculate the size of the container. The operator
+    ///          element_at behaves logarithmically.
     const Term &operator[](size_t position) const
     {
-      return element_at(position);
+      return element_at(position, size());
+    }
+
+    /// \brief Get an element at the indicated position. 
+    /// \param size_t position The required position
+    /// \param size_t size The number of elements in the tree.
+    ///                    This is required to make the complexity logarithmic.
+    /// \detail By providing the size this operation is logarithmic. If a wrong
+    ///         size is provided the outcome is not determined. See also operator [].
+    /// \return The element at the indicated position.
+    const Term &element_at(size_t position, size_t size) const
+    {
+      assert(size == this->size());
+      assert(position < size);
+
+      if (size>1)
+      {
+        size_t left_size = (size + 1) >> 1;
+
+        return (position < left_size) ?
+               left_branch().element_at(position, left_size) :
+               right_branch().element_at(position-left_size, size - left_size);
+      }
+
+      return aterm_cast<const Term>(*this);
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_balanced_tree.
@@ -261,40 +219,32 @@ class term_balanced_tree: public aterm
     void swap(term_balanced_tree< Term >& other)
     {
       std::swap(m_term, other.m_term);
-      std::swap(m_size, other.m_size);
     }
 
     /// \brief Returns the size of the term_balanced_tree.
+    /// \details This operator is linear in the size of the balanced tree.
     /// \return The size of the tree.
     size_type size() const
     {
-      return m_size;
-    }
+      if (is_node())
+      {
+        return left_branch().size() + right_branch().size();
+      }
+      return (empty()) ? 0 : 1;
+    } 
 
-    /// \brief Returns true if the list's size is 0.
-    /// \return True if the list is empty.
+    /// \brief Returns true if tree is empty.
+    /// \return True iff the tree is empty.
     bool empty() const
     {
-      return m_term->function()==detail::function_adm.AS_EMPTY_LIST;
+      return m_term->function()==tree_empty();
     }
 
-    /// \brief Conversion to aterm_list.
-    /// \return The wrapped aterm_list pointer.
-    operator term_list< Term >() const
+    /// \brief Returns true iff the tree is a node with a left and right subtree.
+    /// \return True iff the tree is a node with a left and right subtree.
+    bool is_node() const
     {
-      return term_list< Term >(begin(), end());
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> nodes appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    term_balanced_tree<Term> substitute(Substitution f) const
-    {
-      return term_balanced_tree<Term>(f(*this));
+      return function()==tree_node();
     }
 }; 
 
@@ -310,17 +260,17 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     friend class boost::iterator_core_access;
 
-    std::stack< detail::_aterm* > m_trees;
+    std::stack< atermpp::detail::_aterm* > m_trees;
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
     const Value &dereference() const
     {
-      return aterm_cast<const Value>(m_trees.top());
+      return reinterpret_cast<const Value &>(m_trees.top());
     }
 
     /// \brief Equality operator
-    bool equal(term_balanced_tree_iterator const& other) const
+    bool equal(const term_balanced_tree_iterator &other) const
     {
       return m_trees == other.m_trees;
     }
@@ -328,32 +278,44 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
     /// \brief Increments the iterator
     void increment()
     {
+
       m_trees.pop();
 
       if (!m_trees.empty())
       {
-        while (term_balanced_tree< Value >::is_node(m_trees.top()))
+        detail::_aterm* current = m_trees.top();
+
+        if (current->function()!=term_balanced_tree < Value >::tree_node())
         {
-          aterm top(m_trees.top());
-
-          m_trees.pop();
-
-          m_trees.push(&*term_balanced_tree< Value >::right_branch(top));
-          m_trees.push(&*term_balanced_tree< Value >::left_branch(top));
+          return;
         }
+        m_trees.pop();
+        do 
+        {
+          m_trees.push(&*(reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[1]));
+          current=&*reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[0];
+        }
+        while (current->function()==term_balanced_tree < Value >::tree_node());
+
+        m_trees.push(current);
       }
     }
 
     void initialise(const aterm &tree)
     {
-      m_trees.push(&*tree);
-      m_trees.push(&*tree);
-      increment();
+        detail::_aterm_appl<aterm>* current = reinterpret_cast<detail::_aterm_appl<aterm> *>(&*tree);
+
+      while (current->function()==term_balanced_tree< Value >::tree_node())
+      {
+        m_trees.push(&*(current->arg[1]));
+        current=reinterpret_cast<detail::_aterm_appl<aterm > *>(&*(current->arg[0]));
+      }
+      m_trees.push(current);
     }
 
   public:
 
-    term_balanced_tree_iterator()
+    term_balanced_tree_iterator() 
     { }
 
     term_balanced_tree_iterator(const aterm &tree)

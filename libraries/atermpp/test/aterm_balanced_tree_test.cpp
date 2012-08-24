@@ -63,7 +63,7 @@ void test_aterm_balanced_tree()
 {
   aterm_list q = static_cast<aterm_list>(make_term("[0,1,2,3,4,5,6,7,8,9]"));
 
-  aterm_balanced_tree qtree(q);
+  aterm_balanced_tree qtree(q.begin(),10);
 
   BOOST_CHECK(qtree.size() == 10);
   BOOST_CHECK(!qtree.empty());
@@ -91,7 +91,7 @@ void test_aterm_balanced_tree()
 
   BOOST_CHECK(count == 55); 
 
-  aterm_balanced_tree qcopy(q);
+  aterm_balanced_tree qcopy(q.begin(),10);
 
   qtree.swap(qcopy);
 
@@ -101,10 +101,8 @@ void test_aterm_balanced_tree()
   BOOST_CHECK(!std::equal(q.begin(), q.end(), qcopy.begin()));
 } 
 
-int test_main(int argc, char* argv[])
+int test_main(int , char**)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_aterm_balanced_tree(); 
 
   return 0;
