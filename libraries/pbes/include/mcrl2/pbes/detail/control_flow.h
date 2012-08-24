@@ -761,15 +761,56 @@ class pbes_control_flow_algorithm
     {
       rewrite_propositional_variables();
       const std::vector<pfnf_equation>& equations = m_pbes.equations();
+      std::map<core::identifier_string, std::vector<data::variable> > V;
 
       // initialize all control flow parameters to true
+      // initalize V_km to the empty set
       for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& d_X = k->parameters();
         m_is_control_flow[X.name()] = std::vector<bool>(d_X.size(), true);
+        V[X.name()] = std::vector<data::variable>(d_X.size(), data::variable());
       }
 
+      // pass 1
+      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<pfnf_implication>& implications = k->implications();
+        for (std::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
+        {
+          const std::vector<propositional_variable_instantiation>& propvars = i->variables();
+          for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
+          {
+            const propositional_variable_instantiation& Xij = *j;
+            data::data_expression_list d = Xij.parameters();
+            std::size_t index = 0;
+            for (data::data_expression_list::const_iterator q = d.begin(); q != d.end(); ++q, ++index)
+            {
+              if (data::is_variable(*q))
+              {
+                std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
+                if (found != d_X.end())
+                {
+                  if (V[Xij.name()][index] == data::variable())
+                  {
+                    V[Xij.name()][index] = *q;
+                  }
+                  else
+                  {
+                    m_is_control_flow[Xij.name()][index] = false;
+                  }
+                  std::cout << "pass 1: equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // pass 2
       for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
