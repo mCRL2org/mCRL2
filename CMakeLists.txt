@@ -166,6 +166,8 @@ if( MCRL2_ENABLE_GUI_TOOLS )
     message(FATAL_ERROR "Qt4 not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools.")
   endif(QT4_FOUND)
 
+  message(STATUS "QT Version: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}")
+
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------

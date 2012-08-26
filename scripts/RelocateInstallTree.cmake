@@ -23,10 +23,17 @@ INSTALL(CODE "
     file(WRITE \"\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/qt.conf\" \"\")
     " COMPONENT Runtime)
 
-# 
-# Install the required qt_menu into the Contents/Resources 
-INSTALL(DIRECTORY 
-    "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
+# When a QtGui Library is a shared library, copy the required files manually. 
+if( ${QT_QTGUI_LIBRARY} MATCHES "^.*${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+
+  if(EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
+  # Install the required qt_menu into the Contents/Resources
+  install(DIRECTORY 
+      "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
+  else()
+      message(WARNING "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app is probably corrupt.")
+  endif()
+endif()
 
 # Set libraries that need to be imported into bundle
 set(DIRS 
