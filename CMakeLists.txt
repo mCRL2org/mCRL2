@@ -111,12 +111,12 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 
 # the RPATH to be used when installing (non-OSX, use CMAKE_INSTALL_NAME_DIR instead)
 if(NOT CMAKE_INSTALL_RPATH)
-  set(CMAKE_INSTALL_RPATH "$ORIGIN/../${MCRL2_LIB_DIR}")
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/mcrl2")
 endif(NOT CMAKE_INSTALL_RPATH)
 
 # Mac OSX directory name for installed targets
 # Installing prerequisite shared libraries is dealt with in "RelocateInstallTree.cmake"
-set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
+set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/mcrl2")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH

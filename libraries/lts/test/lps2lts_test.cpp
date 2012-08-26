@@ -17,6 +17,7 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
+#include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -68,7 +69,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   core::garbage_collect();
 
   result.load(options.lts);
-  boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
+  remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;
 }

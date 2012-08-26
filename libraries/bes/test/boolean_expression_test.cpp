@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <string>
+#include <stdio.h>
 #include <boost/test/minimal.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -46,7 +46,7 @@ void test_boolean_expressions()
   boolean_equation_system<> q;
   q.load(filename);
   BOOST_CHECK(p == q);
-  boost::filesystem::remove(boost::filesystem::path(filename));
+  remove(filename.c_str());
   core::garbage_collect();
 }
 

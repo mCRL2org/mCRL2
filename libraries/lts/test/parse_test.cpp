@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <cstdio>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -29,7 +30,7 @@ void parse_fsm(const std::string& text, lts::lts_fsm_t& result)
   to << text;
   to.close();
   result.loadnew(temp_filename);
-  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+  remove(temp_filename.c_str());
 }
 
 inline
@@ -80,7 +81,7 @@ void parse_dot(const std::string& text, lts::lts_dot_t& result)
   to << text;
   to.close();
   result.loadnew(temp_filename);
-  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+  remove(temp_filename.c_str());
 }
 
 std::string print_dot(const lts::lts_dot_t& dot)
@@ -89,7 +90,7 @@ std::string print_dot(const lts::lts_dot_t& dot)
   std::string temp_filename = "parse_test.dot";
   dot.save(temp_filename);
   std::string result = utilities::read_text(temp_filename);
-  boost::filesystem::remove(boost::filesystem::path(temp_filename));
+  remove(temp_filename.c_str();
   return result;
 }
 

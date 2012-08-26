@@ -10,6 +10,7 @@
 /// \brief Test for the PBES_Explorer interface.
 
 #include <iostream>
+#include <stdio.h>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -319,7 +320,7 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
   run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
   // clean up
-  boost::filesystem::remove(pbes_filename);
+  std::remove(pbes_filename.c_str());
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

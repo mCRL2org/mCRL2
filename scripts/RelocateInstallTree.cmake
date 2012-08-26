@@ -15,11 +15,27 @@
 # relocation of shared libraries only for  Mac OSX. 
 
 if( APPLE AND BUILD_SHARED_LIBS AND NOT MCRL2_SINGLE_BUNDLE )
-
 if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+
+# install a qt.conf file
+# this inserts some cmake code into the install script to write the file
+INSTALL(CODE "
+    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/qt.conf\" \"\")
+    " COMPONENT Runtime)
+
+# 
+# Install the required qt_menu into the Contents/Resources 
+INSTALL(DIRECTORY 
+    "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
+
+# Set libraries that need to be imported into bundle
+set(DIRS 
+    ${Boost_LIBRARY_DIRS}
+    ${QT_LIBRARY_DIRS} )
+
 install(CODE "
-    include(${CMAKE_SOURCE_DIR}/scripts/MCRL2BundleUtilities.cmake) 
-    fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app\" \"\" \"${MCRL2_LIB_DIR}\")
+    include(BundleUtilities) 
+    fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app\" \"\" \"${DIRS}\")
     " COMPONENT Runtime)
 endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
 

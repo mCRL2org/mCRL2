@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <cctype>
+#include <fstream>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/core/garbage_collection.h"
@@ -91,21 +92,27 @@ std::string rand_alnum_str(const std::string::size_type n)
   return s;
 }
 
+bool file_exists(const char *filename)
+{
+  std::ifstream ifile(filename);
+  return ifile;
+}
+
 /// \brief Get filename with random suffix
 /// \warning is prone to race conditions
 std::string temporary_filename(std::string const& prefix = "")
 {
   std::string basename(prefix + "_" + rand_alnum_str(8));
-  boost::filesystem::path result(basename);
+  std::string result = basename ;
   int suffix = 0;
-  while (boost::filesystem::exists(result))
+  while (file_exists(result.c_str()))
   {
     std::stringstream suffix_s;
     suffix_s << suffix;
-    result = boost::filesystem::path(basename + suffix_s.str());
+    result = basename + suffix_s.str();
     ++suffix;
   }
-  return result.string();
+  return result;
 }
 
 }
