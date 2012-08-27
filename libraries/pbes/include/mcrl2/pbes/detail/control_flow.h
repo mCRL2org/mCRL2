@@ -23,6 +23,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -466,20 +467,30 @@ class pbes_control_flow_algorithm
       return i->second;
     }
 
-    std::vector<data::variable> control_flow_parameters(const propositional_variable& X) const
+    // returns the control flow parameters of the propositional variable with name X
+    std::set<data::variable> control_flow_parameters(const core::identifier_string& X) const
     {
-      std::vector<data::variable> result;
-      const std::vector<bool>& b = control_flow_values(X.name());
-      const data::variable_list& d = X.parameters();
+      std::set<data::variable> result;
+      const std::vector<bool>& b = control_flow_values(X);
+      const pfnf_equation& eqn = *find_equation(m_pbes, X);
+    	const std::vector<data::variable>& d = eqn.parameters();
       std::size_t index = 0;
-      for (data::variable_list::const_iterator i = d.begin(); i != d.end(); ++i, index++)
+      for (std::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
       {
         if (b[index])
         {
-          result.push_back(*i);
+          result.insert(*i);
         }
       }
       return result;
+    }
+
+    // returns the parameters of the propositional variable with name X
+    std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
+    {
+      const pfnf_equation& eqn = *find_equation(m_pbes, X);
+    	const std::vector<data::variable>& d = eqn.parameters();
+    	return std::set<data::variable>(d.begin(), d.end());
     }
 
     // removes parameter values that do not correspond to a control flow parameter
@@ -609,6 +620,32 @@ class pbes_control_flow_algorithm
       }
     }
 
+    std::string print_control_flow_marking(const control_flow_vertex& v) const
+    {
+      std::ostringstream out;
+      out << "vertex " << pbes_system::pp(v.X) << " = {";
+      for (std::set<data::variable>::const_iterator j = v.marking.begin(); j != v.marking.end(); ++j)
+      {
+        if (j != v.marking.begin())
+        {
+          out << ", ";
+        }
+        out << data::pp(*j);
+      }
+      out << "}";
+      return out.str();
+    }
+
+    void print_control_flow_marking() const
+    {
+      std::cout << "--- control flow marking ---" << std::endl;
+      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      {
+        const control_flow_vertex& v = i->second;
+        std::cout << print_control_flow_marking(v) << std::endl;
+      }
+    }
+
     void compute_control_flow_marking()
     {
       // initialization
@@ -616,24 +653,10 @@ class pbes_control_flow_algorithm
       {
         control_flow_vertex& v = i->second;
         std::set<data::variable> fv = pbes_system::find_free_variables(v.guard);
-
-        const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
-    	  propositional_variable X = eqn.variable();
-    	  const std::vector<data::variable>& d_X = eqn.parameters();
-
-        std::vector<data::variable> to_be_removed = control_flow_parameters(X);
-        for (std::set<data::variable>::iterator j = fv.begin(); j != fv.end(); ++j)
-        {
-        	if (std::find(d_X.begin(), d_X.end(), *j) == d_X.end())
-          {
-          	to_be_removed.push_back(*j);
-          }
-        }
-        for (std::vector<data::variable>::iterator k = to_be_removed.begin(); k != to_be_removed.end(); ++k)
-        {
-        	fv.erase(*k);
-        }
-        v.marking = fv;
+    	  std::set<data::variable> dx = propvar_parameters(v.X.name());
+        std::set<data::variable> cf = control_flow_parameters(v.X.name());
+        v.marking = data::detail::set_difference(data::detail::set_intersection(fv, dx), cf);
+        mCRL2log(log::debug, "control_flow") << "initial marking " << print_control_flow_marking(v) << "\n";
       }
 
       // backwards reachability algorithm
@@ -648,14 +671,21 @@ class pbes_control_flow_algorithm
         std::set<control_flow_vertex*>::iterator i = todo.begin();
         todo.erase(i);
         control_flow_vertex& v = **i;
-        std::cout << "selected todo element " << pbes_system::pp(v.X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
 
         for (std::vector<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           control_flow_vertex& u = *(i->source);
-          std::size_t sz = u.marking.size();
+          std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Xij = i->label;
           std::set<data::variable> fv = pbes_system::find_free_variables(Xij);
+    	    std::set<data::variable> dx = propvar_parameters(Xij.name());
+          u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
+          if (u.marking.size() > last_size)
+          {
+            todo.insert(&u);
+            mCRL2log(log::debug, "control_flow") << "updated marking " << print_control_flow_marking(u) << " using edge " << pbes_system::pp(Xij) << "\n";
+          }
         }
       }
     }
@@ -678,7 +708,9 @@ class pbes_control_flow_algorithm
       compute_control_flow_graph();
       print_control_flow_parameters();
       print_control_flow_graph();
+
       compute_control_flow_marking();
+      print_control_flow_marking();
     }
 };
 

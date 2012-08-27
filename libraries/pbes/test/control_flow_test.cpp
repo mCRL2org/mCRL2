@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/control_flow.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -165,6 +166,6 @@ BOOST_AUTO_TEST_CASE(test_simplify)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
+  log::mcrl2_logger::set_reporting_level(log::debug, "control_flow");
   return 0;
 }
