@@ -164,9 +164,13 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
    When building for the Windows SDK, it is recommended to install QT using the
    following steps:
    
-   - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
-     (for the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
-   - Follow the installation instructions.
+   For a 32-bit version, binaries are available:
+   
+     - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
+       For the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
+     - Follow the installation instructions.
+   
+   For a 64-bit version, follow the instruction on the http://qt-project.org/doc/qt-4.8/install-win.html
    
    When installed correctly, CMake should be able to automatically find your 
    installation.
