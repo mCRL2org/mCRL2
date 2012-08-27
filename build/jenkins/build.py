@@ -41,13 +41,6 @@ if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
 
 #
-# For the time being, do not build the GUI tools on Windows
-# TODO: Enable these tools
-#
-if (label == 'windows-amd64' or label == 'windows-x86'):
-  compilerflags += ['-DMCRL2_ENABLE_GUI_TOOLS=OFF']
-
-#
 # Run CMake, take into account configuration axes.
 #
 if not os.path.exists(builddir):
