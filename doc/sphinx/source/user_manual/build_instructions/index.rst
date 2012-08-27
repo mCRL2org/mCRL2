@@ -6,7 +6,8 @@ Build instructions
 .. include:: downloads.inc
 
 The mCRL2 source code can be obtained in two ways. The source code of the latest
-release version of the toolset is available as a |src_tgz|_. The development 
+release version of the toolset is available as a source tarball, see :ref:`download`.
+The development 
 version can be checked out from our `Subversion <http://subversion.tigris.org>`_ 
 repository::
 

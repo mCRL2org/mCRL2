@@ -241,34 +241,3 @@ Optionally some additional flags can be set, like
 
 By default the flag BUILD_SHARED_LIBS is set to true, but it is recommended to set it to false for MinGW.
 
-= Problems with wxWidgets =
-
-== I got a fatal Error during compiling/ I got a mismatch between the program and library build versions detected. ==
-
-I got the following error, which looks like:
-
-  Fatal Error: Mismatch between the program and library build versions detected.  
-  The library used 2.8 (debug,Unicode,compiler with C++ ABI 1002,wx containers,compatible with 2.6),
-  and your program used 2.8 (no debug,Unicode,compiler with C++ ABI 1002,wx containers,compatible with 2.6).
-
-This error is related to a mismatch between libraries. In this case it applies for wxWidgets.
-CMake detects if a version of wxWidgets is installed. However, it can not detect if all suitable configurations (Debug, Non-Debug, Unicode, etc...) are available. This is the users responsibility. For mCRL2 toolset, wxWidgets requires to be in the same configuration. This means, that if a user want to build the toolset with Debug symbols, wxWidgets should match the configuration. To overcome this error, one should configure, compile and install wxWidgets. Let '''wxdir''' be the library where wxWidgets is installed, then configure Cmake to use that version by executing the following command:
-
-  cmake -DwxWidgets_CONFIG_EXECUTABLE=/wxdir/bin/wx-config -DwxWidgets_wxrc_EXECUTABLE=/wxdir/bin/wxrc
-
-==CMake on Windows complains that it can't find wxWidgets, but I have wxWidgets installed, what should I do?==
-
-For this FAQ, we assume that wxWidgets is compiled in '''<wxdir>''', Visual studio is used for compilation.
-As we do not export symbols, it is not possible to create a build with shared libraries. This only allows us to build static versions. 
-
-mCRL2 requires a version of wxWidgets that is installed and compiled accordingly. 
-Make sure that your are using the static configuration for compiling wxWidgets. 
-To compile graphical tools that require OpenGL, edit the file '''<wxdir>\lib\vc_lib\mswd\wx\setup.h''' , by setting the following define to 1 instead of 0:
-
-  #define wxUSE_GLCANVAS       1
-
-
-When configuring CMake set the following variables '''wxWidgets_LIB_DIR''' and '''wxWidgets_ROOT_DIR'''
-to "<wxdir>/lib/vc_lib" and "<wxdir>", respectively. This can be done by:
-
- cmake -DwxWidgets_LIB_DIR="<wxdir>/lib/vc_lib" -DwxWidgets_ROOT_DIR="<wxdir>"

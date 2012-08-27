@@ -16,11 +16,7 @@ The header files of the utilities library are roughly organised as depicted belo
 
 The top directory is mcrl2, containing a header file with toolset specific build information and the utilities directory.
 
-The toolset build information consists of a single header file setup.h. It should not be necessary to used it directly; it contains path information and compiler settings. At the time of writing it is used only to compile the compiling rewriters.
-
 The command line interfacing sublibrary standardises some more aspects of tool command line interfaces.
-
-Custom wxWidgets controls are found in the header files colorbutton.h and spinctrlfloat.h. They are shared amongst the visualisation tools in the toolset. The color button control is a colour selection button that uses a colour picker dialog and that assumes the selected colour. The spinctrlfloat is a spin control as the one that is present in wxWidgets except for that it works with floating point values.
 
 ext is the BDD implementation (on top of the ATerm library), consisting of bdd2dot.h, bdd_info.h and bdd_manipulator.h.
 Reference
@@ -237,8 +233,8 @@ menu containing the following menu items:
 * Contents: a link to the tool user manual;
 * About: a message dialog containing the tool version information.
 
-Use of the :cpp:class:`mcrl2::utilities::wx::tool` class takes care of both by
-default. This class must be used for all wxWidgets tools to get the correct
+Use of the :cpp:class:`mcrl2::utilities::qt::qt_tool` class takes care of both by
+default. This class must be used for all QT tools to get the correct
 command line interface behaviour.
 
 Help and version information
