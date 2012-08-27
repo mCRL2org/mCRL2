@@ -57,7 +57,7 @@ class CombnPlot : public Visualizer
     // -- input event handlers --------------------------------------
     void handleMouseEvent(QMouseEvent* e);
 
-    QSize sizeHint() { return QSize(400,400); }
+    QSize sizeHint() const { return QSize(400,400); }
 
   protected:
     // -- utility data functions ------------------------------------

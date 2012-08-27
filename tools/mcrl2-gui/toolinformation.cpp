@@ -14,6 +14,9 @@
 ToolInformation::ToolInformation(QString name, QString input, QString output, QString isGui)
   : name(name), input(input), output(output), valid(false)
 {
+  // isGui only used for APPLE
+  Q_UNUSED(isGui)
+
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
 
   #ifdef __APPLE__

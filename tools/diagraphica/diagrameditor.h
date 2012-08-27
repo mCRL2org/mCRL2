@@ -134,7 +134,7 @@ class DiagramEditor : public Visualizer
     void handleDragDOFHge(Shape* s);
     void handleDragDOFAglEnd(Shape* s);
 
-    QSize sizeHint() { return QSize(600,600); }
+    QSize sizeHint() const { return QSize(600,600); }
 
     // -- hit detection ---------------------------------------------
     void processHits(

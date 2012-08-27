@@ -65,7 +65,7 @@ class Examiner : public Visualizer
     void handleMouseEvent(QMouseEvent* e);
     void handleKeyEvent(QKeyEvent* e);
 
-    QSize sizeHint() { return QSize(200,200); }
+    QSize sizeHint() const { return QSize(200,200); }
 
   protected slots:
     void clearData();

@@ -13,8 +13,8 @@ using namespace mcrl2::utilities::qt;
 
 PersistentFileDialog::PersistentFileDialog(QString directory, QWidget *parent)
   : QObject(parent),
-    m_directory(directory),
-    m_parent(parent)
+    m_parent(parent),
+    m_directory(directory)
 {
   if (m_directory.isEmpty())
     m_directory = QDir::currentPath();

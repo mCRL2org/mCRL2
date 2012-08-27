@@ -20,7 +20,7 @@ class MovableTableWidget : public QTableWidget
     explicit MovableTableWidget(QWidget *parent = 0);
 
   protected:
-    int sizeHintForColumn(int column);
+    int sizeHintForColumn(int column) const;
     void paintEvent(QPaintEvent *e);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);

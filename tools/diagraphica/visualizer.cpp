@@ -37,7 +37,6 @@ Visualizer::Visualizer(
   showMenu = false;
 }
 
-
 void Visualizer::updateGL(bool inSelectMode)
 {
   m_inSelectMode = inSelectMode;

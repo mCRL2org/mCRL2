@@ -38,7 +38,7 @@ class ColorChooser : public Visualizer
     void handleMouseLeaveEvent();
     void handleMouseEvent(QMouseEvent* e);
 
-    QSize sizeHint() { return QSize(300,100); }
+    QSize sizeHint() const { return QSize(300,100); }
 
   signals:
     void activated();

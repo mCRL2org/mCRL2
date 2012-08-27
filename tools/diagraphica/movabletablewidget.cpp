@@ -19,7 +19,7 @@ MovableTableWidget::MovableTableWidget(QWidget *parent) :
   setDragDropOverwriteMode(false);
 }
 
-int MovableTableWidget::sizeHintForColumn(int column)
+int MovableTableWidget::sizeHintForColumn(int column) const
 {
   ensurePolished();
 

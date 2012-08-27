@@ -59,7 +59,7 @@ int NumberedTextEdit::lineNumberAreaWidth()
     return (5+fontMetrics().width('9')*digits);
 }
 
-void NumberedTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
+void NumberedTextEdit::lineNumberAreaPaintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(m_numberArea);
     painter.setPen(Qt::black);
