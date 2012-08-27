@@ -40,10 +40,6 @@ add_library(${PROJECT_NAME}
   ${mcrl2_utilities_src}
 )
 
-target_link_libraries(${PROJECT_NAME}
-  ${Boost_LIBRARIES}
-)
-
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 # ##############################

@@ -10,10 +10,9 @@
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
 #include <iostream>
+#include <cstdio> 
 
 #include <boost/test/minimal.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -154,7 +153,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   test_data_type(action_label_type);
 
   // cleanup temporary files
-  boost::filesystem::remove(boost::filesystem::path(abp_filename));
+  std::remove(abp_filename.c_str());
 
   delete[] initial_state;
   delete[] dest_state;

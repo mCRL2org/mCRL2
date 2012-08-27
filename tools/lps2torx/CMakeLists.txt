@@ -35,7 +35,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_syntax
   dparser
-  ${Boost_LIBRARIES}
 )
 
 # add install target:

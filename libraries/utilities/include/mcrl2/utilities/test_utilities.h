@@ -17,8 +17,6 @@
 #include <vector>
 #include <cctype>
 #include <fstream>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewrite_strategy.h"
 

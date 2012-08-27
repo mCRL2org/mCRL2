@@ -31,7 +31,6 @@ foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
-     ${Boost_FILESYSTEM_LIBRARY}
      ${Boost_SYSTEM_LIBRARY}
      mcrl2_core
      mcrl2_data
