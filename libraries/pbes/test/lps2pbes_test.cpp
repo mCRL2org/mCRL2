@@ -41,12 +41,6 @@ using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-#ifdef MCRL2_USE_BOOST_FILESYSTEM
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-namespace fs = boost::filesystem;
-#endif
-
 const std::string TIMED_SPECIFICATION =
   "act a;\n"
   "proc P = a@1 . P;\n"

@@ -14,8 +14,6 @@
 #include <sstream>
 #include <cstdio>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/lts/parse.h"
@@ -90,7 +88,7 @@ std::string print_dot(const lts::lts_dot_t& dot)
   std::string temp_filename = "parse_test.dot";
   dot.save(temp_filename);
   std::string result = utilities::read_text(temp_filename);
-  remove(temp_filename.c_str();
+  std::remove(temp_filename.c_str());
   return result;
 }
 

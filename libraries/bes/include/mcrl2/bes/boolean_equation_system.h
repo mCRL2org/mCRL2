@@ -18,7 +18,6 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <boost/foreach.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
