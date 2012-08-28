@@ -218,14 +218,26 @@ class pbes_control_flow_algorithm
          target(target_),
          label(label_)
        {}
+
+      bool operator<(const control_flow_edge& other) const
+      {
+        if (source == other.source)
+        {
+          return target < other.target;
+        }
+        else
+        {
+          return source < other.source;
+        }
+      }
     };
 
     // vertex of the control flow graph
     struct control_flow_vertex
     {
       propositional_variable_instantiation X;
-      std::vector<control_flow_edge> incoming_edges;
-      std::vector<control_flow_edge> outgoing_edges;
+      std::set<control_flow_edge> incoming_edges;
+      std::set<control_flow_edge> outgoing_edges;
       pbes_expression guard;
       std::set<data::variable> marking;
 
@@ -238,9 +250,9 @@ class pbes_control_flow_algorithm
         std::ostringstream out;
         out << pbes_system::pp(X);
         out << " edges:";
-        for (std::vector<control_flow_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+        for (std::set<control_flow_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
         {
-          out << " " << pbes_system::pp(i->source->X);
+          out << " " << pbes_system::pp(i->target->X);
         }
         return out.str();
       }
@@ -316,28 +328,6 @@ class pbes_control_flow_algorithm
       return propositional_variable();
     }
 
-//    // extract the propositional variable instantiations from an expression of the form g => \/_j in J . X_j(e_j)
-//    std::vector<propositional_variable_instantiation> find_propositional_variables(const pbes_expression& x) const
-//    {
-//      std::vector<pbes_expression> v;
-//      pbes_expression y = x;
-//      if (is_imp(y))
-//      {
-//        y = imp(y).right();
-//      }
-//      split_or(y, v);
-//
-//      std::vector<propositional_variable_instantiation> result;
-//      for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
-//      {
-//        if (is_propositional_variable_instantiation(*i))
-//        {
-//          result.push_back(*i);
-//        }
-//      }
-//      return result;
-//    }
-
     void print_control_flow_parameters()
     {
       std::cout << "--- control flow parameters ---" << std::endl;
@@ -358,6 +348,40 @@ class pbes_control_flow_algorithm
         }
         std::cout << std::endl;
       }
+    }
+
+    std::string print_propvar_parameter(const core::identifier_string& X, std::size_t index) const
+    {
+      return "(" + core::pp(X) + ", " + data::pp(find_equation(m_pbes, X)->parameters()[index]) + ")";
+    }
+
+    std::string print_control_flow_assignment(bool control_flow_value,
+                                              std::size_t index,
+                                              const pbes_system::propositional_variable& X,
+                                              const pbes_system::propositional_variable_instantiation& Xij,
+                                              const std::string& message,
+                                              const data::variable& previous_value = data::variable()
+                                             ) const
+    {
+      std::ostringstream out;
+      out << "[cf] " << message << ": " << print_propvar_parameter(Xij.name(), index) << " -> " << std::boolalpha << control_flow_value;
+      out << " because of equation " << core::pp(X.name());
+      data::variable_list v = X.parameters();
+      if (v.size() > 0)
+      {
+        out << "(";
+        for (data::variable_list::iterator i = v.begin(); i != v.end(); ++i)
+        {
+          if (i != v.begin())
+          {
+            out << ", ";
+          }
+          out << core::pp(i->name());
+        }
+        out << ")";
+      }
+      out << " = ... " << pbes_system::pp(Xij) << " index = " << index << " " << data::pp(previous_value) << std::endl;
+      return out.str();
     }
 
     void compute_control_flow_parameters()
@@ -399,12 +423,14 @@ class pbes_control_flow_algorithm
                   if (V[Xij.name()][index] == data::variable())
                   {
                     V[Xij.name()][index] = *q;
+                    mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(true, index, X, Xij, "pass 1");
                   }
                   else
                   {
-                    m_is_control_flow[Xij.name()][index] = false;
+                    bool is_same_value = (V[Xij.name()][index] == *q);
+                    m_is_control_flow[Xij.name()][index] = is_same_value;
+                    mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(is_same_value, index, X, Xij, "pass 1", V[Xij.name()][index]);
                   }
-                  std::cout << "pass 1: equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
                 }
               }
             }
@@ -438,21 +464,21 @@ class pbes_control_flow_algorithm
                 if (found == d_X.end())
                 {
                   m_is_control_flow[Xij.name()][index] = false;
-                  std::cout << "equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
+                  mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
                 }
                 else
                 {
                   if (X.name() == Xij.name() && (found != d_X.begin() + index))
                   {
                     m_is_control_flow[Xij.name()][index] = false;
-                    std::cout << "equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
+                    mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
                   }
                 }
               }
               else
               {
                 m_is_control_flow[Xij.name()][index] = false;
-                std::cout << "equation " << pbes_system::pp(X) << " variable " << pbes_system::pp(Xij) << " " << index << std::endl;
+                mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
               }
             }
           }
@@ -548,6 +574,9 @@ class pbes_control_flow_algorithm
     {
       compute_control_flow_parameters();
 
+      data::rewriter datar(m_pbes.data());
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+
       std::set<control_flow_vertex*> todo;
 
       // handle the initial state
@@ -561,7 +590,7 @@ class pbes_control_flow_algorithm
         todo.erase(i);
         control_flow_vertex& v = **i;
         control_flow_vertex* source = &v;
-        std::cout << "selected todo element " << pbes_system::pp(v.X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "[cf] selected todo element " << pbes_system::pp(v.X) << std::endl;
 
         const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
         propositional_variable X = project_variable(eqn.variable());
@@ -574,6 +603,12 @@ class pbes_control_flow_algorithm
         {
           const std::vector<propositional_variable_instantiation>& propvars = i->variables();
           pbes_expression guard = and_(eqn.h(), i->g());
+          pbes_expression evaluate_guard = pbesr(guard, sigma);
+          if (is_false(evaluate_guard))
+          {
+            continue;
+          }
+
           for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
             propositional_variable_instantiation Xij = project(*j);
@@ -583,17 +618,17 @@ class pbes_control_flow_algorithm
             if (q == m_control_vertices.end())
             {
               // vertex Y does not yet exist
-              std::cout << "discovered " << pbes_system::pp(Y) << std::endl;
+              mCRL2log(log::debug, "control_flow") << "[cf] discovered " << pbes_system::pp(Y) << std::endl;
               vertex_iterator k = insert_control_flow_vertex(Y, guard);
               todo.insert(&(k->second));
-              std::cout << "added todo element " << pbes_system::pp(k->first) << std::endl;
+              mCRL2log(log::debug, "control_flow") << "[cf] added todo element " << pbes_system::pp(k->first) << std::endl;
               control_flow_vertex* target = &(k->second);
-              v.outgoing_edges.push_back(control_flow_edge(source, target, label));
+              v.outgoing_edges.insert(control_flow_edge(source, target, label));
             }
             else
             {
               control_flow_vertex* target = &(q->second);
-              v.outgoing_edges.push_back(control_flow_edge(source, target, label));
+              v.outgoing_edges.insert(control_flow_edge(source, target, label));
             }
           }
         }
@@ -603,10 +638,10 @@ class pbes_control_flow_algorithm
       for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
-        for (std::vector<control_flow_edge>::iterator j = v.outgoing_edges.begin(); j != v.outgoing_edges.end(); ++j)
+        for (std::set<control_flow_edge>::iterator j = v.outgoing_edges.begin(); j != v.outgoing_edges.end(); ++j)
         {
-          control_flow_edge& e = *j;
-          e.target->incoming_edges.push_back(e);
+          const control_flow_edge& e = *j;
+          e.target->incoming_edges.insert(e);
         }
       }
     }
@@ -620,19 +655,26 @@ class pbes_control_flow_algorithm
       }
     }
 
-    std::string print_control_flow_marking(const control_flow_vertex& v) const
+    std::string print_variable_set(const std::set<data::variable>& v) const
     {
       std::ostringstream out;
-      out << "vertex " << pbes_system::pp(v.X) << " = {";
-      for (std::set<data::variable>::const_iterator j = v.marking.begin(); j != v.marking.end(); ++j)
+      out << "{";
+      for (std::set<data::variable>::const_iterator j = v.begin(); j != v.end(); ++j)
       {
-        if (j != v.marking.begin())
+        if (j != v.begin())
         {
           out << ", ";
         }
         out << data::pp(*j);
       }
       out << "}";
+      return out.str();
+    }
+
+    std::string print_control_flow_marking(const control_flow_vertex& v) const
+    {
+      std::ostringstream out;
+      out << "vertex " << pbes_system::pp(v.X) << " = " << print_variable_set(v.marking);
       return out.str();
     }
 
@@ -652,9 +694,13 @@ class pbes_control_flow_algorithm
       for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
+        std::cout << "<guard>" << pbes_system::pp(v.guard) << std::endl;
         std::set<data::variable> fv = pbes_system::find_free_variables(v.guard);
+        std::cout << "<fv>" << print_variable_set(fv) << std::endl;
     	  std::set<data::variable> dx = propvar_parameters(v.X.name());
+        std::cout << "<dx>" << print_variable_set(dx) << std::endl;
         std::set<data::variable> cf = control_flow_parameters(v.X.name());
+        std::cout << "<cf>" << print_variable_set(cf) << std::endl;
         v.marking = data::detail::set_difference(data::detail::set_intersection(fv, dx), cf);
         mCRL2log(log::debug, "control_flow") << "initial marking " << print_control_flow_marking(v) << "\n";
       }
@@ -673,7 +719,7 @@ class pbes_control_flow_algorithm
         control_flow_vertex& v = **i;
         mCRL2log(log::debug, "control_flow") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
 
-        for (std::vector<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
+        for (std::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();

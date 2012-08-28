@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_source_dest1)
   algorithm.run();
 }
 
-BOOST_AUTO_TEST_CASE(test_source_dest2)
+BOOST_AUTO_TEST_CASE(test_running_example)
 {
   std::string text =
     "sort D = struct d1 | d2 | d3;                                                \n"
@@ -121,8 +121,6 @@ BOOST_AUTO_TEST_CASE(test_source_dest2)
     "init Y(1, d1, 1, d1);                                                        \n"
     ;
   pbes<> p = txt2pbes(text, false);
-//  pfnf_rewriter R;
-//  pbes_rewrite(p, R);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
