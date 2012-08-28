@@ -284,16 +284,51 @@ namespace Graph
     }
   }
 
+  QByteArray SpringLayoutUi::settings()
+  {
+    QByteArray result;
+    QDataStream out(&result, QIODevice::WriteOnly);
+
+    out << quint32(m_ui.sldAttraction->value()) <<
+           quint32(m_ui.sldRepulsion->value()) <<
+           quint32(m_ui.sldSpeed->value()) <<
+           quint32(m_ui.sldHandleWeight->value()) <<
+           quint32(m_ui.sldNatLength->value()) <<
+           quint32(m_ui.cmbForceCalculation->currentIndex());
+
+    return result;
+  }
+
+  void SpringLayoutUi::setSettings(QByteArray state)
+  {
+    if (state.isEmpty())
+      return;
+
+    QDataStream in(&state, QIODevice::ReadOnly);
+
+    quint32 attraction, repulsion, speed, handleWeight, NatLength, ForceCalculation;
+    in >> attraction >> repulsion >> speed >> handleWeight >> NatLength >> ForceCalculation;
+
+    if (in.status() == QDataStream::Ok)
+    {
+      m_ui.sldAttraction->setValue(attraction);
+      m_ui.sldRepulsion->setValue(repulsion);
+      m_ui.sldSpeed->setValue(speed);
+      m_ui.sldHandleWeight->setValue(handleWeight);
+      m_ui.sldNatLength->setValue(NatLength);
+      m_ui.cmbForceCalculation->setCurrentIndex(ForceCalculation);
+    }
+
+  }
+
   void SpringLayoutUi::onAttractionChanged(int value)
   {
     m_layout.setAttraction(value);
-    m_ui.lblAttraction->setText(QString("Attraction (%0)").arg(m_layout.attraction()));
   }
 
   void SpringLayoutUi::onRepulsionChanged(int value)
   {
     m_layout.setRepulsion(value);
-    m_ui.lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
   }
 
   void SpringLayoutUi::onSpeedChanged(int value)
@@ -310,7 +345,6 @@ namespace Graph
   void SpringLayoutUi::onNatLengthChanged(int value)
   {
     m_layout.setNaturalTransitionLength(value);
-    m_ui.lblRepulsion->setText(QString("Repulsion (%0)").arg(m_layout.repulsion()));
   }
 
   void SpringLayoutUi::onForceCalculationChanged(int value)

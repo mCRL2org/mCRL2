@@ -79,6 +79,7 @@
      <string>&amp;View</string>
     </property>
     <addaction name="act3D"/>
+    <addaction name="separator"/>
     <addaction name="actLayoutControl"/>
     <addaction name="actVisualization"/>
     <addaction name="actInformation"/>
@@ -118,11 +119,8 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
-    <string>&amp;Layout control...</string>
+    <string>&amp;Layout control</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
@@ -188,18 +186,12 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Visualization</string>
    </property>
   </action>
   <action name="actInformation">
    <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">

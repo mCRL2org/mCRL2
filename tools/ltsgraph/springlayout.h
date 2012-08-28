@@ -150,12 +150,25 @@ namespace Graph
        * @brief Destructor.
        */
       virtual ~SpringLayoutUi();
+
+      /**
+       * @brief Get the current state of the settings.
+       */
+      QByteArray settings();
+
+      /**
+       * @brief Restore the settings of the given state.
+       * @param state The original state
+       */
+      void setSettings(QByteArray state);
+
     signals:
 
       /**
        * @brief Indicates that the thread is started or stopped.
        */
       void runningChanged(bool);
+
     public slots:
 
       /**

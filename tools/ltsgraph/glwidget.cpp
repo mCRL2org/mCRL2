@@ -67,7 +67,7 @@ struct HandleMoveRecord : public MoveRecord
     void release(bool toggleLocked) {
       MoveRecord::release(toggleLocked);
       if (movingLabel)
-        label.release(toggleLocked);
+        label.release(false);
     }
     void move(const Graph::Coord3D &pos)
     {
@@ -249,7 +249,17 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
   else
   {
     m_dragstart = e->pos();
-    if ((e->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+    if (e->modifiers() == Qt::ControlModifier)
+    {
+      if (e->button() == Qt::LeftButton)
+        m_dragmode = dm_translate;
+    }
+    else if (e->modifiers() == Qt::ShiftModifier)
+    {
+      if (e->button() == Qt::LeftButton && m_scene->size().z > 1)
+        m_dragmode = dm_rotate;
+    }
+    else if (e->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
     {
       if (e->button() == Qt::LeftButton)
         m_dragmode = dm_translate;
@@ -260,8 +270,8 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
       {
         if (e->button() == Qt::RightButton && m_scene->size().z > 1)
           m_dragmode = dm_rotate;
-        else if (e->button() == Qt::RightButton)
-          m_dragmode = dm_rotate_2d;
+//        else if (e->button() == Qt::RightButton)
+//          m_dragmode = dm_rotate_2d;
         else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton)))
           m_dragmode = dm_zoom;
       }
@@ -315,9 +325,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;
-    Graph::Coord3D vec3 = m_scene->eyeToWorld(vec.x() + m_dragstart.x(), vec.y() + m_dragstart.y(), 0);
-    vec3 -= m_scene->eyeToWorld(m_dragstart.x(), m_dragstart.y(), 0);
-    vec3.z = 0;
+
+    Graph::Coord3D vec3 = m_scene->eyeToWorld(e->pos().x(), e->pos().y(), 1.0f) - m_scene->eyeToWorld(m_dragstart.x(), m_dragstart.y(), 1.0f);
 
     switch (m_dragmode)
     {
@@ -355,6 +364,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         break;
       case dm_dragnode:
         m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
+        mCRL2log(mcrl2::log::info) << QString("Z: %1\n").arg(m_scene->worldToEye(m_dragnode->pos()).z).toStdString();
         break;
       case dm_zoom:
         m_scene->zoom(pow(1.0005f, vec.y()));
@@ -391,7 +401,7 @@ void GLWidget::resetViewpoint(size_t animation)
 {
   m_scene->setRotation(Graph::Coord3D(0, 0, 0), animation);
   m_scene->setTranslation(Graph::Coord3D(0, 0, 0), animation);
-  m_scene->setZoom(1.0, animation);
+  m_scene->setZoom(0.95f, animation);
 }
 
 void GLWidget::setPaint(const QColor &color)

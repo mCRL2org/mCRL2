@@ -72,10 +72,12 @@ MainWindow::MainWindow(QWidget *parent) :
   QSettings settings("mCRL2", "LTSGraph");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
-  m_ui.actLayoutControl->setChecked(springlayoutui->isVisible());
-  m_ui.actVisualization->setChecked(glwidgetui->isVisible());
-  m_ui.actInformation->setChecked(informationui->isVisible());
-  m_ui.actOutput->setChecked(m_ui.dockOutput->isVisible());
+  springlayoutui->setSettings(settings.value("settings").toByteArray());
+
+  m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
+  m_ui.actVisualization->setChecked(!glwidgetui->isHidden());
+  m_ui.actInformation->setChecked(!informationui->isHidden());
+  m_ui.actOutput->setChecked(!m_ui.dockOutput->isHidden());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -83,16 +85,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QSettings settings("mCRL2", "LTSGraph");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
+  settings.setValue("settings", m_layout->ui()->settings());
   QMainWindow::closeEvent(event);
 }
 
 void MainWindow::showEvent(QShowEvent *event)
 {
   QMainWindow::showEvent(event);
-  qDebug() << "showEvent";
   if (!m_delayedOpen.isEmpty())
   {
-    qDebug() << "m_delayedOpen";
     m_glwidget->updateGL();
     openFile(m_delayedOpen);
     m_delayedOpen = QString();
@@ -128,7 +129,6 @@ void MainWindow::onTimer()
 
 void MainWindow::delayedOpenFile(QString fileName)
 {
-  qDebug() << "set delayed";
   m_delayedOpen = fileName;
 }
 
