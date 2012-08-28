@@ -268,6 +268,26 @@ class pbes_control_flow_algorithm
         }
         return result;
       }
+
+      std::set<std::size_t> marking_variable_indices(const pfnf_pbes& p) const
+      {
+        std::set<std::size_t> result;
+        for (std::set<data::variable>::const_iterator i = marking.begin(); i != marking.end(); ++i)
+        {
+          // TODO: make this code more efficient
+          const pfnf_equation& eqn = *find_equation(p, X.name());
+        	const std::vector<data::variable>& d = eqn.parameters();
+        	for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
+        	{
+        	  if (*i == *j)
+        	  {
+        	    result.insert(j - d.begin());
+        	    break;
+        	  }
+        	}
+        }
+        return result;
+      }
     };
 
     struct control_flow_substitution
@@ -622,9 +642,9 @@ class pbes_control_flow_algorithm
 
           for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
-            propositional_variable_instantiation Xij = project(*j);
-            propositional_variable_instantiation Y = apply_substitution(Xij, sigma);
-            propositional_variable_instantiation label = Y;
+            propositional_variable_instantiation Xij = apply_substitution(*j, sigma);
+            propositional_variable_instantiation Y = project(Xij);
+            propositional_variable_instantiation label = Xij;
             vertex_iterator q = m_control_vertices.find(Y);
             if (q == m_control_vertices.end())
             {
@@ -720,15 +740,27 @@ class pbes_control_flow_algorithm
         todo.erase(i);
         control_flow_vertex& v = **i;
         mCRL2log(log::debug, "control_flow") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
+        std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
         for (std::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Xij = i->label;
-          std::set<data::variable> fv = pbes_system::find_free_variables(Xij);
     	    std::set<data::variable> dx = propvar_parameters(Xij.name());
-          u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
+          for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
+          {
+            std::size_t m = *j;
+            data::data_expression_list e = Xij.parameters();
+            data::data_expression_list::const_iterator k = e.begin();
+            for (std::size_t p = 0; p < m; ++p)
+            {
+              ++k;
+            }
+            data::data_expression e_m = *k;
+            std::set<data::variable> fv = pbes_system::find_free_variables(e_m);
+            u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
+          }
           if (u.marking.size() > last_size)
           {
             todo.insert(&u);
