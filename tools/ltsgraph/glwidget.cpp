@@ -364,7 +364,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         break;
       case dm_dragnode:
         m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
-        mCRL2log(mcrl2::log::info) << QString("Z: %1\n").arg(m_scene->worldToEye(m_dragnode->pos()).z).toStdString();
         break;
       case dm_zoom:
         m_scene->zoom(pow(1.0005f, vec.y()));
