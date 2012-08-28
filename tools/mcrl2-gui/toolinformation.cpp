@@ -11,11 +11,9 @@
 #include "mcrl2/utilities/logger.h"
 #include <QTextStream>
 
-ToolInformation::ToolInformation(QString name, QString input, QString output, QString isGui)
-  : name(name), input(input), output(output), valid(false)
+ToolInformation::ToolInformation(QString name, QString input, QString output, bool guiTool)
+  : name(name), input(input), output(output), guiTool(guiTool), valid(false)
 {
-  // isGui only used for APPLE
-  Q_UNUSED(isGui)
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
 
@@ -30,7 +28,7 @@ ToolInformation::ToolInformation(QString name, QString input, QString output, QS
     path.append(".exe");
   #endif
   #ifdef __APPLE__
-    if (isGui.compare(QString("true"),Qt::CaseSensitive) == 0)
+    if (guiTool)
     {
       path.append(".app/Contents/MacOS/");
       path.append(name);
@@ -109,9 +107,9 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
 
   while (!optionElement.isNull())
   {
-    bool standard = (optionElement.attribute("default") == "yes");
     QString optShort = optionElement.firstChildElement("short").text();
     QString optLong = optionElement.firstChildElement("long").text();
+    bool standard = (optionElement.attribute("default") == "yes") || (optLong.toLower() == "verbose");
     QString optDescription = optionElement.firstChildElement("description").text();
     ToolOption option(standard, optShort, optLong, optDescription);
 

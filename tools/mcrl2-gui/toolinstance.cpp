@@ -26,6 +26,7 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QFileDialog>
+#include <QScrollBar>
 #include "mcrl2/utilities/logger.h"
 
 ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent) :
@@ -36,10 +37,8 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 {
   m_ui.setupUi(this);
 
-  m_pckFileOut = new FilePicker(m_fileDialog, m_ui.scrollAreaWidgetContents);
-  QWidget* old = m_ui.pckFileOut;
-  m_ui.pckFileOut = m_pckFileOut;
-  delete old;
+  m_pckFileOut = new FilePicker(m_fileDialog, m_ui.pckFileOut);
+  m_ui.pckFileOut->layout()->addWidget(m_pckFileOut);
 
   connect(this, SIGNAL(colorChanged(QColor)), this, SLOT(onColorChanged(QColor)));
 
@@ -49,6 +48,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   connect(m_ui.btnRun, SIGNAL(clicked()), this, SLOT(onRun()));
   connect(m_ui.btnAbort, SIGNAL(clicked()), this, SLOT(onAbort()));
   connect(m_ui.btnSave, SIGNAL(clicked()), this, SLOT(onSave()));
+  connect(m_ui.btnClear, SIGNAL(clicked()), m_ui.edtOutput, SLOT(clear()));
 
   QFileInfo fileInfo(filename);
 
@@ -298,7 +298,7 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
   switch (state)
   {
     case QProcess::NotRunning:
-      if (m_process.exitCode() == 0)
+      if (m_process.exitCode() == 0 && m_process.error() != QProcess::FailedToStart && m_process.error() != QProcess::Crashed && m_process.error() != QProcess::Timedout)
       {
         m_ui.lblState->setText("[Ready]");
         emit(titleChanged(fileInfo.fileName().append(" [Ready]")));
@@ -333,27 +333,69 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
 
 void ToolInstance::onStandardOutput()
 {
+  QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
+  bool end = scrollbar->value() == scrollbar->maximum();
+
+  m_ui.edtOutput->setTextColor(Qt::black);
   QByteArray outText = m_process.readAllStandardOutput();
-  m_ui.edtOutput->appendPlainText(QString(outText));
+  m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
+
+  if (end)
+  {
+    scrollbar->setValue(scrollbar->maximum());
+  }
 }
 
 void ToolInstance::onStandardError()
 {
+  QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
+  bool end = scrollbar->value() == scrollbar->maximum();
+
+  m_ui.edtOutput->setTextColor(Qt::black);
   QByteArray outText = m_process.readAllStandardError();
-  m_ui.edtOutput->appendPlainText(QString(outText));
+  m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
+
+  if (end)
+  {
+    scrollbar->setValue(scrollbar->maximum());
+  }
 }
 
 void ToolInstance::onRun()
 {
-  m_process.start(executable().append(" ").append(arguments()), QIODevice::ReadOnly);
+  QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
+  bool end = scrollbar->value() == scrollbar->maximum();
+  int oldValue = scrollbar->value();
+
+  m_ui.edtOutput->setTextColor(Qt::gray);
+  m_ui.edtOutput->setPlainText(m_ui.edtOutput->toPlainText());
+
+  if (end)
+  {
+    scrollbar->setValue(scrollbar->maximum());
+  }
+  else
+  {
+    scrollbar->setValue(oldValue);
+  }
+
+  QString exec = executable();
+  if (exec.contains(" "))
+  {
+    exec = QString("\"%1\"").arg(exec);
+  }
+  exec.append(" ").append(arguments());
+
+  m_process.start(exec, QIODevice::ReadOnly);
   if (m_process.waitForStarted(1000))
   {
-    mCRL2log(mcrl2::log::info) << "Started " << executable().append(" ").append(arguments()).toStdString() << std::endl;
+    mCRL2log(mcrl2::log::info) << "Started " << exec.toStdString() << std::endl;
     m_ui.tabWidget->setCurrentIndex(1);
   }
   else
   {
-    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString() << " (" << executable().append(" ").append(arguments()).toStdString() << ")" << std::endl;
+    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString() << " (" << exec.toStdString() << ")" << std::endl;
+    onStateChange(QProcess::NotRunning);
   }
 }
 

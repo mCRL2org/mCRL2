@@ -94,7 +94,7 @@ void ToolCatalog::load()
         m_categories.insert(cat, QMap<QString, ToolInformation>());
 
       QMap<QString, ToolInformation> tools = m_categories.value(cat);
-      ToolInformation toolinfo(e.attribute("name"), e.attribute("input_format"), e.attribute("output_format", ""), e.attribute("gui"));
+      ToolInformation toolinfo(e.attribute("name"), e.attribute("input_format"), e.attribute("output_format", ""), e.attribute("gui", "").toLower() == "true");
       toolinfo.load();
       tools.insert(e.attribute("name"), toolinfo);
       m_categories.insert(cat, tools);

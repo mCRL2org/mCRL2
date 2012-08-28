@@ -145,7 +145,16 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QWidget" name="pckFileOut" native="true"/>
+              <widget class="QWidget" name="pckFileOut" native="true">
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
+               </layout>
+              </widget>
              </item>
             </layout>
            </item>
@@ -191,7 +200,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPlainTextEdit" name="edtOutput">
+        <widget class="QTextEdit" name="edtOutput">
          <property name="tabChangesFocus">
           <bool>true</bool>
          </property>
@@ -202,6 +211,13 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="btnClear">
+           <property name="text">
+            <string>Clear Output</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">

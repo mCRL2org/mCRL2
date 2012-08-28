@@ -35,7 +35,6 @@
 <tool name="txt2lps" 		input_format="txt"  output_format ="lps"    category="Transformation"/>
 <tool name="txt2pbes" 		input_format="txt"  output_format ="pbes"   category="Transformation"/>
 <tool name="lpsxsim" 		input_format="lps" 				gui="true"  category="Analysis"/>
-<tool name="grapemcrl2" 		input_format="gra" 			gui="true"  category="Analysis"/>
 <tool name="mcrl2xi" 		input_format="mcrl2" 				gui="true" category="Editing"/>
 <tool name="pbes2bes" 	input_format="pbes" 	output_format ="bes"	category="Transformation"/>
 <tool name="pbespgsolve" 		input_format="pbes"                         category="Analysis"/>

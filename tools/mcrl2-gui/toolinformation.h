@@ -90,13 +90,13 @@ struct ToolOption
 class ToolInformation
 {
   public:
-    ToolInformation(QString name, QString input, QString output, QString isGui);
+    ToolInformation(QString name, QString input, QString output, bool guiTool);
 
     void load();
     bool hasOutput() { return !output.isEmpty(); }
 
     QString path, name, input, output, desc, author;
-    bool valid;
+    bool guiTool, valid;
 
     QList<ToolOption> options;
 
