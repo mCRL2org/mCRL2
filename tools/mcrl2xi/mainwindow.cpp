@@ -53,10 +53,14 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
   connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(onDelete()));
   connect(m_ui.actionSelect_All, SIGNAL(triggered()), this, SLOT(onSelectAll()));
-
   connect(m_ui.actionFind, SIGNAL(triggered()), this, SLOT(onFind()));
+
   connect(m_ui.actionWrap_mode, SIGNAL(triggered()), this, SLOT(onWrapMode()));
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
+  connect(m_ui.actionParser, SIGNAL(toggled(bool)), m_ui.dockParse, SLOT(setVisible(bool)));
+  connect(m_ui.actionRewriter, SIGNAL(toggled(bool)), m_ui.dockRewriter, SLOT(setVisible(bool)));
+  connect(m_ui.actionSolver, SIGNAL(toggled(bool)), m_ui.dockSolver, SLOT(setVisible(bool)));
+  connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
 
   //All button functionality
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
@@ -82,6 +86,12 @@ MainWindow::MainWindow(QWidget *parent) :
   QSettings settings("mCRL2", "mCRL2xi");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+
+  m_ui.actionParser->setChecked(!m_ui.dockParse->isHidden());
+  m_ui.actionRewriter->setChecked(!m_ui.dockRewriter->isHidden());
+  m_ui.actionSolver->setChecked(!m_ui.dockSolver->isHidden());
+  m_ui.actionOutput->setChecked(!m_ui.dockOutput->isHidden());
+
 }
 
 MainWindow::~MainWindow()
@@ -308,6 +318,11 @@ void MainWindow::onWrapMode()
 void MainWindow::onResetPerspective()
 {
   restoreState(m_state);
+
+  m_ui.actionParser->setChecked(!m_ui.dockParse->isHidden());
+  m_ui.actionRewriter->setChecked(!m_ui.dockRewriter->isHidden());
+  m_ui.actionSolver->setChecked(!m_ui.dockSolver->isHidden());
+  m_ui.actionOutput->setChecked(!m_ui.dockOutput->isHidden());
 }
 
 
