@@ -41,6 +41,23 @@ std::vector<pfnf_equation>::const_iterator find_equation(const pfnf_pbes& p, con
   return equations.end();
 }
 
+inline
+std::string print_pbes_expressions(const atermpp::set<pbes_expression>& v)
+{
+  std::ostringstream out;
+  out << "{";
+  for (atermpp::set<pbes_expression>::const_iterator j = v.begin(); j != v.end(); ++j)
+  {
+    if (j != v.begin())
+    {
+      out << ", ";
+    }
+    out << pbes_system::pp(*j);
+  }
+  out << "}";
+  return out.str();
+}
+
 } // namespace detail
 
 } // namespace pbes_system

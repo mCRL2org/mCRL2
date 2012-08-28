@@ -221,14 +221,15 @@ class pbes_control_flow_algorithm
 
       bool operator<(const control_flow_edge& other) const
       {
-        if (source == other.source)
-        {
-          return target < other.target;
-        }
-        else
+        if (source != other.source)
         {
           return source < other.source;
         }
+        if (target != other.target)
+        {
+          return target < other.target;
+        }
+        return label < other.label;
       }
     };
 
@@ -238,11 +239,11 @@ class pbes_control_flow_algorithm
       propositional_variable_instantiation X;
       std::set<control_flow_edge> incoming_edges;
       std::set<control_flow_edge> outgoing_edges;
-      pbes_expression guard;
+      atermpp::set<pbes_expression> guards;
       std::set<data::variable> marking;
 
-      control_flow_vertex(const propositional_variable_instantiation& X_, pbes_expression guard_ = true_())
-        : X(X_), guard(guard_)
+      control_flow_vertex(const propositional_variable_instantiation& X_)
+        : X(X_)
       {}
 
       std::string print() const
@@ -254,7 +255,18 @@ class pbes_control_flow_algorithm
         {
           out << " " << pbes_system::pp(i->target->X);
         }
+        out << " guards: " << print_pbes_expressions(guards);
         return out.str();
+      }
+
+      std::set<data::variable> free_guard_variables() const
+      {
+        std::set<data::variable> result;
+        for (atermpp::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
+        {
+          pbes_system::find_free_variables(*i, std::inserter(result, result.end()));
+        }
+        return result;
       }
     };
 
@@ -557,9 +569,9 @@ class pbes_control_flow_algorithm
 
     // x is a projected value
     // \pre x is not present in m_control_vertices
-    vertex_iterator insert_control_flow_vertex(const propositional_variable_instantiation& X, pbes_expression guard = true_())
+    vertex_iterator insert_control_flow_vertex(const propositional_variable_instantiation& X)
     {
-      std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(X, control_flow_vertex(X, guard)));
+      std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(X, control_flow_vertex(X)));
       assert(p.second);
       return p.first;
     }
@@ -588,23 +600,22 @@ class pbes_control_flow_algorithm
       {
         std::set<control_flow_vertex*>::iterator i = todo.begin();
         todo.erase(i);
-        control_flow_vertex& v = **i;
-        control_flow_vertex* source = &v;
-        mCRL2log(log::debug, "control_flow") << "[cf] selected todo element " << pbes_system::pp(v.X) << std::endl;
+        control_flow_vertex& u = **i;
+        control_flow_vertex* source = &u;
+        mCRL2log(log::debug, "control_flow") << "[cf] selected todo element " << pbes_system::pp(u.X) << std::endl;
 
-        const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
+        const pfnf_equation& eqn = *find_equation(m_pbes, u.X.name());
         propositional_variable X = project_variable(eqn.variable());
         data::variable_list d = X.parameters();
-        data::data_expression_list e = v.X.parameters();
+        data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
 
         const std::vector<pfnf_implication>& implications = eqn.implications();
         for (std::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
           const std::vector<propositional_variable_instantiation>& propvars = i->variables();
-          pbes_expression guard = and_(eqn.h(), i->g());
-          pbes_expression evaluate_guard = pbesr(guard, sigma);
-          if (is_false(evaluate_guard))
+          pbes_expression guard = pbesr(and_(eqn.h(), i->g()), sigma);
+          if (is_false(guard))
           {
             continue;
           }
@@ -613,35 +624,31 @@ class pbes_control_flow_algorithm
           {
             propositional_variable_instantiation Xij = project(*j);
             propositional_variable_instantiation Y = apply_substitution(Xij, sigma);
-            propositional_variable_instantiation label = Xij;
+            propositional_variable_instantiation label = Y;
             vertex_iterator q = m_control_vertices.find(Y);
             if (q == m_control_vertices.end())
             {
               // vertex Y does not yet exist
               mCRL2log(log::debug, "control_flow") << "[cf] discovered " << pbes_system::pp(Y) << std::endl;
-              vertex_iterator k = insert_control_flow_vertex(Y, guard);
-              todo.insert(&(k->second));
-              mCRL2log(log::debug, "control_flow") << "[cf] added todo element " << pbes_system::pp(k->first) << std::endl;
-              control_flow_vertex* target = &(k->second);
-              v.outgoing_edges.insert(control_flow_edge(source, target, label));
+              vertex_iterator k = insert_control_flow_vertex(Y);
+              control_flow_vertex& v = k->second;
+              u.guards.insert(guard);
+              todo.insert(&v);
+              control_flow_vertex* target = &v;
+              control_flow_edge e(source, target, label);
+              u.outgoing_edges.insert(e);
+              v.incoming_edges.insert(e);
             }
             else
             {
-              control_flow_vertex* target = &(q->second);
-              v.outgoing_edges.insert(control_flow_edge(source, target, label));
+              control_flow_vertex& v = q->second;
+              u.guards.insert(guard);
+              control_flow_vertex* target = &v;
+              control_flow_edge e(source, target, label);
+              u.outgoing_edges.insert(e);
+              v.incoming_edges.insert(e);
             }
           }
-        }
-      }
-
-      // add incoming edges
-      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
-      {
-        control_flow_vertex& v = i->second;
-        for (std::set<control_flow_edge>::iterator j = v.outgoing_edges.begin(); j != v.outgoing_edges.end(); ++j)
-        {
-          const control_flow_edge& e = *j;
-          e.target->incoming_edges.insert(e);
         }
       }
     }
@@ -694,14 +701,9 @@ class pbes_control_flow_algorithm
       for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
-        std::cout << "<guard>" << pbes_system::pp(v.guard) << std::endl;
-        std::set<data::variable> fv = pbes_system::find_free_variables(v.guard);
-        std::cout << "<fv>" << print_variable_set(fv) << std::endl;
+        std::set<data::variable> fv = v.free_guard_variables();
     	  std::set<data::variable> dx = propvar_parameters(v.X.name());
-        std::cout << "<dx>" << print_variable_set(dx) << std::endl;
-        std::set<data::variable> cf = control_flow_parameters(v.X.name());
-        std::cout << "<cf>" << print_variable_set(cf) << std::endl;
-        v.marking = data::detail::set_difference(data::detail::set_intersection(fv, dx), cf);
+        v.marking = data::detail::set_intersection(fv, dx);
         mCRL2log(log::debug, "control_flow") << "initial marking " << print_control_flow_marking(v) << "\n";
       }
 
@@ -741,8 +743,8 @@ class pbes_control_flow_algorithm
     /// \brief Runs the control_flow algorithm
     void run()
     {
-      control_flow_influence_graph_algorithm ialgo(m_pbes);
-      ialgo.run();
+      //control_flow_influence_graph_algorithm ialgo(m_pbes);
+      //ialgo.run();
 
       control_flow_source_dest_algorithm sdalgo(m_pbes);
       sdalgo.compute_source_destination();
