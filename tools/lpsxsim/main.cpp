@@ -5,8 +5,6 @@
 
 using namespace mcrl2::utilities;
 
-#include <QDebug>
-
 typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > lpsxsim_base;
 class lpsxsim_tool : public lpsxsim_base
 {

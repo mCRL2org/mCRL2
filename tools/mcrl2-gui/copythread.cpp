@@ -9,7 +9,6 @@
 
 #include <QDir>
 #include <QFile>
-#include <QDebug>
 
 #include "copythread.h"
 

@@ -13,7 +13,6 @@
 #include "filepicker.h"
 
 #include <limits>
-#include <QDebug>
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QButtonGroup>

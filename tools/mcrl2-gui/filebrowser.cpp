@@ -12,8 +12,6 @@
 #include <QAction>
 #include <QMessageBox>
 
-#include <QDebug>
-
 FileBrowser::FileBrowser(QWidget *parent) :
   QTreeView(parent), m_model(this), m_context(NULL), m_cut(false), m_copy(false), m_copydialog(parent)
 {

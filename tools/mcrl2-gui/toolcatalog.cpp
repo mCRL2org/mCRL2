@@ -10,8 +10,6 @@
 #include "toolcatalog.h"
 #include "mcrl2/utilities/logger.h"
 
-#include <QDebug>
-
 ToolCatalog::ToolCatalog()
 {
   generateFileTypes();
