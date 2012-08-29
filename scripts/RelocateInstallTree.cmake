@@ -39,13 +39,15 @@ set(DIRS
 
 # On Apple, the MacPorts build of Qt uses a slightly different structure
 # Therefore, we need to copy the qt_menu.nib file over to a decent location.
-if(APPLE AND ${QT_QTGUI_LIBRARY} MATCHES "^.*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  if(EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
-    install(DIRECTORY
-      "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
-    else()
-      message(WARNING "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app is probably corrupt.")
-    endif()
+if(APPLE)
+  if(${QT_QTGUI_LIBRARY} MATCHES "^.*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    if(EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
+      install(DIRECTORY
+        "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
+      else()
+        message(WARNING "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app is probably corrupt.")
+      endif()
+  endif()
 endif()
 
 INSTALL(CODE "
