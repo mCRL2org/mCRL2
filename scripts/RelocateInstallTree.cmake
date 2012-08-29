@@ -28,8 +28,6 @@ if(NOT(MACOSX_BUNDLE_NAME))
   return()
 endif()
 
-include(InstallRequiredSystemLibraries)
-
 #-------------------------------------------------------------------------------
 # Now the installation stuff below
 #-------------------------------------------------------------------------------
