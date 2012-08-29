@@ -205,15 +205,16 @@
    <addaction name="menuPlay"/>
    <addaction name="menuOptions"/>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dockOutput">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetContents"/>
+   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPlayTrace">
    <property name="text">
     <string>Play &amp;Trace</string>

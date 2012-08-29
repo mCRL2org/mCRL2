@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
   connect(m_ui.actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
   connect(m_ui.actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
   m_timer->start(40);
 
@@ -125,6 +126,11 @@ void MainWindow::on3DChanged(bool enabled)
 void MainWindow::onTimer()
 {
   m_glwidget->updateGL();
+}
+
+void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
+{
+  m_ui.statusBar->showMessage(formattedMessage, 5000);
 }
 
 void MainWindow::delayedOpenFile(QString fileName)

@@ -37,6 +37,8 @@ MainWindow::MainWindow()
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
   connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(selectTransition(int)));
 
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
 
@@ -306,6 +308,11 @@ void MainWindow::animationStep()
       stopPlay();
     }
   }
+}
+
+void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
+{
+  m_ui.statusBar->showMessage(formattedMessage, 5000);
 }
 
 QString MainWindow::renderStateChange(Simulation::State source, Simulation::State destination)

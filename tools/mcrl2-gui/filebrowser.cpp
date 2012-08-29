@@ -126,7 +126,7 @@ void FileBrowser::onOpenFile()
 void FileBrowser::onDeleteFile()
 {
   QModelIndexList indexes = selectedIndexes();
-  if (askRemove(indexes))
+  if (indexes.size() > 0 && askRemove(indexes))
   {
     for (int i = 0; i < indexes.size(); i++)
     {
@@ -239,6 +239,18 @@ void FileBrowser::mouseDoubleClickEvent(QMouseEvent *event)
       QTreeView::mouseDoubleClickEvent(event);
     }
   }
+}
+
+void FileBrowser::keyPressEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete))
+    {
+        onDeleteFile();
+    }
+    else
+    {
+        FileBrowser::keyPressEvent(event);
+    }
 }
 
 

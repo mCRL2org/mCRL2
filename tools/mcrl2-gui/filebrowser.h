@@ -48,6 +48,7 @@ class FileBrowser : public QTreeView
   protected:
     void contextMenuEvent(QContextMenuEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
   private:
     QAction* addConditionalAction(QMenu* menu, QString action, bool condition);

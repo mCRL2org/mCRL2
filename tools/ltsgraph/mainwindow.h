@@ -93,6 +93,11 @@ class MainWindow : public QMainWindow
      */
     void onTimer();
 
+    /**
+     * @brief Updates the statusbar with the latest log output
+     */
+    void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
+
   protected:
     /**
      * @brief Saves window information
