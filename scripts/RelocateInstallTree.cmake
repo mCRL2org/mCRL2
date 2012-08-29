@@ -28,12 +28,16 @@ if(NOT(MACOSX_BUNDLE_NAME))
   return()
 endif()
 
+include(InstallRequiredSystemLibraries)
+
 #-------------------------------------------------------------------------------
 # Now the installation stuff below
 #-------------------------------------------------------------------------------
+set(plugin_dest_dir bin)
 set(qtconf_dest_dir bin)
 set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
 if(APPLE)
+  set(plugin_dest_dir bin/${PROJECT_NAME}.app/Contents/MacOS)
   set(qtconf_dest_dir bin/${PROJECT_NAME}.app/Contents/Resources)
   set (APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app")
 endif()
@@ -54,7 +58,9 @@ INSTALL(CODE "
 # for dependencies.  If they are not system dependencies, they are copied.
 
 # directories to look for dependencies
-SET(DIRS ${QT_LIBRARY_DIRS})
+# Note: dlls for QT are installed in QT_BINARY_DIR if it is installed through
+# the windows installer.
+SET(DIRS ${QT_LIBRARY_DIR} ${QT_BINARY_DIR})
 
 # On Apple, the MacPorts build of Qt uses a slightly different structure
 # Therefore, we need to copy the qt_menu.nib file over to a decent location,
@@ -76,6 +82,8 @@ endif()
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
 INSTALL(CODE "
+    file(GLOB_RECURSE QTPLUGINS
+	  \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
     include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")
+    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
     " COMPONENT Runtime)

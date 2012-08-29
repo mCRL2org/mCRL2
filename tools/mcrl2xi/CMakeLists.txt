@@ -94,7 +94,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

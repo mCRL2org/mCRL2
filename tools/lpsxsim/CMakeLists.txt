@@ -76,7 +76,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
