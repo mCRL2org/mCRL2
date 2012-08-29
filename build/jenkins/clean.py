@@ -4,5 +4,6 @@ from util import *
 #
 # Clean up the build directory. Can be used to ensure a completely clean build.
 #
-shutil.rmtree(builddir)
+if os.path.exists(builddir):
+  shutil.rmtree(builddir)
 
