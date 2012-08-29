@@ -2155,24 +2155,35 @@ void VisUtils::drawLabelInBoundBox(
   const double& scaling,
   const std::string& label)
 {
-  double w = xRgt - xLft;
-  double h = yTop - yBot;
-  double r = w/h;
+  double w = abs(xRgt - xLft);
+  double h = abs(yTop - yBot);
 
   double charWidth = (CHARWIDTH*scaling);
+  double charHeight = (CHARHEIGHT*scaling);
   double lblLength = label.size()*charWidth;
   std::string cropLbl = label;
 
-  if (r >= 1.0)   // longer than tall or short label
-  {
-    int numToCrop = (int)ceil((lblLength-w)/charWidth);
-    if (0 < numToCrop && static_cast<size_t>(numToCrop) < cropLbl.size())
-    {
-      size_t eraseSize = cropLbl.size() - numToCrop;
-      cropLbl.erase(eraseSize);
-      cropLbl.append(".");
-    }
+  int numToCropHorizontal = (int)ceil((lblLength-w)/charWidth);
+  int numToCropVertical = (int)ceil((lblLength-h)/charWidth);
 
+  bool horizontal = (numToCropHorizontal <= 0 || numToCropHorizontal <= numToCropVertical);
+  int numToCrop = (horizontal ? numToCropHorizontal : numToCropVertical);
+
+  if ((horizontal && h < charHeight) || (!horizontal && w < charHeight) || (numToCrop+2 >= int(cropLbl.size())))
+  // Nothing fits
+  {
+    return;
+  }
+
+  if (numToCrop > 0)
+  {
+    size_t eraseSize = cropLbl.size() - numToCrop - 2;
+    cropLbl.erase(eraseSize);
+    cropLbl.append("..");
+  }
+
+  if (horizontal)
+  {
     drawLabelCenter(
       texCharId,
       xLft + (xRgt-xLft)/2.0,
@@ -2180,37 +2191,14 @@ void VisUtils::drawLabelInBoundBox(
       scaling,
       cropLbl);
   }
-  else // taller than long
+  else
   {
-    int numToCrop = (int)ceil((lblLength-h)/charWidth);
-    if (0 < numToCrop && static_cast<size_t>(numToCrop)+2 < cropLbl.size())
-    {
-      size_t eraseSize = cropLbl.size() - numToCrop - 2;
-      if (eraseSize > 2)
-      {
-        cropLbl.erase(eraseSize);
-        cropLbl.append("..");
-      }
-    }
-
-    if (cropLbl.size() > 2)
-    {
-      drawLabelVertCenter(
-        texCharId,
-        xLft + (xRgt-xLft)/2.0,
-        yBot + (yTop-yBot)/2.0,
-        scaling,
-        cropLbl);
-    }
-    else
-    {
-      drawLabelCenter(
-        texCharId,
-        xLft + (xRgt-xLft)/2.0,
-        yBot + (yTop-yBot)/2.0,
-        scaling,
-        cropLbl);
-    }
+    drawLabelVertCenter(
+      texCharId,
+      xLft + (xRgt-xLft)/2.0,
+      yBot + (yTop-yBot)/2.0,
+      scaling,
+      cropLbl);
   }
 }
 

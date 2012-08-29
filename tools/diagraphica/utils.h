@@ -47,6 +47,11 @@ class Utils
       const double& x,
       const double& y);
 
+    static double distLinePoint(
+      const QPointF& lineStart,
+      const QPointF& lineEnd,
+      const QPointF& point);
+
     // -- math functions --------------------------------------------
     static int rndToInt(const double& f);
     static double rndToNearestMult(

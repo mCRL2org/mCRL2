@@ -103,6 +103,7 @@ class DiagramEditor : public Visualizer
 
   protected:
     // -- private utility functions ---------------------------------
+    double snapIfNeeded(double input);
     QRectF worldRectangle(QPointF start, QPointF stop);
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
     void createShape();
@@ -116,16 +117,12 @@ class DiagramEditor : public Visualizer
 
     void handleHits(const std::vector< int > &ids);
 
-    void handleDragTopLft(Shape* s);
     void handleDragLft(Shape* s);
-    void handleDragBotLft(Shape* s);
     void handleDragBot(Shape* s);
-    void handleDragBotRgt(Shape* s);
     void handleDragRgt(Shape* s);
-    void handleDragTopRgt(Shape* s);
     void handleDragTop(Shape* s);
-    void handleDragRotRgt(Shape* s);
-    void handleDragRotTop(Shape* s);
+
+    void handleDragRot(Shape* s, bool isTop);
 
     void handleDragDOFXCtrEnd(Shape* s);
     void handleDragDOFYCtrEnd(Shape* s);

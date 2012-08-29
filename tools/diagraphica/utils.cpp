@@ -144,6 +144,16 @@ double Utils::calcAngleRd(
   return angleRd;
 }
 
+double Utils::distLinePoint(const QPointF &lineStart, const QPointF &lineEnd, const QPointF &point)
+{
+  double pointStartX = point.x() - lineStart.x();
+  double pointStartY = point.y() - lineStart.y();
+  double endStartX = lineEnd.x() - lineStart.x();
+  double endStartY = lineEnd.y() - lineStart.y();
+
+  return (pointStartX*endStartY - pointStartY*endStartX)/sqrt(endStartX*endStartX + endStartY*endStartY);
+}
+
 
 // -- math functions ------------------------------------------------
 
