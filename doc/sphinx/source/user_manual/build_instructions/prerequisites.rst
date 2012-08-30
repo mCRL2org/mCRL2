@@ -169,10 +169,26 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
      - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
        For the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
      - Follow the installation instructions.
+     
+   For a 64-bit version, perform the following steps (taken from http://qt-project.org/doc/qt-4.8/install-win.html):
    
-   For a 64-bit version, follow the instruction on the http://qt-project.org/doc/qt-4.8/install-win.html
+     - Download the Qt libraries source package (.zip) from http://qt.nokia.com/downloads.
+     - Extract the files, e.g. to ``C:\Qt\4.8.2``
+     - Add ``C:\Qt\4.8.2\bin`` to your ``PATH`` environment variable.
+     - Open a *Visual Studio* command prompt, and type the following (to support
+       both the Debug and the Release build)::
+     
+         C:
+         cd /D C:\Qt\4.8.2
+         configure -opensource -fast -debug-and-release -no-qt3support -no-dsp -no-vcproj  
+       
+       You need to accept the licence by typing ``y``.
+       Qt can now be compiled by typing::
+       
+         nmake
    
-   When installed correctly, CMake should be able to automatically find your 
+   When installed correctly, and the binary directory for Qt has been added to
+   your ``PATH``, CMake should be able to automatically find your 
    installation.
    
 .. admonition:: Linux
