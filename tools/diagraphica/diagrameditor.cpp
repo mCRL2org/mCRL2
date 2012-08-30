@@ -751,23 +751,20 @@ void DiagramEditor::handleHits(const vector< int > &ids)
     }
   }
 
-  if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
+  if (ids.size() >= 2 && m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
   {
-    if (m_editMode == EDIT_MODE_DOF)
+    Shape* s = m_diagram->shape(ids[1]);
+    if (s != 0)
     {
-      Shape* s = m_diagram->shape(ids[1]);
-      if (s != 0)
+      if (m_editMode == EDIT_MODE_DOF && ids.size() == 2)
       {
-        if (ids.size() == 2)
+        editDof(s);
+      }
+      if ((m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF) && ids.size() == 3)
+      {
+        if (s->drawMode() == Shape::MODE_EDIT_DOF_AGL && ids[2] == Shape::ID_HDL_DIR)
         {
-          editDof(s);
-        }
-        if (ids.size() == 3)
-        {
-          if (s->drawMode() == Shape::MODE_EDIT_DOF_AGL && ids[2] == Shape::ID_HDL_DIR)
-          {
-            s->angleDOF()->setDirection(0-s->angleDOF()->direction());
-          }
+          s->angleDOF()->setDirection(0-s->angleDOF()->direction());
         }
       }
     }
