@@ -104,7 +104,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

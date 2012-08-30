@@ -48,7 +48,7 @@ endif()
 # this inserts some cmake code into the install script to write the file
 INSTALL(CODE "
     file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
-    " COMPONENT Runtime)
+    " COMPONENT Applications)
 
 #--------------------------------------------------------------------------------
 # Use BundleUtilities to get all other dependencies for the application to work.
@@ -84,4 +84,4 @@ INSTALL(CODE "
 	  \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
+    " COMPONENT Applications)

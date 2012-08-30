@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

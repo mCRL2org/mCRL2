@@ -353,8 +353,8 @@ install(
     libraries/trace/include/
     libraries/utilities/include/
   DESTINATION include
-  PATTERN ".svn" EXCLUDE
   COMPONENT Headers
+  PATTERN ".svn" EXCLUDE
 )
 FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
@@ -376,8 +376,8 @@ if ( MCRL2_INSTALL_EXAMPLES )
 install(
   DIRECTORY examples/
   DESTINATION share/doc/mcrl2/examples
-  PATTERN ".svn" EXCLUDE
   COMPONENT Examples
+  PATTERN ".svn" EXCLUDE
 )
 endif ( MCRL2_INSTALL_EXAMPLES )
 

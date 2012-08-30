@@ -32,6 +32,22 @@ set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG})
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CXX_COMPILER_ARCHITECTURE})
 
+# Group the COMPONENTS such that we get a decent installer
+set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
+set(CPACK_COMPONENT_LIBRARIES_GROUP "Development")
+set(CPACK_COMPONENT_HEADERS_GROUP "Development")
+set(CPACK_COMPONENT_EXAMPLE_GROUP "Documentation")
+
+# For a windows installer
+set(CPACK_ALL_INSTALL_TYPES Full Default)
+set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full Default)
+set(CPACK_COMPONENT_LIBRARIES_INSTALL_TYPES Full)
+set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Full)
+set(CPACK_COMPONENT_EXAMPLE_INSTALL_TYPES Full Default)
+
+# Always install the tools
+set(CPACK_COMPONENT_APPLCIATIONS_REQUIRED)
+
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY )
 
 if( NOT APPLE )
@@ -69,7 +85,7 @@ SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
 SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
 
-# Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64. 
+# Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64.
 if(CMAKE_CL_64)
   set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
 endif(CMAKE_CL_64)
@@ -89,13 +105,13 @@ set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
 # Following should not exceed 77 chars
-set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language toolset 
+set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language toolset
  mCRL2 stands for micro Common Representation Language 2.  It is a
  specification language that can be used to specify and analyse the
  behaviour of distributed systems and protocols and is the successor to
  muCRL.  Using its accompanying toolset, systems can be analysed and
  verified automatically.
- 
+
  This toolset supports a collection of tools for linearisation, simulation,
  state-space exploration and generation and tools to optimise and analyse
  specifications.  Moreover, state spaces can be manipulated, visualised and
@@ -116,7 +132,7 @@ set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 # /etc/xandros-desktop-version
 # /etc/zenwalk-version
 
-set(MCRL2_BOOST_VER "1.35" ) 
+set(MCRL2_BOOST_VER "1.35" )
 
 # OpenSuSE RPM dependencies
 if(EXISTS /etc/SuSE-release )

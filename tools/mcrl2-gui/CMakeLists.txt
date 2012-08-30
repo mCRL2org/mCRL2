@@ -72,12 +72,12 @@ if(NOT APPLE)
 
   if( UNIX )
     # Install desktop icons
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications COMPONENT Runtime)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications COMPONENT Applications)
   endif( UNIX )
 
 else(NOT APPLE)
   # Copy directly into application
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Runtime)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Applications)
 endif(NOT APPLE)
 
 # ######### Create Windows Icon ##########
@@ -108,7 +108,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
