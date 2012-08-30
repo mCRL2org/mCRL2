@@ -38,75 +38,75 @@ struct communicating_lpe_traverser: public process_expression_traverser<communic
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  void enter(const process_instance& x)
+  void enter(const process_instance&)
   {
     result = false;
   }
 
-  void enter(const process_instance_assignment& x)
+  void enter(const process_instance_assignment&)
   {
     result = false;
   }
 
-  void enter(const sum& x)
+  void enter(const sum&)
   {
     result = false;
   }
 
-  void enter(const block& x)
+  void enter(const block&)
   {
   }
 
-  void enter(const hide& x)
+  void enter(const hide&)
   {
   }
 
-  void enter(const rename& x)
+  void enter(const rename&)
   {
   }
 
-  void enter(const comm& x)
+  void enter(const comm&)
   {
   }
 
-  void enter(const allow& x)
+  void enter(const allow&)
   {
   }
 
-  void enter(const sync& x)
+  void enter(const sync&)
   {
   }
 
-  void enter(const at& x)
-  {
-    result = false;
-  }
-
-  void enter(const seq& x)
+  void enter(const at&)
   {
     result = false;
   }
 
-  void enter(const if_then& x)
+  void enter(const seq&)
   {
     result = false;
   }
 
-  void enter(const if_then_else& x)
+  void enter(const if_then&)
   {
     result = false;
   }
 
-  void enter(const bounded_init& x)
+  void enter(const if_then_else&)
   {
     result = false;
   }
 
-  void enter(const merge& x)
+  void enter(const bounded_init&)
+  {
+    result = false;
+  }
+
+  void enter(const merge&)
   {
   }
 
-  void enter(const left_merge& x)
+  void enter(const left_merge&)
   {
     result = false;
   }

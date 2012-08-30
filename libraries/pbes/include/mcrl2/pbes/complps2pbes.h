@@ -30,7 +30,7 @@ void complps2pbes(const std::string& input_filename,
                  );
 
 inline
-pbes_system::pbes<> complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& formula)
+pbes_system::pbes<> complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
 {
   const atermpp::vector<process::process_equation>& equations = procspec.equations();
   for (atermpp::vector<process::process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
