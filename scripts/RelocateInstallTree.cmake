@@ -24,7 +24,7 @@
 # and check whether the MACOSX_BUNDLE_NAME has been set.
 #
 # TODO: Make this into a proper solution
-if(NOT(MACOSX_BUNDLE_NAME))
+if(NOT(MACOSX_BUNDLE_NAME) OR MCRL2_SINGLE_BUNDLE)
   return()
 endif()
 
