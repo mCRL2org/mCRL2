@@ -77,7 +77,7 @@ if(NOT APPLE)
 
 else(NOT APPLE)
   # Copy directly into application
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Applications)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Applications)
 endif(NOT APPLE)
 
 # ######### Create Windows Icon ##########
