@@ -74,6 +74,8 @@ if(APPLE)
   endif()
 endif()
 
+if(APPLE OR WIN32)
+
 # Now the work of copying dependencies into the bundle/package
 # The quotes are escaped and variables to use at install time have their $ escaped
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
@@ -85,3 +87,5 @@ INSTALL(CODE "
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
     " COMPONENT Applications)
+
+endif()
