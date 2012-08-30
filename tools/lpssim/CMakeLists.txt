@@ -1,4 +1,4 @@
-# Authors: Frank Stappers and Jan Friso Groote 
+# Authors: Frank Stappers and Jan Friso Groote
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)

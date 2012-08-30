@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Runtime)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
