@@ -596,38 +596,45 @@ void test_substitutions3()
 
 void test_one_point_rule_rewriter()
 {
+  std::cout << "<test_one_point_rule_rewriter>" << std::endl;
   one_point_rule_rewriter R;
   pbes_system::pbes_expression x;
   pbes_system::pbes_expression y;
 
   x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
   y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
   x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
   y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
-//  x = pbes_system::parse_pbes_expression("forall c: Bool. forall b: Bool. val(b) => val(b || c)");
-//  y = R(x);
-//  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-//  BOOST_CHECK(pbes_system::pp(y) == "val(c)");
+  x = pbes_system::parse_pbes_expression("forall c: Bool. forall b: Bool. val(b) => val(b || c)");
+  y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "forall c: Bool. val(false) || val(c)");
 }
 
 void test_data2pbes()
 {
+  std::cout << "<test_data2pbes>" << std::endl;
   pbes_system::pbes_expression x;
   pbes_system::pbes_expression y;
 
   x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3 && n == 5)");
   y = pbes_system::detail::data2pbes(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 
   x = pbes_system::parse_pbes_expression("val(forall n: Nat. n != 3 && n == 5)");
   y = pbes_system::detail::data2pbes(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 }
