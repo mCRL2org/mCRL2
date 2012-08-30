@@ -119,7 +119,7 @@ void syntax_error_fn(struct D_Parser *ap)
       {
         std::locale loc;
         mCRL2log(log::error, "parser") << "Unexpected "
-                                       << (std::isalpha(n.string()[0]) ? "keyword " : "")
+                                       << (std::isalpha(n.string()[0], loc) ? "keyword " : "")
                                        << "'" << n.string() << "'" << std::endl;
       }
       break;
