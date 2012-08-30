@@ -104,6 +104,8 @@ class DiagramEditor : public Visualizer
   protected:
     // -- private utility functions ---------------------------------
     double snapIfNeeded(double input);
+    QPointF snapIfNeeded(QPointF input);
+    double snapAngleIfNeeded(double input);
     QRectF worldRectangle(QPointF start, QPointF stop);
     void translatePoints(double& x1, double& y1, double& x2, double& y2, double givenX1, double givenY1, double givenX2, double givenY2);
     void createShape();

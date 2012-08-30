@@ -110,6 +110,11 @@ double Utils::calcAngleRd(
 {
   double angleRd;
 
+  if (x == 0 && y == 0)
+  {
+    return 0.0;
+  }
+
   if (x != 0)
   {
     angleRd = atan(y/x);

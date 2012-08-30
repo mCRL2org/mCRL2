@@ -495,6 +495,21 @@ double DiagramEditor::snapIfNeeded(double input)
   return input;
 }
 
+QPointF DiagramEditor::snapIfNeeded(QPointF input)
+{
+  return QPointF(snapIfNeeded(input.x()), snapIfNeeded(input.y()));
+}
+
+double DiagramEditor::snapAngleIfNeeded(double input)
+{
+  if (m_diagram->snapGrid())
+  {
+    double itv = m_diagram->angleInterval();
+    return Utils::rndToNearestMult(input, itv);
+  }
+  return input;
+}
+
 QRectF DiagramEditor::worldRectangle(QPointF start, QPointF stop)
 {
   start = worldCoordinate(start);
@@ -950,12 +965,12 @@ void DiagramEditor::handleDragBot(Shape* s)
   double angle = Utils::degrToRad(s->angle());
 
   QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
-  QPointF TopLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
+  QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
 
-  double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(TopLocation, TopLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
-  QPointF BottomLocation = QPointF(TopLocation.x() + mouseToTopDistance*sin(angle), TopLocation.y() - mouseToTopDistance*cos(angle));
+  double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
+  QPointF BottomLocation = QPointF(topLocation.x() + mouseToTopDistance*sin(angle), topLocation.y() - mouseToTopDistance*cos(angle));
 
-  QPointF newCenter = (BottomLocation + TopLocation) / 2;
+  QPointF newCenter = (BottomLocation + topLocation) / 2;
 
   s->setCenter(newCenter.x(), newCenter.y());
   s->setDistance(s->xDistance(), mouseToTopDistance/2);
@@ -1011,11 +1026,7 @@ void DiagramEditor::handleDragRot(Shape* s, bool isTop)
     newAngle -= 360.0;
   }
 
-  if (m_diagram->snapGrid())
-  {
-    double itv = m_diagram->angleInterval();
-    newAngle = Utils::rndToNearestMult(newAngle, itv);
-  }
+  newAngle = snapAngleIfNeeded(newAngle);
 
   s->setAngle(newAngle);
 }
@@ -1023,204 +1034,63 @@ void DiagramEditor::handleDragRot(Shape* s, bool isTop)
 
 void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double x0;            // x position after translating to shape's center
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  double mouseToCenterDistance = snapIfNeeded(mouseLocation.x() - s->xCenter());
 
-  // get shape's geometry
-  s->center(xCtr, yCtr);
-
-  // get mouse info
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-
-  if (m_diagram->snapGrid())
-  {
-    double itv  = m_diagram->gridInterval(pixelSize());
-    x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
-  }
-
-  s->xCenterDOF()->setMax(x0);
+  s->xCenterDOF()->setMax(mouseToCenterDistance);
 }
 
 
 void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double y0;            // y position after translating to shape's center
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  double mouseToCenterDistance = snapIfNeeded(mouseLocation.y() - s->yCenter());
 
-  // get shape's geometry
-  s->center(xCtr, yCtr);
-
-  // get mouse info
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-  // translate to center, the 'origin'
-  y0 = yCur-yCtr;
-
-  if (m_diagram->snapGrid())
-  {
-    double itv  = m_diagram->gridInterval(pixelSize());
-    y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
-  }
-
-  s->yCenterDOF()->setMax(y0);
+  s->yCenterDOF()->setMax(mouseToCenterDistance);
 }
 
 
 void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double xS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's x-axis
+  double angle = Utils::degrToRad(s->angle());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF rightLocation = QPointF(s->xCenter()+cos(angle)*s->xDistance(), s->yCenter()+sin(angle)*s->xDistance());
+  double mouseToRightDistance = snapIfNeeded(Utils::distLinePoint(rightLocation, rightLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->angle());
-  s->center(xCtr, yCtr);
-  s->distance(xDFC, yDFC);
-
-  // get mouse info
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-
-  if (m_diagram->snapGrid())
-  {
-    double itv  = m_diagram->gridInterval(pixelSize());
-    double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
-    xS = a/cos(angl);
-  }
-
-  hyp = xS-xDFC;
-  s->widthDOF()->setMax(hyp);
+  s->widthDOF()->setMax(mouseToRightDistance);
 }
 
 
 void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double yS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's y-axis
+  double angle = Utils::degrToRad(s->angle());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
+  double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation - QPointF(cos(angle), sin(angle)), mouseLocation));
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->angle());
-  s->center(xCtr, yCtr);
-  s->distance(xDFC, yDFC);
-
-  // get mouse info
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  if (m_diagram->snapGrid())
-  {
-    double itv  = m_diagram->gridInterval(pixelSize());
-    double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
-    yS = a/cos(angl);
-  }
-
-  hyp = yS-yDFC;
-  s->heightDOF()->setMax(hyp);
+  s->heightDOF()->setMax(mouseToTopDistance);
 }
 
 
 void DiagramEditor::handleDragDOFHge(Shape* s)
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // y position after translating to shape's center
+  QPointF mouseLocation = snapIfNeeded(worldCoordinate(m_lastMouseEvent.posF()));
+  QPointF centerLocation = QPointF(s->xCenter(), s->yCenter());
+  QPointF relativeLocation = mouseLocation - centerLocation;
 
-  // get shape's geometry
-  s->center(xCtr, yCtr);
-
-  // get mouse info
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-  // translate to center, the 'origin'
-  y0 = yCur-yCtr;
-  x0 = xCur-xCtr;
-
-  if (m_diagram->snapGrid())
-  {
-    double itv  = m_diagram->gridInterval(pixelSize());
-    x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
-    y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
-  }
-
-  s->setHinge(x0, y0);
+  s->setHinge(relativeLocation.x(), relativeLocation.y());
 }
 
 
 void DiagramEditor::handleDragDOFAglEnd(Shape* s)
 {
-  double xHge, yHge, xCtr, yCtr;
-  double dstHgeCtr;
-  double aglRef, aglTot;
-  double xCur, yCur, xRelHge, yRelHge;
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF relativeMouseLocation = mouseLocation - QPointF(s->xCenter()+s->xHinge(), s->yCenter()+s->yHinge());
+  double newAngle = Utils::calcAngleDg(relativeMouseLocation.x(), relativeMouseLocation.y());
+  double offsetAngle = Utils::calcAngleDg(-s->xHinge(), -s->yHinge());
+  newAngle = snapAngleIfNeeded(newAngle);
 
-  // distance from hinge to center
-  s->hinge(xHge, yHge);
-  s->center(xCtr, yCtr);
-  dstHgeCtr = Utils::dist(xCtr+xHge, yCtr+yHge, xCtr, yCtr);
-  // angle center relative to hinge
-  if (dstHgeCtr == 0)
-  {
-    aglRef = 0;
-  }
-  else
-  {
-    aglRef = Utils::calcAngleDg(-xHge, -yHge);
-  }
-
-  // mouse position relative to hinge
-  xCur = worldCoordinate(m_lastMouseEvent.posF()).x();
-  yCur = worldCoordinate(m_lastMouseEvent.posF()).y();
-
-
-  xRelHge = xCur-(xCtr+xHge);
-  yRelHge = yCur-(yCtr+yHge);
-
-  /*
-  // rotate to 'normal' orientation, find x & y
-  double xTmp, yTmp;
-  xS = x0*cos( -angl ) - y0*sin( -angl );
-  yS = x0*sin( -angl ) + y0*cos( -angl );
-  */
-
-  aglTot = Utils::calcAngleDg(xRelHge, yRelHge);
-
-  if (m_diagram->snapGrid())
-  {
-    double itvAgl  = m_diagram->angleInterval();
-    aglTot = Utils::rndToNearestMult(aglTot, itvAgl);
-  }
-
-  s->angleDOF()->setMax(aglTot-aglRef);
+  s->angleDOF()->setMax(newAngle-offsetAngle);
 }
 
 
