@@ -51,7 +51,7 @@ target_link_libraries(mcrl2_syntax
 )
 
 # add install target:
-install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ######### Set policies ############
 
@@ -102,4 +102,4 @@ target_link_libraries(${PROJECT_NAME}
 
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

@@ -65,19 +65,19 @@ set(MCRL2_GUI_SRC_FILES
 if(NOT APPLE)
   if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tool_catalog.xml" COPYONLY )
-  else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)  
+  else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
   endif(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
 
   if( UNIX )
     # Install desktop icons
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications COMPONENT Runtime)
   endif( UNIX )
 
 else(NOT APPLE)
   # Copy directly into application
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Runtime)
 endif(NOT APPLE)
 
 # ######### Create Windows Icon ##########

@@ -40,14 +40,14 @@ add_library(${PROJECT_NAME}
   ${mcrl2_utilities_src}
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ##############################
 # ##    mcrl2_utilities_qt    ##
 # ##############################
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-  
+
 # ##############################
 # ##    mcrl2_utilities_qt    ##
 # ##############################
@@ -108,6 +108,6 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 endif(MCRL2_ENABLE_GUI_TOOLS)

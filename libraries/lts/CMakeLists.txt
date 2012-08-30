@@ -100,7 +100,7 @@ target_link_libraries(dot_syntax
 )
 
 # add install target:
-install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ##### End generate parser tables ######
 
@@ -124,4 +124,4 @@ if( USE_BCG STREQUAL "" )
 endif( USE_BCG STREQUAL "" )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

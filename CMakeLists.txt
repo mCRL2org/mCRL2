@@ -20,13 +20,13 @@ project (MCRL2)
 
 option(MCRL2_ENABLE_GUI_TOOLS
        "Enable/disable creation of GUI tools"          ON)
-option(MCRL2_ENABLE_CADP_SUPPORT 
+option(MCRL2_ENABLE_CADP_SUPPORT
        "Enable/disable support for CADP"               OFF)
-option(MCRL2_ENABLE_EXPERIMENTAL 
+option(MCRL2_ENABLE_EXPERIMENTAL
        "Enable/disable creation of experimental tools" OFF)
-option(MCRL2_ENABLE_DEPRECATED   
+option(MCRL2_ENABLE_DEPRECATED
        "Enable/disable creation of deprecated tools"   OFF)
-option(MCRL2_INSTALL_HEADERS     
+option(MCRL2_INSTALL_HEADERS
        "Enable/disable install headers"                ON)
 
 # Note on adding definitions containing quotes (")
@@ -287,7 +287,7 @@ if(MCRL2_ENABLE_DEPRECATED)
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
-## Helper for exporting symbolic links on OS-X 
+## Helper for exporting symbolic links on OS-X
 ##---------------------------------------------------
 
 if(APPLE AND MCRL2_SINGLE_BUNDLE AND MCRL2_ENABLE_GUI_TOOLS)
@@ -354,12 +354,14 @@ install(
     libraries/utilities/include/
   DESTINATION include
   PATTERN ".svn" EXCLUDE
+  COMPONENT Headers
 )
 FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
   FILES
     ${dparser_headers}
   DESTINATION include/dparser
+  COMPONENT Headers
 )
 endif( MCRL2_INSTALL_HEADERS )
 
@@ -375,6 +377,7 @@ install(
   DIRECTORY examples/
   DESTINATION share/doc/mcrl2/examples
   PATTERN ".svn" EXCLUDE
+  COMPONENT Examples
 )
 endif ( MCRL2_INSTALL_EXAMPLES )
 
