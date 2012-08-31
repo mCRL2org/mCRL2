@@ -101,6 +101,7 @@ set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
 # --------------------------------
 
 set(MCRL2_BOOST_VER "1.35" )
+set(CPACK_SET_DESTDIR TRUE)
 
 # Linux
 # -----
