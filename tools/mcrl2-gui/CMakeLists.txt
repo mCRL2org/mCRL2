@@ -68,7 +68,7 @@ if(NOT APPLE)
   else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
   endif(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2 COMPONENT Applications)
 
   if( UNIX )
     # Install desktop icons
