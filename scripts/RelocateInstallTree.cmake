@@ -28,6 +28,11 @@ if(NOT(MACOSX_BUNDLE_NAME) OR MCRL2_SINGLE_BUNDLE)
   return()
 endif()
 
+# Warning: this seems to only make sense on Windows and MacOSX!
+if(NOT(APPLE OR WIN32))
+  return()
+endif()
+
 #-------------------------------------------------------------------------------
 # Now the installation stuff below
 #-------------------------------------------------------------------------------

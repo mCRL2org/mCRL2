@@ -12,52 +12,108 @@
 
 INCLUDE(InstallRequiredSystemLibraries)
 
-set(CPACK_PACKAGE_NAME "mcrl2")
-set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
+# TODO: Remove this variable
+set(MCRL2_BOOST_VER "1.35" )
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
-set(CPACK_PACKAGE_CONTACT "mcrl2-users@listserver.tue.nl")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
-
-SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
-SET(CPACK_PACKAGE_VENDOR "TUe")
-
-# Stuff for source packages
-if(WIN32)
-  set(CPACK_SOURCE_GENERATOR "ZIP")
-elseif(APPLE OR UNIX)
-  set(CPACK_SOURCE_GENERATOR "TGZ")
-endif()
-set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG})
-set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CXX_COMPILER_ARCHITECTURE})
+# Configure some files
+# --------------------
 
 # Record the version in the package, for proper version reporting of the tools
 # and documentation
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY )
 
-# -----------------
-# Binary installers
-# -----------------
+# README and COPYING require a .txt extention when be used with MacOSX's PackageMaker
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/COPYING" "${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/README"  "${CMAKE_CURRENT_BINARY_DIR}/README.txt" COPYONLY)
+
+# ----------------------------------------
+# Variables common to all CPack generators
+# ----------------------------------------
+
+# The name of the package
+set(CPACK_PACKAGE_NAME "mcrl2")
+
+# The name of the package vendor
+set(CPACK_PACKAGE_VENDOR "TUe")
+
+# Package full version
+set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
+
+# Directory for the installed files
+set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+
+# Name of the package file to generate, excluding extension.
+set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CXX_COMPILER_ARCHITECTURE})
 
 # Create Desktop link to mcrl2-gui
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
-# Mark the executables for which links have to be generated in the
-# menus.
+
+# Text file used to describe project
+#set(CPACK_PACKAGE_DESCRIPTION_FILE XXX)
+
+# Short description of the project.
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
+
+# List of the executables and associated text label to be used to create Start Menu shortcuts.
 set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui" "mcrl2xi;mcrl2xi")
+
+# Branding image displayed inside the installer
+set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
+
+# Registry key used when installing; windows only
+set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
+
+# TODO: Check whether these are used somewhere
+set(CPACK_PACKAGE_CONTACT "mcrl2-users@listserver.tue.nl")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
+
+
+# License to be embedded in the installer
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt )
+
+# Readme file to be embedded in the installer
+set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
+
+# Warn when a file with absolute installation destination is encountered
+set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION True)
+
+# Source packages
+# ---------------
+
+# Stuff for source packages
+if(WIN32)
+  set(CPACK_SOURCE_GENERATOR "ZIP")
+else()
+  set(CPACK_SOURCE_GENERATOR "TGZ")
+endif()
+
+# Name of the source package to generate, excluding extension.
+set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG})
+
+# Do not strip files for the source packages
+set(CPACK_SOURCE_STRIP_FILES False)
+
+# Binary installers
+# -----------------
+
+set(CPACK_STRIP_FILES True)
+
+# -------------------------------------
+# Variables concerning CPack Components
+# -------------------------------------
+
+# Specify how components are grouped for mult-package component-aware CPack generators
+# We pack everything in one component.
+set(CPACK_COMPONENTS_CROUPING ALL_COMPONENTS_IN_ONE)
 
 # Group the COMPONENTS such that we get a decent installer
 set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
+set(CPACK_COMPONENT_EXAMPLE_GROUP "Documentation")
 set(CPACK_COMPONENT_LIBRARIES_GROUP "Development")
 set(CPACK_COMPONENT_HEADERS_GROUP "Development")
-set(CPACK_COMPONENT_EXAMPLE_GROUP "Documentation")
 
 # Always install the tools
 set(CPACK_COMPONENT_APPLICATIONS_REQUIRED TRUE)
-
-# For generators that can generate more than one package; make sure that only
-# a single package with all components is generated.
-set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE TRUE)
 
 # If we build with shared libraries, make sure they are included in the package
 if(BUILD_SHARED_LIBS)
@@ -67,7 +123,6 @@ endif()
 # For non-windows platforms we need to include libraries and headers, in order
 # to build the compiling rewriters
 if(NOT WIN32)
-  #set(CPACK_COMPONENT_APPLICATIONS_DEPENDS Libraries)
   set(CPACK_COMPONENT_APPLICATIONS_DEPENDS Headers)
 endif()
 
@@ -80,28 +135,10 @@ set(CPACK_COMPONENT_LIBRARIES_INSTALL_TYPES Full)
 set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Full)
 set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 
-# For a release build, strip the executables
-# Note that there is a bug on Apple for which we need to disallow this.
-string(TOLOWER ${CMAKE_BUILD_TYPE} LC_CMAKE_BUILD_TYPE)
-if(LC_CMAKE_BUILD_TYPE MATCHES "release")
-  if(NOT APPLE)
-    SET( CPACK_STRIP_FILES true )
-  endif()
-endif()
-
-# README and COPYING require a .txt extention when be used with MacOSX's PackageMaker
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/COPYING" "${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/README"  "${CMAKE_CURRENT_BINARY_DIR}/README.txt" COPYONLY)
-
-set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt )
-set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
-
 # --------------------------------
 # Platform specific configurations
 # --------------------------------
 
-set(MCRL2_BOOST_VER "1.35" )
-set(CPACK_SET_DESTDIR TRUE)
 
 # Linux
 # -----
@@ -144,19 +181,23 @@ endif(EXISTS /etc/debian_version )
 # Apple
 # -----
 
-IF(APPLE AND MCRL2_SINGLE_BUNDLE)
-  SET(CPACK_SET_DESTDIR TRUE)
+if(APPLE)
+  set(CPACK_STRIP_FILES FALSE)
 
-  configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  if(MCRL2_SINGLE_BUNDLE)
+    set(CPACK_SET_DESTDIR TRUE)
 
-  SET(CMAKE_POSTFLIGHT_SCRIPT
-    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-  SET(CPACK_POSTUPGRADE_SCRIPT
-    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+    configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
 
-  set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
+    set(CMAKE_POSTFLIGHT_SCRIPT
+      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+    set(CPACK_POSTUPGRADE_SCRIPT
+      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
 
-ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
+    set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
+
+  endif()
+endif()
 
 # Windows
 # -------
@@ -164,7 +205,7 @@ ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
-SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
+
 
 # Workaround
 # Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64.
