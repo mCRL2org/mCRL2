@@ -12,6 +12,11 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB_RECURSE HEADERS "." "*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS})
+
 add_definitions(-DWITH_MCRL2)
 
 add_library(mcrl2_${PROJECT_NAME}

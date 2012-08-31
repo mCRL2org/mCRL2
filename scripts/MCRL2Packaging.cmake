@@ -63,10 +63,11 @@ set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-insta
 # Registry key used when installing; windows only
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 
-# TODO: Check whether these are used somewhere
+# E-mail address for contacting
 set(CPACK_PACKAGE_CONTACT "mcrl2-users@listserver.tue.nl")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) # Used for NSIS
 
+# The directory to which mCRL2 needs to be installed (NSIS only?)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2)
 
 # License to be embedded in the installer
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt )
@@ -176,6 +177,7 @@ endif(EXISTS /etc/redhat-release )
 if(EXISTS /etc/debian_version )
 	message(STATUS "Distribution: Debian/Ubuntu" )
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "gcc, debhelper (>= 5), libboost-dev (>=${MCRL2_BOOST_VER}), libglu1-mesa-dev (>= 7.0.1)")
+  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 endif(EXISTS /etc/debian_version )
 
 # Apple

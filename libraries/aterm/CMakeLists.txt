@@ -10,7 +10,7 @@ project(mcrl2_aterm)
 cmake_minimum_required(VERSION 2.6)
 
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB HEADERS "include/mcrl2/aterm/*.h")
+FILE(GLOB_RECURSE HEADERS "include" "*.h")
 add_custom_target(${PROJECT_NAME}_headers
   SOURCES ${HEADERS}
 )

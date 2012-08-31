@@ -11,11 +11,8 @@ project(mcrl2_core)
 cmake_minimum_required(VERSION 2.6)
 
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB HEADERS "include/mcrl2/core/*.h")
-FILE(GLOB DETAIL_HEADERS "include/mcrl2/core/detail/*.h")
-add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS} ${DETAIL_HEADERS}
-)
+FILE(GLOB_RECURSE HEADERS "include" "*.h")
+add_custom_target(${PROJECT_NAME}_headers SOURCES ${HEADERS})
 
 # ##### Generate parser tables ######
 
