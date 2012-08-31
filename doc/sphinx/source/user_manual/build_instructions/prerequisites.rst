@@ -186,6 +186,12 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
        Qt can now be compiled by typing::
        
          nmake
+
+       .. warning::
+
+          A bug in 64-bit MSVC is causing a problem in the release build of the
+          Qt libraries. This can be circumvented by installing the fix of Microsoft
+          `KB2280741 <http://support.microsoft.com/kb/2280741>`_.
    
    When installed correctly, and the binary directory for Qt has been added to
    your ``PATH``, CMake should be able to automatically find your 
