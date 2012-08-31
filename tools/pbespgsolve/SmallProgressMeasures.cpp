@@ -75,7 +75,7 @@ SmallProgressMeasures::SmallProgressMeasures(
             ++cnt;
         }
     }
-    info("Initialized %d vert%s to top.", cnt, cnt == 1 ? "ex" : "ices");
+    mCRL2log(mcrl2::log::verbose) << "Initialized " << cnt << (cnt == 1?" vertex":" vertices") << " to top" << std::endl;
 
     // Create lifting strategy
     ls_ = lsf->create(game_, *this);
@@ -315,7 +315,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
     std::vector<verti> won_by_odd;
 
     {
-        info("Solving for Even...");
+        mCRL2log(mcrl2::log::verbose) << "Solving for Even..." << std::endl;
         SmallProgressMeasures spm( game(), ParityGame::PLAYER_EVEN,
                                    lsf_, stats_, vmap_, vmap_size_ );
         if (!spm.solve()) return ParityGame::Strategy();
@@ -336,8 +336,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
     {
         // Make a dual subgame of the vertices won by player Odd
         ParityGame subgame;
-        info("Constructing subgame of size %ld to solve for Odd...",
-             (long)won_by_odd.size());
+        mCRL2log(mcrl2::log::verbose) << "Constructing subgame of size " << won_by_odd.size() << " to solve for Odd..." << std::endl;
         subgame.make_subgame(game_, won_by_odd.begin(), won_by_odd.end());
         subgame.compress_priorities();
         assert(subgame.proper());
@@ -354,7 +353,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         }
 
         // Second pass; solve subgame of vertices won by Odd:
-        info("Solving for Odd...");
+        mCRL2log(mcrl2::log::verbose) << "Solving for Odd..." << std::endl;
         SmallProgressMeasures spm( subgame, ParityGame::PLAYER_ODD,
                                    lsf_, stats_, submap, submap_size );
         if (!spm.solve()) return ParityGame::Strategy();
@@ -390,17 +389,17 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
     int player = 0;
     long long max_lifts = game_.graph().V(), num_lifts = 0;
     do {
-        info("Switching to %s game...", player == 0 ? "normal" : "dual");
+        mCRL2log(mcrl2::log::verbose) << "Switching to " << (player==0?"normal":"dual") << " game..." << std::endl;
         num_lifts = spm[player]->solve_part(max_lifts);
         if (aborted()) return ParityGame::Strategy();
 
-        info("Propagating solved vertices to other game...");
+        mCRL2log(mcrl2::log::verbose) << "Propagating solved vertices to other game..." << std::endl;
         SetToTopIterator it = { *spm[1 - player] };
         spm[player]->get_winning_set((ParityGame::Player)player, it);
         player = 1 - player;
     } while (num_lifts == max_lifts);
     // One game is solved; solve other game completely too:
-    info("Finishing %s game...", player == 0 ? "normal" : "dual");
+    mCRL2log(mcrl2::log::verbose) << "Finishing " << (player==0?"normal":"dual") << " game..." << std::endl;
     if (!spm[player]->solve()) return ParityGame::Strategy();
 
     // Retrieve combined strategies:

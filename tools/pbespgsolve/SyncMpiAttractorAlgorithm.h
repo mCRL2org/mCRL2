@@ -11,7 +11,7 @@
 #define SYNC_MPI_ATTRACTOR_ALGORITHM_H_INCLUDED
 
 #include "MpiAttractorAlgorithm.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 
 /*! Attractor set computation implementation that runs synchronously; i.e. all
     worker processes compute the attractor set in lockstep, synchronizing after

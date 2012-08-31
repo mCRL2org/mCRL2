@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ParityGame.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 #include <assert.h>
 
 /* N.B. The PGSolver I/O functions reverse the priorities when reading/writing

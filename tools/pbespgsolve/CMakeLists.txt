@@ -28,10 +28,7 @@ add_library(mcrl2_${PROJECT_NAME}
   Graph.cpp
   LiftingStrategy.cpp
   LinearLiftingStrategy.cpp
-  Logger.cpp
-  #main.cpp
   MaxMeasureLiftingStrategy.cpp
-  #mcrl2-example.cpp
   OldMaxMeasureLiftingStrategy.cpp
   ParityGame.cpp
   ParityGame_IO.cpp
