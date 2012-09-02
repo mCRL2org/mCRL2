@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
@@ -39,7 +39,7 @@ class pbes_absinthe_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_strategy = parse_absinthe_strategy(parser.option_argument("strategy"));
+      m_strategy = parser.option_argument_as<absinthe_strategy>("strategy");
       m_abstraction_file = parser.option_argument("abstraction-file");
       m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
       m_enable_logging = parser.options.count("enable-logging") > 0;
@@ -50,15 +50,15 @@ class pbes_absinthe_tool: public input_output_tool
       super::add_options(desc);
 
       desc.add_option("abstraction-file",
-                       make_mandatory_argument("FILE"),
+                       make_file_argument("FILE"),
                        "use the abstraction specification in FILE. ",
                        'a');
 
       desc.add_option("strategy",
-                       make_mandatory_argument("NAME"),
-                       "use the approximation strategy NAME:\n"
-                       "  'over'  for an over-approximation,\n"
-                       "  'under' for an under-approximation\n",
+                       make_enum_argument<absinthe_strategy>("NAME")
+                      .add_value(absinthe_over)
+                      .add_value(absinthe_under),
+                       "use the approximation strategy NAME:",
                        's');
       desc.add_option("used-function-symbols", "print used function symbols", 'u');
       desc.add_option("enable-logging", "print absinthe specific log messages", 'l');

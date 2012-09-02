@@ -62,6 +62,9 @@ struct func
 
 void test_aterm_balanced_tree()
 {
+  aterm_balanced_tree empty_tree;
+  BOOST_CHECK(empty_tree.begin() == empty_tree.end());
+
   aterm_list q = make_term("[0,1,2,3,4,5,6,7,8,9]");
 
   aterm_balanced_tree qtree(q);

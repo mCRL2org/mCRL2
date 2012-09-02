@@ -6,6 +6,10 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+if (NOT APPLE)
+  return()
+endif()
+
 ##---------------------------------------------------
 ## Set Compiler options 
 ##---------------------------------------------------
@@ -23,7 +27,6 @@ option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF)
 ## Add definitions
 ##---------------------------------------------------
 
-add_definitions( -D__DARWIN__)
 add_definitions( -D__WXMAC__)
 
 ##---------------------------------------------------
@@ -71,5 +74,34 @@ if(MCRL2_SINGLE_BUNDLE)
   set(MCRL2_BIN_DIR "MacOS")
 else(MCRL2_SINGLE_BUNDLE)
   set(MCRL2_BIN_DIR "bin")
+endif(MCRL2_SINGLE_BUNDLE)
+
+##---------------------------------------------------
+## Set configuration for a single bundle app 
+##---------------------------------------------------
+if(MCRL2_SINGLE_BUNDLE)
+  #Process Info.plist with Copyright Information
+  configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
+  #Install Info.plist for single application bundle
+  install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
+  #Install mcrl2-logo for single application bundle
+  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
+
+  if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This creates a non-standard installer when using CPack." )
+  endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+
+  SET(CMAKE_BUNDLE_NAME "mCRL2")
+
+  SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
+  # make sure CMAKE_INSTALL_PREFIX ends in /
+  STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
+  MATH(EXPR LEN "${LEN} -1" )
+  STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
+  IF(NOT "${ENDCH}" STREQUAL "/")
+    SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
+  ENDIF(NOT "${ENDCH}" STREQUAL "/")
+  SET(CMAKE_INSTALL_PREFIX
+    "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
 endif(MCRL2_SINGLE_BUNDLE)
 

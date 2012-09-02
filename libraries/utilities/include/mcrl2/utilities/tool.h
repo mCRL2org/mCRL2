@@ -115,7 +115,7 @@ class tool
       {
         log::mcrl2_logger::set_reporting_level(log::debug);
       }
-      if (parser.options.count("log-level") > 0)
+      if (parser.options.count("log-level"))
       {
         log::mcrl2_logger::set_reporting_level(log::log_level_from_string(parser.option_argument("log-level")));
       }
@@ -124,9 +124,12 @@ class tool
 
     /// \brief Checks if the number of positional options is OK.
     /// By default this function handles standard options: -v, -d and -q
+    /// Furthermore, it checks that all options occur at most once
     /// \param parser A command line parser
-    virtual void check_positional_options(const command_line_parser&)
-    { }
+    virtual void check_positional_options(const command_line_parser& parser)
+    {
+      parser.check_no_duplicate_arguments();
+    }
 
     /// \brief Returns the synopsis of the tool
     /// \return The string "[OPTION]...\n"
@@ -225,7 +228,7 @@ class tool
       }
       catch (std::exception& e)
       {
-        mCRL2log(mcrl2::log::error) << "Standard exception: " << e.what() << std::endl;
+        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
       }
       return EXIT_FAILURE;
     }

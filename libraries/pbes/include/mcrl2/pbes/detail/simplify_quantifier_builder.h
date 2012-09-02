@@ -14,7 +14,7 @@
 
 #include <set>
 #include <utility>
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
@@ -31,7 +31,7 @@ namespace detail
 template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
 struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionFunction>
 {
-  typedef pbes_expr_builder<Term, SubstitutionFunction>                super;
+  typedef pbes_expr_builder<Term, SubstitutionFunction>                      super;
   typedef SubstitutionFunction                                               argument_type;
   typedef typename super::term_type                                          term_type;
   typedef typename core::term_traits<term_type>::data_term_type              data_term_type;
@@ -41,37 +41,6 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   typedef core::term_traits<Term> tr;
 
   const DataRewriter& m_data_rewriter;
-
-  /// \brief Store the variables of the lhs and rhs of any application of and/or for later reference
-  mutable variable_sequence_type lvar;
-  mutable variable_sequence_type rvar;
-
-  /// \brief A binary function with the side effect that the dependent variables of the arguments are stored
-  template <typename BinaryFunction>
-  struct store_variables_function
-  {
-    variable_sequence_type& lvar;
-    variable_sequence_type& rvar;
-    BinaryFunction& op;
-
-    store_variables_function(variable_sequence_type& l, variable_sequence_type& r, BinaryFunction& o)
-      : lvar(l), rvar(r), op(o)
-    {}
-
-    term_type operator()(const term_type& left, const term_type& right) const
-    {
-      lvar = tr::free_variables(left);
-      rvar = tr::free_variables(right);
-      return op(left, right);
-    }
-  };
-
-  /// \brief Utility function for creating a store_variables_function
-  template <typename BinaryFunction>
-  store_variables_function<BinaryFunction> make_store_variables_function(variable_sequence_type& l, variable_sequence_type& r, BinaryFunction& o)
-  {
-    return store_variables_function<BinaryFunction>(l, r, o);
-  }
 
   /// \brief Is called in the case rewriting is done with a substitution function.
   /// \param d A data term
@@ -136,11 +105,8 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   /// \return The result of visiting the node
   term_type visit_not(const term_type& /* x */, const term_type& n, SubstitutionFunction& sigma)
   {
-    if (tr::is_not(n))
-    {
-      return super::visit(tr::arg(n), sigma);
-    }
-    return term_type(); // continue recursion
+    term_type arg = super::visit(n, sigma);
+    return utilities::optimized_not(arg);
   }
 
   /// \brief Visit and node
@@ -154,7 +120,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return utilities::detail::optimized_and(l, r, make_store_variables_function(lvar, rvar, tr::and_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::optimized_and(l, r);
   }
 
   /// \brief Visit or node
@@ -168,7 +134,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return utilities::detail::optimized_or(l, r, make_store_variables_function(lvar, rvar, tr::or_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::optimized_or(l, r);
   }
 
   /// \brief Visit imp node
@@ -182,7 +148,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return utilities::detail::optimized_imp(l, r, make_store_variables_function(lvar, rvar, tr::imp), tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::optimized_imp(l, r);
   }
 
   /// \brief Visit forall node
@@ -194,44 +160,45 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   /// \return The result of visiting the node
   term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
-    typedef typename core::term_traits<data_term_type> tt;
     term_type result;
     term_type t = super::visit(phi, sigma);
 
-    if (tr::is_not(t))
+    if (variables.empty())
     {
-      result = utilities::optimized_not(utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      return tr::true_();
+    }
+    else if (tr::is_not(t))
+    {
+      result = utilities::optimized_not(utilities::optimized_exists(variables, tr::arg(t), true));
     }
     if (tr::is_and(t))
     {
       term_type l = tr::left(t);
       term_type r = tr::right(t);
-      data::variable_list lv = tt::set_intersection(variables, lvar);
-      data::variable_list rv = tt::set_intersection(variables, rvar);
-      result = utilities::optimized_and(utilities::optimized_forall(lv, l), utilities::optimized_forall(rv, r));
+      result = utilities::optimized_and(utilities::optimized_forall(variables, l, true), utilities::optimized_forall(variables, r, true));
     }
     else if (tr::is_or(t))
     {
       term_type l = tr::left(t);
       term_type r = tr::right(t);
-      data::variable_list lv = tt::set_intersection(variables, lvar);
-      data::variable_list rv = tt::set_intersection(variables, rvar);
+      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(l));
+      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(r));
       if (lv.empty())
       {
-        result = utilities::optimized_or(l, utilities::optimized_forall(rv, r));
+        result = utilities::optimized_or(l, utilities::optimized_forall_no_empty_domain(rv, r, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(r, utilities::optimized_forall(lv, l));
+        result = utilities::optimized_or(r, utilities::optimized_forall_no_empty_domain(lv, l, true));
       }
       else
       {
-        result = utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+        result = utilities::optimized_forall(variables, t, true);
       }
     }
     else
     {
-      result = utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+      result = utilities::optimized_forall(variables, t, true);
     }
     return result;
   }
@@ -245,44 +212,45 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   /// \return The result of visiting the node
   term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
-    typedef typename core::term_traits<data_term_type> tt;
     term_type result;
     term_type t = super::visit(phi, sigma);
 
-    if (tr::is_not(t))
+    if (variables.empty())
     {
-      result = utilities::optimized_not(utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      return tr::false_();
+    }
+    else if (tr::is_not(t))
+    {
+      result = utilities::optimized_not(utilities::optimized_forall(variables, tr::arg(t), true));
     }
     else if (tr::is_or(t))
     {
       term_type l = tr::left(t);
       term_type r = tr::right(t);
-      data::variable_list lv = tt::set_intersection(variables, lvar);
-      data::variable_list rv = tt::set_intersection(variables, rvar);
-      result = utilities::optimized_or(utilities::optimized_exists(lvar, l), utilities::optimized_exists(rvar, r));
+      result = utilities::optimized_or(utilities::optimized_exists(variables, l, true), utilities::optimized_exists(variables, r, true));
     }
     else if (tr::is_and(t))
     {
       term_type l = tr::left(t);
       term_type r = tr::right(t);
-      data::variable_list lv = tt::set_intersection(variables, lvar);
-      data::variable_list rv = tt::set_intersection(variables, rvar);
+      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(l));
+      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(r));
       if (lv.empty())
       {
-        result = utilities::optimized_and(l, utilities::optimized_exists(rv, r));
+        result = utilities::optimized_and(l, utilities::optimized_exists_no_empty_domain(rv, r, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_and(r, utilities::optimized_exists(lv, l));
+        result = utilities::optimized_and(r, utilities::optimized_exists_no_empty_domain(lv, l, true));
       }
       else
       {
-        result = utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+        result = utilities::optimized_exists(variables, t, true);
       }
     }
     else
     {
-      result = utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+      result = utilities::optimized_exists(variables, t, true);
     }
     return result;
   }

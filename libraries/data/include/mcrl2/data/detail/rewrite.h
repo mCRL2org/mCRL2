@@ -16,13 +16,9 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/data/rewrite_strategy.h"
 // #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/set_identifier_generator.h"
-
-#ifndef NO_DYNLOAD
-#define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
-rewriter is available */
-#endif
 
 namespace mcrl2
 {
@@ -30,20 +26,6 @@ namespace data
 {
 namespace detail
 {
-
-/** \brief Rewrite strategies. */
-typedef enum {
-               GS_REWR_JITTY,     /** \brief JITty */
-#ifdef MCRL2_JITTYC_AVAILABLE
-               GS_REWR_JITTYC,    /** \brief Compiling JITty */
-#endif
-               GS_REWR_JITTY_P,   /** \brief JITty + Prover */
-#ifdef MCRL2_JITTYC_AVAILABLE
-               GS_REWR_JITTYC_P,  /** \brief Compiling JITty + Prover*/
-#endif
-               GS_REWR_INVALID   /** \brief Invalid strategy */
-             } RewriteStrategy;
-
 
 atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
 
@@ -111,7 +93,7 @@ class Rewriter
      * \brief Get rewriter strategy that is used.
      * \return Used rewriter strategy.
      **/
-    virtual RewriteStrategy getStrategy() = 0;
+    virtual rewrite_strategy getStrategy() = 0;
 
     /**
      * \brief Rewrite an mCRL2 data term.
@@ -250,7 +232,7 @@ class Rewriter
 Rewriter* createRewriter(
              const data_specification& DataSpec,
              const used_data_equation_selector &equations_selector,
-             const RewriteStrategy Strategy = GS_REWR_JITTY);
+             const rewrite_strategy Strategy = jitty);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.
@@ -265,20 +247,6 @@ void CheckRewriteRule(const data_equation dataeqn);
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
 bool isValidRewriteRule(const data_equation dataeqn);
-
-/**
- * \brief Print a string representation of a rewrite strategy.
- * \param stream File stream to print to.
- * \param strat  Rewrite strategy to print.
- **/
-void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat);
-/**
- * \brief Get rewrite strategy from its string representation.
- * \param s String representation of strategy.
- * \return Rewrite strategy represented by s. If s is not a valid rewrite
- *         strategy, ::GS_REWR_INVALID is returned.
- **/
-RewriteStrategy RewriteStrategyFromString(char const* s);
 
 // extern size_t num_apples;
 extern std::vector <AFun> apples;

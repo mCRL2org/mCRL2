@@ -142,7 +142,7 @@ class Formula_Checker
     /// to 0, no time limit will be enforced
     Formula_Checker(
       mcrl2::data::data_specification a_data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,

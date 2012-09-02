@@ -21,6 +21,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/precedence.h"
 #include "mcrl2/lps/action.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
@@ -31,8 +32,11 @@ namespace mcrl2
 namespace process
 {
 
-// Make the LPS action visible.
+// Make some LPS types visible. These should become part of the process library.
 using lps::action;
+using lps::multi_action;
+using lps::multi_action_name;
+using lps::multi_action_name_set;
 
 // Needed for argument dependent lookup (?)
 using namespace core::detail::precedences;

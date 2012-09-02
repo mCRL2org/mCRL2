@@ -9,6 +9,12 @@
 project(mcrl2_aterm)
 cmake_minimum_required(VERSION 2.6)
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB_RECURSE HEADERS "include" "*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS}
+)
+
 # main target
 add_library(${PROJECT_NAME}
   source/idmappings.cpp
@@ -33,4 +39,4 @@ target_link_libraries(mcrl2_aterm
   mcrl2_utilities
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

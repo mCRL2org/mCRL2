@@ -16,6 +16,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
 
@@ -73,16 +74,30 @@ void test_equal_multi_actions()
   action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
   action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
   action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
-
   test_multi_actions(a1,  a1, d::sort_bool::true_());
   test_multi_actions(a1,  a2, d::equal_to(d1, d2));
   test_multi_actions(a11, a11, d::sort_bool::true_());
   test_multi_actions(a12, a21, d::sort_bool::true_());
+  test_multi_actions(a21, a12, d::sort_bool::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));
   test_multi_actions(a1, a12,  d::sort_bool::false_());
   test_multi_actions(a1, b1,   d::sort_bool::false_());
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
+
+  data_expression m1 = equal_multi_actions(a12, a34);
+  data_expression m2 = equal_multi_actions(a34, a12);
+  data_expression n1 = data::detail::normalize_equality(m1);
+  data_expression n2 = data::detail::normalize_equality(m2);
+  data_expression p1 = data::detail::normalize_and_or(n1);
+  data_expression p2 = data::detail::normalize_and_or(n2);
+  std::cout << "m1 = " << data::pp(m1) << std::endl;
+  std::cout << "m2 = " << data::pp(m2) << std::endl;
+  std::cout << "n1 = " << data::pp(n1) << std::endl;
+  std::cout << "n2 = " << data::pp(n2) << std::endl;
+  std::cout << "p1 = " << data::pp(p1) << std::endl;
+  std::cout << "p2 = " << data::pp(p2) << std::endl;
+  BOOST_CHECK(p1 == p2);
 }
 
 void test_pp()

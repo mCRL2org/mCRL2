@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_FIND_H
 #define MCRL2_LPS_FIND_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"

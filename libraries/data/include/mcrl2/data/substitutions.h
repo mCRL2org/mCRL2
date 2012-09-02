@@ -224,6 +224,18 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
     throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
   }
+
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << "[";
+    for (typename AssociativeContainer::const_iterator i = m_map.begin(); i != m_map.end(); ++i)
+    {
+      out << (i == m_map.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+    }
+    out << "]";
+    return out.str();
+  }
 };
 
 /// \brief Utility function for creating a map_substitution.
@@ -917,7 +929,7 @@ std::string print_substitution(const Substitution& sigma)
 template <typename Substitution>
 std::string print_substitution(const mutable_substitution_composer<Substitution>& sigma)
 {
-  return to_string(sigma.substitution());
+  return print_substitution(sigma.substitution());
 }
 
 } // namespace data

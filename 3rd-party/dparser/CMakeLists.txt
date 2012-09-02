@@ -34,24 +34,24 @@ endif(MSVC)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 # actual target:
-add_library(dparser 
-  arg.c 
-  parse.c 
-  scan.c 
-  symtab.c 
-  util.c 
-  read_binary.c 
+add_library(dparser
+  arg.c
+  parse.c
+  scan.c
+  symtab.c
+  util.c
+  read_binary.c
   dparse_tree.c
 )
 
-add_executable(make_dparser 
+add_executable(make_dparser
   make_dparser.c
   version.c
-  mkdparse.c 
-  write_tables.c 
-  grammar.g.c 
-  gram.c 
-  lex.c 
+  mkdparse.c
+  write_tables.c
+  grammar.g.c
+  gram.c
+  lex.c
   lr.c
 )
 
@@ -59,4 +59,4 @@ target_link_libraries(make_dparser
   dparser
 )
 
-install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

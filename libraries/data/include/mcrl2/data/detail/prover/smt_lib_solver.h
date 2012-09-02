@@ -20,8 +20,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
@@ -250,7 +249,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_operators.empty())
       {
         f_operators_notes = "  :notes \"";
-        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i) 
+        for(atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
           std::stringstream v_operator_string;
           v_operator_string << "op" << i->second;
@@ -628,10 +627,10 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       const data_expression v_operator = application(a_clause).head();
       atermpp::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
-      
+
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
       if (i==f_operators.end()) // not found.
-      { 
+      {
         f_operators[v_operator]=v_operator_number;
       }
       else

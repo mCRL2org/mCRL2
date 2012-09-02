@@ -28,7 +28,7 @@ def main():
         propvar_count = 2
         use_quantifiers = True
 
-        for i in range(10000):
+        for i in range(options.iterations):
             filename = 'pbesabsinthe'
             p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
             if i % 2 == 0:

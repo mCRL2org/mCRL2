@@ -135,10 +135,6 @@ std::string t10 =
 std::string x10 = "binding_variables = X";
 
 std::string t11 =
-  "% conditions: universal quantification which cannot be solved \n"
-  "% (by the current rewriter), n1 and n2 are constants, but not \n"
-  "% detected as such                                            \n"
-  "                                                              \n"
   "pbes mu X(n1,n2:Nat) =                                        \n"
   "    forall m:Nat. (val(m>n2) && X(n1+1,n2+1));                \n"
   "                                                              \n"
@@ -231,6 +227,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   if (!diff.empty())
   {
     std::cerr << "\n------ FAILED TEST ------" << std::endl;
+    std::cout << pbes_spec << std::endl;
     std::cerr << "--- expected result" << std::endl;
     std::cerr << expected_result << std::endl;
     std::cerr << "--- found result" << std::endl;

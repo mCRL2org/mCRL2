@@ -54,6 +54,9 @@ struct func
 
 void test_aterm_list()
 {
+  aterm_list empty_list;
+  BOOST_CHECK(empty_list.begin() == empty_list.end());
+
   aterm_list q = make_term("[1,2,3,4]");
 
   aterm_list r = reverse(q); // r == [4,3,2,1]

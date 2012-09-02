@@ -156,19 +156,19 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
 static data_expression condition_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return *boost::next(application(e).arguments().begin(), 0);
+  return application(e).argument(0);
 }
 
 static data_expression then_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return *boost::next(application(e).arguments().begin(), 1);
+  return application(e).argument(1);
 }
 
 static data_expression else_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return *boost::next(application(e).arguments().begin(), 2);
+  return application(e).argument(2);
 }
 
 
@@ -270,7 +270,8 @@ static void split_condition(
     {
       if (i->sort()==sort_real::real_())
       {
-        throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +                                          data::pp(*i) + " of sort Real.");
+        throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
+                                    data::pp(*i) + " of sort Real.");
       }
     }
     if (negate)

@@ -11,6 +11,9 @@
 #ifndef TIMESERIES_H
 #define TIMESERIES_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
@@ -18,89 +21,68 @@
 #include <set>
 #include <string>
 #include <vector>
-//#include <wx/event.h>
+#include <QTimer>
 #include "attribute.h"
 #include "diagram.h"
-#include "glcanvas.h"
 #include "graph.h"
+#include "settings.h"
 #include "visualizer.h"
 
-class TimeSeries : public wxEvtHandler, public Visualizer
+class TimeSeries : public Visualizer
 {
+  Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     TimeSeries(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      QWidget *parent,
+      Settings* s,
+      Graph* g);
     virtual ~TimeSeries();
 
     // -- get functions ---------------------------------------------
-    static bool getUseShading();
     void getIdcsClstMarked(std::set< size_t > &idcs);
     void getIdcsClstMarked(
       std::set< size_t > &idcs ,
-      ColorRGB& col);
+      QColor& col);
     void getIdxMseOver(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getCurrIdxDgrm(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getAnimIdxDgrm(
       size_t& idxLeaf,
       std::set< size_t > &idcsBndl,
-      ColorRGB& colLeaf);
+      QColor& colLeaf);
     void getAttrIdcs(std::vector< size_t > &idcs);
-
-    // -- set functions ---------------------------------------------
-    static void setUseShading(const bool& useShd);
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
-    static void setSizeTxt(const int& sze);
 
     void setDiagram(Diagram* dgrm);
     void initAttributes(const std::vector< size_t > attrIdcs);
+
+  public slots:
     void clearData();
-
     void markItems(Cluster* frame);
-    void markItems(const std::vector< Cluster* > frames);
+    void markItems(QList<Cluster*> frames);
 
-    void handleSendDgrmSglToExnr();
-
+  public:
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    void handleMouseWheelIncEvent(
-      const int& x,
-      const int& y);
-    void handleMouseWheelDecEvent(
-      const int& x,
-      const int& y);
+    void handleMouseEvent(QMouseEvent* e);
+    void handleWheelEvent(QWheelEvent* e);
     void handleMouseLeaveEvent();
-    void handleKeyDownEvent(const int& keyCode);
-    void handleKeyUpEvent(const int& keyCode);
+    void handleKeyEvent(QKeyEvent* e);
+
+    QSize sizeHint() const { return QSize(600,200); }
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
+    void marksChanged();
+    void animationChanged();
 
   protected:
     // -- utility functions -----------------------------------------
@@ -112,13 +94,16 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void clearAttributes();
 
     // -- utility event handlers ------------------------------------
-    void onTimer(wxTimerEvent& e);
+  protected slots:
+    void animate();
+  protected:
     void handleRwndDiagram(const int& dgrmIdx);
     void handlePrevDiagram(const int& dgrmIdx);
     void handlePlayDiagram(const size_t& dgrmIdx);
     void handleNextDiagram(const int& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
+    void route();
     void handleHits(const std::vector< int > &ids);
     void processHits(
       GLint hits,
@@ -135,10 +120,9 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void drawMouseOver(const bool& inSelectMode);
     void drawLabels(const bool& inSelectMode);
 
-    void handleHitSlider();
-    void handleDragSliderHdl();
-    void handleDragSliderHdlLft();
-    void handleDragSliderHdlRgt();
+    void initDragSlider();
+    void clickSliderBar();
+    void dragSlider();
 
     void handleHitItems(const int& idx);
     void handleDragItems(const int& idx);
@@ -146,11 +130,6 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     void handleShowDiagram(const int& dgrmIdx);
     void handleDragDiagram(const int& dgrmIdx);
 
-    // -- static variables ------------------------------------------
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
-    static int      szeTxt;
-    static ColorRGB colMrk;
     enum
     {
       ID_TIMER,
@@ -179,16 +158,18 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     };
 
     // -- data members ----------------------------------------------
+    QPoint m_lastMousePos;
+    Settings* settings;
+
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
-
-    static bool useShading;
 
     Position2D posSliderTopLft;
     Position2D posSliderBotRgt;
     double itvSlider;
     int    nodesItvSlider;
     double itvSliderPerNode;
+    double sliderDragPosition;
 
     Position2D posScaleTopLft;
     Position2D posScaleBotRgt;
@@ -226,15 +207,10 @@ class TimeSeries : public wxEvtHandler, public Visualizer
     size_t animIdxDgrm; // diagram being animated
 
     double ySpacePxl;
-    bool critSect;
 
     // animation
-    wxTimer* timerAnim;
-    static int itvAnim;
+    QTimer m_animationTimer;
     std::set< size_t >::iterator animFrame;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

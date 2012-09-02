@@ -43,7 +43,6 @@ There are six standard template instantiations of labelled transitions systems:
   * :cpp:type:`lts_fsm_t`: Strings as label values. Vectors of strings as state values. Contains the names and sorts of process parameters. Is stored in the fsm file format.
   * :cpp:type:`lts_bcg_t`: Strings as label values. No state values. Is stored in the bcg file format.
   * :cpp:type:`lts_dot_t`: Label values are strings. State values are a pair of a state name, and a state label.
-  * :cpp:type:`lts_svc_t`: The values of action labels and states are ATerms.
 
 Each of these six classes contains at least load and save functionality, as well as as function pp to
 transform state and label values to strings. 
@@ -150,8 +149,6 @@ labelled transition system has its own file extension. The table below shows the
    |:cpp:class:`lts_dot_t` | :cpp:member:`lts_dot` | .dot           |:cpp:type:`state_label_dot`  |:cpp:type:`action_label_string`|No                 |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
    |:cpp:class:`lts_bcg_t` | :cpp:member:`lts_bcg` | .bcg           |:cpp:type:`state_label_empty`|:cpp:type:`action_label_string`|No                 |
-   +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
-   |:cpp:class:`lts_svc_t` | :cpp:member:`lts_svc` | .svc           |:cpp:type:`state_label_svc`  |:cpp:type:`action_label_lts`   |No                 |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+
 
 

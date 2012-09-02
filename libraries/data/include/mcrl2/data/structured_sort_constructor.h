@@ -135,7 +135,7 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
 
   public:
 
-    /// \overlaod
+    /// \\overload
     structured_sort_constructor()
       : detail::structured_sort_constructor_base()
     {}

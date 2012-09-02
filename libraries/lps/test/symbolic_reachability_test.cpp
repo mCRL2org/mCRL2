@@ -9,12 +9,14 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/convert.h"
-#include "mcrl2/lps/nextstate/standard.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/convert.h"
+#include "mcrl2/lps/state.h"
+#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/linearise.h"
+
 
 const std::string case_no_influenced_parameters(
   "act a;\n\n"
@@ -225,37 +227,30 @@ int test_main(int argc, char** argv)
     model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
+    next_state_generator::substitution_t dummy;
 
-    // Note the second argument that specifies that don't care variables are not treated specially
-    NextState* explorer = createNextState(model, rewriter, false);
+    next_state_generator explorer(model, rewriter);
 
-    std::stack< ATerm >     stack;
-    atermpp::set< ATerm >   known;
+    std::stack< state >     stack;
+    atermpp::set< state >   known;
 
-    stack.push(explorer->getInitialState());
+    stack.push(explorer.initial_state());
     known.insert(stack.top());
 
     while (!stack.empty())
     {
-      ATerm     current(stack.top());
-
+      state current(stack.top());
       stack.pop();
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        ATerm     state;
-        multi_action transition;
-
-        std::auto_ptr< NextStateGenerator > generator(explorer->getNextStates(current, i));
-
-        while (generator->next(transition, &state))
+        for(next_state_generator::iterator j = explorer.begin(current, &dummy, i); j != explorer.end(); ++j)
         {
-          if (known.find(state) == known.end())
+          if (known.find(j->state()) == known.end())
           {
-            std::cerr << atermpp::aterm(state) << std::endl;
-
-            known.insert(state);
-            stack.push(state);
+            std::cerr << pp(j->state()) << std::endl;
+            known.insert(j->state());
+            stack.push(j->state());
           }
         }
       }

@@ -24,7 +24,7 @@ inline
 void aterm_init(const aterm& bottom_of_stack)
 {
   ATerm a = bottom_of_stack;
-  ATinit(0, 0, &a);
+  ATinit(&a);
 }
 
 } // namespace atermpp
@@ -32,10 +32,10 @@ void aterm_init(const aterm& bottom_of_stack)
 // \cond INTERNAL_DOCS
 #if defined(_MSC_VER) || defined(__MINGW32__)
 # define MCRL2_ATERMPP_INIT_(argc, argv, bottom) \
-  ATinit(0, 0, reinterpret_cast< ATerm* >(&bottom));
+  ATinit(reinterpret_cast< ATerm* >(&bottom));
 #else
 #define MCRL2_ATERMPP_INIT_(argc, argv, bottom) \
-  ATinit(argc, argv, reinterpret_cast< ATerm* >(bottom));
+  ATinit(reinterpret_cast< ATerm* >(bottom));
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 // \endcond
 
@@ -44,14 +44,14 @@ void aterm_init(const aterm& bottom_of_stack)
 /// actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
-# define MCRL2_ATERMPP_INIT(argc, argv) \
+# define MCRL2_ATERMPP_INIT(argc,argv) \
   MCRL2_ATERMPP_INIT_(argc, argv, argv);
 
 /// MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
 ///  MCRL2_ATERMPP_INIT(argc,argv). If NDEBUG is not defined, the aterm library
 ///  performs now all debug checking by default. So, MCRL2_ATERMPP_INIT_DEBUG
 ///  equals MCRL2_ATERMPP_INIT.
-# define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
+# define MCRL2_ATERMPP_INIT_DEBUG(argc,argv)\
   MCRL2_ATERMPP_INIT_(argc, argv, argv)
 
 #endif // MCRL2_ATERMPP_ATERM_INIT_H

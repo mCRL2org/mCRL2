@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -8,57 +8,67 @@
 
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
-#include <wx/wx.h>
+
+#include "ui_settingsdialog.h"
+
 #include "settings.h"
+#include <QDialog>
 
-class GLCanvas;
-class wxSpinEvent;
-
-class SettingsDialog: public wxDialog, public Subscriber
+class ColorButtonHandler : public QObject
 {
+  Q_OBJECT
+
   public:
-    SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss);
-    void notify(SettingID s);
-    void onBackgroundClrButton(wxCommandEvent& event);
-    void onDownEdgeClrButton(wxCommandEvent& event);
-    void onInterpolateClr1Button(wxCommandEvent& event);
-    void onInterpolateClr2Button(wxCommandEvent& event);
-    void onMarkClrButton(wxCommandEvent& event);
-    void onStateClrButton(wxCommandEvent& event);
-    void onUpEdgeClrButton(wxCommandEvent& event);
-    void onSimCurrClrButton(wxCommandEvent& event);
-    void onSimPosClrButton(wxCommandEvent& event);
-    void onSimSelClrButton(wxCommandEvent& event);
-    void onSimPrevClrButton(wxCommandEvent& event);
-    void onLongInterpolationCheck(wxCommandEvent& event);
-    void onNavShowBackpointersCheck(wxCommandEvent& event);
-    void onNavShowStatesCheck(wxCommandEvent& event);
-    void onNavShowTransitionsCheck(wxCommandEvent& event);
-    void onNavSmoothShadingCheck(wxCommandEvent& event);
-    void onNavLightingCheck(wxCommandEvent& event);
-    void onNavTransparencyCheck(wxCommandEvent& event);
-    void onBranchRotationSpin(wxSpinEvent& event);
-    void onStateSizeSpin(wxSpinEvent& event);
-    void onClusterHeightSpin(wxSpinEvent& event);
-    void onBranchTiltSpin(wxSpinEvent& event);
-    void onQualitySpin(wxSpinEvent& event);
-    void onTransparencySpin(wxSpinEvent& event);
-    void onIterativeRadio(wxCommandEvent& event);
-    void onCyclicRadio(wxCommandEvent& event);
-    void onConesRadio(wxCommandEvent& event);
-    void onTubesRadio(wxCommandEvent& event);
-    void onFsmStyleCheck(wxCommandEvent& event);
-    void onSinglePassRadio(wxCommandEvent& event);
-    void onMultiPassRadio(wxCommandEvent& event);
+    ColorButtonHandler(QPushButton *button, Settings::SettingColor &setting);
+
+  protected slots:
+    void clicked();
+    void setColor();
+
   private:
-    GLCanvas* glCanvas;
-    Settings* settings;
-    void setupAlgorithmsPanel(wxPanel* panel);
-    void setupColourPanel(wxPanel* panel);
-    void setupParametersPanel(wxPanel* panel);
-    void setupPerformancePanel(wxPanel* panel);
-    void setupSimulationPanel(wxPanel* panel);
-    DECLARE_EVENT_TABLE()
+    QPushButton *m_button;
+    Settings::SettingColor *m_setting;
+};
+
+class ComboboxHandler : public QObject
+{
+  Q_OBJECT
+
+  public:
+    ComboboxHandler(QComboBox *combobox, Settings::SettingBool &setting);
+
+  protected slots:
+    void stateChanged(int state);
+    void setState();
+
+  private:
+    QComboBox *m_combobox;
+    Settings::SettingBool *m_setting;
+};
+
+class SettingsDialog : public QDialog
+{
+  Q_OBJECT
+
+  public:
+    SettingsDialog(QWidget *parent, Settings *settings);
+
+  private slots:
+    void stateSizeChanged(int value);
+    void setStateSize(float value);
+    void clusterHeightChanged(int value);
+    void setClusterHeight(float value);
+    void accuracyChanged(int value);
+    void setAccuracy(int value);
+
+  private:
+    void setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting);
+    void setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting);
+    void setupCombobox(QComboBox *combobox, Settings::SettingBool &setting);
+
+  private:
+    Ui::SettingsDialog m_ui;
+    Settings *m_settings;
 };
 
 #endif

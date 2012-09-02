@@ -27,11 +27,9 @@ layer. The FSM system in the CMS experiment contains well over 25,000 nodes. The
 exact number fluctuates as a result of continuous development of the control
 system; a recent count revealed over 27,500 nodes.  
 
-Techniques
-----------
-
 Formalisation
-^^^^^^^^^^^^^
+-------------
+
 We have developed a prototype translation of SML to mCRL2. The transformation is
 coded using the `ASF+SDF meta-environment <http://www.meta-environment.org/Meta-Environment/ASF%2BSDF>`_.
 As a result, any finite state machine
@@ -45,7 +43,8 @@ experiment. The feedback obtained by the verification and simulation enabled us
 to further improve the transformation. 
 
 Bugs Detected
-^^^^^^^^^^^^^
+-------------
+
 Drawing inspiration from our formal verification of the Wheel subsystem of the
 RPC subdetector using model checking, we have developed dedicated tooling for
 checking properties that can be verified on finite state machines in isolation. 
@@ -59,7 +58,8 @@ verification tooling. In addition, nearly 11% of the finite state machines in
 the control software was found to suffer from reachability issues. 
 
 Future
-^^^^^^
+------
+
 As of December 2011, we also have access to the control software for the
 remaining 3 large experiments (ATLAS, LHC beauty and ALICE). Our efforts for
 further analysing the system continue. On the one hand, we plan to scale our
@@ -71,42 +71,35 @@ that can be integrated in CERN's development environment.
 Technical details
 -----------------
  
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Simulation/Validation/Model Checking/Satisfiability Solving
+*Type of verification*
+   Simulation/Validation/Model Checking/Satisfiability Solving
  
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-28 Intel Xeon E5520 Processors running at 2.27GHz with 1TB of shared main memory
-running a 64-bit Linux distribution using kernel version 2.6.27. 
+*Equipment (computers, CPU, RAM)*
+   28 Intel Xeon E5520 Processors running at 2.27GHz with 1TB of shared main 
+   memory running a 64-bit Linux distribution using kernel version 2.6.27. 
 
-mCRL2 toolset rev: 9500-9800.
+*mCRL2 toolset*
+   SVN revision: 9500-9800
 
-Models
-^^^^^^
-The models that were used for verification were generated directly from a
-database of Finite State Machines. The mCRL2 model of the Wheel subsystem is
-included in the appendix of the arXiv report. Other mCRL2 models can be obtained
-upon request.
+*Models*
+   The models that were used for verification were generated directly from a
+   database of Finite State Machines. The mCRL2 model of the Wheel subsystem is
+   included in the appendix of the arXiv report. Other mCRL2 models can be 
+   obtained upon request.
 
-Organisational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - `Tim A.C. Willemse <http://www.win.tue.nl/~timw>`_, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    -   * CERN: Robert Gomeiz-Reino Garrido, Frank Glege, Yi Ling Hwong, Sander Leemans, Lorenzo Masetti
-        * TU/e: Jan Friso Groote, Jeroen Keiren
-        * ETH Zurich: Vincent Kusters
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - The project is carried out in cooperation with CERN, Geneva, Switzerland.
+*Organisational context*
+  :Contact person: `Tim A.C. Willemse <http://www.win.tue.nl/~timw>`_, 
+                   Technische Universiteit Eindhoven, The Netherlands.
+  :Other people involved: - CERN: Robert Gomeiz-Reino Garrido, Frank Glege, Yi Ling Hwong, Sander Leemans, Lorenzo Masetti
+                          - TU/e: Jan Friso Groote, Jeroen Keiren
+                          - ETH Zurich: Vincent Kusters
+  :Institution: Technische Universiteit Eindhoven, The Netherlands.
+  :Industrial partner: The project is carried out in cooperation with CERN, 
+                       Geneva, Switzerland.
 
 Publications
 ------------
+
 .. [HKW11] Y.L. Hwong, V.J.J. Kusters and T.A.C. Willemse,
    ''Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider.''
    In ''Proc. of FSEN 2011'', Lecture Notes in Computer Science, Springer, vol. 7141, pp 174-190, 2011.

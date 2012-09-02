@@ -34,7 +34,7 @@
 #include "mcrl2/atermpp/container_utility.h"
 
 #include "mcrl2/lts/transition.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/lts/detail/lts_convert.h"
 
@@ -50,8 +50,6 @@ namespace detail
  * \param[in] s The name of the file of which the format will be
  * determined.
  * \return The LTS format based on the extension of \a s.
- * If the extension is \p svc then the mCRL2 SVC format is assumed and
- * \a lts_lts is returned.
  * If no supported format can be determined from the extension then \a
  * lts_none is returned.  */
 lts_type guess_format(std::string const& s);
@@ -59,9 +57,6 @@ lts_type guess_format(std::string const& s);
 /** \brief Determines the LTS format from a format specification string.
  * \details This can be any of the following strings:
  * \li "aut" for the Ald&eacute;baran format;
- * \li "mcrl" or "svc+mcrl" for the muCRL SVC format;
- * \li "mcrl2" or "svc+mcrl2" for the mCRL2 SVC format;
- * \li "svc" for the SVC format;
  * \li "fsm" for the FSM format;
  * \li "dot" for the GraphViz format;
  * \li "bcg" for the BCG format (only available if the LTS library is built
@@ -132,7 +127,7 @@ std::string lts_extensions_as_string(const std::set<lts_type> &supported);
 
 
 /** \brief Read a labelled transition system and return it in fsm format.
- *  \details The file can refer to any file in lts, aut, fsm, bcg, dot or svc
+ *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot 
  *           format. After reading it is is attempted to translate it into
  *           fsm format.
  *  \param[in] path A string with the name of the file.
@@ -175,13 +170,6 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     case lts_dot:
     {
       lts_dot_t l1;
-      l1.load(path);
-      detail::lts_convert(l1,l);
-      return;
-    }
-    case lts_svc:
-    {
-      lts_svc_t l1;
       l1.load(path);
       detail::lts_convert(l1,l);
       return;

@@ -42,7 +42,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"
@@ -498,7 +498,9 @@ struct absinthe_algorithm
       if (words.size() == 2)
       {
         data::function_symbol lhs = data::parse_function_symbol(words[0], dataspec_text);
-        data::function_symbol rhs = data::parse_function_symbol(words[1], dataspec_text);
+        std::string s = words[1];
+        s = utilities::regex_replace(";\\s*$", "", s);
+        data::function_symbol rhs = data::parse_function_symbol(s, dataspec_text);
         result[lhs] = rhs;
       }
     }

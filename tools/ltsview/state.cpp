@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "wx.hpp" // precompiled headers
-
 #include <cstddef>
 
 #include "state.h"
@@ -22,8 +20,7 @@ State::State(int aid):
   positionAngle(-1.0f),
   positionRadius(0.0f),
   rank(0),
-  simulated(false),
-  selected(false)
+  simulationCount(0)
 {}
 
 State::~State()
@@ -54,45 +51,20 @@ void State::addLoop(Transition* trans)
   loops.push_back(trans);
 }
 
-void State::addMatchedRule(int mr)
+bool State::addMatchedRule(MarkRuleIndex index)
 {
-  matchedRules.insert(mr);
+  matchedRules.insert(index);
+  return matchedRules.size() == 1;
 }
 
-//returns true iff an element has actually been removed
-bool State::removeMatchedRule(int mr)
+bool State::removeMatchedRule(MarkRuleIndex index)
 {
-  return (matchedRules.erase(mr) > 0);
-}
-
-void State::getMatchedRules(std::vector< int > &mrs)
-{
-  mrs.assign(matchedRules.begin(),matchedRules.end());
-}
-
-int State::getNumMatchedRules()
-{
-  return static_cast<int>(matchedRules.size());
+  return matchedRules.erase(index) > 0;
 }
 
 bool State::isDeadlock() const
 {
   return (outTransitions.size() + loops.size() == 0);
-}
-
-bool State::isSelected() const
-{
-  return selected;
-}
-
-void State::select()
-{
-  selected = true;
-}
-
-void State::deselect()
-{
-  selected = false;
 }
 
 int State::getID()
@@ -234,16 +206,6 @@ Transition* State::getLoop(int i) const
 int State::getNumLoops() const
 {
   return static_cast<int>(loops.size());
-}
-
-void State::setSimulated(bool simulated)
-{
-  this->simulated = simulated;
-}
-
-bool State::isSimulated() const
-{
-  return simulated;
 }
 
 int State::getZoomLevel() const

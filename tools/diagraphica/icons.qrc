@@ -1,0 +1,17 @@
+<RCC>
+  <qresource>
+    <file>images/arrow.png</file>
+    <file>images/darrow.png</file>
+    <file>images/dof.png</file>
+    <file>images/ellipse.png</file>
+    <file>images/fillcol.png</file>
+    <file>images/line.png</file>
+    <file>images/linecol.png</file>
+    <file>images/logo.png</file>
+    <file>images/note.png</file>
+    <file>images/rectangle.png</file>
+    <file>images/selecticon.png</file>
+    <file>images/showgrid.png</file>
+    <file>images/snapgrid.png</file>
+  </qresource>
+</RCC>

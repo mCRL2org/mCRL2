@@ -29,21 +29,20 @@ namespace aterm
 
 // \cond INTERNAL_DOCS
 #if defined(_MSC_VER) || defined(__MINGW32__)
-# define MCRL2_ATERM_INIT_(argc, argv, bottom) \
-  ATinit(0, 0, reinterpret_cast< ATerm* >(&bottom));
+# define MCRL2_ATERM_INIT_(bottom) \
+  ATinit(reinterpret_cast< ATerm* >(&bottom));
 #else
-# define MCRL2_ATERM_INIT_(argc, argv, bottom) \
-  ATinit(argc, argv, reinterpret_cast< ATerm* >(bottom));
+# define MCRL2_ATERM_INIT_(bottom) \
+  ATinit(reinterpret_cast< ATerm* >(bottom));
 #endif
 // \endcond
 
-/// MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
+/// MCRL2_ATERM_INIT(argv) initialises the ATerm library using
 /// one of the parameters as the bottom of the stack. The parameter that is
 /// actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
-# define MCRL2_ATERM_INIT(argc, argv) \
-  MCRL2_ATERM_INIT_(argc, argv, argv);
+# define MCRL2_ATERM_INIT(argv) MCRL2_ATERM_INIT_(argv);
 
 //-------------------------------------------------------------------------
 //For all functions below we use the precondition the ATerm library has been

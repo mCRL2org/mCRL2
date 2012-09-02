@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -43,9 +43,27 @@ bisimulation_type parse_bisimulation_type(const std::string& type)
 
 /// \brief Returns a description of a bisimulation type
 inline
-std::string print_bisimulation_type(int type)
+std::string print_bisimulation_type(const bisimulation_type t)
 {
-  switch (type)
+  switch (t)
+  {
+    case strong_bisim:
+      return "strong-bisim";
+    case weak_bisim:
+      return "weak-bisim";
+    case branching_bisim:
+      return "branching-bisim";
+    case branching_sim:
+      return "branching-sim";
+  }
+  throw mcrl2::runtime_error("unknown type");
+}
+
+/// \brief Returns a description of a bisimulation type
+inline
+std::string description(const bisimulation_type t)
+{
+  switch (t)
   {
     case strong_bisim:
       return "strong bisimulation";
@@ -56,8 +74,32 @@ std::string print_bisimulation_type(int type)
     case branching_sim:
       return "branching simulation equivalence";
   }
-  return "unknown type";
+  throw mcrl2::runtime_error("unknown type");
 }
+
+inline
+std::istream& operator>>(std::istream& is, bisimulation_type& t)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    t = parse_bisimulation_type(s);
+  }
+  catch (mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const bisimulation_type t)
+{
+  os << print_bisimulation_type(t);
+  return os;
+}
+
 
 } // namespace pbes_system
 

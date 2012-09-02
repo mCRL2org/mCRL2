@@ -59,20 +59,25 @@ class parity_game_generator_deprecated: public parity_game_generator
 
     /// \brief Stores an internal representation of equations
     atermpp::vector<internal_equation_t> m_internal_equations;
-
+public:
     pbes_expression from_rewrite_format(const pbes_expression& e)
     {
-      if(is_pbes_true(e) || is_pbes_false(e))
+      pbes_expression result;
+      if(!m_precompile_pbes)
       {
-        return e;
+        result = e;
+      }
+      else if(is_pbes_true(e) || is_pbes_false(e))
+      {
+        result = e;
       }
       else if(tr::is_and(e))
       {
-        return tr::and_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
+        result = tr::and_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
       }
       else if(tr::is_or(e))
       {
-        return tr::or_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
+        result = tr::or_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
       }
       else if(tr::is_prop_var(e))
       {
@@ -82,14 +87,37 @@ class parity_game_generator_deprecated: public parity_game_generator
         {
           pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
         }
-        return tr::prop_var(tr::name(e), pretty_args.begin(), pretty_args.end());
+        result = tr::prop_var(tr::name(e), pretty_args.begin(), pretty_args.end());
+      }
+      else if(tr::is_forall(e))
+      {
+        tr::variable_sequence_type params = tr::var(e);
+        data::data_expression_vector pretty_args;
+        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        {
+          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+        }
+        pbes_expression arg = from_rewrite_format(tr::arg(e));
+        result = tr::forall(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);
+      }
+      else if(tr::is_exists(e))
+      {
+        tr::variable_sequence_type params = tr::var(e);
+        data::data_expression_vector pretty_args;
+        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        {
+          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+        }
+        pbes_expression arg = from_rewrite_format(tr::arg(e));
+        result = tr::exists(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);
       }
       else
       {
-        return datar_internal.convert_from((atermpp::aterm_appl)e);
+        result = datar_internal.convert_from((atermpp::aterm_appl)e);
       }
+      return result;
     }
-
+public:
     virtual
     std::string print(const pbes_expression& e)
     {
@@ -102,7 +130,20 @@ class parity_game_generator_deprecated: public parity_game_generator
         return pbes_system::pp(e);
       }
     }
-
+public:
+    virtual
+    std::string data_to_string(const data::data_expression& e)
+    {
+      if (m_precompile_pbes)
+      {
+        return data::pp(from_rewrite_format(e));
+      }
+      else
+      {
+        return data::pp(e);
+      }
+    }
+public:
     /// \brief Check whether e corresponds to true
     virtual
     bool is_true(const pbes_expression& e) const
@@ -126,7 +167,7 @@ class parity_game_generator_deprecated: public parity_game_generator
       }
       return result;
     }
-
+protected:
     /// \brief Add mappings and equations to datar_internal
     /// Declare constructors to the rewriter to prevent unnecessary compilation for bound variables.
     // This can be removed if the jittyc compilers are not in use anymore.
@@ -166,26 +207,30 @@ class parity_game_generator_deprecated: public parity_game_generator
               i->symbol(),
               i->variable(),
               rewrite_and_simplify(i->formula(),sigma,sigma_internal)
-            )));
+            )
+           )
+          );
       }
     }
-
+public:
     /// \brief Simplify expression e.
     pbes_expression rewrite_and_simplify(
            const pbes_expression& e,
            data::detail::legacy_rewriter::substitution_type &sigma,
-           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal,
+           const bool convert_data_to_pbes = true)
     {
-      return ::bes::pbes_expression_rewrite_and_simplify(e, m_precompile_pbes, datar_internal,sigma,sigma_internal);
+      return ::bes::pbes_expression_rewrite_and_simplify(e, m_precompile_pbes, datar_internal,sigma,sigma_internal, convert_data_to_pbes);
     }
 
+protected:
     /// \brief Substitute and rewrite e.
     pbes_expression substitute_and_rewrite(
            const pbes_expression& e,
            data::detail::legacy_rewriter::substitution_type &sigma,
            data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
     {
-      return detail::pbes_expression_substitute_and_rewrite
+      pbes_expression result =  detail::pbes_expression_substitute_and_rewrite
           (e,
            m_pbes.data(),
            datar_internal,
@@ -193,6 +238,7 @@ class parity_game_generator_deprecated: public parity_game_generator
            sigma,
            sigma_internal
           );
+      return result;
     }
 
     /// \brief Compute equation index map.
@@ -237,7 +283,7 @@ class parity_game_generator_deprecated: public parity_game_generator
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
 
-        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << (m_precompile_pbes?(pbes_eqn.formula().to_string()):(tr::pp(pbes_eqn.formula()))) << " into ";
+        mCRL2log(log::debug, "parity_game_generator") << "Expanding right hand side of formula " << print(psi) << std::endl << "  rhs: " << print(pbes_eqn.formula()) << " into " << std::endl;
 
         pbes_expression result;
 
@@ -246,7 +292,7 @@ class parity_game_generator_deprecated: public parity_game_generator
         make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma,sigma_internal);
         result = substitute_and_rewrite(pbes_eqn.formula(),sigma,sigma_internal);
 
-        mCRL2log(log::debug2, "parity_game_generator") << (m_precompile_pbes?(result.to_string()):(tr::pp(result))) << std::endl;
+        mCRL2log(log::debug, "parity_game_generator") << print(result) << std::endl;
 
         return result;
       }
@@ -294,7 +340,7 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator_deprecated(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
+    parity_game_generator_deprecated(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       :
       parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       datar_internal(datar)
@@ -306,6 +352,8 @@ class parity_game_generator_deprecated: public parity_game_generator
       m_precompile_pbes = false;
 #endif
     }
+
+    virtual ~parity_game_generator_deprecated() {}
 
 };
 

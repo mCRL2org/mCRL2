@@ -1,58 +1,45 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file simdialog.h
-/// \brief Header file for simulation dialog class
 
 #ifndef SIMDIALOG_H
 #define SIMDIALOG_H
-#include <wx/wx.h>
-#include "simreader.h"
 
-class Mediator;
-class wxListView;
-class wxListEvent;
+#include <QDialog>
+#include "ui_simdialog.h"
 
-class SimDialog: public wxDialog, public simReader
+#include "ltsmanager.h"
+#include "simulation.h"
+#include "state.h"
+#include "transition.h"
+
+class SimDialog : public QDialog
 {
+  Q_OBJECT
+
   public:
-    SimDialog(wxWindow* parent, Mediator* mediator);
+    SimDialog(QWidget *parent, LtsManager *ltsManager);
 
-    // Event handlers
-    void onSimStartButton(wxCommandEvent& event);
-    void onSimResetButton(wxCommandEvent& event);
-    void onSimStopButton(wxCommandEvent& event);
-    void onSimTransitionSelected(wxListEvent& event);
-    void onSimTransitionActivated(wxListEvent& event);
-    void onKeyDown(wxKeyEvent& event);
-    void onSimTriggerButton(wxCommandEvent& event);
-    void onSimUndoButton(wxCommandEvent& event);
-    void onGenerateBackTraceButton(wxCommandEvent& event);
+  public slots:
+    void changed();
+    void selectionChanged();
 
+  protected slots:
+    void start();
+    void stop();
+    void backtrace();
+    void reset();
+    void trigger();
+    void undo();
+    void select();
 
-    // Implemented for simReader interface
-    virtual void refresh();
-    virtual void selChange();
   private:
-    // Buttons for simulation
-    wxButton* simStartButton;
-    wxButton* simBTButton;
-    wxButton* simResetButton;
-    wxButton* simStopButton;
-    wxButton* simTriggerButton;
-    wxButton* simUndoButton;
-
-    // List views used in simulation
-    wxListView* simTransView; // Transition information
-
-    Mediator* mediator;
-
-    DECLARE_EVENT_TABLE()
+    Ui::SimDialog m_ui;
+    LtsManager *m_ltsManager;
 };
 
-#endif //SIMDIALOG_H
+#endif

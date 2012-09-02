@@ -67,15 +67,15 @@ class lts2lps_tool : public input_output_tool
     {
       super::add_options(desc);
 
-      desc.add_option("data", make_mandatory_argument("FILE"),
+      desc.add_option("data", make_file_argument("FILE"),
                       "use FILE as the data and action specification. "
                       "FILE must be a .mcrl2 file which does not contain an init clause. ", 'D');
 
-      desc.add_option("lps", make_mandatory_argument("FILE"),
+      desc.add_option("lps", make_file_argument("FILE"),
                       "use FILE for the data and action specification. "
                       "FILE must be a .lps file. ", 'l');
 
-      desc.add_option("mcrl2", make_mandatory_argument("FILE"),
+      desc.add_option("mcrl2", make_file_argument("FILE"),
                       "use FILE as the data and action specification for the LTS. "
                       "FILE must be a .mcrl2 file. ", 'm');
     }
@@ -311,10 +311,6 @@ class lts2lps_tool : public input_output_tool
         case lts_dot:
         {
           return transform_lps2lts<lts_dot_t>();
-        }
-        case lts_svc:
-        {
-          return transform_lps2lts<lts_svc_t>();
         }
       }
       return true;

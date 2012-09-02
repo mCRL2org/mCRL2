@@ -8,34 +8,26 @@
 //
 /// \file ./visualizer.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"
 
 
-// -- constructors and destructor -----------------------------------
-
-
-// --------------------
 Visualizer::Visualizer(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Colleague(m)
-// --------------------
+  QWidget *parent,
+  Graph *graph_)
+  : QGLWidget(parent),
+    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
+    m_graph(graph_)
 {
-  clearColor.r = 1.0;
-  clearColor.g = 1.0;
-  clearColor.b = 1.0;
-  clearColor.a = 1.0;
+  setMinimumSize(10,10);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  setFocusPolicy(Qt::ClickFocus);
+  clearColor = Qt::white;
 
   initMouse();
 
-  graph  = g;
-  canvas = c;
-
+  m_inSelectMode = false;
   texCharOK = false;
   texCushOK = false;
 
@@ -45,82 +37,86 @@ Visualizer::Visualizer(
   showMenu = false;
 }
 
-
-// ----------------------
-Visualizer::~Visualizer()
-// ----------------------
+void Visualizer::updateGL(bool inSelectMode)
 {
-  graph  = NULL;
-  canvas = NULL;
+  m_inSelectMode = inSelectMode;
+  QGLWidget::updateGL();
+}
+
+void Visualizer::paintGL()
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
+  if (aspect > 1)
+  {
+    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+  }
+  else
+  {
+    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+  }
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glViewport(0, 0, width(), height());
+
+  visualize(m_inSelectMode);
+  m_inSelectMode = false;
 }
 
 
-// -- set functions -------------------------------------------------
+QSizeF Visualizer::worldSize()
+// Return viewport width and height in WORLD coordinates. The 
+// viewport is set up such that the shortest side has
+// length 2 in world coordinates.
+{
+  if (height() < width())
+  {
+    return QSizeF(width() / (double)height() * 2.0, 2.0);
+  }
+  else
+  {
+    return QSizeF(2.0, height() / (double)width() * 2.0);
+  }
+}
 
 
-// ----------------------------
+double Visualizer::pixelSize()
+// Return distance in WORLD coordinates of 1 pixel.
+{
+  return worldSize().width() / (double)width();
+}
+
+
+QPointF Visualizer::worldCoordinate(QPointF deviceCoordinate)
+{
+  QSizeF size = worldSize();
+  double pixel = pixelSize();
+  return QPointF(-0.5 * size.width() + deviceCoordinate.x() * pixel, 0.5 * size.height() - deviceCoordinate.y() * pixel);
+}
+
+
 void Visualizer::setClearColor(
   const double& r,
   const double& g,
   const double& b)
-// ----------------------------
 {
-  clearColor.r = r;
-  clearColor.g = g;
-  clearColor.b = b;
-  clearColor.a = 1.0;
-}
-
-// -- helper functions ----------------------------------------------
-void Visualizer::printMouseVariables()
-{
-  char const* mb = "DOWN";
-  char const* ms = "LEFT";
-  char const* mc = "SINGLE";
-  char const* md = "DRAG";
-
-  if (mouseButton == MSE_BUTTON_UP)
-  {
-    mb = "UP";
-  }
-  if (mouseSide == MSE_SIDE_RGT)
-  {
-    ms = "RIGHT";
-  }
-  else if (mouseSide == MSE_SIDE_MID)
-  {
-    ms = "MIDDLE";
-  }
-  if (mouseClick == MSE_CLICK_DOUBLE)
-  {
-    mc = "DOUBLE";
-  }
-  if (mouseDrag == MSE_DRAG_FALSE)
-  {
-    md = "NOT_DRAG";
-  }
-
-  std::clog << "Mouse Button: " << mb << std::endl;
-  std::clog << "Mouse Side: " << ms << std::endl;
-  std::clog << "Mouse Click: " << mc << std::endl;
-  std::clog << "Mouse Drag: " << md << std::endl << std::endl;
+  clearColor = QColor::fromRgbF(r, g, b);
 }
 
 
 // -- visualization functions ---------------------------------------
 
 
-// ------------------------------------------------
 void Visualizer::setGeomChanged(const bool& flag)
-// ------------------------------------------------
 {
   geomChanged = flag;
 }
 
 
-// ------------------------------------------------
 void Visualizer::setDataChanged(const bool& flag)
-// ------------------------------------------------
 {
   geomChanged = flag;
   dataChanged = flag;
@@ -130,229 +126,62 @@ void Visualizer::setDataChanged(const bool& flag)
 // -- event handlers ------------------------------------------------
 
 
-// -------------------------------
 void Visualizer::handleSizeEvent()
-// -------------------------------
 {
   geomChanged = true;
 }
 
-
-// --------------------------------------
-void Visualizer::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
+void Visualizer::handleMouseEvent(QMouseEvent* e)
 {
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_TRUE;
-  if (mouseDrag == MSE_DRAG_TRUE)
-
+  m_mouseDragReleased = false;
+  if (!m_mouseDrag && e->buttons() != Qt::NoButton && e->type() == QEvent::MouseMove)
   {
-    xMouseDragBeg = x;
+    m_mouseDrag = true;
+    m_mouseDragStart = m_lastMouseEvent.pos();
   }
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-// ------------------------------------
-void Visualizer::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-// ------------------------------------
-{
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_LFT;
-  if (mouseClick != MSE_CLICK_DOUBLE)
+  if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
-    mouseClick  = MSE_CLICK_SINGLE;
+    m_mouseDrag = false;
+    m_mouseDragReleased = true;
   }
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseCur = x;
-  yMouseCur = y;
+  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
 }
 
-
-// ----------------------------------------
-void Visualizer::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
+void Visualizer::handleKeyEvent(QKeyEvent* e)
 {
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_DOUBLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-// --------------------------------------
-void Visualizer::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
-{
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_RGT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_TRUE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-// ------------------------------------
-void Visualizer::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-// ------------------------------------
-{
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_RGT;
-  if (mouseClick != MSE_CLICK_DOUBLE)
+  if (e->type() == QEvent::KeyPress)
   {
-    mouseClick  = MSE_CLICK_SINGLE;
-  }
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseCur = x;
-  yMouseCur = y;
-}
-
-
-// ----------------------------------------
-void Visualizer::handleMouseRgtDClickEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
-{
-  mouseButton = MSE_BUTTON_DOWN;
-  mouseSide   = MSE_SIDE_RGT;
-  mouseClick  = MSE_CLICK_DOUBLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = x;
-  yMouseDragBeg = y;
-  xMouseCur     = x;
-  yMouseCur     = y;
-}
-
-
-// -------------------------------------
-void Visualizer::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-// -------------------------------------
-{
-  if (mouseButton == MSE_BUTTON_DOWN)
-  {
-    mouseDrag  = MSE_DRAG_TRUE;
-    mouseClick = MSE_CLICK_SINGLE;
+    m_lastKeyCode = Qt::Key(e->key());
   }
   else
   {
-    mouseDrag  = MSE_DRAG_FALSE;
-    mouseClick = -1;
+    m_lastKeyCode = Qt::Key_unknown;
   }
-
-  xMouseCur = x;
-  yMouseCur = y;
-}
-
-
-// ---------------------------------------
-void Visualizer::handleMouseWheelIncEvent(
-  const int& /*x*/,
-  const int& /*y*/)
-// ---------------------------------------
-{}
-
-
-// ---------------------------------------
-void Visualizer::handleMouseWheelDecEvent(
-  const int& /*x*/,
-  const int& /*y*/)
-// ---------------------------------------
-{}
-
-
-// -------------------------------------
-void Visualizer::handleMouseEnterEvent()
-// -------------------------------------
-{}
-
-
-// -------------------------------------
-void Visualizer::handleMouseLeaveEvent()
-// -------------------------------------
-{
-  initMouse();
-}
-
-
-// ------------------------------------------------------
-void Visualizer::handleKeyDownEvent(const int& keyCode)
-// ------------------------------------------------------
-{
-  keyCodeDown = keyCode;
-}
-
-
-// ----------------------------------------------------
-void Visualizer::handleKeyUpEvent(const int& /*keyCode*/)
-// ----------------------------------------------------
-{
-  keyCodeDown = -1;
 }
 
 
 // -- protected utility functions -----------------------------------
 
 
-// ---------------------
 void Visualizer::clear()
-// ---------------------
 {
   VisUtils::clear(clearColor);
 }
 
 
-// -------------------------
 void Visualizer::initMouse()
-// -------------------------
 {
-  mouseButton = MSE_BUTTON_UP;
-  mouseSide   = MSE_SIDE_LFT;
-  mouseClick  = MSE_CLICK_SINGLE;
-  mouseDrag   = MSE_DRAG_FALSE;
-
-  xMouseDragBeg = 0.0;
-  yMouseDragBeg = 0.0;
-  xMouseCur     = 0.0;
-  yMouseCur     = 0.0;
+  m_lastMouseEvent = QMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+  m_mouseDrag = false;
+  m_mouseDragStart = QPoint(0,0);
 }
 
 
-// ------------------------------
 void Visualizer::startSelectMode(
   GLint /*hits*/,
   GLuint selectBuf[],
   double pickWth,
   double pickHgt)
-// ------------------------------
 {
   GLint viewport[4];
 
@@ -370,18 +199,14 @@ void Visualizer::startSelectMode(
   glLoadIdentity();
 
   gluPickMatrix(
-    (GLdouble) xMouseCur,
-    (GLdouble)(viewport[3]-yMouseCur),
+    (GLdouble) m_lastMouseEvent.x(),
+    (GLdouble)(viewport[3]-m_lastMouseEvent.y()),
     pickWth,    // picking width
     pickHgt,    // picking height
     viewport);
 
-  // get current size of canvas
-  int width, height;
-  canvas->GetSize(&width, &height);
-
   // casting to GLdouble ensures smooth transitions
-  GLdouble aspect = (GLdouble)width / (GLdouble)height;
+  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
 
   // specify clipping rectangle ( left, right, bottom, top )
   if (aspect > 1)
@@ -399,24 +224,19 @@ void Visualizer::startSelectMode(
 }
 
 
-// -------------------------------
 void Visualizer::finishSelectMode(
   GLint hits,
   GLuint selectBuf[])
-// -------------------------------
 {
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
-  glFlush();
 
   hits = glRenderMode(GL_RENDER);
   processHits(hits, selectBuf);
 }
 
 
-// --------------------------
 void Visualizer::genCharTex()
-// --------------------------
 {
   VisUtils::genCharTextures(
     texCharId,
@@ -425,15 +245,10 @@ void Visualizer::genCharTex()
 }
 
 
-// --------------------------
 void Visualizer::genCushTex()
-// --------------------------
 {
   VisUtils::genCushTextures(
     texCushId,
     texCush);
   texCushOK = true;
 }
-
-
-// -- end -----------------------------------------------------------

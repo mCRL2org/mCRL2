@@ -19,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
@@ -40,7 +40,7 @@ foreach( OBJ ${TERM_OBJS} )
     mcrl2_utilities
   )
 
-  add_test("${PREFIX}_${result}" "${lpsparunfold_test_container_BINARY_DIR}/${PREFIX}_${result}" )
+  add_test(NAME "${PREFIX}_${result}" COMMAND "${PREFIX}_${result}" )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 
 endforeach( OBJ )

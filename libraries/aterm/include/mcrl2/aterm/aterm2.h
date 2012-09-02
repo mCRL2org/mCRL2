@@ -335,13 +335,13 @@ char* ATgetName(const AFun sym)
 inline
 size_t ATgetArity(const AFun sym)
 {
-  return GET_LENGTH(at_lookup_table_alias[sym]->header);
+  return GET_LENGTH(at_lookup_table[sym]->header);
 }
 
 inline
 bool ATisQuoted(const AFun sym)
 {
-  return IS_QUOTED(at_lookup_table_alias[sym]->header);
+  return IS_QUOTED(at_lookup_table[sym]->header);
 }
 
 void    ATprotectAFun(const AFun sym);

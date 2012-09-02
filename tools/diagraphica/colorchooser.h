@@ -11,10 +11,14 @@
 #ifndef COLORCHOOSER_H
 #define COLORCHOOSER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include "dof.h"
 #include "graph.h"
 #include "shape.h"
 #include "utils.h"
@@ -22,72 +26,43 @@
 
 class ColorChooser : public Visualizer
 {
+  Q_OBJECT
+
   public:
-    // -- constructors and destructor -------------------------------
-    ColorChooser(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
-    virtual ~ColorChooser();
+    enum ColorType { HueColor, OpacityColor };
+    ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorType type);
 
-    // -- set functions ---------------------------------------------
-    void setActive(const bool& flag);
-    void setPoints(
-      const std::vector< double > &hue,
-      const std::vector< double > &y);
-
-    // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
 
-    // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
+    void handleMouseEnterEvent();
+    void handleMouseLeaveEvent();
+    void handleMouseEvent(QMouseEvent* e);
 
-    // -- public constants ------------------------------------------
-    static double hdlSzeHnt;
+    QSize sizeHint() const { return QSize(300,100); }
+
+  signals:
+    void activated();
+    void deactivated();
 
   protected:
-    // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
+    double xPosition(int index) { return m_dof->value(index) * 2.0 - 1.0; }
+    double yPosition(int index) { return (*m_yCoordinates)[index]; }
+
     void drawColorSpectrum();
+    void drawGrayScale();
     void drawPath(const bool& inSelectMode);
     void drawPoints(const bool& inSelectMode);
 
-    // -- utility event handlers ------------------------------------
-    void handleHits(const std::vector< int > &ids);
+    void handleHits(const std::vector<int> &ids);
     void handleDrag();
 
-    // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    void processHits(GLint hits, GLuint buffer[]);
 
-    // -- data members ----------------------------------------------
-    bool active;
-
-    std::vector< double > positionsX;
-    std::vector< double > positionsY;
-    size_t dragIdx;
-
-    // vis settings
-    double hdlSize;
-    /*
-    std::vector< Position2D > positions;
-    */
+  protected:
+    DOF *m_dof;
+    QList<double> *m_yCoordinates;
+    ColorType m_type;
+    size_t m_dragIdx;
 };
 
 #endif

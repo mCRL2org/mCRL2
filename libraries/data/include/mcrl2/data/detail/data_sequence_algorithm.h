@@ -25,24 +25,6 @@ namespace data
 namespace detail
 {
 
-/// \brief Removes elements from a sequence
-/// \param l A sequence of terms
-/// \param to_be_removed A set of terms
-/// \return The removal result
-template <typename Term>
-variable_list remove_elements(variable_list l, const std::set<Term>& to_be_removed)
-{
-  variable_list result;
-  for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    if (to_be_removed.find(*i) == to_be_removed.end())
-    {
-      result = push_front(result, *i);
-    }
-  }
-  return reverse(result);
-}
-
 /// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
 /// \param x A sequence of data variables
 /// \param y A sequence of data variables
@@ -55,19 +37,38 @@ variable_list set_intersection(variable_list x, variable_list y)
     return x;
   }
 
-  std::set<variable> to_be_removed;
+  std::vector<variable> result;
+  for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (std::find(y.begin(), y.end(), *i) != y.end())
+    {
+      result.push_back(*i);
+    }
+  }
+  return variable_list(result.begin(), result.end());
+}
+
+/// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.
+/// \param x A sequence of data variables
+/// \param y A sequence of data variables
+/// \return The difference of two sets.
+inline
+variable_list set_difference(const variable_list& x, const variable_list& y)
+{
+  if (x == y)
+  {
+    return variable_list();
+  }
+
+  std::vector<variable> result;
   for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
   {
     if (std::find(y.begin(), y.end(), *i) == y.end())
     {
-      to_be_removed.insert(*i);
+      result.push_back(*i);
     }
   }
-  if (to_be_removed.empty())
-  {
-    return x;
-  }
-  return remove_elements(x, to_be_removed);
+  return variable_list(result.begin(), result.end());
 }
 
 } // namespace detail

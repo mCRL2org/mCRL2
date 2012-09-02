@@ -95,6 +95,84 @@ enum transformation_strategy
   // for each variable, which can take a lot of time.
 };
 
+inline
+transformation_strategy parse_transformation_strategy(const std::string& s)
+{
+  if(s == "0") return lazy;
+  else if (s == "1") return optimize;
+  else if (s == "2") return on_the_fly;
+  else if (s == "3") return on_the_fly_with_fixed_points;
+  else throw mcrl2::runtime_error("unknown transformation strategy " + s);
+}
+
+inline
+std::string print_transformation_strategy(const transformation_strategy s)
+{
+  switch(s)
+  {
+    case lazy: return "0";
+    case optimize: return "1";
+    case on_the_fly: return "2";
+    case on_the_fly_with_fixed_points: return "3";
+  }
+  throw mcrl2::runtime_error("unknown transformation strategy");
+}
+
+inline
+std::istream& operator>>(std::istream& is, transformation_strategy& strategy)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    strategy = parse_transformation_strategy(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const transformation_strategy s)
+{
+  os << print_transformation_strategy(s);
+  return os;
+}
+
+inline
+std::string description(const transformation_strategy s)
+{
+  switch(s)
+  {
+    case lazy: return "Compute all boolean equations which can be reached"
+        " from the initial state, without optimization."
+        " This is is the most data efficient"
+        " option per generated equation.";
+    case optimize: return "Optimize by immediately substituting the right"
+        " hand sides for already investigated variables"
+        " that are true or false when generating an"
+        " expression. This is as memory efficient as 0.";
+    case on_the_fly: return "In addition to 1, also substitute variables that"
+        " are true or false into an already generated right"
+        " hand side. This can mean that certain variables"
+        " become unreachable (e.g. X0 in X0 and X1, when X1"
+        " becomes false, assuming X0 does not occur"
+        " elsewhere. It will be maintained which variables"
+        " have become unreachable as these do not have to be"
+        " investigated. Depending on the PBES, this can"
+        " reduce the size of the generated BES substantially"
+        " but requires a larger memory footprint.";
+    case on_the_fly_with_fixed_points: return "In addition to 2, investigate for generated"
+        " variables whether they occur on a loop, such that"
+        " they can be set to true or false, depending on the"
+        " fixed point symbol. This can increase the time"
+        " needed to generate an equation substantially.";
+  }
+  throw mcrl2::runtime_error("unknown transformation strategy");
+}
+
 
 /* Declare a protected PAIR symbol */
 inline AFun initAFunPair(AFun& f)
@@ -1141,7 +1219,8 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
      bool opt_precompile_pbes,
      mcrl2::data::detail::legacy_rewriter& R,
      mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
-     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal,
+     const bool convert_data_to_pbes = true)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
@@ -1305,33 +1384,35 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     if (opt_precompile_pbes)
     {
       atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
-      if (d==R.get_rewriter().internal_true)
+      result = d;
+
+      if (convert_data_to_pbes)
       {
-        result = pbes_expr::true_();
-      }
-      else if (d==R.get_rewriter().internal_false)
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
+        if (d==R.get_rewriter().internal_true)
+        {
+          result = pbes_expr::true_();
+        }
+        else if (d==R.get_rewriter().internal_false)
+        {
+          result = pbes_expr::false_();
+        }
       }
     }
     else
     {
       data::data_expression d(R(p,sigma));
-      if (d == data::sort_bool::true_())
+      result = d;
+
+      if (convert_data_to_pbes)
       {
-        result = pbes_expr::true_();
-      }
-      else if (d == data::sort_bool::false_())
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
+        if (d == data::sort_bool::true_())
+        {
+          result = pbes_expr::true_();
+        }
+        else if (d == data::sort_bool::false_())
+        {
+          result = pbes_expr::false_();
+        }
       }
     }
   }

@@ -17,8 +17,7 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -28,58 +27,26 @@
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_svc.h"
 #include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
+using namespace mcrl2::lps;
 
-// Get filename based on timestamp
-// Warning: is prone to race conditions
-std::string temporary_filename(std::string const& prefix = "")
-{
-  time_t now = time(NULL);
-  std::stringstream now_s;
-  now_s << now;
 
-  std::string basename(prefix + now_s.str());
-  boost::filesystem::path result(basename);
-  int suffix = 0;
-  while (boost::filesystem::exists(result))
-  {
-    std::stringstream suffix_s;
-    suffix_s << suffix;
-    result = boost::filesystem::path(basename + suffix_s.str());
-    ++suffix;
-  }
-  return result.string();
-}
-
-std::string nextstate_format_to_string(const NextStateFormat f)
-{
-  switch (f)
-  {
-    case GS_STATE_VECTOR:
-      return std::string("vector");
-    case GS_STATE_TREE:
-      return std::string("tree");
-    default:
-      return std::string("unknown");
-  }
-}
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
-                              mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
+                              mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
                               NextStateFormat format = GS_STATE_VECTOR,
                               std::string priority_action = "")
 {
-  std::clog << "Translating LPS to LTS with exploration strategy " << std::string(expl_strat_to_str(strategy)) << ", rewrite strategy " << pp(rewrite_strategy) << ", and state format " << nextstate_format_to_string(format) << "." << std::endl;
+  std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << ", and state format " << format << "." << std::endl;
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
@@ -88,7 +55,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   options.expl_strat = strategy;
   options.stateformat = format;
 
-  options.lts = temporary_filename("lps2lts_test_file");
+  options.lts = utilities::temporary_filename("lps2lts_test_file");
 
   LTS_TYPE result;
   options.outformat = result.type();
@@ -102,13 +69,13 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   core::garbage_collect();
 
   result.load(options.lts);
-  boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
+  remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;
 }
 
 // Configure rewrite strategies to be used.
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
+typedef mcrl2::data::rewrite_strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 // Configure exploration strategies to be tested;
@@ -150,7 +117,7 @@ nextstate_format_vector nextstate_formats()
   return nextstate_formats;
 }
 
-void check_lps2lts_specification(std::string const& specification,
+static void check_lps2lts_specification(std::string const& specification,
                                  const size_t expected_states,
                                  const size_t expected_transitions,
                                  const size_t expected_labels,
@@ -203,13 +170,6 @@ void check_lps2lts_specification(std::string const& specification,
         BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
         BOOST_CHECK_EQUAL(result4.num_action_labels(), expected_labels);
-
-        lts::lts_svc_t result5 = translate_lps_to_lts<lts::lts_svc_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
-
-        std::cerr << "SVC FORMAT\n";
-        BOOST_CHECK_EQUAL(result5.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result5.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result5.num_action_labels(), expected_labels);
 
 #ifdef USE_BCG
         lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
@@ -459,7 +419,7 @@ BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
 BOOST_AUTO_TEST_CASE(test_plus)
 {
   // This example provides two identical transitions between a state.
-  // There is a discussion on whether this is desirable. Currently, for 
+  // There is a discussion on whether this is desirable. Currently, for
   // efficiency reasons such extra transitions are not removed by lps2lts.
   std::string spec(
     "act a;\n"
@@ -471,7 +431,7 @@ BOOST_AUTO_TEST_CASE(test_plus)
 
 // The example below fails if #[0,1] does not have a decent
 // type. The tricky thing is that the type of the list can be List(Nat),
-// List(Int) or List(Real). Toolset version 10180 resolved this by 
+// List(Int) or List(Real). Toolset version 10180 resolved this by
 // delivering the type List({Nat, Int, Real}), i.e. a set of possible
 // options. But this was not expected and understood by the other tools.
 // This is related to bug report #949.
@@ -484,11 +444,39 @@ BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
+#ifndef MCRL2_SKIP_LONG_TESTS
+#if 0 // This test has been disabled; it was decided not to fix this issue.
+// The following example illustrates that enumeration can sometimes need
+// a large stack depth.
+// The example was attached to bug #1019, and fails with limited stack,
+// succeeds with unlimited stack.
+BOOST_AUTO_TEST_CASE(test_deep_stack)
+{
+  std::string spec(
+    "sort Packet = struct packet(d0: Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool);\n"
+    "act  Terminate;\n"
+    "proc P(s3: Pos) =\n"
+    "   (s3 == 2) ->\n"
+    "     Terminate .\n"
+    "     P(s3 = 3)\n"
+    " + sum p: Packet.\n"
+    "     (s3 == 1) ->\n"
+    "     tau .\n"
+    "     P(s3 = 2)\n"
+    " + delta;\n"
+    "init P(1);\n"
+  );
+  check_lps2lts_specification(spec, 3, 524289, 2);
+}
+#endif // false
+#endif // MCRL2_SKIP_LONG_TESTS
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
+ // Initialise random seed to allow parallel running with lps2lts_test_old
+  std::srand(time(NULL) * 13);
   return 0;
 }
 

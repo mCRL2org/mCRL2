@@ -8,74 +8,40 @@
 //
 /// \file ./distrplot.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "distrplot.h"
 
 // -- constructors and destructor -----------------------------------
 
 using namespace std;
 
-// ----------------------------
 DistrPlot::DistrPlot(
-  Mediator* m,
+  QWidget *parent,
   Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
-// ----------------------------
+  int attributeIndex):
+  Visualizer(parent, g)
 {
   maxNumber    =  0;
   minHgtHintPx =  4;
   maxWthHintPx = 10;
 
-  diagram        = NULL;
+  diagram        = 0;
   showDgrm       = false;
   attrValIdxDgrm = -1;
-}
 
+  attribute = m_graph->getAttribute(attributeIndex);
+  connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
+  m_graph->calcAttrDistr(attributeIndex, number);
+  calcMaxNumber();
+  calcPositions();
 
-// --------------------
-DistrPlot::~DistrPlot()
-// --------------------
-{
-  clearValues();
-  diagram = NULL;
+  setMouseTracking(true);
 }
 
 
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------
-void DistrPlot::setValues(
-  const size_t& idx,
-  const vector< size_t > &num)
-// ---------------------------
-{
-  clearValues();
-
-  attrIdx = idx;
-  number  = num;
-  calcMaxNumber();
-  calcPositions();
-}
-
-
-// --------------------------
-void DistrPlot::clearValues()
-// --------------------------
-{
-  number.clear();
-  attrIdx    = 0;
-  maxNumber  = 0;
-
-  clearPositions();
-}
-
-
-// ----------------------------------------
 void DistrPlot::setDiagram(Diagram* dgrm)
-// ----------------------------------------
 {
   diagram = dgrm;
 }
@@ -84,9 +50,7 @@ void DistrPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-// --------------------------------------------------
 void DistrPlot::visualize(const bool& inSelectMode)
-// --------------------------------------------------
 {
   // have textures been generated
   if (texCharOK != true)
@@ -133,87 +97,75 @@ void DistrPlot::visualize(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------
 void DistrPlot::drawAxes(const bool& inSelectMode)
-// -------------------------------------------------
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
 
   // calc size of bounding box
-  double xLft = -0.5*w+20*pix;
-  double xRgt =  0.5*w-10*pix;
-  double yTop =  0.5*h-10*pix;
-  double yBot = -0.5*h+20*pix;
+  double xLft = -0.5*size.width()+20*pix;
+  double xRgt =  0.5*size.width()-10*pix;
+  double yTop =  0.5*size.height()-10*pix;
+  double yBot = -0.5*size.height()+20*pix;
   double yMid =  0.5*(yTop+yBot);
 
   // rendering mode
   if (inSelectMode != true)
   {
     // draw guides
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(xLft, xRgt, yTop, yTop);
     VisUtils::drawLine(xLft, xRgt, yMid, yMid);
     VisUtils::drawLine(xRgt, xRgt, yBot, yTop);
 
     // x- & y-axis
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(xLft, xLft, yBot, yTop);
     VisUtils::drawLine(xLft, xRgt, yBot, yBot);
   }
 }
 
 
-// ---------------------------------------------------
 void DistrPlot::drawLabels(const bool& /*inSelectMode*/)
-// ---------------------------------------------------
 {
-  // get size of sides
-  double w, h;
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  double pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  double pix = pixelSize();
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
 
   // color
-  VisUtils::setColorBlack();
+  VisUtils::setColor(Qt::black);
 
   // y-axis labels
-  double x = -0.5*w+9*pix;
+  double x = -0.5*size.width()+9*pix;
   double y =  0;
   VisUtils::drawLabelVertCenter(texCharId, x, y, scaling, "Number");
 
   if (number.size() > 0)
   {
     // x-axis label
-    string xLabel = graph->getAttribute(attrIdx)->getName();
+    string xLabel = attribute->name().toStdString();
     x =  0.0;
-    y = -0.5*h+9*pix;
+    y = -0.5*size.height()+9*pix;
     VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
 
     string max = Utils::size_tToStr(maxNumber);
-    x = -0.5*w+13*pix;
-    y =  0.5*h-10*pix;
+    x = -0.5*size.width()+13*pix;
+    y =  0.5*size.height()-10*pix;
     VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
 
     string min = "0";
-    y = -0.5*h+20*pix;
+    y = -0.5*size.height()+20*pix;
     VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
   }
 }
 
 
-// -------------------------------------------------
 void DistrPlot::drawPlot(const bool& inSelectMode)
-// -------------------------------------------------
 {
 
-  double hCanv = canvas->getHeight();
-  double pix = canvas->getPixelSize();
+  double hCanv = worldSize().height();
+  double pix = pixelSize();
   size_t sizePositions = positions.size();
 
   double yBot = -0.5*hCanv + 20*pix;
@@ -240,11 +192,8 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
       double yTop = positions[i].y;
-      ColorRGB col;
 
-      VisUtils::mapColorCoolGreen(col);
-      col.a = 0.7;
-      VisUtils::setColor(col);
+      VisUtils::setColor(VisUtils::coolGreen, 0.7);
 
       if (xRgt-xLft < pix)
       {
@@ -261,17 +210,15 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void DistrPlot::drawDiagram(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode != true)
   {
-    double pix      = canvas->getPixelSize();
+    double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
     vector< Attribute* > attrs;
-    attrs.push_back(graph->getAttribute(attrIdx));
+    attrs.push_back(attribute);
     vector< double > vals;
     vals.push_back(attrValIdxDgrm);
 
@@ -280,7 +227,7 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
     // drop shadow
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::fillRect(
       -1.0 + 4.0*pix/scaleDgrm,
       1.0 + 4.0*pix/scaleDgrm,
@@ -289,11 +236,11 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
     // diagram
     diagram->visualize(
       inSelectMode,
-      canvas,
+      pixelSize(),
       attrs,
       vals);
 
-    VisUtils::setColorBlack();
+    VisUtils::setColor(Qt::black);
     VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
 
     glPopMatrix();
@@ -304,39 +251,21 @@ void DistrPlot::drawDiagram(const bool& inSelectMode)
 // -- input event handlers ------------------------------------------
 
 
-// ------------------------------------
-void DistrPlot::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-// ------------------------------------
+
+void DistrPlot::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseMotionEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
-
-/*
-// ------------------------------------
-void DistrPlot::handleMouseEnterEvent()
-// ------------------------------------
-{}
-*/
-/*
-// ------------------------------------
-void DistrPlot::handleMouseLeaveEvent()
-// ------------------------------------
-{}
-*/
 
 // -- utility data functions ------------------------------------
 
 
-// ----------------------------
 void DistrPlot::calcMaxNumber()
-// ----------------------------
 {
   maxNumber = 0;
   for (size_t i = 0; i < number.size(); ++i)
@@ -353,42 +282,28 @@ void DistrPlot::calcMaxNumber()
 
 // ***
 /*
-// --------------------
 void DistrPlot::clear()
-// --------------------
 {
     VisUtils::clear( clearColor );
 }
 */
 
-// -------------------------------
 void DistrPlot::setScalingTransf()
-// -------------------------------
 {
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  double f = canvas->getScaleFactor();
-  glScalef(f, f, f);
-  glTranslatef(
-    canvas->getXTranslation(),
-    canvas->getYTranslation(),
-    0.0);
   glLoadIdentity();
 }
 
 
-// ----------------------------------------------
 void DistrPlot::displTooltip(const size_t& posIdx)
-// ----------------------------------------------
 {
   if (posIdx < number.size())
   {
-    Attribute* attr = graph->getAttribute(attrIdx);
-    string xLabel   = attr->getName();
+    string xLabel   = attribute->name().toStdString();
     string value    = "";
-    if (posIdx < static_cast <size_t>(attr->getSizeCurValues()))
+    if (posIdx < static_cast <size_t>(attribute->getSizeCurValues()))
     {
-      value = attr->getCurValue(posIdx)->getValue();
+      value = attribute->getCurValue(posIdx)->getValue();
     }
 
     msgDgrm.clear();
@@ -404,55 +319,26 @@ void DistrPlot::displTooltip(const size_t& posIdx)
     msgDgrm.append(Utils::size_tToStr(number[posIdx]));
     msgDgrm.append(" nodes; ");
     msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((int) number[posIdx], (int) graph->getSizeNodes())));
+                     Utils::perc((int) number[posIdx], (int) m_graph->getSizeNodes())));
     msgDgrm.append("%");
 
-    if (diagram == NULL)
+    if (diagram == 0)
     {
-      // show tooltip
-      canvas->showToolTip(msgDgrm);
+      setToolTip(QString::fromStdString(msgDgrm));
     }
     else
     {
-      // calc diagram position
-      double xM, yM;
-      double xD, yD;
-      canvas->getWorldCoords(xMouseCur, yMouseCur, xM, yM);
-
-      if (xM < 0)
-      {
-        xD = xM+1.0*scaleDgrm;
-      }
-      else
-      {
-        xD = xM-1.0*scaleDgrm;
-      }
-
-      if (yM < 0)
-      {
-        yD = yM+1.0*scaleDgrm;
-      }
-      else
-      {
-        yD = yM-1.0*scaleDgrm;
-      }
-
-      posDgrm.x = xD;
-      posDgrm.y = yD;
-
-      showDgrm       = true;
+      QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+      posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      showDgrm = true;
       attrValIdxDgrm = posIdx;
     }
-
-    // free memory
-    attr = NULL;
   }
 }
 
 
-// ----------------------------
 void DistrPlot::calcPositions()
-// ----------------------------
 {
   // update flag
   geomChanged = false;
@@ -460,19 +346,17 @@ void DistrPlot::calcPositions()
   // calc positions
   if (number.size() > 0)
   {
-    // get size of sides & 1 pixel
-    double w,h;
-    canvas->getSize(w, h);
-    double pix = canvas->getPixelSize();
+    QSizeF size = worldSize();
+    double pix = pixelSize();
 
     // calc size of bounding box
-    double xLft = -0.5*w+20*pix;
-    double xRgt =  0.5*w-10*pix;
-    double yTop =  0.5*h-10*pix;
-    double yBot = -0.5*h+20*pix;
+    double xLft = -0.5*size.width()+20*pix;
+    double xRgt =  0.5*size.width()-10*pix;
+    double yTop =  0.5*size.height()-10*pix;
+    double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
-    double numX = graph->getAttribute(attrIdx)->getSizeCurValues();
+    double numX = attribute->getSizeCurValues();
 
     // get intervals for x-axis
     double fracX = 1.0;
@@ -518,9 +402,7 @@ void DistrPlot::calcPositions()
 }
 
 
-// -----------------------------
 void DistrPlot::clearPositions()
-// -----------------------------
 {
   positions.clear();
   width = 0.0;
@@ -530,11 +412,9 @@ void DistrPlot::clearPositions()
 // -- hit detection -------------------------------------------------
 
 
-// -------------------------
 void DistrPlot::processHits(
   GLint hits,
   GLuint buffer[])
-// -------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;
@@ -568,11 +448,11 @@ void DistrPlot::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
     showDgrm = false;
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

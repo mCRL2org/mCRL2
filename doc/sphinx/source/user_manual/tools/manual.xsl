@@ -100,8 +100,33 @@ Standard options
   <xsl:text>   </xsl:text>
   <xsl:apply-templates select="description"/>
   <xsl:text>
+  
+  </xsl:text>
+  <xsl:apply-templates select="option_argument/values"/>
+  <xsl:text>
       
 </xsl:text>
+</xsl:template>
+
+<xsl:template match="values">
+  <xsl:apply-templates select="value"/>
+</xsl:template>
+
+<xsl:template match="value">
+  <xsl:text>   </xsl:text>
+  <xsl:if test="short">
+    <xsl:text>``</xsl:text><xsl:apply-templates select="short"/>
+    <xsl:text>``, </xsl:text>
+  </xsl:if>
+  <xsl:text>``</xsl:text><xsl:apply-templates select="long"/>
+  <xsl:text>``
+  
+  </xsl:text>
+  <xsl:text>      </xsl:text>
+  <xsl:apply-templates select="description"/>
+  <xsl:text>
+  
+  </xsl:text>
 </xsl:template>
 
 <xsl:template match="description">
@@ -116,7 +141,7 @@ Standard options
   <xsl:if test="$long='yes'">
     <xsl:text>=</xsl:text>
   </xsl:if>
-  <xsl:apply-templates/>
+  <xsl:apply-templates select="name" />
   <xsl:if test="@optional='yes'">
     <xsl:text>]</xsl:text>
   </xsl:if>

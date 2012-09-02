@@ -243,27 +243,116 @@ data::variable_vector parse_data_variables(const std::string& text, const data::
   return result;
 }
 
+typedef enum {
+  actfrm_e,
+  besexpr_e,
+  besspec_e,
+  dataexpr_e,
+  dataspec_e,
+  mcrl2spec_e,
+  multact_e,
+  pbesexpr_e,
+  pbesspec_e,
+  procexpr_e,
+  regfrm_e,
+  sortexpr_e,
+  statefrm_e
+} file_type_t;
+
+inline
+file_type_t parse_file_type(const std::string& type)
+{
+  if      (type == "actfrm"   )   { return actfrm_e   ; }
+  else if (type == "besexpr"  )   { return besexpr_e  ; }
+  else if (type == "besspec"  )   { return besspec_e  ; }
+  else if (type == "dataexpr" )   { return dataexpr_e ; }
+  else if (type == "dataspec" )   { return dataspec_e ; }
+  else if (type == "mcrl2spec")   { return mcrl2spec_e; }
+  else if (type == "multact"  )   { return multact_e  ; }
+  else if (type == "pbesexpr" )   { return pbesexpr_e ; }
+  else if (type == "pbesspec" )   { return pbesspec_e ; }
+  else if (type == "procexpr" )   { return procexpr_e ; }
+  else if (type == "regfrm"   )   { return regfrm_e   ; }
+  else if (type == "sortexpr" )   { return sortexpr_e ; }
+  else if (type == "statefrm" )   { return statefrm_e ; }
+  else
+  {
+    throw mcrl2::runtime_error("unknown file type specified (got `" + type + "')");
+  }
+}
+
+inline
+std::string print_file_type(const file_type_t type)
+{
+  switch(type)
+  {
+    case actfrm_e: return "actfrm";
+    case besexpr_e: return "besexpr";
+    case besspec_e: return "besspec";
+    case dataexpr_e: return "dataexpr";
+    case dataspec_e: return "dataspec";
+    case mcrl2spec_e: return "mcrl2spec";
+    case multact_e: return "multact";
+    case pbesexpr_e: return "pbesexpr";
+    case pbesspec_e: return "pbesspec";
+    case procexpr_e: return "procexpr";
+    case regfrm_e: return "regfrm";
+    case sortexpr_e: return "sortexpr";
+    case statefrm_e: return "statefrm";
+  }
+  throw mcrl2::runtime_error("unknown file type");
+}
+
+inline
+std::string description(const file_type_t type)
+{
+  switch(type)
+  {
+    case actfrm_e: return "for an action formula";
+    case besexpr_e: return "for a BES expression";
+    case besspec_e: return "for a BES specification";
+    case dataexpr_e: return "for a data expression";
+    case dataspec_e: return "for a data specification";
+    case mcrl2spec_e: return "for an mCRL2 specification";
+    case multact_e: return "for a multi action";
+    case pbesexpr_e: return "for a PBES expression";
+    case pbesspec_e: return "for a PBES specification";
+    case procexpr_e: return "for a process expression";
+    case regfrm_e: return "for a regular formula";
+    case sortexpr_e: return "for a sort expression";
+    case statefrm_e: return "for a state formula";
+  }
+  throw mcrl2::runtime_error("unknown file type");
+}
+
+inline
+std::istream& operator>>(std::istream& is, file_type_t& type)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    type = parse_file_type(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const file_type_t type)
+{
+  os << print_file_type(type);
+  return os;
+}
+
 class mcrl2parse_tool : public input_tool
 {
   typedef input_tool super;
 
   protected:
-    typedef enum {
-      actfrm_e,
-      besexpr_e,
-      besspec_e,
-      dataexpr_e,
-      dataspec_e,
-      mcrl2spec_e,
-      multact_e,
-      pbesexpr_e,
-      pbesspec_e,
-      procexpr_e,
-      regfrm_e,
-      sortexpr_e,
-      statefrm_e
-    } file_type_t;
-
     std::string text;
     file_type_t file_type;
     bool partial_parses;
@@ -273,26 +362,7 @@ class mcrl2parse_tool : public input_tool
     bool aterm_format;
     bool warn;
 
-    void set_file_type(const std::string& type)
-    {
-      if      (type == "actfrm"   )   { file_type = actfrm_e   ; }
-      else if (type == "besexpr"  )   { file_type = besexpr_e  ; }
-      else if (type == "besspec"  )   { file_type = besspec_e  ; }
-      else if (type == "dataexpr" )   { file_type = dataexpr_e ; }
-      else if (type == "dataspec" )   { file_type = dataspec_e ; }
-      else if (type == "mcrl2spec")   { file_type = mcrl2spec_e; }
-      else if (type == "multact"  )   { file_type = multact_e  ; }
-      else if (type == "pbesexpr" )   { file_type = pbesexpr_e ; }
-      else if (type == "pbesspec" )   { file_type = pbesspec_e ; }
-      else if (type == "procexpr" )   { file_type = procexpr_e ; }
-      else if (type == "regfrm"   )   { file_type = regfrm_e   ; }
-      else if (type == "sortexpr" )   { file_type = sortexpr_e ; }
-      else if (type == "statefrm" )   { file_type = statefrm_e ; }
-      else
-      {
-        throw std::runtime_error("unknown file type specified (got `" + type + "')");
-      }
-    }
+
 
     void add_options(interface_description& desc)
     {
@@ -303,24 +373,21 @@ class mcrl2parse_tool : public input_tool
              'e'
            );
       desc.add_option("filetype",
-           make_optional_argument("NAME", "mcrl2spec"),
-             "input has the file type NAME:\n"
-             "  'actfrm'    for an action formula\n"
-             "  'besexpr'   for a BES expression\n"
-             "  'besspec'   for a BES specification\n"
-             "  'dataexpr'  for a data expression\n"
-             "  'dataspec'  for a data specification\n"
-             "  'mcrl2spec' for an mCRL2 specification (default)\n"
-             "  'multact'   for a multi action\n"
-             "  'pbesexpr'  for a PBES expression\n"
-             "  'pbesspec'  for a PBES specification\n"
-             "  'procexpr'  for a process expression\n"
-             "  'regfrm'    for a regular formula\n"
-             "  'sortexpr'  for a sort expression\n"
-             "  'statefrm'  for a state formula\n"
-             ,
-             'f'
-           );
+           make_enum_argument<file_type_t>("NAME")
+                      .add_value(actfrm_e)
+                      .add_value(besexpr_e)
+                      .add_value(besspec_e)
+                      .add_value(dataexpr_e)
+                      .add_value(dataspec_e)
+                      .add_value(mcrl2spec_e, true)
+                      .add_value(multact_e)
+                      .add_value(pbesexpr_e)
+                      .add_value(pbesspec_e)
+                      .add_value(procexpr_e)
+                      .add_value(regfrm_e)
+                      .add_value(sortexpr_e)
+                      .add_value(statefrm_e),
+             "input has the file type NAME:", 'f');
       desc.add_option("partial-parses", "allow partial parses");
       desc.add_option("print-tree", "print parse tree", 't');
       desc.add_option("check-parser", "compare the results of the old and new parser", 'p');
@@ -332,14 +399,7 @@ class mcrl2parse_tool : public input_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      try
-      {
-        set_file_type(parser.option_argument("filetype"));
-      }
-      catch (std::logic_error)
-      {
-        set_file_type("mcrl2");
-      }
+      file_type = parser.option_argument_as<file_type_t>("filetype");
       partial_parses = 0 < parser.options.count("partial-parses");
       print_tree     = 0 < parser.options.count("print-tree");
       check_parser   = 0 < parser.options.count("check-parser");

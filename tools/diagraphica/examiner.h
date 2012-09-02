@@ -11,67 +11,50 @@
 #ifndef EXAMINER_H
 #define EXAMINER_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-#include <wx/event.h>
-#include <wx/timer.h>
 #include "bundle.h"
 #include "diagram.h"
 #include "edge.h"
-#include "glcanvas.h"
 #include "graph.h"
+#include "settings.h"
 #include "utils.h"
 #include "visualizer.h"
 #include "visutils.h"
 
-class Examiner : public wxEvtHandler, public Visualizer
+class Examiner : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Examiner(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+      QWidget *parent,
+      Settings* s,
+      Graph* g);
     virtual ~Examiner();
 
-    // -- get functions ---------------------------------------------
-    static ColorRGB getColorClr();
-    static ColorRGB getColorTxt();
-    static int getSizeTxt();
-    static ColorRGB getColorBdl();
+    QColor selectionColor() { return VisUtils::coolRed; }
+    size_t selectedClusterIndex();
 
-    ColorRGB getColorSel();
-    size_t getIdxClstSel();
-
-    // -- set functions ---------------------------------------------
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
-    static void setSizeTxt(const int& sze);
-    static void setColorBdl(const ColorRGB& col);
-
-    static void setBlendType(const int& type);
-
-    void setDiagram(Diagram* dgrm);
+    void setDiagram(Diagram* dgrm) { diagram = dgrm; update(); }
     void setFrame(
       Cluster* frme,
       const std::vector< Attribute* > &attrs,
-      ColorRGB col);
+      QColor col);
     void clrFrame();
 
     void addFrameHist(
       Cluster* frme,
       const std::vector< Attribute* > &attrs);
-    void clrFrameHist();
-    void clrFrameHistCur();
-    size_t getSizeFramesHist();
-
-    void clearData();
-
-    void handleSendDgrmSglToSiml();
-    void handleSendDgrmSglToTrace();
-    void handleSendDgrmSetToTrace();
+    void addFrameHist(
+      QList<Cluster*> frames,
+      const std::vector< Attribute* > &attrs);
 
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
@@ -79,25 +62,18 @@ class Examiner : public wxEvtHandler, public Visualizer
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
 
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    void handleKeyDownEvent(const int& keyCode);
+    void handleMouseEvent(QMouseEvent* e);
+    void handleKeyEvent(QKeyEvent* e);
+
+    QSize sizeHint() const { return QSize(200,200); }
+
+  protected slots:
+    void clearData();
+    void clrFrameHistCur();
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void selectionChanged();
 
   protected:
     // -- utility functions -----------------------------------------
@@ -134,18 +110,6 @@ class Examiner : public wxEvtHandler, public Visualizer
     void drawFramesHist(const bool& inSelectMode);
     void drawControls(const bool& inSelectMode);
 
-    // -- utility event handlers ------------------------------------
-    /*
-        void onTimer( wxTimerEvent &e );
-    */
-    // -- static variables ------------------------------------------
-
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
-    static int      szeTxt;
-    static ColorRGB colBdl;
-    static int      hgtHstPix;
-
     enum
     {
       ID_ICON_CLR,
@@ -159,11 +123,13 @@ class Examiner : public wxEvtHandler, public Visualizer
     };
 
     // -- data members ----------------------------------------------
+    Settings* settings;
+
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
 
     Cluster* frame;                  // composition
-    ColorRGB colFrm;
+    QColor colFrm;
 
     std::vector< Cluster* > framesHist;            // composition
     std::vector< std::vector< Attribute* > > attrsHist; // association
@@ -179,11 +145,6 @@ class Examiner : public wxEvtHandler, public Visualizer
     double offset;
     size_t vsblHistIdxLft;
     size_t vsblHistIdxRgt;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif
-
-// -- end -----------------------------------------------------------

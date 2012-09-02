@@ -59,7 +59,7 @@ class binary_gui_tool: public mcrl2_gui_tool<binary_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc,argv)
 
   return binary_gui_tool().execute(argc, argv);
 }

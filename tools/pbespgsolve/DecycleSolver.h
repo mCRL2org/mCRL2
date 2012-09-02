@@ -12,7 +12,7 @@
 
 #include "SmallProgressMeasures.h"
 #include "DenseSet.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 #include "SCC.h"
 #include <deque>
 #include <string>
@@ -21,7 +21,7 @@
 /*! A solver that first removes i-dominated cycles controlled by player p
     for all values of i and p where i%2 == p, then calls another, general
     solver to solve the remaining subgame. */
-class DecycleSolver : public ParityGameSolver, public virtual Logger
+class DecycleSolver : public ParityGameSolver
 {
 public:
     DecycleSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,

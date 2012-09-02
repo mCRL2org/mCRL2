@@ -105,7 +105,7 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbesinst_substitution_function& sigma)
   {
     term_type y = super::visit_propositional_variable(x, v, sigma);
-    term_type result = term_type(rename(y), y.variables(), atermpp::make_list(y));
+    term_type result = term_type(rename(y), y.variables(), atermpp::make_list(atermpp::aterm_appl(y)));
     return result;
   }
 };
@@ -123,7 +123,7 @@ class pbesinst_rewriter
     /// \param data_spec A data specification
     /// \param rewriter_strategy A rewriter strategy
     /// \param print_rewriter_output If true, rewriter output is printed to standard error
-    pbesinst_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
+    pbesinst_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::jitty, bool print_rewriter_output = false)
       :
       datar(data_spec, rewriter_strategy),
       datarv(data_spec),

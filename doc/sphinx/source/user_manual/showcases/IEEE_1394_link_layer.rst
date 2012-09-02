@@ -1,7 +1,6 @@
 IEEE 1394 link layer
 ====================
 
-
 .. image:: img/FireWire_cables.jpg
    :align: right
    :width: 250px
@@ -20,30 +19,22 @@ Technical details
 Asynchronous mode of the Link Layer of IEEE 1394 was modeled in µCRL based on
 the documentation.
  
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Deadlock, safety and liveness properties checking.
+*Type of verification*
+  Deadlock, safety and liveness properties checking.
 
-Models
-^^^^^^
-The µCRL model is available as a part of the µCRL toolset distribution. 
-A translation to mCRL2, performed by Jan Friso Groote, is available as a part
-of the mCRL2 distribution.
+*Models*
+  The µCRL model is available as a part of the µCRL toolset distribution. 
+  A translation to mCRL2, performed by Jan Friso Groote, is available as a part
+  of the mCRL2 distribution.
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Bas Luttik, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Institution**
-    - Centrum voor Wiskunde en Informatica (CWI), Amsterdam
-  * - **Time period**
-    - The model was written in 1997, translation to mCRL2 in 2005.
+*Organizational context*
+  :Contact person: Bas Luttik, Technische Universiteit Eindhoven, The Netherlands.
+  :Institution: Centrum voor Wiskunde en Informatica (CWI), Amsterdam
+  :Time period: The model was written in 1997, translation to mCRL2 in 2005.
 
 Publications
 ------------
+
 .. [Lut97] Description and formal specification of the Link Layer of P1394.
    S. P. Luttik. In: Ignac Lovrek, editor, Proceedings of the 2nd International
    Workshop on Applied Formal Methods in System Design, University of Zagreb,

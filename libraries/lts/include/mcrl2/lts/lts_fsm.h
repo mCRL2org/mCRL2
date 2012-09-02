@@ -51,7 +51,28 @@ class state_label_fsm:  public std::vector < size_t >
       std::vector < size_t >(v)
     {}
 };
+/** \brief Pretty print a state value of this FSM.
+    \details The label l is printed as (t1,...,tn).
+    \param[in] l  The state value to pretty print.
+    \return           The pretty-printed representation of value. */
 
+inline std::string pp(const state_label_fsm l)
+{
+  std::string s;
+  s = "(";
+  for (size_t i=0; i<l.size(); ++i)
+  {
+    std::stringstream sNr;
+    sNr << l[i];
+    s += sNr.str();
+    if (i+1<l.size())
+    {
+      s += ",";
+    }
+  }
+  s += ")";
+  return s;
+}
 } // namespace detail
 
 
@@ -89,7 +110,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
         \return A vector containing strings representing the possible values
                 that this parameter can have.
     */
-    std::vector < std::string > state_element_values(size_t idx) const
+    const std::vector < std::string >& state_element_values(size_t idx) const
     {
       assert(idx<m_state_element_values.size());
       return m_state_element_values[idx];
@@ -172,6 +193,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
      *  \param[in] filename Name of the file from which this lts is read.
      */
     void load(const std::string& filename);
+    void loadnew(const std::string& filename);
 
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is written to stdout.

@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include <iterator>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2

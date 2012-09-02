@@ -1,0 +1,312 @@
+\documentclass[a4paper]{article}
+
+\usepackage[footnotesize]{caption}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0em}
+
+\title{Next-state computation templates in state space exploration}
+\author{Ruud Koolen \\ \texttt{r.p.j.koolen@student.tue.nl}}
+
+\catcode`\^^I=13
+\catcode`\^^M=13
+
+\newcounter{linenumber}
+
+\newenvironment{sourcecode}{\begingroup%
+\setcounter{linenumber}{0}%
+\def\algorithm##1{\textbf{Algorithm} ##1 \parskip=0pt\everypar={\parskip=0pt\stepcounter{linenumber}\rlap{\scriptsize{\thelinenumber}}\qquad}}%
+\def\qif##1{\textbf{if} ##1}%
+\def\qifdefined##1{\textbf{if} ##1 \textbf{defined}}%
+\def\qifndefined##1{\textbf{if} ##1 \textbf{not defined}}%
+\def\qelse{\textbf{else}}%
+\def\qelseif##1{\textbf{else if ##1}}%
+\def\for##1{\textbf{for} ##1}%
+\def\foreach##1{\textbf{for each} ##1}%
+\def\qdo{\textbf{do}}%
+\def\while##1{\textbf{while} ##1}%
+\def\return##1{\textbf{return} ##1}%
+\def\break{\textbf{break}}%
+\def\qglobal##1{\textbf{global} ##1}%
+\catcode`\^^I=13%
+\catcode`\^^M=13%
+\def^^I{\qquad}%
+\def^^M{\par}%
+}{\endgroup}
+
+\catcode`\^^I=10
+\catcode`\^^M=5
+
+\def\concat{\ensuremath{+\!\!\!\!+\,}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent In the context of the mCRL2 model checking toolkit, we investigate the transition system computation process of \textit{state space exploration} in search of cases in which similar states lead to duplicate work being performed. We present two techniques to take advantage of this scenario to speed up state space exploration by memoizing the results of expensive computations among usable state patterns, resulting in a performance improvement of almost a factor 200 for real-world workloads.
+\end{abstract}
+
+
+\section{Introduction}
+In model checking applications, the generation of an explicit state space from an algebraic system description is a common and usually time-consuming task. Tools for such computations generally work by implementing the primitive of computing the set of outgoing transitions from a given state, and running a generic graph exploration algorithm on top of that system.
+
+Something such tools do not generally take advantage of is the phenomenon that different states may have (parts of) outgoing transition sets that are very similar, such that parts of the computational work is effectively duplicated when computing outgoing transition sets for multiple such ``similar'' states. By recognizing such cases of redundant computations, major performance gains could be possible.
+
+In this paper, we present two techniques to take advantage of this phenomenon, in the context of the mCRL2 model checking toolset \cite{mcrl2}. We do this by analyzing system descriptions in search of opportunities to share computational work between several states, implemented by memoizing certain results among the largest set of states to which it applies. We show how this can speed up the exploration process by almost a factor 200 for particular real-world models.
+
+In Section \ref{sec:background} we formally introduce the different formalisms involved, as well as the base algorithms on which our techniques are based. Section \ref{sec:enumeration-caching} describes a technique for sharing the result of the expensive set comprehension computations as widely as possible; in Section \ref{sec:summand-pruning} we describe a technique for bulk dismissal of transition terms known not to apply to states sharing particular patterns. Finally, in Section \ref{sec:conclusions} we summarize our results, and describe some future research that can be done on this topic.
+
+
+\section{Background}
+\label{sec:background}
+\subsection{Labelled transition systems}
+\label{sec:background/labelled-transition-systems}
+Labelled transition systems are used in mCRL2 both as the formal semantics of a given process description, and as an explicit data structure on which various operations can be performed (in which case it must be finite). In the context of this document, a labelled transition system is an edge-labelled directed multigraph with a designated initial node; formally, it is a tuple $(S, A, \rightarrow, s_0)$ \cite{mcrl2lts} where:
+\begin{itemize}
+ \item $S$ is a set of states;
+ \item $A$ is a set of action labels;
+ \item $\rightarrow \subseteq S \times A \times S$ is a transition relation;
+ \item $s_0 \in S$ is the initial state.
+\end{itemize}
+
+\subsection{Linear process specifications}
+\label{sec:background/linear-process-specifications}
+The notion of linear process specifications forms a formalism for specifying processes in the version of the Algebra of Communicating Processes used by the mCRL2 toolset \cite{mcrl2language}. Specifically, a linear process specification is an equation of the following form:
+$$ P(\vec{d}_0) \textsf{ where } P(\vec{d} : \vec{D}) = \sum_{i \in I} \sum_{\vec{e} : \vec{E}_i} c_i(\vec{d}, \vec{e}) \rightarrow a_i(\vec{f}_i(\vec{d}, \vec{e})) \cdot P(\vec{g}_i(\vec{d}, \vec{e})) $$
+in which the variables $\vec{d}$ are called the \textit{process parameters}, the values $i$ in the finite index set $I$ are the \textit{summands} of the process, the variables $\vec{e}$ are the \textit{enumeration variables}, the boolean expression $c_i$ in terms of $\vec{d}$ and $\vec{e}$ is the \textit{condition} for summand $i$, the term $a_i$ with arguments $\vec{f}_i$ in terms of $\vec{d}$ and $\vec{e}$ is the parameterized \textit{action label} for summand $i$, the expressions $\vec{g}_i$ in terms of $\vec{d}$ and $\vec{e}$ are the \textit{resulting state} for summand $i$, and the expressions $\vec{d}_0 : \vec{D}$ form the \textit{initial state}. A linear process specification represents a (not necessarily finite) labelled transition system with one state for each $\vec{d} : \vec{D}$, with $\vec{d}_0$ being the initial state, in which each state $\vec{d}$ has an outgoing transition with action label $a_i(\vec{f}_i(\vec{d}, \vec{e}))$ and target state $\vec{g}_i(\vec{d}, \vec{e})$ for each $i \in I$, $\vec{e} \in \vec{E}_i$ such that $c_i(\vec{d}, \vec{e})$ holds.
+
+\subsubsection{Example}
+As an example linear process specification, one can consider the following equation:
+
+\begin{align*}
+P(\textsf{true}, 0) \textsf{~where~} P(b: \mathbb{B}, n: \mathbb{N}) \quad ={} \quad & \sum_{m : \mathbb{N}} b \rightarrow \textit{red} \cdot P(\textsf{false}, m) \\
+\quad {}+{} \quad & \neg b \land n > 0 \rightarrow \textit{blue} \cdot P(b, n - 1) \\
+\quad {}+{} \quad & \neg b \land n = 0 \rightarrow \textit{red} \cdot P(\textsf{true}, n)
+\end{align*}
+
+This describes a process that can perform \textit{red} and \textit{blue} actions, such that no infinite sequence of \textit{blue} actions is possible.
+
+
+\subsection{State space exploration}
+\label{sec:background/state-space-exploration}
+The process of \textit{state space exploration} is the problem of computing, for a given linear process specification, the reachable part of the labelled transition system it represents --- assuming this reachable part is finite. Since this is a standard graph exploration problem, standard graph exploration algorithms like depth-first search or breadth-first search can be used to solve it, given an algorithm for computing the outgoing transitions for a given state.
+
+To compute the set of outgoing transitions from a given state (also known as the \textit{next-state set}), mCRL2 currently uses the following algorithm:
+
+\begin{sourcecode}
+\algorithm{outgoing-transitions$(\vec{d})$}
+$R := \emptyset$
+\foreach $i \in I$
+	$\mathcal{E} := \{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}, \vec{e})\}$
+	\foreach $\vec{e} \in \mathcal{E}$
+		$A := a_i(\vec{f}_i(\vec{d}, \vec{e}))$
+		$S := g_i(\vec{d}, \vec{e})$
+		$R := R \cup \{(A, S)\}$
+\return $R$
+\end{sourcecode}
+
+At line 3, the (hopefully finite) \textit{enumeration} $\mathcal{E}$ of terms matching the condition $c_i$ is computed; at lines 5 and 6, two vectors of expressions $\vec{f}_i$ and $\vec{g}_i$ (together called the \textit{transition arguments}) are computed by substituting $\vec{d}$ and $\vec{e}$ in the given expressions.
+
+\section{Enumeration caching}
+\label{sec:enumeration-caching}
+In the algorithm described in Section \ref{sec:background/state-space-exploration}, both the computation of the enumeration $\mathcal{E}$ and the transition arguments $\vec{f}_i$ and $\vec{g}_i$ are nontrivial computation steps depending on the process parameters $\vec{d}$. For both types of computations, we can analyze, based on the structure of the expressions involved, to what degree the computation depends on the value of $\vec{d}$ and (for the transition arguments) $\vec{e}$. Given this analysis, we can proceed to cache the results of all computations performed (within the limits of memory constraints), and use the cached result whenever we would otherwise perform a computation that only differs from a cached entry in ways shown not to affect the outcome of the computation.
+
+\subsection{Enumeration caching}
+\label{sec:enumeration-caching/enumeration-caching}
+Since the enumeration computation at line 3 is typically the most expensive computation step in a complete state space exploration instance, it is an attractive optimization target.
+
+For a given $i \in I$, the value of $\mathcal{E}$ depends only on $\vec{d}$, which is a vector of independent parameters $(d_1, \ldots, d_N)$. For each of those parameters $d_j$, we can show $\mathcal{E}$ does not depend on $d_j$ whenever $d_j$ simply does not \textit{occur} in the (maximally simplified) condition $c_i$; clearly, when the condition $c_i$ does not depend on $d_j$, then neither does the set of terms satisfying that condition. Hence, whenever two values $\vec{d}$ differ only in the parameters not occurring in $c_i$, we can conclude that they must have the same value of $\mathcal{E}$.
+
+Using this notion, we can --- for each $i \in I$ --- define a function $\textsf{key}_i(\vec{d})$ that, for a given parameter vector $\vec{d}$, selects those parameters that occur in $c_i$ and ignores the others:
+$$ \textsf{key}_i(\vec{d}) = \left[ d_j \in \vec{d} ~|~ d_j \textrm{ occurs in } c_i \right] $$
+For example, for $\vec{d} = [d_1, d_2, d_3, d_4]$ and $c_i = c(d_1, d_3, \vec{e})$, $\textsf{key}_i(\vec{d}) = [d_1, d_3]$. It now holds that for any $\vec{d}_1$ and $\vec{d}_2$ such that $\textsf{key}_i(\vec{d}_1) = \textsf{key}_i(\vec{d}_2)$, it is also true that $\{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}_1, \vec{e})\} = \{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}_2, \vec{e})\}$, for all $i \in I$. Moreover, since the ``occurs in'' relation can be precomputed before starting the state space exploration proper, the function value $\textsf{key}_i(\vec{d})$ is very inexpensive to compute. This leads to the following algorithm that maintains a dictionary $M_i$ for each $i \in I$ storing $(\textsf{key}_i(\vec{d}), \mathcal{E})$ pairs:
+
+\begin{sourcecode}
+\algorithm{outgoing-transitions$(\vec{d})$}
+$R := \emptyset$
+\foreach $i \in I$
+	$k := \textsf{key}_i(\vec{d})$
+	\qifdefined{$M_i[k]$}
+		$\mathcal{E} := M_i[k]$
+	\qelse
+		$\mathcal{E} := \{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}, \vec{e})\}$
+		$M_i[k] := \mathcal{E}$
+	\foreach $\vec{e} \in \mathcal{E}$
+		$A := a_i(\vec{f}_i(\vec{d}, \vec{e}))$
+		$S := g_i(\vec{d}, \vec{e})$
+		$R := R \cup \{(A, S)\}$
+\return $R$
+\end{sourcecode}
+
+Assuming the computation of simplifying the condition $c_i$ is performed perfectly, and that therefore the only process parameters remaining in $c_i$ can indeed (for suitable values of all other parameters) make the difference between the condition evaluating to \textsf{true} and it evaluating to \textsf{false}, this algorithm is optimal in the sense that no other process parameters can be unconditionally ignored in the computation of $\mathcal{E}$. It can, however, be possible to cache $\mathcal{E}$ across different values of a parameter occurring in the condition \textit{for particular values of other variables}; for example, for $c_i \equiv (d_1 = 1 \lor d_2 = 2)$, the value of $\mathcal{E}$ can be used for different values of $d_2$ whenever $d_1$ happens to have the value $1$. This area of techniques is outside the scope of this research, however, and is left as future research.
+
+\subsection{Transition argument caching}
+\label{sec:enumeration-caching/transition-argument-caching}
+Building on the structure introduced in Section \ref{sec:enumeration-caching/enumeration-caching}, we can apply a similar analysis to lines 5 and 6 of the original algorithm. Computing terms $A$ and $S$ involves substituting $\vec{d}$ and $\vec{e}$ in the expression vectors $\vec{f}_i$ and $\vec{g}_i$, and simplifying the result; for each expression involved, we can determine what variables occur in it. Occurring variables can be classified into three groups:
+\begin{itemize}
+ \item process parameters that occur in the condition $c_i$;
+ \item process parameters that do not occur in the condition $c_i$; and
+ \item enumeration variables.
+\end{itemize}
+Based on which of those variables occur in a given expression, the resulting expression can be shared across a different range:
+\begin{itemize}
+ \item expressions that do not contain any variables at all are constants, and can be trivially cached globally;
+ \item expressions that only contain process parameters occurring in $c_i$ are equal for all $i$-transitions for states sharing a value of $\mathcal{E}$, and can therefore be cached along with $\mathcal{E}$;
+ \item expressions that only contain process parameters occurring in $c_i$ and enumeration variables are different for different $i$-transitions within a given state, but equal among different states sharing a value of $\mathcal{E}$, and can therefore be cached along with each particular $\vec{e} \in \mathcal{E}$;
+ \item expressions that contain process parameters not occurring in $c_i$ are different for each state, and therefore cannot be cached at all.
+\end{itemize}
+This analysis leads to a fairly obvious extension of the algorithm from Section \ref{sec:enumeration-caching/enumeration-caching}:
+
+\vbox{
+\begin{sourcecode}
+\algorithm{outgoing-transitions$(\vec{d})$}
+$R := \emptyset$
+\foreach $i \in I$
+	$\vec{h} := \vec{f}_i \concat \vec{g}_i$
+	$k := \textsf{key}_i(\vec{d})$
+	\qifdefined{$M_i[k]$}
+		$(\mathcal{E}', \vec{h}_\mathrm{enum}) := M_i[k]$
+	\qelse
+		$\mathcal{E} := \{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}, \vec{e})\}$
+		$\mathcal{E'} := \{(\vec{e}, p_\mathrm{term}(\vec{h}, \vec{d}, \vec{e})) ~|~ \vec{e} \in \mathcal{E}\}$
+		$\vec{h}_\mathrm{enum} := p_\mathrm{enum}(\vec{h}, \vec{d})$
+		$M_i[k] := (\mathcal{E'}, \vec{h}_\mathrm{enum})$
+	\foreach $(\vec{e}, \vec{h}_\mathrm{term}) \in \mathcal{E}'$
+		$\vec{h}_\mathrm{none} := p_\mathrm{none}(\vec{h}, \vec{d}, \vec{e})$
+		construct $A$ and $S$ out of $\vec{h}_{i,\mathrm{global}}$, $\vec{h}_\mathrm{enum}$, $\vec{h}_\mathrm{term}$, $\vec{h}_\mathrm{none}$
+		$R := R \cup \{(A, S)\}$
+\return $R$
+\end{sourcecode}
+}
+
+Here, the three functions $p_\mathrm{enum}$, $p_\mathrm{term}$, and $p_\mathrm{none}$ respectively compute the subsets of transition arguments in the second, third, and fourth category described above, substituting the required values for $\vec{d}$ and $\vec{e}$. The vector $\vec{h}_{i,\mathrm{global}}$ is the precomputed analogous set representing the first category of constant transition arguments for summand $i$.
+
+\subsection{Memory usage}
+\label{sec:enumeration-caching/memory-usage}
+Both algorithms described in this Section require $O((|I| \cdot |V| + |E|) \cdot \alpha)$, where $|V|$ and $|E|$ are respectively the number of vertices (states) and edges (transitions) in the generated labelled transition system, and $\alpha$ is the \textit{cache miss ratio}, i.e.\ the number of times line 8 is executed divided by the number of times line 4 is executed. This means that if the cache is functioning properly, i.e. when $\alpha$ is low, memory usage is quite modest compared to the memory required to store the generated labelled transition system. It also means that even when the cache is \textit{not} functioning properly --- when $\alpha$ is close to $1$, and most of the cache bookkeeping is performed in vain because cache hits are rare --- then the memory used by the cache is comparable to the memory used to store the resulting labelled transition system, which is significant but not unacceptably large. Nonetheless, in situations where memory is tight, it might be useful to implement some system to keep the memory usage from growing out of control. The details of such a scheme are outside the scope of this paper, however.
+
+\subsection{Results}
+\label{sec:enumeration-caching/results}
+In order to test how well the algorithm described in Section \ref{sec:enumeration-caching/enumeration-caching} works in practice, we implemented it as an extension to a version of the mCRL2 toolset and compared its performance to the base version using the unmodified algorithm from Section \ref{sec:background/state-space-exploration}. For a number of selected systems, we performed a full state space exploration, measuring the executing time of the exploration proper (excluding the start-up time, as it is fairly constant and not influenced by the algorithm used) for both implementations. We also measured the cache miss ratio for these systems. Table \ref{tbl:enumeration-caching-performance} shows the ratio of the two execution times (which should be more-or-less independent from machine-specific details) and the value $1 / \alpha$.
+
+The systems we used to test are the firewire protocol specification, available as part of the official mCRL2 example set (``1394''); a description of a fault-tolerant egg incubator device we have used in past projects (``incubator-2''); and a version of incubator-2 that is structurally almost identical, but has a much larger state space (``incubator-5''). These systems were chosen due to having a practical size for testing, and being fairly representative.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|rrrr}
+\emph{System} & \emph{states} & \emph{transitions} & \emph{speedup factor} & \emph{$1 / \alpha$} \\
+\hline
+incubator-2 & 18803 & 46018 & 2.85 & 49.26 \\
+1394 & 197197 & 354155 & 29.6 & 212.5 \\
+incubator-5 & 11732672 & 53042671 & 6.19 & 117.5 \\
+\end{tabular}
+\caption{Performance measurements of the enumeration-caching algorithm relative to the base algorithm.}
+\label{tbl:enumeration-caching-performance}
+\end{center}
+\end{table}
+
+Additionally, as documented in Table \ref{tbl:transition-argument-caching-performance} we measured the gains of the transition-argument-caching algorithm relative to the enumeration-caching algorithm, using the same procedure as above.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|r}
+\emph{System} & \emph{speedup factor} \\
+\hline
+incubator-2 & 1.12 \\
+1394 & 0.90 \\
+incubator-5 & 1.17 \\
+\end{tabular}
+\caption{Performance measurements of the transition-argument-caching algorithm relative to the enumeration-caching algorithm.}
+\label{tbl:transition-argument-caching-performance}
+\end{center}
+\end{table}
+
+A quick glance at Table \ref{tbl:enumeration-caching-performance} shows that enumeration caching does indeed work, and that performance improvements of more than one order of magnitude are possible for real-world systems. Unfortunately, the results for transition argument caching aren't quite as straightforward; while Table \ref{tbl:transition-argument-caching-performance} shows that modest gains are possible, it also shows that the extra caching may actually by counterproductive for less susceptible systems.
+
+
+\section{Summand pruning}
+\label{sec:summand-pruning}
+
+\subsection{Introduction}
+\label{sec:summand-pruning/introduction}
+In Section \ref{sec:enumeration-caching}, we detailed a technique to minimize the amount of work performed to compute the outgoing transitions for a state as pertaining to a given summand. Even if the amount of time required for a single summand is optimized to the point of being negligible, however, a complete state space exploration still takes $O(|V| \cdot |I|)$ time in the best case merely to check each $i \in I$ for each reachable state --- even if the great majority of summands ends up not contributing any transitions for each given state. This presents a problem for linear process specifications containing large amounts of summands. To decrease this best-case lower bound, some technique must be used to avoid visiting the bulk of the available summands for most states. If we could show, for a given state $\vec{d}$, that a set of summands $J \subseteq I$ cannot contribute any transitions --- by showing that substitution of the state vector in the condition $c_i$ and simplifying it reduces the condition to \textsf{false} without substituting anything for $\vec{e}$, for all $i \in J$ --- then the entire set $J$ could be disregarded without further notice for the given state.
+
+To accomplish this, we can compute the subset of summands whose condition does \textit{not} necessarily reduce to \textsf{false} when substituting each prefix of the state vector $\vec{d}$, caching the results along the way. In other words, we iteratively compute (for given $\vec{d}$) $\{ i \in I ~|~ c_i(d_1) \neq \textsf{false}\}$, $\{ i \in I ~|~ c_i(d_1, d_2) \neq \textsf{false}\}$, $\{ i \in I ~|~ c_i(d_1, d_2, d_3) \neq \textsf{false}\}$, $\ldots$, $\{ i \in I ~|~ c_i(\vec{d}) \neq \textsf{false}\}$, consulting the cache for each computation; the final term represents the set of summands for which enumeration proper is necessary.
+
+To implement this, we can maintain a decision tree $T$ in which each node represents a prefix $[d_1, \ldots, d_n]$ of a visited state vector, storing for this prefix the set of not-necessarily-empty summands, and having as children those visited prefixes obtained by adding a single value to the end, i.e.\ $\{ [d_1, \ldots, d_n, d_{n+1}] ~|~ d_{n+1} : D_{n+1} \}$; the root of this tree would represent the empty prefix, corresponding to the full set of summands. With a tree node representing $[d_1, \ldots, d_n]$ implemented as a tuple $(W, J)$, where $W$ is a dictionary mapping values from $D_{n+1}$ to children and $J$ is the subset of not-necessarily-empty summands, this leads to the following algorithm:
+
+\begin{sourcecode}
+\algorithm{outgoing-transitions$(\vec{d})$}
+$(W, J) := T$
+\foreach $d_n \in \vec{d}$
+	\qifndefined{$W[d_n]$}
+		$J' := \{ j \in J ~|~ c_j(d_1, \ldots, d_n) \neq \textsf{false} \}$
+		$W[d_n] := (\emptyset, J')$
+	$(W, J) := W[d_n]$
+$R := \emptyset$
+\foreach $i \in J$
+	$\mathcal{E} := \{\vec{e} : \vec{E}_i ~|~ c_i(\vec{d}, \vec{e})\}$
+	\foreach $\vec{e} \in \mathcal{E}$
+		$A := a_i(\vec{f}_i(\vec{d}, \vec{e}))$
+		$S := g_i(\vec{d}, \vec{e})$
+		$R := R \cup \{(A, S)\}$
+\return $R$
+\end{sourcecode}
+
+Of course, the algorithm described in Section \ref{sec:enumeration-caching} can be substituted for the lower half of the above algorithm to combine the two caching techniques; the two techniques are independent.
+
+\subsection{Variable ordering}
+\label{sec:summand-pruning/variable-ordering}
+The performance of the above algorithm depends heavily on the order of the process parameters; a process parameter near the beginning of the process parameter vector whose value doesn't significantly help in disregarding summands duplicates effort for no gain, whereas having a very influential parameter near the end means its optimization potential is effectively wasted. Therefore, to make the above algorithm useful, the process parameters should be ordered in such a way that parameters that tend to reduce many conditions to \textsf{false} are near the start, and parameters that don't tend to reduce many conditions are near the end (or are even disregarded entirely for the purpose of the summand pruning algorithm). Intuitively, the parameters should be ordered by ``influence'' on the summand conditions; unfortunately, no obvious formal interpretations of this notion are evident.
+
+This problem is reminiscent of the problem of \textit{variable ordering} in the context of Binary Decision Diagrams, and indeed many of the same concerns apply. Since finding the optimal variable ordering for a binary decision diagram is generally infeasible \cite{bollig96}, applications using binary decision diagrams usually use heuristic algorithms to find reasonably efficient variable orderings. We took the same approach, experimenting with several simple heuristics, the details of which are explained in Section \ref{sec:summand-pruning/results}.
+
+\subsection{Results}
+\label{sec:summand-pruning/results}
+To test whether the summand pruning algorithm works in principle, we implemented a version of it that does not perform any parameter reordering at all, and tested its performance on an artificially constructed system known to be susceptible to summand pruning. Specifically, we designed a system consisting of $10^6$ states and $11^6$ summands, of which no more than $2^6$ can generate any transitions for each given state. Moreover, this system has the property that any parameter ordering should produce equivalent results. Comparing the execution time of the state space exploration using the summand pruning algorithm with the execution time using the unmodified algorithm described in Section \ref{sec:background/state-space-exploration}, we found that the summand pruning algorithm explores this particular system over 1500 times faster than the base algorithm. This shows beyond doubt that summand pruning can indeed produce great performance improvements for well-chosen variable orderings.
+
+In order to apply summand pruning to more realistic systems for which the process parameter ordering isn't as fortune, we implemented several different parameter ordering heuristics:
+\begin{itemize}
+ \item an algorithm that simply counts, for each parameter, the number of summand conditions in which the variable occurs, sorting the summands by this number in decreasing order and disregarding parameters for which this value does not exceed a certain threshold (``occurrence count'');
+ \item an algorithm that tries to predict the size of the reachable part of each process parameter's domain by analyzing each summand's target state expression vector, and applies the above algorithm scaled by this number (``weighted occurrence count'');
+ \item an algorithm that, for each each parameter-summand pair, structurally analyzes the summand condition structure in search for subexpressions that are likely to reduce the condition to \textsf{false} for particular values of the parameter, such as $d_n = K$ for some constant $K$ (``condition structure'');
+ \item an algorithm that (like ``weighted occurrence count'') enumerates reachable parts of parameter domains, substituting all resulting values in each summand condition, in an attempt to directly measure the parameter's selectivity in isolation (``selectivity measures'').
+\end{itemize}
+
+For each of these algorithms, we measured its performance by measuring the execution time (and comparing this to the execution time of the Section \ref{sec:background/state-space-exploration} algorithm) when applied to four different systems: the three systems used in Section \ref{sec:enumeration-caching/results} (modified in such a way as to contain a relatively large amount of summands and relatively few enumeration variables), as well as a similarly processed model of the USB protocol (``usb''). Again, we calculated the ratio of the execution time of the base algorithm and the execution time of the summand-pruning algorithm.
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{l|rrrr}
+\multicolumn{5}{c}{\emph{Performance improvements relative to Section \ref{sec:background/state-space-exploration} algorithm}} \\
+& incubator-2 & 1394 & incubator-5 & usb \\
+\hline
+\emph{occurrence count} & 2.40 & 10.51 & 2.51 & 184.55 \\
+\emph{weighted occurrence count} & 2.40 & 44.04 & 2.51 & 57.30 \\
+\emph{condition structure} & 2.40 & 40.10 & 2.51 & 168.67 \\
+\emph{selectivity measures} & 2.40 & 29.17 & 2.39 & 0.89 \\
+\end{tabular}
+\caption{Performance measurements of the summand pruning algorithm using different variable ordering heuristics relative to the base algorithm.}
+\label{tbl:summand-pruning-performance}
+\end{center}
+\end{table}
+
+As Table \ref{tbl:summand-pruning-performance} shows, summand pruning can indeed produce great performance improvements for real-world systems. It also demonstrates that a proper parameter ordering greatly affects the efficiency of the algorithm, with a factor 200 performance difference between the most effective ordering and the least effective ordering for the usb system. For this reason, future research on the topic of how to improve parameter ordering heuristics appears to be warranted.
+
+
+\section{Conclusions and future work}
+In this paper, we have introduced the technique of enumeration caching to take advantage of state similarity by minimizing the number of enumeration opererations performed; we have seen that this technique can work well in practice, observing improvements of almost a factor 30 in real-world state space exploration problems. We have also introduced an extension to this technique that aims to similarly minimize the computation of transition arguments, but for this technique we have only seen modest improvements and even decreases in performance.
+
+Additionally, we have introduced the technique of summand pruning that aims to minimize the amount of work performed on enumerating summands for which it can be shown, based on state similarity, that the summand cannot produce any transitions. We have seen that this can work very well for particular systems, with an observed improvement of a factor 1500 in computation time for a constructed example. We have also seen that the effectivity of this scheme depends greatly on the order of process parameters; moreover, we have seen that relatively simple heuristics can already produce good results, with observed performance improvements of a factor 184.
+
+As shown in Section \ref{sec:summand-pruning/results}, the process parameter ordering strongly influences the performance of the summand pruning algorithm. For that reason, it could be worthwhile to investigate whether better ordering heuristics can be found. In particular, the question of whether the techniques used in existing binary decision diagram implementations can be applied in this setting, and how well they work. Furthermore, to support a practical implementation of the techniques presented in this paper, the question of when to stop caching to avoid excessive memory usage needs to be addressed.
+
+\appendix
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+
+\end{document}

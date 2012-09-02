@@ -46,7 +46,7 @@ class pbes_abstract_tool: public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("select",
-                      make_optional_argument("NUM", ""),
+                      make_optional_argument("PARAMS", ""),
                       "select the PBES parameters that are allowed to be abstracted. Wild cards are allowed\n"
                       "\n"
                       "Examples:\n\n"

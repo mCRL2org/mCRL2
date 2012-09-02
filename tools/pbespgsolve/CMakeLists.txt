@@ -12,6 +12,11 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB_RECURSE HEADERS "." "*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS})
+
 add_definitions(-DWITH_MCRL2)
 
 add_library(mcrl2_${PROJECT_NAME}
@@ -23,10 +28,7 @@ add_library(mcrl2_${PROJECT_NAME}
   Graph.cpp
   LiftingStrategy.cpp
   LinearLiftingStrategy.cpp
-  Logger.cpp
-  #main.cpp
   MaxMeasureLiftingStrategy.cpp
-  #mcrl2-example.cpp
   OldMaxMeasureLiftingStrategy.cpp
   ParityGame.cpp
   ParityGame_IO.cpp
@@ -56,6 +58,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
+
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
   mcrl2_pbes
@@ -69,8 +72,8 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
-install(TARGETS mcrl2_${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
+install(TARGETS mcrl2_${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

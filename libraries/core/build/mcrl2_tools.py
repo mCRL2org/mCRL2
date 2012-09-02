@@ -99,12 +99,18 @@ def run_pbes2bool(filename, timeout = 3):
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
-    return last_word(text) == 'true'
+    try:
+        return last_word(text) == 'true'
+    except IndexError:
+        print 'pbes2bool output:'
+        print '  stdout:', text
+        print '  stderr:', dummy
+        return None
 
 # returns True, False or None if a timeout occurs
 def run_pbespgsolve(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbespgsolve', filename, timeout)
+    text, dummy = timeout_command('pbespgsolve', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
@@ -113,6 +119,10 @@ def run_pbespgsolve(filename, timeout = 3):
 def run_txt2pbes(txtfile, pbesfile):
     add_temporary_files(txtfile, pbesfile)
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+
+def run_txt2bes(txtfile, besfile):
+    add_temporary_files(txtfile, besfile)
+    run_program('txt2bes', '%s %s' % (txtfile, besfile))
 
 def run_pbesabsinthe(pbesfile1, pbesfile2, strategy, abstraction_file = None):
     add_temporary_files(pbesfile1, pbesfile2)
@@ -174,3 +184,25 @@ def run_bessolve(filename, strategy = 'spm', timeout = 10):
         return False
     print 'WARNING: unknown failure on "%s"' % command
     return None
+
+# runs pbesrewr
+def run_pbesrewr(pbesfile1, pbesfile2, pbes_rewriter = 'simplify', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('pbesrewr',  '--pbes-rewriter=%s %s %s' % (pbes_rewriter, pbesfile1, pbesfile2), timeout)
+
+def run_mcrl22lps(mcrl2file, lpsfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, mcrl2file, lpsfile)
+    timeout_command('mcrl22lps',  args.strip(), timeout)
+
+def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, lpsfile, destfile)
+    dummy, text = timeout_command('lps2lts', args.strip(), timeout)
+    return text
+
+def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
+    dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
+    return text.find('LTSs are strongly bisimilar') != -1
+
+def run_lpspbes(lpsfile, mcffile, pbesfile, options = '', timeout = 10):
+    args = '%s -f%s %s %s' % (lpsfile, mcffile, options, pbesfile)
+    timeout_command('lps2pbes',  args.strip(), timeout)

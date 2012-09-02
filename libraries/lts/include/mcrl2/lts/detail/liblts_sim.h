@@ -17,7 +17,7 @@
 #include <sstream>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/sim_hashtable.h"
@@ -26,7 +26,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 namespace mcrl2
 {

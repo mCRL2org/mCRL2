@@ -118,8 +118,55 @@ void test4()
   specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
-  BOOST_CHECK(new_spec.process().summand_count()==3);
+  BOOST_CHECK(new_spec.process().summand_count()==2);
 }
+
+void test5() // Test whether partial renaming to delta is going well. See bug report #1009.
+{
+  const std::string SPEC =
+    "sort Command = struct com1 | com2;\n"
+    "sort State = struct st1 | st2;\n"
+    "\n"
+    "proc Parent(id: Nat, children: List(Nat)) =\n"
+    "  sum child: Nat, command: Command . (child in children) -> sc(id, child, command) . Parent()\n"
+    "+ sum child: Nat, state: State . (child in children) -> rs(child, id, state) . Parent();\n"
+    "\n"
+    "proc Child(id: Nat, parent: Nat) =\n"
+    "  sum command: Command . rc(parent, id, command) . Child()\n"
+    "+ sum state: State . ss(id, parent, state) . Child();\n"
+    "\n"
+    "act sc, rc, cc: Nat # Nat # Command;\n"
+    "    rs, ss, cs: Nat # Nat # State;\n"
+    "\n"
+    "act none;\n"
+    "\n"
+    "init\n"
+    "  allow({cc, cs, sc, rs},\n"
+    "  comm({sc|rc -> cc, rs|ss->cs},\n"
+    "    Parent(0, [1, 2]) ||\n"
+    "    Child(1, 0) ||\n"
+    "    Child(2, 0)\n"
+    "  ));\n";
+
+
+  const std::string AR_SPEC =
+    "var c: Command;\n"
+    "    s: State;\n"
+    "rename\n"
+    "  sc(0, 1, c) => delta;\n"
+    "  rs(1, 0, s) => delta;\n";
+
+
+  specification spec = lps::linearise(SPEC);
+  std::istringstream ar_spec_stream(AR_SPEC);
+  action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
+  data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
+  specification new_spec = action_rename(ar_spec,spec);
+  lps::rewrite(new_spec, R);
+  lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(new_spec.process().summand_count()==8);
+}
+
 
 int test_main(int argc, char** argv)
 {
@@ -129,6 +176,10 @@ int test_main(int argc, char** argv)
   test2();
   core::garbage_collect();
   test3();
-
+  core::garbage_collect();
+  test4();
+  core::garbage_collect();
+  test5();
+  core::garbage_collect();
   return 0;
 }

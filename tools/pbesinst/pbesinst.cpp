@@ -35,6 +35,7 @@ using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
+using utilities::make_enum_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::pbes_input_output_tool;
 using utilities::tools::rewriter_tool;
@@ -67,7 +68,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         pbes_system::detail::set_bes_equation_limit(limit);
       }
 
-      m_strategy = parse_pbesinst_strategy(parser.option_argument("strategy"));
+      m_strategy = parser.option_argument_as<pbesinst_strategy>("strategy");
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
       m_aterm_ascii = parser.options.count("aterm-ascii") > 0;
     }
@@ -77,13 +78,12 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       super::add_options(desc);
       desc.
       add_option("strategy",
-                 make_optional_argument("NAME", "lazy"),
-                 "compute the BES using strategy NAME:\n"
-                 "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-                 "  'finite' for computing all possible boolean equations.",
-                 's').
+                 make_enum_argument<pbesinst_strategy>("NAME")
+                 .add_value(pbesinst_lazy, true)
+                 .add_value(pbesinst_finite),
+                 "compute the BES using strategy NAME:", 's').
       add_option("select",
-                 make_optional_argument("NAME", ""),
+                 make_optional_argument("PARAMS", ""),
                  "select finite parameters that need to be expanded\n"
                  "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
                  "            *(*:Bool)\n",
@@ -124,7 +124,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       mCRL2log(verbose) << "parameters of pbesinst:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  strategy:           " << print_pbesinst_strategy(m_strategy) << std::endl;
+      mCRL2log(verbose) << "  strategy:           " << m_strategy << std::endl;
       mCRL2log(verbose) << "  output format:      " << pbes_system::file_format_to_string(pbes_output_format()) << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 

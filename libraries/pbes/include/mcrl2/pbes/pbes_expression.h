@@ -23,11 +23,12 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 namespace mcrl2
 {
@@ -892,7 +893,7 @@ using pbes_expr::split_or;
 inline
 pbes_expression not_(const pbes_expression& p)
 {
-  return utilities::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_not(p);
 }
 
 /// \brief Make a conjunction
@@ -902,7 +903,7 @@ pbes_expression not_(const pbes_expression& p)
 inline
 pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_and(p, q);
 }
 
 /// \brief Make a disjunction
@@ -912,7 +913,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_or(p, q);
 }
 
 /// \brief Make an implication
@@ -922,7 +923,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
+  return utilities::optimized_imp(p, q);
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -994,6 +995,116 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
 }
 
 } // namespace pbes_expr_optimized
+
+/// \brief The namespace for access functions that operate on both pbes and data expressions
+// TODO: unfinished!
+namespace combined_access
+{
+/// \brief Test for the value true
+/// \param t A PBES expression
+/// \return True if it is the value \p true
+inline bool is_true(const pbes_expression& t)
+{
+  return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+}
+
+/// \brief Test for the value false
+/// \param t A PBES expression
+/// \return True if it is the value \p false
+inline bool is_false(const pbes_expression& t)
+{
+  return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+}
+
+/// \brief Test for a negation
+/// \param t A PBES expression
+/// \return True if it is a negation
+inline bool is_not(const pbes_expression& t)
+{
+  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
+}
+
+/// \brief Test for a conjunction
+/// \param t A PBES expression
+/// \return True if it is a conjunction
+inline bool is_and(const pbes_expression& t)
+{
+  return is_pbes_and(t) || data::sort_bool::is_and_application(t);
+}
+
+/// \brief Test for a disjunction
+/// \param t A PBES expression
+/// \return True if it is a disjunction
+inline bool is_or(const pbes_expression& t)
+{
+  return is_pbes_or(t) || data::sort_bool::is_or_application(t);
+}
+
+/// \brief Test for an implication
+/// \param t A PBES expression
+/// \return True if it is an implication
+inline bool is_imp(const pbes_expression& t)
+{
+  return is_pbes_imp(t);
+}
+
+/// \brief Test for an universal quantification
+/// \param t A PBES expression
+/// \return True if it is a universal quantification
+inline bool is_forall(const pbes_expression& t)
+{
+  return is_pbes_forall(t);
+}
+
+/// \brief Test for an existential quantification
+/// \param t A PBES expression
+/// \return True if it is an existential quantification
+inline bool is_exists(const pbes_expression& t)
+{
+  return is_pbes_exists(t);
+}
+
+/// \brief Returns true if the term t is a propositional variable expression
+/// \param t A PBES expression
+/// \return True if the term t is a propositional variable expression
+inline bool is_propositional_variable_instantiation(const pbes_expression& t)
+{
+  return core::detail::gsIsPropVarInst(t);
+}
+
+/// \brief Returns the left hand side of an expression of type and, or or imp.
+/// \param t A PBES expression or a data expression
+/// \return The left hand side of an expression of type and, or or imp.
+inline
+pbes_expression left(const pbes_expression& t)
+{
+  if (data::is_data_expression(t))
+  {
+    return data::application(t).left();
+  }
+  else
+  {
+    return atermpp::arg1(t);
+  }
+}
+
+/// \brief Returns the left hand side of an expression of type and, or or imp.
+/// \param t A PBES expression or a data expression
+/// \return The left hand side of an expression of type and, or or imp.
+inline
+pbes_expression right(const pbes_expression& t)
+{
+  if (data::is_data_expression(t))
+  {
+    return data::application(t).right();
+  }
+  else
+  {
+    return atermpp::arg2(t);
+  }
+}
+
+}; // namespace pbes_data
 
 } // namespace pbes_system
 
@@ -1297,6 +1408,15 @@ struct term_traits<pbes_system::pbes_expression>
     return pbes_system::accessors::right(t);
   }
 
+  /// \brief Returns the argument of a term of type not
+  /// \param t A term
+  static inline
+  term_type not_arg(const term_type& t)
+  {
+    assert(is_pbes_not(t));
+    return atermpp::arg1(t);
+  }
+
   /// \brief Returns the quantifier variables of a quantifier expression
   /// \param t A term
   /// \return The requested argument. Doesn't work for data terms
@@ -1376,6 +1496,16 @@ struct term_traits<pbes_system::pbes_expression>
   data_term_type term2dataterm(const term_type& t)
   {
     return t;
+  }
+
+  /// \brief Returns the difference of two unordered sets of variables
+  /// \param v A sequence of data variables
+  /// \param w A sequence of data variables
+  /// \return The difference of two sets.
+  static inline
+  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
+  {
+    return term_traits<data::data_expression>::set_intersection(v, w);
   }
 
   /// \brief Test if a term is constant

@@ -328,10 +328,16 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
       return Value(m_trees.top());
     }
 
+    /// \brief Determine if a stack is empty
+    bool is_empty(const std::stack<aterm>& tree) const
+    {
+      return tree.empty() || (tree.size() == 1 && term_balanced_tree<Value>::is_empty(tree.top()));
+    }
+    
     /// \brief Equality operator
     bool equal(term_balanced_tree_iterator const& other) const
     {
-      return m_trees == other.m_trees;
+      return m_trees == other.m_trees || (is_empty(m_trees) && is_empty(other.m_trees));
     }
 
     /// \brief Increments the iterator

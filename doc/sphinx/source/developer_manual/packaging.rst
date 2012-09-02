@@ -58,6 +58,7 @@ supported platforms::
 * Mac OS X 32-bit
 * Mac OS X 64-bit
 
+
 Testing is done by running (a platform specific variation of)::
 
   $ mkdir mcrl2-release-build
@@ -83,9 +84,6 @@ Testing is done by running (a platform specific variation of)::
   $ make install
   $ ctest
   
-.. warning::
-
-  Do not forget to manually test all graphical tools!
 
   
 Furthermore, integration with CADP and LTSmin must be tested on Linux::
@@ -174,16 +172,112 @@ The source package for the mCRL2 release is generated as follows::
   $ svn checkout https://svn.win.tue.nl/repos/MCRL2/tags/mcrl2-VERSION
   $ mkdir mcrl2-package
   $ cd mcrl2-package
-  $ cmake ../mcrl2-VERSION
+  $ cmake ../mcrl2-VERSION -DMCRL2_PACKAGE_RELEASE="ON"
   $ make package_source
   
+Upload the source package::
+
+  $ scp mcrl2-VERSION.tar.gz mcrl2@www.win.tue.nl:www/download/release
   
-.. Debian/Ubuntu packages
-.. ^^^^^^^^^^^^^^^^^^^^^^
+Debian/Ubuntu packages
+^^^^^^^^^^^^^^^^^^^^^^
 
+Check out the Debian packaging files for mCRL2 and get the mCRL2 sources::
 
-.. Windows installer
-.. ^^^^^^^^^^^^^^^^^
+  $ cd /tmp
+  $ svn checkout https://svn.win.tue.nl/repos/MCRL2/packaging
+  $ cd packaging/mcrl2
+  $ wget http://www.mcrl2.org/download/release/mcrl2-VERSION.tar.gz
+  $ cp mcrl2-VERSION.tar.gz mcrl2_VERSION.orig.tar.gz
+  $ cd trunk
+
+Check whether the build instructions in ``debian/rules`` are up to date, and
+generate a version number (e.g. for an Ubuntu Oneiric PPA build)::
+
+  $ dch -v VERSION-0ubuntu0+1~oneiric -D oneiric
+  
+Build the source package::
+
+  $ debuild -S -sa
+  
+Build the ``.deb`` locally::
+
+  $ cd ..
+  $ pbuilder-dist oneiric build mcrl2-VERSION-0ubuntu0+1~oneiric.dsc
+  
+Check the generated debian package::
+
+  $ lintian -i mcrl2_VERSION-0ubuntu0+1~oneiric_amd64.deb
+
+Windows installer
+^^^^^^^^^^^^^^^^^
+
+First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
+``mcrl2-VERSION``.
+
+The following can be used as a ``.bat`` file to build the package on 64-bit
+Windows::
+
+  call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.Cmd" /Debug /x64 /win7
+  set PATH=%PATH%;"C:\Program Files (x86)\CMake 2.8\bin";"C:\Program Files\SlikSvn\bin"
+  mkdir package
+  cd package
+  cmake ..\mcrl2-VERSION -G "NMake Makefiles" -DSVNVERSION:FILEPATH="C:\Program Files\SlikSvn\bin\svnversion" -DSVNCOMMAND:FILEPATH="C:\Program Files\SlikSvn\bin\svn" -DBUILDNAME=MSVC9-Win7-X64-Release -DBOOST_ROOT:PATH="C:\Projects\boost_1_48_0" -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_ENABLE_EXPERIMENTAL=ON -DCMAKE_BUILD_TYPE:STRING="Release" -DMCRL2_PACKAGE_RELEASE=ON
+  cpack -G NSIS
+
+An alternative way to create a Windows installer, used on a 32bit system::
+
+  cmake . -DBOOST_ROOT=D:/build/boost/boost_1_47 -DMCRL2_PACKAGE_RELEASE=ON
+  cmake --build . --config Release --target ALL_BUILD
+  cpack -G NSIS
+
+Upload the installer that has been generated to
+``http://www.mcrl2.org/download/release``.
+
+Mac OS-X installer for 10.5+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
+``mcrl2-VERSION``.
+
+Then statically build and install QT for the i386 architecture to ``$QT-INSTALL``.
+Then statically build and install Boost 1.47 for the i386 architecture to ``$BOOST-INSTALL``.
+
+Then configure cmake::
+
+  $ cmake . -DCMAKE_OSX_ARCHITECTURES=i386 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 \
+            -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
+            -DCMAKE_INSTALL_PREFIX=/  \
+            -DMCRL2_SINGLE_BUNDLE=ON  \
+            -DBOOST_ROOT=$BOOST-INSTALL \
+            -DMCRL2_PACKAGE_RELEASE=ON
+
+Build the toolset::
+
+  $ make 
+
+Create the DMG-installer::
+
+  $ cpack -G PackageMaker
+
+Upload the installer that has been generated to
+``http://www.mcrl2.org/download/release``.
+
+Checking the installers
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Double check that the installers that have been built, as well as a build from
+the source tarball succeed!
+
+Updating the website
+^^^^^^^^^^^^^^^^^^^^
+
+* Add the old release to :ref:`historic_releases`
+* Update the file :file:`downloads-release.inc`
+* Generate and upload the new homepage::
+  
+    $ make doc
+    $ rsync -rz --delete doc/sphinx/html/* mcrl2@www:~/www/release
 
 
 Creating a development snapshot

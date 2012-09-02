@@ -64,7 +64,7 @@ verti FocusListLiftingStrategy::phase1()
         phase_ = 2;
         num_lift_attempts_ = 0;
         read_pos_ = write_pos_ = focus_list_.begin();
-        info("Switching to focus list of size %d.", (int)focus_list_.size());
+        mCRL2log(mcrl2::log::verbose) << "Switching to focus list of size " << focus_list_.size() << std::endl;
         return phase2();
     }
 
@@ -102,12 +102,11 @@ verti FocusListLiftingStrategy::phase2()
     {
         if (focus_list_.empty())
         {
-            info("Focus list exhausted.");
+            mCRL2log(mcrl2::log::verbose) << "Focus list exhausted." << std::endl;
         }
         else
         {
-            info( "Maximum lift attempts (%lld) on focus list reached.",
-                max_lift_attempts_ );
+            mCRL2log(mcrl2::log::verbose) << "Maximum lift attempts (" << max_lift_attempts_ << ") on focus list reached." << std::endl;
             focus_list_.clear();
         }
 

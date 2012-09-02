@@ -39,7 +39,7 @@
 
 #include "mcrl2/utilities/command_line_interface.h"
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -181,6 +181,26 @@ std::string interface_description::option_descriptor::textual_description(
   }
 
   s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
+  if (m_argument.get() != 0 && m_argument->has_description())
+  {
+    std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    {
+      std::string arg;
+      if(i->get_short() != std::string())
+      {
+        arg += "'" + i->get_short() + "', ";
+      }
+      arg += "'" + i->get_long() + "' " + i->get_description();
+      bool is_default = m_argument->get_default() == i->get_long();
+      if(is_default)
+      {
+        arg += " (default)";
+      }
+      s << std::string(left_width+2, ' ')
+        << word_wrap(arg, right_width, std::string(left_width+4, ' ')) << std::endl;
+    }
+  }
 
   return s.str();
 }
@@ -228,94 +248,84 @@ std::string interface_description::option_descriptor::man_page_description() con
        )
     << std::endl;
 
+  if (m_argument.get() != 0 && m_argument->has_description())
+  {
+    std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    {
+      std::string arg;
+      if(i->get_short() != std::string())
+      {
+        arg += "'" + i->get_short() + "', ";
+      }
+      arg += "'" + i->get_long() + "' " + i->get_description();
+      bool is_default = m_argument->get_default() == i->get_long();
+      if(is_default)
+      {
+        arg += " (default)";
+      }
+
+      s << boost::xpressive::regex_replace(
+            boost::xpressive::regex_replace(word_wrap(arg, 80),
+                                                  boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")),
+            boost::xpressive::sregex(boost::xpressive::as_xpr('.')), std::string("\\&.")
+          )
+       << std::endl;
+    }
+  }
+
   return s.str();
 }
 
-std::ostream& interface_description::option_descriptor::xml_page_description(std::ostream& s, const bool is_standard) const
+std::ostream& interface_description::option_descriptor::xml_page_description(std::ostream& s, const bool is_standard, unsigned int indentation) const
 {
-  s << "<option standard=\"" << (is_standard?"yes":"no") << "\">";
+  s << std::string(indentation++, ' ') << "<option standard=\"" << (is_standard?"yes":"no") << "\">" << std::endl;
 
   if (m_short != '\0')
   {
-    s << "<short>" << m_short << "</short>" << std::endl;
+    s << std::string(indentation, ' ') << "<short>" << m_short << "</short>" << std::endl;
   }
 
-  s << "<long>" << m_long << "</long>" << std::endl;
+  s << std::string(indentation, ' ') << "<long>" << m_long << "</long>" << std::endl;
 
-  if (m_argument.get() != 0)
-  {
-    s << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") << "\">"
-      << m_argument->get_name() << "</option_argument>" << std::endl;
-  }
-
-  s << "<description>";
+  s << std::string(indentation++, ' ') << "<description>";
   // Produce output line by line, such that indentation provided in the description
   // can be preserved.
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
   for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
   {
-    s << *i << "<br/>";
+    s << *i << "<br/>" << std::endl;
   }
-  s << "</description>" << std::endl;
-  s << "</option>" << std::endl;
-
-  return s;
-}
-
-std::ostream& interface_description::option_descriptor::wiki_page_description(std::ostream& s) const
-{
-  s << "; ";
-
-  if (m_short != '\0')
-  {
-    s << "<tt>-" << std::string(1, m_short) << "</tt>";
-
-    if (m_argument.get() != 0)
-    {
-      if (m_argument->is_optional())
-      {
-        s << "[''" << m_argument->get_name() << "'']";
-      }
-      else
-      {
-        s << "''" << m_argument->get_name() << "''";
-      }
-    }
-
-    s << ", ";
-  }
-
-  s << "<tt>--" << m_long << "</tt>";
-
-  std::string description(m_description);
+  s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
   if (m_argument.get() != 0)
   {
-    s << ((m_argument->is_optional()) ?
-          "[=''" + m_argument->get_name() + "'']" :
-          "=''" + m_argument->get_name() + "''");
+    s << std::string(indentation++, ' ') << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") <<"\" type=\"" << (m_argument->get_type()) << "\">" << std::endl;
+    s << std::string(indentation, ' ') << "<name>" << m_argument->get_name() << "</name>" << std::endl;
 
-    boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
+    if(m_argument->has_description())
+    {
+      s << std::string(indentation++, ' ') << "<values>" << std::endl;
+      std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
+      for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+      {
+        bool is_default = m_argument->get_default() == i->get_long();
+        s << std::string(indentation++, ' ') << "<value default=\"" << (is_default?"yes":"no") << "\">" << std::endl;
+        if(i->get_short() != std::string())
+        {
+          s << std::string(indentation, ' ') << "<short>" << i->get_short() << "</short>" << std::endl;
+        }
+        s << std::string(indentation, ' ') << "<long>" << i->get_long() << "</long>" << std::endl;
+        s << std::string(indentation, ' ') << "<description>" << i->get_description() << "</description>" << std::endl;
+        s << std::string(--indentation, ' ') << "</value>" << std::endl;
+      }
+      s << std::string(--indentation, ' ') << "</values>" << std::endl;
+    }
+
+    s << std::string(--indentation, ' ') << "</option_argument>" << std::endl;
   }
 
-  boost::xpressive::mark_tag option(1);
-
-  // Following line:
-  //
-#if defined(MCRL2_DISABLE_BOOST_REGEX)
-  description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~boost::xpressive::_w >> (option= '-' >> -*boost::xpressive::as_xpr('-') >> +boost::xpressive::_w)), std::string("<tt>$1</tt>"));
-#else
-  //
-  // Should be equal to:
-  // -- begin --
-  //
-  //
-  boost::regex e("(--\\w*)|(-\\w*)");
-  description = boost::regex_replace(description, e, "<tt>$&</tt>");
-  // -- end --
-#endif // defined(MCRL2_DISABLE_BOOST_REGEX)
-
-  s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
+  s << std::string(--indentation, ' ') << "</option>" << std::endl;
 
   return s;
 }
@@ -353,7 +363,6 @@ make_optional_argument(std::string const& name, std::string const& default_value
 
   return interface_description::optional_argument< std::string >(name, default_value);
 }
-
 
 interface_description& interface_description::get_standard_description()
 {
@@ -482,7 +491,7 @@ std::string interface_description::textual_description() const
 
   s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
     << std::endl
-    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
+    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
 
   return s.str();
 }
@@ -607,7 +616,7 @@ std::string interface_description::man_page() const
     "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
     "There is NO WARRANTY, to the extent permitted by law.\n";
   s << ".SH \"SEE ALSO\"" << std::endl
-    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
+    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
 
   return s.str();
 }
@@ -627,21 +636,23 @@ std::map<std::string, std::string> interface_description::get_long_argument_with
 
 std::ostream& interface_description::xml_page(std::ostream& s) const
 {
-  s << "<tool>" << std::endl;
-  s << "  <name>" << m_name << "</name>" << std::endl;
-  s << "  <usage>" << m_usage << "</usage>" << std::endl;
-  s << "  <description>" << std::endl;
+  unsigned int indentation = 0;
+
+  s << std::string(indentation++, ' ') << "<tool>" << std::endl;
+  s << std::string(indentation, ' ')   << "<name>" << m_name << "</name>" << std::endl;
+  s << std::string(indentation, ' ')   << "<usage>" << m_usage << "</usage>" << std::endl;
+  s << std::string(indentation++, ' ') << "<description>" << std::endl;
 
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
   for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
   {
-    s << *i << "<br/>";
+    s << *i << "<br/>" << std::endl;
   }
-  s << "  </description>" << std::endl;
+  s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
   if (0 < m_options.size())
   {
-    s << "  <options>" << std::endl;
+    s << std::string(indentation++, ' ') << "<options>" << std::endl;
 
     for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
     {
@@ -649,88 +660,28 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
 
       if (option.m_show)
       {
-        option.xml_page_description(s);
+        option.xml_page_description(s, false, indentation);
       }
     }
   }
 
-  m_options.find("quiet")->second.xml_page_description(s);
-  m_options.find("verbose")->second.xml_page_description(s);
-  m_options.find("debug")->second.xml_page_description(s);
-  m_options.find("log-level")->second.xml_page_description(s);
-  m_options.find("help")->second.xml_page_description(s);
-  m_options.find("version")->second.xml_page_description(s);
+  m_options.find("quiet")->second.xml_page_description(s, true, indentation);
+  m_options.find("verbose")->second.xml_page_description(s, true, indentation);
+  m_options.find("debug")->second.xml_page_description(s, true, indentation);
+  m_options.find("log-level")->second.xml_page_description(s, true, indentation);
+  m_options.find("help")->second.xml_page_description(s, true, indentation);
+  m_options.find("version")->second.xml_page_description(s, true, indentation);
 
-  s << "  </options>" << std::endl;
+  s << std::string(--indentation, ' ') << "</options>" << std::endl;
 
   if (0 < m_known_issues.size())
   {
-    s << "  <known_issues>" << m_known_issues << "</known_issues>" << std::endl;
+    s << std::string(indentation, ' ') << "<known_issues>" << m_known_issues << "</known_issues>" << std::endl;
   }
-  s << "  <author>" << m_authors << "</author>" << std::endl;
-  s << "</tool>" << std::endl;
+  s << std::string(indentation, ' ') << "<author>" << m_authors << "</author>" << std::endl;
+  s << std::string(--indentation, ' ') << "</tool>" << std::endl;
 
-  return s;
-}
-
-std::ostream& interface_description::wiki_page(std::ostream& s) const
-{
-  s << "{{Hierarchy header}}" << std::endl
-    << std::endl;
-
-  s << "== Synopsis ==" << std::endl
-    << "<tt>'''" << m_name << "'''"
-    << mark_name_in_usage(m_usage, "''", "''") << "</tt>" << std::endl;
-  s << "== Short Description ==" << std::endl
-    << word_wrap(m_description, 80) << std::endl;
-
-  if (0 < m_options.size())
-  {
-    s << "== Options ==" << std::endl
-      << std::endl
-      << "''OPTION'' can be any of the following:" << std::endl;
-
-    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
-    {
-      option_descriptor const& option(i->second);
-
-      if (option.m_show)
-      {
-        option.wiki_page_description(s);
-      }
-    }
-  }
-
-  if (0 < m_options.size())
-  {
-    s << "Standard options:" << std::endl
-      << std::endl;
-  }
-  else
-  {
-    s << "''OPTION'' can be any of the following standard options:" << std::endl;
-  }
-  m_options.find("quiet")->second.wiki_page_description(s);
-  m_options.find("verbose")->second.wiki_page_description(s);
-  m_options.find("debug")->second.wiki_page_description(s);
-  m_options.find("log-level")->second.wiki_page_description(s);
-  m_options.find("help")->second.wiki_page_description(s);
-  m_options.find("version")->second.wiki_page_description(s);
-
-  if (!m_known_issues.empty())
-  {
-    s << "== Known Issues ==" << std::endl
-      << word_wrap(m_known_issues, 80) << std::endl;
-  }
-
-  s << "== Author ==" << std::endl
-    << std::endl
-    << "Written by " << m_authors << "." << std::endl
-    << std::endl;
-  s << "== Reporting bugs ==" << std::endl
-    << std::endl
-    << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
-    << "{{Hierarchy footer}}" << std::endl;
+  assert(indentation == 0);
 
   return s;
 }
@@ -784,7 +735,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
         if (d.m_options.find(option) == d.m_options.end())
         {
-          if (argument == "--generate-man-page" || argument == "--generate-wiki-page" || argument == "--generate-xml")
+          if (argument == "--generate-man-page" || argument == "--generate-xml")
           {
             // Special option
             m_options.insert(std::make_pair(argument.substr(2), ""));
@@ -1136,10 +1087,6 @@ void command_line_parser::process_default_options(interface_description& d)
   else if (m_options.count("generate-man-page"))
   {
     std::cout << d.man_page();
-  }
-  else if (m_options.count("generate-wiki-page"))
-  {
-    std::cout << d.wiki_page(std::cout);
   }
   else if (m_options.count("generate-xml"))
   {

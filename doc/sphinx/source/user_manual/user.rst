@@ -39,4 +39,5 @@ Contents
       :glob:
 
       articles/*
+      publications
 

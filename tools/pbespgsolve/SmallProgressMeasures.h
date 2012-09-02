@@ -12,7 +12,7 @@
 
 #include "ParityGameSolver.h"
 #include "LiftingStrategy.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 #include <vector>
 #include <utility>
 
@@ -70,7 +70,7 @@ private:
     two-way approach to propagate information from the dual game, and the MPI
     recursive solver.
 */
-class SmallProgressMeasures : public Abortable, public virtual Logger
+class SmallProgressMeasures : public Abortable
 {
 public:
     SmallProgressMeasures( const ParityGame &game, ParityGame::Player player,
@@ -239,7 +239,7 @@ struct SetToTopIterator
 /*! A parity game solver based on Marcin Jurdzinski's small progress measures
     algorithm, with pluggable lifting heuristics. */
 class SmallProgressMeasuresSolver
-    : public ParityGameSolver, public virtual Logger
+    : public ParityGameSolver
 {
 public:
     SmallProgressMeasuresSolver( const ParityGame &game,

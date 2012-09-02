@@ -77,7 +77,8 @@ static void LZmakeToken(char c, unsigned int offset, unsigned int length, LZtoke
   if (length<=1)
   {
     token[0]=c;
-    token[1]='\0';
+    token[1]=0;
+    token[2]=0;
   }
   else
   {

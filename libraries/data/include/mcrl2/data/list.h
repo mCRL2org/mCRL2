@@ -17,10 +17,7 @@
 
 #include "boost/utility.hpp"
 
-// Workaround for OS X with Apples patched gcc 4.0.1
-#undef nil
-
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/function_symbol.h"
@@ -67,20 +64,20 @@ namespace mcrl2 {
       /// \brief Generate identifier []
       /// \return Identifier []
       inline
-      core::identifier_string const& nil_name()
+      core::identifier_string const& empty_name()
       {
-        static core::identifier_string nil_name = core::detail::initialise_static_expression(nil_name, core::identifier_string("[]"));
-        return nil_name;
+        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("[]"));
+        return empty_name;
       }
 
       /// \brief Constructor for function symbol []
       /// \param s A sort expression
-      /// \return Function symbol nil
+      /// \return Function symbol empty
       inline
-      function_symbol nil(const sort_expression& s)
+      function_symbol empty(const sort_expression& s)
       {
-        function_symbol nil(nil_name(), list(s));
-        return nil;
+        function_symbol empty(empty_name(), list(s));
+        return empty;
       }
 
 
@@ -88,11 +85,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching []
       inline
-      bool is_nil_function_symbol(const atermpp::aterm_appl& e)
+      bool is_empty_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == nil_name();
+          return function_symbol(e).name() == empty_name();
         }
         return false;
       }
@@ -162,7 +159,7 @@ namespace mcrl2 {
       function_symbol_vector list_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(nil(s));
+        result.push_back(empty(s));
         result.push_back(cons_(s));
 
         return result;
@@ -751,31 +748,31 @@ namespace mcrl2 {
         variable vp("p",sort_pos::pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(nil(s), cons_(s, vd, vs)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(nil(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(nil(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
-        result.push_back(data_equation(variable_list(), count(s, nil(s)), sort_nat::c0()));
+        result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
-        result.push_back(data_equation(atermpp::make_vector(vd), snoc(s, nil(s), vd), cons_(s, vd, nil(s))));
+        result.push_back(data_equation(atermpp::make_vector(vd), snoc(s, empty(s), vd), cons_(s, vd, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, nil(s), vs), vs));
+        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, empty(s), vs), vs));
         result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, vs, nil(s)), vs));
+        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, vs, empty(s)), vs));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), element_at(s, cons_(s, vd, vs), sort_nat::c0()), vd));
         result.push_back(data_equation(atermpp::make_vector(vd, vp, vs), element_at(s, cons_(s, vd, vs), sort_nat::cnat(vp)), element_at(s, vs, sort_nat::pred(vp))));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), head(s, cons_(s, vd, vs)), vd));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), tail(s, cons_(s, vd, vs)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd), rhead(s, cons_(s, vd, nil(s))), vd));
+        result.push_back(data_equation(atermpp::make_vector(vd), rhead(s, cons_(s, vd, empty(s))), vd));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd), rtail(s, cons_(s, vd, nil(s))), nil(s)));
+        result.push_back(data_equation(atermpp::make_vector(vd), rtail(s, cons_(s, vd, empty(s))), empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
         return result;
       }

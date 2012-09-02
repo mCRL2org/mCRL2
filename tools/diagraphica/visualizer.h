@@ -11,29 +11,39 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include <QtCore>
+#include <QtGui>
+#include <QGLWidget>
+
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+# include <GLUT/glut.h>
 #else
-#ifdef WIN32
-#include <windows.h>
-#endif
-#include <GL/glu.h>
+# ifdef WIN32
+#  define NOMINMAX
+#  include <windows.h>
+# endif
+# include <GL/glu.h>
 #endif
 #include <cstddef>
-#include "colleague.h"
-#include "glcanvas.h"
 #include "graph.h"
 #include "visutils.h"
 
-class Visualizer : public Colleague
+class Visualizer : public QGLWidget
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Visualizer(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
-    virtual ~Visualizer();
+      QWidget *parent,
+      Graph *m_graph);
+    virtual ~Visualizer() {}
+
+    virtual void paintGL();
+
+    QSizeF worldSize();
+    double pixelSize();
+    QPointF worldCoordinate(QPointF deviceCoordinate);
 
     // -- set functions ---------------------------------------------
     virtual void setClearColor(
@@ -41,51 +51,34 @@ class Visualizer : public Colleague
       const double& g,
       const double& b);
 
-    // -- helper functions ------------------------------------------
-    virtual void printMouseVariables();
-
     // -- visualization functions -----------------------------------
     virtual void visualize(const bool& inSelectMode) = 0;
     virtual void setGeomChanged(const bool& flag);
     virtual void setDataChanged(const bool& flag);
-    /*
-    virtual void animate() = 0;
-    */
 
     // -- event handlers --------------------------------------------
     virtual void handleSizeEvent();
 
-    virtual void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseRgtDClickEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseWheelIncEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseWheelDecEvent(
-      const int& x,
-      const int& y);
-    virtual void handleMouseEnterEvent();
-    virtual void handleMouseLeaveEvent();
-    virtual void handleKeyDownEvent(const int& keyCode);
-    virtual void handleKeyUpEvent(const int& keyCode);
+    virtual void handleMouseEvent(QMouseEvent* e);
+    virtual void handleWheelEvent(QWheelEvent* /*e*/) { }
+    virtual void handleMouseEnterEvent() { }
+    virtual void handleMouseLeaveEvent() { }
+    virtual void handleKeyEvent(QKeyEvent* e);
+
+    virtual void enterEvent(QEvent *event) { handleMouseEnterEvent(); QGLWidget::enterEvent(event); }
+    virtual void leaveEvent(QEvent *event) { handleMouseLeaveEvent(); QGLWidget::leaveEvent(event); }
+    virtual void keyPressEvent(QKeyEvent *event) { handleKeyEvent(event); QGLWidget::keyPressEvent(event); }
+    virtual void keyReleaseEvent(QKeyEvent *event) { handleKeyEvent(event); QGLWidget::keyReleaseEvent(event); }
+    virtual void wheelEvent(QWheelEvent *event) { handleWheelEvent(event); QGLWidget::wheelEvent(event); }
+    virtual void mouseMoveEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseMoveEvent(event); }
+    virtual void mousePressEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mousePressEvent(event); }
+    virtual void mouseReleaseEvent(QMouseEvent *event) { handleMouseEvent(event); QGLWidget::mouseReleaseEvent(event); }
+    virtual void resizeEvent(QResizeEvent *event) { handleSizeEvent(); QGLWidget::resizeEvent(event); }
+
+    QSize sizeHint() const { return QSize(200,200); } // Reimplement to change preferred size
+  public slots:
+    void updateGL(bool inSelectMode);
+    void updateGL() { updateGL(false); } // Overloaded virtual; refrain compiler from complaining
 
   protected:
     // -- protected utility functions -------------------------------
@@ -110,53 +103,32 @@ class Visualizer : public Colleague
       GLuint buffer[]) = 0;
 
     // -- mouse -----------------------------------------------------
-    enum
-    {
-      MSE_BUTTON_UP,
-      MSE_BUTTON_DOWN,
-      MSE_SIDE_LFT,
-      MSE_SIDE_MID,
-      MSE_SIDE_RGT,
-      MSE_CLICK_SINGLE,
-      MSE_CLICK_DOUBLE,
-      MSE_DRAG_TRUE,
-      MSE_DRAG_FALSE
-    };
-    int mouseButton;
-    int mouseSide;
-    int mouseClick;
-    int mouseDrag;
-    double xMouseDragBeg;
-    double yMouseDragBeg;
-    double xMouseCur;
-    double yMouseCur;
-    double xMousePrev;
-    double yMousePrev;
-    int keyCodeDown;
+
+    bool m_inSelectMode;
+
+    QMouseEvent m_lastMouseEvent;   // The latest received event
+    bool m_mouseDrag;               // The mouse is being dragged
+    bool m_mouseDragReleased;       // The cursor was released after dragging
+    QPoint m_mouseDragStart;        // The position where the drag started, only valid if (m_mouseDrag or m_mouseDragReleased)
+
+    Qt::Key m_lastKeyCode;
 
     bool showMenu;
 
-    // -- data members ----------------------------------------------
-    ColorRGB  clearColor;
+    QColor clearColor;
 
-    Graph*    graph;  // association
-    GLCanvas* canvas; // association
+    Graph *m_graph;
 
-    // -- flags -----------------------------------------------------
     bool geomChanged; // canvas resized
     bool dataChanged; // data has changed
 
-    // -- character textures ----------------------------------------
-    bool    texCharOK;
-    GLuint  texCharId[CHARSETSIZE];
+    bool texCharOK;
+    GLuint texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH];
 
-    // -- cushion texture -------------------------------------------
-    bool    texCushOK;
-    GLuint  texCushId;
-    float   texCush[CUSHSIZE];
+    bool texCushOK;
+    GLuint texCushId;
+    float texCush[CUSHSIZE];
 };
 
 #endif
-
-// -- end -----------------------------------------------------------

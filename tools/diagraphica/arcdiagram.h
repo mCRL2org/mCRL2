@@ -15,59 +15,42 @@
 #ifndef ARCDIAGRAM_H
 #define ARCDIAGRAM_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
 #include <map>
 #include <vector>
-#include <wx/timer.h>
+#include <QTimer>
 #include "diagram.h"
 #include "graph.h"
+#include "settings.h"
 #include "utils.h"
 #include "visualizer.h"
 #include "visutils.h"
 
-class ArcDiagram : public wxEvtHandler, public Visualizer
+
+enum RenderMode
 {
+  HQRender,
+  LQRender,
+  HitRender
+};
+
+class ArcDiagram : public Visualizer
+{
+  Q_OBJECT
   public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
-      Mediator* m,
-      Graph* g,
-      GLCanvas* c);
+        QWidget *parent,
+        Settings* s,
+        Graph* g);
     virtual ~ArcDiagram();
 
-    // -- get functions ---------------------------------------------
-    static ColorRGB getColorClr();
-    static ColorRGB getColorTxt();
-    static int getSizeTxt();
-    static double getIntervAnim();
-    static bool getShowTree();
-    static bool getAnnotateTree();
-    static int getColorMap();
-    static bool getShowBarTree();
-    static double getMagnBarTree();
-    static bool getShowLeaves();
-    static bool getShowBundles();
-    static ColorRGB getColorBundles();
-    static double getTrspBundles();
-
     void getAttrsTree(std::vector< size_t > &idcs);
-
-    // -- set functions ---------------------------------------------
-    static void setColorClr(const ColorRGB& col);
-    static void setColorTxt(const ColorRGB& col);
-    static void setSizeTxt(const int& sze);
-    static void setIntervAnim(const int& itv);
-    static void setShowTree(const bool& shw);
-    static void setAnnotateTree(const bool& shw);
-    static void setColorMap(const int& colMap);
-    static void setShowBarTree(const bool& shw);
-    static void setMagnBarTree(const double& val);
-    static void setShowLeaves(const bool& shw);
-    static void setShowBundles(const bool& shw);
-    static void setColorBundles(const ColorRGB& col);
-    static void setTrspBundles(const double& trsp);
 
     void setAttrsTree(const std::vector< size_t > idcs);
 
@@ -75,20 +58,15 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void hideAllDiagrams();
 
     void markLeaf(
-      const size_t& leafIdx,
-      ColorRGB& col);
+        const size_t& leafIdx,
+        QColor col);
     void unmarkLeaves();
     void markBundle(const size_t& idx);
     void unmarkBundles();
 
-    void handleSendDgrmSglToSiml();
-    void handleSendDgrmSglToTrace();
-    void handleSendDgrmSetToTrace();
-    void handleSendDgrmSglToExnr();
-    void handleSendDgrmSetToExnr();
-
     // -- visualization functions  ----------------------------------
     void visualize(const bool& inSelectMode);
+    void visualizeParts(const bool& inSelectMode);
     void drawBundles(const bool& inSelectMode);
     void drawLeaves(const bool& inSelectMode);
     void drawTree(const bool& inSelectMode);
@@ -98,34 +76,22 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void drawDiagrams(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseLftDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseLftDClickEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtDownEvent(
-      const int& x,
-      const int& y);
-    void handleMouseRgtUpEvent(
-      const int& x,
-      const int& y);
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
+
+    void handleMouseEvent(QMouseEvent* e);
+
+    QSize sizeHint() const { return QSize(600,600); }
 
     void updateDiagramData();
+
+  signals:
+    void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
+    void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
+    void clickedCluster(Cluster *cluster);
 
   protected:
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& col);
+    QColor calcColor(size_t iter, size_t numr);
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
 
@@ -133,14 +99,14 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void calcSettingsBundles();
     void calcSettingsTree();
     void calcPositionsTree(
-      Cluster* c,
-      const size_t& maxLvl,
-      const double& itvHgt);
+        Cluster* c,
+        const size_t& maxLvl,
+        const double& itvHgt);
     void calcSettingsBarTree();
     void calcPositionsBarTree(
-      Cluster* c,
-      const double& yBot,
-      const double& height);
+        Cluster* c,
+        const double& yBot,
+        const double& height);
     void calcSettingsDiagram();
     void updateMarkBundles();
 
@@ -152,17 +118,20 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     void clearSettingsDiagram();
 
     // -- utility event handlers ------------------------------------
-    void onTimer(wxTimerEvent& e);
+  protected slots:
+    void animate();
+    void clustersChanged();
 
+  protected:
     void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(
-      const size_t& i,
-      const size_t& j);
+        const size_t& i,
+        const size_t& j);
     void handleHoverBundle(const size_t& bndlIdx);
     void handleHoverBarTree(
-      const int& i,
-      const int& j);
+        const int& i,
+        const int& j);
 
     void handleShowDiagram(const size_t& dgrmIdx);
     void handleDragDiagram();
@@ -177,28 +146,14 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
 
     // -- hit detection ---------------------------------------------
     void processHits(
-      GLint hits,
-      GLuint buffer[]);
+        GLint hits,
+        GLuint buffer[]);
 
     // -- static variables ------------------------------------------
-
-    // general
-    static ColorRGB colClr;
-    static ColorRGB colTxt;
-    static int      szeTxt;
-    // cluster tree
-    static bool showTree;
-    static bool annotateTree;
-    static int colorMap;
-    // bar tree
-    static bool showBarTree;
-    static double magnBarTree;
-    // arc diagram
-    static bool showLeaves;
-    static bool showBundles;
-    static ColorRGB colBundles;
-
     // -- data members ----------------------------------------------
+    Settings* settings;
+
+    QPoint m_lastMousePos;
 
     // vis settings bundles
     std::vector< Position2D > posBundles;
@@ -237,11 +192,10 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     size_t prevFrameIdxClust;
     size_t currFrameIdxClust;
     size_t nextFrameIdxClust;
-    std::map< size_t, std::vector< ColorRGB > > markLeaves;
+    std::map< size_t, std::vector< QColor > > markLeaves;
 
     // animation
-    wxTimer* timerAnim;
-    static int itvAnim;
+    QTimer m_animationTimer;
 
     // -- constants -------------------------------------------------
     enum
@@ -265,9 +219,6 @@ class ArcDiagram : public wxEvtHandler, public Visualizer
     static int MAX_RAD_HINT_PX; // radius cannot be larger than this
     static int SEGM_HINT_HQ;
     static int SEGM_HINT_LQ;
-
-    // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

@@ -16,6 +16,7 @@
 #include <iterator>
 #include <utility>
 #include <set>
+#include <cstdio>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
@@ -30,7 +31,6 @@
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -38,8 +38,6 @@
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-
-#include <boost/filesystem/operations.hpp>
 
 using namespace mcrl2;
 using atermpp::make_vector;
@@ -163,12 +161,12 @@ void test_pbes()
   }
   catch (mcrl2::runtime_error e)
   {
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    remove(filename.c_str());
   }
   filename = "pbes_test_file.pbes";
   p.save(filename);
   p.load(filename);
-  boost::filesystem::remove(boost::filesystem::path(filename));
+  remove(filename.c_str());
   core::garbage_collect();
 }
 

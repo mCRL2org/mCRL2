@@ -50,6 +50,7 @@ lps::action_label_list
 lps::action_label_vector
 lps::multi_action
 lps::process_initializer
+lps::state
 pbes_system::fixpoint_symbol
 pbes_system::pbes<>
 pbes_system::pbes_equation

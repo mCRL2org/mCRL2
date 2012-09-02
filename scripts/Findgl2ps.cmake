@@ -19,5 +19,15 @@ INCLUDE(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(gl2ps DEFAULT_MSG GL2PS_LIBRARY GL2PS_INCLUDE_DIRS )
 
+##---------------------------------------------------
+## Find mlib / required by gl2ps to resolve undefined symbols
+##---------------------------------------------------
+if(UNIX)
+  find_package( mlib )
+  if(NOT mlib_FOUND )
+    message( FATAL_ERROR "Package 'mlib' not found (required for using gl2ps).")
+  endif(NOT mlib_FOUND )
+endif(UNIX)
+
 MARK_AS_ADVANCED( GL2PS_LIBRARY GL2PS_INCLUDE_DIRS )
 

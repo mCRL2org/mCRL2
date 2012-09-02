@@ -13,6 +13,7 @@
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/state.h"
 #include "mcrl2/lps/translate_user_notation.h"
 
 #include "mcrl2/modal_formula/find.h"
@@ -38,6 +39,7 @@ std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_la
 std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
+std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
 lps::action normalize_sorts(const lps::action& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action >(x, dataspec); }
 lps::action_label_list normalize_sorts(const lps::action_label_list& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action_label_list >(x, dataspec); }
 void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }

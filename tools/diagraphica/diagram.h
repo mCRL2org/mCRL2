@@ -11,98 +11,89 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <vector>
-#include "colleague.h"
-#include "glcanvas.h"
 #include "visutils.h"
 #include "shape.h"
 
-class Diagram : public Colleague
+class Diagram : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
-    Diagram(Mediator* m);
-    virtual ~Diagram();
+    Diagram(QObject *parent = 0);
+    Diagram &operator=(const Diagram &other);
 
     // -- set functions ---------------------------------------------
-    void addShape(Shape* s);
-    void moveShapeToFront(const size_t& idx);
-    void moveShapeToBack(const size_t& idx);
-    void moveShapeForward(const size_t& idx);
-    void moveShapeBackward(const size_t& idx);
+    void addShape(Shape* s)     { m_shapes.append(s); }
+    void moveShapeToFront(int index);
+    void moveShapeToBack(int index);
+    void moveShapeForward(int index);
+    void moveShapeBackward(int index);
 
-    void setShowGrid(const bool& flag);
-    void setSnapGrid(const bool& flag);
+    void setShowGrid(bool flag) { m_showGrid = flag; }
+    void setSnapGrid(bool flag) { m_snapGrid = flag; }
 
     // -- get functions ---------------------------------------------
-    size_t getSizeShapes();
-    Shape* getShape(const size_t& idx);
+    int shapeCount() const { return m_shapes.size(); }
+    Shape* shape(int index) { return m_shapes[index]; }
+    const Shape* shape(int index) const { return m_shapes[index]; }
 
-    bool getSnapGrid();
-    double getGridInterval(GLCanvas* canvas);
-    double getAngleInterval();
-    void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom);
+    bool snapGrid()                       { return m_snapGrid; }
+    double gridInterval(double pixelSize) { return (2.0-(2.0*pixelSize*SIZE_BORDER))/(double)GRID_NUM_INTERV_HINT; }
+    double angleInterval()                { return 360.0/(double)ANGL_NUM_INTERV_HINT; }
+    QRectF gridCoordinates()               { return m_gridCoordinates; }
 
     // -- clear functions -------------------------------------------
-    void deleteShape(const size_t& idx);
+    void removeShape(int index);
 
     // -- vis functions ---------------------------------------------
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas,
+      double pixelSize,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs);
     void visualize(
       const bool& inSelectMode,
-      GLCanvas* canvas,
+      double pixelSize,
       const std::vector< Attribute* > attrs,
       const std::vector< double > attrValIdcs,
-      const double& pix);
-    void visualize(
-      const bool& inSelectMode,
-      GLCanvas* canvas,
-      const double& opacity,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs);
-
+      double opacity);
 
   protected:
     // -- private utility functions ---------------------------------
-    void initGridSettings();
 
     void drawAxes(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawBorder(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
+    void drawBorderFlush(
+      const bool& inSelectMode);
     void drawBorderFlush(
       const bool& inSelectMode,
-      GLCanvas* canvas);
-    void drawBorderFlush(
-      const bool& inSelectMode,
-      GLCanvas* canvas,
       const double& opacity);
     void drawGrid(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
     void drawShapes(
       const bool& inSelectMode,
-      GLCanvas* canvas);
+      double pixelSize);
 
     // -- data members ----------------------------------------------
-    std::vector< Shape* > shapes; // composition
+    QList<Shape*> m_shapes; // composition
 
-    bool   showGrid;
-    bool   snapGrid;
-    double gridXLeft;
-    double gridXRight;
-    double gridYTop;
-    double gridYBottom;
+    bool  m_showGrid;
+    bool  m_snapGrid;
+    QRectF m_gridCoordinates;
 
     // constants
     int SIZE_BORDER;

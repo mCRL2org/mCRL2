@@ -1,19 +1,44 @@
 ===============================================================================
-Changes between toolset releases 201102.0 and 201202.1:
+Changes between toolset releases 201202.0 and 201207.0:
 ===============================================================================
 
-Bugs fixed:
-   - #1000: unused quantified variables are removed; improving the treatment
-     of expressions like forall x: Set(Bool) . true in the rewriters.
-   - #993: be less agressive in renaming bound variables. This reduces the
-     number of cases in which the jitty and jittyc rewriters give different
-     results. In general this improves state space generation in the presence
-     of lambda abstractions and quantifications.
-   - #994: install man page for mcrl2compilerewriter.
-   - #1001: fix crash bug in mcrl2xi.
-   - Fix possible null pointer dereference on error path in jittyc rewriter.
-   - Fix generation of different ATerms for the same term. Sometimes, the number
-     of states generated was too large due to this issue.
+Libraries:
+   - Header files are shown in IDEs like Visual Studio, XCode and QTCreator
+   - LTS library: removed support for the SVC format.
+   - Fixed installation path of dparser headers
+     (include/dparser instead of include)
+   - Remove unused quantifier variables when enumerating (r10356)
+   - Improved performance of alphabet reductions.
+   - Reimplemented nextstate generation on top of the LPS library.
+   - Added an interface to the LTSmin toolset for the PBES library.
+   - Cleaned up the ATerm library to remove unused functionality.
+   - Improved performance of parsers.
+   
+Tool changes:
+   - The graphical tools mcrl2-gui, ltsgraph, ltsview, diagraphica, lpsxsim
+     and mcrl2xi have been ported to QT, the wxWidgets versions have been
+     removed.
+   - lps2lts has been extended with the options --cached and --prune. The first
+     option enables caching of intermediate results, and gives rise to a
+     performance improvement in most cases. Note that in some cases this comes
+     with a significant memory penalty. The second argument uses a decision tree
+     such that, given a value of a parameter, only a subset of summands needs
+     to be considered.
+   - lps2lts, lpssim, lpsxsim, lps2torx use the new implementation of nextstate
+     generation.
+   - Added implementations of signature based algorithms for bisimulation,
+     braching bisimulation and divergence preserving branching bisimulation to
+     ltsconvert.
+   - The number of variables used internally for quantifier enumeration is
+     configurable using the -Q/--qlimit flag for all tools using the rewriter.
+     By default this value is set to 1000.
+   - Improved performance of lts2pbes.
+
+The following tools have been removed:
+   - chi2mcrl2
+   - grapemcrl2
+   - ltsmin
+   - lysa2mcrl2
 
 ===============================================================================
 Changes between toolset releases 201107.1 and 201202.0:

@@ -13,7 +13,7 @@
 #define MCRL2_CORE_PRINT_FORMAT_H
 
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -39,6 +39,46 @@ std::string pp_format_to_string(const print_format_type pp_format)
     default:
       throw mcrl2::runtime_error("Unknown pretty print format");
   }
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const print_format_type& pp_format)
+{
+  os << pp_format_to_string(pp_format);
+  return os;
+}
+
+inline
+print_format_type parse_pp_format(const std::string& s)
+{
+  if(s == "default")
+  {
+    return print_default;
+  }
+  else if(s == "internal")
+  {
+    return print_internal;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Unknown pretty print format " + s);
+  }
+}
+
+inline
+std::istream& operator>>(std::istream& is, print_format_type& f)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    f = parse_pp_format(s);
+  }
+  catch(mcrl2::runtime_error &)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
 }
 
 } // namespace core

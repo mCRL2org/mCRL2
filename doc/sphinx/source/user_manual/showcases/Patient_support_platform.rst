@@ -11,23 +11,23 @@ The software was designed from scratch, modeled and validated using mCRL2 and
 implemented in Python. The software was embedded in an industrial medical
 device.
 
-The device is a Patient Support Platform. During an examination in an
-`MRI <http://en.wikipedia.org/wiki/Magnetic_resonance_imaging>`_ scanner, a patient
+The device is a Patient Support Platform. During an examination in an `MRI
+<http://en.wikipedia.org/wiki/Magnetic_resonance_imaging>`_ scanner, a patient
 lies on the upper part of the Platform (called ''carrier''). The movements of
 the carrier are controlled by the distributed software system. The software
 controls the motors, brakes and other hardware in the Patient Support Platform
 and it implements safety requirements to avoid injuring the patient or the
 operator of the scanner.
 
-A priori four essential requirements were formulated. As the complexity of
-the model was substantial, the analysis of the validity of these requirements on
-the model could only be accomplished, after the implementation in python 
-was finished. Three of the requirements turned out to hold, but unfortunately, one
-requirement did not turn out to be true in the mCRL2 model. 
-This failing requirement indicated a design error in the communication protocol of the new software,
-which could also be shown to exist in the implementation. However, it was considered
-unlikely to occur in practise, as it was expected that it would only show up
-when components run at substantial different speeds, and even then
+A priori four essential requirements were formulated. As the complexity of the
+model was substantial, the analysis of the validity of these requirements on the
+model could only be accomplished, after the implementation in python was
+finished. Three of the requirements turned out to hold, but unfortunately, one
+requirement did not turn out to be true in the mCRL2 model. This failing
+requirement indicated a design error in the communication protocol of the new
+software, which could also be shown to exist in the implementation. However, it
+was considered unlikely to occur in practise, as it was expected that it would
+only show up when components run at substantial different speeds, and even then
 the undesired internal state causing the problem would exist for only a short
 while. 
 
@@ -131,42 +131,35 @@ The software of the Motion Controller and Convertor was designed and modeled
 formally in mCRL2. The specification of the host system was based on its
 interface implementation (available in C++ code).
 
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Deadlock, reachability and safety properties were validated by explicit
-state-space generation (breadth-first search) and applying modal formulae.
+*Type of verification*
+  Deadlock, reachability and safety properties were validated by explicit
+  state-space generation (breadth-first search) and applying modal formulae.
 
-Data size
-^^^^^^^^^
-The state space of the model, without hiding any transitions, is 45 million states.
+*Data size*
+  The state space of the model, without hiding any transitions, is 45 million
+  states.
 
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Entire state space generation was performed on an 8-way AMD 64 bit machine with 128GB RAM.
+*Equipment (computers, CPU, RAM)*
+  Entire state space generation was performed on an 8-way AMD 64 bit machine
+  with 128GB RAM.
 
-The modal formulas were checked on a 32 bit machine with 8GB RAM.
+  The modal formulas were checked on a 32 bit machine with 8GB RAM.
 
-Models
-^^^^^^
-The model is available via Jan Friso Groote. Note that the model was updated
-after the final report of the project was written.
+*Models*
+  The model is available via Jan Friso Groote. Note that the model was updated
+  after the final report of the project was written.
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Jan Friso Groote, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    -   * Tom Engels (Student, TU/e, Eindhoven)
-        * Bas Kloet (Student, TU/e, Eindhoven)
-        * John van der Koijk (Supervisor, Philips Medical Systems, Best)
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - Philips Medical Systems, Best, Netherlands
-  * - **Project**
-    - The project was carried out by two students during their internship at Philips Medical Systems, Best, Netherlands.
-  * - **Time period**
-    - The project started in July 2006 and was successfully finished in October 2006. Some final adaptation to the model were made in Februari and March 2007.
+*Organizational context*
+  :Contact person: Jan Friso Groote, Technische Universiteit Eindhoven, The 
+                   Netherlands.
+  :Other people involved: - Tom Engels (Student, TU/e, Eindhoven)
+                          - Bas Kloet (Student, TU/e, Eindhoven)
+                          - John van der Koijk (Supervisor, Philips Medical 
+                            Systems, Best)
+  :Institution: Technische Universiteit Eindhoven, The Netherlands.
+  :Industrial partner: Philips Medical Systems, Best, Netherlands
+  :Project: The project was carried out by two students during their internship 
+            at Philips Medical Systems, Best, Netherlands.
+  :Time period: The project started in July 2006 and was successfully finished 
+                in October 2006. Some final adaptation to the model were made in
+                Februari and March 2007.

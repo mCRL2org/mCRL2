@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,547 +6,139 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "wx.hpp" // precompiled headers
-
 #include "settingsdialog.h"
-#include <wx/notebook.h>
-#include <wx/radiobut.h>
-#include <wx/spinctrl.h>
-#include <wx/statline.h>
-#include "mcrl2/utilities/colorbutton.h"
-#include "enums.h"
-#include "glcanvas.h"
-#include "settings.h"
-#include "mathutils.h"
-#include "ids.h"
-#include "rgb_color.h"
+#include <QColorDialog>
 
-using mcrl2::utilities::wx::wxColorButton;
-
-using namespace IDs;
-
-BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
-  EVT_BUTTON(myID_BACKGROUND_CLR,SettingsDialog::onBackgroundClrButton)
-  EVT_BUTTON(myID_DOWN_EDGE_CLR,SettingsDialog::onDownEdgeClrButton)
-  EVT_BUTTON(myID_INTERPOLATE_CLR_1,SettingsDialog::onInterpolateClr1Button)
-  EVT_BUTTON(myID_INTERPOLATE_CLR_2,SettingsDialog::onInterpolateClr2Button)
-  EVT_BUTTON(myID_MARK_CLR,SettingsDialog::onMarkClrButton)
-  EVT_BUTTON(myID_STATE_CLR,SettingsDialog::onStateClrButton)
-  EVT_BUTTON(myID_UP_EDGE_CLR,SettingsDialog::onUpEdgeClrButton)
-  EVT_BUTTON(myID_SIM_CURR_CLR,SettingsDialog::onSimCurrClrButton)
-  EVT_BUTTON(myID_SIM_POS_CLR,SettingsDialog::onSimPosClrButton)
-  EVT_BUTTON(myID_SIM_SEL_CLR,SettingsDialog::onSimSelClrButton)
-  EVT_BUTTON(myID_SIM_PREV_CLR,SettingsDialog::onSimPrevClrButton)
-  EVT_SPINCTRL(myID_BRANCH_ROTATION,SettingsDialog::onBranchRotationSpin)
-  EVT_SPINCTRL(myID_STATE_SIZE,SettingsDialog::onStateSizeSpin)
-  EVT_SPINCTRL(myID_CLUSTER_HEIGHT,SettingsDialog::onClusterHeightSpin)
-  EVT_SPINCTRL(myID_BRANCH_TILT,SettingsDialog::onBranchTiltSpin)
-  EVT_SPINCTRL(myID_QUALITY,SettingsDialog::onQualitySpin)
-  EVT_SPINCTRL(myID_TRANSPARENCY,SettingsDialog::onTransparencySpin)
-  EVT_CHECKBOX(myID_LONG_INTERPOLATION,SettingsDialog::onLongInterpolationCheck)
-  EVT_CHECKBOX(myID_NAV_SHOW_BACKPOINTERS,
-               SettingsDialog::onNavShowBackpointersCheck)
-  EVT_CHECKBOX(myID_NAV_SHOW_STATES,SettingsDialog::onNavShowStatesCheck)
-  EVT_CHECKBOX(myID_NAV_SHOW_TRANSITIONS,
-               SettingsDialog::onNavShowTransitionsCheck)
-  EVT_CHECKBOX(myID_NAV_SMOOTH_SHADING,SettingsDialog::onNavSmoothShadingCheck)
-  EVT_CHECKBOX(myID_NAV_LIGHTING,SettingsDialog::onNavLightingCheck)
-  EVT_CHECKBOX(myID_NAV_TRANSPARENCY,SettingsDialog::onNavTransparencyCheck)
-  EVT_RADIOBUTTON(myID_ITERATIVE, SettingsDialog::onIterativeRadio)
-  EVT_RADIOBUTTON(myID_CYCLIC, SettingsDialog::onCyclicRadio)
-  EVT_RADIOBUTTON(myID_CONES_STYLE, SettingsDialog::onConesRadio)
-  EVT_RADIOBUTTON(myID_TUBES_STYLE, SettingsDialog::onTubesRadio)
-  EVT_CHECKBOX(myID_FSM_STYLE,SettingsDialog::onFsmStyleCheck)
-  EVT_RADIOBUTTON(myID_SP_STATEPOS, SettingsDialog::onSinglePassRadio)
-  EVT_RADIOBUTTON(myID_MP_STATEPOS, SettingsDialog::onMultiPassRadio)
-END_EVENT_TABLE()
-
-SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
-  : wxDialog(parent,wxID_ANY,wxT("Settings"),wxDefaultPosition)
+ColorButtonHandler::ColorButtonHandler(QPushButton *button, Settings::SettingColor &setting):
+  QObject(button),
+  m_button(button),
+  m_setting(&setting)
 {
-  glCanvas = glc;
-  settings = ss;
-
-  settings->subscribe(ClusterHeight,this);
-
-  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-  wxNotebook* nb = new wxNotebook(this,wxID_ANY);
-  wxPanel* parPanel = new wxPanel(nb,wxID_ANY);
-  wxPanel* clrPanel = new wxPanel(nb,wxID_ANY);
-  wxPanel* simPanel = new wxPanel(nb,wxID_ANY);
-  wxPanel* pfmPanel = new wxPanel(nb,wxID_ANY);
-  wxPanel* algPanel = new wxPanel(nb,wxID_ANY);
-
-  setupParametersPanel(parPanel);
-  setupColourPanel(clrPanel);
-  setupSimulationPanel(simPanel);
-  setupAlgorithmsPanel(algPanel);
-  setupPerformancePanel(pfmPanel);
-
-  nb->AddPage(parPanel,wxT("Parameters"), true);
-  nb->AddPage(clrPanel,wxT("Colours"), false);
-  nb->AddPage(simPanel,wxT("Simulation"), false);
-  nb->AddPage(algPanel,wxT("Algorithms"), false);
-  nb->AddPage(pfmPanel,wxT("Performance"), false);
-
-  sizer->Add(nb,0,wxEXPAND|wxALL,5);
-  SetSizerAndFit(sizer);
-  Layout();
-  SetSize(wxSize(400,-1));
+  connect(m_button, SIGNAL(clicked()), this, SLOT(clicked()));
+  connect(m_setting, SIGNAL(changed(QColor)), this, SLOT(setColor()));
+  setColor();
 }
 
-void SettingsDialog::setupParametersPanel(wxPanel* panel)
+void ColorButtonHandler::clicked()
 {
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int bd = 5;
-  wxSize spinSize(65,-1);
-  wxSize sliderSize(200,-1);
-  long spinStyle = wxSP_ARROW_KEYS;
-
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(6,2,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(5);
-
-  wxSpinCtrl* ssSpin = new wxSpinCtrl(panel,myID_STATE_SIZE,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle,0,1000,
-                                      int(10*settings->getFloat(StateSize)));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State size:")),0,lf,bd);
-  sizer->Add(ssSpin,0,rf,bd);
-
-  wxSpinCtrl* chSpin = new wxSpinCtrl(panel,myID_CLUSTER_HEIGHT,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle,0,1000000,
-                                      int(10*settings->getFloat(ClusterHeight)));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Cluster height:")),0,lf,bd);
-  sizer->Add(chSpin,0,rf,bd);
-
-  wxSpinCtrl* brSpin = new wxSpinCtrl(panel,myID_BRANCH_ROTATION,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle|wxSP_WRAP,0,359,
-                                      settings->getInt(BranchRotation));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch rotation:")),0,lf,bd);
-  sizer->Add(brSpin,0,rf,bd);
-
-  wxSpinCtrl* btSpin = new wxSpinCtrl(panel,myID_BRANCH_TILT,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle,0,90,settings->getInt(BranchTilt));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch tilt:")),0,lf,bd);
-  sizer->Add(btSpin,0,rf,bd);
-
-  wxSpinCtrl* qlSpin = new wxSpinCtrl(panel,myID_QUALITY,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle,2,50,settings->getInt(Quality)/2);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
-  sizer->Add(qlSpin,0,rf,bd);
-
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void SettingsDialog::setupColourPanel(wxPanel* panel)
-{
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int bd = 5;
-  wxSize spinSize(65,-1);
-  long spinStyle = wxSP_ARROW_KEYS;
-  wxSize btnSize(25,25);
-
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(9,3,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(8);
-
-  wxSpinCtrl* trSpin = new wxSpinCtrl(panel,myID_TRANSPARENCY,wxEmptyString,
-                                      wxDefaultPosition,spinSize,spinStyle,0,100,
-                                      static_cast<int>((255-settings->getInt(Alpha))/2.55f));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transparency:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(trSpin,0,rf,bd);
-
-  wxColorButton* bgButton = new wxColorButton(panel,this,myID_BACKGROUND_CLR,
-      wxDefaultPosition,btnSize);
-  bgButton->SetBackgroundColour(settings->getRGB(BackgroundColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Background:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(bgButton,0,rf,bd);
-
-  wxColorButton* ndButton = new wxColorButton(panel,this,myID_STATE_CLR,
-      wxDefaultPosition,btnSize);
-  ndButton->SetBackgroundColour(settings->getRGB(StateColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(ndButton,0,rf,bd);
-
-  wxColorButton* deButton = new wxColorButton(panel,this,myID_DOWN_EDGE_CLR,
-      wxDefaultPosition,btnSize);
-  deButton->SetBackgroundColour(settings->getRGB(DownEdgeColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(deButton,0,rf,bd);
-
-  wxColorButton* ueButton = new wxColorButton(panel,this,myID_UP_EDGE_CLR,
-      wxDefaultPosition,btnSize);
-  ueButton->SetBackgroundColour(settings->getRGB(UpEdgeColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Backpointer:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(ueButton,0,rf,bd);
-
-  wxColorButton* mkButton = new wxColorButton(panel,this,myID_MARK_CLR,
-      wxDefaultPosition,btnSize);
-  mkButton->SetBackgroundColour(settings->getRGB(MarkedColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Mark:")),0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->Add(mkButton,0,rf,bd);
-
-  wxColorButton* i1Btn = new wxColorButton(panel,this,myID_INTERPOLATE_CLR_1,
-      wxDefaultPosition,btnSize);
-  wxColorButton* i2Btn = new wxColorButton(panel,this,myID_INTERPOLATE_CLR_2,
-      wxDefaultPosition,btnSize);
-  i1Btn->SetBackgroundColour(settings->getRGB(InterpolateColor1).toWxColour());
-  i2Btn->SetBackgroundColour(settings->getRGB(InterpolateColor2).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,lf,bd);
-  sizer->Add(i1Btn,0,rf,bd);
-  sizer->Add(i2Btn,0,rf,bd);
-
-  wxCheckBox* liCheck = new wxCheckBox(panel,myID_LONG_INTERPOLATION,
-                                       wxT("Long interpolation"));
-  liCheck->SetValue(settings->getBool(LongInterpolation));
-  sizer->Add(liCheck,0,lf,bd);
-  sizer->AddSpacer(0);
-  sizer->AddSpacer(0);
-
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void SettingsDialog::setupSimulationPanel(wxPanel* panel)
-{
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int bd = 5;
-
-  wxSize btnSize(25,25);
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(4);
-
-  wxColorButton* shButton = new wxColorButton(panel,this,myID_SIM_PREV_CLR,
-      wxDefaultPosition,btnSize);
-  shButton->SetBackgroundColour(settings->getRGB(SimPrevColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,
-                              wxT("Previous states/transitions:")),0,lf,bd);
-  sizer->Add(shButton,0,rf,bd);
-
-  wxColorButton* scButton = new wxColorButton(panel,this,myID_SIM_CURR_CLR,
-      wxDefaultPosition,btnSize);
-  scButton->SetBackgroundColour(settings->getRGB(SimCurrColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state:")),0,lf,bd);
-  sizer->Add(scButton,0,rf,bd);
-
-  wxColorButton* ssButton = new wxColorButton(panel,this,myID_SIM_SEL_CLR,
-      wxDefaultPosition,btnSize);
-  ssButton->SetBackgroundColour(settings->getRGB(SimSelColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),
-             0,lf,bd);
-  sizer->Add(ssButton,0,rf,bd);
-
-  wxColorButton* spButton = new wxColorButton(panel,this,myID_SIM_POS_CLR,
-      wxDefaultPosition,btnSize);
-  spButton->SetBackgroundColour(settings->getRGB(SimPosColor).toWxColour());
-  sizer->Add(new wxStaticText(panel,wxID_ANY,
-                              wxT("Possible states/transitions:")),0,lf,bd);
-  sizer->Add(spButton,0,rf,bd);
-
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void SettingsDialog::setupAlgorithmsPanel(wxPanel* panel)
-{
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int bd = 5;
-
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(10,1,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(9);
-
-  wxRadioButton* irsRadio = new wxRadioButton(panel, myID_ITERATIVE,
-      wxT("Iterative state ranking"), wxDefaultPosition, wxDefaultSize,
-      wxRB_GROUP);
-  wxRadioButton* crsRadio = new wxRadioButton(panel, myID_CYCLIC,
-      wxT("Cyclic state ranking"));
-  sizer->Add(irsRadio, 0, lf, bd);
-  sizer->Add(crsRadio, 0, lf, bd);
-
-  sizer->Add(new wxStaticLine(panel), 0, lf, bd);
-
-  wxRadioButton* cvsRadio = new wxRadioButton(panel, myID_CONES_STYLE,
-      wxT("Cones visualization"), wxDefaultPosition, wxDefaultSize,
-      wxRB_GROUP);
-  wxRadioButton* tvsRadio = new wxRadioButton(panel, myID_TUBES_STYLE,
-      wxT("Tubes visualization"));
-  wxCheckBox* fsmCheck = new wxCheckBox(panel, myID_FSM_STYLE,
-                                        wxT("FSMView style"));
-  sizer->Add(cvsRadio, 0, lf, bd);
-  sizer->Add(tvsRadio, 0, lf, bd);
-  sizer->Add(fsmCheck, 0, lf, bd);
-
-  sizer->Add(new wxStaticLine(panel), 0, lf, bd);
-
-  wxRadioButton* spsRadio = new wxRadioButton(panel, myID_SP_STATEPOS,
-      wxT("Single-pass state positioning"), wxDefaultPosition, wxDefaultSize,
-      wxRB_GROUP);
-  wxRadioButton* mpsRadio = new wxRadioButton(panel, myID_MP_STATEPOS,
-      wxT("Multi-pass state positioning"));
-  sizer->Add(spsRadio, 0, lf, bd);
-  sizer->Add(mpsRadio, 0, lf, bd);
-
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void SettingsDialog::setupPerformancePanel(wxPanel* panel)
-{
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int bd = 5;
-
-  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,
-                              wxT("While zooming/panning/rotating:")),0,lf,bd);
-
-  wxCheckBox* nsbCheck = new wxCheckBox(panel,myID_NAV_SHOW_BACKPOINTERS,
-                                        wxT("Show backpointers"));
-  nsbCheck->SetValue(settings->getBool(NavShowBackpointers));
-  sizer->Add(nsbCheck,0,lf,bd);
-
-  wxCheckBox* nssCheck = new wxCheckBox(panel,myID_NAV_SHOW_STATES,
-                                        wxT("Show states"));
-  nssCheck->SetValue(settings->getBool(NavShowStates));
-  sizer->Add(nssCheck,0,lf,bd);
-
-  wxCheckBox* nstCheck = new wxCheckBox(panel,myID_NAV_SHOW_TRANSITIONS,
-                                        wxT("Show transitions"));
-  nstCheck->SetValue(settings->getBool(NavShowTransitions));
-  sizer->Add(nstCheck,0,lf,bd);
-
-  wxCheckBox* nshCheck = new wxCheckBox(panel,myID_NAV_SMOOTH_SHADING,
-                                        wxT("Enable smooth shading"));
-  nshCheck->SetValue(settings->getBool(NavSmoothShading));
-  sizer->Add(nshCheck,0,lf,bd);
-
-  wxCheckBox* nliCheck = new wxCheckBox(panel,myID_NAV_LIGHTING,
-                                        wxT("Enable lighting"));
-  nliCheck->SetValue(settings->getBool(NavLighting));
-  sizer->Add(nliCheck,0,lf,bd);
-
-  wxCheckBox* ntrCheck = new wxCheckBox(panel,myID_NAV_TRANSPARENCY,
-                                        wxT("Render transparent objects correctly"));
-  ntrCheck->SetValue(settings->getBool(NavTransparency));
-  sizer->Add(ntrCheck,0,lf,bd);
-
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void SettingsDialog::notify(SettingID s)
-{
-  switch (s)
+  QColor color = QColorDialog::getColor(m_setting->value(), m_button->parentWidget());
+  if (color.isValid())
   {
-    case ClusterHeight:
-    {
-      wxSpinCtrl* chSpin = static_cast<wxSpinCtrl*>(
-                             FindWindowById(myID_CLUSTER_HEIGHT,this));
-      chSpin->SetValue(MathUtils::round_to_int(10*settings->getFloat(ClusterHeight)));
-      break;
-    }
-    default:
-      break;
+    m_setting->setValue(color);
   }
 }
 
-void SettingsDialog::onBackgroundClrButton(wxCommandEvent& event)
+void ColorButtonHandler::setColor()
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(BackgroundColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_button->setAutoFillBackground(true);
+  QColor color = m_setting->value();
+  QString colorString = QString("rgb(") + QString::number(color.red()) + ", " + QString::number(color.green()) + ", " + QString::number(color.blue()) + ")";
+  m_button->setStyleSheet(QString("background-color: ") + colorString + "; color: " + colorString + ";");
 }
 
-void SettingsDialog::onDownEdgeClrButton(wxCommandEvent& event)
+ComboboxHandler::ComboboxHandler(QComboBox *combobox, Settings::SettingBool &setting):
+  QObject(combobox),
+  m_combobox(combobox),
+  m_setting(&setting)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(DownEdgeColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  connect(m_combobox, SIGNAL(activated(int)), this, SLOT(stateChanged(int)));
+  connect(m_setting, SIGNAL(changed(bool)), this, SLOT(setState()));
+  setState();
 }
 
-void SettingsDialog::onInterpolateClr1Button(wxCommandEvent& event)
+void ComboboxHandler::stateChanged(int state)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(InterpolateColor1, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_setting->setValue(state != 0);
 }
 
-void SettingsDialog::onInterpolateClr2Button(wxCommandEvent& event)
+void ComboboxHandler::setState()
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(InterpolateColor2, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_combobox->setCurrentIndex(m_setting->value() ? 1 : 0);
 }
 
-void SettingsDialog::onMarkClrButton(wxCommandEvent& event)
+SettingsDialog::SettingsDialog(QWidget *parent, Settings *settings):
+  QDialog(parent),
+  m_settings(settings)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(MarkedColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_ui.setupUi(this);
+
+  connect(m_ui.stateSize, SIGNAL(valueChanged(int)), this, SLOT(stateSizeChanged(int)));
+  connect(&m_settings->stateSize, SIGNAL(changed(float)), this, SLOT(setStateSize(float)));
+  setStateSize(m_settings->stateSize.value());
+  connect(m_ui.clusterHeight, SIGNAL(valueChanged(int)), this, SLOT(clusterHeightChanged(int)));
+  connect(&m_settings->clusterHeight, SIGNAL(changed(float)), this, SLOT(setClusterHeight(float)));
+  setClusterHeight(m_settings->clusterHeight.value());
+  setupSpinbox(m_ui.branchRotation, m_settings->branchRotation);
+  setupSpinbox(m_ui.branchTilt, m_settings->branchTilt);
+  connect(m_ui.accuracy, SIGNAL(valueChanged(int)), this, SLOT(accuracyChanged(int)));
+  connect(&m_settings->quality, SIGNAL(changed(int)), this, SLOT(setAccuracy(int)));
+  setAccuracy(m_settings->quality.value());
+  setupSpinbox(m_ui.transparency, m_settings->transparency);
+  new ColorButtonHandler(m_ui.backgroundColor, m_settings->backgroundColor);
+  new ColorButtonHandler(m_ui.stateColor, m_settings->stateColor);
+  new ColorButtonHandler(m_ui.transitionColor, m_settings->downEdgeColor);
+  new ColorButtonHandler(m_ui.backpointerColor, m_settings->upEdgeColor);
+  new ColorButtonHandler(m_ui.markColor, m_settings->markedColor);
+  new ColorButtonHandler(m_ui.clusterColorTop, m_settings->clusterColorTop);
+  new ColorButtonHandler(m_ui.clusterColorBottom, m_settings->clusterColorBottom);
+  setupCheckbox(m_ui.longInterpolation, m_settings->longInterpolation);
+  new ColorButtonHandler(m_ui.simulationHistoryColor, m_settings->simPrevColor);
+  new ColorButtonHandler(m_ui.simulationCurrentStateColor, m_settings->simCurrColor);
+  new ColorButtonHandler(m_ui.simulationSelectedColor, m_settings->simSelColor);
+  new ColorButtonHandler(m_ui.simulationNextStateColor, m_settings->simPosColor);
+  new ComboboxHandler(m_ui.stateRanking, m_settings->stateRankStyleCyclic);
+  new ComboboxHandler(m_ui.clusterPositioning, m_settings->fsmStyle);
+  new ComboboxHandler(m_ui.statePositioning, m_settings->statePosStyleMultiPass);
+  new ComboboxHandler(m_ui.visualizationStyle, m_settings->clusterVisStyleTubes);
+  setupCheckbox(m_ui.navShowBackpointers, m_settings->navShowBackpointers);
+  setupCheckbox(m_ui.navShowStates, m_settings->navShowStates);
+  setupCheckbox(m_ui.navShowTransitions, m_settings->navShowTransitions);
+  setupCheckbox(m_ui.navSmoothShading, m_settings->navSmoothShading);
+  setupCheckbox(m_ui.navLighting, m_settings->navLighting);
+  setupCheckbox(m_ui.navTransparency, m_settings->navTransparency);
 }
 
-void SettingsDialog::onStateClrButton(wxCommandEvent& event)
+void SettingsDialog::stateSizeChanged(int value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(StateColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_settings->stateSize.setValue(value / 10.0f);
 }
 
-void SettingsDialog::onUpEdgeClrButton(wxCommandEvent& event)
+void SettingsDialog::setStateSize(float value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(UpEdgeColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_ui.stateSize->setValue((int)(value * 10.0f));
 }
 
-void SettingsDialog::onSimCurrClrButton(wxCommandEvent& event)
+void SettingsDialog::clusterHeightChanged(int value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimCurrColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_settings->clusterHeight.setValue(value / 10.0f);
 }
 
-void SettingsDialog::onSimPosClrButton(wxCommandEvent& event)
+void SettingsDialog::setClusterHeight(float value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimPosColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_ui.clusterHeight->setValue((int)(value * 10.0f));
 }
 
-void SettingsDialog::onSimSelClrButton(wxCommandEvent& event)
+void SettingsDialog::accuracyChanged(int value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimSelColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_settings->quality.setValue(value * 2);
 }
 
-void SettingsDialog::onSimPrevClrButton(wxCommandEvent& event)
+void SettingsDialog::setAccuracy(int value)
 {
-  wxColorButton* btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimPrevColor, RGB_Color(btn->GetBackgroundColour()));
-  glCanvas->display();
+  m_ui.accuracy->setValue(value / 2);
 }
 
-void SettingsDialog::onLongInterpolationCheck(wxCommandEvent& event)
+void SettingsDialog::setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting)
 {
-  settings->setBool(LongInterpolation,event.IsChecked());
-  glCanvas->display();
+  connect(spinbox, SIGNAL(valueChanged(int)), &setting, SLOT(setValue(int)));
+  connect(&setting, SIGNAL(changed(int)), spinbox, SLOT(setValue(int)));
+  spinbox->setValue(setting.value());
 }
 
-void SettingsDialog::onNavShowBackpointersCheck(wxCommandEvent& event)
+void SettingsDialog::setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting)
 {
-  settings->setBool(NavShowBackpointers,event.IsChecked());
+  connect(checkbox, SIGNAL(toggled(bool)), &setting, SLOT(setValue(bool)));
+  connect(&setting, SIGNAL(changed(bool)), checkbox, SLOT(setChecked(bool)));
+  checkbox->setChecked(setting.value());
 }
 
-void SettingsDialog::onNavShowStatesCheck(wxCommandEvent& event)
-{
-  settings->setBool(NavShowStates,event.IsChecked());
-}
-
-void SettingsDialog::onNavShowTransitionsCheck(wxCommandEvent& event)
-{
-  settings->setBool(NavShowTransitions,event.IsChecked());
-}
-
-void SettingsDialog::onNavSmoothShadingCheck(wxCommandEvent& event)
-{
-  settings->setBool(NavSmoothShading,event.IsChecked());
-}
-
-void SettingsDialog::onNavLightingCheck(wxCommandEvent& event)
-{
-  settings->setBool(NavLighting,event.IsChecked());
-}
-
-void SettingsDialog::onNavTransparencyCheck(wxCommandEvent& event)
-{
-  settings->setBool(NavTransparency,event.IsChecked());
-}
-
-void SettingsDialog::onBranchRotationSpin(wxSpinEvent& event)
-{
-  settings->setInt(BranchRotation,event.GetPosition());
-  glCanvas->display();
-}
-
-void SettingsDialog::onStateSizeSpin(wxSpinEvent& event)
-{
-  settings->setFloat(StateSize,event.GetPosition()/10.0f);
-  glCanvas->display();
-}
-
-void SettingsDialog::onClusterHeightSpin(wxSpinEvent& event)
-{
-  settings->setFloat(ClusterHeight,event.GetPosition()/10.0f);
-  glCanvas->display();
-}
-
-void SettingsDialog::onBranchTiltSpin(wxSpinEvent& event)
-{
-  settings->setInt(BranchTilt,event.GetPosition());
-  glCanvas->display();
-}
-
-void SettingsDialog::onQualitySpin(wxSpinEvent& event)
-{
-  settings->setInt(Quality,2*event.GetPosition());
-  glCanvas->display();
-}
-
-void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
-{
-  settings->setInt(Alpha,
-                   static_cast<int>((100-event.GetPosition())*2.55f));
-  glCanvas->display();
-}
-
-void SettingsDialog::onIterativeRadio(wxCommandEvent&)
-{
-  settings->setInt(StateRankStyle, ITERATIVE);
-}
-
-void SettingsDialog::onCyclicRadio(wxCommandEvent&)
-{
-  settings->setInt(StateRankStyle, CYCLIC);
-}
-
-void SettingsDialog::onConesRadio(wxCommandEvent&)
-{
-  settings->setInt(ClusterVisStyle, CONES);
-}
-
-void SettingsDialog::onTubesRadio(wxCommandEvent&)
-{
-  settings->setInt(ClusterVisStyle, TUBES);
-}
-
-void SettingsDialog::onFsmStyleCheck(wxCommandEvent& event)
-{
-  settings->setBool(FsmStyle, event.IsChecked());
-}
-
-void SettingsDialog::onSinglePassRadio(wxCommandEvent&)
-{
-  settings->setInt(StatePosStyle, SINGLE_PASS);
-}
-
-void SettingsDialog::onMultiPassRadio(wxCommandEvent&)
-{
-  settings->setInt(StatePosStyle, MULTI_PASS);
-}

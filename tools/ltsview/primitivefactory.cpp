@@ -9,8 +9,6 @@
 /// \file primitivefactory.cpp
 /// \brief Source file for PrimitiveFactory class
 
-#include "wx.hpp" // precompiled headers
-
 #include <cmath>
 #include <stdlib.h>
 #include "primitivefactory.h"
@@ -29,8 +27,8 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss)
   hemisphere = -1;
   simple_sphere = -1;
   settings = ss;
-  settings->subscribe(Quality,this);
-  settings->subscribe(BranchTilt,this);
+  connect(&settings->quality, SIGNAL(changed(int)), this, SLOT(qualityChanged()));
+  connect(&settings->branchTilt, SIGNAL(changed(int)), this, SLOT(branchTiltChanged()));
 
   cos_theta = NULL;
   sin_theta = NULL;
@@ -95,8 +93,7 @@ int PrimitiveFactory::makeObliqueCone(float a,float r,float s)
   if (result == -1)
   {
     P_ObliqueCone* p = new P_ObliqueCone(a,r,s);
-    p->reshape(settings->getInt(Quality),cos_theta,sin_theta,
-               deg_to_rad(float(settings->getInt(BranchTilt))));
+    p->reshape(settings->quality.value(),cos_theta,sin_theta,deg_to_rad(float(settings->branchTilt.value())));
     result = static_cast<int>(primitives.size());
     primitives.push_back(p);
     oblq_cones.push_back(p);
@@ -110,7 +107,7 @@ int PrimitiveFactory::makeHemisphere()
   if (hemisphere == -1)
   {
     P_Hemisphere* p = new P_Hemisphere();
-    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
+    p->reshape(settings->quality.value(),cos_theta,sin_theta);
     hemisphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
@@ -122,33 +119,16 @@ int PrimitiveFactory::makeSphere()
   if (sphere == -1)
   {
     P_Sphere* p = new P_Sphere();
-    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
+    p->reshape(settings->quality.value(),cos_theta,sin_theta);
     sphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
   return sphere;
 }
 
-void PrimitiveFactory::notify(SettingID s)
-{
-  switch (s)
-  {
-    case Quality:
-      update_geom_tables();
-      update_primitives();
-      update_oblique_cones();
-      break;
-    case BranchTilt:
-      update_oblique_cones();
-      break;
-    default:
-      break;
-  }
-}
-
 void PrimitiveFactory::update_geom_tables()
 {
-  int qlt = settings->getInt(Quality);
+  int qlt = settings->quality.value();
   cos_theta = (float*)realloc(cos_theta,2*qlt*sizeof(float));
   sin_theta = (float*)realloc(sin_theta,2*qlt*sizeof(float));
 
@@ -164,7 +144,7 @@ void PrimitiveFactory::update_geom_tables()
 
 void PrimitiveFactory::update_primitives()
 {
-  int qlt = settings->getInt(Quality);
+  int qlt = settings->quality.value();
   for (unsigned int i = 0; i < primitives.size(); ++i)
   {
     primitives[i]->reshape(qlt,cos_theta,sin_theta);
@@ -173,8 +153,8 @@ void PrimitiveFactory::update_primitives()
 
 void PrimitiveFactory::update_oblique_cones()
 {
-  int qlt = settings->getInt(Quality);
-  float obt = deg_to_rad(float(settings->getInt(BranchTilt)));
+  int qlt = settings->quality.value();
+  float obt = deg_to_rad(float(settings->branchTilt.value()));
   for (unsigned int i = 0; i < oblq_cones.size(); ++i)
   {
     oblq_cones[i]->reshape(qlt,cos_theta,sin_theta,obt);
@@ -187,7 +167,7 @@ int PrimitiveFactory::make_ring(float r)
   if (result == -1)
   {
     P_Ring* p = new P_Ring(r);
-    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
+    p->reshape(settings->quality.value(),cos_theta,sin_theta);
     result = static_cast<int>(primitives.size());
     primitives.push_back(p);
     coneDB->addTruncatedCone(r,false,false,result);
@@ -200,7 +180,7 @@ void PrimitiveFactory::make_disc()
   if (disc == -1)
   {
     P_Disc* p = new P_Disc();
-    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
+    p->reshape(settings->quality.value(),cos_theta,sin_theta);
     disc = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
@@ -214,4 +194,16 @@ void PrimitiveFactory::make_simple_sphere()
     simple_sphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
+}
+
+void PrimitiveFactory::qualityChanged()
+{
+  update_geom_tables();
+  update_primitives();
+  update_oblique_cones();
+}
+
+void PrimitiveFactory::branchTiltChanged()
+{
+  update_oblique_cones();
 }

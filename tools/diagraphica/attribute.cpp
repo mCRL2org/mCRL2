@@ -8,195 +8,111 @@
 //
 /// \file ./attribute.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "attribute.h"
 
 // -- constructors and destructor -----------------------------------
 
 using namespace std;
 
-// ------------------
 Attribute::Attribute(
-  Mediator* m,
-  const string& nam,
-  const string& typ,
+  QString name,
+  QString type,
   const size_t& idx)
-  : Colleague(m)
-// ------------------
 {
-  name  = nam;
-  type  = typ;
+  m_name  = name;
+  m_type  = type;
   index = idx;
 }
 
 
-// ------------------------------------------
 Attribute::Attribute(const Attribute& attr)
-  :Colleague(attr)
-// ------------------------------------------
 {
   index = attr.index;
-  name  = attr.name;
-  type  = attr.type;
+  m_name  = attr.m_name;
+  m_type  = attr.m_type;
 }
 
 
-// --------------------
 Attribute::~Attribute()
-// --------------------
 {}
 
 
 // -- set functions -------------------------------------------------
 
 
-// ---------------------------------------
 void Attribute::setIndex(const size_t& idx)
-// ---------------------------------------
 {
   index = idx;
 }
 
 
-// -----------------------------------------
-void Attribute::setName(const string& nme)
-// -----------------------------------------
+void Attribute::setName(QString name)
 {
-  name = nme;
+  m_name = name;
+  emit renamed();
 }
 
 
-// -----------------------------------------
-void Attribute::setType(const string& typ)
-// -----------------------------------------
+void Attribute::setType(QString type)
 {
-  type = typ;
+  m_type = type;
 }
 
 
-// ------------------------------
 void Attribute::clusterValues(
   const vector< int > & /*indices*/,
   const string& /*newValue*/)
-// ------------------------------
 {}
 
 
-// -----------------------
 void Attribute::moveValue(
   const size_t& /*idxFr*/,
   const size_t& /*idxTo*/)
-// ------------------------
 {}
 
 
-// ------------------------------------
 void Attribute::configValues(
   const vector< string > &/*curDomain*/,
   map< size_t, size_t  > &/*origToCurDomain*/)
-// ------------------------------------
-{}
-
-
-// --------------------------------------------------------
-void Attribute::classifyEqualIntervals(const size_t& /*number*/)
-// --------------------------------------------------------
-{}
-
-
-// ---------------------------------------------------
-void Attribute::classifyQuantiles(const size_t& /*number*/)
-// ---------------------------------------------------
-{}
-
-
-// ---------------------------------------------------------------
-void Attribute::classifyMeanStandardDeviation(const size_t& /*number*/)
-// ---------------------------------------------------------------
-{}
-
-
-// -----------------------------------
-void Attribute::removeClassification()
-// -----------------------------------
 {}
 
 
 // -- get functions -------------------------------------------------
 
 
-// ----------------------
 size_t Attribute::getIndex()
-// ----------------------
 {
   return index;
 }
 
 
-// ------------------------
-string Attribute::getName()
-// ------------------------
+QString Attribute::name()
 {
-  return name;
+  return m_name;
 }
 
 
-// ------------------------
-string Attribute::getType()
-// ------------------------
+QString Attribute::type()
 {
-  return type;
+  return m_type;
 }
 
 
-// -------------------------------
 size_t Attribute::getSizeOrigValues()
-// -------------------------------
 {
   return 0;
 }
 
 
-// --------------------------------------
 Value* Attribute::getOrigValue(size_t /*idx*/)
-// --------------------------------------
 {
-  return NULL;
+  return 0;
 }
 
 
-// -------------------------------------
 Value* Attribute::getCurValue(size_t /*idx*/)
-// -------------------------------------
 {
-  return NULL;
-}
-
-
-// ------------------------------
-double Attribute::getLowerBound()
-// ------------------------------
-{
-  return 0.0;
-}
-
-
-// ------------------------------
-double Attribute::getUpperBound()
-// ------------------------------
-{
-  return 0.0;
-}
-
-
-// -------------------------------
-void Attribute::getRangeOrigValues(
-  double& lwrBnd,
-  double& uprBnd)
-// ------------------------------
-{
-  lwrBnd = uprBnd = 0.0;
+  return 0;
 }
 
 

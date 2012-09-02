@@ -1,272 +1,262 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file markdialog.cpp
-/// \brief Source file for mark dialog class
 
-#include "wx.hpp" // precompiled headers
-
-#include <string>
-#include <vector>
-
-#include "ids.h"
 #include "markdialog.h"
-#include "mediator.h"
+#include "markmanager.h"
+#include "markstateruledialog.h"
+#include "lts.h"
+#include <QList>
 
-using namespace std;
-using namespace IDs;
-
-BEGIN_EVENT_TABLE(MarkDialog, wxDialog)
-  EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MarkDialog::onMarkRadio)
-  EVT_CHOICE(myID_MARK_ANYALL, MarkDialog::onMarkAnyAll)
-  EVT_CHOICE(myID_MARK_CLUSTER, MarkDialog::onMarkCluster)
-  EVT_LISTBOX_DCLICK(myID_MARK_RULES, MarkDialog::onMarkRuleEdit)
-  EVT_CHECKLISTBOX(myID_MARK_RULES, MarkDialog::onMarkRuleActivate)
-  EVT_CHECKLISTBOX(myID_MARK_TRANSITIONS, MarkDialog::onMarkTransition)
-  EVT_BUTTON(myID_ADD_RULE, MarkDialog::onAddMarkRuleButton)
-  EVT_BUTTON(myID_REMOVE_RULE, MarkDialog::onRemoveMarkRuleButton)
-END_EVENT_TABLE()
-
-
-MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
-  : wxDialog(parent, wxID_ANY, wxT("Mark"), wxDefaultPosition,
-             wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
+MarkDialog::MarkDialog(QWidget *parent, MarkManager *markManager):
+  QDialog(parent),
+  m_markManager(markManager)
 {
-  mediator = owner;
+  m_ui.setupUi(this);
 
-  wxFlexGridSizer* markSizer = new wxFlexGridSizer(7,1,0,0);
-  markSizer->AddGrowableCol(0);
-  markSizer->AddGrowableRow(5);
-  markSizer->AddGrowableRow(6);
+  m_markRuleColors = QList<QColor>()
+    << QColor(228, 26, 28)
+    << QColor(55, 126, 184)
+    << QColor(77, 175, 74)
+    << QColor(152, 78, 163)
+    << QColor(255, 127, 0)
+    << QColor(255, 255, 51)
+    << QColor(166, 86, 40)
+    << QColor(247, 129, 191)
+    << QColor(153, 153, 153);
+  m_markRuleNextColorIndex = 0;
 
-  int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int border = 3;
+  connect(m_markManager, SIGNAL(ltsChanged()), this, SLOT(loadLts()));
+  connect(m_ui.noMarks, SIGNAL(clicked()), this, SLOT(markStyleClicked()));
+  connect(m_ui.markDeadlocks, SIGNAL(clicked()), this, SLOT(markStyleClicked()));
+  connect(m_ui.markStates, SIGNAL(clicked()), this, SLOT(markStyleClicked()));
+  connect(m_ui.markTransitions, SIGNAL(clicked()), this, SLOT(markStyleClicked()));
+  connect(m_markManager, SIGNAL(markStyleChanged(MarkStyle)), this, SLOT(setMarkStyle(MarkStyle)));
+  connect(m_ui.clusterMatchStyle, SIGNAL(activated(int)), this, SLOT(clusterMatchStyleChanged(int)));
+  connect(m_markManager, SIGNAL(clusterMatchStyleChanged(MatchStyle)), this, SLOT(setClusterMatchStyle(MatchStyle)));
+  connect(m_ui.stateMatchStyle, SIGNAL(activated(int)), this, SLOT(stateMatchStyleChanged(int)));
+  connect(m_markManager, SIGNAL(stateMatchStyleChanged(MatchStyle)), this, SLOT(setStateMatchStyle(MatchStyle)));
+  connect(m_ui.add, SIGNAL(clicked()), this, SLOT(addMarkRule()));
+  connect(m_markManager, SIGNAL(markRuleAdded(MarkRuleIndex)), this, SLOT(markRuleAdded(MarkRuleIndex)));
+  connect(m_ui.markRuleList, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(editMarkRule(QListWidgetItem *)));
+  connect(m_ui.markRuleList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(enableMarkRule(QListWidgetItem *)));
+  connect(m_markManager, SIGNAL(markRuleChanged(MarkRuleIndex)), this, SLOT(markRuleChanged(MarkRuleIndex)));
+  connect(m_ui.remove, SIGNAL(clicked()), this, SLOT(removeMarkRule()));
+  connect(m_markManager, SIGNAL(markRuleRemoved(MarkRuleIndex)), this, SLOT(markRuleRemoved(MarkRuleIndex)));
+  connect(m_ui.markedActionList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(actionLabelChanged(QListWidgetItem *)));
+  connect(m_markManager, SIGNAL(actionMarked(int, bool)), this, SLOT(setActionMarked(int, bool)));
 
-  nomarksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
-                                   wxT("No marks"),wxDefaultPosition,wxDefaultSize,wxRB_GROUP);
-  nomarksRadio->SetValue(true);
-  markDeadlocksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
-                                         wxT("Mark deadlocks"));
-  markStatesRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
-                                      wxT("Mark states"));
-  markTransitionsRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
-      wxT("Mark transitions"));
-
-  markSizer->Add(nomarksRadio,0,flags,border);
-  markSizer->Add(markDeadlocksRadio,0,flags,border);
-  markSizer->Add(markStatesRadio,0,flags,border);
-  markSizer->Add(markTransitionsRadio,0,flags,border);
-
-  wxString choices1[2] =
-  {
-    wxT("Mark cluster if any state is marked"),
-    wxT("Mark cluster if all states are marked")
-  };
-  markClusterChoice = new wxChoice(this,myID_MARK_CLUSTER,
-                                   wxDefaultPosition,wxDefaultSize,2,choices1);
-  markClusterChoice->SetSelection(0);
-  markSizer->Add(markClusterChoice,0,flags,border);
-
-  wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,
-      this,wxT("Mark states"));
-
-  wxString choices2[3] =
-  {
-    wxT("Match any of the following"),
-    wxT("Match all of the following"),
-    wxT("Match the following separately")
-  };
-  markAnyAllChoice = new wxChoice(this,myID_MARK_ANYALL,
-                                  wxDefaultPosition,wxDefaultSize,3,choices2);
-  markAnyAllChoice->SetSelection(0);
-  markStatesSizer->Add(markAnyAllChoice,0,flags,border);
-
-  markStatesListBox = new wxCheckListBox(this,myID_MARK_RULES,
-                                         wxDefaultPosition,wxSize(200,100),0,NULL,
-                                         wxLB_SINGLE|wxLB_NEEDED_SB|wxLB_HSCROLL);
-  //markStatesListBox->SetMinSize(wxSize(200,-1));
-  markStatesSizer->Add(markStatesListBox,1,flags|wxEXPAND,border);
-  wxBoxSizer* addremoveSizer = new wxBoxSizer(wxHORIZONTAL);
-  addremoveSizer->Add(new wxButton(this,myID_ADD_RULE,wxT("Add")),0,
-                      flags,border);
-  addremoveSizer->Add(new wxButton(this,myID_REMOVE_RULE,wxT("Remove")),
-                      0,flags,border);
-
-  markStatesSizer->Add(addremoveSizer,0,flags,border);
-
-  wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(
-    wxVERTICAL,this,wxT("Mark transitions"));
-  markTransitionsListBox = new wxCheckListBox(this,
-      myID_MARK_TRANSITIONS,wxDefaultPosition,wxSize(200,-1),0,NULL,
-      wxLB_SINGLE|wxLB_SORT|wxLB_NEEDED_SB|wxLB_HSCROLL);
-  markTransitionsListBox->SetMinSize(wxSize(200,-1));
-  markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,
-                            border);
-
-  markSizer->Add(markStatesSizer,0,wxEXPAND|wxALL,border);
-  markSizer->Add(markTransitionsSizer,0,wxEXPAND|wxALL,border);
-  markSizer->Fit(this);
-  SetSizer(markSizer);
-  Fit();
-  Layout();
-
+  setMarkStyle(m_markManager->markStyle());
+  setClusterMatchStyle(m_markManager->clusterMatchStyle());
+  setStateMatchStyle(m_markManager->stateMatchStyle());
+  loadLts();
 }
 
-void MarkDialog::onMarkRadio(wxCommandEvent& event)
+void MarkDialog::loadLts()
 {
-  wxRadioButton* buttonClicked = (wxRadioButton*)event.GetEventObject();
-
-  if (buttonClicked == nomarksRadio)
+  m_actions.clear();
+  m_actionNumbers.clear();
+  m_actionPositions.clear();
+  m_ui.markedActionList->clear();
+  if (m_markManager->lts())
   {
-    mediator->setMarkStyle(NO_MARKS);
-  }
-  else if (buttonClicked == markDeadlocksRadio)
-  {
-    mediator->setMarkStyle(MARK_DEADLOCKS);
-  }
-  else if (buttonClicked == markStatesRadio)
-  {
-    mediator->setMarkStyle(MARK_STATES);
-  }
-  else if (buttonClicked == markTransitionsRadio)
-  {
-    mediator->setMarkStyle(MARK_TRANSITIONS);
+    for (int i = 0; i < m_markManager->lts()->getNumLabels(); i++)
+    {
+      QString label = QString::fromStdString(m_markManager->lts()->getLabel(i));
+      m_actionNumbers[label] = i;
+      m_actions += label;
+    }
+    for (QMap<QString, int>::iterator i = m_actionNumbers.begin(); i != m_actionNumbers.end(); i++)
+    {
+      int index = m_ui.markedActionList->count();
+      m_actionPositions[i.value()] = index;
+      m_ui.markedActionList->addItem(i.key());
+      m_ui.markedActionList->item(index)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+      m_ui.markedActionList->item(index)->setCheckState(Qt::Unchecked);
+    }
   }
 }
 
-void MarkDialog::onMarkRuleActivate(wxCommandEvent& event)
+void MarkDialog::markStyleClicked()
 {
-  int i = event.GetInt();
-  mediator->activateMarkRule(
-    *(static_cast<int*>(markStatesListBox->GetClientData(i))),
-    markStatesListBox->IsChecked(i));
-  markStatesRadio->SetValue(true);
-}
-
-void MarkDialog::onMarkRuleEdit(wxCommandEvent& event)
-{
-  mediator->editMarkRule(*(static_cast<int*>
-                           (markStatesListBox->GetClientData(event.GetInt()))));
-}
-
-void MarkDialog::onMarkAnyAll(wxCommandEvent& event)
-{
-  if (event.GetSelection() == 0)
+  if (m_ui.noMarks->isChecked())
   {
-    mediator->setMatchStyle(MATCH_ANY);
+    m_markManager->setMarkStyle(NO_MARKS);
   }
-  else if (event.GetSelection() == 1)
+  else if (m_ui.markDeadlocks->isChecked())
   {
-    mediator->setMatchStyle(MATCH_ALL);
+    m_markManager->setMarkStyle(MARK_DEADLOCKS);
   }
-  else if (event.GetSelection() == 2)
+  else if (m_ui.markStates->isChecked())
   {
-    mediator->setMatchStyle(MATCH_MULTI);
+    m_markManager->setMarkStyle(MARK_STATES);
   }
-  markStatesRadio->SetValue(true);
-}
-
-void MarkDialog::onMarkCluster(wxCommandEvent& event)
-{
-  if (event.GetSelection() == 0)
+  else if (m_ui.markTransitions->isChecked())
   {
-    mediator->setMatchStyleClusters(MATCH_ANY);
-  }
-  else if (event.GetSelection() == 1)
-  {
-    mediator->setMatchStyleClusters(MATCH_ALL);
+    m_markManager->setMarkStyle(MARK_TRANSITIONS);
   }
 }
 
-void MarkDialog::onAddMarkRuleButton(wxCommandEvent& /*event*/)
+void MarkDialog::setMarkStyle(MarkStyle style)
 {
-  mediator->addMarkRule();
-}
-
-void MarkDialog::addMarkRule(wxString str,int mr)
-{
-  markStatesListBox->Append(str,new int(mr));
-  markStatesListBox->Check(markStatesListBox->GetCount()-1,true);
-  markStatesRadio->SetValue(true);
-  markStatesListBox->GetParent()->Fit();
-  Layout();
-}
-
-void MarkDialog::onRemoveMarkRuleButton(wxCommandEvent& /*event*/)
-{
-  int i = markStatesListBox->GetSelection();
-  if (i != wxNOT_FOUND)
+  if (style == NO_MARKS)
   {
-    int* p = static_cast<int*>(markStatesListBox->GetClientData(i));
-    markStatesListBox->Delete(i);
-    mediator->removeMarkRule(*p);
-    markStatesRadio->SetValue(true);
-    markStatesListBox->GetParent()->Fit();
-    Layout();
-    delete p;
+    m_ui.noMarks->click();
+  }
+  else if (style == MARK_DEADLOCKS)
+  {
+    m_ui.markDeadlocks->click();
+  }
+  else if (style == MARK_STATES)
+  {
+    m_ui.markStates->click();
+  }
+  else if (style == MARK_TRANSITIONS)
+  {
+    m_ui.markTransitions->click();
   }
 }
 
-void MarkDialog::onMarkTransition(wxCommandEvent& event)
+void MarkDialog::clusterMatchStyleChanged(int index)
 {
-  int i = event.GetInt();
-  mediator->setActionMark(
-    label_index[markTransitionsListBox->GetString(i)],
-    markTransitionsListBox->IsChecked(i));
-  markTransitionsRadio->SetValue(true);
+  m_markManager->setClusterMatchStyle(index == 0 ? MATCH_ANY : MATCH_ALL);
 }
 
-void MarkDialog::replaceMarkRule(wxString str,int mr)
+void MarkDialog::setClusterMatchStyle(MatchStyle style)
 {
-  unsigned int i = 0;
-  while (i < markStatesListBox->GetCount() &&
-         mr != *(static_cast<int*>(markStatesListBox->GetClientData(i))))
-  {
-    ++i;
-  }
-  if (i == markStatesListBox->GetCount())
-  {
-    return;
-  }
-  bool isChecked = markStatesListBox->IsChecked(i);
-  markStatesListBox->SetString(i,str);
-  markStatesListBox->Check(i,isChecked);
-  markStatesRadio->SetValue(true);
+  m_ui.clusterMatchStyle->setCurrentIndex(style == MATCH_ANY ? 0 : 1);
 }
 
-void MarkDialog::resetMarkRules()
+void MarkDialog::stateMatchStyleChanged(int index)
 {
-  for (unsigned int i = 0; i < markStatesListBox->GetCount(); ++i)
-  {
-    delete static_cast<int*>(markStatesListBox->GetClientData(i));
-  }
-  markStatesListBox->Clear();
-  markAnyAllChoice->SetSelection(0);
-  nomarksRadio->SetValue(true);
-  markStatesListBox->GetParent()->Fit();
-  Layout();
+  m_markManager->setStateMatchStyle(index == 0 ? MATCH_ANY : index == 1 ? MATCH_ALL : MATCH_MULTI);
 }
 
-void MarkDialog::setActionLabels(vector<string> &labels)
+void MarkDialog::setStateMatchStyle(MatchStyle style)
 {
-  wxArrayString strLabels;
-  strLabels.Alloc(labels.size());
-  label_index.clear();
-  wxString wxlabel;
-  for (unsigned int i = 0; i < labels.size(); ++i)
-  {
-    wxlabel = wxString(labels[i].c_str(),wxConvLocal);
-    strLabels.Add(wxlabel);
-    label_index[wxlabel] = i;
-  }
-  strLabels.Sort();
-  markTransitionsListBox->Set(strLabels);
-  markTransitionsListBox->GetParent()->Fit();
-  Layout();
+  m_ui.stateMatchStyle->setCurrentIndex(style == MATCH_ANY ? 0 : style == MATCH_ALL ? 1 : 2);
 }
 
+void MarkDialog::addMarkRule()
+{
+  if (m_markManager->lts())
+  {
+    QColor color = m_markRuleColors[m_markRuleNextColorIndex];
+    m_markRuleNextColorIndex = (m_markRuleNextColorIndex + 1) % m_markRuleColors.size();
+
+    MarkStateRuleDialog dialog(this, m_markManager->lts(), color, 0, false, QSet<int>());
+    if (dialog.exec() == QDialog::Accepted)
+    {
+      MarkRule rule;
+      rule.active = true;
+      rule.color = dialog.color();
+      rule.parameter = dialog.parameter();
+      rule.negated = dialog.negated();
+      rule.values = dialog.values();
+      m_markManager->addMarkRule(rule);
+      m_markManager->setMarkStyle(MARK_STATES);
+    }
+  }
+}
+
+void MarkDialog::markRuleAdded(MarkRuleIndex index)
+{
+  MarkListItem *item = new MarkListItem(markRuleDescription(index), index);
+  m_markListItems[index] = item;
+  m_ui.markRuleList->addItem(item);
+  item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+  item->setCheckState(Qt::Checked);
+}
+
+void MarkDialog::editMarkRule(QListWidgetItem *item)
+{
+  MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
+  MarkRule rule = m_markManager->markRule(index);
+  MarkStateRuleDialog dialog(this, m_markManager->lts(), rule.color, rule.parameter, rule.negated, rule.values);
+  if (dialog.exec() == QDialog::Accepted)
+  {
+    rule.color = dialog.color();
+    rule.parameter = dialog.parameter();
+    rule.negated = dialog.negated();
+    rule.values = dialog.values();
+    m_markManager->setMarkRule(index, rule);
+    m_markManager->setMarkStyle(MARK_STATES);
+  }
+}
+
+void MarkDialog::enableMarkRule(QListWidgetItem *item)
+{
+  MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
+  MarkRule rule = m_markManager->markRule(index);
+  rule.active = item->checkState() == Qt::Checked;
+  if (rule.active != m_markManager->markRule(index).active)
+  {
+    m_markManager->setMarkRule(index, rule);
+    m_markManager->setMarkStyle(MARK_STATES);
+  }
+}
+
+void MarkDialog::markRuleChanged(MarkRuleIndex index)
+{
+  m_markListItems[index]->setCheckState(m_markManager->markRule(index).active ? Qt::Checked : Qt::Unchecked);
+  m_markListItems[index]->setText(markRuleDescription(index));
+}
+
+void MarkDialog::removeMarkRule()
+{
+  QList<QListWidgetItem *> selection = m_ui.markRuleList->selectedItems();
+  if (!selection.isEmpty())
+  {
+    MarkRuleIndex index = static_cast<MarkListItem *>(selection[0])->index;
+    m_markManager->removeMarkRule(index);
+  }
+}
+
+void MarkDialog::markRuleRemoved(MarkRuleIndex index)
+{
+  delete m_ui.markRuleList->takeItem(m_ui.markRuleList->row(m_markListItems[index]));
+  m_markListItems.remove(index);
+}
+
+void MarkDialog::actionLabelChanged(QListWidgetItem *item)
+{
+  bool checked = item->checkState() == Qt::Checked;
+  int action = m_actionNumbers[item->text()];
+  if (m_markManager->isActionMarked(action) != checked)
+  {
+    m_markManager->setActionMarked(action, checked);
+    m_markManager->setMarkStyle(MARK_TRANSITIONS);
+  }
+}
+
+void MarkDialog::setActionMarked(int action, bool marked)
+{
+  m_ui.markedActionList->item(m_actionPositions[action])->setCheckState(marked ? Qt::Checked : Qt::Unchecked);
+}
+
+QString MarkDialog::markRuleDescription(MarkRuleIndex index) const
+{
+  MarkRule rule = m_markManager->markRule(index);
+  QString output;
+  output += QString::fromStdString(m_markManager->lts()->getParameterName(rule.parameter));
+  output += rule.negated ? " not in { " : " in { ";
+  bool first = true;
+  for (QSet<int>::iterator i = rule.values.begin(); i != rule.values.end(); i++)
+  {
+    if (first)
+    {
+      first = false;
+    }
+    else
+    {
+      output += ", ";
+    }
+    output += QString::fromStdString(m_markManager->lts()->getParameterDomain(rule.parameter)[*i]);
+  }
+  output += "}";
+  return output;
+}

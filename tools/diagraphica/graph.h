@@ -11,30 +11,31 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <map>
 #include <vector>
 #include <string>
 #include "attribute.h"
-#include "attrconti.h"
 #include "attrdiscr.h"
 #include "bundle.h"
 #include "cluster.h"
-#include "colleague.h"
 #include "edge.h"
 #include "node.h"
 
-class Mediator;
-
-class Graph : public Colleague
+class Graph : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructors ------------------------------
-    Graph(Mediator* m);
-    virtual ~Graph();
+    Graph();
+    ~Graph();
 
     // -- set functions ---------------------------------------------
-    void setFileName(const std::string& fn);
+    void setFileName(QString filename);
     /*
         void addAttribute(
             const std::string &name,
@@ -49,20 +50,11 @@ class Graph : public Colleague
             const double &uprBnd );
     */
     void addAttrDiscr(
-      const std::string& name,
-      const std::string& type,
+      QString name,
+      QString type,
       const size_t& idx,
       const std::vector< std::string > &vals);
-    void addAttrConti(
-      const std::string& name,
-      const std::string& type,
-      const size_t& idx,
-      const double& lwrBnd,
-      const double& uprBnd);
 
-    void swapAttributes(
-      const size_t& idx1,
-      const size_t& idx2);
     void moveAttribute(
       const size_t& idxFr,
       const size_t& idxTo);
@@ -82,10 +74,10 @@ class Graph : public Colleague
     void initGraph();
 
     // -- get functions  --------------------------------------------
-    std::string getFileName();
+    QString filename();
     size_t getSizeAttributes();
     Attribute* getAttribute(const size_t& idx);
-    Attribute* getAttribute(const std::string& name);
+    Attribute* getAttribute(QString name);
     size_t getSizeNodes();
     Node* getNode(const size_t& idx);
     size_t getSizeEdges();
@@ -101,18 +93,8 @@ class Graph : public Colleague
     void calcAttrDistr(
       const size_t& attrIdx,
       std::vector< size_t > &distr);
-    void calcAttrDistr(
-      Cluster* clust,
-      const size_t& attrIdx,
-      std::vector< size_t > &distr);
 
     void calcAttrCorrl(
-      const size_t& attrIdx1,
-      const size_t& attrIdx2,
-      std::vector< std::vector< size_t > > &corrlMap,
-      std::vector< std::vector< int > > &number);
-    void calcAttrCorrl(
-      Cluster* clust,
       const size_t& attrIdx1,
       const size_t& attrIdx2,
       std::vector< std::vector< size_t > > &corrlMap,
@@ -163,6 +145,16 @@ class Graph : public Colleague
       std::vector< Node* > &nodes);
     size_t calcMaxNumCombns(const std::vector< size_t > &attrIdcs);
 
+  protected slots:
+    void recluster();
+
+  signals:
+    void startedClusteringNodes(int steps);
+    void startedClusteringEdges(int steps);
+    void progressedClustering(int steps);
+    void clusteringChanged();
+    void deletedAttribute();
+
   protected:
     // -- private utility functions ---------------------------------
     void deleteAttributes();
@@ -191,25 +183,18 @@ class Graph : public Colleague
     void clearLeaves();
     void deleteClusters();
 
-    void printClusters();
-    void printClusters(std::vector< Cluster* > &clusts);
-
     void updateBundles(size_t& progress);
     void updateBundles();
     void deleteBundles();
-    void printBundles();
 
     // -- data members ----------------------------------------------
-    std::string               fileName;   // file name
+    QString                   m_filename; // file name
     std::vector< Attribute* > attributes; // attributes
     std::vector< Node* >      nodes;      // composition
     std::vector< Edge* >      edges;      // composition
-    Cluster*             root;       // composition
+    Cluster*                  root;       // composition
     std::vector< Cluster* >   leaves;     // association
     std::vector< Bundle* >    bundles;    // composition
-
-    // -- constants -------------------------------------------------
-    static int PROGRESS_INTERV_HINT;
 };
 
 #endif

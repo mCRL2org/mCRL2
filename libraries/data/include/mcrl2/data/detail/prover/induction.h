@@ -14,7 +14,6 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
@@ -150,7 +149,7 @@ class Induction
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
+      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::empty(sort_expression(v_induction_variable_sort)));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_base_case = data_expression(gsSubstValues_Appl(v_substitution_list, f_formula, true));
 
@@ -211,7 +210,7 @@ class Induction
       ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
       ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
       data_expression v_formula_1 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
-      v_substitution = gsMakeSubst_Appl(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
+      v_substitution = gsMakeSubst_Appl(v_variable, sort_list::empty(sort_expression(v_variable_sort)));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       data_expression v_formula_2 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
       data_expression v_hypothesis = data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true));

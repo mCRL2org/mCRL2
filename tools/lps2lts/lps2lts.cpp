@@ -28,7 +28,8 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
-#include "mcrl2/lps/action_label.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/action_parse.h"
 
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -44,68 +45,40 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
-static atermpp::set < identifier_string > parse_action_list(const std::string& s)
+std::list<std::string> split_actions(const std::string& s)
 {
-  atermpp::set < identifier_string > result;
-
-  for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
+  size_t pcount = 0;
+  std::string a;
+  std::list<std::string> result;
+  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
   {
-    const std::string a=s.substr(p, q - p);
-    // Check that a is a proper string, with syntax: [a-zA-Z\_][a-zA-Z0-9\_']
-    for (unsigned int i=0; i<a.size(); ++i)
+    if (*i == ',' && pcount == 0)
     {
-      const char c=a[i];
-      if (!(('a'<=c && c<='z')||
-            ('A'<=c && c<='Z')||
-            (c=='_')||
-            (i>0 && (('0'<=c && c<='9') || c=='\''))))
-      {
-        throw mcrl2::runtime_error("The string " + a + " is not a proper action label.");
-      }
+      result.push_back(a);
+      a.clear();
     }
-    result.insert(identifier_string(a));
-
-    if (q == std::string::npos)
+    else
     {
-      break;
+      if (*i == '(') ++pcount;
+      else if (*i == ')') --pcount;
+      a.push_back(*i);
     }
   }
+  if (!a.empty())
+    result.push_back(a);
   return result;
-}
-
-static void check_whether_actions_on_commandline_exist(
-             const atermpp::set < identifier_string > &actions, 
-             const action_label_list action_labels)
-{
-  for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
-               i!=actions.end(); ++i)
-  {
-    mCRL2log(verbose) << "checking for occurrences of action '" << pp(*i) << "'.\n";
-
-    bool found=(pp(*i)=="tau"); // If i equals tau, it does not need to be declared.
-    for(action_label_list::const_iterator j=action_labels.begin(); 
-              !found && j!=action_labels.end(); ++j)
-    {
-      found=(*i == j->name());  // The action in the set occurs in the action label.
-    }
-    if (!found)
-    { 
-      throw mcrl2::runtime_error("'" + pp(*i) + "' is not declared as an action in this LPS.");
-    }
-  }
-
 }
 
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
-  private:
-    lps2lts_algorithm lps2lts;
-    lts_generation_options options;
+  protected:
+    mcrl2::lts::lps2lts_algorithm m_lps2lts;
+    lts_generation_options m_options;
     std::string m_filename;
 
   public:
-    ~lps2lts_tool() { options.m_rewriter.reset(); }
+    ~lps2lts_tool() { m_options.m_rewriter.reset(); }
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -141,32 +114,42 @@ class lps2lts_tool : public lps2lts_base
 
     void abort()
     {
-      lps2lts.abort();
+      m_lps2lts.abort();
     }
 
     bool run()
     {
-      options.specification.load(m_filename);
-      options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
+      m_options.specification.load(m_filename);
+      m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
 
-      check_whether_actions_on_commandline_exist(options.trace_actions, options.specification.action_labels()); 
-      if (!lps2lts.initialise_lts_generation(&options))
+      // check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
+      try
+      {
+        m_options.validate_actions();
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        mCRL2log(error) << "Invalid (multi-)action given: " << e.what() << std::endl;
+        return false;
+      }
+
+      if (!m_lps2lts.initialise_lts_generation(&m_options))
       {
         return false;
       }
 
       try
       {
-        lps2lts.generate_lts();
+        m_lps2lts.generate_lts();
       }
       catch (mcrl2::runtime_error& e)
       {
         mCRL2log(error) << e.what() << std::endl;
-        lps2lts.finalise_lts_generation();
+        m_lps2lts.finalise_lts_generation();
         return false;
       }
 
-      lps2lts.finalise_lts_generation();
+      m_lps2lts.finalise_lts_generation();
 
       return true;
     }
@@ -177,15 +160,18 @@ class lps2lts_tool : public lps2lts_base
       lps2lts_base::add_options(desc);
 
       desc.
+      add_option("cached",
+                 "use enumeration caching techniques to speed up state space generation.").
+      add_option("prune",
+                 "use summand pruning to speed up state space generation.").
       add_option("dummy", make_mandatory_argument("BOOL"),
                  "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
       add_option("unused-data",
                  "do not remove unused parts of the data specification", 'u').
-      add_option("state-format", make_mandatory_argument("NAME"),
-                 "store state internally in format NAME:\n"
-                 "  'tree' for a tree (memory efficient, default), or\n"
-                 "  'vector' for a vector (slightly faster, often far less memory efficient)"
-                 , 'f').
+      add_option("state-format", make_enum_argument<NextStateFormat>("NAME")
+                 .add_value(GS_STATE_TREE, true)
+                 .add_value(GS_STATE_VECTOR),
+                 "store state internally in format NAME:", 'f').
       add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
                  "use bit hashing to store states and store at most NUM states. "
                  "This means that instead of keeping a full record of all states "
@@ -214,6 +200,10 @@ class lps2lts_tool : public lps2lts_base
                  "to find (or prove the absence) of an action error. A message "
                  "is printed for every occurrence of one of these action names. "
                  "With the -t flag traces towards these actions are generated", 'a').
+      add_option("multiaction", make_mandatory_argument("NAMES"),
+                 "detect and report multiactions in the transitions system "
+                 "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
+                 "are matched exactly, including data parameters.", 'm').
       add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
                  "Write a shortest trace to each state that is reached with an action from NAMES "
                  "from option --action, is a deadlock detected with --deadlock, or is a "
@@ -232,13 +222,14 @@ class lps2lts_tool : public lps2lts_base
                  "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
                  "state space is necessarily branching bisimilar to the state space of the lps. The generation "
                  "algorithm that is used does not require the linear process to be tau convergent.", 'c').
-      add_option("strategy", make_mandatory_argument("NAME"),
-                 "explore the state space using strategy NAME:\n"
-                 "  'b', 'breadth'   breadth-first search (default)\n"
-                 "  'd', 'depth'     depth-first search\n"
-                 "  'p', 'prioritized'  prioritize single actions on its first argument being of sort Nat where only those actions with the lowest value for this parameter are selected. E.g. if there are actions a(3) and b(4), a(3) remains and b(4) is skipped. Actions without a first parameter of sort Nat and multactions with more than one action are always chosen (option is experimental).\n"
-                 "  'q', 'rprioritized'  prioritize actions on its first argument being of sort Nat (see option --prioritized), and randomly select one of these to obtain a prioritized random simulation (option is experimental).\n"
-                 "  'r', 'random'    random simulation. Out of all next states one is chosen at random independently of whether this state has already been observed. Consequently, random simultation only terminates when a deadlocked state is encountered.", 's').
+      add_option("strategy", make_enum_argument<exploration_strategy>("NAME")
+                 .add_value_short(es_breadth, "b", true)
+                 .add_value_short(es_depth, "d")
+                 .add_value_short(es_value_prioritized, "p")
+                 .add_value_short(es_value_random_prioritized, "q")
+                 .add_value_short(es_random, "r")
+                 , "explore the state space using strategy NAME:"
+                 , 's').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "save the output in the specified FORMAT", 'o').
       add_option("no-info", "do not add state information to OUTFILE"
@@ -259,12 +250,15 @@ class lps2lts_tool : public lps2lts_base
     void parse_options(const command_line_parser& parser)
     {
       lps2lts_base::parse_options(parser);
-      options.removeunused    = parser.options.count("unused-data") == 0;
-      options.detect_deadlock = parser.options.count("deadlock") != 0;
-      options.detect_divergence = parser.options.count("divergence") != 0;
-      options.outinfo         = parser.options.count("no-info") == 0;
-      options.suppress_progress_messages = parser.options.count("suppress") !=0;
-      options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
+      m_options.removeunused    = parser.options.count("unused-data") == 0;
+      m_options.detect_deadlock = parser.options.count("deadlock") != 0;
+      m_options.detect_divergence = parser.options.count("divergence") != 0;
+      m_options.outinfo         = parser.options.count("no-info") == 0;
+      m_options.suppress_progress_messages = parser.options.count("suppress") !=0;
+      m_options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
+
+      m_options.use_enumeration_caching = parser.options.count("cached");
+      m_options.use_summand_pruning = parser.options.count("prune");
 
       if (parser.options.count("dummy"))
       {
@@ -275,11 +269,11 @@ class lps2lts_tool : public lps2lts_base
         std::string dummy_str(parser.option_argument("dummy"));
         if (dummy_str == "yes")
         {
-          options.usedummies = true;
+          m_options.usedummies = true;
         }
         else if (dummy_str == "no")
         {
-          options.usedummies = false;
+          m_options.usedummies = false;
         }
         else
         {
@@ -287,84 +281,62 @@ class lps2lts_tool : public lps2lts_base
         }
       }
 
-      if (parser.options.count("state-format"))
-      {
-        if (parser.options.count("state-format") > 1)
-        {
-          parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
-        }
-        std::string state_format_str(parser.option_argument("state-format"));
-        if (state_format_str == "vector")
-        {
-          options.stateformat = GS_STATE_VECTOR;
-        }
-        else if (state_format_str == "tree")
-        {
-          options.stateformat = GS_STATE_TREE;
-        }
-        else
-        {
-          parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
-        }
-      }
+      m_options.stateformat = parser.option_argument_as<NextStateFormat>("state-format");
 
       if (parser.options.count("bit-hash"))
       {
-        options.bithashing  = true;
-        options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
+        m_options.bithashing  = true;
+        m_options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
       }
       if (parser.options.count("max"))
       {
-        options.max_states = parser.option_argument_as< unsigned long > ("max");
+        m_options.max_states = parser.option_argument_as< unsigned long > ("max");
       }
       if (parser.options.count("action"))
       {
-        options.detect_action = true;
-        options.trace_actions = parse_action_list(parser.option_argument("action").c_str());
+        m_options.detect_action = true;
+        std::list<std::string> actions = split_actions(parser.option_argument("action"));
+        for (std::list<std::string>::iterator it = actions.begin(); it != actions.end(); ++it)
+          m_options.trace_actions.insert(mcrl2::core::identifier_string(it->c_str()));
+      }
+      if (parser.options.count("multiaction"))
+      {
+        std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
+        m_options.trace_multiaction_strings.insert(actions.begin(), actions.end());
       }
       if (parser.options.count("trace"))
       {
-        options.trace      = true;
-        options.max_traces = parser.option_argument_as< unsigned long > ("trace");
+        m_options.trace      = true;
+        m_options.max_traces = parser.option_argument_as< unsigned long > ("trace");
       }
       if (parser.options.count("confluence"))
       {
-        options.priority_action = parser.option_argument("confluence");
+        m_options.priority_action = parser.option_argument("confluence");
       }
-      if (parser.options.count("strategy"))
-      {
-        options.expl_strat = str_to_expl_strat(parser.option_argument("strategy").c_str());
 
-        if (options.expl_strat == es_none)
-        {
-          parser.error("invalid exploration strategy '" + parser.option_argument("strategy") + "'");
-        }
-      }
+      m_options.expl_strat = parser.option_argument_as<exploration_strategy>("strategy");
+
       if (parser.options.count("out"))
       {
-        options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
+        m_options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
-        if (options.outformat == lts_none)
+        if (m_options.outformat == lts_none)
         {
           parser.error("format '" + parser.option_argument("out") + "' is not recognised");
         }
       }
       if (parser.options.count("init-tsize"))
       {
-        options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
+        m_options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
       }
       if (parser.options.count("todo-max"))
       {
-        options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
+        m_options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
       }
       if (parser.options.count("error-trace"))
       {
-        options.save_error_trace = true;
+        m_options.save_error_trace = true;
       }
-
-      /* if ( options.bithashing && options.trace ) {
-        parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
-      } */
 
       if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
       {
@@ -381,20 +353,17 @@ class lps2lts_tool : public lps2lts_base
       }
       if (1 < parser.arguments.size())
       {
-        options.lts = parser.arguments[1];
+        m_options.lts = parser.arguments[1];
       }
 
-      if (!options.lts.empty())
+      if (!m_options.lts.empty() && m_options.outformat == lts_none)
       {
-        if (options.outformat == lts_none)
-        {
-          options.outformat = mcrl2::lts::detail::guess_format(options.lts);
+        m_options.outformat = mcrl2::lts::detail::guess_format(m_options.lts);
 
-          if (options.outformat == lts_none)
-          {
-            mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
-            options.outformat = lts_lts;
-          }
+        if (m_options.outformat == lts_none)
+        {
+          mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
+          m_options.outformat = lts_lts;
         }
       }
     }
@@ -403,7 +372,7 @@ class lps2lts_tool : public lps2lts_base
 
 class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 {
-  public:    
+  public:
     lps2lts_gui_tool()
     {
       std::vector<std::string> values;
@@ -417,7 +386,7 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
       values.clear();
       values.push_back("tree");
       values.push_back("vector");
-      
+
       m_gui_options["state-format"] = create_radiobox_widget(values);
       m_gui_options["divergence"] = create_checkbox_widget();
       m_gui_options["init-tsize"] = create_textctrl_widget();
@@ -439,10 +408,6 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 
       m_gui_options["unused-data"] = create_checkbox_widget();
       m_gui_options["dummy"] = create_textctrl_widget();
-
-      // TODO:
-//      -oFORMAT, --out=FORMAT   save the output in the specified FORMAT
-
 
     }
 };
@@ -470,9 +435,9 @@ int main(int argc, char** argv)
   signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
   try
-  { 
+  {
     result = tool_instance->execute(argc, argv);
-  } 
+  }
   catch (...)
   {
     delete tool_instance;

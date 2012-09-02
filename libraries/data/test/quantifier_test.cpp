@@ -28,10 +28,10 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
 
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
-void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
+static
+void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 {
   data_specification specification;
   specification = parse_data_specification(

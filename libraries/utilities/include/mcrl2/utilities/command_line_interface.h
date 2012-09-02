@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <fstream>
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
@@ -35,49 +36,12 @@ class command_line_parser;
 /** \brief toolset copyright period description */
 inline std::string copyright_period()
 {
-  // We assume that the version number always starts with a four digit year 
+  // We assume that the version number always starts with a four digit year
   // in which the version was released.
   if (get_toolset_version().size() >= 4)
     return get_toolset_version().substr(0, 4);
   return "Today";
 }
-
-// \cond INTERNAL
-namespace detail
-{
-
-/// Helper class to prevent uninitialised variable warnings
-template < typename T, bool = boost::is_pod< T >::value >
-struct instance_of;
-
-template < typename T >
-struct instance_of< T, true >
-{
-  T m_wrapped;
-
-  instance_of()
-  {
-    m_wrapped = static_cast< T >(0);
-  }
-
-  T& wrapped()
-  {
-    return m_wrapped;
-  }
-};
-
-template < typename T >
-struct instance_of< T, false >
-{
-  T m_wrapped;
-
-  T& wrapped()
-  {
-    return m_wrapped;
-  }
-};
-}
-// \endcond
 
 /**
  * \brief Command line interface description component.
@@ -141,7 +105,7 @@ struct instance_of< T, false >
 
     Report bugs at <http://www.mcrl2.org/issuetracker>.
 
-    See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/demo-tool>.
+    See also the manual at <http://www.mcrl2.org/release/user_manual/tools/demo-tool.html>.
    \endverbatim
  * Printing version information.
  *
@@ -165,7 +129,7 @@ class interface_description
 {
     friend class command_line_parser;
 
-  private:
+  public:
 
     /// \cond INTERNAL
     /**
@@ -181,6 +145,9 @@ class interface_description
         /// name of the argument (for reference purposes in option description)
         std::string m_name;
 
+        /// type of the argument
+        std::string m_type;
+
       protected:
 
         /// sets the name for the argument
@@ -189,7 +156,45 @@ class interface_description
           m_name = n;
         }
 
+        /// sets the type for the argument
+        void set_type(std::string const& t)
+        {
+          m_type = t;
+        }
+
       public:
+
+        class argument_description
+        {
+        protected:
+          std::string m_long;
+          std::string m_short;
+          std::string m_description;
+
+        public:
+          argument_description(const std::string& long_, const std::string& short_, const std::string& description)
+            : m_long(long_), m_short(short_), m_description(description)
+          {}
+
+          argument_description(const std::string& long_, const std::string& description)
+            : m_long(long_), m_description(description)
+          {}
+
+          const std::string& get_long() const
+          {
+            return m_long;
+          }
+
+          const std::string& get_short() const
+          {
+            return m_short;
+          }
+
+          const std::string& get_description() const
+          {
+            return m_description;
+          }
+        };
 
         /// returns a copy of the object
         virtual basic_argument* clone() const = 0;
@@ -199,6 +204,18 @@ class interface_description
         {
           return m_name;
         }
+
+        /// returns the type for the argument
+        std::string get_type() const
+        {
+          return m_type;
+        }
+
+        /// whether the argument has a description or not
+        virtual bool has_description() const = 0;
+
+        /// Gets the description of the argument(s), as key-description pairs;
+        virtual std::vector< argument_description > const& get_description() const = 0;
 
         /// Gets default value for option argument
         virtual std::string const& get_default() const = 0;
@@ -229,6 +246,14 @@ class interface_description
     /// Represents a mandatory argument to an option
     template < typename T = std::string >
     class mandatory_argument;
+
+    template < typename T = std::string >
+    class enum_argument;
+
+    /// Represents a file argument
+    class file_argument;
+
+  private:
 
     /**
      * \brief Describes a single option
@@ -272,10 +297,7 @@ class interface_description
         std::string man_page_description() const;
 
         /// Returns a man page description for the option
-        std::ostream& wiki_page_description(std::ostream& s) const;
-
-        /// Returns a man page description for the option
-        std::ostream& xml_page_description(std::ostream& s, const bool is_default = false) const;
+        std::ostream& xml_page_description(std::ostream& s, const bool is_default = false, unsigned int indentation = 0) const;
 
       public:
 
@@ -362,17 +384,6 @@ class interface_description
       }
     };
     /// \endcond
-
-    friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
-    friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
-    friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
-
-    template < typename ArgumentType >
-    friend optional_argument< ArgumentType >  make_optional_argument(std::string const&, std::string const&);
-    template < typename ArgumentType >
-    friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&);
-    template < typename ArgumentType >
-    friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&, std::string const&);
 
     typedef std::map< std::string, option_descriptor > option_map;
 
@@ -630,7 +641,7 @@ class interface_description
      *
      * A hidden option is not advertised as being part of the interface.
      * As a consequence the result of class methods such as textual_description,
-     * man_page and wiki_page will not contain information about these options.
+     * man_page and xml will not contain information about these options.
      *
      * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
      **/
@@ -673,12 +684,6 @@ class interface_description
      * \return string containing a man page description of the interface
      **/
     std::string man_page() const;
-
-    /**
-     * \brief Returns the text of a wiki page
-     * \return string containing a wiki page description of the interface
-     **/
-    std::ostream& wiki_page(std::ostream&) const;
 
     /**
      * \brief Returns the text of an page
@@ -766,7 +771,7 @@ class command_line_parser
 {
   public:
 
-    /// Used to maps options to arguments
+    /// Used to map options to arguments
     typedef std::multimap< std::string, std::string >  option_map;
 
     /// Used to store command line arguments that were not recognised as option or arguments to options
@@ -879,6 +884,21 @@ class command_line_parser
     void error(std::string const& message) const;
 
     /**
+     *  \brief Checks that all arguments are passed at most once
+     */
+    void check_no_duplicate_arguments() const
+    {
+      for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+      {
+        if (1 < m_options.count(i->first))
+        {
+          error("option -" + (m_interface.long_to_short(i->first) != '\0' ?
+                              std::string(1, m_interface.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+        }
+      }
+    }
+
+    /**
      * \brief Returns the argument of the first option matching a name
      * \param[in] long_identifier the long identifier for the option
      * Finds and returns the argument of an option with long identifier
@@ -917,9 +937,9 @@ class command_line_parser
     {
       std::istringstream in(option_argument(long_identifier));
 
-      detail::instance_of< T > result;
+      T result;
 
-      in >> result.wrapped();
+      in >> result;
 
       if (in.fail())
       {
@@ -929,7 +949,7 @@ class command_line_parser
               ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
       }
 
-      return result.wrapped();
+      return result;
     }
 };
 
@@ -1035,6 +1055,13 @@ interface_description::mandatory_argument< std::string >
 make_mandatory_argument(std::string const& name, std::string const& standard_value);
 /// \cond INTERNAL
 
+/// Creates a option argument specification object for an enumerated type
+template < typename ArgumentType >
+interface_description::enum_argument< ArgumentType > make_enum_argument(std::string const& name)
+{
+  return interface_description::enum_argument< ArgumentType >(name);
+}
+
 /**
  * \brief Represents a typed argument
  *
@@ -1048,6 +1075,10 @@ class interface_description::typed_argument : public basic_argument
 {
 
   public:
+    typed_argument()
+    {
+      set_type("typed");
+    }
 
     /// Checks whether string is convertible to a value of a specific type
     inline bool validate(std::string const& s) const
@@ -1075,6 +1106,159 @@ inline bool interface_description::typed_argument< std::string >::validate(std::
   return true;
 }
 
+/**
+ * \brief Represents an argument with a limited number of allowed values.
+ *
+ */
+template < typename T >
+class interface_description::enum_argument : public typed_argument< T >
+{
+  protected:
+
+    std::vector< basic_argument::argument_description > m_enum;
+
+    std::string m_default;
+    bool m_has_default;
+
+    /// \brief Implementation that adds the value of an enum type
+    enum_argument& add_value_with_short(const std::string& long_arg, const std::string& short_arg, const std::string& description, const bool is_default = false)
+    {
+      m_enum.push_back(basic_argument::argument_description(long_arg, short_arg, description));
+
+      if(is_default)
+      {
+        if(has_default())
+        {
+          throw std::runtime_error("cannot define duplicate default value to enum argument");
+        }
+        m_default = long_arg;
+        m_has_default = true;
+      }
+
+      return (*this);
+    }
+
+  public:
+
+    /// Constructor
+    enum_argument(std::string const& name) :
+      m_has_default(false)
+    {
+      basic_argument::set_type("enum");
+      basic_argument::set_name(name);
+    }
+
+    /// \overload
+    virtual
+    enum_argument* clone() const
+    {
+      return new enum_argument< T >(*this);
+    }
+
+    /// \overload
+    virtual
+    bool has_default() const
+    {
+      return m_has_default;
+    }
+
+    /// \overload
+    virtual
+    const std::string& get_default() const
+    {
+      return m_default;
+    }
+
+    /// \overload
+    virtual
+    bool is_optional() const
+    {
+      return false;
+    }
+
+    /// \overload
+    inline bool validate(std::string const& s) const
+    {
+      for(typename std::vector< basic_argument::argument_description >::const_iterator i = m_enum.begin(); i != m_enum.end(); ++i)
+      {
+        if(i->get_long() == s || i->get_short() == s)
+        {
+          std::istringstream test(s);
+          T result;
+          test >> result;
+
+          return !test.fail();
+        }
+      }
+      return false;
+    }
+
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value(const T& arg, const bool is_default = false)
+    {
+      return add_value_with_short(to_string(arg), std::string(), description(arg), is_default);
+    }
+
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] description a description of the value
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value_desc(const T& arg, const std::string& description, const bool is_default = false)
+    {
+      return add_value_with_short(to_string(arg), std::string(), description, is_default);
+    }
+
+    /**
+     * \brief Add an enum value as a valid argument.
+     *
+     * \param[in] arg a value of the enumerated type T
+     * \param[in] short_argument the short version of the argument
+     * \param[in] is_default whether \a arg is the default value of the option
+     *
+     * \pre T has an operator <<, giving a textual description of \a arg
+     * \pre The function description is defined on T
+     * \pre If a short option must be available, then the function short_option
+     *      is overloaded for T.
+     */
+    enum_argument& add_value_short(const T& arg, const std::string& short_argument, const bool is_default = false)
+    {
+      return add_value_with_short(to_string(arg), short_argument, description(arg), is_default);
+    }
+
+
+
+    /// \overload
+    virtual bool has_description() const
+    {
+      return true;
+    }
+
+    /// \overload
+    virtual const std::vector< basic_argument::argument_description >& get_description() const
+    {
+      return m_enum;
+    }
+
+};
+
 /// Represents an optional argument to an option
 template < typename T >
 class interface_description::optional_argument : public typed_argument< T >
@@ -1087,6 +1271,9 @@ class interface_description::optional_argument : public typed_argument< T >
 
     /// default value
     std::string m_default;
+
+    /// description
+    std::vector< basic_argument::argument_description > m_description;
 
   public:
 
@@ -1102,6 +1289,7 @@ class interface_description::optional_argument : public typed_argument< T >
      **/
     inline optional_argument(std::string const& name, std::string const& d)
     {
+      basic_argument::set_type("optional");
       basic_argument::set_name(name);
 
       m_default = d;
@@ -1128,6 +1316,16 @@ class interface_description::optional_argument : public typed_argument< T >
     {
       return true;
     }
+
+    inline bool has_description() const
+    {
+      return false;
+    }
+
+    inline const std::vector< basic_argument::argument_description >& get_description() const
+    {
+      return m_description;
+    }
 };
 
 /// Represents a mandatory argument to an option
@@ -1143,6 +1341,9 @@ class interface_description::mandatory_argument : public typed_argument< T >
     /// whether a default value has been specified
     bool        m_has_default;
 
+    /// description
+    std::vector< basic_argument::argument_description > m_description;
+
   public:
 
     virtual basic_argument* clone() const
@@ -1156,6 +1357,7 @@ class interface_description::mandatory_argument : public typed_argument< T >
      **/
     inline mandatory_argument(std::string const& name) : m_has_default(false)
     {
+      basic_argument::set_type("mandatory");
       basic_argument::set_name(name);
     }
 
@@ -1165,6 +1367,7 @@ class interface_description::mandatory_argument : public typed_argument< T >
      **/
     inline mandatory_argument(std::string const& name, std::string const& d) : m_default(d), m_has_default(true)
     {
+      basic_argument::set_type("mandatory");
       basic_argument::set_name(name);
     }
 
@@ -1189,7 +1392,96 @@ class interface_description::mandatory_argument : public typed_argument< T >
     {
       return false;
     }
+
+    inline bool has_description() const
+    {
+      return false;
+    }
+
+    inline const std::vector< basic_argument::argument_description >& get_description() const
+    {
+      return m_description;
+    }
 };
+
+/// Represents a file argument to an option
+class interface_description::file_argument : public typed_argument<std::string>
+{
+
+  protected:
+
+    /// default value
+    std::string m_default;
+
+    /// whether a default value has been specified
+    bool        m_has_default;
+
+    /// description
+    std::vector< basic_argument::argument_description > m_description;
+
+  public:
+
+    virtual basic_argument* clone() const
+    {
+      return new file_argument(*this);
+    }
+
+
+    /// \overload
+    inline bool validate(std::string const& /*s*/) const
+    {
+      return true;
+    }
+
+    /**
+     * Constructor
+     * \param[in] n the name of the argument
+     **/
+    inline file_argument(std::string const& name) : m_has_default(false)
+    {
+      basic_argument::set_type("file");
+      basic_argument::set_name(name);
+    }
+
+    /**
+     * \brief Throws because mandatory arguments have no default
+     **/
+    inline std::string const& get_default() const
+    {
+      return m_default;
+    }
+
+    /**
+     * \brief Throws because mandatory arguments have no default
+     **/
+    inline bool has_default() const
+    {
+      return m_has_default;
+    }
+
+    /// whether the argument is optional or not
+    inline bool is_optional() const
+    {
+      return false;
+    }
+
+    inline bool has_description() const
+    {
+      return false;
+    }
+
+    inline const std::vector< basic_argument::argument_description >& get_description() const
+    {
+      return m_description;
+    }
+};
+
+/// Creates a file option argument specification object
+inline
+interface_description::file_argument make_file_argument(std::string const& name)
+{
+  return interface_description::file_argument(name);
+}
 
 #if !defined(__COMMAND_LINE_INTERFACE__)
 

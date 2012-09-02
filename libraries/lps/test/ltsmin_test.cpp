@@ -10,10 +10,9 @@
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
 #include <iostream>
+#include <cstdio> 
 
 #include <boost/test/minimal.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -62,7 +61,7 @@ struct state_callback_function
   }
 };
 
-void test_data_type(lps::pins_data_type& type)
+static void test_data_type(lps::pins_data_type& type)
 {
   std::cout << "test_data_type(" << type.name() << ")" << std::endl;
 
@@ -92,7 +91,7 @@ void test_data_type(lps::pins_data_type& type)
   }
 }
 
-void test_ltsmin(const std::string& rewriter_strategy)
+static void test_ltsmin(const std::string& rewriter_strategy)
 {
   // create an input file
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
@@ -154,7 +153,7 @@ void test_ltsmin(const std::string& rewriter_strategy)
   test_data_type(action_label_type);
 
   // cleanup temporary files
-  boost::filesystem::remove(boost::filesystem::path(abp_filename));
+  std::remove(abp_filename.c_str());
 
   delete[] initial_state;
   delete[] dest_state;

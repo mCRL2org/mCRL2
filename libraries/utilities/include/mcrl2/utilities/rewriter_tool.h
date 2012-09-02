@@ -12,8 +12,10 @@
 #ifndef MCRL2_UTILITIES_REWRITER_TOOL_H
 #define MCRL2_UTILITIES_REWRITER_TOOL_H
 
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 
 namespace mcrl2
 {
@@ -30,7 +32,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    mcrl2::data::rewriter::strategy m_rewrite_strategy;
+    data::rewrite_strategy m_rewrite_strategy;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -40,15 +42,22 @@ class rewriter_tool: public Tool
       Tool::add_options(desc);
 
       desc.add_option(
-        "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
-        "use rewrite strategy NAME:\n"
-        "  'jitty' for jitty rewriting (default),\n"
+        "rewriter", make_enum_argument<data::rewrite_strategy>("NAME")
+            .add_value(data::jitty, true)
 #ifdef MCRL2_JITTYC_AVAILABLE
-        "  'jittyc' for compiled jitty rewriting,\n"
+            .add_value(data::jitty_compiling)
 #endif
-        "  'jittyp' for jitty rewriting with prover\n"
+            .add_value(data::jitty_prover),
+        "use rewrite strategy NAME:"
         ,'r'
       );
+
+      desc.add_option(
+        "qlimit", make_mandatory_argument("NUM"),
+        "limit enumeration of quantifiers to NUM variables. (Default NUM=1000, NUM=0 for unlimited).",
+        'Q'
+      );
+
     }
 
     /// \brief Parse non-standard options
@@ -56,7 +65,13 @@ class rewriter_tool: public Tool
     void parse_options(const command_line_parser& parser)
     {
       Tool::parse_options(parser);
-      m_rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
+      m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
+
+      if(parser.options.count("qlimit"))
+      {
+        //Set enumerator limit for quantifier enumeration
+        data::detail::set_enumerator_variable_limit(parser.option_argument_as< size_t >("qlimit"));
+      }
     }
 
   public:
@@ -69,14 +84,14 @@ class rewriter_tool: public Tool
                   std::string known_issues = ""
                  )
       : Tool(name, author, what_is, tool_description, known_issues),
-        m_rewrite_strategy(mcrl2::data::rewriter::jitty)
+        m_rewrite_strategy(mcrl2::data::jitty)
     {}
 
     /// \brief Returns the rewrite strategy
     /// \return The rewrite strategy
-    data::rewriter::strategy rewrite_strategy() const
+    data::rewrite_strategy rewrite_strategy() const
     {
-      return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
+      return data::rewrite_strategy(m_rewrite_strategy);
     }
 
     /// \brief Creates a data rewriter as specified on the command line.

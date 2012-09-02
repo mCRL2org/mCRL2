@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -28,7 +28,9 @@ enum pbes_rewriter_type
   quantifier_finite,
   quantifier_one_point,
   prover,
-  pfnf
+  pfnf,
+  ppg,
+  bqnf_quantifier
 };
 
 /// \brief Parses a pbes rewriter type
@@ -59,29 +61,68 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   {
     return pfnf             ;
   }
+  if (type == "ppg")
+  {
+    return ppg              ;
+  }
+  if (type == "bqnf-quantifier")
+  {
+    return bqnf_quantifier  ;
+  }
   throw mcrl2::runtime_error("unknown pbes rewriter option " + type);
+}
+
+/// \brief Prints a pbes rewriter type
+inline
+std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
+{
+  switch (type)
+  {
+    case simplify:
+      return "simplify";
+    case quantifier_all:
+      return "quantifier-all";
+    case quantifier_finite:
+      return "quantifier-finite";
+    case quantifier_one_point:
+      return "quantifier-one-point";
+    case prover:
+      return "prover";
+    case pfnf:
+      return "pfnf";
+    case ppg:
+      return "ppg";
+    case bqnf_quantifier:
+      return "bqnf-quantifier";
+    default:
+    return "unknown pbes rewriter";
+  }
 }
 
 /// \brief Returns a description of a pbes rewriter
 inline
-std::string pbes_rewriter_description(pbes_rewriter_type type)
+std::string description(const pbes_rewriter_type type)
 {
   switch (type)
   {
     case simplify          :
-      return "  'simplify' for simplification";
+      return "for simplification";
     case quantifier_all    :
-      return "  'quantifier-all' for eliminating all quantifiers";
+      return "for eliminating all quantifiers";
     case quantifier_finite :
-      return "  'quantifier-finite' for eliminating finite quantifier variables";
+      return "for eliminating finite quantifier variables";
     case quantifier_one_point :
-      return "  'quantifier-one-point' for one point rule quantifier elimination";
+      return "for one point rule quantifier elimination";
     case prover            :
-      return "  'prover' for rewriting using a prover";
+      return "for rewriting using a prover";
     case pfnf              :
-      return "  'pfnf' for rewriting into PFNF normal form";
+      return "for rewriting into PFNF normal form";
+    case ppg               :
+      return "for rewriting into Parameterised Parity Game form";
+    case bqnf_quantifier   :
+      return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }
-  return "  unknown pbes rewriter";
+  throw mcrl2::runtime_error("unknown pbes rewriter");
 }
 
 /// \brief Stream operator for rewriter type
@@ -102,6 +143,13 @@ std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
     is.setstate(std::ios_base::failbit);
   }
   return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const pbes_rewriter_type t)
+{
+  os << print_pbes_rewriter_type(t);
+  return os;
 }
 
 } // namespace pbes_system

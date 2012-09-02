@@ -1,4 +1,4 @@
-# Authors: Frank Stappers
+# Authors: Frank Stappers, Aad Mathijssen and Rimco Boudewijns
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -10,69 +10,108 @@
 project(mcrl2-gui)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_ENABLE_GUI_TOOLS )
-
-# ########## Create MacOSX Bundle Information ######### 
+# ########## Create MacOSX Bundle Information #########
 include(MCRL2MacOSXBundleInformation)
-
-# ######### General setup ##########
-if(NOT APPLE)
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION share/mcrl2)
-
-  if( UNIX )
-		# Install desktop icons			
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/icons/mcrl2-gui.png DESTINATION share/icons)
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications)
-  endif( UNIX )
-
-else(NOT APPLE)
-  # Copy directly into application
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/mcrl2.png" COPYONLY )
-endif(NOT APPLE)
-
-# ########## mcrl2_tools_mcrl2 executable ##########
-
-IF(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  SET(SRCS ${SRCS} mcrl2-gui.rc)
-ENDIF(WIN32)
-
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
-  mcrl2-gui.cpp
-  initialization.cpp
-  #gui/mainframe.cpp
-
-  ${MACOSX_BUNDLE_ICON_FILE}
-  ${SRCS}
-)
-
 IF (APPLE)
  SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ENDIF (APPLE)
 
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+# ######### General setup ##########
+set(MCRL2_GUI_RCC_SRCS mcrl2-gui.qrc)
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+qt4_add_resources(MCRL2_GUI_RC_FILES ${MCRL2_GUI_RCC_SRCS})
 
-target_link_libraries(${PROJECT_NAME}
-  ${wxWidgets_LIBRARIES}
-  mcrl2_utilities
-  mcrl2_utilities_wx
-  mcrl2_core
+set(MCRL2_GUI_UI_FILES
+  mainwindow.ui
+  toolinstance.ui
+  fileinformation.ui
+  filepicker.ui
+  copydialog.ui
 )
 
+qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
+
+set(MCRL2_GUI_MOC_HEADERS
+  mainwindow.h
+  filebrowser.h
+  toolaction.h
+  toolinstance.h
+  fileinformation.h
+  filepicker.h
+  copydialog.h
+  copythread.h
+)
+qt4_wrap_cpp(MCRL2_GUI_MOC_SOURCES ${MCRL2_GUI_MOC_HEADERS})
+
+set(MCRL2_GUI_SRC_FILES
+  ${MCRL2_GUI_RC_FILES}
+  ${MCRL2_GUI_UI_HEADERS}
+  ${MCRL2_GUI_MOC_SOURCES}
+  main.cpp
+  mainwindow.cpp
+  filebrowser.cpp
+  toolaction.cpp
+  toolinstance.cpp
+  toolcatalog.cpp
+  toolinformation.cpp
+  fileinformation.cpp
+  filepicker.cpp
+  copydialog.cpp
+  copythread.cpp
+  optionvalue.cpp
+)
+
+# ######### Copy extra files ##########
+if(NOT APPLE)
+  if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tool_catalog.xml" COPYONLY )
+  else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
+  endif(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2 COMPONENT Applications)
+
+  if( UNIX )
+    # Install desktop icons
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications COMPONENT Applications)
+  endif( UNIX )
+
+else(NOT APPLE)
+  # Copy directly into application
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Applications)
+endif(NOT APPLE)
+
+# ######### Create Windows Icon ##########
+if(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  set(MCRL2_GUI_SRC_FILES ${MCRL2_GUI_SRC_FILES} mcrl2-gui.rc)
+endif(WIN32)
+
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2_GUI_SRC_FILES})
+
+target_link_libraries(${PROJECT_NAME}
+  ${QT_LIBRARIES}
+  mcrl2_core
+  mcrl2_utilities
+  mcrl2_utilities_qt
+)
+
+# Don't forget to include output directory, otherwise
+# the UI file won't be wrapped!
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+# For promoted widgets
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-
-endif ( MCRL2_ENABLE_GUI_TOOLS )

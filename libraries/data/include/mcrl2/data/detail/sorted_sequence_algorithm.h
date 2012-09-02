@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file sorted_sequence_algorithm.h
+/// \file mcrl2/data/detail/sorted_sequence_algorithm.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H

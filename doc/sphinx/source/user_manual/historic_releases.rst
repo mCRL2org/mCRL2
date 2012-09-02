@@ -120,9 +120,6 @@ Release March 2011 (SVN revision 9030)
 .. |bin_w64_201103| replace:: Windows Installer (64-bit)
 .. _bin_w64_201103: http://www.mcrl2.org/download/release/mcrl2-201103-1-win64.exe
 
-.. |ubuntu| replace:: Ubuntu Launchpad PPA
-.. _ubuntu: https://launchpad.net/~mcrl2/+archive/ppa
-
 .. |suse_11.2_32_201103| replace:: OpenSUSE 11.2 package (32-bit)
 .. _suse_11.2_32_201103: http://www.mcrl2.org/download/release/mcrl2-201103-1.openSUSE_11.2.i586.rpm
 

@@ -28,6 +28,7 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
+#include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -241,7 +242,7 @@ void test_simplifying_rewriter()
   test_simplify(R, r, "forall n: Nat. forall b: Bool. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
   test_simplify(R, r, "forall n: Nat. val(b) && Y(n)"                                   , "val(b) && forall n: Nat. Y(n)");
   test_simplify(R, r, "forall n: Nat. val(b)"                                           , "val(b)");
-
+  test_simplify(R, r, "forall m: Nat. val(m > 2) && X"                                  , "(forall m: Nat. val(m > 2)) && X");
   // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
   // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
   // test_expressions(R, "X && (Y(p) || X)"                                                , "X");
@@ -595,19 +596,47 @@ void test_substitutions3()
 
 void test_one_point_rule_rewriter()
 {
+  std::cout << "<test_one_point_rule_rewriter>" << std::endl;
   one_point_rule_rewriter R;
   pbes_system::pbes_expression x;
   pbes_system::pbes_expression y;
 
   x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
   y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
   x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
   y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
+
+  x = pbes_system::parse_pbes_expression("forall c: Bool. forall b: Bool. val(b) => val(b || c)");
+  y = R(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "forall c: Bool. val(false) || val(c)");
+}
+
+void test_data2pbes()
+{
+  std::cout << "<test_data2pbes>" << std::endl;
+  pbes_system::pbes_expression x;
+  pbes_system::pbes_expression y;
+
+  x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3 && n == 5)");
+  y = pbes_system::detail::data2pbes(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
+
+  x = pbes_system::parse_pbes_expression("val(forall n: Nat. n != 3 && n == 5)");
+  y = pbes_system::detail::data2pbes(x);
+  std::clog << "x = " << pbes_system::pp(x) << std::endl;
+  std::clog << "y = " << pbes_system::pp(y) << std::endl;
+  BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 }
 
 int test_main(int argc, char* argv[])
@@ -622,6 +651,7 @@ int test_main(int argc, char* argv[])
   test_substitutions2();
   test_substitutions3();
   test_one_point_rule_rewriter();
+  test_data2pbes();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
   BOOST_CHECK(false);

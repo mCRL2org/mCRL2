@@ -19,6 +19,7 @@
 #include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
@@ -459,6 +460,18 @@ void test_find_nil()
   BOOST_CHECK(find_nil(formula) == true);
 }
 
+void test_count_fixpoints()
+{
+  state_formula formula;
+  specification spec;
+
+  formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  BOOST_CHECK(count_fixpoints(formula) == 2);
+
+  formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", spec);
+  BOOST_CHECK(count_fixpoints(formula) == 3);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -468,6 +481,7 @@ int test_main(int argc, char* argv[])
   test_type_checking();
   test_not();
   test_parse();
+  test_count_fixpoints();
 
   // TODO: this test fails due to a bug in translate_reg_frms
   // test_find_nil();

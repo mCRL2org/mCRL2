@@ -18,7 +18,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lts/lts_io.h"
@@ -29,7 +29,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace mcrl2::utilities::tools;
@@ -187,10 +186,6 @@ class ltsinfo_tool : public ltsinfo_base
         case lts_dot:
         {
           return provide_information<lts_dot_t>();
-        }
-        case lts_svc:
-        {
-          return provide_information<lts_svc_t>();
         }
       }
       return true;

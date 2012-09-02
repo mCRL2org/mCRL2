@@ -240,27 +240,16 @@ void ATaddProtectFunction(const ATermProtFunc f);
  */
 void ATmarkTerm(const ATerm t);
 
-
-/**
- * Mark an array to prevent it from being garbage collected. CAVEAT EMPTOR.
- * This function should only be called from a function previously registered
- * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
- * core dumps.
- */
-void ATmarkArray(const ATerm* start, const size_t size);
-
 /**
  * Initialize the ATerm library. It is essential to call this function in the
  * main frame of your application. It is needed to boot the administration
  * for maximal sharing and garbage collecting terms.
  *
- * \arg argc argc argument of your main function
- * \arg argv argv argument of your main function
  * \arg bottomOfStack a reference to a variable of type ATerm that is in the
  *                    main stack frame. This should be the FIRST ATerm variable
  *                    declared.
  */
-void ATinit(int argc, char* argv[], ATerm* bottomOfStack);
+void ATinit(ATerm* bottomOfStack);
 
 /**
  * Check whether the ATerm library has been initialized.

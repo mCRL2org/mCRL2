@@ -25,6 +25,7 @@
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -217,6 +218,14 @@ void one_point_rule_preprocessor_test()
   test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(n1 != n2 || n1 != n2 + 1)", "n1 == n2 && n1 == n2 + 1");
 }
 
+void simplify_rewriter_test()
+{
+  data::detail::simplify_rewriter R;
+  test_rewriters(N(R), N(I), "!(true && false)", "true");
+  test_rewriters(N(R), N(I), "exists n:Nat, b:Bool. b", "exists b:Bool. b");
+  test_rewriters(N(R), N(I), "forall b:Bool. !!b", "forall b:Bool. b");
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -225,6 +234,7 @@ int test_main(int argc, char** argv)
   test3();
   test4();
   one_point_rule_preprocessor_test();
+  simplify_rewriter_test();
 
   return 0;
 }

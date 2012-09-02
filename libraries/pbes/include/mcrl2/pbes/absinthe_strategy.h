@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -47,7 +47,7 @@ absinthe_strategy parse_absinthe_strategy(const std::string& strategy)
 
 /// \brief Prints an absinthe strategy
 inline
-std::string print_absinthe_strategy(absinthe_strategy strategy)
+std::string print_absinthe_strategy(const absinthe_strategy strategy)
 {
   switch (strategy)
   {
@@ -56,7 +56,44 @@ std::string print_absinthe_strategy(absinthe_strategy strategy)
     case absinthe_under:
       return "under";
   }
-  return "unknown absinthe strategy";
+  throw mcrl2::runtime_error("unknown absinthe strategy");
+}
+
+inline
+std::istream& operator>>(std::istream& is, absinthe_strategy& strategy)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    strategy = parse_absinthe_strategy(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator <<(std::ostream& os, const absinthe_strategy strategy)
+{
+  os << print_absinthe_strategy(strategy);
+  return os;
+}
+
+/// \brief Prints an absinthe strategy
+inline
+std::string description(const absinthe_strategy strategy)
+{
+  switch (strategy)
+  {
+    case absinthe_over:
+      return "an over-approximation";
+    case absinthe_under:
+      return "an under-approximation";
+  }
+  throw mcrl2::runtime_error("unknown absinthe strategy");
 }
 
 } // namespace pbes_system

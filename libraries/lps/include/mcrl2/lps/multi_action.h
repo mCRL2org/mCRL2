@@ -233,8 +233,8 @@ inline bool equal_action_signatures(const std::vector<action>& a, const std::vec
   return true;
 }
 
-/// \brief Compares names and sorts of two actions
-struct compare_actions
+/// \brief Compares action labels
+struct compare_action_labels
 {
   /// \brief Function call operator
   /// \param a An action
@@ -246,8 +246,8 @@ struct compare_actions
   }
 };
 
-/// \brief Compares names and sorts of two actions
-struct compare_actions2
+/// \brief Compares action labels and arguments
+struct compare_action_label_arguments
 {
   /// \brief Function call operator
   /// \param a An action
@@ -255,12 +255,11 @@ struct compare_actions2
   /// \return The function result
   bool operator()(const action& a, const action& b) const
   {
-    return a.label() < b.label();
-    if (a.label().name() != b.label().name())
+    if (a.label() != b.label())
     {
-      return a.label().name() ==  b.label().name();
+      return a.label() < b.label();
     }
-    return a.label().sorts() < b.label().sorts();
+    return a < b;
   }
 };
 
@@ -365,8 +364,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   // make copies of a and b and sort them
   std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
   std::vector<action> vb(b.actions().begin(), b.actions().end()); // protection not needed
-  std::sort(va.begin(), va.end(), detail::compare_actions());
-  std::sort(vb.begin(), vb.end(), detail::compare_actions());
+  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
+  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -384,7 +383,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   action_iterator first = va.begin();
   while (first != va.end())
   {
-    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
+    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
@@ -408,8 +407,8 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   // make copies of a and b and sort them
   std::vector<action> va(a.actions().begin(), a.actions().end());
   std::vector<action> vb(b.actions().begin(), b.actions().end());
-  std::sort(va.begin(), va.end(), detail::compare_actions());
-  std::sort(vb.begin(), vb.end(), detail::compare_actions());
+  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
+  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -422,7 +421,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   action_iterator first = va.begin();
   while (first != va.end())
   {
-    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
+    action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
@@ -431,6 +430,46 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
+}
+
+/// \brief Represents the name of a multi action
+typedef atermpp::multiset<core::identifier_string> multi_action_name;
+
+/// \brief Represents a set of multi action names
+typedef std::set<multi_action_name> multi_action_name_set;
+
+/// \brief Pretty print function for a multi action name
+inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (i != x.begin())
+    {
+      out << " | ";
+    }
+    out << core::pp(*i);
+  }
+  return out.str();
+}
+
+/// \brief Pretty print function for a set of multi action names
+inline
+std::string pp(const multi_action_name_set& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
 }
 
 } // namespace lps

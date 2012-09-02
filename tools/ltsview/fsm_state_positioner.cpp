@@ -274,8 +274,8 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
   {
     float circumference = 2 * static_cast<float>(PI) * ring * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
-    int slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
-    num_slots.push_back(slots);
+    int size = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
+    num_slots.push_back(size);
   }
 }
 

@@ -8,8 +8,6 @@
 //
 /// \file ./timeseries.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "timeseries.h"
 
 #include <iostream>
@@ -19,29 +17,21 @@ using namespace std;
 // -- static variables ----------------------------------------------
 
 
-bool TimeSeries::useShading = false;
-//ColorRGB TimeSeries::colClr = { 1.0, 1.0, 0.93, 1.0 };
-ColorRGB TimeSeries::colClr = { 1.0, 1.0, 1.0, 1.0 };
-ColorRGB TimeSeries::colTxt = { 0.0, 0.0, 0.0, 1.0 };
-int TimeSeries::szeTxt = 12;
-ColorRGB TimeSeries::colMrk = { 0.73, 0.89, 1.0, 1.0 };
-//ColorRGB TimeSeries::colMrk = { 0.84, 0.93, 1.0, 1.0 };
-int TimeSeries::itvAnim = 350;
+static const QColor colMrk(186, 227, 255);
+static const int itvAnim = 350;
 
 
 // -- constructors and destructor -----------------------------------
 
 
-// ----------------------------
 TimeSeries::TimeSeries(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
-// ----------------------------
+  QWidget *parent,
+  Settings* s,
+  Graph* g)
+  : Visualizer(parent, g),
+    settings(s)
 {
-  critSect = false;
-
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   ySpacePxl     = 6.0;
   minPixPerNode = 4.0;
   actPixPerNode = 4.0;
@@ -54,113 +44,93 @@ TimeSeries::TimeSeries(
 
   dragDir = DRAG_DIR_NULL;
 
-  timerAnim = new wxTimer();
-  timerAnim->SetOwner(this, ID_TIMER);
-
   animIdxDgrm = -1;
   animFrame = itemsMarked.end();
+
+  connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
+
+  connect(&settings->backgroundColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textColor, SIGNAL(changed(QColor)), this, SLOT(update()));
+  connect(&settings->textSize, SIGNAL(changed(int)), this, SLOT(update()));
 }
 
 
-// ----------------------
 TimeSeries::~TimeSeries()
-// ----------------------
 {
   clearDiagram();
   clearAttributes();
-
-  delete timerAnim;
-  timerAnim = NULL;
 }
 
 
 // -- get functions -------------------------------------------------
 
 
-// -----------------------------
-bool TimeSeries::getUseShading()
-// -----------------------------
-{
-  return useShading;
-}
-
-
-// ---------------------------------------------------
 void TimeSeries::getIdcsClstMarked(set< size_t > &idcs)
-// ---------------------------------------------------
 {
   idcs.clear();
   set< size_t >::iterator it;
   for (it = itemsMarked.begin(); it != itemsMarked.end(); ++it)
   {
-    idcs.insert(graph->getNode(*it)->getCluster()->getIndex());
+    idcs.insert(m_graph->getNode(*it)->getCluster()->getIndex());
   }
 }
 
 
-// --------------------------------
 void TimeSeries::getIdcsClstMarked(
   set< size_t > &idcs ,
-  ColorRGB& col)
-// --------------------------------
+  QColor& col)
 {
   getIdcsClstMarked(idcs);
   col = colMrk;
 }
 
 
-// ----------------------------
 void TimeSeries::getIdxMseOver(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
-// ----------------------------
+  QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
-  if (mouseOverIdx != NON_EXISTING && mouseOverIdx < graph->getSizeNodes())
+  if (mouseOverIdx != NON_EXISTING && mouseOverIdx < m_graph->getSizeNodes())
   {
-    Node* node = graph->getNode(mouseOverIdx);
+    Node* node = m_graph->getNode(mouseOverIdx);
     idxLeaf = node->getCluster()->getIndex();
     for (size_t i = 0; i < node->getSizeInEdges(); ++i)
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
-    node = NULL;
+    node = 0;
   }
-  VisUtils::mapColorCoolBlue(colLeaf);
+  colLeaf = VisUtils::coolBlue;
 }
 
 
-// ----------------------------
 void TimeSeries::getCurrIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
-// ----------------------------
+  QColor& colLeaf)
 {
   idxLeaf = NON_EXISTING;
   idcsBndl.clear();
-  if (currIdxDgrm != NON_EXISTING && currIdxDgrm < graph->getSizeNodes())
+  if (currIdxDgrm != NON_EXISTING && currIdxDgrm < m_graph->getSizeNodes())
   {
-    Node* node = graph->getNode(currIdxDgrm);
+    Node* node = m_graph->getNode(currIdxDgrm);
     idxLeaf = node->getCluster()->getIndex();
     for (size_t i = 0; i < node->getSizeInEdges(); ++i)
     {
       idcsBndl.insert(node->getInEdge(i)->getBundle()->getIndex());
     }
-    node = NULL;
+    node = 0;
   }
-  VisUtils::mapColorCoolBlue(colLeaf);
+  colLeaf = VisUtils::coolBlue;
 }
 
 
-// -----------------------------
 void TimeSeries::getAnimIdxDgrm(
   size_t& idxLeaf,
   set< size_t > &idcsBndl,
-  ColorRGB& colLeaf)
-// -----------------------------
+  QColor& colLeaf)
 {
   if (animFrame != itemsMarked.end())
   {
@@ -171,9 +141,9 @@ void TimeSeries::getAnimIdxDgrm(
     idxLeaf = NON_EXISTING;
     idcsBndl.clear();
 
-    if (*animFrame != NON_EXISTING && *animFrame < graph->getSizeNodes())
+    if (*animFrame != NON_EXISTING && *animFrame < m_graph->getSizeNodes())
     {
-      nodeTo = graph->getNode(*animFrame);
+      nodeTo = m_graph->getNode(*animFrame);
       set< size_t >::iterator it = itemsMarked.begin();
       if (nodeTo->getIndex() == *it)
       {
@@ -183,7 +153,7 @@ void TimeSeries::getAnimIdxDgrm(
       {
         it = animFrame;
       }
-      nodeFr = graph->getNode(*(--it));
+      nodeFr = m_graph->getNode(*(--it));
 
       idxLeaf = nodeTo->getCluster()->getIndex();
       for (size_t i = 0; i < nodeTo->getSizeInEdges(); ++i)
@@ -195,18 +165,16 @@ void TimeSeries::getAnimIdxDgrm(
         }
       }
     }
-    VisUtils::mapColorCoolBlue(colLeaf);
+    colLeaf = VisUtils::coolBlue;
 
-    nodeFr = NULL;
-    nodeTo = NULL;
-    edgeIn = NULL;
+    nodeFr = 0;
+    nodeTo = 0;
+    edgeIn = 0;
   }
 }
 
 
-// ------------------------------------------------
 void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
-// ------------------------------------------------
 {
   idcs.clear();
   for (size_t i = 0; i < attributes.size(); ++i)
@@ -219,52 +187,17 @@ void TimeSeries::getAttrIdcs(vector< size_t > &idcs)
 // -- set functions -------------------------------------------------
 
 
-// -------------------------------------------------
-void TimeSeries::setUseShading(const bool& useShd)
-// -------------------------------------------------
-{
-  useShading = useShd;
-}
-
-
-// ------------------------------------------------
-void TimeSeries::setColorClr(const ColorRGB& col)
-// ------------------------------------------------
-{
-  colClr = col;
-}
-
-
-// ------------------------------------------------
-void TimeSeries::setColorTxt(const ColorRGB& col)
-// ------------------------------------------------
-{
-  colTxt = col;
-}
-
-
-// ------------------------------------------
-void TimeSeries::setSizeTxt(const int& sze)
-// ------------------------------------------
-{
-  szeTxt = sze;
-}
-
-
-// -----------------------------------------
 void TimeSeries::setDiagram(Diagram* dgrm)
-// -----------------------------------------
 {
   clearDiagram();
   diagram = dgrm;
 
   dataChanged = true;
+  update();
 }
 
 
-// ------------------------------------------------------------
 void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
-// ------------------------------------------------------------
 {
   // clear existing attributes
   clearAttributes();
@@ -272,24 +205,24 @@ void TimeSeries::initAttributes(const vector< size_t > attrIdcs)
   // init new attributes
   for (size_t i = 0; i < attrIdcs.size(); ++i)
   {
-    attributes.push_back(graph->getAttribute(attrIdcs[i]));
+    Attribute *attribute = m_graph->getAttribute(attrIdcs[i]);
+    attributes.push_back(attribute);
+    connect(attribute, SIGNAL(deleted()), this, SLOT(clearData()));
   }
 
   dataChanged = true;
+  update();
 }
 
 
-// -------------------------
 void TimeSeries::clearData()
-// -------------------------
 {
   wdwStartIdx = 0;
+  update();
 }
 
 
-// -----------------------------------------
 void TimeSeries::markItems(Cluster* frame)
-// -----------------------------------------
 {
   if (frame->getSizeNodes() > 0)
   {
@@ -317,151 +250,87 @@ void TimeSeries::markItems(Cluster* frame)
     {
       animFrame = itemsMarked.begin();
     }
+
+    update();
   }
 }
 
 
-// ----------------------------------------------------------
-void TimeSeries::markItems(const vector< Cluster* > frames)
-// ----------------------------------------------------------
+void TimeSeries::markItems(QList<Cluster*> frames)
 {
-  Cluster* frame;
-
-  // get index of animation frame
-  size_t prevAnimIdx;
-  if (animFrame != itemsMarked.end())
+  for (int i = 0; i < frames.size(); ++i)
   {
-    prevAnimIdx = *animFrame;
+    markItems(frames[i]);
   }
-  else
-  {
-    prevAnimIdx = NON_EXISTING;
-  }
-
-  // update marked items
-  for (size_t i = 0; i < frames.size(); ++i)
-  {
-    frame = frames[i];
-
-    if (i == 0 && frame->getSizeNodes() > 0)
-    {
-      itemsMarked.clear();
-    }
-
-    for (size_t j = 0; j < frame->getSizeNodes(); ++j)
-    {
-      itemsMarked.insert(frame->getNode(j)->getIndex());
-    }
-  }
-  frame = NULL;
-
-  // update animation frame
-  animFrame = itemsMarked.find(prevAnimIdx);
-  if (animFrame == itemsMarked.end())
-  {
-    animFrame = itemsMarked.begin();
-  }
-}
-
-
-// ---------------------------------------
-void TimeSeries::handleSendDgrmSglToExnr()
-// ---------------------------------------
-{
-  Cluster* frame;
-  vector< Attribute* > attrs;
-
-  frame = new Cluster();
-  frame->addNode(graph->getNode(currIdxDgrm));
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
-  {
-    if (graph->getAttribute(i)->getSizeCurValues() > 0)
-    {
-      attrs.push_back(graph->getAttribute(i));
-    }
-  }
-  mediator->addToExaminer(frame, attrs);
-
-  delete frame;
-  frame = NULL;
-  attrs.clear();
 }
 
 
 // -- visualization functions  --------------------------------------
 
 
-// ---------------------------------------------------
 void TimeSeries::visualize(const bool& inSelectMode)
-// ---------------------------------------------------
 {
-  if (critSect != true)
+  // have textures been generated
+  if (texCharOK != true)
   {
-    // have textures been generated
-    if (texCharOK != true)
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged == true)
+  {
+    calcSettingsGeomBased();
+  }
+  // check if data are ok
+  if (dataChanged == true)
+  {
+    calcSettingsDataBased();
+  }
+
+  // visualize
+  if (inSelectMode == true)
+  {
+    QSizeF size = worldSize();
+
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+      hits,
+      selectBuf,
+      0.0125,
+      0.0125);
+
+    glPushName(ID_CANVAS);
+    VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
+
+    if (!m_animationTimer.isActive())
     {
-      genCharTex();
-    }
-
-    // check if positions are ok
-    if (geomChanged == true)
-    {
-      calcSettingsGeomBased();
-    }
-    // check if data are ok
-    if (dataChanged == true)
-    {
-      calcSettingsDataBased();
-    }
-
-    // clear canvas
-    clear();
-
-    // visualize
-    if (inSelectMode == true)
-    {
-      double wth, hgt;
-      canvas->getSize(wth, hgt);
-
-      GLint hits = 0;
-      GLuint selectBuf[512];
-      startSelectMode(
-        hits,
-        selectBuf,
-        0.0125,
-        0.0125);
-
-      glPushName(ID_CANVAS);
-      VisUtils::fillRect(-0.5*wth, 0.5*wth, 0.5*wth, -0.5*wth);
-
-      if (timerAnim->IsRunning() != true)
-      {
-        drawMarkedItems(inSelectMode);
-        drawSlider(inSelectMode);
-      }
-      if (dragStatus != DRAG_STATUS_ITMS)
-      {
-        drawDiagrams(inSelectMode);
-      }
-
-      glPopName();
-
-      finishSelectMode(
-        hits,
-        selectBuf);
-    }
-    else
-    {
-      drawAxes(inSelectMode);
       drawMarkedItems(inSelectMode);
       drawSlider(inSelectMode);
-      drawScale(inSelectMode);
-      drawAttrVals(inSelectMode);
-      //drawAxes( inSelectMode );
-      drawLabels(inSelectMode);
-      drawMouseOver(inSelectMode);
+    }
+    if (dragStatus != DRAG_STATUS_ITMS)
+    {
       drawDiagrams(inSelectMode);
     }
+
+    glPopName();
+
+    finishSelectMode(
+      hits,
+      selectBuf);
+  }
+  else
+  {
+    clear();
+    drawAxes(inSelectMode);
+    drawMarkedItems(inSelectMode);
+    drawSlider(inSelectMode);
+    drawScale(inSelectMode);
+    drawAttrVals(inSelectMode);
+    //drawAxes( inSelectMode );
+    drawLabels(inSelectMode);
+    drawMouseOver(inSelectMode);
+    drawDiagrams(inSelectMode);
   }
 }
 
@@ -469,296 +338,186 @@ void TimeSeries::visualize(const bool& inSelectMode)
 // -- event handlers ------------------------------------------------
 
 
-// --------------------------------------
-void TimeSeries::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
+void TimeSeries::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
   // redraw in select mode
-  visualize(true);
+  updateGL(true);
   // redraw in render mode
-  visualize(false);
+  updateGL();
+
+  if (e->type() == QEvent::MouseMove)
+  {
+    m_lastMousePos = e->pos();
+  }
 }
 
 
-// ------------------------------------
-void TimeSeries::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-// ------------------------------------
+void TimeSeries::handleWheelEvent(QWheelEvent *e)
 {
-  Visualizer::handleMouseLftUpEvent(x, y);
+  Visualizer::handleWheelEvent(e);
 
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-// ----------------------------------------
-void TimeSeries::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-// --------------------------------------
-void TimeSeries::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-// ------------------------------------
-void TimeSeries::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-// ------------------------------------
-{
-  Visualizer::handleMouseRgtUpEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-}
-
-
-// -------------------------------------
-void TimeSeries::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-// -------------------------------------
-{
-  Visualizer::handleMouseMotionEvent(x, y);
-
-  // redraw in select mode
-  visualize(true);
-  // redraw in render mode
-  visualize(false);
-
-  xMousePrev = xMouseCur;
-  yMousePrev = yMouseCur;
-}
-
-
-
-// ---------------------------------------
-void TimeSeries::handleMouseWheelIncEvent(
-  const int& x,
-  const int& y)
-// ---------------------------------------
-{
-  Visualizer::handleMouseWheelIncEvent(x, y);
-
-  if (timerAnim->IsRunning() != true)
+  if (!m_animationTimer.isActive())
   {
     mouseOverIdx = -1;
 
     // zoom out
-    double pix  = canvas->getPixelSize();
+    double pix  = pixelSize();
     double dist = posSliderBotRgt.x - posSliderTopLft.x;
 
     double diff = actPixPerNode;
     actPixPerNode = (dist/pix)/(double)(nodesWdwScale-nodesItvSlider);
     diff -= actPixPerNode;
 
-    if (actPixPerNode > minPixPerNode)
+    if (e->delta() > 0)
     {
-      actPixPerNode = minPixPerNode;
-      if (diff > 0)
+      if (actPixPerNode > minPixPerNode)
       {
-        wdwStartIdx += (int)(0.5*(nodesItvSlider-1));
+        actPixPerNode = minPixPerNode;
+        if (diff > 0)
+        {
+          wdwStartIdx += (int)(0.5*(nodesItvSlider-1));
+        }
       }
-    }
-    else if (actPixPerNode < 0)
-    {
-      actPixPerNode = minPixPerNode;
-    }
-    else
-    {
-      wdwStartIdx += (int)(0.5*nodesItvSlider);
-    }
-
-    geomChanged = true;
-
-    // redraw in render mode
-    visualize(false);
-  }
-}
-
-
-// ---------------------------------------
-void TimeSeries::handleMouseWheelDecEvent(
-  const int& x,
-  const int& y)
-// ---------------------------------------
-{
-  Visualizer::handleMouseWheelDecEvent(x, y);
-
-  if (timerAnim->IsRunning() != true)
-  {
-    mouseOverIdx = -1;
-
-    // zoom in
-    double pix  = canvas->getPixelSize();
-    double dist = posSliderBotRgt.x - posSliderTopLft.x;
-
-    // update pixels per node
-    actPixPerNode = (dist/pix)/(double)(nodesWdwScale+nodesItvSlider);
-    if (actPixPerNode < itvSliderPerNode)
-    {
-      actPixPerNode = itvSliderPerNode;
-      wdwStartIdx -= (int)(0.5*itvSliderPerNode);
-    }
-    else
-    {
-      // update position
-      wdwStartIdx -= (int)(0.5*nodesItvSlider);
-      if (wdwStartIdx + nodesWdwScale+nodesItvSlider > graph->getSizeNodes()-1)
+      else if (actPixPerNode < 0)
       {
-        wdwStartIdx = (graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
+        actPixPerNode = minPixPerNode;
       }
-      if (wdwStartIdx == NON_EXISTING)
+      else
       {
-        wdwStartIdx = 0;
+        wdwStartIdx += (int)(0.5*nodesItvSlider);
+      }
+    } else {
+      if (actPixPerNode < itvSliderPerNode)
+      {
+        actPixPerNode = itvSliderPerNode;
+        wdwStartIdx -= (int)(0.5*itvSliderPerNode);
+      }
+      else
+      {
+        // update position
+        wdwStartIdx -= (int)(0.5*nodesItvSlider);
+        if (wdwStartIdx + nodesWdwScale+nodesItvSlider > m_graph->getSizeNodes()-1)
+        {
+          wdwStartIdx = (m_graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
+        }
+        if (wdwStartIdx == NON_EXISTING)
+        {
+          wdwStartIdx = 0;
+        }
       }
     }
 
     geomChanged = true;
 
     // redraw in render mode
-    visualize(false);
+    updateGL();
   }
 }
 
 
-// -------------------------------------
+
+
+
 void TimeSeries::handleMouseLeaveEvent()
-// -------------------------------------
 {
-  Visualizer::initMouse();
+  Visualizer::handleMouseLeaveEvent();
 
   // reset mouse roll-over
   mouseOverIdx = -1;
-  mediator->handleMarkFrameClust(this);
 
   // redraw in render mode
-  visualize(false);
+  updateGL();
 }
 
 
-// -----------------------------------------------------
-void TimeSeries::handleKeyDownEvent(const int& keyCode)
-// -----------------------------------------------------
+void TimeSeries::handleKeyEvent(QKeyEvent *e)
 {
-  Visualizer::handleKeyDownEvent(keyCode);
+  Visualizer::handleKeyEvent(e);
 
-  if (keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT)
+  if (e->type() == QEvent::KeyPress)
   {
-    // move to right
-    if ((wdwStartIdx + 1 + nodesWdwScale) <= (graph->getSizeNodes()-1))
+    if (e->key() == Qt::Key_Right)
     {
-      wdwStartIdx += 1;
+      // move to right
+      if ((wdwStartIdx + 1 + nodesWdwScale) <= (m_graph->getSizeNodes()-1))
+      {
+        wdwStartIdx += 1;
+      }
+      else if ((wdwStartIdx + 1 + nodesWdwScale) > (m_graph->getSizeNodes()-1))
+      {
+        wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
+      }
     }
-    else if ((wdwStartIdx + 1 + nodesWdwScale) > (graph->getSizeNodes()-1))
+    else if (e->key() == Qt::Key_Left)
     {
-      wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
+      // move to left
+      if ((wdwStartIdx + 1) == NON_EXISTING)
+      {
+        wdwStartIdx = 0;
+      }
+      else if ((wdwStartIdx - 1) != NON_EXISTING)
+      {
+        wdwStartIdx -= 1;
+      }
     }
-  }
-  else if (keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT)
-  {
-    // move to left
-    if ((wdwStartIdx + 1) == NON_EXISTING)
+    else if (e->key() == Qt::Key_Home)
     {
+      // move to beginning
       wdwStartIdx = 0;
     }
-    else if ((wdwStartIdx - 1) != NON_EXISTING)
+    else if (e->key() == Qt::Key_End)
     {
-      wdwStartIdx -= 1;
+      // move to end
+      wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
     }
-  }
-  else if (keyCodeDown == WXK_HOME || keyCodeDown == WXK_NUMPAD_HOME)
-  {
-    // move to beginning
-    wdwStartIdx = 0;
-  }
-  else if (keyCodeDown == WXK_END || keyCodeDown == WXK_NUMPAD_END)
-  {
-    // move to end
-    wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
-  }
-  else if (keyCodeDown == WXK_PAGEUP || keyCodeDown == WXK_NUMPAD_PAGEUP || keyCodeDown == WXK_NUMPAD9)
-  {
-    // move one window toward beginning
-    if (wdwStartIdx < nodesWdwScale)
+    else if (e->key() == Qt::Key_PageUp || (e->key() == Qt::Key_9 && (e->modifiers() & Qt::KeypadModifier)))
     {
-      wdwStartIdx = 0;
+      // move one window toward beginning
+      if (wdwStartIdx < nodesWdwScale)
+      {
+        wdwStartIdx = 0;
+      }
+      else
+      {
+        wdwStartIdx -= nodesWdwScale;
+      }
+
     }
-    else
+    else if (e->key() == Qt::Key_PageDown || (e->key() == Qt::Key_3 && (e->modifiers() & Qt::KeypadModifier)))
     {
-      wdwStartIdx -= nodesWdwScale;
+      // move one window toward end
+      if ((wdwStartIdx + 2*nodesWdwScale) <= (m_graph->getSizeNodes()-1))
+      {
+        wdwStartIdx += nodesWdwScale;
+      }
+      else
+      {
+        wdwStartIdx = (m_graph->getSizeNodes()-1) - nodesWdwScale;
+      }
+    }
+    else if (e->key() == Qt::Key_Escape)
+    {
+      if (m_animationTimer.isActive())
+      {
+        m_animationTimer.stop();
+      }
+      else
+      {
+        itemsMarked.clear();
+      }
     }
 
+    // redraw in render mode
+    updateGL();
   }
-  else if (keyCodeDown == WXK_PAGEDOWN || keyCodeDown == WXK_NUMPAD_PAGEDOWN || keyCodeDown == WXK_NUMPAD3)
+  else
   {
-    // move one window toward end
-    if ((wdwStartIdx + 2*nodesWdwScale) <= (graph->getSizeNodes()-1))
+    if (e->key() == Qt::Key_Shift)
     {
-      wdwStartIdx += nodesWdwScale;
+      shiftStartIdx = -1;
     }
-    else
-    {
-      wdwStartIdx = (graph->getSizeNodes()-1) - nodesWdwScale;
-    }
-  }
-  else if (keyCodeDown == WXK_ESCAPE)
-  {
-    if (timerAnim->IsRunning())
-    {
-      timerAnim->Stop();
-    }
-    else
-    {
-      itemsMarked.clear();
-    }
-  }
-
-  // redraw in render mode
-  visualize(false);
-}
-
-
-// ----------------------------------------------------
-void TimeSeries::handleKeyUpEvent(const int& keyCode)
-// ----------------------------------------------------
-{
-  Visualizer::handleKeyUpEvent(keyCode);
-
-  if (keyCode == WXK_SHIFT)
-  {
-    shiftStartIdx = -1;
   }
 }
 
@@ -766,39 +525,25 @@ void TimeSeries::handleKeyUpEvent(const int& keyCode)
 // -- utility functions -----------------------------------------
 
 
-// -------------------------------------
 void TimeSeries::calcSettingsGeomBased()
-// -------------------------------------
 {
-  critSect = true;
-
+  // calculate positions
+  calcPositions();
   // update flag
   geomChanged = false;
-  // calculate positions
-  calcPositions();
-
-  critSect = false;
 }
 
 
-// -------------------------------------
 void TimeSeries::calcSettingsDataBased()
-// -------------------------------------
 {
-  critSect = true;
-
+  // calculate positions
+  calcPositions();
   // update flag
   dataChanged = false;
-  // calculate positions
-  calcPositions();
-
-  critSect = false;
 }
 
 
-// -----------------------------
 void TimeSeries::calcPositions()
-// -----------------------------
 {
   double yItv = 0.0;
 
@@ -806,13 +551,12 @@ void TimeSeries::calcPositions()
   double prevScaleLft      = posScaleTopLft.x;
 
   // calc general info
-  double pix = canvas->getPixelSize();
-  double cWth, cHgt;
-  canvas->getSize(cWth, cHgt);
-  double xLft = -0.5*cWth;
-  double xRgt =  0.5*cWth;
-  double yTop =  0.5*cHgt;
-  double yBot = -0.5*cHgt;
+  double pix = pixelSize();
+  QSizeF size = worldSize();
+  double xLft = -0.5*size.width();
+  double xRgt =  0.5*size.width();
+  double yTop =  0.5*size.height();
+  double yBot = -0.5*size.height();
 
   // calc positions of slider at top
   posSliderTopLft.x = xLft + 5.0*pix;
@@ -820,7 +564,7 @@ void TimeSeries::calcPositions()
   posSliderBotRgt.x = xRgt - 5.0*pix;
   posSliderBotRgt.y = yTop - 6.0*pix - 6.0*ySpacePxl*pix;
   // calc intervals of slider
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     nodesItvSlider = 1;
     double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
@@ -828,7 +572,7 @@ void TimeSeries::calcPositions()
 
     while (itvSlider == 0.0)
     {
-      double fact = (double)(graph->getSizeNodes())/(double)nodesItvSlider;
+      double fact = (double)(m_graph->getSizeNodes())/(double)nodesItvSlider;
       double itvPx = distPx/fact;
 
       if (itvPx >= 5)
@@ -841,22 +585,22 @@ void TimeSeries::calcPositions()
       }
     }
 
-    itvSliderPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)(graph->getSizeNodes());
+    itvSliderPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)(m_graph->getSizeNodes());
   }
   else
   {
-    itvSlider = cWth;
+    itvSlider = size.width();
   }
 
   // calc size of visible window
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
 
     nodesWdwScale = int (distPx/actPixPerNode);
-    if (graph->getSizeNodes() < nodesWdwScale)
+    if (m_graph->getSizeNodes() < nodesWdwScale)
     {
-      nodesWdwScale = graph->getSizeNodes();
+      nodesWdwScale = m_graph->getSizeNodes();
     }
 
     itvWdwPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)nodesWdwScale;
@@ -867,7 +611,7 @@ void TimeSeries::calcPositions()
   }
 
   // calc intervals of scale
-  if (graph->getSizeNodes() > 0)
+  if (m_graph->getSizeNodes() > 0)
   {
     nodesItvScale = 1;
     double distPx = (posScaleBotRgt.x - posScaleTopLft.x)/pix;
@@ -881,7 +625,7 @@ void TimeSeries::calcPositions()
   }
   else
   {
-    nodesItvScale = int (cWth);
+    nodesItvScale = int (size.width());
   }
 
   // calc positions of scale at bottom
@@ -896,7 +640,7 @@ void TimeSeries::calcPositions()
 
   if (attributes.size() > 0)
   {
-    double yDist = cHgt
+    double yDist = size.height()
                    - (6.0*ySpacePxl + 6.0)*pix // slider at top
                    - (3.5*ySpacePxl + 6.0)*pix // scale at bottom
                    - 2.0*pix;                  // spacing
@@ -930,58 +674,24 @@ void TimeSeries::calcPositions()
     attr = attributes[i];
     vector< Position2D > v;
 
-    if (attr->getSizeCurValues() == 0)
+    for (size_t j = 0; j< m_graph->getSizeNodes(); ++j)
     {
-      double rge;
-      if (attr->getLowerBound() < 0)
+      node = m_graph->getNode(j);
+
+      double alphaHgt;
+      if (attr->getSizeCurValues() == 1)
       {
-        rge = 2.0*Utils::maxx(Utils::abs(attr->getLowerBound()), Utils::abs(attr->getUpperBound()));
+        alphaHgt = 1.0;
       }
       else
-      {
-        rge = attr->getUpperBound() - attr->getLowerBound();
-      }
-
-      for (size_t j = 0; j< graph->getSizeNodes(); ++j)
-      {
-        node = graph->getNode(j);
-        double alphaHgt;
-        if (attr->getLowerBound() < 0)
-        {
-          alphaHgt = 0.5 + node->getTupleVal(attr->getIndex())/rge;
-        }
-        else
-        {
-          alphaHgt = (node->getTupleVal(attr->getIndex()) - attr->getLowerBound())/rge;
-        }
-
-        pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
-        pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
-
-        v.push_back(pos);
-      }
+        alphaHgt = (double)attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()
+                   /
+                   (double)(attr->getSizeCurValues()-1);
+     pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
+     pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
+     v.push_back(pos);
     }
-    else
-    {
-      for (size_t j = 0; j< graph->getSizeNodes(); ++j)
-      {
-        node = graph->getNode(j);
 
-        double alphaHgt;
-        if (attr->getSizeCurValues() == 1)
-        {
-          alphaHgt = 1.0;
-        }
-        else
-          alphaHgt = (double)attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()
-                     /
-                     (double)(attr->getSizeCurValues()-1);
-        pos.x = posAxesTopLft[i].x + j*itvWdwPerNode;
-        pos.y = posAxesBotRgt[i].y + alphaHgt*(yItv - 0.5*ySpacePxl*pix - 3.0*pix);
-
-        v.push_back(pos);
-      }
-    }
     posValues.push_back(v);
   }
 
@@ -997,25 +707,22 @@ void TimeSeries::calcPositions()
   }
 
   // clear memory
-  attr = NULL;
-  node = NULL;
+  attr = 0;
+  node = 0;
 }
 
 
-// ----------------------------
 void TimeSeries::clearDiagram()
-// ----------------------------
 {
   // association
-  diagram = NULL;
+  diagram = 0;
 }
 
 
-// -------------------------------
 void TimeSeries::clearAttributes()
-// -------------------------------
 {
-  // association
+  disconnect(this, SLOT(clearData()));
+
   attributes.clear();
 }
 
@@ -1023,9 +730,7 @@ void TimeSeries::clearAttributes()
 // -- utility event handlers ----------------------------------------
 
 
-// ----------------------------------------
-void TimeSeries::onTimer(wxTimerEvent& /*e*/)
-// ----------------------------------------
+void TimeSeries::animate()
 {
   ++animFrame;
   if (animFrame == itemsMarked.end())
@@ -1033,17 +738,14 @@ void TimeSeries::onTimer(wxTimerEvent& /*e*/)
     animFrame = itemsMarked.begin();
   }
 
-  //mediator->handleAnimFrameBundl( this );
-  mediator->handleAnimFrameClust(this);
+  emit animationChanged();
 
-  visualize(false);
-  canvas->Refresh();
+  updateGL();
+  repaint();
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   animFrame = itemsMarked.begin();
 
@@ -1059,20 +761,18 @@ void TimeSeries::handleRwndDiagram(const int& dgrmIdx)
   animIdxDgrm = idx;
   currIdxDgrm = idx;
 
-  mediator->handleAnimFrameClust(this);
+  emit animationChanged();
 
-  visualize(false);
-  canvas->Refresh();
+  updateGL();
+  update();
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
-// -----------------------------------------------------
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (animFrame == itemsMarked.begin())
@@ -1099,7 +799,7 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
     showDgrm.erase(it);
     showDgrm.insert(pair< size_t, Position2D >(idx, pos));
 
-    mediator->handleAnimFrameClust(this);
+    emit animationChanged();
 
     animIdxDgrm = idx;
     currIdxDgrm = idx;
@@ -1107,15 +807,13 @@ void TimeSeries::handlePrevDiagram(const int& /*dgrmIdx*/)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
-// -----------------------------------------------------
 {
   if (dgrmIdx == animIdxDgrm)
   {
-    if (timerAnim->IsRunning())
+    if (m_animationTimer.isActive())
     {
-      timerAnim->Stop();
+      m_animationTimer.stop();
 
       if (*animFrame != animIdxDgrm)
       {
@@ -1134,25 +832,23 @@ void TimeSeries::handlePlayDiagram(const size_t& dgrmIdx)
     }
     else
     {
-      timerAnim->Start(itvAnim);
+      m_animationTimer.start(itvAnim);
     }
   }
   else
   {
     animIdxDgrm = dgrmIdx;
     animFrame = itemsMarked.begin();
-    timerAnim->Start(itvAnim);
+    m_animationTimer.start(itvAnim);
   }
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleNextDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
-  if (timerAnim->IsRunning())
+  if (m_animationTimer.isActive())
   {
-    timerAnim->Stop();
+    m_animationTimer.stop();
   }
 
   if (animFrame == itemsMarked.end())
@@ -1181,7 +877,7 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
     showDgrm.erase(it);
     showDgrm.insert(pair< size_t, Position2D >(idx, pos));
 
-    mediator->handleAnimFrameClust(this);
+    emit animationChanged();
 
     animIdxDgrm = idx;
     currIdxDgrm = idx;
@@ -1192,59 +888,61 @@ void TimeSeries::handleNextDiagram(const int& dgrmIdx)
 // -- hit detection -------------------------------------------------
 
 
-// ----------------------------------------------------
+void TimeSeries::route()
+{
+  Cluster cluster;
+  QList<Attribute*> attributes;
+
+  cluster.addNode(m_graph->getNode(currIdxDgrm));
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
+  {
+    attributes += m_graph->getAttribute(i);
+  }
+
+  emit routingCluster(&cluster, QList<Cluster *>(), attributes);
+}
+
+
 void TimeSeries::handleHits(const vector< int > &ids)
-// ----------------------------------------------------
 {
   if (ids.size() > 1)
   {
     // mouse button down
-    if (mouseButton == MSE_BUTTON_DOWN)
+    if (m_mouseDrag)
     {
       mouseOverIdx = -1;
-
-      if (mouseDrag == MSE_DRAG_TRUE)
+      if (m_lastMouseEvent.buttons() == Qt::LeftButton)
       {
-        if (mouseSide == MSE_SIDE_LFT)
+        if (dragStatus == DRAG_STATUS_SLDR || dragStatus == DRAG_STATUS_SLDR_LFT || dragStatus == DRAG_STATUS_SLDR_RGT)
         {
-          if (dragStatus == DRAG_STATUS_SLDR)
+          dragSlider();
+        }
+        else if (dragStatus == DRAG_STATUS_ITMS)
+        {
+          if (ids.size() > 2)
           {
-            handleDragSliderHdl();
+            handleDragItems(ids[2]);
           }
-          else if (dragStatus == DRAG_STATUS_SLDR_LFT)
+        }
+        else if (dragStatus == DRAG_STATUS_DGRM)
+        {
+          if (ids.size() > 2)
           {
-            handleDragSliderHdlLft();
-          }
-          else if (dragStatus == DRAG_STATUS_SLDR_RGT)
-          {
-            handleDragSliderHdlRgt();
-          }
-          else if (dragStatus == DRAG_STATUS_ITMS)
-          {
-            if (ids.size() > 2)
-            {
-              handleDragItems(ids[2]);
-            }
-          }
-          else if (dragStatus == DRAG_STATUS_DGRM)
-          {
-            if (ids.size() > 2)
-            {
-              handleDragDiagram(ids[2]);
-            }
+            handleDragDiagram(ids[2]);
           }
         }
       }
-    }
-    // mouse button up
-    else
+    }    
+
+    if (m_lastMouseEvent.type() != QEvent::MouseMove) //Implies press, release or double click
     {
       dragDistNodes = 0.0;
       dragStatus = DRAG_STATUS_NONE;
 
-      if (mouseSide == MSE_SIDE_LFT && ids.size() > 2 && ids[1] == ID_DIAGRAM)
+      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton &&
+          ids[1] == ID_DIAGRAM && ids.size() > 2)
       {
-        if (ids.size() == 4 && mouseClick == MSE_CLICK_SINGLE)
+        if (ids.size() == 4)
         {
           if (ids[3] == ID_DIAGRAM_CLSE)
           {
@@ -1253,7 +951,7 @@ void TimeSeries::handleHits(const vector< int > &ids)
           else if (ids[3] == ID_DIAGRAM_MORE)
           {
             currIdxDgrm = ids[2];
-            mediator->handleSendDgrm(this, false, false, false, true, false);
+            route();
           }
           else if (ids[3] == ID_DIAGRAM_RWND)
           {
@@ -1280,29 +978,27 @@ void TimeSeries::handleHits(const vector< int > &ids)
         mouseOverIdx = NON_EXISTING;
         currIdxDgrm = ids[2];
 
-        if (currIdxDgrm != NON_EXISTING && timerAnim->IsRunning() != true)
+        if (currIdxDgrm != NON_EXISTING && !m_animationTimer.isActive())
         {
-          ColorRGB col;
           Cluster* frame = new Cluster();
           vector< Attribute* > attrs;
 
-          VisUtils::mapColorCoolBlue(col);
-          frame->addNode(graph->getNode(currIdxDgrm));
+          frame->addNode(m_graph->getNode(currIdxDgrm));
 
-          for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+          for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
           {
             //if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
-            attrs.push_back(graph->getAttribute(i));
+            attrs.push_back(m_graph->getAttribute(i));
           }
 
-          mediator->handleShowFrame(frame, attrs, col);
-          mediator->handleMarkFrameClust(this);
+          emit hoverCluster(frame, QVector<Attribute *>::fromStdVector(attrs).toList());
 
           delete frame;
-          frame = NULL;
+          frame = 0;
         }
       }
-      else if (mouseClick == MSE_CLICK_SINGLE && mouseSide == MSE_SIDE_LFT && ids[1] == ID_SLIDER)
+      else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::LeftButton &&
+               ids[1] == ID_SLIDER)
       {
         if (ids.size() == 3)
         {
@@ -1318,62 +1014,38 @@ void TimeSeries::handleHits(const vector< int > &ids)
           {
             dragStatus = DRAG_STATUS_SLDR_RGT;
           }
+          initDragSlider();
         }
         else
         {
           dragStatus = DRAG_STATUS_SLDR;
-          handleHitSlider();
+          clickSliderBar();
         }
       }
-      else if (mouseSide == MSE_SIDE_LFT && ids.size() > 2 &&
-               (ids[1] == ID_ITEMS && attributes.size() > 0))
+      else if (m_lastMouseEvent.button() == Qt::LeftButton &&
+               ids[1] == ID_ITEMS && ids.size() > 2 && attributes.size() > 0)
       {
-        if (mouseClick == MSE_CLICK_SINGLE)
+        if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
         {
           handleHitItems(ids[2]);
           dragStatus = DRAG_STATUS_ITMS;
         }
-        else if (mouseClick == MSE_CLICK_DOUBLE)
+        else if (m_lastMouseEvent.type() == QEvent::MouseButtonDblClick)
         {
           handleShowDiagram(ids[2]);
         }
-        //mouseOverIdx = ids[2];
-        //currIdxDgrm = -1;
-
-        //mediator->handleMarkFrameClust( this );
-        //mediator->handleUnshowFrame();
       }
-      else if (mouseSide == MSE_SIDE_RGT && mouseClick == MSE_CLICK_SINGLE)
+      else if (m_lastMouseEvent.type() == QEvent::MouseButtonPress && m_lastMouseEvent.button() == Qt::RightButton &&
+               ids[1] == ID_DIAGRAM)
       {
-        if (mouseButton == MSE_BUTTON_DOWN)
-        {
-          /*
-            if ( ids[1] == ID_ITEMS )
-            *mediator << "show menu\n";
-            else
-            */
-          if (ids[1] == ID_DIAGRAM)
-          {
-            mediator->handleSendDgrm(this, false, false, false, true, false);
-          }
-        }
+        route();
       }
       else
       {
-        if (currIdxDgrm != NON_EXISTING)
-        {
-          currIdxDgrm = -1;
-          mediator->handleUnshowFrame();
-          mediator->handleMarkFrameClust(this);
-        }
+        currIdxDgrm = NON_EXISTING;
+        mouseOverIdx = NON_EXISTING;
 
-        if (mouseOverIdx != NON_EXISTING)
-        {
-          mouseOverIdx = NON_EXISTING;
-        }
-
-        mediator->handleMarkFrameClust(this);
-        mediator->handleUnshowFrame();
+        emit hoverCluster(0);
       }
     }
   }
@@ -1385,11 +1057,9 @@ void TimeSeries::handleHits(const vector< int > &ids)
 }
 
 
-// --------------------------
 void TimeSeries::processHits(
   GLint hits,
   GLuint buffer[])
-// --------------------------
 {
   GLuint* ptr;
   ptr = (GLuint*) buffer;
@@ -1429,31 +1099,27 @@ void TimeSeries::processHits(
   }
   else
   {
-    canvas->clearToolTip();
+    setToolTip(QString());
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 
 // -- utility drawing functions -------------------------------------
 
 
-// ---------------------
 void TimeSeries::clear()
-// ---------------------
 {
-  VisUtils::clear(colClr);
+  VisUtils::clear(settings->backgroundColor.value());
 }
 
 
-// ----------------------------------------------------
 void TimeSeries::drawSlider(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode == true)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     glPushName(ID_SLIDER);
     VisUtils::fillRect(
@@ -1492,8 +1158,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
-    ColorRGB colFill, colFade;
+    double pix = pixelSize();
 
     // draw marked items on slider
     VisUtils::setColor(colMrk);
@@ -1523,7 +1188,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw positions of diagrams
-    VisUtils::setColorCoolBlue();
+    VisUtils::setColor(VisUtils::coolBlue);
     map< size_t, Position2D >::iterator it;
     for (it = showDgrm.begin(); it != showDgrm.end(); ++it)
     {
@@ -1535,24 +1200,24 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw slider outlines
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       posSliderTopLft.x, posSliderBotRgt.x,
       posSliderTopLft.y, posSliderTopLft.y);
 
-    VisUtils::setColorWhite();
+    VisUtils::setColor(Qt::white);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix);
-    VisUtils::setColorLtGray();
+    VisUtils::setColor(VisUtils::lightGray);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix,
       posSliderBotRgt.y - 0.5*ySpacePxl*pix);
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
       posSliderTopLft.x,
       posSliderBotRgt.x,
@@ -1568,24 +1233,24 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       {
         if (ctr%10 == 0)
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             pos,
             pos,
             posSliderTopLft.y - 2.0*ySpacePxl*pix,
             posSliderTopLft.y - 4.0*ySpacePxl*pix);
 
-          VisUtils::setColor(colTxt);
+          VisUtils::setColor(settings->textColor.value());
           VisUtils::drawLabelCenter(
             texCharId,
             pos,
             posSliderTopLft.y - 5.0*ySpacePxl*pix,
-            szeTxt*pix/CHARHEIGHT,
+            settings->textSize.value()*pix/CHARHEIGHT,
             Utils::intToStr(ctr*nodesItvSlider));
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             pos,
             pos,
@@ -1595,7 +1260,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       }
       else
       {
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawLine(
           pos,
           pos,
@@ -1608,17 +1273,15 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
     }
 
     // draw slider
-    VisUtils::mapColorLtCoolGreen(colFade);
-    VisUtils::mapColorCoolGreen(colFill);
     VisUtils::fillRect(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode,
       posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode,
       posSliderTopLft.y - 2.0*pix,
       posSliderTopLft.y - 2.0*ySpacePxl*pix + 2.0*pix,
-      colFade, colFade, colFill, colFill);
+      VisUtils::lightCoolGreen, VisUtils::lightCoolGreen, VisUtils::coolGreen, VisUtils::coolGreen);
 
     // draw slider handles
-    VisUtils::setColorDkGray();
+    VisUtils::setColor(VisUtils::darkGray);
     VisUtils::fillTriangle(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode - 5*pix,
       posSliderTopLft.y - 2.0*ySpacePxl*pix - 10*pix,
@@ -1634,7 +1297,7 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
       posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode,
       posSliderTopLft.y - 2.0*ySpacePxl*pix);
 
-    VisUtils::setColorMdGray();
+    VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::enableLineAntiAlias();
     VisUtils::drawTriangle(
       posSliderTopLft.x + wdwStartIdx*itvSliderPerNode - 5*pix,
@@ -1655,15 +1318,13 @@ void TimeSeries::drawSlider(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------
 void TimeSeries::drawScale(const bool& inSelectMode)
-// ---------------------------------------------------
 {
   if (inSelectMode == true)
     {}
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
     size_t    beg = 0;
     for (size_t i = 0; i < nodesWdwScale; ++i)
     {
@@ -1680,23 +1341,23 @@ void TimeSeries::drawScale(const bool& inSelectMode)
       {
         if ((i/nodesItvScale)%10 == 0)
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.y,
             posScaleTopLft.y - 2.0*ySpacePxl*pix);
-          VisUtils::setColor(colTxt);
+          VisUtils::setColor(settings->textColor.value());
           VisUtils::drawLabelCenter(
             texCharId,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.y - 3.0*ySpacePxl*pix,
-            szeTxt*pix/CHARHEIGHT,
+            settings->textSize.value()*pix/CHARHEIGHT,
             Utils::size_tToStr(i));
         }
         else
         {
-          VisUtils::setColorMdGray();
+          VisUtils::setColor(VisUtils::mediumGray);
           VisUtils::drawLine(
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
             posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
@@ -1706,7 +1367,7 @@ void TimeSeries::drawScale(const bool& inSelectMode)
       }
       else
       {
-        VisUtils::setColorMdGray();
+        VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::drawLine(
           posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
           posScaleTopLft.x + (i-wdwStartIdx)*itvWdwPerNode,
@@ -1718,13 +1379,11 @@ void TimeSeries::drawScale(const bool& inSelectMode)
 }
 
 
-// ---------------------------------------------------------
 void TimeSeries::drawMarkedItems(const bool& inSelectMode)
-// ---------------------------------------------------------
 {
   if (inSelectMode == true)
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     glPushName(ID_ITEMS);
     for (size_t i = 0; i < nodesWdwScale; ++i)
@@ -1741,7 +1400,7 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
   }
   else
   {
-    double pix = canvas->getPixelSize();
+    double pix = pixelSize();
 
     // draw selected items
     VisUtils::setColor(colMrk);
@@ -1760,18 +1419,12 @@ void TimeSeries::drawMarkedItems(const bool& inSelectMode)
 }
 
 
-// --------------------------------------------------
 void TimeSeries::drawAxes(const bool& inSelectMode)
-// --------------------------------------------------
 {
   if (inSelectMode == true)
     {}
   else
   {
-    ColorRGB colFill;
-    ColorRGB colFade;
-    VisUtils::mapColorLtGray(colFill);
-    VisUtils::mapColorLtLtGray(colFade);
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
       VisUtils::fillRect(
@@ -1779,162 +1432,32 @@ void TimeSeries::drawAxes(const bool& inSelectMode)
         posAxesBotRgt[i].x,
         posAxesTopLft[i].y,
         posAxesBotRgt[i].y,
-        colFill,
-        colFill,
-        colFade,
-        colFade);
+        VisUtils::lightGray,
+        VisUtils::lightGray,
+        VisUtils::lightLightGray,
+        VisUtils::lightLightGray);
     }
   }
 }
 
 
-// ------------------------------------------------------
 void TimeSeries::drawAttrVals(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
     {}
   else
   {
-    double iter, numr;
-    ColorRGB colFill, colFade;
-
     // draw bars
     for (size_t i = 0; i < posValues.size(); ++i)
     {
-      if (attributes[i]->getSizeCurValues() == 0)
-        // unclustered attribute
+      for (size_t j = 0; j < nodesWdwScale; ++j)
       {
-        double zero;
-        if (attributes[i]->getLowerBound() < 0)
-          // cater for ranges that include negative values
-        {
-          zero = posAxesBotRgt[i].y + 0.5*(posAxesTopLft[i].y - posAxesBotRgt[i].y);
-        }
-        else
-        {
-          zero = posAxesBotRgt[i].y;
-        }
-
-        for (size_t j = 0; j < nodesWdwScale; ++j)
-        {
-          double value = graph->getNode(wdwStartIdx+j)->getTupleVal(attributes[i]->getIndex());
-          if (value >= 0)
-          {
-            if (useShading == true)
-            {
-              // positive values
-              if (attributes[i]->getLowerBound() < 0)
-              {
-                iter = value;
-                numr = Utils::maxx(Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));;
-              }
-              else
-              {
-                iter = value - attributes[i]->getLowerBound();
-                numr = attributes[i]->getUpperBound()-attributes[i]->getLowerBound();
-              }
-
-              VisUtils::mapColorSeqGreen(iter/numr, colFill);
-              colFade.r = colFill.r-0.25;
-              colFade.g = colFill.g-0.25;
-              colFade.b = colFill.b-0.25;
-              colFade.a = 1.0;
-
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero,
-                colFill,
-                colFill,
-                colFade,
-                colFade);
-            }
-            else
-            {
-              VisUtils::setColorCoolGreen();
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero);
-            }
-          }
-          else
-          {
-            if (useShading == true)
-            {
-              // negative values
-              iter = value;
-              numr = Utils::maxx(Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));
-
-              VisUtils::mapColorSeqRed(Utils::abs(iter)/Utils::abs(numr), colFill);
-              colFade.r = colFill.r-0.25;
-              colFade.g = colFill.g-0.25;
-              colFade.b = colFill.b-0.25;
-              colFade.a = 1.0;
-
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero,
-                colFade,
-                colFade,
-                colFill,
-                colFill);
-            }
-            else
-            {
-              VisUtils::setColorCoolRed();
-              VisUtils::fillRect(
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-                posValues[i][wdwStartIdx+j].y,
-                zero);
-            }
-          }
-        }
-      }
-      else
-        // clustered attribute
-      {
-        for (size_t j = 0; j < nodesWdwScale; ++j)
-        {
-          if (useShading == true)
-          {
-            iter = (double)attributes[i]->mapToValue(
-                     graph->getNode(wdwStartIdx+j)->getTupleVal(
-                       attributes[i]->getIndex()))->getIndex();
-            numr = (double)(attributes[i]->getSizeCurValues()-1);
-
-            VisUtils::mapColorSeqGreen(iter/numr, colFill);
-            colFade.r = colFill.r-0.25;
-            colFade.g = colFill.g-0.25;
-            colFade.b = colFill.b-0.25;
-            colFade.a = 1.0;
-
-            VisUtils::fillRect(
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].y,
-              posAxesBotRgt[i].y,
-              colFill,
-              colFill,
-              colFade,
-              colFade);
-          }
-          else
-          {
-            VisUtils::setColorCoolGreen();
-            VisUtils::fillRect(
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
-              posValues[i][wdwStartIdx+j].y,
-              posAxesBotRgt[i].y);
-          }
-        }
+        VisUtils::setColor(VisUtils::coolGreen);
+        VisUtils::fillRect(
+          posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
+          posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
+          posValues[i][wdwStartIdx+j].y,
+          posAxesBotRgt[i].y);
       }
     }
 
@@ -1945,10 +1468,7 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
       glBegin(GL_LINE_STRIP);
       for (size_t j = 0; j < nodesWdwScale; ++j)
       {
-        iter = graph->getNode(wdwStartIdx+j)->getTupleVal(attributes[i]->getIndex());
-        VisUtils::mapColorMdGray(colFill);
-
-        glColor3f(colFill.r, colFill.g, colFill.b);
+        VisUtils::setColor(VisUtils::mediumGray);
         glVertex2f(
           posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode,
           posValues[i][wdwStartIdx + j].y);
@@ -1963,14 +1483,12 @@ void TimeSeries::drawAttrVals(const bool& inSelectMode)
 }
 
 
-// ------------------------------------------------------
 void TimeSeries::drawDiagrams(const bool& inSelectMode)
-// ------------------------------------------------------
 {
   if (inSelectMode == true)
   {
     glPushName(ID_DIAGRAM);
-    if (timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING)
+    if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posDgrm;
       map< size_t, Position2D >::iterator it;
@@ -2061,9 +1579,9 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
   }
   else
   {
-    double     pix = canvas->getPixelSize();
+    double     pix = pixelSize();
 
-    if (timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING)
+    if (m_animationTimer.isActive() && animIdxDgrm != NON_EXISTING)
     {
       Position2D posPvot, posDgrm;
       map< size_t, Position2D >::iterator it;
@@ -2080,7 +1598,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       double dist   = Utils::dist(posPvot.x, posPvot.y, posDgrm.x, posDgrm.y);
 
       // draw vertical line
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(
         posPvot.x,
         posPvot.x,
@@ -2088,7 +1606,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         posScaleTopLft.y - 2.0*ySpacePxl*pix);
 
       // draw connector
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       glPushMatrix();
       glTranslatef(posPvot.x, posPvot.y, 0.0);
       glRotatef(aglDeg-90.0, 0.0, 0.0, 1.0);
@@ -2103,17 +1621,17 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
       glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
       // drop shadow
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillRect(
         -1.0 + 4.0*pix/scaleDgrm,
         1.0 + 4.0*pix/scaleDgrm,
         1.0 - 4.0*pix/scaleDgrm,
         -1.0 - 4.0*pix/scaleDgrm);
       // diagram
-      for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+      for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
       {
-        Attribute* attr = graph->getAttribute(i);
-        Node* node = graph->getNode(*animFrame);
+        Attribute* attr = m_graph->getAttribute(i);
+        Node* node = m_graph->getNode(*animFrame);
         if (attr->getSizeCurValues() > 0)
         {
           attrs.push_back(attr);
@@ -2125,12 +1643,12 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
           attrs.push_back(attr);
           vals.push_back(val);
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
       }
       diagram->visualize(
         inSelectMode,
-        canvas,
+        pixelSize(),
         attrs,
         vals);
       attrs.clear();
@@ -2138,24 +1656,24 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
 
       VisUtils::enableLineAntiAlias();
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillRwndIcon(0.2, 0.36, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawRwndIcon(0.2, 0.36, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillPrevIcon(0.4, 0.56, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillPauseIcon(0.6, 0.76, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawPauseIcon(0.6, 0.76, -0.8, -0.98);
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::fillNextIcon(0.8, 0.96, -0.8, -0.98);
-      VisUtils::setColorLtLtGray();
+      VisUtils::setColor(VisUtils::lightLightGray);
       VisUtils::drawNextIcon(0.8, 0.96, -0.8, -0.98);
 
       VisUtils::disableLineAntiAlias();
@@ -2179,7 +1697,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         double dist   = Utils::dist(posPvot.x, posPvot.y, posDgrm.x, posDgrm.y);
 
         // draw vertical line
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::drawLine(
           posPvot.x,
           posPvot.x,
@@ -2187,7 +1705,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
           posScaleTopLft.y - 2.0*ySpacePxl*pix);
 
         // draw connector
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         glPushMatrix();
         glTranslatef(posPvot.x, posPvot.y, 0.0);
         glRotatef(aglDeg-90.0, 0.0, 0.0, 1.0);
@@ -2202,7 +1720,7 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
 
         // drop shadow
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillRect(
           -1.0 + 4.0*pix/scaleDgrm,
           1.0 + 4.0*pix/scaleDgrm,
@@ -2211,10 +1729,10 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         // diagram
         Attribute* attr;
         Node* node;
-        for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+        for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
         {
-          attr = graph->getAttribute(i);
-          node = graph->getNode(it->first);
+          attr = m_graph->getAttribute(i);
+          node = m_graph->getNode(it->first);
           if (attr->getSizeCurValues() > 0)
           {
             attrs.push_back(attr);
@@ -2227,12 +1745,12 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
             vals.push_back(val);
           }
         }
-        attr = NULL;
-        node = NULL;
+        attr = 0;
+        node = 0;
 
         diagram->visualize(
           inSelectMode,
-          canvas,
+          pixelSize(),
           attrs,
           vals);
         attrs.clear();
@@ -2241,36 +1759,36 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
         VisUtils::enableLineAntiAlias();
 
         // close icon
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillCloseIcon(0.8, 0.96, 0.96, 0.8);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawCloseIcon(0.8, 0.96, 0.96, 0.8);
         // more icon
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::fillMoreIcon(-0.98, -0.8, -0.8, -0.98);
-        VisUtils::setColorLtLtGray();
+        VisUtils::setColor(VisUtils::lightLightGray);
         VisUtils::drawMoreIcon(-0.98, -0.8, -0.8, -0.98);
 
         if (it->first == currIdxDgrm && itemsMarked.size() > 1)
         {
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillRwndIcon(0.2, 0.36, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawRwndIcon(0.2, 0.36, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillPrevIcon(0.4, 0.56, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPrevIcon(0.4, 0.56, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillPlayIcon(0.6, 0.76, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawPlayIcon(0.6, 0.76, -0.8, -0.98);
 
-          VisUtils::setColorCoolBlue();
+          VisUtils::setColor(VisUtils::coolBlue);
           VisUtils::fillNextIcon(0.8, 0.96, -0.8, -0.98);
-          VisUtils::setColorLtLtGray();
+          VisUtils::setColor(VisUtils::lightLightGray);
           VisUtils::drawNextIcon(0.8, 0.96, -0.8, -0.98);
         }
 
@@ -2282,15 +1800,13 @@ void TimeSeries::drawDiagrams(const bool& inSelectMode)
 }
 
 
-// -------------------------------------------------------
 void TimeSeries::drawMouseOver(const bool& inSelectMode)
-// -------------------------------------------------------
 {
   if (inSelectMode != true)
   {
     if (mouseOverIdx != NON_EXISTING && attributes.size() > 0)
     {
-      double pix = canvas->getPixelSize();
+      double pix = pixelSize();
       Position2D pos1, pos2;
       vector< string > lbls;
       vector< Position2D > posTopLft;
@@ -2302,28 +1818,21 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
       pos2.x = pos1.x;
       pos2.y = posAxesBotRgt[posAxesBotRgt.size()-1].y;
 
-      double txtScaling = szeTxt*pix/CHARHEIGHT;
+      double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
-      VisUtils::setColorCoolBlue();
+      VisUtils::setColor(VisUtils::coolBlue);
       VisUtils::drawLine(pos1.x, pos2.x, pos1.y, pos2.y);
 
       for (size_t i = 0; i < attributes.size(); ++i)
       {
         string lbl;
-        if (attributes[i]->getSizeCurValues() == 0)
-        {
-          lbl = Utils::dblToStr(graph->getNode(mouseOverIdx)->getTupleVal(attributes[i]->getIndex()));
-        }
-        else
-        {
-          Attribute* attr = attributes[i];
-          Node* node = graph->getNode(mouseOverIdx);
+        Attribute* attr = attributes[i];
+        Node* node = m_graph->getNode(mouseOverIdx);
 
-          lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
+        lbl = attr->mapToValue(node->getTupleVal(attr->getIndex()))->getValue();
 
-          attr = NULL;
-          node = NULL;
-        }
+        attr = 0;
+        node = 0;
         lbls.push_back(lbl);
 
         if (lbl.size() > maxLbl)
@@ -2351,25 +1860,25 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 
       for (size_t i = 0; i < posTopLft.size(); ++i)
       {
-        VisUtils::setColorWhite();
+        VisUtils::setColor(Qt::white);
         VisUtils::fillRect(
           posTopLft[i].x,
           posBotRgt[i].x,
           posTopLft[i].y,
           posBotRgt[i].y);
-        VisUtils::setColorCoolBlue();
+        VisUtils::setColor(VisUtils::coolBlue);
         VisUtils::drawRect(
           posTopLft[i].x,
           posBotRgt[i].x,
           posTopLft[i].y,
           posBotRgt[i].y);
 
-        VisUtils::setColor(colTxt);
+        VisUtils::setColor(settings->textColor.value());
         VisUtils::drawLabel(
           texCharId,
           posTopLft[i].x + 0.5*txtScaling*CHARWIDTH,
           posTopLft[i].y - 0.5*txtScaling*CHARHEIGHT,
-          szeTxt*pix/CHARHEIGHT,
+          settings->textSize.value()*pix/CHARHEIGHT,
           lbls[i]);
       }
     }
@@ -2377,243 +1886,99 @@ void TimeSeries::drawMouseOver(const bool& inSelectMode)
 }
 
 
-// ----------------------------------------------------
 void TimeSeries::drawLabels(const bool& inSelectMode)
-// ----------------------------------------------------
 {
   if (inSelectMode == true)
     {}
   else
   {
-    double pix = canvas->getPixelSize();
-    double txtScaling = szeTxt*pix/CHARHEIGHT;
+    double pix = pixelSize();
+    double txtScaling = settings->textSize.value()*pix/CHARHEIGHT;
 
     for (size_t i = 0; i < posAxesTopLft.size(); ++i)
     {
       string lblTop, lblBot;
-      if (attributes[i]->getLowerBound() < 0)
-      {
-        double tmp = Utils::maxx(
-                       Utils::abs(attributes[i]->getLowerBound()), Utils::abs(attributes[i]->getUpperBound()));
-        lblTop = Utils::dblToStr(tmp);
-        lblBot = Utils::dblToStr(-tmp);
-      }
-      else
-      {
-        lblTop = Utils::dblToStr(attributes[i]->getUpperBound());
-        lblBot = Utils::dblToStr(attributes[i]->getLowerBound());
-      }
+      lblTop = Utils::dblToStr(0);
+      lblBot = Utils::dblToStr(0);
 
       // min
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
         posAxesBotRgt[i].y + 0.5*txtScaling*CHARHEIGHT + 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblBot);
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 1.0*pix,
         posAxesBotRgt[i].y + 0.5*txtScaling*CHARHEIGHT + 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblBot);
 
       // max
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 2.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblTop);
-      VisUtils::setColor(colTxt);
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabel(
         texCharId,
         posAxesTopLft[i].x + 1.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
+        settings->textSize.value()*pix/CHARHEIGHT,
         lblTop);
 
       // attribute
-      VisUtils::setColorWhite();
+      VisUtils::setColor(Qt::white);
       VisUtils::drawLabelCenter(
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x) + 1.0*pix,
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 2.0*pix,
-        szeTxt*pix/CHARHEIGHT,
-        attributes[i]->getName());
-      VisUtils::setColor(colTxt);
+        settings->textSize.value()*pix/CHARHEIGHT,
+        attributes[i]->name().toStdString());
+      VisUtils::setColor(settings->textColor.value());
       VisUtils::drawLabelCenter(
         texCharId,
         posAxesTopLft[i].x + 0.5*(posAxesBotRgt[i].x - posAxesTopLft[i].x),
         posAxesTopLft[i].y - 0.5*txtScaling*CHARHEIGHT - 1.0*pix,
-        szeTxt*pix/CHARHEIGHT,
-        attributes[i]->getName());
+        settings->textSize.value()*pix/CHARHEIGHT,
+        attributes[i]->name().toStdString());
     }
   }
 }
 
 
-// -------------------------------
-void TimeSeries::handleHitSlider()
-// -------------------------------
+
+void TimeSeries::initDragSlider()
 {
-  double x, y;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, x, y);
-  double distWorld = x - (posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode);
-
-  dragDistNodes = distWorld/itvSliderPerNode;
-
-  if (distWorld < 0)
-  {
-    // move to left
-    if (((double)wdwStartIdx + dragDistNodes) < 0)
-    {
-      wdwStartIdx   = 0;
-    }
-    else if (((double)wdwStartIdx + dragDistNodes) >= 0)
-    {
-      wdwStartIdx += (size_t)dragDistNodes;
-    }
-  }
-  else if (distWorld > 0)
-  {
-    // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx += (int)dragDistNodes;
-    }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx = (graph->getSizeNodes()/*-1*/) - nodesWdwScale;
-    }
-  }
-
-  dragDistNodes = 0.0;
+  double pix  = pixelSize();
+  sliderDragPosition = worldCoordinate(m_lastMouseEvent.posF()).x() - (posSliderTopLft.x + 5 * pix + wdwStartIdx*itvSliderPerNode);
 }
 
 
-// -----------------------------------
-void TimeSeries::handleDragSliderHdl()
-// -----------------------------------
+void TimeSeries::clickSliderBar()
 {
-//    draggingSlider = true;
-  dragStatus = DRAG_STATUS_SLDR;
-
-  double x1, y1;
-  double x2, y2;
-  canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-  canvas->getWorldCoords(xMouseCur, yMouseCur, x2, y2);
-
-  double distWorld = x2-x1;
-  dragDistNodes += (distWorld/itvSliderPerNode);
-
-  if (dragDistNodes < -1)
-  {
-    // move to left
-    if (((double)wdwStartIdx + dragDistNodes) < 0)
-    {
-      wdwStartIdx   = 0;
-      dragDistNodes = 0.0;
-    }
-    else if (((double)wdwStartIdx + dragDistNodes) >= 0)
-    {
-      wdwStartIdx += (size_t)dragDistNodes;
-      dragDistNodes -= (size_t)dragDistNodes;
-    }
-  }
-  else if (dragDistNodes > 1)
-  {
-    // move to right
-    if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) <= (graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx += (int)dragDistNodes;
-      dragDistNodes -= (int)dragDistNodes;
-    }
-    else if ((wdwStartIdx + (int)dragDistNodes + nodesWdwScale) > (graph->getSizeNodes()/*-1*/))
-    {
-      wdwStartIdx = (graph->getSizeNodes()/*-1*/) - nodesWdwScale;
-      dragDistNodes = 0.0;
-    }
-  }
+  double pix  = pixelSize();
+  sliderDragPosition = nodesWdwScale * itvSliderPerNode / 2.0 - 5 * pix;
+  dragSlider();
 }
 
 
-// --------------------------------------
-void TimeSeries::handleDragSliderHdlLft()
-// --------------------------------------
+void TimeSeries::dragSlider()
 {
-  double pix  = canvas->getPixelSize();
-  double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
-  double xMse, yMse;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xMse, yMse);
-
-  if (xMse < posSliderTopLft.x)
-  {
-    xMse = posSliderTopLft.x;
-  }
-
-  double distWorld  = xMse-xHdl;
-  double distNodes  = Utils::rndToNearestMult((distWorld/itvSliderPerNode), 1.0);
-
-  double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-  double pixWindow  = distWindow/pix;
-
-  double tempPixPerNode = pixWindow/(double)(nodesWdwScale-distNodes);
-  if (tempPixPerNode < minPixPerNode)
-  {
-    // update pixels per node
-    actPixPerNode  = tempPixPerNode;
-    wdwStartIdx   += int (distNodes);
-
-    geomChanged    = true;
-  }
-  else
-  {
-    dragStatus = -1;
-  }
+  double pix  = pixelSize();
+  int index = (int)((worldCoordinate(m_lastMouseEvent.posF()).x() - sliderDragPosition - posSliderTopLft.x - 5 * pix) / itvSliderPerNode);
+  wdwStartIdx = (index < 0) ? 0 : ((size_t)index > m_graph->getSizeNodes() - nodesWdwScale) ? m_graph->getSizeNodes() - nodesWdwScale : index;
+  update();
 }
 
 
-// --------------------------------------
-void TimeSeries::handleDragSliderHdlRgt()
-// --------------------------------------
-{
-  double pix  = canvas->getPixelSize();
-  double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
-  double xMse, yMse;
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xMse, yMse);
-
-  if (posSliderBotRgt.x < xMse)
-  {
-    xMse = posSliderBotRgt.x;
-  }
-
-  double distWorld  = xMse-xHdl;
-  double distNodes  = distWorld/itvSliderPerNode;
-
-  double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-  double pixWindow  = distWindow/pix;
-
-  double tempPixPerNode = pixWindow/(double)(nodesWdwScale+distNodes);
-  if (tempPixPerNode < minPixPerNode)
-  {
-    // update pixels per node
-    actPixPerNode  = tempPixPerNode;
-    geomChanged = true;
-  }
-  else
-  {
-    dragStatus = -1;
-  }
-}
-
-
-// ----------------------------------------------
 void TimeSeries::handleHitItems(const int& idx)
-// ----------------------------------------------
 {
   if (shiftStartIdx < 0)
   {
@@ -2632,7 +1997,7 @@ void TimeSeries::handleHitItems(const int& idx)
   }
 
   // shift key
-  if (keyCodeDown == WXK_SHIFT)
+  if (m_lastKeyCode == Qt::Key_Shift)
   {
     int begIdx, endIdx;
 
@@ -2657,7 +2022,7 @@ void TimeSeries::handleHitItems(const int& idx)
     }
   }
   // control key
-  else if (keyCodeDown == WXK_CONTROL)
+  else if (m_lastKeyCode == Qt::Key_Control)
   {
     // update marked items
     set< size_t >::iterator it;
@@ -2690,13 +2055,11 @@ void TimeSeries::handleHitItems(const int& idx)
 
   dragStartIdx = idx;
 
-  mediator->handleMarkFrameClust(this);
+  emit marksChanged();
 }
 
 
-// -----------------------------------------------
 void TimeSeries::handleDragItems(const int& idx)
-// -----------------------------------------------
 {
   if (dragStartIdx < 0)
   {
@@ -2722,14 +2085,14 @@ void TimeSeries::handleDragItems(const int& idx)
     bool flag = false;
 
     // shift key
-    if (keyCodeDown == WXK_SHIFT)
+    if (m_lastKeyCode == Qt::Key_Shift)
     {
       /*
       for ( int i = begIdx; i <= endIdx; ++i )
           itemsMarked.insert( i );
       */
     }
-    else if (keyCodeDown == WXK_CONTROL)
+    else if (m_lastKeyCode == Qt::Key_Control)
     {
       int begIdx, endIdx;
       bool incr;
@@ -2842,13 +2205,11 @@ void TimeSeries::handleDragItems(const int& idx)
     animFrame = itemsMarked.begin();
   }
 
-  mediator->handleMarkFrameClust(this);
+  emit marksChanged();
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleShowDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
   map< size_t, Position2D >::iterator it;
 
@@ -2869,35 +2230,16 @@ void TimeSeries::handleShowDiagram(const int& dgrmIdx)
 }
 
 
-// -----------------------------------------------------
 void TimeSeries::handleDragDiagram(const int& dgrmIdx)
-// -----------------------------------------------------
 {
-  double x1, y1;
-  double x2, y2;
-
   dragStatus = DRAG_STATUS_DGRM;
-
-  canvas->getWorldCoords(xMousePrev, yMousePrev, x1, y1);
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  x2, y2);
 
   map< size_t, Position2D >::iterator it;
   it = showDgrm.find(dgrmIdx);
   if (it != showDgrm.end())
   {
-    it->second.x += (x2-x1);
-    it->second.y += (y2-y1);
+    QPointF delta = worldCoordinate(m_lastMouseEvent.posF()) - worldCoordinate(m_lastMousePos);
+    it->second.x += delta.x();
+    it->second.y += delta.y();
   }
 }
-
-
-// -- implement event table -----------------------------------------
-
-
-BEGIN_EVENT_TABLE(TimeSeries, wxEvtHandler)
-  // menu bar
-  EVT_TIMER(ID_TIMER, TimeSeries::onTimer)
-END_EVENT_TABLE()
-
-
-// -- end -----------------------------------------------------------

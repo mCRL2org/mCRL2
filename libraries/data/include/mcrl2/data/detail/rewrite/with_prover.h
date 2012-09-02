@@ -27,7 +27,7 @@ class RewriterProver: public Rewriter
 {
   public:
     BDD_Prover* prover_obj;
-    boost::shared_ptr<detail::Rewriter> rewr_obj; 
+    boost::shared_ptr<detail::Rewriter> rewr_obj;
 
     typedef Rewriter::substitution_type substitution_type;
     typedef Rewriter::internal_substitution_type internal_substitution_type;
@@ -36,7 +36,7 @@ class RewriterProver: public Rewriter
     RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
     virtual ~RewriterProver();
 
-    mcrl2::data::detail::RewriteStrategy getStrategy();
+    rewrite_strategy getStrategy();
 
     data_expression rewrite(
          const data_expression term,

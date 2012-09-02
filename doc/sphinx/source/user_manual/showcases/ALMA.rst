@@ -29,47 +29,37 @@ have reflected on this issue together with the engineers.
 Technical details
 -----------------
 
-Type of verification
-^^^^^^^^^^^^^^^^^^^^
-Construct model out of existing source code and discussions with engineers.
-Check for deadlocks and validation by simulation.
+*Type of verification*
+   Construct model out of existing source code and discussions with engineers.
+   Check for deadlocks and validation by simulation.
 
-Data size
-^^^^^^^^^
-The state space was rather small and consisted of 3.484 states and 9.832
-transitions.
+*Data size*
+   The state space was rather small and consisted of 3.484 states and 9.832
+   transitions.
 
-Equipment (computers, CPU, RAM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Acer Aspire Timeline 3810T notebook with an Intel 1.4GHz Core 2 Duo SU9400 processor and 4 GB of RAM.
+*Equipment (computers, CPU, RAM)*
+   Acer Aspire Timeline 3810T notebook with an Intel 1.4GHz Core 2 Duo SU9400
+   processor and 4 GB of RAM.
 
-Models
-^^^^^^
-The model is available as an appendix to [Ploeger09]_
-It is also distributed with the mCRL2 toolset.
+*Models*
+   The model is available as an appendix to [Ploeger09]_. It is also distributed
+   with the mCRL2 toolset.
 
-Organizational context
-----------------------
-
-.. list-table:: 
-
-  * - **Contact person**
-    - Bas Ploeger, Technische Universiteit Eindhoven, The Netherlands.
-  * - **Other people involved**
-    -   * Jan Friso Groote, Technische Universiteit Eindhoven, The Netherlands.
-        * Heiko Sommer, European Southern Observatory, Garching, Germany.
-        * Gianni Raffi, European Southern Observatory, Garching, Germany.
-        * Joseph Schwarz, European Southern Observatory, Garching, Germany.
-  * - **Institution**
-    - Technische Universiteit Eindhoven, The Netherlands.
-  * - **Industrial partner**
-    - European Southern Observatory, Garching, Germany.
-  * - **Time period**
-    - March 2009 - August 2009
+*Organizational context*
+   :Contact person: Bas Ploeger, Technische Universiteit Eindhoven, The  
+                    Netherlands.
+   :Other people involved: - Jan Friso Groote, Technische Universiteit Eindhoven, The Netherlands.
+                           - Heiko Sommer, European Southern Observatory, Garching, Germany.
+                           - Gianni Raffi, European Southern Observatory, Garching, Germany.
+                           - Joseph Schwarz, European Southern Observatory, Garching, Germany.
+   :Institution: Technische Universiteit Eindhoven, The Netherlands.
+   :Industrial partner: European Southern Observatory, Garching, Germany.
+   :Time period: March 2009 -- August 2009
 
 Publications
 ------------
-.. [Ploeger09] Bas Ploeger. Analysis of ACS using mCRL2.
+
+.. [Ploeger09] Bas Ploeger. *Analysis of ACS using mCRL2.*
    CS-Report 09-11, Technische Universiteit Eindhoven (2009).
    `(PDF) <http://alexandria.tue.nl/repository/books/653251.pdf>`_
 

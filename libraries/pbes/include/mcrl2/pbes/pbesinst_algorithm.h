@@ -117,7 +117,7 @@ class pbesinst_algorithm
     /// \param print_equations If true, the generated equations are printed
     /// \param print_rewriter_output If true, invocations of the rewriter are printed
     pbesinst_algorithm(data::data_specification const& data_spec,
-                       data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
+                       data::rewriter::strategy rewriter_strategy = data::jitty,
                        bool print_equations = false,
                        bool print_rewriter_output = false
                       )

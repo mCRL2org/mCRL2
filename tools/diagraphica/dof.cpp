@@ -8,8 +8,6 @@
 //
 /// \file ./dof.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "dof.h"
 
 using namespace std;
@@ -17,260 +15,54 @@ using namespace std;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------
-DOF::DOF(
-  const int& idx,
-  const string& lbl)
-// --------------------
+DOF::DOF(int index, QString label)
 {
-  index = idx;
-  label = lbl;
-  /*
-  min   = 0.0;
-  max   = 0.0;
-  */
-  values.push_back(0.0);   // init min
-  values.push_back(0.0);   // init max
-  dir   = 1;
-  attr  = NULL;
-  textStatus = ID_TEXT_NONE;
+  m_index     = index;
+  m_label     = label;
+  m_values    << 0.0 << 0.0;
+  m_direction = 1;
+  m_attribute = 0;
 }
 
 
-// -----------------------
 DOF::DOF(const DOF& dof)
-// -----------------------
-// ------------------------------------------------------------------
 // Copy constructor.
-// ------------------------------------------------------------------
 {
-  index = dof.index;    // index in attribute
-  label = dof.label;
-  /*
-  min   = dof.min;
-  max   = dof.max;
-  */
-  values = dof.values;
-  dir   = dof.dir;
-  attr  = dof.attr;
-  textStatus = dof.textStatus;
-}
-
-
-// --------
-DOF::~DOF()
-// --------
-{
-  // association
-  attr = NULL;
+  m_index     = dof.m_index;
+  m_label     = dof.m_label;
+  m_values    = dof.m_values;
+  m_direction = dof.m_direction;
+  m_attribute = dof.m_attribute;
 }
 
 
 // -- set functions -------------------------------------------------
 
-
-// ---------------------------------
-void DOF::setIndex(const int& idx)
-// ---------------------------------
+void DOF::setValue(int index, double value)
 {
-  index = idx;
-}
-
-
-// ------------------------------------
-void DOF::setLabel(const string& lbl)
-// ------------------------------------
-{
-  label = lbl;
-}
-
-
-// ---------------------------------
-void DOF::setMin(const double& m)
-// ---------------------------------
-{
-  //min = m;
-  values[0] = m;
-}
-
-
-// --------------------------------
-void DOF::setMax(const double& m)
-// --------------------------------
-{
-  //max = m;
-  values[values.size()-1] = m;
-}
-
-
-// ------------------------------------------------------
-void DOF::setMinMax(const double& mn, const double& mx)
-// ------------------------------------------------------
-{
-  /*
-  min = mn;
-  max = mx;
-  */
-  values[0] = mn;
-  values[values.size()-1] = mx;
-}
-
-
-// --------------------
-void DOF::setValue(
-  const size_t& idx,
-  const double& val)
-// --------------------
-{
-  if (idx != NON_EXISTING && idx < values.size())
+  if (0 <= index && index < m_values.size())
   {
-    values[idx] = val;
+    m_values[index] = value;
   }
 }
 
-
-// ------------------------------------
-void DOF::addValue(const double& val)
-// ------------------------------------
+void DOF::removeValue(int index)
 {
-  values.push_back(val);
-}
-
-
-// -----------------------------------
-void DOF::clearValue(const size_t& idx)
-// -----------------------------------
-{
-  if (values.size() > 2 &&
-      (idx != NON_EXISTING && static_cast <size_t>(idx) < values.size()))
+  if (m_values.size() > 2 && 0 <= index && index < m_values.size())
   {
-    values.erase(values.begin() + idx);
+    m_values.removeAt(index);
   }
 }
-
-
-// ------------------------------
-void DOF::setDir(const int& dr)
-// ------------------------------
-{
-  dir = dr;
-}
-
-
-// -----------------------------------
-void DOF::setAttribute(Attribute* a)
-// -----------------------------------
-{
-  attr = a;
-}
-
-
-// -----------------------------------------
-void DOF::setTextStatus(const int& status)
-// -----------------------------------------
-{
-  if (status == ID_TEXT_NONE ||
-      status == ID_TEXT_ALL  ||
-      status == ID_TEXT_ATTR ||
-      status == ID_TEXT_VAL)
-  {
-    textStatus =  status;
-  }
-  else
-  {
-    textStatus = ID_TEXT_NONE;
-  }
-}
-
 
 // -- get functions -------------------------------------------------
 
-
-// ----------------
-size_t DOF::getIndex()
-// ----------------
+double DOF::value(int index)
 {
-  return index;
-}
-
-
-// -------------------
-string DOF::getLabel()
-// -------------------
-{
-  return label;
-}
-
-
-// -----------------
-double DOF::getMin()
-// -----------------
-{
-  //return min;
-  return values[0];
-}
-
-
-// -----------------
-double DOF::getMax()
-// -----------------
-{
-  //return max;
-  return values[values.size()-1];
-}
-
-
-// ---------------------
-size_t DOF::getSizeValues()
-// ---------------------
-{
-  return values.size();
-}
-
-
-// -----------------------------------
-double DOF::getValue(const size_t& idx)
-// -----------------------------------
-{
-  double result = -1;
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < values.size())
+  if (0 <= index && index < m_values.size())
   {
-    result = values[idx];
+    return m_values[index];
   }
-  return result;
+  return 0;
 }
-
-
-// ------------------------------------------
-void DOF::getValues(vector< double > &vals)
-// ------------------------------------------
-{
-  vals = values;
-}
-
-
-// --------------
-int DOF::getDir()
-// --------------
-{
-  return dir;
-}
-
-
-// ---------------------------
-Attribute* DOF::getAttribute()
-// ---------------------------
-{
-  return attr;
-}
-
-
-// ---------------------
-int DOF::getTextStatus()
-// ---------------------
-{
-  return textStatus;
-}
-
 
 // -- end -----------------------------------------------------------

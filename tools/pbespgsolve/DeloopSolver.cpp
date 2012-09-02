@@ -30,7 +30,7 @@ ParityGame::Strategy DeloopSolver::solve()
     const verti V = game_.graph().V();
     ParityGame::Strategy strategy(V, NO_VERTEX);
 
-    info("(DeloopSolver) Searching for winning loops...");
+    mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Searching for winning loops..." << std::endl;
     DenseSet<verti> solved(0, V);
     for (int player = 0; player < 2; ++player)
     {
@@ -56,8 +56,7 @@ ParityGame::Strategy DeloopSolver::solve()
                             solved, winning, strategy );
 
         verti num_solved = (verti)solved.size() - old_solved;
-        info( "(DeloopSolver) Found %d vertices won by %s",
-              num_solved, player == 0 ? "Even" : "Odd" );
+        mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Found " << num_solved << " vertices won by " << (player == 0 ? "Even" : "Odd" ) << std::endl;
 
         update_memory_use( sizeof(strategy[0])*strategy.capacity() +
             solved.memory_use() + sizeof(winning[0])*winning.size()*2  );
@@ -72,7 +71,7 @@ ParityGame::Strategy DeloopSolver::solve()
     if (solved.empty())
     {
         // Don't construct a subgame if it is identical to the input game:
-        info("(DeloopSolver) Solving game.");
+        mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Solving game." << std::endl;
         subsolver.reset(pgsf_.create(game_, vmap_, vmap_size_));
         strategy = subsolver->solve();
     }
@@ -80,8 +79,7 @@ ParityGame::Strategy DeloopSolver::solve()
     if (solved.size() != V)
     {
         const verti num_unsolved = V - (verti)solved.size();
-        info( "(DeloopSolver) Creating subgame with %d vertices remaining...",
-                num_unsolved );
+        mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Creating subgame with " << num_unsolved << " vertices remaining..." << std::endl;
 
         // Create game with remaining unsolved vertices:
         unsolved.reserve(num_unsolved);
@@ -106,11 +104,11 @@ ParityGame::Strategy DeloopSolver::solve()
             subsolver.reset(pgsf_.create(subgame, &unsolved[0], unsolved.size()));
         }
 
-        info( "(DeloopSolver) Solving...");
+        mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Solving..." << std::endl;
         substrat = subsolver->solve();
         if (!substrat.empty())
         {
-            info( "(DeloopSolver) Merging strategies...");
+            mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Merging strategies..." << std::endl;
             merge_strategies(strategy, substrat, unsolved);
         }
     }

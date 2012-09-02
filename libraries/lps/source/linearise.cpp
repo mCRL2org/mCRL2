@@ -39,7 +39,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/find.h"
 
 // atermpp includes
@@ -7454,11 +7454,11 @@ class specification_basic_type:public boost::noncopyable
         // otherwise into c->p<>delta@0. In this last case the process
         // contains time.
         contains_if_then=true;
-        if (options.add_delta)     
-        { 
+        if (options.add_delta)
+        {
           return containstimebody(if_then(t).then_case(),stable,visited,allowrecursion,contains_if_then);
         }
-        else 
+        else
         {
           return true;
         }
@@ -8014,7 +8014,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
+  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << " ' method.\n";
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
   process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));

@@ -213,7 +213,5 @@ PBES are available, such as :ref:`tool-pbesparelm` and :ref:`tool-pbesconstelm`.
 Import and export
 ^^^^^^^^^^^^^^^^^
 The mCRL2 toolset also provides tools for converting system specifications in
-other languages to mCRL2. This can be done for Chi-models using
-:ref:`tool-chi2mcrl2`, and for typed LySa using :ref:`tool-lysa2mcrl2`. Furthermore a μCRL
-linear process can be converted to an mCRL2 LPS using :ref:`tool-tbf2lps`. Finally,
-an interface with the TorX tool is provided by :ref:`tool-lps2torx`.
+other languages to mCRL2. A μCRL
+linear process can be converted to an mCRL2 LPS using :ref:`tool-tbf2lps`. An interface with the TorX tool is provided by :ref:`tool-lps2torx`.

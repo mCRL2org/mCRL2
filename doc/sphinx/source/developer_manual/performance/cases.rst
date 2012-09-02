@@ -1,0 +1,8 @@
+Cases
+-----
+
+.. toctree::
+   :glob:
+
+   cases/*
+   

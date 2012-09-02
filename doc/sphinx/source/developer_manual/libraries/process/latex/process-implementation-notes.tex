@@ -1,0 +1,365 @@
+% at
+% left merge
+% \RequirePackage{stmaryrd}
+
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{stmaryrd}
+
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Friday, June 15, 2012 17:58:29}
+%TCIDATA{LastRevised=Thursday, June 28, 2012 14:32:22}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\geometry{left=1in,right=1in,top=1in,bottom=1in}
+\input{include/tcilatex}
+\font \aap cmmi10
+\newcommand{\at}{\mathbin{\mbox{\aap ,}}}
+\newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
+\begin{document}
+
+
+\section{Process Library Implementation Notes}
+
+\subsection{Alphabet reduction}
+
+\subsubsection{Definitions}
+
+We define pCRL terms $p$ using the following grammar:%
+\[
+p::=a\ \mathbf{|}\ P(e)\mid P(e-d)\mid \delta \mid \tau \mid p+p\mid p\cdot
+p\mid c\rightarrow p\mid c\rightarrow p\diamond p\mid \Sigma _{d:D}p\mid p^{%
+\mathbin{\mbox{\aap ,}}}t\mid p<<p 
+\]%
+and extended pCRL terms $q$ using the following grammar:%
+\[
+q::=p\mid q\parallel q\mid q\mathbin{\mathrel{\llfloor}}q\mid q\shortmid
+q\mid \rho _{R}(q)\mid \partial _{B}(q)\mid \tau _{I}(q)\mid \Gamma
+_{C}(q)\mid \nabla _{V}(q) 
+\]
+
+Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
+\begin{eqnarray*}
+A^{\subseteq } &=&\{\alpha \mid \exists \beta .\alpha \beta \in A\} \\
+A_{1}\times A_{2} &=&\{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
+\in A_{2}\} \\
+A_{1}\leftarrowtail A_{2} &=&\{\alpha \mid \exists \beta .\alpha \beta \in
+A_{1}\text{ and }\beta \in A_{2}\}
+\end{eqnarray*}
+
+Let $C$ be a communication set, then we define%
+\begin{eqnarray*}
+C(A) &=&A\cup \{a\beta \mid \exists a.\alpha \rightarrow a\in C\text{ and }%
+\alpha \beta \in A\} \\
+C^{-1}(A) &=&\{\alpha \beta \mid \exists a.\alpha \rightarrow a\in C\text{
+and }a\beta \in A\} \\
+\overline{C}(A) &=&\{\alpha \in A\mid \exists \beta .\alpha \beta
+\rightarrow a\in C\} \\
+C\setminus A &=&\{\alpha \rightarrow a\in C\mid a\notin A\}
+\end{eqnarray*}%
+Let $R$ be a rename set, then we define%
+\begin{eqnarray*}
+R(\alpha ) &=&\{R(a)\mid a\in \alpha \} \\
+R^{-1}(a) &=&\{\beta \mid R(\beta )=\alpha \} \\
+R(A) &=&\{R(\alpha )\mid \alpha \in A\} \\
+R^{-1}(A) &=&\cup _{\alpha \in A}R^{-1}(\alpha )
+\end{eqnarray*}%
+Let $B$ be a block set, then we define%
+\[
+\partial _{B}(A)=\{\alpha \in A\mid \text{no action in }B\text{ occurs in }%
+\alpha \} 
+\]%
+Let $I$ be a hide set, then we define%
+\[
+\tau _{I}(A)=\{\alpha \mid \exists \beta \in I^{\ast }.\alpha \beta \in A%
+\text{ and no action in }I\text{ occurs in }\alpha \}\text{,} 
+\]%
+where $I^{\ast }$ is the transitive reflexive closure of $I$.\newpage
+
+\subsubsection{The mapping $push_{\odot }$}
+
+We define the mapping $push_{\odot }$, with $\odot \in \{\bigtriangledown
+,\subseteq ,\partial \}$ as follows, where $\left\langle p^{\prime
+},A_{p}^{\prime }\right\rangle =$ $push_{\odot }(p,A)$ and $\left\langle
+q^{\prime },A_{q}^{\prime }\right\rangle =push_{\odot }(q,A)$, unless told
+otherwise. Note that this specification is only valid for pCRL expressions.%
+\[
+\begin{tabular}{ll}
+$x$ & \multicolumn{1}{|l}{$push_{\odot }(x,A)$} \\ \cline{1-2}
+$\delta $ & \multicolumn{1}{|l}{$\left\langle \delta ,\emptyset
+\right\rangle $} \\ 
+$P(e_{1},\cdots ,e_{n})$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\langle Q(e_{1},\cdots ,e_{n}),A_{p}^{\prime }\right\rangle \\ 
+\text{where }\left\{ \text{ }%
+\begin{array}{lll}
+p & = & \text{the body of process }P \\ 
+Q(e_{1},\cdots ,e_{n})=p^{\prime } & = & \text{a possibly new process
+equation}%
+\end{array}%
+\right.%
+\end{array}%
+$} \\ 
+$P(d_{i_{1}}=e_{i_{1}},\cdots ,d_{i_{k}}=e_{i_{k}})$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\langle Q(d_{i_{1}}=e_{i_{1}},\cdots
+,d_{i_{k}}=e_{i_{k}}),A_{p}^{\prime }\right\rangle \\ 
+\text{where }\left\{ \text{ }%
+\begin{array}{lll}
+p & = & \text{the body of process }P \\ 
+Q(e_{1},\cdots ,e_{n})=p^{\prime } & = & \text{a possibly new process
+equation}%
+\end{array}%
+\right.%
+\end{array}%
+$} \\ 
+$p+q$ & \multicolumn{1}{|l}{$\left\langle f_{\odot }(x,A),A_{p}^{\prime
+}\cup A_{q}^{\prime }\right\rangle $} \\ 
+$p\cdot q$ & \multicolumn{1}{|l}{$\left\langle f_{\odot }(x,A),A_{p}^{\prime
+}\cup A_{q}^{\prime }\right\rangle $} \\ 
+$c\rightarrow p$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
+}(x,A),A_{p}^{\prime }\right\rangle $} \\ 
+$c\rightarrow p\diamond q$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
+}(x,A),A_{p}^{\prime }\cup A_{q}^{\prime }\right\rangle $} \\ 
+$\Sigma _{d:D}p$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
+}(x,A),A_{p}^{\prime }\right\rangle $} \\ 
+$p^{\mathbin{\mbox{\aap ,}}}t$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
+}(x,A),A_{p}^{\prime }\right\rangle $} \\ 
+$p\ll q$ & \multicolumn{1}{|l}{$push_{\odot }(p,A)$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$push_{\odot }(p,A^{\prime })\text{
+where }A^{\prime }=\{R(\alpha )\mid \alpha \in R^{-1}(A)\},$}%
+\end{tabular}%
+\]%
+where%
+\begin{eqnarray*}
+f_{\bigtriangledown }(p,A) &=&\nabla _{A}(x) \\
+f_{\subseteq }(p,A) &=&\nabla _{A\setminus \{\tau \}}(x) \\
+f_{\partial }(p,A) &=&\partial _{A}(x)
+\end{eqnarray*}
+
+\newpage
+
+\subsubsection{The mapping $push_{\bigtriangledown }$}
+
+We define the mapping $push_{\bigtriangledown }$ as follows, where $%
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle =$ $%
+push_{\bigtriangledown }(p,A)$ and $\left\langle q^{\prime },A_{q}^{\prime
+}\right\rangle =push_{\bigtriangledown }(q,A)$, unless told otherwise.%
+\[
+\begin{tabular}{l|l}
+$x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
+$a(e_{1},\cdots ,e_{n})$ & $\left\langle \nabla _{A^{\prime }}(x),A^{\prime
+}\right\rangle \text{ where }A^{\prime }=A\cap \{a\}$ \\ 
+$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
+A^{\prime }=A\cap \{\tau \}$ \\ 
+$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
+\}}(p^{\prime }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where}%
+\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
+}(p,A) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
+A_{p}^{\prime }\times A_{q}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
+}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+}),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
+}(p,A) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
+A_{p}^{\prime }\times A_{q}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
+}\mid q^{\prime }),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
+}(p,A) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+A^{\prime } & = & A\cap (A_{p}^{\prime }\times A_{q}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$\rho _{R}(p)$ & $push_{\bigtriangledown }(p,A^{\prime })\text{ where }%
+A^{\prime }=R(R^{-1}(A))$ \\ 
+$\partial _{B}(p)$ & $push_{\bigtriangledown }(p,\partial _{B}(A))$ \\ 
+$\tau _{I}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\tau
+_{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
+push_{\bigtriangledown }(p,Act) \\ 
+A^{\prime } & = & A\cap \tau _{I}(A_{p}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$\Gamma _{C}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\Gamma
+_{C}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
+push_{\bigtriangledown }(p,A\cup C^{-1}(A)) \\ 
+A^{\prime } & = & A\cap C(A_{p}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$\nabla _{V}(p)$ & $push_{\bigtriangledown }(p,A\cap V)$%
+\end{tabular}%
+\]%
+\[
+\begin{tabular}{l|l}
+$x$ & $push_{\bigtriangledown }(x,Act)$ \\ \hline
+$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
+\}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }),A^{\prime
+}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime
+}\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
+}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+}),A^{\prime }\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup
+A_{q}^{\prime }\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
+$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
+}\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where }A^{\prime
+}=A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
+$\partial _{B}(p)$ & $push_{\partial }(p,B)$%
+\end{tabular}%
+\]
+
+\newpage
+
+\subsubsection{The mapping $push_{\subseteq }$}
+
+We define the mapping $push_{\subseteq }$ as follows, where $\left\langle
+p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\subseteq }(p,A)$ and $%
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\subseteq
+}(q,A) $, unless told otherwise.%
+\[
+\begin{tabular}{l|l}
+$x$ & $push_{\subseteq }(x,A)$ \\ \hline
+$a(e_{1},\cdots ,e_{n})$ & $\left\langle \nabla _{A^{\prime
+}}(a(e_{1},\cdots ,e_{n})),A^{\prime }\right\rangle \text{ where }A^{\prime
+}=A^{\subseteq }\cap \{a\}$ \\ 
+$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
+A^{\prime }=A\cap \{\tau \}$ \\ 
+$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
+\}}(p^{\prime }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where }%
+A^{\prime }=A^{\subseteq }\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
+A_{p}^{\prime }\times A_{q}^{\prime })$ \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
+}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+}),A^{\prime }\right\rangle \text{ where }A^{\prime }=A^{\subseteq }\cap
+(A_{p}^{\prime }\cup A_{q}^{\prime }\cup A_{p}^{\prime }\times A_{q}^{\prime
+})$ \\ 
+$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
+}\mid q^{\prime }),A^{\prime }\right\rangle \text{ where }A^{\prime
+}=A^{\subseteq }\cap (A_{p}^{\prime }\times A_{q}^{\prime })$ \\ 
+$\rho _{R}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
+}=\{R(\alpha )\mid \alpha \in R^{-1}(A)\}$ \\ 
+$\partial _{B}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }%
+A^{\prime }=\partial _{B}(A)$ \\ 
+$\tau _{I}(p)$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(\tau
+_{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where }A^{\prime }=A\cap
+\tau _{I}(A_{p}^{\prime })\text{ }$ \\ 
+$\Gamma _{C}(p)$ & $\left\langle \nabla _{A^{\prime }}(\Gamma _{C}(p^{\prime
+})),A^{\prime \prime }\right\rangle \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
+}(p,A\cup C^{-1}(A)) \\ 
+A^{\prime } & = & A\cap C(A_{p}^{\prime }) \\ 
+A^{\prime \prime } & = & A^{\subseteq }\cap C(A_{p}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
+}=A^{\subseteq }\cap V$%
+\end{tabular}%
+\]
+
+\subsubsection{The mapping $push_{\partial }$}
+
+We define the mapping $push_{\partial }$ as follows, where $\left\langle
+p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\partial }(p,A)$ and $%
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\partial }(q,A)$%
+, unless told otherwise.%
+\[
+\begin{tabular}{l|l}
+$x$ & $push_{\partial }(x,A)$ \\ \hline
+$a(e_{1},\cdots ,e_{n})$ & $\left\langle \partial _{A}(a(e_{1},\cdots
+,e_{n})),A^{\prime }\right\rangle \text{ where }A^{\prime }=A\cap \{a\}$ \\ 
+$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
+A^{\prime }=\{\tau \}$ \\ 
+$p\parallel q$ & $\left\langle p^{\prime }\parallel q^{\prime },A^{\prime
+}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime
+}\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle p^{\prime }%
+\mathbin{\mathrel{\llfloor}}q^{\prime },A^{\prime }\right\rangle \text{
+where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime }\cup A_{p}^{\prime
+}\times A_{q}^{\prime }$ \\ 
+$p\mid q$ & $\left\langle p^{\prime }\mid q^{\prime },A^{\prime
+}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\times A_{q}^{\prime
+}$ \\ 
+$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),A^{\prime
+}\right\rangle \text{ where }\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
+}(p,R^{-1}(A)) \\ 
+A^{\prime } & = & R(A_{p}^{\prime })%
+\end{array}%
+\right. $ \\ 
+$\partial _{B}(p)$ & $push_{\partial }(p,A^{\prime })\text{ where }A^{\prime
+}=A\cup B$ \\ 
+$\tau _{I}(p)$ & $\left\langle \tau _{I}(p^{\prime }),A^{\prime
+}\right\rangle \text{ where }\left\{ \text{ }%
+\begin{array}{lll}
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
+}(p,A\setminus I) \\ 
+A^{\prime } & = & \tau _{I}(A)%
+\end{array}%
+\right. $ \\ 
+$\Gamma _{C}(p)$ & $\left\langle \partial _{A^{\prime \prime }}(\Gamma
+_{C^{\prime }}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ 
+\text{ }%
+\begin{array}{lll}
+A^{\prime \prime } & = & \overline{C}(A) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
+}(p,A\setminus A^{\prime \prime }) \\ 
+A^{\prime } & = & \partial _{A}(C(A_{p}^{\prime })) \\ 
+C^{\prime } & = & C\setminus A%
+\end{array}%
+\right. $ \\ 
+$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
+}=A^{\subseteq }\cap V$%
+\end{tabular}%
+\]
+
+\end{document}

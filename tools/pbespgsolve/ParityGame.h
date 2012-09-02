@@ -217,7 +217,7 @@ public:
     template <typename Container>
     void assign_pbes(
         mcrl2::pbes_system::pbes<Container> &pbes, verti *goal_vertex = 0,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL, mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::rewriter::jitty );
+        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL, mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::jitty );
 #endif
 
 protected:

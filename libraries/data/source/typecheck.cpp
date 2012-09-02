@@ -1281,7 +1281,7 @@ void gstcDataInit(void)
   gstcAddSystemFunction(sort_real::ceil());
   gstcAddSystemFunction(sort_real::round());
   //Lists
-  gstcAddSystemConstant(sort_list::nil(data::unknown_sort()));
+  gstcAddSystemConstant(sort_list::empty(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::cons_(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::count(data::unknown_sort()));
   gstcAddSystemFunction(sort_list::snoc(data::unknown_sort()));
@@ -3479,7 +3479,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
-      if (ATAgetFirst(VarDecls) != NULL)
+      if (VarDecls != ATempty)
       {
         mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
         return NULL;

@@ -10,12 +10,13 @@
 
 #include "mcrl2/core/detail/dparser_functions.h"
 #include "mcrl2/core/dparser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "d.h"
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <locale>
 
 extern "C"
 {
@@ -93,6 +94,44 @@ void syntax_error_fn(struct D_Parser *ap)
     mCRL2log(log::error, "parser") << " after '" << after << "'";
   }
   mCRL2log(log::error, "parser") << std::endl;
+  if (*p->user.loc.s == 0)
+  {
+    mCRL2log(log::error, "parser") << "Unexpected end of input." << std::endl;
+  }
+  else
+  if (p->pnode_hash.all && p->pnode_hash.all->latest)
+  {
+    core::parse_node n(&p->pnode_hash.all->latest->parse_node);
+    D_Symbol &s = p->t->symbols[n.symbol()];
+    if (s.kind == D_SYMBOL_INTERNAL)
+    {
+      /* DParser stores production rules in order: search for the corresponding nonterminal. */
+      int parentsym = n.symbol() - 1;
+      while (p->t->symbols[parentsym].kind == D_SYMBOL_INTERNAL)
+        --parentsym;
+      s = p->t->symbols[parentsym];
+    }
+
+    switch (s.kind)
+    {
+    case D_SYMBOL_STRING:
+    case D_SYMBOL_TOKEN:
+      {
+        std::locale loc;
+        mCRL2log(log::error, "parser") << "Unexpected "
+                                       << (std::isalpha(n.string()[0], loc) ? "keyword " : "")
+                                       << "'" << n.string() << "'" << std::endl;
+      }
+      break;
+    case D_SYMBOL_NTERM:
+      mCRL2log(log::error, "parser") << "Unexpected " << s.name << " '" << n.string() << "'" << std::endl;
+      break;
+    default:
+      // TODO: check if we can give more sensible output in the remaining cases.
+      break;
+    }
+
+  }
 }
 
 } // namespace detail

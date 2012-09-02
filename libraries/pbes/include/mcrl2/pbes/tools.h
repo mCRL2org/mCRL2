@@ -80,8 +80,14 @@ void txt2pbes(const std::string& input_filename,
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
               const std::string& formfilename,
-              bool timed
+              bool timed,
+              bool structured
              );
+
+void complps2pbes(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& formfilename
+                 );
 
 void lpsbisim2pbes(const std::string& input_filename1,
                    const std::string& input_filename2,

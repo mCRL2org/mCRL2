@@ -2,7 +2,7 @@
 #include <queue>
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/next_state_generator_old.h"
 
 using namespace mcrl2;
 
@@ -10,7 +10,7 @@ void traverse_states(const lps::specification& lps_spec, bool per_summand = fals
 {
   using namespace mcrl2::lps;
 
-  next_state_generator generator(lps_spec, data::rewriter::jitty_compiling);
+  next_state_generator generator(lps_spec, data::jitty_compiling);
 
   atermpp::aterm initial_state = generator.initial_state();
 

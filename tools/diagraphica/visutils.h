@@ -11,39 +11,24 @@
 #ifndef VISUTILS_H
 #define VISUTILS_H
 
+#include <QtCore>
+#include <QtGui>
 
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+# include <GLUT/glut.h>
 #else
-#ifdef WIN32
-#include <windows.h>
-#undef __in_range
-#endif
-#include <GL/glu.h>
+# ifdef WIN32
+#  define NOMINMAX
+#  include <windows.h>
+#  undef __in_range // for STLport on Windows
+# endif
+# include <GL/glu.h>
 #endif
 #include <string>
-#include <wx/bitmap.h>
-#include <wx/image.h>
 #include "utils.h"
 
 
-// -- structs for color ---------------------------------------------
-
-struct ColorHLS
-{
-  double h;
-  double l;
-  double s;
-};
-
-struct ColorRGB
-{
-  double r;
-  double g;
-  double b;
-  double a;
-};
-
+static inline QColor alpha(QColor color, double alpha) { color.setAlphaF(alpha); return color; }
 
 // -- structs for positions -----------------------------------------
 
@@ -66,22 +51,33 @@ struct Position2D
 const int CHARSETSIZE = 95;
 const int CHARWIDTH   = 16;
 const int CHARHEIGHT  = 32;
-const std::string CHARPATH = "Chars/";
 
 // -- data for cushion textures -------------------------------------
 
 const int CUSHSIZE    = 256;
 
-// -- data for gradient textures ------------------------------------
-
-const int GRADSIZE    = 256;
-const std::string GRADPATH = "Grads/";
+QColor interpolateRgb(QColor from, QColor to, float t);
 
 class VisUtils
 {
+  template<class T> struct ColorMap
+  {
+    QColor operator()(int numerator, int denominator) const { return T::operator()(numerator / (double)denominator); }
+  };
+
+  class ListColorMap
+  {
+    public:
+      ListColorMap(QList<QColor> colors): m_colors(QVector<QColor>::fromList(colors)) {}
+      QColor operator()(double fraction) const;
+      QColor operator()(int numerator, int denominator) const;
+
+    private:
+      QVector<QColor> m_colors;
+  };
+
   public:
-    // -- clear canvas ----------------------------------------------
-    static void clear(const ColorRGB& col);
+    static void clear(QColor col);
 
     // -- anti-aliasing & blending ----------------------------------
     static void enableLineAntiAlias();
@@ -93,115 +89,35 @@ class VisUtils
     static void setLineWidth(const double& px);
 
     // -- color -----------------------------------------------------
-    static void setColor(const ColorRGB& colRGB);
+    static void setValidColor(QColor color) { if (color.isValid()) setColor(color); }
+    static void setColor(QColor color) { setColor(color, color.alphaF()); }
+    static void setColor(QColor color, double alpha) { glColor4f(color.redF(), color.greenF(), color.blueF(), alpha); }
 
-    static void setColorBlack();
-    static void setColorBlue();
-    static void setColorCoolBlue();
-    static void setColorDkCoolBlue();
-    static void setColorGreen();
-    static void setColorCoolGreen();
-    static void setColorLtCoolGreen();
-    static void setColorLtLtGray();
-    static void setColorLtGray();
-    static void setColorMdGray();
-    static void setColorDkGray();
-    static void setColorOrange();
-    static void setColorRed();
-    static void setColorCoolRed();
-    static void setColorWhite();
-    static void setColorYellow();
-    static void setColorBlueYellow(const double& frac);
+    static const QRgb coolBlue = 0x7097d9;
+    static const QRgb darkCoolBlue = 0x004fd9;
+    static const QRgb coolGreen = 0x6bcc51;
+    static const QRgb lightCoolGreen = 0xbaf3ab;
+    static const QRgb lightLightGray = 0xf3f3f3;
+    static const QRgb lightGray = 0xbfbfbf;
+    static const QRgb mediumGray = 0x808080;
+    static const QRgb darkGray = 0x404040;
+    static const QRgb orange = 0xff8000;
+    static const QRgb coolRed = 0xf54000;
 
-    static void mapColorBlack(ColorRGB& col);
-    static void mapColorBlue(ColorRGB& col);
-    static void mapColorCoolBlue(ColorRGB& col);
-    static void mapColorDkCoolBlue(ColorRGB& col);
-    static void mapColorGreen(ColorRGB& col);
-    static void mapColorCoolGreen(ColorRGB& col);
-    static void mapColorLtCoolGreen(ColorRGB& col);
-    static void mapColorLtLtGray(ColorRGB& col);
-    static void mapColorLtGray(ColorRGB& col);
-    static void mapColorMdGray(ColorRGB& col);
-    static void mapColorDkGray(ColorRGB& col);
-    static void mapColorOrange(ColorRGB& col);
-    static void mapColorRed(ColorRGB& col);
-    static void mapColorCoolRed(ColorRGB& col);
-    static void mapColorWhite(ColorRGB& col);
+    static const struct BlueYellow: public ColorMap<BlueYellow> { BlueYellow(){} QColor operator()(double fraction) const; } blueYellow;
+    static const struct Spectral: public ColorMap<Spectral> { Spectral(){} QColor operator()(double fraction) const; } spectral;
 
-    static void mapColorBlueYellow(
-      const double& frac,
-      ColorRGB& colRGB);
-    static void mapColorGrayScale(
-      const double& frac,
-      ColorRGB& colRGB);
-    static void mapColorSpectral(
-      const double& frac,
-      ColorRGB& colRGB);
-
-    static void mapColorQualPast1(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualPast2(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualSet1(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualSet2(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualSet3(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualPair(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualDark(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorQualAccent(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-
-    static void mapColorSeqOrRd(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorSeqGnBu(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorSeqGreen(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorSeqGreen(
-      const double& alpha,
-      ColorRGB& colRGB);
-    static void mapColorSeqRed(
-      const size_t& iter,
-      const size_t& numr,
-      ColorRGB& colRGB);
-    static void mapColorSeqRed(
-      const double& alpha,
-      ColorRGB& colRGB);
-
-    static void hlsToRgb(
-      ColorHLS& colHLS,
-      ColorRGB& colRGB);
-    static double hlsValue(
-      double var1,
-      double var2,
-      double hue);
+    static const ListColorMap grayScale;
+    static const ListColorMap qualPast1;
+    static const ListColorMap qualPast2;
+    static const ListColorMap qualSet1;
+    static const ListColorMap qualSet2;
+    static const ListColorMap qualSet3;
+    static const ListColorMap qualPair;
+    static const ListColorMap qualDark;
+    static const ListColorMap qualAccent;
+    static const ListColorMap seqGreen;
+    static const ListColorMap seqRed;
 
     // -- drawing functions -----------------------------------------
     static void drawLine(
@@ -228,67 +144,39 @@ class VisUtils
       const double& aglBegDg, const double& aglEndDg,
       const double& radius,   const int& slices);
     static void drawArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const double& radius,   const int& slices);
-    static void drawArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const ColorRGB& colBeg, const ColorRGB& colEnd,
-      const double& radius,   const int& slices);
+      const double& xCtr,       const double& yCtr,
+      const double& aglBegDg,   const double& aglEndDg,
+      const double& wthBeg,     const double& wthEnd,
+      const double& radius,     const int& slices,
+      QColor colBeg = QColor(), QColor colEnd = QColor());
     static void fillArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const double& radius,   const int& slices);
-    static void fillArc(
-      const double& xCtr,     const double& yCtr,
-      const double& aglBegDg, const double& aglEndDg,
-      const double& wthBeg,   const double& wthEnd,
-      const ColorRGB& colBeg, const ColorRGB& colEnd,
-      const double& radius,   const int& slices);
+      const double& xCtr,       const double& yCtr,
+      const double& aglBegDg,   const double& aglEndDg,
+      const double& wthBeg,     const double& wthEnd,
+      const double& radius,     const int& slices,
+      QColor colBeg = QColor(), QColor colEnd = QColor());
 
     static void drawTriangle(
-      const double& x1, const double& y1,
-      const double& x2, const double& y2,
-      const double& x3, const double& y3);
-    static void drawTriangle(
-      const double&   x1, const double& y1,
-      const ColorRGB& col1,
-      const double&   x2, const double& y2,
-      const ColorRGB& col2,
-      const double&   x3, const double& y3,
-      const ColorRGB& col3);
+      const double&   x1,     const double& y1,
+      const double&   x2,     const double& y2,
+      const double&   x3,     const double& y3,
+      QColor col1 = QColor(), QColor col2 = QColor(), QColor col3 = QColor());
     static void fillTriangle(
-      const double& x1, const double& y1,
-      const double& x2, const double& y2,
-      const double& x3, const double& y3);
-    static void fillTriangle(
-      const double&   x1, const double& y1,
-      const ColorRGB& col1,
-      const double&   x2, const double& y2,
-      const ColorRGB& col2,
-      const double&   x3, const double& y3,
-      const ColorRGB& col3);
+      const double&   x1,     const double& y1,
+      const double&   x2,     const double& y2,
+      const double&   x3,     const double& y3,
+      QColor col1 = QColor(), QColor col2 = QColor(), QColor col3 = QColor());
 
     static void drawRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot);
-    static void drawRect(
-      const double& xLft,        const double& xRgt,
-      const double& yTop,        const double& yBot,
-      const ColorRGB& colTopLft, ColorRGB& colTopRgt,
-      const ColorRGB& colBotLft, ColorRGB& colBotRgt);
+      const double& xLft,          const double& xRgt,
+      const double& yTop,          const double& yBot,
+      QColor colTopLft = QColor(), QColor colTopRgt = QColor(),
+      QColor colBotLft = QColor(), QColor colBotRgt = QColor());
     static void fillRect(
-      const double& xLft, const double& xRgt,
-      const double& yTop, const double& yBot);
-    static void fillRect(
-      const double& xLft,        const double& xRgt,
-      const double& yTop,        const double& yBot,
-      const ColorRGB& colTopLft, ColorRGB& colTopRgt,
-      const ColorRGB& colBotLft, ColorRGB& colBotRgt);
+      const double& xLft,          const double& xRgt,
+      const double& yTop,          const double& yBot,
+      QColor colTopLft = QColor(), QColor colTopRgt = QColor(),
+      QColor colBotLft = QColor(), QColor colBotRgt = QColor());
 
     static void drawEllipse(
       const double& xCtr, const double& yCtr,
@@ -302,21 +190,15 @@ class VisUtils
       const double&   xCtr,    const double&   yCtr,
       const double&   xDOFIn,  const double&   yDOFIn,
       const double&   xDOFOut, const double&   yDOFOut,
-      const double&   slices,  const ColorRGB& cIn,
-      const ColorRGB& cOut);
+      const double&   slices,  QColor cIn, QColor cOut);
     static void fillEllipse(
       const double&   xCtr,     const double&   yCtr,
       const double&   xDOFIn,   const double&   yDOFIn,
       const double&   xDOFOut,  const double&   yDOFOut,
       const double&   aglBegDg, const double& aglEndDg,
-      const double&   slices,   const ColorRGB& cIn,
-      const ColorRGB& cOut);
+      const double&   slices,   QColor cIn, QColor cOut);
 
     static void drawArrow(
-      const double& xFr,     const double& xTo,
-      const double& yFr,     const double& yTo,
-      const double& wHead, const double& lHead);
-    static void fillArrow(
       const double& xFr,     const double& xTo,
       const double& yFr,     const double& yTo,
       const double& wHead, const double& lHead);
@@ -324,19 +206,16 @@ class VisUtils
       const double& xFr,   const double&   xTo,
       const double& yFr,   const double&   yTo,
       const double& wBase, const double&   wHead,
-      const double& lHead, const ColorRGB& cFr,
-      const ColorRGB& cTo);
+      const double& lHead, QColor cFr = QColor(), QColor cTo = QColor());
+    static void fillArrow(
+      const double& xFr,     const double& xTo,
+      const double& yFr,     const double& yTo,
+      const double& wHead, const double& lHead);
     static void fillArrow(
       const double& xFr,   const double& xTo,
       const double& yFr,   const double& yTo,
       const double& wBase, const double& wHead,
-      const double& lHead);
-    static void fillArrow(
-      const double& xFr,   const double& xTo,
-      const double& yFr,   const double& yTo,
-      const double& wBase, const double& wHead,
-      const double& lHead, const ColorRGB& cFr,
-      const ColorRGB& cTo);
+      const double& lHead, QColor cFr = QColor(), QColor cTo = QColor());
 
     static void drawDArrow(
       const double& xFr,   const double& xTo,

@@ -11,6 +11,9 @@
 #ifndef COMBNPLOT_H
 #define COMBNPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
@@ -23,21 +26,16 @@
 
 class CombnPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     CombnPlot(
-      Mediator* m,
+      QWidget *parent,
       Graph* g,
-      GLCanvas* c);
-    virtual ~CombnPlot();
-
+      const std::vector<size_t> &attributeIndices
+      );
     // -- set data functions ----------------------------------------
-    void setValues(
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs,
-      std::vector< size_t > &number);
-    void clearValues();
-
     void setDiagram(Diagram* dgrm);
 
     // -- set vis settings functions --------------------------------
@@ -57,13 +55,9 @@ class CombnPlot : public Visualizer
     void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    /*
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    */
+    void handleMouseEvent(QMouseEvent* e);
+
+    QSize sizeHint() const { return QSize(400,400); }
 
   protected:
     // -- utility data functions ------------------------------------
@@ -91,7 +85,7 @@ class CombnPlot : public Visualizer
 
     // data
     std::vector< std::string >        attributeLabels;
-    std::vector< size_t >           attributeIndcs;
+    std::vector< Attribute *> attributes;
     size_t                     maxAttrCard;
     std::vector< std::vector< size_t > > combinations;
     std::vector< size_t >           numberPerComb;
@@ -106,8 +100,6 @@ class CombnPlot : public Visualizer
     // combination plot
     std::vector< std::vector< Position2D > > posLftTop;
     std::vector< std::vector< Position2D > > posRgtBot;
-
-    bool   mouseInside;
     size_t    mouseCombnIdx;
 
     // diagram

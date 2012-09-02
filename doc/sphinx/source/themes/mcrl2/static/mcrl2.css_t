@@ -10,6 +10,10 @@ table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
 
+table.docutils.field-list { margin: 0; }
+table.docutils.citation { margin: 0; border: 0; }
+table.docutils.citation td.label { padding-right: 1em; }
+
 dl.function, dl.type, dl.member, dl.class  { border: solid 1px #80B090; } /* For reference manual */
 dl.function dt, dl.type dt, dl.member dt, dl.class dt {
   background-color: #A0E0C0;
@@ -76,12 +80,15 @@ div.platform-buttons {
   margin-bottom:0px;
   padding:5px;
   padding-bottom:0px;
+  height: 45px;
 }
 .platform-button {
-  padding: 19px;
+  display: block;
+  float: left;
+  padding: 0px;
   margin: 0px;
-  height: 0px;
-  width: 0px;
+  height: 38px;
+  width: 38px;
   opacity: 0.3;
   filter: alpha(opacity=30); /* For IE8 and earlier */
 }

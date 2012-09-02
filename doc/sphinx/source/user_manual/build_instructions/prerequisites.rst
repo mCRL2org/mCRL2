@@ -59,15 +59,16 @@ setup:
    - *XCode* must be installed. It can be found on the OS X installation DVDs.
      Consult the following table for the required version.
 
-       ============ =================
-       OS X version XCode version
-       ============ =================
-       10.4         2.5
-       ------------ -----------------
-       10.5         3.1
-       ------------ -----------------
-       10.6         3.2.5
-       ============ =================
+     +-----------------+-----------------+
+     | OS X version    |  XCode version  |
+     +=================+=================+
+     | 10.5            | 3.1             |
+     +-----------------+-----------------+
+     | 10.6            | 3.2.5           |
+     +-----------------+-----------------+
+     | 10.7            | 4.2.1           |
+     +-----------------+-----------------+
+
 
    - |cmake|_ or higher.
      
@@ -147,104 +148,62 @@ version). The following libraries are required:
 
    You can also :doc:`compile the required Boost libraries yourself <boost>`.
 
+QT
+--
 
-wxWidgets
----------
+.. |qt| replace:: *QT 4*
+.. _qt: http://qt.nokia.com
 
-.. |wx| replace:: *wxWidgets 2.8.11*
-.. _wx: http://www.wxwidgets.org
-
-The mCRL2 toolset requires |wx|_ or higher for compilation of the graphical 
-tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
+The mCRL2 toolset requires |qt|_ for compilation of the graphical tools 
+(:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 :ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`). 
-
-.. warning::
-
-   It is important that you have matching wxWidgets libraries for your build
-   setup. Linking debug versions of the wxWidgets libraries to the mCRL2 
-   binaries or vice versa may give unexpected results.
-
-.. warning::
-
-   To be able to use all graphical tools, wxWidgets must be configured to
-   support OpenGL.
 
 .. admonition:: Windows
    :class: platform-specific win
-
-   It is recommended to install wxWidgets using the following steps:
-
-   - Download wxWidgets to ``<WXROOT>``
-   - Edit ``<WXROOT/include/wx/msw/setup.h>`` such that ``wxUSE_GLCANVAS`` is 
-     defined to be 1.
-   - In the Visual Studio/Windows SDK command prompt, build *wxWidgets* as 
-     follows::
+   
+   When building for the Windows SDK, it is recommended to install QT using the
+   following steps:
+   
+   For a 32-bit version, binaries are available:
+   
+     - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
+       For the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
+     - Follow the installation instructions.
      
-       cd <WXROOT>/build/msw 
-       nmake BUILD="release" USE_OPENGL=1 makefile.vc 
-       nmake BUILD="debug" USE_OPENGL=1 makefile.vc 
+   For a 64-bit version, perform the following steps (taken from http://qt-project.org/doc/qt-4.8/install-win.html):
+   
+     - Download the Qt libraries source package (.zip) from http://qt.nokia.com/downloads.
+     - Extract the files, e.g. to ``C:\Qt\4.8.2``
+     - Add ``C:\Qt\4.8.2\bin`` to your ``PATH`` environment variable.
+     - Open a *Visual Studio* command prompt, and type the following (to support
+       both the Debug and the Release build)::
+     
+         C:
+         cd /D C:\Qt\4.8.2
+         configure -opensource -fast -debug-and-release -no-qt3support -no-dsp -no-vcproj  
+       
+       You need to accept the licence by typing ``y``.
+       Qt can now be compiled by typing::
+       
+         nmake
 
-   Alternatively, the last step can be replaced by the following:
+       .. warning::
 
-   - Open ``/build/msw/wx.sln`` in Visual Studio. If it asks to convert 
-     projects, confirm for all files in the project.
-   - Compile all libraries for a certain build type (e.g. Release, Debug).
-   - To build for a x64 platform, perform the following steps: 
-
-     - Select the solution in the Solution Explorer and open the Properties page
-       (Right click, then select :guilabel:`Properties`). 
-     - Select :guilabel:`Configuration Properties` and click on 
-       :guilabel:`Configuration Manager`. 
-     - Change the :guilabel:`Active solution configuration` to "Release". 
-     - Click on the :guilabel:`Active solution plaform`, and select "New" in the
-       dropdown box. 
-     - Select "x64" as the new platform, and copy settings from "Win32".
-
-   When installed correctly, CMake should be able to automatically find your 
-   installation. If automatic detection fails, configure CMake appropriately by
-   by setting the ``wxWidgets_LIB_DIR`` and ``wxWidgets_ROOT_DIR`` to 
-   ``<wxdir>/lib/vc_lib`` and ``<wxdir>``, respectively. This can be done by
-   executing::
-
-     cmake -DwxWidgets_LIB_DIR="<wxdir>/lib/vc_lib" -DwxWidgets_ROOT_DIR="<wxdir>"
-
-   Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
-   This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
-   bracket matching. To enable these features, perform the following steps:
-
-   - After having wxWidgets compiled, goto "<wxdir>/contrib/build/stc"
-   - Open ``stc.dsw`` with MSVC.
-   - For Windows X64 set "Active Solution Platform" to X64 
-     (:menuselection:`Build -> Configuration Manager`)
-   - Compile desired configurations (Debug & Release are sufficient). These 
-     options can be found under :menuselection:`Build -> Batch Build`.
-   - Press :guilabel:`build` to compile.
-   - Close MSVC and copy ``<wxdir>/contrib/include/wx/stc`` to 
-     ``<wxdir>/include/wx/stc``
-   - Now mCRL2 can be compiled with wxSTC. To enable this option, the CMake 
-     configuration flag ``MCRL2_WITH_WXSTC`` should be set to ``TRUE``.
-
-.. admonition:: Mac OS X
-   :class: platform-specific mac
-
-   wxWidgets can be installed using MacPorts::
-
-     sudo port install wxWidgets
-
-   See the :ref:`notes <osx-boost>` on installing *Boost* for information on how
-   to install MacPorts. Installing wxWidgets may take a while.
-
+          A bug in 64-bit MSVC is causing a problem in the release build of the
+          Qt libraries. This can be circumvented by installing the fix of Microsoft
+          `KB2280741 <http://support.microsoft.com/kb/2280741>`_.
+   
+   When installed correctly, and the binary directory for Qt has been added to
+   your ``PATH``, CMake should be able to automatically find your 
+   installation.
+   
 .. admonition:: Linux
    :class: platform-specific linux
-
+   
    Binary development versions are available in the package manager in most 
-   distributions (for instance the ``libwxgtk2.8-dev`` PPA package).
+   distributions (for instance the ``libqt4-dev`` PPA package).
 
-   To build from source, download the sources and build as usual, using the
-   following configuration::
-
-     ./configure  --disable-shared --disable-compat24 --disable-mediactrl --disable-sound --with-opengl 
-     
    On linux it is also required to install OpenGL related development packages.
    The exact package to be installed depends on your distribution. For Ubuntu
-   this are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
+   these are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
+

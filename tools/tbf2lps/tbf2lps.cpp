@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
@@ -155,6 +155,6 @@ class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERM_INIT(argv)
   return tbf2lps_gui_tool().execute(argc, argv);
 }

@@ -23,15 +23,12 @@ class Transition
     State*  getEndState() const;
     int     getLabel() const;
     bool    isBackpointer() const;
-    bool                isSelfLoop() const;
-    bool    isMarked() const;
-    void    setMarkedPointer(bool* bp);
+    bool    isSelfLoop() const;
 
   private:
     State*  beginState;
     State*  endState;
     int     label;
-    bool*   marked;
 };
 
 #endif
