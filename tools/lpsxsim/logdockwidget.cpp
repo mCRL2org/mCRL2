@@ -19,6 +19,7 @@ LogDockWidget::LogDockWidget(QMainWindow *window):
   m_logWidget = new mcrl2::utilities::qt::LogWidget;
   m_logWidget->layout()->setContentsMargins(0, 0, 0, 0);
   connect(m_logWidget, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)));
+  connect(m_logWidget, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(expand()));
 
   m_collapseButton = new QPushButton("Log output");
   m_collapseButton->setCheckable(true);
@@ -68,4 +69,10 @@ void LogDockWidget::setExpanded(bool expanded)
     m_collapseButton->setChecked(false);
     widget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   }
+}
+
+void LogDockWidget::expand()
+{
+  disconnect(m_logWidget, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(expand()));
+  setExpanded(true);
 }

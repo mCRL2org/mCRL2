@@ -26,6 +26,7 @@ class LogDockWidget : public QDockWidget
 
   public slots:
     void setExpanded(bool expanded);
+    void expand();
 
   signals:
     void logMessage(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
