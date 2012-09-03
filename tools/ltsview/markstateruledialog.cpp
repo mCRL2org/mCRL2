@@ -26,6 +26,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color
     m_ui.parameterList->addItem(QString::fromStdString(m_lts->getParameterName(i)));
   }
 
+  assert(parameter < m_lts->getNumParameters());
   m_ui.parameterList->item(parameter)->setSelected(true);
 
   if (negated)
