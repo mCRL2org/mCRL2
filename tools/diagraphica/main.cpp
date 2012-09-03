@@ -13,14 +13,13 @@ class diagraphica_tool : public diagraphica_base
       diagraphica_base("DiaGraphica",
         (QStringList() << "Hannes Pretorius" << "Ruud Koolen" << "Rimco Boudewijns").join(", ").toStdString(),
         "interactive visual analysis of an LTS", // what-is
-        "", // command-line description
+        "Multivariate state visualisation and simulation analysis for labelled " // command-line description
+        "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
+        "DiaGraphica is started without opening an LTS.",
         "You are free to use images produced with DiaGraphica.\n" // gui-specific description
         "In this case, image credits would be much appreciated.\n"
         "\n"
         "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-        "Multivariate state visualisation and simulation analysis for labelled "
-        "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
-        "DiaGraphica is started without opening an LTS.",
         "http://mcrl2.org/release/user_manual/tools/diagraphica.html")
     {}
 
