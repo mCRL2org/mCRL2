@@ -79,14 +79,15 @@ void txt2pbes(const std::string& input_filename,
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
-              const std::string& formfilename,
+              const std::string& formula_filename,
               bool timed,
-              bool structured
+              bool structured,
+              bool unoptimized
              );
 
 void complps2pbes(const std::string& input_filename,
                   const std::string& output_filename,
-                  const std::string& formfilename
+                  const std::string& formula_filename
                  );
 
 void lpsbisim2pbes(const std::string& input_filename1,

@@ -28,18 +28,21 @@ namespace pbes_system {
 
 namespace detail {
 
-inline
+template <typename TermTraits>
 pbes_expression RHS(const state_formulas::state_formula& x0,
                     const state_formulas::state_formula& x,
                     const lps::linear_process& lps,
                     data::set_identifier_generator& id_generator,
-                    const data::variable& T = data::variable()
+                    const data::variable& T,
+                    TermTraits tr
                    );
 
-template <typename Derived>
+template <typename Derived, typename TermTraits>
 struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 {
   typedef state_formulas::state_formula_traverser<Derived> super;
+  typedef TermTraits tr;
+
   using super::enter;
   using super::leave;
   using super::operator();
@@ -57,7 +60,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   rhs_traverser(const state_formulas::state_formula& phi0_,
                 const lps::linear_process& lps_,
                 data::set_identifier_generator& id_generator_,
-                const data::variable& T_ = data::variable()
+                const data::variable& T_,
+                TermTraits
                )
     : phi0(phi0_), lps(lps_), id_generator(id_generator_), T(T_)
   {}
@@ -134,14 +138,14 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
-    push(pbes_expr_optimized::and_(left, right));
+    push(tr::and_(left, right));
   }
 
   void leave(const state_formulas::or_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
-    push(pbes_expr_optimized::or_(left, right));
+    push(tr::or_(left, right));
   }
 
   void operator()(const state_formulas::imp&)
@@ -153,7 +157,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     push_variables(x.variables());
     derived()(x.body());
-    top() = forall(x.variables(), top());
+    top() = tr::forall(x.variables(), top());
     //pop_variables(x.variables());
   }
 
@@ -161,7 +165,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     push_variables(x.variables());
     derived()(x.body());
-    top() = exists(x.variables(), top());
+    top() = tr::exists(x.variables(), top());
     //pop_variables(x.variables());
   }
 
@@ -171,7 +175,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     bool timed = is_timed();
     atermpp::vector<pbes_expression> v;
-    pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T);
+    pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
     action_formulas::action_formula alpha = x.formula();
 
     const lps::action_summand_vector& asv = lps.action_summands();
@@ -191,13 +195,13 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression p1 = Sat(ai, alpha);
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
-      pbes_expression p = and_(p1, p2);
+      pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
         rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
-        p = and_(p, data::greater(ti, T));
+        p = tr::and_(p, data::greater(ti, T));
       }
-      p = is_must ? pbes_expr::forall(y, imp(p, rhs)) : pbes_expr::exists(y, and_(p, rhs));
+      p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
       v.push_back(p);
     }
 
@@ -230,7 +234,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression       ci = i->condition();
       data::data_expression ti = i->multi_action().time();
       data::variable_list   yi = i->summation_variables();
-      pbes_expression p = forall(yi, or_(data::sort_bool::not_(ci), data::greater(t, ti)));
+      pbes_expression p = tr::forall(yi, tr::or_(data::sort_bool::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
     const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
@@ -239,10 +243,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::data_expression cj = j->condition();
       data::data_expression tj = j->deadlock().time();
       data::variable_list   yj = j->summation_variables();
-      pbes_expression p = forall(yj, or_(data::sort_bool::not_(cj), data::greater(t, tj)));
+      pbes_expression p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
-    push(and_(pbes_expr::join_or(v.begin(), v.end()), data::greater(t, T)));
+    push(tr::and_(pbes_expr::join_or(v.begin(), v.end()), data::greater(t, T)));
   }
 
   void leave(const state_formulas::delay&)
@@ -260,7 +264,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::data_expression ci = i->condition();
       data::data_expression ti = i->multi_action().time();
       data::variable_list   yi = i->summation_variables();
-      pbes_expression p = exists(yi, and_(ci, data::less_equal(t, ti)));
+      pbes_expression p = tr::exists(yi, tr::and_(ci, data::less_equal(t, ti)));
       v.push_back(p);
     }
     const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
@@ -269,10 +273,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::data_expression cj = j->condition();
       data::data_expression tj = j->deadlock().time();
       data::variable_list   yj = j->summation_variables();
-      pbes_expression p = exists(yj, and_(cj, data::less_equal(t, tj)));
+      pbes_expression p = tr::exists(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }
-    push(or_(pbes_expr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
+    push(tr::or_(pbes_expr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
   }
 
   void leave(const state_formulas::variable& x)
@@ -318,10 +322,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   }
 };
 
-template <template <class> class Traverser>
-struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser> >
+template <template <class, class> class Traverser, typename TermTraits>
+struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_rhs_traverser<Traverser> > super;
+  typedef Traverser<apply_rhs_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -329,9 +333,10 @@ struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser> >
   apply_rhs_traverser(const state_formulas::state_formula& phi0,
                       const lps::linear_process& lps,
                       data::set_identifier_generator& id_generator,
-                      const data::variable& T = data::variable()
+                      const data::variable& T,
+                      TermTraits tr
                      )
-    : super(phi0, lps, id_generator, T)
+    : super(phi0, lps, id_generator, T, tr)
   {}
 
 #ifdef BOOST_MSVC
@@ -339,19 +344,22 @@ struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser> >
 #endif
 };
 
+template <typename TermTraits>
 inline
 pbes_expression RHS(const state_formulas::state_formula& x0,
                     const state_formulas::state_formula& x,
                     const lps::linear_process& lps,
                     data::set_identifier_generator& id_generator,
-                    const data::variable& T // = data::variable()
+                    const data::variable& T,
+                    TermTraits tr
                    )
 {
-  apply_rhs_traverser<rhs_traverser> f(x0, lps, id_generator, T);
+  apply_rhs_traverser<rhs_traverser, TermTraits> f(x0, lps, id_generator, T, tr);
   f(x);
   return f.top();
 }
 
+template <typename TermTraits>
 inline
 pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                const state_formulas::state_formula& x,
@@ -361,13 +369,16 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
                                atermpp::vector<pbes_equation>& Z,
-                               const data::variable& T = data::variable()
+                               const data::variable& T,
+                               TermTraits tr
                     );
 
-template <typename Derived>
-struct rhs_structured_traverser: public rhs_traverser<Derived>
+template <typename Derived, typename TermTraits>
+struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
 {
-  typedef rhs_traverser<Derived> super;
+  typedef rhs_traverser<Derived, TermTraits> super;
+  typedef TermTraits tr;
+
   using super::enter;
   using super::leave;
   using super::operator();
@@ -396,9 +407,10 @@ struct rhs_structured_traverser: public rhs_traverser<Derived>
                            data::variable_list& variables_,
                            const fixpoint_symbol& sigma_,
                            atermpp::vector<pbes_equation>& Z_,
-                           const data::variable& T = data::variable()
+                           const data::variable& T,
+                           TermTraits tr
                )
-    : super(phi0, lps, id_generator, T),
+    : super(phi0, lps, id_generator, T, tr),
     	variables(variables_.begin(), variables_.end()),
     	sigma(sigma_),
     	propvar_generator(propvar_generator_),
@@ -444,7 +456,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived>
     fv.insert(variables.begin(), variables.end());
     data::variable_list vars(fv.begin(), fv.end());
 
-    pbes_expression rhs0 = RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, vars, sigma, Z, T);
+    pbes_expression rhs0 = RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, vars, sigma, Z, T, TermTraits());
     action_formulas::action_formula alpha = x.formula();
 
     const lps::action_summand_vector& asv = lps.action_summands();
@@ -464,13 +476,13 @@ struct rhs_structured_traverser: public rhs_traverser<Derived>
       pbes_expression p1 = Sat(ai, alpha);
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
-      pbes_expression p = and_(p1, p2);
+      pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
         rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
-        p = and_(p, data::greater(ti, T));
+        p = tr::and_(p, data::greater(ti, T));
       }
-      p = is_must ? pbes_expr::forall(y, imp(p, rhs)) : pbes_expr::exists(y, and_(p, rhs));
+      p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
 
       // generate a new equation 'Y(d) = p', and add Y(d) to v
     	core::identifier_string Y = propvar_generator("Y");
@@ -496,10 +508,10 @@ struct rhs_structured_traverser: public rhs_traverser<Derived>
   }
 };
 
-template <template <class> class Traverser>
-struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_traverser<Traverser> >
+template <template <class, class> class Traverser, typename TermTraits>
+struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_rhs_structured_traverser<Traverser> > super;
+  typedef Traverser<apply_rhs_structured_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -511,9 +523,10 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
                                  data::variable_list& variables,
                                  const fixpoint_symbol& sigma,
                                  atermpp::vector<pbes_equation>& Z,
-                                 const data::variable& T = data::variable()
+                                 const data::variable& T,
+                                 TermTraits tr
                                 )
-    : super(phi0, lps, id_generator, propvar_generator, variables, sigma, Z, T)
+    : super(phi0, lps, id_generator, propvar_generator, variables, sigma, Z, T, tr)
   {}
 
 #ifdef BOOST_MSVC
@@ -521,6 +534,7 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
 #endif
 };
 
+template <typename TermTraits>
 inline
 pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                const state_formulas::state_formula& x,
@@ -530,10 +544,11 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
                                atermpp::vector<pbes_equation>& Z,
-                               const data::variable& T
+                               const data::variable& T,
+                               TermTraits tr
                     )
 {
-  apply_rhs_structured_traverser<rhs_structured_traverser> f(x0, lps, id_generator, propvar_generator, variables, sigma, Z, T);
+  apply_rhs_structured_traverser<rhs_structured_traverser, TermTraits> f(x0, lps, id_generator, propvar_generator, variables, sigma, Z, T, tr);
   f(x);
   return f.top();
 }

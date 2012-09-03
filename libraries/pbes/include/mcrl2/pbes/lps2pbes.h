@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
 #include "mcrl2/pbes/detail/lps2pbes_e.h"
+#include "mcrl2/pbes/detail/term_traits_optimized.h"
 
 namespace mcrl2
 {
@@ -47,7 +48,7 @@ class lps2pbes_algorithm
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \param structured use the 'structured' approach of generating equations
     /// \return A PBES that encodes the property applied to the given specification
-    pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured, data::variable T = data::variable())
+    pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::variable())
     {
       using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
@@ -75,11 +76,25 @@ class lps2pbes_algorithm
       	data::set_identifier_generator propvar_generator;
         std::set<core::identifier_string> names = state_formulas::find_state_variable_names(f);
         propvar_generator.add_identifiers(names);
-        eqn = detail::E_structured(f, f, spec.process(), propvar_generator, T);
+        if (unoptimized)
+        {
+          eqn = detail::E_structured(f, f, spec.process(), propvar_generator, T, core::term_traits<pbes_expression>());
+        }
+        else
+        {
+          eqn = detail::E_structured(f, f, spec.process(), propvar_generator, T, core::term_traits_optimized<pbes_expression>());
+        }
       }
       else
       {
-        eqn = detail::E(f, f, spec.process(), T);
+        if (unoptimized)
+        {
+          eqn = detail::E(f, f, spec.process(), T, core::term_traits<pbes_expression>());
+        }
+        else
+        {
+          eqn = detail::E(f, f, spec.process(), T, core::term_traits_optimized<pbes_expression>());
+        }
       }
 
       // compute the initial state
@@ -114,7 +129,7 @@ class lps2pbes_algorithm
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \param structured use the 'structured' approach of generating equations
 /// \return The resulting pbes
-inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false)
+inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false)
 {
   if ((formula.has_time() || spec.process().has_time()) && !timed)
   {
@@ -131,11 +146,11 @@ inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::sta
     data::variable T = fresh_variable(id_generator, data::sort_real::real_(), "T");
     id_generator.insert(T.name());
     lps::detail::make_timed_lps(spec_timed.process(), id_generator);
-    return lps2pbes_algorithm().run(formula, spec_timed, structured, T);
+    return lps2pbes_algorithm().run(formula, spec_timed, structured, unoptimized, T);
   }
   else
   {
-    return lps2pbes_algorithm().run(formula, spec, structured);
+    return lps2pbes_algorithm().run(formula, spec, structured, unoptimized);
   }
 }
 
@@ -145,12 +160,12 @@ inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::sta
 /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
 /// \return The result of the algorithm
 inline
-pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed, bool structured = false)
+pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed = false, bool structured = false, bool unoptimized = false)
 {
   pbes<> result;
   lps::specification spec = lps::linearise(spec_text);
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
-  return lps2pbes(spec, f, timed, structured);
+  return lps2pbes(spec, f, timed, structured, unoptimized);
 }
 
 } // namespace pbes_system

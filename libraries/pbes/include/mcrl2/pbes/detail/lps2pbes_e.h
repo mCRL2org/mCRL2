@@ -20,13 +20,15 @@ namespace pbes_system {
 
 namespace detail {
 
+template <typename TermTraits>
 atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lps::linear_process& lps,
-                                 const data::variable& T = data::variable()
+                                 const data::variable& T,
+                                 TermTraits tr
                                 );
 
-template <typename Derived>
+template <typename Derived, typename TermTraits>
 struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 {
   typedef state_formulas::state_formula_traverser<Derived> super;
@@ -46,9 +48,10 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   std::vector<result_type> result_stack;
 
   e_traverser(const state_formulas::state_formula& phi0_,
-                const lps::linear_process& lps_,
-                const data::variable& T_ = data::variable()
-               )
+              const lps::linear_process& lps_,
+              const data::variable& T_,
+              TermTraits tr
+             )
     : phi0(phi0_), lps(lps_), T(T_)
   {}
 
@@ -186,9 +189,9 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     e = is_timed() ? T + e : e;
     propositional_variable v(X, e);
     data::set_identifier_generator id_generator;
-    pbes_expression expr = detail::RHS(phi0, phi, lps, id_generator, T);
+    pbes_expression expr = detail::RHS(phi0, phi, lps, id_generator, T, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(atermpp::vector<pbes_equation>() + eqn + E(phi0, phi, lps, T));
+    push(atermpp::vector<pbes_equation>() + eqn + E(phi0, phi, lps, T, TermTraits()));
   }
 
   void operator()(const state_formulas::nu& x)
@@ -202,19 +205,20 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   }
 };
 
-template <template <class> class Traverser>
-struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser> >
+template <template <class, class> class Traverser, typename TermTraits>
+struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_e_traverser<Traverser> > super;
+  typedef Traverser<apply_e_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
 
   apply_e_traverser(const state_formulas::state_formula& phi0,
-                   const lps::linear_process& lps,
-                   const data::variable& T = data::variable()
-                  )
-    : super(phi0, lps, T)
+                    const lps::linear_process& lps,
+                    const data::variable& T,
+                    TermTraits tr
+                   )
+    : super(phi0, lps, T, tr)
   {}
 
 #ifdef BOOST_MSVC
@@ -222,30 +226,34 @@ struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser> >
 #endif
 };
 
+template <typename TermTraits>
 inline
 atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lps::linear_process& lps,
-                                 const data::variable& T // = data::variable()
+                                 const data::variable& T,
+                                 TermTraits tr
                                 )
 {
-  apply_e_traverser<e_traverser> f(x0, lps, T);
+  apply_e_traverser<e_traverser, TermTraits> f(x0, lps, T, tr);
   f(x);
   assert(f.result_stack.size() == 1);
   return f.top();
 }
 
+template <typename TermTraits>
 atermpp::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
                                             const state_formulas::state_formula& x,
                                             const lps::linear_process& lps,
                                             data::set_identifier_generator& propvar_generator,
-                                            const data::variable& T = data::variable()
+                                            const data::variable& T,
+                                            TermTraits tr
                                            );
 
-template <typename Derived>
-struct e_structured_traverser: public e_traverser<Derived>
+template <typename Derived, typename TermTraits>
+struct e_structured_traverser: public e_traverser<Derived, TermTraits>
 {
-  typedef e_traverser<Derived> super;
+  typedef e_traverser<Derived, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -269,9 +277,10 @@ struct e_structured_traverser: public e_traverser<Derived>
   e_structured_traverser(const state_formulas::state_formula& phi0,
                          const lps::linear_process& lps,
                          data::set_identifier_generator& propvar_generator_,
-                         const data::variable& T = data::variable()
+                         const data::variable& T,
+                         TermTraits tr
                         )
-    : super(phi0, lps, T),
+    : super(phi0, lps, T, tr),
     	propvar_generator(propvar_generator_)
   {}
 
@@ -294,9 +303,9 @@ struct e_structured_traverser: public e_traverser<Derived>
     propositional_variable v(X, e);
     data::set_identifier_generator id_generator;
     atermpp::vector<pbes_equation> Z;
-    pbes_expression expr = detail::RHS_structured(phi0, phi, lps, id_generator, propvar_generator, d, sigma, Z, T);
+    pbes_expression expr = detail::RHS_structured(phi0, phi, lps, id_generator, propvar_generator, d, sigma, Z, T, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(atermpp::vector<pbes_equation>() + eqn + Z + E_structured(phi0, phi, lps, propvar_generator, T));
+    push(atermpp::vector<pbes_equation>() + eqn + Z + E_structured(phi0, phi, lps, propvar_generator, T, TermTraits()));
   }
 
   void operator()(const state_formulas::nu& x)
@@ -310,10 +319,10 @@ struct e_structured_traverser: public e_traverser<Derived>
   }
 };
 
-template <template <class> class Traverser>
-struct apply_e_structured_traverser: public Traverser<apply_e_structured_traverser<Traverser> >
+template <template <class, class> class Traverser, typename TermTraits>
+struct apply_e_structured_traverser: public Traverser<apply_e_structured_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_e_structured_traverser<Traverser> > super;
+  typedef Traverser<apply_e_structured_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -321,9 +330,10 @@ struct apply_e_structured_traverser: public Traverser<apply_e_structured_travers
   apply_e_structured_traverser(const state_formulas::state_formula& phi0,
                                const lps::linear_process& lps,
                                data::set_identifier_generator& propvar_generator,
-                               const data::variable& T = data::variable()
+                               const data::variable& T,
+                               TermTraits tr
                               )
-    : super(phi0, lps, propvar_generator, T)
+    : super(phi0, lps, propvar_generator, T, tr)
   {}
 
 #ifdef BOOST_MSVC
@@ -331,15 +341,16 @@ struct apply_e_structured_traverser: public Traverser<apply_e_structured_travers
 #endif
 };
 
-inline
+template <typename TermTraits>
 atermpp::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
                                             const state_formulas::state_formula& x,
                                             const lps::linear_process& lps,
                                             data::set_identifier_generator& propvar_generator,
-                                            const data::variable& T
+                                            const data::variable& T,
+                                            TermTraits tr
                                            )
 {
-  apply_e_structured_traverser<e_structured_traverser> f(x0, lps, propvar_generator, T);
+  apply_e_structured_traverser<e_structured_traverser, TermTraits> f(x0, lps, propvar_generator, T, tr);
   f(x);
   assert(f.result_stack.size() == 1);
   return f.top();

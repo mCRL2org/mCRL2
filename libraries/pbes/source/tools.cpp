@@ -50,12 +50,13 @@ namespace pbes_system
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
-              const std::string& formfilename,
+              const std::string& formula_filename,
               bool timed,
-              bool structured
+              bool structured,
+              bool unoptimized
              )
 {
-  if (formfilename.empty())
+  if (formula_filename.empty())
   {
     throw mcrl2::runtime_error("option -f is not specified");
   }
@@ -72,17 +73,17 @@ void lps2pbes(const std::string& input_filename,
   lps::specification spec;
   spec.load(input_filename);
   //load formula file
-  mCRL2log(log::verbose) << "reading input from file '" <<  formfilename << "'..." << std::endl;
-  std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+  mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
+  std::ifstream instream(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
   if (!instream)
   {
-    throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+    throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
   state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
   instream.close();
   //convert formula and LPS to a PBES
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed, structured);
+  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized);
   //save the result
   if (output_filename.empty())
   {
@@ -97,10 +98,10 @@ void lps2pbes(const std::string& input_filename,
 
 void complps2pbes(const std::string& input_filename,
                   const std::string& output_filename,
-                  const std::string& formfilename
+                  const std::string& formula_filename
                  )
 {
-  if (formfilename.empty())
+  if (formula_filename.empty())
   {
     throw mcrl2::runtime_error("option -f is not specified");
   }
@@ -123,11 +124,11 @@ void complps2pbes(const std::string& input_filename,
   lps::specification spec = lps::linearise(procspec);
 
   // load state formula
-  mCRL2log(log::verbose) << "reading formula from file '" <<  formfilename << "'..." << std::endl;
-  std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+  mCRL2log(log::verbose) << "reading formula from file '" <<  formula_filename << "'..." << std::endl;
+  std::ifstream instream(formula_filename.c_str(), std::ifstream::in|std::ifstream::binary);
   if (!instream)
   {
-    throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+    throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
   state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
   instream.close();
