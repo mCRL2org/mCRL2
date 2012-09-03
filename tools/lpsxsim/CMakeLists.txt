@@ -27,6 +27,7 @@ set(LPSXSIM_UI_FILES
 qt4_wrap_ui(LPSXSIM_UI_HEADERS ${LPSXSIM_UI_FILES})
 
 set(LPSXSIM_MOC_HEADERS
+  logdockwidget.h
   mainwindow.h
   simulation.h
 )
@@ -36,6 +37,7 @@ set(LPSXSIM_SRC_FILES
   ${LPSXSIM_RC_FILES}
   ${LPSXSIM_UI_HEADERS}
   ${LPSXSIM_MOC_SOURCES}
+  logdockwidget.cpp
   main.cpp
   mainwindow.cpp
   simulation.cpp
