@@ -207,6 +207,7 @@ void LtsCanvas::render(bool light)
       m_ltsManager->currentSimulationState(),
       m_ltsManager->currentSimulationTransition()
     );
+    glPopName();
   }
   if (!light || m_settings->navShowStates.value())
   {
