@@ -32,6 +32,7 @@ MainWindow::MainWindow()
   connect(m_ui.actionRandomPlay, SIGNAL(triggered()), this, SLOT(randomPlay()));
   connect(m_ui.actionStop, SIGNAL(triggered()), this, SLOT(stopPlay()));
   connect(m_ui.actionSetPlayDelay, SIGNAL(triggered()), this, SLOT(setPlayDelay()));
+  connect(m_ui.actionEnableTauPrioritisation, SIGNAL(toggled(bool)), this, SLOT(setTauPrioritization()));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
@@ -213,6 +214,14 @@ void MainWindow::stateSelected()
   }
 }
 
+void MainWindow::setTauPrioritization()
+{
+  if (m_simulation)
+  {
+    m_simulation->enable_tau_prioritization(m_ui.actionEnableTauPrioritisation->isChecked());
+  }
+}
+
 void MainWindow::openSpecification(QString filename)
 {
   Simulation *simulation = new Simulation(filename, mcrl2::data::rewrite_strategy());
@@ -239,6 +248,8 @@ void MainWindow::openSpecification(QString filename)
 
     m_ui.stateTable->item(i, 0)->setText(parameters[i]);
   }
+
+  setTauPrioritization();
 
   connect(m_simulation, SIGNAL(traceChanged(unsigned int)), this, SLOT(updateSimulation()));
   updateSimulation();

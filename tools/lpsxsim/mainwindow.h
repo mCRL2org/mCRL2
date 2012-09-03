@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow
     void setPlayDelay();
     void updateSimulation();
     void stateSelected();
+    void setTauPrioritization();
 
   public slots:
     void openSpecification(QString filename);

@@ -59,6 +59,12 @@
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
            <column>
             <property name="text">
              <string>Action</string>
@@ -97,6 +103,12 @@
            </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
            </attribute>
            <column>
             <property name="text">
@@ -141,6 +153,12 @@
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
           <column>
            <property name="text">
             <string>#</string>
@@ -170,7 +188,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -198,7 +216,7 @@
     <property name="title">
      <string>&amp;Options</string>
     </property>
-    <addaction name="actionEnableTauPriotisation"/>
+    <addaction name="actionEnableTauPrioritisation"/>
     <addaction name="actionShowDontCaresInStateChanges"/>
    </widget>
    <addaction name="menuFile"/>
@@ -233,12 +251,12 @@
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionEnableTauPriotisation">
+  <action name="actionEnableTauPrioritisation">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Enable &amp;Tau Priotisation</string>
+    <string>Enable &amp;Tau Prioritisation</string>
    </property>
   </action>
   <action name="actionOpen">
