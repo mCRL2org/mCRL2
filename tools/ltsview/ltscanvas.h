@@ -39,10 +39,6 @@ class LtsCanvas : public QGLWidget
   public slots:
     void resetView();
     void exportToText(QString filename) { m_visualizer->exportToText(filename.toStdString()); }
-    void useSelect() { setSelectedTool(SelectTool); }
-    void usePan() { setSelectedTool(PanTool); }
-    void useZoom() { setSelectedTool(ZoomTool); }
-    void useRotate() { setSelectedTool(RotateTool); }
 
   protected slots:
     void clusterPositionsChanged();

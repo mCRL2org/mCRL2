@@ -293,9 +293,17 @@ void LtsCanvas::render(bool light)
 
 void LtsCanvas::mousePressEvent(QMouseEvent *event)
 {
-  if (event->modifiers() & Qt::ControlModifier)
+  if ((event->modifiers() & Qt::ControlModifier) && (event->modifiers() & Qt::ShiftModifier))
+  {
+    setActiveTool(ZoomTool);
+  }
+  else if (event->modifiers() & Qt::ControlModifier)
   {
     setActiveTool(PanTool);
+  }
+  else if (event->modifiers() & Qt::ShiftModifier)
+  {
+    setActiveTool(RotateTool);
   }
   else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
   {
