@@ -146,7 +146,7 @@ LTS::LTS()
   previousLevel = NULL;
   lastWasAbove = false;
   zoomLevel = 0;
-  // mcrl2_lts = NULL;
+  mcrl2_lts = 0;
 }
 
 LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
@@ -156,7 +156,7 @@ LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
   previousLevel  = parent;
   zoomLevel = previousLevel->getZoomLevel() + 1;
 
-  // mcrl2_lts = previousLevel->getmCRL2LTS();
+  mcrl2_lts = previousLevel->mcrl2_lts;
 
   if (lastWasAbove)
   {
@@ -214,11 +214,10 @@ LTS::~LTS()
     }
     clustersInRank.clear();
 
-    /* if (mcrl2_lts != NULL)
+    if (mcrl2_lts)
     {
       delete mcrl2_lts;
-      mcrl2_lts = NULL;
-    } */
+    }
   }
   else
   {
@@ -244,18 +243,18 @@ State_iterator LTS::getStateIterator()
 
 string LTS::getParameterName(size_t parindex)
 {
-  return mcrl2_lts.process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
+  return mcrl2_lts->process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
 }
 
 size_t LTS::getStateParameterValue(State* state,size_t param)
 {
-  return mcrl2_lts.state_label(state->getID())[param];
+  return mcrl2_lts->state_label(state->getID())[param];
 }
 
 std::string LTS::getStateParameterValueStr(State* state, size_t param)
 {
   using namespace mcrl2::lts::detail;
-  return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_label(state->getID()))[param]);
+  return mcrl2_lts->state_element_value(param,(mcrl2_lts->state_label(state->getID()))[param]);
 }
 
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param)
@@ -271,21 +270,29 @@ std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t pa
 
 bool LTS::readFromFile(const std::string& filename)
 {
-  load_lts_as_fsm_file(filename,mcrl2_lts);
+  assert(!previousLevel);
+
+  if (mcrl2_lts)
+  {
+    delete mcrl2_lts;
+  }
+  mcrl2_lts = new mcrl2::lts::lts_fsm_t;
+
+  load_lts_as_fsm_file(filename, *mcrl2_lts);
 
   // remove unreachable states
-  reachability_check(mcrl2_lts,true);
+  reachability_check(*mcrl2_lts, true);
 
   states.clear();
-  states.reserve(mcrl2_lts.num_states());
-  for (size_t i = 0; i < mcrl2_lts.num_states(); ++i)
+  states.reserve(mcrl2_lts->num_states());
+  for (size_t i = 0; i < mcrl2_lts->num_states(); ++i)
   {
     states.push_back(new State(static_cast<int>(i)));
   }
 
-  initialState = states[mcrl2_lts.initial_state()];
+  initialState = states[mcrl2_lts->initial_state()];
 
-  const std::vector<transition> &trans=mcrl2_lts.get_transitions();
+  const std::vector<transition> &trans=mcrl2_lts->get_transitions();
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     State* s1 = states[r->from()];
@@ -306,21 +313,17 @@ bool LTS::readFromFile(const std::string& filename)
 
 int LTS::getNumLabels()
 {
-  return static_cast<int>(mcrl2_lts.num_action_labels());
+  return static_cast<int>(mcrl2_lts->num_action_labels());
 }
 
 size_t LTS::getNumParameters() const
 {
-  /* if (mcrl2_lts.has_process_parameters())
-  { */
-  return mcrl2_lts.process_parameters().size();
-  /* }
-  return 0; */
+  return mcrl2_lts->process_parameters().size();
 }
 
 string LTS::getLabel(int labindex)
 {
-  return mcrl2_lts.action_label(labindex);
+  return mcrl2_lts->action_label(labindex);
 }
 
 void LTS::addCluster(Cluster* cluster)
@@ -371,9 +374,9 @@ void LTS::addClusterAndBelow(Cluster* cluster)
 void LTS::getActionLabels(vector< string > &ls) const
 {
   ls.clear();
-  for (size_t i = 0; i < mcrl2_lts.num_action_labels(); ++i)
+  for (size_t i = 0; i < mcrl2_lts->num_action_labels(); ++i)
   {
-    ls.push_back(mcrl2_lts.action_label(i));
+    ls.push_back(mcrl2_lts->action_label(i));
   }
 }
 
@@ -427,12 +430,12 @@ int LTS::getNumDeadlocks()
 
 int LTS::getNumStates() const
 {
-  return static_cast<int>(mcrl2_lts.num_states());
+  return static_cast<int>(mcrl2_lts->num_states());
 }
 
 int LTS::getNumTransitions() const
 {
-  return static_cast<int>(mcrl2_lts.num_transitions());
+  return static_cast<int>(mcrl2_lts->num_transitions());
 }
 
 void LTS::clearRanksAndClusters()

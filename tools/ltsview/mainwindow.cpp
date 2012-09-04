@@ -60,10 +60,6 @@ MainWindow::MainWindow():
   connect(&m_settings.displayWireframe, SIGNAL(changed(bool)), m_ui.displayWireframe, SLOT(setChecked(bool)));
   connect(m_ui.settings, SIGNAL(triggered()), m_settingsDialog, SLOT(show()));
 
-  connect(m_ui.select, SIGNAL(triggered()), m_ltsCanvas, SLOT(useSelect()));
-  connect(m_ui.pan, SIGNAL(triggered()), m_ltsCanvas, SLOT(usePan()));
-  connect(m_ui.zoom, SIGNAL(triggered()), m_ltsCanvas, SLOT(useZoom()));
-  connect(m_ui.rotate, SIGNAL(triggered()), m_ltsCanvas, SLOT(useRotate()));
   connect(m_ui.information, SIGNAL(triggered()), m_infoDialog, SLOT(show()));
   connect(m_ui.simulation, SIGNAL(triggered()), m_simDialog, SLOT(show()));
   connect(m_ui.mark, SIGNAL(triggered()), m_markDialog, SLOT(show()));

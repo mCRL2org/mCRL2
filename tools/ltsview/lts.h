@@ -90,9 +90,9 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
-    bool hasStateInfo() const { return mcrl2_lts.has_state_info(); }
+    bool hasStateInfo() const { return mcrl2_lts->has_state_info(); }
     size_t getNumParameters() const;
-    const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts.state_element_values(parindex); }
+    const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts->state_element_values(parindex); }
     std::string getParameterName(size_t parindex) ;
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
@@ -122,7 +122,7 @@ class LTS
     void fromAbove();
 
   private:
-    mcrl2::lts::lts_fsm_t mcrl2_lts;
+    mcrl2::lts::lts_fsm_t *mcrl2_lts;
 
     bool lastWasAbove;
     int zoomLevel;
