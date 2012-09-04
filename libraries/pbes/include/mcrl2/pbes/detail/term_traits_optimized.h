@@ -58,13 +58,13 @@ struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_tr
   static inline
   term_type forall(const variable_sequence_type& d, const term_type& x)
   {
-    return utilities::optimized_forall(d, x);
+    return utilities::optimized_forall_no_empty_domain(d, x);
   }
 
   static inline
   term_type exists(const variable_sequence_type& d, const term_type& x)
   {
-    return utilities::optimized_exists(d, x);
+    return utilities::optimized_exists_no_empty_domain(d, x);
   }
 };
 
