@@ -4,6 +4,7 @@
 
 import os
 import random
+import re
 from optparse import OptionParser
 from path import *
 
@@ -69,7 +70,7 @@ def timeout_command(program, options, timeout = -1):
     if mcrl2_tool_options.verbose:
         print 'executing', command
 
-    cmd = command.split(" ")
+    cmd = re.split('\s+', command)
     start = datetime.datetime.now()
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
