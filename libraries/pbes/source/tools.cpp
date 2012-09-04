@@ -409,7 +409,8 @@ void pbesrewr(const std::string& input_filename,
 }
 
 void txt2pbes(const std::string& input_filename,
-              const std::string& output_filename
+              const std::string& output_filename,
+              bool normalize
              )
 {
   pbes_system::pbes<> p;
@@ -417,7 +418,7 @@ void txt2pbes(const std::string& input_filename,
   {
     //parse specification from stdin
     mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
-    p = pbes_system::txt2pbes(std::cin);
+    p = pbes_system::txt2pbes(std::cin, normalize);
   }
   else
   {
@@ -428,7 +429,7 @@ void txt2pbes(const std::string& input_filename,
     {
       throw mcrl2::runtime_error("cannot open input file: " + input_filename);
     }
-    p = pbes_system::txt2pbes(instream);
+    p = pbes_system::txt2pbes(instream, normalize);
     instream.close();
   }
   if (output_filename.empty())
