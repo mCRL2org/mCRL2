@@ -112,6 +112,19 @@ class pfnf_quantifier
     {
       return m_variables;
     }
+
+    // applies the quantifier to a pbes expression
+    pbes_expression apply(const pbes_expression& phi) const
+    {
+      if (m_is_forall)
+      {
+        return forall(m_variables, phi);
+      }
+      else
+      {
+        return exists(m_variables, phi);
+      }
+    }
 };
 
 // represents Qq: Q. h /\ implications
@@ -119,6 +132,7 @@ class pfnf_equation
 {
   protected:
     // left hand side
+    fixpoint_symbol m_symbol;
     propositional_variable m_X;
     std::vector<data::variable> m_parameters;
 
@@ -130,6 +144,7 @@ class pfnf_equation
   public:
     pfnf_equation(const pbes_equation& eqn)
     {
+      m_symbol = eqn.symbol();
       propositional_variable X = eqn.variable();
       pbes_expression phi = eqn.formula();
 
@@ -194,6 +209,22 @@ class pfnf_equation
     std::vector<pfnf_implication>& implications()
     {
       return m_implications;
+    }
+
+    // computes the equation with the implications replaced by new_implication
+    pbes_equation apply_implication(const pbes_expression& new_implications) const
+    {
+      pbes_expression phi = new_implications;
+
+      // apply quantifiers
+      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      {
+        phi = i->apply(phi);
+      }
+
+      phi = and_(m_h, phi);
+
+      return pbes_equation(m_symbol, m_X, phi);
     }
 };
 

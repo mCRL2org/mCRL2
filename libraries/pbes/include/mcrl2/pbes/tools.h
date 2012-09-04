@@ -113,6 +113,11 @@ void pbesabsinthe(const std::string& input_filename,
                   bool enable_logging
                  );
 
+void pbesstategraph(const std::string& input_filename,
+                    const std::string& output_filename,
+                    bool simplify
+                   );
+
 } // namespace pbes_system
 
 } // namespace mcrl2

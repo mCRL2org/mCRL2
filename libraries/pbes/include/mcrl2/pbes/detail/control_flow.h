@@ -24,6 +24,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -241,6 +242,7 @@ class pbes_control_flow_algorithm
       std::set<control_flow_edge> outgoing_edges;
       atermpp::set<pbes_expression> guards;
       std::set<data::variable> marking;
+      std::vector<bool> marked_parameters; // will be set after computing the marking
 
       control_flow_vertex(const propositional_variable_instantiation& X_)
         : X(X_)
@@ -287,6 +289,12 @@ class pbes_control_flow_algorithm
         	}
         }
         return result;
+      }
+
+      // returns true if the i-th parameter of X is marked
+      bool is_marked_parameter(std::size_t i) const
+      {
+        return marked_parameters[i];
       }
     };
 
@@ -543,6 +551,12 @@ class pbes_control_flow_algorithm
       return result;
     }
 
+    // returns true if the i-th parameter of X is a control flow parameter
+    bool is_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
+    {
+      return control_flow_values(X)[i];
+    }
+
     // returns the parameters of the propositional variable with name X
     std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
     {
@@ -768,29 +782,138 @@ class pbes_control_flow_algorithm
           }
         }
       }
+
+      // set the marking_parameters attributes
+      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      {
+        control_flow_vertex& v = i->second;
+        const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
+        const std::vector<data::variable>& d = eqn.parameters();
+        for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
+        {
+          v.marked_parameters.push_back(v.marking.find(*j) != v.marking.end());
+        }
+      }
+    }
+
+    data::data_expression default_value(const data::sort_expression& x)
+    {
+      // TODO: make this an attribute
+      data::representative_generator f(m_pbes.data());
+      return f(x);
+    }
+
+    // generates a PBES from the control flow graph and the marking
+    pbes<> reset_variables(bool simplify)
+    {
+      pbes<> result;
+      result.initial_state() = m_pbes.initial_state();
+      data::rewriter datar(m_pbes.data());
+      simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_pbes.data());
+
+      // create an index for all vertices in the control flow graph with a given name
+      std::map<core::identifier_string, std::set<control_flow_vertex*> > propvar_map;
+      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      {
+        control_flow_vertex& v = i->second;
+        propvar_map[v.X.name()].insert(&v);
+      }
+
+      // expand the equations, and add them to the result
+      std::vector<pfnf_equation>& equations = m_pbes.equations();
+      for (std::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        std::vector<pfnf_implication>& implications = k->implications();
+        atermpp::vector<pbes_expression> new_implications;
+        for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+        {
+          std::vector<propositional_variable_instantiation>& v = i->variables();
+          for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
+          {
+            std::vector<pbes_expression> conjuncts;
+            core::identifier_string X = j->name();
+            std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(j->parameters());
+
+            // iterate over the alternatives as defined by the control flow graph
+            std::set<control_flow_vertex*>& inst = propvar_map[X];
+            for (std::set<control_flow_vertex*>::iterator q = inst.begin(); q != inst.end(); ++q)
+            {
+              control_flow_vertex& v = **q;
+              atermpp::vector<data::data_expression> e;
+              std::size_t N = v.marked_parameters.size();
+              data::data_expression_list::const_iterator s = v.X.parameters().begin();
+              data::data_expression condition = data::sort_bool::true_();
+              for (std::size_t r = 0; r < N; ++r)
+              {
+                if (is_control_flow_parameter(X, r))
+                {
+                  data::data_expression v_X_r = *s++;
+                  condition = data::lazy::and_(condition, data::equal_to(d_X[r], v_X_r));
+                  e.push_back(v_X_r);
+                }
+                else if (v.is_marked_parameter(r))
+                {
+                  e.push_back(d_X[r]);
+                }
+                else
+                {
+                  e.push_back(default_value(d_X[r].sort()));
+                }
+              }
+              propositional_variable_instantiation Xe(X, atermpp::convert<data::data_expression_list>(e));
+              if (simplify)
+              {
+                condition = datar(condition);
+                if (condition != data::sort_bool::false_())
+                {
+                  conjuncts.push_back(imp(condition, Xe));
+                }
+              }
+              else
+              {
+                conjuncts.push_back(imp(condition, Xe));
+              }
+              if (simplify)
+              {
+                new_implications.push_back(utilities::optimized_imp(pbesr(i->g()), pbes_expr::join_and(conjuncts.begin(), conjuncts.end())));
+              }
+              else
+              {
+                new_implications.push_back(imp(i->g(), pbes_expr::join_and(conjuncts.begin(), conjuncts.end())));
+              }
+            }
+          }
+        }
+        pbes_expression phi = pbes_expr::join_and(new_implications.begin(), new_implications.end());
+        result.equations().push_back(k->apply_implication(phi));
+      }
+
+      return result;
     }
 
   public:
 
     /// \brief Runs the control_flow algorithm
-    void run()
+    pbes<> run(bool simplify = true)
     {
       //control_flow_influence_graph_algorithm ialgo(m_pbes);
       //ialgo.run();
 
       control_flow_source_dest_algorithm sdalgo(m_pbes);
       sdalgo.compute_source_destination();
-      sdalgo.print_source_destination();
+      // sdalgo.print_source_destination();
       sdalgo.rewrite_propositional_variables();
       // N.B. This modifies m_pbes. It is needed as a precondition for the
       // function compute_control_flow_parameters().
 
       compute_control_flow_graph();
-      print_control_flow_parameters();
-      print_control_flow_graph();
+      // print_control_flow_parameters();
+      // print_control_flow_graph();
 
       compute_control_flow_marking();
-      print_control_flow_marking();
+      // print_control_flow_marking();
+
+      return reset_variables(simplify);
     }
 };
 

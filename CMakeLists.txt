@@ -275,6 +275,7 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/pbesabsinthe )
   add_subdirectory ( tools/pbesinst )
   add_subdirectory ( tools/pbespareqelm )
+  add_subdirectory ( tools/pbesstategraph )
   add_subdirectory ( tools/txt2bes )
 endif(MCRL2_ENABLE_EXPERIMENTAL)
 
