@@ -427,25 +427,7 @@ void CorrlPlot::calcPositions()
     radii.clear();
 
     // calc positions
-    double maxRadius;
-    if ((0.5*fracX > maxRadHintPx*pix) &&
-        (0.5*fracY > maxRadHintPx*pix))
-    {
-      maxRadius = 0.5*Utils::minn(fracX, fracY);
-    }
-    else
-    {
-      maxRadius = maxRadHintPx*pix;
-      yTop -= (maxRadius-10*pix);
-      if (numY > 1)
-      {
-        fracY = (1.0/(double)(numY))*(yTop-yBot);
-      }
-      else
-      {
-        fracY = 1.0;
-      }
-    }
+    double maxRadius = Utils::maxx(maxRadHintPx*pix, 0.5*Utils::minn(fracX, fracY));
 
     for (size_t i = 0; i < mapXToY.size(); ++i)
     {
