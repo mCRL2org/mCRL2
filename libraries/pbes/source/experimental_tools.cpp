@@ -248,12 +248,6 @@ void pbesstategraph(const std::string& input_filename,
 {
   pbes<> p;
   load_pbes(p, input_filename);
-  if (!pbes_system::detail::is_pfnf(p))
-  {
-    mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;
-    pfnf_rewriter R;
-    pbes_system::rewrite(p, R);
-  }
   pbes_system::detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run(simplify);
 

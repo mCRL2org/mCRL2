@@ -14,6 +14,9 @@
 
 #include <iostream>
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -232,16 +235,27 @@ class pfnf_equation
 class pfnf_pbes
 {
   protected:
-    const pbes<>& m_pbes; // store a reference to the original pbes, to indicate that it should not be destroyed
+    // TODO: avoid the copy of the pbes
+    pbes<> m_pbes; // make a copy of the original pbes, to avoid garbage collection problems
     std::vector<pfnf_equation> m_equations;
 
   public:
+    pfnf_pbes()
+    {}
+
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
     pfnf_pbes(const pbes<>& p)
       : m_pbes(p)
     {
-      const atermpp::vector<pbes_equation>& equations = p.equations();
+      if (!pbes_system::detail::is_pfnf(m_pbes))
+      {
+        mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;
+        pfnf_rewriter R;
+        pbes_system::pbes_rewrite(m_pbes, R);
+        assert (is_pfnf(m_pbes));
+      }
+      const atermpp::vector<pbes_equation>& equations = m_pbes.equations();
       for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         m_equations.push_back(pfnf_equation(*i));
