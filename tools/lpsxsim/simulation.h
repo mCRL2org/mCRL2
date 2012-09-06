@@ -12,13 +12,12 @@
 #include <QList>
 #include <QMutex>
 #include <QObject>
+#include <QSemaphore>
 #include <QString>
 #include <QStringList>
-#include <QWaitCondition>
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/simulation.h"
-
 
 class Simulation : public QObject
 {
@@ -55,13 +54,13 @@ class Simulation : public QObject
 
   public slots:
     void reset(unsigned int stateNumber) { m_simulation->truncate(stateNumber); updateTrace(stateNumber); }
-    void select(unsigned int transitionNumber) { m_simulation->select(transitionNumber); updateTrace(m_trace.size() - 1); }
-    void enable_tau_prioritization(bool enable, QString action = "ctau") { m_simulation->enable_tau_prioritization(enable, action.toStdString()); updateTrace(0); }
+    void select(unsigned int transitionNumber, QSemaphore *semaphore);
+    void enable_tau_prioritization(bool enable, QSemaphore *semaphore, QString action = "ctau");
     void load(QString filename);
     void save(QString filename);
 
   signals:
-    void traceChanged(unsigned int firstChangedState);
+    void finished();
 
   private:
     QString m_filename;

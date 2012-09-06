@@ -26,6 +26,7 @@ simulation::simulation(const specification& specification, data::rewrite_strateg
 
 void simulation::truncate(size_t state_number)
 {
+  assert(state_number < m_full_trace.size());
   if (m_tau_prioritization)
   {
     m_prioritized_trace.resize(state_number + 1);
@@ -40,6 +41,7 @@ void simulation::truncate(size_t state_number)
 
 void simulation::select(size_t transition_number)
 {
+  assert(transition_number < m_full_trace.back().transitions.size());
   if (m_tau_prioritization)
   {
     m_prioritized_trace.back().transition_number = transition_number;

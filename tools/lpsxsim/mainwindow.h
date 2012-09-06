@@ -10,6 +10,7 @@
 #define LPSXSIM_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSemaphore>
 #include <QTimer>
 #include "ui_mainwindow.h"
 
@@ -52,6 +53,9 @@ class MainWindow : public QMainWindow
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 
   protected:
+    void reset(unsigned int selectedState);
+    void select(unsigned int transition);
+    void waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, int timeout = 50);
     /**
      * @brief Saves window information
      */
@@ -65,6 +69,7 @@ class MainWindow : public QMainWindow
     int m_selectedState;
     QTimer *m_animationTimer;
     bool m_randomAnimation;
+    bool m_animationDisabled;
 
     mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };
