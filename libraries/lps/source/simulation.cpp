@@ -215,6 +215,7 @@ atermpp::vector<simulation::transition_t> simulation::prioritize(const atermpp::
         break;
       }
     }
+    output.push_back(transition);
   }
   return output;
 }
@@ -233,7 +234,7 @@ bool simulation::is_prioritized(const multi_action &action)
 
 void simulation::prioritize_trace()
 {
-  m_prioritized_trace.push_back(m_full_trace.back());
+  m_prioritized_trace.push_back(m_full_trace.front());
   for (size_t index = 0; index < m_full_trace.size() - 1; index++)
   {
     transition_t transition = m_full_trace[index].transitions[m_full_trace[index].transition_number];
