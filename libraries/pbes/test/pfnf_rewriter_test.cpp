@@ -326,6 +326,46 @@ void test_pfnf_print()
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 }
 
+void test_pfnf_rewriter3()
+{
+  std::string text =
+    "sort D = struct d1 | d2 | d3;                                                \n"
+    "                                                                             \n"
+    "map match: Pos # D -> Bool;                                                  \n"
+    "                                                                             \n"
+    "pbes                                                                         \n"
+    "                                                                             \n"
+    "nu Y(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 1 && match(1, d1))                  => X(2, d1, s2, e2))  \n"
+    "     && (val(s1 == 1 && !match(1, d1))                 => X(1, d1, s2, e2))  \n"
+    "     && (val(s1 == 2 && s2 == 1 && match(2, e1))       => Y(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => Y(1, d1, 1, d1))   \n"
+    "     && (val(s2 == 2)                                  => Y(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => Y(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => Y(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "mu X(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 2 && s2 == 1 && match(2, e1))       => X(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => X(1, d1, 1, d1))   \n"
+    "     && (val(e2 != d1 && s2 == 2)                      => X(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => X(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => X(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "init Y(1, d1, 1, d1);                                                        \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  BOOST_CHECK(!pbes_system::detail::is_pfnf(p));
+  pfnf_rewriter R;
+  pbes_system::pbes_rewrite(p, R);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -333,6 +373,7 @@ int test_main(int argc, char** argv)
   test_pfnf_visitor();
   test_pfnf_rewriter();
   test_pfnf_rewriter2();
+  test_pfnf_rewriter3();
   test_is_pfnf();
   test_pfnf_print();
 
