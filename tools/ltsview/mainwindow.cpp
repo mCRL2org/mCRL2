@@ -29,15 +29,27 @@ MainWindow::MainWindow():
   m_ltsManager = new LtsManager(this, &m_settings);
   m_markManager = new MarkManager(this, m_ltsManager);
 
+  m_infoDock = new InfoDock(this, m_ltsManager, m_markManager);
+  m_markDock = new MarkDock(this, m_markManager);
+  m_simDock = new SimDock(this, m_ltsManager);
+  m_settingsDock = new SettingsDock(this, &m_settings);
   m_settingsDialog = new SettingsDialog(this, &m_settings);
-  m_infoDialog = new InfoDialog(this, m_ltsManager, m_markManager);
-  m_markDialog = new MarkDialog(this, m_markManager);
-  m_simDialog = new SimDialog(this, m_ltsManager);
   m_ltsCanvas = new LtsCanvas(this, &m_settings, m_ltsManager, m_markManager);
   setCentralWidget(m_ltsCanvas);
   m_progressDialog = new QProgressDialog("", QString(), 0, 6, this);
   m_progressDialog->setWindowModality(Qt::WindowModal);
   m_progressDialog->setMinimumDuration(0);
+
+  m_ui.informationDock->setWidget(m_infoDock);
+  m_ui.simulationDock->setWidget(m_simDock);
+  m_ui.markDock->setWidget(m_markDock);
+  m_ui.settingsDock->setWidget(m_settingsDock);
+
+  m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.informationDock->toggleViewAction());
+  m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.simulationDock->toggleViewAction());
+  m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.markDock->toggleViewAction());
+  m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.settingsDock->toggleViewAction());
+  m_ui.viewMenu->insertSeparator(m_ui.preferences);
 
   connect(m_ui.open, SIGNAL(triggered()), this, SLOT(open()));
   connect(m_ui.openTrace, SIGNAL(triggered()), this, SLOT(openTrace()));
@@ -50,6 +62,7 @@ MainWindow::MainWindow():
   connect(m_ui.zoomIntoAbove, SIGNAL(triggered()), m_ltsManager, SLOT(zoomInAbove()));
   connect(m_ui.zoomIntoBelow, SIGNAL(triggered()), m_ltsManager, SLOT(zoomInBelow()));
   connect(m_ui.zoomOut, SIGNAL(triggered()), m_ltsManager, SLOT(zoomOut()));
+
   connect(m_ui.displayStates, SIGNAL(triggered(bool)), &m_settings.displayStates, SLOT(setValue(bool)));
   connect(&m_settings.displayStates, SIGNAL(changed(bool)), m_ui.displayStates, SLOT(setChecked(bool)));
   connect(m_ui.displayTransitions, SIGNAL(triggered(bool)), &m_settings.displayTransitions, SLOT(setValue(bool)));
@@ -58,11 +71,8 @@ MainWindow::MainWindow():
   connect(&m_settings.displayBackpointers, SIGNAL(changed(bool)), m_ui.displayBackpointers, SLOT(setChecked(bool)));
   connect(m_ui.displayWireframe, SIGNAL(triggered(bool)), &m_settings.displayWireframe, SLOT(setValue(bool)));
   connect(&m_settings.displayWireframe, SIGNAL(changed(bool)), m_ui.displayWireframe, SLOT(setChecked(bool)));
-  connect(m_ui.settings, SIGNAL(triggered()), m_settingsDialog, SLOT(show()));
 
-  connect(m_ui.information, SIGNAL(triggered()), m_infoDialog, SLOT(show()));
-  connect(m_ui.simulation, SIGNAL(triggered()), m_simDialog, SLOT(show()));
-  connect(m_ui.mark, SIGNAL(triggered()), m_markDialog, SLOT(show()));
+  connect(m_ui.preferences, SIGNAL(triggered()), m_settingsDialog, SLOT(show()));
 
   connect(m_ltsManager, SIGNAL(loadingLts()), this, SLOT(loadingLts()));
   connect(m_ltsManager, SIGNAL(rankingStates()), this, SLOT(rankingStates()));
@@ -75,13 +85,6 @@ MainWindow::MainWindow():
 
   connect(m_ltsCanvas, SIGNAL(renderingStarted()), this, SLOT(startRendering()));
   connect(m_ltsCanvas, SIGNAL(renderingFinished()), this, SLOT(clearStatusBar()));
-
-  QActionGroup *toolGroup = new QActionGroup(this);
-  toolGroup->addAction(m_ui.select);
-  toolGroup->addAction(m_ui.pan);
-  toolGroup->addAction(m_ui.zoom);
-  toolGroup->addAction(m_ui.rotate);
-  m_ui.select->setChecked(true);
 
   QSettings settings("mCRL2", "LTSView");
   restoreGeometry(settings.value("geometry").toByteArray());

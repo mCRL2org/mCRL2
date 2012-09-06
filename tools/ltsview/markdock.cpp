@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "markdialog.h"
+#include "markdock.h"
 #include "markmanager.h"
 #include "markstateruledialog.h"
 #include "lts.h"
 #include <QList>
 
-MarkDialog::MarkDialog(QWidget *parent, MarkManager *markManager):
-  QDialog(parent),
+MarkDock::MarkDock(QWidget *parent, MarkManager *markManager):
+  QWidget(parent),
   m_markManager(markManager)
 {
   m_ui.setupUi(this);
@@ -56,7 +56,7 @@ MarkDialog::MarkDialog(QWidget *parent, MarkManager *markManager):
   loadLts();
 }
 
-void MarkDialog::loadLts()
+void MarkDock::loadLts()
 {
   m_actions.clear();
   m_actionNumbers.clear();
@@ -81,7 +81,7 @@ void MarkDialog::loadLts()
   }
 }
 
-void MarkDialog::markStyleClicked()
+void MarkDock::markStyleClicked()
 {
   if (m_ui.noMarks->isChecked())
   {
@@ -101,7 +101,7 @@ void MarkDialog::markStyleClicked()
   }
 }
 
-void MarkDialog::setMarkStyle(MarkStyle style)
+void MarkDock::setMarkStyle(MarkStyle style)
 {
   if (style == NO_MARKS)
   {
@@ -121,27 +121,27 @@ void MarkDialog::setMarkStyle(MarkStyle style)
   }
 }
 
-void MarkDialog::clusterMatchStyleChanged(int index)
+void MarkDock::clusterMatchStyleChanged(int index)
 {
   m_markManager->setClusterMatchStyle(index == 0 ? MATCH_ANY : MATCH_ALL);
 }
 
-void MarkDialog::setClusterMatchStyle(MatchStyle style)
+void MarkDock::setClusterMatchStyle(MatchStyle style)
 {
   m_ui.clusterMatchStyle->setCurrentIndex(style == MATCH_ANY ? 0 : 1);
 }
 
-void MarkDialog::stateMatchStyleChanged(int index)
+void MarkDock::stateMatchStyleChanged(int index)
 {
   m_markManager->setStateMatchStyle(index == 0 ? MATCH_ANY : index == 1 ? MATCH_ALL : MATCH_MULTI);
 }
 
-void MarkDialog::setStateMatchStyle(MatchStyle style)
+void MarkDock::setStateMatchStyle(MatchStyle style)
 {
   m_ui.stateMatchStyle->setCurrentIndex(style == MATCH_ANY ? 0 : style == MATCH_ALL ? 1 : 2);
 }
 
-void MarkDialog::addMarkRule()
+void MarkDock::addMarkRule()
 {
   if (m_markManager->lts())
   {
@@ -163,7 +163,7 @@ void MarkDialog::addMarkRule()
   }
 }
 
-void MarkDialog::markRuleAdded(MarkRuleIndex index)
+void MarkDock::markRuleAdded(MarkRuleIndex index)
 {
   MarkListItem *item = new MarkListItem(markRuleDescription(index), index);
   m_markListItems[index] = item;
@@ -172,7 +172,7 @@ void MarkDialog::markRuleAdded(MarkRuleIndex index)
   item->setCheckState(Qt::Checked);
 }
 
-void MarkDialog::editMarkRule(QListWidgetItem *item)
+void MarkDock::editMarkRule(QListWidgetItem *item)
 {
   MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
   MarkRule rule = m_markManager->markRule(index);
@@ -188,7 +188,7 @@ void MarkDialog::editMarkRule(QListWidgetItem *item)
   }
 }
 
-void MarkDialog::enableMarkRule(QListWidgetItem *item)
+void MarkDock::enableMarkRule(QListWidgetItem *item)
 {
   MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
   MarkRule rule = m_markManager->markRule(index);
@@ -200,13 +200,13 @@ void MarkDialog::enableMarkRule(QListWidgetItem *item)
   }
 }
 
-void MarkDialog::markRuleChanged(MarkRuleIndex index)
+void MarkDock::markRuleChanged(MarkRuleIndex index)
 {
   m_markListItems[index]->setCheckState(m_markManager->markRule(index).active ? Qt::Checked : Qt::Unchecked);
   m_markListItems[index]->setText(markRuleDescription(index));
 }
 
-void MarkDialog::removeMarkRule()
+void MarkDock::removeMarkRule()
 {
   QList<QListWidgetItem *> selection = m_ui.markRuleList->selectedItems();
   if (!selection.isEmpty())
@@ -216,13 +216,13 @@ void MarkDialog::removeMarkRule()
   }
 }
 
-void MarkDialog::markRuleRemoved(MarkRuleIndex index)
+void MarkDock::markRuleRemoved(MarkRuleIndex index)
 {
   delete m_ui.markRuleList->takeItem(m_ui.markRuleList->row(m_markListItems[index]));
   m_markListItems.remove(index);
 }
 
-void MarkDialog::actionLabelChanged(QListWidgetItem *item)
+void MarkDock::actionLabelChanged(QListWidgetItem *item)
 {
   bool checked = item->checkState() == Qt::Checked;
   int action = m_actionNumbers[item->text()];
@@ -233,12 +233,12 @@ void MarkDialog::actionLabelChanged(QListWidgetItem *item)
   }
 }
 
-void MarkDialog::setActionMarked(int action, bool marked)
+void MarkDock::setActionMarked(int action, bool marked)
 {
   m_ui.markedActionList->item(m_actionPositions[action])->setCheckState(marked ? Qt::Checked : Qt::Unchecked);
 }
 
-QString MarkDialog::markRuleDescription(MarkRuleIndex index) const
+QString MarkDock::markRuleDescription(MarkRuleIndex index) const
 {
   MarkRule rule = m_markManager->markRule(index);
   QString output;

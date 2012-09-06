@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "infodialog.h"
+#include "infodock.h"
 #include "cluster.h"
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -36,8 +36,8 @@ static void initTable(QTableWidget *table)
   }
 }
 
-InfoDialog::InfoDialog(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager):
-  QDialog(parent),
+InfoDock::InfoDock(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager):
+  QWidget(parent),
   m_ltsManager(ltsManager),
   m_markManager(markManager)
 {
@@ -53,7 +53,7 @@ InfoDialog::InfoDialog(QWidget *parent, LtsManager *ltsManager, MarkManager *mar
   connect(m_ltsManager, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
 }
 
-void InfoDialog::ltsChanged()
+void InfoDock::ltsChanged()
 {
   m_ui.ltsTable->item(0, 1)->setText(QString::number(m_ltsManager->lts()->getNumStates()));
   m_ui.ltsTable->item(1, 1)->setText(QString::number(m_ltsManager->lts()->getNumTransitions()));
@@ -61,13 +61,13 @@ void InfoDialog::ltsChanged()
   m_ui.ltsTable->item(3, 1)->setText(QString::number(m_ltsManager->lts()->getNumRanks()));
 }
 
-void InfoDialog::markStatisticsChanged()
+void InfoDock::markStatisticsChanged()
 {
   m_ui.ltsTable->item(4, 1)->setText(QString::number(m_markManager->markedStates()));
   m_ui.ltsTable->item(5, 1)->setText(QString::number(m_markManager->markedTransitions()));
 }
 
-void InfoDialog::selectionChanged()
+void InfoDock::selectionChanged()
 {
   LTS *lts = m_ltsManager->lts();
   int parameters = lts->getNumParameters();

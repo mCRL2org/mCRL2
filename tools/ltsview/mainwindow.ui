@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1280</width>
+    <height>1024</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,13 +17,20 @@
    <iconset resource="ltsview.qrc">
     <normaloff>:/ltsview/icons/ltsview.ico</normaloff>:/ltsview/icons/ltsview.ico</iconset>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1280</width>
      <height>27</height>
     </rect>
    </property>
@@ -46,7 +53,7 @@
     <addaction name="separator"/>
     <addaction name="exit"/>
    </widget>
-   <widget class="QMenu" name="menu_View">
+   <widget class="QMenu" name="viewMenu">
     <property name="title">
      <string>&amp;View</string>
     </property>
@@ -61,21 +68,48 @@
     <addaction name="displayBackpointers"/>
     <addaction name="displayWireframe"/>
     <addaction name="separator"/>
-    <addaction name="settings"/>
-   </widget>
-   <widget class="QMenu" name="menu_Tools">
-    <property name="title">
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="information"/>
-    <addaction name="simulation"/>
-    <addaction name="mark"/>
+    <addaction name="preferences"/>
    </widget>
    <addaction name="menu_File"/>
-   <addaction name="menu_View"/>
-   <addaction name="menu_Tools"/>
+   <addaction name="viewMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="informationDock">
+   <property name="windowTitle">
+    <string>Information</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
+  <widget class="QDockWidget" name="simulationDock">
+   <property name="windowTitle">
+    <string>Simulation</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
+  </widget>
+  <widget class="QDockWidget" name="markDock">
+   <property name="windowTitle">
+    <string>Marks</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3"/>
+  </widget>
+  <widget class="QDockWidget" name="settingsDock">
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4"/>
+  </widget>
   <action name="open">
    <property name="text">
     <string>&amp;Open...</string>
@@ -191,77 +225,9 @@
     <string>F6</string>
    </property>
   </action>
-  <action name="settings">
+  <action name="preferences">
    <property name="text">
-    <string>&amp;Settings...</string>
-   </property>
-  </action>
-  <action name="select">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Select</string>
-   </property>
-   <property name="shortcut">
-    <string>S</string>
-   </property>
-  </action>
-  <action name="pan">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Pan</string>
-   </property>
-   <property name="shortcut">
-    <string>D</string>
-   </property>
-  </action>
-  <action name="zoom">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Zoom</string>
-   </property>
-   <property name="shortcut">
-    <string>A</string>
-   </property>
-  </action>
-  <action name="rotate">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Rotate</string>
-   </property>
-   <property name="shortcut">
-    <string>F</string>
-   </property>
-  </action>
-  <action name="information">
-   <property name="text">
-    <string>&amp;Information...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+I</string>
-   </property>
-  </action>
-  <action name="simulation">
-   <property name="text">
-    <string>Sim&amp;ulation...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="mark">
-   <property name="text">
-    <string>&amp;Mark...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+M</string>
+    <string>&amp;Preferences...</string>
    </property>
   </action>
  </widget>

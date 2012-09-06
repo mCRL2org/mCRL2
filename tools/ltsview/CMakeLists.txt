@@ -22,22 +22,23 @@ set(LTSVIEW_RCC_SRCS ltsview.qrc)
 qt4_add_resources(LTSVIEW_RC_FILES ${LTSVIEW_RCC_SRCS})
 
 set(LTSVIEW_UI_FILES
-  infodialog.ui
+  infodock.ui
   mainwindow.ui
-  markdialog.ui
+  markdock.ui
   markstateruledialog.ui
   savepicturedialog.ui
   savevectordialog.ui
   settingsdialog.ui
-  simdialog.ui
+  settingsdock.ui
+  simdock.ui
 )
 qt4_wrap_ui(LTSVIEW_UI_HEADERS ${LTSVIEW_UI_FILES})
 
 set(LTSVIEW_MOC_HEADERS
-  infodialog.h
+  infodock.h
   ltscanvas.h
   ltsmanager.h
-  markdialog.h
+  markdock.h
   mainwindow.h
   markmanager.h
   markstateruledialog.h
@@ -45,7 +46,8 @@ set(LTSVIEW_MOC_HEADERS
   savepicturedialog.h
   savevectordialog.h
   settingsdialog.h
-  simdialog.h
+  settingsdock.h
+  simdock.h
   simulation.h
   visualizer.h
 )
@@ -58,13 +60,13 @@ set(LTSVIEW_SRC_FILES
   cluster.cpp
   conedb.cpp
   fsm_state_positioner.cpp
-  infodialog.cpp
+  infodock.cpp
   lts.cpp
   ltscanvas.cpp
   ltsmanager.cpp
   main.cpp
   mainwindow.cpp
-  markdialog.cpp
+  markdock.cpp
   markmanager.cpp
   markstateruledialog.cpp
   primitivefactory.cpp
@@ -73,7 +75,8 @@ set(LTSVIEW_SRC_FILES
   savepicturedialog.cpp
   savevectordialog.cpp
   settingsdialog.cpp
-  simdialog.cpp
+  settingsdock.cpp
+  simdock.cpp
   simulation.cpp
   sp_state_positioner.cpp
   state.cpp

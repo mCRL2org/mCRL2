@@ -17,14 +17,15 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/persistentfiledialog.h"
 
-#include "infodialog.h"
+#include "infodock.h"
 #include "ltscanvas.h"
 #include "ltsmanager.h"
-#include "markdialog.h"
+#include "markdock.h"
 #include "markmanager.h"
 #include "settings.h"
 #include "settingsdialog.h"
-#include "simdialog.h"
+#include "settingsdock.h"
+#include "simdock.h"
 
 class LogMessenger : public mcrl2::log::output_policy
 {
@@ -83,10 +84,11 @@ class MainWindow : public QMainWindow
     Settings m_settings;
     LtsManager *m_ltsManager;
     MarkManager *m_markManager;
+    InfoDock *m_infoDock;
+    MarkDock *m_markDock;
+    SimDock *m_simDock;
+    SettingsDock *m_settingsDock;
     SettingsDialog *m_settingsDialog;
-    InfoDialog *m_infoDialog;
-    MarkDialog *m_markDialog;
-    SimDialog *m_simDialog;
     LtsCanvas *m_ltsCanvas;
     QProgressDialog *m_progressDialog;
 
