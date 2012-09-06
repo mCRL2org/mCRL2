@@ -37,7 +37,6 @@ MainWindow::MainWindow():
   m_ltsCanvas = new LtsCanvas(this, &m_settings, m_ltsManager, m_markManager);
   setCentralWidget(m_ltsCanvas);
   m_progressDialog = new QProgressDialog("", QString(), 0, 6, this);
-  m_progressDialog->setWindowModality(Qt::WindowModal);
   m_progressDialog->setMinimumDuration(0);
 
   m_ui.informationDock->setWidget(m_infoDock);
@@ -82,6 +81,8 @@ MainWindow::MainWindow():
   connect(m_ltsManager, SIGNAL(positioningStates()), this, SLOT(positioningStates()));
   connect(m_ltsManager, SIGNAL(ltsStructured()), this, SLOT(hideProgressDialog()));
   connect(m_ltsManager, SIGNAL(errorLoadingLts()), this, SLOT(hideProgressDialog()));
+  connect(m_ltsManager, SIGNAL(startStructuring()), this, SLOT(startStructuring()));
+  connect(m_ltsManager, SIGNAL(stopStructuring()), this, SLOT(stopStructuring()));
 
   connect(m_ltsManager, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
   connect(m_ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(zoomChanged()));
@@ -99,10 +100,14 @@ MainWindow::MainWindow():
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-  QSettings settings("mCRL2", "LTSView");
-  settings.setValue("geometry", saveGeometry());
-  settings.setValue("windowState", saveState());
-  QMainWindow::closeEvent(event);
+  {
+    QSettings settings("mCRL2", "LTSView");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+  }
+
+  // It's possible we're in the middle of an LTS restructuring operation that can't be stopped in any friendly way, so hard-terminate the program.
+  _exit(0);
 }
 
 void MainWindow::open(QString filename)

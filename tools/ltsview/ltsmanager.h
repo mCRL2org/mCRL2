@@ -10,11 +10,40 @@
 #define LTSMANAGER_H
 
 #include <QObject>
+#include <QThread>
 #include <QString>
 
 #include "lts.h"
 #include "settings.h"
 #include "simulation.h"
+
+class LtsManagerHelper : public QObject
+{
+  Q_OBJECT
+
+  public:
+    LtsManagerHelper(Settings *settings): m_settings(settings) {}
+    LTS *lts() { return m_lts; }
+
+  public slots:
+    void loadLts(QString filename);
+    void clusterStates(LTS *lts);
+    void positionClusters(LTS *lts);
+    void positionStates(LTS *lts);
+
+  signals:
+    void loadingLts();
+    void rankingStates();
+    void clusteringStates();
+    void computingClusterInfo();
+    void positioningClusters();
+    void positioningStates();
+    void finished();
+
+  private:
+    Settings *m_settings;
+    LTS *m_lts;
+};
 
 class LtsManager : public QObject
 {
@@ -52,9 +81,6 @@ class LtsManager : public QObject
     void clusterStates();
     void positionClusters();
     void positionStates();
-    void clusterStates(LTS *lts);
-    void positionClusters(LTS *lts);
-    void positionStates(LTS *lts);
     void updateSimulationHistory();
     void unselectNonsimilated();
 
@@ -62,6 +88,9 @@ class LtsManager : public QObject
     Transition *transitionTo(State *state);
 
   signals:
+    void startStructuring();
+    void stopStructuring();
+
     void loadingLts();
     void errorLoadingLts();
     void rankingStates();
@@ -81,6 +110,8 @@ class LtsManager : public QObject
     void simulationChanged();
 
   public:
+    LtsManagerHelper m_helper;
+
     Settings *m_settings;
     LTS *m_lts;
     Simulation *m_simulation;
@@ -88,7 +119,6 @@ class LtsManager : public QObject
     Cluster *m_selectedCluster;
     QList<State *> m_simulationStateHistory;
     QList<Transition *> m_simulationTransitionHistory;
-
 };
 
 #endif

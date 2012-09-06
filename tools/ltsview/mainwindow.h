@@ -73,6 +73,8 @@ class MainWindow : public QMainWindow
     void setProgress(int phase, QString message);
     void selectionChanged();
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
+    void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }
+    void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
 
   protected:
     /**
