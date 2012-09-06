@@ -44,6 +44,10 @@ MainWindow::MainWindow()
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
 
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(false);
+
   QSettings settings("mCRL2", "LpsXSim");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
@@ -134,6 +138,10 @@ void MainWindow::playTrace()
 
   m_randomAnimation = false;
   m_animationTimer->start();
+
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(true);
 }
 
 void MainWindow::randomPlay()
@@ -145,11 +153,19 @@ void MainWindow::randomPlay()
 
   m_randomAnimation = true;
   m_animationTimer->start();
+
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(true);
 }
 
 void MainWindow::stopPlay()
 {
   m_animationTimer->stop();
+
+  m_ui.actionPlayTrace->setEnabled(true);
+  m_ui.actionRandomPlay->setEnabled(true);
+  m_ui.actionStop->setEnabled(false);
 }
 
 void MainWindow::setPlayDelay()
@@ -281,6 +297,10 @@ void MainWindow::openSpecification(QString filename)
 
   m_trace = m_simulation->trace();
   updateSimulation();
+
+  m_ui.actionPlayTrace->setEnabled(true);
+  m_ui.actionRandomPlay->setEnabled(true);
+  m_ui.actionStop->setEnabled(false);
 }
 
 void MainWindow::selectState(int state)
