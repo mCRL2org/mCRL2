@@ -347,6 +347,12 @@ void MainWindow::animationStep()
       m_selectedState = m_trace.size() - 1;
     }
 
+    if (m_trace.last().transitions.size() == 0)
+    {
+      stopPlay();
+      return;
+    }
+
     if (m_selectedState == m_trace.size() - 1)
     {
       m_selectedState++;
