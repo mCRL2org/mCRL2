@@ -14,6 +14,7 @@
 #include <QTimer>
 #include "ui_mainwindow.h"
 
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "simulation.h"
@@ -25,7 +26,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
   public:
-    MainWindow();
+    MainWindow(mcrl2::data::rewrite_strategy strategy);
     ~MainWindow();
 
   protected slots:
@@ -64,6 +65,7 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow m_ui;
+    mcrl2::data::rewrite_strategy m_strategy;
     Simulation *m_simulation;
     Simulation::Trace m_trace;
     int m_selectedState;

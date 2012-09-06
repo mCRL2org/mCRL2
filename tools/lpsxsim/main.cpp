@@ -22,7 +22,7 @@ class lpsxsim_tool : public lpsxsim_base
     {
       qRegisterMetaType<QSemaphore *>("QSemaphore *");
 
-      MainWindow *window = new MainWindow();
+      MainWindow *window = new MainWindow(rewrite_strategy());
 
       if (!m_input_filename.empty())
       {

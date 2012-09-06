@@ -15,8 +15,9 @@
 #include <QSettings>
 #include <climits>
 
-MainWindow::MainWindow()
-  : m_simulation(0),
+MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy)
+  : m_strategy(strategy),
+    m_simulation(0),
     m_animationTimer(new QTimer(this)),
     m_fileDialog("", this)
 {
@@ -271,7 +272,7 @@ void MainWindow::setTauPrioritization()
 
 void MainWindow::openSpecification(QString filename)
 {
-  Simulation *simulation = new Simulation(filename, mcrl2::data::rewrite_strategy());
+  Simulation *simulation = new Simulation(filename, m_strategy);
   if (!simulation->initialized())
   {
     simulation->deleteLater();
