@@ -83,6 +83,12 @@ MainWindow::MainWindow():
   connect(m_ltsManager, SIGNAL(ltsStructured()), this, SLOT(hideProgressDialog()));
   connect(m_ltsManager, SIGNAL(errorLoadingLts()), this, SLOT(hideProgressDialog()));
 
+  connect(m_ltsManager, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
+  connect(m_ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(zoomChanged()));
+  m_ui.zoomIntoAbove->setEnabled(false);
+  m_ui.zoomIntoBelow->setEnabled(false);
+  m_ui.zoomOut->setEnabled(false);
+
   connect(m_ltsCanvas, SIGNAL(renderingStarted()), this, SLOT(startRendering()));
   connect(m_ltsCanvas, SIGNAL(renderingFinished()), this, SLOT(clearStatusBar()));
 
@@ -228,4 +234,10 @@ void MainWindow::setProgress(int phase, QString message)
   }
   m_progressDialog->setLabelText(message);
   m_progressDialog->setValue(phase);
+}
+
+void MainWindow::selectionChanged()
+{
+  m_ui.zoomIntoAbove->setEnabled(m_ltsManager->selectedCluster() != 0);
+  m_ui.zoomIntoBelow->setEnabled(m_ltsManager->selectedCluster() != 0);
 }

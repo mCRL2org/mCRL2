@@ -71,6 +71,8 @@ class MainWindow : public QMainWindow
     void positioningStates() { setProgress(5, "Positioning states"); }
     void hideProgressDialog() { setProgress(6, ""); }
     void setProgress(int phase, QString message);
+    void selectionChanged();
+    void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
 
   protected:
     /**
