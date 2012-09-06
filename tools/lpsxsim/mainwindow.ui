@@ -218,17 +218,19 @@
     </property>
     <addaction name="actionEnableTauPrioritisation"/>
     <addaction name="actionShowDontCaresInStateChanges"/>
+    <addaction name="separator"/>
+    <addaction name="actionOutput"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlay"/>
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="LogDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dockWidget">
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents"/>
+   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetContents"/>
   </widget>
   <action name="actionPlayTrace">
    <property name="text">
@@ -322,12 +324,20 @@
     <string>&amp;About</string>
    </property>
   </action>
+  <action name="actionOutput">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show mCRL2 Output</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LogDockWidget</class>
-   <extends>QDockWidget</extends>
-   <header>logdockwidget.h</header>
+   <class>mcrl2::utilities::qt::LogWidget</class>
+   <extends>QWidget</extends>
+   <header>mcrl2/utilities/logwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

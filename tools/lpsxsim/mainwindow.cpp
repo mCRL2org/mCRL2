@@ -34,12 +34,13 @@ MainWindow::MainWindow()
   connect(m_ui.actionStop, SIGNAL(triggered()), this, SLOT(stopPlay()));
   connect(m_ui.actionSetPlayDelay, SIGNAL(triggered()), this, SLOT(setPlayDelay()));
   connect(m_ui.actionEnableTauPrioritisation, SIGNAL(toggled(bool)), this, SLOT(setTauPrioritization()));
+  connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockWidget, SLOT(setVisible(bool)));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
   connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(selectTransition(int)));
 
-  connect(m_ui.dockWidget, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidget->widget(), SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
@@ -51,6 +52,8 @@ MainWindow::MainWindow()
   QSettings settings("mCRL2", "LpsXSim");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+
+  m_ui.actionOutput->setChecked(!m_ui.dockWidget->isHidden());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
