@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include <cassert>
 #include <iostream>
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/rewriter.h"

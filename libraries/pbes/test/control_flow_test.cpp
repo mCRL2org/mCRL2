@@ -11,16 +11,24 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/control_flow.h"
 #include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
+
+bool solve_pbes(const pbes<>& p)
+{
+  pbes<> q = p;
+  pbes_system::normalize(q);
+  return pbespgsolve(q);
+}
 
 BOOST_AUTO_TEST_CASE(test_control_flow1)
 {
@@ -176,10 +184,10 @@ BOOST_AUTO_TEST_CASE(test_stategraph1)
     "init X0;                                                                              \n"
     ;
   pbes<> p = txt2pbes(text, true);
-  bool answer1 = pbes2_bool_test(p);
+  bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run();
-  bool answer2 = pbes2_bool_test(q);
+  bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
 }
 
@@ -197,10 +205,10 @@ BOOST_AUTO_TEST_CASE(test_stategraph2)
     "init X0(0, true);                                     \n"
     ;
   pbes<> p = txt2pbes(text, true);
-  bool answer1 = pbes2_bool_test(p);
+  bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run();
-  bool answer2 = pbes2_bool_test(q);
+  bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
 }
 

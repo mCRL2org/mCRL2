@@ -828,9 +828,10 @@ class pbes_control_flow_algorithm
         for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
         {
           std::vector<propositional_variable_instantiation>& v = i->variables();
+          std::vector<pbes_expression> disjuncts;
           for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
           {
-            std::vector<pbes_expression> conjuncts;
+            std::vector<pbes_expression> Xij_conjuncts;
             core::identifier_string X = j->name();
             std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(j->parameters());
 
@@ -866,22 +867,24 @@ class pbes_control_flow_algorithm
                 condition = datar(condition);
                 if (condition != data::sort_bool::false_())
                 {
-                  conjuncts.push_back(imp(condition, Xe));
+                  Xij_conjuncts.push_back(imp(condition, Xe));
                 }
               }
               else
               {
-                conjuncts.push_back(imp(condition, Xe));
-              }
-              if (simplify)
-              {
-                new_implications.push_back(utilities::optimized_imp(pbesr(i->g()), pbes_expr::join_and(conjuncts.begin(), conjuncts.end())));
-              }
-              else
-              {
-                new_implications.push_back(imp(i->g(), pbes_expr::join_and(conjuncts.begin(), conjuncts.end())));
+                Xij_conjuncts.push_back(imp(condition, Xe));
               }
             }
+            disjuncts.push_back(pbes_expr::join_and(Xij_conjuncts.begin(), Xij_conjuncts.end()));
+          }
+          pbes_expression dj = pbes_expr::join_or(disjuncts.begin(), disjuncts.end());
+          if (simplify)
+          {
+            new_implications.push_back(utilities::optimized_imp(pbesr(i->g()), dj));
+          }
+          else
+          {
+            new_implications.push_back(imp(i->g(), dj));
           }
         }
         pbes_expression phi = pbes_expr::join_and(new_implications.begin(), new_implications.end());
@@ -894,7 +897,7 @@ class pbes_control_flow_algorithm
   public:
 
     /// \brief Runs the control_flow algorithm
-    pbes<> run(bool simplify = true)
+    pbes<> run(bool simplify = true, bool print_output = false)
     {
       //control_flow_influence_graph_algorithm ialgo(m_pbes);
       //ialgo.run();
@@ -907,11 +910,17 @@ class pbes_control_flow_algorithm
       // function compute_control_flow_parameters().
 
       compute_control_flow_graph();
-      // print_control_flow_parameters();
-      // print_control_flow_graph();
+      if (print_output)
+      {
+        print_control_flow_parameters();
+        print_control_flow_graph();
+      }
 
       compute_control_flow_marking();
-      // print_control_flow_marking();
+      if (print_output)
+      {
+        print_control_flow_marking();
+      }
 
       return reset_variables(simplify);
     }
