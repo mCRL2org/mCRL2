@@ -187,6 +187,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph1)
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run();
+  BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
 }
@@ -208,6 +209,47 @@ BOOST_AUTO_TEST_CASE(test_stategraph2)
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run();
+  BOOST_CHECK(q.is_well_typed());
+  bool answer2 = solve_pbes(q);
+  BOOST_CHECK(answer1 == answer2);
+}
+
+// found by random testing 7 Sep 2012
+BOOST_AUTO_TEST_CASE(test_stategraph3)
+{
+  std::string text =
+    "pbes mu X0 =                                                                                           \n"
+    "       (forall t: Nat. false) || (forall t: Nat. false) || (exists t: Nat. false || val(t > 1)) || X1; \n"
+    "     nu X1 =                                                                                           \n"
+    "       false;                                                                                          \n"
+    "                                                                                                       \n"
+    "init X0;                                                                                               \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  bool answer1 = solve_pbes(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  pbes<> q = algorithm.run();
+  BOOST_CHECK(q.is_well_typed());
+  bool answer2 = solve_pbes(q);
+  BOOST_CHECK(answer1 == answer2);
+}
+
+// found by random testing 7 Sep 2012
+BOOST_AUTO_TEST_CASE(test_stategraph4)
+{
+  std::string text =
+    "pbes                                                                                                                                                                                                                                                                                                                           \n"
+    "mu X0(n:Nat, m:Nat) = ((val(m < 2)) && ((val(m > 0)) => ((!X0(m + 1, m + 1)) || (!X2(false, m > 1))))) => ((exists u:Nat.((val(u < 3)) || ((val(m < 2)) && (val(u == n))))) && (X1(n < 3, n > 1)));                                                                                                                            \n"
+    "mu X1(b:Bool, c:Bool) = ((((!(exists u:Nat.((val(u < 3)) || (val(u < 2))))) => (forall u:Nat.((val(u < 3)) && (X1(u > 0, u < 3))))) && ((val(true)) || (!(val(b))))) && (forall u:Nat.((val(u < 3)) && (!(val(c)))))) && (forall v:Nat.((val(v < 3)) && (forall t:Nat.((val(t < 3)) && ((X0(0, v + 1)) || (X2(c, t < 2))))))); \n"
+    "mu X2(b:Bool, c:Bool) = ((!X1(false, true)) => (X2(false, true))) && (((forall t:Nat.((val(t < 3)) && ((val(t < 2)) && (val(t > 0))))) => (!(X0(0, 1)))) => ((val(false)) && (val(true))));                                                                                                                                    \n"
+    "                                                                                                                                                                                                                                                                                                                               \n"
+    "init X0(0, 0);                                                                                                                                                                                                                                                                                                                 \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  bool answer1 = solve_pbes(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  pbes<> q = algorithm.run();
+  BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
 }
