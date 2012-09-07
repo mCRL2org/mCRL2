@@ -50,7 +50,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   e_traverser(const state_formulas::state_formula& phi0_,
               const lps::linear_process& lps_,
               const data::variable& T_,
-              TermTraits tr
+              TermTraits /* tr */
              )
     : phi0(phi0_), lps(lps_), T(T_)
   {}
