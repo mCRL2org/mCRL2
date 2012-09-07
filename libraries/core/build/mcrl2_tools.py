@@ -117,9 +117,9 @@ def run_pbespgsolve(filename, timeout = 3):
         return None
     return last_word(text) == 'true'
 
-def run_txt2pbes(txtfile, pbesfile):
+def run_txt2pbes(txtfile, pbesfile, options = ''):
     add_temporary_files(txtfile, pbesfile)
-    run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+    run_program('txt2pbes', '%s %s %s' % (options, txtfile, pbesfile))
 
 def run_txt2bes(txtfile, besfile):
     add_temporary_files(txtfile, besfile)
@@ -207,3 +207,8 @@ def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
 def run_lpspbes(lpsfile, mcffile, pbesfile, options = '', timeout = 10):
     args = '%s -f%s %s %s' % (lpsfile, mcffile, options, pbesfile)
     timeout_command('lps2pbes',  args.strip(), timeout)
+
+def run_pbesstategraph(pbesfile1, pbesfile2, options = '', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('pbesstategraph',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
+

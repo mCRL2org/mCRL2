@@ -250,8 +250,12 @@ void pbesstategraph(const std::string& input_filename,
   load_pbes(p, input_filename);
   pbes_system::detail::pbes_control_flow_algorithm algorithm(p);
   pbes<> q = algorithm.run(simplify);
-
-  q.save(output_filename);
+  q.save(output_filename, true, true);
+  if (!q.is_well_typed())
+  {
+    std::cerr << "pbesstategraph error: not well typed!" << std::endl;
+    std::cerr << pbes_system::pp(q) << std::endl;
+  }
 }
 
 } // namespace pbes_system

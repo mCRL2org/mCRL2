@@ -14,6 +14,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/control_flow.h"
 #include "mcrl2/utilities/logger.h"
@@ -159,6 +160,48 @@ BOOST_AUTO_TEST_CASE(test_simplify)
     std::cout << " y = " << pbes_system::pp(y) << std::endl;
     BOOST_CHECK(x == y);
   }
+}
+
+// found by random testing 7 Sep 2012
+BOOST_AUTO_TEST_CASE(test_stategraph1)
+{
+  std::string text =
+    "pbes nu X0 =                                                                          \n"
+    "       true && X1 || true && (forall u: Nat. false && (X2(u > 0, 1) && X0 || false)); \n"
+    "     mu X1 =                                                                          \n"
+    "       true;                                                                          \n"
+    "     nu X2(c: Bool, m: Nat) =                                                         \n"
+    "       true && false;                                                                 \n"
+    "                                                                                      \n"
+    "init X0;                                                                              \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  bool answer1 = pbes2_bool_test(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  pbes<> q = algorithm.run();
+  bool answer2 = pbes2_bool_test(q);
+  BOOST_CHECK(answer1 == answer2);
+}
+
+// found by random testing 7 Sep 2012
+BOOST_AUTO_TEST_CASE(test_stategraph2)
+{
+  std::string text =
+    "pbes nu X0(m: Nat, c: Bool) =                         \n"
+    "       true && (false || X1(0, true));                \n"
+    "     mu X1(m: Nat, b: Bool) =                         \n"
+    "       true && (X1(0, true) && false || X2 || false); \n"
+    "     nu X2 =                                          \n"
+    "       true;                                          \n"
+    "                                                      \n"
+    "init X0(0, true);                                     \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  bool answer1 = pbes2_bool_test(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  pbes<> q = algorithm.run();
+  bool answer2 = pbes2_bool_test(q);
+  BOOST_CHECK(answer1 == answer2);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
