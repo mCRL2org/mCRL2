@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/pbespgsolve.h"
+#include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/control_flow.h"
 #include "mcrl2/utilities/logger.h"
@@ -25,9 +26,24 @@ using namespace mcrl2::pbes_system;
 
 bool solve_pbes(const pbes<>& p)
 {
-  pbes<> q = p;
-  pbes_system::normalize(q);
-  return pbespgsolve(q);
+  std::cout << "<solve_pbes>" << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
+  bool result;
+  if (is_normalized(p))
+  {
+    pbes<> q = p;
+    result = pbes2_bool_test(q);
+  }
+  else
+  {
+    std::cout << "<normalizing>" << std::endl;
+    pbes<> q = p;
+    pbes_system::normalize(q);
+    std::cout << pbes_system::pp(q) << std::endl;
+    result = pbes2_bool_test(q);
+  }
+  std::cout << "<result>" << std::boolalpha << result << std::endl;
+  return result;
 }
 
 BOOST_AUTO_TEST_CASE(test_control_flow1)

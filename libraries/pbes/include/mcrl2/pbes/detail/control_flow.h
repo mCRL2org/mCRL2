@@ -888,7 +888,12 @@ class pbes_control_flow_algorithm
           }
         }
         pbes_expression phi = pbes_expr::join_and(new_implications.begin(), new_implications.end());
-        result.equations().push_back(k->apply_implication(phi));
+        pbes_equation eqn = k->apply_implication(phi);
+        if (!eqn.is_well_typed())
+        {
+          std::cerr << "<eqn not well typed>" << pbes_system::pp(eqn) << std::endl;
+        }
+        result.equations().push_back(eqn);
       }
 
       return result;
