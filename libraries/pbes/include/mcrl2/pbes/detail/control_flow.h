@@ -198,106 +198,182 @@ class control_flow_simplifying_rewriter
     }
 };
 
+struct control_flow_vertex;
+
+// edge of the control flow graph
+struct control_flow_edge
+{
+  control_flow_vertex* source;
+  control_flow_vertex* target;
+  propositional_variable_instantiation label;
+
+  control_flow_edge(control_flow_vertex* source_,
+                    control_flow_vertex* target_,
+                    const propositional_variable_instantiation& label_
+                   )
+   : source(source_),
+     target(target_),
+     label(label_)
+   {}
+
+  bool operator<(const control_flow_edge& other) const
+  {
+    if (source != other.source)
+    {
+      return source < other.source;
+    }
+    if (target != other.target)
+    {
+      return target < other.target;
+    }
+    return label < other.label;
+  }
+
+  void protect() const
+  {
+    label.protect();
+  }
+
+  void unprotect() const
+  {
+    label.unprotect();
+  }
+
+  void mark() const
+  {
+    label.mark();
+  }
+};
+
+// vertex of the control flow graph
+struct control_flow_vertex
+{
+  propositional_variable_instantiation X;
+  atermpp::set<control_flow_edge> incoming_edges;
+  atermpp::set<control_flow_edge> outgoing_edges;
+  atermpp::set<pbes_expression> guards;
+  std::set<data::variable> marking;
+  std::vector<bool> marked_parameters; // will be set after computing the marking
+
+  control_flow_vertex(const propositional_variable_instantiation& X_)
+    : X(X_)
+  {}
+
+  std::string print() const
+  {
+    std::ostringstream out;
+    out << pbes_system::pp(X);
+    out << " edges:";
+    for (atermpp::set<control_flow_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+    {
+      out << " " << pbes_system::pp(i->target->X);
+    }
+    out << " guards: " << print_pbes_expressions(guards);
+    return out.str();
+  }
+
+  std::set<data::variable> free_guard_variables() const
+  {
+    std::set<data::variable> result;
+    for (atermpp::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
+    {
+      pbes_system::find_free_variables(*i, std::inserter(result, result.end()));
+    }
+    return result;
+  }
+
+  std::set<std::size_t> marking_variable_indices(const pfnf_pbes& p) const
+  {
+    std::set<std::size_t> result;
+    for (std::set<data::variable>::const_iterator i = marking.begin(); i != marking.end(); ++i)
+    {
+      // TODO: make this code more efficient
+      const pfnf_equation& eqn = *find_equation(p, X.name());
+      const atermpp::vector<data::variable>& d = eqn.parameters();
+      for (atermpp::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
+      {
+        if (*i == *j)
+        {
+          result.insert(j - d.begin());
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  // returns true if the i-th parameter of X is marked
+  bool is_marked_parameter(std::size_t i) const
+  {
+    return marked_parameters[i];
+  }
+
+  void protect() const
+  {
+    X.protect();
+  }
+
+  void unprotect() const
+  {
+    X.unprotect();
+  }
+
+  void mark() const
+  {
+    X.mark();
+  }
+};
+
+} // namespace detail
+} // namespace pbes_system
+} // namespace mcrl2 
+/// \cond INTERNAL_DOCS
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::control_flow_vertex>
+{
+  static void protect(const mcrl2::pbes_system::detail::control_flow_vertex& t)
+  {
+    t.protect();
+  }
+  static void unprotect(const mcrl2::pbes_system::detail::control_flow_vertex& t)
+  {
+    t.unprotect();
+  }
+  static void mark(const mcrl2::pbes_system::detail::control_flow_vertex& t)
+  {
+    t.mark();
+  }
+};
+
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::control_flow_edge>
+{
+  static void protect(const mcrl2::pbes_system::detail::control_flow_edge& t)
+  {
+    t.protect();
+  }
+  static void unprotect(const mcrl2::pbes_system::detail::control_flow_edge& t)
+  {
+    t.unprotect();
+  }
+  static void mark(const mcrl2::pbes_system::detail::control_flow_edge& t)
+  {
+    t.mark();
+  }
+};
+} // namespace atermpp
+/// \endcond
+namespace mcrl2 {
+namespace pbes_system {
+namespace detail {
+
 /// \brief Algorithm class for the control_flow algorithm
 class pbes_control_flow_algorithm
 {
   public:
-    struct control_flow_vertex;
-
-    // edge of the control flow graph
-    struct control_flow_edge
-    {
-      control_flow_vertex* source;
-      control_flow_vertex* target;
-      propositional_variable_instantiation label;
-
-      control_flow_edge(control_flow_vertex* source_,
-                        control_flow_vertex* target_,
-                        const propositional_variable_instantiation& label_
-                       )
-       : source(source_),
-         target(target_),
-         label(label_)
-       {}
-
-      bool operator<(const control_flow_edge& other) const
-      {
-        if (source != other.source)
-        {
-          return source < other.source;
-        }
-        if (target != other.target)
-        {
-          return target < other.target;
-        }
-        return label < other.label;
-      }
-    };
-
-    // vertex of the control flow graph
-    struct control_flow_vertex
-    {
-      propositional_variable_instantiation X;
-      std::set<control_flow_edge> incoming_edges;
-      std::set<control_flow_edge> outgoing_edges;
-      atermpp::set<pbes_expression> guards;
-      std::set<data::variable> marking;
-      std::vector<bool> marked_parameters; // will be set after computing the marking
-
-      control_flow_vertex(const propositional_variable_instantiation& X_)
-        : X(X_)
-      {}
-
-      std::string print() const
-      {
-        std::ostringstream out;
-        out << pbes_system::pp(X);
-        out << " edges:";
-        for (std::set<control_flow_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
-        {
-          out << " " << pbes_system::pp(i->target->X);
-        }
-        out << " guards: " << print_pbes_expressions(guards);
-        return out.str();
-      }
-
-      std::set<data::variable> free_guard_variables() const
-      {
-        std::set<data::variable> result;
-        for (atermpp::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
-        {
-          pbes_system::find_free_variables(*i, std::inserter(result, result.end()));
-        }
-        return result;
-      }
-
-      std::set<std::size_t> marking_variable_indices(const pfnf_pbes& p) const
-      {
-        std::set<std::size_t> result;
-        for (std::set<data::variable>::const_iterator i = marking.begin(); i != marking.end(); ++i)
-        {
-          // TODO: make this code more efficient
-          const pfnf_equation& eqn = *find_equation(p, X.name());
-        	const std::vector<data::variable>& d = eqn.parameters();
-        	for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
-        	{
-        	  if (*i == *j)
-        	  {
-        	    result.insert(j - d.begin());
-        	    break;
-        	  }
-        	}
-        }
-        return result;
-      }
-
-      // returns true if the i-th parameter of X is marked
-      bool is_marked_parameter(std::size_t i) const
-      {
-        return marked_parameters[i];
-      }
-    };
-
+/*
     struct control_flow_substitution
     {
       std::map<std::size_t, data::data_expression> values;
@@ -312,6 +388,7 @@ class pbes_control_flow_algorithm
         return propositional_variable_instantiation(x.name(), atermpp::convert<data::data_expression_list>(e));
       }
     };
+*/
 
     // simplify and rewrite the expression x
     pbes_expression simplify(const pbes_expression& x) const
@@ -324,12 +401,12 @@ class pbes_control_flow_algorithm
     // simplify and rewrite the guards of the pbes p
     void simplify(pfnf_pbes& p) const
     {
-      std::vector<pfnf_equation>& equations = p.equations();
-      for (std::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
+      atermpp::vector<pfnf_equation>& equations = p.equations();
+      for (atermpp::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
       {
         simplify(k->h());
-        std::vector<pfnf_implication>& implications = k->implications();
-        for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+        atermpp::vector<pfnf_implication>& implications = k->implications();
+        for (atermpp::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
         {
           simplify(i->g());
         }
@@ -371,11 +448,11 @@ class pbes_control_flow_algorithm
     void print_control_flow_parameters()
     {
       std::cout << "--- control flow parameters ---" << std::endl;
-      const std::vector<pfnf_equation>& equations = m_pbes.equations();
-      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      const atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
+      for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const atermpp::vector<data::variable>& d_X = k->parameters();
         const std::vector<bool>& cf = m_is_control_flow[X.name()];
 
         std::cout << core::pp(X.name()) << " ";
@@ -426,29 +503,29 @@ class pbes_control_flow_algorithm
 
     void compute_control_flow_parameters()
     {
-      const std::vector<pfnf_equation>& equations = m_pbes.equations();
+      const atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
       std::map<core::identifier_string, std::vector<data::variable> > V;
 
       // initialize all control flow parameters to true
       // initalize V_km to the empty set
-      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const atermpp::vector<data::variable>& d_X = k->parameters();
         m_is_control_flow[X.name()] = std::vector<bool>(d_X.size(), true);
         V[X.name()] = std::vector<data::variable>(d_X.size(), data::variable());
       }
 
       // pass 1
-      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
-        const std::vector<pfnf_implication>& implications = k->implications();
-        for (std::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
+        const atermpp::vector<data::variable>& d_X = k->parameters();
+        const atermpp::vector<pfnf_implication>& implications = k->implications();
+        for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          const std::vector<propositional_variable_instantiation>& propvars = i->variables();
-          for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
+          const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
+          for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
             const propositional_variable_instantiation& Xij = *j;
             data::data_expression_list d = Xij.parameters();
@@ -479,15 +556,15 @@ class pbes_control_flow_algorithm
       }
 
       // pass 2
-      for (std::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
-        const std::vector<pfnf_implication>& implications = k->implications();
-        for (std::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
+        const atermpp::vector<data::variable>& d_X = k->parameters();
+        const atermpp::vector<pfnf_implication>& implications = k->implications();
+        for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          const std::vector<propositional_variable_instantiation>& propvars = i->variables();
-          for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
+          const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
+          for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
             const propositional_variable_instantiation& Xij = *j;
             data::data_expression_list d = Xij.parameters();
@@ -539,9 +616,9 @@ class pbes_control_flow_algorithm
       std::set<data::variable> result;
       const std::vector<bool>& b = control_flow_values(X);
       const pfnf_equation& eqn = *find_equation(m_pbes, X);
-    	const std::vector<data::variable>& d = eqn.parameters();
+      const atermpp::vector<data::variable>& d = eqn.parameters();
       std::size_t index = 0;
-      for (std::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
+      for (atermpp::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
       {
         if (b[index])
         {
@@ -561,8 +638,8 @@ class pbes_control_flow_algorithm
     std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
     {
       const pfnf_equation& eqn = *find_equation(m_pbes, X);
-    	const std::vector<data::variable>& d = eqn.parameters();
-    	return std::set<data::variable>(d.begin(), d.end());
+      const atermpp::vector<data::variable>& d = eqn.parameters();
+      return std::set<data::variable>(d.begin(), d.end());
     }
 
     // removes parameter values that do not correspond to a control flow parameter
@@ -644,17 +721,17 @@ class pbes_control_flow_algorithm
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
 
-        const std::vector<pfnf_implication>& implications = eqn.implications();
-        for (std::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
+        const atermpp::vector<pfnf_implication>& implications = eqn.implications();
+        for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          const std::vector<propositional_variable_instantiation>& propvars = i->variables();
+          const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
           pbes_expression guard = pbesr(and_(eqn.h(), i->g()), sigma);
           if (is_false(guard))
           {
             continue;
           }
 
-          for (std::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
+          for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
             propositional_variable_instantiation Xij = apply_substitution(*j, sigma);
             propositional_variable_instantiation Y = project(Xij);
@@ -736,7 +813,7 @@ class pbes_control_flow_algorithm
       {
         control_flow_vertex& v = i->second;
         std::set<data::variable> fv = v.free_guard_variables();
-    	  std::set<data::variable> dx = propvar_parameters(v.X.name());
+        std::set<data::variable> dx = propvar_parameters(v.X.name());
         v.marking = data::detail::set_intersection(fv, dx);
         mCRL2log(log::debug, "control_flow") << "initial marking " << print_control_flow_marking(v) << "\n";
       }
@@ -756,12 +833,12 @@ class pbes_control_flow_algorithm
         mCRL2log(log::debug, "control_flow") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-        for (std::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
+        for (atermpp::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Xij = i->label;
-    	    std::set<data::variable> dx = propvar_parameters(Xij.name());
+          std::set<data::variable> dx = propvar_parameters(Xij.name());
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
@@ -788,8 +865,8 @@ class pbes_control_flow_algorithm
       {
         control_flow_vertex& v = i->second;
         const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
-        const std::vector<data::variable>& d = eqn.parameters();
-        for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
+        const atermpp::vector<data::variable>& d = eqn.parameters();
+        for (atermpp::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
         {
           v.marked_parameters.push_back(v.marking.find(*j) != v.marking.end());
         }
@@ -820,18 +897,18 @@ class pbes_control_flow_algorithm
       }
 
       // expand the equations, and add them to the result
-      std::vector<pfnf_equation>& equations = m_pbes.equations();
-      for (std::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
+      atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
+      for (atermpp::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        std::vector<pfnf_implication>& implications = k->implications();
+        atermpp::vector<pfnf_implication>& implications = k->implications();
         atermpp::vector<pbes_expression> new_implications;
-        for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+        for (atermpp::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          std::vector<propositional_variable_instantiation>& v = i->variables();
-          std::vector<pbes_expression> disjuncts;
-          for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
+          atermpp::vector<propositional_variable_instantiation>& v = i->variables();
+          atermpp::vector<pbes_expression> disjuncts;
+          for (atermpp::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
           {
-            std::vector<pbes_expression> Xij_conjuncts;
+            atermpp::vector<pbes_expression> Xij_conjuncts;
             core::identifier_string X = j->name();
             std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(j->parameters());
 

@@ -26,7 +26,7 @@ namespace pbes_system {
 namespace detail {
 
 inline
-void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, std::vector<propositional_variable_instantiation>& Xij)
+void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, atermpp::vector<propositional_variable_instantiation>& Xij)
 {
   if (is_pfnf_simple_expression(x))
   {
@@ -60,7 +60,7 @@ class pfnf_implication
 {
   protected:
     pbes_expression m_g;
-    std::vector<propositional_variable_instantiation> m_v;
+    atermpp::vector<propositional_variable_instantiation> m_v;
 
   public:
     pfnf_implication(const pbes_expression& x)
@@ -78,14 +78,29 @@ class pfnf_implication
       return m_g;
     }
 
-    const std::vector<propositional_variable_instantiation>& variables() const
+    const atermpp::vector<propositional_variable_instantiation>& variables() const
     {
       return m_v;
     }
 
-    std::vector<propositional_variable_instantiation>& variables()
+    atermpp::vector<propositional_variable_instantiation>& variables()
     {
       return m_v;
+    }
+
+    void protect() const
+    {
+      m_g.protect();
+    }
+
+    void unprotect() const
+    {
+      m_g.unprotect();
+    }
+
+    void mark() const
+    {
+      m_g.mark();
     }
 };
 
@@ -94,6 +109,34 @@ std::ostream& operator<<(std::ostream& out, const pfnf_implication& x)
 {
   return out << pbes_system::pp(imp(x.g(), pbes_expr::join_or(x.variables().begin(), x.variables().end())));
 }
+
+} // namespace detail
+} // namespace pbes_system
+} // namespace mcrl2 
+/// \cond INTERNAL_DOCS
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_implication>
+{
+  static void protect(const mcrl2::pbes_system::detail::pfnf_implication& t)
+  {
+    t.protect();
+  }
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_implication& t)
+  {
+    t.unprotect();
+  }
+  static void mark(const mcrl2::pbes_system::detail::pfnf_implication& t)
+  {
+    t.mark();
+  }
+};
+} // namespace atermpp
+/// \endcond
+namespace mcrl2 {
+namespace pbes_system {
+namespace detail {
 
 // represents forall d:D or exists d:D
 class pfnf_quantifier
@@ -129,7 +172,50 @@ class pfnf_quantifier
         return exists(m_variables, phi);
       }
     }
+
+    void protect() const
+    {
+      m_variables.protect();
+    }
+
+    void unprotect() const
+    {
+      m_variables.unprotect();
+    }
+
+    void mark() const
+    {
+      m_variables.mark();
+    }
 };
+
+} // namespace detail
+} // namespace pbes_system
+} // namespace mcrl2 
+/// \cond INTERNAL_DOCS
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_quantifier>
+{
+  static void protect(const mcrl2::pbes_system::detail::pfnf_quantifier& t)
+  {
+    t.protect();
+  }
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_quantifier& t)
+  {
+    t.unprotect();
+  }
+  static void mark(const mcrl2::pbes_system::detail::pfnf_quantifier& t)
+  {
+    t.mark();
+  }
+};
+} // namespace atermpp
+/// \endcond
+namespace mcrl2 {
+namespace pbes_system {
+namespace detail {
 
 // represents Qq: Q. h /\ implications
 class pfnf_equation
@@ -138,12 +224,12 @@ class pfnf_equation
     // left hand side
     fixpoint_symbol m_symbol;
     propositional_variable m_X;
-    std::vector<data::variable> m_parameters;
+    atermpp::vector<data::variable> m_parameters;
 
     // right hand side
-    std::vector<pfnf_quantifier> m_quantifiers;
+    atermpp::vector<pfnf_quantifier> m_quantifiers;
     pbes_expression m_h;
-    std::vector<pfnf_implication> m_implications;
+    atermpp::vector<pfnf_implication> m_implications;
 
   public:
     pfnf_equation(const pbes_equation& eqn)
@@ -155,7 +241,7 @@ class pfnf_equation
       // left hand side
       m_X = X;
       data::variable_list d = X.parameters();
-      m_parameters = std::vector<data::variable>(d.begin(), d.end());
+      m_parameters = atermpp::vector<data::variable>(d.begin(), d.end());
 
       // right hand side
       pbes_expression y = phi;
@@ -172,9 +258,9 @@ class pfnf_equation
           y = exists(y).body();
         }
       }
-      std::vector<pbes_expression> g;
+      atermpp::vector<pbes_expression> g;
       split_pfnf_expression(y, m_h, g);
-      for (std::vector<pbes_expression>::iterator i = g.begin(); i != g.end(); ++i)
+      for (atermpp::vector<pbes_expression>::iterator i = g.begin(); i != g.end(); ++i)
       {
         m_implications.push_back(pfnf_implication(*i));
       }
@@ -185,12 +271,12 @@ class pfnf_equation
       return m_X;
     }
 
-    const std::vector<data::variable>& parameters() const
+    const atermpp::vector<data::variable>& parameters() const
     {
       return m_parameters;
     }
 
-    const std::vector<pfnf_quantifier>& quantifiers() const
+    const atermpp::vector<pfnf_quantifier>& quantifiers() const
     {
       return m_quantifiers;
     }
@@ -205,12 +291,12 @@ class pfnf_equation
       return m_h;
     }
 
-    const std::vector<pfnf_implication>& implications() const
+    const atermpp::vector<pfnf_implication>& implications() const
     {
       return m_implications;
     }
 
-    std::vector<pfnf_implication>& implications()
+    atermpp::vector<pfnf_implication>& implications()
     {
       return m_implications;
     }
@@ -222,21 +308,70 @@ class pfnf_equation
       phi = and_(m_h, phi);
 
       // apply quantifiers
-      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      for (atermpp::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
       {
         phi = i->apply(phi);
       }
       return pbes_equation(m_symbol, m_X, phi);
     }
+
+    void protect() const
+    {
+      m_symbol.protect();
+      m_X.protect();
+      m_h.protect();
+    }
+
+    void unprotect() const
+    {
+      m_symbol.unprotect();
+      m_X.unprotect();
+      m_h.unprotect();
+    }
+
+    void mark() const
+    {
+      m_symbol.mark();
+      m_X.mark();
+      m_h.mark();
+    }
 };
+
+} // namespace detail
+} // namespace pbes_system
+} // namespace mcrl2 
+/// \cond INTERNAL_DOCS
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_equation>
+{
+  static void protect(const mcrl2::pbes_system::detail::pfnf_equation& t)
+  {
+    t.protect();
+  }
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_equation& t)
+  {
+    t.unprotect();
+  }
+  static void mark(const mcrl2::pbes_system::detail::pfnf_equation& t)
+  {
+    t.mark();
+  }
+};
+} // namespace atermpp
+/// \endcond
+namespace mcrl2 {
+namespace pbes_system {
+namespace detail {
 
 // explicit representation of a pbes in PFNF format
 class pfnf_pbes
 {
   protected:
-    // TODO: avoid the copy of the pbes
-    pbes<> m_pbes; // make a copy of the original pbes, to avoid garbage collection problems
-    std::vector<pfnf_equation> m_equations;
+    data::data_specification m_data;
+    atermpp::vector<pfnf_equation> m_equations;
+    pbes_expression m_initial_state;
 
   public:
     pfnf_pbes()
@@ -245,40 +380,41 @@ class pfnf_pbes
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
     pfnf_pbes(const pbes<>& p)
-      : m_pbes(p)
+      : m_data(p.data()), m_initial_state(p.initial_state())
     {
-      if (!pbes_system::detail::is_pfnf(m_pbes))
+      pbes<> q = p;
+      if (!pbes_system::detail::is_pfnf(p))
       {
         mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;
         pfnf_rewriter R;
-        pbes_system::pbes_rewrite(m_pbes, R);
-        assert (is_pfnf(m_pbes));
+        pbes_system::pbes_rewrite(q, R);
+        assert (is_pfnf(q));
       }
-      const atermpp::vector<pbes_equation>& equations = m_pbes.equations();
+      const atermpp::vector<pbes_equation>& equations = q.equations();
       for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         m_equations.push_back(pfnf_equation(*i));
       }
     }
 
-    const std::vector<pfnf_equation>& equations() const
+    const atermpp::vector<pfnf_equation>& equations() const
     {
       return m_equations;
     }
 
-    std::vector<pfnf_equation>& equations()
+    atermpp::vector<pfnf_equation>& equations()
     {
       return m_equations;
     }
 
     const pbes_expression& initial_state() const
     {
-      return m_pbes.initial_state();
+      return m_initial_state;
     }
 
     const data::data_specification& data() const
     {
-      return m_pbes.data();
+      return m_data;
     }
 };
 

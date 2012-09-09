@@ -230,6 +230,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph2)
   BOOST_CHECK(answer1 == answer2);
 }
 
+#ifdef MCRL2_CONTROL_FLOW_TEST_ALL
 // found by random testing 7 Sep 2012
 BOOST_AUTO_TEST_CASE(test_stategraph3)
 {
@@ -269,6 +270,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
 }
+#endif // MCRL2_CONTROL_FLOW_TEST_ALL
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
