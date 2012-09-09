@@ -9,6 +9,7 @@
 /// \file mcrl2/pbes/pbesinst_algorithm.h
 /// \brief Algorithm for instantiating a PBES.
 
+#include <cassert>
 #include <set>
 #include <iostream>
 #include <sstream>
