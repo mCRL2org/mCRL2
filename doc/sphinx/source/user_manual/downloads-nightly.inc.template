@@ -7,7 +7,7 @@
 .. |bin_deb32n| replace:: Ubuntu DEB (32-bit)
 .. _bin_deb32n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86.deb
 
-.. |bin_deb64n| replace:: Ubuntu DEB (32-bit)
+.. |bin_deb64n| replace:: Ubuntu DEB (64-bit)
 .. _bin_deb64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86_64.deb
 
 .. |bin_fedora64n| replace:: Fedora RPM (64-bit)
