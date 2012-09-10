@@ -353,12 +353,16 @@ void pbesrewr(const std::string& input_filename,
     {
       // first preprocess data expressions
       data::detail::one_point_rule_preprocessor one_point_processor;
-      data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar(one_point_processor);
-      pbes_rewrite(p, datar);
+      data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
+      pbes_rewrite(p, datar_onepoint);
 
+      // apply the one point rule rewriter
       one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);
 
+      // post processing: apply the simplifying rewriter
+      simplifying_rewriter<pbes_expression, data::rewriter> simp(datar);
+      pbes_rewrite(p, simp);
       break;
     }
     case pfnf:
