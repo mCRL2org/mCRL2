@@ -134,6 +134,20 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
     throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
   }
+
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << "[";
+    typename VariableContainer::const_iterator i = variables.begin();
+    typename ExpressionContainer::const_iterator j = expressions.begin();
+    for (; i != variables.end(); ++i, ++j)
+    {
+      out << (i == variables.begin() ? "" : "; ") << data::pp(*i) << " := " << data::pp(*j);
+    }
+    out << "]";
+    return out.str();
+  }
 };
 
 /// \brief Utility function for creating a sequence_sequence_substitution.
