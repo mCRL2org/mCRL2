@@ -67,6 +67,7 @@ class lps2lts_algorithm
 
     size_t m_num_states;
     size_t m_num_transitions;
+    size_t m_initial_state_number;
     size_t m_level;
 
     volatile bool m_must_abort;

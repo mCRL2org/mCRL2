@@ -200,6 +200,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 bool lps2lts_algorithm::generate_lts()
 {
   generator_state_t initial_state = m_generator->internal_initial_state();
+  m_initial_state_number=0;
   if (m_use_confluence_reduction)
   {
     initial_state = get_prioritised_representative(initial_state);
@@ -207,7 +208,9 @@ bool lps2lts_algorithm::generate_lts()
 
   if (m_options.bithashing)
   {
-    m_bit_hash_table.add_state(storage_state(initial_state));
+    const std::pair<size_t, bool> p=m_bit_hash_table.add_state(storage_state(initial_state));
+    m_initial_state_number=p.first; 
+    assert(p.second); // The initial state is new.
   }
   else
   {
@@ -217,12 +220,12 @@ bool lps2lts_algorithm::generate_lts()
   if (m_options.outformat == lts_aut)
   {
     // HACK: this line will be overwritten once generation is finished.
-    m_aut_file << "                                                 " << std::endl;
+    m_aut_file << "                                                             " << std::endl;
   }
   else if (m_options.outformat != lts_none)
   {
-    size_t initial_state_number = m_output_lts.add_state(m_generator->initial_state());
-    m_output_lts.set_initial_state(initial_state_number);
+    m_initial_state_number = m_output_lts.add_state(m_generator->initial_state());
+    m_output_lts.set_initial_state(m_initial_state_number);
   }
   m_num_states = 1;
 
@@ -282,7 +285,7 @@ bool lps2lts_algorithm::finalise_lts_generation()
   {
     m_aut_file.flush();
     m_aut_file.seekp(0);
-    m_aut_file << "des (0," << m_num_transitions << "," << m_num_states << ")";
+    m_aut_file << "des (" << m_initial_state_number << "," << m_num_transitions << "," << m_num_states << ")";
     m_aut_file.close();
   }
   else if (m_options.outformat != lts_none)

@@ -192,7 +192,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
 
   l.set_num_states(nstate,false);
 
-  state_number_translator[0]=initial_state;
+  state_number_translator[initial_state]=0;
   initial_state=0;
   l.set_initial_state(initial_state);
 
