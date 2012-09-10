@@ -272,6 +272,28 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
 }
 #endif // MCRL2_CONTROL_FLOW_TEST_ALL
 
+// found by random testing 7 Sep 2012
+BOOST_AUTO_TEST_CASE(test_stategraph4)
+{
+  std::string text =
+    "pbes mu X0 =                              \n"
+    "       forall b: Bool. X2(true) || X1(b); \n"
+    "     mu X1(c: Bool) =                     \n"
+    "       val(c);                            \n"
+    "     mu X2(d: Bool) =                     \n"
+    "       X1(false);                         \n"
+    "                                          \n"
+    "init X0;                                  \n"
+    ;
+  pbes<> p = txt2pbes(text, true);
+  bool answer1 = solve_pbes(p);
+  detail::pbes_control_flow_algorithm algorithm(p);
+  pbes<> q = algorithm.run();
+  BOOST_CHECK(q.is_well_typed());
+  bool answer2 = solve_pbes(q);
+  BOOST_CHECK(answer1 == answer2);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

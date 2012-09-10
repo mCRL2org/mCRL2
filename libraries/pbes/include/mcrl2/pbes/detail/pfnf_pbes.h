@@ -88,6 +88,12 @@ class pfnf_implication
       return m_v;
     }
 
+    // convert to pbes_expression
+    pbes_expression convert() const
+    {
+      return imp(m_g, pbes_expr::join_or(m_v.begin(), m_v.end()));
+    }
+
     void protect() const
     {
       m_g.protect();
@@ -112,7 +118,7 @@ std::ostream& operator<<(std::ostream& out, const pfnf_implication& x)
 
 } // namespace detail
 } // namespace pbes_system
-} // namespace mcrl2 
+} // namespace mcrl2
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
@@ -191,7 +197,7 @@ class pfnf_quantifier
 
 } // namespace detail
 } // namespace pbes_system
-} // namespace mcrl2 
+} // namespace mcrl2
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
@@ -301,6 +307,26 @@ class pfnf_equation
       return m_implications;
     }
 
+    // convert to pbes_equation
+    pbes_equation convert() const
+    {
+      atermpp::vector<pbes_expression> v;
+      for (atermpp::vector<pfnf_implication>::const_iterator i = m_implications.begin(); i != m_implications.end(); ++i)
+      {
+        v.push_back(i->convert());
+      }
+      pbes_expression phi = pbes_expr::join_and(v.begin(), v.end());
+
+      phi = and_(m_h, phi);
+
+      // apply quantifiers
+      for (atermpp::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      {
+        phi = i->apply(phi);
+      }
+      return pbes_equation(m_symbol, m_X, phi);
+    }
+
     // computes the equation with the implications replaced by new_implication
     pbes_equation apply_implication(const pbes_expression& new_implications) const
     {
@@ -339,7 +365,7 @@ class pfnf_equation
 
 } // namespace detail
 } // namespace pbes_system
-} // namespace mcrl2 
+} // namespace mcrl2
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {

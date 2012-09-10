@@ -230,6 +230,8 @@ struct control_flow_edge
     return label < other.label;
   }
 
+  std::string print() const;
+
   void protect() const
   {
     label.protect();
@@ -370,27 +372,18 @@ namespace mcrl2 {
 namespace pbes_system {
 namespace detail {
 
+inline
+std::string control_flow_edge::print() const
+{
+  std::ostringstream out;
+  out << "(" << pbes_system::pp(source->X) << ", " << pbes_system::pp(target->X) << ") label = " << pbes_system::pp(label);
+  return out.str();
+}
+
 /// \brief Algorithm class for the control_flow algorithm
 class pbes_control_flow_algorithm
 {
   public:
-/*
-    struct control_flow_substitution
-    {
-      std::map<std::size_t, data::data_expression> values;
-
-      propositional_variable_instantiation operator()(const propositional_variable_instantiation& x) const
-      {
-        data::data_expression_vector e = atermpp::convert<data::data_expression_vector>(x.parameters());
-        for (std::map<std::size_t, data::data_expression>::const_iterator i = values.begin(); i != values.end(); ++i)
-        {
-          e[i->first] = i->second;
-        }
-        return propositional_variable_instantiation(x.name(), atermpp::convert<data::data_expression_list>(e));
-      }
-    };
-*/
-
     // simplify and rewrite the expression x
     pbes_expression simplify(const pbes_expression& x) const
     {
@@ -759,6 +752,10 @@ class pbes_control_flow_algorithm
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
         mCRL2log(log::debug, "control_flow") << "[cf] sigma = " << data::print_substitution(sigma) << std::endl;
         const atermpp::vector<pfnf_implication>& implications = eqn.implications();
+        if (implications.empty())
+        {
+          u.guards.insert(eqn.h());
+        }
         for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
           const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
@@ -787,6 +784,7 @@ class pbes_control_flow_algorithm
               todo.insert(&v);
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
+              mCRL2log(log::debug, "control_flow") << "[cf] insert edge " << e.print() << std::endl;
               u.outgoing_edges.insert(e);
               v.incoming_edges.insert(e);
             }
@@ -796,6 +794,7 @@ class pbes_control_flow_algorithm
               u.guards.insert(guard);
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
+              mCRL2log(log::debug, "control_flow") << "[cf] insert edge " << e.print() << std::endl;
               u.outgoing_edges.insert(e);
               v.incoming_edges.insert(e);
             }
@@ -940,6 +939,7 @@ class pbes_control_flow_algorithm
       atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
       for (atermpp::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
       {
+        mCRL2log(log::debug, "control_flow") << "<reset equation>" << pbes_system::pp(k->convert()) << std::endl;
         atermpp::vector<pfnf_implication>& implications = k->implications();
         atermpp::vector<pbes_expression> new_implications;
         for (atermpp::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
