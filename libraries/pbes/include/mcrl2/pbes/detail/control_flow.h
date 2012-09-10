@@ -22,6 +22,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/representative_generator.h"
@@ -326,7 +327,7 @@ struct control_flow_vertex
 
 } // namespace detail
 } // namespace pbes_system
-} // namespace mcrl2 
+} // namespace mcrl2
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
@@ -556,11 +557,20 @@ class pbes_control_flow_algorithm
       }
 
       // pass 2
+      std::set<core::identifier_string> todo;
       for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        propositional_variable X = k->variable();
-        const atermpp::vector<data::variable>& d_X = k->parameters();
-        const atermpp::vector<pfnf_implication>& implications = k->implications();
+        todo.insert(k->variable().name());
+      }
+
+      while (!todo.empty())
+      {
+        core::identifier_string name = *todo.begin();
+        todo.erase(todo.begin());
+        const pfnf_equation& eqn = *find_equation(m_pbes, name);
+        propositional_variable X = eqn.variable();
+        const atermpp::vector<data::variable>& d_X = eqn.parameters();
+        const atermpp::vector<pfnf_implication>& implications = eqn.implications();
         for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
           const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
@@ -580,22 +590,46 @@ class pbes_control_flow_algorithm
                 std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
                 if (found == d_X.end())
                 {
-                  m_is_control_flow[Xij.name()][index] = false;
-                  mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                  if (m_is_control_flow[Xij.name()][index] != false)
+                  {
+                    m_is_control_flow[Xij.name()][index] = false;
+                    todo.insert(Xij.name());
+                    mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                  }
                 }
                 else
                 {
                   if (X.name() == Xij.name() && (found != d_X.begin() + index))
                   {
-                    m_is_control_flow[Xij.name()][index] = false;
-                    mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                    if (m_is_control_flow[Xij.name()][index] != false)
+                    {
+                      m_is_control_flow[Xij.name()][index] = false;
+                      todo.insert(Xij.name());
+                      mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                    }
+                  }
+                  else
+                  {
+                    if (!m_is_control_flow[X.name()][found - d_X.begin()])
+                    {
+                      if (m_is_control_flow[Xij.name()][index] != false)
+                      {
+                        m_is_control_flow[Xij.name()][index] = false;
+                        todo.insert(Xij.name());
+                        mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                      }
+                    }
                   }
                 }
               }
               else
               {
-                m_is_control_flow[Xij.name()][index] = false;
-                mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                if (m_is_control_flow[Xij.name()][index] != false)
+                {
+                  m_is_control_flow[Xij.name()][index] = false;
+                  todo.insert(Xij.name());
+                  mCRL2log(log::debug, "control_flow") << print_control_flow_assignment(false, index, X, Xij, "pass 2");
+                }
               }
             }
           }
@@ -706,6 +740,7 @@ class pbes_control_flow_algorithm
       propositional_variable_instantiation Xinit = project(m_pbes.initial_state());
       vertex_iterator i = insert_control_flow_vertex(Xinit);
       todo.insert(&(i->second));
+      mCRL2log(log::debug, "control_flow") << "[cf] Xinit = " << pbes_system::pp(m_pbes.initial_state()) << " -> " << pbes_system::pp(Xinit) << std::endl;
 
       while (!todo.empty())
       {
@@ -717,10 +752,12 @@ class pbes_control_flow_algorithm
 
         const pfnf_equation& eqn = *find_equation(m_pbes, u.X.name());
         propositional_variable X = project_variable(eqn.variable());
+        mCRL2log(log::debug, "control_flow") << "[cf] X = " << pbes_system::pp(X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "[cf] u.X = " << pbes_system::pp(u.X) << std::endl;
         data::variable_list d = X.parameters();
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
-
+        mCRL2log(log::debug, "control_flow") << "[cf] sigma = " << data::print_substitution(sigma) << std::endl;
         const atermpp::vector<pfnf_implication>& implications = eqn.implications();
         for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
@@ -733,8 +770,11 @@ class pbes_control_flow_algorithm
 
           for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
+            mCRL2log(log::debug, "control_flow") << "[cf] Xij = " << pbes_system::pp(*j) << std::endl;
             propositional_variable_instantiation Xij = apply_substitution(*j, sigma);
+            mCRL2log(log::debug, "control_flow") << "[cf] Xij_sigma = " << pbes_system::pp(Xij) << std::endl;
             propositional_variable_instantiation Y = project(Xij);
+            mCRL2log(log::debug, "control_flow") << "[cf] Xij_sigma_projected = " << pbes_system::pp(Y) << std::endl;
             propositional_variable_instantiation label = Xij;
             vertex_iterator q = m_control_vertices.find(Y);
             if (q == m_control_vertices.end())
@@ -908,6 +948,7 @@ class pbes_control_flow_algorithm
           atermpp::vector<pbes_expression> disjuncts;
           for (atermpp::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
           {
+            mCRL2log(log::debug, "control_flow") << "<expand propvar>" << pbes_system::pp(*j) << std::endl;
             atermpp::vector<pbes_expression> Xij_conjuncts;
             core::identifier_string X = j->name();
             std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(j->parameters());
@@ -916,10 +957,11 @@ class pbes_control_flow_algorithm
             std::set<control_flow_vertex*>& inst = propvar_map[X];
             for (std::set<control_flow_vertex*>::iterator q = inst.begin(); q != inst.end(); ++q)
             {
-              control_flow_vertex& v = **q;
+              control_flow_vertex& w = **q;
+              mCRL2log(log::debug, "control_flow") << "  <vertex>" << pbes_system::pp(w.X) << std::endl;
               atermpp::vector<data::data_expression> e;
-              std::size_t N = v.marked_parameters.size();
-              data::data_expression_list::const_iterator s = v.X.parameters().begin();
+              std::size_t N = w.marked_parameters.size();
+              data::data_expression_list::const_iterator s = w.X.parameters().begin();
               data::data_expression condition = data::sort_bool::true_();
               for (std::size_t r = 0; r < N; ++r)
               {
@@ -929,7 +971,7 @@ class pbes_control_flow_algorithm
                   condition = data::lazy::and_(condition, data::equal_to(d_X[r], v_X_r));
                   e.push_back(v_X_r);
                 }
-                else if (v.is_marked_parameter(r))
+                else if (w.is_marked_parameter(r))
                 {
                   e.push_back(d_X[r]);
                 }
@@ -939,6 +981,7 @@ class pbes_control_flow_algorithm
                 }
               }
               propositional_variable_instantiation Xe(X, atermpp::convert<data::data_expression_list>(e));
+              mCRL2log(log::debug, "control_flow") << "  <alternative>" << pbes_system::pp(Xe) << std::endl;
               if (simplify)
               {
                 condition = datar(condition);
@@ -979,7 +1022,7 @@ class pbes_control_flow_algorithm
   public:
 
     /// \brief Runs the control_flow algorithm
-    pbes<> run(bool simplify = true, bool print_output = false)
+    pbes<> run(bool simplify = true, bool print_output = true)
     {
       //control_flow_influence_graph_algorithm ialgo(m_pbes);
       //ialgo.run();
