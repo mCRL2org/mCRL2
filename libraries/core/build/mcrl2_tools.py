@@ -212,3 +212,7 @@ def run_pbesstategraph(pbesfile1, pbesfile2, options = '', timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
     timeout_command('pbesstategraph',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
 
+def run_symbolic_exploration(pbesfile1, pbesfile2, timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('symbolic_exploration',  '%s %s' % (pbesfile1, pbesfile2), timeout)
+

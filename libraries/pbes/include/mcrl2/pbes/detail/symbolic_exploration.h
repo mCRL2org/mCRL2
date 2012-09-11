@@ -40,7 +40,7 @@ class symbolic_exploration_algorithm
 
     bool is_conjunctive(const pbes_expression& x) const
     {
-      return is_forall(x) || is_and(x);
+      return is_forall(x) || is_and(x) || is_propositional_variable_instantiation(x) || is_simple_expression(x);
     }
 
     pbes_expression expr_or(const pbes_expression& x)
@@ -140,47 +140,13 @@ class symbolic_exploration_algorithm
       }
       else if (is_forall(x))
       {
-        pbes_expression phi = forall(x).body();
-        data::variable_list d = forall(x).variables();
-        return z::and_(z::forall(d, expr_or(phi)), z::forall(d, z::imp(z::not_(expr_or(phi)), F(phi))));
+        return z::and_(expr_and(x), F_and(x));
       }
       else if (is_exists(x))
       {
         data::variable_list d = exists(x).variables();
         pbes_expression phi = exists(x).body();
-        if (is_exists(phi))
-        {
-          data::variable_list e = exists(phi).variables();
-          pbes_expression psi = exists(phi).body();
-          return z::exists(concat(d, e), psi);
-        }
-        else if (is_and(phi))
-        {
-          pbes_expression left = and_(phi).left();
-          pbes_expression right = and_(phi).right();
-          if (is_simple_expression(left) && is_exists(right))
-          {
-            pbes_expression b = left;
-            data::variable_list e = exists(right).variables();
-            pbes_expression psi = exists(right).body();
-            return F_or(z::exists(concat(d, e), z::and_(b, psi)));
-          }
-          else if (is_exists(left) && is_simple_expression(right))
-          {
-            data::variable_list e = exists(left).variables();
-            pbes_expression psi = exists(left).body();
-            pbes_expression b = right;
-            return F_or(z::exists(concat(d, e), z::and_(b, psi)));
-          }
-          else
-          {
-            return z::exists(d, z::and_(expr_and(phi), F(phi))); // otherwise
-          }
-        }
-        else
-        {
-          return z::exists(d, z::and_(expr_and(phi), F(phi))); // otherwise
-        }
+        return z::and_(z::exists(d, expr_and(phi)), F(phi));
       }
       throw mcrl2::runtime_error("unknown pbes expression encountered in F_or: " + pbes_system::pp(x));
       return pbes_expression();
@@ -199,59 +165,25 @@ class symbolic_exploration_algorithm
       {
         return x;
       }
-      else if (is_or(x))
-      {
-        return z::or_(expr_or(x), F_or(x));
-      }
       else if (is_and(x))
       {
         pbes_expression phi = and_(x).left();
         pbes_expression psi = and_(x).right();
         return z::and_(F_and(phi), F_and(psi));
       }
+      else if (is_or(x))
+      {
+        return z::imp(z::not_(expr_or(x)), F_or(x));
+      }
       else if (is_exists(x))
       {
-        pbes_expression phi = exists(x).body();
-        data::variable_list d = exists(x).variables();
-        return z::or_(z::exists(d, expr_or(phi)), z::exists(d, z::and_(expr_and(phi), F(phi))));
+        return z::imp(z::not_(expr_or(x)), F_or(x));
       }
       else if (is_forall(x))
       {
-        data::variable_list d = forall(x).variables();
-        pbes_expression phi = forall(x).body();
-        if (is_forall(phi))
-        {
-          data::variable_list e = forall(phi).variables();
-          pbes_expression psi = forall(phi).body();
-          return z::forall(concat(d, e), psi);
-        }
-        else if (is_or(phi))
-        {
-          pbes_expression left = or_(phi).left();
-          pbes_expression right = or_(phi).right();
-          if (is_simple_expression(left) && is_forall(right))
-          {
-            pbes_expression b = left;
-            data::variable_list e = forall(right).variables();
-            pbes_expression psi = forall(right).body();
-            return F_and(z::forall(concat(d, e), z::imp(z::not_(b), psi)));
-          }
-          else if (is_forall(left) && is_simple_expression(right))
-          {
-            data::variable_list e = forall(left).variables();
-            pbes_expression psi = forall(left).body();
-            pbes_expression b = right;
-            return F_and(z::forall(concat(d, e), z::imp(z::not_(b), psi)));
-          }
-          else
-          {
-            return z::forall(d, z::imp(z::not_(expr_or(phi)), F(phi))); // otherwise
-          }
-        }
-        else
-        {
-          return z::forall(d, z::imp(z::not_(expr_or(phi)), F(phi))); // otherwise
-        }
+        data::variable_list d = exists(x).variables();
+        pbes_expression phi = exists(x).body();
+        return z::forall(d, z::imp(z::not_(expr_or(phi)), F(phi)));
       }
       throw mcrl2::runtime_error("unknown pbes expression encountered in F_and: " + pbes_system::pp(x));
       return pbes_expression();
@@ -285,7 +217,7 @@ class symbolic_exploration_algorithm
         }
         else
         {
-          i->formula() = z::or_(expr_or(phi), F_or(phi));
+          i->formula() = z::imp(z::not_(expr_or(phi)), F_or(phi));
         }
       }
     }
