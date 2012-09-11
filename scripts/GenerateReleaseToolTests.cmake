@@ -1506,7 +1506,7 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
     gen_lts2lps_release_tests()
 	endif()
 
-	list(FIND SET_OF_DISABLED_TESTS "lpsconvert" index_find)
+	list(FIND SET_OF_DISABLED_TESTS "ltsconvert" index_find)
   if( index_find LESS 0 )
     gen_ltsconvert_release_tests()
 	endif()
