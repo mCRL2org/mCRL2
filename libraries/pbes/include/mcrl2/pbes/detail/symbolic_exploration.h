@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 #define MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
 
+#include <cassert>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/io.h"
@@ -30,11 +31,46 @@ class symbolic_exploration_algorithm
 {
   protected:
     pbes<>& m_pbes;
-    data::variable_list m_parameters; // the parameters of the current equation (used for clustering)
+    std::vector<data::variable> m_variables; // the parameters of the current equation (used for clustering)
     data::set_identifier_generator m_generator; // used for generating cluster variables
     bool m_optimized;
     bool m_clustered;
     atermpp::vector<pbes_equation> m_cluster_equations;
+
+    std::string pp(const std::vector<data::variable>& v)
+    {
+      return data::pp(data::variable_list(v.begin(), v.end()));
+    }
+
+    void push_variables(const data::variable_list& v)
+    {
+      if (v.empty())
+      {
+        return;
+      }
+      m_variables.insert(m_variables.end(), v.begin(), v.end());
+    }
+
+    void pop_variables(const data::variable_list& v)
+    {
+      if (v.empty())
+      {
+        return;
+      }
+      assert (m_variables.size() >= v.size());
+      m_variables.erase(m_variables.end() - v.size(), m_variables.end());
+    }
+
+    /// \brief Concatenates two variable lists
+    /// \param x A variable list
+    /// \param y A variable list
+    /// \return The concatenation of x and y
+    data::variable_list concat(const data::variable_list& x, const data::variable_list& y)
+    {
+      std::vector<data::variable> v(x.begin(), x.end());
+      v.insert(v.end(), y.begin(), y.end());
+      return data::variable_list(v.begin(), v.end());
+    }
 
     bool is_disjunctive(const pbes_expression& x) const
     {
@@ -46,13 +82,25 @@ class symbolic_exploration_algorithm
       return is_and(x) || is_forall(x);
     }
 
+    void check_equation(const pbes_equation& eqn) const
+    {
+      std::set<data::variable> v = pbes_system::find_free_variables(eqn);
+      if (!v.empty())
+      {
+        throw std::runtime_error("CORRUPT CLUSTER");
+      }
+    }
+
     pbes_expression make_cluster(const pbes_expression& x)
     {
       core::identifier_string X = m_generator("Cluster");
-      pbes_equation eqn(fixpoint_symbol::mu(), propositional_variable(X, m_parameters), x);
+      data::variable_list parameters(m_variables.begin(), m_variables.end());
+      pbes_equation eqn(fixpoint_symbol::mu(), propositional_variable(X, parameters), x);
       m_cluster_equations.push_back(eqn);
       mCRL2log(log::debug) << "\nadding cluster " << pbes_system::pp(eqn);
-      return propositional_variable_instantiation(X, m_parameters);
+      check_equation(eqn);
+      data::data_expression_list e = data::make_data_expression_list(parameters);
+      return propositional_variable_instantiation(X, e);
     }
 
     pbes_expression not_(const pbes_expression& x)
@@ -72,17 +120,6 @@ class symbolic_exploration_algorithm
     {
       pbes_expression left = x;
       pbes_expression right = y;
-      if (m_clustered)
-      {
-        if (is_disjunctive(left))
-        {
-          left = make_cluster(left);
-        }
-        if (is_disjunctive(right))
-        {
-          right = make_cluster(right);
-        }
-      }
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -98,17 +135,6 @@ class symbolic_exploration_algorithm
     {
       pbes_expression left = x;
       pbes_expression right = y;
-      if (m_clustered)
-      {
-        if (is_conjunctive(left))
-        {
-          left = make_cluster(left);
-        }
-        if (is_conjunctive(right))
-        {
-          right = make_cluster(right);
-        }
-      }
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -124,13 +150,6 @@ class symbolic_exploration_algorithm
     {
       pbes_expression left = x;
       pbes_expression right = y;
-      if (m_clustered)
-      {
-        if (is_conjunctive(left) != is_conjunctive(right))
-        {
-          right = make_cluster(right);
-        }
-      }
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -145,13 +164,6 @@ class symbolic_exploration_algorithm
     pbes_expression forall(const data::variable_list& d, const pbes_expression& x)
     {
       pbes_expression body = x;
-      if (m_clustered)
-      {
-        if (is_disjunctive(body))
-        {
-          body = make_cluster(body);
-        }
-      }
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -166,13 +178,6 @@ class symbolic_exploration_algorithm
     pbes_expression exists(const data::variable_list& d, const pbes_expression& x)
     {
       pbes_expression body = x;
-      if (m_clustered)
-      {
-        if (is_conjunctive(body))
-        {
-          body = make_cluster(body);
-        }
-      }
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -184,30 +189,22 @@ class symbolic_exploration_algorithm
       }
     }
 
-    /// \brief Concatenates two variable lists
-    /// \param x A variable list
-    /// \param y A variable list
-    /// \return The concatenation of x and y
-    data::variable_list concat(const data::variable_list& x, const data::variable_list& y)
+    pbes_expression expr_or(const pbes_expression& x, const data::variable_list& v = data::variable_list())
     {
-      std::vector<data::variable> v(x.begin(), x.end());
-      v.insert(v.end(), y.begin(), y.end());
-      return data::variable_list(v.begin(), v.end());
-    }
-
-    pbes_expression expr_or(const pbes_expression& x)
-    {
+      push_variables(v);
       pbes_expression result;
       // N.B. The case statement below is order dependent!
       if (is_forall(x))
       {
         pbes_system::forall y = x;
-        result = forall(y.variables(), expr_or(y.body()));
+mCRL2log(log::debug) << "\n<forall> " << pbes_system::pp(x) << std::endl;
+        result = forall(y.variables(), expr_or(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
         pbes_system::exists y = x;
-        result = exists(y.variables(), expr_or(y.body()));
+mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
+        result = exists(y.variables(), expr_or(y.body(), y.variables()));
       }
       else if (is_propositional_variable_instantiation(x))
       {
@@ -218,35 +215,39 @@ class symbolic_exploration_algorithm
         pbes_system::or_ y = x;
         result = or_(expr_or(y.left()), expr_or(y.right()));
       }
-      else if (is_simple_expression(x))
-      {
-        result = x;
-      }
       else if (is_and(x))
       {
         result = false_();
       }
       else
       {
-        throw mcrl2::runtime_error("unknown pbes expression encountered in expr_or: " + pbes_system::pp(x));
+        result = x;
       }
+      //else
+      //{
+      //  throw mcrl2::runtime_error("unknown pbes expression encountered in expr_or: " + pbes_system::pp(x));
+      //}
       mCRL2log(log::debug) << "\n<expr_or> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      pop_variables(v);
       return result;
     }
 
-    pbes_expression expr_and(const pbes_expression& x)
+    pbes_expression expr_and(const pbes_expression& x, const data::variable_list& v = data::variable_list())
     {
+      push_variables(v);
       pbes_expression result;
       // N.B. The case statement below is order dependent!
       if (is_forall(x))
       {
         pbes_system::forall y = x;
-        result = forall(y.variables(), expr_and(y.body()));
+mCRL2log(log::debug) << "\n<forall> " << pbes_system::pp(x) << std::endl;
+        result = forall(y.variables(), expr_and(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
         pbes_system::exists y = x;
-        result = exists(y.variables(), expr_and(y.body()));
+mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
+        result = exists(y.variables(), expr_and(y.body(), y.variables()));
       }
       else if (is_propositional_variable_instantiation(x))
       {
@@ -257,19 +258,20 @@ class symbolic_exploration_algorithm
         pbes_system::and_ y = x;
         result = and_(expr_and(y.left()), expr_and(y.right()));
       }
-      else if (is_simple_expression(x))
-      {
-        result = x;
-      }
       else if (is_or(x))
       {
         result = true_();
       }
       else
       {
-        throw mcrl2::runtime_error("unknown pbes expression encountered in expr_and: " + pbes_system::pp(x));
+        result = x;
       }
+      //else
+      //{
+      //  throw mcrl2::runtime_error("unknown pbes expression encountered in expr_and: " + pbes_system::pp(x));
+      //}
       mCRL2log(log::debug) << "\n<expr_and> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      pop_variables(v);
       return result;
     }
 
@@ -287,7 +289,7 @@ class symbolic_exploration_algorithm
       }
       else if (is_and(x))
       {
-        result = and_(expr_and(x), F_and(x));
+        result = and_(expr_and(x), make_cluster(F_and(x)));
       }
       else if (is_or(x))
       {
@@ -297,13 +299,20 @@ class symbolic_exploration_algorithm
       }
       else if (is_forall(x))
       {
-        result = and_(expr_and(x), F_and(x));
+        result = and_(expr_and(x), make_cluster(F_and(x)));
       }
       else if (is_exists(x))
       {
         data::variable_list d = pbes_system::exists(x).variables();
         pbes_expression phi = pbes_system::exists(x).body();
-        result = exists(d, and_(expr_and(phi), F(phi)));
+        pbes_expression Fphi = F(phi, d);
+        if (is_conjunctive(Fphi))
+        {
+          push_variables(d);
+          Fphi = make_cluster(Fphi);
+          pop_variables(d);
+        }
+        result = exists(d, and_(expr_and(phi, d), Fphi));
       }
       else
       {
@@ -334,17 +343,24 @@ class symbolic_exploration_algorithm
       }
       else if (is_or(x))
       {
-        result = imp(not_(expr_or(x)), F_or(x));
+        result = imp(not_(expr_or(x)), make_cluster(F_or(x)));
       }
       else if (is_exists(x))
       {
-        result = imp(not_(expr_or(x)), F_or(x));
+        result = imp(not_(expr_or(x)), make_cluster(F_or(x)));
       }
       else if (is_forall(x))
       {
         data::variable_list d = pbes_system::forall(x).variables();
         pbes_expression phi = pbes_system::forall(x).body();
-        result = forall(d, imp(not_(expr_or(phi)), F(phi)));
+        pbes_expression Fphi = F(phi, d);
+        if (is_disjunctive(Fphi))
+        {
+          push_variables(d);
+          Fphi = make_cluster(Fphi);
+          pop_variables(d);
+        }
+        result = forall(d, imp(not_(expr_or(phi, d)), Fphi));
       }
       else
       {
@@ -354,8 +370,9 @@ class symbolic_exploration_algorithm
       return result;
     }
 
-    pbes_expression F(const pbes_expression& x)
+    pbes_expression F(const pbes_expression& x, const data::variable_list& v = data::variable_list())
     {
+      push_variables(v);
       pbes_expression result;
       if (is_conjunctive(x))
       {
@@ -366,6 +383,7 @@ class symbolic_exploration_algorithm
         result = F_or(x);
       }
       mCRL2log(log::debug) << "\n<F> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      pop_variables(v);
       return result;
     }
 
@@ -385,8 +403,8 @@ class symbolic_exploration_algorithm
       atermpp::vector<pbes_equation>& equations = m_pbes.equations();
       for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
       {
+        push_variables(i->variable().parameters());
         pbes_expression phi = i->formula();
-        m_parameters = i->variable().parameters();
         if (is_conjunctive(phi))
         {
           i->formula() = and_(expr_and(phi), F_and(phi));
@@ -395,6 +413,7 @@ class symbolic_exploration_algorithm
         {
           i->formula() = imp(not_(expr_or(phi)), F_or(phi));
         }
+        pop_variables(i->variable().parameters());
       }
 
       // add the cluster equations to the PBES
