@@ -20,11 +20,12 @@ call ``<BOOSTROOT>``.
      - 32bit: Visual Studio 2008 Command Prompt
      - 64bit: Visual Studio 2008 x64 Win64 Command Prompt
 
-   - In the command prompt, build *Boost* as follows::
+   - In the command prompt, build *Boost* as follows (to install to C:\Boost) ::
 
        cd <BOOSTROOT> 
        bootstrap.bat 
-       bjam address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex 
+       bjam address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
+       bjam install address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
 
    .. warning::
 
