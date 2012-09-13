@@ -193,20 +193,7 @@ class symbolic_exploration_algorithm
     {
       push_variables(v);
       pbes_expression result;
-      // N.B. The case statement below is order dependent!
-      if (is_forall(x))
-      {
-        pbes_system::forall y = x;
-mCRL2log(log::debug) << "\n<forall> " << pbes_system::pp(x) << std::endl;
-        result = forall(y.variables(), expr_or(y.body(), y.variables()));
-      }
-      else if (is_exists(x))
-      {
-        pbes_system::exists y = x;
-mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
-        result = exists(y.variables(), expr_or(y.body(), y.variables()));
-      }
-      else if (is_propositional_variable_instantiation(x))
+      if (is_propositional_variable_instantiation(x))
       {
         result = false_();
       }
@@ -215,9 +202,15 @@ mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
         pbes_system::or_ y = x;
         result = or_(expr_or(y.left()), expr_or(y.right()));
       }
-      else if (is_and(x))
+      else if (is_forall(x))
       {
-        result = false_();
+        pbes_system::forall y = x;
+        result = forall(y.variables(), expr_or(y.body(), y.variables()));
+      }
+      else if (is_exists(x))
+      {
+        pbes_system::exists y = x;
+        result = exists(y.variables(), expr_or(y.body(), y.variables()));
       }
       else
       {
@@ -236,20 +229,7 @@ mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
     {
       push_variables(v);
       pbes_expression result;
-      // N.B. The case statement below is order dependent!
-      if (is_forall(x))
-      {
-        pbes_system::forall y = x;
-mCRL2log(log::debug) << "\n<forall> " << pbes_system::pp(x) << std::endl;
-        result = forall(y.variables(), expr_and(y.body(), y.variables()));
-      }
-      else if (is_exists(x))
-      {
-        pbes_system::exists y = x;
-mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
-        result = exists(y.variables(), expr_and(y.body(), y.variables()));
-      }
-      else if (is_propositional_variable_instantiation(x))
+      if (is_propositional_variable_instantiation(x))
       {
         result = true_();
       }
@@ -258,9 +238,15 @@ mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
         pbes_system::and_ y = x;
         result = and_(expr_and(y.left()), expr_and(y.right()));
       }
-      else if (is_or(x))
+      else if (is_forall(x))
       {
-        result = true_();
+        pbes_system::forall y = x;
+        result = forall(y.variables(), expr_and(y.body(), y.variables()));
+      }
+      else if (is_exists(x))
+      {
+        pbes_system::exists y = x;
+        result = exists(y.variables(), expr_and(y.body(), y.variables()));
       }
       else
       {
@@ -278,7 +264,6 @@ mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
     pbes_expression F_or(const pbes_expression& x)
     {
       pbes_expression result;
-      // N.B. The case statement below is order dependent!
       if (is_simple_expression(x))
       {
         result = false_();
@@ -325,8 +310,6 @@ mCRL2log(log::debug) << "\n<exists> " << pbes_system::pp(x) << std::endl;
     pbes_expression F_and(const pbes_expression& x)
     {
       pbes_expression result;
-
-      // N.B. The case statement below is order dependent!
       if (is_simple_expression(x))
       {
         result = true_();
