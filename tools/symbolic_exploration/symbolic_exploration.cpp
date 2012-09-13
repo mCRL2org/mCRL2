@@ -33,7 +33,7 @@ class symbolic_exploration_tool: public input_output_tool
     {
       super::parse_options(parser);
       m_optimized = parser.option_argument_as<bool>("optimize");
-      m_clustered = parser.options.count("compute-conditions") > 0;
+      m_clustered = parser.options.count("clustered") > 0;
     }
 
     void add_options(interface_description& desc)

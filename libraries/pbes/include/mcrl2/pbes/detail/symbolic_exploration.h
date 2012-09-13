@@ -34,6 +34,7 @@ class symbolic_exploration_algorithm
     data::set_identifier_generator m_generator; // used for generating cluster variables
     bool m_optimized;
     bool m_clustered;
+    atermpp::vector<pbes_equation> m_cluster_equations;
 
     bool is_disjunctive(const pbes_expression& x) const
     {
@@ -49,8 +50,8 @@ class symbolic_exploration_algorithm
     {
       core::identifier_string X = m_generator("Cluster");
       pbes_equation eqn(fixpoint_symbol::mu(), propositional_variable(X, m_parameters), x);
-      m_pbes.equations().push_back(eqn);
-      mCRL2log(log::debug) << "adding cluster " << pbes_system::pp(eqn);
+      m_cluster_equations.push_back(eqn);
+      mCRL2log(log::debug) << "\nadding cluster " << pbes_system::pp(eqn);
       return propositional_variable_instantiation(X, m_parameters);
     }
 
@@ -395,6 +396,9 @@ class symbolic_exploration_algorithm
           i->formula() = imp(not_(expr_or(phi)), F_or(phi));
         }
       }
+
+      // add the cluster equations to the PBES
+      equations.insert(equations.end(), m_cluster_equations.begin(), m_cluster_equations.end());
     }
 };
 
