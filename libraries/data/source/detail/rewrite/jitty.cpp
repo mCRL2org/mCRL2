@@ -69,15 +69,12 @@ static function_symbol get_function_symbol_of_head(const data_expression t)
   return get_function_symbol_of_head(application(t).head());
 }
 
-
-
-static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewriter)
+ATermList RewriterJitty::create_strategy(data_equation_list rules1) //, RewriterJitty *rewriter)
 {
-
   size_t max_arity = 0;
   for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l)
   {
-    const size_t current_arity=rewriter->toRewriteFormat(l->lhs()).size();
+    const size_t current_arity=toRewriteFormat(l->lhs()).size();
     if (current_arity > max_arity + 1)
     {
       max_arity = current_arity-1;
@@ -89,9 +86,9 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
     rules = ATinsert(rules,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
-                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->condition()),
-                                         (ATerm) (ATermAppl)rewriter->toRewriteFormat(j->lhs()),
-                                         (ATerm)(ATermAppl)rewriter->toRewriteFormat(j->rhs())));
+                                         (ATerm)(ATermAppl)toRewriteFormat(j->condition()),
+                                         (ATerm) (ATermAppl)toRewriteFormat(j->lhs()),
+                                         (ATerm)(ATermAppl)toRewriteFormat(j->rhs())));
   }
   rules = ATreverse(rules);
 
@@ -202,7 +199,13 @@ static ATermList create_strategy(data_equation_list rules1, RewriterJitty *rewri
       {
         if (ATisEmpty(ATLgetFirst(ATLgetFirst(m))))
         {
-          strat = ATinsert(strat, ATgetFirst(ATgetNext(ATLgetFirst(m))));
+          ATerm rule=ATgetFirst(ATgetNext(ATLgetFirst(m)));
+          strat = ATinsert(strat, rule);
+          size_t len =ATgetLength(ATLgetFirst((ATermList)rule));
+          if (len>MAX_LEN) 
+          {
+            MAX_LEN=len;
+          }
         }
         else
         {
@@ -272,6 +275,7 @@ RewriterJitty::RewriterJitty(
 {
   m_data_specification_for_enumeration = data_spec;
 
+  MAX_LEN=0;
   max_vars = 0;
   need_rebuild = false;
 
@@ -322,7 +326,7 @@ RewriterJitty::RewriterJitty(
     }
     else
     {
-      jitty_strat[i.value()] = create_strategy(reverse(it->second), this);
+      jitty_strat[i.value()] = create_strategy(reverse(it->second));
     }
   }
 }
@@ -679,6 +683,9 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   make_jitty_strat_sufficiently_larger(op.value());
   if ((strat = jitty_strat[op.value()]) != NULL)
   {
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,variable, MAX_LEN);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,atermpp::aterm, MAX_LEN);
+
     for (; !ATisEmpty(strat); strat=ATgetNext(strat))
     {
       if (ATisInt(ATgetFirst(strat)))
@@ -705,9 +712,10 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         }
 
         size_t max_len = ATgetLength(ATLgetFirst(rule));
+        assert(max_len<=MAX_LEN);
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,variable, max_len);
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,atermpp::aterm, max_len);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,variable, max_len);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,atermpp::aterm, max_len);
 
         size_t len = 0;
         bool matches = true;
@@ -788,7 +796,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
       make_jitty_strat_sufficiently_larger(j);
       if (jitty_strat[j] == NULL)
       {
-        jitty_strat[j] = create_strategy(opids->second, this);
+        jitty_strat[j] = create_strategy(opids->second);
       }
     }
     need_rebuild = false;
