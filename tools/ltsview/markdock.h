@@ -6,12 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MARKDIALOG_H
-#define MARKDIALOG_H
+#ifndef MARKDOCK_H
+#define MARKDOCK_H
 
-#include "ui_markdialog.h"
+#include "ui_markdock.h"
 
-#include <QDialog>
 #include <QMap>
 #include <QString>
 
@@ -24,12 +23,12 @@ class MarkListItem : public QListWidgetItem
     MarkRuleIndex index;
 };
 
-class MarkDialog : public QDialog
+class MarkDock : public QWidget
 {
   Q_OBJECT
 
   public:
-    MarkDialog(QWidget *parent, MarkManager *markManager);
+    MarkDock(QWidget *parent, MarkManager *markManager);
 
   protected slots:
     void loadLts();
@@ -53,7 +52,7 @@ class MarkDialog : public QDialog
     QString markRuleDescription(MarkRuleIndex index) const;
 
   private:
-    Ui::MarkDialog m_ui;
+    Ui::MarkDock m_ui;
     MarkManager *m_markManager;
     QVector<QString> m_actions;
     QList<QColor> m_markRuleColors;

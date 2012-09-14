@@ -6,20 +6,87 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "mcrl2/utilities/atermthread.h"
 #include "mcrl2/utilities/logger.h"
 #include "ltsmanager.h"
 #include "simulation.h"
 #include "state.h"
 #include "transition.h"
+#include <QEventLoop>
+
+void LtsManagerHelper::loadLts(QString filename)
+{
+  emit loadingLts();
+
+  m_lts = 0;
+
+  LTS *lts = new LTS();
+  try
+  {
+    if (!lts->readFromFile(filename.toStdString()))
+    {
+      delete lts;
+      mCRL2log(mcrl2::log::error) << "Error loading file: " << filename.toStdString();
+      emit finished();
+      return;
+    }
+  }
+  catch (mcrl2::runtime_error e)
+  {
+    delete lts;
+    mCRL2log(mcrl2::log::error) << e.what();
+    emit finished();
+    return;
+  }
+
+  clusterStates(lts);
+}
+
+void LtsManagerHelper::clusterStates(LTS *lts)
+{
+  bool cyclic = m_settings->stateRankStyleCyclic.value();
+  emit rankingStates();
+  lts->rankStates(cyclic);
+  emit clusteringStates();
+  lts->clusterStates(cyclic);
+  emit computingClusterInfo();
+  lts->computeClusterInfo();
+  positionClusters(lts);
+}
+
+void LtsManagerHelper::positionClusters(LTS *lts)
+{
+  emit positioningClusters();
+  lts->positionClusters(m_settings->fsmStyle.value());
+  positionStates(lts);
+}
+
+void LtsManagerHelper::positionStates(LTS *lts)
+{
+  emit positioningStates();
+  lts->positionStates(m_settings->statePosStyleMultiPass.value());
+  m_lts = lts;
+  emit finished();
+}
 
 LtsManager::LtsManager(QObject *parent, Settings *settings):
   QObject(parent),
+  m_helper(settings),
   m_settings(settings),
   m_lts(0),
   m_simulation(0),
   m_selectedState(0),
   m_selectedCluster(0)
 {
+  m_helper.moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+
+  connect(&m_helper, SIGNAL(loadingLts()), this, SIGNAL(loadingLts()));
+  connect(&m_helper, SIGNAL(rankingStates()), this, SIGNAL(rankingStates()));
+  connect(&m_helper, SIGNAL(clusteringStates()), this, SIGNAL(clusteringStates()));
+  connect(&m_helper, SIGNAL(computingClusterInfo()), this, SIGNAL(computingClusterInfo()));
+  connect(&m_helper, SIGNAL(positioningClusters()), this, SIGNAL(positioningClusters()));
+  connect(&m_helper, SIGNAL(positioningStates()), this, SIGNAL(positioningStates()));
+
   connect(&settings->stateRankStyleCyclic, SIGNAL(changed(bool)), this, SLOT(clusterStates()));
   connect(&settings->fsmStyle, SIGNAL(changed(bool)), this, SLOT(positionClusters()));
   connect(&settings->statePosStyleMultiPass, SIGNAL(changed(bool)), this, SLOT(positionStates()));
@@ -63,28 +130,21 @@ QList<Transition *> LtsManager::simulationAvailableTransitions() const
 
 bool LtsManager::openLts(QString filename)
 {
-  emit loadingLts();
+  emit startStructuring();
 
-  LTS *lts = new LTS();
-  try
+  QEventLoop loop;
+  connect(&m_helper, SIGNAL(finished()), &loop, SLOT(quit()));
+  QMetaObject::invokeMethod(&m_helper, "loadLts", Q_ARG(QString, filename));
+  loop.exec();
+
+  LTS *lts = m_helper.lts();
+  if (!lts)
   {
-    if (!lts->readFromFile(filename.toStdString()))
-    {
-      delete lts;
-      emit errorLoadingLts();
-      mCRL2log(mcrl2::log::error) << "Error loading file: " << filename.toStdString();
-      return false;
-    }
-  }
-  catch (mcrl2::runtime_error e)
-  {
-    delete lts;
-    emit errorLoadingLts();
-    mCRL2log(mcrl2::log::error) << e.what();
+    emit stopStructuring();
     return false;
   }
 
-  clusterStates(lts);
+  emit ltsStructured();
 
   if (m_simulation)
   {
@@ -107,6 +167,7 @@ bool LtsManager::openLts(QString filename)
   emit statePositionsChanged();
   emit simulationChanged();
 
+  emit stopStructuring();
   return true;
 }
 
@@ -200,10 +261,21 @@ void LtsManager::clusterStates()
     {
       // do nothing
     }
-    clusterStates(m_lts);
+
+    emit startStructuring();
+
+    QEventLoop loop;
+    connect(&m_helper, SIGNAL(finished()), &loop, SLOT(quit()));
+    QMetaObject::invokeMethod(&m_helper, "clusterStates", Q_ARG(LTS *, m_lts));
+    loop.exec();
+
+    emit ltsStructured();
+
     emit clustersChanged();
     emit clusterPositionsChanged();
     emit statePositionsChanged();
+
+    emit stopStructuring();
   }
 }
 
@@ -211,9 +283,19 @@ void LtsManager::positionClusters()
 {
   if (m_lts)
   {
-    positionClusters(m_lts);
+    emit startStructuring();
+
+    QEventLoop loop;
+    connect(&m_helper, SIGNAL(finished()), &loop, SLOT(quit()));
+    QMetaObject::invokeMethod(&m_helper, "positionClusters", Q_ARG(LTS *, m_lts));
+    loop.exec();
+
+    emit ltsStructured();
+
     emit clusterPositionsChanged();
     emit statePositionsChanged();
+
+    emit stopStructuring();
   }
 }
 
@@ -221,35 +303,19 @@ void LtsManager::positionStates()
 {
   if (m_lts)
   {
-    positionStates(m_lts);
+    emit startStructuring();
+
+    QEventLoop loop;
+    connect(&m_helper, SIGNAL(finished()), &loop, SLOT(quit()));
+    QMetaObject::invokeMethod(&m_helper, "positionStates", Q_ARG(LTS *, m_lts));
+    loop.exec();
+
+    emit ltsStructured();
+
     emit statePositionsChanged();
+
+    emit stopStructuring();
   }
-}
-
-void LtsManager::clusterStates(LTS *lts)
-{
-  bool cyclic = m_settings->stateRankStyleCyclic.value();
-  emit rankingStates();
-  lts->rankStates(cyclic);
-  emit clusteringStates();
-  lts->clusterStates(cyclic);
-  emit computingClusterInfo();
-  lts->computeClusterInfo();
-  positionClusters(lts);
-}
-
-void LtsManager::positionClusters(LTS *lts)
-{
-  emit positioningClusters();
-  lts->positionClusters(m_settings->fsmStyle.value());
-  positionStates(lts);
-}
-
-void LtsManager::positionStates(LTS *lts)
-{
-  emit positioningStates();
-  lts->positionStates(m_settings->statePosStyleMultiPass.value());
-  emit ltsStructured();
 }
 
 void LtsManager::updateSimulationHistory()

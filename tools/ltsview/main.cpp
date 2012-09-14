@@ -40,6 +40,8 @@ class ltsview_tool : public ltsview_base
 
     bool run()
     {
+      qRegisterMetaType<LTS *>("LTS *");
+
       MainWindow *window = new MainWindow();
 
       if (!m_input_filename.empty())
@@ -53,7 +55,5 @@ class ltsview_tool : public ltsview_base
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return ltsview_tool().execute(argc, argv);
 }

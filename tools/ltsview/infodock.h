@@ -6,20 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef INFODIALOG_H
-#define INFODIALOG_H
+#ifndef INFODOCK_H
+#define INFODOCK_H
 
-#include <QDialog>
-#include "ui_infodialog.h"
+#include "ui_infodock.h"
 #include "ltsmanager.h"
 #include "markmanager.h"
 
-class InfoDialog : public QDialog
+class InfoDock : public QWidget
 {
   Q_OBJECT
 
   public:
-    InfoDialog(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager);
+    InfoDock(QWidget *parent, LtsManager *ltsManager, MarkManager *markManager);
 
   protected slots:
     void ltsChanged();
@@ -27,7 +26,7 @@ class InfoDialog : public QDialog
     void selectionChanged();
 
   private:
-    Ui::InfoDialog m_ui;
+    Ui::InfoDock m_ui;
     LtsManager *m_ltsManager;
     MarkManager *m_markManager;
 };

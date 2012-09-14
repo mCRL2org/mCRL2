@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "simdialog.h"
+#include "simdock.h"
 #include <QList>
 
-SimDialog::SimDialog(QWidget *parent, LtsManager *ltsManager)
-  : QDialog(parent),
+SimDock::SimDock(QWidget *parent, LtsManager *ltsManager)
+  : QWidget(parent),
     m_ltsManager(ltsManager)
 {
   m_ui.setupUi(this);
@@ -36,7 +36,7 @@ static inline QTableWidgetItem *item()
   return item;
 }
 
-void SimDialog::changed()
+void SimDock::changed()
 {
   Simulation *simulation = m_ltsManager->simulation();
   if (!simulation)
@@ -91,7 +91,7 @@ void SimDialog::changed()
   }
 }
 
-void SimDialog::selectionChanged()
+void SimDock::selectionChanged()
 {
   if (m_ltsManager->simulation() && m_ltsManager->simulation()->isStarted())
   {
@@ -111,28 +111,28 @@ void SimDialog::selectionChanged()
   }
 }
 
-void SimDialog::start()
+void SimDock::start()
 {
   m_ltsManager->simulation()->start();
 }
 
-void SimDialog::stop()
+void SimDock::stop()
 {
   m_ltsManager->simulation()->stop();
 }
 
-void SimDialog::backtrace()
+void SimDock::backtrace()
 {
   m_ltsManager->simulation()->traceback();
 }
 
-void SimDialog::reset()
+void SimDock::reset()
 {
   m_ltsManager->simulation()->stop();
   m_ltsManager->simulation()->start();
 }
 
-void SimDialog::trigger()
+void SimDock::trigger()
 {
   Transition *transition = m_ltsManager->simulation()->currentTransition();
   if (!transition)
@@ -149,12 +149,12 @@ void SimDialog::trigger()
   }
 }
 
-void SimDialog::undo()
+void SimDock::undo()
 {
   m_ltsManager->simulation()->undo();
 }
 
-void SimDialog::select()
+void SimDock::select()
 {
   QList<QTableWidgetSelectionRange> selection = m_ui.transitionTable->selectedRanges();
   if (selection.size() > 0)

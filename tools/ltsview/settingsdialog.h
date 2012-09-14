@@ -30,22 +30,6 @@ class ColorButtonHandler : public QObject
     Settings::SettingColor *m_setting;
 };
 
-class ComboboxHandler : public QObject
-{
-  Q_OBJECT
-
-  public:
-    ComboboxHandler(QComboBox *combobox, Settings::SettingBool &setting);
-
-  protected slots:
-    void stateChanged(int state);
-    void setState();
-
-  private:
-    QComboBox *m_combobox;
-    Settings::SettingBool *m_setting;
-};
-
 class SettingsDialog : public QDialog
 {
   Q_OBJECT
@@ -53,18 +37,9 @@ class SettingsDialog : public QDialog
   public:
     SettingsDialog(QWidget *parent, Settings *settings);
 
-  private slots:
-    void stateSizeChanged(int value);
-    void setStateSize(float value);
-    void clusterHeightChanged(int value);
-    void setClusterHeight(float value);
-    void accuracyChanged(int value);
-    void setAccuracy(int value);
-
   private:
     void setupSpinbox(QSpinBox *spinbox, Settings::SettingInt &setting);
     void setupCheckbox(QCheckBox *checkbox, Settings::SettingBool &setting);
-    void setupCombobox(QComboBox *combobox, Settings::SettingBool &setting);
 
   private:
     Ui::SettingsDialog m_ui;

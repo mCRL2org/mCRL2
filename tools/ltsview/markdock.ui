@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MarkDialog</class>
- <widget class="QDialog" name="MarkDialog">
+ <class>MarkDock</class>
+ <widget class="QWidget" name="MarkDock">
   <property name="geometry">
    <rect>
     <x>0</x>

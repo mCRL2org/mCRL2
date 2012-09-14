@@ -6,23 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef SIMDIALOG_H
-#define SIMDIALOG_H
+#ifndef SIMDOCK_H
+#define SIMDOCK_H
 
-#include <QDialog>
-#include "ui_simdialog.h"
+#include "ui_simdock.h"
 
 #include "ltsmanager.h"
 #include "simulation.h"
 #include "state.h"
 #include "transition.h"
 
-class SimDialog : public QDialog
+class SimDock : public QWidget
 {
   Q_OBJECT
 
   public:
-    SimDialog(QWidget *parent, LtsManager *ltsManager);
+    SimDock(QWidget *parent, LtsManager *ltsManager);
 
   public slots:
     void changed();
@@ -38,7 +37,7 @@ class SimDialog : public QDialog
     void select();
 
   private:
-    Ui::SimDialog m_ui;
+    Ui::SimDock m_ui;
     LtsManager *m_ltsManager;
 };
 
