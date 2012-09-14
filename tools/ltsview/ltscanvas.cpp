@@ -468,13 +468,13 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint *selectionBuffer, GLint it
   // (buffer[5]: The second identifier of the object picked.)
 
   bool stateFound = false;
-  float minimumStateDepth;
-  int stateID;
+  float minimumStateDepth = -1;
+  int stateID = -1;
 
   float clusterFound = false;
-  float minimumClusterDepth;
-  int rank;
-  int position;
+  float minimumClusterDepth = -1;
+  int rank = -1;
+  int position = -1;
 
   for (GLint i = 0; i < items; i++)
   {
