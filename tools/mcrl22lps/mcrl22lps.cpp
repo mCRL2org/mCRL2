@@ -168,7 +168,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       //check for dangerous and illegal option combinations
       if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)
       {
-        parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
+        throw parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
       }
 
       m_linearisation_options.infilename       = input_filename();

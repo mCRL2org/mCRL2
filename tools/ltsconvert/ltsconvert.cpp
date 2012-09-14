@@ -353,12 +353,12 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.determinise && (tool_options.equivalence != lts_eq_none))
       {
-        parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+        throw parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
       }
 
       if (2 < parser.arguments.size())
       {
-        parser.error("too many file arguments");
+        throw parser.error("too many file arguments");
       }
       else
       {

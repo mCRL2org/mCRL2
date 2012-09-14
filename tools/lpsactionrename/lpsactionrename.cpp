@@ -104,7 +104,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         }
         else
         {
-          parser.error("option -p has illegal argument '" + phase + "'");
+          throw parser.error("option -p has illegal argument '" + phase + "'");
         }
       }
 

@@ -121,13 +121,13 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("in"))
         {
-          parser.error("multiple input formats specified; can only use one");
+          throw parser.error("multiple input formats specified; can only use one");
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)
         {
-          parser.error("option -i/--in has illegal argument '" +
+          throw parser.error("option -i/--in has illegal argument '" +
                        parser.option_argument("in") + "'");
         }
       }
