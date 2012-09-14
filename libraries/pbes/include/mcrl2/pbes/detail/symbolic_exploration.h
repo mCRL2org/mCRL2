@@ -390,11 +390,11 @@ class symbolic_exploration_algorithm
         pbes_expression phi = i->formula();
         if (is_conjunctive(phi))
         {
-          i->formula() = and_(expr_and(phi), F_and(phi));
+          i->formula() = and_(expr_and(phi), make_cluster(F_and(phi)));
         }
         else
         {
-          i->formula() = imp(not_(expr_or(phi)), F_or(phi));
+          i->formula() = imp(not_(expr_or(phi)), make_cluster(F_or(phi)));
         }
         pop_variables(i->variable().parameters());
       }
