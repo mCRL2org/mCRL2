@@ -68,8 +68,6 @@ void Simulation::updateTrace(unsigned int firstChangedState)
     }
     m_trace += position;
   }
-
-  emit traceChanged(firstChangedState);
 }
 
 Simulation::State Simulation::renderState(const mcrl2::lps::state &state)
@@ -87,6 +85,28 @@ Simulation::State Simulation::renderState(const mcrl2::lps::state &state)
     }
   }
   return output;
+}
+
+void Simulation::select(unsigned int transitionNumber, QSemaphore *semaphore)
+{
+  m_simulation->select(transitionNumber);
+  updateTrace(m_trace.size() - 1);
+  if (semaphore)
+  {
+    semaphore->release();
+  }
+  emit finished();
+}
+
+void Simulation::enable_tau_prioritization(bool enable, QSemaphore *semaphore, QString action)
+{
+  m_simulation->enable_tau_prioritization(enable, action.toStdString());
+  updateTrace(0);
+  if (semaphore)
+  {
+    semaphore->release();
+  }
+  emit finished();
 }
 
 void Simulation::load(QString filename)

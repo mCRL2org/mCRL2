@@ -8,14 +8,16 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QEventLoop>
 #include <QInputDialog>
 #include <QMetaObject>
 #include <QUrl>
 #include <QSettings>
 #include <climits>
 
-MainWindow::MainWindow()
-  : m_simulation(0),
+MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy)
+  : m_strategy(strategy),
+    m_simulation(0),
     m_animationTimer(new QTimer(this)),
     m_fileDialog("", this)
 {
@@ -32,19 +34,27 @@ MainWindow::MainWindow()
   connect(m_ui.actionRandomPlay, SIGNAL(triggered()), this, SLOT(randomPlay()));
   connect(m_ui.actionStop, SIGNAL(triggered()), this, SLOT(stopPlay()));
   connect(m_ui.actionSetPlayDelay, SIGNAL(triggered()), this, SLOT(setPlayDelay()));
+  connect(m_ui.actionEnableTauPrioritisation, SIGNAL(toggled(bool)), this, SLOT(setTauPrioritization()));
+  connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockWidget, SLOT(setVisible(bool)));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
   connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
   connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(selectTransition(int)));
 
-  connect(m_ui.dockWidget, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidget->widget(), SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
 
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(false);
+
   QSettings settings("mCRL2", "LpsXSim");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+
+  m_ui.actionOutput->setChecked(!m_ui.dockWidget->isHidden());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -72,6 +82,8 @@ QTableWidgetItem *item()
 
 void MainWindow::openSpecification()
 {
+  assert(m_ui.traceTable->isEnabled());
+
   QString filename = m_fileDialog.getOpenFileName("Open Process Specification", "Process specifications (*.lps)");
   if (filename.isNull())
   {
@@ -88,6 +100,8 @@ void MainWindow::loadTrace()
     return;
   }
 
+  assert(m_ui.traceTable->isEnabled());
+
   QString filename = m_fileDialog.getOpenFileName("Open Trace", "Traces (*.trc)");
   if (filename.isNull())
   {
@@ -96,6 +110,9 @@ void MainWindow::loadTrace()
 
   m_selectedState = 0;
   QMetaObject::invokeMethod(m_simulation, "load", Qt::BlockingQueuedConnection, Q_ARG(QString, filename));
+
+  m_trace = m_simulation->trace();
+  updateSimulation();
 }
 
 void MainWindow::saveTrace()
@@ -104,6 +121,8 @@ void MainWindow::saveTrace()
   {
     return;
   }
+
+  assert(m_ui.traceTable->isEnabled());
 
   QString filename = m_fileDialog.getSaveFileName("Save Trace", "Traces (*.trc)");
   if (filename.isNull())
@@ -116,19 +135,41 @@ void MainWindow::saveTrace()
 
 void MainWindow::playTrace()
 {
+  if (!m_simulation)
+  {
+    return;
+  }
+
   m_randomAnimation = false;
   m_animationTimer->start();
+
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(true);
 }
 
 void MainWindow::randomPlay()
 {
+  if (!m_simulation)
+  {
+    return;
+  }
+
   m_randomAnimation = true;
   m_animationTimer->start();
+
+  m_ui.actionPlayTrace->setEnabled(false);
+  m_ui.actionRandomPlay->setEnabled(false);
+  m_ui.actionStop->setEnabled(true);
 }
 
 void MainWindow::stopPlay()
 {
   m_animationTimer->stop();
+
+  m_ui.actionPlayTrace->setEnabled(true);
+  m_ui.actionRandomPlay->setEnabled(true);
+  m_ui.actionStop->setEnabled(false);
 }
 
 void MainWindow::setPlayDelay()
@@ -144,8 +185,6 @@ void MainWindow::setPlayDelay()
 void MainWindow::updateSimulation()
 {
   assert(m_simulation);
-
-  m_trace = m_simulation->trace();
 
   int selectedState = m_selectedState < m_trace.size() ? m_selectedState : m_trace.size() - 1;
 
@@ -213,9 +252,27 @@ void MainWindow::stateSelected()
   }
 }
 
+void MainWindow::setTauPrioritization()
+{
+  assert(m_ui.traceTable->isEnabled());
+
+  if (m_simulation)
+  {
+    QEventLoop loop;
+    connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
+    QSemaphore semaphore;
+    QMetaObject::invokeMethod(m_simulation, "enable_tau_prioritization", Qt::QueuedConnection, Q_ARG(bool, m_ui.actionEnableTauPrioritisation->isChecked()), Q_ARG(QSemaphore *, &semaphore));
+
+    waitForResponse(&loop, &semaphore);
+
+    m_trace = m_simulation->trace();
+    updateSimulation();
+  }
+}
+
 void MainWindow::openSpecification(QString filename)
 {
-  Simulation *simulation = new Simulation(filename, mcrl2::data::rewrite_strategy());
+  Simulation *simulation = new Simulation(filename, m_strategy);
   if (!simulation->initialized())
   {
     simulation->deleteLater();
@@ -240,8 +297,14 @@ void MainWindow::openSpecification(QString filename)
     m_ui.stateTable->item(i, 0)->setText(parameters[i]);
   }
 
-  connect(m_simulation, SIGNAL(traceChanged(unsigned int)), this, SLOT(updateSimulation()));
+  setTauPrioritization();
+
+  m_trace = m_simulation->trace();
   updateSimulation();
+
+  m_ui.actionPlayTrace->setEnabled(true);
+  m_ui.actionRandomPlay->setEnabled(true);
+  m_ui.actionStop->setEnabled(false);
 }
 
 void MainWindow::selectState(int state)
@@ -250,6 +313,8 @@ void MainWindow::selectState(int state)
   {
     return;
   }
+
+  assert(m_ui.traceTable->isEnabled());
 
   if (state != m_selectedState)
   {
@@ -265,7 +330,9 @@ void MainWindow::truncateTrace(int state)
     return;
   }
 
-  QMetaObject::invokeMethod(m_simulation, "reset", Q_ARG(unsigned int, state));
+  assert(m_ui.traceTable->isEnabled());
+
+  reset(state);
 }
 
 void MainWindow::selectTransition(int transition)
@@ -275,15 +342,25 @@ void MainWindow::selectTransition(int transition)
     return;
   }
 
-  QMetaObject::invokeMethod(m_simulation, "reset", Q_ARG(unsigned int, m_selectedState));
-  QMetaObject::invokeMethod(m_simulation, "select", Q_ARG(unsigned int, transition));
+  assert(m_ui.traceTable->isEnabled());
+
+  reset(m_selectedState);
   m_selectedState++;
+  select(transition);
+  m_ui.traceTable->scrollToItem(m_ui.traceTable->item(m_selectedState, 1));
 }
 
 void MainWindow::animationStep()
 {
   if (!m_simulation)
   {
+    return;
+  }
+
+  if (!m_ui.traceTable->isEnabled())
+  {
+    m_animationTimer->stop();
+    m_animationDisabled = true;
     return;
   }
 
@@ -294,7 +371,17 @@ void MainWindow::animationStep()
       m_selectedState = m_trace.size() - 1;
     }
 
-    selectTransition(qrand() % m_trace[m_selectedState].transitions.size());
+    if (m_trace.last().transitions.size() == 0)
+    {
+      stopPlay();
+      return;
+    }
+
+    if (m_selectedState == m_trace.size() - 1)
+    {
+      m_selectedState++;
+    }
+    select(qrand() % m_trace.last().transitions.size());
   }
   else
   {
@@ -307,6 +394,56 @@ void MainWindow::animationStep()
     {
       stopPlay();
     }
+  }
+}
+
+void MainWindow::reset(unsigned int selectedState)
+{
+  QMetaObject::invokeMethod(m_simulation, "reset", Qt::BlockingQueuedConnection, Q_ARG(unsigned int, selectedState));
+
+  m_trace = m_simulation->trace();
+  updateSimulation();
+}
+
+void MainWindow::select(unsigned int transition)
+{
+  QEventLoop loop;
+  connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
+  QSemaphore semaphore;
+  QMetaObject::invokeMethod(m_simulation, "select", Qt::QueuedConnection, Q_ARG(unsigned int, transition), Q_ARG(QSemaphore *, &semaphore));
+
+  waitForResponse(&loop, &semaphore);
+
+  m_trace = m_simulation->trace();
+  updateSimulation();
+}
+
+void MainWindow::waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, int timeout)
+{
+  m_animationDisabled = false;
+
+  if (!semaphore->tryAcquire(1, timeout))
+  {
+    m_ui.traceTable->setEnabled(false);
+    m_ui.transitionTable->setEnabled(false);
+    m_ui.actionOpen->setEnabled(false);
+    m_ui.actionLoadTrace->setEnabled(false);
+    m_ui.actionSaveTrace->setEnabled(false);
+    m_ui.actionEnableTauPrioritisation->setEnabled(false);
+
+    eventLoop->exec();
+
+    m_ui.traceTable->setEnabled(true);
+    m_ui.transitionTable->setEnabled(true);
+    m_ui.actionOpen->setEnabled(true);
+    m_ui.actionLoadTrace->setEnabled(true);
+    m_ui.actionSaveTrace->setEnabled(true);
+    m_ui.actionEnableTauPrioritisation->setEnabled(true);
+  }
+
+  if (m_animationDisabled)
+  {
+    m_animationTimer->start();
   }
 }
 

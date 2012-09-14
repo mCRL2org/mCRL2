@@ -10,9 +10,11 @@
 #define LPSXSIM_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSemaphore>
 #include <QTimer>
 #include "ui_mainwindow.h"
 
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "simulation.h"
@@ -24,7 +26,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
   public:
-    MainWindow();
+    MainWindow(mcrl2::data::rewrite_strategy strategy);
     ~MainWindow();
 
   protected slots:
@@ -37,6 +39,7 @@ class MainWindow : public QMainWindow
     void setPlayDelay();
     void updateSimulation();
     void stateSelected();
+    void setTauPrioritization();
 
   public slots:
     void openSpecification(QString filename);
@@ -51,6 +54,9 @@ class MainWindow : public QMainWindow
     void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
 
   protected:
+    void reset(unsigned int selectedState);
+    void select(unsigned int transition);
+    void waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, int timeout = 50);
     /**
      * @brief Saves window information
      */
@@ -59,11 +65,13 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow m_ui;
+    mcrl2::data::rewrite_strategy m_strategy;
     Simulation *m_simulation;
     Simulation::Trace m_trace;
     int m_selectedState;
     QTimer *m_animationTimer;
     bool m_randomAnimation;
+    bool m_animationDisabled;
 
     mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };

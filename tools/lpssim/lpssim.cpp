@@ -109,7 +109,7 @@ class sim_tool : public rewriter_tool< input_tool >
         lps::detail::instantiate_global_variables(lps_specification);
       }
 
-      lps::simulation simulation(lps_specification);
+      lps::simulation simulation(lps_specification, rewrite_strategy());
       size_t state_index = 0;
 
 
