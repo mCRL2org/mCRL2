@@ -158,11 +158,11 @@ void explorer::bfs()
     std::vector<int> initial_state_vector = this->to_int_vector(state_length, initial_state);
     visited.insert(initial_state_vector);
     fresh.push_back(initial_state_vector);
+    // int state[state_length]; N.B. This is not portable C++
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(state, int, state_length);
     while (!fresh.empty()) {
         std::vector<int> state_vector = fresh.front();
         fresh.pop_front();
-        // int state[state_length]; N.B. This is not portable C++
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(state, int, state_length);
         from_int_vector(state_length, state_vector, state);
         ltsmin::test::pbes_state_cb f(this);
         this->next_state_all(state, f);
