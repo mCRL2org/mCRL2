@@ -4826,7 +4826,7 @@ static int gl2psPrintPDFDataStreamLength(size_t val)
 {
   return fprintf(gl2ps->stream,
                  "5 0 obj\n"
-                 "%lu\n"
+                 "%zu\n"
                  "endobj\n", val);
 }
 
@@ -5217,7 +5217,7 @@ static int gl2psPrintPDFShaderMask(int obj, int childobj)
         : strlen("/TrSh0 sh\n");
 
   offs += fprintf(gl2ps->stream,
-                  "/Length %lu\n"
+                  "/Length %zu\n"
                   ">>\n"
                   "stream\n",
                   len);
@@ -5546,7 +5546,7 @@ static void gl2psPrintPDFFooter(void)
 
   for (i = 1; i < gl2ps->objects_stack; ++i)
   {
-    fprintf(gl2ps->stream, "%010lu 00000 n \n", gl2ps->xreflist[i]);
+    fprintf(gl2ps->stream, "%010zu 00000 n \n", gl2ps->xreflist[i]);
   }
 
   fprintf(gl2ps->stream,
@@ -5556,7 +5556,7 @@ static void gl2psPrintPDFFooter(void)
           "/Info 1 0 R\n"
           "/Root 2 0 R\n"
           ">>\n"
-          "startxref\n%lu\n"
+          "startxref\n%zu\n"
           "%%%%EOF\n",
           gl2ps->objects_stack, gl2ps->xreflist[gl2ps->objects_stack]);
 

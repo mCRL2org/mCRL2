@@ -98,7 +98,7 @@ MainWindow::MainWindow():
   restoreState(settings.value("windowState").toByteArray());
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent */*event*/)
 {
   {
     QSettings settings("mCRL2", "LTSView");
