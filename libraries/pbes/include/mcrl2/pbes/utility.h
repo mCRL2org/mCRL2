@@ -576,7 +576,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       atermpp::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
-      for (; constructor_sorts_found ;)
+      while (constructor_sorts_found)
       {
         constructor_sorts_found=false;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
