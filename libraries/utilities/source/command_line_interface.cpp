@@ -742,7 +742,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
           }
           else
           {
-            error("command line argument `--" + option + "' not recognised");
+            throw error("command line argument `--" + option + "' not recognised");
           }
         }
         else
@@ -756,7 +756,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
           {
             if (descriptor.needs_argument())
             {
-              error("expected argument to option `--" + option + "'!");
+              throw error("expected argument to option `--" + option + "'!");
             }
             else if (descriptor.m_argument.get() == 0)
             {
@@ -774,11 +774,11 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
             if (!descriptor.accepts_argument())
             {
-              error("did not expect argument to option `--" + option + "'");
+              throw error("did not expect argument to option `--" + option + "'");
             }
             else if (!descriptor.m_argument->validate(option_argument))
             {
-              error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
+              throw error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
             }
 
             m_options.insert(std::make_pair(long_option, option_argument));
@@ -798,7 +798,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
             // Assume that the argument is a short option
             if (d.m_short_to_long.find(argument[j]) == d.m_short_to_long.end())
             {
-              error("command line argument `-" + option + "' not recognised");
+              throw error("command line argument `-" + option + "' not recognised");
             }
             else
             {
@@ -822,7 +822,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
                   }
                   else
                   {
-                    error("expected argument to option `-" + option + "'");
+                    throw error("expected argument to option `-" + option + "'");
                   }
                 }
                 else
@@ -838,11 +838,11 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
                   if (!descriptor.accepts_argument())
                   {
-                    error("did not expect argument to option `-" + option + "'");
+                    throw error("did not expect argument to option `-" + option + "'");
                   }
                   else if (!descriptor.m_argument->validate(option_argument))
                   {
-                    error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
+                    throw error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
                   }
 
                   // must be the last option, so take the remainder as option argument
@@ -934,16 +934,6 @@ std::vector< std::string > command_line_parser::convert(const int count, wchar_t
 }
 /// \endcond
 #endif // __CYGWIN__
-
-/**
- * \param[in] message the body of the exception message
- * \throw std::runtime_error with an appropriately formatted versions of the message argument
- **/
-void command_line_parser::error(std::string const& message) const
-{
-  throw std::runtime_error(m_interface.m_name + ": " + message
-                           + "\nTry `" + m_interface.m_name + " --help' for more information.");
-}
 
 /**
  * Parses a string as if it were an unparsed command line and stores it as
@@ -1068,7 +1058,7 @@ void command_line_parser::process_default_options(interface_description& d)
     {
       if (1 < m_options.count(i->first))
       {
-        error("option -" + (d.long_to_short(i->first) != '\0' ?
+        throw error("option -" + (d.long_to_short(i->first) != '\0' ?
                             std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
       }
     }

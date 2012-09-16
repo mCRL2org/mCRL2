@@ -240,7 +240,7 @@ class ltscompare_tool : public ltscompare_base
     {
       if (2 < parser.arguments.size())
       {
-        parser.error("too many file arguments");
+        throw parser.error("too many file arguments");
       }
     }
 
@@ -293,17 +293,17 @@ class ltscompare_tool : public ltscompare_base
 
       if (parser.options.count("equivalence") > 1)
       {
-        parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
+        throw parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
       }
 
       if (parser.options.count("preorder") > 1)
       {
-        parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
+        throw parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
       }
 
       if (parser.options.count("counter-example")>0 && parser.options.count("equivalence")==0)
       {
-        parser.error("counter examples can only be used in combination with an equivalence");
+        throw parser.error("counter examples can only be used in combination with an equivalence");
       }
 
       tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
