@@ -1330,7 +1330,7 @@ message( STATUS  "Preparing release tool tests" )
 # Set lts different lts output formats
 set(LTS_EXTS "lts;aut;dot;fsm" )
 if(${MCRL2_ENABLE_CADP_SUPPORT})
-  set(LTS_EXTS "${LTS_EXTS};bcg}")
+  set(LTS_EXTS "${LTS_EXTS};bcg")
 endif(${MCRL2_ENABLE_CADP_SUPPORT})
 
 # Set location of mcf formula's
@@ -1506,7 +1506,7 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
     gen_lts2lps_release_tests()
 	endif()
 
-	list(FIND SET_OF_DISABLED_TESTS "lpsconvert" index_find)
+	list(FIND SET_OF_DISABLED_TESTS "ltsconvert" index_find)
   if( index_find LESS 0 )
     gen_ltsconvert_release_tests()
 	endif()
