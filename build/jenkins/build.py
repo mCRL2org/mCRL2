@@ -47,8 +47,10 @@ if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
 
 #
 # If we are building the mCRL2-release job, run all tests
+# Note that jobname is something like, i.e. including buildtype etc.
+# mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
 #
-if jobname.lower().find("release"):
+if jobname.split('/')[0].lower().find("release"):
   testflags += ['-DMCRL2_ENABLE_RELEASE_TEST_TARGETS=ON']
 
 #
