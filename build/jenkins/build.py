@@ -7,6 +7,11 @@ import multiprocessing
 from util import *
 
 #
+# Print some info about the build
+#
+print "Building job {0} with label {1}, using compiler {2} and buildtype {3}".format(jobname, label, compiler, buildtype)
+
+#
 # Try to remove CMake cache. We can wait the extra few minutes if it means we don't
 # get weird errors all the time.
 #
