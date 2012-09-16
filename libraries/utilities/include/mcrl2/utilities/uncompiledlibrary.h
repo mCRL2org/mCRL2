@@ -50,7 +50,7 @@ public:
     void compile(const std::string& filename) throw(std::runtime_error)
     {
       std::stringstream commandline;
-      commandline << m_compile_script << " " << filename << " " << " 2>&1";
+      commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
 
       // Execute script.
       FILE* stream = popen(commandline.str().c_str(), "r");
