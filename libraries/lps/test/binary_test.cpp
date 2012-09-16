@@ -40,7 +40,6 @@ void test_case_1()
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
 
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   variable_list parameters1 = s1.process().process_parameters();
 
   int bool_param_count = 0;
@@ -77,7 +76,6 @@ void test_case_2()
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -115,7 +113,6 @@ void test_case_3()
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -152,7 +149,6 @@ void test_case_4()
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -190,7 +186,6 @@ void test_case_5()
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -231,7 +226,6 @@ void test_case_6()
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();

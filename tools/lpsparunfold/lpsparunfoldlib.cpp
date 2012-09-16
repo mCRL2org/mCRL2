@@ -721,8 +721,6 @@ mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(data_expres
 
 mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_t parameter_at_index)
 {
-  bool generated_name = false;
-
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector(lps_proc_pars_list.begin(), lps_proc_pars_list.end());
   mCRL2log(debug) << "- Number of parameters in LPS: " <<  lps_proc_pars.size() << "" << std::endl;
@@ -736,7 +734,6 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
   if (is_basic_sort(lps_proc_pars[parameter_at_index].sort()))
   {
     unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
-    generated_name = true;
   }
 
   if (is_structured_sort(lps_proc_pars[parameter_at_index].sort()))
@@ -747,12 +744,6 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
     sort_names.insert(nstr);
     generator.add_identifiers(sort_names);
     unfold_parameter_name = nstr;
-    generated_name = true;
-  }
-
-  if (is_function_sort(lps_proc_pars[parameter_at_index].sort()))
-  {
-    generated_name = true;
   }
 
   if (is_container_sort(lps_proc_pars[parameter_at_index].sort()))
@@ -763,10 +754,8 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
     sort_names.insert(nstr);
     generator.add_identifiers(sort_names);
     unfold_parameter_name = nstr;
-    generated_name = true;
   }
 
-  assert(generated_name);
   return lps_proc_pars[parameter_at_index].sort();
 }
 
