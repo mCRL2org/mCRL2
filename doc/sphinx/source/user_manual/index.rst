@@ -60,3 +60,4 @@
    :hidden:
 
    user
+   boost
