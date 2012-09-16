@@ -41,6 +41,12 @@ if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
 
 #
+# If we are building the mCRL2-release job, run all tests
+#
+if jobname == "mCRL2-release":
+  testflags += ['-DMCRL2_ENABLE_RELEASE_TEST_TARGETS=ON']
+
+#
 # Run CMake, take into account configuration axes.
 #
 if not os.path.exists(builddir):
