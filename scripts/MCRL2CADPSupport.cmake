@@ -51,7 +51,7 @@ if(MCRL2_ENABLE_CADP_SUPPORT )
     message( STATUS "CADP found: ${MCRL2_CADP_BINARY_DIR}")
  
   else( MCRL2_CADP_ARCHITECTURE  )
-    message( STATUS "CADP not found")
+    message( FATAL_ERROR "CADP not found")
     set( USE_BCG "//" )
 endif( MCRL2_CADP_ARCHITECTURE )
 
