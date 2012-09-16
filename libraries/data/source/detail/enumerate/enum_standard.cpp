@@ -399,6 +399,8 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
+  vector < atermpp::aterm > var_array; // This does not need to be a atermpp vector, as its content
+                                       // is protected elsewhere.
   while (ss_stack.empty() && !fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
@@ -509,15 +511,14 @@ bool EnumeratorSolutionsStandard::next(
           assert(target_sort==sort);
 
           variable_list var_list;
-          MCRL2_SYSTEM_SPECIFIC_ALLOCA(var_array,atermpp::aterm,domain_sorts.size()+1);
-          size_t j=1;
-          var_array[0]=OpId2Int(*it);
-          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
+          assert(var_array.size()==0);
+          var_array.push_back(OpId2Int(*it));
+          
+          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
           {
             const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
             var_list = push_front(var_list,fv);
-            var_array[j]=fv;
-
+            var_array.push_back(fv);
 
             used_vars++;
             if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
@@ -564,7 +565,8 @@ bool EnumeratorSolutionsStandard::next(
           // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
           // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
           // using it is much cheaper than using a default substitution.
-          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array),enum_sigma);
+          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,&var_array[0]),enum_sigma);
+          var_array.clear();
 
           const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
           enum_sigma[var]=term_rf;

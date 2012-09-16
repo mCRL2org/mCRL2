@@ -385,6 +385,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, next_s
 
 void next_state_generator::iterator::increment()
 {
+  std::vector < rewriter_expression_t > condition_arguments;
   while (!m_summand ||
     (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
     (!m_cached && m_enumeration_iterator == enumerator_t::iterator_internal()))
@@ -424,13 +425,13 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(condition_arguments, rewriter_expression_t, m_summand->condition_parameters.size());
+      condition_arguments.resize(m_summand->condition_parameters.size());
 
       for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
       {
         condition_arguments[i] = m_state(m_summand->condition_parameters[i]);
       }
-      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments, condition_arguments + m_summand->condition_parameters.size());
+      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
       atermpp::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
       {
@@ -492,14 +493,15 @@ void next_state_generator::iterator::increment()
   m_transition.m_state = internal_state_t(m_generator->m_state_function, state_arguments, state_arguments + m_summand->result_state.size());
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(actions, action, m_summand->action_label.size());
+  std::vector < data_expression> arguments;
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
   {
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, data_expression, m_summand->action_label[i].arguments.size());
+    arguments.resize(m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
       arguments[j] = m_generator->m_rewriter.convert_from(m_generator->m_rewriter.rewrite_internal(m_summand->action_label[i].arguments[j], *m_substitution));
     }
-    actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments, arguments + m_summand->action_label[i].arguments.size()));
+    actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
   m_transition.m_action = multi_action(action_list(actions, actions + m_summand->action_label.size()));
 
