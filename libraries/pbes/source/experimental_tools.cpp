@@ -223,10 +223,9 @@ void pbespareqelm(const std::string& input_filename,
     case quantifier_all:
     case quantifier_finite:
     {
-      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> my_pbes_rewriter;
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      utilities::number_postfix_generator name_generator("UNIQUE_PREFIX");
-      data::data_enumerator<> datae(p.data(), datar, name_generator);
+      data::data_enumerator datae(p.data(), datar);
       data::rewriter_with_variables datarv(datar);
       my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
       pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);

@@ -67,7 +67,6 @@ struct data_enumerator_helper
 /// \endcond
 
 /// \brief Class for enumerating data expressions.
-template <typename IdentifierGenerator = utilities::number_postfix_generator>
 class data_enumerator
 {
   protected:
@@ -82,7 +81,7 @@ class data_enumerator
     const data::rewriter* m_rewriter;
 
     /// \brief An identifier generator.
-    IdentifierGenerator* m_generator;
+    mutable utilities::number_postfix_generator m_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -113,10 +112,12 @@ class data_enumerator
     /// \param data_spec A data specification.
     /// \param rewriter A rewriter.
     /// \param generator An identifier generator.
+    /// \param identifier_prefix A unique prefix, used by the identifier generator.
     data_enumerator(const data_specification& data_spec,
                     const data::rewriter& rewriter,
-                    IdentifierGenerator& generator)
-      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
+                    const std::string& identifier_prefix = "UNIQUE_PREFIX"
+                   )
+      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(identifier_prefix)
     {}
 
     /// \brief The data specification.
@@ -124,6 +125,18 @@ class data_enumerator
     const data_specification& data() const
     {
       return *m_data;
+    }
+
+    /// \return The identifier generator used for generating new variables.
+    const utilities::number_postfix_generator& generator() const
+    {
+      return m_generator;
+    }
+
+    /// \return The identifier generator used for generating new variables.
+    utilities::number_postfix_generator& generator()
+    {
+      return m_generator;
     }
 
     /// \brief Enumerates a data variable.
@@ -147,7 +160,7 @@ class data_enumerator
           sort_expression_list i_domain(function_sort(i->sort()).domain());
           for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
           {
-            variables.push_back(variable((*m_generator)(), *j));
+            variables.push_back(variable(m_generator(), *j));
           }
 
           variable_list w(atermpp::convert< variable_list >(variables));

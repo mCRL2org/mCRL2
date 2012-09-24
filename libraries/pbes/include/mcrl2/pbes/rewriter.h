@@ -301,6 +301,14 @@ class enumerate_quantifiers_rewriter
       : m_rewriter(r), m_enumerator(e), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
     {}
 
+    /// \brief Constructor
+    /// \param r A data rewriter
+    /// \param e A data enumerator
+    /// \param enumerate_infinite_sorts Determines if quantifier variables of infinte sorts are enumerated
+    enumerate_quantifiers_rewriter(const data::data_specification& dataspec, data::rewrite_strategy strategy = data::jitty, bool enumerate_infinite_sorts = true, bool skip_data = false)
+      : m_rewriter(dataspec, strategy), m_enumerator(dataspec, m_rewriter), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
+    {}
+
     /// \brief Rewrites a pbes expression.
     /// \param x A term
     /// \return The rewrite result.
