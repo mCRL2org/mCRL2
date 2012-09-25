@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Thursday, June 28, 2012 14:32:22}
+%TCIDATA{LastRevised=Tuesday, September 25, 2012 10:14:15}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -46,10 +46,42 @@
 \font \aap cmmi10
 \newcommand{\at}{\mathbin{\mbox{\aap ,}}}
 \newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
+
 \begin{document}
 
 
 \section{Process Library Implementation Notes}
+
+\subsection{Guarded process expressions}
+
+We define the predicate $is\_guarded$ for process expressions as follows:%
+\[
+\begin{array}{lll}
+is\_guarded(a(e)) & = & true \\ 
+is\_guarded(\delta ) & = & true \\ 
+is\_guarded(\tau ) & = & true \\ 
+is\_guarded(P(e)) & = & false \\ 
+is\_guarded(P(d:=e)) & = & false \\ 
+is\_guarded(p+q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
+is\_guarded(p\cdot q) & = & is\_guarded(p) \\ 
+is\_guarded(c\rightarrow p) & = & is\_guarded(p) \\ 
+is\_guarded(c\rightarrow p\diamond q) & = & is\_guarded(p)\wedge
+is\_guarded(q) \\ 
+is\_guarded(\Sigma _{d:D}\ p) & = & is\_guarded(p) \\ 
+is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t) & = & is\_guarded(p) \\ 
+is\_guarded(p\ll q) & = & is\_guarded(p) \\ 
+is\_guarded(p\parallel q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
+is\_guarded(p\mathbin{\mathrel{\llfloor}}q) & = & is\_guarded(p)\wedge
+is\_guarded(q) \\ 
+is\_guarded(p\mid q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
+is\_guarded(\rho _{R}(p)) & = & is\_guarded(p) \\ 
+is\_guarded(\partial _{B}(p)) & = & is\_guarded(p) \\ 
+is\_guarded(\tau _{I}(p)) & = & is\_guarded(p) \\ 
+is\_guarded(\Gamma _{C}(p)) & = & is\_guarded(p) \\ 
+is\_guarded(\nabla _{V}(p)) & = & is\_guarded(p)%
+\end{array}%
+\]%
+\newpage 
 
 \subsection{Alphabet reduction}
 
@@ -57,9 +89,9 @@
 
 We define pCRL terms $p$ using the following grammar:%
 \[
-p::=a\ \mathbf{|}\ P(e)\mid P(e-d)\mid \delta \mid \tau \mid p+p\mid p\cdot
+p::=a\ \mathbf{|}\ P(e)\mid P(e:=d)\mid \delta \mid \tau \mid p+p\mid p\cdot
 p\mid c\rightarrow p\mid c\rightarrow p\diamond p\mid \Sigma _{d:D}p\mid p^{%
-\mathbin{\mbox{\aap ,}}}t\mid p<<p 
+\mathbin{\mbox{\aap ,}}}t\mid p\ll p 
 \]%
 and extended pCRL terms $q$ using the following grammar:%
 \[
