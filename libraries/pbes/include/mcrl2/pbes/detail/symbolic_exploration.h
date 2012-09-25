@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/pbesinst_symbolic.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -408,7 +409,8 @@ inline
 void symbolic_exploration(const std::string& input_filename,
                           const std::string& output_filename,
                           bool optimized = true,
-                          bool clustered = false
+                          bool clustered = false,
+                          bool instantiate = false
                          )
 {
   // load the pbes
@@ -421,6 +423,13 @@ void symbolic_exploration(const std::string& input_filename,
 
   // save the result
   p.save(output_filename);
+
+  if (instantiate)
+  {
+    // instantiate the PBES
+    pbesinst_symbolic_algorithm symbolic_algorithm(p);
+    symbolic_algorithm.run();
+  }
 }
 
 } // namespace detail
