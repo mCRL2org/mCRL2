@@ -1319,9 +1319,21 @@ namespace mcrl2
           if (non_recursive_set.count(pn)>0 && pCRL_set.count(pn)>0)
           {
             mCRL2log(warning)  
-              << "This warning could indicate a forgotten (multi-)action in this allow operation." << std::endl 
-              << "An allow operation allowing only the (multi-)action(s) from:"  << std::endl
-              << "  " << pp(detail::transform_list_back(V)) << std::endl
+              << "This warning could indicate a forgotten (multi-)action in the following allow operation." << std::endl 
+              << "An allow operation allowing only the (multi-)action(s) from:"  << std::endl;
+              //atermpp::term_list < core::identifier_string_list > l = detail::list_minus(untypeMAL(ll),V);
+              for(atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
+              {
+                // An action_name_multiset_list contains the empty multi_action by default, but it cannot be part of it.
+                if (!i->empty())
+                { 
+                  mCRL2log(warning) << "  "<< pp(action_name_multiset(*i)) << std::endl;
+                }
+              }
+              //mCRL2log(warning) << std::endl;
+
+              // << "  " << pp(detail::transform_list_back(V)) << std::endl
+            mCRL2log(warning)  
               << "is applied to sequential non-directly-recursive process:" << std::endl 
               << "  " << pp(pn) << std::endl
               << "The following (multi-)action(s) are disallowed in this process:" << std::endl; 
