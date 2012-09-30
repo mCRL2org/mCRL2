@@ -28,6 +28,14 @@ template <class Term>
 class term_appl:public aterm
 {
 
+  protected:
+    /// \brief Constructor.
+    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
+    {
+      // assert((boost::is_base_of<Term, aterm>::value));
+      assert(sizeof(Term)==sizeof(size_t));
+    } 
+    
   public: // Should become protected.
     detail::_aterm_appl<Term> & operator *() const
     {
@@ -44,13 +52,6 @@ class term_appl:public aterm
       return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
     }
 
-    /// \brief Constructor.
-    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
-    {
-      // assert((boost::is_base_of<Term, aterm>::value));
-      assert(sizeof(Term)==sizeof(size_t));
-    }
-    
   public:
     /// The type of object, T stored in the term_appl.
     typedef Term value_type;

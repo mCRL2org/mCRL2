@@ -50,7 +50,7 @@ const atermpp::function_symbol& function_symbol_ActAnd()
 inline
 bool gsIsActAnd(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActAnd();
+  return Term.function() == function_symbol_ActAnd();
 }
 
 // ActAt
@@ -64,7 +64,7 @@ const atermpp::function_symbol& function_symbol_ActAt()
 inline
 bool gsIsActAt(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActAt();
+  return Term.function() == function_symbol_ActAt();
 }
 
 // ActExists
@@ -78,7 +78,7 @@ const atermpp::function_symbol& function_symbol_ActExists()
 inline
 bool gsIsActExists(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActExists();
+  return Term.function() == function_symbol_ActExists();
 }
 
 // ActFalse
@@ -92,7 +92,7 @@ const atermpp::function_symbol& function_symbol_ActFalse()
 inline
 bool gsIsActFalse(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActFalse();
+  return Term.function() == function_symbol_ActFalse();
 }
 
 // ActForall
@@ -106,7 +106,7 @@ const atermpp::function_symbol& function_symbol_ActForall()
 inline
 bool gsIsActForall(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActForall();
+  return Term.function() == function_symbol_ActForall();
 }
 
 // ActId
@@ -120,7 +120,7 @@ const atermpp::function_symbol& function_symbol_ActId()
 inline
 bool gsIsActId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActId();
+  return Term.function() == function_symbol_ActId();
 }
 
 // ActImp
@@ -134,7 +134,7 @@ const atermpp::function_symbol& function_symbol_ActImp()
 inline
 bool gsIsActImp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActImp();
+  return Term.function() == function_symbol_ActImp();
 }
 
 // ActNot
@@ -148,7 +148,7 @@ const atermpp::function_symbol& function_symbol_ActNot()
 inline
 bool gsIsActNot(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActNot();
+  return Term.function() == function_symbol_ActNot();
 }
 
 // ActOr
@@ -162,7 +162,7 @@ const atermpp::function_symbol& function_symbol_ActOr()
 inline
 bool gsIsActOr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActOr();
+  return Term.function() == function_symbol_ActOr();
 }
 
 // ActSpec
@@ -176,7 +176,7 @@ const atermpp::function_symbol& function_symbol_ActSpec()
 inline
 bool gsIsActSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActSpec();
+  return Term.function() == function_symbol_ActSpec();
 }
 
 // ActTrue
@@ -190,7 +190,7 @@ const atermpp::function_symbol& function_symbol_ActTrue()
 inline
 bool gsIsActTrue(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActTrue();
+  return Term.function() == function_symbol_ActTrue();
 }
 
 // Action
@@ -204,7 +204,7 @@ const atermpp::function_symbol& function_symbol_Action()
 inline
 bool gsIsAction(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Action();
+  return Term.function() == function_symbol_Action();
 }
 
 // ActionRenameRule
@@ -218,7 +218,7 @@ const atermpp::function_symbol& function_symbol_ActionRenameRule()
 inline
 bool gsIsActionRenameRule(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActionRenameRule();
+  return Term.function() == function_symbol_ActionRenameRule();
 }
 
 // ActionRenameRules
@@ -232,7 +232,7 @@ const atermpp::function_symbol& function_symbol_ActionRenameRules()
 inline
 bool gsIsActionRenameRules(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActionRenameRules();
+  return Term.function() == function_symbol_ActionRenameRules();
 }
 
 // ActionRenameSpec
@@ -246,7 +246,7 @@ const atermpp::function_symbol& function_symbol_ActionRenameSpec()
 inline
 bool gsIsActionRenameSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ActionRenameSpec();
+  return Term.function() == function_symbol_ActionRenameSpec();
 }
 
 // Allow
@@ -260,7 +260,7 @@ const atermpp::function_symbol& function_symbol_Allow()
 inline
 bool gsIsAllow(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Allow();
+  return Term.function() == function_symbol_Allow();
 }
 
 // AtTime
@@ -274,7 +274,7 @@ const atermpp::function_symbol& function_symbol_AtTime()
 inline
 bool gsIsAtTime(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_AtTime();
+  return Term.function() == function_symbol_AtTime();
 }
 
 // BES
@@ -288,7 +288,7 @@ const atermpp::function_symbol& function_symbol_BES()
 inline
 bool gsIsBES(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BES();
+  return Term.function() == function_symbol_BES();
 }
 
 // BInit
@@ -302,7 +302,7 @@ const atermpp::function_symbol& function_symbol_BInit()
 inline
 bool gsIsBInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BInit();
+  return Term.function() == function_symbol_BInit();
 }
 
 // BagComp
@@ -316,7 +316,7 @@ const atermpp::function_symbol& function_symbol_BagComp()
 inline
 bool gsIsBagComp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BagComp();
+  return Term.function() == function_symbol_BagComp();
 }
 
 // Binder
@@ -330,7 +330,7 @@ const atermpp::function_symbol& function_symbol_Binder()
 inline
 bool gsIsBinder(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Binder();
+  return Term.function() == function_symbol_Binder();
 }
 
 // Block
@@ -344,7 +344,7 @@ const atermpp::function_symbol& function_symbol_Block()
 inline
 bool gsIsBlock(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Block();
+  return Term.function() == function_symbol_Block();
 }
 
 // BooleanAnd
@@ -358,7 +358,7 @@ const atermpp::function_symbol& function_symbol_BooleanAnd()
 inline
 bool gsIsBooleanAnd(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanAnd();
+  return Term.function() == function_symbol_BooleanAnd();
 }
 
 // BooleanEquation
@@ -372,7 +372,7 @@ const atermpp::function_symbol& function_symbol_BooleanEquation()
 inline
 bool gsIsBooleanEquation(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanEquation();
+  return Term.function() == function_symbol_BooleanEquation();
 }
 
 // BooleanFalse
@@ -386,7 +386,7 @@ const atermpp::function_symbol& function_symbol_BooleanFalse()
 inline
 bool gsIsBooleanFalse(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanFalse();
+  return Term.function() == function_symbol_BooleanFalse();
 }
 
 // BooleanImp
@@ -400,7 +400,7 @@ const atermpp::function_symbol& function_symbol_BooleanImp()
 inline
 bool gsIsBooleanImp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanImp();
+  return Term.function() == function_symbol_BooleanImp();
 }
 
 // BooleanNot
@@ -414,7 +414,7 @@ const atermpp::function_symbol& function_symbol_BooleanNot()
 inline
 bool gsIsBooleanNot(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanNot();
+  return Term.function() == function_symbol_BooleanNot();
 }
 
 // BooleanOr
@@ -428,7 +428,7 @@ const atermpp::function_symbol& function_symbol_BooleanOr()
 inline
 bool gsIsBooleanOr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanOr();
+  return Term.function() == function_symbol_BooleanOr();
 }
 
 // BooleanTrue
@@ -442,7 +442,7 @@ const atermpp::function_symbol& function_symbol_BooleanTrue()
 inline
 bool gsIsBooleanTrue(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanTrue();
+  return Term.function() == function_symbol_BooleanTrue();
 }
 
 // BooleanVariable
@@ -456,7 +456,7 @@ const atermpp::function_symbol& function_symbol_BooleanVariable()
 inline
 bool gsIsBooleanVariable(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_BooleanVariable();
+  return Term.function() == function_symbol_BooleanVariable();
 }
 
 // Choice
@@ -470,7 +470,7 @@ const atermpp::function_symbol& function_symbol_Choice()
 inline
 bool gsIsChoice(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Choice();
+  return Term.function() == function_symbol_Choice();
 }
 
 // Comm
@@ -484,7 +484,7 @@ const atermpp::function_symbol& function_symbol_Comm()
 inline
 bool gsIsComm(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Comm();
+  return Term.function() == function_symbol_Comm();
 }
 
 // CommExpr
@@ -498,7 +498,7 @@ const atermpp::function_symbol& function_symbol_CommExpr()
 inline
 bool gsIsCommExpr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_CommExpr();
+  return Term.function() == function_symbol_CommExpr();
 }
 
 // ConsSpec
@@ -512,7 +512,7 @@ const atermpp::function_symbol& function_symbol_ConsSpec()
 inline
 bool gsIsConsSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ConsSpec();
+  return Term.function() == function_symbol_ConsSpec();
 }
 
 // DataAppl
@@ -526,7 +526,7 @@ const atermpp::function_symbol& function_symbol_DataAppl()
 inline
 bool gsIsDataAppl(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataAppl();
+  return Term.function() == function_symbol_DataAppl();
 }
 
 // DataEqn
@@ -540,7 +540,7 @@ const atermpp::function_symbol& function_symbol_DataEqn()
 inline
 bool gsIsDataEqn(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataEqn();
+  return Term.function() == function_symbol_DataEqn();
 }
 
 // DataEqnSpec
@@ -554,7 +554,7 @@ const atermpp::function_symbol& function_symbol_DataEqnSpec()
 inline
 bool gsIsDataEqnSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataEqnSpec();
+  return Term.function() == function_symbol_DataEqnSpec();
 }
 
 // DataSpec
@@ -568,7 +568,7 @@ const atermpp::function_symbol& function_symbol_DataSpec()
 inline
 bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataSpec();
+  return Term.function() == function_symbol_DataSpec();
 }
 
 // DataVarId
@@ -582,7 +582,7 @@ const atermpp::function_symbol& function_symbol_DataVarId()
 inline
 bool gsIsDataVarId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataVarId();
+  return Term.function() == function_symbol_DataVarId();
 }
 
 // DataVarIdInit
@@ -596,7 +596,7 @@ const atermpp::function_symbol& function_symbol_DataVarIdInit()
 inline
 bool gsIsDataVarIdInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_DataVarIdInit();
+  return Term.function() == function_symbol_DataVarIdInit();
 }
 
 // Delta
@@ -610,7 +610,7 @@ const atermpp::function_symbol& function_symbol_Delta()
 inline
 bool gsIsDelta(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Delta();
+  return Term.function() == function_symbol_Delta();
 }
 
 // Exists
@@ -624,7 +624,7 @@ const atermpp::function_symbol& function_symbol_Exists()
 inline
 bool gsIsExists(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Exists();
+  return Term.function() == function_symbol_Exists();
 }
 
 // Forall
@@ -638,7 +638,7 @@ const atermpp::function_symbol& function_symbol_Forall()
 inline
 bool gsIsForall(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Forall();
+  return Term.function() == function_symbol_Forall();
 }
 
 // GlobVarSpec
@@ -652,7 +652,7 @@ const atermpp::function_symbol& function_symbol_GlobVarSpec()
 inline
 bool gsIsGlobVarSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_GlobVarSpec();
+  return Term.function() == function_symbol_GlobVarSpec();
 }
 
 // Hide
@@ -666,7 +666,7 @@ const atermpp::function_symbol& function_symbol_Hide()
 inline
 bool gsIsHide(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Hide();
+  return Term.function() == function_symbol_Hide();
 }
 
 // Id
@@ -680,7 +680,7 @@ const atermpp::function_symbol& function_symbol_Id()
 inline
 bool gsIsId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Id();
+  return Term.function() == function_symbol_Id();
 }
 
 // IdAssignment
@@ -694,7 +694,7 @@ const atermpp::function_symbol& function_symbol_IdAssignment()
 inline
 bool gsIsIdAssignment(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_IdAssignment();
+  return Term.function() == function_symbol_IdAssignment();
 }
 
 // IdInit
@@ -708,7 +708,7 @@ const atermpp::function_symbol& function_symbol_IdInit()
 inline
 bool gsIsIdInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_IdInit();
+  return Term.function() == function_symbol_IdInit();
 }
 
 // IfThen
@@ -722,7 +722,7 @@ const atermpp::function_symbol& function_symbol_IfThen()
 inline
 bool gsIsIfThen(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_IfThen();
+  return Term.function() == function_symbol_IfThen();
 }
 
 // IfThenElse
@@ -736,7 +736,7 @@ const atermpp::function_symbol& function_symbol_IfThenElse()
 inline
 bool gsIsIfThenElse(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_IfThenElse();
+  return Term.function() == function_symbol_IfThenElse();
 }
 
 // LMerge
@@ -750,7 +750,7 @@ const atermpp::function_symbol& function_symbol_LMerge()
 inline
 bool gsIsLMerge(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_LMerge();
+  return Term.function() == function_symbol_LMerge();
 }
 
 // Lambda
@@ -764,7 +764,7 @@ const atermpp::function_symbol& function_symbol_Lambda()
 inline
 bool gsIsLambda(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Lambda();
+  return Term.function() == function_symbol_Lambda();
 }
 
 // LinProcSpec
@@ -778,7 +778,7 @@ const atermpp::function_symbol& function_symbol_LinProcSpec()
 inline
 bool gsIsLinProcSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_LinProcSpec();
+  return Term.function() == function_symbol_LinProcSpec();
 }
 
 // LinearProcess
@@ -792,7 +792,7 @@ const atermpp::function_symbol& function_symbol_LinearProcess()
 inline
 bool gsIsLinearProcess(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_LinearProcess();
+  return Term.function() == function_symbol_LinearProcess();
 }
 
 // LinearProcessInit
@@ -806,7 +806,7 @@ const atermpp::function_symbol& function_symbol_LinearProcessInit()
 inline
 bool gsIsLinearProcessInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_LinearProcessInit();
+  return Term.function() == function_symbol_LinearProcessInit();
 }
 
 // LinearProcessSummand
@@ -820,7 +820,7 @@ const atermpp::function_symbol& function_symbol_LinearProcessSummand()
 inline
 bool gsIsLinearProcessSummand(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_LinearProcessSummand();
+  return Term.function() == function_symbol_LinearProcessSummand();
 }
 
 // MapSpec
@@ -834,7 +834,7 @@ const atermpp::function_symbol& function_symbol_MapSpec()
 inline
 bool gsIsMapSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_MapSpec();
+  return Term.function() == function_symbol_MapSpec();
 }
 
 // Merge
@@ -848,7 +848,7 @@ const atermpp::function_symbol& function_symbol_Merge()
 inline
 bool gsIsMerge(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Merge();
+  return Term.function() == function_symbol_Merge();
 }
 
 // Mu
@@ -862,7 +862,7 @@ const atermpp::function_symbol& function_symbol_Mu()
 inline
 bool gsIsMu(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Mu();
+  return Term.function() == function_symbol_Mu();
 }
 
 // MultAct
@@ -876,7 +876,7 @@ const atermpp::function_symbol& function_symbol_MultAct()
 inline
 bool gsIsMultAct(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_MultAct();
+  return Term.function() == function_symbol_MultAct();
 }
 
 // MultActName
@@ -890,7 +890,7 @@ const atermpp::function_symbol& function_symbol_MultActName()
 inline
 bool gsIsMultActName(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_MultActName();
+  return Term.function() == function_symbol_MultActName();
 }
 
 // Nil
@@ -904,7 +904,7 @@ const atermpp::function_symbol& function_symbol_Nil()
 inline
 bool gsIsNil(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Nil();
+  return Term.function() == function_symbol_Nil();
 }
 
 // Nu
@@ -918,7 +918,7 @@ const atermpp::function_symbol& function_symbol_Nu()
 inline
 bool gsIsNu(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Nu();
+  return Term.function() == function_symbol_Nu();
 }
 
 // OpId
@@ -932,7 +932,7 @@ const atermpp::function_symbol& function_symbol_OpId()
 inline
 bool gsIsOpId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_OpId();
+  return Term.function() == function_symbol_OpId();
 }
 
 // PBES
@@ -946,7 +946,7 @@ const atermpp::function_symbol& function_symbol_PBES()
 inline
 bool gsIsPBES(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBES();
+  return Term.function() == function_symbol_PBES();
 }
 
 // PBESAnd
@@ -960,7 +960,7 @@ const atermpp::function_symbol& function_symbol_PBESAnd()
 inline
 bool gsIsPBESAnd(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESAnd();
+  return Term.function() == function_symbol_PBESAnd();
 }
 
 // PBESExists
@@ -974,7 +974,7 @@ const atermpp::function_symbol& function_symbol_PBESExists()
 inline
 bool gsIsPBESExists(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESExists();
+  return Term.function() == function_symbol_PBESExists();
 }
 
 // PBESFalse
@@ -988,7 +988,7 @@ const atermpp::function_symbol& function_symbol_PBESFalse()
 inline
 bool gsIsPBESFalse(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESFalse();
+  return Term.function() == function_symbol_PBESFalse();
 }
 
 // PBESForall
@@ -1002,7 +1002,7 @@ const atermpp::function_symbol& function_symbol_PBESForall()
 inline
 bool gsIsPBESForall(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESForall();
+  return Term.function() == function_symbol_PBESForall();
 }
 
 // PBESImp
@@ -1016,7 +1016,7 @@ const atermpp::function_symbol& function_symbol_PBESImp()
 inline
 bool gsIsPBESImp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESImp();
+  return Term.function() == function_symbol_PBESImp();
 }
 
 // PBESNot
@@ -1030,7 +1030,7 @@ const atermpp::function_symbol& function_symbol_PBESNot()
 inline
 bool gsIsPBESNot(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESNot();
+  return Term.function() == function_symbol_PBESNot();
 }
 
 // PBESOr
@@ -1044,7 +1044,7 @@ const atermpp::function_symbol& function_symbol_PBESOr()
 inline
 bool gsIsPBESOr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESOr();
+  return Term.function() == function_symbol_PBESOr();
 }
 
 // PBESTrue
@@ -1058,7 +1058,7 @@ const atermpp::function_symbol& function_symbol_PBESTrue()
 inline
 bool gsIsPBESTrue(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBESTrue();
+  return Term.function() == function_symbol_PBESTrue();
 }
 
 // PBEqn
@@ -1072,7 +1072,7 @@ const atermpp::function_symbol& function_symbol_PBEqn()
 inline
 bool gsIsPBEqn(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBEqn();
+  return Term.function() == function_symbol_PBEqn();
 }
 
 // PBEqnSpec
@@ -1086,7 +1086,7 @@ const atermpp::function_symbol& function_symbol_PBEqnSpec()
 inline
 bool gsIsPBEqnSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBEqnSpec();
+  return Term.function() == function_symbol_PBEqnSpec();
 }
 
 // PBInit
@@ -1100,7 +1100,7 @@ const atermpp::function_symbol& function_symbol_PBInit()
 inline
 bool gsIsPBInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PBInit();
+  return Term.function() == function_symbol_PBInit();
 }
 
 // ParamId
@@ -1114,7 +1114,7 @@ const atermpp::function_symbol& function_symbol_ParamId()
 inline
 bool gsIsParamId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ParamId();
+  return Term.function() == function_symbol_ParamId();
 }
 
 // ProcEqn
@@ -1128,7 +1128,7 @@ const atermpp::function_symbol& function_symbol_ProcEqn()
 inline
 bool gsIsProcEqn(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcEqn();
+  return Term.function() == function_symbol_ProcEqn();
 }
 
 // ProcEqnSpec
@@ -1142,7 +1142,7 @@ const atermpp::function_symbol& function_symbol_ProcEqnSpec()
 inline
 bool gsIsProcEqnSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcEqnSpec();
+  return Term.function() == function_symbol_ProcEqnSpec();
 }
 
 // ProcSpec
@@ -1156,7 +1156,7 @@ const atermpp::function_symbol& function_symbol_ProcSpec()
 inline
 bool gsIsProcSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcSpec();
+  return Term.function() == function_symbol_ProcSpec();
 }
 
 // ProcVarId
@@ -1170,7 +1170,7 @@ const atermpp::function_symbol& function_symbol_ProcVarId()
 inline
 bool gsIsProcVarId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcVarId();
+  return Term.function() == function_symbol_ProcVarId();
 }
 
 // Process
@@ -1184,7 +1184,7 @@ const atermpp::function_symbol& function_symbol_Process()
 inline
 bool gsIsProcess(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Process();
+  return Term.function() == function_symbol_Process();
 }
 
 // ProcessAssignment
@@ -1198,7 +1198,7 @@ const atermpp::function_symbol& function_symbol_ProcessAssignment()
 inline
 bool gsIsProcessAssignment(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcessAssignment();
+  return Term.function() == function_symbol_ProcessAssignment();
 }
 
 // ProcessInit
@@ -1212,7 +1212,7 @@ const atermpp::function_symbol& function_symbol_ProcessInit()
 inline
 bool gsIsProcessInit(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_ProcessInit();
+  return Term.function() == function_symbol_ProcessInit();
 }
 
 // PropVarDecl
@@ -1226,7 +1226,7 @@ const atermpp::function_symbol& function_symbol_PropVarDecl()
 inline
 bool gsIsPropVarDecl(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PropVarDecl();
+  return Term.function() == function_symbol_PropVarDecl();
 }
 
 // PropVarInst
@@ -1240,7 +1240,7 @@ const atermpp::function_symbol& function_symbol_PropVarInst()
 inline
 bool gsIsPropVarInst(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_PropVarInst();
+  return Term.function() == function_symbol_PropVarInst();
 }
 
 // RegAlt
@@ -1254,7 +1254,7 @@ const atermpp::function_symbol& function_symbol_RegAlt()
 inline
 bool gsIsRegAlt(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RegAlt();
+  return Term.function() == function_symbol_RegAlt();
 }
 
 // RegNil
@@ -1268,7 +1268,7 @@ const atermpp::function_symbol& function_symbol_RegNil()
 inline
 bool gsIsRegNil(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RegNil();
+  return Term.function() == function_symbol_RegNil();
 }
 
 // RegSeq
@@ -1282,7 +1282,7 @@ const atermpp::function_symbol& function_symbol_RegSeq()
 inline
 bool gsIsRegSeq(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RegSeq();
+  return Term.function() == function_symbol_RegSeq();
 }
 
 // RegTrans
@@ -1296,7 +1296,7 @@ const atermpp::function_symbol& function_symbol_RegTrans()
 inline
 bool gsIsRegTrans(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RegTrans();
+  return Term.function() == function_symbol_RegTrans();
 }
 
 // RegTransOrNil
@@ -1310,7 +1310,7 @@ const atermpp::function_symbol& function_symbol_RegTransOrNil()
 inline
 bool gsIsRegTransOrNil(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RegTransOrNil();
+  return Term.function() == function_symbol_RegTransOrNil();
 }
 
 // Rename
@@ -1324,7 +1324,7 @@ const atermpp::function_symbol& function_symbol_Rename()
 inline
 bool gsIsRename(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Rename();
+  return Term.function() == function_symbol_Rename();
 }
 
 // RenameExpr
@@ -1338,7 +1338,7 @@ const atermpp::function_symbol& function_symbol_RenameExpr()
 inline
 bool gsIsRenameExpr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_RenameExpr();
+  return Term.function() == function_symbol_RenameExpr();
 }
 
 // Seq
@@ -1352,7 +1352,7 @@ const atermpp::function_symbol& function_symbol_Seq()
 inline
 bool gsIsSeq(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Seq();
+  return Term.function() == function_symbol_Seq();
 }
 
 // SetBagComp
@@ -1366,7 +1366,7 @@ const atermpp::function_symbol& function_symbol_SetBagComp()
 inline
 bool gsIsSetBagComp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SetBagComp();
+  return Term.function() == function_symbol_SetBagComp();
 }
 
 // SetComp
@@ -1380,7 +1380,7 @@ const atermpp::function_symbol& function_symbol_SetComp()
 inline
 bool gsIsSetComp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SetComp();
+  return Term.function() == function_symbol_SetComp();
 }
 
 // SortArrow
@@ -1394,7 +1394,7 @@ const atermpp::function_symbol& function_symbol_SortArrow()
 inline
 bool gsIsSortArrow(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortArrow();
+  return Term.function() == function_symbol_SortArrow();
 }
 
 // SortBag
@@ -1408,7 +1408,7 @@ const atermpp::function_symbol& function_symbol_SortBag()
 inline
 bool gsIsSortBag(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortBag();
+  return Term.function() == function_symbol_SortBag();
 }
 
 // SortCons
@@ -1422,7 +1422,7 @@ const atermpp::function_symbol& function_symbol_SortCons()
 inline
 bool gsIsSortCons(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortCons();
+  return Term.function() == function_symbol_SortCons();
 }
 
 // SortFBag
@@ -1436,7 +1436,7 @@ const atermpp::function_symbol& function_symbol_SortFBag()
 inline
 bool gsIsSortFBag(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortFBag();
+  return Term.function() == function_symbol_SortFBag();
 }
 
 // SortFSet
@@ -1450,7 +1450,7 @@ const atermpp::function_symbol& function_symbol_SortFSet()
 inline
 bool gsIsSortFSet(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortFSet();
+  return Term.function() == function_symbol_SortFSet();
 }
 
 // SortId
@@ -1464,7 +1464,7 @@ const atermpp::function_symbol& function_symbol_SortId()
 inline
 bool gsIsSortId(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortId();
+  return Term.function() == function_symbol_SortId();
 }
 
 // SortList
@@ -1478,7 +1478,7 @@ const atermpp::function_symbol& function_symbol_SortList()
 inline
 bool gsIsSortList(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortList();
+  return Term.function() == function_symbol_SortList();
 }
 
 // SortRef
@@ -1492,7 +1492,7 @@ const atermpp::function_symbol& function_symbol_SortRef()
 inline
 bool gsIsSortRef(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortRef();
+  return Term.function() == function_symbol_SortRef();
 }
 
 // SortSet
@@ -1506,7 +1506,7 @@ const atermpp::function_symbol& function_symbol_SortSet()
 inline
 bool gsIsSortSet(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortSet();
+  return Term.function() == function_symbol_SortSet();
 }
 
 // SortSpec
@@ -1520,7 +1520,7 @@ const atermpp::function_symbol& function_symbol_SortSpec()
 inline
 bool gsIsSortSpec(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortSpec();
+  return Term.function() == function_symbol_SortSpec();
 }
 
 // SortStruct
@@ -1534,7 +1534,7 @@ const atermpp::function_symbol& function_symbol_SortStruct()
 inline
 bool gsIsSortStruct(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortStruct();
+  return Term.function() == function_symbol_SortStruct();
 }
 
 // SortUnknown
@@ -1548,7 +1548,7 @@ const atermpp::function_symbol& function_symbol_SortUnknown()
 inline
 bool gsIsSortUnknown(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortUnknown();
+  return Term.function() == function_symbol_SortUnknown();
 }
 
 // SortsPossible
@@ -1562,7 +1562,7 @@ const atermpp::function_symbol& function_symbol_SortsPossible()
 inline
 bool gsIsSortsPossible(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_SortsPossible();
+  return Term.function() == function_symbol_SortsPossible();
 }
 
 // StateAnd
@@ -1576,7 +1576,7 @@ const atermpp::function_symbol& function_symbol_StateAnd()
 inline
 bool gsIsStateAnd(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateAnd();
+  return Term.function() == function_symbol_StateAnd();
 }
 
 // StateDelay
@@ -1590,7 +1590,7 @@ const atermpp::function_symbol& function_symbol_StateDelay()
 inline
 bool gsIsStateDelay(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateDelay();
+  return Term.function() == function_symbol_StateDelay();
 }
 
 // StateDelayTimed
@@ -1604,7 +1604,7 @@ const atermpp::function_symbol& function_symbol_StateDelayTimed()
 inline
 bool gsIsStateDelayTimed(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateDelayTimed();
+  return Term.function() == function_symbol_StateDelayTimed();
 }
 
 // StateExists
@@ -1618,7 +1618,7 @@ const atermpp::function_symbol& function_symbol_StateExists()
 inline
 bool gsIsStateExists(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateExists();
+  return Term.function() == function_symbol_StateExists();
 }
 
 // StateFalse
@@ -1632,7 +1632,7 @@ const atermpp::function_symbol& function_symbol_StateFalse()
 inline
 bool gsIsStateFalse(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateFalse();
+  return Term.function() == function_symbol_StateFalse();
 }
 
 // StateForall
@@ -1646,7 +1646,7 @@ const atermpp::function_symbol& function_symbol_StateForall()
 inline
 bool gsIsStateForall(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateForall();
+  return Term.function() == function_symbol_StateForall();
 }
 
 // StateImp
@@ -1660,7 +1660,7 @@ const atermpp::function_symbol& function_symbol_StateImp()
 inline
 bool gsIsStateImp(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateImp();
+  return Term.function() == function_symbol_StateImp();
 }
 
 // StateMay
@@ -1674,7 +1674,7 @@ const atermpp::function_symbol& function_symbol_StateMay()
 inline
 bool gsIsStateMay(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateMay();
+  return Term.function() == function_symbol_StateMay();
 }
 
 // StateMu
@@ -1688,7 +1688,7 @@ const atermpp::function_symbol& function_symbol_StateMu()
 inline
 bool gsIsStateMu(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateMu();
+  return Term.function() == function_symbol_StateMu();
 }
 
 // StateMust
@@ -1702,7 +1702,7 @@ const atermpp::function_symbol& function_symbol_StateMust()
 inline
 bool gsIsStateMust(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateMust();
+  return Term.function() == function_symbol_StateMust();
 }
 
 // StateNot
@@ -1716,7 +1716,7 @@ const atermpp::function_symbol& function_symbol_StateNot()
 inline
 bool gsIsStateNot(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateNot();
+  return Term.function() == function_symbol_StateNot();
 }
 
 // StateNu
@@ -1730,7 +1730,7 @@ const atermpp::function_symbol& function_symbol_StateNu()
 inline
 bool gsIsStateNu(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateNu();
+  return Term.function() == function_symbol_StateNu();
 }
 
 // StateOr
@@ -1744,7 +1744,7 @@ const atermpp::function_symbol& function_symbol_StateOr()
 inline
 bool gsIsStateOr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateOr();
+  return Term.function() == function_symbol_StateOr();
 }
 
 // StateTrue
@@ -1758,7 +1758,7 @@ const atermpp::function_symbol& function_symbol_StateTrue()
 inline
 bool gsIsStateTrue(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateTrue();
+  return Term.function() == function_symbol_StateTrue();
 }
 
 // StateVar
@@ -1772,7 +1772,7 @@ const atermpp::function_symbol& function_symbol_StateVar()
 inline
 bool gsIsStateVar(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateVar();
+  return Term.function() == function_symbol_StateVar();
 }
 
 // StateYaled
@@ -1786,7 +1786,7 @@ const atermpp::function_symbol& function_symbol_StateYaled()
 inline
 bool gsIsStateYaled(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateYaled();
+  return Term.function() == function_symbol_StateYaled();
 }
 
 // StateYaledTimed
@@ -1800,7 +1800,7 @@ const atermpp::function_symbol& function_symbol_StateYaledTimed()
 inline
 bool gsIsStateYaledTimed(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StateYaledTimed();
+  return Term.function() == function_symbol_StateYaledTimed();
 }
 
 // StructCons
@@ -1814,7 +1814,7 @@ const atermpp::function_symbol& function_symbol_StructCons()
 inline
 bool gsIsStructCons(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StructCons();
+  return Term.function() == function_symbol_StructCons();
 }
 
 // StructProj
@@ -1828,7 +1828,7 @@ const atermpp::function_symbol& function_symbol_StructProj()
 inline
 bool gsIsStructProj(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_StructProj();
+  return Term.function() == function_symbol_StructProj();
 }
 
 // Sum
@@ -1842,7 +1842,7 @@ const atermpp::function_symbol& function_symbol_Sum()
 inline
 bool gsIsSum(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Sum();
+  return Term.function() == function_symbol_Sum();
 }
 
 // Sync
@@ -1856,7 +1856,7 @@ const atermpp::function_symbol& function_symbol_Sync()
 inline
 bool gsIsSync(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Sync();
+  return Term.function() == function_symbol_Sync();
 }
 
 // Tau
@@ -1870,7 +1870,7 @@ const atermpp::function_symbol& function_symbol_Tau()
 inline
 bool gsIsTau(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Tau();
+  return Term.function() == function_symbol_Tau();
 }
 
 // Whr
@@ -1884,7 +1884,7 @@ const atermpp::function_symbol& function_symbol_Whr()
 inline
 bool gsIsWhr(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_Whr();
+  return Term.function() == function_symbol_Whr();
 }
 
 inline
@@ -2702,8 +2702,8 @@ inline
 bool gsIsString(const ATermAppl &term)
 //Ret: term is a quoted constant
 {
-  AFun head = ATgetAFun(term);
-  return ((ATgetArity(head) == 0) /* && (ATisQuoted(head) == true) */ );
+  AFun head = term.function();
+  return ((head.arity() == 0) /* && (ATisQuoted(head) == true) */ );
 }
 
 inline
@@ -2713,7 +2713,7 @@ std::string gsATermAppl2String(const ATermAppl &term)
 {
   // if (gsIsString(term))
   {
-    return ATgetName(ATgetAFun(term));
+    return ATgetName(term.function());
   }
   // else
   // {

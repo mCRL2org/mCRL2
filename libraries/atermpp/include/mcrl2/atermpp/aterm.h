@@ -78,7 +78,7 @@ class aterm
     /// \param sym A function symbol.
     aterm(const function_symbol &sym);
   
-  public:  // Functions below should become protected.
+    // Functions below should become protected.
     detail::_aterm & operator *() const
     {
       assert(m_term!=NULL);
@@ -90,6 +90,14 @@ class aterm
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
       return m_term;
+    }
+
+    aterm (detail::_aterm *t):m_term(t)
+    {
+      // Note that reference_count can be 0, as this term can just be constructed,
+      // and is now handed over to become a real aterm.
+      assert(t!=NULL);
+      increase_reference_count<false>(m_term);
     }
 
   public:
@@ -105,14 +113,6 @@ class aterm
     {
       assert(t.address()!=NULL);
       increase_reference_count<true>(m_term);
-    }
-
-    aterm (detail::_aterm *t):m_term(t)
-    {
-      // Note that reference_count can be 0, as this term can just be constructed,
-      // and is now handed over to become a real aterm.
-      assert(t!=NULL);
-      increase_reference_count<false>(m_term);
     }
 
     /// \brief Assignment operator.

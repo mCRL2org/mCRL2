@@ -35,9 +35,6 @@ using namespace mcrl2::log;
 // #include <bcg_user.h>
 #endif
 
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-
 using namespace std;
 
 namespace mcrl2

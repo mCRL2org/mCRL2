@@ -183,7 +183,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = push_front(deps,static_cast<const aterm>(aterm_int((int)i)));
+            deps = push_front(deps,static_cast<const aterm>(aterm_int(i)));
             args[i] += 1;
           }
         }
@@ -236,7 +236,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         args[maxidx] = -1;
         used[maxidx] = true;
 
-        aterm_int k(maxidx);
+        aterm_int k(static_cast<size_t>(maxidx));
         strat = push_front(strat,static_cast<aterm>(k));
         m2 = aterm_list();
         for (; !m.empty(); m=pop_front(m))

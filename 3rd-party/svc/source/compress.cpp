@@ -147,7 +147,7 @@ int CSreadInt(CompressedStream* cs, long* n)
   ATerm term;
 
   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
-  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_INT)
+  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && term.type()==AT_INT)
   {
     *n =ATgetInt((ATermInt)term);
     return 1;

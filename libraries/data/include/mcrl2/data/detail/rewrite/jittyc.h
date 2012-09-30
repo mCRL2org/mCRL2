@@ -89,11 +89,11 @@ class RewriterCompilingJitty: public Rewriter
     bool made_files;
 
     atermpp::aterm_int true_inner;
-    int true_num;
+    size_t true_num;
 
     std::vector < data_equation_list >  jittyc_eqns;
 
-    std::map <int,int> int2ar_idx;
+    std::map <size_t,size_t> int2ar_idx;
     size_t ar_size;
     std::vector<atermpp::aterm_appl> ar;
     atermpp::aterm_appl build_ar_expr(atermpp::aterm expr, atermpp::aterm_appl var);
@@ -118,10 +118,10 @@ class RewriterCompilingJitty: public Rewriter
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
     void calcTerm(FILE* f, atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, int cur_arg, int parent, int level, int cnt, int d, const size_t arity, 
+    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
                const std::vector<bool> &used, atermpp::aterm_list nnfvars);
-    void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, int d, int opid, const std::vector<bool> &used);
-    void implement_strategy(FILE* f, atermpp::aterm_list strat, int arity, int d, int opid, size_t nf_args);
+    void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, size_t d, size_t opid, const std::vector<bool> &used);
+    void implement_strategy(FILE* f, atermpp::aterm_list strat, size_t arity, size_t d, size_t opid, size_t nf_args);
     void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();

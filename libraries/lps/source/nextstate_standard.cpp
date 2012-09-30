@@ -182,7 +182,7 @@ ATerm NextState::getTreeElement(const ATerm &tree1, size_t index)
   {
     size_t t = (m+n)/2;
 
-    assert((ATgetType(tree) == AT_APPL) && (tree.function()==info.pairAFun));
+    assert((tree.type() == AT_APPL) && (tree.function()==info.pairAFun));
 
     if (index < t)
     {
@@ -370,7 +370,7 @@ ATerm NextState::parseStateVector(const ATermAppl &state, const ATerm &match)
     info.stateAFun = AFun("STATE",info.statelen);
   }
 
-  if (info.stateAFun==ATgetAFun(state))
+  if (info.stateAFun==state.function())
   {
     bool valid = true;
     ATermList l = info.procvars;
@@ -526,7 +526,7 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
     assert(stateargs.size() == ATgetLength(pars));
     for (ATermList m=assigns; !ATisEmpty(m); m=ATgetNext(m))
     {
-      if (ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)))
+      if (ATAgetArgument(ATAgetFirst(m),0)==ATAgetFirst(l))
       {
         stateargs[i] = info.m_rewriter.convert_to((data_expression)(ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
         set = true;
@@ -665,7 +665,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     bool set = false;
     for (; !ATisEmpty(n); n=ATgetNext(n))
     {
-      if (ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)))
+      if (ATAgetArgument(ATAgetFirst(n),0)==ATAgetFirst(l))
       {
         stateargs[i] = info.m_rewriter.convert_to((data_expression)SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
         set = true;

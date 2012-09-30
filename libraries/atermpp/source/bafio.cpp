@@ -578,8 +578,8 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
       break;
     default:
       throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
-      sym = (function_symbol)-1; // error path...
-      break;
+      // sym = (function_symbol)-1; // error path...
+      // break;
   }
 
   return &sym_entries[index[sym.number()]];
@@ -787,8 +787,8 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
       break;
       default:
         throw std::runtime_error("collect_terms: illegal term");
-        sym = (function_symbol)(-1); // Kill compiler warnings
-        break;
+        // sym = (function_symbol)(-1); // Kill compiler warnings
+        // break;
     }
     entry = &sym_entries[index[sym.number()]];
 
@@ -1456,7 +1456,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
       return aterm();
     }
 
-    result = aterm_int((int)val);
+    result = aterm_int(val);
 
       /*}}}  */
   }

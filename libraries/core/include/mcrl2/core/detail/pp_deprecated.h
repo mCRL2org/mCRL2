@@ -406,13 +406,13 @@ static void PrintAFun(std::ostream& OutStream, const AFun fun)
 static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nesting)
 {
   std::string prefix(2*nesting, ' ');
-  if (ATgetType(term) == AT_APPL)
+  if (term.type() == AT_APPL)
   {
     OutStream <<  prefix.c_str();
     ATermAppl appl = (ATermAppl) term;
-    AFun fun = ATgetAFun(appl);
+    AFun fun = appl.function();
     PrintAFun(OutStream, fun);
-    size_t arity = ATgetArity(fun);
+    size_t arity = fun.arity();
     if (arity > 0)
     {
       OutStream <<  "(\n";
@@ -429,7 +429,7 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
       OutStream <<  ")";
     }
   }
-  else if (ATgetType(term) == AT_LIST)
+  else if (term.type() == AT_LIST)
   {
     OutStream <<  prefix;
     if (ATisEmpty((ATermList) term))
@@ -471,12 +471,12 @@ void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
   }
   else
   {
-    if (ATgetType(Part) == AT_APPL)
+    if (Part.type() == AT_APPL)
     {
       PrintPart_Appl(OutStream, (ATermAppl) Part, pp_format,
                                  false, 0);
     }
-    else if (ATgetType(Part) == AT_LIST)
+    else if (Part.type() == AT_LIST)
     {
       OutStream <<  "[";
       PrintPart_List(OutStream, (ATermList) Part,
@@ -660,7 +660,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print process specification or LPS
     mCRL2log(log::debug2, "pretty printer") << "printing process specification or LPS" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
-    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
     bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
@@ -840,7 +840,7 @@ void PrintPart_Appl(std::ostream& OutStream,
       ATermList l = Summands;
       while (!ATisEmpty(l))
       {
-        if (!ATisEqual(l, Summands))
+        if (l!=Summands)
         {
           OutStream <<  "\n     + ";
         }
@@ -928,7 +928,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print PBES specification
     mCRL2log(log::debug2, "pretty printer") << "printing PBES specification" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
-    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 1);
     bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
     ATermAppl PBEqnSpec = ATAgetArgument(Part, 2);
@@ -1023,7 +1023,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print action rename specification
     mCRL2log(log::debug2, "pretty printer") << "printing action rename specification" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
-    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
     bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
     ATermAppl ActionRenameRules = ATAgetArgument(Part, 2);
@@ -1067,7 +1067,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsString(Part))
   {
     //print string
-    OutStream <<  ATgetName(ATgetAFun(Part));
+    OutStream <<  ATgetName(Part.function());
   }
   else
   {
@@ -1086,7 +1086,7 @@ void PrintPart_List(std::ostream& OutStream,
   ATermList l = Parts;
   while (!ATisEmpty(l))
   {
-    if (!ATisEqual(l, Parts) && Separator != NULL)
+    if (l!=Parts && Separator != NULL)
     {
       OutStream <<  Separator;
     }
@@ -1107,7 +1107,7 @@ void PrintPart_BagEnum(std::ostream& OutStream,
   ATermList l = Parts;
   while (!ATisEmpty(l))
   {
-    if (!ATisEqual(l, Parts) && Separator != NULL)
+    if (l!=Parts && Separator != NULL)
     {
       OutStream <<  Separator;
     }
@@ -1250,8 +1250,7 @@ void PrintDecls(std::ostream& OutStream, const ATermList Decls,
     ATermList NextDecls = ATgetNext(Decls);
     while (!ATisEmpty(NextDecls))
     {
-      if (ATisEqual(ATgetArgument(Decl, 1),
-                    ATgetArgument(ATAgetFirst(NextDecls), 1)))
+      if (ATgetArgument(Decl, 1)==ATgetArgument(ATAgetFirst(NextDecls), 1))
       {
         PrintDecl(OutStream, Decl, pp_format, false);
         OutStream <<  ",";
@@ -1574,7 +1573,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
     ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
-    if (ATisEqual(ArgDenominator, static_cast<ATermAppl>(data::function_symbol("1", data::sort_pos::pos()))))
+    if (ArgDenominator==static_cast<ATermAppl>(data::function_symbol("1", data::sort_pos::pos())))
     {
       Part = data::sort_real::int2real(data::data_expression(ArgNumerator));
       if (gsIsOpId(ArgNumerator))
@@ -2966,7 +2965,7 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
     l = ATinsert(l, ATgetArgument(ATAgetFirst(Assignments), 1));
     Assignments = ATgetNext(Assignments);
   }
-  return ATreverse(l);
+  return reverse(l);
 }
 
 ATermList gsGroupDeclsBySort(ATermList Decls)
@@ -2998,7 +2997,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
                  Result);
       DeclSorts = ATgetNext(DeclSorts);
     }
-    return ATreverse(Result);
+    return reverse(Result);
   }
   else
   {
@@ -3025,7 +3024,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
       if (CorVarDecl != ATerm())
       {
         //check consistency of VarDecl with CorVarDecl
-        Result = (ATisEqual(VarDecl, CorVarDecl) == true);
+        Result = (VarDecl==CorVarDecl);
       }
     }
   }
@@ -3038,16 +3037,16 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
   //check consistency in the arguments of Part
   if (Result)
   {
-    AFun Head = ATgetAFun(Part);
-    size_t NrArgs = ATgetArity(Head);
+    AFun Head = Part.function();
+    size_t NrArgs = Head.arity();
     for (size_t i = 0; i < NrArgs && Result; i++)
     {
       ATerm Arg = ATgetArgument(Part, i);
-      if (ATgetType(Arg) == AT_APPL)
+      if (Arg.type() == AT_APPL)
       {
         Result = gsHasConsistentContext(DataVarDecls, (ATermAppl) Arg);
       }
-      else //ATgetType(Arg) == AT_LIST
+      else //Arg.type() == AT_LIST
       {
         Result = gsHasConsistentContextList(DataVarDecls, (ATermList) Arg);
       }

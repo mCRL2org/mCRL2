@@ -29,7 +29,7 @@ namespace atermpp
 
 static const size_t DEFAULT_BUFFER_SIZE = 4096;
 
-static const int ERROR_SIZE = 32;
+static const size_t ERROR_SIZE = 32;
 
 /* Initial number of terms that can be protected */
 /* In the current implementation this means that
@@ -133,7 +133,7 @@ writeToTextFile(const aterm &t, FILE* f)
   switch (t.type())
   {
     case AT_INT:
-      fprintf(f, "%d", aterm_int(t).value());
+      fprintf(f, "%ld", aterm_int(t).value());
       break;
     case AT_APPL:
       /*{{{  Print application */
@@ -552,7 +552,7 @@ fparse_unquoted_appl(int* c, FILE* f)
     }
     if (args == aterm() || *c != ')')
     {
-      return NULL;
+      return aterm_appl();
     }
     fnext_skip_layout(c, f);
   }
@@ -595,7 +595,7 @@ fparse_num(int* c, FILE* f)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return aterm_int(atoi(num));
+    return aterm_int(static_cast<size_t>(atol(num)));
 
     /*}}}  */
   }
@@ -680,10 +680,9 @@ readFromTextFile(int* c, FILE* file)
   }
   else
   {
-    int i;
     mCRL2log(mcrl2::log::error) << "readFromTextFile: parse error at line " << line
                                 << ", col " << col << ((line||col)?":\n":"");
-    for (i = 0; i < ERROR_SIZE; ++i)
+    for (size_t i = 0; i < ERROR_SIZE; ++i)
     {
       char c = error_buf[(i + error_idx) % ERROR_SIZE];
       if (c)
@@ -962,7 +961,7 @@ sparse_unquoted_appl(int* c, char** s)
     }
     if (args == aterm() || *c != ')')
     {
-      return NULL;
+      return aterm_appl();
     }
     snext_skip_layout(c, s);
   }
@@ -1004,7 +1003,7 @@ sparse_num(int* c, char** s)
     /*{{{  An integer */
 
     *ptr = '\0';
-    return aterm_int(atoi(num));
+    return aterm_int(static_cast<size_t>(atol(num)));
 
     /*}}}  */
   }

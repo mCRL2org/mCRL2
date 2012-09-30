@@ -722,8 +722,7 @@ atermpp::aterm_int OpId2Int(const function_symbol &term)
   if (f == term2int().end())
   {
     const size_t num_opids=get_num_opids();
-    assert(num_opids<=static_cast<size_t>(std::numeric_limits<int>::max())); // Check that num_opids is not too big, to be casted to an int.
-    atermpp::aterm_int i(static_cast<int>(num_opids));
+    atermpp::aterm_int i(num_opids);
     term2int()[term] =  i;
     assert(int2term().size()==num_opids);
     int2term().push_back(term);
@@ -750,7 +749,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     }
     else
     {
-      size_t arity = arg0.size(); //ATgetArity(ATgetAFun(arg0));
+      size_t arity = arg0.size(); 
       for (size_t i = 0; i < arity; ++i)
       {
         l = push_front(l, arg0(i));

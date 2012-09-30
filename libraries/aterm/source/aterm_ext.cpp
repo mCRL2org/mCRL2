@@ -40,7 +40,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
   while (!ATisEmpty(l))
   {
     ATermAppl Subst = ATAgetFirst(l);
-    if (ATisEqual(ATgetArgument(Subst, 0), Term))
+    if (ATgetArgument(Subst, 0)==Term)
     {
       return ATgetArgument(Subst, 1);
     }
@@ -53,11 +53,11 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
   else
   {
     //Recursive; distribute substitutions over the arguments/elements of Term
-    if (ATgetType(Term) == AT_APPL)
+    if (Term.type() == AT_APPL)
     {
       //Term is an ATermAppl; distribute substitutions over the arguments
-      AFun Head = ATgetAFun((ATermAppl) Term);
-      const size_t NrArgs = ATgetArity(Head);
+      AFun Head = Term.function();
+      const size_t NrArgs = Head.arity();
       if (NrArgs > 0)
       {
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
@@ -78,7 +78,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
         return Term;
       }
     }
-    else if (ATgetType(Term) == AT_LIST)
+    else if (Term.type() == AT_LIST)
     {
       //Term is an ATermList; distribute substitutions over the elements
       ATermList Result = ATmakeList0();
@@ -112,11 +112,11 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
   else
   {
     //Recursive; distribute substitutions over the arguments/elements of Term
-    if (ATgetType(Term) == AT_APPL)
+    if (Term.type() == AT_APPL)
     {
       //Term is an ATermAppl; distribute substitutions over the arguments
-      AFun Head = ATgetAFun((ATermAppl) Term);
-      const size_t NrArgs = ATgetArity(Head);
+      AFun Head = Term.function();
+      const size_t NrArgs = Head.arity();
       if (NrArgs > 0)
       {
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
@@ -137,7 +137,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
         return Term;
       }
     }
-    else if (ATgetType(Term) == AT_LIST)
+    else if (Term.type() == AT_LIST)
     {
       //Term is an ATermList; distribute substitutions over the elements
       ATermList Result = ATmakeList0();
@@ -147,7 +147,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
                           gsSubstValuesTable(Substs, ATgetFirst((ATermList) Term), Recursive));
         Term = ATgetNext((ATermList) Term);
       }
-      return ATreverse(Result);
+      return reverse(Result);
     }
     else
     {
@@ -170,16 +170,16 @@ bool gsOccurs(const ATerm &Elt, const ATerm &t)
   else
   {
     //check occurrences of Elt in the arguments/elements of Term
-    if (ATgetType(Term) == AT_APPL)
+    if (Term.type() == AT_APPL)
     {
-      AFun Head = ATgetAFun((ATermAppl) Term);
-      const size_t NrArgs = ATgetArity(Head);
+      AFun Head = Term.function();
+      const size_t NrArgs = Head.arity();
       for (size_t i = 0; i < NrArgs && !Result; i++)
       {
         Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));
       }
     }
-    else if (ATgetType(Term) == AT_LIST)
+    else if (Term.type() == AT_LIST)
     {
       while (!ATisEmpty((ATermList) Term) && !Result)
       {

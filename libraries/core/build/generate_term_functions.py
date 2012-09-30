@@ -19,7 +19,7 @@ const atermpp::function_symbol& function_symbol_%(name)s()
 inline
 bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 {
-  return ATgetAFun(Term) == function_symbol_%(name)s();
+  return Term.function() == function_symbol_%(name)s();
 }
 
 '''

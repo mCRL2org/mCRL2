@@ -55,10 +55,10 @@ ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSu
   {
     //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
     mCRL2log(log::error) << "cannot generate fresh ATermAppl with prefix " << s << std::endl;
-    return NULL;
+    return ATermAppl();
   }
 }
 
 } //namespace detail
-}   //namespace core
-}    //namespace mcrl2
+} //namespace core
+} //namespace mcrl2

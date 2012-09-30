@@ -244,7 +244,7 @@ bool lps2lts_algorithm::savetrace(
     {
       while (nsgen->next(trans,&t,&priority))
       {
-        if (!priority && ATisEqual(s,get_repr(t)))
+        if (!priority && s==get_repr(t))
         {
           break;
         }
@@ -854,7 +854,7 @@ bool lps2lts_algorithm::generate_lts()
             }
           }
           tmp_trans=reverse(new_tmp_trans);
-          tmp_states=ATreverse(new_tmp_states);
+          tmp_states=reverse(new_tmp_states);
         }
         catch (mcrl2::runtime_error& e)
         {

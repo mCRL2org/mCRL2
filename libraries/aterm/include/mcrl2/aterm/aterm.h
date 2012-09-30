@@ -45,39 +45,39 @@ const char* ATgetName(const AFun &sym)
   return sym.name().c_str();
 }
 
-inline
+/* inline
 size_t ATgetArity(const AFun &sym)
 {
   return sym.arity();
-}
+} */
 
-inline
+/* inline
 const AFun &ATgetAFun(const ATerm &t)
 {
   return t.function();
-}
+} */
 
-inline 
+/* inline 
 size_t ATgetType(const ATerm &t)
 {
   return t.type();
-}
+} */
 
-inline
+/* inline
 bool ATisEqual(const ATerm &t1, const ATerm &t2)
 {
   return t1==t2;
-}
+} */
 
 /* ATermInt related functions */
 inline
-ATermInt ATmakeInt(const int value)
+ATermInt ATmakeInt(const size_t value)
 {
   return ATermInt(value);
 }
 
 inline
-int ATgetInt(const ATermInt &t)
+size_t ATgetInt(const ATermInt &t)
 {
   return t.value();
 }
@@ -242,11 +242,11 @@ ATermList ATconcat(const ATermList &l1, const ATermList &l2)
   return l1+l2;
 }
 
-inline
+/* inline
 ATermList ATreverse(const ATermList &l)
 {
   return reverse(l);
-}
+} */
 
 inline
 ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx) // Replace one element of a list.
@@ -384,7 +384,7 @@ size_t ATindexOf(const ATermList &list_in, const ATerm &el)
 typedef table ATermTable;
 
 inline
-ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_pct)
+ATermTable ATtableCreate(const size_t initial_size, const size_t max_load_pct)
 {
   return table(initial_size,max_load_pct);
 }
@@ -404,7 +404,7 @@ ATermList  ATtableKeys(const ATermTable &table)
 typedef indexed_set ATermIndexedSet;
 
 inline
-ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct)
+ATermIndexedSet ATindexedSetCreate(size_t initial_size, const size_t max_load_pct)
 {
   return indexed_set(initial_size,max_load_pct);
 }

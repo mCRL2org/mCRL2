@@ -22,18 +22,10 @@ namespace detail
 class _aterm_int:public _aterm
 {
   public:
-    union
-    {
-      int value;
-      size_t reserved; /* Only use lower 32 bits as int. The value is used ambiguously
-                          as integer and as MachineWord. For all cases using bitwise
-                          operations, the MachineWord version must be used,
-                          as failing to do so may lead to improper initialisation
-                          of the last 32 bits during casting. */
-    };
+    size_t value;
 };
 
-_aterm *aterm_int(int val);
+_aterm *aterm_int(size_t val);
 
 } // namespace detail 
 

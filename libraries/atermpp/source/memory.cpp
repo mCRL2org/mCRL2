@@ -413,24 +413,12 @@ aterm::aterm(const function_symbol &sym)
 namespace detail
 {
 
-_aterm* aterm_int(int val)
+_aterm* aterm_int(size_t val)
 {
-  /* The following emulates the encoding trick that is also used in the definition
-   * of aterm_int. Not using a union here leads to incorrect hashing results.
-   */
-  union
-  {
-    int value;
-    size_t reserved;
-  } _val;
-
-  _val.reserved = 0;
-  _val.value = val;
-
-  HashNumber hnr = COMBINE(detail::function_adm.AS_INT.number(), _val.reserved);
+  HashNumber hnr = COMBINE(detail::function_adm.AS_INT.number(), val);
 
   detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
-  while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != _val.value)))
+  while (cur && (cur->function()!=detail::function_adm.AS_INT || (reinterpret_cast<detail::_aterm_int*>(cur)->value != val)))
   {
     cur = cur->next();
   }
@@ -441,7 +429,7 @@ _aterm* aterm_int(int val)
     /* Delay masking until after allocate */
     hnr &= detail::aterm_table_mask;
     new (&cur->function()) function_symbol(detail::function_adm.AS_INT);
-    reinterpret_cast<detail::_aterm_int*>(cur)->reserved = _val.reserved;
+    reinterpret_cast<detail::_aterm_int*>(cur)->value = val;
 
     cur->next() = detail::aterm_hashtable[hnr];
     detail::aterm_hashtable[hnr] = cur;

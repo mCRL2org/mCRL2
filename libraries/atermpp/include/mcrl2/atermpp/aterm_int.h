@@ -20,6 +20,12 @@ namespace atermpp
 
 class aterm_int:public aterm
 {
+  protected:
+    /// \brief Constructor
+    aterm_int(detail::_aterm_int *t):aterm(reinterpret_cast<detail::_aterm*>(t))
+    {
+    } 
+
   public:  // These should be protected, but that is currently not yet possible.
     detail::_aterm_int & operator *() const
     {
@@ -36,27 +42,23 @@ class aterm_int:public aterm
       return reinterpret_cast<detail::_aterm_int*>(m_term);
     }
 
-    /// \brief Get the integer value of the aterm_int.
   public:
 
-    /// \brief Constructor.
+    /// \brief Default constructor.
     aterm_int()
     {}
 
-    
-    aterm_int(detail::_aterm_int *t):aterm(reinterpret_cast<detail::_aterm*>(t))
-    {
-    }
-
+    /// \brief Construct an aterm_int from an aterm.
+    /// \details The aterm must be of type AT_INT.
     explicit aterm_int(const aterm &t):aterm(t) 
     {
+      assert(t.type()==AT_INT);
     }
     
     /// \brief Constructor.
     /// \param value An integer value.
-    aterm_int(int value):aterm(detail::aterm_int(value))
+    aterm_int(size_t value):aterm(detail::aterm_int(value))
     {
-//       increase_reference_count<false>(m_term);
     }
 
     /// \brief Assignment operator.
@@ -67,8 +69,9 @@ class aterm_int:public aterm
       return *this;
     }
 
+    /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.
-    int value() const
+    size_t value() const
     {
       return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
     }

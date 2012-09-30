@@ -87,12 +87,12 @@ class bit_hash_table
                          size_t& sh_c,
                          size_t& sh_i)
     {
-      switch (ATgetType(t))
+      switch (t.type())
       {
         case AT_APPL:
           calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
           {
-            size_t len = ATgetArity(ATgetAFun((ATermAppl) t));
+            size_t len = t.function().arity();
             for (size_t i=0; i<len; i++)
             {
               calc_hash_aterm(ATgetArgument((ATermAppl) t, i),sh_a,sh_b,sh_c,sh_i);
