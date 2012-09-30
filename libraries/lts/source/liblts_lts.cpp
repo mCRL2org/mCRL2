@@ -86,7 +86,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
       ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==true)?true:false);
+      l.add_action((ATerm) lab,((ATLgetArgument(lab,0)).empty())?true:false);
     }
 
     l.add_transition(transition((size_t) from,
@@ -181,9 +181,9 @@ static void add_extra_mcrl2_lts_data(
   }
 
   ATerm arg1 = (ATerm)(has_data_spec?data_spec:gsMakeNil());
-  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(AFun("ParamSpec",1),(ATerm) params):gsMakeNil());
+  ATerm arg2 = (ATerm)(has_params?aterm_appl(AFun("ParamSpec",1),(ATerm) params):gsMakeNil());
   ATerm arg3 = (ATerm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
-  ATerm data = (ATerm) ATmakeAppl3(AFun("mCRL2LTS1",3),arg1,arg2,arg3);
+  ATerm data = (ATerm) aterm_appl(AFun("mCRL2LTS1",3),arg1,arg2,arg3);
 
   /* From the remarks on MSDN:
    *
@@ -260,7 +260,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   SVCsetCreator(&f,const_cast < char* >("liblts (mCRL2)"));
 
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm)aterm_int(l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
 
@@ -268,10 +268,10 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   for (std::vector < transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
   {
     assert(t->from()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->from()) : (ATerm) ATmakeInt((int)t->from()) ,&b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->from()) : (ATerm) aterm_int(t->from()) ,&b);
     SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t->label()).aterm_without_time(), &b);
     assert(t->to()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->to()) : (ATerm) ATmakeInt((int)t->to()) ,&b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->to()) : (ATerm) aterm_int(t->to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 

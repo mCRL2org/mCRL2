@@ -101,13 +101,13 @@ class bit_hash_table
           break;
         case AT_LIST:
           calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
-          for (ATermList l=(ATermList) t; !ATisEmpty(l); l=ATgetNext(l))
+          for (ATermList l=(ATermList) t; !l.empty(); l=ATgetNext(l))
           {
             calc_hash_aterm(ATgetFirst(l),sh_a,sh_b,sh_c,sh_i);
           }
           break;
         case AT_INT:
-          calc_hash_add(ATgetInt((ATermInt) t),sh_a,sh_b,sh_c,sh_i);
+          calc_hash_add(((ATermInt) t).value(),sh_a,sh_b,sh_c,sh_i);
           break;
         default:
           calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);

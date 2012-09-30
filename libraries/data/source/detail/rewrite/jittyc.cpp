@@ -567,7 +567,7 @@ static void inc_usedcnt(aterm_list l)
     aterm first=ATgetFirst(l);
     if (first.type_is_int())
     {
-      treevars_usedcnt[ATgetInt(static_cast<aterm_int>(first))]++;
+      treevars_usedcnt[static_cast<aterm_int>(first).value()]++;
     }
   }
 }
@@ -588,7 +588,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       aterm_list e = ATLgetFirst(pars.Slist);
 
-      e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0), v,ATmakeInt(k),ATmakeList1(gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),v)));
+      e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0), v,aterm_int(k),ATmakeList1(gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),v)));
 
       l = push_front<aterm>(l,ATgetFirst(e));
       m = push_front<aterm>(m,ATgetNext(e));
@@ -677,7 +677,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      treevars_usedcnt[ATgetInt(static_cast<aterm_int>(ATgetArgument((aterm_appl) M,1)))]++;
+      treevars_usedcnt[static_cast<aterm_int>(ATgetArgument((aterm_appl) M,1)).value()]++;
       return atermpp::aterm_appl(afunM,ATgetArgument((aterm_appl) M,0),true_tree,false_tree);
     }
   }
@@ -1152,7 +1152,7 @@ static aterm_list create_strategy(
       // Only if needed and not already rewritten
       if (bs[i] && !used[i])
       {
-        deps = push_front<aterm>(deps, ATmakeInt(i));
+        deps = push_front<aterm>(deps, aterm_int(i));
         // Increase dependency count
         args[i] += 1;
         //fprintf(stderr,"dep of arg %i\n",i);
@@ -1213,7 +1213,7 @@ static aterm_list create_strategy(
     {
       args[maxidx] = -1;
       used[maxidx] = true;
-      aterm_int rewr_arg = ATmakeInt(maxidx);
+      aterm_int rewr_arg = aterm_int(maxidx);
 
       strat = push_front<aterm>(strat, rewr_arg);
 
@@ -1252,7 +1252,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int
   aterm_list strat = create_strategy(eqns,opid.value(),arity,nfs,true_inner);
   while (!strat.empty() && ATgetFirst(strat).type_is_int())
   {
-    nfs.set(ATgetInt(static_cast<aterm_int>(ATgetFirst(strat))));
+    nfs.set(static_cast<aterm_int>(ATgetFirst(strat)).value());
     strat = ATgetNext(strat);
   }
 }
@@ -1334,7 +1334,8 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   }
   else if (/*ATisAppl(t) && */ gsIsNil((aterm_appl) t))
   {
-    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars, ATmakeInt(startarg)) == ATERM_NON_EXISTING_POSITION);
+    assert(startarg>=0);
+    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars, aterm_int(startarg)) == ATERM_NON_EXISTING_POSITION);
   }
   else if (/* ATisAppl(t) && */ gsIsDataVarId((aterm_appl) t))
   {
@@ -1427,7 +1428,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         else
         {
-          ss << "rewr_" << ATgetInt(static_cast<aterm_int>(ATgetFirst((aterm_list) t))) << "_0_0()";
+          ss << "rewr_" << static_cast<aterm_int>(ATgetFirst((aterm_list) t)).value() << "_0_0()";
         }
       }
       else
@@ -1467,7 +1468,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
             } */
           }
           else
-            ss << ATgetInt(static_cast<aterm_int>(ATgetFirst((aterm_list) t)));
+            ss << static_cast<aterm_int>(ATgetFirst((aterm_list) t)).value();
         }
         else
         {
@@ -1490,24 +1491,24 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                  The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
                  which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
                  to recalculate the normal form. TODO: this needs to be reconstructed. */
-              /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((aterm_list) t))
+              /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((ATermInt) ATgetFirst((aterm_list) t)).value()
                                + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
-              ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(ATgetInt(OpId2Int(f))) << ")";
+              ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f).value()) << ")";
             /* }
             else
             {
               / * See the remark above. * /
-              / * ss << "(aterm_appl) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((aterm_list) t))
+              / * ss << "(aterm_appl) " << (void*) get_int2aterm_value(((ATermInt) ATgetFirst((aterm_list) t)).value()
                                  + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ""; * /
-              ss << "(aterm_appl)(atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(ATgetInt(OpId2Int(f))) << "";
+              ss << "(aterm_appl)(atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f)).value()) << "";
             } */
 
           }
           else
           {
             // QUE?! Dit stond er vroeger // Sjoerd
-            //   ss << (ATgetInt((ATermInt) ATgetFirst((aterm_list) t))+((1 << arity)-arity-1)+args_nfs);
-            ss << (ATgetInt(static_cast<aterm_int>(ATgetFirst((aterm_list) t)))+((1 << arity)-arity-1)+args_nfs.getraw(0));
+            //   ss << (((ATermInt) ATgetFirst((aterm_list) t)).value()+((1 << arity)-arity-1)+args_nfs);
+            ss << (static_cast<aterm_int>(ATgetFirst((aterm_list) t)).value()+((1 << arity)-arity-1)+args_nfs.getraw(0));
           }
         }
         nfs_array args_first(arity);
@@ -1613,7 +1614,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         ss << ":";
         bool c = rewr;
-        if (rewr && (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION))
+        assert(startarg>=0);
+        if (rewr && (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars, aterm_int(startarg)) != ATERM_NON_EXISTING_POSITION))
         {
           ss << "rewrite(";
           c = false;
@@ -1672,7 +1674,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << "&*";
     } */
     assert(nnfvars!=aterm_list(aterm()));
-    bool b = (ATindexOf(nnfvars, ATmakeInt(startarg)) != ATERM_NON_EXISTING_POSITION);
+    assert(startarg>=0);
+    bool b = (ATindexOf(nnfvars, aterm_int(startarg)) != ATERM_NON_EXISTING_POSITION);
     if (rewr && b)
     {
       ss << "rewrite(arg_not_nf" << startarg << ")";
@@ -2124,7 +2127,7 @@ void RewriterCompilingJitty::implement_tree(
   {
     if (!used[i])
     {
-      nnfvars = push_front<aterm>(nnfvars, ATmakeInt(i));
+      nnfvars = push_front<aterm>(nnfvars, aterm_int(i));
     }
   }
 
@@ -2260,7 +2263,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
   {
     if (ATgetFirst(strat).type_is_int())
     {
-      size_t arg = ATgetInt(static_cast<aterm_int>(ATgetFirst(strat)));
+      size_t arg = static_cast<aterm_int>(ATgetFirst(strat)).value();
 
       if (!used[arg])
       {
@@ -2407,7 +2410,7 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
   }
   else     // is_ar_var(expr)
   {
-    return !is_ar_false(ar[ATgetInt(static_cast<aterm_int>(ATgetArgument(expr,0)))]);
+    return !is_ar_false(ar[static_cast<aterm_int>(ATgetArgument(expr,0)).value()]);
   }
 }
 
@@ -2556,7 +2559,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   need_rebuild = true;
 
   true_inner = OpId2Int(sort_bool::true_());
-  true_num = ATgetInt(true_inner);
+  true_num = true_inner.value();
 
   for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
   {

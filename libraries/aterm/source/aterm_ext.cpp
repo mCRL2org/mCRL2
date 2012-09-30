@@ -66,7 +66,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
         {
           new (&Args[i]) aterm(gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
         }
-        const aterm a = ATmakeAppl_iterator(Head, &Args[0],&Args[0]+NrArgs);
+        const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
         for (size_t i = 0; i < NrArgs; ++i)
         {
           Args[i].~ATerm();
@@ -125,7 +125,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
         {
            new (&Args[i]) aterm(gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
         }
-        const aterm a = ATmakeAppl_iterator(Head, &Args[0],&Args[0]+NrArgs);
+        const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
           Args[i].~aterm(); 

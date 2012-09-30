@@ -432,17 +432,17 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
   else if (term.type() == AT_LIST)
   {
     OutStream <<  prefix;
-    if (ATisEmpty((ATermList) term))
+    if (((ATermList) term).empty())
     {
       OutStream <<  "[]";
     }
     else
     {
       OutStream <<  "[\n";
-      for (ATermList l = (ATermList) term; !ATisEmpty(l); l = ATgetNext(l))
+      for (ATermList l = (ATermList) term; !l.empty(); l = ATgetNext(l))
       {
         IndentedATerm(OutStream, ATgetFirst(l), nesting+1);
-        if (!ATisEmpty(ATgetNext(l)))
+        if (!(ATgetNext(l)).empty())
         {
           OutStream <<  ",\n";
         }
@@ -507,7 +507,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList StructProjs = ATLgetArgument(Part, 1);
-    if (ATgetLength(StructProjs) > 0)
+    if (StructProjs.size() > 0)
     {
       OutStream <<  "(";
       PrintPart_List(OutStream, StructProjs,
@@ -564,7 +564,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print multiaction
     mCRL2log(log::debug2, "pretty printer") << "printing multiaction" << std::endl;
     ATermList Actions = ATLgetArgument(Part, 0);
-    size_t ActionsLength = ATgetLength(Actions);
+    size_t ActionsLength = Actions.size();
     if (ActionsLength == 0)
     {
       OutStream <<  "tau";
@@ -593,7 +593,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     if (ShowSorts)
     {
       ATermList SortExprs = ATLgetArgument(Part, 1);
-      if (ATgetLength(SortExprs) > 0)
+      if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
         PrintPart_List(OutStream, SortExprs,
@@ -616,7 +616,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     if (ShowSorts)
     {
       ATermList SortExprs = ATLgetArgument(Part, 1);
-      if (ATgetLength(SortExprs) > 0)
+      if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
         PrintPart_List(OutStream, SortExprs,
@@ -662,11 +662,11 @@ void PrintPart_Appl(std::ostream& OutStream,
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
-    bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
+    bool ActSpecEmpty = (ATLgetArgument(ActSpec, 0)).empty();
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
-    bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
+    bool GlobVarSpecEmpty = (ATLgetArgument(GlobVarSpec, 0)).empty();
     ATermAppl ProcEqnSpec = ATAgetArgument(Part, 3);
-    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?(bool)ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
+    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?(bool)(ATLgetArgument(ProcEqnSpec, 0)).empty():false;
     ATermAppl ProcInit = ATAgetArgument(Part, 4);
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty)
@@ -695,13 +695,13 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print data specification
     mCRL2log(log::debug2, "pretty printer") << "printing data specification" << std::endl;
     ATermAppl SortSpec = ATAgetArgument(Part, 0);
-    bool SortSpecEmpty = ATisEmpty(ATLgetArgument(SortSpec, 0));
+    bool SortSpecEmpty = (ATLgetArgument(SortSpec, 0)).empty();
     ATermAppl ConsSpec = ATAgetArgument(Part, 1);
-    bool ConsSpecEmpty = ATisEmpty(ATLgetArgument(ConsSpec, 0));
+    bool ConsSpecEmpty = (ATLgetArgument(ConsSpec, 0)).empty();
     ATermAppl MapSpec = ATAgetArgument(Part, 2);
-    bool MapSpecEmpty = ATisEmpty(ATLgetArgument(MapSpec, 0));
+    bool MapSpecEmpty = (ATLgetArgument(MapSpec, 0)).empty();
     ATermAppl DataEqnSpec = ATAgetArgument(Part, 3);
-    bool DataEqnSpecEmpty = ATisEmpty(ATLgetArgument(DataEqnSpec, 0));
+    bool DataEqnSpecEmpty = (ATLgetArgument(DataEqnSpec, 0)).empty();
     PrintPart_Appl(OutStream, SortSpec, pp_format, ShowSorts, PrecLevel);
     if (!ConsSpecEmpty && !SortSpecEmpty)
     {
@@ -724,7 +724,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print sort specification
     mCRL2log(log::debug2, "pretty printer") << "printing sort specification" << std::endl;
     ATermList SortDecls = ATLgetArgument(Part, 0);
-    if (ATgetLength(SortDecls) > 0)
+    if (SortDecls.size() > 0)
     {
       OutStream <<  "sort ";
       PrintPart_List(OutStream, SortDecls,
@@ -736,7 +736,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print operation specification
     mCRL2log(log::debug2, "pretty printer") << "printing operation specification" << std::endl;
     ATermList OpIds = ATLgetArgument(Part, 0);
-    if (ATgetLength(OpIds) > 0)
+    if (OpIds.size() > 0)
     {
       OutStream <<  (gsIsConsSpec(Part)?"cons ":"map  ");
       PrintDecls(OutStream, OpIds, pp_format, ";\n", "     ");
@@ -754,7 +754,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print action specification
     mCRL2log(log::debug2, "pretty printer") << "printing action specification" << std::endl;
     ATermList ActIds = ATLgetArgument(Part, 0);
-    if (ATgetLength(ActIds) > 0)
+    if (ActIds.size() > 0)
     {
       OutStream <<  "act  ";
       PrintDecls(OutStream, ActIds, pp_format, ";\n", "     ");
@@ -792,7 +792,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print global variable specification
     mCRL2log(log::debug2, "pretty printer") << "printing global variable specification" << std::endl;
     ATermList Vars = ATLgetArgument(Part, 0);
-    if (ATgetLength(Vars) > 0)
+    if (Vars.size() > 0)
     {
       OutStream <<  "glob ";
       PrintDecls(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
@@ -804,7 +804,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print process equation specification
     mCRL2log(log::debug2, "pretty printer") << "printing process equation specification" << std::endl;
     ATermList ProcEqns = ATLgetArgument(Part, 0);
-    if (ATgetLength(ProcEqns) > 0)
+    if (ProcEqns.size() > 0)
     {
       OutStream <<  "proc ";
       PrintPart_List(OutStream, ProcEqns,
@@ -817,7 +817,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing linear process" << std::endl;
     //print process name and variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 0);
-    size_t VarDeclsLength = ATgetLength(VarDecls);
+    size_t VarDeclsLength = VarDecls.size();
     OutStream <<  "proc P";
     if (VarDeclsLength > 0)
     {
@@ -828,7 +828,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     OutStream <<  " =";
     //print summations
     ATermList Summands = ATLgetArgument(Part, 1);
-    size_t SummandsLength = ATgetLength(Summands);
+    size_t SummandsLength = Summands.size();
     if (SummandsLength == 0)
     {
       OutStream <<  " delta@0;\n";
@@ -838,7 +838,7 @@ void PrintPart_Appl(std::ostream& OutStream,
       //SummandsLength > 0
       OutStream <<  "\n       ";
       ATermList l = Summands;
-      while (!ATisEmpty(l))
+      while (!l.empty())
       {
         if (l!=Summands)
         {
@@ -858,7 +858,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 1);
-    if (ATgetLength(DataVarIds) > 0)
+    if (DataVarIds.size() > 0)
     {
       OutStream <<  "(";
       PrintDecls(OutStream, DataVarIds, pp_format, NULL, ", ");
@@ -888,7 +888,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing LPS initialisation" << std::endl;
     OutStream <<  "init P";
     ATermList Args = ATLgetArgument(Part, 0);
-    if (ATgetLength(Args) > 0)
+    if (Args.size() > 0)
     {
       OutStream <<  "(";
       if (pp_format == ppDefault)
@@ -930,9 +930,9 @@ void PrintPart_Appl(std::ostream& OutStream,
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 1);
-    bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
+    bool GlobVarSpecEmpty = (ATLgetArgument(GlobVarSpec, 0)).empty();
     ATermAppl PBEqnSpec = ATAgetArgument(Part, 2);
-    bool PBEqnSpecEmpty = ATisEmpty(ATLgetArgument(PBEqnSpec, 0));
+    bool PBEqnSpecEmpty = (ATLgetArgument(PBEqnSpec, 0)).empty();
     ATermAppl PBInit = ATAgetArgument(Part, 3);
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!GlobVarSpecEmpty && !DataSpecEmpty)
@@ -956,7 +956,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print parameterised boolean equation specification
     mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean equation specification" << std::endl;
     ATermList PBEqns = ATLgetArgument(Part, 0);
-    if (ATgetLength(PBEqns) > 0)
+    if (PBEqns.size() > 0)
     {
       OutStream <<  "pbes ";
       PrintPart_List(OutStream, PBEqns,
@@ -1005,7 +1005,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 1);
-    if (ATgetLength(DataVarIds) > 0)
+    if (DataVarIds.size() > 0)
     {
       OutStream <<  "(";
       PrintDecls(OutStream, DataVarIds, pp_format, NULL, ", ");
@@ -1025,9 +1025,9 @@ void PrintPart_Appl(std::ostream& OutStream,
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
-    bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
+    bool ActSpecEmpty = (ATLgetArgument(ActSpec, 0)).empty();
     ATermAppl ActionRenameRules = ATAgetArgument(Part, 2);
-    bool ActionRenameRulesEmpty = ATisEmpty(ATLgetArgument(ActionRenameRules, 0));
+    bool ActionRenameRulesEmpty = (ATLgetArgument(ActionRenameRules, 0)).empty();
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty)
     {
@@ -1084,7 +1084,7 @@ void PrintPart_List(std::ostream& OutStream,
                                 const char* Terminator, const char* Separator)
 {
   ATermList l = Parts;
-  while (!ATisEmpty(l))
+  while (!l.empty())
   {
     if (l!=Parts && Separator != NULL)
     {
@@ -1105,7 +1105,7 @@ void PrintPart_BagEnum(std::ostream& OutStream,
                                    const char* Terminator, const char* Separator)
 {
   ATermList l = Parts;
-  while (!ATisEmpty(l))
+  while (!l.empty())
   {
     if (l!=Parts && Separator != NULL)
     {
@@ -1131,11 +1131,11 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
   if (pp_format == ppDebug)
   {
     ATermList l = Eqns;
-    while (!ATisEmpty(l))
+    while (!l.empty())
     {
       ATermAppl Eqn = ATAgetFirst(l);
       ATermList DataDecls = ATLgetArgument(Eqn, 0);
-      if (!ATisEmpty(DataDecls))
+      if (!DataDecls.empty())
       {
         OutStream <<  "var  ";
         PrintDecls(OutStream, (pp_format == ppDebug)?DataDecls:gsGroupDeclsBySort(DataDecls),
@@ -1157,7 +1157,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
                                  pp_format, ShowSorts, PrecLevel);
       OutStream <<  ";\n";
       l = ATgetNext(l);
-      if (!ATisEmpty(l))
+      if (!l.empty())
       {
         OutStream <<  "\n";
       }
@@ -1165,7 +1165,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
   }
   else     //pp_format == ppDefault
   {
-    size_t EqnsLength = ATgetLength(Eqns);
+    size_t EqnsLength = Eqns.size();
     if (EqnsLength > 0)
     {
       size_t StartPrefix = 0;
@@ -1189,7 +1189,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
         {
           //add new variables from Eqns(i) to VarDeclTable
           ATermList VarDecls = ATLgetArgument(Eqn, 0);
-          size_t VarDeclsLength = ATgetLength(VarDecls);
+          size_t VarDeclsLength = VarDecls.size();
           for (size_t j = 0; j < VarDeclsLength; j++)
           {
             ATermAppl VarDecl = ATAelementAt(VarDecls, j);
@@ -1208,7 +1208,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           //the corresponding equations,and if necessary, update StartPrefix and
           //reset VarDeclTable.
           ATermList VarDecls = VarDeclTable.values();
-          if (ATgetLength(VarDecls) > 0)
+          if (VarDecls.size() > 0)
           {
             OutStream <<  "var  ";
             PrintDecls(OutStream, (pp_format == ppDebug)?VarDecls:gsGroupDeclsBySort(VarDecls),
@@ -1244,11 +1244,11 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
 void PrintDecls(std::ostream& OutStream, const ATermList Decls,
                             t_pp_format pp_format, const char* Terminator, const char* Separator)
 {
-  if (!ATisEmpty(Decls))
+  if (!Decls.empty())
   {
     ATermAppl Decl = ATAgetFirst(Decls);
     ATermList NextDecls = ATgetNext(Decls);
-    while (!ATisEmpty(NextDecls))
+    while (!NextDecls.empty())
     {
       if (ATgetArgument(Decl, 1)==ATgetArgument(ATAgetFirst(NextDecls), 1))
       {
@@ -1288,7 +1288,7 @@ void PrintDecl(std::ostream& OutStream, const ATermAppl Decl,
     if (gsIsActId(Decl))
     {
       ATermList SortExprs = ATLgetArgument(Decl, 1);
-      if (ATgetLength(SortExprs) > 0)
+      if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
         PrintPart_List(OutStream, SortExprs,
@@ -1907,7 +1907,7 @@ void PrintDataExpr(std::ostream& OutStream,
         Head = ATAgetArgument(DataExpr, 0);
         Args = ATLgetArgument(DataExpr, 1);
       }
-      size_t ArgsLength = ATgetLength(Args);
+      size_t ArgsLength = Args.size();
       if (gsIsBinder(Head) && Args == ATmakeList0())
       {
         // A binder could be introduced by reconstructing a container expression
@@ -1952,7 +1952,7 @@ void PrintDataExpr(std::ostream& OutStream,
       {
         //print function update
         mCRL2log(log::debug2, "pretty printer") << "printing function update" << std::endl;
-        assert(ATgetLength(Args)==3);
+        assert(Args.size()==3);
         PrintDataExpr(OutStream, ATAelementAt(Args, 0),
                                   pp_format, ShowSorts, gsPrecIdPrefix());
         OutStream <<  "[";
@@ -2051,7 +2051,7 @@ void PrintDataExpr(std::ostream& OutStream,
       //print set/bag comprehension
       mCRL2log(log::debug2, "pretty printer") << "printing set/bag comprehension" << std::endl;
       OutStream <<  "{ ";
-      assert(!ATisEmpty(ATLgetArgument(DataExpr,1)));
+      assert(!(ATLgetArgument(DataExpr,1)).empty());
       PrintDecls(OutStream, ATLgetArgument(DataExpr, 1),
                              pp_format, NULL, ", ");
       OutStream <<  " | ";
@@ -2114,7 +2114,7 @@ static void PrintProcExpr(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(ProcExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(ProcExpr, 1);
-    if (ATgetLength(Args) > 0)
+    if (Args.size() > 0)
     {
       OutStream <<  "(";
       PrintPart_List(OutStream, Args,
@@ -2413,7 +2413,7 @@ static void PrintStateFrm(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(StateFrm, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(StateFrm, 1);
-    if (ATgetLength(Args) > 0)
+    if (Args.size() > 0)
     {
       OutStream <<  "(";
       PrintPart_List(OutStream, Args,
@@ -2466,7 +2466,7 @@ static void PrintStateFrm(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(StateFrm, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList DataVarInits = ATLgetArgument(StateFrm, 1);
-    if (ATgetLength(DataVarInits) > 0)
+    if (DataVarInits.size() > 0)
     {
       OutStream <<  "(";
       PrintPart_List(OutStream, DataVarInits,
@@ -2817,7 +2817,7 @@ static void PrintPBExpr(std::ostream& OutStream,
     PrintPart_Appl(OutStream, ATAgetArgument(PBExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(PBExpr, 1);
-    if (ATgetLength(Args) > 0)
+    if (Args.size() > 0)
     {
       OutStream <<  "(";
       PrintPart_List(OutStream, Args,
@@ -2919,7 +2919,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
   mCRL2log(log::debug2, "pretty printer") << "printing LPS summand" << std::endl;
   //print data summations
   ATermList SumVarDecls = ATLgetArgument(Summand, 0);
-  if (ATgetLength(SumVarDecls) > 0)
+  if (SumVarDecls.size() > 0)
   {
     OutStream <<  "sum ";
     PrintDecls(OutStream, SumVarDecls, pp_format, NULL, ",");
@@ -2960,7 +2960,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
 ATermList GetAssignmentsRHS(ATermList Assignments)
 {
   ATermList l = ATmakeList0();
-  while (!ATisEmpty(Assignments))
+  while (!Assignments.empty())
   {
     l = ATinsert(l, ATgetArgument(ATAgetFirst(Assignments), 1));
     Assignments = ATgetNext(Assignments);
@@ -2970,12 +2970,12 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
 
 ATermList gsGroupDeclsBySort(ATermList Decls)
 {
-  if (!ATisEmpty(Decls))
+  if (!Decls.empty())
   {
-    ATermTable SortDeclsTable = ATtableCreate(2*ATgetLength(Decls), 50);
+    ATermTable SortDeclsTable = ATtableCreate(2*Decls.size(), 50);
     //Add all variable declarations from Decls to hash table
     //SortDeclsTable
-    while (!ATisEmpty(Decls))
+    while (!Decls.empty())
     {
       ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
@@ -2990,7 +2990,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     //Return the hash table as a list of variable declarations
     ATermList DeclSorts = ATtableKeys(SortDeclsTable);
     ATermList Result = ATmakeList0();
-    while (!ATisEmpty(DeclSorts))
+    while (!DeclSorts.empty())
     {
       Result = ATconcat(
                  ATLtableGet(SortDeclsTable, ATgetFirst(DeclSorts)),
@@ -3014,7 +3014,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
   {
     //check consistency of DataVarDecls with the variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 0);
-    size_t n = ATgetLength(VarDecls);
+    size_t n = VarDecls.size();
     for (size_t i = 0; i < n && Result; i++)
     {
       //check consistency of variable VarDecls(j) with VarDeclTable
@@ -3060,7 +3060,7 @@ bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
 {
   bool Result = true;
   ATermList l = Parts;
-  while (!ATisEmpty(l) && Result)
+  while (!l.empty() && Result)
   {
     Result = gsHasConsistentContext(DataVarDecls, ATAgetFirst(l));
     l = ATgetNext(l);

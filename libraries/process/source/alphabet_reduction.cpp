@@ -36,7 +36,7 @@ namespace mcrl2
 
       static ATermAppl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
       {
-        return ATmakeAppl2(afunPair,(ATerm)(ATermList)ma1,(ATerm)(ATermAppl)ma2);
+        return aterm_appl(afunPair,(ATerm)(ATermList)ma1,(ATerm)(ATermAppl)ma2);
       }
 
       
@@ -1733,9 +1733,9 @@ namespace mcrl2
         {
           assert(length<(size_t)1 << (sizeof(int)*8-1));
           // Rare truuk. Hier moet nog naar gekeken worden.
-          if (alphas_length.count(ATmakeList3((ATerm)(ATermAppl)a,(ATerm)ATmakeInt(static_cast<int>(length)),(ATerm)(ATermList)allowed))>0)
+          if (alphas_length.count(ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed))>0)
           {
-            return alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)ATmakeInt(static_cast<int>(length)),(ATerm)(ATermList)allowed)];
+            return alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed)];
           }
         }
 */
@@ -1915,7 +1915,7 @@ namespace mcrl2
         {
 /*        // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
           assert(length<(size_t)1 << (sizeof(int)*8-1));
-          alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)ATmakeInt((int)length),(ATerm)(ATermList)allowed)]=l;
+          alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed)]=l;
  */
         }
       }

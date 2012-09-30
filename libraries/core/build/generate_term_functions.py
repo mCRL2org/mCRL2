@@ -27,7 +27,7 @@ bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 LIBSTRUCT_MAKE_FUNCTION = '''inline
 ATermAppl gsMake%(name)s(%(parameters)s)
 {
-  return ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s);
+  return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
 }
 
 '''
@@ -191,7 +191,7 @@ CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 const atermpp::aterm_appl& construct%(name)s()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
   return t;
 }
 
@@ -333,7 +333,7 @@ def postprocess_libstruct(filename):
     src = '''inline
 ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
 \{
-  return ATmakeAppl2\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
+  return aterm_appl\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
 \}
 '''
     dest = '''inline
@@ -343,7 +343,7 @@ ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+  return term_appl<aterm>(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
 }
 '''
     text = path(filename).text()

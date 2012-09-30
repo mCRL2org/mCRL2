@@ -70,27 +70,27 @@ bool ATisEqual(const ATerm &t1, const ATerm &t2)
 } */
 
 /* ATermInt related functions */
-inline
+/* inline
 ATermInt ATmakeInt(const size_t value)
 {
   return ATermInt(value);
-}
+} */
 
-inline
+/* inline
 size_t ATgetInt(const ATermInt &t)
 {
   return t.value();
-}
+} */
 
 /* ATermAppl related functions */
-template <class TERM_ITERATOR>
+/* template <class TERM_ITERATOR>
 inline
 ATermAppl ATmakeAppl_iterator(const AFun &sym, const TERM_ITERATOR begin, const TERM_ITERATOR end)
 {
   return term_appl<ATerm>(sym,begin,end);
-}
+} */
 
-inline
+/* inline
 ATermAppl ATmakeAppl0(const AFun &sym)
 {
   return term_appl<ATerm>(sym);
@@ -133,13 +133,13 @@ ATermAppl ATmakeAppl6(const AFun &sym, const ATerm &arg0, const ATerm &arg1, con
                       const ATerm &arg3, const ATerm &arg4, const ATerm &arg5)
 {
   return term_appl<ATerm>(sym,arg0,arg1,arg2,arg3,arg4,arg5);
-}
+} */
 
-inline
+/* inline
 ATermAppl ATmakeApplList(const AFun &sym, const ATermList args)
 {
   return term_appl<aterm>(sym,args.begin(), args.end());
-}
+} */
 
 inline
 const ATerm &ATgetArgument(const ATermAppl &appl, const size_t idx)
@@ -147,19 +147,19 @@ const ATerm &ATgetArgument(const ATermAppl &appl, const size_t idx)
   return appl(idx);
 }
 
-inline
+/* inline
 ATermAppl ATsetArgument(ATermAppl appl, const ATerm &arg, const size_t n)
 {
   return appl.set_argument(arg,n);
-}
+}  */
 
 /* ATermList related functions */
 
-inline
+/* inline
 size_t ATgetLength(const ATermList &list)
 {
   return list.size();
-}
+} */
 
 inline
 const ATerm &ATgetFirst(const ATermList &l)
@@ -173,11 +173,11 @@ ATermList &ATgetNext(const ATermList &l)
   return l->tail;
 }
 
-inline
+/* inline
 bool ATisEmpty(const ATermList &l)
 {
   return l.empty();
-}
+} */
 
 ATermList &ATgetTail(const ATermList &list, const int &start);
 ATermList ATgetSlice(const ATermList &list, const size_t start, const size_t end);
@@ -277,7 +277,7 @@ inline
 ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' to the end of 'list'
 {
   ATermList list=list_in;
-  size_t i, len = ATgetLength(list);
+  size_t i, len = list.size();
   ATermList result;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 

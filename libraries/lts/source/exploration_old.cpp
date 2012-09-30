@@ -261,7 +261,7 @@ bool lps2lts_algorithm::savetrace(
 
   Trace trace;
   trace.setState(nstate->make_new_state_vector(s));
-  for (; !ATisEmpty(tr); tr=ATgetNext(tr))
+  for (; !tr.empty(); tr=ATgetNext(tr))
   {
     ATermList e = (ATermList) ATgetFirst(tr);
     trace.addAction(multi_action(ATgetFirst(e)));
@@ -540,7 +540,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       repr_next[v]=nextl;
     }
     ATermList nextl = repr_next[v];
-    if (ATisEmpty(nextl))
+    if (nextl.empty())
     {
       assert(repr_number.count(v)>0);
       assert(repr_low.count(v)>0);
@@ -767,12 +767,12 @@ bool lps2lts_algorithm::generate_lts()
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             const action_list multi_action_list=*tmp_trans_walker;
-            if (ATgetLength(multi_action_list)==1)
+            if (multi_action_list.size()==1)
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
               ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
-              if (ATgetLength(action_arguments)>0)
+              if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
@@ -812,12 +812,12 @@ bool lps2lts_algorithm::generate_lts()
             ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
             tmp_state_walker=ATgetNext(tmp_state_walker);
             const action_list multi_action_list= *tmp_trans_walker;
-            if (ATgetLength(multi_action_list)==1)
+            if (multi_action_list.size()==1)
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
               ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
-              if (ATgetLength(action_arguments)>0)
+              if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
@@ -945,12 +945,12 @@ bool lps2lts_algorithm::generate_lts()
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             const action_list multi_action_list= *tmp_trans_walker;
-            if (ATgetLength(multi_action_list)==1)
+            if (multi_action_list.size()==1)
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
               ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
-              if (ATgetLength(action_arguments)>0)
+              if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
@@ -992,12 +992,12 @@ bool lps2lts_algorithm::generate_lts()
             ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
             tmp_state_walker=ATgetNext(tmp_state_walker);
             const action_list multi_action_list= *tmp_trans_walker;
-            if (ATgetLength(multi_action_list)==1)
+            if (multi_action_list.size()==1)
             {
               ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
               ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
               ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
-              if (ATgetLength(action_arguments)>0)
+              if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
                 ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
@@ -1034,9 +1034,9 @@ bool lps2lts_algorithm::generate_lts()
           }
 
           // Randomly select one element from the list for experiments.
-          if (ATgetLength(new_tmp_trans)>0)
+          if (new_tmp_trans.size()>0)
           {
-            size_t r = rand()%ATgetLength(new_tmp_trans);
+            size_t r = rand()%(new_tmp_trans.size());
             tmp_trans=atermpp::term_list < action_list >(ATgetSlice(new_tmp_trans,r,r+1));
             tmp_states=ATgetSlice(new_tmp_states,r,r+1);
           }

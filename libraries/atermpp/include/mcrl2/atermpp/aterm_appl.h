@@ -107,7 +107,10 @@ class term_appl:public aterm
     /// \param last The end of a range of elements.
     
     template <class ForwardIterator>
-    term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
+    term_appl(const function_symbol &sym, 
+              const ForwardIterator begin, 
+              const ForwardIterator end,
+              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ForwardIterator>::type>::type* = 0)
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
       // increase_reference_count<false>(m_term);
@@ -126,10 +129,14 @@ class term_appl:public aterm
     /// \param convert_to_aterm. An optional translator that is applied to each element in the iterator range,
     //                              and which must translate these elements to type Term.
     template <class InputIterator, class ATermConverter>
-    term_appl(const function_symbol &sym, InputIterator begin, InputIterator end, ATermConverter convert_to_aterm)
+    term_appl(const function_symbol &sym, 
+              InputIterator begin, 
+              InputIterator end, 
+              ATermConverter convert_to_aterm,
+              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, InputIterator>::type>::type* = 0,
+              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ATermConverter>::type>::type* = 0)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
     {
-      // increase_reference_count<false>(m_term);
     }
     
     /// \brief Constructor.
@@ -143,7 +150,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1)
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief Constructor for a binary function application.
@@ -153,7 +159,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief Constructor for a ternary function application.
@@ -164,7 +169,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief Constructor for a unary function application.
@@ -176,7 +180,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief Constructor for a unary function application.
@@ -189,7 +192,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief Constructor for a unary function application.
@@ -203,7 +205,6 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
-      // increase_reference_count<false>(m_term);
     }
 
     /// \brief The assignment operator

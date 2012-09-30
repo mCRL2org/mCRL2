@@ -149,7 +149,7 @@ ATerm NextState::buildTree(std::vector<ATerm> &args)
   {
     if (tree_init[n])
     {
-      args[m-1] = ATmakeAppl2(info.pairAFun,args[m-1],args[n]);
+      args[m-1] = aterm_appl(info.pairAFun,args[m-1],args[n]);
     }
     else
     {
@@ -164,7 +164,7 @@ ATerm NextState::buildTree(std::vector<ATerm> &args)
   {
     for (size_t i=0; i<n; i+=2)
     {
-      args[i/2] = ATmakeAppl2(info.pairAFun,args[i],args[i+1]);
+      args[i/2] = aterm_appl(info.pairAFun,args[i],args[i+1]);
     }
 
     n /= 2;
@@ -240,7 +240,7 @@ ATermAppl NextState::makeStateVector(const ATerm &state)
   {
     stateargs[i] = getStateArgument(state,i);
   }
-  return ATmakeAppl_iterator(info.stateAFun,stateargs.begin(),stateargs.end());
+  return aterm_appl(info.stateAFun,stateargs.begin(),stateargs.end());
 }
 
 //Prototype
@@ -349,7 +349,7 @@ ATerm NextState::parse_state_vector_new(const mcrl2::lps::state &s, const mcrl2:
     switch (info.stateformat)
     {
       case GS_STATE_VECTOR:
-        return ATmakeAppl_iterator(info.stateAFun,stateargs.begin(),stateargs.end());
+        return aterm_appl(info.stateAFun,stateargs.begin(),stateargs.end());
         break;
       case GS_STATE_TREE:
         return buildTree(stateargs);
@@ -397,7 +397,7 @@ ATerm NextState::parseStateVector(const ATermAppl &state, const ATerm &match)
       switch (info.stateformat)
       {
         case GS_STATE_VECTOR:
-          return ATmakeAppl_iterator(info.stateAFun,stateargs.begin(),stateargs.end());
+          return aterm_appl(info.stateAFun,stateargs.begin(),stateargs.end());
           break;
         case GS_STATE_TREE:
           return buildTree(stateargs);
@@ -424,7 +424,7 @@ ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
   {
     ATermList l(a);
     ATermList m;
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    for (; !l.empty(); l=ATgetNext(l))
     {
       m = push_front(m,SetVars(ATgetFirst(l),free_vars));
     }
@@ -454,7 +454,7 @@ ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
 
 ATermList NextState::ListToFormat(const ATermList &l, const ATermList &free_vars)
 {
-  if (ATisEmpty(l))
+  if (l.empty())
   {
     return l;
   }
@@ -466,7 +466,7 @@ ATermList NextState::ListToFormat(const ATermList &l, const ATermList &free_vars
 
 ATermList NextState::ListFromFormat(const ATermList &l)
 {
-  if ( ATisEmpty(l) )
+  if ( l.empty() )
   {
     return l;
   }
@@ -478,7 +478,7 @@ ATermList NextState::ListFromFormat(const ATermList &l)
 
 ATermList NextStateGenerator::ListFromFormat(const ATermList &l)
 {
-  if ( ATisEmpty(l) )
+  if ( l.empty() )
   {
     return l;
   }
@@ -499,7 +499,7 @@ ATermAppl NextState::ActionToRewriteFormat(const ATermAppl &act, const ATermList
   ATermList l = ATLgetArgument(act,0);
   ATermList m = ATmakeList0();
 
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  for (; !l.empty(); l=ATgetNext(l))
   {
     ATermAppl a = ATAgetFirst(l);
     a = gsMakeAction(ATAgetArgument(a,0),ListToFormat(ATLgetArgument(a,1),free_vars));
@@ -519,12 +519,12 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   size_t i = 0;
-  for (ATermList l=pars; !ATisEmpty(l); l=ATgetNext(l),i++)
+  for (ATermList l=pars; !l.empty(); l=ATgetNext(l),i++)
   {
     bool set = false;
 
-    assert(stateargs.size() == ATgetLength(pars));
-    for (ATermList m=assigns; !ATisEmpty(m); m=ATgetNext(m))
+    assert(stateargs.size() == pars.size());
+    for (ATermList m=assigns; !m.empty(); m=ATgetNext(m))
     {
       if (ATAgetArgument(ATAgetFirst(m),0)==ATAgetFirst(l))
       {
@@ -610,7 +610,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   pars = spec.process().process_parameters();
 
-  info.statelen = ATgetLength(pars);
+  info.statelen = pars.size();
   if (info.stateformat == GS_STATE_VECTOR)
   {
     stateAFun_made = true;
@@ -628,7 +628,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   smndAFun = AFun("@SMND@",4);
   ATermList sums = mcrl2::lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();
-  for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
+  for (bool b=true; !sums.empty(); sums=ATgetNext(sums))
   {
     if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
     {
@@ -641,14 +641,14 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     }
   }
   sums = reverse(l);
-  // info.num_summands = ATgetLength(sums);
+  // info.num_summands = sums.size();
   info.num_prioritised = 0;
-  info.summands = std::vector < ATermAppl> (ATgetLength(sums));
+  info.summands = std::vector < ATermAppl> (sums.size());
   
-  for (size_t i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
+  for (size_t i=0; !sums.empty(); sums=ATgetNext(sums),i++)
   {
     info.summands[i] =
-      ATmakeAppl4(
+      aterm_appl(
         smndAFun,
         ATgetArgument(ATAgetFirst(sums),0),
         info.m_rewriter.convert_to((data_expression)SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
@@ -659,11 +659,11 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   l = pars;
   m = spec.initial_process().assignments();
 
-  for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
+  for (size_t i=0; !l.empty(); l=ATgetNext(l), i++)
   {
     n = m;
     bool set = false;
-    for (; !ATisEmpty(n); n=ATgetNext(n))
+    for (; !n.empty(); n=ATgetNext(n))
     {
       if (ATAgetArgument(ATAgetFirst(n),0)==ATAgetFirst(l))
       {
@@ -694,7 +694,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   switch (info.stateformat)
   {
     case GS_STATE_VECTOR:
-      initial_state = ATmakeAppl_iterator(info.stateAFun,stateargs.begin(),stateargs.end());
+      initial_state = aterm_appl(info.stateAFun,stateargs.begin(),stateargs.end());
       break;
     case GS_STATE_TREE:
       initial_state = buildTree(stateargs);
@@ -749,7 +749,7 @@ void NextState::prioritise(const char* action)
   {
     ATermAppl s = info.summands[pos];
     ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
-    if ((is_tau && ATisEmpty(ma)) || (!is_tau && only_action(ma,action)))
+    if ((is_tau && ma.empty()) || (!is_tau && only_action(ma,action)))
     {
       //if ( rest < pos )
       //{
@@ -901,7 +901,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(const ATermAppl &act)
   ATermList l = ATLgetArgument(act,0);
   ATermList m = ATmakeList0();
 
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  for (; !l.empty(); l=ATgetNext(l))
   {
     ATermAppl a = ATAgetFirst(l);
     const atermpp::term_list <atermpp::aterm_appl> l(ATLgetArgument(a,1));
@@ -978,7 +978,7 @@ void NextStateGenerator::set_substitutions()
   switch (info.stateformat)
   {
     case GS_STATE_VECTOR:
-      for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+      for (size_t i=0; !l.empty(); l=ATgetNext(l),i++)
       {
         atermpp::aterm_appl a (atermpp::aterm_cast<const atermpp::aterm_appl>(cur_state)(i));
         if (a!=info.nil)
