@@ -23,9 +23,9 @@
 # once the rewriter library is no longer needed.
 
 (echo $1 &&
-@CXX@ -c @R_CXXFLAGS@ @R_SCXXFLAGS@ @R_CPPFLAGS@ @ATERM_FLAGS@ @R_MCRL2_OSX_ARCH@ -I"@R_CMAKE_INSTALL_PREFIX@/include" @R_STAGE_INCLUDE_DIRS@ -I"@R_Boost_INCLUDE_DIRS@" -o $1.o $1 > $1.log 2>&1 &&
+@CXX@ -c @R_CXXFLAGS@ -o $1.o $1 > $1.log 2>&1 &&
 echo $1.o &&
-@CXX@ @R_LDFLAGS@ @R_SLDFLAGS@ @R_MCRL2_OSX_ARCH@ -L"@R_Boost_LIBRARY_DIRS@" -L"@R_CMAKE_INSTALL_PREFIX@/lib/mcrl2" -l"mcrl2_aterm" -o $1.bin $1.o >> $1.log 2>&1 &&
+@CXX@ @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
 echo $1.log &&
 echo $1.bin) || (
 echo "Compile script was:" &&
