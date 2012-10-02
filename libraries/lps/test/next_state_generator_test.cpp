@@ -133,6 +133,28 @@ BOOST_AUTO_TEST_CASE(test_abp)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_non_true_condition)
+{
+  std::string text(
+    "map  b: Bool;\n"
+    "act  a;\n"
+    "proc P(s3: Pos) =\n"
+    "       (s3 == 1 && b) ->\n"
+    "         a .\n"
+    "         P(s3 = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+  );
+  specification spec = parse_linear_process_specification(text);
+  for (size_t i = 0; i < 8; i++)
+  {
+    // The respective sizes do not matter here, since we should get an exception in the nextstate
+    // generator.
+    BOOST_CHECK_THROW(test_next_state_generator(spec, 0, 0, 0, i&1, i&2, i&4), mcrl2::runtime_error);
+  }
+
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
