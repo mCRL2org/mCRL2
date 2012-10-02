@@ -14,35 +14,6 @@
 #include <iterator>
 #include <assert.h>
 
-// Note: code below is not currently used and has not been properly tested.
-#if 0
-EdgeIterator &EdgeIterator::operator=(const EdgeIterator &ei)
-{
-    g = ei.g;
-    v = ei.v;
-    e = ei.e;
-    return *this;
-}
-
-std::pair<verti, verti> EdgeIterator::operator*()
-{
-    return std::pair<verti, verti>(v, g->successors_[e]);
-}
-
-std::pair<verti, verti> EdgeIterator::operator++()
-{
-    if (++e < g->E_) while (g->successor_index_[v + 1] < e) ++v;
-    return **this;
-}
-
-std::pair<verti, verti> EdgeIterator::operator++(int)
-{
-    std::pair<verti, verti> result = **this;
-    ++*this;
-    return result;
-}
-#endif
-
 template<class It, class Cmp>
 bool is_sorted(It i, It j, Cmp cmp)
 {
