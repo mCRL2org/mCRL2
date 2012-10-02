@@ -473,7 +473,10 @@ void next_state_generator::iterator::increment()
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
     if(!m_enumeration_iterator.solution_is_exact())
     {
-      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)) + " does not rewrite to true");
+      rewriter_expression_t reduced_condition(m_generator->m_rewriter.rewrite_internal(m_summand->condition, *m_substitution));
+      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(m_summand->condition))
+                                 + " rewrites to " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition))
+                                 + " instead of true");
     }
     valuation = *m_enumeration_iterator++;
   }
