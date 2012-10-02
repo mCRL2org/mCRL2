@@ -124,7 +124,11 @@ class output_policy
   public:
     /// \brief Constructor.
     output_policy()
-    {};
+    {}
+
+    /// \brief Destructor.
+    virtual ~output_policy()
+    {}
 
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
@@ -403,6 +407,9 @@ class file_output: public output_policy
 
   public:
     file_output()
+    {}
+
+    virtual ~file_output()
     {}
 
     /// \brief Set stream handle for a hint

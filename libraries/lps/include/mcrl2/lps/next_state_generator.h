@@ -78,9 +78,13 @@ class next_state_generator
     friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
   public:
+    class iterator;
+
     class summand_subset_t
     {
       friend class next_state_generator;
+      friend class next_state_generator::iterator;
+
       public:
         /// \brief Trivial constructor. Constructs an invalid command subset.
         summand_subset_t() {}
@@ -108,7 +112,6 @@ class next_state_generator
         atermpp::shared_subset<summand_t>::iterator begin(internal_state_t state);
     };
 
-    class iterator;
     class transition_t
     {
       friend struct atermpp::aterm_traits<transition_t>;
